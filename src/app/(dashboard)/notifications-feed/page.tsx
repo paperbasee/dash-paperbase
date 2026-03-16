@@ -1,0 +1,174 @@
+ "use client";
+
+import { useRouter } from "next/navigation";
+import { useCallback, useRef, useState } from "react";
+import { useNotifications } from "@/context/NotificationContext";
+import { getNotificationLink } from "@/lib/notifications";
+import { Button } from "@/components/ui/button";
+
+function formatDateTime(value: string): string {
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return value;
+  const pad = (n: number) => n.toString().padStart(2, "0");
+  const datePart = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+  const timePart = `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+  return `${datePart}, ${timePart}`;
+}
+
+export default function NotificationsFeedPage() {
+  const {
+    notifications,
+    unreadCount,
+    isLoading,
+    error,
+    markAllAsRead,
+    markNotificationAsRead,
+    deleteNotification,
+    deleteAllNotifications,
+  } = useNotifications();
+  const router = useRouter();
+
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [showActions, setShowActions] = useState(false);
+  const longPressTimerRef = useRef<number | null>(null);
+  const longPressTriggeredRef = useRef(false);
+
+  const handleItemClick = (id: string) => {
+    if (longPressTriggeredRef.current) {
+      longPressTriggeredRef.current = false;
+      return;
+    }
+    const notification = notifications.find((n) => n.id === id);
+    if (!notification) return;
+    const link = getNotificationLink(notification);
+    markNotificationAsRead(id);
+    router.push(link);
+  };
+
+  const startLongPress = useCallback((id: string) => {
+    if (longPressTimerRef.current) {
+      window.clearTimeout(longPressTimerRef.current);
+    }
+    longPressTriggeredRef.current = false;
+    longPressTimerRef.current = window.setTimeout(() => {
+      longPressTriggeredRef.current = true;
+      setSelectedId(id);
+      setShowActions(true);
+    }, 500);
+  }, []);
+
+  const cancelLongPress = useCallback(() => {
+    if (longPressTimerRef.current) {
+      window.clearTimeout(longPressTimerRef.current);
+      longPressTimerRef.current = null;
+    }
+  }, []);
+
+  const handleDeleteSelected = () => {
+    if (selectedId) {
+      deleteNotification(selectedId);
+    }
+    setShowActions(false);
+    setSelectedId(null);
+  };
+
+  const handleDeleteAll = () => {
+    deleteAllNotifications();
+    setShowActions(false);
+    setSelectedId(null);
+  };
+
+  const handleCloseActions = () => {
+    setShowActions(false);
+    setSelectedId(null);
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-medium text-foreground">
+          Notifications {notifications.length > 0 ? `(${notifications.length})` : ""}
+        </h1>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={markAllAsRead}
+          disabled={unreadCount === 0 || notifications.length === 0}
+        >
+          Mark all as read
+        </Button>
+      </div>
+
+      {isLoading && (
+        <div className="flex h-40 items-center justify-center">
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+        </div>
+      )}
+
+      {!isLoading && error && (
+        <p className="text-sm text-destructive">{error}</p>
+      )}
+
+      {!isLoading && !error && notifications.length === 0 && (
+        <p className="text-sm text-muted-foreground">You&apos;re all caught up. No notifications yet.</p>
+      )}
+
+      {!isLoading && !error && notifications.length > 0 && (
+        <>
+          <div className="divide-y divide-border overflow-hidden rounded-xl border border-border bg-background">
+            {notifications.map((notification) => (
+              <button
+                key={notification.id}
+                type="button"
+                onClick={() => handleItemClick(notification.id)}
+                onMouseDown={() => startLongPress(notification.id)}
+                onMouseUp={cancelLongPress}
+                onMouseLeave={cancelLongPress}
+                onTouchStart={() => startLongPress(notification.id)}
+                onTouchEnd={cancelLongPress}
+                onTouchCancel={cancelLongPress}
+                className={`flex w-full items-start justify-between gap-3 px-4 py-3 text-left text-sm transition hover:bg-muted ${
+                  !notification.isRead ? "bg-primary/10" : ""
+                }`}
+              >
+                <div>
+                  <div className="font-medium">{notification.title}</div>
+                  {notification.message && (
+                    <p className="mt-0.5 text-xs text-muted-foreground">
+                      {notification.message}
+                    </p>
+                  )}
+                </div>
+                <div className="shrink-0 text-xs text-muted-foreground">
+                  {formatDateTime(notification.createdAt)}
+                </div>
+              </button>
+            ))}
+          </div>
+
+          {showActions && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+              <div className="w-full max-w-sm rounded-lg bg-background p-4 shadow-lg">
+                <p className="mb-4 text-sm font-medium text-foreground">
+                  Manage notification
+                </p>
+                <div className="flex flex-col gap-2">
+                  <Button variant="destructive" size="sm" onClick={handleDeleteSelected}>
+                    Delete this notification
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={handleDeleteAll}>
+                    Select all &amp; delete
+                  </Button>
+                  <Button variant="ghost" size="sm" onClick={handleCloseActions}>
+                    Cancel
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
+        </>
+      )}
+    </div>
+  );
+}
+
