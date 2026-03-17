@@ -19,7 +19,7 @@ export default function StatsCard({
   accent = "blue",
 }: StatsCardProps) {
   return (
-    <div className="rounded-xl border border-border bg-card p-5">
+    <div className="rounded-xl border border-card-border bg-card p-5">
       <p className="text-sm font-medium text-muted-foreground">{title}</p>
       <p
         className={`mt-2 text-3xl font-bold font-mono tabular-nums ${ACCENT_CLASSES[accent]}`}

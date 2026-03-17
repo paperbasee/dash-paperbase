@@ -57,7 +57,7 @@ export default function DashboardBarChart({ data }: DashboardBarChartProps) {
   const [activeMetric, setActiveMetric] = useState<MetricKey | "all">("all");
 
   return (
-    <Card className="h-[360px] border border-border bg-card">
+    <Card className="h-[360px] border border-card-border bg-card">
       <CardContent className="h-full pb-2 pt-4">
         {data.length === 0 ? (
           <div className="flex h-full items-center justify-center text-sm text-muted-foreground">

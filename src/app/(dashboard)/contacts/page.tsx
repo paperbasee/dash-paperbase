@@ -78,7 +78,7 @@ export default function ContactsPage() {
             {contacts.map((contact) => (
               <div
                 key={contact.id}
-                className="rounded-xl border border-border bg-card p-4"
+                className="rounded-xl border border-card-border bg-card p-4"
               >
                 <div className="flex items-start justify-between">
                   <div>

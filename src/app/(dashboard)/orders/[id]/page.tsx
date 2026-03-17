@@ -262,7 +262,7 @@ export default function OrderDetailPage() {
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3 lg:items-start">
         {/* Product - left, wider; height locked to Payment + Customer combined on desktop; scrolls when many items */}
         <Card
-          className="flex min-h-0 flex-col overflow-hidden rounded-xl border bg-card shadow-sm lg:col-span-2"
+          className="flex min-h-0 flex-col overflow-hidden rounded-xl border border-card-border bg-card shadow-sm lg:col-span-2"
           style={rightColHeight !== null ? { height: rightColHeight } : undefined}
         >
           <CardHeader className="shrink-0 border-b border-border/50 px-4 pb-4 sm:px-6">
@@ -358,7 +358,7 @@ export default function OrderDetailPage() {
         {/* Right column: Payment + Customer stacked (height drives Product card on desktop) */}
         <div ref={rightColRef} className="flex flex-col gap-6 lg:col-span-1">
         {/* Payment */}
-        <Card className="overflow-hidden rounded-xl border bg-card shadow-sm">
+        <Card className="overflow-hidden rounded-xl border border-card-border bg-card shadow-sm">
           <CardHeader className="border-b border-border/50 px-4 pb-4 sm:px-6">
             <CardTitle>Payment</CardTitle>
             <CardDescription>Final Payment Amount</CardDescription>
@@ -392,7 +392,7 @@ export default function OrderDetailPage() {
         </Card>
 
         {/* Customer */}
-        <Card className="overflow-hidden rounded-xl border bg-card shadow-sm">
+        <Card className="overflow-hidden rounded-xl border border-card-border bg-card shadow-sm">
           <CardHeader className="border-b border-border/50 px-4 pb-4 sm:px-6">
             <CardTitle>Customer</CardTitle>
             <CardDescription>Information Detail</CardDescription>
@@ -578,7 +578,7 @@ export default function OrderDetailPage() {
       </div>
 
       {/* Timeline */}
-      <Card className="overflow-hidden rounded-xl border bg-card shadow-sm">
+      <Card className="overflow-hidden rounded-xl border border-card-border bg-card shadow-sm">
         <CardHeader className="border-b border-border/50 px-4 pb-4 sm:px-6">
           <CardTitle>Timeline</CardTitle>
           <CardDescription>Track Order Progress</CardDescription>

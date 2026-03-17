@@ -91,12 +91,12 @@ export default function CartsPage() {
           <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
         </div>
       ) : groupedItems.length === 0 ? (
-        <div className="rounded-xl border border-border bg-card py-12 text-center text-sm text-muted-foreground">
+        <div className="rounded-xl border border-card-border bg-card py-12 text-center text-sm text-muted-foreground">
           No cart items found
         </div>
       ) : (
         <>
-          <div className="overflow-x-auto rounded-xl border border-border bg-card">
+          <div className="overflow-x-auto rounded-xl border border-card-border bg-card">
             <table className="w-full text-left text-sm">
               <thead>
                 <tr className="border-b border-border bg-muted/40">

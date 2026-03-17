@@ -166,7 +166,7 @@ export default function NewOrderPage() {
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Customer info */}
-        <section className="rounded-xl border border-border bg-card p-6">
+        <section className="rounded-xl border border-card-border bg-card p-6">
           <h2 className="mb-4 text-lg font-semibold text-foreground">
             Customer Information
           </h2>
@@ -245,7 +245,7 @@ export default function NewOrderPage() {
         </section>
 
         {/* Order items */}
-        <section className="rounded-xl border border-border bg-card p-6">
+        <section className="rounded-xl border border-card-border bg-card p-6">
           <h2 className="mb-4 text-lg font-semibold text-foreground">
             Order Items
           </h2>
@@ -267,7 +267,7 @@ export default function NewOrderPage() {
             )}
 
             {showResults && results.length > 0 && (
-              <div className="absolute z-10 mt-1 max-h-64 w-full overflow-y-auto rounded-lg border border-border bg-card shadow-lg">
+              <div className="absolute z-10 mt-1 max-h-64 w-full overflow-y-auto rounded-lg border border-card-border bg-card shadow-lg">
                 {results.map((product) => (
                   <button
                     key={product.id}
@@ -297,7 +297,7 @@ export default function NewOrderPage() {
             )}
 
             {showResults && query.trim().length >= 2 && results.length === 0 && !searching && (
-              <div className="absolute z-10 mt-1 w-full rounded-lg border border-border bg-card px-4 py-3 text-sm text-muted-foreground shadow-lg">
+              <div className="absolute z-10 mt-1 w-full rounded-lg border border-card-border bg-card px-4 py-3 text-sm text-muted-foreground shadow-lg">
                 No products found
               </div>
             )}

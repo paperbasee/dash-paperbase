@@ -62,25 +62,27 @@
 @layer base {
   :root,
   :root[data-theme="light"] {
+    /* Light mode – matches shadcn/ui docs */
     --background: 0 0% 100%;
-    --foreground: 224 71% 4%;
+    --foreground: 222 47% 11%;
     --card: 0 0% 100%;
-    --card-foreground: 224 71% 4%;
+    --card-foreground: 222 47% 11%;
     --popover: 0 0% 100%;
-    --popover-foreground: 224 71% 4%;
-    --primary: 263 70% 50%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 220 14% 96%;
-    --secondary-foreground: 224 71% 4%;
-    --muted: 220 14% 96%;
-    --muted-foreground: 220 9% 46%;
-    --accent: 263 70% 96%;
-    --accent-foreground: 263 70% 40%;
+    --popover-foreground: 222 47% 11%;
+    --primary: 222 47% 11%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 222 47% 11%;
+    --muted: 210 40% 96%;
+    --muted-foreground: 215 16% 47%;
+    --accent: 210 40% 96%;
+    --accent-foreground: 222 47% 11%;
     --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 220 13% 91%;
-    --input: 220 13% 91%;
-    --ring: 263 70% 50%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214 32% 91%;
+    --card-border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 222 84% 56%;
     --radius: 0;
 
     /* Stats / badge accent hues (light) */
@@ -90,7 +92,7 @@
     --accent-red: 0 84% 60%;
 
     /* Chart series colors (light) */
-    --chart-orders: 263 70% 50%;
+    --chart-orders: 222 84% 56%;
     --chart-products: 221 83% 53%;
     --chart-carts: 142 76% 36%;
     --chart-wishlist: 38 92% 50%;
@@ -98,25 +100,27 @@
   }
 
   :root[data-theme="dark"] {
-    --background: 248 32% 7%;
+    /* Dark mode – neutral charcoal gray, no blue tint */
+    --background: 220 8% 7%;
     --foreground: 210 20% 96%;
-    --card: 248 32% 9%;
+    --card: 220 8% 9%;
     --card-foreground: 210 20% 96%;
-    --popover: 248 32% 9%;
+    --popover: 220 8% 9%;
     --popover-foreground: 210 20% 96%;
-    --primary: 263 70% 60%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 248 30% 14%;
+    --primary: 210 20% 96%;
+    --primary-foreground: 220 10% 12%;
+    --secondary: 220 6% 14%;
     --secondary-foreground: 210 20% 96%;
-    --muted: 248 30% 14%;
+    --muted: 220 6% 14%;
     --muted-foreground: 220 10% 65%;
-    --accent: 263 70% 25%;
-    --accent-foreground: 0 0% 100%;
-    --destructive: 0 84% 63%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 248 30% 16%;
-    --input: 248 30% 16%;
-    --ring: 263 70% 60%;
+    --accent: 220 6% 18%;
+    --accent-foreground: 210 20% 96%;
+    --destructive: 0 63% 38%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 220 6% 18%;
+    --card-border: 220 6% 24%;
+    --input: 220 6% 18%;
+    --ring: 220 10% 60%;
     --radius: 0;
 
     /* Stats / badge accent hues (dark) */
@@ -126,7 +130,7 @@
     --accent-red: 0 84% 70%;
 
     /* Chart series colors (dark) */
-    --chart-orders: 263 70% 60%;
+    --chart-orders: 212 96% 78%;
     --chart-products: 221 83% 66%;
     --chart-carts: 142 76% 48%;
     --chart-wishlist: 38 92% 60%;
@@ -156,6 +160,7 @@
   --color-destructive: hsl(var(--destructive));
   --color-destructive-foreground: hsl(var(--destructive-foreground));
   --color-border: hsl(var(--border));
+  --color-card-border: hsl(var(--card-border));
   --color-input: hsl(var(--input));
   --color-ring: hsl(var(--ring));
   --radius-xs: 0;
