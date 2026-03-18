@@ -47,7 +47,7 @@ export default function CtaPage() {
   function fetchData() {
     setLoading(true);
     api
-      .get<PaginatedResponse<Notification> | Notification[]>("/api/admin/notifications/")
+      .get<PaginatedResponse<Notification> | Notification[]>("admin/notifications/")
       .then((res) => {
         const data = res.data;
         setCtas(Array.isArray(data) ? data : data.results);
@@ -96,9 +96,9 @@ export default function CtaPage() {
 
     try {
       if (editing === "new") {
-        await api.post("/api/admin/notifications/", payload);
+        await api.post("admin/notifications/", payload);
       } else {
-        await api.patch(`/api/admin/notifications/${editing}/`, payload);
+        await api.patch(`admin/notifications/${editing}/`, payload);
       }
       setEditing(null);
       fetchData();
@@ -112,7 +112,7 @@ export default function CtaPage() {
   async function toggleActive(n: Notification) {
     try {
       const { data } = await api.patch<Notification>(
-        `/api/admin/notifications/${n.id}/`,
+        `admin/notifications/${n.id}/`,
         { is_active: !n.is_active }
       );
       setCtas((prev) => prev.map((x) => (x.id === data.id ? data : x)));
@@ -124,7 +124,7 @@ export default function CtaPage() {
   async function handleDelete(id: number) {
     if (!confirm("Delete this CTA?")) return;
     try {
-      await api.delete(`/api/admin/notifications/${id}/`);
+      await api.delete(`admin/notifications/${id}/`);
       setCtas((prev) => prev.filter((n) => n.id !== id));
     } catch (err) {
       console.error(err);

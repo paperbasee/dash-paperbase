@@ -27,7 +27,7 @@ export default function ContactsPage() {
   useEffect(() => {
     setLoading(true);
     api
-      .get<PaginatedResponse<ContactSubmission>>("/api/admin/contacts/", {
+      .get<PaginatedResponse<ContactSubmission>>("admin/contacts/", {
         params: { page },
       })
       .then((res) => {
@@ -42,7 +42,7 @@ export default function ContactsPage() {
   async function handleDelete(id: number) {
     if (!confirm("Delete this contact submission?")) return;
     try {
-      await api.delete(`/api/admin/contacts/${id}/`);
+      await api.delete(`admin/contacts/${id}/`);
       setContacts((prev) => prev.filter((c) => c.id !== id));
       setCount((c) => c - 1);
     } catch (err) {

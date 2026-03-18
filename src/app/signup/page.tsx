@@ -5,24 +5,48 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 
-export default function LoginPage() {
+export default function SignupPage() {
   const router = useRouter();
-  const { login } = useAuth();
-  const [username, setUsername] = useState("");
+  const { register } = useAuth();
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [passwordConfirm, setPasswordConfirm] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [rememberMe, setRememberMe] = useState(false);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setError("");
+    if (password !== passwordConfirm) {
+      setError("Passwords do not match.");
+      return;
+    }
+    if (password.length < 8) {
+      setError("Password must be at least 8 characters.");
+      return;
+    }
     setLoading(true);
     try {
-      const result = await login(username, password);
+      const result = await register(email, password, passwordConfirm);
       router.push(result.active_store_id ? "/" : "/onboarding");
-    } catch {
-      setError("Invalid credentials. Please try again.");
+    } catch (err: unknown) {
+      const res =
+        err && typeof err === "object" && "response" in err
+          ? (err as { response?: { data?: Record<string, unknown> } }).response
+              ?.data
+          : null;
+      if (res && typeof res === "object") {
+        const msg = (v: unknown) =>
+          Array.isArray(v) ? (v[0] as string) : typeof v === "string" ? v : null;
+        const errMsg =
+          msg(res.email) ??
+          msg(res.password_confirm) ??
+          msg(res.password) ??
+          (typeof res.detail === "string" ? res.detail : null);
+        setError(errMsg || "Registration failed. Please try again.");
+      } else {
+        setError("Registration failed. Please try again.");
+      }
     } finally {
       setLoading(false);
     }
@@ -36,13 +60,10 @@ export default function LoginPage() {
             Gadzilla Dashboard
           </p>
           <h1 className="text-3xl font-semibold tracking-tight text-slate-900">
-            Login
+            Create account
           </h1>
           <p className="text-sm text-slate-500">
-            Hi, welcome back{" "}
-            <span role="img" aria-label="waving hand">
-              👋
-            </span>
+            Sign up to get started with your store
           </p>
         </div>
 
@@ -55,19 +76,19 @@ export default function LoginPage() {
 
           <div className="space-y-1.5">
             <label
-              htmlFor="username"
+              htmlFor="email"
               className="block text-sm font-medium text-slate-700"
             >
               Email
             </label>
             <input
-              id="username"
-              type="text"
+              id="email"
+              type="email"
               required
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               className="w-full rounded-xl border border-slate-200 bg-slate-50/60 px-3 py-2.5 text-sm text-slate-900 placeholder-slate-400 shadow-sm transition focus:border-indigo-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-100"
-              placeholder="e.g. johndoe@email.com"
+              placeholder="e.g. you@example.com"
             />
           </div>
 
@@ -82,23 +103,31 @@ export default function LoginPage() {
               id="password"
               type="password"
               required
+              minLength={8}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="w-full rounded-xl border border-slate-200 bg-slate-50/60 px-3 py-2.5 text-sm text-slate-900 placeholder-slate-400 shadow-sm transition focus:border-indigo-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-100"
-              placeholder="Enter your password"
+              placeholder="At least 8 characters"
             />
           </div>
 
-          <div className="flex items-center justify-between text-sm">
-            <label className="inline-flex items-center gap-2 text-slate-600">
-              <input
-                type="checkbox"
-                checked={rememberMe}
-                onChange={(e) => setRememberMe(e.target.checked)}
-                className="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
-              />
-              <span>Remember me</span>
+          <div className="space-y-1.5">
+            <label
+              htmlFor="password_confirm"
+              className="block text-sm font-medium text-slate-700"
+            >
+              Confirm password
             </label>
+            <input
+              id="password_confirm"
+              type="password"
+              required
+              minLength={8}
+              value={passwordConfirm}
+              onChange={(e) => setPasswordConfirm(e.target.value)}
+              className="w-full rounded-xl border border-slate-200 bg-slate-50/60 px-3 py-2.5 text-sm text-slate-900 placeholder-slate-400 shadow-sm transition focus:border-indigo-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-100"
+              placeholder="Repeat your password"
+            />
           </div>
 
           <button
@@ -106,17 +135,17 @@ export default function LoginPage() {
             disabled={loading}
             className="mt-2 w-full rounded-xl bg-indigo-600 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-500 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {loading ? "Signing in..." : "Login"}
+            {loading ? "Creating account..." : "Create account"}
           </button>
         </form>
 
         <p className="mt-6 text-center text-sm text-slate-600">
-          Don&apos;t have an account?{" "}
+          Already have an account?{" "}
           <Link
-            href="/signup"
+            href="/login"
             className="font-medium text-indigo-600 hover:text-indigo-500"
           >
-            Sign up
+            Log in
           </Link>
         </p>
       </div>

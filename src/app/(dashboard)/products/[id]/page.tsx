@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { ExtraFieldsFormSection, validateExtraFields } from "@/components/ExtraFieldsFormSection";
 import { useExtraFieldsSchema } from "@/hooks/useExtraFieldsSchema";
 import type { ExtraFieldValues } from "@/types/extra-fields";
-import type { Product, NavbarCategory, Category } from "@/types";
+import type { Product, ParentCategory, Category } from "@/types";
 
 const BADGE_OPTIONS = [
   { value: "", label: "None" },
@@ -28,7 +28,7 @@ export default function EditProductPage() {
   const submitAsDraftRef = useRef(false);
 
   const [product, setProduct] = useState<Product | null>(null);
-  const [navCategories, setNavCategories] = useState<NavbarCategory[]>([]);
+  const [parentCategories, setParentCategories] = useState<ParentCategory[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -83,22 +83,25 @@ export default function EditProductPage() {
 
   useEffect(() => {
     Promise.all([
-      api.get<Product>(`/api/admin/products/${id}/`),
-      api.get("/api/admin/navbar-categories/"),
-      api.get("/api/admin/categories/"),
+      api.get<Product>(`admin/products/${id}/`),
+      api.get("admin/parent-categories/"),
+      api.get("admin/categories/"),
     ])
-      .then(([prodRes, navRes, catRes]) => {
+      .then(([prodRes, parentRes, catRes]) => {
         const p = prodRes.data;
+        const cats = catRes.data.results ?? catRes.data;
+        const cat = cats.find((c: Category) => String(c.id) === String(p.category));
+        const parentId = cat?.parent ?? null;
         setProduct(p);
-        setNavCategories(navRes.data.results ?? navRes.data);
-        setCategories(catRes.data.results ?? catRes.data);
+        setParentCategories(parentRes.data.results ?? parentRes.data);
+        setCategories(cats);
         setForm({
           name: p.name,
           brand: p.brand,
           price: p.price,
           original_price: p.original_price ?? "",
-          category: String(p.category),
-          sub_category: p.sub_category != null ? String(p.sub_category) : "",
+          category: parentId != null ? String(parentId) : String(p.category),
+          sub_category: parentId != null ? String(p.category) : "",
           description: p.description ?? "",
           stock: String(p.stock),
           badge: p.badge ?? "",
@@ -116,8 +119,8 @@ export default function EditProductPage() {
     return () => urls.forEach((u) => u && URL.revokeObjectURL(u));
   }, [imageFiles]);
 
-  const filteredSubCategories = categories.filter(
-    (c) => String(c.navbar_category) === form.category
+  const filteredChildCategories = categories.filter(
+    (c) => String(c.parent) === form.category
   );
 
   async function handleSubmit(e: FormEvent, asDraft: boolean) {
@@ -141,8 +144,7 @@ export default function EditProductPage() {
     formData.append("brand", form.brand);
     formData.append("price", form.price);
     if (form.original_price) formData.append("original_price", form.original_price);
-    formData.append("category", form.category);
-    if (form.sub_category) formData.append("sub_category", form.sub_category);
+    formData.append("category", form.sub_category || form.category);
     formData.append("description", form.description);
     formData.append("stock", form.stock);
     if (form.badge) formData.append("badge", form.badge);
@@ -152,7 +154,7 @@ export default function EditProductPage() {
     if (mainImage) formData.append("image", mainImage);
 
     try {
-      const { data } = await api.patch(`/api/admin/products/${id}/`, formData, {
+      const { data } = await api.patch(`admin/products/${id}/`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
       setProduct(data);
@@ -596,7 +598,7 @@ export default function EditProductPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <Field label="Product category" required>
+              <Field label="Parent category" required>
                 <select
                   required
                   value={form.category}
@@ -609,15 +611,15 @@ export default function EditProductPage() {
                   }
                   className={inputClass}
                 >
-                  <option value="">Select category...</option>
-                  {navCategories.map((c) => (
+                  <option value="">Select parent...</option>
+                  {parentCategories.map((c) => (
                     <option key={c.id} value={c.id}>
                       {c.name}
                     </option>
                   ))}
                 </select>
               </Field>
-              <Field label="Subcategory">
+              <Field label="Child category">
                 <select
                   value={form.sub_category}
                   onChange={(e) =>
@@ -626,8 +628,8 @@ export default function EditProductPage() {
                   className={inputClass}
                   disabled={!form.category}
                 >
-                  <option value="">Select subcategory...</option>
-                  {filteredSubCategories.map((c) => (
+                  <option value="">Select child (optional)...</option>
+                  {filteredChildCategories.map((c) => (
                     <option key={c.id} value={c.id}>
                       {c.name}
                     </option>

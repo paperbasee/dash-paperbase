@@ -1,8 +1,13 @@
 export interface Branding {
   logo_url: string | null;
   admin_name: string;
-  admin_subtitle: string;
+  owner_name: string;
+  owner_email: string;
   currency_symbol: string;
+  store_type: string;
+  contact_email: string;
+  phone: string;
+  address: string;
 }
 
 export interface OrderItem {
@@ -67,7 +72,7 @@ export interface ProductImage {
   order: number;
 }
 
-export interface NavbarCategory {
+export interface ParentCategory {
   id: number;
   name: string;
   slug: string;
@@ -75,7 +80,7 @@ export interface NavbarCategory {
   image: string | null;
   order: number;
   is_active: boolean;
-  subcategory_count: number;
+  child_count: number;
 }
 
 export interface Category {
@@ -84,8 +89,8 @@ export interface Category {
   slug: string;
   description: string;
   image: string | null;
-  navbar_category: number;
-  navbar_category_name: string;
+  parent: number | null;
+  parent_name: string;
   order: number;
   is_active: boolean;
   product_count: number;
@@ -199,4 +204,80 @@ export interface ActivityLog {
   entity_id: string;
   summary: string;
   metadata: Record<string, unknown>;
+}
+
+export interface Inventory {
+  id: number;
+  product: string;
+  product_name: string;
+  variant: number | null;
+  variant_sku: string | null;
+  quantity: number;
+  low_stock_threshold: number;
+  is_tracked: boolean;
+  updated_at: string;
+  is_low: boolean;
+}
+
+export interface StockMovement {
+  id: number;
+  change: number;
+  reason: string;
+  reference: string;
+  created_at: string;
+  actor: number | null;
+}
+
+export interface Coupon {
+  id: number;
+  code: string;
+  discount_type: string;
+  discount_value: string;
+  min_order_value: string | null;
+  max_uses: number | null;
+  times_used: number;
+  valid_from: string | null;
+  valid_until: string | null;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Banner {
+  id: number;
+  title: string;
+  image: string;
+  link_url: string;
+  position: string;
+  order: number;
+  is_active: boolean;
+  start_date: string | null;
+  end_date: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Review {
+  id: number;
+  product: string;
+  product_name: string;
+  user: number;
+  user_email: string;
+  rating: number;
+  title: string;
+  body: string;
+  status: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Customer {
+  id: number;
+  user: number;
+  user_email: string;
+  user_username: string;
+  phone: string;
+  marketing_opt_in: boolean;
+  created_at: string;
+  updated_at?: string;
 }

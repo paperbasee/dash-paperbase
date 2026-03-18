@@ -55,7 +55,7 @@ export function useDashboardAnalytics(filters: DashboardAnalyticsFilters) {
     setState((prev) => ({ ...prev, loading: true, error: null }));
 
     api
-      .get<DashboardAnalyticsResponse>("/api/admin/analytics/overview/", {
+      .get<DashboardAnalyticsResponse>("admin/analytics/overview/", {
         params: {
           start_date: filters.startDate,
           end_date: filters.endDate,

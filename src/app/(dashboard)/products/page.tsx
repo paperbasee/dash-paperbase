@@ -30,7 +30,7 @@ export default function ProductsPage() {
   const fetchProducts = useCallback(() => {
     setLoading(true);
     api
-      .get<PaginatedResponse<Product>>("/api/admin/products/", {
+      .get<PaginatedResponse<Product>>("admin/products/", {
         params: { page },
       })
       .then((res) => {
@@ -69,7 +69,7 @@ export default function ProductsPage() {
     setDeleting(true);
     try {
       await Promise.all(
-        Array.from(selectedIds).map((id) => api.delete(`/api/admin/products/${id}/`))
+        Array.from(selectedIds).map((id) => api.delete(`admin/products/${id}/`))
       );
       setSelectedIds(new Set());
       fetchProducts();
@@ -83,7 +83,7 @@ export default function ProductsPage() {
   async function updateProduct(id: string, payload: { stock?: number; is_active?: boolean }) {
     setUpdatingId(id);
     try {
-      await api.patch(`/api/admin/products/${id}/`, payload);
+      await api.patch(`admin/products/${id}/`, payload);
       setProducts((prev) =>
         prev.map((p) =>
           p.id === id ? { ...p, ...payload } : p

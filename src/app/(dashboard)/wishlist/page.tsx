@@ -18,7 +18,7 @@ export default function WishlistPage() {
   useEffect(() => {
     setLoading(true);
     api
-      .get<PaginatedResponse<WishlistItem>>("/api/admin/wishlist/", {
+      .get<PaginatedResponse<WishlistItem>>("admin/wishlist/", {
         params: { page },
       })
       .then((res) => {

@@ -77,7 +77,7 @@ export default function NewOrderPage() {
       setSearching(true);
       try {
         const { data } = await api.get<PaginatedResponse<Product>>(
-          "/api/admin/products/",
+          "admin/products/",
           { params: { search: value.trim() } }
         );
         setResults(data.results);
@@ -152,7 +152,7 @@ export default function NewOrderPage() {
           price: item.price,
         })),
       };
-      await api.post("/api/admin/orders/", payload);
+      await api.post("admin/orders/", payload);
       router.push("/orders");
     } catch {
       setError("Failed to create order. Please check the details and try again.");

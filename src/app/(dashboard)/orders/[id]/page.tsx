@@ -115,7 +115,7 @@ export default function OrderDetailPage() {
 
   useEffect(() => {
     api
-      .get<Order>(`/api/admin/orders/${id}/`)
+      .get<Order>(`admin/orders/${id}/`)
       .then((res) => setOrder(res.data))
       .catch(console.error)
       .finally(() => setLoading(false));
@@ -166,7 +166,7 @@ export default function OrderDetailPage() {
     setExtraFieldsErrors({});
     setSaving(true);
     try {
-      const { data } = await api.patch<Order>(`/api/admin/orders/${id}/`, form);
+      const { data } = await api.patch<Order>(`admin/orders/${id}/`, form);
       setOrder(data);
       setEditing(false);
     } catch (err) {
@@ -179,7 +179,7 @@ export default function OrderDetailPage() {
   async function handleDelete() {
     if (!confirm("Delete this order permanently?")) return;
     try {
-      await api.delete(`/api/admin/orders/${id}/`);
+      await api.delete(`admin/orders/${id}/`);
       router.push("/orders");
     } catch (err) {
       console.error(err);

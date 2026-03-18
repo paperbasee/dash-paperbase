@@ -32,7 +32,7 @@ export default function BrandsPage() {
   function fetchData() {
     setLoading(true);
     api
-      .get<PaginatedResponse<Brand> | Brand[]>("/api/admin/brands/")
+      .get<PaginatedResponse<Brand> | Brand[]>("admin/brands/")
       .then((res) => {
         const data = res.data;
         setBrands(Array.isArray(data) ? data : data.results);
@@ -72,9 +72,9 @@ export default function BrandsPage() {
 
     try {
       if (editing === "new") {
-        await api.post("/api/admin/brands/", fd, { headers: { "Content-Type": "multipart/form-data" } });
+        await api.post("admin/brands/", fd, { headers: { "Content-Type": "multipart/form-data" } });
       } else {
-        await api.patch(`/api/admin/brands/${editing}/`, fd, { headers: { "Content-Type": "multipart/form-data" } });
+        await api.patch(`admin/brands/${editing}/`, fd, { headers: { "Content-Type": "multipart/form-data" } });
       }
       setEditing(null);
       fetchData();
@@ -88,7 +88,7 @@ export default function BrandsPage() {
   async function handleDelete(id: number) {
     if (!confirm("Delete this brand?")) return;
     try {
-      await api.delete(`/api/admin/brands/${id}/`);
+      await api.delete(`admin/brands/${id}/`);
       fetchData();
     } catch (err) {
       console.error(err);

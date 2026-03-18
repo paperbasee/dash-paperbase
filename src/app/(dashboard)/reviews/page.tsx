@@ -1,22 +1,219 @@
 "use client";
 
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { Undo2, Star } from "lucide-react";
+import api from "@/lib/api";
+import type { Review, PaginatedResponse } from "@/types";
 
 export default function ReviewsPage() {
+  const router = useRouter();
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [count, setCount] = useState(0);
+  const [hasNext, setHasNext] = useState(false);
+  const [updating, setUpdating] = useState<number | null>(null);
+
+  function fetchData() {
+    setLoading(true);
+    api
+      .get<PaginatedResponse<Review>>("admin/reviews/", {
+        params: { page },
+      })
+      .then((res) => {
+        setReviews(res.data.results);
+        setCount(res.data.count);
+        setHasNext(!!res.data.next);
+      })
+      .catch(console.error)
+      .finally(() => setLoading(false));
+  }
+
+  useEffect(() => {
+    fetchData();
+  }, [page]);
+
+  async function handleStatusChange(id: number, status: string) {
+    setUpdating(id);
+    try {
+      await api.patch(`admin/reviews/${id}/`, { status });
+      fetchData();
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setUpdating(null);
+    }
+  }
+
+  async function handleDelete(id: number) {
+    if (!confirm("Delete this review?")) return;
+    try {
+      await api.delete(`admin/reviews/${id}/`);
+      fetchData();
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  function statusColor(status: string) {
+    switch (status) {
+      case "approved":
+        return "text-green-600 dark:text-green-400";
+      case "rejected":
+        return "text-red-600 dark:text-red-400";
+      default:
+        return "text-amber-600 dark:text-amber-400";
+    }
+  }
+
   return (
-    <div className="flex flex-col gap-6">
-      <header>
-        <h1 className="text-2xl font-medium tracking-tight text-foreground">Reviews</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Product reviews and ratings. Full management coming soon.
-        </p>
-      </header>
-      <div className="rounded-xl border border-dashed border-border bg-muted/30 p-12 text-center">
-        <p className="text-muted-foreground">Review management is coming soon.</p>
-        <Link href="/settings" className="mt-4 inline-block text-sm text-primary hover:underline">
-          Go to Settings → Apps to configure
-        </Link>
+    <div className="space-y-6">
+      <div className="flex items-center gap-3">
+        <div className="rounded-lg bg-muted/80 px-1 py-1">
+          <button
+            type="button"
+            onClick={() => router.back()}
+            aria-label="Go back"
+            className="flex items-center justify-center rounded-md p-1 text-muted-foreground hover:bg-muted"
+          >
+            <Undo2 className="h-4 w-4" />
+          </button>
+        </div>
+        <h1 className="text-2xl font-medium text-foreground">
+          Reviews ({count})
+        </h1>
       </div>
+
+      {loading ? (
+        <div className="flex h-64 items-center justify-center">
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+        </div>
+      ) : reviews.length === 0 ? (
+        <div className="rounded-xl border border-dashed border-card-border bg-card py-12 text-center text-sm text-muted-foreground">
+          No reviews yet.
+        </div>
+      ) : (
+        <>
+          <div className="overflow-x-auto rounded-xl border border-dashed border-card-border bg-card">
+            <table className="w-full text-left text-sm">
+              <thead>
+                <tr className="border-b border-border bg-muted/40">
+                  <th className="px-4 py-3 text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+                    Product
+                  </th>
+                  <th className="px-4 py-3 text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+                    User
+                  </th>
+                  <th className="px-4 py-3 text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+                    Rating
+                  </th>
+                  <th className="px-4 py-3 text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+                    Title
+                  </th>
+                  <th className="px-4 py-3 text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+                    Status
+                  </th>
+                  <th className="px-4 py-3 text-right text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border/60">
+                {reviews.map((r) => (
+                  <tr key={r.id} className="hover:bg-muted/40">
+                    <td className="px-4 py-3 font-medium">
+                      <Link
+                        href={`/products/${r.product}`}
+                        className="text-primary hover:underline"
+                      >
+                        {r.product_name}
+                      </Link>
+                    </td>
+                    <td className="px-4 py-3 text-muted-foreground">
+                      {r.user_email}
+                    </td>
+                    <td className="px-4 py-3">
+                      <span className="flex items-center gap-0.5">
+                        {Array.from({ length: 5 }).map((_, i) => (
+                          <Star
+                            key={i}
+                            className={`h-4 w-4 ${
+                              i < r.rating
+                                ? "fill-amber-400 text-amber-400"
+                                : "text-muted-foreground/40"
+                            }`}
+                          />
+                        ))}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3">{r.title || "—"}</td>
+                    <td className="px-4 py-3">
+                      <span className={statusColor(r.status)}>
+                        {r.status}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 text-right">
+                      {r.status === "pending" && (
+                        <>
+                          <button
+                            type="button"
+                            disabled={updating === r.id}
+                            onClick={() =>
+                              handleStatusChange(r.id, "approved")
+                            }
+                            className="mr-2 text-green-600 hover:underline disabled:opacity-50"
+                          >
+                            Approve
+                          </button>
+                          <button
+                            type="button"
+                            disabled={updating === r.id}
+                            onClick={() =>
+                              handleStatusChange(r.id, "rejected")
+                            }
+                            className="mr-2 text-red-600 hover:underline disabled:opacity-50"
+                          >
+                            Reject
+                          </button>
+                        </>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => handleDelete(r.id)}
+                        className="text-destructive hover:underline"
+                      >
+                        Delete
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {(count > 10 || hasNext) && (
+            <div className="flex items-center justify-between">
+              <button
+                disabled={page <= 1}
+                onClick={() => setPage((p) => p - 1)}
+                className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground transition hover:bg-muted disabled:opacity-40"
+              >
+                Previous
+              </button>
+              <span className="text-sm text-muted-foreground">Page {page}</span>
+              <button
+                disabled={!hasNext}
+                onClick={() => setPage((p) => p + 1)}
+                className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground transition hover:bg-muted disabled:opacity-40"
+              >
+                Next
+              </button>
+            </div>
+          )}
+        </>
+      )}
     </div>
   );
 }

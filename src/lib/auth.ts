@@ -2,11 +2,38 @@ import axios from "axios";
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
+export interface LoginResponse {
+  access: string;
+  refresh: string;
+  active_store_id: number | null;
+}
+
+export interface RegisterPayload {
+  email: string;
+  password: string;
+  password_confirm: string;
+}
+
+export async function register(
+  email: string,
+  password: string,
+  password_confirm: string
+): Promise<LoginResponse> {
+  const { data } = await axios.post<LoginResponse>(`${BASE_URL}/auth/register/`, {
+    email: email.trim().toLowerCase(),
+    password,
+    password_confirm,
+  });
+  localStorage.setItem("access_token", data.access);
+  localStorage.setItem("refresh_token", data.refresh);
+  return data;
+}
+
 export async function login(
   username: string,
   password: string
-): Promise<{ access: string; refresh: string }> {
-  const { data } = await axios.post(`${BASE_URL}/api/auth/token/`, {
+): Promise<LoginResponse> {
+  const { data } = await axios.post<LoginResponse>(`${BASE_URL}/auth/token/`, {
     username,
     password,
   });

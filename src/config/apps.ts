@@ -12,6 +12,8 @@ import {
   PackageSearch,
   History,
   Star,
+  Image as ImageIcon,
+  BarChart3,
 } from "lucide-react";
 
 export interface NavCounts {
@@ -177,6 +179,26 @@ export const APP_CONFIG: Record<string, AppConfig> = {
     countKey: null,
     parentId: "more",
   },
+  banners: {
+    id: "banners",
+    label: "Banners",
+    icon: ImageIcon,
+    description: "Manage banners for homepage, sidebar, footer",
+    essential: false,
+    href: "/banners",
+    countKey: null,
+    parentId: null,
+  },
+  analytics: {
+    id: "analytics",
+    label: "Analytics",
+    icon: BarChart3,
+    description: "Store insights – orders, carts, pageviews",
+    essential: false,
+    href: "/analytics",
+    countKey: null,
+    parentId: null,
+  },
 };
 
 export const ESSENTIAL_APP_IDS = ["products", "orders", "customers"] as const;
@@ -193,9 +215,11 @@ export const OPTIONAL_APP_IDS = [
   "variants",
   "inventory",
   "activities",
+  "banners",
+  "analytics",
 ] as const;
 
-export const MAIN_NAV_APP_IDS = ["orders", "products", "customers", "cta", "carts", "wishlist"] as const;
+export const MAIN_NAV_APP_IDS = ["orders", "products", "customers", "cta", "carts", "wishlist", "banners", "analytics"] as const;
 
 export const CATEGORIES_BRANDS_APP_IDS = ["categories", "brands"] as const;
 

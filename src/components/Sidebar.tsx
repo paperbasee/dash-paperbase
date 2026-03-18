@@ -44,6 +44,7 @@ import {
 } from "@/components/ui/tooltip";
 import { useAuth } from "@/context/AuthContext";
 import { useBranding, defaultBranding } from "@/context/BrandingContext";
+import { useStoreLimit } from "@/hooks/useStoreLimit";
 import { useSearchModal } from "@/context/SearchModalContext";
 import { useNavCounts } from "@/hooks/useNavCounts";
 import { useEnabledApps } from "@/hooks/useEnabledApps";
@@ -91,8 +92,9 @@ function SidebarContent({
   onToggle?: () => void;
 }) {
   const pathname = usePathname();
-  const { logout } = useAuth();
+  const { logout, isAuthenticated } = useAuth();
   const { branding } = useBranding();
+  const { canAddStore } = useStoreLimit(isAuthenticated);
   const { setOpen: setSearchOpen } = useSearchModal();
   const { counts, formatCount } = useNavCounts();
   const { isEnabled } = useEnabledApps();
@@ -157,7 +159,9 @@ function SidebarContent({
   };
 
   const adminName = branding?.admin_name ?? defaultBranding.admin_name;
-  const adminSubtitle = branding?.admin_subtitle ?? defaultBranding.admin_subtitle;
+  const storeType = branding?.store_type ?? "";
+  const ownerName = branding?.owner_name || "Owner";
+  const ownerEmail = branding?.owner_email || "";
   const resolvedLogoUrl = logoUrl(branding?.logo_url ?? null);
   const initial = adminName.charAt(0).toUpperCase();
 
@@ -208,9 +212,11 @@ function SidebarContent({
               <span className="block truncate text-lg font-medium text-foreground">
                 {adminName}
               </span>
-              <span className="block truncate text-xs text-muted-foreground">
-                {adminSubtitle}
-              </span>
+              {storeType ? (
+                <span className="block truncate text-xs text-muted-foreground">
+                  {storeType}
+                </span>
+              ) : null}
             </div>
           </>
         )}
@@ -432,10 +438,10 @@ function SidebarContent({
                 <>
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-sm font-medium text-foreground">
-                      John Smith
+                      {ownerName}
                     </p>
                     <p className="truncate text-xs text-muted-foreground">
-                      john.doe@example.com
+                      {ownerEmail || "Set in Settings"}
                     </p>
                   </div>
                   <ChevronDown className="size-4 shrink-0 text-muted-foreground" />
@@ -470,19 +476,32 @@ function SidebarContent({
                 <DropdownMenuItem disabled>
                   <span className="flex items-center gap-2">
                     <span
-                      className="h-2.5 w-2.5 bg-emerald-400"
+                      className="h-2.5 w-2.5 shrink-0 bg-emerald-400"
                       style={{ borderRadius: "999px" }}
                     />
-                    <span>Example Store</span>
+                    <span className="truncate">{adminName || "Store"}</span>
                   </span>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem disabled>
-                  <span className="flex items-center gap-2 text-muted-foreground">
-                    <Plus className="size-3.5" />
-                    <span>Add another store</span>
-                  </span>
-                </DropdownMenuItem>
+                {canAddStore === false ? (
+                  <DropdownMenuItem disabled>
+                    <span className="flex items-center gap-2 text-muted-foreground">
+                      <Plus className="size-3.5" />
+                      <span>Add another store</span>
+                    </span>
+                  </DropdownMenuItem>
+                ) : (
+                  <DropdownMenuItem asChild>
+                    <Link
+                      href="/onboarding?add=1"
+                      onClick={handleLinkClick}
+                      className="flex cursor-pointer items-center gap-2 text-muted-foreground hover:text-foreground"
+                    >
+                      <Plus className="size-3.5" />
+                      <span>Add another store</span>
+                    </Link>
+                  </DropdownMenuItem>
+                )}
               </>
             )}
             <DropdownMenuSeparator />

@@ -18,7 +18,7 @@ export default function CartsPage() {
   useEffect(() => {
     setLoading(true);
     api
-      .get<PaginatedResponse<Cart>>("/api/admin/carts/", {
+      .get<PaginatedResponse<Cart>>("admin/carts/", {
         params: { page },
       })
       .then((res) => {

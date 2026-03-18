@@ -22,8 +22,13 @@ interface BrandingState {
 const defaultBranding: Branding = {
   logo_url: null,
   admin_name: "Core",
-  admin_subtitle: "Core dashboard",
+  owner_name: "",
+  owner_email: "",
   currency_symbol: "৳",
+  store_type: "",
+  contact_email: "",
+  phone: "",
+  address: "",
 };
 
 const BrandingContext = createContext<BrandingState | undefined>(undefined);
@@ -34,7 +39,7 @@ export function BrandingProvider({ children }: { children: ReactNode }) {
 
   const fetchBranding = useCallback(async () => {
     try {
-      const { data } = await api.get<Branding>("/api/admin/branding/");
+      const { data } = await api.get<Branding>("admin/branding/");
       setBranding(data);
     } catch {
       setBranding(defaultBranding);

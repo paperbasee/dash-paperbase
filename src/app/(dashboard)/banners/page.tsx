@@ -2,55 +2,56 @@
 
 import { useEffect, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
-import { Undo2, Plus } from "lucide-react";
+import { Undo2, Plus, Image as ImageIcon } from "lucide-react";
 import api from "@/lib/api";
-import type { Coupon, PaginatedResponse } from "@/types";
+import type { Banner, PaginatedResponse } from "@/types";
 
-type CouponForm = {
-  code: string;
-  discount_type: string;
-  discount_value: string;
-  min_order_value: string;
-  max_uses: string;
-  valid_from: string;
-  valid_until: string;
+type BannerForm = {
+  title: string;
+  link_url: string;
+  position: string;
+  order: string;
   is_active: boolean;
 };
 
-const emptyForm: CouponForm = {
-  code: "",
-  discount_type: "percentage",
-  discount_value: "",
-  min_order_value: "",
-  max_uses: "",
-  valid_from: "",
-  valid_until: "",
+const emptyForm: BannerForm = {
+  title: "",
+  link_url: "",
+  position: "homepage",
+  order: "0",
   is_active: true,
 };
 
-function formatDate(value: string | null): string {
-  if (!value) return "—";
-  const d = new Date(value);
-  if (Number.isNaN(d.getTime())) return value;
-  const pad = (n: number) => n.toString().padStart(2, "0");
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+const POSITIONS = [
+  { value: "homepage", label: "Homepage" },
+  { value: "sidebar", label: "Sidebar" },
+  { value: "footer", label: "Footer" },
+  { value: "header", label: "Header" },
+];
+
+function imageUrl(url: string | null): string | null {
+  if (!url) return null;
+  if (url.startsWith("http")) return url;
+  const base = process.env.NEXT_PUBLIC_API_URL || "";
+  return base ? `${base.replace(/\/$/, "")}${url.startsWith("/") ? "" : "/"}${url}` : url;
 }
 
-export default function CouponsPage() {
+export default function BannersPage() {
   const router = useRouter();
-  const [coupons, setCoupons] = useState<Coupon[]>([]);
+  const [banners, setBanners] = useState<Banner[]>([]);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState<number | "new" | null>(null);
-  const [form, setForm] = useState<CouponForm>(emptyForm);
+  const [form, setForm] = useState<BannerForm>(emptyForm);
+  const [imageFile, setImageFile] = useState<File | null>(null);
   const [saving, setSaving] = useState(false);
 
   function fetchData() {
     setLoading(true);
     api
-      .get<PaginatedResponse<Coupon> | Coupon[]>("admin/coupons/")
+      .get<PaginatedResponse<Banner> | Banner[]>("admin/banners/")
       .then((res) => {
         const data = res.data;
-        setCoupons(Array.isArray(data) ? data : data.results);
+        setBanners(Array.isArray(data) ? data : data.results);
       })
       .catch(console.error)
       .finally(() => setLoading(false));
@@ -63,41 +64,41 @@ export default function CouponsPage() {
   function openNew() {
     setEditing("new");
     setForm(emptyForm);
+    setImageFile(null);
   }
 
-  function openEdit(coupon: Coupon) {
-    setEditing(coupon.id);
+  function openEdit(banner: Banner) {
+    setEditing(banner.id);
     setForm({
-      code: coupon.code,
-      discount_type: coupon.discount_type,
-      discount_value: coupon.discount_value,
-      min_order_value: coupon.min_order_value || "",
-      max_uses: coupon.max_uses != null ? String(coupon.max_uses) : "",
-      valid_from: coupon.valid_from ? coupon.valid_from.slice(0, 10) : "",
-      valid_until: coupon.valid_until ? coupon.valid_until.slice(0, 10) : "",
-      is_active: coupon.is_active,
+      title: banner.title,
+      link_url: banner.link_url || "",
+      position: banner.position,
+      order: String(banner.order),
+      is_active: banner.is_active,
     });
+    setImageFile(null);
   }
 
   async function handleSave(e: FormEvent) {
     e.preventDefault();
     setSaving(true);
-    const payload: Record<string, unknown> = {
-      code: form.code.trim(),
-      discount_type: form.discount_type,
-      discount_value: form.discount_value,
-      is_active: form.is_active,
-    };
-    if (form.min_order_value) payload.min_order_value = form.min_order_value;
-    if (form.max_uses) payload.max_uses = parseInt(form.max_uses, 10);
-    if (form.valid_from) payload.valid_from = `${form.valid_from}T00:00:00Z`;
-    if (form.valid_until) payload.valid_until = `${form.valid_until}T23:59:59Z`;
+    const fd = new FormData();
+    fd.append("title", form.title);
+    fd.append("link_url", form.link_url);
+    fd.append("position", form.position);
+    fd.append("order", form.order);
+    fd.append("is_active", String(form.is_active));
+    if (imageFile) fd.append("image", imageFile);
 
     try {
       if (editing === "new") {
-        await api.post("admin/coupons/", payload);
+        await api.post("admin/banners/", fd, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
       } else {
-        await api.patch(`admin/coupons/${editing}/`, payload);
+        await api.patch(`admin/banners/${editing}/`, fd, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
       }
       setEditing(null);
       fetchData();
@@ -109,9 +110,9 @@ export default function CouponsPage() {
   }
 
   async function handleDelete(id: number) {
-    if (!confirm("Delete this coupon?")) return;
+    if (!confirm("Delete this banner?")) return;
     try {
-      await api.delete(`admin/coupons/${id}/`);
+      await api.delete(`admin/banners/${id}/`);
       fetchData();
     } catch (err) {
       console.error(err);
@@ -141,110 +142,92 @@ export default function CouponsPage() {
             </button>
           </div>
           <h1 className="text-2xl font-medium text-foreground">
-            Coupons ({coupons.length})
+            Banners ({banners.length})
           </h1>
         </div>
         <button
           type="button"
           onClick={openNew}
-          className="flex items-center gap-2 rounded-lg border border-border bg-background px-4 py-2 text-sm font-medium hover:bg-muted"
+          className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
         >
           <Plus className="h-4 w-4" />
-          Add Coupon
+          Add Banner
         </button>
       </div>
 
-      {editing && (
+      {editing !== null && (
         <form
           onSubmit={handleSave}
           className="rounded-xl border border-border bg-card p-6 space-y-4"
         >
           <h2 className="text-lg font-medium">
-            {editing === "new" ? "New Coupon" : "Edit Coupon"}
+            {editing === "new" ? "New Banner" : "Edit Banner"}
           </h2>
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              <label className="mb-1 block text-sm font-medium">Code</label>
+              <label className="mb-1 block text-sm font-medium">Title</label>
               <input
                 type="text"
-                value={form.code}
-                onChange={(e) => setForm((f) => ({ ...f, code: e.target.value }))}
+                value={form.title}
+                onChange={(e) =>
+                  setForm((f) => ({ ...f, title: e.target.value }))
+                }
                 className="w-full rounded border border-border bg-background px-3 py-2 text-sm"
-                placeholder="SAVE20"
-                required
+                placeholder="Optional"
               />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium">Discount type</label>
+              <label className="mb-1 block text-sm font-medium">Position</label>
               <select
-                value={form.discount_type}
+                value={form.position}
                 onChange={(e) =>
-                  setForm((f) => ({ ...f, discount_type: e.target.value }))
+                  setForm((f) => ({ ...f, position: e.target.value }))
                 }
                 className="w-full rounded border border-border bg-background px-3 py-2 text-sm"
               >
-                <option value="percentage">Percentage</option>
-                <option value="fixed">Fixed amount</option>
+                {POSITIONS.map((p) => (
+                  <option key={p.value} value={p.value}>
+                    {p.label}
+                  </option>
+                ))}
               </select>
             </div>
-            <div>
-              <label className="mb-1 block text-sm font-medium">Discount value</label>
+            <div className="sm:col-span-2">
+              <label className="mb-1 block text-sm font-medium">Link URL</label>
               <input
-                type="text"
-                value={form.discount_value}
+                type="url"
+                value={form.link_url}
                 onChange={(e) =>
-                  setForm((f) => ({ ...f, discount_value: e.target.value }))
+                  setForm((f) => ({ ...f, link_url: e.target.value }))
                 }
                 className="w-full rounded border border-border bg-background px-3 py-2 text-sm"
-                placeholder={form.discount_type === "percentage" ? "20" : "10.00"}
-                required
+                placeholder="https://..."
               />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium">Min order value</label>
+              <label className="mb-1 block text-sm font-medium">Order</label>
               <input
-                type="text"
-                value={form.min_order_value}
+                type="number"
+                value={form.order}
                 onChange={(e) =>
-                  setForm((f) => ({ ...f, min_order_value: e.target.value }))
-                }
-                className="w-full rounded border border-border bg-background px-3 py-2 text-sm"
-                placeholder="Optional"
-              />
-            </div>
-            <div>
-              <label className="mb-1 block text-sm font-medium">Max uses</label>
-              <input
-                type="text"
-                value={form.max_uses}
-                onChange={(e) =>
-                  setForm((f) => ({ ...f, max_uses: e.target.value }))
-                }
-                className="w-full rounded border border-border bg-background px-3 py-2 text-sm"
-                placeholder="Optional"
-              />
-            </div>
-            <div>
-              <label className="mb-1 block text-sm font-medium">Valid from</label>
-              <input
-                type="date"
-                value={form.valid_from}
-                onChange={(e) =>
-                  setForm((f) => ({ ...f, valid_from: e.target.value }))
+                  setForm((f) => ({ ...f, order: e.target.value }))
                 }
                 className="w-full rounded border border-border bg-background px-3 py-2 text-sm"
               />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium">Valid until</label>
+              <label className="mb-1 block text-sm font-medium">Image</label>
               <input
-                type="date"
-                value={form.valid_until}
-                onChange={(e) =>
-                  setForm((f) => ({ ...f, valid_until: e.target.value }))
-                }
+                type="file"
+                accept="image/*"
+                onChange={(e) => setImageFile(e.target.files?.[0] ?? null)}
                 className="w-full rounded border border-border bg-background px-3 py-2 text-sm"
               />
+              {editing !== "new" && !imageFile && (
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Leave empty to keep current image
+                </p>
+              )}
             </div>
             <div className="flex items-center gap-2">
               <input
@@ -255,13 +238,15 @@ export default function CouponsPage() {
                   setForm((f) => ({ ...f, is_active: e.target.checked }))
                 }
               />
-              <label htmlFor="is_active" className="text-sm">Active</label>
+              <label htmlFor="is_active" className="text-sm">
+                Active
+              </label>
             </div>
           </div>
           <div className="flex gap-2">
             <button
               type="submit"
-              disabled={saving}
+              disabled={saving || (editing === "new" && !imageFile)}
               className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
             >
               {saving ? "Saving..." : "Save"}
@@ -282,16 +267,16 @@ export default function CouponsPage() {
           <thead>
             <tr className="border-b border-border bg-muted/40">
               <th className="px-4 py-3 text-xs font-semibold tracking-wide text-muted-foreground uppercase">
-                Code
+                Preview
               </th>
               <th className="px-4 py-3 text-xs font-semibold tracking-wide text-muted-foreground uppercase">
-                Discount
+                Title
               </th>
               <th className="px-4 py-3 text-xs font-semibold tracking-wide text-muted-foreground uppercase">
-                Uses
+                Position
               </th>
               <th className="px-4 py-3 text-xs font-semibold tracking-wide text-muted-foreground uppercase">
-                Valid
+                Order
               </th>
               <th className="px-4 py-3 text-xs font-semibold tracking-wide text-muted-foreground uppercase">
                 Status
@@ -302,43 +287,50 @@ export default function CouponsPage() {
             </tr>
           </thead>
           <tbody className="divide-y divide-border/60">
-            {coupons.map((c) => (
-              <tr key={c.id} className="hover:bg-muted/40">
-                <td className="px-4 py-3 font-medium">{c.code}</td>
-                <td className="px-4 py-3 text-muted-foreground">
-                  {c.discount_type === "percentage"
-                    ? `${c.discount_value}%`
-                    : `$${c.discount_value}`}
-                </td>
+            {banners.map((b) => (
+              <tr key={b.id} className="hover:bg-muted/40">
                 <td className="px-4 py-3">
-                  {c.times_used}
-                  {c.max_uses != null ? ` / ${c.max_uses}` : ""}
+                  {b.image ? (
+                    <img
+                      src={imageUrl(b.image) || b.image}
+                      alt={b.title || "Banner"}
+                      className="h-12 w-20 rounded object-cover"
+                    />
+                  ) : (
+                    <div className="flex h-12 w-20 items-center justify-center rounded bg-muted">
+                      <ImageIcon className="h-6 w-6 text-muted-foreground" />
+                    </div>
+                  )}
                 </td>
-                <td className="px-4 py-3 text-muted-foreground">
-                  {formatDate(c.valid_from)} – {formatDate(c.valid_until)}
+                <td className="px-4 py-3 font-medium">
+                  {b.title || "—"}
                 </td>
+                <td className="px-4 py-3 text-muted-foreground capitalize">
+                  {b.position}
+                </td>
+                <td className="px-4 py-3">{b.order}</td>
                 <td className="px-4 py-3">
                   <span
                     className={
-                      c.is_active
+                      b.is_active
                         ? "text-green-600 dark:text-green-400"
                         : "text-muted-foreground"
                     }
                   >
-                    {c.is_active ? "Active" : "Inactive"}
+                    {b.is_active ? "Active" : "Inactive"}
                   </span>
                 </td>
                 <td className="px-4 py-3 text-right">
                   <button
                     type="button"
-                    onClick={() => openEdit(c)}
+                    onClick={() => openEdit(b)}
                     className="mr-2 text-primary hover:underline"
                   >
                     Edit
                   </button>
                   <button
                     type="button"
-                    onClick={() => handleDelete(c.id)}
+                    onClick={() => handleDelete(b.id)}
                     className="text-destructive hover:underline"
                   >
                     Delete
@@ -350,9 +342,9 @@ export default function CouponsPage() {
         </table>
       </div>
 
-      {coupons.length === 0 && !editing && (
+      {banners.length === 0 && !editing && (
         <div className="rounded-xl border border-dashed border-card-border bg-card py-12 text-center text-sm text-muted-foreground">
-          No coupons yet. Click "Add Coupon" to create one.
+          No banners yet. Click "Add Banner" to create one.
         </div>
       )}
     </div>

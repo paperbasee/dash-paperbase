@@ -173,12 +173,13 @@ export default function SettingsPage() {
 
   const { branding, isLoading, refetch } = useBranding();
   const enabledApps = useEnabledApps();
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [email, setEmail] = useState("");
-  const [adminName, setAdminName] = useState(defaultBranding.admin_name);
-  const [adminSubtitle, setAdminSubtitle] = useState(defaultBranding.admin_subtitle);
-  const [currencySymbol, setCurrencySymbol] = useState(defaultBranding.currency_symbol);
+  const [ownerName, setOwnerName] = useState("");
+  const [ownerEmail, setOwnerEmail] = useState("");
+  const [storeName, setStoreName] = useState(defaultBranding.admin_name);
+  const [storeType, setStoreType] = useState("");
+  const [contactEmail, setContactEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [address, setAddress] = useState("");
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [clearLogo, setClearLogo] = useState(false);
   const [accountSaving, setAccountSaving] = useState(false);
@@ -195,9 +196,13 @@ export default function SettingsPage() {
 
   useEffect(() => {
     if (branding) {
-      setAdminName(branding.admin_name);
-      setAdminSubtitle(branding.admin_subtitle);
-      setCurrencySymbol(branding.currency_symbol ?? defaultBranding.currency_symbol);
+      setStoreName(branding.admin_name);
+      setStoreType(branding.store_type ?? "");
+      setContactEmail(branding.contact_email ?? "");
+      setPhone(branding.phone ?? "");
+      setAddress(branding.address ?? "");
+      setOwnerName(branding.owner_name ?? "");
+      setOwnerEmail(branding.owner_email ?? "");
     }
   }, [branding]);
 
@@ -225,6 +230,32 @@ export default function SettingsPage() {
       // ignore and keep defaults
     }
   }, []);
+
+  // Auto-dismiss success messages after 2 seconds
+  useEffect(() => {
+    if (accountMessage?.type === "success") {
+      const t = setTimeout(() => setAccountMessage(null), 2000);
+      return () => clearTimeout(t);
+    }
+  }, [accountMessage]);
+  useEffect(() => {
+    if (storeMessage?.type === "success") {
+      const t = setTimeout(() => setStoreMessage(null), 2000);
+      return () => clearTimeout(t);
+    }
+  }, [storeMessage]);
+  useEffect(() => {
+    if (dynamicFieldsMessage?.type === "success") {
+      const t = setTimeout(() => setDynamicFieldsMessage(null), 2000);
+      return () => clearTimeout(t);
+    }
+  }, [dynamicFieldsMessage]);
+  useEffect(() => {
+    if (integrationsMessage?.type === "success") {
+      const t = setTimeout(() => setIntegrationsMessage(null), 2000);
+      return () => clearTimeout(t);
+    }
+  }, [integrationsMessage]);
 
   function handleFacebookCapiSave() {
     setIntegrationsSaving(true);
@@ -260,13 +291,27 @@ export default function SettingsPage() {
 
   async function handleAccountSubmit(e: React.FormEvent) {
     e.preventDefault();
+    const trimmedName = ownerName.trim();
+    const trimmedEmail = ownerEmail.trim();
+    if (!trimmedName) {
+      setAccountMessage({ type: "error", text: "Please enter the owner name." });
+      return;
+    }
+    if (!trimmedEmail || !trimmedEmail.includes("@")) {
+      setAccountMessage({ type: "error", text: "Please enter a valid owner email." });
+      return;
+    }
     setAccountSaving(true);
     setAccountMessage(null);
     try {
-      // TODO: wire up to owner profile API when available
-      setAccountMessage({ type: "success", text: "Profile saved." });
+      const formData = new FormData();
+      formData.append("owner_name", trimmedName.slice(0, 255));
+      formData.append("owner_email", trimmedEmail.slice(0, 254));
+      await api.patch("admin/branding/", formData);
+      await refetch();
+      setAccountMessage({ type: "success", text: "Account settings saved." });
     } catch {
-      setAccountMessage({ type: "error", text: "Failed to save profile." });
+      setAccountMessage({ type: "error", text: "Failed to save account settings." });
     } finally {
       setAccountSaving(false);
     }
@@ -278,16 +323,21 @@ export default function SettingsPage() {
     setStoreMessage(null);
     try {
       const formData = new FormData();
-      formData.append("admin_name", adminName || defaultBranding.admin_name);
-      formData.append("admin_subtitle", adminSubtitle || defaultBranding.admin_subtitle);
-      formData.append(
-        "currency_symbol",
-        (currencySymbol || defaultBranding.currency_symbol).trim().slice(0, 10)
-      );
+      formData.append("admin_name", storeName || defaultBranding.admin_name);
+      const st = storeType.trim();
+      if (st.split(/\s+/).length > 4) {
+        setStoreMessage({ type: "error", text: "Store type must be at most 4 words." });
+        setStoreSaving(false);
+        return;
+      }
+      formData.append("store_type", st);
+      formData.append("contact_email", contactEmail.trim());
+      formData.append("phone", phone.trim().slice(0, 50));
+      formData.append("address", address.trim());
       if (logoFile) formData.append("logo", logoFile);
       if (clearLogo) formData.append("clear_logo", "true");
 
-      await api.patch("/api/admin/branding/", formData);
+      await api.patch("admin/branding/", formData);
       await refetch();
       setLogoFile(null);
       setClearLogo(false);
@@ -380,54 +430,42 @@ export default function SettingsPage() {
               </div>
             ) : (
               <form onSubmit={handleAccountSubmit} className="w-full max-w-6xl space-y-6">
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <h2 className="text-lg font-medium text-foreground">Account</h2>
+                <p className="text-sm text-muted-foreground">
+                  Owner information for this store.
+                </p>
+                <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                   <div className="flex flex-col gap-2">
                     <label
-                      htmlFor="first_name"
+                      htmlFor="owner_name"
                       className="text-sm font-medium leading-normal text-foreground"
                     >
-                      First name
+                      Owner name
                     </label>
                     <Input
-                      id="first_name"
-                      value={firstName}
-                      onChange={(e) => setFirstName(e.target.value)}
-                      placeholder="e.g. John"
+                      id="owner_name"
+                      value={ownerName}
+                      onChange={(e) => setOwnerName(e.target.value)}
+                      placeholder="e.g. John Doe"
                       className="w-full"
                     />
                   </div>
                   <div className="flex flex-col gap-2">
                     <label
-                      htmlFor="last_name"
+                      htmlFor="owner_email"
                       className="text-sm font-medium leading-normal text-foreground"
                     >
-                      Last name
+                      Owner email
                     </label>
                     <Input
-                      id="last_name"
-                      value={lastName}
-                      onChange={(e) => setLastName(e.target.value)}
-                      placeholder="e.g. Doe"
+                      id="owner_email"
+                      type="email"
+                      value={ownerEmail}
+                      onChange={(e) => setOwnerEmail(e.target.value)}
+                      placeholder="e.g. owner@yourstore.com"
                       className="w-full"
                     />
                   </div>
-                </div>
-
-                <div className="flex flex-col gap-2">
-                  <label
-                    htmlFor="email"
-                    className="text-sm font-medium leading-normal text-foreground"
-                  >
-                    Email
-                  </label>
-                  <Input
-                    id="email"
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="e.g. john@example.com"
-                    className="w-full max-w-md"
-                  />
                 </div>
 
                 {accountMessage && (
@@ -505,75 +543,88 @@ export default function SettingsPage() {
                 </div>
               </div>
 
-              <div className="flex flex-col gap-2">
-                <label
-                  htmlFor="store_admin_name"
-                  className="text-sm font-medium leading-normal text-foreground"
-                >
-                  Store name
-                </label>
-                <Input
-                  id="store_admin_name"
-                  value={adminName}
-                  onChange={(e) => setAdminName(e.target.value)}
-                  placeholder="e.g. Gadzilla"
-                  className="w-full max-w-md"
-                />
-              </div>
-
-              <div className="flex flex-col gap-2">
-                <label
-                  htmlFor="store_admin_subtitle"
-                  className="text-sm font-medium leading-normal text-foreground"
-                >
-                  Store category and type
-                </label>
-                <Input
-                  id="store_admin_subtitle"
-                  value={adminSubtitle}
-                  onChange={(e) => setAdminSubtitle(e.target.value)}
-                  placeholder="e.g. Electronics, Gadgets & accessories"
-                  className="w-full max-w-md"
-                />
-              </div>
-              <div className="flex flex-col gap-2">
-                <label className="text-sm font-medium text-foreground">Store Description</label>
-                <Input placeholder="Brief description of your store" disabled />
-              </div>
-              <div className="flex flex-col gap-2">
-                <label className="text-sm font-medium text-foreground">Contact Email</label>
-                <Input placeholder="contact@yourstore.com" disabled />
-              </div>
-              <div className="flex flex-col gap-2">
-                <label className="text-sm font-medium text-foreground">Phone Number</label>
-                <Input placeholder="+880 1XXX-XXXXXX" disabled />
-              </div>
-              <div className="flex flex-col gap-2">
-                <label className="text-sm font-medium text-foreground">Address</label>
-                <Input placeholder="Store address" disabled />
-              </div>
-              <div className="flex flex-col gap-2">
-                <label className="text-sm font-medium text-foreground">Currency</label>
-                <Input placeholder="BDT, USD, etc." disabled />
-              </div>
-              <div className="flex flex-col gap-2">
-                <label
-                  htmlFor="store_currency_symbol"
-                  className="text-sm font-medium leading-normal text-foreground"
-                >
-                  Currency symbol
-                </label>
-                <Input
-                  id="store_currency_symbol"
-                  value={currencySymbol}
-                  onChange={(e) => setCurrencySymbol(e.target.value)}
-                  placeholder="e.g. ৳, $, €"
-                  className="w-full max-w-[8rem]"
-                  maxLength={10}
-                />
-                <p className="text-xs text-muted-foreground">
-                  Used in front of all prices across the dashboard (orders, products, etc.).
-                </p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="flex flex-col gap-2">
+                  <label
+                    htmlFor="store_name"
+                    className="text-sm font-medium leading-normal text-foreground"
+                  >
+                    Store name
+                  </label>
+                  <Input
+                    id="store_name"
+                    value={storeName}
+                    onChange={(e) => setStoreName(e.target.value)}
+                    placeholder="e.g. Gadzilla"
+                    className="w-full"
+                  />
+                </div>
+                <div className="flex flex-col gap-2">
+                  <label
+                    htmlFor="store_type"
+                    className="text-sm font-medium leading-normal text-foreground"
+                  >
+                    Store type
+                  </label>
+                  <Input
+                    id="store_type"
+                    value={storeType}
+                    onChange={(e) => setStoreType(e.target.value)}
+                    placeholder="e.g. Fashion, Retail, E-commerce"
+                    className="w-full"
+                    maxLength={60}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Category or type of your store. Max 4 words.
+                  </p>
+                </div>
+                <div className="flex flex-col gap-2">
+                  <label
+                    htmlFor="store_contact_email"
+                    className="text-sm font-medium leading-normal text-foreground"
+                  >
+                    Contact email
+                  </label>
+                  <Input
+                    id="store_contact_email"
+                    type="email"
+                    value={contactEmail}
+                    onChange={(e) => setContactEmail(e.target.value)}
+                    placeholder="contact@yourstore.com"
+                    className="w-full"
+                  />
+                </div>
+                <div className="flex flex-col gap-2">
+                  <label
+                    htmlFor="store_phone"
+                    className="text-sm font-medium leading-normal text-foreground"
+                  >
+                    Phone number
+                  </label>
+                  <Input
+                    id="store_phone"
+                    type="tel"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    placeholder="+880 1XXX-XXXXXX"
+                    className="w-full"
+                  />
+                </div>
+                <div className="flex flex-col gap-2 md:col-span-2">
+                  <label
+                    htmlFor="store_address"
+                    className="text-sm font-medium leading-normal text-foreground"
+                  >
+                    Address
+                  </label>
+                  <Input
+                    id="store_address"
+                    value={address}
+                    onChange={(e) => setAddress(e.target.value)}
+                    placeholder="123 Main St, City, Country"
+                    className="w-full"
+                  />
+                </div>
               </div>
 
               {storeMessage && (

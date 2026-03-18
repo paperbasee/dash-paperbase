@@ -30,7 +30,7 @@ export function useActivities(filters: ActivitiesFilters) {
   const fetchActivities = useCallback(() => {
     setState((prev) => ({ ...prev, loading: true, error: null }));
     api
-      .get<PaginatedResponse<ActivityLog>>("/api/admin/activities/", {
+      .get<PaginatedResponse<ActivityLog>>("admin/activities/", {
         params: filters,
       })
       .then((res) => setState({ data: res.data, loading: false, error: null }))

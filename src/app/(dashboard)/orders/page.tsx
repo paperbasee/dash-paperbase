@@ -45,7 +45,7 @@ export default function OrdersPage() {
   const fetchOrders = useCallback(() => {
     setLoading(true);
     api
-      .get<PaginatedResponse<Order>>("/api/admin/orders/", {
+      .get<PaginatedResponse<Order>>("admin/orders/", {
         params: { page },
       })
       .then((res) => {
@@ -81,7 +81,7 @@ export default function OrdersPage() {
   async function handleStatusChange(orderId: string, newStatus: OrderStatus) {
     setUpdatingStatusId(orderId);
     try {
-      await api.patch(`/api/admin/orders/${orderId}/`, { status: newStatus });
+      await api.patch(`admin/orders/${orderId}/`, { status: newStatus });
       setOrders((prev) =>
         prev.map((o) => (o.id === orderId ? { ...o, status: newStatus } : o))
       );
@@ -98,7 +98,7 @@ export default function OrdersPage() {
     setDeleting(true);
     try {
       await Promise.all(
-        Array.from(selectedIds).map((id) => api.delete(`/api/admin/orders/${id}/`))
+        Array.from(selectedIds).map((id) => api.delete(`admin/orders/${id}/`))
       );
       setSelectedIds(new Set());
       fetchOrders();

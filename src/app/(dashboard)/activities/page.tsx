@@ -8,7 +8,6 @@ const ENTITY_OPTIONS = [
   { value: "product", label: "Product" },
   { value: "order", label: "Order" },
   { value: "category", label: "Category" },
-  { value: "navbar_category", label: "Navbar category" },
   { value: "brand", label: "Brand" },
   { value: "notification", label: "Notification" },
   { value: "contact", label: "Contact" },

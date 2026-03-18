@@ -41,12 +41,22 @@ export function getNotificationLink(notification: DashboardNotification): string
 }
 
 export async function fetchNotifications(): Promise<DashboardNotification[]> {
-  const [ordersRes, cartRes, wishlistRes, contactsRes] = await Promise.all([
-    api.get<PaginatedResponse<Order>>("/api/admin/orders/"),
-    api.get<Cart | PaginatedResponse<Cart>>("/api/admin/carts/"),
-    api.get<PaginatedResponse<WishlistItem>>("/api/admin/wishlist/"),
-    api.get<PaginatedResponse<ContactSubmission>>("/api/admin/contacts/"),
-  ]);
+  let ordersRes: { data: unknown };
+  let cartRes: { data: unknown };
+  let wishlistRes: { data: unknown };
+  let contactsRes: { data: unknown };
+
+  try {
+    [ordersRes, cartRes, wishlistRes, contactsRes] = await Promise.all([
+      api.get<PaginatedResponse<Order>>("admin/orders/"),
+      api.get<Cart | PaginatedResponse<Cart>>("admin/carts/"),
+      api.get<PaginatedResponse<WishlistItem>>("admin/wishlist/"),
+      api.get<PaginatedResponse<ContactSubmission>>("admin/contacts/"),
+    ]);
+  } catch {
+    // 401/403 when unauthenticated or non-staff; return empty array
+    return [];
+  }
 
   const notifications: DashboardNotification[] = [];
 

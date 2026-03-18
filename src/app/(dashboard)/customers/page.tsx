@@ -1,32 +1,148 @@
 "use client";
 
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Plus } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Undo2 } from "lucide-react";
+import api from "@/lib/api";
+import type { Customer, PaginatedResponse } from "@/types";
 
 export default function CustomersPage() {
+  const router = useRouter();
+  const [customers, setCustomers] = useState<Customer[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [count, setCount] = useState(0);
+  const [hasNext, setHasNext] = useState(false);
+
+  function fetchData() {
+    setLoading(true);
+    api
+      .get<PaginatedResponse<Customer>>("admin/customers/", {
+        params: { page },
+      })
+      .then((res) => {
+        setCustomers(res.data.results);
+        setCount(res.data.count);
+        setHasNext(!!res.data.next);
+      })
+      .catch(console.error)
+      .finally(() => setLoading(false));
+  }
+
+  useEffect(() => {
+    fetchData();
+  }, [page]);
+
   return (
-    <div className="flex flex-col gap-6">
-      <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-medium tracking-tight text-foreground">Customers</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Customer accounts and profiles. Full management coming soon.
-          </p>
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="rounded-lg bg-muted/80 px-1 py-1">
+            <button
+              type="button"
+              onClick={() => router.back()}
+              aria-label="Go back"
+              className="flex items-center justify-center rounded-md p-1 text-muted-foreground hover:bg-muted"
+            >
+              <Undo2 className="h-4 w-4" />
+            </button>
+          </div>
+          <div>
+            <h1 className="text-2xl font-medium text-foreground">
+              Customers ({count})
+            </h1>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Customer accounts and profiles
+            </p>
+          </div>
         </div>
-        <Button asChild className="gap-2 shrink-0">
-          <Link href="/customers/new">
-            <Plus className="size-4" />
-            Add Customer
-          </Link>
-        </Button>
-      </header>
-      <div className="rounded-xl border border-dashed border-border bg-muted/30 p-12 text-center">
-        <p className="text-muted-foreground">Customer management is coming soon.</p>
-        <Link href="/settings" className="mt-4 inline-block text-sm text-primary hover:underline">
-          Go to Settings → Dynamic Fields to configure extra customer fields
+        <Link
+          href="/customers/new"
+          className="rounded-lg border border-border bg-background px-4 py-2 text-sm font-medium hover:bg-muted"
+        >
+          Add Customer
         </Link>
       </div>
+
+      {loading ? (
+        <div className="flex h-64 items-center justify-center">
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+        </div>
+      ) : customers.length === 0 ? (
+        <div className="rounded-xl border border-dashed border-card-border bg-card py-12 text-center text-sm text-muted-foreground">
+          No customers yet. Customers are created when users register or place orders.
+        </div>
+      ) : (
+        <>
+          <div className="overflow-x-auto rounded-xl border border-dashed border-card-border bg-card">
+            <table className="w-full text-left text-sm">
+              <thead>
+                <tr className="border-b border-border bg-muted/40">
+                  <th className="px-4 py-3 text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+                    Email
+                  </th>
+                  <th className="px-4 py-3 text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+                    Username
+                  </th>
+                  <th className="px-4 py-3 text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+                    Phone
+                  </th>
+                  <th className="px-4 py-3 text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+                    Marketing
+                  </th>
+                  <th className="px-4 py-3 text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+                    Joined
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border/60">
+                {customers.map((c) => (
+                  <tr key={c.id} className="hover:bg-muted/40">
+                    <td className="px-4 py-3 font-medium text-foreground">
+                      {c.user_email}
+                    </td>
+                    <td className="px-4 py-3 text-muted-foreground">
+                      {c.user_username}
+                    </td>
+                    <td className="px-4 py-3 text-muted-foreground">
+                      {c.phone || "—"}
+                    </td>
+                    <td className="px-4 py-3">
+                      {c.marketing_opt_in ? "Yes" : "No"}
+                    </td>
+                    <td className="px-4 py-3 text-muted-foreground">
+                      {c.created_at
+                        ? new Date(c.created_at).toLocaleDateString()
+                        : "—"}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {(count > 10 || hasNext) && (
+            <div className="flex items-center justify-between">
+              <button
+                disabled={page <= 1}
+                onClick={() => setPage((p) => p - 1)}
+                className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground transition hover:bg-muted disabled:opacity-40"
+              >
+                Previous
+              </button>
+              <span className="text-sm text-muted-foreground">Page {page}</span>
+              <button
+                disabled={!hasNext}
+                onClick={() => setPage((p) => p + 1)}
+                className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground transition hover:bg-muted disabled:opacity-40"
+              >
+                Next
+              </button>
+            </div>
+          )}
+        </>
+      )}
     </div>
   );
 }

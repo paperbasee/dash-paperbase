@@ -37,7 +37,7 @@ api.interceptors.response.use(
 
       try {
         const { data } = await axios.post(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/auth/token/refresh/`,
+          `${process.env.NEXT_PUBLIC_API_URL}/auth/token/refresh/`,
           { refresh: refreshToken }
         );
         localStorage.setItem("access_token", data.access);

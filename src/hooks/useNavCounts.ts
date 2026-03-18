@@ -18,7 +18,7 @@ export function useNavCounts() {
 
   const fetchCounts = useCallback(() => {
     api
-      .get<DashboardStats>("/api/admin/stats/")
+      .get<DashboardStats>("admin/stats/")
       .then((res) => setStats(res.data))
       .catch(() => setStats(null))
       .finally(() => setLoading(false));

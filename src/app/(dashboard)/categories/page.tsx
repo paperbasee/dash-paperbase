@@ -4,41 +4,41 @@ import { useEffect, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { Undo2 } from "lucide-react";
 import api from "@/lib/api";
-import type { NavbarCategory, Category, PaginatedResponse } from "@/types";
+import type { ParentCategory, Category, PaginatedResponse } from "@/types";
 
-type NavForm = { name: string; slug: string; description: string; order: string; is_active: boolean };
-type SubForm = { name: string; slug: string; description: string; navbar_category: string; order: string; is_active: boolean };
+type ParentForm = { name: string; slug: string; description: string; order: string; is_active: boolean };
+type ChildForm = { name: string; slug: string; description: string; parent: string; order: string; is_active: boolean };
 
-const emptyNavForm: NavForm = { name: "", slug: "", description: "", order: "0", is_active: true };
-const emptySubForm: SubForm = { name: "", slug: "", description: "", navbar_category: "", order: "0", is_active: true };
+const emptyParentForm: ParentForm = { name: "", slug: "", description: "", order: "0", is_active: true };
+const emptyChildForm: ChildForm = { name: "", slug: "", description: "", parent: "", order: "0", is_active: true };
 
 export default function CategoriesPage() {
   const router = useRouter();
-  const [navCategories, setNavCategories] = useState<NavbarCategory[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
+  const [parentCategories, setParentCategories] = useState<ParentCategory[]>([]);
+  const [childCategories, setChildCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const [navEditing, setNavEditing] = useState<number | "new" | null>(null);
-  const [navForm, setNavForm] = useState<NavForm>(emptyNavForm);
-  const [navImageFile, setNavImageFile] = useState<File | null>(null);
-  const [navSaving, setNavSaving] = useState(false);
+  const [parentEditing, setParentEditing] = useState<number | "new" | null>(null);
+  const [parentForm, setParentForm] = useState<ParentForm>(emptyParentForm);
+  const [parentImageFile, setParentImageFile] = useState<File | null>(null);
+  const [parentSaving, setParentSaving] = useState(false);
 
-  const [subEditing, setSubEditing] = useState<number | "new" | null>(null);
-  const [subForm, setSubForm] = useState<SubForm>(emptySubForm);
-  const [subImageFile, setSubImageFile] = useState<File | null>(null);
-  const [subSaving, setSubSaving] = useState(false);
+  const [childEditing, setChildEditing] = useState<number | "new" | null>(null);
+  const [childForm, setChildForm] = useState<ChildForm>(emptyChildForm);
+  const [childImageFile, setChildImageFile] = useState<File | null>(null);
+  const [childSaving, setChildSaving] = useState(false);
 
   function fetchData() {
     setLoading(true);
     Promise.all([
-      api.get<PaginatedResponse<NavbarCategory> | NavbarCategory[]>("/api/admin/navbar-categories/"),
-      api.get<PaginatedResponse<Category> | Category[]>("/api/admin/categories/"),
+      api.get<PaginatedResponse<ParentCategory> | ParentCategory[]>("admin/parent-categories/"),
+      api.get<PaginatedResponse<Category> | Category[]>("admin/categories/"),
     ])
-      .then(([navRes, catRes]) => {
-        const navData = navRes.data;
+      .then(([parentRes, catRes]) => {
+        const parentData = parentRes.data;
         const catData = catRes.data;
-        setNavCategories(Array.isArray(navData) ? navData : navData.results);
-        setCategories(Array.isArray(catData) ? catData : catData.results);
+        setParentCategories(Array.isArray(parentData) ? parentData : parentData.results);
+        setChildCategories(Array.isArray(catData) ? catData : catData.results);
       })
       .catch(console.error)
       .finally(() => setLoading(false));
@@ -46,97 +46,97 @@ export default function CategoriesPage() {
 
   useEffect(() => { fetchData(); }, []);
 
-  function openNavEdit(cat: NavbarCategory) {
-    setNavEditing(cat.id);
-    setNavForm({ name: cat.name, slug: cat.slug, description: cat.description, order: String(cat.order), is_active: cat.is_active });
-    setNavImageFile(null);
+  function openParentEdit(cat: ParentCategory) {
+    setParentEditing(cat.id);
+    setParentForm({ name: cat.name, slug: cat.slug, description: cat.description, order: String(cat.order), is_active: cat.is_active });
+    setParentImageFile(null);
   }
 
-  function openNavNew() {
-    setNavEditing("new");
-    setNavForm(emptyNavForm);
-    setNavImageFile(null);
+  function openParentNew() {
+    setParentEditing("new");
+    setParentForm(emptyParentForm);
+    setParentImageFile(null);
   }
 
-  async function saveNav(e: FormEvent) {
+  async function saveParent(e: FormEvent) {
     e.preventDefault();
-    setNavSaving(true);
+    setParentSaving(true);
     const fd = new FormData();
-    fd.append("name", navForm.name);
-    fd.append("slug", navForm.slug);
-    fd.append("description", navForm.description);
-    fd.append("order", navForm.order);
-    fd.append("is_active", String(navForm.is_active));
-    if (navImageFile) fd.append("image", navImageFile);
+    fd.append("name", parentForm.name);
+    fd.append("slug", parentForm.slug);
+    fd.append("description", parentForm.description);
+    fd.append("order", parentForm.order);
+    fd.append("is_active", String(parentForm.is_active));
+    if (parentImageFile) fd.append("image", parentImageFile);
 
     try {
-      if (navEditing === "new") {
-        await api.post("/api/admin/navbar-categories/", fd, { headers: { "Content-Type": "multipart/form-data" } });
+      if (parentEditing === "new") {
+        await api.post("admin/parent-categories/", fd, { headers: { "Content-Type": "multipart/form-data" } });
       } else {
-        await api.patch(`/api/admin/navbar-categories/${navEditing}/`, fd, { headers: { "Content-Type": "multipart/form-data" } });
+        await api.patch(`admin/parent-categories/${parentEditing}/`, fd, { headers: { "Content-Type": "multipart/form-data" } });
       }
-      setNavEditing(null);
+      setParentEditing(null);
       fetchData();
     } catch (err) {
       console.error(err);
     } finally {
-      setNavSaving(false);
+      setParentSaving(false);
     }
   }
 
-  async function deleteNav(id: number) {
-    if (!confirm("Delete this navbar category? All subcategories under it will also be deleted.")) return;
+  async function deleteParent(id: number) {
+    if (!confirm("Delete this parent category? All child categories under it will also be deleted.")) return;
     try {
-      await api.delete(`/api/admin/navbar-categories/${id}/`);
+      await api.delete(`admin/parent-categories/${id}/`);
       fetchData();
     } catch (err) {
       console.error(err);
     }
   }
 
-  function openSubEdit(cat: Category) {
-    setSubEditing(cat.id);
-    setSubForm({ name: cat.name, slug: cat.slug, description: cat.description, navbar_category: String(cat.navbar_category), order: String(cat.order), is_active: cat.is_active });
-    setSubImageFile(null);
+  function openChildEdit(cat: Category) {
+    setChildEditing(cat.id);
+    setChildForm({ name: cat.name, slug: cat.slug, description: cat.description, parent: String(cat.parent ?? ""), order: String(cat.order), is_active: cat.is_active });
+    setChildImageFile(null);
   }
 
-  function openSubNew() {
-    setSubEditing("new");
-    setSubForm(emptySubForm);
-    setSubImageFile(null);
+  function openChildNew() {
+    setChildEditing("new");
+    setChildForm(emptyChildForm);
+    setChildImageFile(null);
   }
 
-  async function saveSub(e: FormEvent) {
+  async function saveChild(e: FormEvent) {
     e.preventDefault();
-    setSubSaving(true);
+    setChildSaving(true);
     const fd = new FormData();
-    fd.append("name", subForm.name);
-    fd.append("slug", subForm.slug);
-    fd.append("description", subForm.description);
-    fd.append("navbar_category", subForm.navbar_category);
-    fd.append("order", subForm.order);
-    fd.append("is_active", String(subForm.is_active));
-    if (subImageFile) fd.append("image", subImageFile);
+    fd.append("name", childForm.name);
+    fd.append("slug", childForm.slug);
+    fd.append("description", childForm.description);
+    if (childForm.parent) fd.append("parent", childForm.parent);
+    fd.append("order", childForm.order);
+    fd.append("is_active", String(childForm.is_active));
+    if (childImageFile) fd.append("image", childImageFile);
 
     try {
-      if (subEditing === "new") {
-        await api.post("/api/admin/categories/", fd, { headers: { "Content-Type": "multipart/form-data" } });
+      if (childEditing === "new") {
+        await api.post("admin/categories/", fd, { headers: { "Content-Type": "multipart/form-data" } });
       } else {
-        await api.patch(`/api/admin/categories/${subEditing}/`, fd, { headers: { "Content-Type": "multipart/form-data" } });
+        await api.patch(`admin/categories/${childEditing}/`, fd, { headers: { "Content-Type": "multipart/form-data" } });
       }
-      setSubEditing(null);
+      setChildEditing(null);
       fetchData();
     } catch (err) {
       console.error(err);
     } finally {
-      setSubSaving(false);
+      setChildSaving(false);
     }
   }
 
-  async function deleteSub(id: number) {
-    if (!confirm("Delete this subcategory?")) return;
+  async function deleteChild(id: number) {
+    if (!confirm("Delete this child category?")) return;
     try {
-      await api.delete(`/api/admin/categories/${id}/`);
+      await api.delete(`admin/categories/${id}/`);
       fetchData();
     } catch (err) {
       console.error(err);
@@ -167,53 +167,53 @@ export default function CategoriesPage() {
         <h1 className="text-2xl font-medium text-foreground">Categories</h1>
       </div>
 
-      {/* ── Navbar Categories ── */}
+      {/* ── Parent Categories (top-level) ── */}
       <section>
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-lg font-medium text-foreground">
-            Navbar Categories ({navCategories.length})
+            Parent Categories ({parentCategories.length})
           </h2>
           <button
-            onClick={openNavNew}
+            onClick={openParentNew}
             className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
           >
-            Add Category
+            Add Parent Category
           </button>
         </div>
 
-        {navEditing !== null && (
+        {parentEditing !== null && (
           <form
-            onSubmit={saveNav}
+            onSubmit={saveParent}
             className="mb-4 space-y-3 rounded-xl border border-primary/30 bg-primary/5 p-4"
           >
             <p className="text-sm font-medium text-primary">
-              {navEditing === "new" ? "New Navbar Category" : "Edit Navbar Category"}
+              {parentEditing === "new" ? "New Parent Category" : "Edit Parent Category"}
             </p>
             <div className="grid grid-cols-2 gap-3">
-              <input required placeholder="Name" value={navForm.name} onChange={(e) => setNavForm({ ...navForm, name: e.target.value })} className="input" />
-              <input required placeholder="Slug" value={navForm.slug} onChange={(e) => setNavForm({ ...navForm, slug: e.target.value })} className="input" />
+              <input required placeholder="Name" value={parentForm.name} onChange={(e) => setParentForm({ ...parentForm, name: e.target.value })} className="input" />
+              <input required placeholder="Slug" value={parentForm.slug} onChange={(e) => setParentForm({ ...parentForm, slug: e.target.value })} className="input" />
             </div>
-            <input placeholder="Description" value={navForm.description} onChange={(e) => setNavForm({ ...navForm, description: e.target.value })} className="input" />
+            <input placeholder="Description" value={parentForm.description} onChange={(e) => setParentForm({ ...parentForm, description: e.target.value })} className="input" />
             <div className="grid grid-cols-3 gap-3">
               <input
                 type="number"
                 placeholder="Order"
-                value={navForm.order}
-                onChange={(e) => setNavForm({ ...navForm, order: e.target.value })}
+                value={parentForm.order}
+                onChange={(e) => setParentForm({ ...parentForm, order: e.target.value })}
                 className="input"
               />
               <input
                 type="file"
                 accept="image/*"
-                onChange={(e) => setNavImageFile(e.target.files?.[0] ?? null)}
+                onChange={(e) => setParentImageFile(e.target.files?.[0] ?? null)}
                 className="input"
               />
               <label className="flex items-center gap-2 text-sm text-foreground">
                 <input
                   type="checkbox"
-                  checked={navForm.is_active}
+                  checked={parentForm.is_active}
                   onChange={(e) =>
-                    setNavForm({ ...navForm, is_active: e.target.checked })
+                    setParentForm({ ...parentForm, is_active: e.target.checked })
                   }
                 />{" "}
                 Active
@@ -222,14 +222,14 @@ export default function CategoriesPage() {
             <div className="flex gap-2">
               <button
                 type="submit"
-                disabled={navSaving}
+                disabled={parentSaving}
                 className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
               >
-                {navSaving ? "Saving..." : "Save"}
+                {parentSaving ? "Saving..." : "Save"}
               </button>
               <button
                 type="button"
-                onClick={() => setNavEditing(null)}
+                onClick={() => setParentEditing(null)}
                 className="rounded-lg border border-border px-4 py-2 text-sm text-foreground hover:bg-muted"
               >
                 Cancel
@@ -249,7 +249,7 @@ export default function CategoriesPage() {
                   Slug
                 </th>
                 <th className="px-4 py-3 text-xs font-semibold tracking-wide text-muted-foreground uppercase">
-                  Subcategories
+                  Children
                 </th>
                 <th className="px-4 py-3 text-xs font-semibold tracking-wide text-muted-foreground uppercase">
                   Order
@@ -263,11 +263,11 @@ export default function CategoriesPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-border/60">
-              {navCategories.map((cat) => (
+              {parentCategories.map((cat) => (
                 <tr key={cat.id} className="hover:bg-muted/40">
                   <td className="px-4 py-3 font-medium text-foreground">{cat.name}</td>
                   <td className="px-4 py-3 text-muted-foreground">{cat.slug}</td>
-                  <td className="px-4 py-3 text-foreground">{cat.subcategory_count}</td>
+                  <td className="px-4 py-3 text-foreground">{cat.child_count}</td>
                   <td className="px-4 py-3 text-foreground">{cat.order}</td>
                   <td className="px-4 py-3">
                     <ActiveBadge active={cat.is_active} />
@@ -275,13 +275,13 @@ export default function CategoriesPage() {
                   <td className="px-4 py-3">
                     <div className="flex gap-2">
                       <button
-                        onClick={() => openNavEdit(cat)}
+                        onClick={() => openParentEdit(cat)}
                         className="text-sm text-primary hover:underline"
                       >
                         Edit
                       </button>
                       <button
-                        onClick={() => deleteNav(cat.id)}
+                        onClick={() => deleteParent(cat.id)}
                         className="text-sm text-destructive hover:underline"
                       >
                         Delete
@@ -295,61 +295,61 @@ export default function CategoriesPage() {
         </div>
       </section>
 
-      {/* ── Subcategories ── */}
+      {/* ── Child Categories (nested) ── */}
       <section>
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-lg font-medium text-foreground">
-            Subcategories ({categories.length})
+            Child Categories ({childCategories.length})
           </h2>
           <button
-            onClick={openSubNew}
+            onClick={openChildNew}
             className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90"
           >
-            Add Subcategory
+            Add Child Category
           </button>
         </div>
 
-        {subEditing !== null && (
+        {childEditing !== null && (
           <form
-            onSubmit={saveSub}
+            onSubmit={saveChild}
             className="mb-4 space-y-3 rounded-xl border border-primary/30 bg-primary/5 p-4"
           >
             <p className="text-sm font-semibold text-primary">
-              {subEditing === "new" ? "New Subcategory" : "Edit Subcategory"}
+              {childEditing === "new" ? "New Child Category" : "Edit Child Category"}
             </p>
             <div className="grid grid-cols-2 gap-3">
-              <input required placeholder="Name" value={subForm.name} onChange={(e) => setSubForm({ ...subForm, name: e.target.value })} className="input" />
-              <input required placeholder="Slug" value={subForm.slug} onChange={(e) => setSubForm({ ...subForm, slug: e.target.value })} className="input" />
+              <input required placeholder="Name" value={childForm.name} onChange={(e) => setChildForm({ ...childForm, name: e.target.value })} className="input" />
+              <input required placeholder="Slug" value={childForm.slug} onChange={(e) => setChildForm({ ...childForm, slug: e.target.value })} className="input" />
             </div>
             <div className="grid grid-cols-2 gap-3">
-              <select required value={subForm.navbar_category} onChange={(e) => setSubForm({ ...subForm, navbar_category: e.target.value })} className="input">
+              <select required value={childForm.parent} onChange={(e) => setChildForm({ ...childForm, parent: e.target.value })} className="input">
                 <option value="">Parent category...</option>
-                {navCategories.map((nc) => (
-                  <option key={nc.id} value={nc.id}>{nc.name}</option>
+                {parentCategories.map((pc) => (
+                  <option key={pc.id} value={pc.id}>{pc.name}</option>
                 ))}
               </select>
-              <input placeholder="Description" value={subForm.description} onChange={(e) => setSubForm({ ...subForm, description: e.target.value })} className="input" />
+              <input placeholder="Description" value={childForm.description} onChange={(e) => setChildForm({ ...childForm, description: e.target.value })} className="input" />
             </div>
             <div className="grid grid-cols-3 gap-3">
               <input
                 type="number"
                 placeholder="Order"
-                value={subForm.order}
-                onChange={(e) => setSubForm({ ...subForm, order: e.target.value })}
+                value={childForm.order}
+                onChange={(e) => setChildForm({ ...childForm, order: e.target.value })}
                 className="input"
               />
               <input
                 type="file"
                 accept="image/*"
-                onChange={(e) => setSubImageFile(e.target.files?.[0] ?? null)}
+                onChange={(e) => setChildImageFile(e.target.files?.[0] ?? null)}
                 className="input"
               />
               <label className="flex items-center gap-2 text-sm text-foreground">
                 <input
                   type="checkbox"
-                  checked={subForm.is_active}
+                  checked={childForm.is_active}
                   onChange={(e) =>
-                    setSubForm({ ...subForm, is_active: e.target.checked })
+                    setChildForm({ ...childForm, is_active: e.target.checked })
                   }
                 />{" "}
                 Active
@@ -358,14 +358,14 @@ export default function CategoriesPage() {
             <div className="flex gap-2">
               <button
                 type="submit"
-                disabled={subSaving}
+                disabled={childSaving}
                 className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
               >
-                {subSaving ? "Saving..." : "Save"}
+                {childSaving ? "Saving..." : "Save"}
               </button>
               <button
                 type="button"
-                onClick={() => setSubEditing(null)}
+                onClick={() => setChildEditing(null)}
                 className="rounded-lg border border-border px-4 py-2 text-sm text-foreground hover:bg-muted"
               >
                 Cancel
@@ -399,11 +399,11 @@ export default function CategoriesPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-border/60">
-              {categories.map((cat) => (
+              {childCategories.map((cat) => (
                 <tr key={cat.id} className="hover:bg-muted/40">
                   <td className="px-4 py-3 font-medium text-foreground">{cat.name}</td>
                   <td className="px-4 py-3 text-muted-foreground">
-                    {cat.navbar_category_name}
+                    {cat.parent_name}
                   </td>
                   <td className="px-4 py-3 text-foreground">{cat.product_count}</td>
                   <td className="px-4 py-3 text-foreground">{cat.order}</td>
@@ -413,13 +413,13 @@ export default function CategoriesPage() {
                   <td className="px-4 py-3">
                     <div className="flex gap-2">
                       <button
-                        onClick={() => openSubEdit(cat)}
+                        onClick={() => openChildEdit(cat)}
                         className="text-sm text-primary hover:underline"
                       >
                         Edit
                       </button>
                       <button
-                        onClick={() => deleteSub(cat.id)}
+                        onClick={() => deleteChild(cat.id)}
                         className="text-sm text-destructive hover:underline"
                       >
                         Delete
