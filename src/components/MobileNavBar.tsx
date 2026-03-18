@@ -1,20 +1,28 @@
 "use client";
 
 import Link from "next/link";
-import { Menu, Search, CircleUserRound } from "lucide-react";
+import { Menu, Search } from "lucide-react";
 import { useSearchModal } from "@/context/SearchModalContext";
 import { Button } from "@/components/ui/button";
 import NotificationDropdown from "@/components/NotificationDropdown";
+import { cn } from "@/lib/utils";
 
 interface MobileNavBarProps {
   onMenuClick: () => void;
+  /** When true, nav bar sticks below the announcement banner (top-16). When false, sticks at top-0. */
+  bannerVisible?: boolean;
 }
 
-export default function MobileNavBar({ onMenuClick }: MobileNavBarProps) {
+export default function MobileNavBar({ onMenuClick, bannerVisible = false }: MobileNavBarProps) {
   const { setOpen: setSearchOpen } = useSearchModal();
 
   return (
-    <div className="sticky top-0 z-40 flex h-14 items-center justify-between border-b border-border bg-background px-4 md:hidden">
+    <div
+      className={cn(
+        "sticky z-40 flex h-14 items-center justify-between border-b border-border bg-background px-4 md:hidden",
+        bannerVisible ? "top-[var(--header-height)]" : "top-0"
+      )}
+    >
       <Button
         variant="ghost"
         size="icon"
@@ -35,16 +43,6 @@ export default function MobileNavBar({ onMenuClick }: MobileNavBarProps) {
           <Search className="size-5" />
         </Button>
         <NotificationDropdown />
-        <Link href="/account">
-          <Button
-            variant="ghost"
-            size="icon"
-            aria-label="Account"
-            className="shrink-0 text-muted-foreground hover:text-foreground"
-          >
-            <CircleUserRound className="size-5" />
-          </Button>
-        </Link>
       </div>
     </div>
   );

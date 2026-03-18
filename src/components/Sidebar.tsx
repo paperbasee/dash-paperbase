@@ -17,7 +17,6 @@ import {
   PanelRightClose,
   Search,
   LogOut,
-  CircleUserRound,
   Settings,
   Store,
   Plus,
@@ -147,7 +146,10 @@ function SidebarContent({
   return (
     <>
       {/* Header: when collapsed show only toggle button; when expanded show logo + name + subtitle + toggle */}
-      <div className="flex h-16 shrink-0 items-center justify-between gap-2 border-b border-border px-4">
+      <div
+        className="flex shrink-0 items-center justify-between gap-2 border-b border-border px-4"
+        style={{ height: "var(--header-height)" }}
+      >
         {collapsed ? (
           onToggle ? (
             <Button
