@@ -24,12 +24,12 @@ interface StoreFormData {
 }
 
 interface MeResponse {
-  active_store_id: number | null;
-  username?: string;
+  active_store_id: string | null;
+  public_id?: string;
   email?: string;
   first_name?: string;
   last_name?: string;
-  stores: { id: number; name: string; domain: string | null; role: string }[];
+  stores: { id: string; name: string; domain: string | null; role: string }[];
 }
 
 export default function OnboardingPage() {
@@ -145,8 +145,8 @@ export default function OnboardingPage() {
       const { data: switchData } = await api.post<{
         access: string;
         refresh: string;
-        active_store_id: number;
-      }>("auth/switch-store/", { store_id: store.id });
+        active_store_id: string;
+      }>("auth/switch-store/", { store_id: store.public_id });
 
       localStorage.setItem("access_token", switchData.access);
       localStorage.setItem("refresh_token", switchData.refresh);

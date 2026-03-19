@@ -5,7 +5,7 @@ const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 export interface LoginResponse {
   access: string;
   refresh: string;
-  active_store_id: number | null;
+  active_store_id: string | null;
 }
 
 export interface RegisterPayload {
@@ -30,11 +30,11 @@ export async function register(
 }
 
 export async function login(
-  username: string,
+  email: string,
   password: string
 ): Promise<LoginResponse> {
   const { data } = await axios.post<LoginResponse>(`${BASE_URL}/auth/token/`, {
-    username,
+    email: email.trim().toLowerCase(),
     password,
   });
   localStorage.setItem("access_token", data.access);

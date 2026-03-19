@@ -18,7 +18,7 @@ import {
 interface AuthState {
   isAuthenticated: boolean;
   isLoading: boolean;
-  login: (username: string, password: string) => Promise<LoginResponse>;
+  login: (email: string, password: string) => Promise<LoginResponse>;
   register: (
     email: string,
     password: string,
@@ -39,8 +39,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setIsLoading(false);
   }, []);
 
-  const login = useCallback(async (username: string, password: string) => {
-    const result = await authLogin(username, password);
+  const login = useCallback(async (email: string, password: string) => {
+    const result = await authLogin(email, password);
     setIsAuthenticated(true);
     return result;
   }, []);

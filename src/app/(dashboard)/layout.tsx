@@ -11,6 +11,13 @@ import MobileNavBar from "@/components/MobileNavBar";
 import AnnouncementBanner from "@/components/AnnouncementBanner";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
+import api from "@/lib/api";
+
+interface MeSubscription {
+  active: boolean;
+  plan: string | null;
+  end_date: string | null;
+}
 
 export default function DashboardLayout({
   children,
@@ -22,6 +29,8 @@ export default function DashboardLayout({
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [bannerDismissed, setBannerDismissed] = useState(false);
+  const [subscription, setSubscription] = useState<MeSubscription | null>(null);
+  const [subChecked, setSubChecked] = useState(false);
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -29,10 +38,51 @@ export default function DashboardLayout({
     }
   }, [isAuthenticated, isLoading, router]);
 
-  if (isLoading || !isAuthenticated) {
+  useEffect(() => {
+    if (!isAuthenticated || isLoading) return;
+    api.get<{ subscription: MeSubscription }>("auth/me/")
+      .then(({ data }) => setSubscription(data.subscription))
+      .catch(() => setSubscription(null))
+      .finally(() => setSubChecked(true));
+  }, [isAuthenticated, isLoading]);
+
+  if (isLoading || !isAuthenticated || !subChecked) {
     return (
       <div className="flex h-screen items-center justify-center bg-background">
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+      </div>
+    );
+  }
+
+  if (!subscription?.active) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-50 via-white to-slate-100 px-4">
+        <div className="w-full max-w-md rounded-2xl bg-white p-10 text-center shadow-xl ring-1 ring-slate-100">
+          <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-amber-50 text-3xl">
+            🔒
+          </div>
+          <h1 className="text-xl font-semibold text-slate-900">
+            No active subscription
+          </h1>
+          <p className="mt-2 text-sm text-slate-500">
+            Your account does not have an active plan. Please contact support to
+            activate a subscription before accessing the dashboard.
+          </p>
+          <div className="mt-6 space-y-3">
+            <a
+              href="mailto:support@yourplatform.com"
+              className="block w-full rounded-xl bg-indigo-600 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-500"
+            >
+              Contact support
+            </a>
+            <button
+              onClick={() => { localStorage.clear(); router.replace("/login"); }}
+              className="block w-full rounded-xl border border-slate-200 py-2.5 text-sm font-medium text-slate-600 transition hover:bg-slate-50"
+            >
+              Sign out
+            </button>
+          </div>
+        </div>
       </div>
     );
   }
