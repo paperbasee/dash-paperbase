@@ -21,7 +21,7 @@ export function StoreDetailsStep({
   return (
     <form onSubmit={onSubmit} className="space-y-5">
       {error && (
-        <div className="border border-destructive/20 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+        <div className="rounded-none border border-destructive/20 bg-destructive/10 px-3 py-2 text-sm text-destructive">
           {error}
         </div>
       )}
@@ -37,6 +37,7 @@ export function StoreDetailsStep({
           value={formData.name}
           onChange={(e) => onFieldChange("name", e.target.value)}
           placeholder="e.g. My Shop"
+          className="rounded-none"
         />
       </div>
 
@@ -51,6 +52,7 @@ export function StoreDetailsStep({
           onChange={(e) => onFieldChange("store_type", e.target.value)}
           placeholder="e.g. Fashion, Retail, E-commerce"
           maxLength={60}
+          className="rounded-none"
         />
         <p className="text-xs text-muted-foreground">Max 4 words. Optional.</p>
       </div>
@@ -67,6 +69,7 @@ export function StoreDetailsStep({
             value={formData.owner_first_name}
             onChange={(e) => onFieldChange("owner_first_name", e.target.value)}
             placeholder="e.g. John"
+            className="rounded-none"
           />
         </div>
         <div className="form-field">
@@ -80,6 +83,7 @@ export function StoreDetailsStep({
             value={formData.owner_last_name}
             onChange={(e) => onFieldChange("owner_last_name", e.target.value)}
             placeholder="e.g. Doe"
+            className="rounded-none"
           />
         </div>
       </div>
@@ -95,7 +99,7 @@ export function StoreDetailsStep({
           readOnly
           value={formData.owner_email}
           placeholder="owner@example.com"
-          className="cursor-not-allowed opacity-70"
+          className="cursor-not-allowed rounded-none opacity-70"
         />
       </div>
 
@@ -109,6 +113,7 @@ export function StoreDetailsStep({
           value={formData.contact_email}
           onChange={(e) => onFieldChange("contact_email", e.target.value)}
           placeholder="store@example.com"
+          className="rounded-none"
         />
       </div>
 
@@ -122,6 +127,7 @@ export function StoreDetailsStep({
           value={formData.phone}
           onChange={(e) => onFieldChange("phone", e.target.value)}
           placeholder="+1 234 567 8900"
+          className="rounded-none"
         />
       </div>
 
@@ -134,12 +140,12 @@ export function StoreDetailsStep({
           rows={2}
           value={formData.address}
           onChange={(e) => onFieldChange("address", e.target.value)}
-          className="input resize-none"
+          className="input resize-none rounded-none"
           placeholder="123 Main St, City, Country"
         />
       </div>
 
-      <Button type="submit" className="mt-2 w-full">
+      <Button type="submit" className="mt-2 w-full rounded-none">
         Continue
       </Button>
     </form>

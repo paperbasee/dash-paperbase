@@ -62,7 +62,8 @@ export function useOnboarding() {
     async function checkStore() {
       try {
         const { data } = await api.get<MeResponse>("auth/me/");
-        if (data.active_store_id && !isAddMode) {
+        const hasStores = (data.stores?.length ?? 0) > 0;
+        if (data.active_store_id && hasStores && !isAddMode) {
           router.replace("/");
           return;
         }

@@ -21,7 +21,7 @@ export function AppSelectionStep({
   return (
     <form onSubmit={onSubmit} className="space-y-5">
       {error && (
-        <div className="border border-destructive/20 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+        <div className="rounded-none border border-destructive/20 bg-destructive/10 px-3 py-2 text-sm text-destructive">
           {error}
         </div>
       )}
@@ -41,7 +41,7 @@ export function AppSelectionStep({
             <label
               key={id}
               className={[
-                "flex cursor-pointer items-start gap-3 border p-3 transition",
+                "flex cursor-pointer items-start gap-3 rounded-none border p-3 transition",
                 checked
                   ? "border-primary/40 bg-primary/5"
                   : "border-border bg-muted/20 hover:border-border/80 hover:bg-muted/40",
@@ -51,7 +51,7 @@ export function AppSelectionStep({
                 type="checkbox"
                 checked={checked}
                 onChange={() => onToggleApp(id)}
-                className="mt-1 h-4 w-4 border-border"
+                className="mt-1 h-4 w-4 rounded-none border-border"
               />
               <div className="min-w-0 flex-1">
                 <span className="block text-sm font-medium text-foreground">
@@ -72,14 +72,14 @@ export function AppSelectionStep({
           type="button"
           variant="outline"
           onClick={onBack}
-          className="flex-1"
+          className="flex-1 rounded-none"
         >
           Back
         </Button>
         <Button
           type="submit"
           disabled={loading}
-          className="flex-1"
+          className="flex-1 rounded-none"
         >
           {loading ? "Creating store..." : "Create store"}
         </Button>

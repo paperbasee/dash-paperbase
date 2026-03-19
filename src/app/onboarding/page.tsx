@@ -7,7 +7,7 @@ import { AppSelectionStep } from "./AppSelectionStep";
 
 function LoadingSpinner() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-background via-background to-muted">
+    <div className="flex min-h-screen items-center justify-center bg-muted/30">
       <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
     </div>
   );
@@ -32,12 +32,9 @@ function OnboardingPageContent() {
   if (!isReady) return <LoadingSpinner />;
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-background via-background to-muted px-4 py-8">
-      <div className="w-full max-w-lg border border-border bg-card p-8 shadow-xl backdrop-blur">
-        <div className="mb-8 space-y-2">
-          <p className="text-sm font-normal uppercase tracking-[0.25em] text-muted-foreground">
-            Gadzilla Dashboard
-          </p>
+    <div className="min-h-screen bg-muted/30">
+      <div className="mx-auto w-full max-w-4xl px-4 py-6 md:px-6 md:py-8">
+        <div className="mb-6 space-y-2">
           <h1 className="text-2xl font-semibold tracking-tight text-foreground">
             {isAddMode ? "Create a new store" : "Set up your store"}
           </h1>
@@ -47,24 +44,25 @@ function OnboardingPageContent() {
               : "Step 2 of 2: Choose apps"}
           </p>
         </div>
-
-        {step === 1 ? (
-          <StoreDetailsStep
-            formData={formData}
-            error={error}
-            onFieldChange={updateField}
-            onSubmit={handleStep1Submit}
-          />
-        ) : (
-          <AppSelectionStep
-            selectedApps={selectedApps}
-            loading={loading}
-            error={error}
-            onToggleApp={toggleApp}
-            onSubmit={handleStep2Submit}
-            onBack={goBack}
-          />
-        )}
+        <div className="page-card rounded-none p-5 md:p-6">
+          {step === 1 ? (
+            <StoreDetailsStep
+              formData={formData}
+              error={error}
+              onFieldChange={updateField}
+              onSubmit={handleStep1Submit}
+            />
+          ) : (
+            <AppSelectionStep
+              selectedApps={selectedApps}
+              loading={loading}
+              error={error}
+              onToggleApp={toggleApp}
+              onSubmit={handleStep2Submit}
+              onBack={goBack}
+            />
+          )}
+        </div>
       </div>
     </div>
   );
