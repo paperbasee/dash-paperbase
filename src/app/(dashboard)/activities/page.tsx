@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { Select } from "@/components/ui/select";
 import { useActivities } from "@/hooks/useActivities";
 
 const ENTITY_OPTIONS = [
@@ -74,10 +75,10 @@ export default function ActivitiesPage() {
       </div>
 
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
-        <select
+        <Select
           value={entityType}
           onChange={(e) => onChangeType(e.target.value)}
-          className="h-10 w-full sm:w-[220px] rounded-lg border border-border bg-background px-3 text-sm text-foreground"
+          className="w-full sm:w-[220px]"
           aria-label="Filter by type"
         >
           {ENTITY_OPTIONS.map((opt) => (
@@ -85,12 +86,12 @@ export default function ActivitiesPage() {
               {opt.label}
             </option>
           ))}
-        </select>
+        </Select>
 
-        <select
+        <Select
           value={action}
           onChange={(e) => onChangeAction(e.target.value)}
-          className="h-10 w-full sm:w-[180px] rounded-lg border border-border bg-background px-3 text-sm text-foreground"
+          className="w-full sm:w-[180px]"
           aria-label="Filter by action"
         >
           {ACTION_OPTIONS.map((opt) => (
@@ -98,7 +99,7 @@ export default function ActivitiesPage() {
               {opt.label}
             </option>
           ))}
-        </select>
+        </Select>
       </div>
 
       {loading ? (
@@ -156,7 +157,7 @@ export default function ActivitiesPage() {
             <button
               disabled={page <= 1}
               onClick={() => setPage((p) => p - 1)}
-              className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground transition hover:bg-muted disabled:opacity-40"
+              className="btn-page"
             >
               Previous
             </button>
@@ -164,7 +165,7 @@ export default function ActivitiesPage() {
             <button
               disabled={!hasNext}
               onClick={() => setPage((p) => p + 1)}
-              className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground transition hover:bg-muted disabled:opacity-40"
+              className="btn-page"
             >
               Next
             </button>

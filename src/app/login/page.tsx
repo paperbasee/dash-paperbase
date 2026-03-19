@@ -5,6 +5,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Eye, EyeOff } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -31,16 +33,16 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-50 via-white to-slate-100 px-4">
-      <div className="w-full max-w-md rounded-none bg-white/80 p-8 shadow-xl shadow-slate-200 ring-1 ring-slate-100 backdrop-blur">
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-background via-background to-muted px-4">
+      <div className="w-full max-w-md border border-border bg-card p-8 shadow-xl backdrop-blur">
         <div className="mb-8 space-y-2">
-          <p className="text-sm font-normal uppercase tracking-[0.25em] text-slate-500">
+          <p className="text-sm font-normal uppercase tracking-[0.25em] text-muted-foreground">
             Gadzilla Dashboard
           </p>
-          <h1 className="text-3xl font-semibold tracking-tight text-slate-900">
+          <h1 className="text-3xl font-semibold tracking-tight text-foreground">
             Login
           </h1>
-          <p className="text-sm text-slate-500">
+          <p className="text-sm text-muted-foreground">
             Hi, welcome back{" "}
             <span role="img" aria-label="waving hand">
               👋
@@ -50,50 +52,43 @@ export default function LoginPage() {
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {error && (
-            <div className="rounded-lg border border-red-100 bg-red-50/80 px-3 py-2 text-sm text-red-700">
+            <div className="border border-destructive/20 bg-destructive/10 px-3 py-2 text-sm text-destructive">
               {error}
             </div>
           )}
 
-          <div className="space-y-1.5">
-            <label
-              htmlFor="email"
-              className="block text-sm font-medium text-slate-700"
-            >
+          <div className="form-field">
+            <label htmlFor="email" className="field-label">
               Email
             </label>
-            <input
+            <Input
               id="email"
               type="email"
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full rounded-xl border border-slate-200 bg-slate-50/60 px-3 py-2.5 text-sm text-slate-900 placeholder-slate-400 shadow-sm transition focus:border-indigo-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-100"
               placeholder="e.g. johndoe@email.com"
             />
           </div>
 
-          <div className="space-y-1.5">
-            <label
-              htmlFor="password"
-              className="block text-sm font-medium text-slate-700"
-            >
+          <div className="form-field">
+            <label htmlFor="password" className="field-label">
               Password
             </label>
             <div className="relative">
-              <input
+              <Input
                 id="password"
                 type={showPassword ? "text" : "password"}
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full rounded-xl border border-slate-200 bg-slate-50/60 px-3 py-2.5 pr-10 text-sm text-slate-900 placeholder-slate-400 shadow-sm transition focus:border-indigo-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-100"
                 placeholder="Enter your password"
+                className="pr-10"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword((v) => !v)}
-                className="absolute inset-y-0 right-0 flex items-center px-3 text-slate-400 hover:text-slate-600 focus:outline-none"
+                className="absolute inset-y-0 right-0 flex items-center px-3 text-muted-foreground hover:text-foreground focus:outline-none"
                 aria-label={showPassword ? "Hide password" : "Show password"}
               >
                 {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
@@ -101,32 +96,32 @@ export default function LoginPage() {
             </div>
           </div>
 
-          <div className="flex items-center justify-between text-sm">
-            <label className="inline-flex items-center gap-2 text-slate-600">
+          <div className="flex items-center text-sm">
+            <label className="inline-flex items-center gap-2 text-muted-foreground">
               <input
                 type="checkbox"
                 checked={rememberMe}
                 onChange={(e) => setRememberMe(e.target.checked)}
-                className="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                className="h-4 w-4 border-border"
               />
               <span>Remember me</span>
             </label>
           </div>
 
-          <button
+          <Button
             type="submit"
             disabled={loading}
-            className="mt-2 w-full rounded-xl bg-indigo-600 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-500 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
+            className="mt-2 w-full"
           >
             {loading ? "Signing in..." : "Login"}
-          </button>
+          </Button>
         </form>
 
-        <p className="mt-6 text-center text-sm text-slate-600">
+        <p className="mt-6 text-center text-sm text-muted-foreground">
           Don&apos;t have an account?{" "}
           <Link
             href="/signup"
-            className="font-medium text-indigo-600 hover:text-indigo-500"
+            className="font-medium text-foreground underline-offset-4 hover:underline"
           >
             Sign up
           </Link>

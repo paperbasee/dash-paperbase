@@ -279,19 +279,19 @@ export default function CtaPage() {
         <table className="w-full text-left text-sm">
           <thead>
             <tr className="border-b border-border bg-muted/40">
-              <th className="px-4 py-3 text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+              <th className="th">
                 Text
               </th>
-              <th className="px-4 py-3 text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+              <th className="th">
                 Type
               </th>
-              <th className="px-4 py-3 text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+              <th className="th">
                 Active
               </th>
-              <th className="px-4 py-3 text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+              <th className="th">
                 Schedule
               </th>
-              <th className="px-4 py-3 text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+              <th className="th">
                 Actions
               </th>
             </tr>

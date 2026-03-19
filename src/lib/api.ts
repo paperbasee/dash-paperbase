@@ -54,6 +54,7 @@ api.interceptors.response.use(
       if (!refreshToken) {
         localStorage.removeItem("access_token");
         localStorage.removeItem("refresh_token");
+        document.cookie = "auth_session=; path=/; max-age=0; SameSite=Strict";
         window.location.href = "/login";
         return Promise.reject(error);
       }
@@ -69,6 +70,7 @@ api.interceptors.response.use(
       } catch {
         localStorage.removeItem("access_token");
         localStorage.removeItem("refresh_token");
+        document.cookie = "auth_session=; path=/; max-age=0; SameSite=Strict";
         window.location.href = "/login";
         return Promise.reject(error);
       }

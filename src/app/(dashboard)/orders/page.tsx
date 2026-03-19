@@ -168,30 +168,14 @@ export default function OrdersPage() {
                       aria-label="Select all orders on this page"
                     />
                   </th>
-                  <th className="px-4 py-3 text-xs font-semibold tracking-wide text-muted-foreground uppercase whitespace-nowrap">
-                    Order #
-                  </th>
-                  <th className="px-4 py-3 text-xs font-semibold tracking-wide text-muted-foreground uppercase whitespace-nowrap">
-                    Customer
-                  </th>
-                  <th className="px-4 py-3 text-xs font-semibold tracking-wide text-muted-foreground uppercase whitespace-nowrap">
-                    Phone
-                  </th>
-                  <th className="px-4 py-3 text-xs font-semibold tracking-wide text-muted-foreground uppercase whitespace-nowrap">
-                    Status
-                  </th>
-                  <th className="px-4 py-3 text-xs font-semibold tracking-wide text-muted-foreground uppercase whitespace-nowrap">
-                    Total
-                  </th>
-                  <th className="px-4 py-3 text-xs font-semibold tracking-wide text-muted-foreground uppercase whitespace-nowrap">
-                    Delivery
-                  </th>
-                  <th className="px-4 py-3 text-xs font-semibold tracking-wide text-muted-foreground uppercase whitespace-nowrap">
-                    Extra
-                  </th>
-                  <th className="px-4 py-3 text-xs font-semibold tracking-wide text-muted-foreground uppercase whitespace-nowrap">
-                    Date
-                  </th>
+                  <th className="th">Order #</th>
+                  <th className="th">Customer</th>
+                  <th className="th">Phone</th>
+                  <th className="th">Status</th>
+                  <th className="th">Total</th>
+                  <th className="th">Delivery</th>
+                  <th className="th">Extra</th>
+                  <th className="th">Date</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border/60">
@@ -223,9 +207,10 @@ export default function OrdersPage() {
                     <td className="px-4 py-3 whitespace-nowrap">
                       <Combobox
                         value={order.status}
-                        onValueChange={(_, value) =>
-                          handleStatusChange(order.id, value as OrderStatus)
-                        }
+                        onValueChange={(value) => {
+                          if (!value) return;
+                          handleStatusChange(order.id, value);
+                        }}
                         disabled={updatingStatusId === order.id}
                       >
                         <ComboboxInput
@@ -272,7 +257,7 @@ export default function OrdersPage() {
             <button
               disabled={page <= 1}
               onClick={() => setPage((p) => p - 1)}
-              className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground transition hover:bg-muted disabled:opacity-40"
+              className="btn-page"
             >
               Previous
             </button>
@@ -280,7 +265,7 @@ export default function OrdersPage() {
             <button
               disabled={!hasNext}
               onClick={() => setPage((p) => p + 1)}
-              className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground transition hover:bg-muted disabled:opacity-40"
+              className="btn-page"
             >
               Next
             </button>

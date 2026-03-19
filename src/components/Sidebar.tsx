@@ -288,8 +288,9 @@ function SidebarContent({
 
   const hasReachedStoreLimit =
     maxStores != null && availableStores.length >= maxStores;
-  const showAddStoreOption =
-    canAddStore === null ? !hasReachedStoreLimit : canAddStore && !hasReachedStoreLimit;
+  const canRenderAddStoreOption = maxStores != null;
+  const addStoreOptionDisabled =
+    canAddStore === false || (maxStores != null && hasReachedStoreLimit);
 
   return (
     <>
@@ -669,17 +670,26 @@ function SidebarContent({
                   </DropdownMenuItem>
                 )}
                 <DropdownMenuSeparator />
-                {showAddStoreOption ? (
-                  <DropdownMenuItem asChild>
-                    <Link
-                      href="/onboarding?add=1"
-                      onClick={handleLinkClick}
-                      className="flex cursor-pointer items-center gap-2 text-muted-foreground hover:text-foreground"
-                    >
-                      <Plus className="size-3.5" />
-                      <span>Add another store</span>
-                    </Link>
-                  </DropdownMenuItem>
+                {canRenderAddStoreOption ? (
+                  addStoreOptionDisabled ? (
+                    <DropdownMenuItem disabled>
+                      <span className="flex items-center gap-2 text-muted-foreground">
+                        <Plus className="size-3.5" />
+                        <span>Add another store</span>
+                      </span>
+                    </DropdownMenuItem>
+                  ) : (
+                    <DropdownMenuItem asChild>
+                      <Link
+                        href="/onboarding?add=1"
+                        onClick={handleLinkClick}
+                        className="flex cursor-pointer items-center gap-2 text-muted-foreground hover:text-foreground"
+                      >
+                        <Plus className="size-3.5" />
+                        <span>Add another store</span>
+                      </Link>
+                    </DropdownMenuItem>
+                  )
                 ) : null}
               </>
             )}

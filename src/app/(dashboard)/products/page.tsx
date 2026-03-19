@@ -161,24 +161,12 @@ export default function ProductsPage() {
                       aria-label="Select all products on this page"
                     />
                   </th>
-                  <th className="px-4 py-3 text-xs font-semibold tracking-wide text-muted-foreground uppercase whitespace-nowrap">
-                    Product
-                  </th>
-                  <th className="px-4 py-3 text-xs font-semibold tracking-wide text-muted-foreground uppercase whitespace-nowrap">
-                    Brand
-                  </th>
-                  <th className="px-4 py-3 text-xs font-semibold tracking-wide text-muted-foreground uppercase whitespace-nowrap">
-                    Category
-                  </th>
-                  <th className="px-4 py-3 text-xs font-semibold tracking-wide text-muted-foreground uppercase whitespace-nowrap">
-                    Price
-                  </th>
-                  <th className="px-4 py-3 text-xs font-semibold tracking-wide text-muted-foreground uppercase whitespace-nowrap">
-                    Stock
-                  </th>
-                  <th className="px-4 py-3 text-xs font-semibold tracking-wide text-muted-foreground uppercase whitespace-nowrap">
-                    Status
-                  </th>
+                  <th className="th">Product</th>
+                  <th className="th">Brand</th>
+                  <th className="th">Category</th>
+                  <th className="th">Price</th>
+                  <th className="th">Stock</th>
+                  <th className="th">Status</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border/60">
@@ -274,9 +262,10 @@ export default function ProductsPage() {
                     <td className="px-4 py-3 whitespace-nowrap">
                       <Combobox
                         value={product.is_active ? "active" : "inactive"}
-                        onValueChange={(_, value) =>
-                          handleStatusChange(product, value === "active")
-                        }
+                        onValueChange={(value) => {
+                          if (!value) return;
+                          handleStatusChange(product, value === "active");
+                        }}
                         disabled={updatingId === product.id}
                       >
                         <ComboboxInput
@@ -315,7 +304,7 @@ export default function ProductsPage() {
             <button
               disabled={page <= 1}
               onClick={() => setPage((p) => p - 1)}
-              className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground transition hover:bg-muted disabled:opacity-40"
+              className="btn-page"
             >
               Previous
             </button>
@@ -323,7 +312,7 @@ export default function ProductsPage() {
             <button
               disabled={!hasNext}
               onClick={() => setPage((p) => p + 1)}
-              className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground transition hover:bg-muted disabled:opacity-40"
+              className="btn-page"
             >
               Next
             </button>

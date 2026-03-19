@@ -79,24 +79,12 @@ export default function CustomersPage() {
             <table className="w-full text-left text-sm">
               <thead>
                 <tr className="border-b border-border bg-muted/40">
-                  <th className="px-4 py-3 text-xs font-semibold tracking-wide text-muted-foreground uppercase">
-                    Email
-                  </th>
-                  <th className="px-4 py-3 text-xs font-semibold tracking-wide text-muted-foreground uppercase">
-                    Username
-                  </th>
-                  <th className="px-4 py-3 text-xs font-semibold tracking-wide text-muted-foreground uppercase">
-                    Phone
-                  </th>
-                  <th className="px-4 py-3 text-xs font-semibold tracking-wide text-muted-foreground uppercase">
-                    Marketing
-                  </th>
-                  <th className="px-4 py-3 text-xs font-semibold tracking-wide text-muted-foreground uppercase">
-                    Extra
-                  </th>
-                  <th className="px-4 py-3 text-xs font-semibold tracking-wide text-muted-foreground uppercase">
-                    Joined
-                  </th>
+                  <th className="th">Email</th>
+                  <th className="th">Username</th>
+                  <th className="th">Phone</th>
+                  <th className="th">Marketing</th>
+                  <th className="th">Extra</th>
+                  <th className="th">Joined</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border/60">
@@ -135,7 +123,7 @@ export default function CustomersPage() {
               <button
                 disabled={page <= 1}
                 onClick={() => setPage((p) => p - 1)}
-                className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground transition hover:bg-muted disabled:opacity-40"
+                className="btn-page"
               >
                 Previous
               </button>
@@ -143,7 +131,7 @@ export default function CustomersPage() {
               <button
                 disabled={!hasNext}
                 onClick={() => setPage((p) => p + 1)}
-                className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground transition hover:bg-muted disabled:opacity-40"
+                className="btn-page"
               >
                 Next
               </button>

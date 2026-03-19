@@ -100,15 +100,9 @@ export default function CartsPage() {
             <table className="w-full text-left text-sm">
               <thead>
                 <tr className="border-b border-border bg-muted/40">
-                  <th className="px-4 py-3 text-xs font-semibold tracking-wide text-muted-foreground uppercase">
-                    Product
-                  </th>
-                  <th className="px-4 py-3 text-xs font-semibold tracking-wide text-muted-foreground uppercase">
-                    Brand
-                  </th>
-                  <th className="px-4 py-3 text-right text-xs font-semibold tracking-wide text-muted-foreground uppercase">
-                    Qty
-                  </th>
+                  <th className="th">Product</th>
+                  <th className="th">Brand</th>
+                  <th className="th text-right">Qty</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border/60">
@@ -138,7 +132,7 @@ export default function CartsPage() {
             <button
               disabled={page <= 1}
               onClick={() => setPage((p) => p - 1)}
-              className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground transition hover:bg-muted disabled:opacity-40"
+              className="btn-page"
             >
               Previous
             </button>
@@ -146,7 +140,7 @@ export default function CartsPage() {
             <button
               disabled={!hasNext}
               onClick={() => setPage((p) => p + 1)}
-              className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground transition hover:bg-muted disabled:opacity-40"
+              className="btn-page"
             >
               Next
             </button>

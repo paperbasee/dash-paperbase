@@ -121,7 +121,7 @@ export default function ContactsPage() {
             <button
               disabled={page <= 1}
               onClick={() => setPage((p) => p - 1)}
-              className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground transition hover:bg-muted disabled:opacity-40"
+              className="btn-page"
             >
               Previous
             </button>
@@ -129,7 +129,7 @@ export default function ContactsPage() {
             <button
               disabled={!hasNext}
               onClick={() => setPage((p) => p + 1)}
-              className="rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground transition hover:bg-muted disabled:opacity-40"
+              className="btn-page"
             >
               Next
             </button>

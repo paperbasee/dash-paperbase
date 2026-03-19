@@ -281,22 +281,22 @@ export default function CouponsPage() {
         <table className="w-full text-left text-sm">
           <thead>
             <tr className="border-b border-border bg-muted/40">
-              <th className="px-4 py-3 text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+              <th className="th">
                 Code
               </th>
-              <th className="px-4 py-3 text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+              <th className="th">
                 Discount
               </th>
-              <th className="px-4 py-3 text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+              <th className="th">
                 Uses
               </th>
-              <th className="px-4 py-3 text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+              <th className="th">
                 Valid
               </th>
-              <th className="px-4 py-3 text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+              <th className="th">
                 Status
               </th>
-              <th className="px-4 py-3 text-right text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+              <th className="th text-right">
                 Actions
               </th>
             </tr>

@@ -266,22 +266,22 @@ export default function BannersPage() {
         <table className="w-full text-left text-sm">
           <thead>
             <tr className="border-b border-border bg-muted/40">
-              <th className="px-4 py-3 text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+              <th className="th">
                 Preview
               </th>
-              <th className="px-4 py-3 text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+              <th className="th">
                 Title
               </th>
-              <th className="px-4 py-3 text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+              <th className="th">
                 Position
               </th>
-              <th className="px-4 py-3 text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+              <th className="th">
                 Order
               </th>
-              <th className="px-4 py-3 text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+              <th className="th">
                 Status
               </th>
-              <th className="px-4 py-3 text-right text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+              <th className="th text-right">
                 Actions
               </th>
             </tr>

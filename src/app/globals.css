@@ -267,3 +267,45 @@ select {
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
 }
+
+/* ============================================
+   REUSABLE COMPONENT CLASSES
+   Centralises the most frequently duplicated
+   Tailwind utility patterns across page files.
+   ============================================ */
+@layer components {
+  /* Table header cell — used in every list-page <th> */
+  .th {
+    @apply px-4 py-3 text-xs font-semibold tracking-wide text-muted-foreground uppercase whitespace-nowrap;
+  }
+
+  /* Table data cell — consistent padding with .th */
+  .td {
+    @apply px-4 py-3 text-sm text-foreground;
+  }
+
+  /* Pagination prev/next button — duplicated across 9 list pages */
+  .btn-page {
+    @apply rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground transition hover:bg-muted disabled:opacity-40 disabled:cursor-not-allowed;
+  }
+
+  /* Form field wrapper — label stacked above input */
+  .form-field {
+    @apply flex flex-col gap-2;
+  }
+
+  /* Form field label */
+  .field-label {
+    @apply text-sm font-medium leading-normal text-foreground;
+  }
+
+  /* Page-level section card */
+  .page-card {
+    @apply border border-card-border bg-card p-6;
+  }
+
+  /* Page header row (title + actions) */
+  .page-header {
+    @apply flex items-center justify-between gap-4;
+  }
+}
