@@ -71,9 +71,9 @@ export default function CategoriesPage() {
 
     try {
       if (parentEditing === "new") {
-        await api.post("admin/parent-categories/", fd, { headers: { "Content-Type": "multipart/form-data" } });
+        await api.post("admin/parent-categories/", fd);
       } else {
-        await api.patch(`admin/parent-categories/${parentEditing}/`, fd, { headers: { "Content-Type": "multipart/form-data" } });
+        await api.patch(`admin/parent-categories/${parentEditing}/`, fd);
       }
       setParentEditing(null);
       fetchData();
@@ -120,9 +120,9 @@ export default function CategoriesPage() {
 
     try {
       if (childEditing === "new") {
-        await api.post("admin/categories/", fd, { headers: { "Content-Type": "multipart/form-data" } });
+        await api.post("admin/categories/", fd);
       } else {
-        await api.patch(`admin/categories/${childEditing}/`, fd, { headers: { "Content-Type": "multipart/form-data" } });
+        await api.patch(`admin/categories/${childEditing}/`, fd);
       }
       setChildEditing(null);
       fetchData();

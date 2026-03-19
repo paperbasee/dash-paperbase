@@ -187,6 +187,9 @@ export default function OrdersPage() {
                     Delivery
                   </th>
                   <th className="px-4 py-3 text-xs font-semibold tracking-wide text-muted-foreground uppercase whitespace-nowrap">
+                    Extra
+                  </th>
+                  <th className="px-4 py-3 text-xs font-semibold tracking-wide text-muted-foreground uppercase whitespace-nowrap">
                     Date
                   </th>
                 </tr>
@@ -250,6 +253,11 @@ export default function OrdersPage() {
                     </td>
                     <td className="px-4 py-3 text-muted-foreground whitespace-nowrap">
                       {order.delivery_area_label}
+                    </td>
+                    <td className="px-4 py-3 text-muted-foreground whitespace-nowrap">
+                      {order.extra_data && typeof order.extra_data === "object"
+                        ? Object.keys(order.extra_data).length
+                        : 0}
                     </td>
                     <td className="px-4 py-3 text-muted-foreground whitespace-nowrap">
                       {formatDate(order.created_at)}

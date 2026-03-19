@@ -221,32 +221,55 @@ export default function ProductsPage() {
                       {currencySymbol}{Number(product.price).toLocaleString()}
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap">
-                      <div className="flex items-center gap-1">
-                        <input
-                          type="number"
-                          min={0}
-                          value={product.stock}
-                          onChange={(e) => {
-                            const v = parseInt(e.target.value, 10);
-                            setProducts((prev) =>
-                              prev.map((p) =>
-                                p.id === product.id ? { ...p, stock: Number.isNaN(v) ? 0 : Math.max(0, v) } : p
-                              )
-                            );
-                          }}
-                          onBlur={() => updateProduct(product.id, { stock: product.stock })}
-                          onKeyDown={(e) => e.key === "Enter" && (e.target as HTMLInputElement).blur()}
-                          className={`w-16 rounded border px-2 py-1 text-sm ${
-                            product.stock === 0
-                              ? "border-destructive text-destructive"
-                              : "border-input text-foreground"
-                          } focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring`}
-                          disabled={updatingId === product.id}
-                        />
-                        {updatingId === product.id && (
-                          <span className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-                        )}
-                      </div>
+                      {product.variant_count && product.variant_count > 0 ? (
+                        <div className="flex flex-col gap-0.5">
+                          <span
+                            className={`font-numbers text-sm font-medium ${
+                              (product.total_stock ?? 0) === 0
+                                ? "text-destructive"
+                                : "text-foreground"
+                            }`}
+                          >
+                            {product.total_stock ?? product.stock}
+                          </span>
+                          <Link
+                            href={`/variants?product=${encodeURIComponent(product.id)}`}
+                            className="text-xs text-primary underline-offset-2 hover:underline"
+                            title="Stock lives on each variant (SKUs)."
+                          >
+                            {product.variant_count} variants — manage
+                          </Link>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-1">
+                          <input
+                            type="number"
+                            min={0}
+                            value={product.stock}
+                            onChange={(e) => {
+                              const v = parseInt(e.target.value, 10);
+                              setProducts((prev) =>
+                                prev.map((p) =>
+                                  p.id === product.id
+                                    ? { ...p, stock: Number.isNaN(v) ? 0 : Math.max(0, v) }
+                                    : p
+                                )
+                              );
+                            }}
+                            onBlur={() => updateProduct(product.id, { stock: product.stock })}
+                            onKeyDown={(e) => e.key === "Enter" && (e.target as HTMLInputElement).blur()}
+                            className={`w-16 rounded border px-2 py-1 text-sm ${
+                              product.stock === 0
+                                ? "border-destructive text-destructive"
+                                : "border-input text-foreground"
+                            } focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring`}
+                            disabled={updatingId === product.id}
+                          />
+                          {updatingId === product.id && (
+                            <span className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+                          )}
+                        </div>
+                      )}
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap">
                       <Combobox

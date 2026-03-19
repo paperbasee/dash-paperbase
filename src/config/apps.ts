@@ -8,12 +8,14 @@ import {
   Heart,
   Layers,
   Tag,
+  Tags,
   Bell,
   PackageSearch,
   History,
   Star,
   Image as ImageIcon,
   BarChart3,
+  Truck,
 } from "lucide-react";
 
 export interface NavCounts {
@@ -23,7 +25,6 @@ export interface NavCounts {
   carts: number;
   wishlist: number;
   categories: number;
-  brands: number;
   contacts: number;
 }
 
@@ -47,7 +48,7 @@ export const APP_CONFIG: Record<string, AppConfig> = {
     essential: true,
     href: "/products",
     countKey: "products",
-    parentId: null,
+    parentId: "catalog",
   },
   orders: {
     id: "orders",
@@ -97,17 +98,7 @@ export const APP_CONFIG: Record<string, AppConfig> = {
     essential: false,
     href: "/categories",
     countKey: "categories",
-    parentId: "categories_brands",
-  },
-  brands: {
-    id: "brands",
-    label: "Brands",
-    icon: Tag,
-    description: "Product brands and brand showcase",
-    essential: false,
-    href: "/brands",
-    countKey: "brands",
-    parentId: "categories_brands",
+    parentId: "catalog",
   },
   contacts: {
     id: "contacts",
@@ -157,7 +148,17 @@ export const APP_CONFIG: Record<string, AppConfig> = {
     essential: false,
     href: "/variants",
     countKey: null,
-    parentId: "more",
+    parentId: "catalog",
+  },
+  product_attributes: {
+    id: "product_attributes",
+    label: "Attributes",
+    icon: Tags,
+    description: "Option types and values (e.g. Color, Size) for variants",
+    essential: false,
+    href: "/product-attributes",
+    countKey: null,
+    parentId: "catalog",
   },
   inventory: {
     id: "inventory",
@@ -199,6 +200,16 @@ export const APP_CONFIG: Record<string, AppConfig> = {
     countKey: null,
     parentId: null,
   },
+  shipping: {
+    id: "shipping",
+    label: "Shipping",
+    icon: Truck,
+    description: "Shipping zones, methods, and rates",
+    essential: false,
+    href: "/shipping",
+    countKey: null,
+    parentId: "more",
+  },
 };
 
 export const ESSENTIAL_APP_IDS = ["products", "orders", "customers"] as const;
@@ -207,27 +218,43 @@ export const OPTIONAL_APP_IDS = [
   "carts",
   "wishlist",
   "categories",
-  "brands",
   "contacts",
   "cta",
   "reviews",
   "coupons",
   "variants",
+  "product_attributes",
   "inventory",
   "activities",
   "banners",
   "analytics",
+  "shipping",
 ] as const;
 
-export const MAIN_NAV_APP_IDS = ["orders", "products", "customers", "cta", "carts", "wishlist", "banners", "analytics"] as const;
+/** Collapsible “Catalog” group in the sidebar (Products + related). */
+export const CATALOG_SUB_APP_IDS = [
+  "products",
+  "categories",
+  "variants",
+  "product_attributes",
+] as const;
 
-export const CATEGORIES_BRANDS_APP_IDS = ["categories", "brands"] as const;
+/** Top-level nav items (excluding catalog children). */
+export const MAIN_NAV_APP_IDS = [
+  "orders",
+  "customers",
+  "cta",
+  "carts",
+  "wishlist",
+  "banners",
+  "analytics",
+] as const;
 
 export const MORE_APP_IDS = [
   "contacts",
   "activities",
   "reviews",
   "coupons",
-  "variants",
   "inventory",
+  "shipping",
 ] as const;

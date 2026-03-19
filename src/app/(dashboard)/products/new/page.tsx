@@ -11,6 +11,7 @@ import { ExtraFieldsFormSection, validateExtraFields } from "@/components/ExtraF
 import { useExtraFieldsSchema } from "@/hooks/useExtraFieldsSchema";
 import type { ExtraFieldValues } from "@/types/extra-fields";
 import type { ParentCategory, Category } from "@/types";
+import { MAX_PRODUCT_IMAGES } from "@/lib/product-media";
 
 const BADGE_OPTIONS = [
   { value: "", label: "None" },
@@ -19,7 +20,7 @@ const BADGE_OPTIONS = [
   { value: "hot", label: "Hot" },
 ] as const;
 
-const MAX_IMAGES = 4;
+const MAX_IMAGES = MAX_PRODUCT_IMAGES;
 
 /** Generate URL-safe slug from product name (matches backend slugify behavior). */
 function slugFromName(name: string): string {
@@ -65,7 +66,7 @@ export default function NewProductPage() {
   );
   const [slugTaken, setSlugTaken] = useState(false);
   const [slugChecking, setSlugChecking] = useState(false);
-  /** Which slot (0–3) is shown in the big preview; null = first filled or none. */
+  /** Which slot (0…MAX-1) is shown in the big preview; null = first filled or none. */
   const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(0);
 
   const derivedSlug = slugFromName(form.name);
@@ -149,11 +150,12 @@ export default function NewProductPage() {
     formData.append("is_active", asDraft ? "false" : "true");
     const mainImage = imageFiles[0];
     if (mainImage) formData.append("image", mainImage);
+    if (Object.keys(extraFields).length > 0) {
+      formData.append("extra_data", JSON.stringify(extraFields));
+    }
 
     try {
-      const { data } = await api.post<{ id: string }>("admin/products/", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
+      const { data } = await api.post<{ id: string }>("admin/products/", formData);
       const productId = data.id;
       for (let i = 1; i < MAX_IMAGES; i++) {
         const file = imageFiles[i];
@@ -162,9 +164,7 @@ export default function NewProductPage() {
         galleryData.append("product", productId);
         galleryData.append("image", file);
         galleryData.append("order", String(i));
-        await api.post("admin/product-images/", galleryData, {
-          headers: { "Content-Type": "multipart/form-data" },
-        });
+        await api.post("admin/product-images/", galleryData);
       }
       router.push("/products");
     } catch (err: unknown) {
@@ -433,7 +433,7 @@ export default function NewProductPage() {
 
         {/* Right column */}
         <div className="space-y-6 lg:col-span-1">
-          {/* Upload Image (max 4) */}
+          {/* Upload images (main + gallery, max MAX_PRODUCT_IMAGES total) */}
           <Card className="shadow-sm">
             <CardHeader>
               <CardTitle className="text-base font-semibold text-foreground">
@@ -500,11 +500,15 @@ export default function NewProductPage() {
                   Remove selected image
                 </Button>
               )}
-              <div className="flex gap-2">
+              <div
+                className="mt-3 flex gap-2 overflow-x-auto pb-3 -mx-1 px-1 sm:overflow-visible sm:flex-wrap sm:pb-0 sm:mx-0 sm:px-0"
+                role="list"
+                aria-label="Product images"
+              >
                 {Array.from({ length: MAX_IMAGES }, (_, i) => (
                   <div
                     key={i}
-                    className={`relative aspect-square w-16 shrink-0 overflow-hidden rounded-lg border border-dashed border-border bg-muted/30 ${
+                    className={`relative aspect-square w-16 shrink-0 snap-start overflow-hidden rounded-lg border border-dashed border-border bg-muted/30 ${
                       (selectedImageIndex ?? firstFilledIndex) === i && imagePreviews[i]
                         ? "ring-2 ring-primary"
                         : ""

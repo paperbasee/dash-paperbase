@@ -51,7 +51,7 @@ export function useNavCounts() {
       carts: stats.carts,
       wishlist: stats.wishlist,
       categories: stats.categories,
-      brands: stats.brands,
+      brands: 0,
       contacts: stats.contacts,
     },
     formatCount,

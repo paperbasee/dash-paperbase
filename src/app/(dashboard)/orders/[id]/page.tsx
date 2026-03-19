@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import {
@@ -18,7 +18,14 @@ import { useBranding } from "@/context/BrandingContext";
 import { ExtraFieldsFormSection, validateExtraFields } from "@/components/ExtraFieldsFormSection";
 import { useExtraFieldsSchema } from "@/hooks/useExtraFieldsSchema";
 import type { ExtraFieldValues } from "@/types/extra-fields";
-import type { Order, OrderItem } from "@/types";
+import type {
+  Order,
+  OrderItem,
+  PaginatedResponse,
+  ProductVariant,
+  ShippingMethod,
+  ShippingZone,
+} from "@/types";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -33,14 +40,27 @@ const DELIVERY_OPTIONS = [
   { value: "outside", label: "Outside Dhaka City" },
 ];
 
+const STATUS_OPTIONS = [
+  { value: "pending", label: "Pending" },
+  { value: "confirmed", label: "Confirmed" },
+  { value: "processing", label: "Processing" },
+  { value: "shipped", label: "Shipped" },
+  { value: "delivered", label: "Delivered" },
+  { value: "cancelled", label: "Cancelled" },
+  { value: "returned", label: "Returned" },
+] as const;
+
 type EditForm = {
   shipping_name: string;
   phone: string;
   email: string;
+  status: string;
   shipping_address: string;
   district: string;
   delivery_area: string;
   tracking_number: string;
+  shipping_zone: string;
+  shipping_method: string;
 };
 
 function resolveImageUrl(url: string | null | undefined): string | null {
@@ -101,15 +121,23 @@ export default function OrderDetailPage() {
     shipping_name: "",
     phone: "",
     email: "",
+    status: "pending",
     shipping_address: "",
     district: "",
     delivery_area: "inside",
     tracking_number: "",
+    shipping_zone: "",
+    shipping_method: "",
   });
   const [extraFields, setExtraFields] = useState<ExtraFieldValues>({});
   const [extraFieldsErrors, setExtraFieldsErrors] = useState<Record<string, string>>({});
   const { schema: extraFieldsSchema } = useExtraFieldsSchema("order");
   const [saving, setSaving] = useState(false);
+  const [itemEdits, setItemEdits] = useState<Record<number, { variant_id: number | null; quantity: number; price: string }>>({});
+  const [variantsByProductId, setVariantsByProductId] = useState<Record<string, ProductVariant[]>>({});
+  const [variantsLoadingByProductId, setVariantsLoadingByProductId] = useState<Record<string, boolean>>({});
+  const [shippingZones, setShippingZones] = useState<ShippingZone[]>([]);
+  const [shippingMethods, setShippingMethods] = useState<ShippingMethod[]>([]);
   const rightColRef = useRef<HTMLDivElement>(null);
   const [rightColHeight, setRightColHeight] = useState<number | null>(null);
 
@@ -120,6 +148,23 @@ export default function OrderDetailPage() {
       .catch(console.error)
       .finally(() => setLoading(false));
   }, [id]);
+
+  useEffect(() => {
+    Promise.all([
+      api.get<PaginatedResponse<ShippingZone> | ShippingZone[]>("admin/shipping-zones/"),
+      api.get<PaginatedResponse<ShippingMethod> | ShippingMethod[]>("admin/shipping-methods/"),
+    ])
+      .then(([z, m]) => {
+        const zones = Array.isArray(z.data) ? z.data : z.data.results;
+        const methods = Array.isArray(m.data) ? m.data : m.data.results;
+        setShippingZones(zones ?? []);
+        setShippingMethods(methods ?? []);
+      })
+      .catch(() => {
+        setShippingZones([]);
+        setShippingMethods([]);
+      });
+  }, []);
 
   // Match Product card height to Payment + Customer combined on desktop
   useEffect(() => {
@@ -147,12 +192,48 @@ export default function OrderDetailPage() {
       shipping_name: order.shipping_name,
       phone: order.phone,
       email: order.email,
+      status: order.status,
       shipping_address: order.shipping_address,
       district: order.district,
       delivery_area: order.delivery_area,
       tracking_number: order.tracking_number,
+      shipping_zone: order.shipping_zone != null ? String(order.shipping_zone) : "",
+      shipping_method: order.shipping_method != null ? String(order.shipping_method) : "",
     });
+    setExtraFields(
+      typeof order.extra_data === "object" && order.extra_data !== null
+        ? (order.extra_data as ExtraFieldValues)
+        : {}
+    );
+    const nextEdits: Record<number, { variant_id: number | null; quantity: number; price: string }> = {};
+    for (const item of order.items ?? []) {
+      nextEdits[item.id] = {
+        variant_id: item.variant != null ? (item.variant as number) : null,
+        quantity: item.quantity,
+        price: String(item.price),
+      };
+    }
+    setItemEdits(nextEdits);
     setEditing(true);
+  }
+
+  const orderItems = useMemo(() => order?.items ?? [], [order]);
+
+  async function ensureVariantsLoaded(productId: string) {
+    if (variantsByProductId[productId]) return;
+    setVariantsLoadingByProductId((p) => ({ ...p, [productId]: true }));
+    try {
+      const { data } = await api.get<PaginatedResponse<ProductVariant> | ProductVariant[]>(
+        "admin/product-variants/",
+        { params: { product: productId } },
+      );
+      const list = Array.isArray(data) ? data : data.results;
+      setVariantsByProductId((p) => ({ ...p, [productId]: list ?? [] }));
+    } catch {
+      setVariantsByProductId((p) => ({ ...p, [productId]: [] }));
+    } finally {
+      setVariantsLoadingByProductId((p) => ({ ...p, [productId]: false }));
+    }
   }
 
   async function handleSave(e: FormEvent) {
@@ -166,7 +247,19 @@ export default function OrderDetailPage() {
     setExtraFieldsErrors({});
     setSaving(true);
     try {
-      const { data } = await api.patch<Order>(`admin/orders/${id}/`, form);
+      const payload = {
+        ...form,
+        shipping_zone: form.shipping_zone ? Number(form.shipping_zone) : null,
+        shipping_method: form.shipping_method ? Number(form.shipping_method) : null,
+        items: orderItems.map((it) => ({
+          id: it.id,
+          variant: itemEdits[it.id]?.variant_id ?? null,
+          quantity: itemEdits[it.id]?.quantity ?? it.quantity,
+          price: itemEdits[it.id]?.price ?? String(it.price),
+        })),
+        ...(Object.keys(extraFields).length > 0 && { extra_data: extraFields }),
+      };
+      const { data } = await api.patch<Order>(`admin/orders/${id}/`, payload);
       setOrder(data);
       setEditing(false);
     } catch (err) {
@@ -201,19 +294,31 @@ export default function OrderDetailPage() {
   }
 
   const orderDateFormatted = formatOrderDate(order.created_at);
-  const subtotal = (order.items ?? []).reduce(
+  const savedExtraData =
+    order.extra_data && typeof order.extra_data === "object" ? order.extra_data : null;
+  const computedSubtotal = (order.items ?? []).reduce(
     (s, i) => s + Number(i.price) * i.quantity,
     0
   );
-  const totalNum = Number(order.total);
+  // Some older orders (and previously dashboard-created orders) stored `order.total` as items-only.
+  // Compute a consistent breakdown-based total for display.
   const combinedDiscount = (order.items ?? []).reduce((sum, i) => {
     const orig = i.original_price != null && i.original_price !== "" ? Number(i.original_price) : 0;
     const p = Number(i.price);
     if (orig > p) return sum + (orig - p) * i.quantity;
     return sum;
   }, 0);
-  const shippingCost =
-    order.delivery_area === "outside" ? 150 : order.delivery_area === "inside" ? 60 : 0;
+  const subtotalNum = order.subtotal != null ? Number(order.subtotal) : computedSubtotal;
+  const shippingCostNum = order.shipping_cost != null ? Number(order.shipping_cost) : 0;
+  const totalNum = order.total != null ? Number(order.total) : subtotalNum + shippingCostNum;
+  const zoneLabel =
+    (order.shipping_zone != null
+      ? shippingZones.find((z) => z.id === order.shipping_zone)?.name
+      : null) || "—";
+  const methodLabel =
+    (order.shipping_method != null
+      ? shippingMethods.find((m) => m.id === order.shipping_method)?.name
+      : null) || "—";
   const timelineEvents = buildTimelineEvents(order);
 
   return (
@@ -310,6 +415,13 @@ export default function OrderDetailPage() {
                       ? (Number(item.original_price) - Number(item.price)) * item.quantity
                       : 0;
                   const imageUrl = resolveImageUrl(item.product_image);
+                  const edit = itemEdits[item.id];
+                  const variants = variantsByProductId[item.product] ?? [];
+                  const variantsLoading = variantsLoadingByProductId[item.product] ?? false;
+                  const selectedVariant =
+                    edit?.variant_id != null
+                      ? variants.find((v) => v.id === edit.variant_id) ?? null
+                      : null;
                   return (
                     <tr key={item.id} className="border-b border-border/50">
                       <td className="py-3 pr-4">
@@ -337,7 +449,17 @@ export default function OrderDetailPage() {
                               </Link>
                             </p>
                             <p className="text-xs text-muted-foreground">
-                              {[item.product_brand, item.size ? `Size: ${item.size}` : null]
+                              {[
+                                item.product_brand || null,
+                                item.variant_option_labels?.length
+                                  ? item.variant_option_labels.join(" · ")
+                                  : item.variant_sku
+                                    ? `SKU: ${item.variant_sku}`
+                                    : null,
+                                item.variant_stock_quantity != null
+                                  ? `Stock: ${item.variant_stock_quantity}`
+                                  : null,
+                              ]
                                 .filter(Boolean)
                                 .join(" · ") || "—"}
                             </p>
@@ -345,10 +467,87 @@ export default function OrderDetailPage() {
                         </div>
                       </td>
                       <td className="py-3 pr-4 text-muted-foreground">
-                        {item.quantity}
+                        {editing ? (
+                          <input
+                            type="number"
+                            min={1}
+                            value={edit?.quantity ?? item.quantity}
+                            onChange={(e) =>
+                              setItemEdits((prev) => ({
+                                ...prev,
+                                [item.id]: {
+                                  variant_id: prev[item.id]?.variant_id ?? (item.variant ?? null),
+                                  quantity: Math.max(1, parseInt(e.target.value) || 1),
+                                  price: prev[item.id]?.price ?? String(item.price),
+                                },
+                              }))
+                            }
+                            className="input !h-8 !py-1 w-20 text-center"
+                          />
+                        ) : (
+                          item.quantity
+                        )}
                       </td>
                       <td className="py-3 pr-4">
-                        {currencySymbol}{Number(item.price).toLocaleString()}
+                        {editing ? (
+                          <div className="flex items-center gap-2">
+                            <input
+                              type="number"
+                              step="0.01"
+                              min={0}
+                              value={edit?.price ?? String(item.price)}
+                              onChange={(e) =>
+                                setItemEdits((prev) => ({
+                                  ...prev,
+                                  [item.id]: {
+                                    variant_id: prev[item.id]?.variant_id ?? (item.variant ?? null),
+                                    quantity: prev[item.id]?.quantity ?? item.quantity,
+                                    price: e.target.value,
+                                  },
+                                }))
+                              }
+                              className="input !h-8 !py-1 w-28"
+                            />
+                            <div className="flex items-center gap-2">
+                              <select
+                                className="input !h-8 !py-1 w-[220px]"
+                                value={edit?.variant_id == null ? "" : String(edit.variant_id)}
+                                onFocus={() => ensureVariantsLoaded(item.product)}
+                                onChange={(e) => {
+                                  const raw = e.target.value;
+                                  const next = raw ? Number(raw) : null;
+                                  setItemEdits((prev) => ({
+                                    ...prev,
+                                    [item.id]: {
+                                      variant_id: next,
+                                      quantity: prev[item.id]?.quantity ?? item.quantity,
+                                      price: prev[item.id]?.price ?? String(item.price),
+                                    },
+                                  }));
+                                }}
+                                disabled={variantsLoading}
+                              >
+                                <option value="">
+                                  {variantsLoading ? "Loading…" : "Default"}
+                                </option>
+                                {variants.map((v) => (
+                                  <option key={v.id} value={String(v.id)}>
+                                    {(v.option_labels?.join(" · ") || v.sku) ?? `#${v.id}`}
+                                  </option>
+                                ))}
+                              </select>
+                              {selectedVariant && (
+                                <span className="text-xs text-muted-foreground whitespace-nowrap">
+                                  Stock: {selectedVariant.stock_quantity}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        ) : (
+                          <>
+                            {currencySymbol}{Number(item.price).toLocaleString()}
+                          </>
+                        )}
                       </td>
                       <td className="py-3 text-right">
                         {itemDiscount > 0 ? (
@@ -380,7 +579,7 @@ export default function OrderDetailPage() {
             <dl className="space-y-3 text-sm">
               <div className="flex justify-between">
                 <dt className="text-muted-foreground">Subtotal</dt>
-                <dd>{currencySymbol}{subtotal.toLocaleString()}</dd>
+                <dd>{currencySymbol}{subtotalNum.toLocaleString()}</dd>
               </div>
               <div className="flex justify-between">
                 <dt className="text-muted-foreground">Discount</dt>
@@ -391,10 +590,18 @@ export default function OrderDetailPage() {
               <div className="flex justify-between">
                 <dt className="text-muted-foreground">Shipping Cost</dt>
                 <dd>
-                  {shippingCost
-                    ? `${currencySymbol}${shippingCost.toLocaleString()}`
+                  {shippingCostNum
+                    ? `${currencySymbol}${shippingCostNum.toLocaleString()}`
                     : "—"}
                 </dd>
+              </div>
+              <div className="flex justify-between">
+                <dt className="text-muted-foreground">Shipping method</dt>
+                <dd className="text-muted-foreground">{methodLabel}</dd>
+              </div>
+              <div className="flex justify-between">
+                <dt className="text-muted-foreground">Shipping zone</dt>
+                <dd className="text-muted-foreground">{zoneLabel}</dd>
               </div>
               <div className="flex justify-between border-t border-border pt-3 text-base font-semibold">
                 <dt>Total</dt>
@@ -413,7 +620,51 @@ export default function OrderDetailPage() {
           <CardContent className="px-4 pt-6 sm:px-6">
             {editing ? (
               <form onSubmit={handleSave} className="space-y-4">
+                <div>
+                  <label className="mb-1 block text-xs font-medium text-muted-foreground">
+                    Order number
+                  </label>
+                  <input
+                    value={order.order_number}
+                    readOnly
+                    className="input bg-muted/50"
+                  />
+                </div>
                 <div className="grid gap-3 sm:grid-cols-2">
+                  <div>
+                    <label className="mb-1 block text-xs font-medium text-muted-foreground">
+                      Shipping method
+                    </label>
+                    <select
+                      value={form.shipping_method}
+                      onChange={(e) => setForm({ ...form, shipping_method: e.target.value })}
+                      className="input"
+                    >
+                      <option value="">Auto (cheapest match)</option>
+                      {shippingMethods.map((m) => (
+                        <option key={m.id} value={String(m.id)}>
+                          {m.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-xs font-medium text-muted-foreground">
+                      Shipping zone
+                    </label>
+                    <select
+                      value={form.shipping_zone}
+                      onChange={(e) => setForm({ ...form, shipping_zone: e.target.value })}
+                      className="input"
+                    >
+                      <option value="">Auto (match by district/area)</option>
+                      {shippingZones.map((z) => (
+                        <option key={z.id} value={String(z.id)}>
+                          {z.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
                   <div>
                     <label className="mb-1 block text-xs font-medium text-muted-foreground">
                       Name
@@ -440,6 +691,22 @@ export default function OrderDetailPage() {
                   </div>
                 </div>
                 <div className="grid gap-3 sm:grid-cols-2">
+                  <div>
+                    <label className="mb-1 block text-xs font-medium text-muted-foreground">
+                      Status
+                    </label>
+                    <select
+                      value={form.status}
+                      onChange={(e) => setForm({ ...form, status: e.target.value })}
+                      className="input"
+                    >
+                      {STATUS_OPTIONS.map((s) => (
+                        <option key={s.value} value={s.value}>
+                          {s.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
                   <div>
                     <label className="mb-1 block text-xs font-medium text-muted-foreground">
                       Email
@@ -599,6 +866,37 @@ export default function OrderDetailPage() {
                     </p>
                   </div>
                 </div>
+
+                {(extraFieldsSchema.some((f) => f.name.trim()) ||
+                  (savedExtraData && Object.keys(savedExtraData).length > 0)) && (
+                  <div className="rounded-xl border border-dashed border-card-border bg-card p-4">
+                    <p className="mb-2 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                      Extra Fields
+                    </p>
+                    <p className="mb-3 text-xs text-muted-foreground">
+                      Custom fields from Settings → Dynamic Fields. Values are saved as{" "}
+                      <code className="rounded bg-muted px-1 text-[11px]">extra_data</code> on the order.
+                    </p>
+
+                    {savedExtraData && Object.keys(savedExtraData).length > 0 ? (
+                      <dl className="grid gap-2 text-sm sm:grid-cols-2">
+                        {Object.entries(savedExtraData).map(([k, v]) => (
+                          <div
+                            key={k}
+                            className="rounded-lg border border-border/60 bg-muted/20 px-3 py-2"
+                          >
+                            <dt className="text-xs text-muted-foreground">{k}</dt>
+                            <dd className="font-medium text-foreground break-words">
+                              {typeof v === "object" ? JSON.stringify(v) : String(v)}
+                            </dd>
+                          </div>
+                        ))}
+                      </dl>
+                    ) : (
+                      <p className="text-sm text-muted-foreground">No extra fields saved yet.</p>
+                    )}
+                  </div>
+                )}
               </div>
             )}
           </CardContent>

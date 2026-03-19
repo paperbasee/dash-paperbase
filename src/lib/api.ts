@@ -5,11 +5,34 @@ const api = axios.create({
   headers: { "Content-Type": "application/json" },
 });
 
+function getActiveStoreIdFromJwt(token: string): string | null {
+  try {
+    const parts = token.split(".");
+    if (parts.length < 2) return null;
+    const payload = parts[1];
+    const normalized = payload.replace(/-/g, "+").replace(/_/g, "/");
+    const padded = normalized.padEnd(Math.ceil(normalized.length / 4) * 4, "=");
+    const json = atob(padded);
+    const data = JSON.parse(json) as { active_store_id?: unknown };
+    const val = data.active_store_id;
+    if (typeof val === "number" && Number.isFinite(val)) return String(val);
+    if (typeof val === "string" && val.trim()) return val;
+    return null;
+  } catch {
+    return null;
+  }
+}
+
 api.interceptors.request.use((config) => {
   if (typeof window !== "undefined") {
     const token = localStorage.getItem("access_token");
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
+      // Many admin endpoints require an active store context.
+      const storeId = getActiveStoreIdFromJwt(token);
+      if (storeId) {
+        config.headers["X-Store-ID"] = storeId;
+      }
     }
   }
   // Let browser set Content-Type with boundary when sending FormData

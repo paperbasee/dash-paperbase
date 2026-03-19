@@ -11,6 +11,7 @@ import { ExtraFieldsFormSection, validateExtraFields } from "@/components/ExtraF
 import { useExtraFieldsSchema } from "@/hooks/useExtraFieldsSchema";
 import type { ExtraFieldValues } from "@/types/extra-fields";
 import type { Product, ParentCategory, Category } from "@/types";
+import { MAX_PRODUCT_IMAGES } from "@/lib/product-media";
 
 const BADGE_OPTIONS = [
   { value: "", label: "None" },
@@ -19,7 +20,7 @@ const BADGE_OPTIONS = [
   { value: "hot", label: "Hot" },
 ] as const;
 
-const MAX_IMAGES = 4;
+const MAX_IMAGES = MAX_PRODUCT_IMAGES;
 
 export default function EditProductPage() {
   const { id } = useParams<{ id: string }>();
@@ -108,6 +109,11 @@ export default function EditProductPage() {
           is_featured: p.is_featured,
           is_active: p.is_active,
         });
+        setExtraFields(
+          typeof p.extra_data === "object" && p.extra_data !== null
+            ? (p.extra_data as ExtraFieldValues)
+            : {}
+        );
       })
       .catch(console.error)
       .finally(() => setLoading(false));
@@ -152,11 +158,12 @@ export default function EditProductPage() {
     formData.append("is_active", asDraft ? "false" : "true");
     const mainImage = imageFiles[0];
     if (mainImage) formData.append("image", mainImage);
+    if (Object.keys(extraFields).length > 0) {
+      formData.append("extra_data", JSON.stringify(extraFields));
+    }
 
     try {
-      const { data } = await api.patch(`admin/products/${id}/`, formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
+      const { data } = await api.patch(`admin/products/${id}/`, formData);
       setProduct(data);
       router.push("/products");
     } catch (err: unknown) {
@@ -375,6 +382,20 @@ export default function EditProductPage() {
               <CardTitle className="text-base font-semibold text-foreground">
                 Pricing and Stock
               </CardTitle>
+              {product.variant_count != null && product.variant_count > 0 && (
+                <p className="text-xs text-muted-foreground">
+                  This product has <strong>{product.variant_count}</strong> variants (SKUs). Inventory is
+                  stored per variant; <strong>total units</strong> (sum of variant stock):{" "}
+                  <span className="font-numbers text-foreground">{product.total_stock ?? product.stock}</span>.{" "}
+                  <Link
+                    href={`/variants?product=${encodeURIComponent(id)}`}
+                    className="font-medium text-primary underline-offset-2 hover:underline"
+                  >
+                    Manage variants
+                  </Link>
+                  .
+                </p>
+              )}
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -403,7 +424,7 @@ export default function EditProductPage() {
                     className={`font-numbers ${inputClass}`}
                   />
                 </Field>
-                <Field label="Stock">
+                <Field label={product.variant_count ? "Base product stock (legacy)" : "Stock"}>
                   <input
                     type="number"
                     min={0}
@@ -412,30 +433,68 @@ export default function EditProductPage() {
                       setForm({ ...form, stock: e.target.value })
                     }
                     className={`font-numbers ${inputClass}`}
+                    disabled={Boolean(product.variant_count && product.variant_count > 0)}
+                    title={
+                      product.variant_count
+                        ? "When variants exist, edit stock per SKU under Catalog → Variants."
+                        : undefined
+                    }
                   />
                 </Field>
               </div>
             </CardContent>
           </Card>
 
-          {/* Extra Fields (JSONB) */}
-          {extraFieldsSchema.some((f) => f.name.trim()) && (
+          {/* Extra Fields (JSONB) — show form from schema and/or read-only saved values */}
+          {(extraFieldsSchema.some((f) => f.name.trim()) ||
+            (product.extra_data &&
+              typeof product.extra_data === "object" &&
+              Object.keys(product.extra_data).length > 0)) && (
             <Card className="shadow-sm">
               <CardHeader>
                 <CardTitle className="text-base font-semibold text-foreground">
                   Extra Fields
                 </CardTitle>
                 <p className="text-xs text-muted-foreground">
-                  Custom fields defined in Settings → Dynamic Fields.
+                  Custom fields from Settings → Dynamic Fields. Values are saved as{" "}
+                  <code className="rounded bg-muted px-1 text-[11px]">extra_data</code> on the product
+                  (storefront API includes this JSON — your theme must render it).
                 </p>
               </CardHeader>
-              <CardContent>
-                <ExtraFieldsFormSection
-                  entityType="product"
-                  values={extraFields}
-                  onChange={setExtraFields}
-                  errors={extraFieldsErrors}
-                />
+              <CardContent className="space-y-4">
+                {extraFieldsSchema.some((f) => f.name.trim()) && (
+                  <ExtraFieldsFormSection
+                    entityType="product"
+                    values={extraFields}
+                    onChange={setExtraFields}
+                    errors={extraFieldsErrors}
+                  />
+                )}
+                {product.extra_data &&
+                  typeof product.extra_data === "object" &&
+                  Object.keys(product.extra_data).length > 0 && (
+                    <div
+                      className={
+                        extraFieldsSchema.some((f) => f.name.trim())
+                          ? "border-t border-border pt-4"
+                          : ""
+                      }
+                    >
+                      <p className="mb-2 text-xs font-medium text-muted-foreground">
+                        Saved on product (extra_data)
+                      </p>
+                      <dl className="grid gap-2 text-sm sm:grid-cols-2">
+                        {Object.entries(product.extra_data).map(([k, v]) => (
+                          <div key={k} className="rounded-lg border border-border/60 bg-muted/20 px-3 py-2">
+                            <dt className="text-xs text-muted-foreground">{k}</dt>
+                            <dd className="font-medium text-foreground break-words">
+                              {typeof v === "object" ? JSON.stringify(v) : String(v)}
+                            </dd>
+                          </div>
+                        ))}
+                      </dl>
+                    </div>
+                  )}
               </CardContent>
             </Card>
           )}
@@ -443,7 +502,7 @@ export default function EditProductPage() {
 
         {/* Right column */}
         <div className="space-y-6 lg:col-span-1">
-          {/* Upload Image (max 4) */}
+          {/* Upload images (main + gallery, max MAX_PRODUCT_IMAGES total) */}
           <Card className="shadow-sm">
             <CardHeader>
               <CardTitle className="text-base font-semibold text-foreground">
@@ -510,11 +569,15 @@ export default function EditProductPage() {
                   Remove selected image
                 </Button>
               )}
-              <div className="flex gap-2">
+              <div
+                className="mt-3 flex gap-2 overflow-x-auto pb-3 -mx-1 px-1 sm:overflow-visible sm:flex-wrap sm:pb-0 sm:mx-0 sm:px-0"
+                role="list"
+                aria-label="Product images"
+              >
                 {Array.from({ length: MAX_IMAGES }, (_, i) => (
                   <div
                     key={i}
-                    className={`relative aspect-square w-16 shrink-0 overflow-hidden rounded-lg border border-dashed border-border bg-muted/30 ${
+                    className={`relative aspect-square w-16 shrink-0 snap-start overflow-hidden rounded-lg border border-dashed border-border bg-muted/30 ${
                       (selectedImageIndex ?? firstFilledIndex) === i && imagePreviews[i]
                         ? "ring-2 ring-primary"
                         : ""

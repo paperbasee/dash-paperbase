@@ -92,6 +92,9 @@ export default function CustomersPage() {
                     Marketing
                   </th>
                   <th className="px-4 py-3 text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+                    Extra
+                  </th>
+                  <th className="px-4 py-3 text-xs font-semibold tracking-wide text-muted-foreground uppercase">
                     Joined
                   </th>
                 </tr>
@@ -110,6 +113,11 @@ export default function CustomersPage() {
                     </td>
                     <td className="px-4 py-3">
                       {c.marketing_opt_in ? "Yes" : "No"}
+                    </td>
+                    <td className="px-4 py-3 text-muted-foreground">
+                      {c.extra_data && typeof c.extra_data === "object"
+                        ? Object.keys(c.extra_data).length
+                        : 0}
                     </td>
                     <td className="px-4 py-3 text-muted-foreground">
                       {c.created_at

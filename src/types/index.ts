@@ -8,6 +8,15 @@ export interface Branding {
   contact_email: string;
   phone: string;
   address: string;
+  brand_showcase?: Array<{
+    name: string;
+    slug: string;
+    image_url: string | null;
+    redirect_url: string;
+    brand_type: string;
+    order: number;
+    is_active: boolean;
+  }>;
 }
 
 export interface OrderItem {
@@ -16,8 +25,11 @@ export interface OrderItem {
   product_name: string;
   product_brand?: string;
   product_image: string | null;
+  variant?: number | null;
+  variant_sku?: string | null;
+  variant_stock_quantity?: number | null;
+  variant_option_labels?: string[];
   quantity: number;
-  size: string;
   price: string;
   original_price?: string | null;
 }
@@ -25,9 +37,14 @@ export interface OrderItem {
 export interface Order {
   id: string;
   order_number: string;
+  extra_data?: Record<string, string | number | boolean>;
   user: number | null;
   email: string;
   status: "pending" | "confirmed" | "cancelled";
+  subtotal?: string;
+  shipping_cost?: string;
+  shipping_zone?: number | null;
+  shipping_method?: number | null;
   total: string;
   shipping_name: string;
   shipping_address: string;
@@ -58,8 +75,13 @@ export interface Product {
   sub_category_name: string | null;
   description?: string;
   stock: number;
+  /** Number of ProductVariant rows (admin API). */
+  variant_count?: number;
+  /** Sum of variant stock when variants exist; else same as `stock` (admin API). */
+  total_stock?: number;
   is_featured: boolean;
   is_active: boolean;
+  extra_data?: Record<string, string | number | boolean>;
   images?: ProductImage[];
   created_at: string;
   updated_at?: string;
@@ -69,6 +91,37 @@ export interface ProductImage {
   id: number;
   product: string;
   image: string;
+  order: number;
+}
+
+/** Admin API: product variant (SKU) row. */
+export interface ProductVariant {
+  id: number;
+  product: string;
+  sku: string;
+  price_override: string | null;
+  stock_quantity: number;
+  is_active: boolean;
+  attribute_value_ids: number[];
+  option_labels: string[];
+  created_at: string;
+  updated_at: string;
+}
+
+/** Admin API: global attribute type (Color, Size, …). */
+export interface ProductAttributeAdmin {
+  id: number;
+  name: string;
+  slug: string;
+  order: number;
+  values: ProductAttributeValueAdmin[];
+}
+
+export interface ProductAttributeValueAdmin {
+  id: number;
+  attribute: number;
+  attribute_name?: string;
+  value: string;
   order: number;
 }
 
@@ -94,19 +147,6 @@ export interface Category {
   order: number;
   is_active: boolean;
   product_count: number;
-}
-
-export interface Brand {
-  id: number;
-  name: string;
-  slug: string;
-  image: string;
-  redirect_url: string;
-  brand_type: string;
-  order: number;
-  is_active: boolean;
-  created_at: string;
-  updated_at: string;
 }
 
 export interface Notification {
@@ -148,7 +188,6 @@ export interface DashboardStats {
   };
   categories: number;
   subcategories: number;
-  brands: number;
   contacts: number;
   notifications: number;
   carts: number;
@@ -278,6 +317,39 @@ export interface Customer {
   user_username: string;
   phone: string;
   marketing_opt_in: boolean;
+  extra_data?: Record<string, string | number | boolean>;
   created_at: string;
   updated_at?: string;
+}
+
+export interface ShippingZone {
+  id: number;
+  name: string;
+  delivery_areas: string;
+  districts: string;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ShippingMethod {
+  id: number;
+  name: string;
+  method_type: "standard" | "express" | "pickup" | "other";
+  is_active: boolean;
+  order: number;
+  zone_ids: number[];
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ShippingRate {
+  id: number;
+  shipping_method: number;
+  shipping_zone: number;
+  rate_type: "flat" | "weight" | "order_total";
+  min_order_total: string | null;
+  max_order_total: string | null;
+  price: string;
+  is_active: boolean;
 }

@@ -381,8 +381,7 @@ export function DynamicFieldsPanel({
         </h3>
         <p className="mt-1 text-xs text-muted-foreground">
           Define custom extra fields for {activeEntity}s. These appear in{" "}
-          {activeEntity} create/edit forms. Values are stored locally for now;
-          backend integration coming later.
+          {activeEntity} create/edit forms. Values are persisted via the backend API.
         </p>
 
         {message && (
@@ -443,8 +442,8 @@ export function DynamicFieldsPanel({
             <Button
               type="button"
               className="gap-2"
-              onClick={() => {
-                const result = save();
+              onClick={async () => {
+                const result = await save();
                 if (result.success) {
                   onMessage({ type: "success", text: "Extra fields saved." });
                 } else {
