@@ -16,7 +16,7 @@ describe("order schema", () => {
       items: [
         {
           product_id: "1",
-          variant_id: null,
+          variant_public_id: null,
           quantity: 1,
           price: "100",
         },

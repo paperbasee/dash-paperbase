@@ -2,7 +2,8 @@ import { z } from "zod";
 
 export const orderItemSchema = z.object({
   product_id: z.string().trim().min(1),
-  variant_id: z.number().nullable(),
+  /** Matches dashboard line items (`variant_public_id`). **/
+  variant_public_id: z.string().trim().min(1).nullable(),
   quantity: z.number().int().min(1),
   price: z.string().trim().min(1),
 });
