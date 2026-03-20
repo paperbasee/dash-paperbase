@@ -89,7 +89,7 @@ export default function CustomersPage() {
               </thead>
               <tbody className="divide-y divide-border/60">
                 {customers.map((c) => (
-                  <tr key={c.id} className="hover:bg-muted/40">
+                  <tr key={c.public_id} className="hover:bg-muted/40">
                     <td className="px-4 py-3 font-medium text-foreground">
                       {c.user_email}
                     </td>

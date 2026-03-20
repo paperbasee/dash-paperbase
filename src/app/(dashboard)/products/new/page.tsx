@@ -7,11 +7,17 @@ import { Undo2, FileText, Check, Plus, X } from "lucide-react";
 import api from "@/lib/api";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ExtraFieldsFormSection, validateExtraFields } from "@/components/ExtraFieldsFormSection";
+import { ExtraFieldsFormSection } from "@/components/ExtraFieldsFormSection";
 import { useExtraFieldsSchema } from "@/hooks/useExtraFieldsSchema";
 import type { ExtraFieldValues } from "@/types/extra-fields";
 import type { ParentCategory, Category } from "@/types";
 import { MAX_PRODUCT_IMAGES } from "@/lib/product-media";
+import {
+  parseValidation,
+  productCreateSchema,
+  slugFromName,
+  validateRequiredExtraFields,
+} from "@/lib/validation";
 
 const BADGE_OPTIONS = [
   { value: "", label: "None" },
@@ -21,16 +27,6 @@ const BADGE_OPTIONS = [
 ] as const;
 
 const MAX_IMAGES = MAX_PRODUCT_IMAGES;
-
-/** Generate URL-safe slug from product name (matches backend slugify behavior). */
-function slugFromName(name: string): string {
-  if (!name.trim()) return "";
-  return name
-    .toLowerCase()
-    .trim()
-    .replace(/\s+/g, "-")
-    .replace(/[^a-z0-9-]/g, "");
-}
 
 export default function NewProductPage() {
   const router = useRouter();
@@ -125,8 +121,20 @@ export default function NewProductPage() {
     e.preventDefault();
     if (slugTaken) return;
 
+    const formValidation = parseValidation(productCreateSchema, form);
+    if (!formValidation.success) {
+      setError(
+        formValidation.errors.name ??
+          formValidation.errors.brand ??
+          formValidation.errors.price ??
+          formValidation.errors.category ??
+          "Please correct the highlighted fields."
+      );
+      return;
+    }
+
     const schemaWithNames = extraFieldsSchema.filter((f) => f.name.trim());
-    const extraErrors = validateExtraFields(schemaWithNames, extraFields);
+    const extraErrors = validateRequiredExtraFields(schemaWithNames, extraFields);
     if (Object.keys(extraErrors).length > 0) {
       setExtraFieldsErrors(extraErrors);
       setError("Please fill in all required extra fields.");
@@ -607,7 +615,7 @@ export default function NewProductPage() {
                 >
                   <option value="">Select parent...</option>
                   {parentCategories.map((c) => (
-                    <option key={c.id} value={c.id}>
+                    <option key={c.public_id} value={c.id}>
                       {c.name}
                     </option>
                   ))}
@@ -624,7 +632,7 @@ export default function NewProductPage() {
                 >
                   <option value="">Select child (optional)...</option>
                   {filteredChildCategories.map((c) => (
-                    <option key={c.id} value={c.id}>
+                    <option key={c.public_id} value={c.id}>
                       {c.name}
                     </option>
                   ))}

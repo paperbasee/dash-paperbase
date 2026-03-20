@@ -7,6 +7,7 @@ import { Eye, EyeOff } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { loginSchema, parseValidation } from "@/lib/validation";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -21,9 +22,18 @@ export default function LoginPage() {
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setError("");
+    const validation = parseValidation(loginSchema, { email, password });
+    if (!validation.success) {
+      setError(
+        validation.errors.email ??
+          validation.errors.password ??
+          "Please provide valid credentials."
+      );
+      return;
+    }
     setLoading(true);
     try {
-      const result = await login(email, password);
+      const result = await login(validation.data.email, validation.data.password);
       router.push(result.active_store_id ? "/" : "/onboarding");
     } catch {
       setError("Invalid credentials. Please try again.");

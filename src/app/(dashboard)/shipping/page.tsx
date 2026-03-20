@@ -76,9 +76,9 @@ export default function ShippingPage() {
   const [methods, setMethods] = useState<ShippingMethod[]>([]);
   const [rates, setRates] = useState<ShippingRate[]>([]);
 
-  const [editingZone, setEditingZone] = useState<number | "new" | null>(null);
-  const [editingMethod, setEditingMethod] = useState<number | "new" | null>(null);
-  const [editingRate, setEditingRate] = useState<number | "new" | null>(null);
+  const [editingZone, setEditingZone] = useState<string | "new" | null>(null);
+  const [editingMethod, setEditingMethod] = useState<string | "new" | null>(null);
+  const [editingRate, setEditingRate] = useState<string | "new" | null>(null);
 
   const [zoneForm, setZoneForm] = useState<ZoneForm>(emptyZone);
   const [methodForm, setMethodForm] = useState<MethodForm>(emptyMethod);
@@ -139,7 +139,7 @@ export default function ShippingPage() {
     setZoneForm(emptyZone);
   }
   function openEditZone(z: ShippingZone) {
-    setEditingZone(z.id);
+    setEditingZone(z.public_id);
     setZoneForm({
       name: z.name,
       delivery_areas: z.delivery_areas || "",
@@ -153,7 +153,7 @@ export default function ShippingPage() {
     setMethodForm(emptyMethod);
   }
   function openEditMethod(m: ShippingMethod) {
-    setEditingMethod(m.id);
+    setEditingMethod(m.public_id);
     setMethodForm({
       name: m.name,
       method_type: m.method_type,
@@ -168,7 +168,7 @@ export default function ShippingPage() {
     setRateForm(emptyRate);
   }
   function openEditRate(r: ShippingRate) {
-    setEditingRate(r.id);
+    setEditingRate(r.public_id);
     setRateForm({
       shipping_method: String(r.shipping_method),
       shipping_zone: String(r.shipping_zone),
@@ -284,11 +284,11 @@ export default function ShippingPage() {
     }
   }
 
-  async function del(kind: "zones" | "methods" | "rates", id: number) {
+  async function del(kind: "zones" | "methods" | "rates", publicId: string) {
     if (!confirm("Delete this item?")) return;
     setError("");
     try {
-      await api.delete(`admin/shipping-${kind}/${id}/`);
+      await api.delete(`admin/shipping-${kind}/${publicId}/`);
       fetchAll();
     } catch (e) {
       console.error(e);
@@ -397,7 +397,7 @@ export default function ShippingPage() {
           <div className="space-y-2">
             {zones.map((z) => (
               <div
-                key={z.id}
+                key={z.public_id}
                 className="rounded-lg border border-border/60 bg-background px-3 py-2"
               >
                 <div className="flex items-start justify-between gap-3">
@@ -423,7 +423,7 @@ export default function ShippingPage() {
                     </button>
                     <button
                       type="button"
-                      onClick={() => del("zones", z.id)}
+                      onClick={() => del("zones", z.public_id)}
                       className="text-destructive hover:underline"
                     >
                       Delete
@@ -499,7 +499,7 @@ export default function ShippingPage() {
                   className="w-full rounded border border-border bg-background px-3 py-2 text-sm"
                 >
                   {zones.map((z) => (
-                    <option key={z.id} value={z.id}>
+                    <option key={z.public_id} value={z.id}>
                       {z.name}
                     </option>
                   ))}
@@ -540,7 +540,7 @@ export default function ShippingPage() {
           <div className="space-y-2">
             {methods.map((m) => (
               <div
-                key={m.id}
+                key={m.public_id}
                 className="rounded-lg border border-border/60 bg-background px-3 py-2"
               >
                 <div className="flex items-start justify-between gap-3">
@@ -568,7 +568,7 @@ export default function ShippingPage() {
                     </button>
                     <button
                       type="button"
-                      onClick={() => del("methods", m.id)}
+                      onClick={() => del("methods", m.public_id)}
                       className="text-destructive hover:underline"
                     >
                       Delete
@@ -612,7 +612,7 @@ export default function ShippingPage() {
                   Select method
                 </option>
                 {methods.map((m) => (
-                  <option key={m.id} value={m.id}>
+                  <option key={m.public_id} value={m.id}>
                     {m.name}
                   </option>
                 ))}
@@ -629,7 +629,7 @@ export default function ShippingPage() {
                   Select zone
                 </option>
                 {zones.map((z) => (
-                  <option key={z.id} value={z.id}>
+                  <option key={z.public_id} value={z.id}>
                     {z.name}
                   </option>
                 ))}
@@ -707,7 +707,7 @@ export default function ShippingPage() {
           <div className="space-y-2">
             {rates.map((r) => (
               <div
-                key={r.id}
+                key={r.public_id}
                 className="rounded-lg border border-border/60 bg-background px-3 py-2"
               >
                 <div className="flex items-start justify-between gap-3">
@@ -737,7 +737,7 @@ export default function ShippingPage() {
                     </button>
                     <button
                       type="button"
-                      onClick={() => del("rates", r.id)}
+                      onClick={() => del("rates", r.public_id)}
                       className="text-destructive hover:underline"
                     >
                       Delete

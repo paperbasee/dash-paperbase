@@ -76,7 +76,7 @@ export default function VariantsPage() {
   const [variantsLoading, setVariantsLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const [editing, setEditing] = useState<number | "new" | null>(null);
+  const [editing, setEditing] = useState<string | "new" | null>(null);
   const [form, setForm] = useState<VariantForm | null>(null);
   const [saving, setSaving] = useState(false);
 
@@ -155,7 +155,7 @@ export default function VariantsPage() {
         }
       }
     }
-    setEditing(v.id);
+    setEditing(v.public_id);
     setForm({
       sku: v.sku,
       price_override: v.price_override ?? "",
@@ -195,7 +195,7 @@ export default function VariantsPage() {
     try {
       if (editing === "new") {
         await api.post("admin/product-variants/", payload);
-      } else if (typeof editing === "number") {
+      } else if (typeof editing === "string") {
         await api.patch(`admin/product-variants/${editing}/`, payload);
       }
       closePanel();
@@ -232,7 +232,7 @@ export default function VariantsPage() {
   async function deleteVariant(v: ProductVariant) {
     if (!confirm(`Delete variant SKU "${v.sku}"?`)) return;
     try {
-      await api.delete(`admin/product-variants/${v.id}/`);
+      await api.delete(`admin/product-variants/${v.public_id}/`);
       await loadVariants();
       await loadMeta();
     } catch {
@@ -288,7 +288,7 @@ export default function VariantsPage() {
           >
             <option value="">Select a product…</option>
             {products.map((p) => (
-              <option key={p.id} value={p.id}>
+              <option key={p.public_id} value={p.id}>
                 {p.name}
               </option>
             ))}
@@ -370,7 +370,7 @@ export default function VariantsPage() {
                       </p>
                       <div className="grid gap-3 sm:grid-cols-2">
                         {attributes.map((a) => (
-                          <label key={a.id} className="block space-y-1">
+                          <label key={a.public_id} className="block space-y-1">
                             <span className="text-xs text-muted-foreground">{a.name}</span>
                             <select
                               className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
@@ -384,7 +384,7 @@ export default function VariantsPage() {
                             >
                               <option value="">— None —</option>
                               {a.values.map((v) => (
-                                <option key={v.id} value={String(v.id)}>
+                                <option key={v.public_id} value={String(v.id)}>
                                   {v.value}
                                 </option>
                               ))}
@@ -447,7 +447,7 @@ export default function VariantsPage() {
                 </thead>
                 <tbody>
                   {variants.map((v) => (
-                    <tr key={v.id} className="border-b border-border last:border-0">
+                    <tr key={v.public_id} className="border-b border-border last:border-0">
                       <td className="px-4 py-3 font-medium text-foreground">{v.sku}</td>
                       <td className="px-4 py-3 text-muted-foreground">
                         {v.option_labels?.length

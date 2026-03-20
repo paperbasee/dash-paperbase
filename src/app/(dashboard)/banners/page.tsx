@@ -2,45 +2,47 @@
 
 import { useEffect, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
-import { Undo2, Plus, Image as ImageIcon } from "lucide-react";
+import { Undo2, Plus } from "lucide-react";
+import { isAxiosError } from "axios";
 import api from "@/lib/api";
 import type { Banner, PaginatedResponse } from "@/types";
 
 type BannerForm = {
   title: string;
-  link_url: string;
+  description: string;
+  cta_text: string;
+  redirect_url: string;
+  is_clickable: boolean;
+  placement: string;
   position: string;
-  order: string;
   is_active: boolean;
+  start_date: string;
+  end_date: string;
 };
 
 const emptyForm: BannerForm = {
   title: "",
-  link_url: "",
-  position: "homepage",
-  order: "0",
+  description: "",
+  cta_text: "",
+  redirect_url: "",
+  is_clickable: false,
+  placement: "homepage_hero",
+  position: "0",
   is_active: true,
+  start_date: "",
+  end_date: "",
 };
 
-const POSITIONS = [
-  { value: "homepage", label: "Homepage" },
-  { value: "sidebar", label: "Sidebar" },
-  { value: "footer", label: "Footer" },
-  { value: "header", label: "Header" },
-];
-
-function imageUrl(url: string | null): string | null {
-  if (!url) return null;
-  if (url.startsWith("http")) return url;
-  const base = process.env.NEXT_PUBLIC_API_URL || "";
-  return base ? `${base.replace(/\/$/, "")}${url.startsWith("/") ? "" : "/"}${url}` : url;
+function toDateTimeLocal(value: string | null): string {
+  if (!value) return "";
+  return value.slice(0, 16);
 }
 
 export default function BannersPage() {
   const router = useRouter();
   const [banners, setBanners] = useState<Banner[]>([]);
   const [loading, setLoading] = useState(true);
-  const [editing, setEditing] = useState<number | "new" | null>(null);
+  const [editing, setEditing] = useState<string | "new" | null>(null);
   const [form, setForm] = useState<BannerForm>(emptyForm);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [saving, setSaving] = useState(false);
@@ -68,13 +70,18 @@ export default function BannersPage() {
   }
 
   function openEdit(banner: Banner) {
-    setEditing(banner.id);
+    setEditing(banner.public_id);
     setForm({
       title: banner.title,
-      link_url: banner.link_url || "",
-      position: banner.position,
-      order: String(banner.order),
+      description: banner.description || "",
+      cta_text: banner.cta_text || "",
+      redirect_url: banner.redirect_url || "",
+      is_clickable: banner.is_clickable,
+      placement: banner.placement,
+      position: String(banner.position),
       is_active: banner.is_active,
+      start_date: toDateTimeLocal(banner.start_date),
+      end_date: toDateTimeLocal(banner.end_date),
     });
     setImageFile(null);
   }
@@ -84,10 +91,16 @@ export default function BannersPage() {
     setSaving(true);
     const fd = new FormData();
     fd.append("title", form.title);
-    fd.append("link_url", form.link_url);
+    fd.append("description", form.description);
+    fd.append("cta_text", form.cta_text);
+    const redirectUrl = form.redirect_url.trim();
+    if (redirectUrl) fd.append("redirect_url", redirectUrl);
+    fd.append("is_clickable", String(form.is_clickable));
+    fd.append("placement", form.placement);
     fd.append("position", form.position);
-    fd.append("order", form.order);
     fd.append("is_active", String(form.is_active));
+    if (form.start_date) fd.append("start_date", form.start_date);
+    if (form.end_date) fd.append("end_date", form.end_date);
     if (imageFile) fd.append("image", imageFile);
 
     try {
@@ -103,16 +116,20 @@ export default function BannersPage() {
       setEditing(null);
       fetchData();
     } catch (err) {
-      console.error(err);
+      if (isAxiosError(err)) {
+        console.error("Banner save failed:", err.response?.data || err.message);
+      } else {
+        console.error(err);
+      }
     } finally {
       setSaving(false);
     }
   }
 
-  async function handleDelete(id: number) {
+  async function handleDelete(publicId: string) {
     if (!confirm("Delete this banner?")) return;
     try {
-      await api.delete(`admin/banners/${id}/`);
+      await api.delete(`admin/banners/${publicId}/`);
       fetchData();
     } catch (err) {
       console.error(err);
@@ -177,40 +194,85 @@ export default function BannersPage() {
               />
             </div>
             <div>
+              <label className="mb-1 block text-sm font-medium">Placement</label>
+              <textarea
+                value={form.placement}
+                onChange={(e) =>
+                  setForm((f) => ({ ...f, placement: e.target.value }))
+                }
+                className="w-full rounded border border-border bg-background px-3 py-2 text-sm"
+                placeholder="e.g. homepage_hero"
+                rows={2}
+                maxLength={50}
+                required
+              />
+            </div>
+            <div className="sm:col-span-2">
+              <label className="mb-1 block text-sm font-medium">Description</label>
+              <textarea
+                value={form.description}
+                onChange={(e) =>
+                  setForm((f) => ({ ...f, description: e.target.value }))
+                }
+                className="w-full rounded border border-border bg-background px-3 py-2 text-sm"
+                placeholder="Optional"
+                rows={3}
+              />
+            </div>
+            <div>
+              <label className="mb-1 block text-sm font-medium">CTA Text</label>
+              <input
+                type="text"
+                value={form.cta_text}
+                onChange={(e) =>
+                  setForm((f) => ({ ...f, cta_text: e.target.value }))
+                }
+                className="w-full rounded border border-border bg-background px-3 py-2 text-sm"
+                placeholder='e.g. "Shop Now"'
+              />
+            </div>
+            <div>
               <label className="mb-1 block text-sm font-medium">Position</label>
-              <select
+              <input
+                type="number"
                 value={form.position}
                 onChange={(e) =>
                   setForm((f) => ({ ...f, position: e.target.value }))
                 }
                 className="w-full rounded border border-border bg-background px-3 py-2 text-sm"
-              >
-                {POSITIONS.map((p) => (
-                  <option key={p.value} value={p.value}>
-                    {p.label}
-                  </option>
-                ))}
-              </select>
+              />
             </div>
             <div className="sm:col-span-2">
-              <label className="mb-1 block text-sm font-medium">Link URL</label>
+              <label className="mb-1 block text-sm font-medium">Redirect URL</label>
               <input
                 type="url"
-                value={form.link_url}
+                value={form.redirect_url}
                 onChange={(e) =>
-                  setForm((f) => ({ ...f, link_url: e.target.value }))
+                  setForm((f) => ({ ...f, redirect_url: e.target.value }))
                 }
                 className="w-full rounded border border-border bg-background px-3 py-2 text-sm"
                 placeholder="https://..."
+                required={form.is_clickable}
               />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium">Order</label>
+              <label className="mb-1 block text-sm font-medium">Start Date</label>
               <input
-                type="number"
-                value={form.order}
+                type="datetime-local"
+                value={form.start_date}
                 onChange={(e) =>
-                  setForm((f) => ({ ...f, order: e.target.value }))
+                  setForm((f) => ({ ...f, start_date: e.target.value }))
+                }
+                className="w-full rounded border border-border bg-background px-3 py-2 text-sm"
+              />
+            </div>
+            <div>
+              <label className="mb-1 block text-sm font-medium">End Date</label>
+              <input
+                type="datetime-local"
+                value={form.end_date}
+                onChange={(e) =>
+                  setForm((f) => ({ ...f, end_date: e.target.value }))
                 }
                 className="w-full rounded border border-border bg-background px-3 py-2 text-sm"
               />
@@ -228,6 +290,19 @@ export default function BannersPage() {
                   Leave empty to keep current image
                 </p>
               )}
+            </div>
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                id="is_clickable"
+                checked={form.is_clickable}
+                onChange={(e) =>
+                  setForm((f) => ({ ...f, is_clickable: e.target.checked }))
+                }
+              />
+              <label htmlFor="is_clickable" className="text-sm">
+                Clickable
+              </label>
             </div>
             <div className="flex items-center gap-2">
               <input
@@ -267,16 +342,19 @@ export default function BannersPage() {
           <thead>
             <tr className="border-b border-border bg-muted/40">
               <th className="th">
-                Preview
+                Title
               </th>
               <th className="th">
-                Title
+                Placement
               </th>
               <th className="th">
                 Position
               </th>
               <th className="th">
-                Order
+                Start Date
+              </th>
+              <th className="th">
+                End Date
               </th>
               <th className="th">
                 Status
@@ -288,27 +366,20 @@ export default function BannersPage() {
           </thead>
           <tbody className="divide-y divide-border/60">
             {banners.map((b) => (
-              <tr key={b.id} className="hover:bg-muted/40">
-                <td className="px-4 py-3">
-                  {b.image ? (
-                    <img
-                      src={imageUrl(b.image) || b.image}
-                      alt={b.title || "Banner"}
-                      className="h-12 w-20 rounded object-cover"
-                    />
-                  ) : (
-                    <div className="flex h-12 w-20 items-center justify-center rounded bg-muted">
-                      <ImageIcon className="h-6 w-6 text-muted-foreground" />
-                    </div>
-                  )}
-                </td>
+              <tr key={b.public_id} className="hover:bg-muted/40">
                 <td className="px-4 py-3 font-medium">
                   {b.title || "—"}
                 </td>
                 <td className="px-4 py-3 text-muted-foreground capitalize">
-                  {b.position}
+                  {b.placement}
                 </td>
-                <td className="px-4 py-3">{b.order}</td>
+                <td className="px-4 py-3">{b.position}</td>
+                <td className="px-4 py-3 text-muted-foreground">
+                  {b.start_date ? new Date(b.start_date).toLocaleString() : "—"}
+                </td>
+                <td className="px-4 py-3 text-muted-foreground">
+                  {b.end_date ? new Date(b.end_date).toLocaleString() : "—"}
+                </td>
                 <td className="px-4 py-3">
                   <span
                     className={
@@ -330,7 +401,7 @@ export default function BannersPage() {
                   </button>
                   <button
                     type="button"
-                    onClick={() => handleDelete(b.id)}
+                    onClick={() => handleDelete(b.public_id)}
                     className="text-destructive hover:underline"
                   >
                     Delete
@@ -344,7 +415,7 @@ export default function BannersPage() {
 
       {banners.length === 0 && !editing && (
         <div className="rounded-xl border border-dashed border-card-border bg-card py-12 text-center text-sm text-muted-foreground">
-          No banners yet. Click "Add Banner" to create one.
+          No banners yet. Click Add Banner to create one.
         </div>
       )}
     </div>

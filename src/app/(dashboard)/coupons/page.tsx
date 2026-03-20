@@ -40,7 +40,7 @@ export default function CouponsPage() {
   const router = useRouter();
   const [coupons, setCoupons] = useState<Coupon[]>([]);
   const [loading, setLoading] = useState(true);
-  const [editing, setEditing] = useState<number | "new" | null>(null);
+  const [editing, setEditing] = useState<string | "new" | null>(null);
   const [form, setForm] = useState<CouponForm>(emptyForm);
   const [saving, setSaving] = useState(false);
 
@@ -66,7 +66,7 @@ export default function CouponsPage() {
   }
 
   function openEdit(coupon: Coupon) {
-    setEditing(coupon.id);
+    setEditing(coupon.public_id);
     setForm({
       code: coupon.code,
       discount_type: coupon.discount_type,
@@ -108,10 +108,10 @@ export default function CouponsPage() {
     }
   }
 
-  async function handleDelete(id: number) {
+  async function handleDelete(publicId: string) {
     if (!confirm("Delete this coupon?")) return;
     try {
-      await api.delete(`admin/coupons/${id}/`);
+      await api.delete(`admin/coupons/${publicId}/`);
       fetchData();
     } catch (err) {
       console.error(err);
@@ -303,7 +303,7 @@ export default function CouponsPage() {
           </thead>
           <tbody className="divide-y divide-border/60">
             {coupons.map((c) => (
-              <tr key={c.id} className="hover:bg-muted/40">
+              <tr key={c.public_id} className="hover:bg-muted/40">
                 <td className="px-4 py-3 font-medium">{c.code}</td>
                 <td className="px-4 py-3 text-muted-foreground">
                   {c.discount_type === "percentage"
@@ -338,7 +338,7 @@ export default function CouponsPage() {
                   </button>
                   <button
                     type="button"
-                    onClick={() => handleDelete(c.id)}
+                    onClick={() => handleDelete(c.public_id)}
                     className="text-destructive hover:underline"
                   >
                     Delete

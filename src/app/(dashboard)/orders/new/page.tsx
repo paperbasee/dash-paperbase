@@ -21,7 +21,6 @@ export default function NewOrderPage() {
     setExtraFields,
     extraFieldsErrors,
     extraFieldsSchema,
-    schemaWithNames,
     items,
     query,
     results,

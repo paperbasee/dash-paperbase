@@ -14,7 +14,7 @@ export default function ReviewsPage() {
   const [page, setPage] = useState(1);
   const [count, setCount] = useState(0);
   const [hasNext, setHasNext] = useState(false);
-  const [updating, setUpdating] = useState<number | null>(null);
+  const [updating, setUpdating] = useState<string | null>(null);
 
   function fetchData() {
     setLoading(true);
@@ -35,10 +35,10 @@ export default function ReviewsPage() {
     fetchData();
   }, [page]);
 
-  async function handleStatusChange(id: number, status: string) {
-    setUpdating(id);
+  async function handleStatusChange(publicId: string, status: string) {
+    setUpdating(publicId);
     try {
-      await api.patch(`admin/reviews/${id}/`, { status });
+      await api.patch(`admin/reviews/${publicId}/`, { status });
       fetchData();
     } catch (err) {
       console.error(err);
@@ -47,10 +47,10 @@ export default function ReviewsPage() {
     }
   }
 
-  async function handleDelete(id: number) {
+  async function handleDelete(publicId: string) {
     if (!confirm("Delete this review?")) return;
     try {
-      await api.delete(`admin/reviews/${id}/`);
+      await api.delete(`admin/reviews/${publicId}/`);
       fetchData();
     } catch (err) {
       console.error(err);
@@ -110,7 +110,7 @@ export default function ReviewsPage() {
               </thead>
               <tbody className="divide-y divide-border/60">
                 {reviews.map((r) => (
-                  <tr key={r.id} className="hover:bg-muted/40">
+                  <tr key={r.public_id} className="hover:bg-muted/40">
                     <td className="px-4 py-3 font-medium">
                       <Link
                         href={`/products/${r.product}`}
@@ -147,9 +147,9 @@ export default function ReviewsPage() {
                         <>
                           <button
                             type="button"
-                            disabled={updating === r.id}
+                            disabled={updating === r.public_id}
                             onClick={() =>
-                              handleStatusChange(r.id, "approved")
+                              handleStatusChange(r.public_id, "approved")
                             }
                             className="mr-2 text-green-600 hover:underline disabled:opacity-50"
                           >
@@ -157,9 +157,9 @@ export default function ReviewsPage() {
                           </button>
                           <button
                             type="button"
-                            disabled={updating === r.id}
+                            disabled={updating === r.public_id}
                             onClick={() =>
-                              handleStatusChange(r.id, "rejected")
+                              handleStatusChange(r.public_id, "rejected")
                             }
                             className="mr-2 text-red-600 hover:underline disabled:opacity-50"
                           >
@@ -169,7 +169,7 @@ export default function ReviewsPage() {
                       )}
                       <button
                         type="button"
-                        onClick={() => handleDelete(r.id)}
+                        onClick={() => handleDelete(r.public_id)}
                         className="text-destructive hover:underline"
                       >
                         Delete

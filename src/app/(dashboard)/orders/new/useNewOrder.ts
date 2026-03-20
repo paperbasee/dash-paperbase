@@ -4,7 +4,6 @@ import { useEffect, useMemo, useState, useRef, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import api from "@/lib/api";
 import { useExtraFieldsSchema } from "@/hooks/useExtraFieldsSchema";
-import { validateExtraFields } from "@/components/ExtraFieldsFormSection";
 import type { ExtraFieldValues } from "@/types/extra-fields";
 import type {
   Product,
@@ -13,6 +12,11 @@ import type {
   ShippingMethod,
   ShippingZone,
 } from "@/types";
+import {
+  orderCreateSchema,
+  parseValidation,
+  validateRequiredExtraFields,
+} from "@/lib/validation";
 
 export interface OrderItemRow {
   key: number;
@@ -198,12 +202,19 @@ export function useNewOrder() {
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
-    if (items.length === 0) {
-      setError("Add at least one product to the order.");
+    const validation = parseValidation(orderCreateSchema, { ...form, items });
+    if (!validation.success) {
+      setError(
+        validation.errors.items ??
+          validation.errors.shipping_name ??
+          validation.errors.email ??
+          validation.errors.phone ??
+          "Please correct the highlighted fields."
+      );
       return;
     }
 
-    const extraErrors = validateExtraFields(schemaWithNames, extraFields);
+    const extraErrors = validateRequiredExtraFields(schemaWithNames, extraFields);
     if (Object.keys(extraErrors).length > 0) {
       setExtraFieldsErrors(extraErrors);
       setError("Please fill in all required extra fields.");
@@ -244,7 +255,6 @@ export function useNewOrder() {
     setExtraFields,
     extraFieldsErrors,
     extraFieldsSchema,
-    schemaWithNames,
     items,
     query,
     results,

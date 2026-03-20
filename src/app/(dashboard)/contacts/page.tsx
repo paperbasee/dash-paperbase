@@ -22,7 +22,7 @@ export default function ContactsPage() {
   const [page, setPage] = useState(1);
   const [count, setCount] = useState(0);
   const [hasNext, setHasNext] = useState(false);
-  const [expanded, setExpanded] = useState<number | null>(null);
+  const [expanded, setExpanded] = useState<string | null>(null);
 
   useEffect(() => {
     setLoading(true);
@@ -39,11 +39,11 @@ export default function ContactsPage() {
       .finally(() => setLoading(false));
   }, [page]);
 
-  async function handleDelete(id: number) {
+  async function handleDelete(publicId: string) {
     if (!confirm("Delete this contact submission?")) return;
     try {
-      await api.delete(`admin/contacts/${id}/`);
-      setContacts((prev) => prev.filter((c) => c.id !== id));
+      await api.delete(`admin/contacts/${publicId}/`);
+      setContacts((prev) => prev.filter((c) => c.public_id !== publicId));
       setCount((c) => c - 1);
     } catch (err) {
       console.error(err);
@@ -77,7 +77,7 @@ export default function ContactsPage() {
           <div className="space-y-3">
             {contacts.map((contact) => (
               <div
-                key={contact.id}
+                key={contact.public_id}
                 className="rounded-xl border border-dashed border-card-border bg-card p-4"
               >
                 <div className="flex items-start justify-between">
@@ -94,21 +94,21 @@ export default function ContactsPage() {
                   <div className="flex gap-2">
                     <button
                       onClick={() =>
-                        setExpanded(expanded === contact.id ? null : contact.id)
+                        setExpanded(expanded === contact.public_id ? null : contact.public_id)
                       }
                       className="text-sm text-primary hover:underline"
                     >
-                      {expanded === contact.id ? "Hide" : "View"}
+                      {expanded === contact.public_id ? "Hide" : "View"}
                     </button>
                     <button
-                      onClick={() => handleDelete(contact.id)}
+                      onClick={() => handleDelete(contact.public_id)}
                       className="text-sm text-destructive hover:underline"
                     >
                       Delete
                     </button>
                   </div>
                 </div>
-                {expanded === contact.id && (
+                {expanded === contact.public_id && (
                   <div className="mt-3 rounded-lg bg-muted p-3 text-sm text-foreground whitespace-pre-wrap">
                     {contact.message}
                   </div>

@@ -14,8 +14,8 @@ export default function InventoryPage() {
   const [page, setPage] = useState(1);
   const [count, setCount] = useState(0);
   const [hasNext, setHasNext] = useState(false);
-  const [adjusting, setAdjusting] = useState<number | null>(null);
-  const [adjustValue, setAdjustValue] = useState<Record<number, string>>({});
+  const [adjusting, setAdjusting] = useState<string | null>(null);
+  const [adjustValue, setAdjustValue] = useState<Record<string, string>>({});
 
   function fetchData() {
     setLoading(true);
@@ -36,15 +36,15 @@ export default function InventoryPage() {
     fetchData();
   }, [page]);
 
-  async function handleAdjust(id: number, change: number) {
-    setAdjusting(id);
+  async function handleAdjust(publicId: string, change: number) {
+    setAdjusting(publicId);
     try {
-      await api.post(`admin/inventory/${id}/adjust/`, {
+      await api.post(`admin/inventory/${publicId}/adjust/`, {
         change,
         reason: "adjustment",
         reference: "",
       });
-      setAdjustValue((prev) => ({ ...prev, [id]: "" }));
+      setAdjustValue((prev) => ({ ...prev, [publicId]: "" }));
       fetchData();
     } catch (err) {
       console.error(err);
@@ -107,7 +107,7 @@ export default function InventoryPage() {
               <tbody className="divide-y divide-border/60">
                 {inventory.map((inv) => (
                   <tr
-                    key={inv.id}
+                    key={inv.public_id}
                     className={`hover:bg-muted/40 ${inv.is_low ? "bg-amber-50/50 dark:bg-amber-950/20" : ""}`}
                   >
                     <td className="px-4 py-3 font-medium text-foreground">
@@ -131,11 +131,11 @@ export default function InventoryPage() {
                       <div className="flex items-center justify-end gap-2">
                         <input
                           type="number"
-                          value={adjustValue[inv.id] ?? ""}
+                          value={adjustValue[inv.public_id] ?? ""}
                           onChange={(e) =>
                             setAdjustValue((prev) => ({
                               ...prev,
-                              [inv.id]: e.target.value,
+                              [inv.public_id]: e.target.value,
                             }))
                           }
                           placeholder="±"
@@ -144,19 +144,19 @@ export default function InventoryPage() {
                         <button
                           type="button"
                           disabled={
-                            adjusting === inv.id ||
-                            !adjustValue[inv.id] ||
-                            parseInt(adjustValue[inv.id] || "0", 10) === 0
+                            adjusting === inv.public_id ||
+                            !adjustValue[inv.public_id] ||
+                            parseInt(adjustValue[inv.public_id] || "0", 10) === 0
                           }
                           onClick={() =>
                             handleAdjust(
-                              inv.id,
-                              parseInt(adjustValue[inv.id] || "0", 10)
+                              inv.public_id,
+                              parseInt(adjustValue[inv.public_id] || "0", 10)
                             )
                           }
                           className="rounded border border-border px-3 py-1 text-sm font-medium hover:bg-muted disabled:opacity-50"
                         >
-                          {adjusting === inv.id ? "..." : "Apply"}
+                          {adjusting === inv.public_id ? "..." : "Apply"}
                         </button>
                       </div>
                     </td>

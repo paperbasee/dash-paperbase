@@ -3,6 +3,7 @@
 import { useState, useCallback, useEffect } from "react";
 import api from "@/lib/api";
 import type { ExtraFieldDefinition, ExtraFieldEntityType } from "@/types/extra-fields";
+import { validateExtraFieldDefinitions } from "@/lib/validation";
 
 function generateId(): string {
   return `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
@@ -110,30 +111,16 @@ export function useExtraFieldsSchema(entityType?: ExtraFieldEntityType) {
   );
 
   const save = useCallback(async (): Promise<{ success: boolean; error?: string }> => {
-    const complete = schema.filter((f) => f.name.trim() !== "");
-    const hasIncomplete = schema.some((f) => f.name.trim() === "");
-    if (hasIncomplete) {
-      return { success: false, error: "Complete all fields (add a name) before saving." };
+    const validation = validateExtraFieldDefinitions(schema);
+    if (!validation.success) {
+      return { success: false, error: validation.error };
     }
-    const entityTypes = [...new Set(complete.map((f) => f.entityType))];
-    const hasDuplicates = entityTypes.some((et) => {
-      const fields = complete.filter((f) => f.entityType === et);
-      return fields.some((f, i) => {
-        const name = f.name.trim().toLowerCase().replace(/\s+/g, "_");
-        return fields.some(
-          (g, j) =>
-            i !== j && g.name.trim().toLowerCase().replace(/\s+/g, "_") === name
-        );
-      });
-    });
-    if (hasDuplicates) {
-      return {
-        success: false,
-        error: "Field names must be unique within each entity type.",
-      };
+    if (!("data" in validation)) {
+      return { success: false, error: "Failed to validate dynamic fields." };
     }
+    const completeSchema = validation.data;
     try {
-      const payload = complete.map((f) => ({
+      const payload = completeSchema.map((f) => ({
         id: f.id,
         entityType: f.entityType,
         name: f.name.trim(),
@@ -146,7 +133,7 @@ export function useExtraFieldsSchema(entityType?: ExtraFieldEntityType) {
       await api.patch("stores/settings/current/", {
         extra_field_schema: payload,
       });
-      setSchemaState(complete);
+      setSchemaState(completeSchema);
       return { success: true };
     } catch {
       return { success: false, error: "Failed to save. Please try again." };

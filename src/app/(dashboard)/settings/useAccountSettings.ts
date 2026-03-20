@@ -3,6 +3,7 @@
 import { useState, type FormEvent } from "react";
 import api from "@/lib/api";
 import { useAutoExpire } from "@/hooks/useAutoExpire";
+import { accountSettingsSchema, parseValidation } from "@/lib/validation";
 
 export type SettingsMessage = { type: "success" | "error"; text: string } | null;
 
@@ -20,15 +21,18 @@ export function useAccountSettings({ onSaveSuccess }: UseAccountSettingsOptions 
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
-    const trimmedName = ownerName.trim();
-    const trimmedEmail = ownerEmail.trim();
-
-    if (!trimmedName) {
-      setMessage({ type: "error", text: "Please enter the owner name." });
-      return;
-    }
-    if (!trimmedEmail || !trimmedEmail.includes("@")) {
-      setMessage({ type: "error", text: "Please enter a valid owner email." });
+    const validation = parseValidation(accountSettingsSchema, {
+      ownerName,
+      ownerEmail,
+    });
+    if (!validation.success) {
+      setMessage({
+        type: "error",
+        text:
+          validation.errors.ownerName ??
+          validation.errors.ownerEmail ??
+          "Please correct the highlighted fields.",
+      });
       return;
     }
 
@@ -36,8 +40,8 @@ export function useAccountSettings({ onSaveSuccess }: UseAccountSettingsOptions 
     setMessage(null);
     try {
       const formData = new FormData();
-      formData.append("owner_name", trimmedName.slice(0, 255));
-      formData.append("owner_email", trimmedEmail.slice(0, 254));
+      formData.append("owner_name", validation.data.ownerName.slice(0, 255));
+      formData.append("owner_email", validation.data.ownerEmail.slice(0, 254));
       await api.patch("admin/branding/", formData);
       onSaveSuccess?.();
       setMessage({ type: "success", text: "Account settings saved." });

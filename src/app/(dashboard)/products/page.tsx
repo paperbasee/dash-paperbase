@@ -26,6 +26,7 @@ export default function ProductsPage() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [deleting, setDeleting] = useState(false);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
+  const getProductApiId = (product: Product) => product.public_id || product.id;
 
   const fetchProducts = useCallback(() => {
     setLoading(true);
@@ -59,7 +60,7 @@ export default function ProductsPage() {
     if (selectedIds.size === products.length) {
       setSelectedIds(new Set());
     } else {
-      setSelectedIds(new Set(products.map((p) => p.id)));
+      setSelectedIds(new Set(products.map((p) => getProductApiId(p))));
     }
   };
 
@@ -80,13 +81,14 @@ export default function ProductsPage() {
     }
   }
 
-  async function updateProduct(id: string, payload: { stock?: number; is_active?: boolean }) {
-    setUpdatingId(id);
+  async function updateProduct(product: Product, payload: { stock?: number; is_active?: boolean }) {
+    const apiId = getProductApiId(product);
+    setUpdatingId(apiId);
     try {
-      await api.patch(`admin/products/${id}/`, payload);
+      await api.patch(`admin/products/${apiId}/`, payload);
       setProducts((prev) =>
         prev.map((p) =>
-          p.id === id ? { ...p, ...payload } : p
+          p.id === product.id ? { ...p, ...payload } : p
         )
       );
     } catch (err) {
@@ -98,7 +100,7 @@ export default function ProductsPage() {
 
   function handleStatusChange(product: Product, is_active: boolean) {
     if (product.is_active !== is_active) {
-      updateProduct(product.id, { is_active });
+      updateProduct(product, { is_active });
     }
   }
 
@@ -175,8 +177,8 @@ export default function ProductsPage() {
                     <td className="w-10 px-4 py-3">
                       <input
                         type="checkbox"
-                        checked={selectedIds.has(product.id)}
-                        onChange={() => toggleSelect(product.id)}
+                        checked={selectedIds.has(getProductApiId(product))}
+                        onChange={() => toggleSelect(getProductApiId(product))}
                         onClick={(e) => e.stopPropagation()}
                         className="h-4 w-4 rounded border-input text-primary focus:ring-primary"
                         aria-label={`Select ${product.name}`}
@@ -184,7 +186,7 @@ export default function ProductsPage() {
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap">
                       <Link
-                        href={`/products/${product.id}`}
+                        href={`/products/${getProductApiId(product)}`}
                         className="flex items-center gap-3"
                       >
                         {product.image_url && (
@@ -244,16 +246,16 @@ export default function ProductsPage() {
                                 )
                               );
                             }}
-                            onBlur={() => updateProduct(product.id, { stock: product.stock })}
+                            onBlur={() => updateProduct(product, { stock: product.stock })}
                             onKeyDown={(e) => e.key === "Enter" && (e.target as HTMLInputElement).blur()}
                             className={`w-16 rounded border px-2 py-1 text-sm ${
                               product.stock === 0
                                 ? "border-destructive text-destructive"
                                 : "border-input text-foreground"
                             } focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring`}
-                            disabled={updatingId === product.id}
+                            disabled={updatingId === getProductApiId(product)}
                           />
-                          {updatingId === product.id && (
+                          {updatingId === getProductApiId(product) && (
                             <span className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
                           )}
                         </div>
@@ -266,7 +268,7 @@ export default function ProductsPage() {
                           if (!value) return;
                           handleStatusChange(product, value === "active");
                         }}
-                        disabled={updatingId === product.id}
+                        disabled={updatingId === getProductApiId(product)}
                       >
                         <ComboboxInput
                           placeholder="Status"

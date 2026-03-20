@@ -15,8 +15,9 @@ import {
 } from "lucide-react";
 import api from "@/lib/api";
 import { useBranding } from "@/context/BrandingContext";
-import { ExtraFieldsFormSection, validateExtraFields } from "@/components/ExtraFieldsFormSection";
+import { ExtraFieldsFormSection } from "@/components/ExtraFieldsFormSection";
 import { useExtraFieldsSchema } from "@/hooks/useExtraFieldsSchema";
+import { validateRequiredExtraFields } from "@/lib/validation";
 import type { ExtraFieldValues } from "@/types/extra-fields";
 import type {
   Order,
@@ -239,7 +240,7 @@ export default function OrderDetailPage() {
   async function handleSave(e: FormEvent) {
     e.preventDefault();
     const schemaWithNames = extraFieldsSchema.filter((f) => f.name.trim());
-    const extraErrors = validateExtraFields(schemaWithNames, extraFields);
+    const extraErrors = validateRequiredExtraFields(schemaWithNames, extraFields);
     if (Object.keys(extraErrors).length > 0) {
       setExtraFieldsErrors(extraErrors);
       return;

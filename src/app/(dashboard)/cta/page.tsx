@@ -40,7 +40,7 @@ export default function CtaPage() {
   const router = useRouter();
   const [ctas, setCtas] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
-  const [editing, setEditing] = useState<number | "new" | null>(null);
+  const [editing, setEditing] = useState<string | "new" | null>(null);
   const [form, setForm] = useState<CtaForm>(emptyForm);
   const [saving, setSaving] = useState(false);
 
@@ -66,7 +66,7 @@ export default function CtaPage() {
   }
 
   function openEdit(n: Notification) {
-    setEditing(n.id);
+    setEditing(n.public_id);
     setForm({
       text: n.text,
       notification_type: n.notification_type,
@@ -112,20 +112,22 @@ export default function CtaPage() {
   async function toggleActive(n: Notification) {
     try {
       const { data } = await api.patch<Notification>(
-        `admin/notifications/${n.id}/`,
+        `admin/notifications/${n.public_id}/`,
         { is_active: !n.is_active }
       );
-      setCtas((prev) => prev.map((x) => (x.id === data.id ? data : x)));
+      setCtas((prev) =>
+        prev.map((x) => (x.public_id === data.public_id ? data : x))
+      );
     } catch (err) {
       console.error(err);
     }
   }
 
-  async function handleDelete(id: number) {
+  async function handleDelete(publicId: string) {
     if (!confirm("Delete this CTA?")) return;
     try {
-      await api.delete(`admin/notifications/${id}/`);
-      setCtas((prev) => prev.filter((n) => n.id !== id));
+      await api.delete(`admin/notifications/${publicId}/`);
+      setCtas((prev) => prev.filter((n) => n.public_id !== publicId));
     } catch (err) {
       console.error(err);
     }
@@ -298,7 +300,7 @@ export default function CtaPage() {
           </thead>
           <tbody className="divide-y divide-border/60">
             {ctas.map((n) => (
-              <tr key={n.id} className="hover:bg-muted/40">
+              <tr key={n.public_id} className="hover:bg-muted/40">
                 <td className="max-w-xs truncate px-4 py-3 font-medium text-foreground">
                   {n.text}
                 </td>
@@ -333,7 +335,7 @@ export default function CtaPage() {
                       Edit
                     </button>
                     <button
-                      onClick={() => handleDelete(n.id)}
+                      onClick={() => handleDelete(n.public_id)}
                       className="text-sm text-destructive hover:underline"
                     >
                       Delete

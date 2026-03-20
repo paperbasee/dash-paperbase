@@ -5,6 +5,7 @@ import api from "@/lib/api";
 import { defaultBranding } from "@/context/BrandingContext";
 import { useAutoExpire } from "@/hooks/useAutoExpire";
 import type { SettingsMessage } from "./useAccountSettings";
+import { parseValidation, storeUpdateSchema } from "@/lib/validation";
 
 function resolveLogoUrl(url: string | null): string | null {
   if (!url) return null;
@@ -58,19 +59,36 @@ export function useStoreSettings({ onSaveSuccess }: UseStoreSettingsOptions = {}
     setMessage(null);
 
     try {
-      const st = storeType.trim();
-      if (st.split(/\s+/).filter(Boolean).length > 4) {
-        setMessage({ type: "error", text: "Store type must be at most 4 words." });
-        setSaving(false);
+      const validation = parseValidation(storeUpdateSchema, {
+        storeName,
+        storeType,
+        contactEmail,
+        phone,
+        address,
+      });
+      if (!validation.success) {
+        setMessage({
+          type: "error",
+          text:
+            validation.errors.storeName ??
+            validation.errors.storeType ??
+            validation.errors.contactEmail ??
+            validation.errors.phone ??
+            validation.errors.address ??
+            "Please correct the highlighted fields.",
+        });
         return;
       }
 
       const formData = new FormData();
-      formData.append("admin_name", storeName || defaultBranding.admin_name);
-      formData.append("store_type", st);
-      formData.append("contact_email", contactEmail.trim());
-      formData.append("phone", phone.trim().slice(0, 50));
-      formData.append("address", address.trim());
+      formData.append(
+        "admin_name",
+        validation.data.storeName || defaultBranding.admin_name
+      );
+      formData.append("store_type", validation.data.storeType);
+      formData.append("contact_email", validation.data.contactEmail);
+      formData.append("phone", validation.data.phone.slice(0, 50));
+      formData.append("address", validation.data.address);
 
       if (logoFile) formData.append("logo", logoFile);
       if (clearLogo) formData.append("clear_logo", "true");

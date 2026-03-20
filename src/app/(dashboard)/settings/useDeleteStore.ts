@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import api from "@/lib/api";
+import { validateDeleteStoreConfirmation } from "@/lib/validation";
 
 export type DeleteStatus = {
   status: string;
@@ -25,7 +26,12 @@ export function useDeleteStore(ownerEmail: string, storeName: string) {
   const [successDisplayed, setSuccessDisplayed] = useState(false);
 
   const inputsMatch =
-    emailInput === ownerEmail && storeNameInput === storeName;
+    validateDeleteStoreConfirmation({
+      emailInput,
+      storeNameInput,
+      ownerEmail,
+      storeName,
+    }).success;
   const inProgress = jobId != null;
 
   const steps = [
@@ -84,7 +90,18 @@ export function useDeleteStore(ownerEmail: string, storeName: string) {
   }, [jobId, redirectRoute, router]);
 
   async function handleDeleteConfirmed() {
-    if (!inputsMatch || submitting || jobId) return;
+    const confirmation = validateDeleteStoreConfirmation({
+      emailInput,
+      storeNameInput,
+      ownerEmail,
+      storeName,
+    });
+    if (!confirmation.success || submitting || jobId) {
+      if (!confirmation.success) {
+        setRequestError(confirmation.error);
+      }
+      return;
+    }
 
     setRequestError(null);
     setSubmitting(true);

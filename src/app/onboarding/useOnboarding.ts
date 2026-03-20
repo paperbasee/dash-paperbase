@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import api from "@/lib/api";
 import { OPTIONAL_APP_IDS } from "@/config/apps";
+import { parseValidation, storeCreateSchema } from "@/lib/validation";
 
 const STORAGE_KEY = "core_enabled_apps";
 
@@ -102,25 +103,16 @@ export function useOnboarding() {
 
   function handleStep1Submit(e: React.FormEvent) {
     e.preventDefault();
-    if (!formData.name.trim()) {
-      setError("Store name is required.");
-      return;
-    }
-    const storeType = formData.store_type.trim();
-    if (storeType && storeType.split(/\s+/).length > 4) {
-      setError("Store type must be at most 4 words.");
-      return;
-    }
-    if (!formData.owner_first_name.trim()) {
-      setError("First name is required.");
-      return;
-    }
-    if (!formData.owner_last_name.trim()) {
-      setError("Last name is required.");
-      return;
-    }
-    if (!formData.owner_email.trim()) {
-      setError("Owner email is required.");
+    const validation = parseValidation(storeCreateSchema, formData);
+    if (!validation.success) {
+      setError(
+        validation.errors.name ??
+          validation.errors.store_type ??
+          validation.errors.owner_first_name ??
+          validation.errors.owner_last_name ??
+          validation.errors.owner_email ??
+          "Please correct the highlighted fields."
+      );
       return;
     }
     setError("");

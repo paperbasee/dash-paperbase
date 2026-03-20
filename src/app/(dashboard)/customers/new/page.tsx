@@ -5,9 +5,10 @@ import { useRouter } from "next/navigation";
 import { Undo2, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ExtraFieldsFormSection, validateExtraFields } from "@/components/ExtraFieldsFormSection";
+import { ExtraFieldsFormSection } from "@/components/ExtraFieldsFormSection";
 import { useExtraFieldsSchema } from "@/hooks/useExtraFieldsSchema";
 import type { ExtraFieldValues } from "@/types/extra-fields";
+import { validateRequiredExtraFields } from "@/lib/validation";
 
 const inputClass =
   "input w-full rounded-lg bg-muted/50 border-border focus:ring-2 focus:ring-ring focus:ring-offset-0";
@@ -52,7 +53,7 @@ export default function NewCustomerPage() {
     e.preventDefault();
 
     const schemaWithNames = extraFieldsSchema.filter((f) => f.name.trim());
-    const extraErrors = validateExtraFields(schemaWithNames, extraFields);
+    const extraErrors = validateRequiredExtraFields(schemaWithNames, extraFields);
     if (Object.keys(extraErrors).length > 0) {
       setExtraFieldsErrors(extraErrors);
       setError("Please fill in all required extra fields.");

@@ -23,12 +23,12 @@ export default function ProductAttributesPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  const [attrEditing, setAttrEditing] = useState<number | "new" | null>(null);
+  const [attrEditing, setAttrEditing] = useState<string | "new" | null>(null);
   const [attrForm, setAttrForm] = useState<AttrForm>(emptyAttr);
   const [attrSaving, setAttrSaving] = useState(false);
 
   const [valueEditing, setValueEditing] = useState<
-    { attributeId: number; id: number | "new" } | null
+    { attributeId: number | null; attributePublicId: string; id: string | "new" } | null
   >(null);
   const [valueForm, setValueForm] = useState<ValueForm>(emptyValue);
   const [valueSaving, setValueSaving] = useState(false);
@@ -66,7 +66,7 @@ export default function ProductAttributesPage() {
   }
 
   function openAttrEdit(a: ProductAttributeAdmin) {
-    setAttrEditing(a.id);
+    setAttrEditing(a.public_id);
     setAttrForm({
       name: a.name,
       slug: a.slug,
@@ -86,7 +86,7 @@ export default function ProductAttributesPage() {
       if (s) payload.slug = s;
       if (attrEditing === "new") {
         await api.post("admin/product-attributes/", payload);
-      } else if (typeof attrEditing === "number") {
+      } else if (typeof attrEditing === "string") {
         await api.patch(`admin/product-attributes/${attrEditing}/`, payload);
       }
       setAttrEditing(null);
@@ -99,29 +99,33 @@ export default function ProductAttributesPage() {
     }
   }
 
-  async function deleteAttr(id: number, name: string) {
+  async function deleteAttr(publicId: string, name: string) {
     if (!confirm(`Delete attribute "${name}" and all its values?`)) return;
     try {
-      await api.delete(`admin/product-attributes/${id}/`);
+      await api.delete(`admin/product-attributes/${publicId}/`);
       await fetchData();
     } catch {
       setError("Delete failed (attribute may be in use).");
     }
   }
 
-  function openValueNew(attributeId: number) {
-    setValueEditing({ attributeId, id: "new" });
+  function openValueNew(attributeId: number | null, attributePublicId: string) {
+    setValueEditing({ attributeId, attributePublicId, id: "new" });
     setValueForm(emptyValue);
   }
 
-  function openValueEdit(attributeId: number, v: ProductAttributeValueAdmin) {
-    setValueEditing({ attributeId, id: v.id });
+  function openValueEdit(attributeId: number | null, attributePublicId: string, v: ProductAttributeValueAdmin) {
+    setValueEditing({ attributeId, attributePublicId, id: v.public_id });
     setValueForm({ value: v.value, order: String(v.order) });
   }
 
   async function saveValue(e: FormEvent) {
     e.preventDefault();
     if (!valueEditing) return;
+    if (valueEditing.attributeId == null) {
+      setError("Could not determine attribute ID for saving this value.");
+      return;
+    }
     setValueSaving(true);
     try {
       const payload = {
@@ -144,10 +148,10 @@ export default function ProductAttributesPage() {
     }
   }
 
-  async function deleteValue(id: number, label: string) {
+  async function deleteValue(publicId: string, label: string) {
     if (!confirm(`Delete value "${label}"?`)) return;
     try {
-      await api.delete(`admin/product-attribute-values/${id}/`);
+      await api.delete(`admin/product-attribute-values/${publicId}/`);
       await fetchData();
     } catch {
       setError("Delete failed (value may be linked to variants).");
@@ -247,8 +251,11 @@ export default function ProductAttributesPage() {
             No attributes yet. Create one (e.g. &quot;Color&quot;, &quot;Size&quot;), then add values.
           </p>
         ) : (
-          attributes.map((a) => (
-            <Card key={a.id} className="shadow-sm">
+          attributes.map((a) => {
+            const editingValue =
+              valueEditing && valueEditing.attributePublicId === a.public_id ? valueEditing : null;
+            return (
+            <Card key={a.public_id} className="shadow-sm">
               <CardHeader className="flex flex-row flex-wrap items-start justify-between gap-2 pb-2">
                 <div>
                   <CardTitle className="text-base">{a.name}</CardTitle>
@@ -272,7 +279,7 @@ export default function ProductAttributesPage() {
                     variant="ghost"
                     size="sm"
                     disabled={attrEditing !== null}
-                    onClick={() => deleteAttr(a.id, a.name)}
+                    onClick={() => deleteAttr(a.public_id, a.name)}
                   >
                     <Trash2 className="mr-1 size-3.5 text-destructive" />
                     Delete
@@ -289,20 +296,20 @@ export default function ProductAttributesPage() {
                     variant="outline"
                     size="sm"
                     disabled={valueEditing !== null || attrEditing !== null}
-                    onClick={() => openValueNew(a.id)}
+                    onClick={() => openValueNew(a.id, a.public_id)}
                   >
                     <Plus className="mr-1 size-3.5" />
                     Add value
                   </Button>
                 </div>
 
-                {valueEditing?.attributeId === a.id ? (
+                {editingValue ? (
                   <form
                     onSubmit={saveValue}
                     className="rounded-lg border border-border bg-muted/20 p-3 space-y-2"
                   >
                     <p className="text-sm font-medium">
-                      {valueEditing.id === "new" ? "New value" : "Edit value"}
+                      {editingValue.id === "new" ? "New value" : "Edit value"}
                     </p>
                     <input
                       required
@@ -340,7 +347,7 @@ export default function ProductAttributesPage() {
                   <ul className="divide-y divide-border rounded-lg border border-border">
                     {a.values.map((v) => (
                       <li
-                        key={v.id}
+                        key={v.public_id}
                         className="flex items-center justify-between gap-2 px-3 py-2 text-sm"
                       >
                         <span>
@@ -354,7 +361,7 @@ export default function ProductAttributesPage() {
                             size="icon-xs"
                             aria-label="Edit value"
                             disabled={valueEditing !== null || attrEditing !== null}
-                            onClick={() => openValueEdit(a.id, v)}
+                            onClick={() => openValueEdit(a.id, a.public_id, v)}
                           >
                             <Pencil className="size-4" />
                           </Button>
@@ -364,7 +371,7 @@ export default function ProductAttributesPage() {
                             size="icon-xs"
                             aria-label="Delete value"
                             disabled={valueEditing !== null || attrEditing !== null}
-                            onClick={() => deleteValue(v.id, v.value)}
+                            onClick={() => deleteValue(v.public_id, v.value)}
                           >
                             <Trash2 className="size-4 text-destructive" />
                           </Button>
@@ -375,7 +382,8 @@ export default function ProductAttributesPage() {
                 )}
               </CardContent>
             </Card>
-          ))
+          );
+          })
         )}
       </div>
     </div>

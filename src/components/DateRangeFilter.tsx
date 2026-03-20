@@ -3,64 +3,23 @@
 import { useMemo } from "react";
 import {
   addDays,
-  format,
-  parseISO,
   startOfMonth,
-  subDays,
-  isValid,
+  format,
 } from "date-fns";
-import { AnalyticsBucket } from "@/hooks/useDashboardAnalytics";
 import { Button } from "./ui/button";
 import { Card, CardContent } from "./ui/card";
 import { Input } from "./ui/input";
-
-type PresetKey = "today" | "last7" | "last30" | "thisMonth" | "custom";
-
-export interface DateRangeValue {
-  startDate: string;
-  endDate: string;
-  bucket: AnalyticsBucket;
-  preset: PresetKey;
-}
+import type { AnalyticsBucket } from "@/hooks/useDashboardAnalytics";
+import {
+  dateRangeInputSchema,
+  normalizeDateRange,
+  type DateRangeValue,
+  type PresetKey,
+} from "@/lib/validation";
 
 interface DateRangeFilterProps {
   value: DateRangeValue;
   onChange: (value: DateRangeValue) => void;
-}
-
-function normalizeRange(raw: DateRangeValue, today: Date): DateRangeValue {
-  // Clamp end date to not be in the future (relative to real today).
-  const parsedEnd = parseISO(raw.endDate);
-  const parsedStart = parseISO(raw.startDate);
-
-  let end = isValid(parsedEnd)
-    ? parsedEnd
-    : isValid(parsedStart)
-      ? parsedStart
-      : today;
-
-  if (end > today) {
-    end = today;
-  }
-
-  // Start date must be within 90 days before the (clamped) end date.
-  const minStart = subDays(end, 90);
-
-  let start = isValid(parsedStart) ? parsedStart : end;
-
-  if (start < minStart) {
-    start = minStart;
-  }
-
-  if (start > end) {
-    start = end;
-  }
-
-  return {
-    ...raw,
-    startDate: format(start, "yyyy-MM-dd"),
-    endDate: format(end, "yyyy-MM-dd"),
-  };
 }
 
 export default function DateRangeFilter({
@@ -99,7 +58,7 @@ export default function DateRangeFilter({
       preset,
     };
 
-    onChange(normalizeRange(base, today));
+    onChange(normalizeDateRange(base, today));
   };
 
   const handleDateInput = (field: "startDate" | "endDate", val: string) => {
@@ -121,8 +80,11 @@ export default function DateRangeFilter({
       [field]: cleaned,
       preset: "custom",
     };
-
-    onChange(normalizeRange(next, today));
+    const parsed = dateRangeInputSchema.safeParse(next);
+    if (!parsed.success) {
+      return;
+    }
+    onChange(normalizeDateRange(parsed.data, today));
   };
 
   return (

@@ -18,12 +18,12 @@ export default function CategoriesPage() {
   const [childCategories, setChildCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const [parentEditing, setParentEditing] = useState<number | "new" | null>(null);
+  const [parentEditing, setParentEditing] = useState<string | "new" | null>(null);
   const [parentForm, setParentForm] = useState<ParentForm>(emptyParentForm);
   const [parentImageFile, setParentImageFile] = useState<File | null>(null);
   const [parentSaving, setParentSaving] = useState(false);
 
-  const [childEditing, setChildEditing] = useState<number | "new" | null>(null);
+  const [childEditing, setChildEditing] = useState<string | "new" | null>(null);
   const [childForm, setChildForm] = useState<ChildForm>(emptyChildForm);
   const [childImageFile, setChildImageFile] = useState<File | null>(null);
   const [childSaving, setChildSaving] = useState(false);
@@ -47,7 +47,7 @@ export default function CategoriesPage() {
   useEffect(() => { fetchData(); }, []);
 
   function openParentEdit(cat: ParentCategory) {
-    setParentEditing(cat.id);
+    setParentEditing(cat.public_id);
     setParentForm({ name: cat.name, slug: cat.slug, description: cat.description, order: String(cat.order), is_active: cat.is_active });
     setParentImageFile(null);
   }
@@ -84,10 +84,10 @@ export default function CategoriesPage() {
     }
   }
 
-  async function deleteParent(id: number) {
+  async function deleteParent(publicId: string) {
     if (!confirm("Delete this parent category? All child categories under it will also be deleted.")) return;
     try {
-      await api.delete(`admin/parent-categories/${id}/`);
+      await api.delete(`admin/parent-categories/${publicId}/`);
       fetchData();
     } catch (err) {
       console.error(err);
@@ -95,7 +95,7 @@ export default function CategoriesPage() {
   }
 
   function openChildEdit(cat: Category) {
-    setChildEditing(cat.id);
+    setChildEditing(cat.public_id);
     setChildForm({ name: cat.name, slug: cat.slug, description: cat.description, parent: String(cat.parent ?? ""), order: String(cat.order), is_active: cat.is_active });
     setChildImageFile(null);
   }
@@ -133,10 +133,10 @@ export default function CategoriesPage() {
     }
   }
 
-  async function deleteChild(id: number) {
+  async function deleteChild(publicId: string) {
     if (!confirm("Delete this child category?")) return;
     try {
-      await api.delete(`admin/categories/${id}/`);
+      await api.delete(`admin/categories/${publicId}/`);
       fetchData();
     } catch (err) {
       console.error(err);
@@ -264,7 +264,7 @@ export default function CategoriesPage() {
             </thead>
             <tbody className="divide-y divide-border/60">
               {parentCategories.map((cat) => (
-                <tr key={cat.id} className="hover:bg-muted/40">
+                <tr key={cat.public_id} className="hover:bg-muted/40">
                   <td className="px-4 py-3 font-medium text-foreground">{cat.name}</td>
                   <td className="px-4 py-3 text-muted-foreground">{cat.slug}</td>
                   <td className="px-4 py-3 text-foreground">{cat.child_count}</td>
@@ -281,7 +281,7 @@ export default function CategoriesPage() {
                         Edit
                       </button>
                       <button
-                        onClick={() => deleteParent(cat.id)}
+                        onClick={() => deleteParent(cat.public_id)}
                         className="text-sm text-destructive hover:underline"
                       >
                         Delete
@@ -325,7 +325,7 @@ export default function CategoriesPage() {
               <select required value={childForm.parent} onChange={(e) => setChildForm({ ...childForm, parent: e.target.value })} className="input">
                 <option value="">Parent category...</option>
                 {parentCategories.map((pc) => (
-                  <option key={pc.id} value={pc.id}>{pc.name}</option>
+                  <option key={pc.public_id} value={pc.id}>{pc.name}</option>
                 ))}
               </select>
               <input placeholder="Description" value={childForm.description} onChange={(e) => setChildForm({ ...childForm, description: e.target.value })} className="input" />
@@ -400,7 +400,7 @@ export default function CategoriesPage() {
             </thead>
             <tbody className="divide-y divide-border/60">
               {childCategories.map((cat) => (
-                <tr key={cat.id} className="hover:bg-muted/40">
+                <tr key={cat.public_id} className="hover:bg-muted/40">
                   <td className="px-4 py-3 font-medium text-foreground">{cat.name}</td>
                   <td className="px-4 py-3 text-muted-foreground">
                     {cat.parent_name}
@@ -419,7 +419,7 @@ export default function CategoriesPage() {
                         Edit
                       </button>
                       <button
-                        onClick={() => deleteChild(cat.id)}
+                        onClick={() => deleteChild(cat.public_id)}
                         className="text-sm text-destructive hover:underline"
                       >
                         Delete

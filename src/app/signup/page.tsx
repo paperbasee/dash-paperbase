@@ -7,6 +7,7 @@ import { Eye, EyeOff } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { parseValidation, registerSchema } from "@/lib/validation";
 
 export default function SignupPage() {
   const router = useRouter();
@@ -22,17 +23,27 @@ export default function SignupPage() {
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setError("");
-    if (password !== passwordConfirm) {
-      setError("Passwords do not match.");
-      return;
-    }
-    if (password.length < 8) {
-      setError("Password must be at least 8 characters.");
+    const validation = parseValidation(registerSchema, {
+      email,
+      password,
+      passwordConfirm,
+    });
+    if (!validation.success) {
+      setError(
+        validation.errors.passwordConfirm ??
+          validation.errors.password ??
+          validation.errors.email ??
+          "Please correct the highlighted fields."
+      );
       return;
     }
     setLoading(true);
     try {
-      const result = await register(email, password, passwordConfirm);
+      const result = await register(
+        validation.data.email,
+        validation.data.password,
+        validation.data.passwordConfirm
+      );
       router.push(result.active_store_id ? "/" : "/onboarding");
     } catch (err: unknown) {
       const res =

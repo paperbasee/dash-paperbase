@@ -129,18 +129,3 @@ export function ExtraFieldsFormSection({
     </div>
   );
 }
-
-export function validateExtraFields(
-  schema: { name: string; required: boolean }[],
-  values: ExtraFieldValues
-): Record<string, string> {
-  const errors: Record<string, string> = {};
-  for (const field of schema) {
-    if (!field.required) continue;
-    const value = values[field.name];
-    if (value === undefined || value === null || value === "") {
-      errors[field.name] = "This field is required.";
-    }
-  }
-  return errors;
-}
