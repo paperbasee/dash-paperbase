@@ -41,6 +41,8 @@ import {
 import { useAuth } from "@/context/AuthContext";
 import { useBranding, defaultBranding } from "@/context/BrandingContext";
 import { useStoreLimit } from "@/hooks/useStoreLimit";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
+import UserAvatar from "@/components/UserAvatar";
 import { useSearchModal } from "@/context/SearchModalContext";
 import { useNavCounts } from "@/hooks/useNavCounts";
 import { useEnabledApps } from "@/hooks/useEnabledApps";
@@ -106,6 +108,7 @@ function SidebarContent({
   const { setOpen: setSearchOpen } = useSearchModal();
   const { counts, formatCount } = useNavCounts();
   const { isEnabled } = useEnabledApps();
+  const { publicId: userPublicId, plan: userPlan } = useCurrentUser(isAuthenticated);
   const [catalogOpen, setCatalogOpen] = useState(false);
 
   const isActive = (href: string) => {
@@ -591,7 +594,7 @@ function SidebarContent({
         )}
       </nav>
 
-      {/* User menu (no avatar) */}
+      {/* User menu */}
       <div className="shrink-0 border-t border-border p-4">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -602,6 +605,7 @@ function SidebarContent({
               )}
               aria-label="User menu"
             >
+              <UserAvatar publicId={userPublicId} name={ownerName} plan={userPlan} />
               {!collapsed && (
                 <>
                   <div className="min-w-0 flex-1">
@@ -615,7 +619,6 @@ function SidebarContent({
                   <ChevronDown className="size-4 shrink-0 text-muted-foreground" />
                 </>
               )}
-              {collapsed && <ChevronDown className="size-4 shrink-0 text-muted-foreground" />}
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start" className="w-56" side="top">
