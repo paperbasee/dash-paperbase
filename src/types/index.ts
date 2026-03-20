@@ -55,6 +55,11 @@ export interface Order {
   delivery_area_label: string;
   district: string;
   tracking_number: string;
+  courier_provider?: string;
+  courier_consignment_id?: string;
+  courier_tracking_code?: string;
+  courier_status?: string;
+  sent_to_courier?: boolean;
   items?: OrderItem[];
   items_count?: number;
   created_at: string;
@@ -346,6 +351,17 @@ export interface ShippingMethod {
   updated_at: string;
 }
 
+export interface Courier {
+  public_id: string;
+  provider: "pathao" | "steadfast";
+  api_key_masked: string;
+  secret_key_masked: string;
+  access_token_masked: string;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface ShippingRate {
   public_id: string;
   shipping_method: string;
@@ -355,4 +371,24 @@ export interface ShippingRate {
   max_order_total: string | null;
   price: string;
   is_active: boolean;
+}
+
+export interface IntegrationEventSettings {
+  track_purchase: boolean;
+  track_add_to_cart: boolean;
+  track_initiate_checkout: boolean;
+  track_view_content: boolean;
+  track_page_view: boolean;
+}
+
+export interface MarketingIntegration {
+  public_id: string;
+  provider: "facebook" | "google_analytics" | "tiktok";
+  pixel_id: string;
+  access_token_masked: string;
+  test_event_code: string;
+  is_active: boolean;
+  event_settings: IntegrationEventSettings | null;
+  created_at: string;
+  updated_at: string;
 }

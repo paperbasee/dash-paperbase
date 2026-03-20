@@ -139,6 +139,10 @@ export default function OrderDetailPage() {
   const [variantsLoadingByProductId, setVariantsLoadingByProductId] = useState<Record<string, boolean>>({});
   const [shippingZones, setShippingZones] = useState<ShippingZone[]>([]);
   const [shippingMethods, setShippingMethods] = useState<ShippingMethod[]>([]);
+  const [sendingToCourier, setSendingToCourier] = useState(false);
+  const [courierError, setCourierError] = useState("");
+  const [tracking, setTracking] = useState(false);
+  const [trackingDetails, setTrackingDetails] = useState<Record<string, unknown> | null>(null);
   const rightColRef = useRef<HTMLDivElement>(null);
   const [rightColHeight, setRightColHeight] = useState<number | null>(null);
 
@@ -277,6 +281,48 @@ export default function OrderDetailPage() {
       router.push("/orders");
     } catch (err) {
       console.error(err);
+    }
+  }
+
+  async function handleSendToCourier() {
+    if (!order || order.sent_to_courier) return;
+    setCourierError("");
+    setSendingToCourier(true);
+    try {
+      const { data } = await api.post<Order>(
+        `admin/orders/${id}/send-to-courier/`
+      );
+      setOrder(data);
+    } catch (err: unknown) {
+      const msg =
+        (err as { response?: { data?: { detail?: string } } })?.response?.data
+          ?.detail ?? "Failed to send order to courier.";
+      setCourierError(msg);
+    } finally {
+      setSendingToCourier(false);
+    }
+  }
+
+  async function handleTrack() {
+    if (!order || !order.sent_to_courier) return;
+    setTracking(true);
+    setTrackingDetails(null);
+    try {
+      const { data } = await api.get<{
+        courier_provider: string;
+        courier_consignment_id: string;
+        courier_tracking_code: string;
+        courier_status: string;
+        details: Record<string, unknown>;
+      }>(`admin/orders/${id}/track/`);
+      setTrackingDetails(data.details);
+      setOrder((prev) =>
+        prev ? { ...prev, courier_status: data.courier_status } : prev
+      );
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setTracking(false);
     }
   }
 
@@ -903,6 +949,96 @@ export default function OrderDetailPage() {
         </Card>
         </div>
       </div>
+
+      {/* Courier */}
+      <Card className="overflow-hidden rounded-xl border border-dashed border-card-border bg-card shadow-sm">
+        <CardHeader className="border-b border-border/50 px-4 pb-4 sm:px-6">
+          <CardTitle>Courier</CardTitle>
+          <CardDescription>Send order to courier and track delivery</CardDescription>
+        </CardHeader>
+        <CardContent className="px-4 pt-6 sm:px-6">
+          {courierError && (
+            <div className="mb-4 rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+              {courierError}
+            </div>
+          )}
+
+          {order.sent_to_courier ? (
+            <div className="space-y-4">
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                <div className="rounded-lg border border-border/60 bg-muted/20 px-3 py-2">
+                  <dt className="text-xs text-muted-foreground">Provider</dt>
+                  <dd className="font-medium text-foreground capitalize">
+                    {order.courier_provider || "---"}
+                  </dd>
+                </div>
+                <div className="rounded-lg border border-border/60 bg-muted/20 px-3 py-2">
+                  <dt className="text-xs text-muted-foreground">
+                    Consignment ID
+                  </dt>
+                  <dd className="font-medium text-foreground font-mono text-xs break-all">
+                    {order.courier_consignment_id || "---"}
+                  </dd>
+                </div>
+                <div className="rounded-lg border border-border/60 bg-muted/20 px-3 py-2">
+                  <dt className="text-xs text-muted-foreground">
+                    Tracking Code
+                  </dt>
+                  <dd className="font-medium text-foreground font-mono text-xs break-all">
+                    {order.courier_tracking_code || "---"}
+                  </dd>
+                </div>
+                <div className="rounded-lg border border-border/60 bg-muted/20 px-3 py-2">
+                  <dt className="text-xs text-muted-foreground">Status</dt>
+                  <dd>
+                    <span className="inline-flex items-center rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
+                      {order.courier_status || "pending"}
+                    </span>
+                  </dd>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={handleTrack}
+                  disabled={tracking}
+                >
+                  <Truck className="mr-1.5 size-4" />
+                  {tracking ? "Tracking..." : "Refresh Tracking"}
+                </Button>
+              </div>
+              {trackingDetails && (
+                <div className="mt-3 rounded-lg border border-border bg-muted/30 p-3">
+                  <p className="mb-1 text-xs font-medium text-muted-foreground">
+                    Tracking Details
+                  </p>
+                  <pre className="text-xs text-foreground overflow-auto whitespace-pre-wrap">
+                    {JSON.stringify(trackingDetails, null, 2)}
+                  </pre>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="flex flex-col items-center gap-3 py-4 sm:flex-row sm:items-start">
+              <div className="flex-1">
+                <p className="text-sm text-muted-foreground">
+                  This order has not been sent to a courier yet. Click the button
+                  to dispatch it through your connected courier provider.
+                </p>
+              </div>
+              <Button
+                onClick={handleSendToCourier}
+                disabled={sendingToCourier}
+                className="shrink-0"
+              >
+                <Truck className="mr-1.5 size-4" />
+                {sendingToCourier ? "Sending..." : "Send to Courier"}
+              </Button>
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Timeline */}
       <Card className="overflow-hidden rounded-xl border border-dashed border-card-border bg-card shadow-sm">

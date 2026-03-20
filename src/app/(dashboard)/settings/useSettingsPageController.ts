@@ -10,7 +10,6 @@ import { useDeleteStore } from "./useDeleteStore";
 import type { DynamicFieldsMessage } from "@/components/DynamicFieldsPanel";
 
 const NOTIFICATION_PREFS_KEY = "gadzillabd_notification_prefs";
-const FACEBOOK_CAPI_KEY = "gadzillabd_facebook_capi";
 
 type NotificationPrefs = {
   orders: boolean;
@@ -20,8 +19,6 @@ type NotificationPrefs = {
   emailMeOnOrderReceived: boolean;
   emailCustomerOnOrderConfirmed: boolean;
 };
-
-type SettingsMessage = { type: "success" | "error"; text: string } | null;
 
 const defaultPrefs: NotificationPrefs = {
   orders: true,
@@ -54,49 +51,6 @@ export default function useSettingsPageController() {
   const [dynamicFieldsMessage, setDynamicFieldsMessage] =
     useState<DynamicFieldsMessage>(null);
   useAutoExpire(dynamicFieldsMessage, setDynamicFieldsMessage);
-
-  // ── Integrations (Facebook CAPI) ───────────────────────────────────────────
-  const [facebookPixelId, setFacebookPixelId] = useState("");
-  const [facebookAccessToken, setFacebookAccessToken] = useState("");
-  const [integrationsSaving, setIntegrationsSaving] = useState(false);
-  const [integrationsMessage, setIntegrationsMessage] =
-    useState<SettingsMessage>(null);
-  useAutoExpire(integrationsMessage, setIntegrationsMessage);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    try {
-      const raw = window.localStorage.getItem(FACEBOOK_CAPI_KEY);
-      if (!raw) return;
-      const parsed = JSON.parse(raw) as { pixelId?: string; accessToken?: string };
-      if (parsed.pixelId) setFacebookPixelId(parsed.pixelId);
-      if (parsed.accessToken) setFacebookAccessToken(parsed.accessToken);
-    } catch {
-      // ignore and keep defaults
-    }
-  }, []);
-
-  function handleFacebookCapiSave() {
-    setIntegrationsSaving(true);
-    setIntegrationsMessage(null);
-    try {
-      const config = {
-        pixelId: facebookPixelId.trim(),
-        accessToken: facebookAccessToken.trim(),
-      };
-      if (typeof window !== "undefined") {
-        window.localStorage.setItem(FACEBOOK_CAPI_KEY, JSON.stringify(config));
-      }
-      setIntegrationsMessage({
-        type: "success",
-        text: "Facebook Conversion API settings saved.",
-      });
-    } catch {
-      setIntegrationsMessage({ type: "error", text: "Failed to save." });
-    } finally {
-      setIntegrationsSaving(false);
-    }
-  }
 
   // ── Notification preferences ───────────────────────────────────────────────
   const [notificationPrefs, setNotificationPrefs] =
@@ -162,15 +116,6 @@ export default function useSettingsPageController() {
     // Dynamic fields
     dynamicFieldsMessage,
     setDynamicFieldsMessage,
-
-    // Integrations
-    facebookPixelId,
-    setFacebookPixelId,
-    facebookAccessToken,
-    setFacebookAccessToken,
-    integrationsSaving,
-    integrationsMessage,
-    handleFacebookCapiSave,
 
     // Notifications
     notificationPrefs,

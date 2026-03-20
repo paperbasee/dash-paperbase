@@ -60,17 +60,10 @@ export default function SettingsPage() {
     storeMessage,
     dynamicFieldsMessage,
     setDynamicFieldsMessage,
-    integrationsSaving,
-    integrationsMessage,
-    facebookPixelId,
-    setFacebookPixelId,
-    facebookAccessToken,
-    setFacebookAccessToken,
     notificationPrefs,
     updateNotificationPref,
     handleAccountSubmit,
     handleStoreSubmit,
-    handleFacebookCapiSave,
     deleteEmailInput,
     setDeleteEmailInput,
     deleteStoreNameInput,
@@ -203,13 +196,6 @@ export default function SettingsPage() {
           {/* Integrations section */}
           <IntegrationsSection
             hidden={activeSection !== "integrations"}
-            facebookPixelId={facebookPixelId}
-            facebookAccessToken={facebookAccessToken}
-            onFacebookPixelIdChange={setFacebookPixelId}
-            onFacebookAccessTokenChange={setFacebookAccessToken}
-            integrationsSaving={integrationsSaving}
-            integrationsMessage={integrationsMessage}
-            onSave={handleFacebookCapiSave}
           />
 
           {/* Networking section */}

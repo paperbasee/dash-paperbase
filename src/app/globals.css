@@ -173,7 +173,7 @@
   --radius-md: 0;
   --radius-lg: 0;
   --radius-xl: 0;
-  --radius-full: 0;
+  --radius-full: 9999px;
 }
 
 body {
