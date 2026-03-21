@@ -14,6 +14,8 @@ import {
   ComboboxItem,
   ComboboxList,
 } from "@/components/ui/combobox";
+import { ClickableText } from "@/components/ui/clickable-text";
+import { Input } from "@/components/ui/input";
 
 export default function ProductsPage() {
   const router = useRouter();
@@ -157,7 +159,7 @@ export default function ProductsPage() {
                       type="checkbox"
                       checked={allSelected}
                       onChange={toggleSelectAll}
-                      className="h-4 w-4 rounded border-input text-primary focus:ring-primary"
+                      className="form-checkbox"
                       aria-label="Select all products on this page"
                     />
                   </th>
@@ -178,26 +180,24 @@ export default function ProductsPage() {
                         checked={selectedIds.has(product.public_id)}
                         onChange={() => toggleSelect(product.public_id)}
                         onClick={(e) => e.stopPropagation()}
-                        className="h-4 w-4 rounded border-input text-primary focus:ring-primary"
+                        className="form-checkbox"
                         aria-label={`Select ${product.name}`}
                       />
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap">
-                      <Link
+                      <ClickableText
                         href={`/products/${product.public_id}`}
-                        className="flex items-center gap-3"
+                        className="flex max-w-xs items-center gap-3"
                       >
                         {product.image_url && (
                           <img
                             src={product.image_url}
                             alt={product.name}
-                            className="h-10 w-10 rounded-lg object-cover flex-shrink-0"
+                            className="h-10 w-10 flex-shrink-0 rounded-lg object-cover"
                           />
                         )}
-                        <span className="font-medium text-primary hover:underline truncate max-w-xs">
-                          {product.name}
-                        </span>
-                      </Link>
+                        <span className="truncate">{product.name}</span>
+                      </ClickableText>
                     </td>
                     <td className="px-4 py-3 text-foreground whitespace-nowrap">
                       {product.brand}
@@ -220,17 +220,17 @@ export default function ProductsPage() {
                           >
                             {product.total_stock ?? product.stock}
                           </span>
-                          <Link
+                          <ClickableText
                             href={`/variants?product=${encodeURIComponent(product.public_id)}`}
-                            className="text-xs text-primary underline-offset-2 hover:underline"
+                            className="text-xs underline-offset-2"
                             title="Stock lives on each variant (SKUs)."
                           >
                             {product.variant_count} variants — manage
-                          </Link>
+                          </ClickableText>
                         </div>
                       ) : (
                         <div className="flex items-center gap-1">
-                          <input
+                          <Input
                             type="number"
                             min={0}
                             value={product.stock}
@@ -246,12 +246,13 @@ export default function ProductsPage() {
                             }}
                             onBlur={() => updateProduct(product, { stock: product.stock })}
                             onKeyDown={(e) => e.key === "Enter" && (e.target as HTMLInputElement).blur()}
-                            className={`w-16 rounded border px-2 py-1 text-sm ${
+                            className={`w-16 text-sm ${
                               product.stock === 0
                                 ? "border-destructive text-destructive"
-                                : "border-input text-foreground"
-                            } focus:border-ring focus:outline-none focus:ring-1 focus:ring-ring`}
+                                : ""
+                            }`}
                             disabled={updatingId === product.public_id}
+                            size="sm"
                           />
                           {updatingId === product.public_id && (
                             <span className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />

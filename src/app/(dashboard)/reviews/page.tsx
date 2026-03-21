@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import { Undo2, Star } from "lucide-react";
+import { ClickableText } from "@/components/ui/clickable-text";
 import api from "@/lib/api";
 import type { Review, PaginatedResponse } from "@/types";
 
@@ -112,12 +112,9 @@ export default function ReviewsPage() {
                 {reviews.map((r) => (
                   <tr key={r.public_id} className="hover:bg-muted/40">
                     <td className="px-4 py-3 font-medium">
-                      <Link
-                        href={`/products/${r.product}`}
-                        className="text-primary hover:underline"
-                      >
+                      <ClickableText href={`/products/${r.product}`}>
                         {r.product_name}
-                      </Link>
+                      </ClickableText>
                     </td>
                     <td className="px-4 py-3 text-muted-foreground">
                       {r.user_email}

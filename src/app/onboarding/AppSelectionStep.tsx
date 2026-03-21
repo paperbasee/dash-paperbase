@@ -51,7 +51,7 @@ export function AppSelectionStep({
                 type="checkbox"
                 checked={checked}
                 onChange={() => onToggleApp(id)}
-                className="mt-1 h-4 w-4 rounded-none border-border"
+                className="form-checkbox mt-1 rounded-none"
               />
               <div className="min-w-0 flex-1">
                 <span className="block text-sm font-medium text-foreground">

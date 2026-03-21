@@ -2,6 +2,7 @@
 
 import { Cloud, Copy, Pencil, Trash2, Zap, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { ClickableText } from "@/components/ui/clickable-text";
 
 export default function NetworkingSection({ hidden }: { hidden: boolean }) {
   return (
@@ -28,13 +29,13 @@ export default function NetworkingSection({ hidden }: { hidden: boolean }) {
               <p className="mt-1 flex flex-wrap items-center gap-x-1 gap-y-0.5 text-xs text-muted-foreground">
                 <span>→ Port 8080</span>
                 <span>·</span>
-                <button type="button" className="text-primary hover:underline">
+                <ClickableText onClick={() => {}} className="text-xs">
                   Cloudflare proxy detected
-                </button>
+                </ClickableText>
                 <span>·</span>
-                <button type="button" className="text-primary hover:underline">
+                <ClickableText onClick={() => {}} className="text-xs">
                   View Documentation
-                </button>
+                </ClickableText>
               </p>
             </div>
           </div>

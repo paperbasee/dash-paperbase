@@ -20,6 +20,7 @@ interface BrandingState {
 }
 
 const defaultBranding: Branding = {
+  public_id: "",
   logo_url: null,
   admin_name: "Core",
   owner_name: "",

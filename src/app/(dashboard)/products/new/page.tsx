@@ -7,6 +7,9 @@ import { Undo2, FileText, Check, Plus, X } from "lucide-react";
 import api from "@/lib/api";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Select } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 import { ExtraFieldsFormSection } from "@/components/ExtraFieldsFormSection";
 import { useExtraFieldsSchema } from "@/hooks/useExtraFieldsSchema";
 import type { ExtraFieldValues } from "@/types/extra-fields";
@@ -205,8 +208,7 @@ export default function NewProductPage() {
     handleSubmit(e, asDraft);
   }
 
-  const inputClass =
-    "input w-full rounded-lg bg-muted/50 border-border focus:ring-2 focus:ring-ring focus:ring-offset-0";
+  const fieldControlClass = "w-full rounded-lg bg-muted/50";
 
   return (
     <div className="space-y-6">
@@ -281,22 +283,22 @@ export default function NewProductPage() {
             </CardHeader>
             <CardContent className="space-y-4">
               <Field label="Product name" required>
-                <input
+                <Input
                   type="text"
                   required
                   value={form.name}
                   onChange={(e) => setForm({ ...form, name: e.target.value })}
                   placeholder="e.g. Wireless Earbuds Pro"
-                  className={inputClass}
+                  className={fieldControlClass}
                 />
               </Field>
               <Field label="Slug">
                 <div className="flex items-center gap-2">
-                  <input
+                  <Input
                     type="text"
                     readOnly
                     value={derivedSlug || "—"}
-                    className={`${inputClass} bg-muted/80 font-mono text-sm`}
+                    className={`${fieldControlClass} bg-muted/80 font-mono text-sm`}
                     aria-describedby={slugTaken ? "slug-error" : undefined}
                   />
                   {slugChecking && (
@@ -310,24 +312,24 @@ export default function NewProductPage() {
                 )}
               </Field>
               <Field label="Description">
-                <textarea
+                <Textarea
                   rows={4}
                   value={form.description}
                   onChange={(e) =>
                     setForm({ ...form, description: e.target.value })
                   }
                   placeholder="Describe your product..."
-                  className={inputClass}
+                  className={fieldControlClass}
                 />
               </Field>
               <Field label="Brand" required>
-                <input
+                <Input
                   type="text"
                   required
                   value={form.brand}
                   onChange={(e) => setForm({ ...form, brand: e.target.value })}
                   placeholder="Brand name"
-                  className={inputClass}
+                  className={fieldControlClass}
                 />
               </Field>
               <div>
@@ -358,7 +360,7 @@ export default function NewProductPage() {
                   onChange={(e) =>
                     setForm({ ...form, is_featured: e.target.checked })
                   }
-                  className="size-4 rounded border-border"
+                  className="form-checkbox"
                 />
                 <span className="text-sm font-medium text-foreground">
                   Featured product
@@ -377,7 +379,7 @@ export default function NewProductPage() {
             <CardContent>
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <Field label="Base price" required>
-                  <input
+                  <Input
                     type="number"
                     step="0.01"
                     required
@@ -386,11 +388,11 @@ export default function NewProductPage() {
                       setForm({ ...form, price: e.target.value })
                     }
                     placeholder="0.00"
-                    className={`font-numbers ${inputClass}`}
+                    className={`font-numbers ${fieldControlClass}`}
                   />
                 </Field>
                 <Field label="Compare at (original price)">
-                  <input
+                  <Input
                     type="number"
                     step="0.01"
                     value={form.original_price}
@@ -398,18 +400,18 @@ export default function NewProductPage() {
                       setForm({ ...form, original_price: e.target.value })
                     }
                     placeholder="Optional"
-                    className={`font-numbers ${inputClass}`}
+                    className={`font-numbers ${fieldControlClass}`}
                   />
                 </Field>
                 <Field label="Stock">
-                  <input
+                  <Input
                     type="number"
                     min={0}
                     value={form.stock}
                     onChange={(e) =>
                       setForm({ ...form, stock: e.target.value })
                     }
-                    className={`font-numbers ${inputClass}`}
+                    className={`font-numbers ${fieldControlClass}`}
                   />
                 </Field>
               </div>
@@ -601,7 +603,7 @@ export default function NewProductPage() {
             </CardHeader>
             <CardContent className="space-y-4">
               <Field label="Parent category" required>
-                <select
+                <Select
                   required
                   value={form.category}
                   onChange={(e) =>
@@ -611,7 +613,7 @@ export default function NewProductPage() {
                       sub_category: "",
                     })
                   }
-                  className={inputClass}
+                  className={fieldControlClass}
                 >
                   <option value="">Select parent...</option>
                   {parentCategories.map((c) => (
@@ -619,15 +621,15 @@ export default function NewProductPage() {
                       {c.name}
                     </option>
                   ))}
-                </select>
+                </Select>
               </Field>
               <Field label="Child category">
-                <select
+                <Select
                   value={form.sub_category}
                   onChange={(e) =>
                     setForm({ ...form, sub_category: e.target.value })
                   }
-                  className={inputClass}
+                  className={fieldControlClass}
                   disabled={!form.category}
                 >
                   <option value="">Select child (optional)...</option>
@@ -636,7 +638,7 @@ export default function NewProductPage() {
                       {c.name}
                     </option>
                   ))}
-                </select>
+                </Select>
               </Field>
               <Button variant="outline" className="w-full gap-2" asChild>
                 <Link href="/categories">

@@ -2,10 +2,11 @@
 
 import { useExtraFieldsSchema } from "@/hooks/useExtraFieldsSchema";
 import type { ExtraFieldEntityType, ExtraFieldValues } from "@/types/extra-fields";
+import { Input } from "@/components/ui/input";
+import { Select } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 
-const inputClass =
-  "input w-full rounded-lg bg-muted/50 border-border focus:ring-2 focus:ring-ring focus:ring-offset-0";
+const fieldControlClass = "w-full rounded-lg bg-muted/50";
 
 function Field({
   label,
@@ -69,16 +70,16 @@ export function ExtraFieldsFormSection({
             error={error}
           >
             {field.fieldType === "text" && (
-              <input
+              <Input
                 type="text"
                 value={typeof value === "string" ? value : ""}
                 onChange={(e) => handleChange(field.name, e.target.value)}
                 placeholder={field.defaultValue ?? ""}
-                className={cn(inputClass, error && "border-destructive")}
+                className={cn(fieldControlClass, error && "border-destructive")}
               />
             )}
             {field.fieldType === "number" && (
-              <input
+              <Input
                 type="number"
                 step="any"
                 value={
@@ -91,7 +92,10 @@ export function ExtraFieldsFormSection({
                   handleChange(field.name, v === "" ? "" : Number(v));
                 }}
                 placeholder={field.defaultValue ?? ""}
-                className={cn(inputClass, error && "border-destructive font-numbers")}
+                className={cn(
+                  fieldControlClass,
+                  error && "border-destructive font-numbers"
+                )}
               />
             )}
             {field.fieldType === "boolean" && (
@@ -100,7 +104,7 @@ export function ExtraFieldsFormSection({
                   type="checkbox"
                   checked={value === true}
                   onChange={(e) => handleChange(field.name, e.target.checked)}
-                  className="size-4 rounded border-border"
+                  className="form-checkbox"
                 />
                 <span className="text-sm text-muted-foreground">
                   {field.defaultValue || "Yes / No"}
@@ -108,10 +112,10 @@ export function ExtraFieldsFormSection({
               </label>
             )}
             {field.fieldType === "dropdown" && (
-              <select
+              <Select
                 value={typeof value === "string" ? value : ""}
                 onChange={(e) => handleChange(field.name, e.target.value)}
-                className={cn(inputClass, error && "border-destructive")}
+                className={cn(fieldControlClass, error && "border-destructive")}
               >
                 <option value="">
                   {field.required ? "Select..." : "(Optional)"}
@@ -121,7 +125,7 @@ export function ExtraFieldsFormSection({
                     {opt}
                   </option>
                 ))}
-              </select>
+              </Select>
             )}
           </Field>
         );

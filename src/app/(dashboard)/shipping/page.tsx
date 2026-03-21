@@ -6,12 +6,18 @@ import { Plus, Undo2 } from "lucide-react";
 
 import api from "@/lib/api";
 import axios from "axios";
+import { ClickableText } from "@/components/ui/clickable-text";
+import { Input } from "@/components/ui/input";
+import { Select } from "@/components/ui/select";
 import type {
   ShippingMethod,
   ShippingRate,
   ShippingZone,
   PaginatedResponse,
 } from "@/types";
+
+const multiSelectClass =
+  "w-full min-h-[6rem] rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground shadow-xs outline-none transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50";
 
 type ZoneForm = {
   name: string;
@@ -344,30 +350,31 @@ export default function ShippingPage() {
 
           {editingZone && (
             <form onSubmit={saveZone} className="mb-4 space-y-3">
-              <input
+              <Input
                 value={zoneForm.name}
                 onChange={(e) => setZoneForm((f) => ({ ...f, name: e.target.value }))}
-                className="w-full rounded border border-border bg-background px-3 py-2 text-sm"
+                className="text-sm"
                 placeholder="Zone name (e.g. Dhaka / Inside)"
                 required
               />
-              <input
+              <Input
                 value={zoneForm.delivery_areas}
                 onChange={(e) =>
                   setZoneForm((f) => ({ ...f, delivery_areas: e.target.value }))
                 }
-                className="w-full rounded border border-border bg-background px-3 py-2 text-sm"
+                className="text-sm"
                 placeholder="delivery_areas (e.g. inside,outside) optional"
               />
-              <input
+              <Input
                 value={zoneForm.districts}
                 onChange={(e) => setZoneForm((f) => ({ ...f, districts: e.target.value }))}
-                className="w-full rounded border border-border bg-background px-3 py-2 text-sm"
+                className="text-sm"
                 placeholder="districts (e.g. Dhaka) optional"
               />
               <label className="flex items-center gap-2 text-sm">
                 <input
                   type="checkbox"
+                  className="form-checkbox"
                   checked={zoneForm.is_active}
                   onChange={(e) =>
                     setZoneForm((f) => ({ ...f, is_active: e.target.checked }))
@@ -414,20 +421,19 @@ export default function ShippingPage() {
                     </div>
                   </div>
                   <div className="shrink-0 text-right text-sm">
-                    <button
-                      type="button"
+                    <ClickableText
                       onClick={() => openEditZone(z)}
-                      className="mr-2 text-primary hover:underline"
+                      className="mr-2 text-sm"
                     >
                       Edit
-                    </button>
-                    <button
-                      type="button"
+                    </ClickableText>
+                    <ClickableText
+                      variant="destructive"
                       onClick={() => del("zones", z.public_id)}
-                      className="text-destructive hover:underline"
+                      className="text-sm"
                     >
                       Delete
-                    </button>
+                    </ClickableText>
                   </div>
                 </div>
               </div>
@@ -455,15 +461,15 @@ export default function ShippingPage() {
 
           {editingMethod && (
             <form onSubmit={saveMethod} className="mb-4 space-y-3">
-              <input
+              <Input
                 value={methodForm.name}
                 onChange={(e) => setMethodForm((f) => ({ ...f, name: e.target.value }))}
-                className="w-full rounded border border-border bg-background px-3 py-2 text-sm"
+                className="text-sm"
                 placeholder="Method name (e.g. Standard)"
                 required
               />
               <div className="grid grid-cols-2 gap-3">
-                <select
+                <Select
                   value={methodForm.method_type}
                   onChange={(e) =>
                     setMethodForm((f) => ({
@@ -471,17 +477,17 @@ export default function ShippingPage() {
                       method_type: e.target.value as ShippingMethod["method_type"],
                     }))
                   }
-                  className="w-full rounded border border-border bg-background px-3 py-2 text-sm"
+                  className="text-sm"
                 >
                   <option value="standard">Standard</option>
                   <option value="express">Express</option>
                   <option value="pickup">Pickup</option>
                   <option value="other">Other</option>
-                </select>
-                <input
+                </Select>
+                <Input
                   value={methodForm.order}
                   onChange={(e) => setMethodForm((f) => ({ ...f, order: e.target.value }))}
-                  className="w-full rounded border border-border bg-background px-3 py-2 text-sm"
+                  className="text-sm"
                   placeholder="Sort order"
                 />
               </div>
@@ -494,7 +500,7 @@ export default function ShippingPage() {
                     const selected = Array.from(e.target.selectedOptions).map((o) => o.value);
                     setMethodForm((f) => ({ ...f, zone_public_ids: selected }));
                   }}
-                  className="w-full rounded border border-border bg-background px-3 py-2 text-sm"
+                  className={multiSelectClass}
                 >
                   {zones.map((z) => (
                     <option key={z.public_id} value={z.public_id}>
@@ -509,6 +515,7 @@ export default function ShippingPage() {
               <label className="flex items-center gap-2 text-sm">
                 <input
                   type="checkbox"
+                  className="form-checkbox"
                   checked={methodForm.is_active}
                   onChange={(e) =>
                     setMethodForm((f) => ({ ...f, is_active: e.target.checked }))
@@ -557,20 +564,19 @@ export default function ShippingPage() {
                     </div>
                   </div>
                   <div className="shrink-0 text-right text-sm">
-                    <button
-                      type="button"
+                    <ClickableText
                       onClick={() => openEditMethod(m)}
-                      className="mr-2 text-primary hover:underline"
+                      className="mr-2 text-sm"
                     >
                       Edit
-                    </button>
-                    <button
-                      type="button"
+                    </ClickableText>
+                    <ClickableText
+                      variant="destructive"
                       onClick={() => del("methods", m.public_id)}
-                      className="text-destructive hover:underline"
+                      className="text-sm"
                     >
                       Delete
-                    </button>
+                    </ClickableText>
                   </div>
                 </div>
               </div>
@@ -598,12 +604,12 @@ export default function ShippingPage() {
 
           {editingRate && (
             <form onSubmit={saveRate} className="mb-4 space-y-3">
-              <select
+              <Select
                 value={rateForm.shipping_method}
                 onChange={(e) =>
                   setRateForm((f) => ({ ...f, shipping_method: e.target.value }))
                 }
-                className="w-full rounded border border-border bg-background px-3 py-2 text-sm"
+                className="text-sm"
                 required
               >
                 <option value="" disabled>
@@ -614,13 +620,13 @@ export default function ShippingPage() {
                     {m.name}
                   </option>
                 ))}
-              </select>
-              <select
+              </Select>
+              <Select
                 value={rateForm.shipping_zone}
                 onChange={(e) =>
                   setRateForm((f) => ({ ...f, shipping_zone: e.target.value }))
                 }
-                className="w-full rounded border border-border bg-background px-3 py-2 text-sm"
+                className="text-sm"
                 required
               >
                 <option value="" disabled>
@@ -631,9 +637,9 @@ export default function ShippingPage() {
                       {z.name}
                     </option>
                   ))}
-              </select>
+              </Select>
               <div className="grid grid-cols-2 gap-3">
-                <select
+                <Select
                   value={rateForm.rate_type}
                   onChange={(e) =>
                     setRateForm((f) => ({
@@ -641,41 +647,42 @@ export default function ShippingPage() {
                       rate_type: e.target.value as ShippingRate["rate_type"],
                     }))
                   }
-                  className="w-full rounded border border-border bg-background px-3 py-2 text-sm"
+                  className="text-sm"
                 >
                   <option value="flat">Flat</option>
                   <option value="order_total">By order total</option>
                   <option value="weight">By weight</option>
-                </select>
-                <input
+                </Select>
+                <Input
                   value={rateForm.price}
                   onChange={(e) => setRateForm((f) => ({ ...f, price: e.target.value }))}
-                  className="w-full rounded border border-border bg-background px-3 py-2 text-sm"
+                  className="text-sm"
                   placeholder="Price (e.g. 60.00)"
                   required
                 />
               </div>
               <div className="grid grid-cols-2 gap-3">
-                <input
+                <Input
                   value={rateForm.min_order_total}
                   onChange={(e) =>
                     setRateForm((f) => ({ ...f, min_order_total: e.target.value }))
                   }
-                  className="w-full rounded border border-border bg-background px-3 py-2 text-sm"
+                  className="text-sm"
                   placeholder="Min order total (optional)"
                 />
-                <input
+                <Input
                   value={rateForm.max_order_total}
                   onChange={(e) =>
                     setRateForm((f) => ({ ...f, max_order_total: e.target.value }))
                   }
-                  className="w-full rounded border border-border bg-background px-3 py-2 text-sm"
+                  className="text-sm"
                   placeholder="Max order total (optional)"
                 />
               </div>
               <label className="flex items-center gap-2 text-sm">
                 <input
                   type="checkbox"
+                  className="form-checkbox"
                   checked={rateForm.is_active}
                   onChange={(e) =>
                     setRateForm((f) => ({ ...f, is_active: e.target.checked }))
@@ -726,20 +733,19 @@ export default function ShippingPage() {
                     </div>
                   </div>
                   <div className="shrink-0 text-right text-sm">
-                    <button
-                      type="button"
+                    <ClickableText
                       onClick={() => openEditRate(r)}
-                      className="mr-2 text-primary hover:underline"
+                      className="mr-2 text-sm"
                     >
                       Edit
-                    </button>
-                    <button
-                      type="button"
+                    </ClickableText>
+                    <ClickableText
+                      variant="destructive"
                       onClick={() => del("rates", r.public_id)}
-                      className="text-destructive hover:underline"
+                      className="text-sm"
                     >
                       Delete
-                    </button>
+                    </ClickableText>
                   </div>
                 </div>
               </div>

@@ -6,6 +6,8 @@ import { Undo2, Plus, Pencil, Trash2 } from "lucide-react";
 import api from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ClickableText } from "@/components/ui/clickable-text";
+import { Input } from "@/components/ui/input";
 import type {
   ProductAttributeAdmin,
   ProductAttributeValueAdmin,
@@ -165,9 +167,9 @@ export default function ProductAttributesPage() {
           <h1 className="text-2xl font-medium tracking-tight text-foreground">Attributes</h1>
           <p className="mt-1 text-sm text-muted-foreground">
             Option types and values used on variants (e.g. Color → Red, Blue). Then assign them on{" "}
-            <Link href="/variants" className="text-primary underline-offset-2 hover:underline">
+            <ClickableText href="/variants" className="underline-offset-2">
               Variants
-            </Link>
+            </ClickableText>
             .
           </p>
         </div>
@@ -203,17 +205,17 @@ export default function ProductAttributesPage() {
             <form onSubmit={saveAttr} className="grid gap-3 sm:max-w-md">
               <label className="space-y-1">
                 <span className="text-xs text-muted-foreground">Name *</span>
-                <input
+                <Input
                   required
-                  className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
+                  className="w-full text-sm"
                   value={attrForm.name}
                   onChange={(e) => setAttrForm({ ...attrForm, name: e.target.value })}
                 />
               </label>
               <label className="space-y-1">
                 <span className="text-xs text-muted-foreground">Slug (optional)</span>
-                <input
-                  className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
+                <Input
+                  className="w-full text-sm"
                   value={attrForm.slug}
                   onChange={(e) => setAttrForm({ ...attrForm, slug: e.target.value })}
                   placeholder="Auto from name if empty"
@@ -221,9 +223,9 @@ export default function ProductAttributesPage() {
               </label>
               <label className="space-y-1">
                 <span className="text-xs text-muted-foreground">Order</span>
-                <input
+                <Input
                   type="number"
-                  className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm font-numbers"
+                  className="w-full font-numbers text-sm"
                   value={attrForm.order}
                   onChange={(e) => setAttrForm({ ...attrForm, order: e.target.value })}
                 />
@@ -307,16 +309,16 @@ export default function ProductAttributesPage() {
                     <p className="text-sm font-medium">
                       {editingValue.public_id === "new" ? "New value" : "Edit value"}
                     </p>
-                    <input
+                    <Input
                       required
-                      className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
+                      className="w-full text-sm"
                       value={valueForm.value}
                       onChange={(e) => setValueForm({ ...valueForm, value: e.target.value })}
                       placeholder="e.g. Red, M"
                     />
-                    <input
+                    <Input
                       type="number"
-                      className="w-32 rounded-lg border border-border bg-background px-3 py-2 text-sm font-numbers"
+                      className="w-32 font-numbers text-sm"
                       value={valueForm.order}
                       onChange={(e) => setValueForm({ ...valueForm, order: e.target.value })}
                       title="Order"

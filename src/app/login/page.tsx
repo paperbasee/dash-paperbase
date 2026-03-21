@@ -163,7 +163,7 @@ export default function LoginPage() {
                 type="checkbox"
                 checked={rememberMe}
                 onChange={(e) => setRememberMe(e.target.checked)}
-                className="h-4 w-4 border-border"
+                className="form-checkbox"
                 disabled={!!pendingTwoFactor}
               />
               <span>Remember me</span>

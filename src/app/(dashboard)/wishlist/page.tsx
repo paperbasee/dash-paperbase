@@ -1,9 +1,9 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Undo2 } from "lucide-react";
+import { ClickableText } from "@/components/ui/clickable-text";
 import api from "@/lib/api";
 import type { WishlistItem, PaginatedResponse } from "@/types";
 
@@ -98,12 +98,9 @@ export default function WishlistPage() {
                 {groupedItems.map((item) => (
                   <tr key={item.product_public_id} className="hover:bg-muted/40">
                     <td className="px-4 py-3 font-medium text-foreground whitespace-nowrap">
-                      <Link
-                        href={`/products/${item.product_public_id}`}
-                        className="text-primary hover:underline"
-                      >
+                      <ClickableText href={`/products/${item.product_public_id}`}>
                         {item.product_name}
-                      </Link>
+                      </ClickableText>
                     </td>
                     <td className="px-4 py-3 text-muted-foreground whitespace-nowrap">
                       {item.product_brand || "—"}

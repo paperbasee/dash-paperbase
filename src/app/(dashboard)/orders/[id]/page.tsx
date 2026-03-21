@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
-import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import {
   Undo2,
@@ -28,6 +27,10 @@ import type {
   ShippingZone,
 } from "@/types";
 import { Button } from "@/components/ui/button";
+import { ClickableText } from "@/components/ui/clickable-text";
+import { Input } from "@/components/ui/input";
+import { Select } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Card,
   CardHeader,
@@ -409,12 +412,13 @@ export default function OrderDetailPage() {
             </h1>
           </div>
           <nav className="flex flex-wrap items-center gap-1 text-sm text-muted-foreground">
-            <Link
+            <ClickableText
               href="/orders"
-              className="hover:text-foreground hover:underline"
+              variant="muted"
+              className="text-muted-foreground hover:text-foreground"
             >
               Orders
-            </Link>
+            </ClickableText>
             <span aria-hidden>/</span>
             <span>
               S-{order.order_number} – {orderDateFormatted}
@@ -504,14 +508,13 @@ export default function OrderDetailPage() {
                           )}
                           <div>
                             <p className="font-medium text-foreground">
-                              <Link
+                              <ClickableText
                                 href={`/products/${item.product}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="hover:underline"
                               >
                                 {item.product_name}
-                              </Link>
+                              </ClickableText>
                             </p>
                             <p className="text-xs text-muted-foreground">
                               {[
@@ -533,7 +536,7 @@ export default function OrderDetailPage() {
                       </td>
                       <td className="py-3 pr-4 text-muted-foreground">
                         {editing ? (
-                          <input
+                          <Input
                             type="number"
                             min={1}
                             value={edit?.quantity ?? item.quantity}
@@ -547,7 +550,8 @@ export default function OrderDetailPage() {
                                 },
                               }))
                             }
-                            className="input !h-8 !py-1 w-20 text-center"
+                            className="h-8 w-20 py-1 text-center"
+                            size="sm"
                           />
                         ) : (
                           item.quantity
@@ -556,7 +560,7 @@ export default function OrderDetailPage() {
                       <td className="py-3 pr-4">
                         {editing ? (
                           <div className="flex items-center gap-2">
-                            <input
+                            <Input
                               type="number"
                               step="0.01"
                               min={0}
@@ -571,11 +575,13 @@ export default function OrderDetailPage() {
                                   },
                                 }))
                               }
-                              className="input !h-8 !py-1 w-28"
+                              className="h-8 w-28 py-1"
+                              size="sm"
                             />
                             <div className="flex items-center gap-2">
-                              <select
-                                className="input !h-8 !py-1 w-[220px]"
+                              <Select
+                                className="h-8 w-[220px] py-1"
+                                size="sm"
                                 value={edit?.variant_public_id ?? ""}
                                 onFocus={() => ensureVariantsLoaded(item.product)}
                                 onChange={(e) => {
@@ -599,7 +605,7 @@ export default function OrderDetailPage() {
                                     {(v.option_labels?.join(" · ") || v.sku) ?? v.public_id}
                                   </option>
                                 ))}
-                              </select>
+                              </Select>
                               {selectedVariant && (
                                 <span className="text-xs text-muted-foreground whitespace-nowrap">
                                   Stock: {selectedVariant.stock_quantity}
@@ -688,20 +694,20 @@ export default function OrderDetailPage() {
                   <label className="mb-1 block text-xs font-medium text-muted-foreground">
                     Order number
                   </label>
-                  <input
+                  <Input
                     value={order.order_number}
                     readOnly
-                    className="input bg-muted/50"
+                    className="bg-muted/50"
                   />
                 </div>
                 <div>
                   <label className="mb-1 block text-xs font-medium text-muted-foreground">
                     Order status
                   </label>
-                  <input
+                  <Input
                     value={formatOrderStatus(order.status)}
                     readOnly
-                    className="input cursor-default bg-muted/50 capitalize"
+                    className="cursor-default bg-muted/50 capitalize"
                   />
                   <p className="mt-1 text-xs text-muted-foreground">
                     Status updates when you send to courier and when courier tracking shows
@@ -713,10 +719,9 @@ export default function OrderDetailPage() {
                     <label className="mb-1 block text-xs font-medium text-muted-foreground">
                       Shipping method
                     </label>
-                    <select
+                    <Select
                       value={form.shipping_method}
                       onChange={(e) => setForm({ ...form, shipping_method: e.target.value })}
-                      className="input"
                     >
                       <option value="">Auto (cheapest match)</option>
                       {shippingMethods.map((m) => (
@@ -724,16 +729,15 @@ export default function OrderDetailPage() {
                           {m.name}
                         </option>
                       ))}
-                    </select>
+                    </Select>
                   </div>
                   <div>
                     <label className="mb-1 block text-xs font-medium text-muted-foreground">
                       Shipping zone
                     </label>
-                    <select
+                    <Select
                       value={form.shipping_zone}
                       onChange={(e) => setForm({ ...form, shipping_zone: e.target.value })}
-                      className="input"
                     >
                       <option value="">Auto (match by district/area)</option>
                       {shippingZones.map((z) => (
@@ -741,30 +745,28 @@ export default function OrderDetailPage() {
                           {z.name}
                         </option>
                       ))}
-                    </select>
+                    </Select>
                   </div>
                   <div>
                     <label className="mb-1 block text-xs font-medium text-muted-foreground">
                       Name
                     </label>
-                    <input
+                    <Input
                       value={form.shipping_name}
                       onChange={(e) =>
                         setForm({ ...form, shipping_name: e.target.value })
                       }
-                      className="input"
                     />
                   </div>
                   <div>
                     <label className="mb-1 block text-xs font-medium text-muted-foreground">
                       Phone
                     </label>
-                    <input
+                    <Input
                       value={form.phone}
                       onChange={(e) =>
                         setForm({ ...form, phone: e.target.value })
                       }
-                      className="input"
                     />
                   </div>
                 </div>
@@ -773,25 +775,23 @@ export default function OrderDetailPage() {
                     <label className="mb-1 block text-xs font-medium text-muted-foreground">
                       Email
                     </label>
-                    <input
+                    <Input
                       type="email"
                       value={form.email}
                       onChange={(e) =>
                         setForm({ ...form, email: e.target.value })
                       }
-                      className="input"
                     />
                   </div>
                   <div>
                     <label className="mb-1 block text-xs font-medium text-muted-foreground">
                       District
                     </label>
-                    <input
+                    <Input
                       value={form.district}
                       onChange={(e) =>
                         setForm({ ...form, district: e.target.value })
                       }
-                      className="input"
                     />
                   </div>
                 </div>
@@ -799,13 +799,12 @@ export default function OrderDetailPage() {
                   <label className="mb-1 block text-xs font-medium text-muted-foreground">
                     Address
                   </label>
-                  <textarea
+                  <Textarea
                     rows={2}
                     value={form.shipping_address}
                     onChange={(e) =>
                       setForm({ ...form, shipping_address: e.target.value })
                     }
-                    className="input"
                   />
                 </div>
                 <div className="grid gap-3 sm:grid-cols-2">
@@ -813,25 +812,24 @@ export default function OrderDetailPage() {
                     <label className="mb-1 block text-xs font-medium text-muted-foreground">
                       Delivery Area
                     </label>
-                    <select
+                    <Select
                       value={form.delivery_area}
                       onChange={(e) =>
                         setForm({ ...form, delivery_area: e.target.value })
                       }
-                      className="input"
                     >
                       {DELIVERY_OPTIONS.map((opt) => (
                         <option key={opt.value} value={opt.value}>
                           {opt.label}
                         </option>
                       ))}
-                    </select>
+                    </Select>
                   </div>
                   <div>
                     <label className="mb-1 block text-xs font-medium text-muted-foreground">
                       Tracking Number
                     </label>
-                    <input
+                    <Input
                       value={form.tracking_number}
                       onChange={(e) =>
                         setForm({
@@ -839,7 +837,6 @@ export default function OrderDetailPage() {
                           tracking_number: e.target.value,
                         })
                       }
-                      className="input"
                     />
                   </div>
                 </div>

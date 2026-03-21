@@ -5,13 +5,14 @@ import { useRouter } from "next/navigation";
 import { Undo2, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { ExtraFieldsFormSection } from "@/components/ExtraFieldsFormSection";
 import { useExtraFieldsSchema } from "@/hooks/useExtraFieldsSchema";
 import type { ExtraFieldValues } from "@/types/extra-fields";
 import { validateRequiredExtraFields } from "@/lib/validation";
 
-const inputClass =
-  "input w-full rounded-lg bg-muted/50 border-border focus:ring-2 focus:ring-ring focus:ring-offset-0";
+const fieldControlClass = "w-full rounded-lg bg-muted/50";
 
 function Field({
   label,
@@ -126,42 +127,42 @@ export default function NewCustomerPage() {
           </CardHeader>
           <CardContent className="space-y-4">
             <Field label="Name" required>
-              <input
+              <Input
                 type="text"
                 required
                 value={form.name}
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
                 placeholder="Customer name"
-                className={inputClass}
+                className={fieldControlClass}
               />
             </Field>
             <Field label="Email" required>
-              <input
+              <Input
                 type="email"
                 required
                 value={form.email}
                 onChange={(e) => setForm({ ...form, email: e.target.value })}
                 placeholder="customer@example.com"
-                className={inputClass}
+                className={fieldControlClass}
               />
             </Field>
             <Field label="Phone" required>
-              <input
+              <Input
                 type="tel"
                 required
                 value={form.phone}
                 onChange={(e) => setForm({ ...form, phone: e.target.value })}
                 placeholder="01XXXXXXXXX"
-                className={inputClass}
+                className={fieldControlClass}
               />
             </Field>
             <Field label="Address">
-              <textarea
+              <Textarea
                 rows={3}
                 value={form.address}
                 onChange={(e) => setForm({ ...form, address: e.target.value })}
                 placeholder="Full address"
-                className={inputClass}
+                className={fieldControlClass}
               />
             </Field>
           </CardContent>

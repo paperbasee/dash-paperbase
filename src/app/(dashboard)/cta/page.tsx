@@ -4,6 +4,10 @@ import { useEffect, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { Undo2 } from "lucide-react";
 import api from "@/lib/api";
+import { ClickableText } from "@/components/ui/clickable-text";
+import { Input } from "@/components/ui/input";
+import { Select } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 import type { Notification, PaginatedResponse } from "@/types";
 
 type CtaForm = {
@@ -175,36 +179,37 @@ export default function CtaPage() {
           <p className="text-sm font-semibold text-primary">
             {editing === "new" ? "New CTA" : "Edit CTA"}
           </p>
-          <textarea
+          <Textarea
             required
             placeholder="CTA text"
             rows={2}
             value={form.text}
             onChange={(e) => setForm({ ...form, text: e.target.value })}
-            className="input"
+            className="text-sm"
           />
           <div className="grid grid-cols-3 gap-3">
-            <select
+            <Select
               value={form.notification_type}
               onChange={(e) =>
                 setForm({ ...form, notification_type: e.target.value })
               }
-              className="input"
+              className="text-sm"
             >
               <option value="banner">Banner</option>
               <option value="alert">Alert</option>
               <option value="promo">Promotion</option>
-            </select>
-            <input
+            </Select>
+            <Input
               type="number"
               placeholder="Order"
               value={form.order}
               onChange={(e) => setForm({ ...form, order: e.target.value })}
-              className="input"
+              className="text-sm"
             />
             <label className="flex items-center gap-2 text-sm text-foreground">
               <input
                 type="checkbox"
+                className="form-checkbox"
                 checked={form.is_active}
                 onChange={(e) =>
                   setForm({ ...form, is_active: e.target.checked })
@@ -214,20 +219,20 @@ export default function CtaPage() {
             </label>
           </div>
           <div className="grid grid-cols-2 gap-3">
-            <input
+            <Input
               placeholder="Link URL (optional)"
               type="url"
               value={form.link}
               onChange={(e) => setForm({ ...form, link: e.target.value })}
-              className="input"
+              className="text-sm"
             />
-            <input
+            <Input
               placeholder="Link text (optional)"
               value={form.link_text}
               onChange={(e) =>
                 setForm({ ...form, link_text: e.target.value })
               }
-              className="input"
+              className="text-sm"
             />
           </div>
           <div className="grid grid-cols-2 gap-3">
@@ -235,26 +240,26 @@ export default function CtaPage() {
               <label className="mb-1 block text-xs text-muted-foreground">
                 Start date (optional)
               </label>
-              <input
+              <Input
                 type="datetime-local"
                 value={form.start_date}
                 onChange={(e) =>
                   setForm({ ...form, start_date: e.target.value })
                 }
-                className="input"
+                className="text-sm"
               />
             </div>
             <div>
               <label className="mb-1 block text-xs text-muted-foreground">
                 End date (optional)
               </label>
-              <input
+              <Input
                 type="datetime-local"
                 value={form.end_date}
                 onChange={(e) =>
                   setForm({ ...form, end_date: e.target.value })
                 }
-                className="input"
+                className="text-sm"
               />
             </div>
           </div>
@@ -328,18 +333,19 @@ export default function CtaPage() {
                 </td>
                 <td className="px-4 py-3">
                   <div className="flex gap-2">
-                    <button
+                    <ClickableText
                       onClick={() => openEdit(n)}
-                      className="text-sm text-primary hover:underline"
+                      className="text-sm"
                     >
                       Edit
-                    </button>
-                    <button
+                    </ClickableText>
+                    <ClickableText
+                      variant="destructive"
                       onClick={() => handleDelete(n.public_id)}
-                      className="text-sm text-destructive hover:underline"
+                      className="text-sm"
                     >
                       Delete
-                    </button>
+                    </ClickableText>
                   </div>
                 </td>
               </tr>

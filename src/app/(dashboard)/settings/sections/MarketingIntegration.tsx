@@ -404,7 +404,7 @@ export default function MarketingIntegration() {
                               e.target.checked
                             )
                           }
-                          className="size-3.5 rounded border-border accent-primary"
+                          className="form-checkbox size-3.5"
                         />
                         {label}
                       </label>

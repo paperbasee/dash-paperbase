@@ -136,7 +136,7 @@ export default function ActivitiesPage() {
                               <>
                                 <span>·</span>
                                 <span>
-                                  {item.actor.username || item.actor.email}
+                                  {item.actor.full_name || item.actor.email}
                                 </span>
                               </>
                             )}

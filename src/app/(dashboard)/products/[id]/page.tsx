@@ -7,6 +7,10 @@ import { Undo2, FileText, Check, Plus, X } from "lucide-react";
 import api from "@/lib/api";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { ClickableText } from "@/components/ui/clickable-text";
+import { Input } from "@/components/ui/input";
+import { Select } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 import { ExtraFieldsFormSection } from "@/components/ExtraFieldsFormSection";
 import { useExtraFieldsSchema } from "@/hooks/useExtraFieldsSchema";
 import type { ExtraFieldValues } from "@/types/extra-fields";
@@ -213,8 +217,7 @@ export default function EditProductPage() {
     handleSubmit(e, asDraft);
   }
 
-  const inputClass =
-    "input w-full rounded-lg bg-muted/50 border-border focus:ring-2 focus:ring-ring focus:ring-offset-0";
+  const fieldControlClass = "w-full rounded-lg bg-muted/50";
 
   if (loading) {
     return (
@@ -305,42 +308,42 @@ export default function EditProductPage() {
             </CardHeader>
             <CardContent className="space-y-4">
               <Field label="Product name" required>
-                <input
+                <Input
                   type="text"
                   required
                   value={form.name}
                   onChange={(e) => setForm({ ...form, name: e.target.value })}
                   placeholder="e.g. Wireless Earbuds Pro"
-                  className={inputClass}
+                  className={fieldControlClass}
                 />
               </Field>
               <Field label="Slug">
-                <input
+                <Input
                   type="text"
                   readOnly
                   value={product.slug || "—"}
-                  className={`${inputClass} bg-muted/80 font-mono text-sm`}
+                  className={`${fieldControlClass} bg-muted/80 font-mono text-sm`}
                 />
               </Field>
               <Field label="Description">
-                <textarea
+                <Textarea
                   rows={4}
                   value={form.description}
                   onChange={(e) =>
                     setForm({ ...form, description: e.target.value })
                   }
                   placeholder="Describe your product..."
-                  className={inputClass}
+                  className={fieldControlClass}
                 />
               </Field>
               <Field label="Brand" required>
-                <input
+                <Input
                   type="text"
                   required
                   value={form.brand}
                   onChange={(e) => setForm({ ...form, brand: e.target.value })}
                   placeholder="Brand name"
-                  className={inputClass}
+                  className={fieldControlClass}
                 />
               </Field>
               <div>
@@ -371,7 +374,7 @@ export default function EditProductPage() {
                   onChange={(e) =>
                     setForm({ ...form, is_featured: e.target.checked })
                   }
-                  className="size-4 rounded border-border"
+                  className="form-checkbox"
                 />
                 <span className="text-sm font-medium text-foreground">
                   Featured product
@@ -384,7 +387,7 @@ export default function EditProductPage() {
                   onChange={(e) =>
                     setForm({ ...form, is_active: e.target.checked })
                   }
-                  className="size-4 rounded border-border"
+                  className="form-checkbox"
                 />
                 <span className="text-sm font-medium text-foreground">
                   Active (visible in store)
@@ -404,12 +407,12 @@ export default function EditProductPage() {
                   This product has <strong>{product.variant_count}</strong> variants (SKUs). Inventory is
                   stored per variant; <strong>total units</strong> (sum of variant stock):{" "}
                   <span className="font-numbers text-foreground">{product.total_stock ?? product.stock}</span>.{" "}
-                  <Link
+                  <ClickableText
                     href={`/variants?product=${encodeURIComponent(id)}`}
-                    className="font-medium text-primary underline-offset-2 hover:underline"
+                    className="underline-offset-2"
                   >
                     Manage variants
-                  </Link>
+                  </ClickableText>
                   .
                 </p>
               )}
@@ -417,7 +420,7 @@ export default function EditProductPage() {
             <CardContent>
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <Field label="Base price" required>
-                  <input
+                  <Input
                     type="number"
                     step="0.01"
                     required
@@ -426,11 +429,11 @@ export default function EditProductPage() {
                       setForm({ ...form, price: e.target.value })
                     }
                     placeholder="0.00"
-                    className={`font-numbers ${inputClass}`}
+                    className={`font-numbers ${fieldControlClass}`}
                   />
                 </Field>
                 <Field label="Compare at (original price)">
-                  <input
+                  <Input
                     type="number"
                     step="0.01"
                     value={form.original_price}
@@ -438,18 +441,18 @@ export default function EditProductPage() {
                       setForm({ ...form, original_price: e.target.value })
                     }
                     placeholder="Optional"
-                    className={`font-numbers ${inputClass}`}
+                    className={`font-numbers ${fieldControlClass}`}
                   />
                 </Field>
                 <Field label={product.variant_count ? "Base product stock (legacy)" : "Stock"}>
-                  <input
+                  <Input
                     type="number"
                     min={0}
                     value={form.stock}
                     onChange={(e) =>
                       setForm({ ...form, stock: e.target.value })
                     }
-                    className={`font-numbers ${inputClass}`}
+                    className={`font-numbers ${fieldControlClass}`}
                     disabled={Boolean(product.variant_count && product.variant_count > 0)}
                     title={
                       product.variant_count
@@ -679,7 +682,7 @@ export default function EditProductPage() {
             </CardHeader>
             <CardContent className="space-y-4">
               <Field label="Parent category" required>
-                <select
+                <Select
                   required
                   value={form.category}
                   onChange={(e) =>
@@ -689,7 +692,7 @@ export default function EditProductPage() {
                       sub_category: "",
                     })
                   }
-                  className={inputClass}
+                  className={fieldControlClass}
                 >
                   <option value="">Select parent...</option>
                   {parentCategories.map((c) => (
@@ -697,15 +700,15 @@ export default function EditProductPage() {
                       {c.name}
                     </option>
                   ))}
-                </select>
+                </Select>
               </Field>
               <Field label="Child category">
-                <select
+                <Select
                   value={form.sub_category}
                   onChange={(e) =>
                     setForm({ ...form, sub_category: e.target.value })
                   }
-                  className={inputClass}
+                  className={fieldControlClass}
                   disabled={!form.category}
                 >
                   <option value="">Select child (optional)...</option>
@@ -714,7 +717,7 @@ export default function EditProductPage() {
                       {c.name}
                     </option>
                   ))}
-                </select>
+                </Select>
               </Field>
               <Button variant="outline" className="w-full gap-2" asChild>
                 <Link href="/categories">

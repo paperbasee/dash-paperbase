@@ -4,6 +4,9 @@ import { useEffect, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { Undo2 } from "lucide-react";
 import api from "@/lib/api";
+import { ClickableText } from "@/components/ui/clickable-text";
+import { Input } from "@/components/ui/input";
+import { Select } from "@/components/ui/select";
 import type { ParentCategory, Category, PaginatedResponse } from "@/types";
 
 type ParentForm = { name: string; slug: string; description: string; order: string; is_active: boolean };
@@ -190,23 +193,22 @@ export default function CategoriesPage() {
               {parentEditing === "new" ? "New Parent Category" : "Edit Parent Category"}
             </p>
             <div className="grid grid-cols-2 gap-3">
-              <input required placeholder="Name" value={parentForm.name} onChange={(e) => setParentForm({ ...parentForm, name: e.target.value })} className="input" />
-              <input required placeholder="Slug" value={parentForm.slug} onChange={(e) => setParentForm({ ...parentForm, slug: e.target.value })} className="input" />
+              <Input required placeholder="Name" value={parentForm.name} onChange={(e) => setParentForm({ ...parentForm, name: e.target.value })} />
+              <Input required placeholder="Slug" value={parentForm.slug} onChange={(e) => setParentForm({ ...parentForm, slug: e.target.value })} />
             </div>
-            <input placeholder="Description" value={parentForm.description} onChange={(e) => setParentForm({ ...parentForm, description: e.target.value })} className="input" />
+            <Input placeholder="Description" value={parentForm.description} onChange={(e) => setParentForm({ ...parentForm, description: e.target.value })} />
             <div className="grid grid-cols-3 gap-3">
-              <input
+              <Input
                 type="number"
                 placeholder="Order"
                 value={parentForm.order}
                 onChange={(e) => setParentForm({ ...parentForm, order: e.target.value })}
-                className="input"
               />
               <input
                 type="file"
                 accept="image/*"
                 onChange={(e) => setParentImageFile(e.target.files?.[0] ?? null)}
-                className="input"
+                className="form-file-input"
               />
               <label className="flex items-center gap-2 text-sm text-foreground">
                 <input
@@ -215,6 +217,7 @@ export default function CategoriesPage() {
                   onChange={(e) =>
                     setParentForm({ ...parentForm, is_active: e.target.checked })
                   }
+                  className="form-checkbox"
                 />{" "}
                 Active
               </label>
@@ -274,18 +277,19 @@ export default function CategoriesPage() {
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex gap-2">
-                      <button
+                      <ClickableText
                         onClick={() => openParentEdit(cat)}
-                        className="text-sm text-primary hover:underline"
+                        className="text-sm"
                       >
                         Edit
-                      </button>
-                      <button
+                      </ClickableText>
+                      <ClickableText
+                        variant="destructive"
                         onClick={() => deleteParent(cat.public_id)}
-                        className="text-sm text-destructive hover:underline"
+                        className="text-sm"
                       >
                         Delete
-                      </button>
+                      </ClickableText>
                     </div>
                   </td>
                 </tr>
@@ -318,31 +322,30 @@ export default function CategoriesPage() {
               {childEditing === "new" ? "New Child Category" : "Edit Child Category"}
             </p>
             <div className="grid grid-cols-2 gap-3">
-              <input required placeholder="Name" value={childForm.name} onChange={(e) => setChildForm({ ...childForm, name: e.target.value })} className="input" />
-              <input required placeholder="Slug" value={childForm.slug} onChange={(e) => setChildForm({ ...childForm, slug: e.target.value })} className="input" />
+              <Input required placeholder="Name" value={childForm.name} onChange={(e) => setChildForm({ ...childForm, name: e.target.value })} />
+              <Input required placeholder="Slug" value={childForm.slug} onChange={(e) => setChildForm({ ...childForm, slug: e.target.value })} />
             </div>
             <div className="grid grid-cols-2 gap-3">
-              <select required value={childForm.parent} onChange={(e) => setChildForm({ ...childForm, parent: e.target.value })} className="input">
+              <Select required value={childForm.parent} onChange={(e) => setChildForm({ ...childForm, parent: e.target.value })}>
                 <option value="">Parent category...</option>
                 {parentCategories.map((pc) => (
                   <option key={pc.public_id} value={pc.public_id}>{pc.name}</option>
                 ))}
-              </select>
-              <input placeholder="Description" value={childForm.description} onChange={(e) => setChildForm({ ...childForm, description: e.target.value })} className="input" />
+              </Select>
+              <Input placeholder="Description" value={childForm.description} onChange={(e) => setChildForm({ ...childForm, description: e.target.value })} />
             </div>
             <div className="grid grid-cols-3 gap-3">
-              <input
+              <Input
                 type="number"
                 placeholder="Order"
                 value={childForm.order}
                 onChange={(e) => setChildForm({ ...childForm, order: e.target.value })}
-                className="input"
               />
               <input
                 type="file"
                 accept="image/*"
                 onChange={(e) => setChildImageFile(e.target.files?.[0] ?? null)}
-                className="input"
+                className="form-file-input"
               />
               <label className="flex items-center gap-2 text-sm text-foreground">
                 <input
@@ -351,6 +354,7 @@ export default function CategoriesPage() {
                   onChange={(e) =>
                     setChildForm({ ...childForm, is_active: e.target.checked })
                   }
+                  className="form-checkbox"
                 />{" "}
                 Active
               </label>
@@ -412,18 +416,19 @@ export default function CategoriesPage() {
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex gap-2">
-                      <button
+                      <ClickableText
                         onClick={() => openChildEdit(cat)}
-                        className="text-sm text-primary hover:underline"
+                        className="text-sm"
                       >
                         Edit
-                      </button>
-                      <button
+                      </ClickableText>
+                      <ClickableText
+                        variant="destructive"
                         onClick={() => deleteChild(cat.public_id)}
-                        className="text-sm text-destructive hover:underline"
+                        className="text-sm"
                       >
                         Delete
-                      </button>
+                      </ClickableText>
                     </div>
                   </td>
                 </tr>

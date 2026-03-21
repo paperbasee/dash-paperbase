@@ -6,6 +6,7 @@ import api from "@/lib/api";
 import type { Courier, PaginatedResponse } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Select } from "@/components/ui/select";
 
 const PROVIDER_OPTIONS = [
   { value: "pathao", label: "Pathao" },
@@ -153,19 +154,18 @@ export default function CourierIntegration() {
               <label className="text-sm font-medium text-foreground">
                 Provider
               </label>
-              <select
+              <Select
                 value={form.provider}
                 onChange={(e) =>
                   setForm({ ...form, provider: e.target.value })
                 }
-                className="input"
               >
                 {PROVIDER_OPTIONS.map((p) => (
                   <option key={p.value} value={p.value}>
                     {p.label}
                   </option>
                 ))}
-              </select>
+              </Select>
             </div>
             <div className="flex flex-col gap-1.5">
               <label className="text-sm font-medium text-foreground">

@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/* Tailwind `dark:` follows app theme (data-theme on <html>), not OS preference */
+@custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
+
 /* ============================================
    FONT FACES - Futura PT (from gadzillabd-frontend)
    ============================================ */
@@ -102,6 +105,13 @@
     --chart-carts: 142 76% 36%;
     --chart-wishlist: 38 92% 50%;
     --chart-contacts: 0 84% 60%;
+
+    /* Semantic aliases (reference HSL tokens above) */
+    --bg-primary: hsl(var(--background));
+    --bg-secondary: hsl(var(--muted));
+    --text-primary: hsl(var(--foreground));
+    --text-secondary: hsl(var(--muted-foreground));
+    --border-color: hsl(var(--border));
   }
 
   :root[data-theme="dark"] {
@@ -140,6 +150,12 @@
     --chart-carts: 142 76% 48%;
     --chart-wishlist: 38 92% 60%;
     --chart-contacts: 0 84% 70%;
+
+    --bg-primary: hsl(var(--background));
+    --bg-secondary: hsl(var(--muted));
+    --text-primary: hsl(var(--foreground));
+    --text-secondary: hsl(var(--muted-foreground));
+    --border-color: hsl(var(--border));
   }
 }
 
@@ -180,6 +196,15 @@ body {
   font-family: var(--font-family-sans);
   background: hsl(var(--background));
   color: hsl(var(--foreground));
+}
+
+/* Browser autofill must not override dark mode */
+input:-webkit-autofill:not([type="checkbox"]):not([type="radio"]),
+input:-webkit-autofill:not([type="checkbox"]):not([type="radio"]):hover,
+input:-webkit-autofill:not([type="checkbox"]):not([type="radio"]):focus {
+  -webkit-box-shadow: 0 0 0 1000px var(--bg-primary) inset !important;
+  -webkit-text-fill-color: var(--text-primary) !important;
+  transition: background-color 5000s ease-in-out 0s;
 }
 
 /* Ensure all interactive elements show pointer cursor */
@@ -223,10 +248,11 @@ select {
 .input {
   width: 100%;
   border-radius: var(--radius);
-  border: 1px solid hsl(var(--border));
+  border: 1px solid var(--border-color);
+  background: var(--bg-primary);
   padding: 0.5rem 0.75rem;
   font-size: 0.875rem;
-  color: hsl(var(--foreground));
+  color: var(--text-primary);
   outline: none;
   transition: border-color 0.15s, box-shadow 0.15s;
 }
@@ -237,7 +263,7 @@ select {
 }
 
 .input::placeholder {
-  color: hsl(var(--muted-foreground));
+  color: var(--text-secondary);
 }
 
 /* Themed scrollbars */
@@ -307,5 +333,19 @@ select {
   /* Page header row (title + actions) */
   .page-header {
     @apply flex items-center justify-between gap-4;
+  }
+
+  /* Native checkbox / radio — single token-based style */
+  .form-checkbox {
+    @apply h-4 w-4 shrink-0 cursor-pointer rounded border border-border bg-background text-primary accent-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring;
+  }
+
+  .form-radio {
+    @apply h-4 w-4 shrink-0 cursor-pointer border border-border bg-background text-primary accent-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring;
+  }
+
+  /* File input control surface */
+  .form-file-input {
+    @apply block w-full cursor-pointer rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground file:mr-3 file:cursor-pointer file:rounded-sm file:border-0 file:bg-muted file:px-2 file:py-1 file:text-sm file:font-medium file:text-foreground;
   }
 }

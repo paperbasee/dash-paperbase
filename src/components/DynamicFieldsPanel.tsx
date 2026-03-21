@@ -20,6 +20,7 @@ import { CSS } from "@dnd-kit/utilities";
 import { Plus, Trash2, GripVertical, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { useExtraFieldsSchema } from "@/hooks/useExtraFieldsSchema";
 import type {
@@ -86,7 +87,7 @@ const FIELD_NAME_PLACEHOLDERS: Record<ExtraFieldEntityType, string> = {
 };
 
 const inputClass =
-  "input w-full rounded-lg bg-muted/50 border-border focus:ring-2 focus:ring-ring focus:ring-offset-0";
+  "w-full rounded-lg bg-muted/50 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-0";
 
 function SortableFieldItem({
   field,
@@ -182,7 +183,7 @@ function SortableFieldItem({
               <label className="mb-1 block text-xs font-medium text-muted-foreground">
                 Field Type
               </label>
-              <select
+              <Select
                 value={field.fieldType}
                 onChange={(e) =>
                   onUpdate(field.id, {
@@ -196,7 +197,7 @@ function SortableFieldItem({
                     {t.label}
                   </option>
                 ))}
-              </select>
+              </Select>
             </div>
           </div>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -239,7 +240,7 @@ function SortableFieldItem({
                 onChange={(e) =>
                   onUpdate(field.id, { required: e.target.checked })
                 }
-                className="size-4 rounded border-border"
+                className="form-checkbox"
               />
               <span className="text-muted-foreground">Required</span>
             </label>

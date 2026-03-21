@@ -5,6 +5,9 @@ import { useRouter } from "next/navigation";
 import { Undo2, Plus } from "lucide-react";
 import { isAxiosError } from "axios";
 import api from "@/lib/api";
+import { ClickableText } from "@/components/ui/clickable-text";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import type { Banner, PaginatedResponse } from "@/types";
 
 type BannerForm = {
@@ -183,24 +186,24 @@ export default function BannersPage() {
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
               <label className="mb-1 block text-sm font-medium">Title</label>
-              <input
+              <Input
                 type="text"
                 value={form.title}
                 onChange={(e) =>
                   setForm((f) => ({ ...f, title: e.target.value }))
                 }
-                className="w-full rounded border border-border bg-background px-3 py-2 text-sm"
+                className="text-sm"
                 placeholder="Optional"
               />
             </div>
             <div>
               <label className="mb-1 block text-sm font-medium">Placement</label>
-              <textarea
+              <Textarea
                 value={form.placement}
                 onChange={(e) =>
                   setForm((f) => ({ ...f, placement: e.target.value }))
                 }
-                className="w-full rounded border border-border bg-background px-3 py-2 text-sm"
+                className="text-sm"
                 placeholder="e.g. homepage_hero"
                 rows={2}
                 maxLength={50}
@@ -209,72 +212,72 @@ export default function BannersPage() {
             </div>
             <div className="sm:col-span-2">
               <label className="mb-1 block text-sm font-medium">Description</label>
-              <textarea
+              <Textarea
                 value={form.description}
                 onChange={(e) =>
                   setForm((f) => ({ ...f, description: e.target.value }))
                 }
-                className="w-full rounded border border-border bg-background px-3 py-2 text-sm"
+                className="text-sm"
                 placeholder="Optional"
                 rows={3}
               />
             </div>
             <div>
               <label className="mb-1 block text-sm font-medium">CTA Text</label>
-              <input
+              <Input
                 type="text"
                 value={form.cta_text}
                 onChange={(e) =>
                   setForm((f) => ({ ...f, cta_text: e.target.value }))
                 }
-                className="w-full rounded border border-border bg-background px-3 py-2 text-sm"
+                className="text-sm"
                 placeholder='e.g. "Shop Now"'
               />
             </div>
             <div>
               <label className="mb-1 block text-sm font-medium">Position</label>
-              <input
+              <Input
                 type="number"
                 value={form.position}
                 onChange={(e) =>
                   setForm((f) => ({ ...f, position: e.target.value }))
                 }
-                className="w-full rounded border border-border bg-background px-3 py-2 text-sm"
+                className="text-sm"
               />
             </div>
             <div className="sm:col-span-2">
               <label className="mb-1 block text-sm font-medium">Redirect URL</label>
-              <input
+              <Input
                 type="url"
                 value={form.redirect_url}
                 onChange={(e) =>
                   setForm((f) => ({ ...f, redirect_url: e.target.value }))
                 }
-                className="w-full rounded border border-border bg-background px-3 py-2 text-sm"
+                className="text-sm"
                 placeholder="https://..."
                 required={form.is_clickable}
               />
             </div>
             <div>
               <label className="mb-1 block text-sm font-medium">Start Date</label>
-              <input
+              <Input
                 type="datetime-local"
                 value={form.start_date}
                 onChange={(e) =>
                   setForm((f) => ({ ...f, start_date: e.target.value }))
                 }
-                className="w-full rounded border border-border bg-background px-3 py-2 text-sm"
+                className="text-sm"
               />
             </div>
             <div>
               <label className="mb-1 block text-sm font-medium">End Date</label>
-              <input
+              <Input
                 type="datetime-local"
                 value={form.end_date}
                 onChange={(e) =>
                   setForm((f) => ({ ...f, end_date: e.target.value }))
                 }
-                className="w-full rounded border border-border bg-background px-3 py-2 text-sm"
+                className="text-sm"
               />
             </div>
             <div>
@@ -283,7 +286,7 @@ export default function BannersPage() {
                 type="file"
                 accept="image/*"
                 onChange={(e) => setImageFile(e.target.files?.[0] ?? null)}
-                className="w-full rounded border border-border bg-background px-3 py-2 text-sm"
+                className="form-file-input text-sm"
               />
               {editing !== "new" && !imageFile && (
                 <p className="mt-1 text-xs text-muted-foreground">
@@ -295,6 +298,7 @@ export default function BannersPage() {
               <input
                 type="checkbox"
                 id="is_clickable"
+                className="form-checkbox"
                 checked={form.is_clickable}
                 onChange={(e) =>
                   setForm((f) => ({ ...f, is_clickable: e.target.checked }))
@@ -308,6 +312,7 @@ export default function BannersPage() {
               <input
                 type="checkbox"
                 id="is_active"
+                className="form-checkbox"
                 checked={form.is_active}
                 onChange={(e) =>
                   setForm((f) => ({ ...f, is_active: e.target.checked }))
@@ -392,20 +397,19 @@ export default function BannersPage() {
                   </span>
                 </td>
                 <td className="px-4 py-3 text-right">
-                  <button
-                    type="button"
+                  <ClickableText
                     onClick={() => openEdit(b)}
-                    className="mr-2 text-primary hover:underline"
+                    className="mr-2 text-sm"
                   >
                     Edit
-                  </button>
-                  <button
-                    type="button"
+                  </ClickableText>
+                  <ClickableText
+                    variant="destructive"
                     onClick={() => handleDelete(b.public_id)}
-                    className="text-destructive hover:underline"
+                    className="text-sm"
                   >
                     Delete
-                  </button>
+                  </ClickableText>
                 </td>
               </tr>
             ))}

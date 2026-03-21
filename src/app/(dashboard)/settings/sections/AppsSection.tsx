@@ -72,7 +72,7 @@ export default function AppsSection({
                       type="checkbox"
                       checked={enabledApps.isEnabled(id)}
                       onChange={() => enabledApps.toggleApp(id)}
-                      className="h-4 w-4 rounded border-input text-primary focus:ring-primary"
+                      className="form-checkbox"
                     />
                     <span className="text-sm text-muted-foreground">
                       {enabledApps.isEnabled(id) ? "Enabled" : "Disabled"}

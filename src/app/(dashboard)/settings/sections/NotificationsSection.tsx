@@ -47,13 +47,14 @@ export default function NotificationsSection({
         <div className="space-y-3">
           <label className="flex items-center justify-between gap-4 text-sm">
             <span className="text-foreground">Orders</span>
-            <input type="checkbox" checked={notificationPrefs.orders} onChange={(e) => onUpdatePref("orders", e.target.checked)} />
+            <input type="checkbox" className="form-checkbox" checked={notificationPrefs.orders} onChange={(e) => onUpdatePref("orders", e.target.checked)} />
           </label>
 
           <label className="flex items-center justify-between gap-4 text-sm">
             <span className="text-foreground">Cart items</span>
             <input
               type="checkbox"
+              className="form-checkbox"
               checked={notificationPrefs.carts}
               onChange={(e) => onUpdatePref("carts", e.target.checked)}
             />
@@ -63,6 +64,7 @@ export default function NotificationsSection({
             <span className="text-foreground">Wishlist items</span>
             <input
               type="checkbox"
+              className="form-checkbox"
               checked={notificationPrefs.wishlist}
               onChange={(e) => onUpdatePref("wishlist", e.target.checked)}
             />
@@ -72,6 +74,7 @@ export default function NotificationsSection({
             <span className="text-foreground">Contact form submissions</span>
             <input
               type="checkbox"
+              className="form-checkbox"
               checked={notificationPrefs.contacts}
               onChange={(e) => onUpdatePref("contacts", e.target.checked)}
             />
@@ -99,6 +102,7 @@ export default function NotificationsSection({
               <span className="text-foreground">Email me when an order is received</span>
               <input
                 type="checkbox"
+                className="form-checkbox"
                 disabled={emailLocked}
                 checked={notificationPrefs.emailMeOnOrderReceived}
                 onChange={(e) => onUpdatePref("emailMeOnOrderReceived", e.target.checked)}
@@ -111,6 +115,7 @@ export default function NotificationsSection({
               <span className="text-foreground">Email customer when an order is confirmed</span>
               <input
                 type="checkbox"
+                className="form-checkbox"
                 disabled={emailLocked}
                 checked={notificationPrefs.emailCustomerOnOrderConfirmed}
                 onChange={(e) => onUpdatePref("emailCustomerOnOrderConfirmed", e.target.checked)}
@@ -125,11 +130,11 @@ export default function NotificationsSection({
 
           <div className="flex gap-4">
             <label className="flex items-center gap-2 text-sm text-muted-foreground">
-              <input type="radio" name="delivery" disabled />
+              <input type="radio" name="delivery" disabled className="form-radio" />
               Email
             </label>
             <label className="flex items-center gap-2 text-sm text-muted-foreground">
-              <input type="radio" name="delivery" disabled />
+              <input type="radio" name="delivery" disabled className="form-radio" />
               In-app
             </label>
           </div>

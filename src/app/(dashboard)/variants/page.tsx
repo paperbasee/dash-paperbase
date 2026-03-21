@@ -7,6 +7,9 @@ import { Undo2, Pencil, Trash2, Plus } from "lucide-react";
 import api from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ClickableText } from "@/components/ui/clickable-text";
+import { Input } from "@/components/ui/input";
+import { Select } from "@/components/ui/select";
 import type {
   Product,
   ProductAttributeAdmin,
@@ -253,9 +256,9 @@ export default function VariantsPage() {
           <h1 className="text-2xl font-medium tracking-tight text-foreground">Variants</h1>
           <p className="mt-1 text-sm text-muted-foreground">
             SKUs and options per product. Define option types under{" "}
-            <Link href="/product-attributes" className="text-primary underline-offset-2 hover:underline">
+            <ClickableText href="/product-attributes" className="underline-offset-2">
               Catalog → Attributes
-            </Link>
+            </ClickableText>
             .
           </p>
         </div>
@@ -278,8 +281,8 @@ export default function VariantsPage() {
           <CardTitle className="text-base">Product</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
-          <select
-            className="w-full max-w-xl rounded-lg border border-border bg-background px-3 py-2 text-sm"
+          <Select
+            className="max-w-xl text-sm"
             value={productId}
             onChange={(e) => {
               setProductId(e.target.value);
@@ -292,7 +295,7 @@ export default function VariantsPage() {
                 {p.name}
               </option>
             ))}
-          </select>
+          </Select>
           {selectedProduct ? (
             <p className="text-xs text-muted-foreground">
               Base price:{" "}
@@ -331,8 +334,8 @@ export default function VariantsPage() {
                   <div className="grid gap-4 sm:grid-cols-2">
                     <label className="block space-y-1">
                       <span className="text-xs font-medium text-muted-foreground">SKU</span>
-                      <input
-                        className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
+                      <Input
+                        className="w-full text-sm"
                         value={form.sku}
                         onChange={(e) => setForm({ ...form, sku: e.target.value })}
                         placeholder="Leave empty to auto-generate"
@@ -340,10 +343,10 @@ export default function VariantsPage() {
                     </label>
                     <label className="block space-y-1">
                       <span className="text-xs font-medium text-muted-foreground">Stock</span>
-                      <input
+                      <Input
                         type="number"
                         min={0}
-                        className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm font-numbers"
+                        className="w-full font-numbers text-sm"
                         value={form.stock_quantity}
                         onChange={(e) => setForm({ ...form, stock_quantity: e.target.value })}
                       />
@@ -352,10 +355,10 @@ export default function VariantsPage() {
                       <span className="text-xs font-medium text-muted-foreground">
                         Price override (optional)
                       </span>
-                      <input
+                      <Input
                         type="number"
                         step="0.01"
-                        className="w-full max-w-xs rounded-lg border border-border bg-background px-3 py-2 text-sm font-numbers"
+                        className="max-w-xs font-numbers text-sm"
                         value={form.price_override}
                         onChange={(e) => setForm({ ...form, price_override: e.target.value })}
                         placeholder="Uses product base price if empty"
@@ -372,8 +375,8 @@ export default function VariantsPage() {
                         {attributes.map((a) => (
                           <label key={a.public_id} className="block space-y-1">
                             <span className="text-xs text-muted-foreground">{a.name}</span>
-                            <select
-                              className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
+                            <Select
+                              className="text-sm"
                               value={form.picks[a.public_id] ?? ""}
                               onChange={(e) =>
                                 setForm({
@@ -388,7 +391,7 @@ export default function VariantsPage() {
                                   {v.value}
                                 </option>
                               ))}
-                            </select>
+                            </Select>
                           </label>
                         ))}
                       </div>
@@ -396,9 +399,9 @@ export default function VariantsPage() {
                   ) : (
                     <p className="text-sm text-muted-foreground">
                       No attributes yet. Add some under{" "}
-                      <Link href="/product-attributes" className="text-primary underline-offset-2 hover:underline">
+                      <ClickableText href="/product-attributes" className="underline-offset-2">
                         Attributes
-                      </Link>{" "}
+                      </ClickableText>{" "}
                       to tag variants (e.g. Color, Size).
                     </p>
                   )}
@@ -408,7 +411,7 @@ export default function VariantsPage() {
                       type="checkbox"
                       checked={form.is_active}
                       onChange={(e) => setForm({ ...form, is_active: e.target.checked })}
-                      className="size-4 rounded border-border"
+                      className="form-checkbox"
                     />
                     <span className="text-sm">Active</span>
                   </label>

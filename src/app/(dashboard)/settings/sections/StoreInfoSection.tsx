@@ -83,7 +83,7 @@ export default function StoreInfoSection({
                 ref={fileInputRef}
                 type="file"
                 accept="image/*"
-                className="text-sm file:mr-2 file:rounded-md file:border-0 file:bg-primary file:px-3 file:py-1.5 file:text-primary-foreground"
+                className="form-file-input text-sm"
                 onChange={(e) => {
                   const f = e.target.files?.[0];
                   onLogoFileChange(f || null);
@@ -95,6 +95,7 @@ export default function StoreInfoSection({
                 <label className="flex items-center gap-2 text-sm">
                   <input
                     type="checkbox"
+                    className="form-checkbox"
                     checked={clearLogo}
                     onChange={(e) => {
                       onClearLogoChange(e.target.checked);

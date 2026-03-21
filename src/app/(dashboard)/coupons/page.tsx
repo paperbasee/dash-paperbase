@@ -4,6 +4,9 @@ import { useEffect, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { Undo2, Plus } from "lucide-react";
 import api from "@/lib/api";
+import { ClickableText } from "@/components/ui/clickable-text";
+import { Input } from "@/components/ui/input";
+import { Select } from "@/components/ui/select";
 import type { Coupon, PaginatedResponse } from "@/types";
 
 type CouponForm = {
@@ -165,91 +168,92 @@ export default function CouponsPage() {
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
               <label className="mb-1 block text-sm font-medium">Code</label>
-              <input
+              <Input
                 type="text"
                 value={form.code}
                 onChange={(e) => setForm((f) => ({ ...f, code: e.target.value }))}
-                className="w-full rounded border border-border bg-background px-3 py-2 text-sm"
+                className="text-sm"
                 placeholder="SAVE20"
                 required
               />
             </div>
             <div>
               <label className="mb-1 block text-sm font-medium">Discount type</label>
-              <select
+              <Select
                 value={form.discount_type}
                 onChange={(e) =>
                   setForm((f) => ({ ...f, discount_type: e.target.value }))
                 }
-                className="w-full rounded border border-border bg-background px-3 py-2 text-sm"
+                className="text-sm"
               >
                 <option value="percentage">Percentage</option>
                 <option value="fixed">Fixed amount</option>
-              </select>
+              </Select>
             </div>
             <div>
               <label className="mb-1 block text-sm font-medium">Discount value</label>
-              <input
+              <Input
                 type="text"
                 value={form.discount_value}
                 onChange={(e) =>
                   setForm((f) => ({ ...f, discount_value: e.target.value }))
                 }
-                className="w-full rounded border border-border bg-background px-3 py-2 text-sm"
+                className="text-sm"
                 placeholder={form.discount_type === "percentage" ? "20" : "10.00"}
                 required
               />
             </div>
             <div>
               <label className="mb-1 block text-sm font-medium">Min order value</label>
-              <input
+              <Input
                 type="text"
                 value={form.min_order_value}
                 onChange={(e) =>
                   setForm((f) => ({ ...f, min_order_value: e.target.value }))
                 }
-                className="w-full rounded border border-border bg-background px-3 py-2 text-sm"
+                className="text-sm"
                 placeholder="Optional"
               />
             </div>
             <div>
               <label className="mb-1 block text-sm font-medium">Max uses</label>
-              <input
+              <Input
                 type="text"
                 value={form.max_uses}
                 onChange={(e) =>
                   setForm((f) => ({ ...f, max_uses: e.target.value }))
                 }
-                className="w-full rounded border border-border bg-background px-3 py-2 text-sm"
+                className="text-sm"
                 placeholder="Optional"
               />
             </div>
             <div>
               <label className="mb-1 block text-sm font-medium">Valid from</label>
-              <input
+              <Input
                 type="date"
                 value={form.valid_from}
                 onChange={(e) =>
                   setForm((f) => ({ ...f, valid_from: e.target.value }))
                 }
-                className="w-full rounded border border-border bg-background px-3 py-2 text-sm"
+                className="text-sm"
               />
             </div>
             <div>
               <label className="mb-1 block text-sm font-medium">Valid until</label>
-              <input
+              <Input
                 type="date"
                 value={form.valid_until}
                 onChange={(e) =>
                   setForm((f) => ({ ...f, valid_until: e.target.value }))
                 }
-                className="w-full rounded border border-border bg-background px-3 py-2 text-sm"
+                className="text-sm"
               />
             </div>
             <div className="flex items-center gap-2">
               <input
                 type="checkbox"
                 id="is_active"
+                className="form-checkbox"
                 checked={form.is_active}
                 onChange={(e) =>
                   setForm((f) => ({ ...f, is_active: e.target.checked }))
@@ -329,20 +333,19 @@ export default function CouponsPage() {
                   </span>
                 </td>
                 <td className="px-4 py-3 text-right">
-                  <button
-                    type="button"
+                  <ClickableText
                     onClick={() => openEdit(c)}
-                    className="mr-2 text-primary hover:underline"
+                    className="mr-2 text-sm"
                   >
                     Edit
-                  </button>
-                  <button
-                    type="button"
+                  </ClickableText>
+                  <ClickableText
+                    variant="destructive"
                     onClick={() => handleDelete(c.public_id)}
-                    className="text-destructive hover:underline"
+                    className="text-sm"
                   >
                     Delete
-                  </button>
+                  </ClickableText>
                 </td>
               </tr>
             ))}

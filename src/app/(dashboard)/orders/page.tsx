@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Undo2 } from "lucide-react";
+import { ClickableText } from "@/components/ui/clickable-text";
 import api from "@/lib/api";
 import { useBranding } from "@/context/BrandingContext";
 import type { Order, PaginatedResponse } from "@/types";
@@ -139,7 +140,7 @@ export default function OrdersPage() {
                       type="checkbox"
                       checked={allSelected}
                       onChange={toggleSelectAll}
-                      className="h-4 w-4 rounded border-input text-primary focus:ring-primary"
+                      className="form-checkbox"
                       aria-label="Select all orders on this page"
                     />
                   </th>
@@ -161,17 +162,17 @@ export default function OrdersPage() {
                         type="checkbox"
                         checked={selectedIds.has(order.public_id)}
                         onChange={() => toggleSelect(order.public_id)}
-                        className="h-4 w-4 rounded border-input text-primary focus:ring-primary"
+                        className="form-checkbox"
                         aria-label={`Select order ${order.order_number}`}
                       />
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap">
-                      <Link
+                      <ClickableText
                         href={`/orders/${order.public_id}`}
-                        className="font-medium text-primary hover:underline whitespace-nowrap"
+                        className="whitespace-nowrap"
                       >
                         {order.order_number}
-                      </Link>
+                      </ClickableText>
                     </td>
                     <td className="px-4 py-3 text-foreground whitespace-nowrap">
                       {order.shipping_name || "—"}

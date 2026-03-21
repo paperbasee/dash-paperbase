@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import { Undo2, AlertTriangle } from "lucide-react";
+import { ClickableText } from "@/components/ui/clickable-text";
+import { Input } from "@/components/ui/input";
 import api from "@/lib/api";
 import type { Inventory, PaginatedResponse } from "@/types";
 
@@ -111,12 +112,9 @@ export default function InventoryPage() {
                     className={`hover:bg-muted/40 ${inv.is_low ? "bg-amber-50/50 dark:bg-amber-950/20" : ""}`}
                   >
                     <td className="px-4 py-3 font-medium text-foreground">
-                      <Link
-                        href={`/products/${inv.product_public_id}`}
-                        className="text-primary hover:underline"
-                      >
+                      <ClickableText href={`/products/${inv.product_public_id}`}>
                         {inv.product_name}
-                      </Link>
+                      </ClickableText>
                     </td>
                     <td className="px-4 py-3 text-muted-foreground">
                       {inv.variant_sku || "—"}
@@ -129,7 +127,7 @@ export default function InventoryPage() {
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center justify-end gap-2">
-                        <input
+                        <Input
                           type="number"
                           value={adjustValue[inv.public_id] ?? ""}
                           onChange={(e) =>
@@ -139,7 +137,8 @@ export default function InventoryPage() {
                             }))
                           }
                           placeholder="±"
-                          className="w-20 rounded border border-border bg-background px-2 py-1 text-right text-sm"
+                          className="w-20 px-2 py-1 text-right text-sm"
+                          size="sm"
                         />
                         <button
                           type="button"

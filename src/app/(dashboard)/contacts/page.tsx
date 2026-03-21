@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Undo2 } from "lucide-react";
+import { ClickableText } from "@/components/ui/clickable-text";
 import api from "@/lib/api";
 import type { ContactSubmission, PaginatedResponse } from "@/types";
 
@@ -92,20 +93,21 @@ export default function ContactsPage() {
                     </p>
                   </div>
                   <div className="flex gap-2">
-                    <button
+                    <ClickableText
                       onClick={() =>
                         setExpanded(expanded === contact.public_id ? null : contact.public_id)
                       }
-                      className="text-sm text-primary hover:underline"
+                      className="text-sm"
                     >
                       {expanded === contact.public_id ? "Hide" : "View"}
-                    </button>
-                    <button
+                    </ClickableText>
+                    <ClickableText
+                      variant="destructive"
                       onClick={() => handleDelete(contact.public_id)}
-                      className="text-sm text-destructive hover:underline"
+                      className="text-sm"
                     >
                       Delete
-                    </button>
+                    </ClickableText>
                   </div>
                 </div>
                 {expanded === contact.public_id && (
