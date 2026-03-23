@@ -39,7 +39,6 @@ export default function DashboardLayout({
   const { isAuthenticated, isLoading } = useAuth();
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [bannerDismissed, setBannerDismissed] = useState(false);
   const [systemBannerVisible, setSystemBannerVisible] = useState(false);
   const [subscription, setSubscription] = useState<MeSubscription | null>(null);
   const [storeCount, setStoreCount] = useState(0);
@@ -149,7 +148,7 @@ export default function DashboardLayout({
     );
   }
 
-  const showSystemBanner = systemBannerVisible && !bannerDismissed;
+  const showSystemBanner = systemBannerVisible;
 
   return (
     <BrandingProvider>
@@ -157,13 +156,10 @@ export default function DashboardLayout({
         <NotificationProvider>
           <div className="min-h-screen bg-muted/30">
             {/* Fixed banner at top - no scroll jitter, pixel-perfect alignment with sidebar header */}
-            {!bannerDismissed && (
-              <SystemNotificationBanner
-                onDismiss={() => setBannerDismissed(true)}
-                onPresenceChange={setSystemBannerVisible}
-                sidebarCollapsed={collapsed}
-              />
-            )}
+            <SystemNotificationBanner
+              onPresenceChange={setSystemBannerVisible}
+              sidebarCollapsed={collapsed}
+            />
 
             <Sidebar
               collapsed={collapsed}
