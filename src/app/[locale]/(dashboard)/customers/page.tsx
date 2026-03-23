@@ -8,6 +8,12 @@ import { Undo2 } from "lucide-react";
 import api from "@/lib/api";
 import type { Customer, PaginatedResponse } from "@/types";
 
+function formatMdy(dateValue: string) {
+  const date = new Date(dateValue);
+  if (Number.isNaN(date.getTime())) return "—";
+  return `${date.getMonth() + 1}-${date.getDate()}-${date.getFullYear()}`;
+}
+
 export default function CustomersPage() {
   const router = useRouter();
   const locale = useLocale();
@@ -87,18 +93,30 @@ export default function CustomersPage() {
                   <th className="th">Username</th>
                   <th className="th">Phone</th>
                   <th className="th">Marketing</th>
-                  <th className="th">Extra</th>
+                  <th className="th">Total Orders</th>
                   <th className="th">Joined</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border/60">
                 {customers.map((c) => (
-                  <tr key={c.public_id} className="hover:bg-muted/40">
+                  <tr
+                    key={c.public_id}
+                    className="cursor-pointer hover:bg-muted/40 focus-within:bg-muted/40"
+                    role="link"
+                    tabIndex={0}
+                    onClick={() => router.push(`/customers/${c.public_id}`)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        router.push(`/customers/${c.public_id}`);
+                      }
+                    }}
+                  >
                     <td className="px-4 py-3 font-medium text-foreground">
-                      {c.user_email}
+                      {c.email || c.user_email || "—"}
                     </td>
                     <td className="px-4 py-3 text-muted-foreground">
-                      {c.user_username}
+                      <span className="whitespace-nowrap">{c.name || c.user_username || "—"}</span>
                     </td>
                     <td className="px-4 py-3 text-muted-foreground">
                       {c.phone || "—"}
@@ -107,14 +125,14 @@ export default function CustomersPage() {
                       {c.marketing_opt_in ? "Yes" : "No"}
                     </td>
                     <td className="px-4 py-3 text-muted-foreground">
-                      {c.extra_data && typeof c.extra_data === "object"
-                        ? Object.keys(c.extra_data).length
-                        : 0}
+                      {c.total_orders ?? 0}
                     </td>
                     <td className="px-4 py-3 text-muted-foreground">
-                      {c.created_at
-                        ? new Date(c.created_at).toLocaleDateString()
-                        : "—"}
+                      <span className="whitespace-nowrap">
+                        {c.created_at
+                          ? formatMdy(c.created_at)
+                          : "—"}
+                      </span>
                     </td>
                   </tr>
                 ))}

@@ -337,14 +337,46 @@ export interface Review {
 
 export interface Customer {
   public_id: string;
-  user_public_id: string;
-  user_email: string;
-  user_username: string;
+  user_public_id: string | null;
+  user_email: string | null;
+  user_username: string | null;
+  name: string;
+  email: string | null;
   phone: string;
+  address: string | null;
+  total_orders: number;
   marketing_opt_in: boolean;
   extra_data?: Record<string, string | number | boolean>;
   created_at: string;
   updated_at?: string;
+}
+
+export interface CustomerDetailsResponse {
+  customer: {
+    public_id: string;
+    name: string;
+    email: string | null;
+    phone: string;
+    address: string | null;
+    district: string | null;
+  };
+  analytics: {
+    total_orders: number;
+    total_spent: string;
+    average_order_value: string;
+    first_order_date: string | null;
+    last_order_date: string | null;
+    loyalty_score: string;
+  };
+  ordered_products: Array<{
+    order_public_id: string;
+    order_number: string;
+    ordered_at: string;
+    product_public_id: string;
+    product_name: string;
+    quantity: number;
+    price: string;
+  }>;
 }
 
 export interface ShippingZone {

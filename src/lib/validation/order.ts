@@ -14,8 +14,9 @@ export const orderCreateSchema = z.object({
   email: z
     .string()
     .trim()
-    .min(1, "Email is required.")
-    .email("Please enter a valid email address."),
+    .email("Please enter a valid email address.")
+    .optional()
+    .or(z.literal("")),
   shipping_address: z.string().trim().min(1, "Shipping address is required."),
   district: z.string().trim().min(1, "District is required."),
   delivery_area: z.string().trim().min(1, "Delivery area is required."),
