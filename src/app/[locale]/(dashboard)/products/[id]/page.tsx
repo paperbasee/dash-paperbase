@@ -19,6 +19,7 @@ import { MAX_PRODUCT_IMAGES } from "@/lib/product-media";
 import {
   parseValidation,
   productUpdateSchema,
+  slugFromName,
   validateRequiredExtraFields,
 } from "@/lib/validation";
 
@@ -68,6 +69,9 @@ export default function EditProductPage() {
     () => Array(MAX_IMAGES).fill(null)
   );
   const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(0);
+  const [resolvedSlug, setResolvedSlug] = useState("");
+  const [slugUsesFallback, setSlugUsesFallback] = useState(false);
+  const [slugChecking, setSlugChecking] = useState(false);
 
   const existingImageUrls = useMemo(() => {
     if (!product) return Array(MAX_IMAGES).fill(null) as (string | null)[];
@@ -90,6 +94,7 @@ export default function EditProductPage() {
   const hasMainImage = Boolean(imageFiles[0] || existingImageUrls[0]);
   const canAddMore = imagePreviews.filter(Boolean).length < MAX_IMAGES;
   const canAddToGallery = hasMainImage && canAddMore;
+  const baseSlug = slugFromName(form.name);
 
   useEffect(() => {
     Promise.all([
@@ -107,7 +112,7 @@ export default function EditProductPage() {
         setCategories(cats);
         setForm({
           name: p.name,
-          brand: p.brand,
+          brand: p.brand ?? "",
           price: p.price,
           original_price: p.original_price ?? "",
           category: parentId != null ? String(parentId) : String(p.category),
@@ -134,6 +139,41 @@ export default function EditProductPage() {
     return () => urls.forEach((u) => u && URL.revokeObjectURL(u));
   }, [imageFiles]);
 
+  useEffect(() => {
+    if (!baseSlug) {
+      setResolvedSlug("");
+      setSlugUsesFallback(false);
+      return;
+    }
+    const t = setTimeout(() => {
+      setSlugChecking(true);
+      void (async () => {
+        try {
+          let candidate = baseSlug;
+          let counter = 2;
+          while (true) {
+            const res = await api.get<{ available: boolean }>(
+              `admin/products/check-slug/?slug=${encodeURIComponent(candidate)}&exclude_public_id=${encodeURIComponent(product_public_id)}`
+            );
+            if (res.data.available) {
+              setResolvedSlug(candidate);
+              setSlugUsesFallback(candidate !== baseSlug);
+              break;
+            }
+            candidate = `${baseSlug}-${counter}`;
+            counter += 1;
+          }
+        } catch {
+          setResolvedSlug(baseSlug);
+          setSlugUsesFallback(false);
+        } finally {
+          setSlugChecking(false);
+        }
+      })();
+    }, 400);
+    return () => clearTimeout(t);
+  }, [baseSlug, product_public_id]);
+
   const filteredChildCategories = categories.filter(
     (c) => String(c.parent) === form.category
   );
@@ -146,7 +186,6 @@ export default function EditProductPage() {
     if (!formValidation.success) {
       setError(
         formValidation.errors.name ??
-          formValidation.errors.brand ??
           formValidation.errors.price ??
           formValidation.errors.category ??
           "Please correct the highlighted fields."
@@ -167,8 +206,9 @@ export default function EditProductPage() {
     setError("");
 
     const formData = new FormData();
+    const normalizedBrand = form.brand.trim();
     formData.append("name", form.name);
-    formData.append("brand", form.brand);
+    formData.append("brand", normalizedBrand);
     formData.append("price", form.price);
     if (form.original_price) formData.append("original_price", form.original_price);
     formData.append("category", form.sub_category || form.category);
@@ -316,14 +356,26 @@ export default function EditProductPage() {
                   placeholder="e.g. Wireless Earbuds Pro"
                   className={fieldControlClass}
                 />
-              </Field>
-              <Field label="Slug">
-                <Input
-                  type="text"
-                  readOnly
-                  value={product.slug || "—"}
-                  className={`${fieldControlClass} bg-muted/80 font-mono text-sm`}
-                />
+                <div className="mt-1.5 flex items-center gap-2">
+                  <p
+                    className="text-xs text-muted-foreground"
+                    aria-describedby={slugUsesFallback ? "slug-warning" : undefined}
+                  >
+                    Slug:{" "}
+                    <span className="font-mono">{resolvedSlug || baseSlug || "—"}</span>
+                  </p>
+                  {slugChecking && (
+                    <span className="text-xs text-muted-foreground">Checking…</span>
+                  )}
+                </div>
+                {slugUsesFallback && baseSlug && (
+                  <p
+                    id="slug-warning"
+                    className="mt-1 inline-flex items-center rounded-md border border-amber-200 bg-amber-50 px-2 py-1 text-xs text-amber-700 dark:border-amber-900/50 dark:bg-amber-950/20 dark:text-amber-300"
+                  >
+                    A similar slug already exists. Using an alternative for SEO.
+                  </p>
+                )}
               </Field>
               <Field label="Description">
                 <Textarea
@@ -336,10 +388,9 @@ export default function EditProductPage() {
                   className={fieldControlClass}
                 />
               </Field>
-              <Field label="Brand" required>
+              <Field label="Brand">
                 <Input
                   type="text"
-                  required
                   value={form.brand}
                   onChange={(e) => setForm({ ...form, brand: e.target.value })}
                   placeholder="Brand name"

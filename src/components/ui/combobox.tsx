@@ -22,11 +22,21 @@ function ComboboxTrigger({
   children,
   ...props
 }: ComboboxPrimitive.Trigger.Props) {
+  const { onMouseDown, ...rest } = props
+
   return (
     <ComboboxPrimitive.Trigger
       data-slot="combobox-trigger"
       className={cn("[&_svg:not([class*='size-'])]:size-4", className)}
-      {...props}
+      onMouseDown={(event) => {
+        // Keep focus on the input so we don't end up hiding
+        // a focused descendant when the addon gets aria-hidden.
+        if (event.button === 0 && !event.defaultPrevented) {
+          event.preventDefault()
+        }
+        onMouseDown?.(event)
+      }}
+      {...rest}
     >
       {children}
       <ChevronDownIcon

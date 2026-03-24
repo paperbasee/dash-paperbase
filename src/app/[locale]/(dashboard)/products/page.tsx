@@ -379,7 +379,7 @@ export default function ProductsPage() {
                       </ClickableText>
                     </td>
                     <td className="px-4 py-3 text-foreground whitespace-nowrap">
-                      {product.brand}
+                      {product.brand || "—"}
                     </td>
                     <td className="px-4 py-3 text-muted-foreground whitespace-nowrap">
                       {product.category_name}

@@ -14,7 +14,23 @@ describe("product validation", () => {
   it("accepts valid product create payload", () => {
     const result = productCreateSchema.safeParse({
       name: "Product",
-      brand: "Brand",
+      brand: "",
+      price: "10",
+      category: "1",
+      sub_category: "",
+      stock: "3",
+      description: "",
+      original_price: "",
+      badge: "",
+      is_featured: false,
+      is_active: true,
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("accepts valid payload when brand is omitted", () => {
+    const result = productCreateSchema.safeParse({
+      name: "Product",
       price: "10",
       category: "1",
       sub_category: "",

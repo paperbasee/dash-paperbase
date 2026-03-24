@@ -62,12 +62,13 @@ export default function NewProductPage() {
   const [imagePreviews, setImagePreviews] = useState<(string | null)[]>(
     () => Array(MAX_IMAGES).fill(null)
   );
-  const [slugTaken, setSlugTaken] = useState(false);
+  const [resolvedSlug, setResolvedSlug] = useState("");
+  const [slugUsesFallback, setSlugUsesFallback] = useState(false);
   const [slugChecking, setSlugChecking] = useState(false);
   /** Which slot (0…MAX-1) is shown in the big preview; null = first filled or none. */
   const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(0);
 
-  const derivedSlug = slugFromName(form.name);
+  const baseSlug = slugFromName(form.name);
 
   const firstFilledIndex = imagePreviews.findIndex(Boolean);
   const bigPreviewUrl =
@@ -98,22 +99,39 @@ export default function NewProductPage() {
   }, [imageFiles]);
 
   useEffect(() => {
-    if (!derivedSlug) {
-      setSlugTaken(false);
+    if (!baseSlug) {
+      setResolvedSlug("");
+      setSlugUsesFallback(false);
       return;
     }
     const t = setTimeout(() => {
       setSlugChecking(true);
-      api
-        .get<{ available: boolean }>(
-          `admin/products/check-slug/?slug=${encodeURIComponent(derivedSlug)}`
-        )
-        .then((res) => setSlugTaken(!res.data.available))
-        .catch(() => setSlugTaken(false))
-        .finally(() => setSlugChecking(false));
+      void (async () => {
+        try {
+          let candidate = baseSlug;
+          let counter = 2;
+          while (true) {
+            const res = await api.get<{ available: boolean }>(
+              `admin/products/check-slug/?slug=${encodeURIComponent(candidate)}`
+            );
+            if (res.data.available) {
+              setResolvedSlug(candidate);
+              setSlugUsesFallback(candidate !== baseSlug);
+              break;
+            }
+            candidate = `${baseSlug}-${counter}`;
+            counter += 1;
+          }
+        } catch {
+          setResolvedSlug(baseSlug);
+          setSlugUsesFallback(false);
+        } finally {
+          setSlugChecking(false);
+        }
+      })();
     }, 400);
     return () => clearTimeout(t);
-  }, [derivedSlug]);
+  }, [baseSlug]);
 
   const filteredChildCategories = categories.filter(
     (c) => String(c.parent) === form.category
@@ -121,13 +139,10 @@ export default function NewProductPage() {
 
   async function handleSubmit(e: FormEvent, asDraft: boolean) {
     e.preventDefault();
-    if (slugTaken) return;
-
     const formValidation = parseValidation(productCreateSchema, form);
     if (!formValidation.success) {
       setError(
         formValidation.errors.name ??
-          formValidation.errors.brand ??
           formValidation.errors.price ??
           formValidation.errors.category ??
           "Please correct the highlighted fields."
@@ -148,8 +163,9 @@ export default function NewProductPage() {
     setError("");
 
     const formData = new FormData();
+    const normalizedBrand = form.brand.trim();
     formData.append("name", form.name);
-    formData.append("brand", form.brand);
+    if (normalizedBrand) formData.append("brand", normalizedBrand);
     formData.append("price", form.price);
     if (form.original_price) formData.append("original_price", form.original_price);
     formData.append("category", form.sub_category || form.category);
@@ -235,7 +251,7 @@ export default function NewProductPage() {
               type="button"
               variant="outline"
               onClick={onSaveDraft}
-              disabled={saving || slugTaken}
+              disabled={saving}
               className="gap-2"
             >
             <FileText className="size-4" />
@@ -244,7 +260,7 @@ export default function NewProductPage() {
           <Button
             type="submit"
             form="product-form"
-            disabled={saving || slugTaken}
+            disabled={saving}
             onClick={() => {
               submitAsDraftRef.current = false;
             }}
@@ -290,23 +306,24 @@ export default function NewProductPage() {
                   placeholder="e.g. Wireless Earbuds Pro"
                   className={fieldControlClass}
                 />
-              </Field>
-              <Field label="Slug">
-                <div className="flex items-center gap-2">
-                  <Input
-                    type="text"
-                    readOnly
-                    value={derivedSlug || "—"}
-                    className={`${fieldControlClass} bg-muted/80 font-mono text-sm`}
-                    aria-describedby={slugTaken ? "slug-error" : undefined}
-                  />
+                <div className="mt-1.5 flex items-center gap-2">
+                  <p
+                    className="text-xs text-muted-foreground"
+                    aria-describedby={slugUsesFallback ? "slug-warning" : undefined}
+                  >
+                    Slug:{" "}
+                    <span className="font-mono">{resolvedSlug || baseSlug || "—"}</span>
+                  </p>
                   {slugChecking && (
                     <span className="text-xs text-muted-foreground">Checking…</span>
                   )}
                 </div>
-                {slugTaken && derivedSlug && (
-                  <p id="slug-error" className="mt-1.5 text-sm text-destructive">
-                    A product with this slug already exists. Please change the product name.
+                {slugUsesFallback && baseSlug && (
+                  <p
+                    id="slug-warning"
+                    className="mt-1 inline-flex items-center rounded-md border border-amber-200 bg-amber-50 px-2 py-1 text-xs text-amber-700 dark:border-amber-900/50 dark:bg-amber-950/20 dark:text-amber-300"
+                  >
+                    A similar slug already exists. Using an alternative for SEO.
                   </p>
                 )}
               </Field>
@@ -321,10 +338,9 @@ export default function NewProductPage() {
                   className={fieldControlClass}
                 />
               </Field>
-              <Field label="Brand" required>
+              <Field label="Brand">
                 <Input
                   type="text"
-                  required
                   value={form.brand}
                   onChange={(e) => setForm({ ...form, brand: e.target.value })}
                   placeholder="Brand name"

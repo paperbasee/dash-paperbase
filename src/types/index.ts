@@ -69,7 +69,7 @@ export interface Order {
 export interface Product {
   public_id: string;
   name: string;
-  brand: string;
+  brand: string | null;
   slug: string;
   price: string;
   original_price: string | null;

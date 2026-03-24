@@ -12,7 +12,7 @@ export function slugFromName(name: string): string {
 
 export const productCreateSchema = z.object({
   name: z.string().trim().min(1, "Product name is required."),
-  brand: z.string().trim().min(1, "Brand is required."),
+  brand: z.string().optional(),
   price: z.string().trim().min(1, "Price is required."),
   category: z.string().trim().min(1, "Parent category is required."),
   sub_category: z.string().optional(),
