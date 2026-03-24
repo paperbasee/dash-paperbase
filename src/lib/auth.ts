@@ -5,7 +5,7 @@ const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 export interface LoginResponse {
   access: string;
   refresh: string;
-  active_store_id: string | null;
+  active_store_public_id: string | null;
 }
 
 export interface PendingTwoFactorResponse {

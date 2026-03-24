@@ -32,7 +32,7 @@ const BADGE_OPTIONS = [
 const MAX_IMAGES = MAX_PRODUCT_IMAGES;
 
 export default function EditProductPage() {
-  const { id } = useParams<{ locale: string; id: string }>();
+  const { id: product_public_id } = useParams<{ locale: string; id: string }>();
   const router = useRouter();
   const formRef = useRef<HTMLFormElement>(null);
   const submitAsDraftRef = useRef(false);
@@ -93,7 +93,7 @@ export default function EditProductPage() {
 
   useEffect(() => {
     Promise.all([
-      api.get<Product>(`admin/products/${id}/`),
+      api.get<Product>(`admin/products/${product_public_id}/`),
       api.get("admin/parent-categories/"),
       api.get("admin/categories/"),
     ])
@@ -126,7 +126,7 @@ export default function EditProductPage() {
       })
       .catch(console.error)
       .finally(() => setLoading(false));
-  }, [id]);
+  }, [product_public_id]);
 
   useEffect(() => {
     const urls = imageFiles.map((f) => (f ? URL.createObjectURL(f) : null));
@@ -184,7 +184,7 @@ export default function EditProductPage() {
     }
 
     try {
-      const { data } = await api.patch(`admin/products/${id}/`, formData);
+      const { data } = await api.patch(`admin/products/${product_public_id}/`, formData);
       setProduct(data);
       router.push("/products");
     } catch (err: unknown) {
@@ -408,7 +408,7 @@ export default function EditProductPage() {
                   stored per variant; <strong>total units</strong> (sum of variant stock):{" "}
                   <span className="font-numbers text-foreground">{product.total_stock ?? product.stock}</span>.{" "}
                   <ClickableText
-                    href={`/variants?product=${encodeURIComponent(id)}`}
+                    href={`/variants?product=${encodeURIComponent(product_public_id)}`}
                     className="underline-offset-2"
                   >
                     Manage variants

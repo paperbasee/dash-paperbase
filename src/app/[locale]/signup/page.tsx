@@ -94,7 +94,7 @@ export default function SignupPage() {
         );
         return;
       }
-      router.push(result.active_store_id ? "/" : "/onboarding");
+      router.push(result.active_store_public_id ? "/" : "/onboarding");
     } catch {
       setError(t("invalidOtp"));
     } finally {

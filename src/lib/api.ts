@@ -5,7 +5,7 @@ const api = axios.create({
   headers: { "Content-Type": "application/json" },
 });
 
-function getActiveStoreIdFromJwt(token: string): string | null {
+function getActiveStorePublicIdFromJwt(token: string): string | null {
   try {
     const parts = token.split(".");
     if (parts.length < 2) return null;
@@ -13,8 +13,8 @@ function getActiveStoreIdFromJwt(token: string): string | null {
     const normalized = payload.replace(/-/g, "+").replace(/_/g, "/");
     const padded = normalized.padEnd(Math.ceil(normalized.length / 4) * 4, "=");
     const json = atob(padded);
-    const data = JSON.parse(json) as { active_store_id?: unknown };
-    const val = data.active_store_id;
+    const data = JSON.parse(json) as { active_store_public_id?: unknown };
+    const val = data.active_store_public_id;
     if (typeof val === "string" && val.trim()) return val;
     return null;
   } catch {
@@ -28,9 +28,9 @@ api.interceptors.request.use((config) => {
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
       // Many admin endpoints require an active store context.
-      const storeId = getActiveStoreIdFromJwt(token);
-      if (storeId) {
-        config.headers["X-Store-ID"] = storeId;
+      const storePublicId = getActiveStorePublicIdFromJwt(token);
+      if (storePublicId) {
+        config.headers["X-Store-Public-ID"] = storePublicId;
       }
     }
   }

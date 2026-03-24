@@ -234,8 +234,8 @@ function SidebarContent({
       const payload = parts[1];
       const normalized = payload.replace(/-/g, "+").replace(/_/g, "/");
       const padded = normalized.padEnd(Math.ceil(normalized.length / 4) * 4, "=");
-      const decoded = JSON.parse(atob(padded)) as { active_store_id?: unknown };
-      const val = decoded.active_store_id;
+      const decoded = JSON.parse(atob(padded)) as { active_store_public_id?: unknown };
+      const val = decoded.active_store_public_id;
       if (typeof val === "string" && val.trim()) {
         setActiveStoreId(val);
       } else if (typeof val === "number" && Number.isFinite(val)) {
@@ -303,21 +303,21 @@ function SidebarContent({
       const { data } = await api.post<{
         access: string;
         refresh: string;
-        active_store_id: string | number;
+        active_store_public_id: string | number;
         ["2fa_required"]?: boolean;
         challenge_public_id?: string;
-      }>("auth/switch-store/", { store_id: storeId });
+      }>("auth/switch-store/", { store_public_id: storeId });
       if ("2fa_required" in data && data["2fa_required"] && data.challenge_public_id) {
         const otpCode = window.prompt(tSidebar("twoFaSwitchPrompt"));
         if (!otpCode) {
           return;
         }
         const verified = await verifyTwoFactorChallenge(data.challenge_public_id, otpCode);
-        setActiveStoreId(String(verified.active_store_id));
+        setActiveStoreId(String(verified.active_store_public_id));
       } else {
         window.localStorage.setItem("access_token", data.access);
         window.localStorage.setItem("refresh_token", data.refresh);
-        setActiveStoreId(String(data.active_store_id));
+        setActiveStoreId(String(data.active_store_public_id));
       }
       onNavigate?.();
       router.refresh();

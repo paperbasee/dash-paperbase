@@ -135,7 +135,7 @@ function buildTimelineEvents(order: Order): { icon: typeof Package; text: string
 }
 
 export default function OrderDetailPage() {
-  const { id } = useParams<{ locale: string; id: string }>();
+  const { id: order_public_id } = useParams<{ locale: string; id: string }>();
   const router = useRouter();
   const { currencySymbol } = useBranding();
   const [order, setOrder] = useState<Order | null>(null);
@@ -176,11 +176,11 @@ export default function OrderDetailPage() {
 
   useEffect(() => {
     api
-      .get<Order>(`admin/orders/${id}/`)
+      .get<Order>(`admin/orders/${order_public_id}/`)
       .then((res) => setOrder(res.data))
       .catch(console.error)
       .finally(() => setLoading(false));
-  }, [id]);
+  }, [order_public_id]);
 
   useEffect(() => {
     Promise.all([
@@ -393,7 +393,7 @@ export default function OrderDetailPage() {
         ],
         ...(Object.keys(extraFields).length > 0 && { extra_data: extraFields }),
       };
-      const { data } = await api.patch<Order>(`admin/orders/${id}/`, payload);
+      const { data } = await api.patch<Order>(`admin/orders/${order_public_id}/`, payload);
       setOrder(data);
       setEditing(false);
     } catch (err: unknown) {
@@ -406,7 +406,7 @@ export default function OrderDetailPage() {
   async function handleDelete() {
     if (!confirm("Delete this order permanently?")) return;
     try {
-      await api.delete(`admin/orders/${id}/`);
+      await api.delete(`admin/orders/${order_public_id}/`);
       router.push("/orders");
     } catch (err) {
       console.error(err);
@@ -420,7 +420,7 @@ export default function OrderDetailPage() {
     setSendingToCourier(true);
     try {
       const { data } = await api.post<Order>(
-        `admin/orders/${id}/send-to-courier/`
+        `admin/orders/${order_public_id}/send-to-courier/`
       );
       setOrder(data);
       setCourierSuccess(true);
@@ -443,7 +443,7 @@ export default function OrderDetailPage() {
         courier_status: string;
         order_status?: string;
         details: Record<string, unknown>;
-      }>(`admin/orders/${id}/track/`);
+      }>(`admin/orders/${order_public_id}/track/`);
       setTrackingDetails(data.details);
       setOrder((prev) =>
         prev

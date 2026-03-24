@@ -39,7 +39,7 @@ export default function LoginPage() {
     try {
       const result = await login(validation.data.email, validation.data.password);
       if (!("2fa_required" in result)) {
-        router.push(result.active_store_id ? "/" : "/onboarding");
+        router.push(result.active_store_public_id ? "/" : "/onboarding");
       }
     } catch {
       setError(t("invalidCredentials"));
@@ -58,7 +58,7 @@ export default function LoginPage() {
         pendingTwoFactor.challenge_public_id,
         otpCode
       );
-      router.push(result.active_store_id ? "/" : "/onboarding");
+      router.push(result.active_store_public_id ? "/" : "/onboarding");
     } catch {
       setError(t("invalidOtp"));
     } finally {

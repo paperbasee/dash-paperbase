@@ -25,7 +25,7 @@ export interface StoreFormData {
 type StoreFormErrors = Partial<Record<keyof StoreFormData, string>>;
 
 interface MeResponse {
-  active_store_id: string | null;
+  active_store_public_id: string | null;
   email?: string;
   first_name?: string;
   last_name?: string;
@@ -69,7 +69,7 @@ export function useOnboarding() {
       try {
         const { data } = await api.get<MeResponse>("auth/me/");
         const hasStores = (data.stores?.length ?? 0) > 0;
-        if (data.active_store_id && hasStores && !isAddMode) {
+        if (data.active_store_public_id && hasStores && !isAddMode) {
           router.replace("/");
           return;
         }
@@ -162,10 +162,10 @@ export function useOnboarding() {
       const { data: switchData } = await api.post<{
         access: string;
         refresh: string;
-        active_store_id?: string;
+        active_store_public_id?: string;
         ["2fa_required"]?: boolean;
         challenge_public_id?: string;
-      }>("auth/switch-store/", { store_id: store.public_id });
+      }>("auth/switch-store/", { store_public_id: store.public_id });
 
       if ("2fa_required" in switchData && switchData["2fa_required"] && switchData.challenge_public_id) {
         const otpCode = window.prompt("Enter your 2FA code to activate this store:");

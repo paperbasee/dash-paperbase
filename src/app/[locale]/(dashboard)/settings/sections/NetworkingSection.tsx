@@ -232,7 +232,7 @@ export default function NetworkingSection({ hidden }: { hidden: boolean }) {
       <p className="mt-6 text-xs text-muted-foreground">
         Real-time (authenticated): connect WebSocket to{" "}
         <code className="rounded bg-muted px-1">/ws/v1/store/events/?token=&lt;access_jwt&gt;</code> on
-        your store hostname; JWT <code className="rounded bg-muted px-1">active_store_id</code> must
+        your store hostname; JWT <code className="rounded bg-muted px-1">active_store_public_id</code> must
         match the store resolved from the Host header.
       </p>
 
