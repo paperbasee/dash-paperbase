@@ -366,15 +366,8 @@ export default function ProductsPage() {
                     <td className="px-4 py-3 whitespace-nowrap">
                       <ClickableText
                         href={`/products/${product.public_id}`}
-                        className="flex max-w-xs items-center gap-3"
+                        className="flex max-w-xs items-center"
                       >
-                        {product.image_url && (
-                          <img
-                            src={product.image_url}
-                            alt={product.name}
-                            className="h-10 w-10 flex-shrink-0 rounded-lg object-cover"
-                          />
-                        )}
                         <span className="truncate">{product.name}</span>
                       </ClickableText>
                     </td>
