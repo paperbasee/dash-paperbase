@@ -122,7 +122,7 @@ export default function StoreInfoSection({
               id="store_name"
               value={storeName}
               onChange={(e) => onStoreNameChange(e.target.value)}
-              placeholder="e.g. Gadzilla"
+              placeholder="e.g. Acme"
               className="w-full"
             />
           </div>

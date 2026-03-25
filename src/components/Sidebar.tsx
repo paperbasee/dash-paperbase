@@ -65,6 +65,13 @@ import {
   setLocalePreferenceCookie,
 } from "@/lib/locale-storage";
 import { routing, type AppLocale } from "@/i18n/routing";
+import {
+  applyThemePreference,
+  getStoredThemePreference,
+  persistThemePreference,
+  subscribeToSystemThemeChanges,
+  type ThemePreference,
+} from "@/lib/theme";
 
 /** Top-level nav order; `__catalog__` is the Products / catalog group. */
 const MAIN_NAV_SEQUENCE = [
@@ -145,7 +152,7 @@ function SidebarContent({
     Array<{ public_id: string; name: string; role?: string }>
   >([]);
   const [activeStoreId, setActiveStoreId] = useState<string | null>(null);
-  const [theme, setTheme] = useState<"light" | "dark" | "system">("light");
+  const [theme, setTheme] = useState<ThemePreference>("system");
   /** Mobile sheet: center menu and size below nav panel width (desktop-style inset). */
   const [mobileUserMenuLayout, setMobileUserMenuLayout] = useState(false);
 
@@ -160,36 +167,21 @@ function SidebarContent({
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    const stored = window.localStorage.getItem("core-theme");
-    let initial: "light" | "dark" | "system" = "light";
-    if (stored === "light" || stored === "dark" || stored === "system") {
-      initial = stored;
-    } else if (window.matchMedia?.("(prefers-color-scheme: dark)").matches) {
-      initial = "system";
-    }
+    const initial = getStoredThemePreference() ?? "system";
     setTheme(initial);
-    const root = document.documentElement;
-    const applied =
-      initial === "system"
-        ? window.matchMedia?.("(prefers-color-scheme: dark)").matches
-          ? "dark"
-          : "light"
-        : initial;
-    root.setAttribute("data-theme", applied);
+    applyThemePreference(initial);
   }, []);
 
-  const handleThemeChange = (next: "light" | "dark" | "system") => {
+  useEffect(() => {
+    if (theme !== "system") return;
+    return subscribeToSystemThemeChanges(() => applyThemePreference("system"));
+  }, [theme]);
+
+  const handleThemeChange = (next: ThemePreference) => {
     setTheme(next);
     if (typeof window === "undefined") return;
-    window.localStorage.setItem("core-theme", next);
-    const root = document.documentElement;
-    const applied =
-      next === "system"
-        ? window.matchMedia?.("(prefers-color-scheme: dark)").matches
-          ? "dark"
-          : "light"
-        : next;
-    root.setAttribute("data-theme", applied);
+    persistThemePreference(next);
+    applyThemePreference(next);
   };
 
   const switchUserMenuLocale = (next: AppLocale) => {

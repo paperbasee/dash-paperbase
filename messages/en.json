@@ -19,7 +19,10 @@
     "back": "Back",
     "next": "Next",
     "search": "Search",
-    "close": "Close"
+    "close": "Close",
+    "termsOfService": "Terms of Service",
+    "privacyPolicy": "Privacy Policy",
+    "copyrightBrand": "© 2026 Brand"
   },
   "nav": {
     "home": "Home",
@@ -209,7 +212,6 @@
     "chartSupportTickets": "Support tickets"
   },
   "auth": {
-    "brandSubtitle": "Gadzilla Dashboard",
     "login": {
       "title": "Login",
       "welcome": "Hi, welcome back",

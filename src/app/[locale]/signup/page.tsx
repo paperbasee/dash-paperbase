@@ -12,7 +12,6 @@ import { parseValidation, registerSchema } from "@/lib/validation";
 export default function SignupPage() {
   const router = useRouter();
   const t = useTranslations("auth.signup");
-  const tBrand = useTranslations("auth");
   const tCommon = useTranslations("common");
   const { register, pendingTwoFactor, verifyTwoFactorChallenge } = useAuth();
   const [email, setEmail] = useState("");
@@ -103,26 +102,24 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-background via-background to-muted px-4">
-      <div className="w-full max-w-md border border-border bg-card p-8 shadow-xl backdrop-blur">
-        <div className="mb-8 space-y-2">
-          <p className="text-sm font-normal uppercase tracking-[0.25em] text-muted-foreground">
-            {tBrand("brandSubtitle")}
-          </p>
-          <h1 className="text-3xl font-semibold leading-relaxed tracking-tight text-foreground">
-            {t("title")}
-          </h1>
-          <p className="text-sm leading-relaxed text-muted-foreground">
-            {t("subtitle")}
-          </p>
-        </div>
+    <div className="flex min-h-screen flex-col bg-gradient-to-b from-background via-background to-muted/30 px-4 py-6">
+      <main className="flex flex-1 items-center justify-center">
+        <div className="w-full max-w-md space-y-8 sm:space-y-10">
+          <div className="space-y-2 text-center">
+            <h1 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
+              {t("title")}
+            </h1>
+            <p className="text-sm leading-relaxed text-muted-foreground">
+              {t("subtitle")}
+            </p>
+          </div>
 
-        <form
-          onSubmit={pendingTwoFactor ? handleOtpSubmit : handleSubmit}
-          className="space-y-6"
-        >
+          <form
+            onSubmit={pendingTwoFactor ? handleOtpSubmit : handleSubmit}
+            className="mx-auto w-full max-w-sm space-y-6"
+          >
           {error && (
-            <div className="border border-destructive/20 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+            <div className="rounded-md border border-destructive/20 bg-destructive/10 px-3 py-2 text-sm text-destructive">
               {error}
             </div>
           )}
@@ -140,6 +137,8 @@ export default function SignupPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder={t("emailPlaceholder")}
+                  autoComplete="email"
+                  inputMode="email"
                 />
               </div>
 
@@ -157,14 +156,13 @@ export default function SignupPage() {
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder={t("passwordPlaceholder")}
                     className="pr-10"
+                    autoComplete="new-password"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword((v) => !v)}
-                    className="absolute inset-y-0 right-0 flex items-center px-3 text-muted-foreground hover:text-foreground focus:outline-none"
-                    aria-label={
-                      showPassword ? t("hidePassword") : t("showPassword")
-                    }
+                    className="absolute inset-y-0 right-0 flex items-center px-3 text-muted-foreground hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                    aria-label={showPassword ? t("hidePassword") : t("showPassword")}
                   >
                     {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                   </button>
@@ -185,15 +183,14 @@ export default function SignupPage() {
                     onChange={(e) => setPasswordConfirm(e.target.value)}
                     placeholder={t("confirmPlaceholder")}
                     className="pr-10"
+                    autoComplete="new-password"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPasswordConfirm((v) => !v)}
-                    className="absolute inset-y-0 right-0 flex items-center px-3 text-muted-foreground hover:text-foreground focus:outline-none"
+                    className="absolute inset-y-0 right-0 flex items-center px-3 text-muted-foreground hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                     aria-label={
-                      showPasswordConfirm
-                        ? t("hidePassword")
-                        : t("showPassword")
+                      showPasswordConfirm ? t("hidePassword") : t("showPassword")
                     }
                   >
                     {showPasswordConfirm ? <EyeOff size={16} /> : <Eye size={16} />}
@@ -213,33 +210,54 @@ export default function SignupPage() {
                 value={otpCode}
                 onChange={(e) => setOtpCode(e.target.value)}
                 placeholder={t("otpPlaceholder")}
+                inputMode="numeric"
+                autoComplete="one-time-code"
               />
             </div>
           )}
 
-          <Button
-            type="submit"
-            disabled={loading}
-            className="mt-2 w-full"
-          >
-            {loading
-              ? tCommon("pleaseWait")
-              : pendingTwoFactor
-                ? t("verifyCode")
-                : t("createAccount")}
-          </Button>
-        </form>
+            <Button type="submit" disabled={loading} className="mt-2 w-full">
+              {loading
+                ? tCommon("pleaseWait")
+                : pendingTwoFactor
+                  ? t("verifyCode")
+                  : t("createAccount")}
+            </Button>
+          </form>
 
-        <p className="mt-6 text-center text-sm text-muted-foreground">
-          {t("hasAccount")}{" "}
-          <Link
-            href="/login"
-            className="font-medium text-foreground underline-offset-4 hover:underline"
-          >
-            {t("loginLink")}
-          </Link>
-        </p>
-      </div>
+          <p className="text-center text-sm text-muted-foreground">
+            {t("hasAccount")}{" "}
+            <Link
+              href="/login"
+              className="font-medium text-foreground underline-offset-4 hover:underline"
+            >
+              {t("loginLink")}
+            </Link>
+          </p>
+        </div>
+      </main>
+
+      <footer className="pb-3 pt-4">
+        <div className="mx-auto w-full max-w-sm text-center">
+          <p className="text-xs text-muted-foreground sm:whitespace-nowrap">
+            <Link
+              href="/terms-of-service"
+              className="underline-offset-4 hover:underline"
+            >
+              {tCommon("termsOfService")}
+            </Link>{" "}
+            <span aria-hidden>•</span>{" "}
+            <Link
+              href="/privacy-policy"
+              className="underline-offset-4 hover:underline"
+            >
+              {tCommon("privacyPolicy")}
+            </Link>{" "}
+            <span aria-hidden>•</span>{" "}
+            <span>{tCommon("copyrightBrand")}</span>
+          </p>
+        </div>
+      </footer>
     </div>
   );
 }

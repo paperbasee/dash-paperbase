@@ -19,7 +19,10 @@
     "back": "পিছনে",
     "next": "পরবর্তী",
     "search": "খুঁজুন",
-    "close": "বন্ধ"
+    "close": "বন্ধ",
+    "termsOfService": "সেবার শর্তাবলী",
+    "privacyPolicy": "গোপনীয়তা নীতি",
+    "copyrightBrand": "© ২০২৬ ব্র্যান্ড"
   },
   "nav": {
     "home": "হোম",
@@ -209,7 +212,6 @@
     "chartSupportTickets": "সাপোর্ট টিকিট"
   },
   "auth": {
-    "brandSubtitle": "Gadzilla ড্যাশবোর্ড",
     "login": {
       "title": "লগইন",
       "welcome": "স্বাগতম, আবার দেখায় ভালো লাগলো",

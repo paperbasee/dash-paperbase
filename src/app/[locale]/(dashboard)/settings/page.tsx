@@ -118,34 +118,36 @@ export default function SettingsPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <header className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-center gap-3">
-          <div className="rounded-lg bg-muted/80 px-1 py-1">
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              aria-label="Go back"
-              onClick={() => router.back()}
-              className="shrink-0"
-            >
-              <Undo2 className="size-4" />
-            </Button>
-          </div>
-          <div>
-            <h1 className="text-2xl font-semibold tracking-tight text-foreground">Settings</h1>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Your control center for store owners. Manage your store identity, products, orders,
-              integrations, and more.
-            </p>
-          </div>
-        </div>
-      </header>
-
+      {/* Header + tabs + content share one column on lg so back button and title align with the tab strip and cards */}
       <div
         className="flex flex-col gap-6 lg:mx-auto lg:max-w-full lg:min-w-0"
         style={settingsShellStyle}
       >
+        <header className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center gap-3">
+            <div className="rounded-lg bg-muted/80 px-1 py-1">
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                aria-label="Go back"
+                onClick={() => router.back()}
+                className="shrink-0"
+              >
+                <Undo2 className="size-4" />
+              </Button>
+            </div>
+            <div>
+              <h1 className="text-2xl font-semibold tracking-tight text-foreground">Settings</h1>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Your control center for store owners. Manage your store identity, products, orders,
+                integrations, and more.
+              </p>
+            </div>
+          </div>
+        </header>
+
+        <div className="flex min-w-0 flex-col gap-6">
         {/* Mobile: in-place expandable section picker */}
         <div className="lg:hidden">
           <Collapsible open={mobileNavOpen} onOpenChange={setMobileNavOpen}>
@@ -267,6 +269,7 @@ export default function SettingsPage() {
             logoSrc={previewUrl}
           />
         </main>
+        </div>
       </div>
 
       <DeleteStoreFlow

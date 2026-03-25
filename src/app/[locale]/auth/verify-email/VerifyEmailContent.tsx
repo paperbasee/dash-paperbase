@@ -126,10 +126,7 @@ export default function VerifyEmailContent() {
 
   return (
     <div className="w-full max-w-md border border-border bg-card p-8 shadow-xl backdrop-blur">
-      <p className="text-sm font-normal uppercase tracking-[0.25em] text-muted-foreground">
-        Gadzilla Dashboard
-      </p>
-      <h1 className="mt-2 text-3xl font-semibold tracking-tight text-foreground">
+      <h1 className="text-3xl font-semibold tracking-tight text-foreground">
         Check your email
       </h1>
       <p className="mt-3 text-sm text-muted-foreground">

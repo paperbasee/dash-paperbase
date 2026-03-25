@@ -9,6 +9,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "sonner";
 import { routing } from "@/i18n/routing";
 import { LocaleSync } from "@/components/LocaleSync";
+import { ThemeSync } from "@/components/ThemeSync";
 
 const openSans = Open_Sans({
   subsets: ["latin"],
@@ -50,6 +51,7 @@ export default async function LocaleLayout({
       <body className="antialiased font-sans">
         <NextIntlClientProvider locale={locale} messages={messages}>
           <LocaleSync />
+          <ThemeSync />
           <TooltipProvider>
             <AuthProvider>
               {children}
