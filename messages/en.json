@@ -260,4 +260,12 @@
       "otpPlaceholder": "Enter 6-digit code"
     }
   }
+  ,
+  "errors": {
+    "notFoundTitle": "Page not found",
+    "notFoundBody": "The page you’re looking for doesn’t exist or may have been moved.",
+    "goToDashboard": "Go to dashboard",
+    "genericTitle": "Something went wrong",
+    "genericBody": "Please try again later."
+  }
 }
