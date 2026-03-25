@@ -19,9 +19,9 @@ export function AppSelectionStep({
   onBack,
 }: AppSelectionStepProps) {
   return (
-    <form onSubmit={onSubmit} className="space-y-5">
+    <form onSubmit={onSubmit} className="space-y-4">
       {error && (
-        <div className="rounded-none border border-destructive/20 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+        <div className="rounded-md border border-destructive/20 bg-destructive/10 px-3 py-2 text-sm text-destructive">
           {error}
         </div>
       )}
@@ -31,7 +31,7 @@ export function AppSelectionStep({
         apps for your store:
       </p>
 
-      <div className="grid gap-3 sm:grid-cols-2">
+      <div className="grid gap-2 sm:grid-cols-2">
         {OPTIONAL_APP_IDS.map((id) => {
           const app = APP_CONFIG[id] as AppConfig | undefined;
           if (!app) return null;
@@ -41,17 +41,17 @@ export function AppSelectionStep({
             <label
               key={id}
               className={[
-                "flex cursor-pointer items-start gap-3 rounded-none border p-3 transition",
+                "flex cursor-pointer items-start gap-3 rounded-md p-2.5 transition",
                 checked
-                  ? "border-primary/40 bg-primary/5"
-                  : "border-border bg-muted/20 hover:border-border/80 hover:bg-muted/40",
+                  ? "bg-primary/5 ring-1 ring-primary/30"
+                  : "bg-muted/20 hover:bg-muted/40 ring-1 ring-border/30",
               ].join(" ")}
             >
               <input
                 type="checkbox"
                 checked={checked}
                 onChange={() => onToggleApp(id)}
-                className="form-checkbox mt-1 rounded-none"
+                className="form-checkbox mt-1"
               />
               <div className="min-w-0 flex-1">
                 <span className="block text-sm font-medium text-foreground">
@@ -67,19 +67,19 @@ export function AppSelectionStep({
         })}
       </div>
 
-      <div className="flex gap-3">
+      <div className="flex gap-2">
         <Button
           type="button"
           variant="outline"
           onClick={onBack}
-          className="flex-1 rounded-none"
+          className="flex-1"
         >
           Back
         </Button>
         <Button
           type="submit"
           disabled={loading}
-          className="flex-1 rounded-none"
+          className="flex-1"
         >
           {loading ? "Creating store..." : "Create store"}
         </Button>

@@ -5,6 +5,7 @@ import { Link } from "@/i18n/navigation";
 import { useRouter } from "@/i18n/navigation";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { AuthPageShell } from "@/components/auth/AuthPageShell";
 import { requestPasswordReset } from "@/lib/auth-email";
 import { emailSchema } from "@/lib/validation";
 
@@ -34,49 +35,49 @@ export default function PasswordResetRequestPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-background via-background to-muted px-4">
-      <div className="w-full max-w-md border border-border bg-card p-8 shadow-xl backdrop-blur">
-        <h1 className="text-3xl font-semibold tracking-tight text-foreground">
+    <AuthPageShell>
+      <div className="space-y-2 text-center">
+        <h1 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
           Reset password
         </h1>
-        <p className="mt-3 text-sm text-muted-foreground">
+        <p className="text-sm leading-relaxed text-muted-foreground">
           Enter your account email and we&apos;ll send you a reset link.
         </p>
-
-        <form onSubmit={handleSubmit} className="mt-8 space-y-6">
-          {error ? (
-            <div className="border border-destructive/20 bg-destructive/10 px-3 py-2 text-sm text-destructive">
-              {error}
-            </div>
-          ) : null}
-          <div className="form-field">
-            <label htmlFor="email" className="field-label">
-              Email
-            </label>
-            <Input
-              id="email"
-              type="email"
-              autoComplete="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="e.g. you@example.com"
-            />
-          </div>
-          <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? "Please wait…" : "Send reset link"}
-          </Button>
-        </form>
-
-        <p className="mt-6 text-center text-sm text-muted-foreground">
-          <Link
-            href="/login"
-            className="font-medium text-foreground underline-offset-4 hover:underline"
-          >
-            Back to login
-          </Link>
-        </p>
       </div>
-    </div>
+
+      <form onSubmit={handleSubmit} className="mx-auto w-11/12 max-w-sm space-y-6 sm:w-full">
+        {error ? (
+          <div className="rounded-md border border-destructive/20 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+            {error}
+          </div>
+        ) : null}
+        <div className="form-field">
+          <label htmlFor="email" className="field-label">
+            Email
+          </label>
+          <Input
+            id="email"
+            type="email"
+            autoComplete="email"
+            required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="e.g. you@example.com"
+          />
+        </div>
+        <Button type="submit" className="mt-2 w-full" disabled={loading}>
+          {loading ? "Please wait…" : "Send reset link"}
+        </Button>
+      </form>
+
+      <p className="text-center text-sm text-muted-foreground">
+        <Link
+          href="/login"
+          className="font-medium text-foreground underline-offset-4 hover:underline"
+        >
+          Back to login
+        </Link>
+      </p>
+    </AuthPageShell>
   );
 }

@@ -1,19 +1,20 @@
 import { Suspense } from "react";
 
 import VerifyEmailContent from "./VerifyEmailContent";
+import { AuthPageShell } from "@/components/auth/AuthPageShell";
 
 export default function VerifyEmailPage() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-background via-background to-muted px-4">
+    <AuthPageShell>
       <Suspense
         fallback={
-          <div className="w-full max-w-md border border-border bg-card p-8 text-center text-sm text-muted-foreground shadow-xl backdrop-blur">
+          <div className="mx-auto w-11/12 max-w-sm text-center text-sm text-muted-foreground sm:w-full">
             Loading…
           </div>
         }
       >
         <VerifyEmailContent />
       </Suspense>
-    </div>
+    </AuthPageShell>
   );
 }

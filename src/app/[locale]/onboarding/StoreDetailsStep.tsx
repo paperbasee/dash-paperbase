@@ -21,9 +21,9 @@ export function StoreDetailsStep({
   onSubmit,
 }: StoreDetailsStepProps) {
   return (
-    <form onSubmit={onSubmit} className="space-y-5">
+    <form onSubmit={onSubmit} className="space-y-4">
       {error && (
-        <div className="rounded-none border border-destructive/20 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+        <div className="rounded-md border border-destructive/20 bg-destructive/10 px-3 py-2 text-sm text-destructive">
           {error}
         </div>
       )}
@@ -39,7 +39,6 @@ export function StoreDetailsStep({
           value={formData.name}
           onChange={(e) => onFieldChange("name", e.target.value)}
           placeholder="e.g. My Shop"
-          className="rounded-none"
           aria-invalid={!!fieldErrors.name}
         />
         {fieldErrors.name && (
@@ -58,7 +57,6 @@ export function StoreDetailsStep({
           onChange={(e) => onFieldChange("store_type", e.target.value)}
           placeholder="e.g. Fashion, Retail, E-commerce"
           maxLength={60}
-          className="rounded-none"
           aria-invalid={!!fieldErrors.store_type}
         />
         {fieldErrors.store_type && (
@@ -67,7 +65,7 @@ export function StoreDetailsStep({
         <p className="text-xs text-muted-foreground">Max 4 words. Optional.</p>
       </div>
 
-      <div className="grid gap-5 sm:grid-cols-2">
+      <div className="grid gap-4 sm:grid-cols-2">
         <div className="form-field">
           <label htmlFor="owner_first_name" className="field-label">
             First name <span className="text-destructive">*</span>
@@ -79,7 +77,6 @@ export function StoreDetailsStep({
             value={formData.owner_first_name}
             onChange={(e) => onFieldChange("owner_first_name", e.target.value)}
             placeholder="e.g. John"
-            className="rounded-none"
             aria-invalid={!!fieldErrors.owner_first_name}
           />
           {fieldErrors.owner_first_name && (
@@ -97,7 +94,6 @@ export function StoreDetailsStep({
             value={formData.owner_last_name}
             onChange={(e) => onFieldChange("owner_last_name", e.target.value)}
             placeholder="e.g. Doe"
-            className="rounded-none"
             aria-invalid={!!fieldErrors.owner_last_name}
           />
           {fieldErrors.owner_last_name && (
@@ -117,7 +113,7 @@ export function StoreDetailsStep({
           readOnly
           value={formData.owner_email}
           placeholder="owner@example.com"
-          className="cursor-not-allowed rounded-none opacity-70"
+          className="cursor-not-allowed opacity-70"
           aria-invalid={!!fieldErrors.owner_email}
         />
         {fieldErrors.owner_email && (
@@ -135,7 +131,6 @@ export function StoreDetailsStep({
           value={formData.contact_email}
           onChange={(e) => onFieldChange("contact_email", e.target.value)}
           placeholder="store@example.com"
-          className="rounded-none"
           aria-invalid={!!fieldErrors.contact_email}
         />
         {fieldErrors.contact_email && (
@@ -153,7 +148,6 @@ export function StoreDetailsStep({
           value={formData.phone}
           onChange={(e) => onFieldChange("phone", e.target.value)}
           placeholder="+1 234 567 8900"
-          className="rounded-none"
           aria-invalid={!!fieldErrors.phone}
         />
         {fieldErrors.phone && (
@@ -170,7 +164,7 @@ export function StoreDetailsStep({
           rows={2}
           value={formData.address}
           onChange={(e) => onFieldChange("address", e.target.value)}
-          className="input resize-none rounded-none"
+          className="input resize-none"
           placeholder="123 Main St, City, Country"
           aria-invalid={!!fieldErrors.address}
         />
@@ -179,7 +173,7 @@ export function StoreDetailsStep({
         )}
       </div>
 
-      <Button type="submit" className="mt-2 w-full rounded-none">
+      <Button type="submit" className="mt-2 w-full">
         Continue
       </Button>
     </form>

@@ -11,6 +11,8 @@ import Sidebar, { SidebarContent } from "@/components/Sidebar";
 import MobileNavBar from "@/components/MobileNavBar";
 import SystemNotificationBanner from "@/components/system/SystemNotificationBanner";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
+import { Button } from "@/components/ui/button";
+import { AuthPageShell } from "@/components/auth/AuthPageShell";
 import { cn } from "@/lib/utils";
 import api from "@/lib/api";
 import { logout } from "@/lib/auth";
@@ -45,6 +47,15 @@ export default function DashboardLayout({
   const [subChecked, setSubChecked] = useState(false);
   const [subCheckError, setSubCheckError] = useState(false);
 
+  const normalizedPlan = (subscription?.plan ?? "").toLowerCase();
+  const isEligiblePlan = normalizedPlan === "basic" || normalizedPlan === "premium";
+  const shouldRedirectToOnboarding =
+    subChecked &&
+    pathname === "/" &&
+    subscription?.active === true &&
+    isEligiblePlan &&
+    storeCount === 0;
+
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
       logout();
@@ -68,15 +79,11 @@ export default function DashboardLayout({
   }, [isAuthenticated, isLoading]);
 
   useEffect(() => {
-    if (!subChecked || !subscription?.active || pathname !== "/") return;
-    const normalizedPlan = (subscription.plan ?? "").toLowerCase();
-    const isEligiblePlan = normalizedPlan === "basic" || normalizedPlan === "premium";
-    if (isEligiblePlan && storeCount === 0) {
-      router.replace("/onboarding");
-    }
-  }, [subChecked, subscription, pathname, storeCount, router]);
+    if (!shouldRedirectToOnboarding) return;
+    router.replace("/onboarding");
+  }, [shouldRedirectToOnboarding, router]);
 
-  if (isLoading || !isAuthenticated || !subChecked) {
+  if (isLoading || !isAuthenticated || !subChecked || shouldRedirectToOnboarding) {
     return (
       <div className="flex h-screen items-center justify-center bg-background">
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
@@ -86,65 +93,49 @@ export default function DashboardLayout({
 
   if (subCheckError) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-50 via-white to-slate-100 px-4">
-        <div className="w-full max-w-md rounded-2xl bg-white p-10 text-center shadow-xl ring-1 ring-slate-100">
-          <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-amber-50 text-3xl">
-            ⚠️
-          </div>
-          <h1 className="text-xl font-semibold leading-relaxed text-slate-900">
+      <AuthPageShell>
+        <div className="space-y-2 text-center">
+          <h1 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
             {tLayout("subscriptionVerifyTitle")}
           </h1>
-          <p className="mt-2 text-sm leading-relaxed text-slate-500">
+          <p className="text-sm leading-relaxed text-muted-foreground">
             {tLayout("subscriptionVerifyBody")}
           </p>
-          <div className="mt-6 space-y-3">
-            <button
-              onClick={() => window.location.reload()}
-              className="block w-full rounded-xl bg-indigo-600 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-500"
-            >
-              {tCommon("reload")}
-            </button>
-            <button
-              onClick={() => logout()}
-              className="block w-full rounded-xl border border-slate-200 py-2.5 text-sm font-medium text-slate-600 transition hover:bg-slate-50"
-            >
-              {tCommon("signOut")}
-            </button>
-          </div>
         </div>
-      </div>
+
+        <div className="mx-auto w-11/12 max-w-sm space-y-3 sm:w-full">
+          <Button type="button" className="w-full" onClick={() => window.location.reload()}>
+            {tCommon("reload")}
+          </Button>
+          <Button type="button" variant="outline" className="w-full" onClick={() => logout()}>
+            {tCommon("signOut")}
+          </Button>
+        </div>
+      </AuthPageShell>
     );
   }
 
   if (subscription?.active === false) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-50 via-white to-slate-100 px-4">
-        <div className="w-full max-w-md rounded-2xl bg-white p-10 text-center shadow-xl ring-1 ring-slate-100">
-          <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-amber-50 text-3xl">
-            🔒
-          </div>
-          <h1 className="text-xl font-semibold leading-relaxed text-slate-900">
+      <AuthPageShell>
+        <div className="space-y-2 text-center">
+          <h1 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
             {tLayout("noSubscriptionTitle")}
           </h1>
-          <p className="mt-2 text-sm leading-relaxed text-slate-500">
+          <p className="text-sm leading-relaxed text-muted-foreground">
             {tLayout("noSubscriptionBody")}
           </p>
-          <div className="mt-6 space-y-3">
-            <a
-              href="mailto:support@yourplatform.com"
-              className="block w-full rounded-xl bg-indigo-600 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-500"
-            >
-              {tCommon("contactSupport")}
-            </a>
-            <button
-              onClick={() => logout()}
-              className="block w-full rounded-xl border border-slate-200 py-2.5 text-sm font-medium text-slate-600 transition hover:bg-slate-50"
-            >
-              {tCommon("signOut")}
-            </button>
-          </div>
         </div>
-      </div>
+
+        <div className="mx-auto w-11/12 max-w-sm space-y-3 sm:w-full">
+          <Button asChild className="w-full">
+            <a href="mailto:support@yourplatform.com">{tCommon("contactSupport")}</a>
+          </Button>
+          <Button type="button" variant="outline" className="w-full" onClick={() => logout()}>
+            {tCommon("signOut")}
+          </Button>
+        </div>
+      </AuthPageShell>
     );
   }
 

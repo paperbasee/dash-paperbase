@@ -88,84 +88,103 @@ export default function VerifyEmailContent() {
   if (isFromEmailLink) {
     if (linkStatus === "loading" || linkStatus === "idle") {
       return (
-        <div className="w-full max-w-md border border-border bg-card p-8 shadow-xl backdrop-blur">
-          <p className="text-center text-sm text-muted-foreground">
-            Verifying your email…
-          </p>
+        <div className="mx-auto w-11/12 max-w-sm text-center text-sm text-muted-foreground sm:w-full">
+          Verifying your email…
         </div>
       );
     }
     if (linkStatus === "success") {
       return (
-        <div className="w-full max-w-md border border-border bg-card p-8 shadow-xl backdrop-blur">
-          <h1 className="text-2xl font-semibold tracking-tight text-foreground">
-            Email verified
-          </h1>
-          <p className="mt-3 text-sm text-muted-foreground">{linkMessage}</p>
-          <Button asChild className="mt-6 w-full">
-            <Link href="/login">Log in</Link>
-          </Button>
+        <div className="space-y-8 sm:space-y-10">
+          <div className="space-y-2 text-center">
+            <h1 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
+              Email verified
+            </h1>
+            <p className="text-sm leading-relaxed text-muted-foreground">
+              {linkMessage}
+            </p>
+          </div>
+
+          <div className="mx-auto w-11/12 max-w-sm space-y-6 sm:w-full">
+            <Button asChild className="mt-2 w-full">
+              <Link href="/login">Log in</Link>
+            </Button>
+          </div>
         </div>
       );
     }
     return (
-      <div className="w-full max-w-md border border-border bg-card p-8 shadow-xl backdrop-blur">
-        <h1 className="text-2xl font-semibold tracking-tight text-foreground">
-          Verification failed
-        </h1>
-        <p className="mt-3 text-sm text-destructive">{linkMessage}</p>
-        <p className="mt-4 text-sm text-muted-foreground">
-          Request a new link from the signup flow or contact support.
-        </p>
-        <Button asChild variant="outline" className="mt-6 w-full">
-          <Link href="/login">Back to login</Link>
-        </Button>
+      <div className="space-y-8 sm:space-y-10">
+        <div className="space-y-2 text-center">
+          <h1 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
+            Verification failed
+          </h1>
+          <p className="text-sm leading-relaxed text-destructive">{linkMessage}</p>
+          <p className="text-sm leading-relaxed text-muted-foreground">
+            Request a new link from the signup flow or contact support.
+          </p>
+        </div>
+
+        <div className="mx-auto w-11/12 max-w-sm space-y-6 sm:w-full">
+          <Button asChild variant="outline" className="mt-2 w-full">
+            <Link href="/login">Back to login</Link>
+          </Button>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="w-full max-w-md border border-border bg-card p-8 shadow-xl backdrop-blur">
-      <h1 className="text-3xl font-semibold tracking-tight text-foreground">
-        Check your email
-      </h1>
-      <p className="mt-3 text-sm text-muted-foreground">
-        We&apos;ve sent a verification link to your email address. Please check
-        your inbox.
-      </p>
-      {emailParam ? (
-        <p className="mt-4 rounded-md border border-border bg-muted/40 px-3 py-2 text-sm text-foreground">
-          {(() => {
-            try {
-              return decodeURIComponent(emailParam);
-            } catch {
-              return emailParam;
-            }
-          })()}
+    <div className="space-y-8 sm:space-y-10">
+      <div className="space-y-2 text-center">
+        <h1 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
+          Check your email
+        </h1>
+        <p className="text-sm leading-relaxed text-muted-foreground">
+          We&apos;ve sent a verification link to your email address. Please check your
+          inbox.
         </p>
-      ) : null}
-      <p className="mt-4 text-sm text-muted-foreground">
-        Didn&apos;t receive the email? Check spam or resend.
-      </p>
-      {resendSuccess && (
-        <div className="mt-4 border border-border bg-muted/30 px-3 py-2 text-sm text-foreground">
-          Verification email sent again.
-        </div>
-      )}
-      {resendError ? (
-        <div className="mt-4 border border-destructive/20 bg-destructive/10 px-3 py-2 text-sm text-destructive">
-          {resendError}
-        </div>
-      ) : null}
-      <Button
-        type="button"
-        className="mt-6 w-full"
-        disabled={resendLoading}
-        onClick={handleResend}
-      >
-        {resendLoading ? "Sending…" : "Resend email"}
-      </Button>
-      <p className="mt-6 text-center text-sm text-muted-foreground">
+      </div>
+
+      <div className="mx-auto w-11/12 max-w-sm space-y-6 sm:w-full">
+        {emailParam ? (
+          <p className="rounded-md border border-border bg-muted/40 px-3 py-2 text-sm text-foreground">
+            {(() => {
+              try {
+                return decodeURIComponent(emailParam);
+              } catch {
+                return emailParam;
+              }
+            })()}
+          </p>
+        ) : null}
+
+        <p className="text-sm leading-relaxed text-muted-foreground">
+          Didn&apos;t receive the email? Check spam or resend.
+        </p>
+
+        {resendSuccess && (
+          <div className="rounded-md border border-border bg-muted/30 px-3 py-2 text-sm text-foreground">
+            Verification email sent again.
+          </div>
+        )}
+        {resendError ? (
+          <div className="rounded-md border border-destructive/20 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+            {resendError}
+          </div>
+        ) : null}
+
+        <Button
+          type="button"
+          className="mt-2 w-full"
+          disabled={resendLoading}
+          onClick={handleResend}
+        >
+          {resendLoading ? "Sending…" : "Resend email"}
+        </Button>
+      </div>
+
+      <p className="text-center text-sm text-muted-foreground">
         <Link
           href="/login"
           className="font-medium text-foreground underline-offset-4 hover:underline"

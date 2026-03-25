@@ -78,33 +78,43 @@ export default function PasswordResetConfirmContent() {
 
   if (!uid || !token) {
     return (
-      <div className="w-full max-w-md border border-border bg-card p-8 shadow-xl backdrop-blur">
-        <h1 className="text-2xl font-semibold tracking-tight text-foreground">
-          Invalid link
-        </h1>
-        <p className="mt-3 text-sm text-muted-foreground">
+      <div className="space-y-6">
+        <div className="space-y-2 text-center">
+          <h1 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
+            Invalid link
+          </h1>
+          <p className="text-sm leading-relaxed text-muted-foreground">
           This password reset link is missing required parameters. Open the link
           from your email or request a new reset.
-        </p>
-        <Button asChild className="mt-6 w-full" variant="outline">
-          <Link href="/auth/password-reset">Request new link</Link>
-        </Button>
+          </p>
+        </div>
+
+        <div className="mx-auto w-11/12 max-w-sm space-y-6 sm:w-full">
+          <Button asChild className="mt-2 w-full" variant="outline">
+            <Link href="/auth/password-reset">Request new link</Link>
+          </Button>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="w-full max-w-md border border-border bg-card p-8 shadow-xl backdrop-blur">
-      <h1 className="text-3xl font-semibold tracking-tight text-foreground">
-        Set new password
-      </h1>
-      <p className="mt-3 text-sm text-muted-foreground">
-        Choose a new password for your account.
-      </p>
+    <div className="space-y-8 sm:space-y-10">
+      <div className="space-y-2 text-center">
+        <h1 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
+          Set new password
+        </h1>
+        <p className="text-sm leading-relaxed text-muted-foreground">
+          Choose a new password for your account.
+        </p>
+      </div>
 
-      <form onSubmit={handleSubmit} className="mt-8 space-y-6">
+      <form
+        onSubmit={handleSubmit}
+        className="mx-auto w-11/12 max-w-sm space-y-6 sm:w-full"
+      >
         {error ? (
-          <div className="border border-destructive/20 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+          <div className="rounded-md border border-destructive/20 bg-destructive/10 px-3 py-2 text-sm text-destructive">
             {error}
           </div>
         ) : null}
@@ -127,7 +137,7 @@ export default function PasswordResetConfirmContent() {
             <button
               type="button"
               onClick={() => setShowPassword((v) => !v)}
-              className="absolute inset-y-0 right-0 flex items-center px-3 text-muted-foreground hover:text-foreground focus:outline-none"
+              className="absolute inset-y-0 right-0 flex items-center px-3 text-muted-foreground hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
               aria-label={showPassword ? "Hide password" : "Show password"}
             >
               {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
@@ -153,7 +163,7 @@ export default function PasswordResetConfirmContent() {
             <button
               type="button"
               onClick={() => setShowPasswordConfirm((v) => !v)}
-              className="absolute inset-y-0 right-0 flex items-center px-3 text-muted-foreground hover:text-foreground focus:outline-none"
+              className="absolute inset-y-0 right-0 flex items-center px-3 text-muted-foreground hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
               aria-label={
                 showPasswordConfirm ? "Hide password" : "Show password"
               }
@@ -162,7 +172,7 @@ export default function PasswordResetConfirmContent() {
             </button>
           </div>
         </div>
-        <Button type="submit" className="w-full" disabled={loading}>
+        <Button type="submit" className="mt-2 w-full" disabled={loading}>
           {loading ? "Please wait…" : "Reset password"}
         </Button>
       </form>

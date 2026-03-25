@@ -116,7 +116,7 @@ export default function SignupPage() {
 
           <form
             onSubmit={pendingTwoFactor ? handleOtpSubmit : handleSubmit}
-            className="mx-auto w-full max-w-sm space-y-6"
+            className="mx-auto w-11/12 max-w-sm space-y-6 sm:w-full"
           >
           {error && (
             <div className="rounded-md border border-destructive/20 bg-destructive/10 px-3 py-2 text-sm text-destructive">
