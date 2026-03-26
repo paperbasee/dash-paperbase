@@ -16,6 +16,7 @@ import {
   type LoginResult,
   type LoginResponse,
   type PendingTwoFactorResponse,
+  type RegisterResponse,
 } from "@/lib/auth";
 
 interface AuthState {
@@ -27,7 +28,7 @@ interface AuthState {
     email: string,
     password: string,
     password_confirm: string
-  ) => Promise<LoginResult>;
+  ) => Promise<RegisterResponse | PendingTwoFactorResponse>;
   verifyTwoFactorChallenge: (
     challengeId: string,
     code: string
@@ -69,7 +70,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return result;
       }
       setPendingTwoFactor(null);
-      setIsAuthenticated(true);
+      setIsAuthenticated(false);
       return result;
     },
     []

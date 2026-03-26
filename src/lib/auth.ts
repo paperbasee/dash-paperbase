@@ -22,6 +22,11 @@ export interface RegisterPayload {
   password_confirm: string;
 }
 
+export interface RegisterResponse {
+  detail: string;
+  email_verification_required: true;
+}
+
 /**
  * Set a lightweight routing cookie for the Next.js edge middleware.
  * This is NOT the JWT itself — it is only a hint that a session exists.
@@ -39,17 +44,12 @@ export async function register(
   email: string,
   password: string,
   password_confirm: string
-): Promise<LoginResult> {
-  const { data } = await axios.post<LoginResult>(`${BASE_URL}/auth/register/`, {
+): Promise<RegisterResponse | PendingTwoFactorResponse> {
+  const { data } = await axios.post<RegisterResponse | PendingTwoFactorResponse>(`${BASE_URL}/auth/register/`, {
     email: email.trim().toLowerCase(),
     password,
     password_confirm,
   });
-  if (!("2fa_required" in data)) {
-    localStorage.setItem("access_token", data.access);
-    localStorage.setItem("refresh_token", data.refresh);
-    setAuthSessionCookie();
-  }
   return data;
 }
 

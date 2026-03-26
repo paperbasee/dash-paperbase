@@ -40,7 +40,17 @@ export default function LoginPage() {
       if (!("2fa_required" in result)) {
         router.push(result.active_store_public_id ? "/" : "/onboarding");
       }
-    } catch {
+    } catch (err: unknown) {
+      const data =
+        err && typeof err === "object" && "response" in err
+          ? (err as { response?: { status?: number; data?: { code?: string } } }).response
+          : undefined;
+      if (data?.status === 403 && data.data?.code === "email_not_verified") {
+        router.push(
+          `/auth/verify-email?email=${encodeURIComponent(validation.data.email)}`
+        );
+        return;
+      }
       setError(t("invalidCredentials"));
     } finally {
       setLoading(false);
@@ -58,7 +68,15 @@ export default function LoginPage() {
         otpCode
       );
       router.push(result.active_store_public_id ? "/" : "/onboarding");
-    } catch {
+    } catch (err: unknown) {
+      const data =
+        err && typeof err === "object" && "response" in err
+          ? (err as { response?: { status?: number; data?: { code?: string } } }).response
+          : undefined;
+      if (data?.status === 403 && data.data?.code === "email_not_verified") {
+        router.push(`/auth/verify-email?email=${encodeURIComponent(email.trim().toLowerCase())}`);
+        return;
+      }
       setError(t("invalidOtp"));
     } finally {
       setLoading(false);
