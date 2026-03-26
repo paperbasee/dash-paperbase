@@ -77,7 +77,7 @@ export default function NetworkingSection({ hidden }: { hidden: boolean }) {
       setMessage("Domain verified.");
       await load();
     } catch {
-      setMessage("Verification failed. Check your TXT record at _mybaas.<your-domain>.");
+      setMessage("Verification failed. Check your DNS TXT verification record and try again.");
     } finally {
       setBusy(false);
     }

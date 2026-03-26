@@ -129,7 +129,7 @@ export default function DashboardLayout({
 
         <div className="mx-auto w-11/12 max-w-sm space-y-3 sm:w-full">
           <Button asChild className="w-full">
-            <a href="mailto:support@yourplatform.com">{tCommon("contactSupport")}</a>
+            <a href="mailto:info@akkho.com">{tCommon("contactSupport")}</a>
           </Button>
           <Button type="button" variant="outline" className="w-full" onClick={() => logout()}>
             {tCommon("signOut")}
