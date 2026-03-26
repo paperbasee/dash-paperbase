@@ -8,6 +8,7 @@ import api from "@/lib/api";
 import { verifyTwoFactorChallenge } from "@/lib/auth";
 import { OPTIONAL_APP_IDS } from "@/config/apps";
 import { parseValidation, storeCreateSchema } from "@/lib/validation";
+import { clearPendingVerificationEmail } from "@/lib/verification-state";
 
 const STORAGE_KEY = "core_enabled_apps";
 
@@ -187,6 +188,7 @@ export function useOnboarding() {
         )
       );
 
+      clearPendingVerificationEmail();
       router.push("/");
     } catch (err: unknown) {
       const msg =

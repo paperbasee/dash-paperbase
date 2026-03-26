@@ -4,10 +4,27 @@ import { useEffect, useState } from "react";
 import { Link } from "@/i18n/navigation";
 import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   resendVerificationEmail,
   verifyEmailFromLink,
 } from "@/lib/auth-email";
+import {
+  PENDING_VERIFICATION_EMAIL_KEY,
+  clearPendingVerificationEmail,
+  getPendingVerificationEmail,
+  normalizeEmail,
+  setPendingVerificationEmail,
+} from "@/lib/verification-state";
+
+function decodeEmailParam(value: string): string {
+  if (!value) return "";
+  try {
+    return decodeURIComponent(value);
+  } catch {
+    return value;
+  }
+}
 
 function extractMessage(err: unknown): string {
   const res =
@@ -34,22 +51,55 @@ export default function VerifyEmailContent() {
   const uid = searchParams.get("uid") ?? "";
   const token = searchParams.get("token") ?? "";
   const emailParam = searchParams.get("email") ?? "";
+  const decodedEmail = decodeEmailParam(emailParam);
 
   const [linkStatus, setLinkStatus] = useState<
     "idle" | "loading" | "success" | "error"
   >("idle");
   const [linkMessage, setLinkMessage] = useState("");
 
+  const [pendingEmail, setPendingEmail] = useState("");
+  const [emailInput, setEmailInput] = useState("");
   const [resendLoading, setResendLoading] = useState(false);
   const [resendSuccess, setResendSuccess] = useState(false);
   const [resendError, setResendError] = useState("");
 
   const isFromEmailLink = Boolean(uid && token);
+  const effectiveEmail = pendingEmail || normalizeEmail(decodedEmail) || normalizeEmail(emailInput);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const storedEmail = getPendingVerificationEmail();
+    const queryEmail = normalizeEmail(decodedEmail);
+
+    if (queryEmail) {
+      setPendingVerificationEmail(queryEmail);
+    }
+
+    setPendingEmail(storedEmail || queryEmail);
+  }, [decodedEmail]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const handleStorage = (event: StorageEvent) => {
+      if (event.key !== PENDING_VERIFICATION_EMAIL_KEY) return;
+      const nextEmail = getPendingVerificationEmail();
+      setPendingEmail(nextEmail);
+      if (!nextEmail) {
+        setResendSuccess(false);
+        setResendError("");
+      }
+    };
+    window.addEventListener("storage", handleStorage);
+    return () => window.removeEventListener("storage", handleStorage);
+  }, []);
 
   useEffect(() => {
     if (!isFromEmailLink) return;
     const doneKey = `email_verify_done_${uid}_${token}`;
     if (typeof window !== "undefined" && sessionStorage.getItem(doneKey)) {
+      clearPendingVerificationEmail();
       setLinkStatus("success");
       setLinkMessage("Email verified successfully.");
       return;
@@ -58,6 +108,7 @@ export default function VerifyEmailContent() {
     verifyEmailFromLink(uid, token)
       .then((data) => {
         sessionStorage.setItem(doneKey, "1");
+        clearPendingVerificationEmail();
         setLinkStatus("success");
         setLinkMessage(
           typeof data?.detail === "string"
@@ -72,11 +123,18 @@ export default function VerifyEmailContent() {
   }, [isFromEmailLink, uid, token]);
 
   async function handleResend() {
+    const resendEmail = effectiveEmail || normalizeEmail(emailInput);
+    if (!resendEmail) {
+      setResendError("Email address is required to resend verification.");
+      return;
+    }
+    setPendingVerificationEmail(resendEmail);
+    setPendingEmail(resendEmail);
     setResendError("");
     setResendSuccess(false);
     setResendLoading(true);
     try {
-      await resendVerificationEmail();
+      await resendVerificationEmail(resendEmail);
       setResendSuccess(true);
     } catch (err: unknown) {
       setResendError(extractMessage(err));
@@ -147,17 +205,24 @@ export default function VerifyEmailContent() {
       </div>
 
       <div className="mx-auto w-11/12 max-w-sm space-y-6 sm:w-full">
-        {emailParam ? (
+        {effectiveEmail ? (
           <p className="rounded-md border border-border bg-muted/40 px-3 py-2 text-sm text-foreground">
-            {(() => {
-              try {
-                return decodeURIComponent(emailParam);
-              } catch {
-                return emailParam;
-              }
-            })()}
+            {effectiveEmail}
           </p>
-        ) : null}
+        ) : (
+          <div className="space-y-2">
+            <Input
+              type="email"
+              autoComplete="email"
+              value={emailInput}
+              onChange={(e) => setEmailInput(e.target.value)}
+              placeholder="Enter your email address"
+            />
+            <p className="text-xs text-muted-foreground">
+              Enter your signup email to request a new verification link.
+            </p>
+          </div>
+        )}
 
         <p className="text-sm leading-relaxed text-muted-foreground">
           Didn&apos;t receive the email? Check spam or resend.
@@ -165,7 +230,7 @@ export default function VerifyEmailContent() {
 
         {resendSuccess && (
           <div className="rounded-md border border-border bg-muted/30 px-3 py-2 text-sm text-foreground">
-            Verification email sent again.
+            If the email exists, verification link has been sent.
           </div>
         )}
         {resendError ? (

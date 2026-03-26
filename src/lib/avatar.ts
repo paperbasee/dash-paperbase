@@ -3,5 +3,5 @@
  * Uses the "initials" style — no external packages required.
  */
 export function getAvatarUrl(publicId: string): string {
-  return `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(publicId)}&fontWeight=600&fontSize=42`;
+  return `https://api.dicebear.com/9.x/thumbs/svg?seed=${encodeURIComponent(publicId)}&fontWeight=600&fontSize=42`;
 }

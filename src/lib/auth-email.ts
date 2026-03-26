@@ -1,7 +1,5 @@
 import axios from "axios";
 
-import api from "./api";
-
 const baseUrl = () => {
   const url = process.env.NEXT_PUBLIC_API_URL;
   if (!url) throw new Error("NEXT_PUBLIC_API_URL is not configured.");
@@ -20,11 +18,13 @@ export async function verifyEmailFromLink(uid: string, token: string) {
 }
 
 /**
- * POST /auth/email/resend-verification/ — requires Bearer token (logged-in user).
+ * POST /auth/email/resend-verification/ — unauthenticated, email-driven, enumeration-safe response.
  */
-export async function resendVerificationEmail() {
-  const { data } = await api.post("auth/email/resend-verification/");
-  return data as { detail?: string };
+export async function resendVerificationEmail(email: string) {
+  const { data } = await axios.post(`${baseUrl()}/auth/email/resend-verification/`, {
+    email: email.trim().toLowerCase(),
+  });
+  return data as { message?: string };
 }
 
 /**

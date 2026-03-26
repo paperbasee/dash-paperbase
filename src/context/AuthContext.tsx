@@ -3,7 +3,6 @@
 import {
   createContext,
   useContext,
-  useEffect,
   useState,
   useCallback,
   type ReactNode,
@@ -18,6 +17,7 @@ import {
   type PendingTwoFactorResponse,
   type RegisterResponse,
 } from "@/lib/auth";
+import { clearPendingVerificationEmail } from "@/lib/verification-state";
 
 interface AuthState {
   isAuthenticated: boolean;
@@ -39,15 +39,12 @@ interface AuthState {
 const AuthContext = createContext<AuthState | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return !!localStorage.getItem("access_token");
+  });
   const [pendingTwoFactor, setPendingTwoFactor] = useState<PendingTwoFactorResponse | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    const token = localStorage.getItem("access_token");
-    setIsAuthenticated(!!token);
-    setIsLoading(false);
-  }, []);
+  const [isLoading] = useState(false);
 
   const login = useCallback(async (email: string, password: string) => {
     const result = await authLogin(email, password);
@@ -58,6 +55,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
     setPendingTwoFactor(null);
     setIsAuthenticated(true);
+    clearPendingVerificationEmail();
     return result;
   }, []);
 
@@ -83,6 +81,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const result = await authVerifyTwoFactorChallenge(challengeId, code);
     setPendingTwoFactor(null);
     setIsAuthenticated(true);
+    clearPendingVerificationEmail();
     return result;
   }, []);
 

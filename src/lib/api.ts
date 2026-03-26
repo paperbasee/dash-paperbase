@@ -1,4 +1,5 @@
 import axios from "axios";
+import { isVerifyEmailRoute } from "@/lib/verification-state";
 
 const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL,
@@ -45,8 +46,13 @@ api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
+    const skipVerifyEmailRedirect =
+      typeof window !== "undefined" && isVerifyEmailRoute(window.location.pathname);
 
     if (error.response?.status === 401 && !originalRequest._retry) {
+      if (skipVerifyEmailRedirect) {
+        return Promise.reject(error);
+      }
       originalRequest._retry = true;
 
       const refreshToken = localStorage.getItem("refresh_token");
