@@ -326,7 +326,7 @@ export default function OrderDetailPage() {
         public_id: null,
         product: product.public_id,
         product_name: product.name || "Unavailable",
-        product_brand: product.brand,
+        product_brand: product.brand ?? undefined,
         product_image: product.image_url ?? product.image,
         status: "active",
         variant_public_id: null,
@@ -604,7 +604,8 @@ export default function OrderDetailPage() {
                       ? (Number(item.original_price) - Number(item.price)) * item.quantity
                       : 0;
                   const imageUrl = resolveImageUrl(item.product_image);
-                  const itemEditKey = item.public_id ?? item.key;
+                  const itemEditKey =
+                    "key" in item ? (item.public_id ?? item.key) : item.public_id;
                   const edit = itemEdits[itemEditKey];
                   const variants = item.product ? (variantsByProductId[item.product] ?? []) : [];
                   const variantsLoading = item.product ? (variantsLoadingByProductId[item.product] ?? false) : false;
@@ -613,7 +614,14 @@ export default function OrderDetailPage() {
                       ? variants.find((v) => v.public_id === edit.variant_public_id) ?? null
                       : null;
                   return (
-                    <tr key={item.key ?? item.public_id ?? `order-item-${index}`} className="border-b border-border/50">
+                    <tr
+                      key={
+                        "key" in item
+                          ? (item.key ?? item.public_id ?? `order-item-${index}`)
+                          : (item.public_id ?? `order-item-${index}`)
+                      }
+                      className="border-b border-border/50"
+                    >
                       <td className="py-3 pr-4">
                         <div className="flex items-center gap-3">
                           {imageUrl ? (
@@ -760,7 +768,9 @@ export default function OrderDetailPage() {
                             variant="outline"
                             size="sm"
                             className="border-destructive text-destructive hover:bg-destructive/10"
-                            onClick={() => removeEditableItem(item.key)}
+                            onClick={() =>
+                              removeEditableItem("key" in item ? item.key : item.public_id)
+                            }
                           >
                             Remove
                           </Button>
