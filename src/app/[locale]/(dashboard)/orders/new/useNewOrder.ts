@@ -27,7 +27,7 @@ import {
 
 export interface OrderItemRow {
   key: number;
-  product_id: string;
+  product_public_id: string;
   product_name: string;
   product_image: string | null;
   variant_public_id: string | null;
@@ -42,9 +42,8 @@ export interface OrderForm {
   shipping_address: string;
   district: string;
   tracking_number: string;
-  shipping_zone: string;
-  shipping_method: string;
-  coupon_code: string;
+  shipping_zone_public_id: string;
+  shipping_method_public_id: string;
 }
 
 export function useNewOrder() {
@@ -60,9 +59,8 @@ export function useNewOrder() {
     shipping_address: "",
     district: "",
     tracking_number: "",
-    shipping_zone: "",
-    shipping_method: "",
-    coupon_code: "",
+    shipping_zone_public_id: "",
+    shipping_method_public_id: "",
   });
 
   const [extraFields, setExtraFieldsState] = useState<ExtraFieldValues>({});
@@ -79,7 +77,6 @@ export function useNewOrder() {
   const [items, setItems] = useState<OrderItemRow[]>([]);
   const nextKey = useRef(0);
 
-  // Product search
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<Product[]>([]);
   const [searching, setSearching] = useState(false);
@@ -87,23 +84,14 @@ export function useNewOrder() {
   const searchRef = useRef<HTMLDivElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
-  // Variant cache
   const [variantsByProductId, setVariantsByProductId] = useState<Record<string, ProductVariant[]>>({});
   const [variantsLoadingByProductId, setVariantsLoadingByProductId] = useState<Record<string, boolean>>({});
 
-  // Shipping data
   const [shippingZones, setShippingZones] = useState<ShippingZone[]>([]);
   const [shippingMethods, setShippingMethods] = useState<ShippingMethod[]>([]);
-  const [couponPreview, setCouponPreview] = useState<{
-    code: string;
-    discount_amount: string;
-    subtotal_after_discount: string;
-  } | null>(null);
-  const [couponError, setCouponError] = useState("");
   const [pricingPreview, setPricingPreview] = useState<{
     base_subtotal: string;
-    bulk_discount_total: string;
-    coupon_discount: string;
+    shipping_cost: string;
     final_total: string;
   } | null>(null);
 
@@ -165,7 +153,7 @@ export function useNewOrder() {
     try {
       const { data } = await api.get<PaginatedResponse<ProductVariant> | ProductVariant[]>(
         "admin/product-variants/",
-        { params: { product: productId } }
+        { params: { product_public_id: productId } }
       );
       const list = Array.isArray(data) ? data : data.results;
       setVariantsByProductId((p) => ({ ...p, [productId]: list ?? [] }));
@@ -184,9 +172,9 @@ export function useNewOrder() {
       ...prev,
       {
         key: nextKey.current++,
-        product_id: product.public_id,
+        product_public_id: product.public_id,
         product_name: product.name || "Unavailable",
-        product_image: product.image_url ?? product.image,
+        product_image: product.image_url ?? product.image ?? null,
         variant_public_id: null,
         quantity: 1,
         price: product.price,
@@ -218,50 +206,50 @@ export function useNewOrder() {
     setForm((prev) => ({ ...prev, ...patch }));
   }
 
-  const total = useMemo(
+  const merchandiseTotal = useMemo(
     () => items.reduce((sum, item) => sum + Number(item.price || 0) * item.quantity, 0),
     [items]
   );
 
-  const discountAmount = Number(couponPreview?.discount_amount || 0);
-  const totalAfterDiscount = pricingPreview ? Number(pricingPreview.final_total || 0) : Math.max(0, total - discountAmount);
+  const displayTotal = pricingPreview
+    ? Number(pricingPreview.final_total || 0)
+    : merchandiseTotal;
 
-  async function applyCouponPreview() {
-    const code = form.coupon_code.trim();
-    if (!code) {
-      setCouponPreview(null);
+  useEffect(() => {
+    if (items.length === 0) {
       setPricingPreview(null);
-      setCouponError("");
       return;
     }
-    try {
-      const { data } = await api.post<{
-        base_subtotal: string;
-        bulk_discount_total: string;
-        coupon_discount: string;
-        final_total: string;
-      }>("admin/coupons/pricing-preview/", {
-        coupon_code: code,
-        shipping_zone_public_id: form.shipping_zone,
-        shipping_method_public_id: form.shipping_method || null,
-        items: items.map((item) => ({
-          product_public_id: item.product_id,
-          quantity: item.quantity,
-        })),
-      });
-      setPricingPreview(data);
-      setCouponPreview({
-        code,
-        discount_amount: data.coupon_discount,
-        subtotal_after_discount: data.final_total,
-      });
-      setCouponError("");
-    } catch {
-      setCouponPreview(null);
-      setPricingPreview(null);
-      setCouponError("Invalid or unavailable coupon for current subtotal.");
-    }
-  }
+    const ac = new AbortController();
+    const timer = window.setTimeout(() => {
+      api
+        .post<{
+          base_subtotal: string;
+          shipping_cost: string;
+          final_total: string;
+        }>(
+          "admin/orders/pricing-preview/",
+          {
+            shipping_zone_public_id: form.shipping_zone_public_id,
+            shipping_method_public_id: form.shipping_method_public_id || null,
+            items: items.map((item) => ({
+              product_public_id: item.product_public_id,
+              variant_public_id: item.variant_public_id,
+              quantity: item.quantity,
+            })),
+          },
+          { signal: ac.signal }
+        )
+        .then(({ data }) => setPricingPreview(data))
+        .catch(() => {
+          if (!ac.signal.aborted) setPricingPreview(null);
+        });
+    }, 250);
+    return () => {
+      window.clearTimeout(timer);
+      ac.abort();
+    };
+  }, [items, form.shipping_zone_public_id, form.shipping_method_public_id]);
 
   const schemaWithNames = useMemo(
     () => extraFieldsSchema.filter((f) => f.name.trim()),
@@ -294,10 +282,9 @@ export function useNewOrder() {
     try {
       const payload = {
         ...form,
-        shipping_method: form.shipping_method || null,
-        coupon_code: form.coupon_code || "",
+        shipping_method_public_id: form.shipping_method_public_id || null,
         items: items.map((item) => ({
-          product: item.product_id,
+          product_public_id: item.product_public_id,
           variant_public_id: item.variant_public_id,
           quantity: item.quantity,
           price: item.price,
@@ -334,13 +321,9 @@ export function useNewOrder() {
     variantsLoadingByProductId,
     shippingZones,
     shippingMethods,
-    total,
-    discountAmount,
-    totalAfterDiscount,
-    couponPreview,
+    merchandiseTotal,
+    displayTotal,
     pricingPreview,
-    couponError,
-    applyCouponPreview,
     handleSearch,
     addProduct,
     updateItem,

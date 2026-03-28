@@ -9,6 +9,7 @@ export interface DashboardAnalyticsSummary {
   totalOrders: number;
   totalProducts: number;
   totalSupportTickets: number;
+  totalCustomers: number;
 }
 
 export interface DashboardAnalyticsPoint {
@@ -16,6 +17,7 @@ export interface DashboardAnalyticsPoint {
   orders: number;
   products: number;
   supportTickets: number;
+  customers: number;
 }
 
 export interface DashboardAnalyticsResponse {

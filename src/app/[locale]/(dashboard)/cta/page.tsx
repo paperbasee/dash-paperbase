@@ -11,7 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import type { Notification, PaginatedResponse } from "@/types";
 
 type CtaForm = {
-  text: string;
+  cta_text: string;
   notification_type: string;
   is_active: boolean;
   link: string;
@@ -22,7 +22,7 @@ type CtaForm = {
 };
 
 const emptyForm: CtaForm = {
-  text: "",
+  cta_text: "",
   notification_type: "banner",
   is_active: true,
   link: "",
@@ -72,7 +72,7 @@ export default function CtaPage() {
   function openEdit(n: Notification) {
     setEditing(n.public_id);
     setForm({
-      text: n.text,
+      cta_text: n.cta_text,
       notification_type: n.notification_type,
       is_active: n.is_active,
       link: n.link || "",
@@ -88,7 +88,7 @@ export default function CtaPage() {
     setSaving(true);
 
     const payload: Record<string, unknown> = {
-      text: form.text,
+      cta_text: form.cta_text,
       notification_type: form.notification_type,
       is_active: form.is_active,
       order: Number(form.order),
@@ -183,8 +183,8 @@ export default function CtaPage() {
             required
             placeholder="CTA text"
             rows={2}
-            value={form.text}
-            onChange={(e) => setForm({ ...form, text: e.target.value })}
+            value={form.cta_text}
+            onChange={(e) => setForm({ ...form, cta_text: e.target.value })}
             className="text-sm"
           />
           <div className="grid grid-cols-3 gap-3">
@@ -307,7 +307,7 @@ export default function CtaPage() {
             {ctas.map((n) => (
               <tr key={n.public_id} className="hover:bg-muted/40">
                 <td className="max-w-xs truncate px-4 py-3 font-medium text-foreground">
-                  {n.text}
+                  {n.cta_text}
                 </td>
                 <td className="px-4 py-3 text-muted-foreground capitalize">
                   {n.notification_type}

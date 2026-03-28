@@ -33,7 +33,6 @@
     "support_tickets": "Support tickets",
     "cta": "CTA",
     "reviews": "Reviews",
-    "coupons": "Coupons",
     "variants": "Variants",
     "product_attributes": "Attributes",
     "inventory": "Inventory",
@@ -191,13 +190,15 @@
   },
   "dashboard": {
     "title": "Dashboard overview",
-    "subtitle": "High-level snapshot of orders, products, and support ticket activity. On mobile, see your most recent admin activities.",
+    "subtitle": "High-level snapshot of orders, products, customers, and support ticket activity. On mobile, see your most recent admin activities.",
     "activitiesAria": "Activities",
     "recentActivities": "Recent activities",
     "noRecentActivity": "No recent admin activity yet.",
     "totalOrders": "Total orders",
     "totalProducts": "Total products",
     "supportTickets": "Support tickets",
+    "totalCustomers": "Customers",
+    "customersInPeriod": "New in selected period",
     "withinPeriod": "Within selected period",
     "addedInPeriod": "Added in this period",
     "supportAndInquiries": "Support & inquiries",
@@ -205,7 +206,8 @@
     "chartNoActivity": "No activity for the selected period.",
     "chartOrders": "Orders",
     "chartProducts": "Products",
-    "chartSupportTickets": "Support tickets"
+    "chartSupportTickets": "Support tickets",
+    "chartCustomers": "Customers"
   },
   "auth": {
     "login": {

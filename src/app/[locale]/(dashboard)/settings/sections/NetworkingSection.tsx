@@ -148,6 +148,27 @@ export default function NetworkingSection({ hidden }: { hidden: boolean }) {
           </p>
         </div>
 
+        <div className="rounded-lg border border-border bg-card px-4 py-3 text-sm text-muted-foreground">
+          <p className="font-medium text-foreground">Storefront (publishable key)</p>
+          <p className="mt-2 leading-relaxed">
+            Headless sites should call <code className="rounded bg-muted px-1">GET/POST …/api/v1/…</code> with{" "}
+            <code className="rounded bg-muted px-1">Authorization: Bearer &lt;ak_pk_…&gt;</code>. Response
+            field names differ from this dashboard&apos;s admin API — for example products use{" "}
+            <code className="rounded bg-muted px-1">image_url</code>,{" "}
+            <code className="rounded bg-muted px-1">category_public_id</code> /{" "}
+            <code className="rounded bg-muted px-1">category_slug</code> /{" "}
+            <code className="rounded bg-muted px-1">category_name</code> (not a single{" "}
+            <code className="rounded bg-muted px-1">category</code> slug); banners and CTAs use{" "}
+            <code className="rounded bg-muted px-1">cta_url</code> and{" "}
+            <code className="rounded bg-muted px-1">cta_label</code> on public list endpoints. TypeScript
+            types for those payloads live in{" "}
+            <code className="rounded bg-muted px-1">src/types/storefront-api.ts</code> (re-exported from{" "}
+            <code className="rounded bg-muted px-1">@/types</code>). See the backend{" "}
+            <code className="rounded bg-muted px-1">README.md</code> section &quot;Storefront JSON contract&quot;
+            for the full list.
+          </p>
+        </div>
+
         <div className="rounded-lg border border-border bg-muted/30 px-4 py-3">
           <p className="text-xs uppercase tracking-wide text-muted-foreground">API Base URL</p>
           <div className="mt-2 flex items-start justify-between gap-2">

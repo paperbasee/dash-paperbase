@@ -112,7 +112,7 @@ export default function ReviewsPage() {
                 {reviews.map((r) => (
                   <tr key={r.public_id} className="hover:bg-muted/40">
                     <td className="px-4 py-3 font-medium">
-                      <ClickableText href={`/products/${r.product}`}>
+                      <ClickableText href={`/products/${r.product_public_id}`}>
                         {r.product_name}
                       </ClickableText>
                     </td>

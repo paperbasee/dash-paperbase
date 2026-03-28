@@ -40,13 +40,9 @@ export default function NewOrderPage() {
     variantsLoadingByProductId,
     shippingZones,
     shippingMethods,
-    total,
-    discountAmount,
-    totalAfterDiscount,
-    couponPreview,
+    merchandiseTotal,
+    displayTotal,
     pricingPreview,
-    couponError,
-    applyCouponPreview,
     handleSearch,
     addProduct,
     updateItem,
@@ -121,10 +117,10 @@ export default function NewOrderPage() {
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <FormField label="Shipping method">
                   <Select
-                    value={form.shipping_method}
-                    onChange={(e) => updateForm({ shipping_method: e.target.value })}
-                    aria-invalid={!!fieldErrors.shipping_method}
-                    className={cn(fieldErrors.shipping_method && "border-destructive")}
+                    value={form.shipping_method_public_id}
+                    onChange={(e) => updateForm({ shipping_method_public_id: e.target.value })}
+                    aria-invalid={!!fieldErrors.shipping_method_public_id}
+                    className={cn(fieldErrors.shipping_method_public_id && "border-destructive")}
                   >
                     <option value="">Auto (cheapest match)</option>
                     {shippingMethods.map((m) => (
@@ -135,12 +131,12 @@ export default function NewOrderPage() {
                   </Select>
                 </FormField>
 
-                <FormField label="Shipping zone" required error={fieldErrors.shipping_zone}>
+                <FormField label="Shipping zone" required error={fieldErrors.shipping_zone_public_id}>
                   <Select
-                    value={form.shipping_zone}
-                    onChange={(e) => updateForm({ shipping_zone: e.target.value })}
-                    aria-invalid={!!fieldErrors.shipping_zone}
-                    className={cn(fieldErrors.shipping_zone && "border-destructive")}
+                    value={form.shipping_zone_public_id}
+                    onChange={(e) => updateForm({ shipping_zone_public_id: e.target.value })}
+                    aria-invalid={!!fieldErrors.shipping_zone_public_id}
+                    className={cn(fieldErrors.shipping_zone_public_id && "border-destructive")}
                     required
                   >
                     <option value="">Select shipping zone</option>
@@ -235,28 +231,6 @@ export default function NewOrderPage() {
                     className={cn(fieldErrors.tracking_number && "border-destructive")}
                   />
                 </FormField>
-                <div className="sm:col-span-2">
-                  <FormField label="Coupon code" error={couponError || fieldErrors.coupon_code}>
-                    <div className="flex items-center gap-2">
-                      <Input
-                        id="order-coupon-code"
-                        type="text"
-                        value={form.coupon_code}
-                        onChange={(e) => updateForm({ coupon_code: e.target.value })}
-                        placeholder="Optional"
-                      />
-                      <Button type="button" variant="outline" onClick={applyCouponPreview}>
-                        Apply
-                      </Button>
-                    </div>
-                    {couponPreview && (
-                      <p className="mt-1 text-xs text-emerald-600">
-                        Applied {couponPreview.code} (discount {currencySymbol}
-                        {Number(couponPreview.discount_amount).toLocaleString()}).
-                      </p>
-                    )}
-                  </FormField>
-                </div>
               </div>
 
               {extraFieldsSchema.some((f) => f.name.trim()) && (
@@ -324,7 +298,7 @@ export default function NewOrderPage() {
                           <p className="text-xs text-muted-foreground">
                             {currencySymbol}
                             {Number(product.price || 0).toLocaleString()} · Stock:{" "}
-                            {product.stock ?? 0}
+                            {product.available_quantity ?? product.total_stock ?? 0}
                           </p>
                         </div>
                       </button>
@@ -362,16 +336,16 @@ export default function NewOrderPage() {
                       </tr>
                     ) : (
                       items.map((item, index) => {
-                        const variants = variantsByProductId[item.product_id] ?? [];
+                        const variants = variantsByProductId[item.product_public_id] ?? [];
                         const loadingVariants =
-                          variantsLoadingByProductId[item.product_id] ?? false;
+                          variantsLoadingByProductId[item.product_public_id] ?? false;
                         const selectedVariant =
                           item.variant_public_id != null
                             ? variants.find((v) => v.public_id === item.variant_public_id) ?? null
                             : null;
                         const rowVariantErr =
                           fieldErrors[`items.${index}.variant_public_id`];
-                        const rowProductErr = fieldErrors[`items.${index}.product_id`];
+                        const rowProductErr = fieldErrors[`items.${index}.product_public_id`];
                         const rowQtyErr = fieldErrors[`items.${index}.quantity`];
                         const rowPriceErr = fieldErrors[`items.${index}.price`];
                         return (
@@ -395,7 +369,7 @@ export default function NewOrderPage() {
                                   )}
                                   value={item.variant_public_id ?? ""}
                                   onFocus={() =>
-                                    ensureVariantsLoaded(item.product_id)
+                                    ensureVariantsLoaded(item.product_public_id)
                                   }
                                   onChange={(e) => {
                                     const raw = e.target.value;
@@ -421,7 +395,7 @@ export default function NewOrderPage() {
 
                                 {selectedVariant && (
                                   <span className="whitespace-nowrap text-xs text-muted-foreground">
-                                    Stock: {selectedVariant.inventory_quantity}
+                                    Stock: {selectedVariant.available_quantity}
                                   </span>
                                 )}
                               </div>
@@ -444,7 +418,7 @@ export default function NewOrderPage() {
                                       1,
                                       Math.min(
                                         parseInt(e.target.value) || 1,
-                                        selectedVariant?.inventory_quantity ?? Number.MAX_SAFE_INTEGER,
+                                        selectedVariant?.available_quantity ?? Number.MAX_SAFE_INTEGER,
                                       ),
                                     )
                                   )
@@ -497,32 +471,28 @@ export default function NewOrderPage() {
               </div>
 
               <div className="flex items-center justify-between border-t border-border pt-4">
-                <span className="text-sm text-muted-foreground">Total</span>
+                <span className="text-sm text-muted-foreground">Estimated total</span>
                 <span className="text-lg font-semibold text-foreground">
                   {currencySymbol}
-                  {totalAfterDiscount.toLocaleString()}
+                  {displayTotal.toLocaleString()}
                 </span>
               </div>
               {pricingPreview && (
                 <div className="space-y-1 text-xs text-muted-foreground">
                   <p>
-                    Base subtotal: {currencySymbol}
+                    Merchandise: {currencySymbol}
                     {Number(pricingPreview.base_subtotal || 0).toLocaleString()}
                   </p>
                   <p>
-                    Bulk discount: -{currencySymbol}
-                    {Number(pricingPreview.bulk_discount_total || 0).toLocaleString()}
-                  </p>
-                  <p>
-                    Coupon discount: -{currencySymbol}
-                    {Number(pricingPreview.coupon_discount || 0).toLocaleString()}
+                    Shipping: {currencySymbol}
+                    {Number(pricingPreview.shipping_cost || 0).toLocaleString()}
                   </p>
                 </div>
               )}
-              {discountAmount > 0 && (
+              {!pricingPreview && items.length > 0 && (
                 <p className="text-xs text-muted-foreground">
-                  Discount applied: -{currencySymbol}
-                  {discountAmount.toLocaleString()}
+                  Line items: {currencySymbol}
+                  {merchandiseTotal.toLocaleString()} (add shipping zone for full quote)
                 </p>
               )}
             </CardContent>

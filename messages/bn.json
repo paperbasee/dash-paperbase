@@ -33,7 +33,6 @@
     "support_tickets": "সাপোর্ট টিকিট",
     "cta": "সিটিএ",
     "reviews": "রিভিউ",
-    "coupons": "কুপন",
     "variants": "ভেরিয়েন্ট",
     "product_attributes": "অ্যাট্রিবিউট",
     "inventory": "ইনভেন্টরি",
@@ -191,13 +190,15 @@
   },
   "dashboard": {
     "title": "ড্যাশবোর্ড সারসংক্ষেপ",
-    "subtitle": "অর্ডার, পণ্য ও সাপোর্ট টিকিট কার্যকলাপের সংক্ষিপ্ত চিত্র। মোবাইলে সাম্প্রতিক অ্যাডমিন কার্যকলাপ দেখুন।",
+    "subtitle": "অর্ডার, পণ্য, গ্রাহক ও সাপোর্ট টিকিট কার্যকলাপের সংক্ষিপ্ত চিত্র। মোবাইলে সাম্প্রতিক অ্যাডমিন কার্যকলাপ দেখুন।",
     "activitiesAria": "কার্যকলাপ",
     "recentActivities": "সাম্প্রতিক কার্যকলাপ",
     "noRecentActivity": "এখনও কোনো সাম্প্রতিক অ্যাডমিন কার্যকলাপ নেই।",
     "totalOrders": "মোট অর্ডার",
     "totalProducts": "মোট পণ্য",
     "supportTickets": "সাপোর্ট টিকিট",
+    "totalCustomers": "গ্রাহক",
+    "customersInPeriod": "নির্বাচিত সময়ে নতুন",
     "withinPeriod": "নির্বাচিত সময়ের মধ্যে",
     "addedInPeriod": "এই সময়ে যোগ হয়েছে",
     "supportAndInquiries": "সাপোর্ট ও জিজ্ঞাসা",
@@ -205,7 +206,8 @@
     "chartNoActivity": "নির্বাচিত সময়ে কোনো কার্যকলাপ নেই।",
     "chartOrders": "অর্ডার",
     "chartProducts": "পণ্য",
-    "chartSupportTickets": "সাপোর্ট টিকিট"
+    "chartSupportTickets": "সাপোর্ট টিকিট",
+    "chartCustomers": "গ্রাহক"
   },
   "auth": {
     "login": {

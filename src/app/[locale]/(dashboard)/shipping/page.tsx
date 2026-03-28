@@ -33,8 +33,8 @@ type MethodForm = {
 };
 
 type RateForm = {
-  shipping_method: string;
-  shipping_zone: string;
+  shipping_method_public_id: string;
+  shipping_zone_public_id: string;
   rate_type: ShippingRate["rate_type"];
   min_order_total: string;
   max_order_total: string;
@@ -56,8 +56,8 @@ const emptyMethod: MethodForm = {
 };
 
 const emptyRate: RateForm = {
-  shipping_method: "",
-  shipping_zone: "",
+  shipping_method_public_id: "",
+  shipping_zone_public_id: "",
   rate_type: "flat",
   min_order_total: "",
   max_order_total: "",
@@ -170,8 +170,8 @@ export default function ShippingPage() {
   function openEditRate(r: ShippingRate) {
     setEditingRate(r.public_id);
     setRateForm({
-      shipping_method: r.shipping_method,
-      shipping_zone: r.shipping_zone,
+      shipping_method_public_id: r.shipping_method_public_id,
+      shipping_zone_public_id: r.shipping_zone_public_id,
       rate_type: r.rate_type,
       min_order_total: r.min_order_total || "",
       max_order_total: r.max_order_total || "",
@@ -252,8 +252,8 @@ export default function ShippingPage() {
     setSaving(true);
     setError("");
     const payload: Record<string, unknown> = {
-      shipping_method: rateForm.shipping_method,
-      shipping_zone: rateForm.shipping_zone,
+      shipping_method_public_id: rateForm.shipping_method_public_id,
+      shipping_zone_public_id: rateForm.shipping_zone_public_id,
       rate_type: rateForm.rate_type,
       price: rateForm.price,
       is_active: rateForm.is_active,
@@ -582,9 +582,9 @@ export default function ShippingPage() {
           {editingRate && (
             <form onSubmit={saveRate} className="mb-4 space-y-3">
               <Select
-                value={rateForm.shipping_method}
+                value={rateForm.shipping_method_public_id}
                 onChange={(e) =>
-                  setRateForm((f) => ({ ...f, shipping_method: e.target.value }))
+                  setRateForm((f) => ({ ...f, shipping_method_public_id: e.target.value }))
                 }
                 className="text-sm"
                 required
@@ -599,9 +599,9 @@ export default function ShippingPage() {
                 ))}
               </Select>
               <Select
-                value={rateForm.shipping_zone}
+                value={rateForm.shipping_zone_public_id}
                 onChange={(e) =>
-                  setRateForm((f) => ({ ...f, shipping_zone: e.target.value }))
+                  setRateForm((f) => ({ ...f, shipping_zone_public_id: e.target.value }))
                 }
                 className="text-sm"
                 required
@@ -695,8 +695,11 @@ export default function ShippingPage() {
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <div className="font-medium">
-                      {methodByPublicId.get(r.shipping_method)?.name || r.shipping_method}{" "}
-                      → {zoneByPublicId.get(r.shipping_zone)?.name || r.shipping_zone}
+                      {methodByPublicId.get(r.shipping_method_public_id)?.name ||
+                        r.shipping_method_public_id}{" "}
+                      →{" "}
+                      {zoneByPublicId.get(r.shipping_zone_public_id)?.name ||
+                        r.shipping_zone_public_id}
                     </div>
                     <div className="text-xs text-muted-foreground">
                       {r.is_active ? "Active" : "Inactive"} · {r.rate_type} · price:{" "}

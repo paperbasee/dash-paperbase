@@ -153,7 +153,7 @@ export default function DashboardPage() {
         )}
       </section>
 
-      <section className="order-2 hidden grid-cols-2 gap-4 md:order-2 md:grid md:grid-cols-3">
+      <section className="order-2 hidden grid-cols-2 gap-4 md:order-2 md:grid md:grid-cols-2 lg:grid-cols-4">
         <StatsCard
           title={t("totalOrders")}
           value={loading || !summary ? "--" : fmtStat(summary.totalOrders)}
@@ -166,6 +166,15 @@ export default function DashboardPage() {
           value={loading || !summary ? "--" : fmtStat(summary.totalProducts)}
           accent="green"
           subtitle={t("addedInPeriod")}
+          numberFont={locale === "bn" ? "sans" : "mono"}
+        />
+        <StatsCard
+          title={t("totalCustomers")}
+          value={
+            loading || !summary ? "--" : fmtStat(summary.totalCustomers)
+          }
+          accent="yellow"
+          subtitle={t("customersInPeriod")}
           numberFont={locale === "bn" ? "sans" : "mono"}
         />
         <StatsCard

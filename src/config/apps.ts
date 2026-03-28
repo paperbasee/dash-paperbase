@@ -5,7 +5,6 @@ import {
   Boxes,
   Users,
   Layers,
-  Tag,
   Tags,
   Bell,
   PackageSearch,
@@ -108,16 +107,6 @@ export const APP_CONFIG: Record<string, AppConfig> = {
     countKey: null,
     parentId: "more",
   },
-  coupons: {
-    id: "coupons",
-    label: "Coupons",
-    icon: Tag,
-    description: "Coupon codes and automatic bulk discounts",
-    essential: false,
-    href: "/coupons",
-    countKey: null,
-    parentId: "more",
-  },
   variants: {
     id: "variants",
     label: "Variants",
@@ -203,7 +192,6 @@ export const OPTIONAL_APP_IDS = [
   "support_tickets",
   "cta",
   "reviews",
-  "coupons",
   "inventory",
   "activities",
   "banners",
@@ -234,5 +222,4 @@ export const MORE_APP_IDS = [
   "support_tickets",
   "activities",
   "reviews",
-  "coupons",
 ] as const;

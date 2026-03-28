@@ -7,33 +7,26 @@ import { isAxiosError } from "axios";
 import api from "@/lib/api";
 import { ClickableText } from "@/components/ui/clickable-text";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import type { Banner, PaginatedResponse } from "@/types";
 
 type BannerForm = {
   title: string;
-  description: string;
   cta_text: string;
-  redirect_url: string;
-  is_clickable: boolean;
-  placement: string;
-  position: string;
+  cta_link: string;
+  order: string;
   is_active: boolean;
-  start_date: string;
-  end_date: string;
+  start_at: string;
+  end_at: string;
 };
 
 const emptyForm: BannerForm = {
   title: "",
-  description: "",
   cta_text: "",
-  redirect_url: "",
-  is_clickable: false,
-  placement: "homepage_hero",
-  position: "0",
+  cta_link: "",
+  order: "0",
   is_active: true,
-  start_date: "",
-  end_date: "",
+  start_at: "",
+  end_at: "",
 };
 
 function toDateTimeLocal(value: string | null): string {
@@ -75,16 +68,13 @@ export default function BannersPage() {
   function openEdit(banner: Banner) {
     setEditing(banner.public_id);
     setForm({
-      title: banner.title,
-      description: banner.description || "",
+      title: banner.title || "",
       cta_text: banner.cta_text || "",
-      redirect_url: banner.redirect_url || "",
-      is_clickable: banner.is_clickable,
-      placement: banner.placement,
-      position: String(banner.position),
+      cta_link: banner.cta_link || "",
+      order: String(banner.order ?? 0),
       is_active: banner.is_active,
-      start_date: toDateTimeLocal(banner.start_date),
-      end_date: toDateTimeLocal(banner.end_date),
+      start_at: toDateTimeLocal(banner.start_at),
+      end_at: toDateTimeLocal(banner.end_at),
     });
     setImageFile(null);
   }
@@ -94,16 +84,12 @@ export default function BannersPage() {
     setSaving(true);
     const fd = new FormData();
     fd.append("title", form.title);
-    fd.append("description", form.description);
     fd.append("cta_text", form.cta_text);
-    const redirectUrl = form.redirect_url.trim();
-    if (redirectUrl) fd.append("redirect_url", redirectUrl);
-    fd.append("is_clickable", String(form.is_clickable));
-    fd.append("placement", form.placement);
-    fd.append("position", form.position);
+    fd.append("cta_link", form.cta_link.trim());
+    fd.append("order", form.order || "0");
     fd.append("is_active", String(form.is_active));
-    if (form.start_date) fd.append("start_date", form.start_date);
-    if (form.end_date) fd.append("end_date", form.end_date);
+    if (form.start_at) fd.append("start_at", form.start_at);
+    if (form.end_at) fd.append("end_at", form.end_at);
     if (imageFile) fd.append("image", imageFile);
 
     try {
@@ -178,7 +164,7 @@ export default function BannersPage() {
       {editing !== null && (
         <form
           onSubmit={handleSave}
-          className="rounded-xl border border-border bg-card p-6 space-y-4"
+          className="space-y-4 rounded-xl border border-border bg-card p-6"
         >
           <h2 className="text-lg font-medium">
             {editing === "new" ? "New Banner" : "Edit Banner"}
@@ -197,33 +183,19 @@ export default function BannersPage() {
               />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium">Placement</label>
-              <Textarea
-                value={form.placement}
+              <label className="mb-1 block text-sm font-medium">Display order</label>
+              <Input
+                type="number"
+                min={0}
+                value={form.order}
                 onChange={(e) =>
-                  setForm((f) => ({ ...f, placement: e.target.value }))
+                  setForm((f) => ({ ...f, order: e.target.value }))
                 }
                 className="text-sm"
-                placeholder="e.g. homepage_hero"
-                rows={2}
-                maxLength={50}
-                required
               />
             </div>
             <div className="sm:col-span-2">
-              <label className="mb-1 block text-sm font-medium">Description</label>
-              <Textarea
-                value={form.description}
-                onChange={(e) =>
-                  setForm((f) => ({ ...f, description: e.target.value }))
-                }
-                className="text-sm"
-                placeholder="Optional"
-                rows={3}
-              />
-            </div>
-            <div>
-              <label className="mb-1 block text-sm font-medium">CTA Text</label>
+              <label className="mb-1 block text-sm font-medium">CTA text</label>
               <Input
                 type="text"
                 value={form.cta_text}
@@ -231,56 +203,44 @@ export default function BannersPage() {
                   setForm((f) => ({ ...f, cta_text: e.target.value }))
                 }
                 className="text-sm"
-                placeholder='e.g. "Shop Now"'
+                placeholder='e.g. "Shop now"'
+              />
+            </div>
+            <div className="sm:col-span-2">
+              <label className="mb-1 block text-sm font-medium">CTA link (URL)</label>
+              <Input
+                type="url"
+                value={form.cta_link}
+                onChange={(e) =>
+                  setForm((f) => ({ ...f, cta_link: e.target.value }))
+                }
+                className="text-sm"
+                placeholder="https://..."
               />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium">Position</label>
+              <label className="mb-1 block text-sm font-medium">Start</label>
               <Input
-                type="number"
-                value={form.position}
+                type="datetime-local"
+                value={form.start_at}
                 onChange={(e) =>
-                  setForm((f) => ({ ...f, position: e.target.value }))
+                  setForm((f) => ({ ...f, start_at: e.target.value }))
+                }
+                className="text-sm"
+              />
+            </div>
+            <div>
+              <label className="mb-1 block text-sm font-medium">End</label>
+              <Input
+                type="datetime-local"
+                value={form.end_at}
+                onChange={(e) =>
+                  setForm((f) => ({ ...f, end_at: e.target.value }))
                 }
                 className="text-sm"
               />
             </div>
             <div className="sm:col-span-2">
-              <label className="mb-1 block text-sm font-medium">Redirect URL</label>
-              <Input
-                type="url"
-                value={form.redirect_url}
-                onChange={(e) =>
-                  setForm((f) => ({ ...f, redirect_url: e.target.value }))
-                }
-                className="text-sm"
-                placeholder="https://..."
-                required={form.is_clickable}
-              />
-            </div>
-            <div>
-              <label className="mb-1 block text-sm font-medium">Start Date</label>
-              <Input
-                type="datetime-local"
-                value={form.start_date}
-                onChange={(e) =>
-                  setForm((f) => ({ ...f, start_date: e.target.value }))
-                }
-                className="text-sm"
-              />
-            </div>
-            <div>
-              <label className="mb-1 block text-sm font-medium">End Date</label>
-              <Input
-                type="datetime-local"
-                value={form.end_date}
-                onChange={(e) =>
-                  setForm((f) => ({ ...f, end_date: e.target.value }))
-                }
-                className="text-sm"
-              />
-            </div>
-            <div>
               <label className="mb-1 block text-sm font-medium">Image</label>
               <input
                 type="file"
@@ -294,21 +254,7 @@ export default function BannersPage() {
                 </p>
               )}
             </div>
-            <div className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                id="is_clickable"
-                className="form-checkbox"
-                checked={form.is_clickable}
-                onChange={(e) =>
-                  setForm((f) => ({ ...f, is_clickable: e.target.checked }))
-                }
-              />
-              <label htmlFor="is_clickable" className="text-sm">
-                Clickable
-              </label>
-            </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 sm:col-span-2">
               <input
                 type="checkbox"
                 id="is_active"
@@ -346,44 +292,39 @@ export default function BannersPage() {
         <table className="w-full text-left text-sm">
           <thead>
             <tr className="border-b border-border bg-muted/40">
-              <th className="th">
-                Title
-              </th>
-              <th className="th">
-                Placement
-              </th>
-              <th className="th">
-                Position
-              </th>
-              <th className="th">
-                Start Date
-              </th>
-              <th className="th">
-                End Date
-              </th>
-              <th className="th">
-                Status
-              </th>
-              <th className="th text-right">
-                Actions
-              </th>
+              <th className="th">Preview</th>
+              <th className="th">Title</th>
+              <th className="th">Order</th>
+              <th className="th">Start</th>
+              <th className="th">End</th>
+              <th className="th">Status</th>
+              <th className="th text-right">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-border/60">
             {banners.map((b) => (
               <tr key={b.public_id} className="hover:bg-muted/40">
+                <td className="px-4 py-3">
+                  {b.image ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={b.image}
+                      alt=""
+                      className="h-12 w-20 rounded object-cover"
+                    />
+                  ) : (
+                    <span className="text-muted-foreground">—</span>
+                  )}
+                </td>
                 <td className="px-4 py-3 font-medium">
                   {b.title || "—"}
                 </td>
-                <td className="px-4 py-3 text-muted-foreground capitalize">
-                  {b.placement}
-                </td>
-                <td className="px-4 py-3">{b.position}</td>
+                <td className="px-4 py-3">{b.order}</td>
                 <td className="px-4 py-3 text-muted-foreground">
-                  {b.start_date ? new Date(b.start_date).toLocaleString() : "—"}
+                  {b.start_at ? new Date(b.start_at).toLocaleString() : "—"}
                 </td>
                 <td className="px-4 py-3 text-muted-foreground">
-                  {b.end_date ? new Date(b.end_date).toLocaleString() : "—"}
+                  {b.end_at ? new Date(b.end_at).toLocaleString() : "—"}
                 </td>
                 <td className="px-4 py-3">
                   <span

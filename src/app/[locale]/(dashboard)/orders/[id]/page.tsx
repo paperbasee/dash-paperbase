@@ -47,14 +47,14 @@ type EditForm = {
   shipping_address: string;
   district: string;
   tracking_number: string;
-  shipping_zone: string;
-  shipping_method: string;
+  shipping_zone_public_id: string;
+  shipping_method_public_id: string;
 };
 
 type EditableOrderItem = {
   key: string;
   public_id: string | null;
-  product: string | null;
+  product_public_id: string | null;
   product_name: string;
   product_brand?: string;
   product_image: string | null;
@@ -148,8 +148,8 @@ export default function OrderDetailPage() {
     shipping_address: "",
     district: "",
     tracking_number: "",
-    shipping_zone: "",
-    shipping_method: "",
+    shipping_zone_public_id: "",
+    shipping_method_public_id: "",
   });
   const [extraFields, setExtraFields] = useState<ExtraFieldValues>({});
   const [extraFieldsErrors, setExtraFieldsErrors] = useState<Record<string, string>>({});
@@ -232,8 +232,8 @@ export default function OrderDetailPage() {
       shipping_address: order.shipping_address,
       district: order.district,
       tracking_number: order.tracking_number,
-      shipping_zone: order.shipping_zone_public_id ?? "",
-      shipping_method: order.shipping_method_public_id ?? "",
+      shipping_zone_public_id: order.shipping_zone_public_id ?? "",
+      shipping_method_public_id: order.shipping_method_public_id ?? "",
     });
     setExtraFields(
       typeof order.extra_data === "object" && order.extra_data !== null
@@ -253,7 +253,7 @@ export default function OrderDetailPage() {
       (order.items ?? []).map((item) => ({
         key: item.public_id,
         public_id: item.public_id,
-        product: item.product,
+        product_public_id: item.product_public_id ?? null,
         product_name: item.product_name,
         product_brand: item.product_brand,
         product_image: item.product_image,
@@ -284,7 +284,7 @@ export default function OrderDetailPage() {
     try {
       const { data } = await api.get<PaginatedResponse<ProductVariant> | ProductVariant[]>(
         "admin/product-variants/",
-        { params: { product: productId } },
+        { params: { product_public_id: productId } },
       );
       const list = Array.isArray(data) ? data : data.results;
       setVariantsByProductId((p) => ({ ...p, [productId]: list ?? [] }));
@@ -327,10 +327,10 @@ export default function OrderDetailPage() {
       {
         key: `new-${Date.now()}-${product.public_id}-${prev.length}`,
         public_id: null,
-        product: product.public_id,
+        product_public_id: product.public_id,
         product_name: product.name || "Unavailable",
         product_brand: product.brand ?? undefined,
-        product_image: product.image_url ?? product.image,
+        product_image: product.image_url ?? product.image ?? null,
         status: "active",
         variant_public_id: null,
         quantity: 1,
@@ -374,8 +374,8 @@ export default function OrderDetailPage() {
         shipping_address: form.shipping_address,
         district: form.district,
         tracking_number: form.tracking_number,
-        shipping_zone: form.shipping_zone,
-        shipping_method: form.shipping_method || null,
+        shipping_zone_public_id: form.shipping_zone_public_id,
+        shipping_method_public_id: form.shipping_method_public_id || null,
         items: [
           ...editableItems.map((it) =>
             it.public_id
@@ -386,7 +386,7 @@ export default function OrderDetailPage() {
                   price: itemEdits[it.public_id]?.price ?? String(it.price),
                 }
               : {
-                  product: it.product,
+                  product_public_id: it.product_public_id,
                   variant_public_id: it.variant_public_id ?? null,
                   quantity: it.quantity,
                   price: String(it.price),
@@ -617,7 +617,7 @@ export default function OrderDetailPage() {
               </thead>
               <tbody>
                 {displayItems.map((item, index) => {
-                  const isUnavailable = item.status === "deleted" || !item.product;
+                  const isUnavailable = item.status === "deleted" || !item.product_public_id;
                   const itemDiscount =
                     item.original_price != null &&
                     item.original_price !== "" &&
@@ -628,8 +628,8 @@ export default function OrderDetailPage() {
                   const itemEditKey =
                     "key" in item ? (item.public_id ?? item.key) : item.public_id;
                   const edit = itemEdits[itemEditKey];
-                  const variants = item.product ? (variantsByProductId[item.product] ?? []) : [];
-                  const variantsLoading = item.product ? (variantsLoadingByProductId[item.product] ?? false) : false;
+                  const variants = item.product_public_id ? (variantsByProductId[item.product_public_id] ?? []) : [];
+                  const variantsLoading = item.product_public_id ? (variantsLoadingByProductId[item.product_public_id] ?? false) : false;
                   const selectedVariant =
                     edit?.variant_public_id != null
                       ? variants.find((v) => v.public_id === edit.variant_public_id) ?? null
@@ -662,7 +662,7 @@ export default function OrderDetailPage() {
                                 "Unavailable"
                               ) : (
                                 <ClickableText
-                                  href={`/products/${item.product}`}
+                                  href={`/products/${item.product_public_id}`}
                                   target="_blank"
                                   rel="noopener noreferrer"
                                 >
@@ -703,7 +703,7 @@ export default function OrderDetailPage() {
                                     1,
                                     Math.min(
                                       parseInt(e.target.value) || 1,
-                                      selectedVariant?.inventory_quantity ?? Number.MAX_SAFE_INTEGER,
+                                      selectedVariant?.available_quantity ?? Number.MAX_SAFE_INTEGER,
                                     ),
                                   ),
                                   price: prev[itemEditKey]?.price ?? String(item.price),
@@ -743,7 +743,7 @@ export default function OrderDetailPage() {
                                 className="h-8 w-[220px] py-1"
                                 size="sm"
                                 value={edit?.variant_public_id ?? ""}
-                                onFocus={() => item.product && ensureVariantsLoaded(item.product)}
+                                onFocus={() => item.product_public_id && ensureVariantsLoaded(item.product_public_id)}
                                 onChange={(e) => {
                                   const raw = e.target.value;
                                   setItemEdits((prev) => ({
@@ -768,7 +768,7 @@ export default function OrderDetailPage() {
                               </Select>
                               {selectedVariant && (
                                 <span className="text-xs text-muted-foreground whitespace-nowrap">
-                                  Stock: {selectedVariant.inventory_quantity}
+                                  Stock: {selectedVariant.available_quantity}
                                 </span>
                               )}
                             </div>
@@ -974,8 +974,8 @@ export default function OrderDetailPage() {
                       Shipping method
                     </label>
                     <Select
-                      value={form.shipping_method}
-                      onChange={(e) => setForm({ ...form, shipping_method: e.target.value })}
+                      value={form.shipping_method_public_id}
+                      onChange={(e) => setForm({ ...form, shipping_method_public_id: e.target.value })}
                     >
                       <option value="">Auto (cheapest match)</option>
                       {shippingMethods.map((m) => (
@@ -990,8 +990,8 @@ export default function OrderDetailPage() {
                       Shipping zone
                     </label>
                     <Select
-                      value={form.shipping_zone}
-                      onChange={(e) => setForm({ ...form, shipping_zone: e.target.value })}
+                      value={form.shipping_zone_public_id}
+                      onChange={(e) => setForm({ ...form, shipping_zone_public_id: e.target.value })}
                       required
                     >
                       <option value="">Select shipping zone</option>

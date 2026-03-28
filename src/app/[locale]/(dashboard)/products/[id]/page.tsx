@@ -135,7 +135,7 @@ export default function EditProductPage() {
           category: parentId != null ? String(parentId) : String(p.category),
           sub_category: parentId != null ? String(p.category) : "",
           description: p.description ?? "",
-          stock: String(p.stock),
+          stock: String(p.available_quantity ?? p.total_stock ?? ""),
           badge: p.badge ?? "",
           is_featured: p.is_featured,
           is_active: p.is_active,
@@ -444,9 +444,12 @@ export default function EditProductPage() {
                 <p className="text-xs text-muted-foreground">
                   This product has <strong>{product.variant_count}</strong> variants (SKUs). Inventory is
                   stored per variant; <strong>total units</strong> (sum of variant stock):{" "}
-                  <span className="font-numbers text-foreground">{product.total_stock ?? product.stock}</span>.{" "}
+                  <span className="font-numbers text-foreground">
+                    {product.total_stock ?? product.available_quantity ?? 0}
+                  </span>
+                  .{" "}
                   <ClickableText
-                    href={`/variants?product=${encodeURIComponent(product_public_id)}`}
+                    href={`/variants?product_public_id=${encodeURIComponent(product_public_id)}`}
                     className="underline-offset-2"
                   >
                     Manage variants

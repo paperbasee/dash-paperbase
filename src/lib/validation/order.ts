@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const orderItemSchema = z.object({
-  product_id: z.string().trim().min(1),
+  product_public_id: z.string().trim().min(1),
   /** Matches dashboard line items (`variant_public_id`). **/
   variant_public_id: z.string().trim().min(1).nullable(),
   quantity: z.number().int().min(1),
@@ -20,7 +20,7 @@ export const orderCreateSchema = z.object({
   shipping_address: z.string().trim().min(1, "Shipping address is required."),
   district: z.string().trim().min(1, "District is required."),
   tracking_number: z.string().trim().optional(),
-  shipping_zone: z.string().trim().min(1, "Shipping zone is required."),
-  shipping_method: z.string().optional(),
+  shipping_zone_public_id: z.string().trim().min(1, "Shipping zone is required."),
+  shipping_method_public_id: z.string().optional(),
   items: z.array(orderItemSchema).min(1, "Add at least one product to the order."),
 });

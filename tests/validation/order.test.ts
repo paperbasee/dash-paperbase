@@ -10,11 +10,11 @@ describe("order schema", () => {
       shipping_address: "Dhaka",
       district: "Dhaka",
       tracking_number: "",
-      shipping_zone: "szn_abc123",
-      shipping_method: "",
+      shipping_zone_public_id: "szn_abc123",
+      shipping_method_public_id: "",
       items: [
         {
-          product_id: "1",
+          product_public_id: "1",
           variant_public_id: null,
           quantity: 1,
           price: "100",
@@ -32,8 +32,8 @@ describe("order schema", () => {
       shipping_address: "Dhaka",
       district: "Dhaka",
       tracking_number: "",
-      shipping_zone: "szn_abc123",
-      shipping_method: "",
+      shipping_zone_public_id: "szn_abc123",
+      shipping_method_public_id: "",
       items: [],
     });
     expect(result.success).toBe(false);
@@ -47,11 +47,11 @@ describe("order schema", () => {
       shipping_address: "Dhaka",
       district: "Dhaka",
       tracking_number: "",
-      shipping_zone: "",
-      shipping_method: "",
+      shipping_zone_public_id: "",
+      shipping_method_public_id: "",
       items: [
         {
-          product_id: "1",
+          product_public_id: "1",
           variant_public_id: null,
           quantity: 1,
           price: "100",

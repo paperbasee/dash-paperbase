@@ -67,7 +67,10 @@ const emptyForm = (attrs: ProductAttributeAdmin[]): VariantForm => {
 
 export default function VariantsPage() {
   const searchParams = useSearchParams();
-  const productFromQuery = searchParams.get("product")?.trim() || "";
+  const productFromQuery =
+    searchParams.get("product_public_id")?.trim() ||
+    searchParams.get("product")?.trim() ||
+    "";
 
   const [products, setProducts] = useState<Product[]>([]);
   const [attributes, setAttributes] = useState<ProductAttributeAdmin[]>([]);
@@ -120,7 +123,7 @@ export default function VariantsPage() {
       while (true) {
         const { data } = await api.get<PaginatedResponse<ProductVariant>>(
           "admin/product-variants/",
-          { params: { product: productId, page, page_size: 100 } }
+          { params: { product_public_id: productId, page, page_size: 100 } }
         );
         acc.push(...data.results);
         if (!data.next) break;
@@ -181,7 +184,7 @@ export default function VariantsPage() {
       if (raw) attribute_value_public_ids.push(raw);
     }
     const payload: Record<string, unknown> = {
-      product: productId,
+      product_public_id: productId,
       is_active: form.is_active,
       attribute_value_public_ids,
     };
@@ -446,7 +449,7 @@ export default function VariantsPage() {
                       <td className="px-4 py-3 font-numbers text-foreground">
                         {v.price_override ?? selectedProduct?.price ?? "—"}
                       </td>
-                      <td className="px-4 py-3 font-numbers">{v.inventory_quantity}</td>
+                      <td className="px-4 py-3 font-numbers">{v.available_quantity}</td>
                       <td className="px-4 py-3">{v.is_active ? "Yes" : "No"}</td>
                       <td className="px-4 py-3">
                         <div className="flex gap-1">

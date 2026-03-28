@@ -389,7 +389,7 @@ export default function ProductsPage() {
                       {product.brand || "—"}
                     </td>
                     <td className="px-4 py-3 text-muted-foreground whitespace-nowrap">
-                      {product.category_name}
+                      {product.category_name ?? "—"}
                     </td>
                     <td className="px-4 py-3 text-foreground whitespace-nowrap">
                       {currencySymbol}{Number(product.price).toLocaleString()}
@@ -404,10 +404,10 @@ export default function ProductsPage() {
                                 : "text-foreground"
                             }`}
                           >
-                            {product.total_stock ?? product.stock}
+                            {product.total_stock ?? product.available_quantity ?? 0}
                           </span>
                           <ClickableText
-                            href={`/variants?product=${encodeURIComponent(product.public_id)}`}
+                            href={`/variants?product_public_id=${encodeURIComponent(product.public_id)}`}
                             className="text-xs underline-offset-2"
                             title="Stock lives on each variant (SKUs)."
                           >
@@ -417,11 +417,13 @@ export default function ProductsPage() {
                       ) : (
                         <span
                           className={`font-numbers text-sm font-medium ${
-                            product.stock === 0 ? "text-destructive" : "text-foreground"
+                            (product.total_stock ?? product.available_quantity ?? 0) === 0
+                              ? "text-destructive"
+                              : "text-foreground"
                           }`}
                           title="Stock updates are managed from Inventory."
                         >
-                          {product.stock}
+                          {product.total_stock ?? product.available_quantity ?? 0}
                         </span>
                       )}
                     </td>

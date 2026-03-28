@@ -183,7 +183,7 @@ export default function NewProductPage() {
         const file = imageFiles[i];
         if (!file) continue;
         const galleryData = new FormData();
-        galleryData.append("product", productId);
+        galleryData.append("product_public_id", productId);
         galleryData.append("image", file);
         galleryData.append("order", String(i));
         await api.post("admin/product-images/", galleryData);

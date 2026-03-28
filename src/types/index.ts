@@ -21,17 +21,29 @@ export interface Branding {
   }>;
 }
 
+/** Variant option row on order line items (storefront); admin may use variant_option_labels instead. */
+export interface OrderItemVariantOption {
+  attribute_public_id: string;
+  attribute_slug: string;
+  attribute_name: string;
+  value_public_id: string;
+  value: string;
+}
+
 export interface OrderItem {
   public_id: string;
-  product: string | null;
+  product_public_id: string | null;
   product_name: string;
   status?: "active" | "deleted";
   product_brand?: string;
   product_image: string | null;
+  product_sku?: string | null;
   variant_public_id?: string | null;
   variant_sku?: string | null;
   variant_inventory_quantity?: number | null;
   variant_option_labels?: string[];
+  /** Present on storefront order create responses; admin detail may omit. */
+  variant_options?: OrderItemVariantOption[] | null;
   quantity: number;
   price: string;
   original_price?: string | null;
@@ -60,8 +72,6 @@ export interface Order {
   courier_status?: string;
   sent_to_courier?: boolean;
   customer_confirmation_sent_at?: string | null;
-  coupon_code?: string;
-  discount_amount?: string;
   allowed_next_statuses?: string[];
   items?: OrderItem[];
   items_count?: number;
@@ -69,6 +79,9 @@ export interface Order {
   updated_at: string;
 }
 
+/**
+ * Admin product list/detail (`/api/v1/admin/products/`). Storefront shapes differ — see `StorefrontProductListItem` in `./storefront-api`.
+ */
 export interface Product {
   public_id: string;
   name: string;
@@ -76,18 +89,24 @@ export interface Product {
   slug: string;
   price: string;
   original_price: string | null;
-  image: string | null;
+  /** Admin detail: multipart file field (path/URL). */
+  image?: string | null;
+  /** Admin list: absolute or relative image URL. */
   image_url?: string | null;
   badge: string | null;
-  category: string;
+  /** Admin detail: selected category `public_id`. */
+  category?: string;
   category_public_id?: string;
-  category_name: string;
+  category_slug?: string;
+  category_name?: string;
+  sku?: string;
+  stock_tracking?: boolean;
   description?: string;
-  stock: number;
-  /** Number of ProductVariant rows (admin API). */
-  variant_count?: number;
-  /** Sum of variant stock when variants exist; else same as `stock` (admin API). */
+  /** Admin/catalog: sellable quantity (inventory-aligned). */
+  available_quantity?: number;
   total_stock?: number;
+  stock_source?: string;
+  variant_count?: number;
   is_featured: boolean;
   is_active: boolean;
   extra_data?: Record<string, string | number | boolean>;
@@ -98,7 +117,7 @@ export interface Product {
 
 export interface ProductImage {
   public_id: string;
-  product: string;
+  product_public_id: string;
   image: string;
   order: number;
 }
@@ -106,10 +125,11 @@ export interface ProductImage {
 /** Admin API: product variant (SKU) row. */
 export interface ProductVariant {
   public_id: string;
-  product: string;
+  product_public_id: string;
   sku: string;
   price_override: string | null;
-  inventory_quantity: number;
+  available_quantity: number;
+  stock_source?: string;
   is_active: boolean;
   attribute_value_public_ids: string[];
   option_labels: string[];
@@ -158,9 +178,10 @@ export interface Category {
   product_count: number;
 }
 
+/** Admin storefront CTA rows (`/api/v1/admin/notifications/`). Publishable API uses `cta_url` / `cta_label` / `start_at` / `end_at`. */
 export interface Notification {
   public_id: string;
-  text: string;
+  cta_text: string;
   notification_type: string;
   is_active: boolean;
   is_currently_active: boolean;
@@ -264,59 +285,24 @@ export interface StockMovement {
   actor_public_id: string | null;
 }
 
-export interface Coupon {
-  public_id: string;
-  code: string;
-  discount_type: string;
-  discount_value: string;
-  min_order_value: string | null;
-  max_uses: number | null;
-  per_identity_max_uses: number | null;
-  times_used: number;
-  successful_uses?: number;
-  reversed_uses?: number;
-  valid_from: string | null;
-  valid_until: string | null;
-  is_active: boolean;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface BulkDiscount {
-  public_id: string;
-  target_type: "category" | "subcategory" | "product";
-  category_public_id: string | null;
-  product_public_id: string | null;
-  discount_type: "percentage" | "fixed";
-  discount_value: string;
-  priority: number;
-  start_date: string | null;
-  end_date: string | null;
-  is_active: boolean;
-  created_at: string;
-  updated_at: string;
-}
-
+/** Admin banner CRUD (`/api/v1/admin/banners/`). Storefront GET uses `image_url` and `cta_url`. */
 export interface Banner {
   public_id: string;
   image: string;
   title: string;
-  description: string;
   cta_text: string;
-  redirect_url: string;
-  is_clickable: boolean;
-  placement: string;
-  position: number;
+  cta_link: string;
   is_active: boolean;
-  start_date: string | null;
-  end_date: string | null;
+  order: number;
+  start_at: string | null;
+  end_at: string | null;
   created_at: string;
   updated_at: string;
 }
 
 export interface Review {
   public_id: string;
-  product: string;
+  product_public_id: string;
   product_name: string;
   user_email: string;
   rating: number;
@@ -403,8 +389,8 @@ export interface Courier {
 
 export interface ShippingRate {
   public_id: string;
-  shipping_method: string;
-  shipping_zone: string;
+  shipping_method_public_id: string;
+  shipping_zone_public_id: string;
   rate_type: "flat" | "weight" | "order_total";
   min_order_total: string | null;
   max_order_total: string | null;
@@ -439,3 +425,12 @@ export interface StoreAPIKey {
   created_at: string;
   revoked_at: string | null;
 }
+
+export type {
+  StorefrontBanner,
+  StorefrontCategory,
+  StorefrontCTA,
+  StorefrontOrderItem,
+  StorefrontProductDetail,
+  StorefrontProductListItem,
+} from "./storefront-api";
