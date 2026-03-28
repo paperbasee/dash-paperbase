@@ -1,13 +1,12 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { useParams } from "next/navigation";
 import { useRouter } from "@/i18n/navigation";
 import {
   Undo2,
   CreditCard,
   User,
-  Package,
   Home,
 } from "lucide-react";
 import api from "@/lib/api";
@@ -36,6 +35,15 @@ import {
   CardDescription,
   CardContent,
 } from "@/components/ui/card";
+import { ProductSearchBar } from "@/components/orders/product-search-bar";
+import { ProductGrid } from "@/components/orders/product-grid";
+import { OrderLineProductCard } from "@/components/orders/order-line-product-card";
+import type { EditableOrderItem } from "@/lib/orders/editable-order-item";
+import {
+  orderLineEditKey,
+  orderLineListKey,
+  orderLineRemoveKey,
+} from "@/lib/orders/editable-order-item";
 
 type EditForm = {
   shipping_name: string;
@@ -45,24 +53,6 @@ type EditForm = {
   district: string;
   shipping_zone_public_id: string;
   shipping_method_public_id: string;
-};
-
-type EditableOrderItem = {
-  key: string;
-  public_id: string | null;
-  product_public_id: string | null;
-  product_name: string;
-  product_brand?: string;
-  product_image: string | null;
-  status?: "active" | "deleted";
-  variant_public_id: string | null;
-  quantity: number;
-  price: string;
-  original_price?: string | null;
-  variant_option_labels?: string[];
-  variant_sku?: string | null;
-  variant_inventory_quantity?: number | null;
-  isNew: boolean;
 };
 
 function extractApiDetail(err: unknown, fallback: string): string {
@@ -76,13 +66,6 @@ function extractApiDetail(err: unknown, fallback: string): string {
     }
   }
   return fallback;
-}
-
-function resolveImageUrl(url: string | null | undefined): string | null {
-  if (!url) return null;
-  if (url.startsWith("http")) return url;
-  const base = process.env.NEXT_PUBLIC_API_URL || "";
-  return base ? `${base.replace(/\/$/, "")}${url.startsWith("/") ? "" : "/"}${url}` : url;
 }
 
 function formatOrderDate(iso: string) {
@@ -265,6 +248,10 @@ export default function OrderDetailPage() {
       })
       .finally(() => setSearchingProducts(false));
   }
+
+  const dismissProductResults = useCallback(() => {
+    setShowProductResults(false);
+  }, []);
 
   function addProductToEditableOrder(product: Product) {
     if (!product.public_id) return;
@@ -452,7 +439,7 @@ export default function OrderDetailPage() {
             </span>
           </nav>
         </div>
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-center justify-end gap-2">
           <Button
             variant="outline"
             size="sm"
@@ -461,12 +448,29 @@ export default function OrderDetailPage() {
           >
             Delete Order
           </Button>
-          {!editing && (
-            <Button
-              size="sm"
-              onClick={startEditing}
-              className="rounded-lg"
-            >
+          {editing ? (
+            <>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="rounded-lg"
+                onClick={() => setEditing(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                form="order-edit-form"
+                size="sm"
+                disabled={saving}
+                className="rounded-lg"
+              >
+                {saving ? "Saving…" : "Save Changes"}
+              </Button>
+            </>
+          ) : (
+            <Button size="sm" onClick={startEditing} className="rounded-lg">
               Edit Order
             </Button>
           )}
@@ -476,267 +480,97 @@ export default function OrderDetailPage() {
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3 lg:items-start">
         {/* Product - left, wider; height locked to Payment + Customer combined on desktop; scrolls when many items */}
         <Card
-          className="flex min-h-0 flex-col overflow-hidden rounded-xl border border-dashed border-card-border bg-card shadow-sm lg:col-span-2"
+          className="flex min-h-0 flex-col gap-0 overflow-hidden rounded-xl border border-dashed border-card-border bg-card py-0 shadow-sm lg:col-span-2"
           style={rightColHeight !== null ? { height: rightColHeight } : undefined}
         >
-          <CardHeader className="shrink-0 border-b border-border/50 px-4 pb-4 sm:px-6">
+          <CardHeader className="shrink-0 border-b border-border/50 px-4 pb-4 pt-5 sm:px-6">
             <CardTitle>Product</CardTitle>
             <CardDescription>product details</CardDescription>
           </CardHeader>
-          <CardContent className="min-h-0 flex-1 overflow-auto px-4 pt-6 sm:px-6 [scrollbar-width:thin] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-none [&::-webkit-scrollbar-thumb]:bg-border [&::-webkit-scrollbar-track]:bg-transparent">
-            <div className="overflow-x-auto [scrollbar-width:thin] [&::-webkit-scrollbar]:h-1.5 [&::-webkit-scrollbar-thumb]:rounded-none [&::-webkit-scrollbar-thumb]:bg-border [&::-webkit-scrollbar-track]:bg-transparent">
-            <table className="w-full min-w-[760px] text-left text-sm">
-              <thead>
-                <tr className="border-b border-border">
-                  <th className="pb-3 pr-4 font-medium text-muted-foreground">
-                    Item
-                  </th>
-                  <th className="pb-3 pr-4 font-medium text-muted-foreground">
-                    Quantity
-                  </th>
-                  <th className="pb-3 pr-4 font-medium text-muted-foreground">
-                    Price
-                  </th>
-                  <th className="pb-3 font-medium text-muted-foreground text-right">
-                    Discount
-                  </th>
-                  {editing && (
-                    <th className="pb-3 pl-4 font-medium text-muted-foreground text-right">
-                      Action
-                    </th>
-                  )}
-                </tr>
-              </thead>
-              <tbody>
+          {editing && (
+            <div className="shrink-0 border-b border-border/50">
+              <ProductSearchBar
+                value={productQuery}
+                onValueChange={handleProductSearch}
+                searchingProducts={searchingProducts}
+                showProductResults={showProductResults}
+                productResults={productResults}
+                currencySymbol={currencySymbol}
+                onSelectProduct={addProductToEditableOrder}
+                onDismissResults={dismissProductResults}
+              />
+            </div>
+          )}
+          <CardContent className="flex min-h-0 flex-1 flex-col gap-0 px-0 pb-4 pt-0">
+            <div
+              className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto scroll-smooth px-4 pt-4 sm:px-6 [scrollbar-width:thin] max-h-[70vh] lg:max-h-none [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-none [&::-webkit-scrollbar-thumb]:bg-border [&::-webkit-scrollbar-track]:bg-transparent"
+            >
+              <ProductGrid hasItems={displayItems.length > 0}>
                 {displayItems.map((item, index) => {
-                  const isUnavailable = item.status === "deleted" || !item.product_public_id;
-                  const itemDiscount =
-                    item.original_price != null &&
-                    item.original_price !== "" &&
-                    Number(item.original_price) > Number(item.price)
-                      ? (Number(item.original_price) - Number(item.price)) * item.quantity
-                      : 0;
-                  const imageUrl = resolveImageUrl(item.product_image);
-                  const itemEditKey =
-                    "key" in item ? (item.public_id ?? item.key) : item.public_id;
+                  const itemEditKey = orderLineEditKey(item);
                   const edit = itemEdits[itemEditKey];
-                  const variants = item.product_public_id ? (variantsByProductId[item.product_public_id] ?? []) : [];
-                  const variantsLoading = item.product_public_id ? (variantsLoadingByProductId[item.product_public_id] ?? false) : false;
+                  const variants = item.product_public_id
+                    ? (variantsByProductId[item.product_public_id] ?? [])
+                    : [];
+                  const variantsLoading = item.product_public_id
+                    ? (variantsLoadingByProductId[item.product_public_id] ?? false)
+                    : false;
                   const selectedVariant =
                     edit?.variant_public_id != null
                       ? variants.find((v) => v.public_id === edit.variant_public_id) ?? null
                       : null;
                   return (
-                    <tr
-                      key={
-                        "key" in item
-                          ? (item.key ?? item.public_id ?? `order-item-${index}`)
-                          : (item.public_id ?? `order-item-${index}`)
+                    <OrderLineProductCard
+                      key={orderLineListKey(item, index)}
+                      item={item}
+                      editing={editing}
+                      currencySymbol={currencySymbol}
+                      edit={edit}
+                      variants={variants}
+                      variantsLoading={variantsLoading}
+                      selectedVariant={selectedVariant}
+                      onQuantityChange={(e) =>
+                        setItemEdits((prev) => ({
+                          ...prev,
+                          [itemEditKey]: {
+                            variant_public_id:
+                              prev[itemEditKey]?.variant_public_id ?? (item.variant_public_id ?? null),
+                            quantity: Math.max(
+                              1,
+                              Math.min(
+                                parseInt(e.target.value, 10) || 1,
+                                selectedVariant?.available_quantity ?? Number.MAX_SAFE_INTEGER,
+                              ),
+                            ),
+                            price: prev[itemEditKey]?.price ?? String(item.price),
+                          },
+                        }))
                       }
-                      className="border-b border-border/50"
-                    >
-                      <td className="py-3 pr-4">
-                        <div className="flex items-center gap-3">
-                          {imageUrl ? (
-                            <img
-                              src={imageUrl}
-                              alt=""
-                              className="size-12 shrink-0 rounded-lg object-cover"
-                            />
-                          ) : (
-                            <div className="flex size-12 shrink-0 items-center justify-center rounded-lg bg-muted">
-                              <Package className="size-5 text-muted-foreground" />
-                            </div>
-                          )}
-                          <div>
-                            <p className="font-medium text-foreground">
-                              {isUnavailable ? (
-                                "Unavailable"
-                              ) : (
-                                <ClickableText
-                                  href={`/products/${item.product_public_id}`}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                >
-                                  {item.product_name}
-                                </ClickableText>
-                              )}
-                            </p>
-                            <p className="text-xs text-muted-foreground">
-                              {[
-                                item.product_brand || null,
-                                item.variant_option_labels?.length
-                                  ? item.variant_option_labels.join(" · ")
-                                  : item.variant_sku
-                                    ? `SKU: ${item.variant_sku}`
-                                    : null,
-                                item.variant_inventory_quantity != null
-                                  ? `Stock: ${item.variant_inventory_quantity}`
-                                  : null,
-                              ]
-                                .filter(Boolean)
-                                .join(" · ") || "—"}
-                            </p>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="py-3 pr-4 text-muted-foreground">
-                        {editing ? (
-                          <Input
-                            type="number"
-                            min={1}
-                            value={edit?.quantity ?? item.quantity}
-                            onChange={(e) =>
-                              setItemEdits((prev) => ({
-                                ...prev,
-                                [itemEditKey]: {
-                                  variant_public_id: prev[itemEditKey]?.variant_public_id ?? (item.variant_public_id ?? null),
-                                  quantity: Math.max(
-                                    1,
-                                    Math.min(
-                                      parseInt(e.target.value) || 1,
-                                      selectedVariant?.available_quantity ?? Number.MAX_SAFE_INTEGER,
-                                    ),
-                                  ),
-                                  price: prev[itemEditKey]?.price ?? String(item.price),
-                                },
-                              }))
-                            }
-                            className="h-8 w-20 py-1 text-center"
-                            size="sm"
-                          />
-                        ) : (
-                          item.quantity
-                        )}
-                      </td>
-                      <td className="py-3 pr-4">
-                        {editing ? (
-                          <div className="flex items-center gap-2">
-                            <Input
-                              type="number"
-                              step="0.01"
-                              min={0}
-                              value={edit?.price ?? String(item.price)}
-                              onChange={(e) =>
-                                setItemEdits((prev) => ({
-                                  ...prev,
-                                  [itemEditKey]: {
-                                    variant_public_id: prev[itemEditKey]?.variant_public_id ?? (item.variant_public_id ?? null),
-                                    quantity: prev[itemEditKey]?.quantity ?? item.quantity,
-                                    price: e.target.value,
-                                  },
-                                }))
-                              }
-                              className="h-8 w-28 py-1"
-                              size="sm"
-                            />
-                            <div className="flex items-center gap-2">
-                              <Select
-                                className="h-8 w-[220px] py-1"
-                                size="sm"
-                                value={edit?.variant_public_id ?? ""}
-                                onFocus={() => item.product_public_id && ensureVariantsLoaded(item.product_public_id)}
-                                onChange={(e) => {
-                                  const raw = e.target.value;
-                                  setItemEdits((prev) => ({
-                                    ...prev,
-                                    [itemEditKey]: {
-                                      variant_public_id: raw || null,
-                                      quantity: prev[itemEditKey]?.quantity ?? item.quantity,
-                                      price: prev[itemEditKey]?.price ?? String(item.price),
-                                    },
-                                  }));
-                                }}
-                                disabled={variantsLoading || isUnavailable}
-                              >
-                                <option value="">
-                                  {variantsLoading ? "Loading…" : "Default"}
-                                </option>
-                                {variants.map((v) => (
-                                  <option key={v.public_id} value={v.public_id}>
-                                    {(v.option_labels?.join(" · ") || v.sku) ?? v.public_id}
-                                  </option>
-                                ))}
-                              </Select>
-                              {selectedVariant && (
-                                <span className="text-xs text-muted-foreground whitespace-nowrap">
-                                  Stock: {selectedVariant.available_quantity}
-                                </span>
-                              )}
-                            </div>
-                          </div>
-                        ) : (
-                          <>
-                            {currencySymbol}{Number(item.price).toLocaleString()}
-                          </>
-                        )}
-                      </td>
-                      <td className="py-3 text-right">
-                        {itemDiscount > 0 ? (
-                          <span className="text-destructive">
-                            -{currencySymbol}{itemDiscount.toLocaleString()}
-                          </span>
-                        ) : (
-                          "—"
-                        )}
-                      </td>
-                      {editing && (
-                        <td className="py-3 pl-4 text-right">
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="sm"
-                            className="border-destructive text-destructive hover:bg-destructive/10"
-                            onClick={() =>
-                              removeEditableItem("key" in item ? item.key : item.public_id)
-                            }
-                          >
-                            Remove
-                          </Button>
-                        </td>
-                      )}
-                    </tr>
+                      onVariantChange={(e) => {
+                        const raw = e.target.value;
+                        setItemEdits((prev) => ({
+                          ...prev,
+                          [itemEditKey]: {
+                            variant_public_id: raw || null,
+                            quantity: prev[itemEditKey]?.quantity ?? item.quantity,
+                            price: prev[itemEditKey]?.price ?? String(item.price),
+                          },
+                        }));
+                      }}
+                      onVariantFocus={() =>
+                        item.product_public_id && ensureVariantsLoaded(item.product_public_id)
+                      }
+                      onRemove={() => removeEditableItem(orderLineRemoveKey(item))}
+                    />
                   );
                 })}
-              </tbody>
-            </table>
+              </ProductGrid>
             </div>
-            {editing && (
-              <div className="mt-4 space-y-2">
-                <label className="block text-xs font-medium text-muted-foreground">
-                  Add product
-                </label>
-                <Input
-                  value={productQuery}
-                  onChange={(e) => handleProductSearch(e.target.value)}
-                  placeholder="Search active products..."
-                />
-                {searchingProducts && (
-                  <p className="text-xs text-muted-foreground">Searching products...</p>
-                )}
-                {showProductResults && productResults.length > 0 && (
-                  <div className="max-h-44 overflow-auto rounded-md border border-border bg-background">
-                    {productResults.map((product) => (
-                      <button
-                        key={product.public_id}
-                        type="button"
-                        className="flex w-full items-center justify-between px-3 py-2 text-left hover:bg-muted/50"
-                        onClick={() => addProductToEditableOrder(product)}
-                      >
-                        <span className="text-sm text-foreground">{product.name}</span>
-                        <span className="text-xs text-muted-foreground">
-                          {currencySymbol}
-                          {Number(product.price).toLocaleString()}
-                        </span>
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
             {editing && editError && (
-              <div className="mt-3 rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
-                {editError}
+              <div className="shrink-0 border-t border-border/40 px-4 pt-3 sm:px-6">
+                <div className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+                  {editError}
+                </div>
               </div>
             )}
           </CardContent>
@@ -838,7 +672,7 @@ export default function OrderDetailPage() {
           </CardHeader>
           <CardContent className="px-4 pt-6 sm:px-6">
             {editing ? (
-              <form onSubmit={handleSave} className="space-y-4">
+              <form id="order-edit-form" onSubmit={handleSave} className="space-y-4">
                 <div>
                   <label className="mb-1 block text-xs font-medium text-muted-foreground">
                     Order number
@@ -956,18 +790,6 @@ export default function OrderDetailPage() {
                       setForm({ ...form, shipping_address: e.target.value })
                     }
                   />
-                </div>
-                <div className="flex gap-2 pt-2">
-                  <Button type="submit" disabled={saving}>
-                    {saving ? "Saving…" : "Save Changes"}
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => setEditing(false)}
-                  >
-                    Cancel
-                  </Button>
                 </div>
               </form>
             ) : (
