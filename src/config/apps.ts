@@ -4,8 +4,6 @@ import {
   Box,
   Boxes,
   Users,
-  ShoppingCart,
-  Heart,
   Layers,
   Tag,
   Tags,
@@ -23,8 +21,6 @@ export interface NavCounts {
   orders: number;
   products: number;
   notifications: number;
-  carts: number;
-  wishlist: number;
   categories: number;
   supportTickets: number;
 }
@@ -45,7 +41,8 @@ export const APP_CONFIG: Record<string, AppConfig> = {
     id: "products",
     label: "Products",
     icon: Box,
-    description: "Product catalog, variants, and inventory basics",
+    description:
+      "Product catalog; categories, variants, and attributes are always available with it",
     essential: true,
     href: "/products",
     countKey: "products",
@@ -71,32 +68,12 @@ export const APP_CONFIG: Record<string, AppConfig> = {
     countKey: null,
     parentId: null,
   },
-  carts: {
-    id: "carts",
-    label: "Carts",
-    icon: ShoppingCart,
-    description: "Shopping cart and abandoned cart tracking",
-    essential: false,
-    href: "/carts",
-    countKey: "carts",
-    parentId: null,
-  },
-  wishlist: {
-    id: "wishlist",
-    label: "Wishlist",
-    icon: Heart,
-    description: "Customer wishlists and saved items",
-    essential: false,
-    href: "/wishlist",
-    countKey: "wishlist",
-    parentId: null,
-  },
   categories: {
     id: "categories",
     label: "Categories",
     icon: Layers,
     description: "Product categories and organization",
-    essential: false,
+    essential: true,
     href: "/categories",
     countKey: "categories",
     parentId: "catalog",
@@ -146,7 +123,7 @@ export const APP_CONFIG: Record<string, AppConfig> = {
     label: "Variants",
     icon: Boxes,
     description: "Product variants (size, color, SKU) per product",
-    essential: false,
+    essential: true,
     href: "/variants",
     countKey: null,
     parentId: "catalog",
@@ -156,7 +133,7 @@ export const APP_CONFIG: Record<string, AppConfig> = {
     label: "Attributes",
     icon: Tags,
     description: "Option types and values (e.g. Color, Size) for variants",
-    essential: false,
+    essential: true,
     href: "/product-attributes",
     countKey: null,
     parentId: "catalog",
@@ -169,7 +146,7 @@ export const APP_CONFIG: Record<string, AppConfig> = {
     essential: false,
     href: "/inventory",
     countKey: null,
-    parentId: "more",
+    parentId: null,
   },
   activities: {
     id: "activities",
@@ -195,7 +172,7 @@ export const APP_CONFIG: Record<string, AppConfig> = {
     id: "analytics",
     label: "Analytics",
     icon: BarChart3,
-    description: "Store insights – orders, carts, pageviews",
+    description: "Store insights – orders and pageviews",
     essential: false,
     href: "/analytics",
     countKey: null,
@@ -209,22 +186,24 @@ export const APP_CONFIG: Record<string, AppConfig> = {
     essential: false,
     href: "/shipping",
     countKey: null,
-    parentId: "more",
+    parentId: null,
   },
 };
 
 export const ESSENTIAL_APP_IDS = ["products", "orders", "customers"] as const;
 
-export const OPTIONAL_APP_IDS = [
-  "carts",
-  "wishlist",
+/** Shipped with the catalog; always on — not listed in Settings → Apps or onboarding toggles. */
+export const CATALOG_INCLUDED_APP_IDS = [
   "categories",
+  "variants",
+  "product_attributes",
+] as const;
+
+export const OPTIONAL_APP_IDS = [
   "support_tickets",
   "cta",
   "reviews",
   "coupons",
-  "variants",
-  "product_attributes",
   "inventory",
   "activities",
   "banners",
@@ -244,9 +223,9 @@ export const CATALOG_SUB_APP_IDS = [
 export const MAIN_NAV_APP_IDS = [
   "orders",
   "customers",
+  "inventory",
+  "shipping",
   "cta",
-  "carts",
-  "wishlist",
   "banners",
   "analytics",
 ] as const;
@@ -256,6 +235,4 @@ export const MORE_APP_IDS = [
   "activities",
   "reviews",
   "coupons",
-  "inventory",
-  "shipping",
 ] as const;

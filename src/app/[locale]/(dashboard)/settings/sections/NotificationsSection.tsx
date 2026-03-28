@@ -5,8 +5,6 @@ import { SettingsSectionBody, settingsSectionSurfaceClassName } from "../Setting
 
 type NotificationPrefs = {
   orders: boolean;
-  carts: boolean;
-  wishlist: boolean;
   supportTickets: boolean;
   emailMeOnOrderReceived: boolean;
   emailCustomerOnOrderConfirmed: boolean;
@@ -49,26 +47,6 @@ export default function NotificationsSection({
           <label className="flex items-center justify-between gap-4 text-sm">
             <span className="text-foreground">Orders</span>
             <input type="checkbox" className="form-checkbox" checked={notificationPrefs.orders} onChange={(e) => onUpdatePref("orders", e.target.checked)} />
-          </label>
-
-          <label className="flex items-center justify-between gap-4 text-sm">
-            <span className="text-foreground">Cart items</span>
-            <input
-              type="checkbox"
-              className="form-checkbox"
-              checked={notificationPrefs.carts}
-              onChange={(e) => onUpdatePref("carts", e.target.checked)}
-            />
-          </label>
-
-          <label className="flex items-center justify-between gap-4 text-sm">
-            <span className="text-foreground">Wishlist items</span>
-            <input
-              type="checkbox"
-              className="form-checkbox"
-              checked={notificationPrefs.wishlist}
-              onChange={(e) => onUpdatePref("wishlist", e.target.checked)}
-            />
           </label>
 
           <label className="flex items-center justify-between gap-4 text-sm">

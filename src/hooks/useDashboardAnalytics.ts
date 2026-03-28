@@ -8,8 +8,6 @@ export type AnalyticsBucket = "day" | "week" | "month";
 export interface DashboardAnalyticsSummary {
   totalOrders: number;
   totalProducts: number;
-  totalCartItems: number;
-  totalWishlistItems: number;
   totalSupportTickets: number;
 }
 
@@ -17,8 +15,6 @@ export interface DashboardAnalyticsPoint {
   label: string;
   orders: number;
   products: number;
-  cartItems: number;
-  wishlistItems: number;
   supportTickets: number;
 }
 

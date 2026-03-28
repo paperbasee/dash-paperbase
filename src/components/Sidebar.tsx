@@ -78,9 +78,9 @@ const MAIN_NAV_SEQUENCE = [
   "orders",
   "__catalog__",
   "customers",
+  "inventory",
+  "shipping",
   "cta",
-  "carts",
-  "wishlist",
   "banners",
   "analytics",
 ] as const;

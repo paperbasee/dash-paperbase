@@ -153,7 +153,7 @@ export default function DashboardPage() {
         )}
       </section>
 
-      <section className="order-2 hidden grid-cols-2 gap-4 md:order-2 md:grid md:grid-cols-3 xl:grid-cols-5">
+      <section className="order-2 hidden grid-cols-2 gap-4 md:order-2 md:grid md:grid-cols-3">
         <StatsCard
           title={t("totalOrders")}
           value={loading || !summary ? "--" : fmtStat(summary.totalOrders)}
@@ -166,22 +166,6 @@ export default function DashboardPage() {
           value={loading || !summary ? "--" : fmtStat(summary.totalProducts)}
           accent="green"
           subtitle={t("addedInPeriod")}
-          numberFont={locale === "bn" ? "sans" : "mono"}
-        />
-        <StatsCard
-          title={t("cartItems")}
-          value={loading || !summary ? "--" : fmtStat(summary.totalCartItems)}
-          accent="yellow"
-          subtitle={t("cartActivity")}
-          numberFont={locale === "bn" ? "sans" : "mono"}
-        />
-        <StatsCard
-          title={t("wishlistItems")}
-          value={
-            loading || !summary ? "--" : fmtStat(summary.totalWishlistItems)
-          }
-          accent="blue"
-          subtitle={t("wishlistActivity")}
           numberFont={locale === "bn" ? "sans" : "mono"}
         />
         <StatsCard

@@ -15,8 +15,6 @@ const NOTIFICATION_PREFS_KEY = "gadzillabd_notification_prefs";
 
 type NotificationPrefs = {
   orders: boolean;
-  carts: boolean;
-  wishlist: boolean;
   supportTickets: boolean;
   emailMeOnOrderReceived: boolean;
   emailCustomerOnOrderConfirmed: boolean;
@@ -24,8 +22,6 @@ type NotificationPrefs = {
 
 const defaultPrefs: NotificationPrefs = {
   orders: true,
-  carts: true,
-  wishlist: true,
   supportTickets: true,
   emailMeOnOrderReceived: false,
   emailCustomerOnOrderConfirmed: false,
@@ -78,8 +74,6 @@ export default function useSettingsPageController() {
       setNotificationPrefs((prev) => ({
         ...prev,
         orders: parsed.orders ?? prev.orders,
-        carts: parsed.carts ?? prev.carts,
-        wishlist: parsed.wishlist ?? prev.wishlist,
         supportTickets: parsed.supportTickets ?? prev.supportTickets,
       }));
     } catch {
@@ -143,8 +137,6 @@ export default function useSettingsPageController() {
           NOTIFICATION_PREFS_KEY,
           JSON.stringify({
             orders: next.orders,
-            carts: next.carts,
-            wishlist: next.wishlist,
             supportTickets: next.supportTickets,
           }),
         );

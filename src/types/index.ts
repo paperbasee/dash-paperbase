@@ -215,35 +215,7 @@ export interface DashboardStats {
   subcategories: number;
   support_tickets: number;
   notifications: number;
-  carts: number;
-  wishlist: number;
   recent_orders: Order[];
-}
-
-export interface CartItem {
-  public_id: string;
-  product_public_id?: string;
-  product_name: string;
-  product_brand?: string;
-  quantity: number;
-  size: string;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface Cart {
-  public_id: string;
-  items: CartItem[];
-  created_at: string;
-  updated_at: string;
-}
-
-export interface WishlistItem {
-  public_id: string;
-  product_public_id?: string;
-  product_name: string;
-  product_brand?: string;
-  created_at: string;
 }
 
 export interface PaginatedResponse<T> {
@@ -442,7 +414,6 @@ export interface ShippingRate {
 
 export interface IntegrationEventSettings {
   track_purchase: boolean;
-  track_add_to_cart: boolean;
   track_initiate_checkout: boolean;
   track_view_content: boolean;
   track_page_view: boolean;

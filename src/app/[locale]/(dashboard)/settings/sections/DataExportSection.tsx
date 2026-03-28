@@ -34,11 +34,11 @@ const EXPORT_VARIANT: Record<
     iconClass: "text-[hsl(var(--chart-orders))]",
   },
   backup: {
-    shell: "border-[hsl(var(--chart-carts)/0.38)]",
-    middle: "border-[hsl(var(--chart-carts)/0.2)] bg-[hsl(var(--chart-carts)/0.06)]",
-    footer: "border-[hsl(var(--chart-carts)/0.28)] bg-[hsl(var(--chart-carts)/0.09)]",
-    iconWrap: "border-[hsl(var(--chart-carts)/0.28)] bg-[hsl(var(--chart-carts)/0.1)]",
-    iconClass: "text-[hsl(var(--chart-carts))]",
+    shell: "border-[hsl(var(--chart-support-tickets)/0.38)]",
+    middle: "border-[hsl(var(--chart-support-tickets)/0.2)] bg-[hsl(var(--chart-support-tickets)/0.06)]",
+    footer: "border-[hsl(var(--chart-support-tickets)/0.28)] bg-[hsl(var(--chart-support-tickets)/0.09)]",
+    iconWrap: "border-[hsl(var(--chart-support-tickets)/0.28)] bg-[hsl(var(--chart-support-tickets)/0.1)]",
+    iconClass: "text-[hsl(var(--chart-support-tickets))]",
   },
 };
 
@@ -106,7 +106,7 @@ function ExportOptionCard({
             variant === "orders" &&
               "border-[hsl(var(--chart-orders)/0.45)] hover:bg-[hsl(var(--chart-orders)/0.08)]",
             variant === "backup" &&
-              "border-[hsl(var(--chart-carts)/0.45)] hover:bg-[hsl(var(--chart-carts)/0.08)]",
+              "border-[hsl(var(--chart-support-tickets)/0.45)] hover:bg-[hsl(var(--chart-support-tickets)/0.08)]",
           )}
           disabled
         >

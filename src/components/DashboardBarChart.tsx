@@ -39,16 +39,6 @@ export default function DashboardBarChart({ data }: DashboardBarChartProps) {
           color: "hsl(var(--chart-products))",
         },
         {
-          key: "cartItems",
-          label: t("chartCartItems"),
-          color: "hsl(var(--chart-carts))",
-        },
-        {
-          key: "wishlistItems",
-          label: t("chartWishlist"),
-          color: "hsl(var(--chart-wishlist))",
-        },
-        {
           key: "supportTickets",
           label: t("chartSupportTickets"),
           color: "hsl(var(--chart-support-tickets))",

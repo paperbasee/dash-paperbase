@@ -8,11 +8,13 @@ import { useAuth } from "@/context/AuthContext";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { parseValidation, registerSchema } from "@/lib/validation";
+import { resolvePostAuthRoute } from "@/lib/subscription-access";
 
 export default function SignupPage() {
   const router = useRouter();
   const t = useTranslations("auth.signup");
   const tCommon = useTranslations("common");
+  const tLayout = useTranslations("dashboardLayout");
   const { register, pendingTwoFactor, verifyTwoFactorChallenge } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -83,7 +85,7 @@ export default function SignupPage() {
     setError("");
     setLoading(true);
     try {
-      const result = await verifyTwoFactorChallenge(
+      await verifyTwoFactorChallenge(
         pendingTwoFactor.challenge_public_id,
         otpCode
       );
@@ -93,7 +95,12 @@ export default function SignupPage() {
         );
         return;
       }
-      router.push(result.active_store_public_id ? "/" : "/onboarding");
+      const next = await resolvePostAuthRoute();
+      if (next.ok) {
+        router.push(next.path);
+      } else {
+        setError(tLayout("subscriptionVerifyBody"));
+      }
     } catch {
       setError(t("invalidOtp"));
     } finally {

@@ -28,7 +28,6 @@ const emptyForm: ConnectForm = {
 
 const EVENT_LABELS: { key: keyof IntegrationEventSettings; label: string }[] = [
   { key: "track_purchase", label: "Purchase" },
-  { key: "track_add_to_cart", label: "Add to Cart" },
   { key: "track_initiate_checkout", label: "Initiate Checkout" },
   { key: "track_view_content", label: "View Content" },
   { key: "track_page_view", label: "Page View" },

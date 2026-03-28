@@ -113,8 +113,6 @@
     /* Chart series colors (light) */
     --chart-orders: 222 84% 56%;
     --chart-products: 221 83% 53%;
-    --chart-carts: 142 76% 36%;
-    --chart-wishlist: 38 92% 50%;
     --chart-support-tickets: 0 84% 60%;
 
     /* Semantic aliases (reference HSL tokens above) */
@@ -158,8 +156,6 @@
     /* Chart series colors (dark) */
     --chart-orders: 212 96% 78%;
     --chart-products: 221 83% 66%;
-    --chart-carts: 142 76% 48%;
-    --chart-wishlist: 38 92% 60%;
     --chart-support-tickets: 0 84% 70%;
 
     --bg-primary: hsl(var(--background));

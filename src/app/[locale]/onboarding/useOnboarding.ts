@@ -6,7 +6,7 @@ import { useRouter } from "@/i18n/navigation";
 import { useAuth } from "@/context/AuthContext";
 import api from "@/lib/api";
 import { verifyTwoFactorChallenge } from "@/lib/auth";
-import { OPTIONAL_APP_IDS } from "@/config/apps";
+import { CATALOG_INCLUDED_APP_IDS, OPTIONAL_APP_IDS } from "@/config/apps";
 import { parseValidation, storeCreateSchema } from "@/lib/validation";
 import { clearPendingVerificationEmail } from "@/lib/verification-state";
 
@@ -145,6 +145,9 @@ export function useOnboarding() {
     setLoading(true);
     try {
       const modules_enabled: Record<string, boolean> = {};
+      for (const id of CATALOG_INCLUDED_APP_IDS) {
+        modules_enabled[id] = true;
+      }
       for (const id of OPTIONAL_APP_IDS) {
         modules_enabled[id] = selectedApps.has(id);
       }

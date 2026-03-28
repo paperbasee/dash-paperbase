@@ -33,8 +33,6 @@ const DELETED_KEY = "gadzillabd_notification_deleted_ids";
 
 type NotificationPrefs = {
   orders: boolean;
-  carts: boolean;
-  wishlist: boolean;
   supportTickets: boolean;
 };
 
@@ -83,8 +81,6 @@ function saveDeletedIds(ids: Set<string>) {
 function loadPrefs(): NotificationPrefs {
   const defaults: NotificationPrefs = {
     orders: true,
-    carts: true,
-    wishlist: true,
     supportTickets: true,
   };
   if (typeof window === "undefined") return defaults;
@@ -107,10 +103,6 @@ function filterByPrefs(list: DashboardNotification[]): DashboardNotification[] {
       switch (n.type) {
         case "new_order":
           return prefs.orders;
-        case "added_to_cart":
-          return prefs.carts;
-        case "added_to_wishlist":
-          return prefs.wishlist;
         case "support_ticket":
           return prefs.supportTickets;
         default:

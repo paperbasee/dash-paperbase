@@ -8,11 +8,13 @@ import { useAuth } from "@/context/AuthContext";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { loginSchema, parseValidation } from "@/lib/validation";
+import { resolvePostAuthRoute } from "@/lib/subscription-access";
 
 export default function LoginPage() {
   const router = useRouter();
   const t = useTranslations("auth.login");
   const tCommon = useTranslations("common");
+  const tLayout = useTranslations("dashboardLayout");
   const { login, pendingTwoFactor, verifyTwoFactorChallenge } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -38,7 +40,12 @@ export default function LoginPage() {
     try {
       const result = await login(validation.data.email, validation.data.password);
       if (!("2fa_required" in result)) {
-        router.push(result.active_store_public_id ? "/" : "/onboarding");
+        const next = await resolvePostAuthRoute();
+        if (next.ok) {
+          router.push(next.path);
+        } else {
+          setError(tLayout("subscriptionVerifyBody"));
+        }
       }
     } catch (err: unknown) {
       const data =
@@ -63,11 +70,16 @@ export default function LoginPage() {
     setError("");
     setLoading(true);
     try {
-      const result = await verifyTwoFactorChallenge(
+      await verifyTwoFactorChallenge(
         pendingTwoFactor.challenge_public_id,
         otpCode
       );
-      router.push(result.active_store_public_id ? "/" : "/onboarding");
+      const next = await resolvePostAuthRoute();
+      if (next.ok) {
+        router.push(next.path);
+      } else {
+        setError(tLayout("subscriptionVerifyBody"));
+      }
     } catch (err: unknown) {
       const data =
         err && typeof err === "object" && "response" in err

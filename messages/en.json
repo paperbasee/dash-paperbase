@@ -29,8 +29,6 @@
     "products": "Products",
     "orders": "Orders",
     "customers": "Customers",
-    "carts": "Carts",
-    "wishlist": "Wishlist",
     "categories": "Categories",
     "support_tickets": "Support tickets",
     "cta": "CTA",
@@ -181,6 +179,10 @@
   "sheet": {
     "navigationMenu": "Navigation menu"
   },
+  "planNotActive": {
+    "title": "Plan not active",
+    "body": "Your account does not have an active subscription. Please subscribe or contact support before continuing."
+  },
   "dashboardLayout": {
     "subscriptionVerifyTitle": "Unable to verify subscription",
     "subscriptionVerifyBody": "We could not verify your account status right now. Please try reloading. If the issue continues, contact support.",
@@ -189,26 +191,20 @@
   },
   "dashboard": {
     "title": "Dashboard overview",
-    "subtitle": "High-level snapshot of orders, products, carts, wishlist and support ticket activity. On mobile, see your most recent admin activities.",
+    "subtitle": "High-level snapshot of orders, products, and support ticket activity. On mobile, see your most recent admin activities.",
     "activitiesAria": "Activities",
     "recentActivities": "Recent activities",
     "noRecentActivity": "No recent admin activity yet.",
     "totalOrders": "Total orders",
     "totalProducts": "Total products",
-    "cartItems": "Cart items",
-    "wishlistItems": "Wishlist items",
     "supportTickets": "Support tickets",
     "withinPeriod": "Within selected period",
     "addedInPeriod": "Added in this period",
-    "cartActivity": "Cart activity",
-    "wishlistActivity": "Wishlist activity",
     "supportAndInquiries": "Support & inquiries",
     "chartAll": "All",
     "chartNoActivity": "No activity for the selected period.",
     "chartOrders": "Orders",
     "chartProducts": "Products",
-    "chartCartItems": "Cart items",
-    "chartWishlist": "Wishlist",
     "chartSupportTickets": "Support tickets"
   },
   "auth": {

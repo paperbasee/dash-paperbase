@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "@/i18n/navigation";
 import api from "@/lib/api";
+import { resolvePostAuthRoute } from "@/lib/subscription-access";
 import {
   DELETE_STORE_CONFIRM_PHRASE,
   isDeleteStoreModalPhraseConfirmed,
@@ -25,7 +26,6 @@ export function useDeleteStore(ownerEmail: string, storeName: string) {
   const [confirmOpen, setConfirmOpen] = useState(false);
 
   const [jobId, setJobId] = useState<string | null>(null);
-  const [redirectRoute, setRedirectRoute] = useState<string | null>(null);
   const [status, setStatus] = useState<DeleteStatus>(null);
   const [requestError, setRequestError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -76,8 +76,14 @@ export function useDeleteStore(ownerEmail: string, storeName: string) {
           successHandled = true;
           setSuccessDisplayed(true);
           if (intervalId != null) window.clearInterval(intervalId);
-          const route = redirectRoute || "/onboarding";
-          window.setTimeout(() => router.push(route), 1200);
+          window.setTimeout(async () => {
+            const result = await resolvePostAuthRoute();
+            if (result.ok) {
+              router.push(result.path);
+            } else {
+              router.push("/");
+            }
+          }, 1200);
         }
 
         if (data.status === "failed") {
@@ -98,7 +104,7 @@ export function useDeleteStore(ownerEmail: string, storeName: string) {
       cancelled = true;
       if (intervalId != null) window.clearInterval(intervalId);
     };
-  }, [jobId, redirectRoute, router]);
+  }, [jobId, router]);
 
   async function handleDeleteConfirmed() {
     const email = ownerEmail.trim();
@@ -148,7 +154,6 @@ export function useDeleteStore(ownerEmail: string, storeName: string) {
       localStorage.setItem("access_token", data.access);
       localStorage.setItem("refresh_token", data.refresh);
 
-      setRedirectRoute(data.redirect_route);
       setStatus({
         status: "pending",
         current_step: "Removing orders...",

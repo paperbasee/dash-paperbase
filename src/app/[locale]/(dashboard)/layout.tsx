@@ -11,22 +11,14 @@ import Sidebar, { SidebarContent } from "@/components/Sidebar";
 import MobileNavBar from "@/components/MobileNavBar";
 import SystemNotificationBanner from "@/components/system/SystemNotificationBanner";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
-import { Button } from "@/components/ui/button";
-import { AuthPageShell } from "@/components/auth/AuthPageShell";
 import { cn } from "@/lib/utils";
-import api from "@/lib/api";
 import { logout } from "@/lib/auth";
-
-interface MeSubscription {
-  active: boolean;
-  plan: string | null;
-  end_date: string | null;
-}
-
-interface MeResponse {
-  subscription: MeSubscription;
-  stores?: Array<{ id?: string | number; public_id?: string | number }>;
-}
+import {
+  fetchMeForRouting,
+  hasActiveSubscription,
+  type MeForRouting,
+} from "@/lib/subscription-access";
+import SubscriptionAccessBlock from "@/components/auth/SubscriptionAccessBlock";
 
 export default function DashboardLayout({
   children,
@@ -35,15 +27,14 @@ export default function DashboardLayout({
 }) {
   const router = useRouter();
   const pathname = usePathname();
-  const tLayout = useTranslations("dashboardLayout");
-  const tCommon = useTranslations("common");
   const tSheet = useTranslations("sheet");
   const { isAuthenticated, isLoading } = useAuth();
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [systemBannerVisible, setSystemBannerVisible] = useState(false);
-  const [subscription, setSubscription] = useState<MeSubscription | null>(null);
-  const [storeCount, setStoreCount] = useState(0);
+  const [me, setMe] = useState<MeForRouting | null>(null);
+  const subscription = me?.subscription ?? null;
+  const storeCount = Array.isArray(me?.stores) ? me.stores.length : 0;
   const [subChecked, setSubChecked] = useState(false);
   const [subCheckError, setSubCheckError] = useState(false);
 
@@ -66,15 +57,13 @@ export default function DashboardLayout({
 
   useEffect(() => {
     if (!isAuthenticated || isLoading) return;
-    api.get<MeResponse>("auth/me/")
-      .then(({ data }) => {
-        setSubscription(data.subscription);
-        setStoreCount(Array.isArray(data.stores) ? data.stores.length : 0);
+    fetchMeForRouting()
+      .then((data) => {
+        setMe(data);
         setSubCheckError(false);
       })
       .catch(() => {
-        setSubscription(null);
-        setStoreCount(0);
+        setMe(null);
         setSubCheckError(true);
       })
       .finally(() => setSubChecked(true));
@@ -94,51 +83,11 @@ export default function DashboardLayout({
   }
 
   if (subCheckError) {
-    return (
-      <AuthPageShell>
-        <div className="space-y-2 text-center">
-          <h1 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
-            {tLayout("subscriptionVerifyTitle")}
-          </h1>
-          <p className="text-sm leading-relaxed text-muted-foreground">
-            {tLayout("subscriptionVerifyBody")}
-          </p>
-        </div>
-
-        <div className="mx-auto w-11/12 max-w-sm space-y-3 sm:w-full">
-          <Button type="button" className="w-full" onClick={() => window.location.reload()}>
-            {tCommon("reload")}
-          </Button>
-          <Button type="button" variant="outline" className="w-full" onClick={() => logout()}>
-            {tCommon("signOut")}
-          </Button>
-        </div>
-      </AuthPageShell>
-    );
+    return <SubscriptionAccessBlock variant="verifyFailed" />;
   }
 
-  if (subscription?.active === false) {
-    return (
-      <AuthPageShell>
-        <div className="space-y-2 text-center">
-          <h1 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
-            {tLayout("noSubscriptionTitle")}
-          </h1>
-          <p className="text-sm leading-relaxed text-muted-foreground">
-            {tLayout("noSubscriptionBody")}
-          </p>
-        </div>
-
-        <div className="mx-auto w-11/12 max-w-sm space-y-3 sm:w-full">
-          <Button asChild className="w-full">
-            <a href="mailto:info@akkho.com">{tCommon("contactSupport")}</a>
-          </Button>
-          <Button type="button" variant="outline" className="w-full" onClick={() => logout()}>
-            {tCommon("signOut")}
-          </Button>
-        </div>
-      </AuthPageShell>
-    );
+  if (me && !hasActiveSubscription(me)) {
+    return <SubscriptionAccessBlock variant="inactive" />;
   }
 
   const showSystemBanner = systemBannerVisible;

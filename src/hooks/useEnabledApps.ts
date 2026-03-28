@@ -4,10 +4,18 @@ import { useState, useCallback, useEffect } from "react";
 import {
   OPTIONAL_APP_IDS,
   ESSENTIAL_APP_IDS,
+  CATALOG_INCLUDED_APP_IDS,
 } from "@/config/apps";
 import api from "@/lib/api";
 
 const STORAGE_KEY = "core_enabled_apps";
+
+function isAlwaysOnApp(appId: string): boolean {
+  return (
+    (ESSENTIAL_APP_IDS as readonly string[]).includes(appId) ||
+    (CATALOG_INCLUDED_APP_IDS as readonly string[]).includes(appId)
+  );
+}
 
 function loadEnabledOptionalApps(): Set<string> {
   if (typeof window === "undefined") return new Set(OPTIONAL_APP_IDS);
@@ -29,6 +37,9 @@ function saveEnabledOptionalApps(ids: Set<string>) {
 
 function setToModulesEnabled(enabled: Set<string>): Record<string, boolean> {
   const out: Record<string, boolean> = {};
+  for (const id of CATALOG_INCLUDED_APP_IDS) {
+    out[id] = true;
+  }
   for (const id of OPTIONAL_APP_IDS) {
     out[id] = enabled.has(id);
   }
@@ -74,14 +85,14 @@ export function useEnabledApps() {
 
   const isEnabled = useCallback(
     (appId: string): boolean => {
-      if (ESSENTIAL_APP_IDS.includes(appId as (typeof ESSENTIAL_APP_IDS)[number])) return true;
+      if (isAlwaysOnApp(appId)) return true;
       return enabledOptional.has(appId);
     },
     [enabledOptional]
   );
 
   const toggleApp = useCallback(async (appId: string) => {
-    if (ESSENTIAL_APP_IDS.includes(appId as (typeof ESSENTIAL_APP_IDS)[number])) return;
+    if (isAlwaysOnApp(appId)) return;
     const prev = new Set(enabledOptional);
     const next = new Set(prev);
     if (next.has(appId)) {
@@ -103,7 +114,11 @@ export function useEnabledApps() {
   }, [enabledOptional]);
 
   const enabledAppIds = useCallback(() => {
-    return new Set<string>([...ESSENTIAL_APP_IDS, ...enabledOptional]);
+    return new Set<string>([
+      ...ESSENTIAL_APP_IDS,
+      ...CATALOG_INCLUDED_APP_IDS,
+      ...enabledOptional,
+    ]);
   }, [enabledOptional]);
 
   return {

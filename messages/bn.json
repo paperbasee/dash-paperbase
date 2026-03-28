@@ -29,8 +29,6 @@
     "products": "পণ্য",
     "orders": "অর্ডার",
     "customers": "গ্রাহক",
-    "carts": "কার্ট",
-    "wishlist": "উইশলিস্ট",
     "categories": "ক্যাটাগরি",
     "support_tickets": "সাপোর্ট টিকিট",
     "cta": "সিটিএ",
@@ -181,6 +179,10 @@
   "sheet": {
     "navigationMenu": "নেভিগেশন মেনু"
   },
+  "planNotActive": {
+    "title": "প্ল্যান সক্রিয় নয়",
+    "body": "আপনার অ্যাকাউন্টে সক্রিয় সাবস্ক্রিপশন নেই। চালিয়ে যেতে সাবস্ক্রাইব করুন বা সাপোর্টে যোগাযোগ করুন।"
+  },
   "dashboardLayout": {
     "subscriptionVerifyTitle": "সাবস্ক্রিপশন যাচাই করা যায়নি",
     "subscriptionVerifyBody": "এখন আপনার অ্যাকাউন্টের অবস্থা যাচাই করতে পারিনি। পুনরায় লোড করে দেখুন। সমস্যা থাকলে সাপোর্টে যোগাযোগ করুন।",
@@ -189,26 +191,20 @@
   },
   "dashboard": {
     "title": "ড্যাশবোর্ড সারসংক্ষেপ",
-    "subtitle": "অর্ডার, পণ্য, কার্ট, উইশলিস্ট ও সাপোর্ট টিকিট কার্যকলাপের সংক্ষিপ্ত চিত্র। মোবাইলে সাম্প্রতিক অ্যাডমিন কার্যকলাপ দেখুন।",
+    "subtitle": "অর্ডার, পণ্য ও সাপোর্ট টিকিট কার্যকলাপের সংক্ষিপ্ত চিত্র। মোবাইলে সাম্প্রতিক অ্যাডমিন কার্যকলাপ দেখুন।",
     "activitiesAria": "কার্যকলাপ",
     "recentActivities": "সাম্প্রতিক কার্যকলাপ",
     "noRecentActivity": "এখনও কোনো সাম্প্রতিক অ্যাডমিন কার্যকলাপ নেই।",
     "totalOrders": "মোট অর্ডার",
     "totalProducts": "মোট পণ্য",
-    "cartItems": "কার্ট আইটেম",
-    "wishlistItems": "উইশলিস্ট আইটেম",
     "supportTickets": "সাপোর্ট টিকিট",
     "withinPeriod": "নির্বাচিত সময়ের মধ্যে",
     "addedInPeriod": "এই সময়ে যোগ হয়েছে",
-    "cartActivity": "কার্ট কার্যকলাপ",
-    "wishlistActivity": "উইশলিস্ট কার্যকলাপ",
     "supportAndInquiries": "সাপোর্ট ও জিজ্ঞাসা",
     "chartAll": "সব",
     "chartNoActivity": "নির্বাচিত সময়ে কোনো কার্যকলাপ নেই।",
     "chartOrders": "অর্ডার",
     "chartProducts": "পণ্য",
-    "chartCartItems": "কার্ট আইটেম",
-    "chartWishlist": "উইশলিস্ট",
     "chartSupportTickets": "সাপোর্ট টিকিট"
   },
   "auth": {
