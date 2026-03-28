@@ -19,8 +19,7 @@ export const orderCreateSchema = z.object({
     .or(z.literal("")),
   shipping_address: z.string().trim().min(1, "Shipping address is required."),
   district: z.string().trim().min(1, "District is required."),
-  tracking_number: z.string().trim().optional(),
-  shipping_zone_public_id: z.string().trim().min(1, "Shipping zone is required."),
+  shipping_zone_public_id: z.string().trim().min(1, "Delivery zone is required."),
   shipping_method_public_id: z.string().optional(),
   items: z.array(orderItemSchema).min(1, "Add at least one product to the order."),
 });

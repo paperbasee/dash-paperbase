@@ -64,14 +64,10 @@ export interface Order {
   shipping_address: string;
   phone: string;
   district: string;
-  tracking_number: string;
   courier_provider?: string;
   courier_consignment_id?: string;
-  courier_tracking_code?: string;
-  courier_status?: string;
   sent_to_courier?: boolean;
   customer_confirmation_sent_at?: string | null;
-  allowed_next_statuses?: string[];
   items?: OrderItem[];
   items_count?: number;
   created_at: string;

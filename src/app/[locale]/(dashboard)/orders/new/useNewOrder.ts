@@ -34,7 +34,6 @@ export interface OrderForm {
   email: string;
   shipping_address: string;
   district: string;
-  tracking_number: string;
   shipping_zone_public_id: string;
   shipping_method_public_id: string;
 }
@@ -51,7 +50,6 @@ export function useNewOrder() {
     email: "",
     shipping_address: "",
     district: "",
-    tracking_number: "",
     shipping_zone_public_id: "",
     shipping_method_public_id: "",
   });

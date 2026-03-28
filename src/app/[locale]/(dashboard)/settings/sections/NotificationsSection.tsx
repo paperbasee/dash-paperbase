@@ -91,7 +91,9 @@ export default function NotificationsSection({
             <label
               className={`flex items-center justify-between gap-4 text-sm ${emailLocked ? "cursor-not-allowed opacity-70" : ""}`}
             >
-              <span className="text-foreground">Email customer when an order is confirmed</span>
+              <span className="text-foreground">
+                Email customer when the order is sent to courier
+              </span>
               <input
                 type="checkbox"
                 className="form-checkbox"

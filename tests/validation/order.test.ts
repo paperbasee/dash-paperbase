@@ -9,7 +9,6 @@ describe("order schema", () => {
       email: "john@example.com",
       shipping_address: "Dhaka",
       district: "Dhaka",
-      tracking_number: "",
       shipping_zone_public_id: "szn_abc123",
       shipping_method_public_id: "",
       items: [
@@ -31,7 +30,6 @@ describe("order schema", () => {
       email: "john@example.com",
       shipping_address: "Dhaka",
       district: "Dhaka",
-      tracking_number: "",
       shipping_zone_public_id: "szn_abc123",
       shipping_method_public_id: "",
       items: [],
@@ -39,14 +37,13 @@ describe("order schema", () => {
     expect(result.success).toBe(false);
   });
 
-  it("rejects order without shipping zone", () => {
+  it("rejects order without delivery zone", () => {
     const result = orderCreateSchema.safeParse({
       shipping_name: "John",
       phone: "01712345678",
       email: "john@example.com",
       shipping_address: "Dhaka",
       district: "Dhaka",
-      tracking_number: "",
       shipping_zone_public_id: "",
       shipping_method_public_id: "",
       items: [

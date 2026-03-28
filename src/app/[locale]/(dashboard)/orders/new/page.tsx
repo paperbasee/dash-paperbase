@@ -110,7 +110,7 @@ export default function NewOrderPage() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <FormField label="Shipping method">
+                <FormField label="Shipping method (rates)">
                   <Select
                     value={form.shipping_method_public_id}
                     onChange={(e) => updateForm({ shipping_method_public_id: e.target.value })}
@@ -126,7 +126,7 @@ export default function NewOrderPage() {
                   </Select>
                 </FormField>
 
-                <FormField label="Shipping zone" required error={fieldErrors.shipping_zone_public_id}>
+                <FormField label="Delivery zone (rates)" required error={fieldErrors.shipping_zone_public_id}>
                   <Select
                     value={form.shipping_zone_public_id}
                     onChange={(e) => updateForm({ shipping_zone_public_id: e.target.value })}
@@ -134,7 +134,7 @@ export default function NewOrderPage() {
                     className={cn(fieldErrors.shipping_zone_public_id && "border-destructive")}
                     required
                   >
-                    <option value="">Select shipping zone</option>
+                    <option value="">Select delivery zone</option>
                     {shippingZones.map((z) => (
                       <option key={z.public_id} value={z.public_id}>
                         {z.name}
@@ -215,17 +215,6 @@ export default function NewOrderPage() {
                     />
                   </FormField>
                 </div>
-
-                <FormField label="Tracking number" error={fieldErrors.tracking_number}>
-                  <Input
-                    id="order-tracking"
-                    value={form.tracking_number}
-                    onChange={(e) => updateForm({ tracking_number: e.target.value })}
-                    placeholder="Optional"
-                    aria-invalid={!!fieldErrors.tracking_number}
-                    className={cn(fieldErrors.tracking_number && "border-destructive")}
-                  />
-                </FormField>
               </div>
             </CardContent>
           </Card>
@@ -470,7 +459,7 @@ export default function NewOrderPage() {
               {!pricingPreview && items.length > 0 && (
                 <p className="text-xs text-muted-foreground">
                   Line items: {currencySymbol}
-                  {merchandiseTotal.toLocaleString()} (add shipping zone for full quote)
+                  {merchandiseTotal.toLocaleString()} (add delivery zone for full quote)
                 </p>
               )}
             </CardContent>

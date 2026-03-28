@@ -9,12 +9,13 @@ import {
   User,
   Package,
   Home,
-  PackageOpen,
-  Truck,
-  CheckCircle2,
 } from "lucide-react";
 import api from "@/lib/api";
 import { useBranding } from "@/context/BrandingContext";
+import {
+  ORDER_STATUS_OPTIONS,
+  formatOrderStatusLabel,
+} from "@/lib/orders/order-statuses";
 import type {
   Order,
   PaginatedResponse,
@@ -42,7 +43,6 @@ type EditForm = {
   email: string;
   shipping_address: string;
   district: string;
-  tracking_number: string;
   shipping_zone_public_id: string;
   shipping_method_public_id: string;
 };
@@ -64,11 +64,6 @@ type EditableOrderItem = {
   variant_inventory_quantity?: number | null;
   isNew: boolean;
 };
-
-function formatOrderStatus(status: string): string {
-  if (!status) return "—";
-  return status.replace(/_/g, " ");
-}
 
 function extractApiDetail(err: unknown, fallback: string): string {
   const raw = (err as { response?: { data?: { detail?: unknown } } })?.response?.data?.detail;
@@ -103,33 +98,6 @@ function formatOrderDate(iso: string) {
   return `${month}, ${day} ${year} at ${time}`;
 }
 
-function buildTimelineEvents(order: Order): { icon: typeof Package; text: string; by?: string; date: string }[] {
-  const events: { icon: typeof Package; text: string; by?: string; date: string }[] = [];
-  events.push({
-    icon: PackageOpen,
-    text: "Order placed",
-    by: "customer",
-    date: order.created_at,
-  });
-  if (order.status === "confirmed" && order.updated_at !== order.created_at) {
-    events.push({
-      icon: CheckCircle2,
-      text: "Order confirmed",
-      by: "Admin",
-      date: order.updated_at,
-    });
-  }
-  if (order.tracking_number) {
-    events.push({
-      icon: Truck,
-      text: "Tracking number assigned",
-      date: order.updated_at,
-    });
-  }
-  events.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-  return events;
-}
-
 export default function OrderDetailPage() {
   const { id: order_public_id } = useParams<{ locale: string; id: string }>();
   const router = useRouter();
@@ -143,7 +111,6 @@ export default function OrderDetailPage() {
     email: "",
     shipping_address: "",
     district: "",
-    tracking_number: "",
     shipping_zone_public_id: "",
     shipping_method_public_id: "",
   });
@@ -159,14 +126,8 @@ export default function OrderDetailPage() {
   const [editError, setEditError] = useState("");
   const [shippingZones, setShippingZones] = useState<ShippingZone[]>([]);
   const [shippingMethods, setShippingMethods] = useState<ShippingMethod[]>([]);
-  const [sendingToCourier, setSendingToCourier] = useState(false);
-  const [courierError, setCourierError] = useState("");
-  const [courierSuccess, setCourierSuccess] = useState(false);
-  const [tracking, setTracking] = useState(false);
-  const [trackingDetails, setTrackingDetails] = useState<Record<string, unknown> | null>(null);
   const [statusUpdateError, setStatusUpdateError] = useState("");
   const [statusUpdateLoading, setStatusUpdateLoading] = useState(false);
-  const [nextStatus, setNextStatus] = useState("");
   const rightColRef = useRef<HTMLDivElement>(null);
   const [rightColHeight, setRightColHeight] = useState<number | null>(null);
 
@@ -224,7 +185,6 @@ export default function OrderDetailPage() {
       email: order.email,
       shipping_address: order.shipping_address,
       district: order.district,
-      tracking_number: order.tracking_number,
       shipping_zone_public_id: order.shipping_zone_public_id ?? "",
       shipping_method_public_id: order.shipping_method_public_id ?? "",
     });
@@ -354,7 +314,6 @@ export default function OrderDetailPage() {
         email: form.email,
         shipping_address: form.shipping_address,
         district: form.district,
-        tracking_number: form.tracking_number,
         shipping_zone_public_id: form.shipping_zone_public_id,
         shipping_method_public_id: form.shipping_method_public_id || null,
         items: [
@@ -396,65 +355,16 @@ export default function OrderDetailPage() {
     }
   }
 
-  async function handleSendToCourier() {
-    if (!order || order.sent_to_courier) return;
-    setCourierError("");
-    setCourierSuccess(false);
-    setSendingToCourier(true);
-    try {
-      const { data } = await api.post<Order>(
-        `admin/orders/${order_public_id}/send-to-courier/`
-      );
-      setOrder(data);
-      setCourierSuccess(true);
-    } catch (err: unknown) {
-      setCourierError(extractApiDetail(err, "Failed to send order to courier."));
-    } finally {
-      setSendingToCourier(false);
-    }
-  }
-
-  async function handleTrack() {
-    if (!order || !order.sent_to_courier) return;
-    setTracking(true);
-    setTrackingDetails(null);
-    try {
-      const { data } = await api.get<{
-        courier_provider: string;
-        courier_consignment_id: string;
-        courier_tracking_code: string;
-        courier_status: string;
-        order_status?: string;
-        details: Record<string, unknown>;
-      }>(`admin/orders/${order_public_id}/track/`);
-      setTrackingDetails(data.details);
-      setOrder((prev) =>
-        prev
-          ? {
-              ...prev,
-              courier_status: data.courier_status,
-              status: data.order_status ?? prev.status,
-            }
-          : prev
-      );
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setTracking(false);
-    }
-  }
-
-  async function handleStatusUpdate() {
-    if (!order || !nextStatus) return;
+  async function handleStatusChange(next: string) {
+    if (!order || next === order.status || order.status === "cancelled") return;
     setStatusUpdateError("");
     setStatusUpdateLoading(true);
     try {
-      const { data } = await api.patch<{ order: Order; allowed_next_statuses: string[] }>(
+      const { data } = await api.patch<{ order: Order }>(
         `admin/orders/${order_public_id}/status/`,
-        { status: nextStatus },
+        { status: next },
       );
       setOrder(data.order);
-      setNextStatus("");
     } catch (err: unknown) {
       setStatusUpdateError(extractApiDetail(err, "Failed to update order status."));
     } finally {
@@ -492,15 +402,19 @@ export default function OrderDetailPage() {
   const subtotalNum = order.subtotal != null ? Number(order.subtotal) : computedSubtotal;
   const shippingCostNum = order.shipping_cost != null ? Number(order.shipping_cost) : 0;
   const totalNum = order.total != null ? Number(order.total) : subtotalNum + shippingCostNum;
-  const zoneLabel =
-    (order.shipping_zone_public_id
-      ? shippingZones.find((z) => z.public_id === order.shipping_zone_public_id)?.name
-      : null) || "—";
   const methodLabel =
     (order.shipping_method_public_id
       ? shippingMethods.find((m) => m.public_id === order.shipping_method_public_id)?.name
       : null) || "—";
-  const timelineEvents = buildTimelineEvents(order);
+  const courierSummary =
+    order.sent_to_courier || (order.courier_provider || "").trim()
+      ? [
+          (order.courier_provider || "").trim() || null,
+          (order.courier_consignment_id || "").trim() || null,
+        ]
+          .filter(Boolean)
+          .join(" · ") || "—"
+      : "—";
 
   return (
     <div className="space-y-6">
@@ -861,8 +775,8 @@ export default function OrderDetailPage() {
                 <dd className="text-muted-foreground">{methodLabel}</dd>
               </div>
               <div className="flex justify-between">
-                <dt className="text-muted-foreground">Shipping zone</dt>
-                <dd className="text-muted-foreground">{zoneLabel}</dd>
+                <dt className="text-muted-foreground">Courier</dt>
+                <dd className="text-muted-foreground">{courierSummary}</dd>
               </div>
               <div className="flex justify-between border-t border-border pt-3 text-base font-semibold">
                 <dt>Total</dt>
@@ -876,33 +790,36 @@ export default function OrderDetailPage() {
           <Card className="overflow-hidden rounded-xl border border-dashed border-card-border bg-card shadow-sm">
             <CardHeader className="border-b border-border/50 px-4 pb-4 sm:px-6">
               <CardTitle>Order Status</CardTitle>
-              <CardDescription>Current status and next transition</CardDescription>
+              <CardDescription>
+                Current:{" "}
+                <span className="capitalize text-foreground">
+                  {formatOrderStatusLabel(order.status)}
+                </span>
+              </CardDescription>
             </CardHeader>
             <CardContent className="px-4 py-4 sm:px-6">
               <div className="space-y-2">
-                {(order.allowed_next_statuses?.length ?? 0) > 0 && (
+                {order.status === "cancelled" ? (
+                  <p className="text-sm text-muted-foreground">
+                    This order is cancelled. Status cannot be changed.
+                  </p>
+                ) : (
                   <div className="flex flex-wrap items-center gap-2">
                     <Select
-                      value={nextStatus}
-                      onChange={(e) => setNextStatus(e.target.value)}
-                      className="h-9 w-[180px]"
+                      value={order.status}
+                      onChange={(e) => handleStatusChange(e.target.value)}
+                      disabled={statusUpdateLoading}
+                      className="h-9 w-[180px] capitalize"
                     >
-                      <option value="">Select next status</option>
-                      {order.allowed_next_statuses?.map((status) => (
-                        <option key={status} value={status}>
-                          {formatOrderStatus(status)}
+                      {ORDER_STATUS_OPTIONS.map((s) => (
+                        <option key={s} value={s}>
+                          {formatOrderStatusLabel(s)}
                         </option>
                       ))}
                     </Select>
-                    <Button
-                      type="button"
-                      size="sm"
-                      onClick={handleStatusUpdate}
-                      disabled={statusUpdateLoading || !nextStatus}
-                      className="h-9 px-4"
-                    >
-                      {statusUpdateLoading ? "Updating..." : "Update Status"}
-                    </Button>
+                    {statusUpdateLoading ? (
+                      <span className="text-xs text-muted-foreground">Updating…</span>
+                    ) : null}
                   </div>
                 )}
                 {statusUpdateError && (
@@ -937,19 +854,19 @@ export default function OrderDetailPage() {
                     Order status
                   </label>
                   <Input
-                    value={formatOrderStatus(order.status)}
+                    value={formatOrderStatusLabel(order.status)}
                     readOnly
                     className="cursor-default bg-muted/50 capitalize"
                   />
                   <p className="mt-1 text-xs text-muted-foreground">
-                    Status updates when you send to courier and when courier tracking shows
-                    handoff.
+                    Use the Order Status card to change status. Send to courier from the orders list
+                    when the order is confirmed.
                   </p>
                 </div>
                 <div className="grid gap-3 sm:grid-cols-2">
                   <div>
                     <label className="mb-1 block text-xs font-medium text-muted-foreground">
-                      Shipping method
+                      Shipping method (rates)
                     </label>
                     <Select
                       value={form.shipping_method_public_id}
@@ -965,14 +882,14 @@ export default function OrderDetailPage() {
                   </div>
                   <div>
                     <label className="mb-1 block text-xs font-medium text-muted-foreground">
-                      Shipping zone
+                      Delivery zone (rates)
                     </label>
                     <Select
                       value={form.shipping_zone_public_id}
                       onChange={(e) => setForm({ ...form, shipping_zone_public_id: e.target.value })}
                       required
                     >
-                      <option value="">Select shipping zone</option>
+                      <option value="">Select delivery zone</option>
                       {shippingZones.map((z) => (
                         <option key={z.public_id} value={z.public_id}>
                           {z.name}
@@ -1039,22 +956,6 @@ export default function OrderDetailPage() {
                       setForm({ ...form, shipping_address: e.target.value })
                     }
                   />
-                </div>
-                <div className="grid gap-3 sm:grid-cols-2">
-                  <div>
-                    <label className="mb-1 block text-xs font-medium text-muted-foreground">
-                      Tracking Number
-                    </label>
-                    <Input
-                      value={form.tracking_number}
-                      onChange={(e) =>
-                        setForm({
-                          ...form,
-                          tracking_number: e.target.value,
-                        })
-                      }
-                    />
-                  </div>
                 </div>
                 <div className="flex gap-2 pt-2">
                   <Button type="submit" disabled={saving}>
@@ -1130,144 +1031,6 @@ export default function OrderDetailPage() {
         </Card>
         </div>
       </div>
-
-      {/* Courier */}
-      <Card className="overflow-hidden rounded-xl border border-dashed border-card-border bg-card shadow-sm">
-        <CardHeader className="border-b border-border/50 px-4 pb-4 sm:px-6">
-          <CardTitle>Courier</CardTitle>
-          <CardDescription>Send order to courier and track delivery</CardDescription>
-        </CardHeader>
-        <CardContent className="px-4 pt-6 sm:px-6">
-          {courierError && (
-            <div className="mb-4 rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
-              {courierError}
-            </div>
-          )}
-          {courierSuccess && !courierError && (
-            <div className="mb-4 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-sm text-emerald-800 dark:text-emerald-200">
-              Order sent to courier. Confirmation email was sent to the customer.
-            </div>
-          )}
-
-          {order.sent_to_courier ? (
-            <div className="space-y-4">
-              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                <div className="rounded-lg border border-border/60 bg-muted/20 px-3 py-2">
-                  <dt className="text-xs text-muted-foreground">Provider</dt>
-                  <dd className="font-medium text-foreground capitalize">
-                    {order.courier_provider || "---"}
-                  </dd>
-                </div>
-                <div className="rounded-lg border border-border/60 bg-muted/20 px-3 py-2">
-                  <dt className="text-xs text-muted-foreground">
-                    Consignment ID
-                  </dt>
-                  <dd className="font-medium text-foreground font-mono text-xs break-all">
-                    {order.courier_consignment_id || "---"}
-                  </dd>
-                </div>
-                <div className="rounded-lg border border-border/60 bg-muted/20 px-3 py-2">
-                  <dt className="text-xs text-muted-foreground">
-                    Tracking Code
-                  </dt>
-                  <dd className="font-medium text-foreground font-mono text-xs break-all">
-                    {order.courier_tracking_code || "---"}
-                  </dd>
-                </div>
-                <div className="rounded-lg border border-border/60 bg-muted/20 px-3 py-2">
-                  <dt className="text-xs text-muted-foreground">Status</dt>
-                  <dd>
-                    <span className="inline-flex items-center rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
-                      {order.courier_status || "pending"}
-                    </span>
-                  </dd>
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={handleTrack}
-                  disabled={tracking}
-                >
-                  <Truck className="mr-1.5 size-4" />
-                  {tracking ? "Tracking..." : "Refresh Tracking"}
-                </Button>
-              </div>
-              {trackingDetails && (
-                <div className="mt-3 rounded-lg border border-border bg-muted/30 p-3">
-                  <p className="mb-1 text-xs font-medium text-muted-foreground">
-                    Tracking Details
-                  </p>
-                  <pre className="text-xs text-foreground overflow-auto whitespace-pre-wrap">
-                    {JSON.stringify(trackingDetails, null, 2)}
-                  </pre>
-                </div>
-              )}
-            </div>
-          ) : (
-            <div className="flex flex-col items-center gap-3 py-4 sm:flex-row sm:items-start">
-              <div className="flex-1">
-                <p className="text-sm text-muted-foreground">
-                  This order has not been sent to a courier yet. Click the button
-                  to dispatch it through your connected courier provider.
-                </p>
-              </div>
-              <Button
-                onClick={handleSendToCourier}
-                disabled={sendingToCourier}
-                className="shrink-0"
-              >
-                <Truck className="mr-1.5 size-4" />
-                {sendingToCourier ? "Sending..." : "Send to Courier"}
-              </Button>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Timeline */}
-      <Card className="overflow-hidden rounded-xl border border-dashed border-card-border bg-card shadow-sm">
-        <CardHeader className="border-b border-border/50 px-4 pb-4 sm:px-6">
-          <CardTitle>Timeline</CardTitle>
-          <CardDescription>Track Order Progress</CardDescription>
-        </CardHeader>
-        <CardContent className="px-4 pt-6 sm:px-6">
-          <ul className="space-y-4">
-            {timelineEvents.map((event, i) => {
-              const Icon = event.icon;
-              const titleLabel = event.text.toUpperCase().replace(/\s+/g, " ");
-              return (
-                <li key={i} className="flex flex-col gap-1.5 sm:flex-row sm:items-start sm:gap-3">
-                  <div className="flex min-w-0 flex-1 items-start gap-3">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-muted">
-                      <Icon className="size-5 text-muted-foreground" />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                        {titleLabel}
-                      </p>
-                      {event.by && (
-                        <p className="text-sm text-muted-foreground">
-                          {event.text === "Order placed"
-                            ? `by ${event.by}`
-                            : `Confirmed by ${event.by}`}
-                        </p>
-                      )}
-                      <p className="text-sm text-muted-foreground sm:hidden">
-                        {formatOrderDate(event.date)}
-                      </p>
-                    </div>
-                  </div>
-                  <span className="hidden shrink-0 text-sm text-muted-foreground sm:block">
-                    {formatOrderDate(event.date)}
-                  </span>
-                </li>
-              );
-            })}
-          </ul>
-        </CardContent>
-      </Card>
     </div>
   );
 }

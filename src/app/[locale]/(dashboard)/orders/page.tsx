@@ -4,15 +4,21 @@ import { useCallback, useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Link, useRouter } from "@/i18n/navigation";
 import { toLocaleDigits } from "@/lib/locale-digits";
-import { Undo2 } from "lucide-react";
+import { Truck, Undo2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { ClickableText } from "@/components/ui/clickable-text";
 import { Input } from "@/components/ui/input";
+import { Select } from "@/components/ui/select";
 import { FilterBar } from "@/components/filters/FilterBar";
 import { FilterDropdown } from "@/components/filters/FilterDropdown";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { useFilters } from "@/hooks/useFilters";
 import api from "@/lib/api";
 import { useBranding } from "@/context/BrandingContext";
+import {
+  ORDER_STATUS_OPTIONS,
+  formatOrderStatusLabel,
+} from "@/lib/orders/order-statuses";
 import type { Order, PaginatedResponse } from "@/types";
 
 function formatDate(value: string): string {
@@ -26,9 +32,29 @@ function formatDate(value: string): string {
   return `${month}-${day}-${year} ${hours}:${minutes}`;
 }
 
-function formatStatus(status: string): string {
-  if (!status) return "—";
-  return status.replace(/_/g, " ");
+function extractApiDetail(err: unknown, fallback: string): string {
+  const raw = (err as { response?: { data?: { detail?: unknown } } })?.response?.data?.detail;
+  if (typeof raw === "string") return raw;
+  if (raw && typeof raw === "object") {
+    try {
+      return JSON.stringify(raw);
+    } catch {
+      return fallback;
+    }
+  }
+  return fallback;
+}
+
+function courierCell(order: Order): string {
+  if (!order.sent_to_courier && !(order.courier_provider || "").trim()) {
+    return "—";
+  }
+  const p = (order.courier_provider || "").trim();
+  const c = (order.courier_consignment_id || "").trim();
+  if (p && c) return `${p} · ${c}`;
+  if (p) return p;
+  if (c) return c;
+  return "—";
 }
 
 export default function OrdersPage() {
@@ -50,6 +76,9 @@ export default function OrdersPage() {
   const [hasNext, setHasNext] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [deleting, setDeleting] = useState(false);
+  const [bulkDispatching, setBulkDispatching] = useState(false);
+  const [statusUpdatingId, setStatusUpdatingId] = useState<string | null>(null);
+  const [courierSendingId, setCourierSendingId] = useState<string | null>(null);
 
   useEffect(() => {
     const next = debouncedSearch.trim();
@@ -96,6 +125,77 @@ export default function OrdersPage() {
       setSelectedIds(new Set(orders.map((o) => o.public_id)));
     }
   };
+
+  async function handleBulkConfirmSendCourier() {
+    if (selectedIds.size === 0) return;
+    if (
+      !confirm(
+        `Confirm and send ${selectedIds.size} order(s) to courier? Each order will be set to confirmed (if needed), then dispatched.`
+      )
+    )
+      return;
+    setBulkDispatching(true);
+    try {
+      type BulkResp = {
+        results: { public_id: string; ok: boolean; error: string | null }[];
+        summary: { ok: number; failed: number };
+      };
+      const { data } = await api.post<BulkResp>(
+        "admin/orders/bulk-confirm-send-courier/",
+        { order_public_ids: Array.from(selectedIds) }
+      );
+      const { summary, results } = data;
+      const failedMsgs = results.filter((r) => !r.ok).map((r) => `${r.public_id}: ${r.error || "failed"}`);
+      if (summary.failed > 0) {
+        alert(
+          `Done: ${summary.ok} succeeded, ${summary.failed} failed.\n${failedMsgs.slice(0, 8).join("\n")}${failedMsgs.length > 8 ? "\n…" : ""}`
+        );
+      }
+      setSelectedIds(new Set());
+      fetchOrders();
+    } catch (err) {
+      console.error(err);
+      alert("Bulk dispatch failed.");
+    } finally {
+      setBulkDispatching(false);
+    }
+  }
+
+  async function handleRowStatusChange(order: Order, next: string) {
+    if (order.status === "cancelled" || next === order.status) return;
+    setStatusUpdatingId(order.public_id);
+    try {
+      const { data } = await api.patch<{ order: Order }>(
+        `admin/orders/${order.public_id}/status/`,
+        { status: next }
+      );
+      setOrders((prev) =>
+        prev.map((o) => (o.public_id === order.public_id ? data.order : o))
+      );
+    } catch (e) {
+      console.error(e);
+      alert("Could not update order status.");
+    } finally {
+      setStatusUpdatingId(null);
+    }
+  }
+
+  async function handleSendToCourierRow(order: Order) {
+    if (order.status !== "confirmed" || order.sent_to_courier) return;
+    setCourierSendingId(order.public_id);
+    try {
+      const { data } = await api.post<Order>(
+        `admin/orders/${order.public_id}/send-to-courier/`
+      );
+      setOrders((prev) =>
+        prev.map((o) => (o.public_id === order.public_id ? data : o))
+      );
+    } catch (err: unknown) {
+      alert(extractApiDetail(err, "Failed to send order to courier."));
+    } finally {
+      setCourierSendingId(null);
+    }
+  }
 
   async function handleDeleteSelected() {
     if (selectedIds.size === 0) return;
@@ -144,17 +244,27 @@ export default function OrdersPage() {
         </div>
         <div className="flex items-center gap-2">
           {someSelected && (
-            <button
-              onClick={handleDeleteSelected}
-              disabled={deleting}
-              className="rounded-lg bg-destructive px-4 py-2 text-sm font-semibold text-destructive-foreground transition hover:bg-destructive/90 disabled:opacity-50"
-            >
-              {deleting
-                ? tPages("deleting")
-                : tPages("deleteSelected", {
-                    count: toLocaleDigits(String(selectedIds.size), locale),
-                  })}
-            </button>
+            <>
+              <button
+                type="button"
+                onClick={handleBulkConfirmSendCourier}
+                disabled={bulkDispatching}
+                className="rounded-lg border border-border bg-card px-4 py-2 text-sm font-semibold text-foreground transition hover:bg-muted disabled:opacity-50"
+              >
+                {bulkDispatching ? "Sending…" : "Confirm & Send to Courier"}
+              </button>
+              <button
+                onClick={handleDeleteSelected}
+                disabled={deleting}
+                className="rounded-lg bg-destructive px-4 py-2 text-sm font-semibold text-destructive-foreground transition hover:bg-destructive/90 disabled:opacity-50"
+              >
+                {deleting
+                  ? tPages("deleting")
+                  : tPages("deleteSelected", {
+                      count: toLocaleDigits(String(selectedIds.size), locale),
+                    })}
+              </button>
+            </>
           )}
           <Link
             href="/orders/new"
@@ -170,15 +280,10 @@ export default function OrdersPage() {
           value={filters.status}
           onChange={(value) => setFilter("status", value)}
           placeholder={tPages("filtersStatus")}
-          options={[
-            { value: "pending", label: "Pending" },
-            { value: "confirmed", label: "Confirmed" },
-            { value: "processing", label: "Processing" },
-            { value: "shipped", label: "Shipped" },
-            { value: "delivered", label: "Delivered" },
-            { value: "cancelled", label: "Cancelled" },
-            { value: "returned", label: "Returned" },
-          ]}
+          options={ORDER_STATUS_OPTIONS.map((s) => ({
+            value: s,
+            label: formatOrderStatusLabel(s),
+          }))}
         />
         <FilterDropdown
           value={filters.date_range}
@@ -232,7 +337,7 @@ export default function OrdersPage() {
                   <th className="th">Phone</th>
                   <th className="th">Status</th>
                   <th className="th">Total</th>
-                  <th className="th">Shipping zone</th>
+                  <th className="th">Courier</th>
                   <th className="th">Date</th>
                 </tr>
               </thead>
@@ -263,15 +368,49 @@ export default function OrdersPage() {
                       {order.phone || "—"}
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap">
-                      <span className="text-xs font-medium capitalize text-foreground">
-                        {formatStatus(order.status)}
-                      </span>
+                      <Select
+                        className="w-[180px] capitalize"
+                        value={order.status}
+                        disabled={
+                          order.status === "cancelled" ||
+                          statusUpdatingId === order.public_id
+                        }
+                        onChange={(e) =>
+                          handleRowStatusChange(order, e.target.value)
+                        }
+                        aria-label={`Status for order ${order.order_number}`}
+                      >
+                        {ORDER_STATUS_OPTIONS.map((s) => (
+                          <option key={s} value={s}>
+                            {formatOrderStatusLabel(s)}
+                          </option>
+                        ))}
+                      </Select>
                     </td>
                     <td className="px-4 py-3 text-foreground whitespace-nowrap">
                       {currencySymbol}{Number(order.total).toLocaleString()}
                     </td>
-                    <td className="px-4 py-3 text-muted-foreground whitespace-nowrap">
-                      {order.shipping_zone_public_id || "—"}
+                    <td className="px-4 py-3 text-muted-foreground whitespace-nowrap max-w-[220px]">
+                      {order.status === "confirmed" && !order.sent_to_courier ? (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          className="h-8 gap-1 px-2.5 text-xs"
+                          disabled={courierSendingId === order.public_id}
+                          onClick={() => handleSendToCourierRow(order)}
+                          aria-label={`Send order ${order.order_number} to courier`}
+                        >
+                          <Truck className="size-3.5 shrink-0" />
+                          {courierSendingId === order.public_id
+                            ? "Sending…"
+                            : "Send to Courier"}
+                        </Button>
+                      ) : (
+                        <span className="block truncate" title={courierCell(order)}>
+                          {courierCell(order)}
+                        </span>
+                      )}
                     </td>
                     <td className="px-4 py-3 text-muted-foreground whitespace-nowrap">
                       {formatDate(order.created_at)}
