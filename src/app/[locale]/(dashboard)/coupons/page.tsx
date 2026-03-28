@@ -25,7 +25,7 @@ type CouponForm = {
   discount_value: string;
   min_order_value: string;
   max_uses: string;
-  per_user_max_uses: string;
+  per_identity_max_uses: string;
   valid_from: string;
   valid_until: string;
   is_active: boolean;
@@ -37,7 +37,7 @@ const emptyCouponForm: CouponForm = {
   discount_value: "",
   min_order_value: "",
   max_uses: "",
-  per_user_max_uses: "",
+  per_identity_max_uses: "",
   valid_from: "",
   valid_until: "",
   is_active: true,
@@ -179,7 +179,7 @@ export default function CouponsPage() {
       discount_value: coupon.discount_value,
       min_order_value: coupon.min_order_value || "",
       max_uses: coupon.max_uses != null ? String(coupon.max_uses) : "",
-      per_user_max_uses: coupon.per_user_max_uses != null ? String(coupon.per_user_max_uses) : "",
+      per_identity_max_uses: coupon.per_identity_max_uses != null ? String(coupon.per_identity_max_uses) : "",
       valid_from: coupon.valid_from ? coupon.valid_from.slice(0, 10) : "",
       valid_until: coupon.valid_until ? coupon.valid_until.slice(0, 10) : "",
       is_active: coupon.is_active,
@@ -197,8 +197,8 @@ export default function CouponsPage() {
     };
     if (couponForm.min_order_value) payload.min_order_value = couponForm.min_order_value;
     if (couponForm.max_uses) payload.max_uses = parseInt(couponForm.max_uses, 10);
-    if (couponForm.per_user_max_uses)
-      payload.per_user_max_uses = parseInt(couponForm.per_user_max_uses, 10);
+    if (couponForm.per_identity_max_uses)
+      payload.per_identity_max_uses = parseInt(couponForm.per_identity_max_uses, 10);
     if (couponForm.valid_from) payload.valid_from = `${couponForm.valid_from}T00:00:00Z`;
     if (couponForm.valid_until) payload.valid_until = `${couponForm.valid_until}T23:59:59Z`;
 
@@ -465,15 +465,15 @@ export default function CouponsPage() {
                   />
                 </div>
                 <div>
-                  <label className="mb-1 block text-sm font-medium">Per user max uses</label>
+                  <label className="mb-1 block text-sm font-medium">Max uses per customer (phone / email / session)</label>
                   <Input
                     type="text"
-                    value={couponForm.per_user_max_uses}
+                    value={couponForm.per_identity_max_uses}
                     onChange={(e) =>
-                      setCouponForm((f) => ({ ...f, per_user_max_uses: e.target.value }))
+                      setCouponForm((f) => ({ ...f, per_identity_max_uses: e.target.value }))
                     }
                     className="text-sm"
-                    placeholder="Optional (logged-in users)"
+                    placeholder="Optional — guests included via phone, email, or session"
                   />
                 </div>
                 <div>
@@ -539,7 +539,7 @@ export default function CouponsPage() {
                   <th className="th">Code</th>
                   <th className="th">Discount</th>
                   <th className="th">Uses</th>
-                  <th className="th">Per user</th>
+                  <th className="th">Per customer</th>
                   <th className="th">Valid</th>
                   <th className="th">Status</th>
                   <th className="th text-right">Actions</th>
@@ -559,7 +559,7 @@ export default function CouponsPage() {
                       {c.max_uses != null ? ` / ${c.max_uses}` : ""}
                     </td>
                     <td className="px-4 py-3">
-                      {c.per_user_max_uses != null ? c.per_user_max_uses : "—"}
+                      {c.per_identity_max_uses != null ? c.per_identity_max_uses : "—"}
                       {(c.successful_uses != null || c.reversed_uses != null) && (
                         <div className="text-xs text-muted-foreground">
                           {c.successful_uses ?? 0} success / {c.reversed_uses ?? 0} reversed

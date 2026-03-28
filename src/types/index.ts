@@ -299,7 +299,7 @@ export interface Coupon {
   discount_value: string;
   min_order_value: string | null;
   max_uses: number | null;
-  per_user_max_uses: number | null;
+  per_identity_max_uses: number | null;
   times_used: number;
   successful_uses?: number;
   reversed_uses?: number;
