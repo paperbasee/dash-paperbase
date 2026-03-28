@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type FormEvent, useMemo } from "react";
+import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { Link, useRouter } from "@/i18n/navigation";
 import { useParams } from "next/navigation";
 import { Undo2, Check, Plus, X } from "lucide-react";
@@ -14,7 +14,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { ExtraFieldsFormSection } from "@/components/ExtraFieldsFormSection";
 import { useExtraFieldsSchema } from "@/hooks/useExtraFieldsSchema";
 import type { ExtraFieldValues } from "@/types/extra-fields";
-import type { Product, ParentCategory, Category } from "@/types";
+import type { Product, AdminCategoryTreeNode } from "@/types";
+import { flattenCategoryOptions } from "@/lib/category-tree";
 import { MAX_PRODUCT_IMAGES } from "@/lib/product-media";
 import {
   parseValidation,
@@ -22,13 +23,6 @@ import {
   slugFromName,
   validateRequiredExtraFields,
 } from "@/lib/validation";
-
-const BADGE_OPTIONS = [
-  { value: "", label: "None" },
-  { value: "sale", label: "Sale" },
-  { value: "new", label: "New" },
-  { value: "hot", label: "Hot" },
-] as const;
 
 const MAX_IMAGES = MAX_PRODUCT_IMAGES;
 
@@ -56,8 +50,7 @@ export default function EditProductPage() {
   const { id: product_public_id } = useParams<{ locale: string; id: string }>();
   const router = useRouter();
   const [product, setProduct] = useState<Product | null>(null);
-  const [parentCategories, setParentCategories] = useState<ParentCategory[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
+  const [categoryTree, setCategoryTree] = useState<AdminCategoryTreeNode[]>([]);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
@@ -68,11 +61,8 @@ export default function EditProductPage() {
     price: "",
     original_price: "",
     category: "",
-    sub_category: "",
     description: "",
     stock: "0",
-    badge: "",
-    is_featured: false,
     is_active: true,
   });
   const [extraFields, setExtraFields] = useState<ExtraFieldValues>({});
@@ -116,28 +106,22 @@ export default function EditProductPage() {
   useEffect(() => {
     Promise.all([
       api.get<Product>(`admin/products/${product_public_id}/`),
-      api.get("admin/parent-categories/"),
-      api.get("admin/categories/"),
+      api.get<AdminCategoryTreeNode[]>("admin/categories/?tree=1"),
     ])
-      .then(([prodRes, parentRes, catRes]) => {
+      .then(([prodRes, treeRes]) => {
         const p = prodRes.data;
-        const cats = catRes.data.results ?? catRes.data;
-        const cat = cats.find((c: Category) => c.public_id === p.category);
-        const parentId = cat?.parent ?? null;
+        const d = treeRes.data;
         setProduct(p);
-        setParentCategories(parentRes.data.results ?? parentRes.data);
-        setCategories(cats);
+        setCategoryTree(Array.isArray(d) ? d : []);
+        const catRef = p.category ?? p.category_public_id ?? "";
         setForm({
           name: p.name,
           brand: p.brand ?? "",
           price: p.price,
           original_price: p.original_price ?? "",
-          category: parentId != null ? String(parentId) : String(p.category),
-          sub_category: parentId != null ? String(p.category) : "",
+          category: String(catRef),
           description: p.description ?? "",
           stock: String(p.available_quantity ?? p.total_stock ?? ""),
-          badge: p.badge ?? "",
-          is_featured: p.is_featured,
           is_active: p.is_active,
         });
         setExtraFields(
@@ -149,6 +133,11 @@ export default function EditProductPage() {
       .catch(console.error)
       .finally(() => setLoading(false));
   }, [product_public_id]);
+
+  const categorySelectOptions = useMemo(
+    () => flattenCategoryOptions(categoryTree),
+    [categoryTree]
+  );
 
   useEffect(() => {
     const urls = imageFiles.map((f) => (f ? URL.createObjectURL(f) : null));
@@ -191,10 +180,6 @@ export default function EditProductPage() {
     return () => clearTimeout(t);
   }, [baseSlug, product_public_id]);
 
-  const filteredChildCategories = categories.filter(
-    (c) => String(c.parent) === form.category
-  );
-
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     if (!product) return;
@@ -228,10 +213,8 @@ export default function EditProductPage() {
     formData.append("brand", normalizedBrand);
     formData.append("price", form.price);
     formData.append("original_price", form.original_price.trim());
-    formData.append("category", form.sub_category || form.category);
+    formData.append("category", form.category);
     formData.append("description", form.description);
-    if (form.badge) formData.append("badge", form.badge);
-    formData.append("is_featured", String(form.is_featured));
     formData.append("is_active", String(form.is_active));
     const mainImage = imageFiles[0];
     if (mainImage) formData.append("image", mainImage);
@@ -384,40 +367,6 @@ export default function EditProductPage() {
                   className={fieldControlClass}
                 />
               </Field>
-              <div>
-                <p className="mb-2 text-sm font-medium text-muted-foreground">
-                  Promo badge
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  {BADGE_OPTIONS.map((opt) => (
-                    <button
-                      key={opt.value || "none"}
-                      type="button"
-                      onClick={() => setForm({ ...form, badge: opt.value })}
-                      className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${
-                        form.badge === opt.value
-                          ? "bg-primary text-primary-foreground"
-                          : "bg-muted text-muted-foreground hover:bg-muted/80"
-                      }`}
-                    >
-                      {opt.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <label className="flex cursor-pointer items-center gap-2">
-                <input
-                  type="checkbox"
-                  checked={form.is_featured}
-                  onChange={(e) =>
-                    setForm({ ...form, is_featured: e.target.checked })
-                  }
-                  className="form-checkbox"
-                />
-                <span className="text-sm font-medium text-foreground">
-                  Featured product
-                </span>
-              </label>
               <label className="flex cursor-pointer items-center gap-2">
                 <input
                   type="checkbox"
@@ -716,40 +665,19 @@ export default function EditProductPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <Field label="Parent category" required>
+              <Field label="Category" required>
                 <Select
                   required
                   value={form.category}
                   onChange={(e) =>
-                    setForm({
-                      ...form,
-                      category: e.target.value,
-                      sub_category: "",
-                    })
+                    setForm({ ...form, category: e.target.value })
                   }
                   className={fieldControlClass}
                 >
-                  <option value="">Select parent...</option>
-                  {parentCategories.map((c) => (
-                    <option key={c.public_id} value={c.public_id}>
-                      {c.name}
-                    </option>
-                  ))}
-                </Select>
-              </Field>
-              <Field label="Child category">
-                <Select
-                  value={form.sub_category}
-                  onChange={(e) =>
-                    setForm({ ...form, sub_category: e.target.value })
-                  }
-                  className={fieldControlClass}
-                  disabled={!form.category}
-                >
-                  <option value="">Select child (optional)...</option>
-                  {filteredChildCategories.map((c) => (
-                    <option key={c.public_id} value={c.public_id}>
-                      {c.name}
+                  <option value="">Select category…</option>
+                  {categorySelectOptions.map((c) => (
+                    <option key={c.value} value={c.value}>
+                      {c.label}
                     </option>
                   ))}
                 </Select>

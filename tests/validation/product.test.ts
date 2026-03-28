@@ -17,12 +17,9 @@ describe("product validation", () => {
       brand: "",
       price: "10",
       category: "1",
-      sub_category: "",
       stock: "3",
       description: "",
       original_price: "",
-      badge: "",
-      is_featured: false,
       is_active: true,
     });
     expect(result.success).toBe(true);
@@ -33,12 +30,9 @@ describe("product validation", () => {
       name: "Product",
       price: "10",
       category: "1",
-      sub_category: "",
       stock: "3",
       description: "",
       original_price: "",
-      badge: "",
-      is_featured: false,
       is_active: true,
     });
     expect(result.success).toBe(true);

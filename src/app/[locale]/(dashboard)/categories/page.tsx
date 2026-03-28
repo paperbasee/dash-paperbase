@@ -1,146 +1,257 @@
 "use client";
 
-import { useEffect, useState, type FormEvent } from "react";
+import { Fragment, useCallback, useEffect, useState, type FormEvent } from "react";
 import { useRouter } from "@/i18n/navigation";
-import { Undo2 } from "lucide-react";
+import { ChevronDown, ChevronRight, Undo2 } from "lucide-react";
 import api from "@/lib/api";
 import { ClickableText } from "@/components/ui/clickable-text";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
-import type { ParentCategory, Category, PaginatedResponse } from "@/types";
+import type { AdminCategoryTreeNode } from "@/types";
+import {
+  collectDescendantPublicIds,
+  findCategoryNode,
+  flattenCategoryOptions,
+} from "@/lib/category-tree";
 
-type ParentForm = { name: string; slug: string; description: string; order: string; is_active: boolean };
-type ChildForm = { name: string; slug: string; description: string; parent: string; order: string; is_active: boolean };
+type FormMode = "closed" | "new_root" | "new_child" | "edit";
 
-const emptyParentForm: ParentForm = { name: "", slug: "", description: "", order: "0", is_active: true };
-const emptyChildForm: ChildForm = { name: "", slug: "", description: "", parent: "", order: "0", is_active: true };
+type CatForm = {
+  name: string;
+  slug: string;
+  description: string;
+  parent: string;
+  order: string;
+  is_active: boolean;
+};
+
+const emptyForm: CatForm = {
+  name: "",
+  slug: "",
+  description: "",
+  parent: "",
+  order: "0",
+  is_active: true,
+};
+
+function CategoryTreeRows({
+  nodes,
+  depth,
+  expanded,
+  onToggle,
+  onEdit,
+  onDelete,
+  onAddChild,
+}: {
+  nodes: AdminCategoryTreeNode[];
+  depth: number;
+  expanded: Set<string>;
+  onToggle: (id: string) => void;
+  onEdit: (n: AdminCategoryTreeNode) => void;
+  onDelete: (id: string) => void;
+  onAddChild: (parentId: string) => void;
+}) {
+  return (
+    <>
+      {nodes.map((node) => {
+        const children = node.children ?? [];
+        const hasKids = children.length > 0;
+        const isOpen = expanded.has(node.public_id);
+        return (
+          <Fragment key={node.public_id}>
+            <tr className="hover:bg-muted/40">
+              <td className="px-4 py-3">
+                <div
+                  className="flex items-center gap-1"
+                  style={{ paddingLeft: depth * 16 }}
+                >
+                  {hasKids ? (
+                    <button
+                      type="button"
+                      aria-expanded={isOpen}
+                      className="rounded p-0.5 text-muted-foreground hover:bg-muted"
+                      onClick={() => onToggle(node.public_id)}
+                    >
+                      {isOpen ? (
+                        <ChevronDown className="h-4 w-4" />
+                      ) : (
+                        <ChevronRight className="h-4 w-4" />
+                      )}
+                    </button>
+                  ) : (
+                    <span className="inline-block w-5 shrink-0" />
+                  )}
+                  <span className="font-medium text-foreground">{node.name}</span>
+                </div>
+              </td>
+              <td className="px-4 py-3 text-muted-foreground">{node.slug}</td>
+              <td className="px-4 py-3 text-foreground">{node.child_count}</td>
+              <td className="px-4 py-3 text-foreground">{node.product_count}</td>
+              <td className="px-4 py-3 text-foreground">{node.order}</td>
+              <td className="px-4 py-3">
+                <ActiveBadge active={node.is_active} />
+              </td>
+              <td className="px-4 py-3">
+                <div className="flex flex-wrap gap-2">
+                  <ClickableText
+                    onClick={() => onAddChild(node.public_id)}
+                    className="text-sm"
+                  >
+                    Add child
+                  </ClickableText>
+                  <ClickableText onClick={() => onEdit(node)} className="text-sm">
+                    Edit
+                  </ClickableText>
+                  <ClickableText
+                    variant="destructive"
+                    onClick={() => onDelete(node.public_id)}
+                    className="text-sm"
+                  >
+                    Delete
+                  </ClickableText>
+                </div>
+              </td>
+            </tr>
+            {hasKids && isOpen ? (
+              <CategoryTreeRows
+                nodes={children}
+                depth={depth + 1}
+                expanded={expanded}
+                onToggle={onToggle}
+                onEdit={onEdit}
+                onDelete={onDelete}
+                onAddChild={onAddChild}
+              />
+            ) : null}
+          </Fragment>
+        );
+      })}
+    </>
+  );
+}
 
 export default function CategoriesPage() {
   const router = useRouter();
-  const [parentCategories, setParentCategories] = useState<ParentCategory[]>([]);
-  const [childCategories, setChildCategories] = useState<Category[]>([]);
+  const [tree, setTree] = useState<AdminCategoryTreeNode[]>([]);
+  const [expanded, setExpanded] = useState<Set<string>>(() => new Set());
   const [loading, setLoading] = useState(true);
+  const [mode, setMode] = useState<FormMode>("closed");
+  const [editingPublicId, setEditingPublicId] = useState<string | null>(null);
+  const [form, setForm] = useState<CatForm>(emptyForm);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [saving, setSaving] = useState(false);
 
-  const [parentEditing, setParentEditing] = useState<string | "new" | null>(null);
-  const [parentForm, setParentForm] = useState<ParentForm>(emptyParentForm);
-  const [parentImageFile, setParentImageFile] = useState<File | null>(null);
-  const [parentSaving, setParentSaving] = useState(false);
-
-  const [childEditing, setChildEditing] = useState<string | "new" | null>(null);
-  const [childForm, setChildForm] = useState<ChildForm>(emptyChildForm);
-  const [childImageFile, setChildImageFile] = useState<File | null>(null);
-  const [childSaving, setChildSaving] = useState(false);
-
-  function fetchData() {
+  const fetchTree = useCallback(() => {
     setLoading(true);
-    Promise.all([
-      api.get<PaginatedResponse<ParentCategory> | ParentCategory[]>("admin/parent-categories/"),
-      api.get<PaginatedResponse<Category> | Category[]>("admin/categories/"),
-    ])
-      .then(([parentRes, catRes]) => {
-        const parentData = parentRes.data;
-        const catData = catRes.data;
-        setParentCategories(Array.isArray(parentData) ? parentData : parentData.results);
-        setChildCategories(Array.isArray(catData) ? catData : catData.results);
+    api
+      .get<AdminCategoryTreeNode[]>("admin/categories/?tree=1")
+      .then((res) => {
+        const d = res.data;
+        setTree(Array.isArray(d) ? d : []);
       })
       .catch(console.error)
       .finally(() => setLoading(false));
-  }
+  }, []);
 
-  useEffect(() => { fetchData(); }, []);
+  useEffect(() => {
+    fetchTree();
+  }, [fetchTree]);
 
-  function openParentEdit(cat: ParentCategory) {
-    setParentEditing(cat.public_id);
-    setParentForm({ name: cat.name, slug: cat.slug, description: cat.description, order: String(cat.order), is_active: cat.is_active });
-    setParentImageFile(null);
-  }
-
-  function openParentNew() {
-    setParentEditing("new");
-    setParentForm(emptyParentForm);
-    setParentImageFile(null);
-  }
-
-  async function saveParent(e: FormEvent) {
-    e.preventDefault();
-    setParentSaving(true);
-    const fd = new FormData();
-    fd.append("name", parentForm.name);
-    fd.append("slug", parentForm.slug);
-    fd.append("description", parentForm.description);
-    fd.append("order", parentForm.order);
-    fd.append("is_active", String(parentForm.is_active));
-    if (parentImageFile) fd.append("image", parentImageFile);
-
-    try {
-      if (parentEditing === "new") {
-        await api.post("admin/parent-categories/", fd);
+  function toggleExpand(publicId: string) {
+    setExpanded((prev) => {
+      const n = new Set(prev);
+      if (n.has(publicId)) {
+        n.delete(publicId);
       } else {
-        await api.patch(`admin/parent-categories/${parentEditing}/`, fd);
+        n.add(publicId);
       }
-      setParentEditing(null);
-      fetchData();
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setParentSaving(false);
+      return n;
+    });
+  }
+
+  function openNewRoot() {
+    setMode("new_root");
+    setEditingPublicId(null);
+    setForm({ ...emptyForm, parent: "" });
+    setImageFile(null);
+  }
+
+  function openNewChild(parentPublicId: string) {
+    setMode("new_child");
+    setEditingPublicId(null);
+    setForm({ ...emptyForm, parent: parentPublicId });
+    setImageFile(null);
+  }
+
+  function openEdit(node: AdminCategoryTreeNode) {
+    setMode("edit");
+    setEditingPublicId(node.public_id);
+    setForm({
+      name: node.name,
+      slug: node.slug,
+      description: node.description,
+      parent: node.parent ?? "",
+      order: String(node.order),
+      is_active: node.is_active,
+    });
+    setImageFile(null);
+  }
+
+  const parentOptions = (() => {
+    const flat = flattenCategoryOptions(tree);
+    if (mode === "edit" && editingPublicId) {
+      const node = findCategoryNode(tree, editingPublicId);
+      if (node) {
+        const ban = collectDescendantPublicIds(node);
+        return flat.filter((o) => !ban.has(o.value));
+      }
     }
-  }
+    return flat;
+  })();
 
-  async function deleteParent(publicId: string) {
-    if (!confirm("Delete this parent category? All child categories under it will also be deleted.")) return;
-    try {
-      await api.delete(`admin/parent-categories/${publicId}/`);
-      fetchData();
-    } catch (err) {
-      console.error(err);
-    }
-  }
-
-  function openChildEdit(cat: Category) {
-    setChildEditing(cat.public_id);
-    setChildForm({ name: cat.name, slug: cat.slug, description: cat.description, parent: String(cat.parent ?? ""), order: String(cat.order), is_active: cat.is_active });
-    setChildImageFile(null);
-  }
-
-  function openChildNew() {
-    setChildEditing("new");
-    setChildForm(emptyChildForm);
-    setChildImageFile(null);
-  }
-
-  async function saveChild(e: FormEvent) {
+  async function saveCategory(e: FormEvent) {
     e.preventDefault();
-    setChildSaving(true);
+    setSaving(true);
     const fd = new FormData();
-    fd.append("name", childForm.name);
-    fd.append("slug", childForm.slug);
-    fd.append("description", childForm.description);
-    if (childForm.parent) fd.append("parent", childForm.parent);
-    fd.append("order", childForm.order);
-    fd.append("is_active", String(childForm.is_active));
-    if (childImageFile) fd.append("image", childImageFile);
-
+    fd.append("name", form.name);
+    fd.append("slug", form.slug);
+    fd.append("description", form.description);
+    fd.append("order", form.order);
+    fd.append("is_active", String(form.is_active));
+    if (form.parent) {
+      fd.append("parent", form.parent);
+    } else if (mode === "edit") {
+      fd.append("parent", "");
+    }
+    if (imageFile) {
+      fd.append("image", imageFile);
+    }
     try {
-      if (childEditing === "new") {
+      if (mode === "edit" && editingPublicId) {
+        await api.patch(`admin/categories/${editingPublicId}/`, fd);
+      } else {
         await api.post("admin/categories/", fd);
-      } else {
-        await api.patch(`admin/categories/${childEditing}/`, fd);
       }
-      setChildEditing(null);
-      fetchData();
+      setMode("closed");
+      fetchTree();
     } catch (err) {
       console.error(err);
     } finally {
-      setChildSaving(false);
+      setSaving(false);
     }
   }
 
-  async function deleteChild(publicId: string) {
-    if (!confirm("Delete this child category?")) return;
+  async function deleteCategory(publicId: string) {
+    if (
+      !confirm(
+        "Delete this category? Subcategories are removed with it (database cascade)."
+      )
+    ) {
+      return;
+    }
     try {
       await api.delete(`admin/categories/${publicId}/`);
-      fetchData();
+      fetchTree();
     } catch (err) {
       console.error(err);
     }
@@ -153,6 +264,15 @@ export default function CategoriesPage() {
       </div>
     );
   }
+
+  const formTitle =
+    mode === "edit"
+      ? "Edit category"
+      : mode === "new_child"
+        ? "New subcategory"
+        : mode === "new_root"
+          ? "New root category"
+          : "";
 
   return (
     <div className="space-y-8">
@@ -170,269 +290,139 @@ export default function CategoriesPage() {
         <h1 className="text-2xl font-medium text-foreground">Categories</h1>
       </div>
 
-      {/* ── Parent Categories (top-level) ── */}
-      <section>
-        <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-lg font-medium text-foreground">
-            Parent Categories ({parentCategories.length})
-          </h2>
+      <div className="flex flex-wrap items-center gap-3">
+        <button
+          type="button"
+          onClick={openNewRoot}
+          className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+        >
+          Add root category
+        </button>
+        {mode !== "closed" ? (
           <button
-            onClick={openParentNew}
-            className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+            type="button"
+            onClick={() => setMode("closed")}
+            className="rounded-lg border border-border px-4 py-2 text-sm text-foreground hover:bg-muted"
           >
-            Add Parent Category
+            Cancel form
           </button>
-        </div>
+        ) : null}
+      </div>
 
-        {parentEditing !== null && (
-          <form
-            onSubmit={saveParent}
-            className="mb-4 space-y-3 rounded-xl border border-primary/30 bg-primary/5 p-4"
-          >
-            <p className="text-sm font-medium text-primary">
-              {parentEditing === "new" ? "New Parent Category" : "Edit Parent Category"}
-            </p>
-            <div className="grid grid-cols-2 gap-3">
-              <Input required placeholder="Name" value={parentForm.name} onChange={(e) => setParentForm({ ...parentForm, name: e.target.value })} />
-              <Input required placeholder="Slug" value={parentForm.slug} onChange={(e) => setParentForm({ ...parentForm, slug: e.target.value })} />
-            </div>
-            <Input placeholder="Description" value={parentForm.description} onChange={(e) => setParentForm({ ...parentForm, description: e.target.value })} />
-            <div className="grid grid-cols-3 gap-3">
-              <Input
-                type="number"
-                placeholder="Order"
-                value={parentForm.order}
-                onChange={(e) => setParentForm({ ...parentForm, order: e.target.value })}
-              />
+      {mode !== "closed" ? (
+        <form
+          onSubmit={saveCategory}
+          className="space-y-3 rounded-xl border border-primary/30 bg-primary/5 p-4"
+        >
+          <p className="text-sm font-medium text-primary">{formTitle}</p>
+          <div className="grid grid-cols-2 gap-3">
+            <Input
+              required
+              placeholder="Name"
+              value={form.name}
+              onChange={(e) => setForm({ ...form, name: e.target.value })}
+            />
+            <Input
+              required
+              placeholder="Slug"
+              value={form.slug}
+              onChange={(e) => setForm({ ...form, slug: e.target.value })}
+            />
+          </div>
+          <Input
+            placeholder="Description"
+            value={form.description}
+            onChange={(e) => setForm({ ...form, description: e.target.value })}
+          />
+          <div className="grid grid-cols-2 gap-3">
+            <Select
+              value={form.parent}
+              onChange={(e) => setForm({ ...form, parent: e.target.value })}
+              disabled={mode === "new_child"}
+            >
+              <option value="">Root level (no parent)</option>
+              {parentOptions.map((o) => (
+                <option key={o.value} value={o.value}>
+                  {o.label}
+                </option>
+              ))}
+            </Select>
+            <Input
+              type="number"
+              placeholder="Order"
+              value={form.order}
+              onChange={(e) => setForm({ ...form, order: e.target.value })}
+            />
+          </div>
+          <div className="flex flex-wrap items-center gap-3">
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) => setImageFile(e.target.files?.[0] ?? null)}
+              className="form-file-input"
+            />
+            <label className="flex items-center gap-2 text-sm text-foreground">
               <input
-                type="file"
-                accept="image/*"
-                onChange={(e) => setParentImageFile(e.target.files?.[0] ?? null)}
-                className="form-file-input"
-              />
-              <label className="flex items-center gap-2 text-sm text-foreground">
-                <input
-                  type="checkbox"
-                  checked={parentForm.is_active}
-                  onChange={(e) =>
-                    setParentForm({ ...parentForm, is_active: e.target.checked })
-                  }
-                  className="form-checkbox"
-                />{" "}
-                Active
-              </label>
-            </div>
-            <div className="flex gap-2">
-              <button
-                type="submit"
-                disabled={parentSaving}
-                className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
-              >
-                {parentSaving ? "Saving..." : "Save"}
-              </button>
-              <button
-                type="button"
-                onClick={() => setParentEditing(null)}
-                className="rounded-lg border border-border px-4 py-2 text-sm text-foreground hover:bg-muted"
-              >
-                Cancel
-              </button>
-            </div>
-          </form>
-        )}
+                type="checkbox"
+                checked={form.is_active}
+                onChange={(e) =>
+                  setForm({ ...form, is_active: e.target.checked })
+                }
+                className="form-checkbox"
+              />{" "}
+              Active
+            </label>
+          </div>
+          <div className="flex gap-2">
+            <button
+              type="submit"
+              disabled={saving}
+              className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
+            >
+              {saving ? "Saving…" : "Save"}
+            </button>
+          </div>
+        </form>
+      ) : null}
 
+      <section>
+        <h2 className="mb-4 text-lg font-medium text-foreground">
+          Category tree ({flattenCategoryOptions(tree).length} categories)
+        </h2>
         <div className="overflow-x-auto rounded-xl border border-dashed border-card-border bg-card">
           <table className="w-full text-left text-sm">
             <thead>
               <tr className="border-b border-border bg-muted/40">
-                <th className="th">
-                  Name
-                </th>
-                <th className="th">
-                  Slug
-                </th>
-                <th className="th">
-                  Children
-                </th>
-                <th className="th">
-                  Order
-                </th>
-                <th className="th">
-                  Status
-                </th>
-                <th className="th">
-                  Actions
-                </th>
+                <th className="th">Name</th>
+                <th className="th">Slug</th>
+                <th className="th">Children</th>
+                <th className="th">Products</th>
+                <th className="th">Order</th>
+                <th className="th">Status</th>
+                <th className="th">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border/60">
-              {parentCategories.map((cat) => (
-                <tr key={cat.public_id} className="hover:bg-muted/40">
-                  <td className="px-4 py-3 font-medium text-foreground">{cat.name}</td>
-                  <td className="px-4 py-3 text-muted-foreground">{cat.slug}</td>
-                  <td className="px-4 py-3 text-foreground">{cat.child_count}</td>
-                  <td className="px-4 py-3 text-foreground">{cat.order}</td>
-                  <td className="px-4 py-3">
-                    <ActiveBadge active={cat.is_active} />
-                  </td>
-                  <td className="px-4 py-3">
-                    <div className="flex gap-2">
-                      <ClickableText
-                        onClick={() => openParentEdit(cat)}
-                        className="text-sm"
-                      >
-                        Edit
-                      </ClickableText>
-                      <ClickableText
-                        variant="destructive"
-                        onClick={() => deleteParent(cat.public_id)}
-                        className="text-sm"
-                      >
-                        Delete
-                      </ClickableText>
-                    </div>
+              {tree.length === 0 ? (
+                <tr>
+                  <td
+                    colSpan={7}
+                    className="px-4 py-8 text-center text-muted-foreground"
+                  >
+                    No categories yet. Add a root category to get started.
                   </td>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </section>
-
-      {/* ── Child Categories (nested) ── */}
-      <section>
-        <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-lg font-medium text-foreground">
-            Child Categories ({childCategories.length})
-          </h2>
-          <button
-            onClick={openChildNew}
-            className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90"
-          >
-            Add Child Category
-          </button>
-        </div>
-
-        {childEditing !== null && (
-          <form
-            onSubmit={saveChild}
-            className="mb-4 space-y-3 rounded-xl border border-primary/30 bg-primary/5 p-4"
-          >
-            <p className="text-sm font-semibold text-primary">
-              {childEditing === "new" ? "New Child Category" : "Edit Child Category"}
-            </p>
-            <div className="grid grid-cols-2 gap-3">
-              <Input required placeholder="Name" value={childForm.name} onChange={(e) => setChildForm({ ...childForm, name: e.target.value })} />
-              <Input required placeholder="Slug" value={childForm.slug} onChange={(e) => setChildForm({ ...childForm, slug: e.target.value })} />
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <Select required value={childForm.parent} onChange={(e) => setChildForm({ ...childForm, parent: e.target.value })}>
-                <option value="">Parent category...</option>
-                {parentCategories.map((pc) => (
-                  <option key={pc.public_id} value={pc.public_id}>{pc.name}</option>
-                ))}
-              </Select>
-              <Input placeholder="Description" value={childForm.description} onChange={(e) => setChildForm({ ...childForm, description: e.target.value })} />
-            </div>
-            <div className="grid grid-cols-3 gap-3">
-              <Input
-                type="number"
-                placeholder="Order"
-                value={childForm.order}
-                onChange={(e) => setChildForm({ ...childForm, order: e.target.value })}
-              />
-              <input
-                type="file"
-                accept="image/*"
-                onChange={(e) => setChildImageFile(e.target.files?.[0] ?? null)}
-                className="form-file-input"
-              />
-              <label className="flex items-center gap-2 text-sm text-foreground">
-                <input
-                  type="checkbox"
-                  checked={childForm.is_active}
-                  onChange={(e) =>
-                    setChildForm({ ...childForm, is_active: e.target.checked })
-                  }
-                  className="form-checkbox"
-                />{" "}
-                Active
-              </label>
-            </div>
-            <div className="flex gap-2">
-              <button
-                type="submit"
-                disabled={childSaving}
-                className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
-              >
-                {childSaving ? "Saving..." : "Save"}
-              </button>
-              <button
-                type="button"
-                onClick={() => setChildEditing(null)}
-                className="rounded-lg border border-border px-4 py-2 text-sm text-foreground hover:bg-muted"
-              >
-                Cancel
-              </button>
-            </div>
-          </form>
-        )}
-
-        <div className="overflow-x-auto rounded-xl border border-dashed border-card-border bg-card">
-          <table className="w-full text-left text-sm">
-            <thead>
-              <tr className="border-b border-border bg-muted/40">
-                <th className="th">
-                  Name
-                </th>
-                <th className="th">
-                  Parent
-                </th>
-                <th className="th">
-                  Products
-                </th>
-                <th className="th">
-                  Order
-                </th>
-                <th className="th">
-                  Status
-                </th>
-                <th className="th">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border/60">
-              {childCategories.map((cat) => (
-                <tr key={cat.public_id} className="hover:bg-muted/40">
-                  <td className="px-4 py-3 font-medium text-foreground">{cat.name}</td>
-                  <td className="px-4 py-3 text-muted-foreground">
-                    {cat.parent_name}
-                  </td>
-                  <td className="px-4 py-3 text-foreground">{cat.product_count}</td>
-                  <td className="px-4 py-3 text-foreground">{cat.order}</td>
-                  <td className="px-4 py-3">
-                    <ActiveBadge active={cat.is_active} />
-                  </td>
-                  <td className="px-4 py-3">
-                    <div className="flex gap-2">
-                      <ClickableText
-                        onClick={() => openChildEdit(cat)}
-                        className="text-sm"
-                      >
-                        Edit
-                      </ClickableText>
-                      <ClickableText
-                        variant="destructive"
-                        onClick={() => deleteChild(cat.public_id)}
-                        className="text-sm"
-                      >
-                        Delete
-                      </ClickableText>
-                    </div>
-                  </td>
-                </tr>
-              ))}
+              ) : (
+                <CategoryTreeRows
+                  nodes={tree}
+                  depth={0}
+                  expanded={expanded}
+                  onToggle={toggleExpand}
+                  onEdit={openEdit}
+                  onDelete={deleteCategory}
+                  onAddChild={openNewChild}
+                />
+              )}
             </tbody>
           </table>
         </div>
@@ -445,7 +435,9 @@ function ActiveBadge({ active }: { active: boolean }) {
   return (
     <span
       className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-semibold ${
-        active ? "bg-emerald-500/20 text-emerald-400" : "bg-muted text-muted-foreground"
+        active
+          ? "bg-emerald-500/20 text-emerald-400"
+          : "bg-muted text-muted-foreground"
       }`}
     >
       {active ? "Active" : "Inactive"}

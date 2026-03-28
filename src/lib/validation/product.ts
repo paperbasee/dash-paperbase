@@ -14,13 +14,10 @@ export const productCreateSchema = z.object({
   name: z.string().trim().min(1, "Product name is required."),
   brand: z.string().optional(),
   price: z.string().trim().min(1, "Price is required."),
-  category: z.string().trim().min(1, "Parent category is required."),
-  sub_category: z.string().optional(),
+  category: z.string().trim().min(1, "Category is required."),
   stock: z.string().trim().min(1, "Stock is required."),
   description: z.string().optional(),
   original_price: z.string().optional(),
-  badge: z.string().optional(),
-  is_featured: z.boolean(),
   is_active: z.boolean(),
 });
 

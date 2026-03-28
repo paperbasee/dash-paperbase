@@ -9,7 +9,6 @@ import {
   Bell,
   PackageSearch,
   History,
-  Star,
   Image as ImageIcon,
   BarChart3,
   Truck,
@@ -20,7 +19,6 @@ export interface NavCounts {
   orders: number;
   products: number;
   notifications: number;
-  categories: number;
   supportTickets: number;
 }
 
@@ -74,7 +72,7 @@ export const APP_CONFIG: Record<string, AppConfig> = {
     description: "Product categories and organization",
     essential: true,
     href: "/categories",
-    countKey: "categories",
+    countKey: null,
     parentId: "catalog",
   },
   support_tickets: {
@@ -96,16 +94,6 @@ export const APP_CONFIG: Record<string, AppConfig> = {
     href: "/cta",
     countKey: "notifications",
     parentId: null,
-  },
-  reviews: {
-    id: "reviews",
-    label: "Reviews",
-    icon: Star,
-    description: "Product reviews and ratings",
-    essential: false,
-    href: "/reviews",
-    countKey: null,
-    parentId: "more",
   },
   variants: {
     id: "variants",
@@ -191,7 +179,6 @@ export const CATALOG_INCLUDED_APP_IDS = [
 export const OPTIONAL_APP_IDS = [
   "support_tickets",
   "cta",
-  "reviews",
   "inventory",
   "activities",
   "banners",
@@ -221,5 +208,4 @@ export const MAIN_NAV_APP_IDS = [
 export const MORE_APP_IDS = [
   "support_tickets",
   "activities",
-  "reviews",
 ] as const;

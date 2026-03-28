@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { Link, useRouter } from "@/i18n/navigation";
 import { Undo2, Check, Plus, X } from "lucide-react";
 import api from "@/lib/api";
@@ -12,7 +12,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { ExtraFieldsFormSection } from "@/components/ExtraFieldsFormSection";
 import { useExtraFieldsSchema } from "@/hooks/useExtraFieldsSchema";
 import type { ExtraFieldValues } from "@/types/extra-fields";
-import type { ParentCategory, Category } from "@/types";
+import type { AdminCategoryTreeNode } from "@/types";
+import { flattenCategoryOptions } from "@/lib/category-tree";
 import { MAX_PRODUCT_IMAGES } from "@/lib/product-media";
 import {
   parseValidation,
@@ -21,19 +22,11 @@ import {
   validateRequiredExtraFields,
 } from "@/lib/validation";
 
-const BADGE_OPTIONS = [
-  { value: "", label: "None" },
-  { value: "sale", label: "Sale" },
-  { value: "new", label: "New" },
-  { value: "hot", label: "Hot" },
-] as const;
-
 const MAX_IMAGES = MAX_PRODUCT_IMAGES;
 
 export default function NewProductPage() {
   const router = useRouter();
-  const [parentCategories, setParentCategories] = useState<ParentCategory[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
+  const [categoryTree, setCategoryTree] = useState<AdminCategoryTreeNode[]>([]);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
@@ -43,11 +36,8 @@ export default function NewProductPage() {
     price: "",
     original_price: "",
     category: "",
-    sub_category: "",
     description: "",
     stock: "0",
-    badge: "",
-    is_featured: false,
     is_active: true,
   });
   const [extraFields, setExtraFields] = useState<ExtraFieldValues>({});
@@ -80,14 +70,19 @@ export default function NewProductPage() {
   const canAddToGallery = hasMainImage && canAddMore;
 
   useEffect(() => {
-    Promise.all([
-      api.get("admin/parent-categories/"),
-      api.get("admin/categories/"),
-    ]).then(([parentRes, catRes]) => {
-      setParentCategories(parentRes.data.results ?? parentRes.data);
-      setCategories(catRes.data.results ?? catRes.data);
-    });
+    api
+      .get<AdminCategoryTreeNode[]>("admin/categories/?tree=1")
+      .then((res) => {
+        const d = res.data;
+        setCategoryTree(Array.isArray(d) ? d : []);
+      })
+      .catch(console.error);
   }, []);
+
+  const categorySelectOptions = useMemo(
+    () => flattenCategoryOptions(categoryTree),
+    [categoryTree]
+  );
 
   useEffect(() => {
     const slugs = imageFiles.map((f) => (f ? URL.createObjectURL(f) : null));
@@ -130,10 +125,6 @@ export default function NewProductPage() {
     return () => clearTimeout(t);
   }, [baseSlug]);
 
-  const filteredChildCategories = categories.filter(
-    (c) => String(c.parent) === form.category
-  );
-
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     const formValidation = parseValidation(productCreateSchema, form);
@@ -165,10 +156,8 @@ export default function NewProductPage() {
     if (normalizedBrand) formData.append("brand", normalizedBrand);
     formData.append("price", form.price);
     formData.append("original_price", form.original_price.trim());
-    formData.append("category", form.sub_category || form.category);
+    formData.append("category", form.category);
     formData.append("description", form.description);
-    if (form.badge) formData.append("badge", form.badge);
-    formData.append("is_featured", String(form.is_featured));
     formData.append("is_active", String(form.is_active));
     const mainImage = imageFiles[0];
     if (mainImage) formData.append("image", mainImage);
@@ -313,40 +302,6 @@ export default function NewProductPage() {
                   className={fieldControlClass}
                 />
               </Field>
-              <div>
-                <p className="mb-2 text-sm font-medium text-muted-foreground">
-                  Promo badge
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  {BADGE_OPTIONS.map((opt) => (
-                    <button
-                      key={opt.value || "none"}
-                      type="button"
-                      onClick={() => setForm({ ...form, badge: opt.value })}
-                      className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${
-                        form.badge === opt.value
-                          ? "bg-primary text-primary-foreground"
-                          : "bg-muted text-muted-foreground hover:bg-muted/80"
-                      }`}
-                    >
-                      {opt.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <label className="flex cursor-pointer items-center gap-2">
-                <input
-                  type="checkbox"
-                  checked={form.is_featured}
-                  onChange={(e) =>
-                    setForm({ ...form, is_featured: e.target.checked })
-                  }
-                  className="form-checkbox"
-                />
-                <span className="text-sm font-medium text-foreground">
-                  Featured product
-                </span>
-              </label>
             </CardContent>
           </Card>
 
@@ -585,40 +540,19 @@ export default function NewProductPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <Field label="Parent category" required>
+              <Field label="Category" required>
                 <Select
                   required
                   value={form.category}
                   onChange={(e) =>
-                    setForm({
-                      ...form,
-                      category: e.target.value,
-                      sub_category: "",
-                    })
+                    setForm({ ...form, category: e.target.value })
                   }
                   className={fieldControlClass}
                 >
-                  <option value="">Select parent...</option>
-                  {parentCategories.map((c) => (
-                    <option key={c.public_id} value={c.public_id}>
-                      {c.name}
-                    </option>
-                  ))}
-                </Select>
-              </Field>
-              <Field label="Child category">
-                <Select
-                  value={form.sub_category}
-                  onChange={(e) =>
-                    setForm({ ...form, sub_category: e.target.value })
-                  }
-                  className={fieldControlClass}
-                  disabled={!form.category}
-                >
-                  <option value="">Select child (optional)...</option>
-                  {filteredChildCategories.map((c) => (
-                    <option key={c.public_id} value={c.public_id}>
-                      {c.name}
+                  <option value="">Select category…</option>
+                  {categorySelectOptions.map((c) => (
+                    <option key={c.value} value={c.value}>
+                      {c.label}
                     </option>
                   ))}
                 </Select>

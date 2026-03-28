@@ -1,13 +1,14 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Link, useRouter } from "@/i18n/navigation";
 import { toLocaleDigits } from "@/lib/locale-digits";
 import { Undo2 } from "lucide-react";
 import api from "@/lib/api";
 import { useBranding } from "@/context/BrandingContext";
-import type { Product, PaginatedResponse } from "@/types";
+import type { AdminCategoryTreeNode, Product, PaginatedResponse } from "@/types";
+import { flattenCategoryOptions } from "@/lib/category-tree";
 import {
   Combobox,
   ComboboxContent,
@@ -46,7 +47,7 @@ export default function ProductsPage() {
   const debouncedSearch = useDebouncedValue(searchInput);
   const debouncedPriceMin = useDebouncedValue(priceMinInput);
   const debouncedPriceMax = useDebouncedValue(priceMaxInput);
-  const [categoryOptions, setCategoryOptions] = useState<CategoryOption[]>([]);
+  const [categoryTree, setCategoryTree] = useState<AdminCategoryTreeNode[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [count, setCount] = useState(0);
@@ -76,28 +77,27 @@ export default function ProductsPage() {
 
   useEffect(() => {
     let active = true;
-    Promise.all([
-      api.get<{ results: Array<{ public_id: string; name: string }> }>("admin/parent-categories/"),
-      api.get<{ results: Array<{ public_id: string; name: string }> }>("admin/categories/"),
-    ])
-      .then(([parents, children]) => {
+    api
+      .get<AdminCategoryTreeNode[]>("admin/categories/?tree=1")
+      .then((res) => {
         if (!active) return;
-        const entries = [...parents.data.results, ...children.data.results];
-        const seen = new Set<string>();
-        const options = entries
-          .filter((item) => {
-            if (!item.public_id || seen.has(item.public_id)) return false;
-            seen.add(item.public_id);
-            return true;
-          })
-          .map((item) => ({ value: item.public_id, label: item.name }));
-        setCategoryOptions(options);
+        const d = res.data;
+        setCategoryTree(Array.isArray(d) ? d : []);
       })
       .catch(console.error);
     return () => {
       active = false;
     };
   }, []);
+
+  const categoryOptions = useMemo<CategoryOption[]>(
+    () =>
+      flattenCategoryOptions(categoryTree).map((c) => ({
+        value: c.value,
+        label: c.label,
+      })),
+    [categoryTree]
+  );
 
   useEffect(() => {
     let active = true;

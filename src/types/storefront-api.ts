@@ -28,7 +28,6 @@ export interface StorefrontProductListItem {
   price: string;
   original_price: string | null;
   image_url: string | null;
-  badge: string | null;
   category_public_id: string;
   category_slug: string;
   category_name: string;
@@ -44,7 +43,6 @@ export interface StorefrontProductListItem {
 export interface StorefrontProductDetail extends StorefrontProductListItem {
   images: StorefrontProductImage[];
   description: string;
-  is_featured: boolean;
   created_at: string;
   variants: Array<{
     public_id: string;
@@ -79,6 +77,8 @@ export interface StorefrontCategory {
   parent_public_id: string | null;
   order: number;
   is_active: boolean;
+  /** Present when `GET /categories/?tree=1`. */
+  children?: StorefrontCategory[];
 }
 
 export interface StorefrontBanner {

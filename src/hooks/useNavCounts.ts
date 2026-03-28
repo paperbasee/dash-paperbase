@@ -56,7 +56,6 @@ export function useNavCounts() {
       orders: stats.orders.total,
       products: stats.products.active,
       notifications: stats.notifications,
-      categories: stats.categories,
       brands: 0,
       supportTickets: stats.support_tickets,
     },

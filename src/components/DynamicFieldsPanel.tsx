@@ -50,9 +50,6 @@ const FIXED_FIELDS_BY_ENTITY: Record<
     { key: "stock", label: "Stock" },
     { key: "brand", label: "Brand" },
     { key: "category", label: "Category" },
-    { key: "sub_category", label: "Subcategory" },
-    { key: "badge", label: "Promo Badge" },
-    { key: "is_featured", label: "Featured" },
     { key: "is_active", label: "Active" },
   ],
   customer: [

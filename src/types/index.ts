@@ -93,7 +93,6 @@ export interface Product {
   image?: string | null;
   /** Admin list: absolute or relative image URL. */
   image_url?: string | null;
-  badge: string | null;
   /** Admin detail: selected category `public_id`. */
   category?: string;
   category_public_id?: string;
@@ -107,7 +106,6 @@ export interface Product {
   total_stock?: number;
   stock_source?: string;
   variant_count?: number;
-  is_featured: boolean;
   is_active: boolean;
   extra_data?: Record<string, string | number | boolean>;
   images?: ProductImage[];
@@ -154,18 +152,8 @@ export interface ProductAttributeValueAdmin {
   order: number;
 }
 
-export interface ParentCategory {
-  public_id: string;
-  name: string;
-  slug: string;
-  description: string;
-  image: string | null;
-  order: number;
-  is_active: boolean;
-  child_count: number;
-}
-
-export interface Category {
+/** Admin `GET /admin/categories/?tree=1` node (nested). */
+export interface AdminCategoryTreeNode {
   public_id: string;
   name: string;
   slug: string;
@@ -176,6 +164,8 @@ export interface Category {
   order: number;
   is_active: boolean;
   product_count: number;
+  child_count: number;
+  children: AdminCategoryTreeNode[];
 }
 
 /** Admin storefront CTA rows (`/api/v1/admin/notifications/`). Publishable API uses `cta_url` / `cta_label` / `start_at` / `end_at`. */
@@ -232,8 +222,8 @@ export interface DashboardStats {
     active: number;
     out_of_stock: number;
   };
-  categories: number;
-  subcategories: number;
+  category_roots: number;
+  category_total: number;
   support_tickets: number;
   notifications: number;
   recent_orders: Order[];
@@ -296,19 +286,6 @@ export interface Banner {
   order: number;
   start_at: string | null;
   end_at: string | null;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface Review {
-  public_id: string;
-  product_public_id: string;
-  product_name: string;
-  user_email: string;
-  rating: number;
-  title: string;
-  body: string;
-  status: string;
   created_at: string;
   updated_at: string;
 }
