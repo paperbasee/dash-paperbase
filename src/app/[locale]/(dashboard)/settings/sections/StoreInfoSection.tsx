@@ -5,7 +5,13 @@ import type React from "react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "@/components/ui/input-group";
 import { SettingsSectionBody, settingsSectionSurfaceClassName } from "../SettingsSectionBody";
+import SocialLinkGlyph from "./SocialLinkGlyph";
 import {
   STORE_SOCIAL_LINK_KEYS,
   type StoreSocialLinkKey,
@@ -194,32 +200,46 @@ export default function StoreInfoSection({
           </div>
         </div>
 
-        <div className="space-y-4">
-          <div className="space-y-1">
-            <h3 className="text-base font-medium text-foreground">{t("store.socialHeading")}</h3>
-            <p className="text-sm text-muted-foreground">{t("store.socialSubtitle")}</p>
+        <div className="rounded-xl border border-border/80 bg-muted/20 p-3 sm:p-4">
+          <div className="mb-3 space-y-1">
+            <h3 className="text-sm font-semibold tracking-tight text-foreground sm:text-base">
+              {t("store.socialHeading")}
+            </h3>
+            <p className="text-xs leading-snug text-muted-foreground sm:text-sm sm:leading-relaxed">
+              {t("store.socialSubtitle")}
+            </p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {STORE_SOCIAL_LINK_KEYS.map((key) => (
-              <div key={key} className="flex flex-col gap-2">
-                <label
-                  htmlFor={`social_${key}`}
-                  className="text-sm font-medium leading-normal text-foreground"
-                >
-                  {t(`store.socialLabels.${key}` as never)}
-                </label>
-                <Input
-                  id={`social_${key}`}
-                  type="url"
-                  inputMode="url"
-                  autoComplete="off"
-                  value={socialLinks[key]}
-                  onChange={(e) => onSocialLinkChange(key, e.target.value)}
-                  placeholder={t("store.socialUrlPlaceholder")}
-                  className="w-full"
-                />
-              </div>
-            ))}
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-4">
+            {STORE_SOCIAL_LINK_KEYS.map((key) => {
+              const label = t(`store.socialLabels.${key}` as never);
+              return (
+                <InputGroup key={key} className="h-9 min-w-0 bg-background shadow-sm">
+                  <InputGroupAddon
+                    align="inline-start"
+                    className="w-[7.25rem] shrink-0 gap-2 border-r border-border/80 py-0 pl-2.5 pr-2"
+                    title={label}
+                  >
+                    <span className="text-muted-foreground">
+                      <SocialLinkGlyph platform={key} />
+                    </span>
+                    <span className="min-w-0 truncate text-xs font-medium text-foreground">
+                      {label}
+                    </span>
+                  </InputGroupAddon>
+                  <InputGroupInput
+                    id={`social_${key}`}
+                    type="url"
+                    inputMode="url"
+                    autoComplete="off"
+                    value={socialLinks[key]}
+                    onChange={(e) => onSocialLinkChange(key, e.target.value)}
+                    placeholder={t("store.socialUrlPlaceholder")}
+                    aria-label={label}
+                    className="min-w-0 text-xs sm:text-sm"
+                  />
+                </InputGroup>
+              );
+            })}
           </div>
         </div>
 
