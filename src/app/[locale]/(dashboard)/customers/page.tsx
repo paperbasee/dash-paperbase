@@ -12,12 +12,7 @@ import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { useFilters } from "@/hooks/useFilters";
 import api from "@/lib/api";
 import type { Customer, PaginatedResponse } from "@/types";
-
-function formatMdy(dateValue: string) {
-  const date = new Date(dateValue);
-  if (Number.isNaN(date.getTime())) return "—";
-  return `${date.getMonth() + 1}-${date.getDate()}-${date.getFullYear()}`;
-}
+import { formatDashboardDate } from "@/lib/datetime-display";
 
 export default function CustomersPage() {
   const router = useRouter();
@@ -179,7 +174,7 @@ export default function CustomersPage() {
                         <td className="px-4 py-3 text-muted-foreground">
                           <span className="whitespace-nowrap">
                             {c.created_at
-                              ? formatMdy(c.created_at)
+                              ? formatDashboardDate(c.created_at, locale)
                               : "—"}
                           </span>
                         </td>

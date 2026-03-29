@@ -1,11 +1,11 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { Truck, Plus, X } from "lucide-react";
 import api from "@/lib/api";
 import { formatAdminApiErrorFromAxios } from "@/lib/admin-api-error";
-import { formatIntegrationDate } from "../formatIntegrationDate";
+import { formatDashboardDate } from "@/lib/datetime-display";
 import type { Courier, PaginatedResponse } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,6 +21,7 @@ const emptyForm: ConnectForm = {
 };
 
 export default function CourierIntegration() {
+  const locale = useLocale();
   const t = useTranslations("settings");
   const [couriers, setCouriers] = useState<Courier[]>([]);
   const [loading, setLoading] = useState(true);
@@ -239,7 +240,7 @@ export default function CourierIntegration() {
                     </span>
                   )}
                   <span>
-                    {t("courier.connectedOn")} {formatIntegrationDate(c.created_at)}
+                    {t("courier.connectedOn")} {formatDashboardDate(c.created_at, locale)}
                   </span>
                 </div>
               </div>

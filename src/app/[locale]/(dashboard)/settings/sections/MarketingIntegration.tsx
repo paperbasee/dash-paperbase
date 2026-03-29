@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { Plug, Plus, X, Save } from "lucide-react";
 import api from "@/lib/api";
 import type {
@@ -12,7 +12,7 @@ import type {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
-import { formatIntegrationDate } from "../formatIntegrationDate";
+import { formatDashboardDate } from "@/lib/datetime-display";
 
 type ConnectForm = {
   provider: string;
@@ -36,6 +36,7 @@ const EVENT_LABEL_KEYS: { key: keyof IntegrationEventSettings; labelKey: string 
 ];
 
 export default function MarketingIntegration() {
+  const locale = useLocale();
   const t = useTranslations("settings");
   const [integrations, setIntegrations] = useState<MarketingIntegrationType[]>(
     []
@@ -330,7 +331,7 @@ export default function MarketingIntegration() {
                     )}
                     <span>
                       {t("marketing.connectedOn")}{" "}
-                      {formatIntegrationDate(integration.created_at)}
+                      {formatDashboardDate(integration.created_at, locale)}
                     </span>
                   </div>
                 </div>

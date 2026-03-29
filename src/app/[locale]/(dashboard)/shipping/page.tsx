@@ -414,7 +414,12 @@ export default function ShippingPage() {
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <div className="font-medium">
-                      {z.name}{" "}
+                      <ClickableText
+                        onClick={() => openEditZone(z)}
+                        className="font-medium text-foreground"
+                      >
+                        {z.name}
+                      </ClickableText>{" "}
                       <span className="text-xs text-muted-foreground">
                         {z.is_active ? tCommon("active") : tCommon("inactive")}
                       </span>
@@ -424,12 +429,6 @@ export default function ShippingPage() {
                     </div>
                   </div>
                   <div className="shrink-0 text-right text-sm">
-                    <ClickableText
-                      onClick={() => openEditZone(z)}
-                      className="mr-2 text-sm"
-                    >
-                      {tCommon("edit")}
-                    </ClickableText>
                     <ClickableText
                       variant="destructive"
                       onClick={() => del("zones", z.public_id)}
@@ -558,7 +557,12 @@ export default function ShippingPage() {
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <div className="font-medium">
-                      {m.name}{" "}
+                      <ClickableText
+                        onClick={() => openEditMethod(m)}
+                        className="font-medium text-foreground"
+                      >
+                        {m.name}
+                      </ClickableText>{" "}
                       <span className="text-xs text-muted-foreground">
                         {m.is_active ? tCommon("active") : tCommon("inactive")}
                       </span>
@@ -575,12 +579,6 @@ export default function ShippingPage() {
                     </div>
                   </div>
                   <div className="shrink-0 text-right text-sm">
-                    <ClickableText
-                      onClick={() => openEditMethod(m)}
-                      className="mr-2 text-sm"
-                    >
-                      {tCommon("edit")}
-                    </ClickableText>
                     <ClickableText
                       variant="destructive"
                       onClick={() => del("methods", m.public_id)}
@@ -731,11 +729,16 @@ export default function ShippingPage() {
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <div className="font-medium">
-                      {methodByPublicId.get(r.shipping_method_public_id)?.name ||
-                        r.shipping_method_public_id}{" "}
-                      →{" "}
-                      {zoneByPublicId.get(r.shipping_zone_public_id)?.name ||
-                        r.shipping_zone_public_id}
+                      <ClickableText
+                        onClick={() => openEditRate(r)}
+                        className="font-medium text-foreground"
+                      >
+                        {methodByPublicId.get(r.shipping_method_public_id)?.name ||
+                          r.shipping_method_public_id}{" "}
+                        →{" "}
+                        {zoneByPublicId.get(r.shipping_zone_public_id)?.name ||
+                          r.shipping_zone_public_id}
+                      </ClickableText>
                     </div>
                     <div className="text-xs text-muted-foreground">
                       {tPages("shippingRateMeta", {
@@ -751,12 +754,6 @@ export default function ShippingPage() {
                     </div>
                   </div>
                   <div className="shrink-0 text-right text-sm">
-                    <ClickableText
-                      onClick={() => openEditRate(r)}
-                      className="mr-2 text-sm"
-                    >
-                      {tCommon("edit")}
-                    </ClickableText>
                     <ClickableText
                       variant="destructive"
                       onClick={() => del("rates", r.public_id)}

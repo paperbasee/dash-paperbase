@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, type FormEvent } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { Undo2 } from "lucide-react";
 import api from "@/lib/api";
@@ -10,6 +10,8 @@ import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import type { Notification, PaginatedResponse } from "@/types";
+import { formatDashboardDateOptional } from "@/lib/datetime-display";
+import { displayInputToApiLocal, isoDatetimeToDisplayInput } from "@/lib/datetime-form";
 
 type CtaForm = {
   cta_text: string;
@@ -33,16 +35,9 @@ const emptyForm: CtaForm = {
   order: "0",
 };
 
-function formatDate(value: string | null): string {
-  if (!value) return "";
-  const d = new Date(value);
-  if (Number.isNaN(d.getTime())) return value;
-  const pad = (n: number) => n.toString().padStart(2, "0");
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
-}
-
 export default function CtaPage() {
   const router = useRouter();
+  const locale = useLocale();
   const tPages = useTranslations("pages");
   const tCommon = useTranslations("common");
   const [ctas, setCtas] = useState<Notification[]>([]);
@@ -80,14 +75,26 @@ export default function CtaPage() {
       is_active: n.is_active,
       link: n.link || "",
       link_text: n.link_text || "",
-      start_date: n.start_date ? n.start_date.slice(0, 16) : "",
-      end_date: n.end_date ? n.end_date.slice(0, 16) : "",
+      start_date: isoDatetimeToDisplayInput(n.start_date),
+      end_date: isoDatetimeToDisplayInput(n.end_date),
       order: String(n.order),
     });
   }
 
   async function handleSave(e: FormEvent) {
     e.preventDefault();
+
+    const start_date = displayInputToApiLocal(form.start_date);
+    if (form.start_date.trim() && start_date === null) {
+      window.alert(tPages("datetimeInputInvalid"));
+      return;
+    }
+    const end_date = displayInputToApiLocal(form.end_date);
+    if (form.end_date.trim() && end_date === null) {
+      window.alert(tPages("datetimeInputInvalid"));
+      return;
+    }
+
     setSaving(true);
 
     const payload: Record<string, unknown> = {
@@ -97,8 +104,8 @@ export default function CtaPage() {
       order: Number(form.order),
       link: form.link || null,
       link_text: form.link_text,
-      start_date: form.start_date || null,
-      end_date: form.end_date || null,
+      start_date,
+      end_date,
     };
 
     try {
@@ -244,12 +251,14 @@ export default function CtaPage() {
                 {tPages("ctaStartOptional")}
               </label>
               <Input
-                type="datetime-local"
+                type="text"
+                autoComplete="off"
+                placeholder={tPages("datetimeInputPlaceholder")}
                 value={form.start_date}
                 onChange={(e) =>
                   setForm({ ...form, start_date: e.target.value })
                 }
-                className="text-sm"
+                className="text-sm font-numbers"
               />
             </div>
             <div>
@@ -257,12 +266,14 @@ export default function CtaPage() {
                 {tPages("ctaEndOptional")}
               </label>
               <Input
-                type="datetime-local"
+                type="text"
+                autoComplete="off"
+                placeholder={tPages("datetimeInputPlaceholder")}
                 value={form.end_date}
                 onChange={(e) =>
                   setForm({ ...form, end_date: e.target.value })
                 }
-                className="text-sm"
+                className="text-sm font-numbers"
               />
             </div>
           </div>
@@ -300,7 +311,13 @@ export default function CtaPage() {
             {ctas.map((n) => (
               <tr key={n.public_id} className="hover:bg-muted/40">
                 <td className="max-w-xs truncate px-4 py-3 font-medium text-foreground">
-                  {n.cta_text}
+                  <ClickableText
+                    onClick={() => openEdit(n)}
+                    truncate
+                    className="font-medium text-foreground"
+                  >
+                    {n.cta_text}
+                  </ClickableText>
                 </td>
                 <td className="px-4 py-3 text-muted-foreground capitalize">
                   {n.notification_type}
@@ -319,27 +336,21 @@ export default function CtaPage() {
                 </td>
                 <td className="px-4 py-3 text-xs text-muted-foreground">
                   {n.start_date
-                    ? `${formatDate(n.start_date)} - ${
-                        n.end_date ? formatDate(n.end_date) : tPages("ctaScheduleInfinity")
+                    ? `${formatDashboardDateOptional(n.start_date, locale)} - ${
+                        n.end_date
+                          ? formatDashboardDateOptional(n.end_date, locale)
+                          : tPages("ctaScheduleInfinity")
                       }`
                     : tPages("ctaScheduleAlways")}
                 </td>
                 <td className="px-4 py-3">
-                  <div className="flex gap-2">
-                    <ClickableText
-                      onClick={() => openEdit(n)}
-                      className="text-sm"
-                    >
-                      {tCommon("edit")}
-                    </ClickableText>
-                    <ClickableText
-                      variant="destructive"
-                      onClick={() => handleDelete(n.public_id)}
-                      className="text-sm"
-                    >
-                      {tCommon("delete")}
-                    </ClickableText>
-                  </div>
+                  <ClickableText
+                    variant="destructive"
+                    onClick={() => handleDelete(n.public_id)}
+                    className="text-sm"
+                  >
+                    {tCommon("delete")}
+                  </ClickableText>
                 </td>
               </tr>
             ))}

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, type FormEvent } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { Undo2, Plus } from "lucide-react";
 import { isAxiosError } from "axios";
@@ -9,6 +9,8 @@ import api from "@/lib/api";
 import { ClickableText } from "@/components/ui/clickable-text";
 import { Input } from "@/components/ui/input";
 import type { Banner, PaginatedResponse } from "@/types";
+import { formatDashboardDateTime } from "@/lib/datetime-display";
+import { displayInputToApiLocal, isoDatetimeToDisplayInput } from "@/lib/datetime-form";
 
 type BannerForm = {
   title: string;
@@ -30,13 +32,9 @@ const emptyForm: BannerForm = {
   end_at: "",
 };
 
-function toDateTimeLocal(value: string | null): string {
-  if (!value) return "";
-  return value.slice(0, 16);
-}
-
 export default function BannersPage() {
   const router = useRouter();
+  const locale = useLocale();
   const tPages = useTranslations("pages");
   const tCommon = useTranslations("common");
   const [banners, setBanners] = useState<Banner[]>([]);
@@ -76,14 +74,26 @@ export default function BannersPage() {
       cta_link: banner.cta_link || "",
       order: String(banner.order ?? 0),
       is_active: banner.is_active,
-      start_at: toDateTimeLocal(banner.start_at),
-      end_at: toDateTimeLocal(banner.end_at),
+      start_at: isoDatetimeToDisplayInput(banner.start_at),
+      end_at: isoDatetimeToDisplayInput(banner.end_at),
     });
     setImageFile(null);
   }
 
   async function handleSave(e: FormEvent) {
     e.preventDefault();
+
+    const start_at = displayInputToApiLocal(form.start_at);
+    if (form.start_at.trim() && start_at === null) {
+      window.alert(tPages("datetimeInputInvalid"));
+      return;
+    }
+    const end_at = displayInputToApiLocal(form.end_at);
+    if (form.end_at.trim() && end_at === null) {
+      window.alert(tPages("datetimeInputInvalid"));
+      return;
+    }
+
     setSaving(true);
     const fd = new FormData();
     fd.append("title", form.title);
@@ -91,8 +101,8 @@ export default function BannersPage() {
     fd.append("cta_link", form.cta_link.trim());
     fd.append("order", form.order || "0");
     fd.append("is_active", String(form.is_active));
-    if (form.start_at) fd.append("start_at", form.start_at);
-    if (form.end_at) fd.append("end_at", form.end_at);
+    if (start_at) fd.append("start_at", start_at);
+    if (end_at) fd.append("end_at", end_at);
     if (imageFile) fd.append("image", imageFile);
 
     try {
@@ -226,23 +236,27 @@ export default function BannersPage() {
             <div>
               <label className="mb-1 block text-sm font-medium">{tPages("bannersLabelStart")}</label>
               <Input
-                type="datetime-local"
+                type="text"
+                autoComplete="off"
+                placeholder={tPages("datetimeInputPlaceholder")}
                 value={form.start_at}
                 onChange={(e) =>
                   setForm((f) => ({ ...f, start_at: e.target.value }))
                 }
-                className="text-sm"
+                className="text-sm font-numbers"
               />
             </div>
             <div>
               <label className="mb-1 block text-sm font-medium">{tPages("bannersLabelEnd")}</label>
               <Input
-                type="datetime-local"
+                type="text"
+                autoComplete="off"
+                placeholder={tPages("datetimeInputPlaceholder")}
                 value={form.end_at}
                 onChange={(e) =>
                   setForm((f) => ({ ...f, end_at: e.target.value }))
                 }
-                className="text-sm"
+                className="text-sm font-numbers"
               />
             </div>
             <div className="sm:col-span-2">
@@ -322,14 +336,19 @@ export default function BannersPage() {
                   )}
                 </td>
                 <td className="px-4 py-3 font-medium">
-                  {b.title || "—"}
+                  <ClickableText
+                    onClick={() => openEdit(b)}
+                    className="font-medium text-foreground"
+                  >
+                    {b.title || "—"}
+                  </ClickableText>
                 </td>
                 <td className="px-4 py-3">{b.order}</td>
                 <td className="px-4 py-3 text-muted-foreground">
-                  {b.start_at ? new Date(b.start_at).toLocaleString() : "—"}
+                  {b.start_at ? formatDashboardDateTime(b.start_at, locale) : "—"}
                 </td>
                 <td className="px-4 py-3 text-muted-foreground">
-                  {b.end_at ? new Date(b.end_at).toLocaleString() : "—"}
+                  {b.end_at ? formatDashboardDateTime(b.end_at, locale) : "—"}
                 </td>
                 <td className="px-4 py-3">
                   <span
@@ -343,12 +362,6 @@ export default function BannersPage() {
                   </span>
                 </td>
                 <td className="px-4 py-3 text-right">
-                  <ClickableText
-                    onClick={() => openEdit(b)}
-                    className="mr-2 text-sm"
-                  >
-                    {tCommon("edit")}
-                  </ClickableText>
                   <ClickableText
                     variant="destructive"
                     onClick={() => handleDelete(b.public_id)}

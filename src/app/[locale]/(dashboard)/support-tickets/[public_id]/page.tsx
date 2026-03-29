@@ -2,22 +2,12 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { Undo2 } from "lucide-react";
 import api from "@/lib/api";
 import type { SupportTicket } from "@/types";
-
-function formatDateTime(value: string): string {
-  const d = new Date(value);
-  if (Number.isNaN(d.getTime())) return value;
-  const month = d.getMonth() + 1;
-  const day = d.getDate();
-  const year = d.getFullYear();
-  const hours = String(d.getHours()).padStart(2, "0");
-  const minutes = String(d.getMinutes()).padStart(2, "0");
-  return `${month}-${day}-${year} ${hours}:${minutes}`;
-}
+import { formatDashboardDateTime } from "@/lib/datetime-display";
 
 function labelFromValue(value: string): string {
   if (!value) return "—";
@@ -28,6 +18,7 @@ function labelFromValue(value: string): string {
 }
 
 export default function SupportTicketDetailPage() {
+  const locale = useLocale();
   const tPages = useTranslations("pages");
   const router = useRouter();
   const params = useParams<{ public_id: string }>();
@@ -132,7 +123,7 @@ export default function SupportTicketDetailPage() {
             <div className="rounded-xl border border-dashed border-card-border bg-card p-4">
               <p className="text-sm text-muted-foreground">{tPages("supportTicketDetailCreatedAt")}</p>
               <p className="mt-1 text-base font-medium text-foreground">
-                {formatDateTime(ticket.created_at)}
+                {formatDashboardDateTime(ticket.created_at, locale)}
               </p>
             </div>
           </section>
@@ -184,7 +175,7 @@ export default function SupportTicketDetailPage() {
                           </a>
                         </td>
                         <td className="px-3 py-2 text-muted-foreground">
-                          {formatDateTime(attachment.created_at)}
+                          {formatDashboardDateTime(attachment.created_at, locale)}
                         </td>
                       </tr>
                     ))}

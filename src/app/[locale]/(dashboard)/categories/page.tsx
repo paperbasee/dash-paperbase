@@ -54,7 +54,6 @@ function CategoryTreeRows({
   onAddChild: (parentId: string) => void;
   labels: {
     addChild: string;
-    edit: string;
     delete: string;
     active: string;
     inactive: string;
@@ -90,7 +89,12 @@ function CategoryTreeRows({
                   ) : (
                     <span className="inline-block w-5 shrink-0" />
                   )}
-                  <span className="font-medium text-foreground">{node.name}</span>
+                  <ClickableText
+                    onClick={() => onEdit(node)}
+                    className="font-medium text-foreground"
+                  >
+                    {node.name}
+                  </ClickableText>
                 </div>
               </td>
               <td className="px-4 py-3 text-muted-foreground">{node.slug}</td>
@@ -107,9 +111,6 @@ function CategoryTreeRows({
                     className="text-sm"
                   >
                     {labels.addChild}
-                  </ClickableText>
-                  <ClickableText onClick={() => onEdit(node)} className="text-sm">
-                    {labels.edit}
                   </ClickableText>
                   <ClickableText
                     variant="destructive"
@@ -146,7 +147,6 @@ export default function CategoriesPage() {
   const tCommon = useTranslations("common");
   const treeLabels = {
     addChild: tPages("categoriesAddChild"),
-    edit: tCommon("edit"),
     delete: tCommon("delete"),
     active: tCommon("active"),
     inactive: tCommon("inactive"),

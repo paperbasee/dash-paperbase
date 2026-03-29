@@ -1,20 +1,13 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { Select } from "@/components/ui/select";
 import { useActivities } from "@/hooks/useActivities";
-
-function formatDateTime(value: string): string {
-  const d = new Date(value);
-  if (Number.isNaN(d.getTime())) return value;
-  const pad = (n: number) => n.toString().padStart(2, "0");
-  const datePart = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
-  const timePart = `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
-  return `${datePart}, ${timePart}`;
-}
+import { formatDashboardDateTimeWithSeconds } from "@/lib/datetime-display";
 
 export default function ActivitiesPage() {
+  const locale = useLocale();
   const tPages = useTranslations("pages");
   const [page, setPage] = useState(1);
   const [entityType, setEntityType] = useState("");
@@ -153,7 +146,7 @@ export default function ActivitiesPage() {
                         </div>
                       </div>
                       <div className="shrink-0 text-xs text-muted-foreground whitespace-nowrap">
-                        {formatDateTime(item.created_at)}
+                        {formatDashboardDateTimeWithSeconds(item.created_at, locale)}
                       </div>
                     </div>
                   </div>

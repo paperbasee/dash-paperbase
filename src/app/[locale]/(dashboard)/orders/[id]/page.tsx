@@ -49,6 +49,7 @@ import {
   joinVillageThanaDistrict,
   splitShippingAddressForForm,
 } from "@/lib/orders/shipping-address-parts";
+import { formatDashboardDateTime } from "@/lib/datetime-display";
 
 type EditForm = {
   shipping_name: string;
@@ -72,18 +73,6 @@ function extractApiDetail(err: unknown, fallback: string): string {
     }
   }
   return fallback;
-}
-
-function formatOrderDate(iso: string, locale: string) {
-  const d = new Date(iso);
-  const intlLocale = locale === "bn" ? "bn-BD" : "en-US";
-  return new Intl.DateTimeFormat(intlLocale, {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-    hour: "numeric",
-    minute: "2-digit",
-  }).format(d);
 }
 
 export default function OrderDetailPage() {
@@ -479,7 +468,7 @@ export default function OrderDetailPage() {
     );
   }
 
-  const orderDateFormatted = formatOrderDate(order.created_at, locale);
+  const orderDateFormatted = formatDashboardDateTime(order.created_at, locale);
   const savedSubtotalBefore = Number(order.subtotal_before_discount ?? 0);
   const savedDiscountTotal = Number(order.discount_total ?? 0);
   const savedSubtotalAfter = Number(order.subtotal_after_discount ?? 0);

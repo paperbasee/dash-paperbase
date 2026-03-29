@@ -1,11 +1,12 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { Copy, KeyRound, Loader2, RefreshCcw, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import api from "@/lib/api";
+import { formatDashboardDateTimeWithSeconds } from "@/lib/datetime-display";
 import { SettingsSectionBody, settingsSectionSurfaceClassName } from "../SettingsSectionBody";
 
 type APIKeyRow = {
@@ -24,20 +25,6 @@ type APIKeyCreateResponse = {
   api_key: string;
 };
 
-function formatCreatedAt(value: string): string {
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return value;
-
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
-  const hours = String(date.getHours()).padStart(2, "0");
-  const minutes = String(date.getMinutes()).padStart(2, "0");
-  const seconds = String(date.getSeconds()).padStart(2, "0");
-
-  return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
-}
-
 function extractRows(data: unknown): APIKeyRow[] {
   if (Array.isArray(data)) return (data as APIKeyRow[]).filter((row) => !row.revoked_at);
   if (data && typeof data === "object" && "results" in data) {
@@ -48,6 +35,7 @@ function extractRows(data: unknown): APIKeyRow[] {
 }
 
 export default function NetworkingSection({ hidden }: { hidden: boolean }) {
+  const locale = useLocale();
   const t = useTranslations("settings");
   const [keys, setKeys] = useState<APIKeyRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -198,7 +186,7 @@ export default function NetworkingSection({ hidden }: { hidden: boolean }) {
                   <p className="break-words text-xs leading-relaxed text-muted-foreground">
                     {t("networking.prefix")}{" "}
                     <code className="break-all rounded bg-muted px-1">{k.key_prefix}</code> · {t("networking.created")}{" "}
-                    {formatCreatedAt(k.created_at)} · {k.revoked_at ? t("networking.statusRevoked") : t("networking.statusActive")}
+                    {formatDashboardDateTimeWithSeconds(k.created_at, locale)} · {k.revoked_at ? t("networking.statusRevoked") : t("networking.statusActive")}
                   </p>
                 </div>
                 <div className="flex shrink-0 flex-wrap gap-2">

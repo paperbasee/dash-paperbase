@@ -1,22 +1,15 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { useCallback, useRef, useState } from "react";
 import { useNotifications } from "@/context/NotificationContext";
 import { getNotificationLink } from "@/lib/notifications";
 import { Button } from "@/components/ui/button";
-
-function formatDateTime(value: string): string {
-  const d = new Date(value);
-  if (Number.isNaN(d.getTime())) return value;
-  const pad = (n: number) => n.toString().padStart(2, "0");
-  const datePart = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
-  const timePart = `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
-  return `${datePart}, ${timePart}`;
-}
+import { formatDashboardDateTimeWithSeconds } from "@/lib/datetime-display";
 
 export default function NotificationsFeedPage() {
+  const locale = useLocale();
   const tPages = useTranslations("pages");
   const tCommon = useTranslations("common");
   const {
@@ -146,7 +139,7 @@ export default function NotificationsFeedPage() {
                   )}
                 </div>
                 <div className="shrink-0 text-xs text-muted-foreground">
-                  {formatDateTime(notification.createdAt)}
+                  {formatDashboardDateTimeWithSeconds(notification.createdAt, locale)}
                 </div>
               </button>
             ))}

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { Undo2 } from "lucide-react";
 import { ClickableText } from "@/components/ui/clickable-text";
@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/combobox";
 import api from "@/lib/api";
 import type { SupportTicket, PaginatedResponse } from "@/types";
+import { formatDashboardDateTime } from "@/lib/datetime-display";
 
 type EditableField = "status" | "priority" | "category";
 
@@ -87,16 +88,8 @@ function InlineSelect({
   );
 }
 
-function formatDateTime(value: string): string {
-  const d = new Date(value);
-  if (Number.isNaN(d.getTime())) return value;
-  const pad = (n: number) => n.toString().padStart(2, "0");
-  const datePart = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
-  const timePart = `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
-  return `${datePart}, ${timePart}`;
-}
-
 export default function SupportTicketsPage() {
+  const locale = useLocale();
   const tPages = useTranslations("pages");
   const router = useRouter();
   const { page, filters, setFilter, setPage, clearFilters } = useFilters([
@@ -328,7 +321,7 @@ export default function SupportTicketsPage() {
                       />
                     </td>
                     <td className="px-4 py-3 text-muted-foreground whitespace-nowrap">
-                      {formatDateTime(ticket.created_at)}
+                      {formatDashboardDateTime(ticket.created_at, locale)}
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap">
                       <div className="flex items-center gap-2">

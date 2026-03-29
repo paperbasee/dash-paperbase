@@ -2,12 +2,14 @@
 
 import { useCallback, useEffect, useMemo, useState, type FormEvent } from "react";
 import { useTranslations } from "next-intl";
-import { Link } from "@/i18n/navigation";
+import { Link, usePathname, useRouter } from "@/i18n/navigation";
 import { useSearchParams } from "next/navigation";
 import { Undo2, Plus } from "lucide-react";
 import api from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { FilterBar } from "@/components/filters/FilterBar";
+import { FilterDropdown } from "@/components/filters/FilterDropdown";
 import { ClickableText } from "@/components/ui/clickable-text";
 import {
   Combobox,
@@ -24,6 +26,8 @@ import type {
   ProductVariant,
   PaginatedResponse,
 } from "@/types";
+import { useDebouncedValue } from "@/hooks/useDebouncedValue";
+import { useFilters } from "@/hooks/useFilters";
 
 async function fetchAllProducts(): Promise<Product[]> {
   const out: Product[] = [];
@@ -77,14 +81,22 @@ export default function VariantsPage() {
   const tPages = useTranslations("pages");
   const tCommon = useTranslations("common");
   const searchParams = useSearchParams();
-  const productFromQuery =
-    searchParams.get("product_public_id")?.trim() ||
-    searchParams.get("product")?.trim() ||
-    "";
+  const pathname = usePathname();
+  const router = useRouter();
+  const { filters, setFilter } = useFilters([
+    "product_public_id",
+    "search",
+    "variant_status",
+  ]);
+  const legacyProductParam = searchParams.get("product")?.trim() || "";
+  const productId =
+    (filters.product_public_id || "").trim() || legacyProductParam;
+
+  const [searchInput, setSearchInput] = useState(filters.search || "");
+  const debouncedSearch = useDebouncedValue(searchInput);
 
   const [products, setProducts] = useState<Product[]>([]);
   const [attributes, setAttributes] = useState<ProductAttributeAdmin[]>([]);
-  const [productId, setProductId] = useState<string>(productFromQuery);
   const [variants, setVariants] = useState<ProductVariant[]>([]);
   const [loading, setLoading] = useState(true);
   const [variantsLoading, setVariantsLoading] = useState(false);
@@ -119,8 +131,60 @@ export default function VariantsPage() {
   }, [loadMeta]);
 
   useEffect(() => {
-    if (productFromQuery) setProductId(productFromQuery);
-  }, [productFromQuery]);
+    const next = debouncedSearch.trim();
+    if (next !== searchInput.trim()) return;
+    if (next === (filters.search || "")) return;
+    setFilter("search", next);
+  }, [debouncedSearch, searchInput, filters.search, setFilter]);
+
+  useEffect(() => {
+    setSearchInput(filters.search || "");
+  }, [filters.search]);
+
+  const productOptions = useMemo(
+    () =>
+      products.map((p) => ({
+        value: p.public_id,
+        label: p.name,
+      })),
+    [products]
+  );
+
+  const filteredVariants = useMemo(() => {
+    const q = (filters.search || "").trim().toLowerCase();
+    let rows = variants;
+    if (q) {
+      rows = rows.filter((v) => {
+        if (v.sku.toLowerCase().includes(q)) return true;
+        return (v.option_labels || []).some((l) => l.toLowerCase().includes(q));
+      });
+    }
+    const st = filters.variant_status;
+    if (st === "active") rows = rows.filter((v) => v.is_active);
+    else if (st === "inactive") rows = rows.filter((v) => !v.is_active);
+    return rows;
+  }, [variants, filters.search, filters.variant_status]);
+
+  function applyProductPublicIdToUrl(value: string) {
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete("product");
+    const trimmed = value.trim();
+    if (trimmed) params.set("product_public_id", trimmed);
+    else params.delete("product_public_id");
+    params.delete("page");
+    const query = params.toString();
+    router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
+  }
+
+  function clearVariantFilters() {
+    const params = new URLSearchParams(searchParams.toString());
+    for (const key of ["product_public_id", "product", "search", "variant_status", "page"]) {
+      params.delete(key);
+    }
+    const query = params.toString();
+    router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
+    setSearchInput("");
+  }
 
   const loadVariants = useCallback(async () => {
     if (!productId) {
@@ -314,37 +378,51 @@ export default function VariantsPage() {
         </p>
       ) : null}
 
-      <Card className="shadow-sm">
-        <CardHeader>
-          <CardTitle className="text-base">{tPages("variantsProductCard")}</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          <Select
-            className="max-w-xl text-sm"
-            value={productId}
-            onChange={(e) => {
-              setProductId(e.target.value);
-              closePanel();
-            }}
-          >
-            <option value="">{tPages("variantsSelectProduct")}</option>
-            {products.map((p) => (
-              <option key={p.public_id} value={p.public_id}>
-                {p.name}
-              </option>
-            ))}
-          </Select>
-          {selectedProduct ? (
-            <p className="text-xs text-muted-foreground">
-              {tPages("variantsBasePrice")}{" "}
-              <span className="font-numbers text-foreground">{selectedProduct.price}</span>
-              {selectedProduct.variant_count != null ? (
-                <> {tPages("variantsVariantCount", { count: selectedProduct.variant_count })}</>
-              ) : null}
-            </p>
+      <FilterBar>
+        <FilterDropdown
+          value={productId}
+          onChange={(value) => {
+            closePanel();
+            applyProductPublicIdToUrl(value);
+          }}
+          placeholder={tPages("variantsFiltersProduct")}
+          options={productOptions}
+          className="min-w-[200px] max-w-[min(100vw-2rem,320px)]"
+        />
+        <FilterDropdown
+          value={filters.variant_status}
+          onChange={(value) => setFilter("variant_status", value)}
+          placeholder={tPages("variantsFiltersVariantStatus")}
+          options={[
+            { value: "active", label: tCommon("active") },
+            { value: "inactive", label: tCommon("inactive") },
+          ]}
+        />
+        <Input
+          value={searchInput}
+          onChange={(e) => setSearchInput(e.target.value)}
+          placeholder={tPages("variantsFiltersSearchVariants")}
+          className="w-full md:w-72"
+          disabled={!productId}
+        />
+        <button
+          type="button"
+          onClick={clearVariantFilters}
+          className="h-9 rounded-md border border-border px-3 text-sm hover:bg-muted"
+        >
+          {tPages("filtersClear")}
+        </button>
+      </FilterBar>
+
+      {selectedProduct ? (
+        <p className="text-xs text-muted-foreground">
+          {tPages("variantsBasePrice")}{" "}
+          <span className="font-numbers text-foreground">{selectedProduct.price}</span>
+          {selectedProduct.variant_count != null ? (
+            <> {tPages("variantsVariantCount", { count: selectedProduct.variant_count })}</>
           ) : null}
-        </CardContent>
-      </Card>
+        </p>
+      ) : null}
 
       {productId ? (
         <div className="flex flex-col gap-4">
@@ -468,6 +546,10 @@ export default function VariantsPage() {
             <p className="rounded-xl border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
               {tPages("variantsEmpty")}
             </p>
+          ) : filteredVariants.length === 0 ? (
+            <p className="rounded-xl border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
+              {tPages("variantsEmptyFiltered")}
+            </p>
           ) : (
             <div className="overflow-x-auto rounded-xl border border-border">
               <table className="w-full min-w-[640px] text-sm">
@@ -484,7 +566,7 @@ export default function VariantsPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {variants.map((v) => (
+                  {filteredVariants.map((v) => (
                     <tr key={v.public_id} className="border-b border-border last:border-0">
                       <td className="px-4 py-3">
                         <ClickableText

@@ -15,22 +15,12 @@ import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { useFilters } from "@/hooks/useFilters";
 import api from "@/lib/api";
 import { useBranding } from "@/context/BrandingContext";
+import { formatDashboardDateTime } from "@/lib/datetime-display";
 import {
   ORDER_STATUS_OPTIONS,
   formatOrderStatusLabel,
 } from "@/lib/orders/order-statuses";
 import type { Order, PaginatedResponse } from "@/types";
-
-function formatDate(value: string): string {
-  const d = new Date(value);
-  if (Number.isNaN(d.getTime())) return value;
-  const month = d.getMonth() + 1;
-  const day = d.getDate();
-  const year = d.getFullYear();
-  const hours = String(d.getHours()).padStart(2, "0");
-  const minutes = String(d.getMinutes()).padStart(2, "0");
-  return `${month}-${day}-${year} ${hours}:${minutes}`;
-}
 
 function extractApiDetail(err: unknown, fallback: string): string {
   const raw = (err as { response?: { data?: { detail?: unknown } } })?.response?.data?.detail;
@@ -427,7 +417,7 @@ export default function OrdersPage() {
                       )}
                     </td>
                     <td className="px-4 py-3 text-muted-foreground whitespace-nowrap">
-                      {formatDate(order.created_at)}
+                      {formatDashboardDateTime(order.created_at, locale)}
                     </td>
                   </tr>
                 ))}

@@ -2,11 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { Undo2 } from "lucide-react";
 import api from "@/lib/api";
 import type { CustomerDetailsResponse } from "@/types";
+import { formatDashboardDateTime } from "@/lib/datetime-display";
 
 function asCurrency(value: string) {
   const number = Number(value || "0");
@@ -14,18 +15,8 @@ function asCurrency(value: string) {
   return number.toLocaleString(undefined, { maximumFractionDigits: 2 });
 }
 
-function formatMdyHm(dateValue: string) {
-  const date = new Date(dateValue);
-  if (Number.isNaN(date.getTime())) return "—";
-  const month = date.getMonth() + 1;
-  const day = date.getDate();
-  const year = date.getFullYear();
-  const hours = String(date.getHours()).padStart(2, "0");
-  const minutes = String(date.getMinutes()).padStart(2, "0");
-  return `${month}-${day}-${year} ${hours}:${minutes}`;
-}
-
 export default function CustomerDetailPage() {
+  const locale = useLocale();
   const tPages = useTranslations("pages");
   const router = useRouter();
   const params = useParams<{ public_id: string }>();
@@ -114,7 +105,7 @@ export default function CustomerDetailPage() {
               <p className="text-sm text-muted-foreground">{tPages("customerDetailsFirstOrderDate")}</p>
               <p className="mt-1 text-base font-medium">
                 {data.analytics.first_order_date
-                  ? formatMdyHm(data.analytics.first_order_date)
+                  ? formatDashboardDateTime(data.analytics.first_order_date, locale)
                   : "—"}
               </p>
             </div>
@@ -122,7 +113,7 @@ export default function CustomerDetailPage() {
               <p className="text-sm text-muted-foreground">{tPages("customerDetailsLastOrderDate")}</p>
               <p className="mt-1 text-base font-medium">
                 {data.analytics.last_order_date
-                  ? formatMdyHm(data.analytics.last_order_date)
+                  ? formatDashboardDateTime(data.analytics.last_order_date, locale)
                   : "—"}
               </p>
             </div>
@@ -150,7 +141,9 @@ export default function CustomerDetailPage() {
                       {data.ordered_products.map((item, idx) => (
                         <tr key={`${item.order_public_id}-${item.product_public_id}-${idx}`}>
                           <td className="whitespace-nowrap px-3 py-2 text-muted-foreground">{item.order_number}</td>
-                          <td className="whitespace-nowrap px-3 py-2 text-muted-foreground">{formatMdyHm(item.ordered_at)}</td>
+                          <td className="whitespace-nowrap px-3 py-2 text-muted-foreground">
+                            {formatDashboardDateTime(item.ordered_at, locale)}
+                          </td>
                           <td className="whitespace-nowrap px-3 py-2 font-medium text-foreground">{item.product_name}</td>
                           <td className="px-3 py-2 text-muted-foreground">{item.quantity}</td>
                           <td className="px-3 py-2 text-muted-foreground">{asCurrency(item.unit_price)}</td>
