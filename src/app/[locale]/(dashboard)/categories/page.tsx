@@ -19,7 +19,6 @@ type FormMode = "closed" | "new_root" | "new_child" | "edit";
 
 type CatForm = {
   name: string;
-  slug: string;
   description: string;
   parent: string;
   order: string;
@@ -28,7 +27,6 @@ type CatForm = {
 
 const emptyForm: CatForm = {
   name: "",
-  slug: "",
   description: "",
   parent: "",
   order: "0",
@@ -157,6 +155,8 @@ export default function CategoriesPage() {
   const [mode, setMode] = useState<FormMode>("closed");
   const [editingPublicId, setEditingPublicId] = useState<string | null>(null);
   const [form, setForm] = useState<CatForm>(emptyForm);
+  /** Slug from API when editing (read-only; backend regenerates from name on save). */
+  const [editingSlugPreview, setEditingSlugPreview] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [saving, setSaving] = useState(false);
 
@@ -191,6 +191,7 @@ export default function CategoriesPage() {
   function openNewRoot() {
     setMode("new_root");
     setEditingPublicId(null);
+    setEditingSlugPreview(null);
     setForm({ ...emptyForm, parent: "" });
     setImageFile(null);
   }
@@ -198,6 +199,7 @@ export default function CategoriesPage() {
   function openNewChild(parentPublicId: string) {
     setMode("new_child");
     setEditingPublicId(null);
+    setEditingSlugPreview(null);
     setForm({ ...emptyForm, parent: parentPublicId });
     setImageFile(null);
   }
@@ -205,9 +207,9 @@ export default function CategoriesPage() {
   function openEdit(node: AdminCategoryTreeNode) {
     setMode("edit");
     setEditingPublicId(node.public_id);
+    setEditingSlugPreview(node.slug);
     setForm({
       name: node.name,
-      slug: node.slug,
       description: node.description,
       parent: node.parent ?? "",
       order: String(node.order),
@@ -233,7 +235,6 @@ export default function CategoriesPage() {
     setSaving(true);
     const fd = new FormData();
     fd.append("name", form.name);
-    fd.append("slug", form.slug);
     fd.append("description", form.description);
     fd.append("order", form.order);
     fd.append("is_active", String(form.is_active));
@@ -252,6 +253,7 @@ export default function CategoriesPage() {
         await api.post("admin/categories/", fd);
       }
       setMode("closed");
+      setEditingSlugPreview(null);
       fetchTree();
     } catch (err) {
       console.error(err);
@@ -316,7 +318,10 @@ export default function CategoriesPage() {
         {mode !== "closed" ? (
           <button
             type="button"
-            onClick={() => setMode("closed")}
+            onClick={() => {
+              setMode("closed");
+              setEditingSlugPreview(null);
+            }}
             className="rounded-lg border border-border px-4 py-2 text-sm text-foreground hover:bg-muted"
           >
             {tPages("categoriesCancelForm")}
@@ -330,19 +335,23 @@ export default function CategoriesPage() {
           className="space-y-3 rounded-xl border border-primary/30 bg-primary/5 p-4"
         >
           <p className="text-sm font-medium text-primary">{formTitle}</p>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="space-y-1">
             <Input
               required
               placeholder={tPages("categoriesPlaceholderName")}
               value={form.name}
               onChange={(e) => setForm({ ...form, name: e.target.value })}
+              className="max-w-xl"
             />
-            <Input
-              required
-              placeholder={tPages("categoriesPlaceholderSlug")}
-              value={form.slug}
-              onChange={(e) => setForm({ ...form, slug: e.target.value })}
-            />
+            {mode === "edit" && editingSlugPreview ? (
+              <p className="text-xs text-muted-foreground">
+                {tPages("categoriesSlugEditHint", { slug: editingSlugPreview })}
+              </p>
+            ) : (
+              <p className="text-xs text-muted-foreground">
+                {tPages("categoriesSlugAutoHint")}
+              </p>
+            )}
           </div>
           <Input
             placeholder={tPages("categoriesPlaceholderDescription")}
