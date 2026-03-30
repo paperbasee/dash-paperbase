@@ -13,7 +13,7 @@ import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Toast, type ToastVariant } from "@/components/notifications/Toast";
+import { Toast, type ToastAction, type ToastVariant } from "@/components/notifications/Toast";
 import {
   Dialog,
   DialogContent,
@@ -22,6 +22,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { cn } from "@/lib/utils";
 import { normalizeError, UNKNOWN_ERROR_FALLBACK } from "./normalizeError";
 import { registerNotifyDispatcher } from "./notify";
 import type {
@@ -59,6 +60,7 @@ function isDescriptor(value: MessageDescriptor): value is Exclude<MessageDescrip
 }
 
 export function NotificationProvider({ children }: { children: ReactNode }) {
+  const DEFAULT_DURATION_MS = 5000;
   const t = useTranslations();
   const [validationByForm, setValidationByForm] = useState<Record<string, FieldErrors>>({});
   const [modalRequest, setModalRequest] = useState<ModalRequest | null>(null);
@@ -87,20 +89,32 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
       variant,
       message,
       title,
+      action,
+      persistent,
     }: {
       id: string;
       durationMs?: number;
       variant: ToastVariant;
       message: string;
       title?: string;
+      action?: ToastAction;
+      persistent?: boolean;
     }) => {
       toast.custom(
-        () => <Toast variant={variant} title={title} message={message} />,
-        { id, duration: durationMs },
+        () => (
+          <Toast
+            variant={variant}
+            title={title}
+            message={message}
+            action={action}
+            onClose={() => toast.dismiss(id)}
+          />
+        ),
+        { id, duration: persistent ? Number.POSITIVE_INFINITY : (durationMs ?? DEFAULT_DURATION_MS) },
       );
       return id;
     },
-    [],
+    [DEFAULT_DURATION_MS],
   );
 
   const pushToast = useCallback(
@@ -118,7 +132,14 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
         durationMs: options?.durationMs,
         variant: kind,
         message: text,
-        title: titleByVariant[kind],
+        title: options?.title ? resolveMessage(options.title) : titleByVariant[kind],
+        action: options?.action
+          ? {
+              label: resolveMessage(options.action.label),
+              onClick: options.action.onClick,
+            }
+          : undefined,
+        persistent: options?.persistent,
       });
     },
     [resolveMessage, showToast],
@@ -164,10 +185,16 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
         const id = options?.id ?? makeId();
         showToast({
           id,
-          durationMs: options?.durationMs,
           variant: "info",
-          title: "Loading",
+          title: options?.title ? resolveMessage(options.title) : "Loading",
           message: resolveMessage(message),
+          action: options?.action
+            ? {
+                label: resolveMessage(options.action.label),
+                onClick: options.action.onClick,
+              }
+            : undefined,
+          persistent: true,
         });
         return {
           id,
@@ -181,6 +208,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
                 variant: "error",
                 title: "Error",
                 message: normalized.message,
+                persistent: options?.persistent,
               });
             }
           },
@@ -225,8 +253,16 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
       ) : null}
       {children}
       <Dialog open={!!modalRequest} onOpenChange={(open) => !open && setModalRequest(null)}>
-        <DialogContent showCloseButton={false}>
-          <DialogHeader>
+        <DialogContent
+          showCloseButton={false}
+          className="w-[calc(100%-1.5rem)] max-w-md rounded-xl sm:w-full"
+        >
+          <DialogHeader
+            className={cn(
+              "gap-1 p-4 sm:p-6",
+              modalRequest?.options.level === "destructive" && "border-b-0",
+            )}
+          >
             <DialogTitle>
               {modalRequest ? resolveMessage(modalRequest.options.title) : ""}
             </DialogTitle>
@@ -235,7 +271,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
             ) : null}
           </DialogHeader>
           {modalRequest?.kind === "prompt" ? (
-            <div className="px-6">
+            <div className="px-4 sm:px-6">
               <Input
                 value={promptValue}
                 onChange={(e) => setPromptValue(e.target.value)}
@@ -247,7 +283,12 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
               />
             </div>
           ) : null}
-          <DialogFooter>
+          <DialogFooter
+            className={cn(
+              "gap-2 p-4 sm:gap-3 sm:p-6",
+              modalRequest?.options.level === "destructive" && "border-t-0",
+            )}
+          >
             <Button
               variant="outline"
               onClick={() => {
