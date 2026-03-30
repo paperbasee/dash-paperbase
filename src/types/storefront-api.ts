@@ -23,7 +23,6 @@ export interface StorefrontProductListItem {
   public_id: string;
   name: string;
   brand: string | null;
-  sku: string;
   stock_tracking: boolean;
   price: string;
   original_price: string | null;
@@ -121,7 +120,6 @@ export interface StorefrontOrderItem {
   public_id: string;
   product_public_id: string | null;
   product_name: string;
-  product_sku: string | null;
   status: string;
   quantity: number;
   price: string;

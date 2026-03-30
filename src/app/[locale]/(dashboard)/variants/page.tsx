@@ -59,7 +59,6 @@ async function fetchAllAttributes(): Promise<ProductAttributeAdmin[]> {
 }
 
 type VariantForm = {
-  sku: string;
   price_override: string;
   is_active: boolean;
   /** one value public_id per attribute (or empty) */
@@ -70,7 +69,6 @@ const emptyForm = (attrs: ProductAttributeAdmin[]): VariantForm => {
   const picks: Record<string, string> = {};
   for (const a of attrs) picks[a.public_id] = "";
   return {
-    sku: "",
     price_override: "",
     is_active: true,
     picks,
@@ -111,6 +109,11 @@ export default function VariantsPage() {
     () => products.find((p) => p.public_id === productId) ?? null,
     [products, productId]
   );
+
+  const editingVariantSku =
+    editing && editing !== "new"
+      ? variants.find((v) => v.public_id === editing)?.sku
+      : undefined;
 
   const loadMeta = useCallback(async () => {
     setLoading(true);
@@ -236,7 +239,6 @@ export default function VariantsPage() {
     }
     setEditing(v.public_id);
     setForm({
-      sku: v.sku,
       price_override: v.price_override ?? "",
       is_active: v.is_active,
       picks,
@@ -263,8 +265,6 @@ export default function VariantsPage() {
       is_active: form.is_active,
       attribute_value_public_ids,
     };
-    const sku = form.sku.trim();
-    if (sku) payload.sku = sku;
     const po = form.price_override.trim();
     if (po) payload.price_override = po;
     else payload.price_override = null;
@@ -444,17 +444,18 @@ export default function VariantsPage() {
               <CardContent>
                 <form onSubmit={saveVariant} className="flex flex-col gap-6">
                   <div className="flex flex-col gap-4">
-                    <label className="flex flex-col gap-2">
+                    <div className="flex flex-col gap-2">
                       <span className="text-xs font-medium text-muted-foreground">
                         {tPages("variantsSkuLabel")}
                       </span>
-                      <Input
-                        className="w-full text-sm"
-                        value={form.sku}
-                        onChange={(e) => setForm({ ...form, sku: e.target.value })}
-                        placeholder={tPages("variantsSkuPlaceholder")}
-                      />
-                    </label>
+                      {editing === "new" ? (
+                        <p className="text-sm text-muted-foreground">
+                          {tPages("variantsSkuPlaceholder")}
+                        </p>
+                      ) : (
+                        <p className="font-mono text-sm text-foreground">{editingVariantSku ?? "—"}</p>
+                      )}
+                    </div>
                     <label className="flex flex-col gap-2">
                       <span className="text-xs font-medium text-muted-foreground">
                         {tPages("variantsPriceOverride")}

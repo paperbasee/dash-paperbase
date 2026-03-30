@@ -53,7 +53,6 @@ export interface OrderItem {
   status?: "active" | "deleted";
   product_brand?: string;
   product_image: string | null;
-  product_sku?: string | null;
   variant_public_id?: string | null;
   variant_sku?: string | null;
   variant_inventory_quantity?: number | null;
@@ -128,7 +127,6 @@ export interface Product {
   category_public_id?: string;
   category_slug?: string;
   category_name?: string;
-  sku?: string;
   stock_tracking?: boolean;
   description?: string;
   /** Admin/catalog: sellable quantity (inventory-aligned). */

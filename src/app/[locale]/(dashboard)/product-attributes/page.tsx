@@ -15,10 +15,10 @@ import type {
   PaginatedResponse,
 } from "@/types";
 
-type AttrForm = { name: string; slug: string; order: string };
+type AttrForm = { name: string; order: string };
 type ValueForm = { value: string; order: string };
 
-const emptyAttr: AttrForm = { name: "", slug: "", order: "0" };
+const emptyAttr: AttrForm = { name: "", order: "0" };
 const emptyValue: ValueForm = { value: "", order: "0" };
 
 export default function ProductAttributesPage() {
@@ -74,7 +74,6 @@ export default function ProductAttributesPage() {
     setAttrEditing(a.public_id);
     setAttrForm({
       name: a.name,
-      slug: a.slug,
       order: String(a.order),
     });
   }
@@ -87,8 +86,6 @@ export default function ProductAttributesPage() {
         name: attrForm.name.trim(),
         order: parseInt(attrForm.order, 10) || 0,
       };
-      const s = attrForm.slug.trim();
-      if (s) payload.slug = s;
       if (attrEditing === "new") {
         await api.post("admin/product-attributes/", payload);
       } else if (typeof attrEditing === "string") {
@@ -216,15 +213,7 @@ export default function ProductAttributesPage() {
                   value={attrForm.name}
                   onChange={(e) => setAttrForm({ ...attrForm, name: e.target.value })}
                 />
-              </label>
-              <label className="space-y-1">
-                <span className="text-xs text-muted-foreground">{tPages("attributesSlugOptional")}</span>
-                <Input
-                  className="w-full text-sm"
-                  value={attrForm.slug}
-                  onChange={(e) => setAttrForm({ ...attrForm, slug: e.target.value })}
-                  placeholder={tPages("attributesSlugPlaceholder")}
-                />
+                <p className="text-xs text-muted-foreground">{tPages("attributesNameAutoSlugHint")}</p>
               </label>
               <label className="space-y-1">
                 <span className="text-xs text-muted-foreground">{tPages("attributesOrder")}</span>
@@ -272,8 +261,7 @@ export default function ProductAttributesPage() {
                     </ClickableText>
                   </CardTitle>
                   <p className="mt-1 text-xs text-muted-foreground">
-                    {tPages("attributesSlugMeta")}{" "}
-                    <code className="rounded bg-muted px-1">{a.slug}</code> {tPages("attributesOrderMeta", { order: a.order })}
+                    {tPages("attributesOrderMeta", { order: a.order })}
                   </p>
                 </div>
                 <div className="flex shrink-0 gap-1">
