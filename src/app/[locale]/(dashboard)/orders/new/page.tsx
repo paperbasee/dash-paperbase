@@ -11,12 +11,6 @@ import { FormField } from "@/components/ui/form-field";
 import { cn } from "@/lib/utils";
 import { useNewOrder } from "./useNewOrder";
 
-function firstLineItemError(fieldErrors: Record<string, string>): string | undefined {
-  if (fieldErrors.items) return fieldErrors.items;
-  const key = Object.keys(fieldErrors).find((k) => k.startsWith("items."));
-  return key ? fieldErrors[key] : undefined;
-}
-
 export default function NewOrderPage() {
   const tPages = useTranslations("pages");
   const tCommon = useTranslations("common");
@@ -48,12 +42,15 @@ export default function NewOrderPage() {
     handleSubmit,
     router,
   } = useNewOrder();
+  const hasItemInlineErrors = Object.keys(fieldErrors).some(
+    (k) => k === "items" || k.startsWith("items."),
+  );
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-3">
-          <div className="rounded-lg bg-muted/80 px-1 py-1">
+          <div className="rounded-lg bg-muted/80 px-1 py-1 hidden md:block">
             <Button
               type="button"
               variant="ghost"
@@ -69,7 +66,7 @@ export default function NewOrderPage() {
             <h1 className="text-2xl font-semibold tracking-tight text-foreground">
               {tPages("orderNewTitle")}
             </h1>
-            <p className="mt-1 text-sm text-muted-foreground">
+            <p className="mt-1 text-sm text-muted-foreground md:hidden">
               {tPages("orderNewSubtitle")}
             </p>
           </div>
@@ -90,7 +87,11 @@ export default function NewOrderPage() {
         </div>
       </div>
 
-      {error && (
+      <p className="hidden text-sm text-muted-foreground md:block">
+        {tPages("orderNewSubtitle")}
+      </p>
+
+      {error && !hasItemInlineErrors && (
         <div
           role="alert"
           className="border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive"
@@ -291,12 +292,6 @@ export default function NewOrderPage() {
                   </div>
                 )}
               </div>
-
-              {firstLineItemError(fieldErrors) && (
-                <p className="text-xs text-destructive" role="alert">
-                  {firstLineItemError(fieldErrors)}
-                </p>
-              )}
 
               <div className="overflow-x-auto border border-border/70">
                 <table className="w-full text-left text-sm">

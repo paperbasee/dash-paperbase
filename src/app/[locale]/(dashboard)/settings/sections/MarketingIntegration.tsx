@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { formatDashboardDate } from "@/lib/datetime-display";
+import { notify } from "@/notifications";
 
 type ConnectForm = {
   provider: string;
@@ -60,7 +61,10 @@ export default function MarketingIntegration() {
         const list = Array.isArray(res.data) ? res.data : res.data.results;
         setIntegrations(list ?? []);
       })
-      .catch(console.error)
+      .catch((err) => {
+        console.error(err);
+        notify.error(err);
+      })
       .finally(() => setLoading(false));
   }, []);
 
@@ -94,13 +98,15 @@ export default function MarketingIntegration() {
   }
 
   async function handleDelete(publicId: string) {
-    if (!confirm(t("marketing.confirmDisconnect"))) return;
+    const ok = await notify.confirm({ title: t("marketing.confirmDisconnect"), level: "destructive" });
+    if (!ok) return;
     setDeletingId(publicId);
     try {
       await api.delete(`admin/marketing-integrations/${publicId}/`);
       fetchIntegrations();
     } catch (err) {
       console.error(err);
+      notify.error(err);
     } finally {
       setDeletingId(null);
     }
@@ -116,6 +122,7 @@ export default function MarketingIntegration() {
       fetchIntegrations();
     } catch (err) {
       console.error(err);
+      notify.error(err);
     } finally {
       setTogglingId(null);
     }
@@ -135,6 +142,7 @@ export default function MarketingIntegration() {
       fetchIntegrations();
     } catch (err) {
       console.error(err);
+      notify.error(err);
     } finally {
       setEventSavingId(null);
     }

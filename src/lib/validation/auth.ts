@@ -1,28 +1,41 @@
 import { z } from "zod";
 import { emailSchema, passwordSchema } from "./common";
+import { defaultValidationMessages, type ValidationMessages } from "./messages";
 
-export const loginSchema = z.object({
-  email: emailSchema,
-  password: z.string({ message: "Password is required." }).min(1, "Password is required."),
-});
-
-export const registerSchema = z
-  .object({
-    email: emailSchema,
-    password: passwordSchema,
-    passwordConfirm: passwordSchema,
-  })
-  .refine((data) => data.password === data.passwordConfirm, {
-    message: "Passwords do not match.",
-    path: ["passwordConfirm"],
+export function buildLoginSchema(messages: ValidationMessages = defaultValidationMessages) {
+  return z.object({
+    email: emailSchema(messages),
+    password: z.string({ message: messages.passwordRequired }).min(1, messages.passwordRequired),
   });
+}
 
-export const passwordResetConfirmSchema = z
-  .object({
-    newPassword: passwordSchema,
-    newPasswordConfirm: passwordSchema,
-  })
-  .refine((data) => data.newPassword === data.newPasswordConfirm, {
-    message: "Passwords do not match.",
-    path: ["newPasswordConfirm"],
-  });
+export function buildRegisterSchema(messages: ValidationMessages = defaultValidationMessages) {
+  return z
+    .object({
+      email: emailSchema(messages),
+      password: passwordSchema(messages),
+      passwordConfirm: passwordSchema(messages),
+    })
+    .refine((data) => data.password === data.passwordConfirm, {
+      message: messages.passwordsMismatch,
+      path: ["passwordConfirm"],
+    });
+}
+
+export function buildPasswordResetConfirmSchema(
+  messages: ValidationMessages = defaultValidationMessages
+) {
+  return z
+    .object({
+      newPassword: passwordSchema(messages),
+      newPasswordConfirm: passwordSchema(messages),
+    })
+    .refine((data) => data.newPassword === data.newPasswordConfirm, {
+      message: messages.passwordsMismatch,
+      path: ["newPasswordConfirm"],
+    });
+}
+
+export const loginSchema = buildLoginSchema();
+export const registerSchema = buildRegisterSchema();
+export const passwordResetConfirmSchema = buildPasswordResetConfirmSchema();

@@ -13,6 +13,7 @@ import { cn } from "@/lib/utils";
 interface SystemNotificationBannerProps {
   className?: string;
   sidebarCollapsed?: boolean;
+  placement?: "top" | "sidebar";
   /** When the banner should affect layout offset (has content and should show chrome). */
   onPresenceChange?: (visible: boolean) => void;
 }
@@ -42,6 +43,7 @@ function parseCtaTarget(raw: string): CtaTarget | null {
 export default function SystemNotificationBanner({
   className,
   sidebarCollapsed = false,
+  placement = "top",
   onPresenceChange,
 }: SystemNotificationBannerProps) {
   const router = useRouter();
@@ -69,6 +71,67 @@ export default function SystemNotificationBanner({
   const ctaUrlRaw = notification.cta_url?.trim();
   const ctaTarget =
     ctaText && ctaUrlRaw ? parseCtaTarget(ctaUrlRaw) : null;
+
+  if (placement === "sidebar") {
+    return (
+      <div
+        aria-live="polite"
+        aria-label={`${notification.title}. ${notification.message}`}
+        className={cn(
+          "rounded-xl border border-border bg-muted/40 p-3",
+          className
+        )}
+      >
+        <div className="flex items-start gap-2">
+          <div className="min-w-0 flex-1">
+            <p className="text-xs font-semibold text-foreground">
+              {notification.title}
+            </p>
+            <p className="mt-1 line-clamp-3 text-xs text-muted-foreground">
+              {notification.message}
+            </p>
+            {ctaText && ctaTarget && (
+              <Button
+                type="button"
+                variant="link"
+                className="mt-1 h-auto p-0 text-xs text-primary underline decoration-primary underline-offset-2"
+                onClick={() => {
+                  if (ctaTarget.kind === "internal") {
+                    router.push(ctaTarget.path);
+                    return;
+                  }
+                  window.open(ctaTarget.href, "_blank", "noopener,noreferrer");
+                }}
+              >
+                {ctaText}
+              </Button>
+            )}
+          </div>
+          <Button
+            variant="ghost"
+            size="icon-xs"
+            onClick={async () => {
+              if (isDismissing) return;
+              setIsDismissing(true);
+              setHiddenPublicId(notification.public_id);
+              try {
+                await dismissSystemNotification(notification.public_id);
+              } catch {
+                setHiddenPublicId(null);
+              } finally {
+                setIsDismissing(false);
+              }
+            }}
+            disabled={isDismissing}
+            aria-label={t("dismissAria")}
+            className="shrink-0 text-muted-foreground hover:text-foreground"
+          >
+            <X className="size-4" />
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div

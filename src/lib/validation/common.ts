@@ -1,37 +1,42 @@
 import { z } from "zod";
+import { defaultValidationMessages, type ValidationMessages } from "./messages";
 
-export const requiredString = (fieldName: string) =>
+export const requiredString = (fieldName: string, messages: ValidationMessages = defaultValidationMessages) =>
   z
-    .string({ message: `${fieldName} is required.` })
+    .string({ message: messages.requiredField(fieldName) })
     .trim()
-    .min(1, `${fieldName} is required.`);
+    .min(1, messages.requiredField(fieldName));
 
 export const optionalTrimmedString = z.string().trim().optional().or(z.literal(""));
 
-export const emailSchema = z
-  .string({ message: "Email is required." })
+export const emailSchema = (messages: ValidationMessages = defaultValidationMessages) =>
+  z
+  .string({ message: messages.emailRequired })
   .trim()
-  .min(1, "Email is required.")
-  .email("Please enter a valid email address.");
+  .min(1, messages.emailRequired)
+  .email(messages.emailInvalid);
 
-export const phoneSchema = z
+export const phoneSchema = (messages: ValidationMessages = defaultValidationMessages) =>
+  z
   .string()
   .trim()
   .refine((value) => value === "" || /^01\d{9}$/.test(value), {
-    message: "Phone number must start with 01 and be exactly 11 digits.",
+    message: messages.phoneInvalid,
   });
 
-export const urlSchema = z
+export const urlSchema = (messages: ValidationMessages = defaultValidationMessages) =>
+  z
   .string()
   .trim()
   .refine(
     (value) => value === "" || z.string().url().safeParse(value).success,
-    "Please enter a valid URL."
+    messages.urlInvalid
   );
 
-export const passwordSchema = z
-  .string({ message: "Password is required." })
-  .min(8, "Password must be at least 8 characters.");
+export const passwordSchema = (messages: ValidationMessages = defaultValidationMessages) =>
+  z
+  .string({ message: messages.passwordRequired })
+  .min(8, messages.passwordMinLength);
 
 export const maxWords = (value: string, max: number) =>
   value.trim().split(/\s+/).filter(Boolean).length <= max;

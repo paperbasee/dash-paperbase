@@ -46,7 +46,7 @@ export default function SupportTicketDetailPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-3">
-        <div className="rounded-lg bg-muted/80 px-1 py-1">
+        <div className="rounded-lg bg-muted/80 px-1 py-1 hidden md:block">
           <button
             type="button"
             onClick={() => router.back()}

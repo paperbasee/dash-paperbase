@@ -1,5 +1,6 @@
 import { z } from "zod";
 import type { ExtraFieldDefinition, ExtraFieldValues } from "@/types/extra-fields";
+import { defaultValidationMessages, type ValidationMessages } from "./messages";
 
 export function slugFromName(name: string): string {
   if (!name.trim()) return "";
@@ -10,22 +11,26 @@ export function slugFromName(name: string): string {
     .replace(/[^a-z0-9-]/g, "");
 }
 
-export const productCreateSchema = z.object({
-  name: z.string().trim().min(1, "Product name is required."),
-  brand: z.string().optional(),
-  price: z.string().trim().min(1, "Price is required."),
-  category: z.string().trim().min(1, "Category is required."),
-  stock: z.string().trim().min(1, "Stock is required."),
-  description: z.string().optional(),
-  original_price: z.string().optional(),
-  is_active: z.boolean(),
-});
+export function buildProductCreateSchema(messages: ValidationMessages = defaultValidationMessages) {
+  return z.object({
+    name: z.string().trim().min(1, messages.productNameRequired),
+    brand: z.string().optional(),
+    price: z.string().trim().min(1, messages.productPriceRequired),
+    category: z.string().trim().min(1, messages.productCategoryRequired),
+    stock: z.string().trim().min(1, messages.productStockRequired),
+    description: z.string().optional(),
+    original_price: z.string().optional(),
+    is_active: z.boolean(),
+  });
+}
 
+export const productCreateSchema = buildProductCreateSchema();
 export const productUpdateSchema = productCreateSchema;
 
 export function validateRequiredExtraFields(
   schema: { name: string; required: boolean }[],
-  values: ExtraFieldValues
+  values: ExtraFieldValues,
+  messages: ValidationMessages = defaultValidationMessages
 ): Record<string, string> {
   const requiredSchema = z.object(
     Object.fromEntries(
@@ -45,21 +50,22 @@ export function validateRequiredExtraFields(
   for (const issue of result.error.issues) {
     const key = issue.path[0];
     if (typeof key === "string" && !errors[key]) {
-      errors[key] = "This field is required.";
+      errors[key] = messages.extraFieldRequired;
     }
   }
   return errors;
 }
 
 export function validateExtraFieldDefinitions(
-  schema: ExtraFieldDefinition[]
+  schema: ExtraFieldDefinition[],
+  messages: ValidationMessages = defaultValidationMessages
 ):
   | { success: true; data: ExtraFieldDefinition[] }
   | { success: false; error: string } {
   const complete = schema.filter((f) => f.name.trim() !== "");
   const hasIncomplete = schema.some((f) => f.name.trim() === "");
   if (hasIncomplete) {
-    return { success: false, error: "Complete all fields (add a name) before saving." };
+    return { success: false, error: messages.extraFieldsIncomplete };
   }
 
   const entityTypes = [...new Set(complete.map((f) => f.entityType))];
@@ -76,7 +82,7 @@ export function validateExtraFieldDefinitions(
   if (hasDuplicates) {
     return {
       success: false,
-      error: "Field names must be unique within each entity type.",
+      error: messages.extraFieldsDuplicateName,
     };
   }
 

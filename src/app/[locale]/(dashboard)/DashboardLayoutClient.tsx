@@ -3,14 +3,18 @@
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { usePathname, useRouter } from "@/i18n/navigation";
+import { Link } from "@/i18n/navigation";
+import { History } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { BrandingProvider } from "@/context/BrandingContext";
 import { SearchModalProvider } from "@/context/SearchModalContext";
 import { NotificationProvider } from "@/context/NotificationContext";
 import Sidebar, { SidebarContent } from "@/components/Sidebar";
 import MobileNavBar from "@/components/MobileNavBar";
+import NotificationDropdown from "@/components/NotificationDropdown";
 import SystemNotificationBanner from "@/components/system/SystemNotificationBanner";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { logout } from "@/lib/auth";
 import {
@@ -28,15 +32,17 @@ export default function DashboardLayoutClient({
   const router = useRouter();
   const pathname = usePathname();
   const tSheet = useTranslations("sheet");
+  const tDashboard = useTranslations("dashboard");
   const { isAuthenticated, isLoading } = useAuth();
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [systemBannerVisible, setSystemBannerVisible] = useState(false);
+  const [mobileSystemBannerVisible, setMobileSystemBannerVisible] = useState(false);
   const [me, setMe] = useState<MeForRouting | null>(null);
   const subscription = me?.subscription ?? null;
   const storeCount = Array.isArray(me?.stores) ? me.stores.length : 0;
   const [subChecked, setSubChecked] = useState(false);
   const [subCheckError, setSubCheckError] = useState(false);
+  const contentContainerClass = "mx-auto w-full max-w-[88rem] px-4 md:px-6 lg:px-8";
 
   const normalizedPlan = (subscription?.plan ?? "").toLowerCase();
   const isEligiblePlan =
@@ -90,16 +96,14 @@ export default function DashboardLayoutClient({
     return <SubscriptionAccessBlock variant="inactive" />;
   }
 
-  const showSystemBanner = systemBannerVisible;
-
   return (
     <BrandingProvider>
       <SearchModalProvider>
         <NotificationProvider>
           <div className="min-h-screen bg-muted/30">
             <SystemNotificationBanner
-              onPresenceChange={setSystemBannerVisible}
-              sidebarCollapsed={collapsed}
+              className="md:hidden"
+              onPresenceChange={setMobileSystemBannerVisible}
             />
 
             <Sidebar
@@ -119,24 +123,44 @@ export default function DashboardLayoutClient({
                 <SidebarContent
                   collapsed={false}
                   onNavigate={() => setMobileOpen(false)}
+                  showSystemNotification={false}
                 />
               </SheetContent>
             </Sheet>
 
             <div
               className={cn(
-                "min-h-screen border-t border-border transition-[margin,padding-top] duration-300",
-                collapsed ? "md:ml-16" : "md:ml-72",
-                showSystemBanner && "pt-[var(--header-height)]"
+                "min-h-screen transition-[margin,padding-top] duration-300",
+                collapsed ? "md:ml-16" : "md:ml-72"
+                ,
+                mobileSystemBannerVisible && "pt-[var(--header-height)] md:pt-0"
               )}
             >
               <MobileNavBar
                 onMenuClick={() => setMobileOpen(true)}
-                bannerVisible={showSystemBanner}
+                bannerVisible={mobileSystemBannerVisible}
               />
 
-              <main className="px-4 py-4 md:px-6 md:py-6 lg:px-8">
-                <div className="mx-auto max-w-7xl">
+              <div className="sticky top-0 z-30 hidden h-[var(--header-height)] border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 md:block">
+                <div className={cn(contentContainerClass, "flex h-full items-center justify-end")}>
+                  <div className="flex items-center">
+                    <Link href="/activities">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        aria-label={tDashboard("activitiesAria")}
+                        className="shrink-0 text-muted-foreground hover:text-foreground"
+                      >
+                        <History className="size-5" />
+                      </Button>
+                    </Link>
+                    <NotificationDropdown />
+                  </div>
+                </div>
+              </div>
+
+              <main className="py-4 md:pt-6 md:pb-6">
+                <div className={contentContainerClass}>
                   {children}
                 </div>
               </main>

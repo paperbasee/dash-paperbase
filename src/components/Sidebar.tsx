@@ -72,6 +72,8 @@ import {
   subscribeToSystemThemeChanges,
   type ThemePreference,
 } from "@/lib/theme";
+import { notify } from "@/notifications";
+import SystemNotificationBanner from "@/components/system/SystemNotificationBanner";
 
 /** Top-level nav order; `__catalog__` is the Products / catalog group. */
 const MAIN_NAV_SEQUENCE = [
@@ -102,10 +104,12 @@ function SidebarContent({
   collapsed,
   onNavigate,
   onToggle,
+  showSystemNotification = true,
 }: {
   collapsed: boolean;
   onNavigate?: () => void;
   onToggle?: () => void;
+  showSystemNotification?: boolean;
 }) {
   const tNav = useTranslations("nav");
   const tSidebar = useTranslations("sidebar");
@@ -143,7 +147,14 @@ function SidebarContent({
 
   const showMore = MORE_APP_IDS.some((id) => isEnabled(id) && APP_CONFIG[id]?.href);
   const moreLinks = MORE_APP_IDS.filter((id) => isEnabled(id) && APP_CONFIG[id]?.href);
+  const moreChildActive = moreLinks.some((id) => {
+    const href = APP_CONFIG[id]?.href;
+    return href ? isActive(href) : false;
+  });
   const [celeryOpen, setCeleryOpen] = useState(false);
+  useEffect(() => {
+    if (showMore && moreChildActive) setCeleryOpen(true);
+  }, [pathname, showMore, moreChildActive]);
   const [storesOpen, setStoresOpen] = useState(false);
   const [storesLoading, setStoresLoading] = useState(false);
   const [storeSwitchingId, setStoreSwitchingId] = useState<string | null>(null);
@@ -300,11 +311,20 @@ function SidebarContent({
         challenge_public_id?: string;
       }>("auth/switch-store/", { store_public_id: storeId });
       if ("2fa_required" in data && data["2fa_required"] && data.challenge_public_id) {
-        const otpCode = window.prompt(tSidebar("twoFaSwitchPrompt"));
-        if (!otpCode) {
+        const promptResult = await notify.prompt({
+          title: tSidebar("twoFaSwitchPrompt"),
+          confirmLabel: { key: "common.next" },
+          cancelLabel: { key: "common.cancel" },
+          required: true,
+          level: "warning",
+        });
+        if (!promptResult.confirmed || !promptResult.value) {
           return;
         }
-        const verified = await verifyTwoFactorChallenge(data.challenge_public_id, otpCode);
+        const verified = await verifyTwoFactorChallenge(
+          data.challenge_public_id,
+          promptResult.value
+        );
         setActiveStoreId(String(verified.active_store_public_id));
       } else {
         window.localStorage.setItem("access_token", data.access);
@@ -342,7 +362,10 @@ function SidebarContent({
     <>
       {/* Header: when collapsed show only toggle button; when expanded show logo + name + subtitle + toggle */}
       <div
-        className="flex shrink-0 items-center justify-between gap-2 border-b border-border px-4"
+        className={cn(
+          "flex shrink-0 items-center gap-2 border-b border-border px-4",
+          collapsed ? "justify-center" : "justify-between"
+        )}
         style={{ height: "var(--header-height)" }}
       >
         {collapsed ? (
@@ -584,7 +607,10 @@ function SidebarContent({
               }
             }}
             className={cn(
-              "flex min-h-[44px] w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground md:min-h-[40px]",
+              "flex min-h-[44px] w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors md:min-h-[40px]",
+              moreChildActive && !celeryOpen
+                ? "bg-primary/10 text-primary"
+                : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
               collapsed && "justify-center px-2"
             )}
           >
@@ -611,12 +637,18 @@ function SidebarContent({
                 {moreLinks.map((id) => {
                   const app = APP_CONFIG[id];
                   if (!app?.href) return null;
+                  const childActive = isActive(app.href);
                   return (
                     <Link
                       key={id}
                       href={app.href}
                       onClick={handleLinkClick}
-                      className="flex items-center justify-between rounded-md px-2 py-2 text-sm text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                      className={cn(
+                        "flex items-center justify-between rounded-md px-2 py-2 text-sm",
+                        childActive
+                          ? "bg-primary/10 font-medium text-primary"
+                          : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                      )}
                     >
                       <span className="min-w-0 break-words leading-relaxed">
                         {tNav(app.id)}
@@ -637,6 +669,12 @@ function SidebarContent({
         </Collapsible>
         )}
       </nav>
+
+      {showSystemNotification && !collapsed && (
+        <div className="shrink-0 px-4 pb-3">
+          <SystemNotificationBanner placement="sidebar" />
+        </div>
+      )}
 
       {/* User menu */}
       <div className="shrink-0 border-t border-border p-4">

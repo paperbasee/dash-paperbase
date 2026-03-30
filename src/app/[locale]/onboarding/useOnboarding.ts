@@ -10,6 +10,7 @@ import { verifyTwoFactorChallenge } from "@/lib/auth";
 import { CATALOG_INCLUDED_APP_IDS, OPTIONAL_APP_IDS } from "@/config/apps";
 import { parseValidation, storeCreateSchema } from "@/lib/validation";
 import { clearPendingVerificationEmail } from "@/lib/verification-state";
+import { notify, normalizeError } from "@/notifications";
 
 const STORAGE_KEY = "core_enabled_apps";
 
@@ -175,12 +176,18 @@ export function useOnboarding() {
       }>("auth/switch-store/", { store_public_id: store.public_id });
 
       if ("2fa_required" in switchData && switchData["2fa_required"] && switchData.challenge_public_id) {
-        const otpCode = window.prompt(t("prompt2fa"));
-        if (!otpCode) {
+        const promptResult = await notify.prompt({
+          title: t("prompt2fa"),
+          confirmLabel: { key: "common.next" },
+          cancelLabel: { key: "common.cancel" },
+          required: true,
+          level: "warning",
+        });
+        if (!promptResult.confirmed || !promptResult.value) {
           setError(t("twoFaRequired"));
           return;
         }
-        await verifyTwoFactorChallenge(switchData.challenge_public_id, otpCode);
+        await verifyTwoFactorChallenge(switchData.challenge_public_id, promptResult.value);
       } else {
         localStorage.setItem("access_token", switchData.access);
         localStorage.setItem("refresh_token", switchData.refresh);
@@ -197,12 +204,9 @@ export function useOnboarding() {
       clearPendingVerificationEmail();
       router.push("/");
     } catch (err: unknown) {
-      const msg =
-        err && typeof err === "object" && "response" in err
-          ? (err as { response?: { data?: { detail?: string } } }).response
-              ?.data?.detail
-          : null;
-      setError(msg || t("createStoreFailed"));
+      const normalized = normalizeError(err, t("createStoreFailed"));
+      setError(normalized.message);
+      notify.error(normalized.message);
     } finally {
       setLoading(false);
     }

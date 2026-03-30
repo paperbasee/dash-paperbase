@@ -234,9 +234,34 @@ export function useNewOrder() {
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
+    const hasMissingRequiredVariant = items.some((item, index) => {
+      const variants = variantsByProductId[item.product_public_id] ?? [];
+      return variants.length > 0 && !item.variant_public_id && index >= 0;
+    });
+    if (hasMissingRequiredVariant) {
+      const firstMissingIndex = items.findIndex((item) => {
+        const variants = variantsByProductId[item.product_public_id] ?? [];
+        return variants.length > 0 && !item.variant_public_id;
+      });
+      setFieldErrors(
+        firstMissingIndex >= 0
+          ? { [`items.${firstMissingIndex}.variant_public_id`]: t("orderValidationVariantRequired") }
+          : {}
+      );
+      setError("");
+      return;
+    }
+
     const validation = parseValidation(orderCreateSchema, { ...form, items });
     if (!validation.success) {
       setFieldErrors(validation.errors);
+      const hasItemErrors = Object.keys(validation.errors).some(
+        (k) => k === "items" || k.startsWith("items."),
+      );
+      if (hasItemErrors) {
+        setError("");
+        return;
+      }
       const firstMessage =
         Object.values(validation.errors)[0] ?? t("orderFormFixHighlightedFields");
       setError(firstMessage);
@@ -267,8 +292,34 @@ export function useNewOrder() {
       };
       await api.post("admin/orders/", payload);
       router.push("/orders");
-    } catch {
-      setError(t("orderNewCreateFailed"));
+    } catch (err: unknown) {
+      const data =
+        err && typeof err === "object" && "response" in err
+          ? (err as { response?: { data?: Record<string, unknown> } }).response?.data
+          : undefined;
+      const backendDetail =
+        typeof data?.detail === "string"
+          ? data.detail
+          : undefined;
+      const backendFieldErrors: Record<string, string> = {};
+      if (data && typeof data === "object") {
+        for (const [key, value] of Object.entries(data)) {
+          if (key === "detail") continue;
+          if (Array.isArray(value) && typeof value[0] === "string") {
+            backendFieldErrors[key] = value[0];
+          } else if (typeof value === "string") {
+            backendFieldErrors[key] = value;
+          }
+        }
+      }
+      if (Object.keys(backendFieldErrors).length > 0) {
+        setFieldErrors(backendFieldErrors);
+      }
+      if (backendDetail) {
+        setError(backendDetail);
+      } else {
+        setError(t("orderNewCreateFailed"));
+      }
     } finally {
       setSaving(false);
     }

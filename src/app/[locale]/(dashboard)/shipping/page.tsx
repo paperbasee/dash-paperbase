@@ -6,10 +6,10 @@ import { useRouter } from "@/i18n/navigation";
 import { Plus, Undo2 } from "lucide-react";
 
 import api from "@/lib/api";
-import axios from "axios";
 import { ClickableText } from "@/components/ui/clickable-text";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
+import { notify, normalizeError } from "@/notifications";
 import type {
   ShippingMethod,
   ShippingRate,
@@ -143,14 +143,9 @@ export default function ShippingPage() {
       setRates(unwrap(r.data));
     } catch (e) {
       console.error(e);
-      if (axios.isAxiosError(e)) {
-        const detail =
-          (e.response?.data as { detail?: string } | undefined)?.detail ||
-          (typeof e.response?.data === "string" ? e.response?.data : null);
-        setError(detail || tPages("shippingLoadFailed"));
-      } else {
-        setError(tPages("shippingLoadFailed"));
-      }
+      const normalized = normalizeError(e, tPages("shippingLoadFailed"));
+      setError(normalized.message);
+      notify.error(normalized.message);
     } finally {
       setLoading(false);
     }
@@ -222,15 +217,9 @@ export default function ShippingPage() {
       fetchAll();
     } catch (e) {
       console.error(e);
-      if (axios.isAxiosError(e)) {
-        const data = e.response?.data as
-          | { detail?: string; name?: string[] }
-          | undefined;
-        const msg = data?.name?.[0] || data?.detail || tPages("shippingSaveZoneFailed");
-        setError(msg);
-      } else {
-        setError(tPages("shippingSaveZoneFailed"));
-      }
+      const normalized = normalizeError(e, tPages("shippingSaveZoneFailed"));
+      setError(normalized.message);
+      notify.error(normalized.message);
     } finally {
       setSaving(false);
     }
@@ -257,15 +246,9 @@ export default function ShippingPage() {
       fetchAll();
     } catch (e) {
       console.error(e);
-      if (axios.isAxiosError(e)) {
-        const data = e.response?.data as
-          | { detail?: string; name?: string[] }
-          | undefined;
-        const msg = data?.name?.[0] || data?.detail || tPages("shippingSaveMethodFailed");
-        setError(msg);
-      } else {
-        setError(tPages("shippingSaveMethodFailed"));
-      }
+      const normalized = normalizeError(e, tPages("shippingSaveMethodFailed"));
+      setError(normalized.message);
+      notify.error(normalized.message);
     } finally {
       setSaving(false);
     }
@@ -295,26 +278,29 @@ export default function ShippingPage() {
       fetchAll();
     } catch (e) {
       console.error(e);
-      if (axios.isAxiosError(e)) {
-        const data = e.response?.data as { detail?: string } | undefined;
-        setError(data?.detail || tPages("shippingSaveRateFailed"));
-      } else {
-        setError(tPages("shippingSaveRateFailed"));
-      }
+      const normalized = normalizeError(e, tPages("shippingSaveRateFailed"));
+      setError(normalized.message);
+      notify.error(normalized.message);
     } finally {
       setSaving(false);
     }
   }
 
   async function del(kind: "zones" | "methods" | "rates", publicId: string) {
-    if (!confirm(tPages("shippingConfirmDelete"))) return;
+    const ok = await notify.confirm({
+      title: tPages("shippingConfirmDelete"),
+      level: "destructive",
+    });
+    if (!ok) return;
     setError("");
     try {
       await api.delete(`admin/shipping-${kind}/${publicId}/`);
+      notify.warning(tPages("shippingDeletedSuccess"));
       fetchAll();
     } catch (e) {
       console.error(e);
       setError(tPages("shippingDeleteFailed"));
+      notify.error(e, { fallbackMessage: tPages("shippingDeleteFailed") });
     }
   }
 
@@ -330,7 +316,7 @@ export default function ShippingPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="rounded-lg bg-muted/80 px-1 py-1">
+          <div className="rounded-lg bg-muted/80 px-1 py-1 hidden md:block">
             <button
               type="button"
               onClick={() => router.back()}

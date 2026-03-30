@@ -50,6 +50,7 @@ import {
   splitShippingAddressForForm,
 } from "@/lib/orders/shipping-address-parts";
 import { formatDashboardDateTime } from "@/lib/datetime-display";
+import { notify, normalizeError } from "@/notifications";
 
 type EditForm = {
   shipping_name: string;
@@ -61,19 +62,6 @@ type EditForm = {
   shipping_zone_public_id: string;
   shipping_method_public_id: string;
 };
-
-function extractApiDetail(err: unknown, fallback: string): string {
-  const raw = (err as { response?: { data?: { detail?: unknown } } })?.response?.data?.detail;
-  if (typeof raw === "string") return raw;
-  if (raw && typeof raw === "object") {
-    try {
-      return JSON.stringify(raw);
-    } catch {
-      return fallback;
-    }
-  }
-  return fallback;
-}
 
 export default function OrderDetailPage() {
   const { id: order_public_id } = useParams<{ locale: string; id: string }>();
@@ -120,7 +108,10 @@ export default function OrderDetailPage() {
     api
       .get<Order>(`admin/orders/${order_public_id}/`)
       .then((res) => setOrder(res.data))
-      .catch(console.error)
+      .catch((err) => {
+        console.error(err);
+        notify.error(err);
+      })
       .finally(() => setLoading(false));
   }, [order_public_id]);
 
@@ -420,19 +411,26 @@ export default function OrderDetailPage() {
       setPricingPreview(null);
       setEditing(false);
     } catch (err: unknown) {
-      setEditError(extractApiDetail(err, tPages("orderDetailSaveFailed")));
+      const normalized = normalizeError(err, tPages("orderDetailSaveFailed"));
+      setEditError(normalized.message);
+      notify.error(normalized.message);
     } finally {
       setSaving(false);
     }
   }
 
   async function handleDelete() {
-    if (!confirm(tPages("orderDetailConfirmDelete"))) return;
+    const ok = await notify.confirm({
+      title: tPages("orderDetailConfirmDelete"),
+      level: "destructive",
+    });
+    if (!ok) return;
     try {
       await api.delete(`admin/orders/${order_public_id}/`);
       router.push("/orders");
     } catch (err) {
       console.error(err);
+      notify.error(err);
     }
   }
 
@@ -447,7 +445,9 @@ export default function OrderDetailPage() {
       );
       setOrder(data.order);
     } catch (err: unknown) {
-      setStatusUpdateError(extractApiDetail(err, tPages("orderDetailStatusUpdateFailed")));
+      const normalized = normalizeError(err, tPages("orderDetailStatusUpdateFailed"));
+      setStatusUpdateError(normalized.message);
+      notify.error(normalized.message);
     } finally {
       setStatusUpdateLoading(false);
     }
@@ -494,7 +494,7 @@ export default function OrderDetailPage() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-col gap-2">
           <div className="flex items-center gap-3">
-            <div className="rounded-lg bg-muted/80 px-1 py-1">
+            <div className="rounded-lg bg-muted/80 px-1 py-1 hidden md:block">
               <Button
                 type="button"
                 variant="ghost"

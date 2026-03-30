@@ -22,6 +22,7 @@ import {
   slugFromName,
   validateRequiredExtraFields,
 } from "@/lib/validation";
+import { notify } from "@/notifications";
 
 const MAX_IMAGES = MAX_PRODUCT_IMAGES;
 
@@ -79,7 +80,10 @@ export default function NewProductPage() {
         const d = res.data;
         setCategoryTree(Array.isArray(d) ? d : []);
       })
-      .catch(console.error);
+      .catch((err) => {
+        console.error(err);
+        notify.error(err);
+      });
   }, []);
 
   const categorySelectOptions = useMemo(
@@ -207,7 +211,7 @@ export default function NewProductPage() {
       {/* Page header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-3">
-          <div className="rounded-lg bg-muted/80 px-1 py-1">
+          <div className="rounded-lg bg-muted/80 px-1 py-1 hidden md:block">
             <Button
               type="button"
               variant="ghost"

@@ -3,7 +3,7 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
-import { Undo2, Plus } from "lucide-react";
+import { Undo2} from "lucide-react";
 import { isAxiosError } from "axios";
 import api from "@/lib/api";
 import { ClickableText } from "@/components/ui/clickable-text";
@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import type { Banner, PaginatedResponse } from "@/types";
 import { formatDashboardDateTime } from "@/lib/datetime-display";
 import { displayInputToApiLocal, isoDatetimeToDisplayInput } from "@/lib/datetime-form";
+import { notify } from "@/notifications";
 
 type BannerForm = {
   title: string;
@@ -52,7 +53,10 @@ export default function BannersPage() {
         const data = res.data;
         setBanners(Array.isArray(data) ? data : data.results);
       })
-      .catch(console.error)
+      .catch((err) => {
+        console.error(err);
+        notify.error(err);
+      })
       .finally(() => setLoading(false));
   }
 
@@ -85,12 +89,12 @@ export default function BannersPage() {
 
     const start_at = displayInputToApiLocal(form.start_at);
     if (form.start_at.trim() && start_at === null) {
-      window.alert(tPages("datetimeInputInvalid"));
+      notify.validation("banners-form", { start_at: tPages("datetimeInputInvalid") });
       return;
     }
     const end_at = displayInputToApiLocal(form.end_at);
     if (form.end_at.trim() && end_at === null) {
-      window.alert(tPages("datetimeInputInvalid"));
+      notify.validation("banners-form", { end_at: tPages("datetimeInputInvalid") });
       return;
     }
 
@@ -116,12 +120,16 @@ export default function BannersPage() {
         });
       }
       setEditing(null);
+      notify.clearValidation("banners-form");
+      notify.success(tPages("bannersSavedSuccess"));
       fetchData();
     } catch (err) {
       if (isAxiosError(err)) {
         console.error("Banner save failed:", err.response?.data || err.message);
+        notify.error(err, { fallbackMessage: tCommon("pleaseWait") });
       } else {
         console.error(err);
+        notify.error(err);
       }
     } finally {
       setSaving(false);
@@ -129,12 +137,18 @@ export default function BannersPage() {
   }
 
   async function handleDelete(publicId: string) {
-    if (!confirm(tPages("bannersConfirmDelete"))) return;
+    const ok = await notify.confirm({
+      title: tPages("bannersConfirmDelete"),
+      level: "destructive",
+    });
+    if (!ok) return;
     try {
       await api.delete(`admin/banners/${publicId}/`);
+      notify.warning(tPages("bannersDeletedSuccess"));
       fetchData();
     } catch (err) {
       console.error(err);
+      notify.error(err);
     }
   }
 
@@ -150,7 +164,7 @@ export default function BannersPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="rounded-lg bg-muted/80 px-1 py-1">
+          <div className="rounded-lg bg-muted/80 px-1 py-1 hidden md:block">
             <button
               type="button"
               onClick={() => router.back()}
@@ -169,7 +183,6 @@ export default function BannersPage() {
           onClick={openNew}
           className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
         >
-          <Plus className="h-4 w-4" />
           {tPages("bannersAdd")}
         </button>
       </div>

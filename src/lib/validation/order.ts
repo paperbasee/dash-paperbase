@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { defaultValidationMessages } from "./messages";
 
 export const orderItemSchema = z.object({
   product_public_id: z.string().trim().min(1),
@@ -20,13 +21,13 @@ export type OrderCreateSchemaMessages = {
 };
 
 const DEFAULT_EN_MESSAGES: OrderCreateSchemaMessages = {
-  shippingNameRequired: "Name is required.",
-  phoneRequired: "Phone is required.",
-  emailInvalid: "Please enter a valid email address.",
-  roadVillageRequired: "Road / village is required.",
-  thanaRequired: "Thana is required.",
-  districtRequired: "District is required.",
-  zoneRequired: "Delivery zone is required.",
+  shippingNameRequired: defaultValidationMessages.requiredField("Name"),
+  phoneRequired: defaultValidationMessages.requiredField("Phone"),
+  emailInvalid: defaultValidationMessages.emailInvalid,
+  roadVillageRequired: defaultValidationMessages.requiredField("Road / village"),
+  thanaRequired: defaultValidationMessages.requiredField("Thana"),
+  districtRequired: defaultValidationMessages.requiredField("District"),
+  zoneRequired: defaultValidationMessages.requiredField("Delivery zone"),
   itemsRequired: "Add at least one product to the order.",
 };
 

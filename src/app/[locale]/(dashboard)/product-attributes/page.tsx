@@ -2,8 +2,8 @@
 
 import { useCallback, useEffect, useState, type FormEvent } from "react";
 import { useTranslations } from "next-intl";
-import { Link } from "@/i18n/navigation";
-import { Undo2, Plus } from "lucide-react";
+import { useRouter } from "@/i18n/navigation";
+import { Plus, Undo2 } from "lucide-react";
 import api from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -14,6 +14,7 @@ import type {
   ProductAttributeValueAdmin,
   PaginatedResponse,
 } from "@/types";
+import { notify, normalizeError } from "@/notifications";
 
 type AttrForm = { name: string; order: string };
 type ValueForm = { value: string; order: string };
@@ -22,6 +23,7 @@ const emptyAttr: AttrForm = { name: "", order: "0" };
 const emptyValue: ValueForm = { value: "", order: "0" };
 
 export default function ProductAttributesPage() {
+  const router = useRouter();
   const tPages = useTranslations("pages");
   const tCommon = useTranslations("common");
   const [attributes, setAttributes] = useState<ProductAttributeAdmin[]>([]);
@@ -94,15 +96,20 @@ export default function ProductAttributesPage() {
       setAttrEditing(null);
       await fetchData();
     } catch (err: unknown) {
-      const d = err as { response?: { data?: unknown } };
-      setError(JSON.stringify(d.response?.data ?? tPages("attributesSaveFailed")));
+      const normalized = normalizeError(err, tPages("attributesSaveFailed"));
+      setError(normalized.message);
+      notify.error(normalized.message);
     } finally {
       setAttrSaving(false);
     }
   }
 
   async function deleteAttr(publicId: string, name: string) {
-    if (!confirm(tPages("attributesConfirmDeleteAttr", { name }))) return;
+    const ok = await notify.confirm({
+      title: tPages("attributesConfirmDeleteAttr", { name }),
+      level: "destructive",
+    });
+    if (!ok) return;
     try {
       await api.delete(`admin/product-attributes/${publicId}/`);
       await fetchData();
@@ -139,15 +146,20 @@ export default function ProductAttributesPage() {
       setValueEditing(null);
       await fetchData();
     } catch (err: unknown) {
-      const d = err as { response?: { data?: unknown } };
-      setError(JSON.stringify(d.response?.data ?? tPages("attributesSaveFailed")));
+      const normalized = normalizeError(err, tPages("attributesSaveFailed"));
+      setError(normalized.message);
+      notify.error(normalized.message);
     } finally {
       setValueSaving(false);
     }
   }
 
   async function deleteValue(publicId: string, label: string) {
-    if (!confirm(tPages("attributesConfirmDeleteValue", { label }))) return;
+    const ok = await notify.confirm({
+      title: tPages("attributesConfirmDeleteValue", { label }),
+      level: "destructive",
+    });
+    if (!ok) return;
     try {
       await api.delete(`admin/product-attribute-values/${publicId}/`);
       await fetchData();
@@ -163,38 +175,49 @@ export default function ProductAttributesPage() {
   return (
     <div className="flex flex-col gap-6">
       <header className="flex flex-wrap items-start justify-between gap-4">
-        <div>
+        <div className="flex items-start gap-3">
+          <div className="rounded-lg bg-muted/80 px-1 py-1 hidden md:block">
+            <button
+              type="button"
+              onClick={() => router.back()}
+              aria-label={tPages("goBack")}
+              className="flex items-center justify-center rounded-md p-1 text-muted-foreground hover:bg-muted"
+            >
+              <Undo2 className="h-4 w-4" />
+            </button>
+          </div>
+          <div>
           <h1 className="text-2xl font-medium tracking-tight text-foreground">
             {tPages("attributesTitle")}
           </h1>
-          <p className="mt-1 text-sm text-muted-foreground">
+          <p className="mt-1 text-sm text-muted-foreground md:hidden">
             {tPages("attributesSubtitleBefore")}{" "}
             <ClickableText href="/variants" className="underline-offset-2">
               {tPages("attributesSubtitleLink")}
             </ClickableText>
             {tPages("attributesSubtitleAfter")}
           </p>
+          </div>
         </div>
-        <Button variant="outline" size="sm" asChild>
-          <Link href="/variants">
-            <Undo2 className="mr-2 size-4" />
-            {tPages("attributesVariantsLink")}
-          </Link>
+        <Button type="button" size="sm" onClick={openAttrNew} disabled={attrEditing !== null}>
+          <Plus className="mr-2 size-4" />
+          {tPages("attributesNewAttribute")}
         </Button>
       </header>
+
+      <p className="hidden text-sm text-muted-foreground md:block">
+        {tPages("attributesSubtitleBefore")}{" "}
+        <ClickableText href="/variants" className="underline-offset-2">
+          {tPages("attributesSubtitleLink")}
+        </ClickableText>
+        {tPages("attributesSubtitleAfter")}
+      </p>
 
       {error ? (
         <p className="rounded-lg border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive">
           {error}
         </p>
       ) : null}
-
-      <div className="flex flex-wrap gap-2">
-        <Button type="button" size="sm" onClick={openAttrNew} disabled={attrEditing !== null}>
-          <Plus className="mr-2 size-4" />
-          {tPages("attributesNewAttribute")}
-        </Button>
-      </div>
 
       {attrEditing !== null ? (
         <Card className="border-primary/30 shadow-sm">

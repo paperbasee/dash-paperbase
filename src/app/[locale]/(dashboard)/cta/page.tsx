@@ -12,6 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import type { Notification, PaginatedResponse } from "@/types";
 import { formatDashboardDateOptional } from "@/lib/datetime-display";
 import { displayInputToApiLocal, isoDatetimeToDisplayInput } from "@/lib/datetime-form";
+import { notify } from "@/notifications";
 
 type CtaForm = {
   cta_text: string;
@@ -54,7 +55,10 @@ export default function CtaPage() {
         const data = res.data;
         setCtas(Array.isArray(data) ? data : data.results);
       })
-      .catch(console.error)
+      .catch((err) => {
+        console.error(err);
+        notify.error(err);
+      })
       .finally(() => setLoading(false));
   }
 
@@ -86,12 +90,12 @@ export default function CtaPage() {
 
     const start_date = displayInputToApiLocal(form.start_date);
     if (form.start_date.trim() && start_date === null) {
-      window.alert(tPages("datetimeInputInvalid"));
+      notify.validation("cta-form", { start_date: tPages("datetimeInputInvalid") });
       return;
     }
     const end_date = displayInputToApiLocal(form.end_date);
     if (form.end_date.trim() && end_date === null) {
-      window.alert(tPages("datetimeInputInvalid"));
+      notify.validation("cta-form", { end_date: tPages("datetimeInputInvalid") });
       return;
     }
 
@@ -115,9 +119,12 @@ export default function CtaPage() {
         await api.patch(`admin/notifications/${editing}/`, payload);
       }
       setEditing(null);
+      notify.clearValidation("cta-form");
+      notify.success(tPages("ctaSavedSuccess"));
       fetchData();
     } catch (err) {
       console.error(err);
+      notify.error(err);
     } finally {
       setSaving(false);
     }
@@ -138,12 +145,18 @@ export default function CtaPage() {
   }
 
   async function handleDelete(publicId: string) {
-    if (!confirm(tPages("ctaConfirmDelete"))) return;
+    const ok = await notify.confirm({
+      title: tPages("ctaConfirmDelete"),
+      level: "destructive",
+    });
+    if (!ok) return;
     try {
       await api.delete(`admin/notifications/${publicId}/`);
       setCtas((prev) => prev.filter((n) => n.public_id !== publicId));
+      notify.warning(tPages("ctaDeletedSuccess"));
     } catch (err) {
       console.error(err);
+      notify.error(err);
     }
   }
 
@@ -159,7 +172,7 @@ export default function CtaPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="rounded-lg bg-muted/80 px-1 py-1">
+          <div className="rounded-lg bg-muted/80 px-1 py-1 hidden md:block">
             <button
               type="button"
               onClick={() => router.back()}

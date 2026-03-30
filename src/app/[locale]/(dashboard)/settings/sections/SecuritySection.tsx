@@ -2,12 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
-import { toast } from "sonner";
 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import api from "@/lib/api";
 import { useRateLimitCooldown, extractRateLimitInfo } from "@/hooks/useRateLimitCooldown";
+import { notify } from "@/notifications";
 import { SettingsSectionBody, settingsSectionSurfaceClassName } from "../SettingsSectionBody";
 
 export default function SecuritySection({ hidden }: { hidden: boolean }) {
@@ -110,7 +110,7 @@ export default function SecuritySection({ hidden }: { hidden: boolean }) {
       setDisablePassword("");
       setDisableCode("");
       setRecoveryMessage("");
-      toast.success(data.detail ?? t("security.toastDisabledDetail"));
+      notify.success(data.detail ?? t("security.toastDisabledDetail"));
     } catch {
       setRecoveryMessage(t("security.recoveryInvalid"));
     } finally {
@@ -130,7 +130,7 @@ export default function SecuritySection({ hidden }: { hidden: boolean }) {
       setDisablePassword("");
       setDisableCode("");
       setMessage("");
-      toast.success(t("security.toastDisabledEmail"));
+      notify.success(t("security.toastDisabledEmail"));
     } catch {
       setMessage(t("security.disableFailed"));
     } finally {

@@ -3,8 +3,6 @@
 import { useMemo, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { format } from "date-fns";
-import { Link } from "@/i18n/navigation";
-import { History } from "lucide-react";
 import StatsCard from "@/components/StatsCard";
 import DashboardBarChart from "@/components/DashboardBarChart";
 import DateRangeFilter, {
@@ -12,8 +10,6 @@ import DateRangeFilter, {
 } from "@/components/DateRangeFilter";
 import { useDashboardAnalytics } from "@/hooks/useDashboardAnalytics";
 import { useActivities } from "@/hooks/useActivities";
-import NotificationDropdown from "@/components/NotificationDropdown";
-import { Button } from "@/components/ui/button";
 import { toLocaleDigits } from "@/lib/locale-digits";
 
 function formatDateTime(value: string, locale: string): string {
@@ -72,24 +68,15 @@ export default function DashboardPage() {
           <h1 className="text-2xl font-medium leading-relaxed tracking-tight text-foreground">
             {t("title")}
           </h1>
-          <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
+          <p className="mt-1 text-sm leading-relaxed text-muted-foreground md:hidden">
             {t("subtitle")}
           </p>
         </div>
-        <div className="hidden items-center gap-2 sm:flex">
-          <NotificationDropdown />
-          <Link href="/activities">
-            <Button
-              variant="ghost"
-              size="icon"
-              aria-label={t("activitiesAria")}
-              className="shrink-0 text-muted-foreground hover:text-foreground"
-            >
-              <History className="size-5" />
-            </Button>
-          </Link>
-        </div>
       </header>
+
+      <p className="order-0 hidden text-sm leading-relaxed text-muted-foreground md:block">
+        {t("subtitle")}
+      </p>
 
       <div className="order-3 hidden space-y-3 md:order-1 md:block">
         <DateRangeFilter value={range} onChange={setRange} />

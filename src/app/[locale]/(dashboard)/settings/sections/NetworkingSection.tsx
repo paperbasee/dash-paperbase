@@ -2,12 +2,13 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { Copy, KeyRound, Loader2, RefreshCcw, Trash2 } from "lucide-react";
+import { Check, Copy, KeyRound, Loader2, RefreshCcw, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import api from "@/lib/api";
 import { formatDashboardDateTimeWithSeconds } from "@/lib/datetime-display";
 import { SettingsSectionBody, settingsSectionSurfaceClassName } from "../SettingsSectionBody";
+import { notify } from "@/notifications";
 
 type APIKeyRow = {
   public_id: string;
@@ -44,7 +45,8 @@ export default function NetworkingSection({ hidden }: { hidden: boolean }) {
   const [newKeyName, setNewKeyName] = useState("");
   const [revealedKey, setRevealedKey] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-  const API_BASE_URL = "https://api.paperbase.me/api/v1/";
+  const [apiUrlCopied, setApiUrlCopied] = useState(false);
+  const API_BASE_URL = "https://api.paperbase.me";
 
   const load = useCallback(async () => {
     try {
@@ -63,6 +65,12 @@ export default function NetworkingSection({ hidden }: { hidden: boolean }) {
   useEffect(() => {
     void load();
   }, [load]);
+
+  useEffect(() => {
+    if (!apiUrlCopied) return;
+    const timer = window.setTimeout(() => setApiUrlCopied(false), 1200);
+    return () => window.clearTimeout(timer);
+  }, [apiUrlCopied]);
 
   async function createKey() {
     setBusy(true);
@@ -83,7 +91,8 @@ export default function NetworkingSection({ hidden }: { hidden: boolean }) {
   }
 
   async function regenerateKey(publicId: string, currentName: string) {
-    if (!globalThis.confirm(t("networking.confirmRegenerate"))) return;
+    const ok = await notify.confirm({ title: t("networking.confirmRegenerate"), level: "warning" });
+    if (!ok) return;
     setBusy(true);
     setMessage(null);
     setRevealedKey(null);
@@ -103,7 +112,8 @@ export default function NetworkingSection({ hidden }: { hidden: boolean }) {
   }
 
   async function revokeKey(publicId: string) {
-    if (!globalThis.confirm(t("networking.confirmRevoke"))) return;
+    const ok = await notify.confirm({ title: t("networking.confirmRevoke"), level: "destructive" });
+    if (!ok) return;
     setBusy(true);
     setMessage(null);
     try {
@@ -118,8 +128,18 @@ export default function NetworkingSection({ hidden }: { hidden: boolean }) {
     }
   }
 
-  function copy(text: string) {
-    void navigator.clipboard.writeText(text);
+  async function copy(text: string) {
+    try {
+      await navigator.clipboard.writeText(text);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  async function copyApiBaseUrl() {
+    const didCopy = await copy(API_BASE_URL);
+    if (didCopy) setApiUrlCopied(true);
   }
 
   return (
@@ -140,8 +160,8 @@ export default function NetworkingSection({ hidden }: { hidden: boolean }) {
           <p className="text-xs uppercase tracking-wide text-muted-foreground">{t("networking.apiBaseUrl")}</p>
           <div className="mt-2 flex items-start justify-between gap-2">
             <code className="min-w-0 break-all rounded bg-background px-2 py-1 text-sm">{API_BASE_URL}</code>
-            <Button type="button" variant="ghost" size="icon" className="size-8" onClick={() => copy(API_BASE_URL)}>
-              <Copy className="size-4" />
+            <Button type="button" variant="ghost" size="icon" className="size-8" onClick={() => void copyApiBaseUrl()}>
+              {apiUrlCopied ? <Check className="size-4 text-emerald-600 animate-pulse" /> : <Copy className="size-4" />}
             </Button>
           </div>
         </div>
@@ -162,7 +182,7 @@ export default function NetworkingSection({ hidden }: { hidden: boolean }) {
             <p className="font-medium text-foreground">{t("networking.newKeyTitle")}</p>
             <div className="mt-2 flex items-center justify-between gap-2">
               <code className="rounded bg-background px-2 py-1 break-all">{revealedKey}</code>
-              <Button type="button" variant="ghost" size="icon" className="size-8" onClick={() => copy(revealedKey)}>
+              <Button type="button" variant="ghost" size="icon" className="size-8" onClick={() => void copy(revealedKey)}>
                 <Copy className="size-4" />
               </Button>
             </div>

@@ -9,6 +9,7 @@ import { formatDashboardDate } from "@/lib/datetime-display";
 import type { Courier, PaginatedResponse } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { notify } from "@/notifications";
 
 type ConnectForm = {
   api_key: string;
@@ -40,7 +41,10 @@ export default function CourierIntegration() {
         const list = Array.isArray(res.data) ? res.data : res.data.results;
         setCouriers(list ?? []);
       })
-      .catch(console.error)
+      .catch((err) => {
+        console.error(err);
+        notify.error(err);
+      })
       .finally(() => setLoading(false));
   }, []);
 
@@ -71,13 +75,15 @@ export default function CourierIntegration() {
   }
 
   async function handleDelete(publicId: string) {
-    if (!confirm(t("courier.confirmDisconnect"))) return;
+    const ok = await notify.confirm({ title: t("courier.confirmDisconnect"), level: "destructive" });
+    if (!ok) return;
     setDeletingId(publicId);
     try {
       await api.delete(`admin/couriers/${publicId}/`);
       fetchCouriers();
     } catch (err) {
       console.error(err);
+      notify.error(err);
     } finally {
       setDeletingId(null);
     }
@@ -92,6 +98,7 @@ export default function CourierIntegration() {
       fetchCouriers();
     } catch (err) {
       console.error(err);
+      notify.error(err);
     } finally {
       setTogglingId(null);
     }

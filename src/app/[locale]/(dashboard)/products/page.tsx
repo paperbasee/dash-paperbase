@@ -22,6 +22,7 @@ import { FilterBar } from "@/components/filters/FilterBar";
 import { FilterDropdown } from "@/components/filters/FilterDropdown";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { useFilters } from "@/hooks/useFilters";
+import { notify } from "@/notifications";
 
 type CategoryOption = { value: string; label: string };
 type MeResponse = { is_superuser?: boolean };
@@ -85,7 +86,10 @@ export default function ProductsPage() {
         const d = res.data;
         setCategoryTree(Array.isArray(d) ? d : []);
       })
-      .catch(console.error);
+      .catch((err) => {
+        console.error(err);
+        notify.error(err);
+      });
     return () => {
       active = false;
     };
@@ -136,7 +140,10 @@ export default function ProductsPage() {
         setCount(res.data.count);
         setHasNext(!!res.data.next);
       })
-      .catch(console.error)
+      .catch((err) => {
+        console.error(err);
+        notify.error(err);
+      })
       .finally(() => setLoading(false));
   }, [
     filters.category,
@@ -172,14 +179,13 @@ export default function ProductsPage() {
 
   async function handleDeleteSelected() {
     if (selectedIds.size === 0) return;
-    if (
-      !confirm(
-        tPages("confirmDeleteProducts", {
-          count: toLocaleDigits(String(selectedIds.size), locale),
-        })
-      )
-    )
-      return;
+    const ok = await notify.confirm({
+      title: tPages("confirmDeleteProducts", {
+        count: toLocaleDigits(String(selectedIds.size), locale),
+      }),
+      level: "destructive",
+    });
+    if (!ok) return;
     setDeleting(true);
     try {
       await Promise.all(
@@ -189,6 +195,7 @@ export default function ProductsPage() {
       fetchProducts();
     } catch (err) {
       console.error(err);
+      notify.error(err);
     } finally {
       setDeleting(false);
     }
@@ -223,7 +230,7 @@ export default function ProductsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <div className="flex items-center gap-3">
-          <div className="rounded-lg bg-muted/80 px-1 py-1">
+          <div className="rounded-lg bg-muted/80 px-1 py-1 hidden md:block">
             <button
               type="button"
               onClick={() => router.back()}

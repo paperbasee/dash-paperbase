@@ -2,9 +2,9 @@
 
 import { useCallback, useEffect, useMemo, useState, type FormEvent } from "react";
 import { useTranslations } from "next-intl";
-import { Link, usePathname, useRouter } from "@/i18n/navigation";
+import { usePathname, useRouter } from "@/i18n/navigation";
 import { useSearchParams } from "next/navigation";
-import { Undo2, Plus } from "lucide-react";
+import { Plus, Undo2 } from "lucide-react";
 import api from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -28,6 +28,7 @@ import type {
 } from "@/types";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { useFilters } from "@/hooks/useFilters";
+import { notify, normalizeError } from "@/notifications";
 
 async function fetchAllProducts(): Promise<Product[]> {
   const out: Product[] = [];
@@ -279,35 +280,20 @@ export default function VariantsPage() {
       await loadVariants();
       await loadMeta();
     } catch (err: unknown) {
-      const d = err as { response?: { data?: Record<string, unknown> } };
-      const data = d.response?.data;
-      const msgFromData = (x: unknown): string => {
-        if (typeof x === "string") return x;
-        if (Array.isArray(x)) return x.map((v) => (typeof v === "string" ? v : JSON.stringify(v))).join(" ");
-        if (x && typeof x === "object") {
-          const obj = x as Record<string, unknown>;
-          if (typeof obj.detail === "string") return obj.detail;
-          const parts: string[] = [];
-          for (const [k, v] of Object.entries(obj)) {
-            if (v == null) continue;
-            const vv = Array.isArray(v) ? v : [v];
-            const joined = vv
-              .map((t) => (typeof t === "string" ? t : JSON.stringify(t)))
-              .join(" ");
-            parts.push(`${k}: ${joined}`);
-          }
-          if (parts.length) return parts.join(" | ");
-        }
-        return tPages("variantsSaveFailed");
-      };
-      setError(msgFromData(data));
+      const normalized = normalizeError(err, tPages("variantsSaveFailed"));
+      setError(normalized.message);
+      notify.error(normalized.message);
     } finally {
       setSaving(false);
     }
   }
 
   async function deleteVariant(v: ProductVariant) {
-    if (!confirm(tPages("variantsConfirmDeleteSku", { sku: v.sku }))) return;
+    const ok = await notify.confirm({
+      title: tPages("variantsConfirmDeleteSku", { sku: v.sku }),
+      level: "destructive",
+    });
+    if (!ok) return;
     try {
       await api.delete(`admin/product-variants/${v.public_id}/`);
       await loadVariants();
@@ -352,25 +338,39 @@ export default function VariantsPage() {
   return (
     <div className="flex flex-col gap-6">
       <header className="flex flex-wrap items-start justify-between gap-4">
-        <div>
+        <div className="flex items-start gap-3">
+          <div className="rounded-lg bg-muted/80 px-1 py-1 hidden md:block">
+            <button
+              type="button"
+              onClick={() => router.back()}
+              aria-label={tPages("goBack")}
+              className="flex items-center justify-center rounded-md p-1 text-muted-foreground hover:bg-muted"
+            >
+              <Undo2 className="h-4 w-4" />
+            </button>
+          </div>
+          <div>
           <h1 className="text-2xl font-medium tracking-tight text-foreground">
             {tPages("variantsTitle")}
           </h1>
-          <p className="mt-1 text-sm text-muted-foreground">
+          <p className="mt-1 text-sm text-muted-foreground md:hidden">
             {tPages("variantsSubtitleBefore")}{" "}
             <ClickableText href="/product-attributes" className="underline-offset-2">
               {tPages("variantsSubtitleLink")}
             </ClickableText>
             {tPages("variantsSubtitleAfter")}
           </p>
+          </div>
         </div>
-        <Button variant="outline" size="sm" asChild>
-          <Link href="/products">
-            <Undo2 className="mr-2 size-4" />
-            {tPages("variantsBackProducts")}
-          </Link>
-        </Button>
       </header>
+
+      <p className="hidden text-sm text-muted-foreground md:block">
+        {tPages("variantsSubtitleBefore")}{" "}
+        <ClickableText href="/product-attributes" className="underline-offset-2">
+          {tPages("variantsSubtitleLink")}
+        </ClickableText>
+        {tPages("variantsSubtitleAfter")}
+      </p>
 
       {error ? (
         <p className="rounded-lg border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive">

@@ -14,6 +14,7 @@ import {
   findCategoryNode,
   flattenCategoryOptions,
 } from "@/lib/category-tree";
+import { notify } from "@/notifications";
 
 type FormMode = "closed" | "new_root" | "new_child" | "edit";
 
@@ -176,7 +177,10 @@ export default function CategoriesPage() {
         const d = res.data;
         setTree(Array.isArray(d) ? d : []);
       })
-      .catch(console.error)
+      .catch((err) => {
+        console.error(err);
+        notify.error(err);
+      })
       .finally(() => setLoading(false));
   }, []);
 
@@ -265,13 +269,18 @@ export default function CategoriesPage() {
       fetchTree();
     } catch (err) {
       console.error(err);
+      notify.error(err);
     } finally {
       setSaving(false);
     }
   }
 
   async function deleteCategory(publicId: string) {
-    if (!confirm(tPages("categoriesConfirmDelete"))) {
+    const ok = await notify.confirm({
+      title: tPages("categoriesConfirmDelete"),
+      level: "destructive",
+    });
+    if (!ok) {
       return;
     }
     try {
@@ -279,6 +288,7 @@ export default function CategoriesPage() {
       fetchTree();
     } catch (err) {
       console.error(err);
+      notify.error(err);
     }
   }
 
@@ -301,40 +311,42 @@ export default function CategoriesPage() {
 
   return (
     <div className="space-y-8">
-      <div className="flex items-center gap-3">
-        <div className="rounded-lg bg-muted/80 px-1 py-1">
-          <button
-            type="button"
-            onClick={() => router.back()}
-            aria-label={tPages("categoriesGoBackAria")}
-            className="flex items-center justify-center rounded-md p-1 text-muted-foreground hover:bg-muted"
-          >
-            <Undo2 className="h-4 w-4" />
-          </button>
+      <div className="flex items-center justify-between gap-4 flex-wrap">
+        <div className="flex items-center gap-3">
+          <div className="rounded-lg bg-muted/80 px-1 py-1 hidden md:block">
+            <button
+              type="button"
+              onClick={() => router.back()}
+              aria-label={tPages("categoriesGoBackAria")}
+              className="flex items-center justify-center rounded-md p-1 text-muted-foreground hover:bg-muted"
+            >
+              <Undo2 className="h-4 w-4" />
+            </button>
+          </div>
+          <h1 className="text-2xl font-medium text-foreground">{tPages("categoriesTitle")}</h1>
         </div>
-        <h1 className="text-2xl font-medium text-foreground">{tPages("categoriesTitle")}</h1>
-      </div>
 
-      <div className="flex flex-wrap items-center gap-3">
-        <button
-          type="button"
-          onClick={openNewRoot}
-          className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
-        >
-          {tPages("categoriesAddRoot")}
-        </button>
-        {mode !== "closed" ? (
+        <div className="flex flex-wrap items-center justify-end gap-3">
           <button
             type="button"
-            onClick={() => {
-              setMode("closed");
-              setEditingSlugPreview(null);
-            }}
-            className="rounded-lg border border-border px-4 py-2 text-sm text-foreground hover:bg-muted"
+            onClick={openNewRoot}
+            className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
           >
-            {tPages("categoriesCancelForm")}
+            {tPages("categoriesAddRoot")}
           </button>
-        ) : null}
+          {mode !== "closed" ? (
+            <button
+              type="button"
+              onClick={() => {
+                setMode("closed");
+                setEditingSlugPreview(null);
+              }}
+              className="rounded-lg border border-border px-4 py-2 text-sm text-foreground hover:bg-muted"
+            >
+              {tPages("categoriesCancelForm")}
+            </button>
+          ) : null}
+        </div>
       </div>
 
       {mode !== "closed" ? (

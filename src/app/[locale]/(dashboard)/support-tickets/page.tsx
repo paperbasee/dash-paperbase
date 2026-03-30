@@ -20,6 +20,7 @@ import {
 import api from "@/lib/api";
 import type { SupportTicket, PaginatedResponse } from "@/types";
 import { formatDashboardDateTime } from "@/lib/datetime-display";
+import { notify } from "@/notifications";
 
 type EditableField = "status" | "priority" | "category";
 
@@ -127,18 +128,26 @@ export default function SupportTicketsPage() {
         setCount(res.data.count);
         setHasNext(!!res.data.next);
       })
-      .catch(console.error)
+      .catch((err) => {
+        console.error(err);
+        notify.error(err);
+      })
       .finally(() => setLoading(false));
   }, [filters.priority, filters.search, filters.status, page]);
 
   async function handleDelete(publicId: string) {
-    if (!confirm(tPages("supportTicketsConfirmDeleteOne"))) return;
+    const ok = await notify.confirm({
+      title: tPages("supportTicketsConfirmDeleteOne"),
+      level: "destructive",
+    });
+    if (!ok) return;
     try {
       await api.delete(`admin/support-tickets/${publicId}/`);
       setTickets((prev) => prev.filter((t) => t.public_id !== publicId));
       setCount((c) => c - 1);
     } catch (err) {
       console.error(err);
+      notify.error(err);
     }
   }
 
@@ -191,7 +200,7 @@ export default function SupportTicketsPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-3">
-        <div className="rounded-lg bg-muted/80 px-1 py-1">
+        <div className="rounded-lg bg-muted/80 px-1 py-1 hidden md:block">
           <button
             type="button"
             onClick={() => router.back()}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useLayoutEffect, useRef, useState, type CSSProperties } from "react";
+import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { Undo2, ChevronDown } from "lucide-react";
@@ -31,28 +31,6 @@ export default function SettingsPage() {
   const tSettings = useTranslations("settings");
   const [activeSection, setActiveSection] = useState<SettingsSection>("store");
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
-  const [tabStripWidth, setTabStripWidth] = useState<number | null>(null);
-  const [isLg, setIsLg] = useState(false);
-  const desktopTabNavRef = useRef<HTMLDivElement>(null);
-
-  useLayoutEffect(() => {
-    const mq = window.matchMedia("(min-width: 1024px)");
-    const sync = () => setIsLg(mq.matches);
-    sync();
-    mq.addEventListener("change", sync);
-    return () => mq.removeEventListener("change", sync);
-  }, []);
-
-  useLayoutEffect(() => {
-    if (!isLg) return;
-    const el = desktopTabNavRef.current;
-    if (!el) return;
-    const measure = () => setTabStripWidth(Math.ceil(el.getBoundingClientRect().width));
-    measure();
-    const ro = new ResizeObserver(measure);
-    ro.observe(el);
-    return () => ro.disconnect();
-  }, [isLg, activeSection]);
 
   const controller = useSettingsPageController();
   const {
@@ -118,35 +96,36 @@ export default function SettingsPage() {
     ? tSettings(activeSectionMeta.labelKey)
     : tSettings("title");
   const ActiveIcon = activeSectionMeta?.icon;
-  const settingsShellStyle: CSSProperties | undefined =
-    isLg && tabStripWidth != null ? { width: `${tabStripWidth}px` } : undefined;
 
   return (
     <div className="w-full">
-      <div className="w-full px-4 sm:px-6 lg:px-8">
-      <div className="flex flex-col gap-6 lg:mx-auto" style={settingsShellStyle}>
+      <div className="flex w-full flex-col gap-6">
         <header className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-3">
-            <div className="rounded-lg bg-muted/80 px-1 py-1">
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                aria-label={tSettings("goBackAria")}
-                onClick={() => router.back()}
-                className="shrink-0"
-              >
-                <Undo2 className="size-4" />
-              </Button>
+            <div className="rounded-lg bg-muted/80 px-1 py-1 hidden md:block">
+            <button
+              type="button"
+              onClick={() => router.back()}
+              aria-label={tSettings("goBackAria")}
+              className="flex items-center justify-center rounded-md p-1 text-muted-foreground hover:bg-muted"
+            >
+              <Undo2 className="h-4 w-4" />
+            </button>
             </div>
             <div>
               <h1 className="text-2xl font-semibold tracking-tight text-foreground">
                 {tSettings("title")}
               </h1>
-              <p className="mt-1 text-sm text-muted-foreground">{tSettings("subtitle")}</p>
+              <p className="mt-1 text-sm text-muted-foreground md:hidden">
+                {tSettings("subtitle")}
+              </p>
             </div>
           </div>
         </header>
+
+        <p className="hidden text-sm text-muted-foreground md:block">
+          {tSettings("subtitle")}
+        </p>
 
         <div className="flex min-w-0 flex-col gap-6">
         {/* Mobile: in-place expandable section picker */}
@@ -180,7 +159,6 @@ export default function SettingsPage() {
         {/* Desktop: horizontal nav at top */}
         <div className="hidden lg:block" aria-label={tSettings("navAria")}>
           <SettingsDesktopSectionNav
-            ref={desktopTabNavRef}
             activeSection={activeSection}
             onSelect={setActiveSection}
           />
@@ -273,7 +251,6 @@ export default function SettingsPage() {
           />
         </main>
         </div>
-      </div>
       </div>
 
       <DeleteStoreFlow

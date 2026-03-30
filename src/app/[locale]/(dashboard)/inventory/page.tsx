@@ -12,6 +12,7 @@ import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { useFilters } from "@/hooks/useFilters";
 import api from "@/lib/api";
 import type { Inventory, PaginatedResponse } from "@/types";
+import { notify } from "@/notifications";
 
 export default function InventoryPage() {
   const router = useRouter();
@@ -53,7 +54,10 @@ export default function InventoryPage() {
         setCount(res.data.count);
         setHasNext(!!res.data.next);
       })
-      .catch(console.error)
+      .catch((err) => {
+        console.error(err);
+        notify.error(err);
+      })
       .finally(() => setLoading(false));
   }, [filters.search, filters.stock, filters.tracked, filters.type, page]);
 
@@ -73,6 +77,7 @@ export default function InventoryPage() {
       fetchData();
     } catch (err) {
       console.error(err);
+      notify.error(err);
     } finally {
       setAdjusting(null);
     }
@@ -84,7 +89,7 @@ export default function InventoryPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="rounded-lg bg-muted/80 px-1 py-1">
+          <div className="rounded-lg bg-muted/80 px-1 py-1 hidden md:block">
             <button
               type="button"
               onClick={() => router.back()}
@@ -96,7 +101,7 @@ export default function InventoryPage() {
           </div>
           <div>
             <h1 className="text-2xl font-medium text-foreground">{tPages("inventoryTitle")}</h1>
-            <p className="mt-1 text-sm text-muted-foreground">
+            <p className="mt-1 text-sm text-muted-foreground md:hidden">
               {tPages("inventorySubtitle")}{" "}
               {lowStockCount > 0 && (
                 <span className="flex items-center gap-1 text-amber-600">
@@ -108,6 +113,16 @@ export default function InventoryPage() {
           </div>
         </div>
       </div>
+
+      <p className="hidden text-sm text-muted-foreground md:block">
+        {tPages("inventorySubtitle")}{" "}
+        {lowStockCount > 0 && (
+          <span className="inline-flex items-center gap-1 text-amber-600">
+            <AlertTriangle className="inline h-4 w-4" />
+            {tPages("inventoryLowStock", { count: lowStockCount })}
+          </span>
+        )}
+      </p>
 
       <FilterBar>
         <Input

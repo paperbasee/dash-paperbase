@@ -24,7 +24,7 @@ export default function PasswordResetRequestPage() {
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setError("");
-    const parsed = emailSchema.safeParse(email);
+    const parsed = emailSchema().safeParse(email);
     if (!parsed.success) {
       setError(parsed.error.issues[0]?.message ?? t("invalidEmail"));
       return;

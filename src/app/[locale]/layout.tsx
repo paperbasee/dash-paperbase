@@ -4,10 +4,11 @@ import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { getMessages, setRequestLocale } from "next-intl/server";
 import { AuthProvider } from "@/context/AuthContext";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { Toaster } from "sonner";
 import { routing } from "@/i18n/routing";
 import { LocaleSync } from "@/components/LocaleSync";
 import { ThemeSync } from "@/components/ThemeSync";
+import { NotificationProvider } from "@/notifications";
+import { NotificationViewport } from "@/components/notifications/NotificationViewport";
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
@@ -39,8 +40,10 @@ export default async function LocaleLayout({
       <ThemeSync />
       <TooltipProvider>
         <AuthProvider>
-          {children}
-          <Toaster richColors position="top-center" />
+          <NotificationProvider>
+            {children}
+            <NotificationViewport />
+          </NotificationProvider>
         </AuthProvider>
       </TooltipProvider>
     </NextIntlClientProvider>

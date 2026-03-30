@@ -13,6 +13,7 @@ import { useFilters } from "@/hooks/useFilters";
 import api from "@/lib/api";
 import type { Customer, PaginatedResponse } from "@/types";
 import { formatDashboardDate } from "@/lib/datetime-display";
+import { notify } from "@/notifications";
 
 export default function CustomersPage() {
   const router = useRouter();
@@ -51,7 +52,10 @@ export default function CustomersPage() {
         setCount(res.data.count);
         setHasNext(!!res.data.next);
       })
-      .catch(console.error)
+      .catch((err) => {
+        console.error(err);
+        notify.error(err);
+      })
       .finally(() => setLoading(false));
   }
 
@@ -61,9 +65,9 @@ export default function CustomersPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-4 flex-wrap">
         <div className="flex items-center gap-3">
-          <div className="rounded-lg bg-muted/80 px-1 py-1">
+          <div className="rounded-lg bg-muted/80 px-1 py-1 hidden md:block">
             <button
               type="button"
               onClick={() => router.back()}
@@ -77,18 +81,22 @@ export default function CustomersPage() {
             <h1 className="text-2xl font-medium leading-relaxed text-foreground">
               {tNav("customers")} ({toLocaleDigits(String(count), locale)})
             </h1>
-            <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
+            <p className="mt-1 text-sm leading-relaxed text-muted-foreground md:hidden">
               {tPages("customersSubtitle")}
             </p>
           </div>
         </div>
         <Link
           href="/customers/new"
-          className="rounded-lg border border-border bg-background px-4 py-2 text-sm font-medium hover:bg-muted"
+          className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90"
         >
           {tPages("addCustomer")}
         </Link>
       </div>
+
+      <p className="hidden text-sm leading-relaxed text-muted-foreground md:block">
+        {tPages("customersSubtitle")}
+      </p>
 
       <FilterBar>
         <FilterDropdown

@@ -21,19 +21,7 @@ import {
   formatOrderStatusLabel,
 } from "@/lib/orders/order-statuses";
 import type { Order, PaginatedResponse } from "@/types";
-
-function extractApiDetail(err: unknown, fallback: string): string {
-  const raw = (err as { response?: { data?: { detail?: unknown } } })?.response?.data?.detail;
-  if (typeof raw === "string") return raw;
-  if (raw && typeof raw === "object") {
-    try {
-      return JSON.stringify(raw);
-    } catch {
-      return fallback;
-    }
-  }
-  return fallback;
-}
+import { notify, normalizeError } from "@/notifications";
 
 /** Shown after dispatch: Steadfast consignment id only (not provider name). */
 function courierCell(order: Order): string {
@@ -86,7 +74,10 @@ export default function OrdersPage() {
         setCount(res.data.count);
         setHasNext(!!res.data.next);
       })
-      .catch(console.error)
+      .catch((err) => {
+        console.error(err);
+        notify.error(err);
+      })
       .finally(() => setLoading(false));
   }, [filters.date_range, filters.search, filters.status, page]);
 
@@ -113,14 +104,13 @@ export default function OrdersPage() {
 
   async function handleBulkConfirmSendCourier() {
     if (selectedIds.size === 0) return;
-    if (
-      !confirm(
-        tPages("ordersBulkConfirmCourier", {
-          count: toLocaleDigits(String(selectedIds.size), locale),
-        })
-      )
-    )
-      return;
+    const ok = await notify.confirm({
+      title: tPages("ordersBulkConfirmCourier", {
+        count: toLocaleDigits(String(selectedIds.size), locale),
+      }),
+      level: "warning",
+    });
+    if (!ok) return;
     setBulkDispatching(true);
     try {
       type BulkResp = {
@@ -139,7 +129,7 @@ export default function OrdersPage() {
             `${r.public_id}: ${r.error || tPages("ordersBulkDispatchRowFailed")}`
         );
       if (summary.failed > 0) {
-        alert(
+        notify.warning(
           tPages("ordersBulkDispatchSummary", {
             ok: toLocaleDigits(String(summary.ok), locale),
             failed: toLocaleDigits(String(summary.failed), locale),
@@ -147,11 +137,12 @@ export default function OrdersPage() {
           })
         );
       }
+      if (summary.ok > 0) notify.success(tPages("ordersConfirmSendCourier"));
       setSelectedIds(new Set());
       fetchOrders();
     } catch (err) {
       console.error(err);
-      alert(tPages("ordersBulkDispatchFailed"));
+      notify.error(err, { fallbackMessage: tPages("ordersBulkDispatchFailed") });
     } finally {
       setBulkDispatching(false);
     }
@@ -170,7 +161,7 @@ export default function OrdersPage() {
       );
     } catch (e) {
       console.error(e);
-      alert(tPages("orderDetailStatusUpdateFailed"));
+      notify.error(e, { fallbackMessage: tPages("orderDetailStatusUpdateFailed") });
     } finally {
       setStatusUpdatingId(null);
     }
@@ -187,7 +178,8 @@ export default function OrdersPage() {
         prev.map((o) => (o.public_id === order.public_id ? data : o))
       );
     } catch (err: unknown) {
-      alert(extractApiDetail(err, tPages("ordersSendToCourierErrorFallback")));
+      const normalized = normalizeError(err, tPages("ordersSendToCourierErrorFallback"));
+      notify.error(normalized.message);
     } finally {
       setCourierSendingId(null);
     }
@@ -195,23 +187,28 @@ export default function OrdersPage() {
 
   async function handleDeleteSelected() {
     if (selectedIds.size === 0) return;
-    if (
-      !confirm(
-        tPages("confirmDeleteOrders", {
-          count: toLocaleDigits(String(selectedIds.size), locale),
-        })
-      )
-    )
-      return;
+    const ok = await notify.confirm({
+      title: tPages("confirmDeleteOrders", {
+        count: toLocaleDigits(String(selectedIds.size), locale),
+      }),
+      level: "destructive",
+    });
+    if (!ok) return;
     setDeleting(true);
     try {
       await Promise.all(
         Array.from(selectedIds).map((id) => api.delete(`admin/orders/${id}/`))
       );
       setSelectedIds(new Set());
+      notify.warning(
+        tPages("ordersDeletedSuccess", {
+          count: selectedForBulk.length,
+        })
+      );
       fetchOrders();
     } catch (err) {
       console.error(err);
+      notify.error(err);
     } finally {
       setDeleting(false);
     }
@@ -224,7 +221,7 @@ export default function OrdersPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <div className="flex items-center gap-3">
-          <div className="rounded-lg bg-muted/80 px-1 py-1">
+          <div className="rounded-lg bg-muted/80 px-1 py-1 hidden md:block">
             <button
               type="button"
               onClick={() => router.back()}

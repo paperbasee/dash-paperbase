@@ -24,7 +24,7 @@ export default function AnalyticsPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-3">
-        <div className="rounded-lg bg-muted/80 px-1 py-1">
+        <div className="rounded-lg bg-muted/80 px-1 py-1 hidden md:block">
           <button
             type="button"
             onClick={() => router.back()}
@@ -38,11 +38,15 @@ export default function AnalyticsPage() {
           <h1 className="text-2xl font-medium leading-relaxed text-foreground">
             {tNav("analytics")}
           </h1>
-          <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
+          <p className="mt-1 text-sm leading-relaxed text-muted-foreground md:hidden">
             {tPages("analyticsSubtitle")}
           </p>
         </div>
       </div>
+
+      <p className="hidden text-sm leading-relaxed text-muted-foreground md:block">
+        {tPages("analyticsSubtitle")}
+      </p>
 
       {!hasAdvancedAnalytics ? (
         <div className="rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-2 text-sm leading-relaxed text-destructive">

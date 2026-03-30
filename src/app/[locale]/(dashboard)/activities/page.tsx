@@ -20,7 +20,6 @@ export default function ActivitiesPage() {
         { value: "product", label: tPages("activitiesEntityProduct") },
         { value: "order", label: tPages("activitiesEntityOrder") },
         { value: "category", label: tPages("activitiesEntityCategory") },
-        { value: "brand", label: tPages("activitiesEntityBrand") },
         { value: "notification", label: tPages("activitiesEntityNotification") },
         { value: "support_ticket", label: tPages("activitiesEntitySupportTicket") },
       ] as const,
@@ -72,9 +71,15 @@ export default function ActivitiesPage() {
             {tPages("activitiesTitle")}
             {count > 0 ? ` ${tPages("activitiesCountInParens", { count })}` : ""}
           </h1>
-          <p className="mt-1 text-sm text-muted-foreground">{tPages("activitiesSubtitle")}</p>
+          <p className="mt-1 text-sm text-muted-foreground md:hidden">
+            {tPages("activitiesSubtitle")}
+          </p>
         </div>
       </div>
+
+      <p className="hidden text-sm text-muted-foreground md:block">
+        {tPages("activitiesSubtitle")}
+      </p>
 
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
         <Select
