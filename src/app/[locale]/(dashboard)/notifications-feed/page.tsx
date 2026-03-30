@@ -15,13 +15,17 @@ export default function NotificationsFeedPage() {
   const {
     notifications,
     unreadCount,
-    isLoading,
+    isHydrated,
+    isFetching,
     error,
     markAllAsRead,
     markNotificationAsRead,
     deleteNotification,
     deleteAllNotifications,
   } = useNotifications();
+
+  const showBootSpinner =
+    !isHydrated || (isFetching && notifications.length === 0 && !error);
   const router = useRouter();
 
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -98,21 +102,21 @@ export default function NotificationsFeedPage() {
         </Button>
       </div>
 
-      {isLoading && (
+      {showBootSpinner && (
         <div className="flex h-40 items-center justify-center">
           <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
         </div>
       )}
 
-      {!isLoading && error && (
+      {isHydrated && !isFetching && error && (
         <p className="text-sm text-destructive">{error}</p>
       )}
 
-      {!isLoading && !error && notifications.length === 0 && (
+      {isHydrated && !isFetching && !error && notifications.length === 0 && (
         <p className="text-sm text-muted-foreground">{tPages("notificationsEmpty")}</p>
       )}
 
-      {!isLoading && !error && notifications.length > 0 && (
+      {isHydrated && !error && notifications.length > 0 && (
         <>
           <div className="divide-y divide-border overflow-hidden rounded-xl border border-dashed border-border bg-background">
             {notifications.map((notification) => (

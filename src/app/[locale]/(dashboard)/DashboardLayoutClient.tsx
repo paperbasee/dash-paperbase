@@ -17,11 +17,7 @@ import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { logout } from "@/lib/auth";
-import {
-  fetchMeForRouting,
-  hasActiveSubscription,
-  type MeForRouting,
-} from "@/lib/subscription-access";
+import { hasActiveSubscription } from "@/lib/subscription-access";
 import SubscriptionAccessBlock from "@/components/auth/SubscriptionAccessBlock";
 
 export default function DashboardLayoutClient({
@@ -33,23 +29,31 @@ export default function DashboardLayoutClient({
   const pathname = usePathname();
   const tSheet = useTranslations("sheet");
   const tDashboard = useTranslations("dashboard");
-  const { isAuthenticated, isLoading } = useAuth();
+  const {
+    isAuthenticated,
+    isLoading,
+    authHydrated,
+    meProfile,
+    meProfileStatus,
+  } = useAuth();
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [mobileSystemBannerVisible, setMobileSystemBannerVisible] = useState(false);
-  const [me, setMe] = useState<MeForRouting | null>(null);
-  const subscription = me?.subscription ?? null;
-  const storeCount = Array.isArray(me?.stores) ? me.stores.length : 0;
-  const [subChecked, setSubChecked] = useState(false);
-  const [subCheckError, setSubCheckError] = useState(false);
+  const subscription =
+    meProfileStatus === "ready" ? (meProfile?.subscription ?? null) : null;
+  const storeCount =
+    meProfileStatus === "ready" && Array.isArray(meProfile?.stores)
+      ? meProfile.stores.length
+      : 0;
   const contentContainerClass = "mx-auto w-full max-w-[88rem] px-4 md:px-6 lg:px-8";
 
   const normalizedPlan = (subscription?.plan ?? "").toLowerCase();
   const isEligiblePlan =
     normalizedPlan === "essential" ||
     normalizedPlan === "premium";
+  const meReady = meProfileStatus === "ready";
   const shouldRedirectToOnboarding =
-    subChecked &&
+    meReady &&
     pathname === "/" &&
     subscription?.active === true &&
     isEligiblePlan &&
@@ -59,20 +63,6 @@ export default function DashboardLayoutClient({
     if (!isLoading && !isAuthenticated) {
       logout();
     }
-  }, [isAuthenticated, isLoading]);
-
-  useEffect(() => {
-    if (!isAuthenticated || isLoading) return;
-    fetchMeForRouting()
-      .then((data) => {
-        setMe(data);
-        setSubCheckError(false);
-      })
-      .catch(() => {
-        setMe(null);
-        setSubCheckError(true);
-      })
-      .finally(() => setSubChecked(true));
   }, [isAuthenticated, isLoading]);
 
   useEffect(() => {
@@ -91,7 +81,14 @@ export default function DashboardLayoutClient({
     return () => window.removeEventListener("resize", syncDashboardInset);
   }, [collapsed]);
 
-  if (isLoading || !isAuthenticated || !subChecked || shouldRedirectToOnboarding) {
+  const authBlocking =
+    !authHydrated ||
+    isLoading ||
+    !isAuthenticated ||
+    meProfileStatus === "loading" ||
+    (meProfileStatus === "idle" && isAuthenticated);
+
+  if (authBlocking || shouldRedirectToOnboarding) {
     return (
       <div className="flex h-screen items-center justify-center bg-background">
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
@@ -99,11 +96,11 @@ export default function DashboardLayoutClient({
     );
   }
 
-  if (subCheckError) {
+  if (meProfileStatus === "error") {
     return <SubscriptionAccessBlock variant="verifyFailed" />;
   }
 
-  if (me && !hasActiveSubscription(me)) {
+  if (meProfileStatus === "ready" && meProfile && !hasActiveSubscription(meProfile)) {
     return <SubscriptionAccessBlock variant="inactive" />;
   }
 

@@ -1,4 +1,5 @@
 import axios from "axios";
+import { clearMeProfileCache } from "@/lib/me-profile-store";
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -87,6 +88,7 @@ export async function verifyTwoFactorChallenge(
 }
 
 export function logout() {
+  clearMeProfileCache();
   localStorage.removeItem("access_token");
   localStorage.removeItem("refresh_token");
   clearAuthSessionCookie();

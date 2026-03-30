@@ -1,4 +1,7 @@
-import api from "@/lib/api";
+import {
+  clearMeProfileCache,
+  ensureMeProfile,
+} from "@/lib/me-profile-store";
 
 export interface MeSubscription {
   active: boolean;
@@ -7,14 +10,21 @@ export interface MeSubscription {
 }
 
 export interface MeForRouting {
+  /** User public_id from auth/me/; used for cache key when JWT omits user_public_id. */
+  public_id?: string;
   active_store_public_id: string | null;
   subscription: MeSubscription;
   stores?: Array<{ public_id?: string }>;
 }
 
+/** Clear cached auth/me (logout, store deletion, etc.). */
+export function invalidateMeRoutingCache(): void {
+  clearMeProfileCache();
+}
+
+/** Loads profile via ensureMeProfile (session + deduped network). */
 export async function fetchMeForRouting(): Promise<MeForRouting> {
-  const { data } = await api.get<MeForRouting>("auth/me/");
-  return data;
+  return ensureMeProfile();
 }
 
 export function hasActiveSubscription(me: MeForRouting): boolean {
@@ -37,13 +47,13 @@ export function resolvePostAuthPath(me: MeForRouting): PostAuthPath {
 }
 
 export type PostAuthRouteResult =
-  | { ok: true; path: PostAuthPath }
+  | { ok: true; path: PostAuthPath; me: MeForRouting }
   | { ok: false; kind: "fetch_error" };
 
 export async function resolvePostAuthRoute(): Promise<PostAuthRouteResult> {
   try {
-    const me = await fetchMeForRouting();
-    return { ok: true, path: resolvePostAuthPath(me) };
+    const me = await ensureMeProfile();
+    return { ok: true, path: resolvePostAuthPath(me), me };
   } catch {
     return { ok: false, kind: "fetch_error" };
   }

@@ -14,6 +14,11 @@ import { emptySocialLinks } from "@/lib/storeSocialLinks";
 
 interface BrandingState {
   branding: Branding | null;
+  /** Client mount complete (separate from network). */
+  isHydrated: boolean;
+  /** Branding request in flight. */
+  isFetching: boolean;
+  /** Alias of `isFetching` for existing callers. */
   isLoading: boolean;
   refetch: () => Promise<void>;
   /** Resolved currency symbol for prices (from branding or default). */
@@ -38,27 +43,43 @@ const BrandingContext = createContext<BrandingState | undefined>(undefined);
 
 export function BrandingProvider({ children }: { children: ReactNode }) {
   const [branding, setBranding] = useState<Branding | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isHydrated, setIsHydrated] = useState(false);
+  const [isFetching, setIsFetching] = useState(false);
 
   const fetchBranding = useCallback(async () => {
+    setIsFetching(true);
     try {
       const { data } = await api.get<Branding>("admin/branding/");
       setBranding(data);
     } catch {
       setBranding(defaultBranding);
     } finally {
-      setIsLoading(false);
+      setIsFetching(false);
     }
   }, []);
 
   useEffect(() => {
+    setIsHydrated(true);
+  }, []);
+
+  useEffect(() => {
+    if (!isHydrated) return;
     fetchBranding();
-  }, [fetchBranding]);
+  }, [isHydrated, fetchBranding]);
 
   const currencySymbol = branding?.currency_symbol ?? defaultBranding.currency_symbol;
 
   return (
-    <BrandingContext.Provider value={{ branding, isLoading, refetch: fetchBranding, currencySymbol }}>
+    <BrandingContext.Provider
+      value={{
+        branding,
+        isHydrated,
+        isFetching,
+        isLoading: isFetching,
+        refetch: fetchBranding,
+        currencySymbol,
+      }}
+    >
       {children}
     </BrandingContext.Provider>
   );

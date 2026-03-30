@@ -4,7 +4,10 @@ import { useState, useEffect, useRef } from "react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import api from "@/lib/api";
-import { resolvePostAuthRoute } from "@/lib/subscription-access";
+import {
+  invalidateMeRoutingCache,
+  resolvePostAuthRoute,
+} from "@/lib/subscription-access";
 import {
   DELETE_STORE_CONFIRM_PHRASE,
   isDeleteStoreModalPhraseConfirmed,
@@ -74,6 +77,7 @@ export function useDeleteStore(ownerEmail: string, storeName: string) {
           setSuccessDisplayed(true);
           if (intervalId != null) window.clearInterval(intervalId);
           window.setTimeout(async () => {
+            invalidateMeRoutingCache();
             const result = await resolvePostAuthRoute();
             if (result.ok) {
               router.push(result.path);

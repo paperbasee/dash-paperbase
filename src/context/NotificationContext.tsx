@@ -17,6 +17,9 @@ import {
 interface NotificationState {
   notifications: DashboardNotification[];
   unreadCount: number;
+  isHydrated: boolean;
+  isFetching: boolean;
+  /** Alias of `isFetching` for existing callers. */
   isLoading: boolean;
   error: string | null;
   markAllAsRead: () => void;
@@ -113,7 +116,8 @@ function filterByPrefs(list: DashboardNotification[]): DashboardNotification[] {
 
 export function NotificationProvider({ children }: { children: ReactNode }) {
   const [notifications, setNotifications] = useState<DashboardNotification[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isHydrated, setIsHydrated] = useState(false);
+  const [isFetching, setIsFetching] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const applyReadState = useCallback((list: DashboardNotification[]): DashboardNotification[] => {
@@ -122,6 +126,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const refresh = useCallback(async () => {
+    setIsFetching(true);
     try {
       setError(null);
       const data = await fetchNotifications();
@@ -131,11 +136,16 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
       console.error("Failed to load notifications", err);
       setError("Failed to load notifications.");
     } finally {
-      setIsLoading(false);
+      setIsFetching(false);
     }
   }, [applyReadState]);
 
   useEffect(() => {
+    setIsHydrated(true);
+  }, []);
+
+  useEffect(() => {
+    if (!isHydrated) return;
     refresh();
     const interval = window.setInterval(refresh, 10000);
 
@@ -151,7 +161,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
       window.clearInterval(interval);
       document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
-  }, [refresh]);
+  }, [isHydrated, refresh]);
 
   const markAllAsRead = useCallback(() => {
     setNotifications((prev) => {
@@ -197,7 +207,9 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
       value={{
         notifications,
         unreadCount,
-        isLoading,
+        isHydrated,
+        isFetching,
+        isLoading: isFetching,
         error,
         markAllAsRead,
         markNotificationAsRead,
@@ -215,4 +227,3 @@ export function useNotifications() {
   if (!ctx) throw new Error("useNotifications must be used within NotificationProvider");
   return ctx;
 }
-

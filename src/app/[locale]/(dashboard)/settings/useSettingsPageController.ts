@@ -30,7 +30,7 @@ const defaultPrefs: NotificationPrefs = {
 
 export default function useSettingsPageController() {
   const t = useTranslations("settings");
-  const { branding, isLoading, refetch } = useBranding();
+  const { branding, isHydrated, isFetching, refetch } = useBranding();
   const enabledApps = useEnabledApps();
   const { hasFeature, loading: orderEmailFeatureLoading } = useFeatures();
   const orderEmailNotificationsEnabled = hasFeature("order_email_notifications");
@@ -84,7 +84,7 @@ export default function useSettingsPageController() {
   }, []);
 
   useEffect(() => {
-    if (isLoading || !branding) return;
+    if (!isHydrated || isFetching || !branding) return;
     let cancelled = false;
     (async () => {
       try {
@@ -105,7 +105,7 @@ export default function useSettingsPageController() {
     return () => {
       cancelled = true;
     };
-  }, [isLoading, branding]);
+  }, [isHydrated, isFetching, branding]);
 
   const updateEmailNotificationPref = useCallback(
     async (key: "emailMeOnOrderReceived" | "emailCustomerOnOrderConfirmed", value: boolean) => {

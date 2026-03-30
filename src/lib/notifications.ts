@@ -1,5 +1,4 @@
 import api from "@/lib/api";
-import type { Order, SupportTicket, PaginatedResponse } from "@/types";
 
 export type NotificationType = "new_order" | "support_ticket";
 
@@ -26,53 +25,67 @@ export function getNotificationLink(notification: DashboardNotification): string
   }
 }
 
-export async function fetchNotifications(): Promise<DashboardNotification[]> {
-  let ordersRes: { data: unknown };
-  let supportTicketsRes: { data: unknown };
+interface NotificationsSummaryOrder {
+  public_id: string;
+  order_number: string;
+  shipping_name: string;
+  created_at: string | null;
+  status: string;
+}
 
+interface NotificationsSummaryTicket {
+  public_id: string;
+  name: string;
+  phone: string;
+  email: string;
+  created_at: string | null;
+  status: string;
+}
+
+interface NotificationsSummaryResponse {
+  new_orders_count: number;
+  pending_tickets_count: number;
+  recent_orders: NotificationsSummaryOrder[];
+  recent_tickets: NotificationsSummaryTicket[];
+}
+
+export async function fetchNotifications(): Promise<DashboardNotification[]> {
   try {
-    [ordersRes, supportTicketsRes] = await Promise.all([
-      api.get<PaginatedResponse<Order>>("admin/orders/"),
-      api.get<PaginatedResponse<SupportTicket>>("admin/support-tickets/"),
-    ]);
+    const { data } = await api.get<NotificationsSummaryResponse>(
+      "admin/notifications/summary/"
+    );
+    const notifications: DashboardNotification[] = [];
+
+    for (const order of data.recent_orders ?? []) {
+      notifications.push({
+        id: `order-${order.public_id}`,
+        resourceId: order.public_id,
+        type: "new_order",
+        title: "New order placed",
+        message: `Order #${order.order_number} from ${order.shipping_name}`,
+        createdAt: order.created_at ?? "",
+        isRead: false,
+      });
+    }
+
+    for (const item of data.recent_tickets ?? []) {
+      notifications.push({
+        id: `support-ticket-${item.public_id}`,
+        resourceId: item.public_id,
+        type: "support_ticket",
+        title: "New support ticket",
+        message: `${item.name} (${item.phone || item.email})`,
+        createdAt: item.created_at ?? "",
+        isRead: false,
+      });
+    }
+
+    return notifications.sort(
+      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    );
   } catch {
-    // 401/403 when unauthenticated or non-staff; return empty array
     return [];
   }
-
-  const notifications: DashboardNotification[] = [];
-
-  const orders = Array.isArray((ordersRes.data as { results?: unknown }).results)
-    ? (ordersRes.data as PaginatedResponse<Order>).results
-    : (ordersRes.data as Order[]);
-  for (const order of orders) {
-    notifications.push({
-      id: `order-${order.public_id}`,
-      resourceId: order.public_id,
-      type: "new_order",
-      title: "New order placed",
-      message: `Order #${order.order_number} from ${order.shipping_name}`,
-      createdAt: order.created_at,
-      isRead: false,
-    });
-  }
-
-  const tickets = (supportTicketsRes.data as PaginatedResponse<SupportTicket>).results ?? [];
-  for (const item of tickets) {
-    notifications.push({
-      id: `support-ticket-${item.public_id}`,
-      resourceId: item.public_id,
-      type: "support_ticket",
-      title: "New support ticket",
-      message: `${item.name} (${item.phone || item.email})`,
-      createdAt: item.created_at,
-      isRead: false,
-    });
-  }
-
-  return notifications.sort(
-    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-  );
 }
 
 export function markAllAsReadOnClient(
