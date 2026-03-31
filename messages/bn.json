@@ -421,7 +421,7 @@
     "bannersLabelCtaText": "সিটিএ টেক্সট",
     "bannersCtaPlaceholder": "যেমন: \"এখনই কিনুন\"",
     "bannersLabelCtaLink": "সিটিএ লিংক (URL)",
-    "bannersUrlPlaceholder": "https://…",
+    "bannersUrlPlaceholder": "CTA URL লিখুন",
     "bannersLabelStart": "শুরু",
     "bannersLabelEnd": "শেষ",
     "bannersLabelImage": "ছবি",
@@ -887,7 +887,7 @@
       "addressPlaceholder": "১২৩ মেইন স্ট্রিট, শহর, দেশ",
       "socialHeading": "সোশ্যাল লিংক",
       "socialSubtitle": "স্টোরফ্রন্ট ফুটার বা হেডারের জন্য পাবলিক সোশ্যাল প্রোফাইলের URL (ফেসবুক, ইনস্টাগ্রাম ইত্যাদি)। স্টোর সেটিংসের সাথে সংরক্ষিত হয়।",
-      "socialUrlPlaceholder": "https://…",
+      "socialUrlPlaceholder": "আপনার-সোশ্যাল-লিংক",
       "socialLabels": {
         "facebook": "Facebook",
         "instagram": "Instagram",

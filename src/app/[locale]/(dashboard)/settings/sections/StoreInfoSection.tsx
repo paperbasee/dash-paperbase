@@ -216,7 +216,7 @@ export default function StoreInfoSection({
                 <InputGroup key={key} className="h-9 min-w-0 bg-background shadow-sm">
                   <InputGroupAddon
                     align="inline-start"
-                    className="w-[7.25rem] shrink-0 gap-2 border-r border-border/80 py-0 pl-2.5 pr-2"
+                    className="w-[7.25rem] shrink-0 justify-start gap-2 border-r border-border/80 py-0 pl-2.5 pr-2"
                     title={label}
                   >
                     <span className="text-muted-foreground">
@@ -233,7 +233,7 @@ export default function StoreInfoSection({
                     autoComplete="off"
                     value={socialLinks[key]}
                     onChange={(e) => onSocialLinkChange(key, e.target.value)}
-                    placeholder={t("store.socialUrlPlaceholder")}
+                    placeholder={`Enter ${key} URL`}
                     aria-label={label}
                     className="min-w-0 text-xs sm:text-sm"
                   />

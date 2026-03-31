@@ -70,8 +70,13 @@ export const SettingsDesktopSectionNav = forwardRef<
   }
 >(function SettingsDesktopSectionNav({ activeSection, onSelect }, ref) {
   return (
-    <div ref={ref} className="inline-block w-max overflow-visible">
-      <SettingsSectionNav activeSection={activeSection} onSelect={onSelect} variant="horizontal" />
+    <div ref={ref} className="w-full max-w-full overflow-x-auto">
+      <SettingsSectionNav
+        activeSection={activeSection}
+        onSelect={onSelect}
+        variant="horizontal"
+        className="w-max min-w-max"
+      />
     </div>
   );
 });

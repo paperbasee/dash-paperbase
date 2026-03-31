@@ -157,7 +157,7 @@ export default function SettingsPage() {
         </div>
 
         {/* Desktop: horizontal nav at top */}
-        <div className="hidden lg:block" aria-label={tSettings("navAria")}>
+        <div className="hidden min-w-0 lg:block" aria-label={tSettings("navAria")}>
           <SettingsDesktopSectionNav
             activeSection={activeSection}
             onSelect={setActiveSection}

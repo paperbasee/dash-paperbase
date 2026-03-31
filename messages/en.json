@@ -421,7 +421,7 @@
     "bannersLabelCtaText": "CTA text",
     "bannersCtaPlaceholder": "e.g. \"Shop now\"",
     "bannersLabelCtaLink": "CTA link (URL)",
-    "bannersUrlPlaceholder": "https://…",
+    "bannersUrlPlaceholder": "Enter CTA URL",
     "bannersLabelStart": "Start",
     "bannersLabelEnd": "End",
     "bannersLabelImage": "Image",
@@ -887,7 +887,7 @@
       "addressPlaceholder": "123 Main St, City, Country",
       "socialHeading": "Social links",
       "socialSubtitle": "Public URLs for your storefront footer or header (Facebook, Instagram, etc.). Saved with your store settings.",
-      "socialUrlPlaceholder": "https://…",
+      "socialUrlPlaceholder": "your-social-link",
       "socialLabels": {
         "facebook": "Facebook",
         "instagram": "Instagram",
