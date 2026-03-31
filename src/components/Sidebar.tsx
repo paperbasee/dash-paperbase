@@ -180,7 +180,6 @@ function SidebarContent({
     if (typeof window === "undefined") return;
     const initial = getStoredThemePreference() ?? "system";
     setTheme(initial);
-    applyThemePreference(initial);
   }, []);
 
   useEffect(() => {

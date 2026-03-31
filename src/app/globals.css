@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
-/* Tailwind `dark:` follows app theme (data-theme on <html>), not OS preference */
-@custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
+/* Tailwind `dark:` follows html.dark (class strategy). */
+@custom-variant dark (&:where(.dark, .dark *));
 
 /* ============================================
    FONT FACES - Futura PT
@@ -82,8 +82,7 @@
     --dashboard-main-left-inset: 0rem;
   }
 
-  :root,
-  :root[data-theme="light"] {
+  :root {
     /* Light mode – matches shadcn/ui docs */
     --background: 0 0% 100%;
     --foreground: 222 47% 11%;
@@ -127,7 +126,7 @@
     --border-color: hsl(var(--border));
   }
 
-  :root[data-theme="dark"] {
+  :root.dark {
     /* Dark mode – neutral charcoal gray, no blue tint */
     --background: 220 8% 7%;
     --foreground: 210 20% 96%;
@@ -226,6 +225,13 @@ body {
   font-family: var(--font-family-sans);
   background: hsl(var(--background));
   color: hsl(var(--foreground));
+}
+
+/* Prevent transition flash while pre-paint script applies initial theme. */
+html.theme-preload *,
+html.theme-preload *::before,
+html.theme-preload *::after {
+  transition: none !important;
 }
 
 /* Browser autofill must not override dark mode */

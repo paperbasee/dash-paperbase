@@ -25,7 +25,9 @@ export function resolveAppliedTheme(pref: ThemePreference): AppliedTheme {
 export function applyThemePreference(pref: ThemePreference): AppliedTheme {
   if (typeof window === "undefined") return "light";
   const applied = resolveAppliedTheme(pref);
-  document.documentElement.setAttribute("data-theme", applied);
+  const root = document.documentElement;
+  root.classList.toggle("dark", applied === "dark");
+  root.setAttribute("data-theme", applied);
   return applied;
 }
 

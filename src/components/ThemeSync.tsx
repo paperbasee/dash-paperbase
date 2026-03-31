@@ -14,18 +14,23 @@ function getInitialPreference(): ThemePreference {
   return stored ?? "system";
 }
 
-/** Keeps `<html data-theme>` aligned with user preference + OS changes. */
+/** Keeps root theme class aligned with preference + OS changes after hydration. */
 export function ThemeSync() {
   useEffect(() => {
     if (typeof window === "undefined") return;
 
     let pref: ThemePreference = getInitialPreference();
     applyThemePreference(pref);
+    let cleanupSystem: (() => void) | null = null;
 
-    const cleanupSystem =
-      pref === "system"
-        ? subscribeToSystemThemeChanges(() => applyThemePreference("system"))
-        : () => {};
+    const resubscribeSystem = () => {
+      cleanupSystem?.();
+      cleanupSystem =
+        pref === "system"
+          ? subscribeToSystemThemeChanges(() => applyThemePreference("system"))
+          : null;
+    };
+    resubscribeSystem();
 
     const onStorage = (event: StorageEvent) => {
       if (event.key !== CORE_THEME_STORAGE_KEY) return;
@@ -35,11 +40,12 @@ export function ThemeSync() {
           : "system";
       pref = next;
       applyThemePreference(pref);
+      resubscribeSystem();
     };
 
     window.addEventListener("storage", onStorage);
     return () => {
-      cleanupSystem();
+      cleanupSystem?.();
       window.removeEventListener("storage", onStorage);
     };
   }, []);
