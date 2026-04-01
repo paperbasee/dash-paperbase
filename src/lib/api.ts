@@ -6,6 +6,75 @@ const api = axios.create({
   headers: { "Content-Type": "application/json" },
 });
 
+type RefreshResponse = {
+  access?: unknown;
+  refresh?: unknown;
+};
+
+let isRefreshing = false;
+let refreshPromise: Promise<string> | null = null;
+
+function setAuthSessionCookie() {
+  document.cookie = "auth_session=1; path=/; SameSite=Strict";
+}
+
+function clearAuthSessionCookie() {
+  document.cookie = "auth_session=; path=/; max-age=0; SameSite=Strict";
+}
+
+function clearAuthStateAndRedirect() {
+  localStorage.removeItem("access_token");
+  localStorage.removeItem("refresh_token");
+  clearAuthSessionCookie();
+  window.location.href = "/login";
+}
+
+function persistTokens(data: RefreshResponse): string {
+  if (typeof data.access !== "string" || data.access.length === 0) {
+    throw new Error("Invalid refresh response: missing access token");
+  }
+
+  localStorage.setItem("access_token", data.access);
+
+  if (typeof data.refresh === "string" && data.refresh.length > 0) {
+    localStorage.setItem("refresh_token", data.refresh);
+  }
+
+  setAuthSessionCookie();
+  return data.access;
+}
+
+async function refreshAccessTokenSingleFlight(): Promise<string> {
+  if (isRefreshing && refreshPromise) {
+    return refreshPromise;
+  }
+
+  const refreshToken = localStorage.getItem("refresh_token");
+  if (!refreshToken) {
+    clearAuthStateAndRedirect();
+    throw new Error("Missing refresh token");
+  }
+
+  isRefreshing = true;
+  refreshPromise = (async () => {
+    try {
+      const { data } = await axios.post<RefreshResponse>(
+        `${process.env.NEXT_PUBLIC_API_URL}/auth/token/refresh/`,
+        { refresh: refreshToken }
+      );
+      return persistTokens(data);
+    } catch (err) {
+      clearAuthStateAndRedirect();
+      throw err;
+    } finally {
+      isRefreshing = false;
+      refreshPromise = null;
+    }
+  })();
+
+  return refreshPromise;
+}
+
 function getActiveStorePublicIdFromJwt(token: string): string | null {
   try {
     const parts = token.split(".");
@@ -49,34 +118,22 @@ api.interceptors.response.use(
     const skipVerifyEmailRedirect =
       typeof window !== "undefined" && isVerifyEmailRoute(window.location.pathname);
 
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    if (
+      error.response?.status === 401 &&
+      !originalRequest._retry &&
+      !String(originalRequest?.url || "").includes("/auth/token/refresh/")
+    ) {
       if (skipVerifyEmailRedirect) {
         return Promise.reject(error);
       }
       originalRequest._retry = true;
 
-      const refreshToken = localStorage.getItem("refresh_token");
-      if (!refreshToken) {
-        localStorage.removeItem("access_token");
-        localStorage.removeItem("refresh_token");
-        document.cookie = "auth_session=; path=/; max-age=0; SameSite=Strict";
-        window.location.href = "/login";
-        return Promise.reject(error);
-      }
-
       try {
-        const { data } = await axios.post(
-          `${process.env.NEXT_PUBLIC_API_URL}/auth/token/refresh/`,
-          { refresh: refreshToken }
-        );
-        localStorage.setItem("access_token", data.access);
-        originalRequest.headers.Authorization = `Bearer ${data.access}`;
+        const access = await refreshAccessTokenSingleFlight();
+        originalRequest.headers = originalRequest.headers || {};
+        originalRequest.headers.Authorization = `Bearer ${access}`;
         return api(originalRequest);
       } catch {
-        localStorage.removeItem("access_token");
-        localStorage.removeItem("refresh_token");
-        document.cookie = "auth_session=; path=/; max-age=0; SameSite=Strict";
-        window.location.href = "/login";
         return Promise.reject(error);
       }
     }

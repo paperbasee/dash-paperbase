@@ -139,7 +139,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     (e: StorageEvent) => {
       if (e.storageArea !== localStorage) return;
 
-      if (e.key === "access_token" && e.oldValue != null && e.newValue == null) {
+      const tokenRemoved =
+        (e.key === "access_token" || e.key === "refresh_token") &&
+        e.oldValue != null &&
+        e.newValue == null;
+      if (tokenRemoved) {
         const now = Date.now();
         if (now - lastRemoteLogoutAt.current < 400) return;
         lastRemoteLogoutAt.current = now;
