@@ -51,6 +51,7 @@ export interface OrderItem {
   product_public_id: string | null;
   product_name: string;
   status?: "active" | "deleted";
+  is_unavailable?: boolean;
   product_brand?: string;
   product_image: string | null;
   variant_public_id?: string | null;
@@ -104,6 +105,8 @@ export interface Order {
   customer_confirmation_sent_at?: string | null;
   items?: OrderItem[];
   items_count?: number;
+  has_unavailable_products?: boolean;
+  unavailable_products_count?: number;
   created_at: string;
   updated_at: string;
 }

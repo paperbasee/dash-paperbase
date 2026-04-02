@@ -44,7 +44,8 @@ function OrderLineProductCardInner({
 }: OrderLineProductCardProps) {
   const tPages = useTranslations("pages");
   const tCommon = useTranslations("common");
-  const isUnavailable = item.status === "deleted" || !item.product_public_id;
+  const isUnavailable =
+    item.is_unavailable === true || item.status === "deleted" || !item.product_public_id;
   const qtyShown = edit?.quantity ?? item.quantity;
   const snapshotUnit = Number("unit_price" in item ? item.unit_price : 0);
   const catalogUnitRaw =
@@ -176,12 +177,15 @@ function OrderLineProductCardInner({
             )}
           </p>
           <p className="line-clamp-2 text-xs text-muted-foreground">{subtitle}</p>
+          {isUnavailable ? (
+            <p className="text-xs font-medium text-destructive">Unavailable</p>
+          ) : null}
         </div>
 
         <div className="mt-auto w-full min-w-0 space-y-2 border-t border-border/50 pt-3 text-sm">
           <div className="flex items-center justify-between gap-2 text-muted-foreground">
             <span>{tPages("orderNewColQty")}</span>
-            {editing ? (
+            {editing && !isUnavailable ? (
               <Input
                 type="number"
                 min={1}
@@ -212,7 +216,7 @@ function OrderLineProductCardInner({
           )}
         </div>
 
-        {editing && (
+        {editing && !isUnavailable && (
           <div className="w-full min-w-0 space-y-1.5">
             <span className="block text-left text-xs font-medium text-muted-foreground">
               {tPages("orderNewColVariant")}

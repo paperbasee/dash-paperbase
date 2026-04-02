@@ -152,7 +152,13 @@ export default function OrdersPage() {
   }
 
   async function handleRowStatusChange(order: Order, next: string) {
-    if (order.status === "cancelled" || next === order.status) return;
+    if (
+      order.status === "cancelled" ||
+      order.has_unavailable_products ||
+      next === order.status
+    ) {
+      return;
+    }
     setStatusUpdatingId(order.public_id);
     try {
       const { data } = await api.patch<{ order: Order }>(
@@ -385,26 +391,47 @@ export default function OrdersPage() {
                       {order.phone || "—"}
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap">
-                      <Select
-                        className="w-[180px] capitalize"
-                        value={order.status}
-                        disabled={
-                          order.status === "cancelled" ||
-                          statusUpdatingId === order.public_id
-                        }
-                        onChange={(e) =>
-                          handleRowStatusChange(order, e.target.value)
-                        }
-                        aria-label={tPages("ordersListStatusForOrderAria", {
-                          orderNumber: order.order_number,
-                        })}
-                      >
-                        {ORDER_STATUS_OPTIONS.map((s) => (
-                          <option key={s} value={s}>
-                            {formatOrderStatusLabel(s, (key) => tPages(key))}
-                          </option>
-                        ))}
-                      </Select>
+                      <div className="space-y-1">
+                        {order.has_unavailable_products ? (
+                          <p className="text-xs text-muted-foreground">
+                            {formatOrderStatusLabel(order.status, (key) => tPages(key))}{" "}
+                            •{" "}
+                            {(order.unavailable_products_count ?? 0) === 1
+                              ? "Product unavailable"
+                              : `${order.unavailable_products_count} products unavailable`}
+                          </p>
+                        ) : (
+                          <Select
+                            className="w-[180px] capitalize"
+                            value={order.status}
+                            disabled={
+                              order.status === "cancelled" ||
+                              statusUpdatingId === order.public_id
+                            }
+                            onChange={(e) =>
+                              handleRowStatusChange(order, e.target.value)
+                            }
+                            aria-label={tPages("ordersListStatusForOrderAria", {
+                              orderNumber: order.order_number,
+                            })}
+                          >
+                            {ORDER_STATUS_OPTIONS.map((s) => (
+                              <option key={s} value={s}>
+                                {formatOrderStatusLabel(s, (key) => tPages(key))}
+                              </option>
+                            ))}
+                          </Select>
+                        )}
+                        {!order.has_unavailable_products && (order.unavailable_products_count ?? 0) > 0 ? (
+                          <p className="text-xs text-muted-foreground">
+                            {formatOrderStatusLabel(order.status, (key) => tPages(key))}{" "}
+                            •{" "}
+                            {(order.unavailable_products_count ?? 0) === 1
+                              ? "Product unavailable"
+                              : `${order.unavailable_products_count} products unavailable`}
+                          </p>
+                        ) : null}
+                      </div>
                     </td>
                     <td className="px-4 py-3 text-foreground whitespace-nowrap">
                       {currencySymbol}{Number(order.total).toLocaleString()}

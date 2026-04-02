@@ -9,6 +9,7 @@ export type EditableOrderItem = {
   product_brand?: string;
   product_image: string | null;
   status?: OrderItem["status"];
+  is_unavailable?: boolean;
   variant_public_id: string | null;
   quantity: number;
   unit_price: string;

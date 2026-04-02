@@ -189,6 +189,7 @@ export default function OrderDetailPage() {
         product_brand: item.product_brand,
         product_image: item.product_image,
         status: item.status,
+        is_unavailable: item.is_unavailable,
         variant_public_id: item.variant_public_id ?? null,
         quantity: item.quantity,
         unit_price: String(item.unit_price),
@@ -364,6 +365,10 @@ export default function OrderDetailPage() {
 
   async function handleSave(e: FormEvent) {
     e.preventDefault();
+    if (editableItems.length === 0) {
+      setEditError("product list can't be empty");
+      return;
+    }
     if (!form.village.trim() || !form.thana.trim() || !form.district.trim()) {
       setEditError(tPages("orderEditAddressFieldsRequired"));
       return;
@@ -440,7 +445,14 @@ export default function OrderDetailPage() {
   }
 
   async function handleStatusChange(next: string) {
-    if (!order || next === order.status || order.status === "cancelled") return;
+    if (
+      !order ||
+      next === order.status ||
+      order.status === "cancelled" ||
+      order.has_unavailable_products
+    ) {
+      return;
+    }
     setStatusUpdateError("");
     setStatusUpdateLoading(true);
     try {
@@ -848,6 +860,13 @@ export default function OrderDetailPage() {
                 {order.status === "cancelled" ? (
                   <p className="text-sm text-muted-foreground">
                     {tPages("orderDetailOrderCancelledHint")}
+                  </p>
+                ) : order.has_unavailable_products ? (
+                  <p className="text-sm text-muted-foreground">
+                    {formatOrderStatusLabel(order.status, tPages)} •{" "}
+                    {(order.unavailable_products_count ?? 0) === 1
+                      ? "Product unavailable"
+                      : `${order.unavailable_products_count} products unavailable`}
                   </p>
                 ) : (
                   <div className="flex flex-wrap items-center gap-2">
