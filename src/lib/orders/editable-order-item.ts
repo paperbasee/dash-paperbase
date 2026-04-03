@@ -4,8 +4,11 @@ import type { OrderItem } from "@/types";
 export type EditableOrderItem = {
   key: string;
   public_id: string | null;
+  product?: OrderItem["product"];
   product_public_id: string | null;
   product_name: string;
+  product_name_snapshot?: string;
+  variant_snapshot?: string | null;
   product_brand?: string;
   product_image: string | null;
   status?: OrderItem["status"];
@@ -13,6 +16,7 @@ export type EditableOrderItem = {
   variant_public_id: string | null;
   quantity: number;
   unit_price: string;
+  unit_price_snapshot?: string;
   original_price?: string | null;
   line_subtotal?: string;
   line_total?: string;

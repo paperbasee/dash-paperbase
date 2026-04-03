@@ -186,8 +186,11 @@ export default function OrderDetailPage() {
       (order.items ?? []).map((item) => ({
         key: item.public_id,
         public_id: item.public_id,
+        product: item.product ?? null,
         product_public_id: item.product_public_id ?? null,
         product_name: item.product_name,
+        product_name_snapshot: item.product_name_snapshot ?? item.product_name,
+        variant_snapshot: item.variant_snapshot ?? null,
         product_brand: item.product_brand,
         product_image: item.product_image,
         status: item.status,
@@ -195,6 +198,7 @@ export default function OrderDetailPage() {
         variant_public_id: item.variant_public_id ?? null,
         quantity: item.quantity,
         unit_price: String(item.unit_price),
+        unit_price_snapshot: item.unit_price_snapshot ?? String(item.unit_price),
         original_price: item.original_price,
         line_subtotal: item.line_subtotal,
         line_total: item.line_total,
@@ -869,8 +873,8 @@ export default function OrderDetailPage() {
                   <p className="text-sm text-muted-foreground">
                     {formatOrderStatusLabel(order.status, tPages)} •{" "}
                     {(order.unavailable_products_count ?? 0) === 1
-                      ? "Product unavailable"
-                      : `${order.unavailable_products_count} products unavailable`}
+                      ? "Product data corrupted."
+                      : `${order.unavailable_products_count} products data corrupted.`}
                   </p>
                 ) : (
                   <div className="flex flex-wrap items-center gap-2">

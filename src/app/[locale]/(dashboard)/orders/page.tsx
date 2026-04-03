@@ -405,8 +405,8 @@ export default function OrdersPage() {
                             {formatOrderStatusLabel(order.status, (key) => tPages(key))}{" "}
                             •{" "}
                             {(order.unavailable_products_count ?? 0) === 1
-                              ? "Product unavailable"
-                              : `${order.unavailable_products_count} products unavailable`}
+                              ? "Product data corrupted."
+                              : `${order.unavailable_products_count} products data corrupted.`}
                           </p>
                         ) : (
                           <Select
@@ -435,8 +435,8 @@ export default function OrdersPage() {
                             {formatOrderStatusLabel(order.status, (key) => tPages(key))}{" "}
                             •{" "}
                             {(order.unavailable_products_count ?? 0) === 1
-                              ? "Product unavailable"
-                              : `${order.unavailable_products_count} products unavailable`}
+                              ? "Product data corrupted."
+                              : `${order.unavailable_products_count} products data corrupted.`}
                           </p>
                         ) : null}
                       </div>

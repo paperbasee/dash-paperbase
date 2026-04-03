@@ -46,8 +46,10 @@ function OrderLineProductCardInner({
   const tCommon = useTranslations("common");
   const isUnavailable =
     item.is_unavailable === true || item.status === "deleted" || !item.product_public_id;
+  const snapshotName = item.product_name_snapshot || item.product_name || "Product";
+  const snapshotVariant = item.variant_snapshot || null;
   const qtyShown = edit?.quantity ?? item.quantity;
-  const snapshotUnit = Number("unit_price" in item ? item.unit_price : 0);
+  const snapshotUnit = Number(item.unit_price_snapshot ?? item.unit_price ?? 0);
   const catalogUnitRaw =
     "catalog_unit_price" in item && item.catalog_unit_price != null && item.catalog_unit_price !== ""
       ? Number(item.catalog_unit_price)
@@ -125,6 +127,8 @@ function OrderLineProductCardInner({
     if (item.product_brand) parts.push(item.product_brand);
     if (item.variant_option_labels?.length) {
       parts.push(item.variant_option_labels.join(" · "));
+    } else if (snapshotVariant) {
+      parts.push(snapshotVariant);
     } else if (item.variant_sku) {
       parts.push(`${tPages("orderDetailSkuPrefix")}: ${item.variant_sku}`);
     }
@@ -132,7 +136,7 @@ function OrderLineProductCardInner({
       parts.push(`${tPages("orderNewStock")}: ${item.variant_inventory_quantity}`);
     }
     return parts.length ? parts.join(" · ") : "—";
-  }, [item, tPages]);
+  }, [item, snapshotVariant, tPages]);
 
   return (
     <div className="relative flex h-full min-h-0 min-w-0 flex-col rounded-xl border border-border/80 bg-card p-4 shadow-sm">
@@ -162,7 +166,7 @@ function OrderLineProductCardInner({
         <div className="w-full min-w-0 flex-1 space-y-1.5 text-left">
           <p className="text-sm font-medium leading-snug text-foreground">
             {isUnavailable ? (
-              tPages("orderNewProductUnavailable")
+              snapshotName
             ) : (
               <ClickableText
                 href={`/products/${item.product_public_id}`}
@@ -175,9 +179,7 @@ function OrderLineProductCardInner({
             )}
           </p>
           <p className="line-clamp-2 text-xs text-muted-foreground">{subtitle}</p>
-          {isUnavailable ? (
-            <p className="text-xs font-medium text-destructive">Unavailable</p>
-          ) : null}
+          {isUnavailable ? <p className="text-xs font-medium text-destructive">Product data corrupted</p> : null}
         </div>
 
         <div className="mt-auto w-full min-w-0 space-y-2 border-t border-border/50 pt-3 text-sm">

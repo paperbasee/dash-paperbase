@@ -48,8 +48,11 @@ export interface OrderItemVariantOption {
 
 export interface OrderItem {
   public_id: string;
+  product?: { public_id: string; name: string } | null;
   product_public_id: string | null;
   product_name: string;
+  product_name_snapshot?: string;
+  variant_snapshot?: string | null;
   status?: "active" | "deleted";
   is_unavailable?: boolean;
   product_brand?: string;
@@ -62,6 +65,7 @@ export interface OrderItem {
   variant_options?: OrderItemVariantOption[] | null;
   quantity: number;
   unit_price: string;
+  unit_price_snapshot?: string;
   original_price: string;
   discount_amount: string;
   line_subtotal: string;

@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { Undo2, Plus, Trash2 } from "lucide-react";
+import { Undo2, Trash2 } from "lucide-react";
 import { useBranding } from "@/context/BrandingContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -81,7 +81,6 @@ export default function NewOrderPage() {
             disabled={saving || items.length === 0}
             className="gap-2"
           >
-            <Plus className="size-4" />
             {saving ? tPages("orderNewCreating") : tPages("orderNewCreateOrder")}
           </Button>
         </div>
