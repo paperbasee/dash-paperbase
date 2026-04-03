@@ -368,7 +368,8 @@ export default function OrderDetailPage() {
   async function handleSave(e: FormEvent) {
     e.preventDefault();
     if (editableItems.length === 0) {
-      setEditError("product list can't be empty");
+      setEditError("");
+      notify.warning("product list can't be empty");
       return;
     }
     if (!form.village.trim() || !form.thana.trim() || !form.district.trim()) {

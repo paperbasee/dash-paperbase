@@ -136,22 +136,20 @@ function OrderLineProductCardInner({
 
   return (
     <div className="relative flex h-full min-h-0 min-w-0 flex-col rounded-xl border border-border/80 bg-card p-4 shadow-sm">
-      {editing && (
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon"
-          className="absolute right-2 top-2 z-10 size-8 shrink-0 rounded-full text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
-          aria-label={tPages("orderNewRemoveItemAria")}
-          onClick={onRemove}
-        >
-          <X className="size-4" />
-        </Button>
-      )}
-      <div
-        className={`flex min-w-0 w-full flex-1 flex-col items-center gap-3 ${editing ? "pt-1" : ""}`}
-      >
+      <div className="flex min-w-0 w-full flex-1 flex-col items-center gap-3">
         <div className="relative w-full shrink-0 aspect-square overflow-hidden rounded-lg bg-muted">
+          {editing && (
+            <Button
+              type="button"
+              variant="destructive"
+              size="icon"
+              className="absolute right-1.5 top-1.5 z-10 h-8 w-8 shrink-0 rounded-full shadow-md"
+              aria-label={tPages("orderNewRemoveItemAria")}
+              onClick={onRemove}
+            >
+              <X className="size-4 stroke-[2.5]" />
+            </Button>
+          )}
           {imageUrl ? (
             <img src={imageUrl} alt="" className="size-full object-cover" />
           ) : (
