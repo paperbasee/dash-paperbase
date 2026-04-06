@@ -8,7 +8,6 @@ import {
   Tags,
   Bell,
   PackageSearch,
-  History,
   Image as ImageIcon,
   Truck,
   Ticket,
@@ -60,7 +59,7 @@ export const APP_CONFIG: Record<string, AppConfig> = {
     label: "Customers",
     icon: Users,
     description: "Customer accounts and profiles",
-    essential: true,
+    essential: false,
     href: "/customers",
     countKey: null,
     parentId: null,
@@ -120,20 +119,10 @@ export const APP_CONFIG: Record<string, AppConfig> = {
     label: "Inventory",
     icon: PackageSearch,
     description: "Stock levels and SKU management",
-    essential: false,
+    essential: true,
     href: "/inventory",
     countKey: null,
     parentId: null,
-  },
-  activities: {
-    id: "activities",
-    label: "Activities",
-    icon: History,
-    description: "Activity log and audit trail",
-    essential: false,
-    href: "/activities",
-    countKey: null,
-    parentId: "more",
   },
   trash: {
     id: "trash",
@@ -160,14 +149,14 @@ export const APP_CONFIG: Record<string, AppConfig> = {
     label: "Shipping",
     icon: Truck,
     description: "Shipping zones, methods, and rates",
-    essential: false,
+    essential: true,
     href: "/shipping",
     countKey: null,
     parentId: null,
   },
 };
 
-export const ESSENTIAL_APP_IDS = ["products", "orders", "customers"] as const;
+export const ESSENTIAL_APP_IDS = ["products", "orders", "inventory", "shipping"] as const;
 
 /** Shipped with the catalog; always on — not listed in Settings → Apps or onboarding toggles. */
 export const CATALOG_INCLUDED_APP_IDS = [
@@ -179,10 +168,8 @@ export const CATALOG_INCLUDED_APP_IDS = [
 export const OPTIONAL_APP_IDS = [
   "support_tickets",
   "cta",
-  "inventory",
-  "activities",
+  "customers",
   "banners",
-  "shipping",
 ] as const;
 
 /** Collapsible “Catalog” group in the sidebar (Products + related). */
@@ -203,8 +190,4 @@ export const MAIN_NAV_APP_IDS = [
   "banners",
 ] as const;
 
-export const MORE_APP_IDS = [
-  "support_tickets",
-  "activities",
-  "trash",
-] as const;
+export const MORE_APP_IDS = ["support_tickets", "trash"] as const;

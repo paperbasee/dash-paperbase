@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { BookOpenText, Menu, Search } from "lucide-react";
+import { Menu, Search } from "lucide-react";
 import { useSearchModal } from "@/context/SearchModalContext";
 import { Button } from "@/components/ui/button";
 import NotificationDropdown from "@/components/NotificationDropdown";
@@ -39,14 +39,6 @@ export default function MobileNavBar({ onMenuClick, bannerVisible = false }: Mob
           target="_blank"
           rel="noopener noreferrer"
         >
-          <Button
-            variant="ghost"
-            size="icon"
-            aria-label={tMobile("docsAria")}
-            className="shrink-0 text-muted-foreground hover:text-foreground"
-          >
-            <BookOpenText className="size-5" />
-          </Button>
         </a>
         <Button
           variant="ghost"

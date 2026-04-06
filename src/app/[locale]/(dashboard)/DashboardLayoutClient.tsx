@@ -2,9 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
-import { usePathname, useRouter } from "@/i18n/navigation";
-import { Link } from "@/i18n/navigation";
-import { BookOpenText, History } from "lucide-react";
+import { Link, usePathname, useRouter } from "@/i18n/navigation";
+import { History } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { BrandingProvider } from "@/context/BrandingContext";
 import { SearchModalProvider } from "@/context/SearchModalContext";
@@ -172,14 +171,6 @@ export default function DashboardLayoutClient({
                       target="_blank"
                       rel="noopener noreferrer"
                     >
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        aria-label="Documentation"
-                        className="shrink-0 text-muted-foreground hover:text-foreground"
-                      >
-                        <BookOpenText className="size-5" />
-                      </Button>
                     </a>
                     <NotificationDropdown />
                   </div>

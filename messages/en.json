@@ -1062,10 +1062,6 @@
           "label": "Inventory",
           "description": "Stock levels and SKU management"
         },
-        "activities": {
-          "label": "Activities",
-          "description": "Activity log and audit trail"
-        },
         "banners": {
           "label": "Banners",
           "description": "Manage banners for homepage, sidebar, footer"
