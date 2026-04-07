@@ -34,7 +34,7 @@ export function useExtraFieldsSchema(entityType?: ExtraFieldEntityType) {
     setLoading(true);
     try {
       const { data } = await api.get<{ extra_field_schema?: unknown }>(
-        "stores/settings/current/"
+        "store/settings/current/"
       );
       const raw = data.extra_field_schema ?? [];
       setSchemaState(normalizeSchema(raw));
@@ -132,7 +132,7 @@ export function useExtraFieldsSchema(entityType?: ExtraFieldEntityType) {
         options: f.options,
         defaultValue: f.defaultValue,
       }));
-      await api.patch("stores/settings/current/", {
+      await api.patch("store/settings/current/", {
         extra_field_schema: payload,
       });
       setSchemaState(completeSchema);

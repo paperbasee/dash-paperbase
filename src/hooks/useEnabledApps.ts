@@ -67,7 +67,7 @@ export function useEnabledApps() {
     async function fetchFromBackend() {
       try {
         const { data } = await api.get<{ modules_enabled?: Record<string, boolean> }>(
-          "stores/settings/current/"
+          "store/settings/current/"
         );
         if (!cancelled && data?.modules_enabled) {
           setEnabledOptional(modulesEnabledToSet(data.modules_enabled));
@@ -105,7 +105,7 @@ export function useEnabledApps() {
     saveEnabledOptionalApps(next);
 
     try {
-      await api.patch("stores/settings/current/", {
+      await api.patch("store/settings/current/", {
         modules_enabled: setToModulesEnabled(next),
       });
     } catch {

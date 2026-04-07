@@ -12,10 +12,7 @@ import {
   Search,
   LogOut,
   Settings,
-  Store,
-  Plus,
   LayoutGrid,
-  Ellipsis,
   Copy,
   Sun,
   Moon,
@@ -43,7 +40,6 @@ import {
 } from "@/components/ui/tooltip";
 import { useAuth } from "@/context/AuthContext";
 import { useBranding, defaultBranding } from "@/context/BrandingContext";
-import { useStoreLimit } from "@/hooks/useStoreLimit";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import UserAvatar from "@/components/UserAvatar";
 import { useSearchModal } from "@/context/SearchModalContext";
@@ -55,8 +51,6 @@ import {
   MORE_APP_IDS,
   type NavCounts,
 } from "@/config/apps";
-import api from "@/lib/api";
-import { verifyTwoFactorChallenge } from "@/lib/auth";
 import { cn } from "@/lib/utils";
 import { useEffect, useState } from "react";
 import { useLocale } from "next-intl";
@@ -72,7 +66,6 @@ import {
   subscribeToSystemThemeChanges,
   type ThemePreference,
 } from "@/lib/theme";
-import { notify } from "@/notifications";
 import SystemNotificationBanner from "@/components/system/SystemNotificationBanner";
 
 /** Top-level nav order; `__catalog__` is the Products / catalog group. */
@@ -119,7 +112,6 @@ function SidebarContent({
   const router = useRouter();
   const { logout, isAuthenticated } = useAuth();
   const { branding } = useBranding();
-  const { canAddStore, maxStores } = useStoreLimit(isAuthenticated);
   const { setOpen: setSearchOpen } = useSearchModal();
   const { counts, formatCount } = useNavCounts();
   const { isEnabled } = useEnabledApps();
@@ -154,13 +146,7 @@ function SidebarContent({
   useEffect(() => {
     if (showMore && moreChildActive) setCeleryOpen(true);
   }, [pathname, showMore, moreChildActive]);
-  const [storesOpen, setStoresOpen] = useState(false);
-  const [storesLoading, setStoresLoading] = useState(false);
-  const [storeSwitchingId, setStoreSwitchingId] = useState<string | null>(null);
   const [copiedStoreId, setCopiedStoreId] = useState<string | null>(null);
-  const [availableStores, setAvailableStores] = useState<
-    Array<{ public_id: string; name: string; role?: string }>
-  >([]);
   const [activeStoreId, setActiveStoreId] = useState<string | null>(null);
   const [theme, setTheme] = useState<ThemePreference>("system");
   /** Mobile sheet: center menu and size below nav panel width (desktop-style inset). */
@@ -215,7 +201,6 @@ function SidebarContent({
 
   useEffect(() => {
     if (!isAuthenticated) {
-      setAvailableStores([]);
       setActiveStoreId(null);
       return;
     }
@@ -249,94 +234,6 @@ function SidebarContent({
     }
   }, [isAuthenticated]);
 
-  useEffect(() => {
-    if (!isAuthenticated || !storesOpen) return;
-    let cancelled = false;
-
-    async function loadStores() {
-      setStoresLoading(true);
-      try {
-        const { data } = await api.get<{
-          stores?: Array<{
-            public_id?: string;
-            name?: string;
-            role?: string;
-          }>;
-        }>("auth/me/");
-        if (cancelled) return;
-        const normalized = (data.stores || []).reduce<
-          Array<{ public_id: string; name: string; role?: string }>
-        >((acc, store) => {
-          const rawId = store.public_id;
-          if (rawId == null) return acc;
-          acc.push(
-            store.role
-              ? {
-                  public_id: String(rawId),
-                  name: store.name?.trim() || "Store",
-                  role: store.role,
-                }
-              : {
-                  public_id: String(rawId),
-                  name: store.name?.trim() || "Store",
-                }
-          );
-          return acc;
-        }, []);
-        setAvailableStores(normalized);
-      } catch {
-        if (!cancelled) setAvailableStores([]);
-      } finally {
-        if (!cancelled) setStoresLoading(false);
-      }
-    }
-
-    loadStores();
-    return () => {
-      cancelled = true;
-    };
-  }, [isAuthenticated, storesOpen]);
-
-  const handleSwitchStore = async (storeId: string) => {
-    if (!storeId || storeId === activeStoreId || storeSwitchingId) return;
-    setStoreSwitchingId(storeId);
-    try {
-      const { data } = await api.post<{
-        access: string;
-        refresh: string;
-        active_store_public_id: string | number;
-        ["2fa_required"]?: boolean;
-        challenge_public_id?: string;
-      }>("auth/switch-store/", { store_public_id: storeId });
-      if ("2fa_required" in data && data["2fa_required"] && data.challenge_public_id) {
-        const promptResult = await notify.prompt({
-          title: tSidebar("twoFaSwitchPrompt"),
-          confirmLabel: { key: "common.next" },
-          cancelLabel: { key: "common.cancel" },
-          required: true,
-          level: "warning",
-        });
-        if (!promptResult.confirmed || !promptResult.value) {
-          return;
-        }
-        const verified = await verifyTwoFactorChallenge(
-          data.challenge_public_id,
-          promptResult.value
-        );
-        setActiveStoreId(String(verified.active_store_public_id));
-      } else {
-        window.localStorage.setItem("access_token", data.access);
-        window.localStorage.setItem("refresh_token", data.refresh);
-        setActiveStoreId(String(data.active_store_public_id));
-      }
-      onNavigate?.();
-      router.refresh();
-      window.location.reload();
-    } finally {
-      setStoreSwitchingId(null);
-    }
-  };
-
   const handleCopyStoreId = async (storeId: string) => {
     if (!storeId || typeof window === "undefined") return;
     try {
@@ -349,12 +246,6 @@ function SidebarContent({
       // Ignore clipboard permission/runtime errors.
     }
   };
-
-  const hasReachedStoreLimit =
-    maxStores != null && availableStores.length >= maxStores;
-  const canRenderAddStoreOption = maxStores != null;
-  const addStoreOptionDisabled =
-    canAddStore === false || (maxStores != null && hasReachedStoreLimit);
 
   return (
     <>
@@ -679,8 +570,11 @@ function SidebarContent({
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button
+              type="button"
               className={cn(
-                "flex w-full items-center gap-3 rounded-lg p-3 text-left transition-colors hover:bg-accent",
+                "flex w-full items-center gap-3 rounded-lg border-0 bg-transparent p-3 text-left transition-colors",
+                "outline-none hover:bg-accent",
+                "focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
                 collapsed && "justify-center"
               )}
               aria-label={tSidebar("userMenu")}
@@ -797,129 +691,22 @@ function SidebarContent({
             <DropdownMenuSeparator className="my-0" />
 
             <div className="p-1">
-              <DropdownMenuItem
-                onSelect={(event) => {
-                  event.preventDefault();
-                  setStoresOpen((prev) => !prev);
-                }}
-                className="text-[15px] font-medium"
-              >
-                <Store className="size-[1.125rem]" />
-                <span className="min-w-0 flex-1">{tSidebar("stores")}</span>
-                <ChevronRight
-                  className={cn(
-                    "size-4 shrink-0 text-muted-foreground transition-transform",
-                    storesOpen && "rotate-90"
-                  )}
-                />
-              </DropdownMenuItem>
-              {storesOpen && (
-                <>
-                  <DropdownMenuItem disabled className="opacity-100">
-                    <span className="text-[11px] uppercase tracking-wide text-muted-foreground">
-                      {tSidebar("availableStores")}
-                    </span>
-                  </DropdownMenuItem>
-                  {storesLoading ? (
-                    <DropdownMenuItem disabled>
-                      <span className="text-muted-foreground">
-                        {tSidebar("loadingStores")}
-                      </span>
-                    </DropdownMenuItem>
-                  ) : availableStores.length > 0 ? (
-                    availableStores.map((store) => {
-                      const isCurrent = activeStoreId === store.public_id;
-                      const isSwitching = storeSwitchingId === store.public_id;
-                      return (
-                        <DropdownMenuItem
-                          key={store.public_id}
-                          onSelect={(event) => {
-                            event.preventDefault();
-                            void handleSwitchStore(store.public_id);
-                          }}
-                          disabled={!!storeSwitchingId}
-                        >
-                          <span className="flex min-w-0 flex-1 items-center gap-2">
-                            <span
-                              className={cn(
-                                "h-2.5 w-2.5 shrink-0 rounded-full",
-                                isCurrent ? "bg-emerald-400" : "bg-muted-foreground/40"
-                              )}
-                            />
-                            <span className={cn("flex-1 truncate", isCurrent && "text-foreground")}>
-                              {store.name}
-                            </span>
-                            {isSwitching ? (
-                              <span className="text-xs text-muted-foreground">
-                                {tSidebar("switching")}
-                              </span>
-                            ) : null}
-                          </span>
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <button
-                                type="button"
-                                className="ml-2 inline-flex size-6 shrink-0 items-center justify-center rounded hover:bg-muted"
-                                aria-label={tSidebar("storeActions")}
-                                onClick={(event) => {
-                                  event.preventDefault();
-                                  event.stopPropagation();
-                                }}
-                              >
-                                <Ellipsis className="size-3.5" />
-                              </button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" side="right">
-                              <DropdownMenuItem
-                                onSelect={(event) => {
-                                  event.preventDefault();
-                                  event.stopPropagation();
-                                  void handleCopyStoreId(store.public_id);
-                                }}
-                              >
-                                <Copy className="size-3.5" />
-                                <span>
-                                  {copiedStoreId === store.public_id
-                                    ? tSidebar("storeIdCopied")
-                                    : tSidebar("copyStoreId")}
-                                </span>
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </DropdownMenuItem>
-                      );
-                    })
-                  ) : (
-                    <DropdownMenuItem disabled>
-                      <span className="text-muted-foreground">
-                        {tSidebar("noStoresAvailable")}
-                      </span>
-                    </DropdownMenuItem>
-                  )}
-                  <DropdownMenuSeparator className="my-1" />
-                  {canRenderAddStoreOption ? (
-                    addStoreOptionDisabled ? (
-                      <DropdownMenuItem disabled>
-                        <span className="flex items-center gap-2 text-muted-foreground">
-                          <Plus className="size-3.5" />
-                          <span>{tSidebar("addAnotherStore")}</span>
-                        </span>
-                      </DropdownMenuItem>
-                    ) : (
-                      <DropdownMenuItem asChild>
-                        <Link
-                          href="/onboarding?add=1"
-                          onClick={handleLinkClick}
-                          className="flex cursor-pointer items-center gap-2 text-muted-foreground hover:text-foreground"
-                        >
-                          <Plus className="size-3.5" />
-                          <span>{tSidebar("addAnotherStore")}</span>
-                        </Link>
-                      </DropdownMenuItem>
-                    )
-                  ) : null}
-                </>
-              )}
+              {activeStoreId ? (
+                <DropdownMenuItem
+                  onSelect={(event) => {
+                    event.preventDefault();
+                    void handleCopyStoreId(activeStoreId);
+                  }}
+                  className="text-[15px] font-medium"
+                >
+                  <Copy className="size-[1.125rem]" />
+                  <span>
+                    {copiedStoreId === activeStoreId
+                      ? tSidebar("storeIdCopied")
+                      : tSidebar("copyStoreId")}
+                  </span>
+                </DropdownMenuItem>
+              ) : null}
               <DropdownMenuItem asChild className="text-[15px] font-medium">
                 <Link
                   href="/settings"

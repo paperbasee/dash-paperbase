@@ -17,10 +17,13 @@ import { DELETION_STEPS_API } from "./deletionStepLabels";
 
 const DELETE_REQUEST_MIN_MS = 2500;
 
+export type DeleteModalStep = "phrase" | "otp";
+
 export type DeleteStatus = {
   status: string;
   current_step: string;
   error_message: string | null;
+  scheduled_delete_at?: string | null;
 } | null;
 
 export function useDeleteStore(ownerEmail: string, storeName: string) {
@@ -30,6 +33,10 @@ export function useDeleteStore(ownerEmail: string, storeName: string) {
   const [confirmPhrase, setConfirmPhrase] = useState("");
   const [confirmStoreName, setConfirmStoreName] = useState("");
   const [confirmOpen, setConfirmOpen] = useState(false);
+
+  const [modalStep, setModalStep] = useState<DeleteModalStep>("phrase");
+  const [challengePublicId, setChallengePublicId] = useState<string | null>(null);
+  const [otpCode, setOtpCode] = useState("");
 
   const [jobId, setJobId] = useState<string | null>(null);
   const [status, setStatus] = useState<DeleteStatus>(null);
@@ -42,6 +49,7 @@ export function useDeleteStore(ownerEmail: string, storeName: string) {
   const phraseMatches = isDeleteStoreModalPhraseConfirmed(confirmPhrase);
   const storeNameMatches = isDeleteStoreModalStoreNameConfirmed(confirmStoreName, storeName);
   const confirmMatches = phraseMatches && storeNameMatches;
+  const otpValid = otpCode.trim().length === 6 && /^\d{6}$/.test(otpCode.trim());
   const inProgress = jobId != null;
 
   const steps = [...DELETION_STEPS_API];
@@ -51,6 +59,9 @@ export function useDeleteStore(ownerEmail: string, storeName: string) {
     setConfirmPhrase("");
     setConfirmStoreName("");
     setRequestError(null);
+    setModalStep("phrase");
+    setChallengePublicId(null);
+    setOtpCode("");
   }, [confirmOpen]);
 
   useEffect(() => {
@@ -67,10 +78,14 @@ export function useDeleteStore(ownerEmail: string, storeName: string) {
           status: string;
           current_step: string;
           error_message: string | null;
-        }>(`stores/settings/delete-status/?job_id=${encodeURIComponent(currentJobId)}`);
+          scheduled_delete_at?: string | null;
+        }>(`store/settings/delete-status/?job_id=${encodeURIComponent(currentJobId)}`);
 
         if (cancelled) return;
-        setStatus(data);
+        setStatus({
+          ...data,
+          scheduled_delete_at: data.scheduled_delete_at ?? null,
+        });
 
         if (data.status === "success" && !successHandled) {
           successHandled = true;
@@ -107,7 +122,13 @@ export function useDeleteStore(ownerEmail: string, storeName: string) {
     };
   }, [jobId, router, t]);
 
-  async function handleDeleteConfirmed() {
+  function extractDetail(err: unknown): string | null {
+    if (!err || typeof err !== "object" || !("response" in err)) return null;
+    const d = (err as { response?: { data?: { detail?: string } } }).response?.data?.detail;
+    return d ?? null;
+  }
+
+  async function handleSendDeleteOtp() {
     const email = ownerEmail.trim();
     const name = storeName.trim();
     if (!email || !name) {
@@ -132,6 +153,48 @@ export function useDeleteStore(ownerEmail: string, storeName: string) {
     deleteInFlight.current = true;
     setRequestError(null);
     setSubmitting(true);
+
+    const started = performance.now();
+
+    try {
+      const { data } = await api.post<{
+        challenge_public_id: string;
+        expires_at: string;
+      }>("store/settings/delete/send-otp/", {
+        account_email: email,
+        store_name: name,
+        confirmation_phrase: confirmPhrase.trim(),
+      });
+
+      const elapsed = performance.now() - started;
+      if (elapsed < DELETE_REQUEST_MIN_MS) {
+        await new Promise((r) => window.setTimeout(r, DELETE_REQUEST_MIN_MS - elapsed));
+      }
+
+      setChallengePublicId(data.challenge_public_id);
+      setModalStep("otp");
+      setOtpCode("");
+    } catch (err: unknown) {
+      setRequestError(extractDetail(err) || t("deleteFlow.errSendOtp"));
+    } finally {
+      deleteInFlight.current = false;
+      setSubmitting(false);
+    }
+  }
+
+  async function handleConfirmDeleteOtp() {
+    if (!challengePublicId || !otpValid) {
+      setRequestError(t("deleteFlow.errOtpInvalid"));
+      return;
+    }
+
+    if (deleteInFlight.current || submitting || jobId) {
+      return;
+    }
+
+    deleteInFlight.current = true;
+    setRequestError(null);
+    setSubmitting(true);
     setSuccessDisplayed(false);
 
     const started = performance.now();
@@ -142,9 +205,10 @@ export function useDeleteStore(ownerEmail: string, storeName: string) {
         access: string;
         refresh: string;
         redirect_route: string;
-      }>("stores/settings/delete/", {
-        account_email: email,
-        store_name: name,
+        scheduled_delete_at?: string | null;
+      }>("store/settings/delete/confirm/", {
+        challenge_public_id: challengePublicId,
+        otp: otpCode.trim(),
       });
 
       const elapsed = performance.now() - started;
@@ -157,21 +221,25 @@ export function useDeleteStore(ownerEmail: string, storeName: string) {
 
       setStatus({
         status: "pending",
-        current_step: "Removing orders...",
+        current_step: "Scheduled — permanent deletion pending",
         error_message: null,
+        scheduled_delete_at: data.scheduled_delete_at ?? null,
       });
       setJobId(String(data.job_id));
       setConfirmOpen(false);
     } catch (err: unknown) {
-      const msg =
-        err && typeof err === "object" && "response" in err
-          ? (err as { response?: { data?: { detail?: string } } }).response?.data?.detail ?? null
-          : null;
-      setRequestError(msg || t("deleteFlow.errStartDeletion"));
+      setRequestError(extractDetail(err) || t("deleteFlow.errConfirmOtp"));
     } finally {
       deleteInFlight.current = false;
       setSubmitting(false);
     }
+  }
+
+  function backToPhraseStep() {
+    setModalStep("phrase");
+    setChallengePublicId(null);
+    setOtpCode("");
+    setRequestError(null);
   }
 
   function resetFlow() {
@@ -181,6 +249,9 @@ export function useDeleteStore(ownerEmail: string, storeName: string) {
     setSuccessDisplayed(false);
     setConfirmPhrase("");
     setConfirmStoreName("");
+    setModalStep("phrase");
+    setChallengePublicId(null);
+    setOtpCode("");
     deleteInFlight.current = false;
   }
 
@@ -191,6 +262,10 @@ export function useDeleteStore(ownerEmail: string, storeName: string) {
     setConfirmStoreName,
     confirmOpen,
     setConfirmOpen,
+    modalStep,
+    otpCode,
+    setOtpCode,
+    challengePublicId,
     jobId,
     status,
     requestError,
@@ -200,8 +275,11 @@ export function useDeleteStore(ownerEmail: string, storeName: string) {
     phraseMatches,
     storeNameMatches,
     confirmMatches,
+    otpValid,
     steps,
-    handleDeleteConfirmed,
+    handleSendDeleteOtp,
+    handleConfirmDeleteOtp,
+    backToPhraseStep,
     resetFlow,
   };
 }

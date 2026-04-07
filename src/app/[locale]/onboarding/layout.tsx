@@ -39,8 +39,19 @@ export default function OnboardingLayout({
           router.replace("/plan-not-active");
           return;
         }
-        if (path === "/") {
+        // Strict ownership: if the user has ANY owned store (active or not), onboarding is blocked.
+        // - ACTIVE store -> dashboard
+        // - INACTIVE / PENDING_DELETE -> recover
+        if (me.active_store_public_id) {
           router.replace("/");
+          return;
+        }
+        if (me.store) {
+          router.replace("/recover");
+          return;
+        }
+        if (path === "/recover") {
+          router.replace("/recover");
           return;
         }
         setSubGate("ok");

@@ -12,7 +12,7 @@ export interface LoginResponse {
 export interface PendingTwoFactorResponse {
   ["2fa_required"]: true;
   challenge_public_id: string;
-  flow: "login" | "register" | "switch_store";
+  flow: "login" | "register";
 }
 
 export type LoginResult = LoginResponse | PendingTwoFactorResponse;

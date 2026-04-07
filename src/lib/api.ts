@@ -75,7 +75,12 @@ async function refreshAccessTokenSingleFlight(): Promise<string> {
   return refreshPromise;
 }
 
-function getActiveStorePublicIdFromJwt(token: string): string | null {
+/** Refreshes access (and refresh when rotation is enabled) from the stored refresh token. */
+export async function refreshAccessTokenOrThrow(): Promise<string> {
+  return refreshAccessTokenSingleFlight();
+}
+
+export function getActiveStorePublicIdFromJwt(token: string): string | null {
   try {
     const parts = token.split(".");
     if (parts.length < 2) return null;
@@ -97,11 +102,6 @@ api.interceptors.request.use((config) => {
     const token = localStorage.getItem("access_token");
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
-      // Many admin endpoints require an active store context.
-      const storePublicId = getActiveStorePublicIdFromJwt(token);
-      if (storePublicId) {
-        config.headers["X-Store-Public-ID"] = storePublicId;
-      }
     }
   }
   // Let browser set Content-Type with boundary when sending FormData

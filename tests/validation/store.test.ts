@@ -2,8 +2,10 @@ import { describe, expect, it } from "vitest";
 import {
   accountSettingsSchema,
   DELETE_STORE_CONFIRM_PHRASE,
+  REMOVE_STORE_CONFIRM_PHRASE,
   isDeleteStoreModalPhraseConfirmed,
   isDeleteStoreModalStoreNameConfirmed,
+  isRemoveStoreModalPhraseConfirmed,
   storeCreateSchema,
 } from "@/lib/validation/store";
 
@@ -45,5 +47,13 @@ describe("store validation", () => {
   it("rejects wrong delete modal store name", () => {
     expect(isDeleteStoreModalStoreNameConfirmed("PetCare", "Pet Care")).toBe(false);
     expect(isDeleteStoreModalStoreNameConfirmed("x", "")).toBe(false);
+  });
+
+  it("accepts remove modal phrase with trim", () => {
+    expect(isRemoveStoreModalPhraseConfirmed(`  ${REMOVE_STORE_CONFIRM_PHRASE}  `)).toBe(true);
+  });
+
+  it("rejects wrong remove modal phrase", () => {
+    expect(isRemoveStoreModalPhraseConfirmed("remove my shop")).toBe(false);
   });
 });

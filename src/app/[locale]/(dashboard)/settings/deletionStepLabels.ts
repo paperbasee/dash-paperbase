@@ -21,6 +21,9 @@ export function translateDeletionStep(
   step: string,
   t: (key: string) => string,
 ): string {
+  if (step.includes("Scheduled")) {
+    return t("deleteFlow.stepScheduled");
+  }
   const key = STEP_TO_I18N_KEY[step as DeletionStepApi];
   return key ? t(key) : step;
 }

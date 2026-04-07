@@ -10,6 +10,7 @@ import api from "@/lib/api";
 import { useAccountSettings } from "./useAccountSettings";
 import { useStoreSettings } from "./useStoreSettings";
 import { useDeleteStore } from "./useDeleteStore";
+import { useRemoveStore } from "./useRemoveStore";
 import type { DynamicFieldsMessage } from "@/components/DynamicFieldsPanel";
 
 const NOTIFICATION_PREFS_KEY = "akkho_notification_prefs";
@@ -47,6 +48,7 @@ export default function useSettingsPageController() {
   const deleteStoreReady = Boolean(deletePayloadEmail && deletePayloadStoreName);
 
   const deleteStore = useDeleteStore(deletePayloadEmail, deletePayloadStoreName);
+  const removeStoreHook = useRemoveStore();
 
   // ── Sync branding into local state once loaded ─────────────────────────────
   useEffect(() => {
@@ -91,7 +93,7 @@ export default function useSettingsPageController() {
         const { data } = await api.get<{
           email_notify_owner_on_order_received: boolean;
           email_customer_on_order_confirmed: boolean;
-        }>("stores/settings/current/");
+        }>("store/settings/current/");
         if (cancelled) return;
         setNotificationPrefs((prev) => ({
           ...prev,
@@ -116,7 +118,7 @@ export default function useSettingsPageController() {
           : "email_customer_on_order_confirmed";
       setEmailPrefsSaving(true);
       try {
-        await api.patch("stores/settings/current/", { [patchKey]: value });
+        await api.patch("store/settings/current/", { [patchKey]: value });
         setNotificationPrefs((prev) => ({ ...prev, [key]: value }));
       } catch {
         // keep previous values
@@ -204,6 +206,9 @@ export default function useSettingsPageController() {
     setDeleteConfirmStoreName: deleteStore.setConfirmStoreName,
     deleteConfirmOpen: deleteStore.confirmOpen,
     setDeleteConfirmOpen: deleteStore.setConfirmOpen,
+    deleteModalStep: deleteStore.modalStep,
+    deleteOtpCode: deleteStore.otpCode,
+    setDeleteOtpCode: deleteStore.setOtpCode,
     deletionInProgress: deleteStore.inProgress,
     deleteJobId: deleteStore.jobId,
     deleteStatus: deleteStore.status,
@@ -212,11 +217,19 @@ export default function useSettingsPageController() {
     deleteSuccessDisplayed: deleteStore.successDisplayed,
     deletionSteps: deleteStore.steps,
     deleteConfirmMatches: deleteStore.confirmMatches,
+    deleteOtpValid: deleteStore.otpValid,
     /** Exact store name from branding (matches API `store_name` and modal typing field). */
     deleteExpectedStoreName: deletePayloadStoreName,
     deleteStoreDisplayName,
     deleteStoreReady,
-    handleDeleteConfirmed: deleteStore.handleDeleteConfirmed,
+    handleSendDeleteOtp: deleteStore.handleSendDeleteOtp,
+    handleConfirmDeleteOtp: deleteStore.handleConfirmDeleteOtp,
+    backToDeletePhraseStep: deleteStore.backToPhraseStep,
     resetDeleteFlow: deleteStore.resetFlow,
+
+    removeStoreSubmitting: removeStoreHook.submitting,
+    removeStoreError: removeStoreHook.error,
+    clearRemoveStoreError: removeStoreHook.clearError,
+    removeStore: removeStoreHook.removeStore,
   };
 }

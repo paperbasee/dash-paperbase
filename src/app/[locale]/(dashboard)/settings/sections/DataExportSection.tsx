@@ -1,10 +1,24 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import type { LucideIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Download, Store, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import {
+  REMOVE_STORE_CONFIRM_PHRASE,
+  isDeleteStoreModalStoreNameConfirmed,
+  isRemoveStoreModalPhraseConfirmed,
+} from "@/lib/validation";
 import { cn } from "@/lib/utils";
 import { SettingsSectionBody, settingsSectionSurfaceClassName } from "../SettingsSectionBody";
 
@@ -114,20 +128,61 @@ export default function DataExportSection({
   deleteStoreDisabled,
   onOpenDeleteConfirm,
   storeDisplayName,
+  expectedStoreNameForRemove,
   storeSubtitle,
   logoSrc,
+  contactEmail,
+  onRemoveStore,
+  removeStoreError,
+  clearRemoveStoreError,
+  removeStoreDisabled,
+  removeStoreSubmitting,
 }: {
   hidden: boolean;
   deleteStoreDisabled: boolean;
   onOpenDeleteConfirm: (open: boolean) => void;
   /** Shown in the delete preview row (matches confirmation modal). */
   storeDisplayName: string;
+  /** Exact store name for API `store_name` (same as delete flow). */
+  expectedStoreNameForRemove: string;
   /** Secondary line under the store name (e.g. store type). */
   storeSubtitle: string;
   /** Store logo URL for preview, or null for placeholder. */
   logoSrc: string | null;
+  contactEmail: string;
+  onRemoveStore: (storeName: string, confirmationPhrase: string) => Promise<boolean>;
+  removeStoreError: string | null;
+  clearRemoveStoreError: () => void;
+  removeStoreDisabled: boolean;
+  removeStoreSubmitting: boolean;
 }) {
   const t = useTranslations("settings");
+  const [removeOpen, setRemoveOpen] = useState(false);
+  const [removeName, setRemoveName] = useState("");
+  const [removePhrase, setRemovePhrase] = useState("");
+
+  const removeNameOk = isDeleteStoreModalStoreNameConfirmed(removeName, expectedStoreNameForRemove);
+  const removePhraseOk = isRemoveStoreModalPhraseConfirmed(removePhrase);
+  const removeConfirmOk = removeNameOk && removePhraseOk;
+
+  useEffect(() => {
+    if (!removeOpen) return;
+    setRemoveName("");
+    setRemovePhrase("");
+    clearRemoveStoreError();
+  }, [removeOpen, clearRemoveStoreError]);
+
+  function handleRemoveDialogChange(open: boolean) {
+    if (!open && removeStoreSubmitting) return;
+    setRemoveOpen(open);
+  }
+
+  async function handleSubmitRemove() {
+    if (!removeConfirmOk || removeStoreSubmitting) return;
+    const ok = await onRemoveStore(expectedStoreNameForRemove.trim(), removePhrase.trim());
+    if (ok) setRemoveOpen(false);
+  }
+
   return (
     <section
       id="panel-data"
@@ -167,13 +222,114 @@ export default function DataExportSection({
 
         <div
           className={cn(
+            "overflow-hidden rounded-lg border border-amber-600/35 bg-background",
+            "shadow-sm",
+          )}
+        >
+          <div className="p-5 md:p-6">
+            <h3 className="text-base font-semibold text-foreground">{t("dataExport.removeTitle")}</h3>
+            <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted-foreground">
+              {contactEmail.trim() ? t("dataExport.removeDesc") : t("dataExport.removeNeedsContact")}
+            </p>
+          </div>
+          <div className="flex justify-end border-t border-amber-600/25 bg-amber-500/5 px-4 py-3 md:px-5">
+            <Button
+              type="button"
+              variant="outline"
+              className="shrink-0 border-amber-600/40"
+              onClick={() => setRemoveOpen(true)}
+              disabled={removeStoreDisabled}
+            >
+              {t("dataExport.removeButton")}
+            </Button>
+          </div>
+        </div>
+
+        <Dialog open={removeOpen} onOpenChange={handleRemoveDialogChange}>
+          <DialogContent
+            className={cn(
+              "gap-0 p-0 sm:rounded-lg",
+              "max-sm:max-w-[min(20rem,calc(100vw-1.5rem))] max-sm:rounded-lg",
+            )}
+            onPointerDownOutside={(e) => {
+              if (removeStoreSubmitting) e.preventDefault();
+            }}
+            onEscapeKeyDown={(e) => {
+              if (removeStoreSubmitting) e.preventDefault();
+            }}
+          >
+            <DialogHeader className="gap-1 border-b border-border p-4 sm:p-6">
+              <DialogTitle className="text-base font-semibold">{t("dataExport.removeDialogTitle")}</DialogTitle>
+              <DialogDescription className="text-sm text-muted-foreground">
+                {t("dataExport.removeDialogDesc")}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-3 p-4 sm:space-y-4 sm:p-6">
+              <div className="flex flex-col gap-1.5">
+                <label htmlFor="remove-store-name" className="text-sm font-medium text-foreground">
+                  {t("dataExport.removeConfirmNameLabel")}{" "}
+                  <span className="font-semibold">{expectedStoreNameForRemove || storeDisplayName}</span>
+                </label>
+                <Input
+                  id="remove-store-name"
+                  autoComplete="off"
+                  value={removeName}
+                  onChange={(e) => setRemoveName(e.target.value)}
+                  disabled={removeStoreSubmitting}
+                  placeholder={expectedStoreNameForRemove || storeDisplayName}
+                />
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <label htmlFor="remove-store-phrase" className="text-sm font-medium text-foreground">
+                  {t("dataExport.removeConfirmPhraseLabel")}{" "}
+                  <span className="font-semibold">{REMOVE_STORE_CONFIRM_PHRASE}</span>
+                </label>
+                <Input
+                  id="remove-store-phrase"
+                  autoComplete="off"
+                  value={removePhrase}
+                  onChange={(e) => setRemovePhrase(e.target.value)}
+                  disabled={removeStoreSubmitting}
+                  placeholder={t("dataExport.removeConfirmPhraseHint")}
+                />
+              </div>
+              {removeStoreError ? (
+                <p className="text-sm text-destructive" role="alert">
+                  {removeStoreError}
+                </p>
+              ) : null}
+            </div>
+            <DialogFooter className="flex flex-row justify-end gap-2 border-t border-border p-4 sm:p-6">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setRemoveOpen(false)}
+                disabled={removeStoreSubmitting}
+              >
+                {t("dataExport.removeDialogCancel")}
+              </Button>
+              <Button
+                type="button"
+                variant="default"
+                className="border-amber-600/50 bg-amber-600 text-white hover:bg-amber-600/90"
+                onClick={() => void handleSubmitRemove()}
+                disabled={!removeConfirmOk || removeStoreSubmitting}
+              >
+                {removeStoreSubmitting ? t("dataExport.removeWorking") : t("dataExport.removeDialogSubmit")}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        <div
+          className={cn(
             "overflow-hidden rounded-lg border border-destructive/40 bg-background",
             "shadow-sm",
           )}
         >
           <div className="p-5 md:p-6">
             <h3 className="text-base font-semibold text-foreground">{t("dataExport.deleteTitle")}</h3>
-            <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted-foreground">{t("dataExport.deleteDesc")}</p>
+            <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted-foreground">{t("dataExport.deleteDescScheduled")}</p>
           </div>
 
           <div className="border-t border-border/80 bg-muted/20 px-5 py-4 md:px-6">

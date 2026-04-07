@@ -6,10 +6,10 @@ import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { useAuth } from "@/context/AuthContext";
 import api from "@/lib/api";
-import { verifyTwoFactorChallenge } from "@/lib/auth";
 import { CATALOG_INCLUDED_APP_IDS, OPTIONAL_APP_IDS } from "@/config/apps";
 import { parseValidation, storeCreateSchema } from "@/lib/validation";
 import { clearPendingVerificationEmail } from "@/lib/verification-state";
+import { invalidateMeRoutingCache } from "@/lib/subscription-access";
 import { notify, normalizeError } from "@/notifications";
 
 const STORAGE_KEY = "core_enabled_apps";
@@ -28,15 +28,20 @@ export interface StoreFormData {
 type StoreFormErrors = Partial<Record<keyof StoreFormData, string>>;
 export type OnboardingStep = 1 | 2 | 3 | 4 | 5;
 
-/** POST /stores/ — no api_key; keys are created in Settings → Networking. */
-type StoreCreateResponse = { public_id: string };
+/** POST /store/ — no api_key; keys are created in Settings → Networking. */
+type StoreCreateResponse = {
+  public_id: string;
+  access: string;
+  refresh: string;
+  redirect_route?: string;
+};
 
 interface MeResponse {
   active_store_public_id: string | null;
   email?: string;
   first_name?: string;
   last_name?: string;
-  stores: { public_id: string; name: string; role: string }[];
+  store?: { public_id: string; name: string; role: string } | null;
 }
 
 export function useOnboarding() {
@@ -79,8 +84,12 @@ export function useOnboarding() {
     async function checkStore() {
       try {
         const { data } = await api.get<MeResponse>("auth/me/");
-        const hasStores = (data.stores?.length ?? 0) > 0;
-        if (data.active_store_public_id && hasStores && !isAddMode) {
+        const hasStore = !!(
+          (data.active_store_public_id &&
+            String(data.active_store_public_id).trim()) ||
+          data.store?.public_id
+        );
+        if (hasStore && !isAddMode) {
           router.replace("/");
           return;
         }
@@ -194,7 +203,7 @@ export function useOnboarding() {
       for (const id of OPTIONAL_APP_IDS) {
         modules_enabled[id] = selectedApps.has(id);
       }
-      const { data: store } = await api.post<StoreCreateResponse>("stores/", {
+      const { data } = await api.post<StoreCreateResponse>("store/", {
         name: formData.name.trim(),
         store_type: formData.store_type.trim() || undefined,
         owner_first_name: formData.owner_first_name.trim(),
@@ -206,31 +215,9 @@ export function useOnboarding() {
         modules_enabled,
       });
 
-      const { data: switchData } = await api.post<{
-        access: string;
-        refresh: string;
-        active_store_public_id?: string;
-        ["2fa_required"]?: boolean;
-        challenge_public_id?: string;
-      }>("auth/switch-store/", { store_public_id: store.public_id });
-
-      if ("2fa_required" in switchData && switchData["2fa_required"] && switchData.challenge_public_id) {
-        const promptResult = await notify.prompt({
-          title: t("prompt2fa"),
-          confirmLabel: { key: "common.next" },
-          cancelLabel: { key: "common.cancel" },
-          required: true,
-          level: "warning",
-        });
-        if (!promptResult.confirmed || !promptResult.value) {
-          setError(t("twoFaRequired"));
-          return;
-        }
-        await verifyTwoFactorChallenge(switchData.challenge_public_id, promptResult.value);
-      } else {
-        localStorage.setItem("access_token", switchData.access);
-        localStorage.setItem("refresh_token", switchData.refresh);
-      }
+      localStorage.setItem("access_token", data.access);
+      localStorage.setItem("refresh_token", data.refresh);
+      invalidateMeRoutingCache();
       localStorage.setItem(
         STORAGE_KEY,
         JSON.stringify(
@@ -241,7 +228,7 @@ export function useOnboarding() {
       );
 
       clearPendingVerificationEmail();
-      router.push("/");
+      router.push(data.redirect_route || "/");
     } catch (err: unknown) {
       const normalized = normalizeError(err, t("createStoreFailed"));
       setError(normalized.message);

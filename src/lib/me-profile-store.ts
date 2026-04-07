@@ -1,4 +1,7 @@
-import api from "@/lib/api";
+import api, {
+  getActiveStorePublicIdFromJwt,
+  refreshAccessTokenOrThrow,
+} from "@/lib/api";
 import type { MeForRouting } from "@/lib/subscription-access";
 
 /** Persisted profile cache; stored in localStorage for cross-tab `storage` events. */
@@ -86,6 +89,13 @@ function writeStored(profileKey: string, me: MeForRouting) {
   }
 }
 
+function normalizeStorePublicId(
+  value: string | null | undefined
+): string | null {
+  const s = typeof value === "string" ? value.trim() : "";
+  return s.length ? s : null;
+}
+
 function resolveProfileKeyAfterFetch(me: MeForRouting, token: string): string | null {
   const fromJwt = getMeProfileKeyFromToken(token);
   if (fromJwt) return fromJwt;
@@ -151,12 +161,22 @@ export async function ensureMeProfile(options?: {
   inFlight = (async () => {
     try {
       const { data } = await api.get<MeForRouting>("auth/me/");
-      const tokenAfter = readAccessToken() ?? token;
-      const resolvedKey = resolveProfileKeyAfterFetch(data, tokenAfter);
-      if (resolvedKey) {
-        writeStored(resolvedKey, data);
+      let me = data;
+      let tokenAfter = readAccessToken() ?? token;
+      if (
+        normalizeStorePublicId(getActiveStorePublicIdFromJwt(tokenAfter)) !==
+        normalizeStorePublicId(me.active_store_public_id ?? null)
+      ) {
+        await refreshAccessTokenOrThrow();
+        tokenAfter = readAccessToken() ?? token;
+        const { data: synced } = await api.get<MeForRouting>("auth/me/");
+        me = synced;
       }
-      return data;
+      const resolvedKey = resolveProfileKeyAfterFetch(me, readAccessToken() ?? tokenAfter);
+      if (resolvedKey) {
+        writeStored(resolvedKey, me);
+      }
+      return me;
     } finally {
       inFlight = null;
       inFlightKey = null;

@@ -13,8 +13,15 @@ export interface MeForRouting {
   /** User public_id from auth/me/; used for cache key when JWT omits user_public_id. */
   public_id?: string;
   active_store_public_id: string | null;
+  /** True when the user owns a suspended / pending-delete store that can be restored. */
+  has_recoverable_stores?: boolean;
   subscription: MeSubscription;
-  stores?: Array<{ public_id?: string }>;
+  /** Single store summary for the current user (owner or staff). */
+  store?: {
+    public_id: string;
+    name: string;
+    role: string;
+  } | null;
 }
 
 /** Clear cached auth/me (logout, store deletion, etc.). */
@@ -31,7 +38,7 @@ export function hasActiveSubscription(me: MeForRouting): boolean {
   return me.subscription?.active === true;
 }
 
-export type PostAuthPath = "/" | "/onboarding" | "/plan-not-active";
+export type PostAuthPath = "/" | "/onboarding" | "/plan-not-active" | "/recover";
 
 /**
  * Where to send the user after login / 2FA, using server truth from auth/me/.
@@ -42,6 +49,9 @@ export function resolvePostAuthPath(me: MeForRouting): PostAuthPath {
   }
   if (me.active_store_public_id) {
     return "/";
+  }
+  if (me.has_recoverable_stores === true) {
+    return "/recover";
   }
   return "/onboarding";
 }

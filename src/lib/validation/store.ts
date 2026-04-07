@@ -57,8 +57,15 @@ export const accountSettingsSchema = buildAccountSettingsSchema();
 /** Exact phrase required in the delete-store confirmation modal (trimmed before compare). */
 export const DELETE_STORE_CONFIRM_PHRASE = "delete my store";
 
+/** Exact phrase for remove-store (reversible deactivation). */
+export const REMOVE_STORE_CONFIRM_PHRASE = "remove my store";
+
 export function isDeleteStoreModalPhraseConfirmed(value: string): boolean {
   return value.trim() === DELETE_STORE_CONFIRM_PHRASE;
+}
+
+export function isRemoveStoreModalPhraseConfirmed(value: string): boolean {
+  return value.trim() === REMOVE_STORE_CONFIRM_PHRASE;
 }
 
 /** Must match the active store name exactly (same rules as backend `store.name` vs request body). */

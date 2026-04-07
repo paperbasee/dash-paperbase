@@ -77,8 +77,12 @@ export default function SettingsPage() {
     setDeleteConfirmStoreName,
     deleteConfirmOpen,
     setDeleteConfirmOpen,
+    deleteModalStep,
+    deleteOtpCode,
+    setDeleteOtpCode,
     deletionInProgress,
     deleteConfirmMatches,
+    deleteOtpValid,
     deleteExpectedStoreName,
     deleteStoreDisplayName,
     deleteStoreReady,
@@ -87,8 +91,14 @@ export default function SettingsPage() {
     deleteStatus,
     deleteRequestError,
     deletionSteps,
-    handleDeleteConfirmed,
+    handleSendDeleteOtp,
+    handleConfirmDeleteOtp,
+    backToDeletePhraseStep,
     resetDeleteFlow,
+    removeStore,
+    removeStoreSubmitting,
+    removeStoreError,
+    clearRemoveStoreError,
   } = controller;
 
   const activeSectionMeta = SECTIONS.find((s) => s.id === activeSection);
@@ -246,8 +256,21 @@ export default function SettingsPage() {
             }
             onOpenDeleteConfirm={setDeleteConfirmOpen}
             storeDisplayName={deleteStoreDisplayName}
+            expectedStoreNameForRemove={deleteExpectedStoreName}
             storeSubtitle={storeType.trim() ? storeType : tSettings("currentStoreFallback")}
             logoSrc={previewUrl}
+            contactEmail={contactEmail}
+            onRemoveStore={removeStore}
+            removeStoreError={removeStoreError}
+            clearRemoveStoreError={clearRemoveStoreError}
+            removeStoreDisabled={
+              isLoading ||
+              !contactEmail.trim() ||
+              removeStoreSubmitting ||
+              deletionInProgress ||
+              deleteRequestSubmitting
+            }
+            removeStoreSubmitting={removeStoreSubmitting}
           />
         </main>
         </div>
@@ -256,12 +279,18 @@ export default function SettingsPage() {
       <DeleteStoreFlow
         deleteConfirmOpen={deleteConfirmOpen}
         onDeleteConfirmOpenChange={setDeleteConfirmOpen}
+        deleteModalStep={deleteModalStep}
         deleteConfirmStoreName={deleteConfirmStoreName}
         onDeleteConfirmStoreNameChange={setDeleteConfirmStoreName}
         deleteConfirmPhrase={deleteConfirmPhrase}
         onDeleteConfirmPhraseChange={setDeleteConfirmPhrase}
-        handleDeleteConfirmed={handleDeleteConfirmed}
+        otpCode={deleteOtpCode}
+        onOtpCodeChange={setDeleteOtpCode}
+        handleSendDeleteOtp={handleSendDeleteOtp}
+        handleConfirmDeleteOtp={handleConfirmDeleteOtp}
+        onBackToPhraseStep={backToDeletePhraseStep}
         deleteConfirmMatches={deleteConfirmMatches}
+        otpValid={deleteOtpValid}
         deletionInProgress={deletionInProgress}
         deleteRequestSubmitting={deleteRequestSubmitting}
         deleteSuccessDisplayed={deleteSuccessDisplayed}

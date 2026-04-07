@@ -40,10 +40,15 @@ export default function DashboardLayoutClient({
   const [mobileSystemBannerVisible, setMobileSystemBannerVisible] = useState(false);
   const subscription =
     meProfileStatus === "ready" ? (meProfile?.subscription ?? null) : null;
-  const storeCount =
-    meProfileStatus === "ready" && Array.isArray(meProfile?.stores)
-      ? meProfile.stores.length
-      : 0;
+  /** Must match `resolvePostAuthPath` in subscription-access.ts (avoid / ↔ /onboarding loops). */
+  const hasStoreContext =
+    meProfileStatus === "ready" &&
+    Boolean(
+      (meProfile?.active_store_public_id &&
+        String(meProfile.active_store_public_id).trim()) ||
+        meProfile?.store?.public_id
+    );
+  const storeCount = hasStoreContext ? 1 : 0;
   const contentContainerClass = "mx-auto w-full max-w-[88rem] px-4 md:px-6 lg:px-8";
 
   const normalizedPlan = (subscription?.plan ?? "").toLowerCase();
@@ -57,6 +62,12 @@ export default function DashboardLayoutClient({
     subscription?.active === true &&
     isEligiblePlan &&
     storeCount === 0;
+  const shouldRedirectToRecover =
+    meReady &&
+    meProfile &&
+    subscription?.active === true &&
+    !meProfile.active_store_public_id &&
+    meProfile.has_recoverable_stores === true;
   const authCheckReady = authHydrated && !isLoading;
 
   useEffect(() => {
@@ -73,6 +84,11 @@ export default function DashboardLayoutClient({
     if (!shouldRedirectToOnboarding) return;
     router.replace("/onboarding");
   }, [shouldRedirectToOnboarding, router]);
+
+  useEffect(() => {
+    if (!shouldRedirectToRecover) return;
+    router.replace("/recover");
+  }, [shouldRedirectToRecover, router]);
 
   useEffect(() => {
     const root = document.documentElement;
@@ -92,7 +108,7 @@ export default function DashboardLayoutClient({
     meProfileStatus === "loading" ||
     (meProfileStatus === "idle" && isAuthenticated);
 
-  if (authBlocking || shouldRedirectToOnboarding) {
+  if (authBlocking || shouldRedirectToOnboarding || shouldRedirectToRecover) {
     return (
       <div className="flex h-screen items-center justify-center bg-background">
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
