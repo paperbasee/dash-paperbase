@@ -102,6 +102,12 @@ api.interceptors.request.use((config) => {
     const token = localStorage.getItem("access_token");
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
+      // Backend tenant context is resolved in middleware (before DRF auth attaches request.auth),
+      // so we must also send the active store hint as a header for tenant-scoped admin APIs.
+      const activeStorePublicId = getActiveStorePublicIdFromJwt(token);
+      if (activeStorePublicId) {
+        config.headers["X-Store-Public-ID"] = activeStorePublicId;
+      }
     }
   }
   // Let browser set Content-Type with boundary when sending FormData
