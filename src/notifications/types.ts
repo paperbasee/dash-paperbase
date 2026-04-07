@@ -45,6 +45,15 @@ export type NotifyOptions = {
   dedupeKey?: string;
   surface?: NotificationSurface;
   title?: MessageDescriptor;
+  /** Overrides the default toast icon (if surface is "toast"). */
+  iconName?:
+    | "success"
+    | "information"
+    | "warning"
+    | "error"
+    | "server-error"
+    | "trash"
+    | "undo";
   action?: {
     label: MessageDescriptor;
     onClick: () => void;

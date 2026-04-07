@@ -13,7 +13,7 @@ import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Toast, type ToastAction, type ToastVariant } from "@/components/notifications/Toast";
+import { Toast, type ToastAction, type ToastIconName, type ToastVariant } from "@/components/notifications/Toast";
 import {
   Dialog,
   DialogContent,
@@ -51,6 +51,28 @@ function isDescriptor(value: MessageDescriptor): value is Exclude<MessageDescrip
   return typeof value === "object" && value !== null && "key" in value;
 }
 
+function inferToastIconName(input: {
+  variant: ToastVariant;
+  title?: string;
+  message: string;
+}): ToastIconName {
+  const haystack = `${input.title ?? ""} ${input.message}`.toLowerCase();
+
+  // Prefer intent-based icons over generic variant icons.
+  if (/(server|internal server|gateway|502|503|504|500)\b/.test(haystack)) return "server-error";
+  if (/(delete|deleted|remove|removed|trash)\b/.test(haystack)) return "trash";
+  if (/(restore|restored|undo)\b/.test(haystack)) return "undo";
+
+  const defaultIconNameByVariant: Record<ToastVariant, ToastIconName> = {
+    success: "success",
+    info: "information",
+    warning: "warning",
+    error: "error",
+  };
+
+  return defaultIconNameByVariant[input.variant];
+}
+
 export function NotificationProvider({ children }: { children: ReactNode }) {
   const DEFAULT_DURATION_MS = 5000;
   const t = useTranslations();
@@ -83,6 +105,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
       title,
       action,
       persistent,
+      iconName,
     }: {
       id: string;
       durationMs?: number;
@@ -91,6 +114,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
       title?: string;
       action?: ToastAction;
       persistent?: boolean;
+      iconName?: ToastIconName;
     }) => {
       toast.custom(
         () => (
@@ -99,7 +123,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
             title={title}
             message={message}
             action={action}
-            onClose={() => toast.dismiss(id)}
+            iconName={iconName}
           />
         ),
         { id, duration: persistent ? Number.POSITIVE_INFINITY : (durationMs ?? DEFAULT_DURATION_MS) },
@@ -119,12 +143,20 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
         warning: "Warning",
         error: "Error",
       };
+
+      const resolvedTitle = options?.title ? resolveMessage(options.title) : titleByVariant[kind];
+      const inferredIconName = inferToastIconName({
+        variant: kind,
+        title: resolvedTitle,
+        message: text,
+      });
+
       return showToast({
         id,
         durationMs: options?.durationMs,
         variant: kind,
         message: text,
-        title: options?.title ? resolveMessage(options.title) : titleByVariant[kind],
+        title: resolvedTitle,
         action: options?.action
           ? {
               label: resolveMessage(options.action.label),
@@ -132,6 +164,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
             }
           : undefined,
         persistent: options?.persistent,
+        iconName: options?.iconName ?? inferredIconName,
       });
     },
     [resolveMessage, showToast],
