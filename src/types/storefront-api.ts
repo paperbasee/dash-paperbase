@@ -87,6 +87,8 @@ export interface StorefrontBanner {
   cta_text: string;
   cta_url: string;
   order: number;
+  /** Predefined placement keys (e.g. home_top); same as admin `placement_slots`. */
+  placement_slots: string[];
   start_at: string | null;
   end_at: string | null;
   created_at: string;

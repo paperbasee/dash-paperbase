@@ -54,6 +54,8 @@ export default function NetworkingSection({ hidden }: { hidden: boolean }) {
   const [revealedKey, setRevealedKey] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [apiUrlCopied, setApiUrlCopied] = useState(false);
+  const [promptCopied, setPromptCopied] = useState(false);
+  const [promptLoading, setPromptLoading] = useState(false);
   const API_BASE_URL = "https://api.paperbase.me";
 
   const load = useCallback(async () => {
@@ -79,6 +81,12 @@ export default function NetworkingSection({ hidden }: { hidden: boolean }) {
     const timer = window.setTimeout(() => setApiUrlCopied(false), 1200);
     return () => window.clearTimeout(timer);
   }, [apiUrlCopied]);
+
+  useEffect(() => {
+    if (!promptCopied) return;
+    const timer = window.setTimeout(() => setPromptCopied(false), 1200);
+    return () => window.clearTimeout(timer);
+  }, [promptCopied]);
 
   async function createKey() {
     setBusy(true);
@@ -158,6 +166,28 @@ export default function NetworkingSection({ hidden }: { hidden: boolean }) {
     if (didCopy) setApiUrlCopied(true);
   }
 
+  async function copyStorefrontPrompt() {
+    setPromptLoading(true);
+    try {
+      const res = await fetch("/api/storefront-prompt", { cache: "no-store" });
+      if (!res.ok) throw new Error("load failed");
+      const text = await res.text();
+      const didCopy = await copy(text);
+      if (didCopy) {
+        setPromptCopied(true);
+        notify.success(t("networking.promptCopiedDescription"), {
+          title: t("networking.promptCopiedTitle"),
+        });
+      } else {
+        notify.warning(t("networking.promptCopyFailed"));
+      }
+    } catch {
+      notify.warning(t("networking.promptCopyFailed"));
+    } finally {
+      setPromptLoading(false);
+    }
+  }
+
   return (
     <section
       id="panel-networking"
@@ -178,6 +208,30 @@ export default function NetworkingSection({ hidden }: { hidden: boolean }) {
             <code className="min-w-0 break-all rounded bg-background px-2 py-1 text-sm">{API_BASE_URL}</code>
             <Button type="button" variant="ghost" size="icon" className="size-8" onClick={() => void copyApiBaseUrl()}>
               {apiUrlCopied ? <Check className="size-4 text-emerald-600 animate-pulse" /> : <Copy className="size-4" />}
+            </Button>
+          </div>
+        </div>
+
+        <div className="rounded-lg border border-border bg-muted/30 px-4 py-3">
+          <p className="text-xs uppercase tracking-wide text-muted-foreground">{t("networking.storefrontPromptLabel")}</p>
+          <p className="mt-1 text-sm text-muted-foreground">{t("networking.storefrontPromptHint")}</p>
+          <div className="mt-3 flex flex-wrap items-center gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="shrink-0"
+              disabled={promptLoading}
+              onClick={() => void copyStorefrontPrompt()}
+            >
+              {promptLoading ? (
+                <Loader2 className="mr-2 size-4 animate-spin" />
+              ) : promptCopied ? (
+                <Check className="mr-2 size-4 text-emerald-600" />
+              ) : (
+                <Copy className="mr-2 size-4" />
+              )}
+              {t("networking.copyStorefrontPrompt")}
             </Button>
           </div>
         </div>

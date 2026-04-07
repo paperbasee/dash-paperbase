@@ -1100,7 +1100,13 @@
       "noKeys": "এখনও কোনো API কী নেই। স্টোরফ্রন্ট বা হেডলেস API ব্যবহারের আগে নিচে একটি তৈরি করুন।",
       "createHeading": "API কী তৈরি করুন",
       "namePlaceholder": "যেমন ফ্রন্টএন্ড",
-      "createButton": "কী তৈরি করুন"
+      "createButton": "কী তৈরি করুন",
+      "storefrontPromptLabel": "স্টোরফ্রন্ট ইন্টিগ্রেশন প্রম্পট",
+      "storefrontPromptHint": "AI-সহায়িত স্টোরফ্রন্ট বা হেডলেস ফ্রন্টএন্ডের জন্য সম্পূর্ণ Markdown প্রম্পট কপি করুন। আপনার API কী ও বেস URL সহ সহায়কে পেস্ট করুন।",
+      "copyStorefrontPrompt": "প্রম্পট কপি করুন",
+      "promptCopiedTitle": "কপি হয়েছে",
+      "promptCopiedDescription": "স্টোরফ্রন্ট API প্রম্পট ক্লিপবোর্ডে আছে।",
+      "promptCopyFailed": "ক্লিপবোর্ডে কপি করা যায়নি। ব্রাউজারের অনুমতি দেখুন।"
     },
     "notifications": {
       "heading": "নোটিফিকেশন পছন্দ",

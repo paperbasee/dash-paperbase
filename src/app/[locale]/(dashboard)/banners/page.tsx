@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { Undo2} from "lucide-react";
@@ -8,6 +8,16 @@ import { isAxiosError } from "axios";
 import api from "@/lib/api";
 import { ClickableText } from "@/components/ui/clickable-text";
 import { Input } from "@/components/ui/input";
+import {
+  Combobox,
+  ComboboxChip,
+  ComboboxChips,
+  ComboboxChipsInput,
+  ComboboxContent,
+  ComboboxItem,
+  ComboboxList,
+  useComboboxAnchor,
+} from "@/components/ui/combobox";
 import type { Banner, PaginatedResponse } from "@/types";
 import { formatDashboardDateTime } from "@/lib/datetime-display";
 import { displayInputToApiLocal, isoDatetimeToDisplayInput } from "@/lib/datetime-form";
@@ -20,6 +30,7 @@ type BannerForm = {
   cta_link: string;
   order: string;
   is_active: boolean;
+  placement_slots: string[];
   start_at: string;
   end_at: string;
 };
@@ -30,9 +41,34 @@ const emptyForm: BannerForm = {
   cta_link: "",
   order: "0",
   is_active: true,
+  placement_slots: ["global_topbar"],
   start_at: "",
   end_at: "",
 };
+
+const PLACEMENT_OPTIONS: Array<{ value: string; label: string }> = [
+  { value: "global_topbar", label: "Global Topbar" },
+  { value: "global_bottom", label: "Global Bottom" },
+  { value: "home_top", label: "Home Top" },
+  { value: "home_mid", label: "Home Mid" },
+  { value: "home_bottom", label: "Home Bottom" },
+  { value: "dashboard_header", label: "Dashboard Header" },
+  { value: "dashboard_sidebar", label: "Dashboard Sidebar" },
+  { value: "dashboard_mid", label: "Dashboard Mid" },
+  { value: "product_top", label: "Product Top" },
+  { value: "product_mid", label: "Product Mid" },
+  { value: "product_bottom", label: "Product Bottom" },
+  { value: "checkout_top", label: "Checkout Top" },
+  { value: "checkout_bottom", label: "Checkout Bottom" },
+];
+
+function formatPlacements(values: string[]): string {
+  if (!values?.length) return "—";
+  const map = new Map(PLACEMENT_OPTIONS.map((o) => [o.value, o.label] as const));
+  return values.map((v) => map.get(v) ?? v).join(", ");
+}
+
+type PlacementItem = { value: string; label: string };
 
 export default function BannersPage() {
   const router = useRouter();
@@ -46,6 +82,13 @@ export default function BannersPage() {
   const [form, setForm] = useState<BannerForm>(emptyForm);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [saving, setSaving] = useState(false);
+  const placementAnchor = useComboboxAnchor();
+
+  const placementItems = useMemo((): PlacementItem[] => {
+    const map = new Map(PLACEMENT_OPTIONS.map((o) => [o.value, o.label] as const));
+    const values = form.placement_slots || [];
+    return values.map((value) => ({ value, label: map.get(value) ?? value }));
+  }, [form.placement_slots]);
 
   function fetchData() {
     setLoading(true);
@@ -80,6 +123,8 @@ export default function BannersPage() {
       cta_link: banner.cta_link || "",
       order: String(banner.order ?? 0),
       is_active: banner.is_active,
+      placement_slots:
+        banner.placement_slots?.length ? banner.placement_slots : ["global_topbar"],
       start_at: isoDatetimeToDisplayInput(banner.start_at),
       end_at: isoDatetimeToDisplayInput(banner.end_at),
     });
@@ -88,6 +133,13 @@ export default function BannersPage() {
 
   async function handleSave(e: FormEvent) {
     e.preventDefault();
+
+    if (!form.placement_slots.length) {
+      notify.validation("banners-form", {
+        placement_slots: "Select at least one placement slot",
+      });
+      return;
+    }
 
     const start_at = displayInputToApiLocal(form.start_at);
     if (form.start_at.trim() && start_at === null) {
@@ -107,6 +159,7 @@ export default function BannersPage() {
     fd.append("cta_link", form.cta_link.trim());
     fd.append("order", form.order || "0");
     fd.append("is_active", String(form.is_active));
+    fd.append("placement_slots", JSON.stringify(form.placement_slots));
     if (start_at) fd.append("start_at", start_at);
     if (end_at) fd.append("end_at", end_at);
     if (imageFile) fd.append("image", imageFile);
@@ -199,6 +252,56 @@ export default function BannersPage() {
             {editing === "new" ? tPages("bannersNew") : tPages("bannersEdit")}
           </h2>
           <div className="grid gap-4 sm:grid-cols-2">
+            <div className="sm:col-span-2">
+              <label className="mb-1 block text-sm font-medium">
+                Placement slots
+              </label>
+              <div className="space-y-2">
+                <Combobox<PlacementItem>
+                  multiple
+                  modal={false}
+                  value={placementItems}
+                  onValueChange={(next) => {
+                    if (next === null) return;
+                    const arr = Array.isArray(next) ? next : [next];
+                    setForm((f) => ({
+                      ...f,
+                      placement_slots: arr.map((x) => x.value),
+                    }));
+                  }}
+                  isItemEqualToValue={(a, b) => a.value === b.value}
+                >
+                  <ComboboxChips ref={placementAnchor} className="w-full">
+                    {placementItems.map((item) => (
+                      <ComboboxChip key={item.value} value={item}>
+                        {item.label}
+                      </ComboboxChip>
+                    ))}
+                    <ComboboxChipsInput placeholder="Select placements…" />
+                  </ComboboxChips>
+                  <ComboboxContent anchor={placementAnchor}>
+                    <ComboboxList>
+                      {PLACEMENT_OPTIONS.map((opt) => {
+                        const item: PlacementItem = {
+                          value: opt.value,
+                          label: opt.label,
+                        };
+                        return (
+                          <ComboboxItem key={opt.value} value={item}>
+                            <span className="text-sm font-medium">
+                              {opt.label}
+                            </span>
+                          </ComboboxItem>
+                        );
+                      })}
+                    </ComboboxList>
+                  </ComboboxContent>
+                </Combobox>
+                <p className="text-xs text-muted-foreground">
+                  {formatPlacements(form.placement_slots)}
+                </p>
+              </div>
+            </div>
             <div>
               <label className="mb-1 block text-sm font-medium">{tPages("bannersLabelTitle")}</label>
               <Input
@@ -329,6 +432,7 @@ export default function BannersPage() {
             <tr className="border-b border-border bg-muted/40">
               <th className="th">{tPages("bannersColPreview")}</th>
               <th className="th">{tPages("bannersColTitle")}</th>
+              <th className="th">Placements</th>
               <th className="th">{tPages("bannersColOrder")}</th>
               <th className="th">{tPages("bannersColStart")}</th>
               <th className="th">{tPages("bannersColEnd")}</th>
@@ -358,6 +462,9 @@ export default function BannersPage() {
                   >
                     {b.title || "—"}
                   </ClickableText>
+                </td>
+                <td className="px-4 py-3 text-muted-foreground">
+                  {formatPlacements(b.placement_slots || [])}
                 </td>
                 <td className="px-4 py-3">{b.order}</td>
                 <td className="px-4 py-3 text-muted-foreground">

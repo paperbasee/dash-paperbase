@@ -1100,7 +1100,13 @@
       "noKeys": "No API keys yet. Create one below before using the storefront or headless API.",
       "createHeading": "Create API key",
       "namePlaceholder": "e.g. Frontend",
-      "createButton": "Create Key"
+      "createButton": "Create Key",
+      "storefrontPromptLabel": "Storefront integration prompt",
+      "storefrontPromptHint": "Copy the full Markdown prompt for AI-assisted storefront or headless frontends. Paste it into your assistant with your API key and base URL.",
+      "copyStorefrontPrompt": "Copy prompt",
+      "promptCopiedTitle": "Copied",
+      "promptCopiedDescription": "Storefront API prompt is on your clipboard.",
+      "promptCopyFailed": "Could not copy to clipboard. Check browser permissions."
     },
     "notifications": {
       "heading": "Notification preferences",
