@@ -39,14 +39,14 @@ export default function DashboardBarChart({ data }: DashboardBarChartProps) {
           color: "hsl(var(--chart-products))",
         },
         {
-          key: "supportTickets",
-          label: t("chartSupportTickets"),
-          color: "hsl(var(--chart-support-tickets))",
-        },
-        {
           key: "customers",
           label: t("chartCustomers"),
           color: "hsl(var(--chart-customers))",
+        },
+        {
+          key: "supportTickets",
+          label: t("chartSupportTickets"),
+          color: "hsl(var(--chart-support-tickets))",
         },
       ] as const,
     [t]

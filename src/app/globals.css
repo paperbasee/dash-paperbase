@@ -164,9 +164,10 @@
     /* Dark mode – neutral charcoal gray, no blue tint */
     --background: 220 8% 7%;
     --foreground: 210 20% 96%;
-    --card: 220 8% 9%;
+    /* Keep card surface close to base bg (avoid “double background” feel). */
+    --card: 220 8% 8%;
     --card-foreground: 210 20% 96%;
-    --popover: 220 8% 9%;
+    --popover: 220 8% 8%;
     --popover-foreground: 210 20% 96%;
     --primary: 210 20% 96%;
     --primary-foreground: 220 10% 12%;
