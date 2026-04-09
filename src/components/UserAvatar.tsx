@@ -8,6 +8,7 @@ interface UserAvatarProps {
   publicId: string | null;
   name?: string;
   plan?: string | null;
+  isExpiringSoon?: boolean;
   className?: string;
 }
 
@@ -18,16 +19,19 @@ function getInitial(name?: string): string {
   return trimmed.charAt(0).toUpperCase();
 }
 
-function getPlanRingClasses(plan?: string | null): string {
+function getPlanRingClasses(plan?: string | null, isExpiringSoon?: boolean): string {
+  if (isExpiringSoon) {
+    return "ring-2 ring-red-500 shadow-[0_0_6px_rgba(239,68,68,0.4)]";
+  }
   if (plan?.toLowerCase() === "premium") {
     return "ring-2 ring-amber-400 shadow-[0_0_6px_rgba(251,191,36,0.4)]";
   }
   return "";
 }
 
-export default function UserAvatar({ publicId, name, plan, className }: UserAvatarProps) {
+export default function UserAvatar({ publicId, name, plan, isExpiringSoon, className }: UserAvatarProps) {
   const [imgFailed, setImgFailed] = useState(false);
-  const ringClasses = getPlanRingClasses(plan);
+  const ringClasses = getPlanRingClasses(plan, isExpiringSoon);
 
   if (publicId && !imgFailed) {
     return (

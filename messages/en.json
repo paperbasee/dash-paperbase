@@ -732,7 +732,9 @@
     "subscriptionVerifyTitle": "Unable to verify subscription",
     "subscriptionVerifyBody": "We could not verify your account status right now. Please try reloading. If the issue continues, contact support.",
     "noSubscriptionTitle": "No active subscription",
-    "noSubscriptionBody": "Your account does not have an active plan. Please contact support to activate a subscription before accessing the dashboard."
+    "noSubscriptionBody": "Your account does not have an active plan. Please contact support to activate a subscription before accessing the dashboard.",
+    "expiringBannerText": "Your subscription expires in {days, plural, =0 {less than a day} =1 {1 day} other {# days}}. Contact support to renew.",
+    "expiringBannerCta": "Contact support"
   },
   "dashboard": {
     "title": "Dashboard overview",

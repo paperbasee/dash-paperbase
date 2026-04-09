@@ -115,7 +115,7 @@ function SidebarContent({
   const { setOpen: setSearchOpen } = useSearchModal();
   const { counts, formatCount } = useNavCounts();
   const { isEnabled } = useEnabledApps();
-  const { publicId: userPublicId, plan: userPlan } = useCurrentUser(isAuthenticated);
+  const { publicId: userPublicId, plan: userPlan, isExpiringSoon: userExpiringSoon } = useCurrentUser(isAuthenticated);
   const [catalogOpen, setCatalogOpen] = useState(false);
 
   const isActive = (href: string) => {
@@ -579,7 +579,7 @@ function SidebarContent({
               )}
               aria-label={tSidebar("userMenu")}
             >
-              <UserAvatar publicId={userPublicId} name={ownerName} plan={userPlan} />
+              <UserAvatar publicId={userPublicId} name={ownerName} plan={userPlan} isExpiringSoon={userExpiringSoon} />
               {!collapsed && (
                 <>
                   <div className="min-w-0 flex-1">
@@ -754,7 +754,7 @@ export default function Sidebar({ collapsed, onToggle, onNavigate }: SidebarProp
   return (
     <aside
       className={cn(
-        "fixed left-0 top-0 z-40 hidden h-screen flex-col border-r border-border bg-background transition-[width] duration-300 md:flex",
+        "fixed left-0 top-[var(--subscription-banner-offset,0px)] z-40 hidden h-[calc(100vh-var(--subscription-banner-offset,0px))] flex-col border-r border-border bg-background transition-[width] duration-300 md:flex",
         collapsed ? "w-16" : "w-72"
       )}
     >

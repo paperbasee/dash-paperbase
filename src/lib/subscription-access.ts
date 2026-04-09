@@ -7,6 +7,8 @@ export interface MeSubscription {
   active: boolean;
   plan: string | null;
   end_date: string | null;
+  days_remaining: number;
+  is_expiring_soon: boolean;
 }
 
 export interface MeForRouting {

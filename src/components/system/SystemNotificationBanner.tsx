@@ -137,7 +137,7 @@ export default function SystemNotificationBanner({
       aria-live="polite"
       aria-label={`${notification.title}. ${notification.message}`}
       className={cn(
-        "system-notification-banner fixed right-0 top-0 z-50 flex h-[var(--header-height)] shrink-0 items-center border-b px-4 text-sm transition-[left] duration-300",
+        "system-notification-banner fixed right-0 top-[var(--subscription-banner-offset,0px)] z-50 flex h-[var(--header-height)] shrink-0 items-center border-b px-4 text-sm transition-[left] duration-300",
         "left-0 md:left-16",
         !sidebarCollapsed && "md:left-72",
         className

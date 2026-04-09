@@ -21,7 +21,9 @@ export default function MobileNavBar({ onMenuClick, bannerVisible = false }: Mob
     <div
       className={cn(
         "sticky z-40 flex h-14 items-center justify-between border-b border-border bg-background px-4 md:hidden",
-        bannerVisible ? "top-[var(--header-height)]" : "top-0"
+        bannerVisible
+          ? "top-[calc(var(--subscription-banner-offset,0px)+var(--header-height))]"
+          : "top-[var(--subscription-banner-offset,0px)]"
       )}
     >
       <Button

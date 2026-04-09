@@ -93,6 +93,8 @@
 
 @layer base {
   :root {
+    /* Subscription warning strip height (set from JS when expiring-soon); default 0 */
+    --subscription-banner-offset: 0px;
     /* Header height: sidebar nav bar + announcement banner (pixel-perfect alignment) */
     --header-height: 64px;
     --dashboard-content-max-width: 88rem;
