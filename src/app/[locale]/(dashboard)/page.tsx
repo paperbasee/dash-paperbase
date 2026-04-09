@@ -2,7 +2,6 @@
 
 import { useMemo, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { format } from "date-fns";
 import StatsCard from "@/components/StatsCard";
 import DashboardBarChart from "@/components/DashboardBarChart";
 import DateRangeFilter, {
@@ -11,15 +10,8 @@ import DateRangeFilter, {
 import { useDashboardAnalytics } from "@/hooks/useDashboardAnalytics";
 import { useActivities } from "@/hooks/useActivities";
 import { toLocaleDigits } from "@/lib/locale-digits";
-
-function formatDateTime(value: string, locale: string): string {
-  const d = new Date(value);
-  if (Number.isNaN(d.getTime())) return value;
-  const pad = (n: number) => n.toString().padStart(2, "0");
-  const datePart = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
-  const timePart = `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
-  return toLocaleDigits(`${datePart}, ${timePart}`, locale);
-}
+import { formatDashboardDateTimeWithSeconds } from "@/lib/datetime-display";
+import { todayYmdInBD } from "@/utils/time";
 
 export default function DashboardPage() {
   const locale = useLocale();
@@ -27,9 +19,7 @@ export default function DashboardPage() {
   const today = useMemo(() => new Date(), []);
 
   const [range, setRange] = useState<DateRangeValue>(() => {
-    const end = today;
-    const start = end;
-    const iso = format(start, "yyyy-MM-dd");
+    const iso = todayYmdInBD(today);
     return {
       startDate: iso,
       endDate: iso,
@@ -129,7 +119,10 @@ export default function DashboardPage() {
                         </div>
                       </div>
                       <div className="shrink-0 whitespace-nowrap text-right text-[10px] text-muted-foreground">
-                        {formatDateTime(item.created_at, locale)}
+                        {formatDashboardDateTimeWithSeconds(
+                          item.created_at,
+                          locale
+                        )}
                       </div>
                     </div>
                   </div>

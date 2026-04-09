@@ -1,11 +1,6 @@
 "use client";
 
 import { useMemo } from "react";
-import {
-  addDays,
-  startOfMonth,
-  format,
-} from "date-fns";
 import { Button } from "./ui/button";
 import { Card, CardContent } from "./ui/card";
 import { Input } from "./ui/input";
@@ -16,6 +11,11 @@ import {
   type DateRangeValue,
   type PresetKey,
 } from "@/lib/validation";
+import {
+  addCalendarDaysYmd,
+  startOfMonthYmdInBD,
+  todayYmdInBD,
+} from "@/utils/time";
 
 interface DateRangeFilterProps {
   value: DateRangeValue;
@@ -29,21 +29,21 @@ export default function DateRangeFilter({
   const today = useMemo(() => new Date(), []);
 
   const setPreset = (preset: PresetKey) => {
-    const end = today;
-    let start = end;
+    const endStr = todayYmdInBD(today);
+    let startStr = endStr;
     let bucket: AnalyticsBucket = "day";
 
     if (preset === "last7") {
-      start = addDays(end, -6);
+      startStr = addCalendarDaysYmd(endStr, -6);
       bucket = "day";
     } else if (preset === "last30") {
-      start = addDays(end, -29);
+      startStr = addCalendarDaysYmd(endStr, -29);
       bucket = "day";
     } else if (preset === "thisMonth") {
-      start = startOfMonth(end);
+      startStr = startOfMonthYmdInBD(today);
       bucket = "day";
     } else if (preset === "today") {
-      start = end;
+      startStr = endStr;
       bucket = "day";
     } else {
       // custom – keep existing dates/bucket
@@ -52,8 +52,8 @@ export default function DateRangeFilter({
     }
 
     const base: DateRangeValue = {
-      startDate: format(start, "yyyy-MM-dd"),
-      endDate: format(end, "yyyy-MM-dd"),
+      startDate: startStr,
+      endDate: endStr,
       bucket,
       preset,
     };
@@ -149,4 +149,3 @@ export default function DateRangeFilter({
 }
 
 export type { DateRangeValue, PresetKey } from "@/lib/validation";
-

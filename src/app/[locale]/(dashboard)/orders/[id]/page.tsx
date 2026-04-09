@@ -50,9 +50,7 @@ import {
   splitShippingAddressForForm,
 } from "@/lib/orders/shipping-address-parts";
 import { formatDashboardDateTime } from "@/lib/datetime-display";
-import { useConfirm } from "@/context/ConfirmDialogContext";
 import { notify, normalizeError } from "@/notifications";
-import { useAdminDeleteCapabilities } from "@/hooks/useAdminDeleteCapabilities";
 
 type EditForm = {
   shipping_name: string;
@@ -105,9 +103,6 @@ export default function OrderDetailPage() {
   const [statusUpdateLoading, setStatusUpdateLoading] = useState(false);
   const rightColRef = useRef<HTMLDivElement>(null);
   const [rightColHeight, setRightColHeight] = useState<number | null>(null);
-  const { canDelete: canDeleteOrder, isSuperuser: deleteIsSuperuser } =
-    useAdminDeleteCapabilities();
-  const confirm = useConfirm();
 
   useEffect(() => {
     api
@@ -434,24 +429,6 @@ export default function OrderDetailPage() {
     }
   }
 
-  async function handleDelete() {
-    const ok = await confirm({
-      title: tPages("confirmDialogTitleDeleteOrder"),
-      message: deleteIsSuperuser
-        ? tPages("orderDetailConfirmDeletePermanent")
-        : tPages("orderDetailConfirmDeleteTrash"),
-      variant: "danger",
-    });
-    if (!ok) return;
-    try {
-      await api.delete(`admin/orders/${order_public_id}/`);
-      router.push("/orders");
-    } catch (err) {
-      console.error(err);
-      notify.error(err);
-    }
-  }
-
   async function handleStatusChange(next: string) {
     if (
       !order ||
@@ -550,16 +527,6 @@ export default function OrderDetailPage() {
           </nav>
         </div>
         <div className="flex flex-wrap items-center justify-end gap-2">
-          {canDeleteOrder && (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleDelete}
-            className="rounded-lg border-destructive text-destructive hover:bg-destructive/10"
-          >
-            {tPages("orderDetailDeleteOrder")}
-          </Button>
-          )}
           {editing ? (
             <>
               <Button

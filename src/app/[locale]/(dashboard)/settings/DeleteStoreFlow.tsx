@@ -1,7 +1,7 @@
 "use client";
 
 import type { Dispatch, SetStateAction } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { AlertCircle, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -18,6 +18,7 @@ import { cn } from "@/lib/utils";
 import { translateDeletionStep } from "./deletionStepLabels";
 import type { DeleteModalStep } from "./useDeleteStore";
 import { useAuth } from "@/context/AuthContext";
+import { formatDashboardDateTimeWithSeconds } from "@/lib/datetime-display";
 
 type DeleteStatus = {
   status: string;
@@ -25,19 +26,6 @@ type DeleteStatus = {
   error_message: string | null;
   scheduled_delete_at?: string | null;
 } | null;
-
-function formatScheduledAt(value: string): string {
-  const d = new Date(value);
-  if (Number.isNaN(d.getTime())) return value;
-  const pad = (n: number) => String(n).padStart(2, "0");
-  const y = d.getFullYear();
-  const m = pad(d.getMonth() + 1);
-  const day = pad(d.getDate());
-  const hh = pad(d.getHours());
-  const mm = pad(d.getMinutes());
-  const ss = pad(d.getSeconds());
-  return `${y}-${m}-${day} ${hh}:${mm}:${ss}`;
-}
 
 export default function DeleteStoreFlow({
   deleteConfirmOpen,
@@ -88,6 +76,7 @@ export default function DeleteStoreFlow({
   storeDisplayName: string;
   onCloseDeletion: () => void;
 }) {
+  const locale = useLocale();
   const t = useTranslations("settings");
   const { logout } = useAuth();
   function handleDialogOpenChange(next: boolean) {
@@ -318,7 +307,10 @@ export default function DeleteStoreFlow({
                     </p>
                     {deleteStatus.scheduled_delete_at ? (
                       <p className="mt-2 font-numbers text-base font-semibold text-foreground">
-                        {formatScheduledAt(deleteStatus.scheduled_delete_at)}
+                        {formatDashboardDateTimeWithSeconds(
+                          deleteStatus.scheduled_delete_at,
+                          locale
+                        )}
                       </p>
                     ) : null}
                     <p className="mt-2 text-xs leading-relaxed text-muted-foreground">

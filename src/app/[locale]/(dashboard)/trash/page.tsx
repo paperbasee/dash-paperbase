@@ -30,6 +30,8 @@ export default function TrashPage() {
   const [bulkDeleting, setBulkDeleting] = useState(false);
   const [bulkRestoring, setBulkRestoring] = useState(false);
 
+  const isOrderRow = useCallback((row: TrashItem) => row.entity_type === "order", []);
+
   const typeLabel = useCallback(
     (t: TrashEntityType) =>
       t === "order" ? tPages("trashTypeOrder") : tPages("trashTypeProduct"),
@@ -126,6 +128,8 @@ export default function TrashPage() {
       // Sequential: parallel restores each run sync_product_stock_cache(select_for_update on
       // all store products/inventory) and can deadlock the DB.
       for (const id of ids) {
+        const row = rows.find((r) => r.id === id);
+        if (row && isOrderRow(row)) continue;
         await api.post(`admin/trash/${id}/restore/`);
       }
       setSelectedIds(new Set());
@@ -160,6 +164,8 @@ export default function TrashPage() {
     const ids = Array.from(selectedIds);
     try {
       for (const id of ids) {
+        const row = rows.find((r) => r.id === id);
+        if (row && isOrderRow(row)) continue;
         await api.delete(`admin/trash/${id}/`);
       }
       setSelectedIds(new Set());
@@ -178,6 +184,7 @@ export default function TrashPage() {
   }
 
   async function handleRestore(row: TrashItem) {
+    if (isOrderRow(row)) return;
     const ok = await confirm({
       title: tPages("confirmDialogTitleRestoreFromTrash", {
         type: typeLabel(row.entity_type),
@@ -205,6 +212,7 @@ export default function TrashPage() {
   }
 
   async function handlePermanentDelete(row: TrashItem) {
+    if (isOrderRow(row)) return;
     const ok = await confirm({
       title: tPages("confirmDialogTitleDeleteFromTrashRow"),
       message: tPages("trashConfirmPermanent"),
@@ -357,7 +365,7 @@ export default function TrashPage() {
                             variant="secondary"
                             size="sm"
                             className="shrink-0 whitespace-nowrap"
-                            disabled={busy || bulkBusy}
+                            disabled={busy || bulkBusy || isOrderRow(row)}
                             onClick={() => handleRestore(row)}
                           >
                             <Undo2 className="mr-1 size-3.5 shrink-0" />
@@ -368,7 +376,7 @@ export default function TrashPage() {
                             variant="destructive"
                             size="sm"
                             className="shrink-0 whitespace-nowrap"
-                            disabled={busy || bulkBusy}
+                            disabled={busy || bulkBusy || isOrderRow(row)}
                             onClick={() => handlePermanentDelete(row)}
                           >
                             <Trash2 className="mr-1 size-3.5 shrink-0" />

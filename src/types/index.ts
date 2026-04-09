@@ -347,25 +347,16 @@ export interface Banner {
 
 export interface Customer {
   public_id: string;
-  user_public_id: string | null;
-  user_email: string | null;
-  user_username: string | null;
   name: string;
   email: string | null;
   phone: string;
   address: string | null;
-  /**
-   * Legacy denormalized counter; may drift. Prefer `ledger_order_count` when present.
-   * @deprecated Use ledger_order_count for display.
-   */
   total_orders: number;
-  /** Distinct historical orders from purchase ledger (survives order deletion). */
-  ledger_order_count?: number;
-  /** Sum of ledger line totals for this customer. */
-  ledger_total_spent?: string | number;
-  /** Optional legacy field if API exposes spend on list. */
-  total_spent?: string | number;
-  marketing_opt_in: boolean;
+  total_spent: string | number;
+  first_order_at?: string | null;
+  last_order_at?: string | null;
+  is_repeat_customer?: boolean;
+  avg_order_interval_days?: string | number | null;
   created_at: string;
   updated_at?: string;
 }
@@ -377,30 +368,15 @@ export interface CustomerDetailsResponse {
     email: string | null;
     phone: string;
     address: string | null;
-    district: string | null;
   };
   analytics: {
-    /** Ledger-based distinct order count (same keys as before; semantics are ledger). */
     total_orders: number;
-    /** Ledger-based spend aggregate. */
     total_spent: string;
-    average_order_value: string;
-    first_order_date: string | null;
-    last_order_date: string | null;
-    loyalty_score: string;
+    first_order_at: string | null;
+    last_order_at: string | null;
+    is_repeat_customer: boolean;
+    avg_order_interval_days: string | number | null;
   };
-  ordered_products: Array<{
-    order_public_id: string;
-    order_number: string;
-    ordered_at: string;
-    product_public_id: string | null;
-    product_name: string;
-    variant_label?: string | null;
-    quantity: number;
-    unit_price: string | number;
-    current_order_status?: string | null;
-    order_status_at_purchase: string;
-  }>;
 }
 
 export interface ShippingZone {

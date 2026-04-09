@@ -16,16 +16,8 @@ import type { Customer, PaginatedResponse } from "@/types";
 import { formatDashboardDate } from "@/lib/datetime-display";
 import { notify } from "@/notifications";
 
-/** Prefer ledger-based historical order count; falls back to legacy `total_orders`. */
-function customerLedgerOrderCount(c: Customer): number {
-  const n = c.ledger_order_count;
-  if (typeof n === "number" && !Number.isNaN(n)) return n;
-  return c.total_orders ?? 0;
-}
-
-/** Format ledger (or legacy) list spend; no client-side aggregation. */
-function customerLedgerTotalSpentDisplay(c: Customer): string {
-  const raw = c.ledger_total_spent ?? c.total_spent;
+function customerTotalSpentDisplay(c: Customer): string {
+  const raw = c.total_spent;
   if (raw === undefined || raw === null || raw === "") return "—";
   const num = Number(raw);
   if (Number.isNaN(num)) return String(raw);
@@ -37,7 +29,6 @@ export default function CustomersPage() {
   const locale = useLocale();
   const tNav = useTranslations("nav");
   const tPages = useTranslations("pages");
-  const tCommon = useTranslations("common");
   const { page, filters, setFilter, setPage, clearFilters } = useFilters([
     "joined_date",
     "search",
@@ -150,10 +141,9 @@ export default function CustomersPage() {
                 <table className="w-full text-left text-sm">
                   <thead>
                     <tr className="border-b border-border bg-muted/40">
-                      <th className="th">{tPages("customersListColEmail")}</th>
                       <th className="th">{tPages("customersListColUsername")}</th>
+                      <th className="th">{tPages("customersListColEmail")}</th>
                       <th className="th">{tPages("customersListColPhone")}</th>
-                      <th className="th">{tPages("customersListColMarketing")}</th>
                       <th className="th">{tPages("customersListColTotalOrders")}</th>
                       <th className="th">{tPages("customersListColTotalSpent")}</th>
                       <th className="th">{tPages("customersListColJoined")}</th>
@@ -166,29 +156,24 @@ export default function CustomersPage() {
                         href={`/customers/${c.public_id}`}
                         aria-label={
                           c.email ||
-                          c.user_email ||
                           c.name ||
-                          c.user_username ||
                           c.public_id
                         }
                       >
-                        <td className="px-4 py-3 font-medium text-foreground">
-                          {c.email || c.user_email || "—"}
-                        </td>
                         <td className="px-4 py-3 text-muted-foreground">
-                          <span className="whitespace-nowrap">{c.name || c.user_username || "—"}</span>
+                          <span className="whitespace-nowrap">{c.name || "—"}</span>
+                        </td>
+                        <td className="px-4 py-3 font-medium text-foreground">
+                          {c.email || "—"}
                         </td>
                         <td className="px-4 py-3 text-muted-foreground">
                           {c.phone || "—"}
                         </td>
-                        <td className="px-4 py-3">
-                          {c.marketing_opt_in ? tCommon("yes") : tCommon("no")}
+                        <td className="px-4 py-3 text-muted-foreground">
+                          {c.total_orders ?? 0}
                         </td>
                         <td className="px-4 py-3 text-muted-foreground">
-                          {customerLedgerOrderCount(c)}
-                        </td>
-                        <td className="px-4 py-3 text-muted-foreground">
-                          {customerLedgerTotalSpentDisplay(c)}
+                          {customerTotalSpentDisplay(c)}
                         </td>
                         <td className="px-4 py-3 text-muted-foreground">
                           <span className="whitespace-nowrap">

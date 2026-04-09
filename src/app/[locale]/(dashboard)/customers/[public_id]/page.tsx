@@ -4,12 +4,11 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
-import { ClickableTableRow } from "@/components/ui/clickable-table-row";
 import { Undo2 } from "lucide-react";
 import api from "@/lib/api";
 import type { CustomerDetailsResponse } from "@/types";
 import { formatDashboardDateTime } from "@/lib/datetime-display";
-import { formatOrderStatusLabel } from "@/lib/orders/order-statuses";
+import { Button } from "@/components/ui/button";
 
 function asCurrency(value: string | number) {
   const number = Number(value ?? "0");
@@ -20,6 +19,7 @@ function asCurrency(value: string | number) {
 export default function CustomerDetailPage() {
   const locale = useLocale();
   const tPages = useTranslations("pages");
+  const tCommon = useTranslations("common");
   const router = useRouter();
   const params = useParams<{ public_id: string }>();
   const publicId = params.public_id;
@@ -27,7 +27,6 @@ export default function CustomerDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [data, setData] = useState<CustomerDetailsResponse | null>(null);
-  const [showOrderedProducts, setShowOrderedProducts] = useState(false);
 
   useEffect(() => {
     if (!publicId) return;
@@ -67,139 +66,66 @@ export default function CustomerDetailPage() {
       ) : data ? (
         <>
           <section className="rounded-xl border border-dashed border-card-border bg-card p-6">
-            <h2 className="mb-4 text-lg font-medium">{tPages("customerDetailsBasicInfo")}</h2>
+            <div className="mb-4 flex items-center justify-between gap-3 flex-wrap">
+              <h2 className="text-lg font-medium">{tPages("customerDetailsBasicInfo")}</h2>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => router.push(`/orders?customer=${encodeURIComponent(publicId)}`)}
+              >
+                {tPages("customerDetailsViewOrders")}
+              </Button>
+            </div>
             <div className="grid gap-3 sm:grid-cols-2">
               <p><span className="text-muted-foreground">{tPages("customerDetailsName")}:</span> {data.customer.name || "—"}</p>
               <p><span className="text-muted-foreground">{tPages("customerDetailsEmail")}:</span> {data.customer.email ?? "—"}</p>
               <p><span className="text-muted-foreground">{tPages("customerDetailsPhone")}:</span> {data.customer.phone || "—"}</p>
               <p><span className="text-muted-foreground">{tPages("customerDetailsAddress")}:</span> {data.customer.address ?? "—"}</p>
-              <p>
-                <span className="text-muted-foreground">{tPages("customerDetailsDistrict")}:</span>{" "}
-                {data.customer.district?.trim()
-                  ? data.customer.district
-                  : tPages("customerDetailsDistrictUnavailable")}
-              </p>
             </div>
           </section>
 
-          {/* analytics.* from API is ledger-backed; keys unchanged for contract compatibility. */}
           <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            <button
-              type="button"
-              title={tPages("customerDetailsHistoricalStatsHint")}
-              onClick={() => setShowOrderedProducts((prev) => !prev)}
-              className="rounded-xl border border-dashed border-card-border bg-card p-4 text-left hover:bg-muted/40"
-            >
+            <div className="rounded-xl border border-dashed border-card-border bg-card p-4">
               <p className="text-sm text-muted-foreground">{tPages("customerDetailsTotalOrders")}</p>
               <p className="mt-1 text-2xl font-semibold">{data.analytics.total_orders}</p>
-              <p className="mt-1 text-xs text-muted-foreground">
-                {showOrderedProducts
-                  ? tPages("customerDetailsHideOrderedProducts")
-                  : tPages("customerDetailsShowOrderedProducts")}
-              </p>
-            </button>
+            </div>
             <div
               className="rounded-xl border border-dashed border-card-border bg-card p-4"
-              title={tPages("customerDetailsHistoricalStatsHint")}
             >
               <p className="text-sm text-muted-foreground">{tPages("customerDetailsTotalSpent")}</p>
               <p className="mt-1 text-2xl font-semibold">{asCurrency(data.analytics.total_spent)}</p>
             </div>
             <div className="rounded-xl border border-dashed border-card-border bg-card p-4">
-              <p className="text-sm text-muted-foreground">{tPages("customerDetailsLoyaltyScore")}</p>
-              <p className="mt-1 text-2xl font-semibold">{asCurrency(data.analytics.loyalty_score)}</p>
-            </div>
-            <div className="rounded-xl border border-dashed border-card-border bg-card p-4">
-              <p className="text-sm text-muted-foreground">{tPages("customerDetailsAverageOrderValue")}</p>
-              <p className="mt-1 text-2xl font-semibold">{asCurrency(data.analytics.average_order_value)}</p>
-            </div>
-            <div className="rounded-xl border border-dashed border-card-border bg-card p-4">
               <p className="text-sm text-muted-foreground">{tPages("customerDetailsFirstOrderDate")}</p>
               <p className="mt-1 text-base font-medium">
-                {data.analytics.first_order_date
-                  ? formatDashboardDateTime(data.analytics.first_order_date, locale)
+                {data.analytics.first_order_at
+                  ? formatDashboardDateTime(data.analytics.first_order_at, locale)
                   : "—"}
               </p>
             </div>
             <div className="rounded-xl border border-dashed border-card-border bg-card p-4">
               <p className="text-sm text-muted-foreground">{tPages("customerDetailsLastOrderDate")}</p>
               <p className="mt-1 text-base font-medium">
-                {data.analytics.last_order_date
-                  ? formatDashboardDateTime(data.analytics.last_order_date, locale)
+                {data.analytics.last_order_at
+                  ? formatDashboardDateTime(data.analytics.last_order_at, locale)
                   : "—"}
               </p>
             </div>
+            <div className="rounded-xl border border-dashed border-card-border bg-card p-4">
+              <p className="text-sm text-muted-foreground">{tPages("customerDetailsRepeatCustomer")}</p>
+              <p className="mt-1 text-2xl font-semibold">
+                {data.analytics.is_repeat_customer ? tCommon("yes") : tCommon("no")}
+              </p>
+            </div>
+            <div className="rounded-xl border border-dashed border-card-border bg-card p-4">
+              <p className="text-sm text-muted-foreground">{tPages("customerDetailsAvgOrderIntervalDays")}</p>
+              <p className="mt-1 text-2xl font-semibold">
+                {data.analytics.avg_order_interval_days == null
+                  ? "—"
+                  : asCurrency(data.analytics.avg_order_interval_days)}
+              </p>
+            </div>
           </section>
-          {showOrderedProducts && (
-            <section className="rounded-xl border border-dashed border-card-border bg-card p-6">
-              <h2 className="mb-4 text-lg font-medium">
-                {tPages("customerDetailsOrderedProductsTitle")}
-              </h2>
-              {data.ordered_products.length === 0 ? (
-                <p className="text-sm text-muted-foreground">{tPages("customerDetailsNoOrderedProducts")}</p>
-              ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left text-sm">
-                    <thead>
-                      <tr className="border-b border-border bg-muted/40">
-                        <th className="px-3 py-2">{tPages("customerDetailsOrder")}</th>
-                        <th className="px-3 py-2">{tPages("customerDetailsDate")}</th>
-                        <th className="px-3 py-2">{tPages("customerDetailsProduct")}</th>
-                        <th className="px-3 py-2">{tPages("customerDetailsVariant")}</th>
-                        <th className="px-3 py-2">{tPages("customerDetailsQty")}</th>
-                        <th className="px-3 py-2">{tPages("customerDetailsPrice")}</th>
-                        <th className="px-3 py-2">{tPages("customerDetailsStatus")}</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-border/60">
-                      {data.ordered_products.map((item, idx) => {
-                        const live = item.current_order_status ?? null;
-                        const atPurchase = item.order_status_at_purchase;
-                        const statusPrimary = live ?? atPurchase;
-                        const statusDiffers =
-                          live != null && atPurchase != null && live !== atPurchase;
-                        return (
-                          <ClickableTableRow
-                            key={`${item.order_public_id}-${idx}`}
-                            href={`/orders/${item.order_public_id}`}
-                            aria-label={`${tPages("customerDetailsOrder")} ${item.order_number}. ${tPages("customerDetailsViewOrder")}`}
-                          >
-                            <td className="whitespace-nowrap px-3 py-2 font-medium text-foreground">
-                              {item.order_number}
-                            </td>
-                            <td className="whitespace-nowrap px-3 py-2 text-muted-foreground">
-                              {formatDashboardDateTime(item.ordered_at, locale)}
-                            </td>
-                            <td className="max-w-[14rem] px-3 py-2 font-medium text-foreground">
-                              {item.product_name}
-                            </td>
-                            <td className="max-w-[12rem] px-3 py-2 text-muted-foreground">
-                              {item.variant_label?.trim() ? item.variant_label : "—"}
-                            </td>
-                            <td className="px-3 py-2 text-muted-foreground">{item.quantity}</td>
-                            <td className="px-3 py-2 text-muted-foreground">
-                              {asCurrency(item.unit_price)}
-                            </td>
-                            <td className="min-w-[8rem] px-3 py-2 text-muted-foreground">
-                              <span className="text-foreground">
-                                {formatOrderStatusLabel(statusPrimary, tPages)}
-                              </span>
-                              {statusDiffers ? (
-                                <span className="mt-0.5 block text-xs text-muted-foreground">
-                                  {tPages("customerDetailsStatusAtPurchase")}:{" "}
-                                  {formatOrderStatusLabel(atPurchase, tPages)}
-                                </span>
-                              ) : null}
-                            </td>
-                          </ClickableTableRow>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-            </section>
-          )}
         </>
       ) : null}
     </div>

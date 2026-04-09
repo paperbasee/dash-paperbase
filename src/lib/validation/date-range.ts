@@ -1,6 +1,10 @@
-import { format, isValid, parseISO, subDays } from "date-fns";
 import { z } from "zod";
 import type { AnalyticsBucket } from "@/hooks/useDashboardAnalytics";
+import {
+  addCalendarDaysYmd,
+  isValidYmd,
+  todayYmdInBD,
+} from "@/utils/time";
 import { defaultValidationMessages, type ValidationMessages } from "./messages";
 
 export type PresetKey = "today" | "last7" | "last30" | "thisMonth" | "custom";
@@ -23,27 +27,30 @@ export function buildDateRangeInputSchema(messages: ValidationMessages = default
 
 export const dateRangeInputSchema = buildDateRangeInputSchema();
 
-export function normalizeDateRange(raw: DateRangeValue, today: Date): DateRangeValue {
-  const parsedEnd = parseISO(raw.endDate);
-  const parsedStart = parseISO(raw.startDate);
+export function normalizeDateRange(raw: DateRangeValue, anchorDate: Date): DateRangeValue {
+  const todayStr = todayYmdInBD(anchorDate);
 
-  let end = isValid(parsedEnd) ? parsedEnd : isValid(parsedStart) ? parsedStart : today;
-  if (end > today) {
-    end = today;
+  let endStr = isValidYmd(raw.endDate)
+    ? raw.endDate.trim()
+    : isValidYmd(raw.startDate)
+      ? raw.startDate.trim()
+      : todayStr;
+  if (endStr > todayStr) {
+    endStr = todayStr;
   }
 
-  const minStart = subDays(end, 90);
-  let start = isValid(parsedStart) ? parsedStart : end;
-  if (start < minStart) {
-    start = minStart;
+  const minStartStr = addCalendarDaysYmd(endStr, -90);
+  let startStr = isValidYmd(raw.startDate) ? raw.startDate.trim() : endStr;
+  if (startStr < minStartStr) {
+    startStr = minStartStr;
   }
-  if (start > end) {
-    start = end;
+  if (startStr > endStr) {
+    startStr = endStr;
   }
 
   return {
     ...raw,
-    startDate: format(start, "yyyy-MM-dd"),
-    endDate: format(end, "yyyy-MM-dd"),
+    startDate: startStr,
+    endDate: endStr,
   };
 }

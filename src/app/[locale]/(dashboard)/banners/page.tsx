@@ -472,11 +472,11 @@ export default function BannersPage() {
                 </td>
                 <td className="px-4 py-3">
                   <span
-                    className={
+                    className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-semibold ${
                       b.is_active
-                        ? "text-green-600 dark:text-green-400"
-                        : "text-muted-foreground"
-                    }
+                        ? "bg-emerald-500/20 text-emerald-400"
+                        : "bg-muted text-muted-foreground"
+                    }`}
                   >
                     {b.is_active ? tCommon("active") : tCommon("inactive")}
                   </span>

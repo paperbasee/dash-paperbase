@@ -23,7 +23,6 @@ import {
 import type { Order, PaginatedResponse } from "@/types";
 import { useConfirm } from "@/context/ConfirmDialogContext";
 import { notify, normalizeError } from "@/notifications";
-import { useAdminDeleteCapabilities } from "@/hooks/useAdminDeleteCapabilities";
 
 /** Shown after dispatch: Steadfast consignment id only (not provider name). */
 function courierCell(order: Order): string {
@@ -40,6 +39,7 @@ export default function OrdersPage() {
   const { currencySymbol } = useBranding();
   const confirm = useConfirm();
   const { page, filters, setFilter, setPage, clearFilters } = useFilters([
+    "customer",
     "status",
     "date_range",
     "search",
@@ -51,12 +51,9 @@ export default function OrdersPage() {
   const [count, setCount] = useState(0);
   const [hasNext, setHasNext] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
-  const [deleting, setDeleting] = useState(false);
   const [bulkDispatching, setBulkDispatching] = useState(false);
   const [statusUpdatingId, setStatusUpdatingId] = useState<string | null>(null);
   const [courierSendingId, setCourierSendingId] = useState<string | null>(null);
-  const { canDelete: canDeleteOrders, isSuperuser: deleteIsSuperuser } =
-    useAdminDeleteCapabilities();
 
   useEffect(() => {
     const next = debouncedSearch.trim();
@@ -67,6 +64,7 @@ export default function OrdersPage() {
   const fetchOrders = useCallback(() => {
     setLoading(true);
     const params: Record<string, string | number> = { page };
+    if (filters.customer) params.customer = filters.customer;
     if (filters.status) params.status = filters.status;
     if (filters.date_range) params.date_range = filters.date_range;
     if (filters.search) params.search = filters.search;
@@ -84,7 +82,7 @@ export default function OrdersPage() {
         notify.error(err);
       })
       .finally(() => setLoading(false));
-  }, [filters.date_range, filters.search, filters.status, page]);
+  }, [filters.customer, filters.date_range, filters.search, filters.status, page]);
 
   useEffect(() => {
     fetchOrders();
@@ -199,49 +197,6 @@ export default function OrdersPage() {
     }
   }
 
-  async function handleDeleteSelected() {
-    if (selectedIds.size === 0) return;
-    const deletedCount = selectedIds.size;
-    const ok = await confirm({
-      title: tPages("confirmDialogTitleDeleteOrders", {
-        count: deletedCount,
-      }),
-      message: deleteIsSuperuser
-        ? tPages("confirmDeleteOrdersPermanent", {
-            count: deletedCount,
-          })
-        : tPages("confirmDeleteOrdersTrash", {
-            count: deletedCount,
-          }),
-      variant: "danger",
-    });
-    if (!ok) return;
-    setDeleting(true);
-    const ids = Array.from(selectedIds);
-    try {
-      // Sequential: parallel deletes each touch trash/DB locks and can 500 (deadlock).
-      for (const id of ids) {
-        await api.delete(`admin/orders/${id}/`);
-      }
-      setSelectedIds(new Set());
-      notify.warning(
-        deleteIsSuperuser
-          ? tPages("ordersDeletedPermanentSuccess", {
-              count: toLocaleDigits(String(deletedCount), locale),
-            })
-          : tPages("ordersMovedToTrashSuccess", {
-              count: toLocaleDigits(String(deletedCount), locale),
-            })
-      );
-      fetchOrders();
-    } catch (err) {
-      console.error(err);
-      notify.error(err);
-    } finally {
-      setDeleting(false);
-    }
-  }
-
   const allSelected = orders.length > 0 && selectedIds.size === orders.length;
   const someSelected = selectedIds.size > 0;
 
@@ -276,23 +231,6 @@ export default function OrdersPage() {
                   ? tPages("ordersSending")
                   : tPages("ordersConfirmSendCourier")}
               </button>
-              {canDeleteOrders && (
-              <button
-                onClick={handleDeleteSelected}
-                disabled={deleting}
-                className="rounded-lg bg-destructive px-4 py-2 text-sm font-semibold text-destructive-foreground transition hover:bg-destructive/90 disabled:opacity-50"
-              >
-                {deleting
-                  ? tPages("deleting")
-                  : deleteIsSuperuser
-                    ? tPages("deleteSelectedPermanent", {
-                        count: toLocaleDigits(String(selectedIds.size), locale),
-                      })
-                    : tPages("moveToTrashSelected", {
-                        count: toLocaleDigits(String(selectedIds.size), locale),
-                      })}
-              </button>
-              )}
             </>
           )}
           <Link

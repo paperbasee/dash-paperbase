@@ -1,30 +1,27 @@
-import { format, isValid, parse, parseISO } from "date-fns";
+import { bdWallToUtcIso, formatBDTime, utcIsoToApiNaiveUtc, ymdToDdMmYMidnight } from "@/utils/time";
 
-const DISPLAY_DATETIME = "dd-MM-yyyy HH:mm";
-const API_LOCAL_DATETIME = "yyyy-MM-dd'T'HH:mm";
-
-/** Load API / ISO datetime into form field text (local wall clock). */
+/** Load API / ISO datetime into form field text (Bangladesh wall clock). */
 export function isoDatetimeToDisplayInput(iso: string | null | undefined): string {
   if (!iso) return "";
   const trimmed = iso.trim();
   if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) {
-    const d = parse(trimmed, "yyyy-MM-dd", new Date());
-    if (!isValid(d)) return "";
-    return `${format(d, "dd-MM-yyyy")} 00:00`;
+    return ymdToDdMmYMidnight(trimmed);
   }
-  const d = parseISO(iso);
-  if (!isValid(d)) return "";
-  return format(d, DISPLAY_DATETIME);
+  const s = formatBDTime(trimmed);
+  return s === "—" ? "" : s;
 }
 
 /**
- * Parse form text into `YYYY-MM-DDTHH:mm` for API payloads (same shape as before `datetime-local`).
+ * Parse form text into `YYYY-MM-DDTHH:mm` for API payloads (UTC components).
  * Returns `null` if empty; `null` if non-empty but invalid.
  */
 export function displayInputToApiLocal(display: string): string | null {
   const t = display.trim();
   if (!t) return null;
-  const d = parse(t, DISPLAY_DATETIME, new Date());
-  if (!isValid(d)) return null;
-  return format(d, API_LOCAL_DATETIME);
+  if (/^\d{4}-\d{2}-\d{2}$/.test(t)) {
+    return `${t}T00:00`;
+  }
+  const utcIso = bdWallToUtcIso(t);
+  if (!utcIso) return null;
+  return utcIsoToApiNaiveUtc(utcIso);
 }
