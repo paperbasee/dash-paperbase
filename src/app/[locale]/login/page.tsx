@@ -119,6 +119,7 @@ export default function LoginPage() {
       headline={pendingTwoFactor ? t("twoFactorHeadline") : t("headline")}
       description={pendingTwoFactor ? t("twoFactorDescription") : t("description")}
       containerClassName="space-y-8 sm:space-y-10"
+      showFooter={false}
     >
 
       <form
@@ -142,6 +143,7 @@ export default function LoginPage() {
                   id="email"
                   type="email"
                   required
+                  size="lg"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder={t("emailPlaceholder")}
@@ -159,6 +161,7 @@ export default function LoginPage() {
                     id="password"
                     type={showPassword ? "text" : "password"}
                     required
+                    size="lg"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder={t("passwordPlaceholder")}
@@ -212,6 +215,7 @@ export default function LoginPage() {
                 id="otp"
                 type="text"
                 required
+                size="lg"
                 value={otpCode}
                 onChange={(e) => setOtpCode(e.target.value)}
                 placeholder={t("otpPlaceholder")}

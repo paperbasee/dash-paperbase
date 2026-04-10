@@ -128,6 +128,7 @@ export default function SignupPage() {
       headline={pendingTwoFactor ? t("twoFactorHeadline") : t("headline")}
       description={pendingTwoFactor ? t("twoFactorDescription") : t("description")}
       containerClassName="space-y-8 sm:space-y-10"
+      showFooter={false}
     >
 
       <form
@@ -151,6 +152,7 @@ export default function SignupPage() {
                   id="email"
                   type="email"
                   required
+                  size="lg"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder={t("emailPlaceholder")}
@@ -169,6 +171,7 @@ export default function SignupPage() {
                     type={showPassword ? "text" : "password"}
                     required
                     minLength={8}
+                    size="lg"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder={t("passwordPlaceholder")}
@@ -196,6 +199,7 @@ export default function SignupPage() {
                     type={showPasswordConfirm ? "text" : "password"}
                     required
                     minLength={8}
+                    size="lg"
                     value={passwordConfirm}
                     onChange={(e) => setPasswordConfirm(e.target.value)}
                     placeholder={t("confirmPlaceholder")}
@@ -226,6 +230,7 @@ export default function SignupPage() {
                 id="otp"
                 type="text"
                 required
+                size="lg"
                 value={otpCode}
                 onChange={(e) => setOtpCode(e.target.value)}
                 placeholder={t("otpPlaceholder")}
@@ -235,16 +240,23 @@ export default function SignupPage() {
             </div>
           )}
 
-            <LoadingButton
-              type="submit"
-              isLoading={loading}
-              loadingText={
-                pendingTwoFactor ? t("verifyCodeLoading") : t("createAccountLoading")
-              }
-              className="mt-2 w-full"
-            >
-              {pendingTwoFactor ? t("verifyCode") : t("createAccount")}
-            </LoadingButton>
+            <div className="mt-2 space-y-2">
+              <LoadingButton
+                type="submit"
+                isLoading={loading}
+                loadingText={
+                  pendingTwoFactor ? t("verifyCodeLoading") : t("createAccountLoading")
+                }
+                className="w-full"
+              >
+                {pendingTwoFactor ? t("verifyCode") : t("createAccount")}
+              </LoadingButton>
+              {!pendingTwoFactor ? (
+                <p className="text-center text-xs leading-relaxed text-muted-foreground">
+                  {t("termsAgreementPlain")}
+                </p>
+              ) : null}
+            </div>
       </form>
 
       <p className="text-center text-sm text-muted-foreground">

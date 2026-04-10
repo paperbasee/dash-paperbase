@@ -819,6 +819,7 @@
       "verifyCode": "Verify code",
       "verifyCodeLoading": "Verifying identity",
       "hasAccount": "Already have an account?",
+      "termsAgreementPlain": "By creating an account, you agree to our Terms & Service and Privacy Policy",
       "loginLink": "Log in",
       "verificationCode": "Verification code",
       "otpPlaceholder": "Enter 6-digit code"

@@ -818,6 +818,7 @@
       "verifyCode": "কোড যাচাই করুন",
       "verifyCodeLoading": "পরিচয় যাচাই হচ্ছে",
       "hasAccount": "ইতিমধ্যে অ্যাকাউন্ট আছে?",
+      "termsAgreementPlain": "অ্যাকাউন্ট তৈরি করে আপনি আমাদের শর্তাবলী ও সেবা ও গোপনীয়তা নীতি মেনে চলতে সম্মত হন",
       "loginLink": "লগ ইন",
       "emailPlaceholder": "যেমন: you@example.com",
       "verificationCode": "যাচাইকরণ কোড",

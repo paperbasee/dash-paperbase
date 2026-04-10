@@ -37,6 +37,7 @@ export function TurnstileWidget() {
       if (cancelled || !el || !window.turnstile) return false;
       widgetIdRef.current = window.turnstile.render(el, {
         sitekey: siteKey,
+        size: "flexible",
         callback: (t: string) => setToken(t),
         "error-callback": () => setToken(""),
         "expired-callback": () => setToken(""),
@@ -72,7 +73,7 @@ export function TurnstileWidget() {
   return (
     <>
       <input type="hidden" name="cf-turnstile-response" value={token} readOnly />
-      <div ref={containerRef} className="min-h-[65px]" />
+      <div ref={containerRef} className="w-full min-h-[65px]" />
     </>
   );
 }
