@@ -1383,7 +1383,7 @@
   },
   "checkoutPage": {
     "title": "Complete your payment",
-    "instructionsTitle": "Send money to",
+    "instructionsTitleHighlight": "Send money only",
     "instructionsBody": "Copy a number, send the exact amount shown above, then fill in your transaction details below.",
     "billingPeriodLabel": "Billing period",
     "billingMonthly": "Monthly",
@@ -1392,8 +1392,6 @@
     "billingYearlyHelp": "This price is per year. One payment covers the next 12 months.",
     "amountLabel": "Amount due now",
     "planLabel": "Selected plan",
-    "payMethodCalloutTitle": "Pay with bKash or Nagad only",
-    "payMethodCalloutBody": "Use Send Money in your bKash or Nagad app to transfer the exact amount to one of our numbers below. Do not use Cash Out — only Send Money to this merchant number.",
     "bkashLabel": "bKash",
     "nagadLabel": "Nagad",
     "noNumbersNote": "Contact support for payment details.",

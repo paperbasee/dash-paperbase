@@ -12,6 +12,7 @@ import { TurnstileWidget } from "@/components/auth/TurnstileWidget";
 import { useMinDelayLoading } from "@/hooks/useMinDelayLoading";
 import { parseValidation, registerSchema } from "@/lib/validation";
 import { resolvePostAuthRoute } from "@/lib/subscription-access";
+import { isTurnstileDisabled } from "@/lib/turnstile-env";
 
 export default function SignupPage() {
   const router = useRouter();
@@ -51,7 +52,7 @@ export default function SignupPage() {
     if (!(formEl instanceof HTMLFormElement)) return;
     const turnstileToken =
       (new FormData(formEl).get("cf-turnstile-response") as string | null)?.trim() ?? "";
-    if (!turnstileToken) {
+    if (!isTurnstileDisabled() && !turnstileToken) {
       setError(tAuth("turnstileRequired"));
       return;
     }

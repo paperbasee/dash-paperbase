@@ -1358,7 +1358,7 @@
   },
   "checkoutPage": {
     "title": "পেমেন্ট সম্পন্ন করুন",
-    "instructionsTitle": "টাকা পাঠাবেন",
+    "instructionsTitleHighlight": "Send money only",
     "instructionsBody": "নিচের নম্বরে সঠিক পরিমাণ সেন্ড মানি করুন, তারপর নিচে লেনদেনের তথ্য দিন।",
     "billingPeriodLabel": "বিলিং",
     "billingMonthly": "মাসিক",
@@ -1367,8 +1367,6 @@
     "billingYearlyHelp": "এই মূল্য প্রতি বছরের। একবার পেমেন্টে ১২ মাস কভার হবে।",
     "amountLabel": "এখন পরিশোধযোগ্য",
     "planLabel": "নির্বাচিত প্ল্যান",
-    "payMethodCalloutTitle": "শুধু বিকাশ বা নগদ দিয়ে পে করুন",
-    "payMethodCalloutBody": "বিকাশ বা নগদ অ্যাপে সেন্ড মানি ব্যবহার করে নিচের নম্বরগুলোর একটিতে ঠিক পরিমাণ পাঠান। ক্যাশ আউট ব্যবহার করবেন না — শুধু সেন্ড মানি।",
     "bkashLabel": "বিকাশ",
     "nagadLabel": "নগদ",
     "noNumbersNote": "পেমেন্টের জন্য সাপোর্টে যোগাযোগ করুন।",

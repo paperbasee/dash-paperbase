@@ -1,13 +1,15 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useTranslations } from "next-intl";
-import { CheckCircle2, Copy, Wallet } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
+import { Copy } from "lucide-react";
 import { useRouter } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { LoadingButton } from "@/components/ui/loading-button";
 import { logout, getAccessToken } from "@/lib/auth";
 import api from "@/lib/api";
+import { CheckoutSuccessAnimation } from "@/components/checkout/CheckoutSuccessAnimation";
+import { cn } from "@/lib/utils";
 
 interface Plan {
   public_id: string;
@@ -62,6 +64,7 @@ function CopyButton({ value }: { value: string }) {
 export default function CheckoutPage() {
   const t = useTranslations("checkoutPage");
   const tCommon = useTranslations("common");
+  const locale = useLocale();
   const router = useRouter();
 
   const [screen, setScreen] = useState<Screen>("loading");
@@ -196,26 +199,19 @@ export default function CheckoutPage() {
   if (screen === "submitted") {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-background via-background to-muted/30 px-4 py-10">
-        <div className="w-full max-w-md space-y-6">
-          <div className="rounded-xl border border-border bg-card px-6 py-8 shadow-sm">
-            <div className="flex flex-col items-center space-y-4 text-center">
-              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10">
-                <CheckCircle2 className="h-7 w-7 text-primary" aria-hidden />
-              </div>
-              <h1 className="text-xl font-semibold text-foreground">{t("submittedTitle")}</h1>
-              <p className="text-sm leading-relaxed text-muted-foreground">{t("submittedBody")}</p>
-            </div>
+        <div className="w-full max-w-md space-y-8">
+          <CheckoutSuccessAnimation className="drop-shadow-sm" />
+
+          <div className="space-y-3 text-center">
+            <h1 className="text-xl font-semibold tracking-tight text-foreground sm:text-2xl">
+              {t("submittedTitle")}
+            </h1>
+            <p className="text-sm leading-relaxed text-muted-foreground">{t("submittedBody")}</p>
           </div>
 
-          <div className="space-y-2">
-            <Button
-              variant="outline"
-              className="w-full"
-              onClick={() => logout()}
-            >
-              {t("signOut")}
-            </Button>
-          </div>
+          <Button variant="outline" className="w-full" onClick={() => logout()}>
+            {t("signOut")}
+          </Button>
         </div>
       </div>
     );
@@ -243,7 +239,7 @@ export default function CheckoutPage() {
 
         {/* Plan summary */}
         {payment?.plan && (
-          <div className="rounded-2xl border border-border bg-card px-5 py-4 shadow-sm">
+          <div className="border border-border bg-card px-5 py-4 shadow-sm">
             <dl className="space-y-3 text-sm">
               <div className="flex items-start justify-between gap-4">
                 <dt className="text-muted-foreground shrink-0">{t("planLabel")}</dt>
@@ -285,22 +281,18 @@ export default function CheckoutPage() {
           </div>
         )}
 
-        {/* Manual mobile wallet — not card checkout */}
-        <div className="rounded-2xl border border-amber-500/35 bg-amber-500/10 px-4 py-4 shadow-sm dark:border-amber-400/30 dark:bg-amber-500/5">
-          <div className="flex gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-amber-500/20 text-amber-800 dark:text-amber-200">
-              <Wallet className="h-5 w-5" aria-hidden />
-            </div>
-            <div className="min-w-0 space-y-1">
-              <h2 className="text-sm font-semibold text-foreground">{t("payMethodCalloutTitle")}</h2>
-              <p className="text-sm leading-relaxed text-foreground/90">{t("payMethodCalloutBody")}</p>
-            </div>
-          </div>
-        </div>
-
         {/* Payment instructions */}
-        <div className="rounded-2xl border border-border bg-card px-5 py-5 shadow-sm">
-          <h2 className="mb-3 text-sm font-semibold text-foreground">{t("instructionsTitle")}</h2>
+        <div className="border border-border bg-card px-5 py-5 shadow-sm">
+          <h2 className="mb-3 text-sm font-semibold leading-snug text-foreground">
+            <span
+              className={cn(
+                "inline-block rounded-sm bg-primary/15 px-2 py-1 text-xs font-bold text-primary",
+                locale === "en" && "uppercase tracking-wide"
+              )}
+            >
+              {t("instructionsTitleHighlight")}
+            </span>
+          </h2>
           <p className="mb-4 text-sm text-muted-foreground">{t("instructionsBody")}</p>
 
           {!hasNumbers && (
@@ -308,7 +300,7 @@ export default function CheckoutPage() {
           )}
 
           {config.bkash_number && (
-            <div className="mb-3 flex items-center justify-between rounded-xl bg-muted/50 px-4 py-3">
+            <div className="mb-3 flex items-center justify-between bg-muted/50 px-4 py-3">
               <div>
                 <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
                   {t("bkashLabel")}
@@ -322,7 +314,7 @@ export default function CheckoutPage() {
           )}
 
           {config.nagad_number && (
-            <div className="flex items-center justify-between rounded-xl bg-muted/50 px-4 py-3">
+            <div className="flex items-center justify-between bg-muted/50 px-4 py-3">
               <div>
                 <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
                   {t("nagadLabel")}
@@ -337,11 +329,11 @@ export default function CheckoutPage() {
         </div>
 
         {/* Transaction form */}
-        <div className="rounded-2xl border border-border bg-card px-5 py-5 shadow-sm">
+        <div className="border border-border bg-card px-5 py-5 shadow-sm">
           <h2 className="mb-4 text-sm font-semibold text-foreground">{t("formTitle")}</h2>
 
           {submitError && (
-            <div className="mb-4 rounded-xl border border-destructive/30 bg-destructive/5 px-4 py-2 text-sm text-destructive">
+            <div className="mb-4 border border-destructive/30 bg-destructive/5 px-4 py-2 text-sm text-destructive">
               {submitError}
             </div>
           )}

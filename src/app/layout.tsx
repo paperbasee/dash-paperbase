@@ -2,6 +2,8 @@ import type { ReactNode } from "react";
 import { cookies } from "next/headers";
 import Script from "next/script";
 import "./globals.css";
+import { isTurnstileDisabled } from "@/lib/turnstile-env";
+
 export default async function RootLayout({ children }: { children: ReactNode }) {
   const cookieStore = await cookies();
   const pref = cookieStore.get("core-theme")?.value;
@@ -24,10 +26,12 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
       <head />
       <body className="antialiased font-sans">
         {children}
-        <Script
-          src="https://challenges.cloudflare.com/turnstile/v0/api.js"
-          strategy="afterInteractive"
-        />
+        {!isTurnstileDisabled() ? (
+          <Script
+            src="https://challenges.cloudflare.com/turnstile/v0/api.js"
+            strategy="afterInteractive"
+          />
+        ) : null}
       </body>
     </html>
   );

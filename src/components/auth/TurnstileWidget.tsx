@@ -2,6 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 
+import { isTurnstileDisabled } from "@/lib/turnstile-env";
+
 declare global {
   interface Window {
     turnstile?: {
@@ -20,6 +22,7 @@ declare global {
  * the node exists, which fails on client-rendered pages.
  */
 export function TurnstileWidget() {
+  const disabled = isTurnstileDisabled();
   const siteKey =
     process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? "0x4AAAAAAC6DO_T68mWECpJd";
   const containerRef = useRef<HTMLDivElement>(null);
@@ -27,6 +30,7 @@ export function TurnstileWidget() {
   const [token, setToken] = useState("");
 
   useEffect(() => {
+    if (disabled) return;
     const el = containerRef.current;
     if (!el) return;
 
@@ -68,7 +72,11 @@ export function TurnstileWidget() {
       }
       setToken("");
     };
-  }, [siteKey]);
+  }, [siteKey, disabled]);
+
+  if (disabled) {
+    return null;
+  }
 
   return (
     <>
