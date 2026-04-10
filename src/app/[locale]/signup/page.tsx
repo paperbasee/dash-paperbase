@@ -8,6 +8,7 @@ import { useAuth } from "@/context/AuthContext";
 import { Input } from "@/components/ui/input";
 import { LoadingButton } from "@/components/ui/loading-button";
 import { AuthPageShell } from "@/components/auth/AuthPageShell";
+import { TurnstileWidget } from "@/components/auth/TurnstileWidget";
 import { useMinDelayLoading } from "@/hooks/useMinDelayLoading";
 import { parseValidation, registerSchema } from "@/lib/validation";
 import { resolvePostAuthRoute } from "@/lib/subscription-access";
@@ -15,6 +16,7 @@ import { resolvePostAuthRoute } from "@/lib/subscription-access";
 export default function SignupPage() {
   const router = useRouter();
   const t = useTranslations("auth.signup");
+  const tAuth = useTranslations("auth");
   const tLayout = useTranslations("dashboardLayout");
   const { register, pendingTwoFactor, verifyTwoFactorChallenge } = useAuth();
   const [email, setEmail] = useState("");
@@ -44,12 +46,23 @@ export default function SignupPage() {
       );
       return;
     }
+
+    const formEl = e.currentTarget;
+    if (!(formEl instanceof HTMLFormElement)) return;
+    const turnstileToken =
+      (new FormData(formEl).get("cf-turnstile-response") as string | null)?.trim() ?? "";
+    if (!turnstileToken) {
+      setError(tAuth("turnstileRequired"));
+      return;
+    }
+
     try {
       await runWithLoading(async () => {
         const result = await register(
           validation.data.email,
           validation.data.password,
-          validation.data.passwordConfirm
+          validation.data.passwordConfirm,
+          turnstileToken
         );
         if ("2fa_required" in result) {
           return;
@@ -201,6 +214,8 @@ export default function SignupPage() {
                   </button>
                 </div>
               </div>
+
+              <TurnstileWidget />
             </>
           ) : (
             <div className="form-field">

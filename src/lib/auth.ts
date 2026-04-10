@@ -44,23 +44,30 @@ function clearAuthSessionCookie() {
 export async function register(
   email: string,
   password: string,
-  password_confirm: string
+  password_confirm: string,
+  cf_turnstile_response?: string
 ): Promise<RegisterResponse | PendingTwoFactorResponse> {
-  const { data } = await axios.post<RegisterResponse | PendingTwoFactorResponse>(`${BASE_URL}/auth/register/`, {
-    email: email.trim().toLowerCase(),
-    password,
-    password_confirm,
-  });
+  const { data } = await axios.post<RegisterResponse | PendingTwoFactorResponse>(
+    `${BASE_URL}/auth/register/`,
+    {
+      email: email.trim().toLowerCase(),
+      password,
+      password_confirm,
+      ...(cf_turnstile_response ? { cf_turnstile_response } : {}),
+    }
+  );
   return data;
 }
 
 export async function login(
   email: string,
-  password: string
+  password: string,
+  cf_turnstile_response?: string
 ): Promise<LoginResult> {
   const { data } = await axios.post<LoginResult>(`${BASE_URL}/auth/token/`, {
     email: email.trim().toLowerCase(),
     password,
+    ...(cf_turnstile_response ? { cf_turnstile_response } : {}),
   });
   if (!("2fa_required" in data)) {
     localStorage.setItem("access_token", data.access);

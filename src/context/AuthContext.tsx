@@ -41,11 +41,12 @@ interface AuthState {
   meProfile: MeForRouting | null;
   meProfileStatus: MeProfileStatus;
   refreshMeProfile: () => Promise<void>;
-  login: (email: string, password: string) => Promise<LoginResult>;
+  login: (email: string, password: string, cf_turnstile_response?: string) => Promise<LoginResult>;
   register: (
     email: string,
     password: string,
-    password_confirm: string
+    password_confirm: string,
+    cf_turnstile_response?: string
   ) => Promise<RegisterResponse | PendingTwoFactorResponse>;
   verifyTwoFactorChallenge: (
     challengeId: string,
@@ -205,8 +206,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [isAuthenticated, setMeProfileFromStore]);
 
-  const login = useCallback(async (email: string, password: string) => {
-    const result = await authLogin(email, password);
+  const login = useCallback(async (email: string, password: string, cf_turnstile_response?: string) => {
+    const result = await authLogin(email, password, cf_turnstile_response);
     if ("2fa_required" in result) {
       setPendingTwoFactor(result);
       setIsAuthenticated(false);
@@ -219,8 +220,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const register = useCallback(
-    async (email: string, password: string, password_confirm: string) => {
-      const result = await authRegister(email, password, password_confirm);
+    async (email: string, password: string, password_confirm: string, cf_turnstile_response?: string) => {
+      const result = await authRegister(email, password, password_confirm, cf_turnstile_response);
       if ("2fa_required" in result) {
         setPendingTwoFactor(result);
         setIsAuthenticated(false);

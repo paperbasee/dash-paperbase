@@ -763,6 +763,7 @@
     "chartCustomers": "Customers"
   },
   "auth": {
+    "turnstileRequired": "Please complete the verification challenge before continuing.",
     "login": {
       "title": "Login",
       "welcome": "Hi, welcome back",

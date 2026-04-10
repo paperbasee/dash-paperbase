@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { cookies } from "next/headers";
+import Script from "next/script";
 import "./globals.css";
 export default async function RootLayout({ children }: { children: ReactNode }) {
   const cookieStore = await cookies();
@@ -21,7 +22,13 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
       data-theme={resolved}
     >
       <head />
-      <body className="antialiased font-sans">{children}</body>
+      <body className="antialiased font-sans">
+        {children}
+        <Script
+          src="https://challenges.cloudflare.com/turnstile/v0/api.js"
+          strategy="afterInteractive"
+        />
+      </body>
     </html>
   );
 }

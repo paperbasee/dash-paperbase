@@ -41,12 +41,14 @@ const securityHeaders = [
     key: "Content-Security-Policy",
     value: [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+      // Cloudflare Turnstile (widget script + challenge iframe)
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://challenges.cloudflare.com",
+      "frame-src 'self' https://challenges.cloudflare.com",
       "style-src 'self' 'unsafe-inline'",
       `img-src 'self' data: blob: https: ${apiOrigin}`,
       "font-src 'self' data:",
       // Allow the backend API origin explicitly (http in dev, https in prod).
-      `connect-src 'self' https: ${apiOrigin}`,
+      `connect-src 'self' https: ${apiOrigin} https://challenges.cloudflare.com`,
       "frame-ancestors 'none'",
     ].join("; "),
   },

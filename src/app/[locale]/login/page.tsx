@@ -8,6 +8,7 @@ import { useAuth } from "@/context/AuthContext";
 import { Input } from "@/components/ui/input";
 import { LoadingButton } from "@/components/ui/loading-button";
 import { AuthPageShell } from "@/components/auth/AuthPageShell";
+import { TurnstileWidget } from "@/components/auth/TurnstileWidget";
 import { useMinDelayLoading } from "@/hooks/useMinDelayLoading";
 import { loginSchema, parseValidation } from "@/lib/validation";
 import { resolvePostAuthRoute } from "@/lib/subscription-access";
@@ -15,6 +16,7 @@ import { resolvePostAuthRoute } from "@/lib/subscription-access";
 export default function LoginPage() {
   const router = useRouter();
   const t = useTranslations("auth.login");
+  const tAuth = useTranslations("auth");
   const tLayout = useTranslations("dashboardLayout");
   const { login, pendingTwoFactor, verifyTwoFactorChallenge } = useAuth();
   const [email, setEmail] = useState("");
@@ -39,9 +41,19 @@ export default function LoginPage() {
       );
       return;
     }
+
+    const formEl = e.currentTarget;
+    if (!(formEl instanceof HTMLFormElement)) return;
+    const turnstileToken =
+      (new FormData(formEl).get("cf-turnstile-response") as string | null)?.trim() ?? "";
+    if (!turnstileToken) {
+      setError(tAuth("turnstileRequired"));
+      return;
+    }
+
     try {
       await runWithLoading(async () => {
-        const result = await login(validation.data.email, validation.data.password);
+        const result = await login(validation.data.email, validation.data.password, turnstileToken);
         if (!("2fa_required" in result)) {
           const next = await resolvePostAuthRoute();
           if (next.ok) {
@@ -52,14 +64,20 @@ export default function LoginPage() {
         }
       });
     } catch (err: unknown) {
-      const data =
+      const res =
         err && typeof err === "object" && "response" in err
-          ? (err as { response?: { status?: number; data?: { code?: string } } }).response
+          ? (err as { response?: { status?: number; data?: { code?: string; detail?: unknown } } })
+              .response
           : undefined;
-      if (data?.status === 403 && data.data?.code === "email_not_verified") {
+      if (res?.status === 403 && res.data?.code === "email_not_verified") {
         router.push(
           `/auth/verify-email?email=${encodeURIComponent(validation.data.email)}`
         );
+        return;
+      }
+      const detail = res?.data?.detail;
+      if (res?.status === 400 && typeof detail === "string") {
+        setError(detail);
         return;
       }
       setError(t("invalidCredentials"));
@@ -182,6 +200,8 @@ export default function LoginPage() {
                   ) : null}
                 </Link>
               </div>
+
+              <TurnstileWidget />
             </>
           ) : (
             <div className="form-field">
