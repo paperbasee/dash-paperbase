@@ -16,10 +16,12 @@ import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { logout } from "@/lib/auth";
-import { hasActiveSubscription } from "@/lib/subscription-access";
+import {
+  hasSubscriptionPlan,
+  subscriptionIsPaidPeriod,
+} from "@/lib/subscription-access";
 import SubscriptionAccessBlock from "@/components/auth/SubscriptionAccessBlock";
 import SubscriptionExpirationBanner from "@/components/auth/SubscriptionExpirationBanner";
-import { useCurrentUser } from "@/hooks/useCurrentUser";
 
 export default function DashboardLayoutClient({
   children,
@@ -53,14 +55,14 @@ export default function DashboardLayoutClient({
   const storeCount = hasStoreContext ? 1 : 0;
   const contentContainerClass = "mx-auto w-full max-w-[88rem] px-4 md:px-6 lg:px-8";
 
-  /** Fresh /auth/me/ — same source as Sidebar avatar ring; meProfile cache can omit is_expiring_soon. */
-  const {
-    isExpiringSoon: expiringSoonFromApi,
-    daysRemaining: daysRemainingFromApi,
-    isLoading: currentUserSubscriptionLoading,
-  } = useCurrentUser(isAuthenticated);
-  const showExpirationBanner =
-    !currentUserSubscriptionLoading && expiringSoonFromApi;
+  const subscriptionBannerVariant =
+    subscription?.subscription_status === "GRACE"
+      ? "grace"
+      : subscription?.subscription_status === "EXPIRED"
+        ? "expired"
+        : null;
+  const showSubscriptionBanner =
+    meProfileStatus === "ready" && subscriptionBannerVariant !== null;
 
   const normalizedPlan = (subscription?.plan ?? "").toLowerCase();
   const isEligiblePlan =
@@ -69,14 +71,15 @@ export default function DashboardLayoutClient({
   const meReady = meProfileStatus === "ready";
   const shouldRedirectToOnboarding =
     meReady &&
+    meProfile !== null &&
     pathname === "/" &&
-    subscription?.active === true &&
+    subscriptionIsPaidPeriod(meProfile) &&
     isEligiblePlan &&
     storeCount === 0;
   const shouldRedirectToRecover =
     meReady &&
     meProfile &&
-    subscription?.active === true &&
+    subscriptionIsPaidPeriod(meProfile) &&
     !meProfile.active_store_public_id &&
     meProfile.has_recoverable_stores === true;
   const authCheckReady = authHydrated && !isLoading;
@@ -102,7 +105,9 @@ export default function DashboardLayoutClient({
   }, [shouldRedirectToRecover, router]);
 
   const shouldRedirectToPlanFlow =
-    meProfileStatus === "ready" && meProfile !== null && !hasActiveSubscription(meProfile);
+    meProfileStatus === "ready" &&
+    meProfile !== null &&
+    !hasSubscriptionPlan(meProfile);
 
   useEffect(() => {
     if (!shouldRedirectToPlanFlow) return;
@@ -122,12 +127,12 @@ export default function DashboardLayoutClient({
 
   /** Pushes sidebar / sticky chrome below the fixed subscription strip (same var as globals.css). */
   useEffect(() => {
-    const offset = showExpirationBanner ? "2.5rem" : "0px";
+    const offset = showSubscriptionBanner ? "1.75rem" : "0px";
     document.documentElement.style.setProperty("--subscription-banner-offset", offset);
     return () => {
       document.documentElement.style.setProperty("--subscription-banner-offset", "0px");
     };
-  }, [showExpirationBanner]);
+  }, [showSubscriptionBanner]);
 
   const authBlocking =
     !authHydrated ||
@@ -152,9 +157,14 @@ export default function DashboardLayoutClient({
     <BrandingProvider>
       <SearchModalProvider>
         <NotificationProvider>
-          {showExpirationBanner && (
-            <div className="fixed inset-x-0 top-0 z-[45]">
-              <SubscriptionExpirationBanner daysRemaining={daysRemainingFromApi} />
+          {showSubscriptionBanner && subscriptionBannerVariant && (
+            <div className="fixed inset-x-0 top-0 z-[60]">
+              <SubscriptionExpirationBanner
+                variant={subscriptionBannerVariant}
+                planPublicId={subscription?.plan_public_id ?? null}
+                storefrontBlocksAt={subscription?.storefront_blocks_at ?? null}
+                endDate={subscription?.end_date ?? null}
+              />
             </div>
           )}
 

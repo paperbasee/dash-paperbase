@@ -10,6 +10,7 @@ import { formatDashboardDateTimeWithSeconds } from "@/lib/datetime-display";
 import { SettingsSectionBody, settingsSectionSurfaceClassName } from "../SettingsSectionBody";
 import { useConfirm } from "@/context/ConfirmDialogContext";
 import { notify } from "@/notifications";
+import { useAuth } from "@/context/AuthContext";
 
 type APIKeyRow = {
   public_id: string;
@@ -46,6 +47,10 @@ export default function NetworkingSection({ hidden }: { hidden: boolean }) {
   const t = useTranslations("settings");
   const tPages = useTranslations("pages");
   const confirm = useConfirm();
+  const { meProfile, meProfileStatus } = useAuth();
+  const planExpired =
+    meProfileStatus === "ready" &&
+    meProfile?.subscription?.subscription_status === "EXPIRED";
   const [keys, setKeys] = useState<APIKeyRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -89,6 +94,7 @@ export default function NetworkingSection({ hidden }: { hidden: boolean }) {
   }, [promptCopied]);
 
   async function createKey() {
+    if (planExpired) return;
     setBusy(true);
     setMessage(null);
     setRevealedKey(null);
@@ -167,6 +173,7 @@ export default function NetworkingSection({ hidden }: { hidden: boolean }) {
   }
 
   async function copyStorefrontPrompt() {
+    if (planExpired) return;
     setPromptLoading(true);
     try {
       const res = await fetch("/api/storefront-prompt", { cache: "no-store" });
@@ -202,6 +209,15 @@ export default function NetworkingSection({ hidden }: { hidden: boolean }) {
           <p className="text-sm text-muted-foreground">{t("networking.subtitle")}</p>
         </div>
 
+        {planExpired ? (
+          <p
+            className="rounded-lg border border-destructive/35 bg-destructive/5 px-4 py-3 text-sm text-destructive"
+            role="status"
+          >
+            {t("networking.subscriptionExpiredNotice")}
+          </p>
+        ) : null}
+
         <div className="rounded-lg border border-border bg-muted/30 px-4 py-3">
           <p className="text-xs uppercase tracking-wide text-muted-foreground">{t("networking.apiBaseUrl")}</p>
           <div className="mt-2 flex items-start justify-between gap-2">
@@ -221,7 +237,7 @@ export default function NetworkingSection({ hidden }: { hidden: boolean }) {
               variant="outline"
               size="sm"
               className="shrink-0"
-              disabled={promptLoading}
+              disabled={promptLoading || planExpired}
               onClick={() => void copyStorefrontPrompt()}
             >
               {promptLoading ? (
@@ -317,7 +333,7 @@ export default function NetworkingSection({ hidden }: { hidden: boolean }) {
               placeholder={t("networking.namePlaceholder")}
               value={newKeyName}
               onChange={(e) => setNewKeyName(e.target.value)}
-              disabled={busy}
+              disabled={busy || planExpired}
               className="sm:flex-1"
             />
             <Button
@@ -325,7 +341,7 @@ export default function NetworkingSection({ hidden }: { hidden: boolean }) {
               variant="outline"
               size="sm"
               className="shrink-0 border-primary text-primary hover:bg-primary/10"
-              disabled={busy}
+              disabled={busy || planExpired}
               onClick={() => void createKey()}
             >
               <KeyRound className="mr-2 size-4" />

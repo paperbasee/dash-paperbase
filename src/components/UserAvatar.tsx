@@ -8,7 +8,8 @@ interface UserAvatarProps {
   publicId: string | null;
   name?: string;
   plan?: string | null;
-  isExpiringSoon?: boolean;
+  /** Red ring when subscription is in grace or expired (overrides premium gold). */
+  urgentSubscriptionRing?: boolean;
   className?: string;
 }
 
@@ -19,8 +20,8 @@ function getInitial(name?: string): string {
   return trimmed.charAt(0).toUpperCase();
 }
 
-function getPlanRingClasses(plan?: string | null, isExpiringSoon?: boolean): string {
-  if (isExpiringSoon) {
+function getPlanRingClasses(plan?: string | null, urgentSubscriptionRing?: boolean): string {
+  if (urgentSubscriptionRing) {
     return "ring-2 ring-red-500 shadow-[0_0_6px_rgba(239,68,68,0.4)]";
   }
   if (plan?.toLowerCase() === "premium") {
@@ -29,9 +30,9 @@ function getPlanRingClasses(plan?: string | null, isExpiringSoon?: boolean): str
   return "";
 }
 
-export default function UserAvatar({ publicId, name, plan, isExpiringSoon, className }: UserAvatarProps) {
+export default function UserAvatar({ publicId, name, plan, urgentSubscriptionRing, className }: UserAvatarProps) {
   const [imgFailed, setImgFailed] = useState(false);
-  const ringClasses = getPlanRingClasses(plan, isExpiringSoon);
+  const ringClasses = getPlanRingClasses(plan, urgentSubscriptionRing);
 
   if (publicId && !imgFailed) {
     return (

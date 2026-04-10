@@ -5,7 +5,7 @@ import api, {
 import type { MeForRouting } from "@/lib/subscription-access";
 
 /** Persisted profile cache; stored in localStorage for cross-tab `storage` events. */
-export const ME_PROFILE_STORAGE_KEY = "paperbase_me_profile_v2";
+export const ME_PROFILE_STORAGE_KEY = "paperbase_me_profile_v4";
 
 export const ME_PROFILE_PERSIST_EVENT = "paperbase-me-profile-persisted";
 
@@ -56,6 +56,13 @@ export function getMeProfileKeyFromToken(accessToken: string): string | null {
   }
 }
 
+function isSubscriptionPayloadComplete(me: MeForRouting): boolean {
+  const sub = me.subscription;
+  if (sub == null || typeof sub !== "object") return true;
+  /** Reject legacy/partial caches (e.g. before subscription_status) so we refetch auth/me/. */
+  return typeof sub.subscription_status === "string";
+}
+
 function readStored(profileKey: string): MeForRouting | null {
   if (typeof window === "undefined") return null;
   try {
@@ -68,6 +75,9 @@ function readStored(profileKey: string): MeForRouting | null {
       parsed.me &&
       typeof parsed.me === "object"
     ) {
+      if (!isSubscriptionPayloadComplete(parsed.me)) {
+        return null;
+      }
       return parsed.me;
     }
   } catch {
@@ -144,13 +154,6 @@ export async function ensureMeProfile(options?: {
     throw new Error("Not authenticated");
   }
   const profileKey = getMeProfileKeyFromToken(token);
-
-  if (!options?.forceNetwork && profileKey) {
-    const stored = readStored(profileKey);
-    if (stored) {
-      return stored;
-    }
-  }
 
   const flightKey = profileKey ?? "__pending__";
   if (inFlight && inFlightKey === flightKey) {

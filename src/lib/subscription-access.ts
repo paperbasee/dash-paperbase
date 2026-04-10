@@ -3,12 +3,17 @@ import {
   ensureMeProfile,
 } from "@/lib/me-profile-store";
 
+export type SubscriptionStatus = "NONE" | "ACTIVE" | "GRACE" | "EXPIRED";
+
 export interface MeSubscription {
-  active: boolean;
+  subscription_status: SubscriptionStatus;
   plan: string | null;
+  /** For renew / checkout (billing payment initiate). */
+  plan_public_id: string | null;
   end_date: string | null;
   days_remaining: number;
-  is_expiring_soon: boolean;
+  /** ISO 8601 instant when storefront API keys start receiving subscription_expired (BD calendar). */
+  storefront_blocks_at?: string | null;
 }
 
 export interface MeForRouting {
@@ -26,6 +31,17 @@ export interface MeForRouting {
   } | null;
 }
 
+/** True when the user has (or had) a subscription row — not never-subscribed. */
+export function hasSubscriptionPlan(me: MeForRouting): boolean {
+  return me.subscription?.subscription_status !== "NONE";
+}
+
+/** Calendar-active paid period (excludes EXPIRED and NONE). */
+export function subscriptionIsPaidPeriod(me: MeForRouting): boolean {
+  const s = me.subscription?.subscription_status;
+  return s === "ACTIVE" || s === "GRACE";
+}
+
 /** Clear cached auth/me (logout, store deletion, etc.). */
 export function invalidateMeRoutingCache(): void {
   clearMeProfileCache();
@@ -36,17 +52,13 @@ export async function fetchMeForRouting(): Promise<MeForRouting> {
   return ensureMeProfile();
 }
 
-export function hasActiveSubscription(me: MeForRouting): boolean {
-  return me.subscription?.active === true;
-}
-
 export type PostAuthPath = "/" | "/onboarding" | "/plan-not-active" | "/recover";
 
 /**
  * Where to send the user after login / 2FA, using server truth from auth/me/.
  */
 export function resolvePostAuthPath(me: MeForRouting): PostAuthPath {
-  if (!hasActiveSubscription(me)) {
+  if (!hasSubscriptionPlan(me)) {
     return "/plan-not-active";
   }
   if (me.active_store_public_id) {

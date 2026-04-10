@@ -733,8 +733,13 @@
     "subscriptionVerifyBody": "We could not verify your account status right now. Please try reloading. If the issue continues, contact support.",
     "noSubscriptionTitle": "No active subscription",
     "noSubscriptionBody": "Your account does not have an active plan. Please contact support to activate a subscription before accessing the dashboard.",
-    "expiringBannerText": "Your subscription expires in {days, plural, =0 {less than a day} =1 {1 day} other {# days}}. Contact support to renew.",
-    "expiringBannerCta": "Contact support"
+    "graceBannerText": "Subscription expiring soon. Renew now. Time left: {time}",
+    "graceBannerTextNoTimer": "Subscription expiring soon. Renew now.",
+    "expiredBannerText": "Subscription expired. Renew to continue.",
+    "expiredBannerPay": "Pay & renew",
+    "expiredBannerPayLoading": "Opening checkout…",
+    "expiredBannerPayError": "Could not start checkout. Try again or pick a plan.",
+    "bannerPayNow": "Pay now"
   },
   "dashboard": {
     "title": "Dashboard overview",
@@ -1069,6 +1074,7 @@
     "networking": {
       "heading": "Networking",
       "subtitle": "Create API keys here to authenticate tenant API and WebSocket requests. Keys are not created automatically when you create a store.",
+      "subscriptionExpiredNotice": "Your subscription has expired. Renew your plan to create new API keys and copy the storefront integration prompt.",
       "apiBaseUrl": "API Base URL",
       "loadError": "Could not load API keys.",
       "defaultKeyName": "Default key",
@@ -1177,7 +1183,9 @@
       "loading": "Loading…",
       "dash": "—",
       "statusActive": "Active",
-      "statusInactive": "Inactive"
+      "statusInactive": "Inactive",
+      "statusGrace": "Grace period",
+      "statusExpired": "Expired"
     },
     "dataExport": {
       "heading": "Data & Export",

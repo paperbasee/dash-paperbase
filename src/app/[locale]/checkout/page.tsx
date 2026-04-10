@@ -223,6 +223,12 @@ export default function CheckoutPage() {
 
   // --- Payment form screen ---
   const hasNumbers = config.bkash_number || config.nagad_number;
+  const monthlyEq =
+    payment?.plan?.billing_cycle === "yearly" && payment?.plan?.price
+      ? parseFloat(payment.plan.price)
+      : null;
+  const yearlyTotal =
+    monthlyEq !== null ? `${payment?.currency ?? "BDT"} ${(monthlyEq * 12).toLocaleString()}` : null;
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background via-background to-muted/30 px-4 py-10">
@@ -237,7 +243,7 @@ export default function CheckoutPage() {
 
         {/* Plan summary */}
         {payment?.plan && (
-          <div className="rounded-xl border border-border bg-card px-5 py-4 shadow-sm">
+          <div className="rounded-2xl border border-border bg-card px-5 py-4 shadow-sm">
             <dl className="space-y-3 text-sm">
               <div className="flex items-start justify-between gap-4">
                 <dt className="text-muted-foreground shrink-0">{t("planLabel")}</dt>
@@ -264,6 +270,11 @@ export default function CheckoutPage() {
                   ? t("billingMonthlyHelp")
                   : t("billingYearlyHelp")}
               </p>
+              {payment.plan.billing_cycle === "yearly" && monthlyEq !== null && yearlyTotal && (
+                <p className="text-xs leading-relaxed text-muted-foreground">
+                  {`${payment.currency} ${monthlyEq.toLocaleString()}/month billed yearly (${yearlyTotal} total)`}
+                </p>
+              )}
               <div className="flex items-baseline justify-between gap-4 border-t border-border pt-3">
                 <dt className="text-muted-foreground">{t("amountLabel")}</dt>
                 <dd className="text-lg font-bold tabular-nums text-foreground">
@@ -275,7 +286,7 @@ export default function CheckoutPage() {
         )}
 
         {/* Manual mobile wallet — not card checkout */}
-        <div className="rounded-xl border border-amber-500/35 bg-amber-500/10 px-4 py-4 shadow-sm dark:border-amber-400/30 dark:bg-amber-500/5">
+        <div className="rounded-2xl border border-amber-500/35 bg-amber-500/10 px-4 py-4 shadow-sm dark:border-amber-400/30 dark:bg-amber-500/5">
           <div className="flex gap-3">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-amber-500/20 text-amber-800 dark:text-amber-200">
               <Wallet className="h-5 w-5" aria-hidden />
@@ -288,7 +299,7 @@ export default function CheckoutPage() {
         </div>
 
         {/* Payment instructions */}
-        <div className="rounded-xl border border-border bg-card px-5 py-5 shadow-sm">
+        <div className="rounded-2xl border border-border bg-card px-5 py-5 shadow-sm">
           <h2 className="mb-3 text-sm font-semibold text-foreground">{t("instructionsTitle")}</h2>
           <p className="mb-4 text-sm text-muted-foreground">{t("instructionsBody")}</p>
 
@@ -297,7 +308,7 @@ export default function CheckoutPage() {
           )}
 
           {config.bkash_number && (
-            <div className="mb-3 flex items-center justify-between rounded-lg bg-muted/50 px-4 py-3">
+            <div className="mb-3 flex items-center justify-between rounded-xl bg-muted/50 px-4 py-3">
               <div>
                 <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
                   {t("bkashLabel")}
@@ -311,7 +322,7 @@ export default function CheckoutPage() {
           )}
 
           {config.nagad_number && (
-            <div className="flex items-center justify-between rounded-lg bg-muted/50 px-4 py-3">
+            <div className="flex items-center justify-between rounded-xl bg-muted/50 px-4 py-3">
               <div>
                 <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
                   {t("nagadLabel")}
@@ -326,11 +337,11 @@ export default function CheckoutPage() {
         </div>
 
         {/* Transaction form */}
-        <div className="rounded-xl border border-border bg-card px-5 py-5 shadow-sm">
+        <div className="rounded-2xl border border-border bg-card px-5 py-5 shadow-sm">
           <h2 className="mb-4 text-sm font-semibold text-foreground">{t("formTitle")}</h2>
 
           {submitError && (
-            <div className="mb-4 rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-2 text-sm text-destructive">
+            <div className="mb-4 rounded-xl border border-destructive/30 bg-destructive/5 px-4 py-2 text-sm text-destructive">
               {submitError}
             </div>
           )}

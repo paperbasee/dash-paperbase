@@ -40,7 +40,6 @@ import {
 } from "@/components/ui/tooltip";
 import { useAuth } from "@/context/AuthContext";
 import { useBranding, defaultBranding } from "@/context/BrandingContext";
-import { useCurrentUser } from "@/hooks/useCurrentUser";
 import UserAvatar from "@/components/UserAvatar";
 import { useSearchModal } from "@/context/SearchModalContext";
 import { useNavCounts } from "@/hooks/useNavCounts";
@@ -110,12 +109,19 @@ function SidebarContent({
   const locale = useLocale();
   const pathname = usePathname();
   const router = useRouter();
-  const { logout, isAuthenticated } = useAuth();
+  const { logout, isAuthenticated, meProfile, meProfileStatus } = useAuth();
   const { branding } = useBranding();
   const { setOpen: setSearchOpen } = useSearchModal();
   const { counts, formatCount } = useNavCounts();
   const { isEnabled } = useEnabledApps();
-  const { publicId: userPublicId, plan: userPlan, isExpiringSoon: userExpiringSoon } = useCurrentUser(isAuthenticated);
+  const userPublicId =
+    meProfileStatus === "ready" ? (meProfile?.public_id ?? null) : null;
+  const userPlan =
+    meProfileStatus === "ready" ? (meProfile?.subscription?.plan ?? null) : null;
+  const urgentSubscriptionRing =
+    meProfileStatus === "ready" &&
+    (meProfile?.subscription?.subscription_status === "GRACE" ||
+      meProfile?.subscription?.subscription_status === "EXPIRED");
   const [catalogOpen, setCatalogOpen] = useState(false);
 
   const isActive = (href: string) => {
@@ -579,7 +585,7 @@ function SidebarContent({
               )}
               aria-label={tSidebar("userMenu")}
             >
-              <UserAvatar publicId={userPublicId} name={ownerName} plan={userPlan} isExpiringSoon={userExpiringSoon} />
+              <UserAvatar publicId={userPublicId} name={ownerName} plan={userPlan} urgentSubscriptionRing={urgentSubscriptionRing} />
               {!collapsed && (
                 <>
                   <div className="min-w-0 flex-1">

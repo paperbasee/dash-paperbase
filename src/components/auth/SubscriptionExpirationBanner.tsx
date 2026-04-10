@@ -1,35 +1,118 @@
 "use client";
 
+import { useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import { AlertTriangle } from "lucide-react";
+import { useRouter } from "@/i18n/navigation";
+import api from "@/lib/api";
+import { LoadingButton } from "@/components/ui/loading-button";
+import { cn } from "@/lib/utils";
+import {
+  formatTimeLeftHm,
+  resolveStorefrontBlocksAtIso,
+} from "@/lib/storefront-blocks-at";
+
+export type SubscriptionBannerVariant = "grace" | "expired";
 
 interface SubscriptionExpirationBannerProps {
-  daysRemaining: number;
+  variant: SubscriptionBannerVariant;
+  /** Current plan public id from auth/me — used to open checkout for the same plan. */
+  planPublicId?: string | null;
+  /** From auth/me; fallback computed from `endDate` when absent (older caches). */
+  storefrontBlocksAt?: string | null;
+  endDate?: string | null;
 }
 
 export default function SubscriptionExpirationBanner({
-  daysRemaining,
+  variant,
+  planPublicId,
+  storefrontBlocksAt,
+  endDate,
 }: SubscriptionExpirationBannerProps) {
   const t = useTranslations("dashboardLayout");
+  const router = useRouter();
+  const [payLoading, setPayLoading] = useState(false);
+  const [payError, setPayError] = useState<string | null>(null);
+  const [now, setNow] = useState(() => Date.now());
+
+  const deadlineMs = useMemo(() => {
+    const iso = resolveStorefrontBlocksAtIso(endDate, storefrontBlocksAt);
+    if (!iso) return null;
+    const parsed = Date.parse(iso);
+    return Number.isNaN(parsed) ? null : parsed;
+  }, [endDate, storefrontBlocksAt]);
+
+  useEffect(() => {
+    if (variant !== "grace" || deadlineMs == null) return;
+    const id = window.setInterval(() => setNow(Date.now()), 1000);
+    return () => window.clearInterval(id);
+  }, [variant, deadlineMs]);
+
+  const messageKey = variant === "grace" ? "graceBannerText" : "expiredBannerText";
+  const showGraceTimer = variant === "grace" && deadlineMs != null;
+  const timeLeftHm = showGraceTimer
+    ? formatTimeLeftHm(deadlineMs - now)
+    : null;
+
+  async function handlePay() {
+    const id = (planPublicId ?? "").trim();
+    if (!id) {
+      router.push("/plans");
+      return;
+    }
+    setPayError(null);
+    setPayLoading(true);
+    try {
+      await api.post("billing/payment/initiate/", { plan_public_id: id });
+      router.push("/checkout");
+    } catch {
+      setPayError(t("expiredBannerPayError"));
+    } finally {
+      setPayLoading(false);
+    }
+  }
+
+  const payLinkClass = cn(
+    "h-auto min-h-0 shrink-0 bg-transparent px-0 py-0 text-[11px] font-medium text-red-800 underline underline-offset-2 shadow-none",
+    "hover:bg-transparent hover:text-red-900 hover:underline",
+    "dark:text-red-200 dark:hover:text-red-100"
+  );
 
   return (
     <div className="border-b border-border bg-red-50 dark:bg-red-950">
-      <div className="mx-auto flex w-full max-w-[88rem] flex-wrap items-center justify-center gap-x-3 gap-y-1.5 px-3 py-1.5 text-center md:gap-x-4 md:px-6 md:py-2 lg:px-8">
-        <div className="flex max-w-3xl flex-wrap items-center justify-center gap-1.5 sm:gap-2">
+      <div className="mx-auto flex w-full max-w-[88rem] flex-wrap items-center justify-center gap-x-2 gap-y-1 px-2 py-1 text-center md:gap-x-3 md:px-4 md:py-1">
+        <div className="flex max-w-3xl flex-wrap items-center justify-center gap-1 sm:gap-1.5">
           <AlertTriangle
-            className="size-3.5 shrink-0 text-red-600 dark:text-red-400 sm:size-4"
+            className="size-3 shrink-0 text-red-600 dark:text-red-400 sm:size-3.5"
             aria-hidden
           />
-          <p className="text-center text-xs leading-tight text-red-800 sm:text-sm dark:text-red-200">
-            {t("expiringBannerText", { days: daysRemaining })}
+          <p className="text-center text-[11px] leading-snug text-red-800 sm:text-xs dark:text-red-200">
+            {variant === "grace" ? (
+              <span className="font-medium tabular-nums">
+                {timeLeftHm != null
+                  ? t("graceBannerText", { time: timeLeftHm })
+                  : t("graceBannerTextNoTimer")}
+              </span>
+            ) : (
+              <span>{t(messageKey)}</span>
+            )}
           </p>
         </div>
-        <a
-          href="mailto:noreply@mail.paperbase.me"
-          className="shrink-0 rounded-md bg-red-600 px-2.5 py-1 text-xs font-medium text-white transition-colors hover:bg-red-700 dark:bg-red-500 dark:hover:bg-red-600"
-        >
-          {t("expiringBannerCta")}
-        </a>
+        <div className="flex flex-col items-center gap-1">
+          <LoadingButton
+            type="button"
+            variant="link"
+            className={payLinkClass}
+            isLoading={payLoading}
+            loadingText={t("expiredBannerPayLoading")}
+            onClick={() => void handlePay()}
+          >
+            {variant === "grace" ? t("bannerPayNow") : t("expiredBannerPay")}
+          </LoadingButton>
+          {payError ? (
+            <span className="text-xs text-red-800 dark:text-red-200">{payError}</span>
+          ) : null}
+        </div>
       </div>
     </div>
   );

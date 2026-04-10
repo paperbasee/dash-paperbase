@@ -2,9 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
-import { Check, Zap } from "lucide-react";
+import { Check } from "lucide-react";
 import { useRouter } from "@/i18n/navigation";
-import { AuthPageShell } from "@/components/auth/AuthPageShell";
 import { Button } from "@/components/ui/button";
 import { LoadingButton } from "@/components/ui/loading-button";
 import { logout, getAccessToken } from "@/lib/auth";
@@ -23,6 +22,7 @@ interface Plan {
 }
 
 type PageState = "loading" | "ready" | "error";
+type BillingCycle = "monthly" | "yearly";
 
 export default function PlansPage() {
   const t = useTranslations("plansPage");
@@ -33,6 +33,7 @@ export default function PlansPage() {
   const [plans, setPlans] = useState<Plan[]>([]);
   const [selectingId, setSelectingId] = useState<string | null>(null);
   const [selectError, setSelectError] = useState<string | null>(null);
+  const [billingCycle, setBillingCycle] = useState<BillingCycle>("monthly");
 
   useEffect(() => {
     if (!getAccessToken()) {
@@ -89,11 +90,31 @@ export default function PlansPage() {
     }
   }
 
-  function formatPrice(plan: Plan) {
+  function formatPriceMonthlyEquivalent(plan: Plan) {
     const price = parseFloat(plan.price);
-    const suffix = plan.billing_cycle === "yearly" ? t("perYear") : t("perMonth");
-    return `${t("currency")} ${price.toLocaleString()}${suffix}`;
+    return `${t("currency")} ${price.toLocaleString()}`;
   }
+
+  function formatYearlyTotal(monthlyEquivalentPrice: string) {
+    const m = parseFloat(monthlyEquivalentPrice);
+    const total = m * 12;
+    return `${t("currency")} ${total.toLocaleString()}`;
+  }
+
+  const grouped = plans.reduce<Record<string, Partial<Record<BillingCycle, Plan>>>>(
+    (acc, p) => {
+      acc[p.name] = acc[p.name] ?? {};
+      acc[p.name][p.billing_cycle] = p;
+      return acc;
+    },
+    {}
+  );
+  const planGroups = Object.entries(grouped).map(([name, cycles]) => ({
+    name,
+    monthly: cycles.monthly ?? null,
+    yearly: cycles.yearly ?? null,
+  }));
+  const hasAnyYearly = plans.some((p) => p.billing_cycle === "yearly");
 
   const spinner = (
     <div className="flex items-center justify-center py-16">
@@ -102,20 +123,19 @@ export default function PlansPage() {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background via-background to-muted/30 px-4 py-10">
+    <div className="min-h-screen bg-background px-4 py-12 text-foreground">
       <div className="mx-auto flex max-w-6xl flex-col">
-        {/* Header */}
         <div className="mb-10 text-center">
-          <p className="mb-1 text-sm font-semibold tracking-wide text-foreground/70">Paperbase</p>
-          <h1 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-            {t("title")}
-          </h1>
-          <p className="mt-3 text-sm text-muted-foreground sm:text-base">{t("subtitle")}</p>
+          <p className="mb-2 text-sm font-semibold tracking-wide text-foreground/70">Paperbase</p>
+          <h1 className="text-4xl font-semibold tracking-tight sm:text-6xl">{t("title")}</h1>
+          <p className="mx-auto mt-4 max-w-2xl text-sm text-muted-foreground sm:text-base">
+            {t("subtitle")}
+          </p>
         </div>
 
         {/* Error loading */}
         {pageState === "error" && (
-          <div className="rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-center text-sm text-destructive">
+          <div className="rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-center text-sm text-destructive">
             {t("errorLoad")}
           </div>
         )}
@@ -131,92 +151,125 @@ export default function PlansPage() {
         {pageState === "ready" && plans.length > 0 && (
           <>
             {selectError && (
-              <div className="mb-6 rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-center text-sm text-destructive">
+              <div className="mb-6 rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-center text-sm text-red-200">
                 {selectError}
               </div>
             )}
 
-            <div className="flex w-full flex-wrap justify-center gap-6 lg:gap-8">
-              {plans.map((plan) => {
-                const featureEntries = Object.entries(plan.features?.features ?? {}).filter(
+            <div className="mb-6 flex w-full justify-center">
+              <div className="inline-flex rounded-full border border-border bg-card p-1 shadow-sm">
+                <button
+                  type="button"
+                  className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${
+                    billingCycle === "monthly"
+                      ? "bg-primary text-primary-foreground"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                  onClick={() => setBillingCycle("monthly")}
+                >
+                  {t("monthly")}
+                </button>
+                <button
+                  type="button"
+                  disabled={!hasAnyYearly}
+                  className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${
+                    billingCycle === "yearly"
+                      ? "bg-primary text-primary-foreground"
+                      : hasAnyYearly
+                        ? "text-muted-foreground hover:text-foreground"
+                        : "cursor-not-allowed text-muted-foreground/50"
+                  }`}
+                  onClick={() => {
+                    if (!hasAnyYearly) return;
+                    setBillingCycle("yearly");
+                  }}
+                >
+                  {t("yearly")}
+                </button>
+              </div>
+            </div>
+
+            <div className="mx-auto grid w-full max-w-5xl justify-center justify-items-center gap-6 [grid-template-columns:repeat(auto-fit,minmax(18rem,20rem))]">
+              {planGroups.map((g) => {
+                const selected = (billingCycle === "yearly" ? g.yearly : g.monthly) ?? g.monthly ?? g.yearly;
+                if (!selected) return null;
+
+                const featureEntries = Object.entries(selected.features?.features ?? {}).filter(
                   ([, v]) => v === true
                 );
-                const limitEntries = Object.entries(plan.features?.limits ?? {});
-                const isSelecting = selectingId === plan.public_id;
+                const limitEntries = Object.entries(selected.features?.limits ?? {});
+                const isSelecting = selectingId === selected.public_id;
+                const showYearly = billingCycle === "yearly" && !!g.yearly;
 
                 return (
                   <div
-                    key={plan.public_id}
-                    className={`flex w-full max-w-sm flex-col rounded-xl border bg-card shadow-sm transition-shadow hover:shadow-md ${
-                      plan.is_default ? "border-primary/60 ring-1 ring-primary/30" : "border-border"
+                    key={`${g.name}-${selected.public_id}`}
+                    className={`flex w-full flex-col rounded-2xl bg-card p-6 text-card-foreground shadow-sm ring-1 ring-border ${
+                      selected.is_default ? "ring-2 ring-primary/50" : ""
                     }`}
                   >
-                    {/* Card header */}
-                    <div className="border-b border-border px-6 py-5">
-                      <div className="flex items-center gap-2">
-                        <Zap className="h-4 w-4 text-primary" aria-hidden />
-                        <h2 className="text-base font-semibold text-foreground">{plan.name}</h2>
-                      </div>
-                      <p className="mt-2 text-2xl font-bold text-foreground">
-                        {formatPrice(plan)}
-                      </p>
-                      <p className="mt-0.5 text-xs text-muted-foreground capitalize">
-                        {plan.billing_cycle === "yearly" ? t("yearly") : t("monthly")}
-                      </p>
+                    <div className="flex items-center justify-between">
+                      <h2 className="text-base font-semibold">{selected.name}</h2>
+                      {selected.is_default && (
+                        <span className="rounded-full bg-primary/10 px-2.5 py-1 text-xs font-semibold text-primary">
+                          Best offer
+                        </span>
+                      )}
                     </div>
 
-                    {/* Features & limits */}
-                    <div className="flex-1 space-y-4 px-6 py-5">
-                      {featureEntries.length > 0 && (
-                        <div>
-                          <p className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                            {t("featuresLabel")}
-                          </p>
-                          <ul className="space-y-2.5">
-                            {featureEntries.map(([key]) => (
-                              <li key={key} className="flex items-start gap-3 text-sm text-foreground">
-                                <span
-                                  className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-primary/15 ring-1 ring-primary/20"
-                                  aria-hidden
-                                >
-                                  <Check className="h-3.5 w-3.5 text-primary" strokeWidth={2.5} />
-                                </span>
-                                <span className="min-w-0 pt-0.5 capitalize leading-snug">
-                                  {key.replace(/_/g, " ")}
-                                </span>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
+                    <div className="mt-5 flex items-end gap-2">
+                      <p className="text-4xl font-semibold tracking-tight">
+                        {formatPriceMonthlyEquivalent(selected)}
+                      </p>
+                      <p className="pb-1 text-sm text-muted-foreground">{t("perMonth")}</p>
+                    </div>
 
-                      {limitEntries.length > 0 && (
-                        <div>
-                          <p className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                            {t("limitsLabel")}
-                          </p>
-                          <ul className="space-y-1.5">
-                            {limitEntries.map(([key, val]) => (
-                              <li key={key} className="flex items-center justify-between text-sm">
-                                <span className="capitalize text-muted-foreground">
-                                  {key.replace(/_/g, " ")}
-                                </span>
-                                <span className="font-medium text-foreground">{val}</span>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
+                    {showYearly ? (
+                      <p className="mt-2 text-sm text-muted-foreground">
+                        {`Billed yearly (${formatYearlyTotal(selected.price)} total)`}
+                      </p>
+                    ) : (
+                      <p className="mt-2 text-sm text-muted-foreground">
+                        {t("billingCycleLabel")}: {t("monthly")}
+                      </p>
+                    )}
+
+                    {/* Features & limits */}
+                    <div className="mt-6 flex-1">
+                      <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                        {t("featuresLabel")}
+                      </p>
+                      <ul className="mt-3 space-y-2">
+                        {featureEntries.slice(0, 5).map(([key]) => (
+                          <li key={key} className="flex items-start gap-2 text-sm">
+                            <span className="mt-0.5 inline-flex h-5 w-5 items-center justify-center rounded-full bg-foreground text-background">
+                              <Check className="h-3.5 w-3.5" strokeWidth={3} aria-hidden />
+                            </span>
+                            <span className="min-w-0 leading-snug">{key.replace(/_/g, " ")}</span>
+                          </li>
+                        ))}
+                        {limitEntries.slice(0, 3).map(([key, val]) => (
+                          <li key={key} className="flex items-start gap-2 text-sm">
+                            <span className="mt-0.5 inline-flex h-5 w-5 items-center justify-center rounded-full bg-foreground text-background">
+                              <Check className="h-3.5 w-3.5" strokeWidth={3} aria-hidden />
+                            </span>
+                            <span className="min-w-0 leading-snug text-muted-foreground">
+                              {key.replace(/_/g, " ")}:{" "}
+                              <span className="font-medium text-foreground">{val}</span>
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
                     </div>
 
                     {/* CTA */}
-                    <div className="px-6 pb-6">
+                    <div className="mt-6">
                       <LoadingButton
-                        className="w-full"
+                        className="w-full rounded-2xl"
                         isLoading={isSelecting}
                         loadingText={t("initiating")}
                         disabled={selectingId !== null}
-                        onClick={() => handleSelectPlan(plan)}
+                        onClick={() => handleSelectPlan(selected)}
                       >
                         {t("selectPlan")}
                       </LoadingButton>
