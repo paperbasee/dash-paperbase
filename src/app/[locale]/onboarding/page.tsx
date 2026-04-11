@@ -2,7 +2,7 @@
 
 import { Suspense } from "react";
 import { useTranslations } from "next-intl";
-import { useOnboarding } from "./useOnboarding";
+import { useOnboarding, type OnboardingStep } from "./useOnboarding";
 import { StoreDetailsStep } from "./StoreDetailsStep";
 import { AppSelectionStep } from "./AppSelectionStep";
 import { IntroStep } from "./IntroStep";
@@ -10,7 +10,7 @@ import { IdentityStep } from "./IdentityStep";
 import { AccountStep } from "./AccountStep";
 import { AuthPageShell } from "@/components/auth/AuthPageShell";
 
-function LoadingSpinner() {
+export function OnboardingLoadingSpinner() {
   return (
     <AuthPageShell appName="">
       <div className="mx-auto flex w-full max-w-sm items-center justify-center py-6 sm:py-8">
@@ -20,7 +20,11 @@ function LoadingSpinner() {
   );
 }
 
-function OnboardingPageContent() {
+export function OnboardingPageContent({
+  initialStep,
+}: {
+  initialStep?: OnboardingStep;
+}) {
   const t = useTranslations("auth.onboarding");
   const {
     isAddMode,
@@ -37,9 +41,9 @@ function OnboardingPageContent() {
     nextStep,
     prevStep,
     submitFinalStep,
-  } = useOnboarding();
+  } = useOnboarding({ initialStep });
 
-  if (!isReady) return <LoadingSpinner />;
+  if (!isReady) return <OnboardingLoadingSpinner />;
 
   const showProgress = step > 1;
   const progress = ((step - 1) / 4) * 100;
@@ -136,7 +140,7 @@ function OnboardingPageContent() {
 
 export default function OnboardingPage() {
   return (
-    <Suspense fallback={<LoadingSpinner />}>
+    <Suspense fallback={<OnboardingLoadingSpinner />}>
       <OnboardingPageContent />
     </Suspense>
   );

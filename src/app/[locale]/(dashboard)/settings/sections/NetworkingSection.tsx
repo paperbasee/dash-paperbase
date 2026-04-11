@@ -51,6 +51,10 @@ export default function NetworkingSection({ hidden }: { hidden: boolean }) {
   const planExpired =
     meProfileStatus === "ready" &&
     meProfile?.subscription?.subscription_status === "EXPIRED";
+  const storeUnderReview =
+    meProfileStatus === "ready" &&
+    meProfile?.subscription?.subscription_status === "PENDING_REVIEW";
+  const networkingActionsLocked = planExpired || storeUnderReview;
   const [keys, setKeys] = useState<APIKeyRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -94,7 +98,7 @@ export default function NetworkingSection({ hidden }: { hidden: boolean }) {
   }, [promptCopied]);
 
   async function createKey() {
-    if (planExpired) return;
+    if (networkingActionsLocked) return;
     setBusy(true);
     setMessage(null);
     setRevealedKey(null);
@@ -113,6 +117,7 @@ export default function NetworkingSection({ hidden }: { hidden: boolean }) {
   }
 
   async function regenerateKey(publicId: string, currentName: string) {
+    if (networkingActionsLocked) return;
     const ok = await confirm({
       title: tPages("confirmDialogTitleRegenerateApiKey"),
       message: t("networking.confirmRegenerate"),
@@ -138,6 +143,7 @@ export default function NetworkingSection({ hidden }: { hidden: boolean }) {
   }
 
   async function revokeKey(publicId: string) {
+    if (networkingActionsLocked) return;
     const ok = await confirm({
       title: tPages("confirmDialogTitleRevokeApiKey"),
       message: t("networking.confirmRevoke"),
@@ -173,7 +179,7 @@ export default function NetworkingSection({ hidden }: { hidden: boolean }) {
   }
 
   async function copyStorefrontPrompt() {
-    if (planExpired) return;
+    if (networkingActionsLocked) return;
     setPromptLoading(true);
     try {
       const res = await fetch("/api/storefront-prompt", { cache: "no-store" });
@@ -217,6 +223,14 @@ export default function NetworkingSection({ hidden }: { hidden: boolean }) {
             {t("networking.subscriptionExpiredNotice")}
           </p>
         ) : null}
+        {storeUnderReview ? (
+          <p
+            className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-950 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-50"
+            role="status"
+          >
+            {t("networking.storeUnderReviewNotice")}
+          </p>
+        ) : null}
 
         <div className="rounded-lg border border-border bg-muted/30 px-4 py-3">
           <p className="text-xs uppercase tracking-wide text-muted-foreground">{t("networking.apiBaseUrl")}</p>
@@ -237,7 +251,7 @@ export default function NetworkingSection({ hidden }: { hidden: boolean }) {
               variant="outline"
               size="sm"
               className="shrink-0"
-              disabled={promptLoading || planExpired}
+              disabled={promptLoading || networkingActionsLocked}
               onClick={() => void copyStorefrontPrompt()}
             >
               {promptLoading ? (
@@ -300,7 +314,7 @@ export default function NetworkingSection({ hidden }: { hidden: boolean }) {
                     type="button"
                     variant="outline"
                     size="sm"
-                    disabled={busy || !!k.revoked_at}
+                    disabled={busy || !!k.revoked_at || networkingActionsLocked}
                     onClick={() => void regenerateKey(k.public_id, k.name)}
                   >
                     <RefreshCcw className="mr-1 size-4" />
@@ -311,7 +325,7 @@ export default function NetworkingSection({ hidden }: { hidden: boolean }) {
                     variant="ghost"
                     size="icon"
                     className="size-8 text-destructive hover:text-destructive"
-                    disabled={busy || !!k.revoked_at}
+                    disabled={busy || !!k.revoked_at || networkingActionsLocked}
                     aria-label={t("networking.deleteKeyAria")}
                     onClick={() => void revokeKey(k.public_id)}
                   >
@@ -333,7 +347,7 @@ export default function NetworkingSection({ hidden }: { hidden: boolean }) {
               placeholder={t("networking.namePlaceholder")}
               value={newKeyName}
               onChange={(e) => setNewKeyName(e.target.value)}
-              disabled={busy || planExpired}
+              disabled={busy || networkingActionsLocked}
               className="sm:flex-1"
             />
             <Button
@@ -341,7 +355,7 @@ export default function NetworkingSection({ hidden }: { hidden: boolean }) {
               variant="outline"
               size="sm"
               className="shrink-0 border-primary text-primary hover:bg-primary/10"
-              disabled={busy || planExpired}
+              disabled={busy || networkingActionsLocked}
               onClick={() => void createKey()}
             >
               <KeyRound className="mr-2 size-4" />

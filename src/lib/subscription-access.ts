@@ -3,7 +3,13 @@ import {
   ensureMeProfile,
 } from "@/lib/me-profile-store";
 
-export type SubscriptionStatus = "NONE" | "ACTIVE" | "GRACE" | "EXPIRED";
+export type SubscriptionStatus =
+  | "NONE"
+  | "PENDING_REVIEW"
+  | "REJECTED"
+  | "ACTIVE"
+  | "GRACE"
+  | "EXPIRED";
 
 export interface MeSubscription {
   subscription_status: SubscriptionStatus;
@@ -31,9 +37,10 @@ export interface MeForRouting {
   } | null;
 }
 
-/** True when the user has (or had) a subscription row — not never-subscribed. */
+/** True when the user may access plan/onboarding flows (excludes never-subscribed and rejected). */
 export function hasSubscriptionPlan(me: MeForRouting): boolean {
-  return me.subscription?.subscription_status !== "NONE";
+  const s = me.subscription?.subscription_status;
+  return s !== "NONE" && s !== "REJECTED";
 }
 
 /** Calendar-active paid period (excludes EXPIRED and NONE). */
@@ -52,7 +59,12 @@ export async function fetchMeForRouting(): Promise<MeForRouting> {
   return ensureMeProfile();
 }
 
-export type PostAuthPath = "/" | "/onboarding" | "/plan-not-active" | "/recover";
+export type PostAuthPath =
+  | "/"
+  | "/onboarding"
+  | "/onboarding/create-store"
+  | "/plan-not-active"
+  | "/recover";
 
 /**
  * Where to send the user after login / 2FA, using server truth from auth/me/.
@@ -66,6 +78,9 @@ export function resolvePostAuthPath(me: MeForRouting): PostAuthPath {
   }
   if (me.has_recoverable_stores === true) {
     return "/recover";
+  }
+  if (me.subscription?.subscription_status === "PENDING_REVIEW") {
+    return "/onboarding/create-store";
   }
   return "/onboarding";
 }
