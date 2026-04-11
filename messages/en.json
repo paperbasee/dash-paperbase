@@ -1091,6 +1091,7 @@
       "msgRevoked": "API key revoked.",
       "msgRevokeFailed": "Could not revoke API key.",
       "newKeyTitle": "New API key (shown once)",
+      "copyApiKey": "Copy API key",
       "loadingKeys": "Loading API keys…",
       "prefix": "Prefix:",
       "created": "Created:",
@@ -1107,7 +1108,10 @@
       "copyStorefrontPrompt": "Copy prompt",
       "promptCopiedTitle": "Copied",
       "promptCopiedDescription": "Storefront API prompt is on your clipboard.",
-      "promptCopyFailed": "Could not copy to clipboard. Check browser permissions."
+      "promptCopyFailed": "Could not copy to clipboard. Check browser permissions.",
+      "apiKeyCopiedTitle": "Copied",
+      "apiKeyCopiedDescription": "API key is on your clipboard.",
+      "apiKeyCopyFailed": "Could not copy API key. Check browser permissions."
     },
     "notifications": {
       "heading": "Notification preferences",
@@ -1118,11 +1122,7 @@
       "premium": "Premium",
       "emailHint": "Control when emails are sent for order events. Order email alerts are a Premium feature.",
       "emailOwnerOnOrder": "Email me when an order is received",
-      "emailCustomerCourier": "Email customer when the order is sent to courier",
-      "deliveryHeading": "Delivery preference",
-      "deliverySoon": "Choose how to receive notifications (coming soon).",
-      "deliveryEmail": "Email",
-      "deliveryInApp": "In-app"
+      "emailCustomerCourier": "Email customer when the order is sent to courier"
     },
     "security": {
       "heading": "Security",

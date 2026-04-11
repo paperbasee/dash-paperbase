@@ -20,7 +20,11 @@ import {
   isRemoveStoreModalPhraseConfirmed,
 } from "@/lib/validation";
 import { cn } from "@/lib/utils";
-import { SettingsSectionBody, settingsSectionSurfaceClassName } from "../SettingsSectionBody";
+import {
+  SettingsSectionBody,
+  settingsInvertedButtonClassName,
+  settingsSectionSurfaceClassName,
+} from "../SettingsSectionBody";
 
 type ExportVariant = "exportStore" | "importStore";
 
@@ -107,13 +111,7 @@ function ExportOptionCard({
         <Button
           type="button"
           variant="outline"
-          className={cn(
-            "shrink-0 border bg-background/80 hover:bg-muted/60",
-            variant === "exportStore" &&
-              "border-[hsl(var(--chart-products)/0.45)] hover:bg-[hsl(var(--chart-products)/0.08)]",
-            variant === "importStore" &&
-              "border-[hsl(var(--chart-orders)/0.45)] hover:bg-[hsl(var(--chart-orders)/0.08)]",
-          )}
+          className={cn("shrink-0", settingsInvertedButtonClassName)}
           disabled
         >
           {buttonLabel}
@@ -236,7 +234,7 @@ export default function DataExportSection({
             <Button
               type="button"
               variant="outline"
-              className="shrink-0 border-amber-600/40"
+              className={cn("shrink-0", settingsInvertedButtonClassName)}
               onClick={() => setRemoveOpen(true)}
               disabled={removeStoreDisabled}
             >
@@ -303,6 +301,7 @@ export default function DataExportSection({
               <Button
                 type="button"
                 variant="outline"
+                className={settingsInvertedButtonClassName}
                 onClick={() => setRemoveOpen(false)}
                 disabled={removeStoreSubmitting}
               >
@@ -310,8 +309,8 @@ export default function DataExportSection({
               </Button>
               <Button
                 type="button"
-                variant="default"
-                className="border-amber-600/50 bg-amber-600 text-white hover:bg-amber-600/90"
+                variant="outline"
+                className={settingsInvertedButtonClassName}
                 onClick={() => void handleSubmitRemove()}
                 disabled={!removeConfirmOk || removeStoreSubmitting}
               >

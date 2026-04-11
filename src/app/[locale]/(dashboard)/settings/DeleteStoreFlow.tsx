@@ -15,6 +15,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { DELETE_STORE_CONFIRM_PHRASE } from "@/lib/validation";
 import { cn } from "@/lib/utils";
+import { settingsInvertedButtonClassName } from "./SettingsSectionBody";
 import { translateDeletionStep } from "./deletionStepLabels";
 import type { DeleteModalStep } from "./useDeleteStore";
 import { useAuth } from "@/context/AuthContext";
@@ -210,7 +211,7 @@ export default function DeleteStoreFlow({
                   type="button"
                   variant="outline"
                   size="sm"
-                  className="sm:h-10 sm:px-4 sm:text-sm"
+                  className={cn("sm:h-10 sm:px-4 sm:text-sm", settingsInvertedButtonClassName)}
                   onClick={() => onDeleteConfirmOpenChange(false)}
                   disabled={deleteRequestSubmitting}
                 >
@@ -240,7 +241,7 @@ export default function DeleteStoreFlow({
                   type="button"
                   variant="outline"
                   size="sm"
-                  className="sm:h-10 sm:px-4 sm:text-sm"
+                  className={cn("sm:h-10 sm:px-4 sm:text-sm", settingsInvertedButtonClassName)}
                   onClick={onBackToPhraseStep}
                   disabled={deleteRequestSubmitting}
                 >
@@ -293,7 +294,13 @@ export default function DeleteStoreFlow({
                     : t("deleteFlow.overlayWaitBodyImproved")}
                 </p>
               </div>
-              <Button type="button" variant="outline" size="sm" onClick={() => logout()}>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className={settingsInvertedButtonClassName}
+                onClick={() => logout()}
+              >
                 {t("deleteFlow.logout")}
               </Button>
             </div>
@@ -360,7 +367,12 @@ export default function DeleteStoreFlow({
               <div className="mt-6 rounded-lg border border-destructive/30 bg-destructive/5 p-4">
                 <p className="text-sm text-destructive">{deleteRequestError}</p>
                 <div className="mt-4 flex justify-end">
-                  <Button type="button" variant="outline" onClick={onCloseDeletion}>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className={settingsInvertedButtonClassName}
+                    onClick={onCloseDeletion}
+                  >
                     {t("close")}
                   </Button>
                 </div>

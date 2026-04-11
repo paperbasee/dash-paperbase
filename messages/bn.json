@@ -1091,6 +1091,7 @@
       "msgRevoked": "API কী বাতিল হয়েছে।",
       "msgRevokeFailed": "API কী বাতিল করা যায়নি।",
       "newKeyTitle": "নতুন API কী (একবার দেখানো হয়)",
+      "copyApiKey": "API কী কপি করুন",
       "loadingKeys": "API কী লোড হচ্ছে…",
       "prefix": "প্রিফিক্স:",
       "created": "তৈরি:",
@@ -1107,7 +1108,10 @@
       "copyStorefrontPrompt": "প্রম্পট কপি করুন",
       "promptCopiedTitle": "কপি হয়েছে",
       "promptCopiedDescription": "স্টোরফ্রন্ট API প্রম্পট ক্লিপবোর্ডে আছে।",
-      "promptCopyFailed": "ক্লিপবোর্ডে কপি করা যায়নি। ব্রাউজারের অনুমতি দেখুন।"
+      "promptCopyFailed": "ক্লিপবোর্ডে কপি করা যায়নি। ব্রাউজারের অনুমতি দেখুন।",
+      "apiKeyCopiedTitle": "কপি হয়েছে",
+      "apiKeyCopiedDescription": "API কী ক্লিপবোর্ডে আছে।",
+      "apiKeyCopyFailed": "API কী কপি করা যায়নি। ব্রাউজারের অনুমতি দেখুন।"
     },
     "notifications": {
       "heading": "নোটিফিকেশন পছন্দ",
@@ -1118,11 +1122,7 @@
       "premium": "প্রিমিয়াম",
       "emailHint": "অর্ডার ইভেন্টে কখন ইমেইল যাবে তা নিয়ন্ত্রণ করুন। অর্ডার ইমেইল সতর্কতা প্রিমিয়াম ফিচার।",
       "emailOwnerOnOrder": "অর্ডার পেলে আমাকে ইমেইল করুন",
-      "emailCustomerCourier": "অর্ডার কুরিয়ারে পাঠালে গ্রাহককে ইমেইল করুন",
-      "deliveryHeading": "ডেলিভারি পছন্দ",
-      "deliverySoon": "নোটিফিকেশন কীভাবে পাবেন তা বেছে নিন (শীঘ্রই আসছে)।",
-      "deliveryEmail": "ইমেইল",
-      "deliveryInApp": "ইন-অ্যাপ"
+      "emailCustomerCourier": "অর্ডার কুরিয়ারে পাঠালে গ্রাহককে ইমেইল করুন"
     },
     "security": {
       "heading": "নিরাপত্তা",

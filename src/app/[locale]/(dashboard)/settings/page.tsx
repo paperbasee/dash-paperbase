@@ -24,6 +24,7 @@ import DataExportSection from "./sections/DataExportSection";
 import DeleteStoreFlow from "./DeleteStoreFlow";
 import { SettingsDesktopSectionNav, SettingsSectionNav } from "./SettingsNav";
 import { SECTIONS, type SettingsSection } from "./settingsSections";
+import { settingsInvertedButtonClassName } from "./SettingsSectionBody";
 import useSettingsPageController from "./useSettingsPageController";
 
 export default function SettingsPage() {
@@ -112,15 +113,15 @@ export default function SettingsPage() {
       <div className="flex w-full flex-col gap-6">
         <header className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-3">
-            <div className="rounded-lg bg-muted/80 px-1 py-1 hidden md:block">
-            <button
-              type="button"
-              onClick={() => router.back()}
-              aria-label={tSettings("goBackAria")}
-              className="flex items-center justify-center rounded-md p-1 text-muted-foreground hover:bg-muted"
-            >
-              <Undo2 className="h-4 w-4" />
-            </button>
+            <div className="hidden rounded-lg bg-muted/80 px-1 py-1 md:block">
+              <button
+                type="button"
+                onClick={() => router.back()}
+                aria-label={tSettings("goBackAria")}
+                className="flex items-center justify-center rounded-md border border-foreground bg-foreground p-1.5 text-background hover:bg-foreground/90"
+              >
+                <Undo2 className="h-4 w-4" />
+              </button>
             </div>
             <div>
               <h1 className="text-2xl font-semibold tracking-tight text-foreground">
@@ -142,7 +143,10 @@ export default function SettingsPage() {
         <div className="lg:hidden">
           <Collapsible open={mobileNavOpen} onOpenChange={setMobileNavOpen}>
             <CollapsibleTrigger asChild>
-              <Button variant="outline" className="w-full justify-between gap-2">
+              <Button
+                variant="outline"
+                className={cn("w-full justify-between gap-2", settingsInvertedButtonClassName)}
+              >
                 <span className="flex items-center gap-2">
                   {ActiveIcon && <ActiveIcon className="size-4" />}
                   {activeLabel}

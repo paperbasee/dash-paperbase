@@ -7,7 +7,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import api from "@/lib/api";
 import { formatDashboardDateTimeWithSeconds } from "@/lib/datetime-display";
-import { SettingsSectionBody, settingsSectionSurfaceClassName } from "../SettingsSectionBody";
+import { cn } from "@/lib/utils";
+import {
+  SettingsSectionBody,
+  settingsInvertedButtonClassName,
+  settingsSectionSurfaceClassName,
+} from "../SettingsSectionBody";
 import { useConfirm } from "@/context/ConfirmDialogContext";
 import { notify } from "@/notifications";
 import { useAuth } from "@/context/AuthContext";
@@ -63,6 +68,7 @@ export default function NetworkingSection({ hidden }: { hidden: boolean }) {
   const [revealedKey, setRevealedKey] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [apiUrlCopied, setApiUrlCopied] = useState(false);
+  const [revealedKeyCopied, setRevealedKeyCopied] = useState(false);
   const [promptCopied, setPromptCopied] = useState(false);
   const [promptLoading, setPromptLoading] = useState(false);
   const API_BASE_URL = "https://api.paperbase.me";
@@ -96,6 +102,16 @@ export default function NetworkingSection({ hidden }: { hidden: boolean }) {
     const timer = window.setTimeout(() => setPromptCopied(false), 1200);
     return () => window.clearTimeout(timer);
   }, [promptCopied]);
+
+  useEffect(() => {
+    if (!revealedKeyCopied) return;
+    const timer = window.setTimeout(() => setRevealedKeyCopied(false), 1200);
+    return () => window.clearTimeout(timer);
+  }, [revealedKeyCopied]);
+
+  useEffect(() => {
+    setRevealedKeyCopied(false);
+  }, [revealedKey]);
 
   async function createKey() {
     if (networkingActionsLocked) return;
@@ -178,6 +194,19 @@ export default function NetworkingSection({ hidden }: { hidden: boolean }) {
     if (didCopy) setApiUrlCopied(true);
   }
 
+  async function copyRevealedKey() {
+    if (!revealedKey) return;
+    const didCopy = await copy(revealedKey);
+    if (didCopy) {
+      setRevealedKeyCopied(true);
+      notify.success(t("networking.apiKeyCopiedDescription"), {
+        title: t("networking.apiKeyCopiedTitle"),
+      });
+    } else {
+      notify.warning(t("networking.apiKeyCopyFailed"));
+    }
+  }
+
   async function copyStorefrontPrompt() {
     if (networkingActionsLocked) return;
     setPromptLoading(true);
@@ -236,7 +265,13 @@ export default function NetworkingSection({ hidden }: { hidden: boolean }) {
           <p className="text-xs uppercase tracking-wide text-muted-foreground">{t("networking.apiBaseUrl")}</p>
           <div className="mt-2 flex items-start justify-between gap-2">
             <code className="min-w-0 break-all rounded bg-background px-2 py-1 text-sm">{API_BASE_URL}</code>
-            <Button type="button" variant="ghost" size="icon" className="size-8" onClick={() => void copyApiBaseUrl()}>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="size-8 shrink-0"
+              onClick={() => void copyApiBaseUrl()}
+            >
               {apiUrlCopied ? <Check className="size-4 text-emerald-600 animate-pulse" /> : <Copy className="size-4" />}
             </Button>
           </div>
@@ -248,7 +283,7 @@ export default function NetworkingSection({ hidden }: { hidden: boolean }) {
           <div className="mt-3 flex flex-wrap items-center gap-2">
             <Button
               type="button"
-              variant="outline"
+              variant="ghost"
               size="sm"
               className="shrink-0"
               disabled={promptLoading || networkingActionsLocked}
@@ -282,8 +317,19 @@ export default function NetworkingSection({ hidden }: { hidden: boolean }) {
             <p className="font-medium text-foreground">{t("networking.newKeyTitle")}</p>
             <div className="mt-2 flex items-center justify-between gap-2">
               <code className="rounded bg-background px-2 py-1 break-all">{revealedKey}</code>
-              <Button type="button" variant="ghost" size="icon" className="size-8" onClick={() => void copy(revealedKey)}>
-                <Copy className="size-4" />
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="size-8 shrink-0"
+                aria-label={revealedKeyCopied ? t("networking.apiKeyCopiedTitle") : t("networking.copyApiKey")}
+                onClick={() => void copyRevealedKey()}
+              >
+                {revealedKeyCopied ? (
+                  <Check className="size-4 text-emerald-600 animate-pulse" />
+                ) : (
+                  <Copy className="size-4" />
+                )}
               </Button>
             </div>
           </div>
@@ -314,6 +360,7 @@ export default function NetworkingSection({ hidden }: { hidden: boolean }) {
                     type="button"
                     variant="outline"
                     size="sm"
+                    className={settingsInvertedButtonClassName}
                     disabled={busy || !!k.revoked_at || networkingActionsLocked}
                     onClick={() => void regenerateKey(k.public_id, k.name)}
                   >
@@ -354,7 +401,7 @@ export default function NetworkingSection({ hidden }: { hidden: boolean }) {
               type="button"
               variant="outline"
               size="sm"
-              className="shrink-0 border-primary text-primary hover:bg-primary/10"
+              className={cn("shrink-0", settingsInvertedButtonClassName)}
               disabled={busy || networkingActionsLocked}
               onClick={() => void createKey()}
             >
