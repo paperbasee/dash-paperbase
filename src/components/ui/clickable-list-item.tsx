@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils"
 import { isNestedInteractiveTarget } from "@/lib/row-nav"
 
 const listItemNavClasses =
-  "cursor-pointer rounded-md hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+  "cursor-pointer rounded-ui hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
 
 export type ClickableListItemProps = Omit<
   React.ComponentProps<"li">,

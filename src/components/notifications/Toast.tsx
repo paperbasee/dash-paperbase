@@ -74,7 +74,7 @@ export function Toast({ variant, message, title, action, iconName }: ToastProps)
               <button
                 type="button"
                 onClick={action.onClick}
-                className="rounded-md border border-border bg-muted px-2.5 py-1.5 text-xs font-medium text-foreground transition hover:bg-muted/80"
+                className="rounded-ui border border-border bg-muted px-2.5 py-1.5 text-xs font-medium text-foreground transition hover:bg-muted/80"
               >
                 {action.label}
               </button>

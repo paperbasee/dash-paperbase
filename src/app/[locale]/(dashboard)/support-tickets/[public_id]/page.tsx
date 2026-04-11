@@ -47,12 +47,12 @@ export default function SupportTicketDetailPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-3">
-        <div className="rounded-lg bg-muted/80 px-1 py-1 hidden md:block">
+        <div className="rounded-card bg-muted/80 px-1 py-1 hidden md:block">
           <button
             type="button"
             onClick={() => router.back()}
             aria-label={tPages("goBack")}
-            className="flex items-center justify-center rounded-md p-1 text-muted-foreground hover:bg-muted"
+            className="flex items-center justify-center rounded-ui p-1 text-muted-foreground hover:bg-muted"
           >
             <Undo2 className="h-4 w-4" />
           </button>
@@ -67,16 +67,16 @@ export default function SupportTicketDetailPage() {
           <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
         </div>
       ) : error ? (
-        <div className="rounded-xl border border-dashed border-card-border bg-card p-6 text-sm text-destructive">
+        <div className="rounded-card border border-dashed border-card-border bg-card p-6 text-sm text-destructive">
           {error}
         </div>
       ) : !ticket ? (
-        <div className="rounded-xl border border-dashed border-card-border bg-card p-6 text-sm text-muted-foreground">
+        <div className="rounded-card border border-dashed border-card-border bg-card p-6 text-sm text-muted-foreground">
           {tPages("supportTicketDetailNotFound")}
         </div>
       ) : (
         <>
-          <section className="rounded-xl border border-dashed border-card-border bg-card p-6">
+          <section className="rounded-card border border-dashed border-card-border bg-card p-6">
             <h2 className="mb-4 text-lg font-medium text-foreground">
               {tPages("supportTicketDetailCustomerInfo")}
             </h2>
@@ -103,25 +103,25 @@ export default function SupportTicketDetailPage() {
           </section>
 
           <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <div className="rounded-xl border border-dashed border-card-border bg-card p-4">
+            <div className="rounded-card border border-dashed border-card-border bg-card p-4">
               <p className="text-sm text-muted-foreground">{tPages("supportTicketsStatus")}</p>
               <p className="mt-1 text-lg font-semibold text-foreground">
                 {labelFromValue(ticket.status)}
               </p>
             </div>
-            <div className="rounded-xl border border-dashed border-card-border bg-card p-4">
+            <div className="rounded-card border border-dashed border-card-border bg-card p-4">
               <p className="text-sm text-muted-foreground">{tPages("supportTicketsPriority")}</p>
               <p className="mt-1 text-lg font-semibold text-foreground">
                 {labelFromValue(ticket.priority)}
               </p>
             </div>
-            <div className="rounded-xl border border-dashed border-card-border bg-card p-4">
+            <div className="rounded-card border border-dashed border-card-border bg-card p-4">
               <p className="text-sm text-muted-foreground">{tPages("supportTicketsCategory")}</p>
               <p className="mt-1 text-lg font-semibold text-foreground">
                 {labelFromValue(ticket.category)}
               </p>
             </div>
-            <div className="rounded-xl border border-dashed border-card-border bg-card p-4">
+            <div className="rounded-card border border-dashed border-card-border bg-card p-4">
               <p className="text-sm text-muted-foreground">{tPages("supportTicketDetailCreatedAt")}</p>
               <p className="mt-1 text-base font-medium text-foreground">
                 {formatDashboardDateTime(ticket.created_at, locale)}
@@ -129,23 +129,23 @@ export default function SupportTicketDetailPage() {
             </div>
           </section>
 
-          <section className="rounded-xl border border-dashed border-card-border bg-card p-6">
+          <section className="rounded-card border border-dashed border-card-border bg-card p-6">
             <h2 className="mb-3 text-lg font-medium text-foreground">
               {tPages("supportTicketsSubject")}
             </h2>
             <p className="text-sm text-foreground">{ticket.subject || "—"}</p>
           </section>
 
-          <section className="rounded-xl border border-dashed border-card-border bg-card p-6">
+          <section className="rounded-card border border-dashed border-card-border bg-card p-6">
             <h2 className="mb-3 text-lg font-medium text-foreground">
               {tPages("supportTicketDetailMessage")}
             </h2>
-            <div className="rounded-lg bg-muted p-4 text-sm text-foreground whitespace-pre-wrap">
+            <div className="rounded-card bg-muted p-4 text-sm text-foreground whitespace-pre-wrap">
               {ticket.message || "—"}
             </div>
           </section>
 
-          <section className="rounded-xl border border-dashed border-card-border bg-card p-6">
+          <section className="rounded-card border border-dashed border-card-border bg-card p-6">
             <h2 className="mb-3 text-lg font-medium text-foreground">
               {tPages("supportTicketDetailAttachments", { count: attachmentCount })}
             </h2>
@@ -189,11 +189,11 @@ export default function SupportTicketDetailPage() {
             )}
           </section>
 
-          <section className="rounded-xl border border-dashed border-card-border bg-card p-6">
+          <section className="rounded-card border border-dashed border-card-border bg-card p-6">
             <h2 className="mb-3 text-lg font-medium text-foreground">
               {tPages("supportTicketDetailInternalNotes")}
             </h2>
-            <div className="rounded-lg bg-muted p-4 text-sm text-foreground whitespace-pre-wrap">
+            <div className="rounded-card bg-muted p-4 text-sm text-foreground whitespace-pre-wrap">
               {ticket.internal_notes || "—"}
             </div>
           </section>

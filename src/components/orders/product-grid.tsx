@@ -18,7 +18,7 @@ export function ProductGrid({
       {hasItems ? (
         children
       ) : (
-        <div className="col-span-full rounded-lg border border-dashed border-border/70 bg-muted/20 px-4 py-10 text-center text-sm text-muted-foreground">
+        <div className="col-span-full rounded-card border border-dashed border-border/70 bg-muted/20 px-4 py-10 text-center text-sm text-muted-foreground">
           {emptyLabel}
         </div>
       )}

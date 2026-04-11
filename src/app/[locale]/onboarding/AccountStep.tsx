@@ -1,5 +1,6 @@
 import { useTranslations } from "next-intl";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import type { StoreFormData } from "./useOnboarding";
 
@@ -28,7 +29,7 @@ export function AccountStep({
   return (
     <div className="space-y-4">
       {error && (
-        <div className="rounded-md border border-destructive/20 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+        <div className="rounded-ui border border-destructive/20 bg-destructive/10 px-3 py-2 text-sm text-destructive">
           {error}
         </div>
       )}
@@ -42,6 +43,7 @@ export function AccountStep({
           type="email"
           required
           readOnly
+          size="lg"
           value={formData.owner_email}
           className="cursor-not-allowed opacity-70"
           aria-invalid={!!fieldErrors.owner_email}
@@ -58,6 +60,7 @@ export function AccountStep({
         <Input
           id="phone"
           type="tel"
+          size="lg"
           value={formData.phone}
           onChange={(e) => onFieldChange("phone", e.target.value)}
           placeholder="01XXXXXXXXX"
@@ -70,12 +73,12 @@ export function AccountStep({
         <label htmlFor="address" className="field-label">
           {t("address")}
         </label>
-        <textarea
+        <Textarea
           id="address"
           rows={2}
           value={formData.address}
           onChange={(e) => onFieldChange("address", e.target.value)}
-          className="input resize-none"
+          className="min-h-[4.5rem] resize-none"
           placeholder="House 12, Road 5, Dhanmondi, Dhaka"
           aria-invalid={!!fieldErrors.address}
         />

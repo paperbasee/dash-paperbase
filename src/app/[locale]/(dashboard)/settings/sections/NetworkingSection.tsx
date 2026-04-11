@@ -7,7 +7,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import api from "@/lib/api";
 import { formatDashboardDateTimeWithSeconds } from "@/lib/datetime-display";
-import { SettingsSectionBody, settingsSectionSurfaceClassName } from "../SettingsSectionBody";
+import { cn } from "@/lib/utils";
+import {
+  SettingsSectionBody,
+  settingsInvertedButtonClassName,
+  settingsSectionSurfaceClassName,
+} from "../SettingsSectionBody";
 import { useConfirm } from "@/context/ConfirmDialogContext";
 import { notify } from "@/notifications";
 import { useAuth } from "@/context/AuthContext";
@@ -51,6 +56,10 @@ export default function NetworkingSection({ hidden }: { hidden: boolean }) {
   const planExpired =
     meProfileStatus === "ready" &&
     meProfile?.subscription?.subscription_status === "EXPIRED";
+  const storeUnderReview =
+    meProfileStatus === "ready" &&
+    meProfile?.subscription?.subscription_status === "PENDING_REVIEW";
+  const networkingActionsLocked = planExpired || storeUnderReview;
   const [keys, setKeys] = useState<APIKeyRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -59,6 +68,7 @@ export default function NetworkingSection({ hidden }: { hidden: boolean }) {
   const [revealedKey, setRevealedKey] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [apiUrlCopied, setApiUrlCopied] = useState(false);
+  const [revealedKeyCopied, setRevealedKeyCopied] = useState(false);
   const [promptCopied, setPromptCopied] = useState(false);
   const [promptLoading, setPromptLoading] = useState(false);
   const API_BASE_URL = "https://api.paperbase.me";
@@ -93,8 +103,18 @@ export default function NetworkingSection({ hidden }: { hidden: boolean }) {
     return () => window.clearTimeout(timer);
   }, [promptCopied]);
 
+  useEffect(() => {
+    if (!revealedKeyCopied) return;
+    const timer = window.setTimeout(() => setRevealedKeyCopied(false), 1200);
+    return () => window.clearTimeout(timer);
+  }, [revealedKeyCopied]);
+
+  useEffect(() => {
+    setRevealedKeyCopied(false);
+  }, [revealedKey]);
+
   async function createKey() {
-    if (planExpired) return;
+    if (networkingActionsLocked) return;
     setBusy(true);
     setMessage(null);
     setRevealedKey(null);
@@ -113,6 +133,7 @@ export default function NetworkingSection({ hidden }: { hidden: boolean }) {
   }
 
   async function regenerateKey(publicId: string, currentName: string) {
+    if (networkingActionsLocked) return;
     const ok = await confirm({
       title: tPages("confirmDialogTitleRegenerateApiKey"),
       message: t("networking.confirmRegenerate"),
@@ -138,6 +159,7 @@ export default function NetworkingSection({ hidden }: { hidden: boolean }) {
   }
 
   async function revokeKey(publicId: string) {
+    if (networkingActionsLocked) return;
     const ok = await confirm({
       title: tPages("confirmDialogTitleRevokeApiKey"),
       message: t("networking.confirmRevoke"),
@@ -172,8 +194,21 @@ export default function NetworkingSection({ hidden }: { hidden: boolean }) {
     if (didCopy) setApiUrlCopied(true);
   }
 
+  async function copyRevealedKey() {
+    if (!revealedKey) return;
+    const didCopy = await copy(revealedKey);
+    if (didCopy) {
+      setRevealedKeyCopied(true);
+      notify.success(t("networking.apiKeyCopiedDescription"), {
+        title: t("networking.apiKeyCopiedTitle"),
+      });
+    } else {
+      notify.warning(t("networking.apiKeyCopyFailed"));
+    }
+  }
+
   async function copyStorefrontPrompt() {
-    if (planExpired) return;
+    if (networkingActionsLocked) return;
     setPromptLoading(true);
     try {
       const res = await fetch("/api/storefront-prompt", { cache: "no-store" });
@@ -211,33 +246,47 @@ export default function NetworkingSection({ hidden }: { hidden: boolean }) {
 
         {planExpired ? (
           <p
-            className="rounded-lg border border-destructive/35 bg-destructive/5 px-4 py-3 text-sm text-destructive"
+            className="rounded-card border border-destructive/35 bg-destructive/5 px-4 py-3 text-sm text-destructive"
             role="status"
           >
             {t("networking.subscriptionExpiredNotice")}
           </p>
         ) : null}
+        {storeUnderReview ? (
+          <p
+            className="rounded-card border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-950 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-50"
+            role="status"
+          >
+            {t("networking.storeUnderReviewNotice")}
+          </p>
+        ) : null}
 
-        <div className="rounded-lg border border-border bg-muted/30 px-4 py-3">
+        <div className="rounded-card border border-border bg-muted/30 px-4 py-3">
           <p className="text-xs uppercase tracking-wide text-muted-foreground">{t("networking.apiBaseUrl")}</p>
           <div className="mt-2 flex items-start justify-between gap-2">
-            <code className="min-w-0 break-all rounded bg-background px-2 py-1 text-sm">{API_BASE_URL}</code>
-            <Button type="button" variant="ghost" size="icon" className="size-8" onClick={() => void copyApiBaseUrl()}>
+            <code className="min-w-0 break-all rounded-ui bg-background px-2 py-1 text-sm">{API_BASE_URL}</code>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="size-8 shrink-0"
+              onClick={() => void copyApiBaseUrl()}
+            >
               {apiUrlCopied ? <Check className="size-4 text-emerald-600 animate-pulse" /> : <Copy className="size-4" />}
             </Button>
           </div>
         </div>
 
-        <div className="rounded-lg border border-border bg-muted/30 px-4 py-3">
+        <div className="rounded-card border border-border bg-muted/30 px-4 py-3">
           <p className="text-xs uppercase tracking-wide text-muted-foreground">{t("networking.storefrontPromptLabel")}</p>
           <p className="mt-1 text-sm text-muted-foreground">{t("networking.storefrontPromptHint")}</p>
           <div className="mt-3 flex flex-wrap items-center gap-2">
             <Button
               type="button"
-              variant="outline"
+              variant="ghost"
               size="sm"
               className="shrink-0"
-              disabled={promptLoading || planExpired}
+              disabled={promptLoading || networkingActionsLocked}
               onClick={() => void copyStorefrontPrompt()}
             >
               {promptLoading ? (
@@ -264,12 +313,23 @@ export default function NetworkingSection({ hidden }: { hidden: boolean }) {
         )}
 
         {revealedKey && (
-          <div className="rounded-lg border border-primary/40 bg-primary/5 p-3 text-sm">
+          <div className="rounded-card border border-primary/40 bg-primary/5 p-3 text-sm">
             <p className="font-medium text-foreground">{t("networking.newKeyTitle")}</p>
             <div className="mt-2 flex items-center justify-between gap-2">
-              <code className="rounded bg-background px-2 py-1 break-all">{revealedKey}</code>
-              <Button type="button" variant="ghost" size="icon" className="size-8" onClick={() => void copy(revealedKey)}>
-                <Copy className="size-4" />
+              <code className="rounded-ui bg-background px-2 py-1 break-all">{revealedKey}</code>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="size-8 shrink-0"
+                aria-label={revealedKeyCopied ? t("networking.apiKeyCopiedTitle") : t("networking.copyApiKey")}
+                onClick={() => void copyRevealedKey()}
+              >
+                {revealedKeyCopied ? (
+                  <Check className="size-4 text-emerald-600 animate-pulse" />
+                ) : (
+                  <Copy className="size-4" />
+                )}
               </Button>
             </div>
           </div>
@@ -285,13 +345,13 @@ export default function NetworkingSection({ hidden }: { hidden: boolean }) {
             {keys.map((k) => (
               <div
                 key={k.public_id}
-                className="flex flex-col gap-3 rounded-lg border border-border bg-muted/30 px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
+                className="flex flex-col gap-3 rounded-card border border-border bg-muted/30 px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
               >
                 <div className="min-w-0">
                   <p className="font-medium text-foreground">{k.name}</p>
                   <p className="break-words text-xs leading-relaxed text-muted-foreground">
                     {t("networking.prefix")}{" "}
-                    <code className="break-all rounded bg-muted px-1">{k.key_prefix}</code> · {t("networking.created")}{" "}
+                    <code className="break-all rounded-ui bg-muted px-1">{k.key_prefix}</code> · {t("networking.created")}{" "}
                     {formatDashboardDateTimeWithSeconds(k.created_at, locale)} · {k.revoked_at ? t("networking.statusRevoked") : t("networking.statusActive")}
                   </p>
                 </div>
@@ -300,7 +360,8 @@ export default function NetworkingSection({ hidden }: { hidden: boolean }) {
                     type="button"
                     variant="outline"
                     size="sm"
-                    disabled={busy || !!k.revoked_at}
+                    className={settingsInvertedButtonClassName}
+                    disabled={busy || !!k.revoked_at || networkingActionsLocked}
                     onClick={() => void regenerateKey(k.public_id, k.name)}
                   >
                     <RefreshCcw className="mr-1 size-4" />
@@ -311,7 +372,7 @@ export default function NetworkingSection({ hidden }: { hidden: boolean }) {
                     variant="ghost"
                     size="icon"
                     className="size-8 text-destructive hover:text-destructive"
-                    disabled={busy || !!k.revoked_at}
+                    disabled={busy || !!k.revoked_at || networkingActionsLocked}
                     aria-label={t("networking.deleteKeyAria")}
                     onClick={() => void revokeKey(k.public_id)}
                   >
@@ -333,15 +394,15 @@ export default function NetworkingSection({ hidden }: { hidden: boolean }) {
               placeholder={t("networking.namePlaceholder")}
               value={newKeyName}
               onChange={(e) => setNewKeyName(e.target.value)}
-              disabled={busy || planExpired}
+              disabled={busy || networkingActionsLocked}
               className="sm:flex-1"
             />
             <Button
               type="button"
               variant="outline"
               size="sm"
-              className="shrink-0 border-primary text-primary hover:bg-primary/10"
-              disabled={busy || planExpired}
+              className={cn("shrink-0", settingsInvertedButtonClassName)}
+              disabled={busy || networkingActionsLocked}
               onClick={() => void createKey()}
             >
               <KeyRound className="mr-2 size-4" />

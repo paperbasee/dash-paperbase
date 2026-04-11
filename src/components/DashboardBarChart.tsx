@@ -60,7 +60,7 @@ export default function DashboardBarChart({ data }: DashboardBarChartProps) {
     toLocaleDigits(String(v), locale);
 
   const metricFilterBtnBase =
-    "min-w-0 max-w-full break-words rounded-md border px-2 py-1 text-[11px] font-medium leading-relaxed transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-[hsl(var(--card))]";
+    "min-w-0 max-w-full break-words rounded-ui border px-2 py-1 text-[11px] font-medium leading-relaxed transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-[hsl(var(--card))]";
 
   return (
     <Card className="dashboard-chart-card h-[360px] border border-card-border bg-card">
@@ -76,6 +76,7 @@ export default function DashboardBarChart({ data }: DashboardBarChartProps) {
             minWidth={0}
             minHeight={260}
           >
+            {/* Recharts SVG: keep square geometry; not using theme radius tokens */}
             <BarChart
               data={data}
               margin={{ top: 8, left: 0, right: 0, bottom: 0 }}
@@ -110,6 +111,7 @@ export default function DashboardBarChart({ data }: DashboardBarChartProps) {
                   opacity: 0.25,
                 }}
                 contentStyle={{
+                  /* Tooltip is Recharts inline style; square corners match chart */
                   borderRadius: 0,
                   border: "1px solid hsl(var(--border))",
                   boxShadow: "0 10px 25px rgba(0, 0, 0, 0.25)",

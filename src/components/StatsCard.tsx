@@ -22,7 +22,7 @@ export default function StatsCard({
   numberFont = "mono",
 }: StatsCardProps) {
   return (
-    <div className="rounded-xl border border-dashed border-card-border bg-card p-5">
+    <div className="rounded-card border border-dashed border-card-border bg-card p-5">
       <p className="text-sm font-medium leading-relaxed text-muted-foreground">
         {title}
       </p>

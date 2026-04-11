@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Link, usePathname, useRouter } from "@/i18n/navigation";
-import { History } from "lucide-react";
+import { History, Info } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { BrandingProvider } from "@/context/BrandingContext";
 import { SearchModalProvider } from "@/context/SearchModalContext";
@@ -32,6 +32,7 @@ export default function DashboardLayoutClient({
   const pathname = usePathname();
   const tSheet = useTranslations("sheet");
   const tDashboard = useTranslations("dashboard");
+  const tDashboardLayout = useTranslations("dashboardLayout");
   const {
     isAuthenticated,
     isLoading,
@@ -42,9 +43,10 @@ export default function DashboardLayoutClient({
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [mobileSystemBannerVisible, setMobileSystemBannerVisible] = useState(false);
+  const subscriptionBannerStackRef = useRef<HTMLDivElement>(null);
   const subscription =
     meProfileStatus === "ready" ? (meProfile?.subscription ?? null) : null;
-  /** Must match `resolvePostAuthPath` in subscription-access.ts (avoid / ↔ /onboarding loops). */
+  /** Must match `resolvePostAuthPath` in subscription-access.ts (avoid / ↔ /onboarding / create-store loops). */
   const hasStoreContext =
     meProfileStatus === "ready" &&
     Boolean(
@@ -63,6 +65,13 @@ export default function DashboardLayoutClient({
         : null;
   const showSubscriptionBanner =
     meProfileStatus === "ready" && subscriptionBannerVariant !== null;
+
+  const showPendingReviewBanner =
+    meProfileStatus === "ready" &&
+    subscription?.subscription_status === "PENDING_REVIEW";
+
+  const showTopBannerStrip =
+    showSubscriptionBanner || showPendingReviewBanner;
 
   const normalizedPlan = (subscription?.plan ?? "").toLowerCase();
   const isEligiblePlan =
@@ -125,14 +134,30 @@ export default function DashboardLayoutClient({
     return () => window.removeEventListener("resize", syncDashboardInset);
   }, [collapsed]);
 
-  /** Pushes sidebar / sticky chrome below the fixed subscription strip (same var as globals.css). */
-  useEffect(() => {
-    const offset = showSubscriptionBanner ? "1.75rem" : "0px";
-    document.documentElement.style.setProperty("--subscription-banner-offset", offset);
-    return () => {
-      document.documentElement.style.setProperty("--subscription-banner-offset", "0px");
+  /** Match actual fixed subscription/pending strip height so nav & system banner sit flush (no hardcoded gap). */
+  useLayoutEffect(() => {
+    const root = document.documentElement;
+    if (!showTopBannerStrip) {
+      root.style.setProperty("--subscription-banner-offset", "0px");
+      return;
+    }
+    const el = subscriptionBannerStackRef.current;
+    if (!el) {
+      root.style.setProperty("--subscription-banner-offset", "0px");
+      return;
+    }
+    const apply = () => {
+      const h = el.getBoundingClientRect().height;
+      root.style.setProperty("--subscription-banner-offset", `${Math.max(0, Math.ceil(h))}px`);
     };
-  }, [showSubscriptionBanner]);
+    apply();
+    const ro = new ResizeObserver(apply);
+    ro.observe(el);
+    return () => {
+      ro.disconnect();
+      root.style.setProperty("--subscription-banner-offset", "0px");
+    };
+  }, [showTopBannerStrip]);
 
   const authBlocking =
     !authHydrated ||
@@ -157,14 +182,37 @@ export default function DashboardLayoutClient({
     <BrandingProvider>
       <SearchModalProvider>
         <NotificationProvider>
-          {showSubscriptionBanner && subscriptionBannerVariant && (
-            <div className="fixed inset-x-0 top-0 z-[60]">
-              <SubscriptionExpirationBanner
-                variant={subscriptionBannerVariant}
-                planPublicId={subscription?.plan_public_id ?? null}
-                storefrontBlocksAt={subscription?.storefront_blocks_at ?? null}
-                endDate={subscription?.end_date ?? null}
-              />
+          {showTopBannerStrip && (
+            <div
+              ref={subscriptionBannerStackRef}
+              className="fixed inset-x-0 top-0 z-[60] flex flex-col"
+            >
+              {showPendingReviewBanner ? (
+                <div
+                  role="status"
+                  className="border-b border-border bg-amber-50 dark:bg-amber-950"
+                >
+                  <div className="mx-auto flex w-full max-w-[88rem] flex-wrap items-center justify-center gap-x-2 gap-y-1 px-2 py-1 text-center md:gap-x-3 md:px-4 md:py-1">
+                    <div className="flex max-w-3xl flex-wrap items-center justify-center gap-1 sm:gap-1.5">
+                      <Info
+                        className="size-3 shrink-0 text-amber-700 dark:text-amber-300 sm:size-3.5"
+                        aria-hidden
+                      />
+                      <p className="text-center text-[11px] leading-snug text-amber-900 sm:text-xs dark:text-amber-100">
+                        {tDashboardLayout("pendingReviewBannerText")}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ) : null}
+              {showSubscriptionBanner && subscriptionBannerVariant ? (
+                <SubscriptionExpirationBanner
+                  variant={subscriptionBannerVariant}
+                  planPublicId={subscription?.plan_public_id ?? null}
+                  storefrontBlocksAt={subscription?.storefront_blocks_at ?? null}
+                  endDate={subscription?.end_date ?? null}
+                />
+              ) : null}
             </div>
           )}
 

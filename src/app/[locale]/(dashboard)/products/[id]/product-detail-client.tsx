@@ -421,7 +421,7 @@ export default function ProductDetailClient() {
     }
   }
 
-  const fieldControlClass = "w-full rounded-lg bg-muted/50";
+  const fieldControlClass = "w-full rounded-card bg-muted/50";
 
   if (loading) {
     return (
@@ -443,7 +443,7 @@ export default function ProductDetailClient() {
     <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-3">
-          <div className="rounded-lg bg-muted/80 px-1 py-1 hidden md:block">
+          <div className="rounded-card bg-muted/80 px-1 py-1 hidden md:block">
             <Button
               type="button"
               variant="ghost"
@@ -467,7 +467,7 @@ export default function ProductDetailClient() {
               size="sm"
               disabled={deleting || saving}
               onClick={() => void handleDeleteProduct()}
-              className="rounded-lg border-destructive text-destructive hover:bg-destructive/10"
+              className="rounded-card border-destructive text-destructive hover:bg-destructive/10"
             >
               {deleting ? tPages("deleting") : tPages("productDetailDeleteProduct")}
             </Button>
@@ -490,7 +490,7 @@ export default function ProductDetailClient() {
       {error && (
         <div
           role="alert"
-          className="rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive"
+          className="rounded-card border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive"
         >
           {error}
         </div>
@@ -536,7 +536,7 @@ export default function ProductDetailClient() {
                   {slugUsesFallback && baseSlug && (
                     <p
                       id="slug-warning"
-                      className="mt-1 inline-flex items-center rounded-md border border-amber-200 bg-amber-50 px-2 py-1 text-xs text-amber-700 dark:border-amber-900/50 dark:bg-amber-950/20 dark:text-amber-300"
+                      className="mt-1 inline-flex items-center rounded-ui border border-amber-200 bg-amber-50 px-2 py-1 text-xs text-amber-700 dark:border-amber-900/50 dark:bg-amber-950/20 dark:text-amber-300"
                     >
                       {tPages("productSlugFallbackWarning")}
                     </p>
@@ -680,7 +680,7 @@ export default function ProductDetailClient() {
                           {Object.entries(product.extra_data).map(([k, v]) => (
                             <div
                               key={k}
-                              className="rounded-lg border border-border/60 bg-muted/20 px-3 py-2"
+                              className="rounded-card border border-border/60 bg-muted/20 px-3 py-2"
                             >
                               <dt className="text-xs text-muted-foreground">{k}</dt>
                               <dd className="font-medium text-foreground break-words">
@@ -707,7 +707,7 @@ export default function ProductDetailClient() {
                 </p>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="aspect-square w-full overflow-hidden rounded-lg bg-muted/50">
+                <div className="aspect-square w-full overflow-hidden rounded-card bg-muted/50">
                   {bigPreviewUrl ? (
                     <img
                       src={bigPreviewUrl}
@@ -756,7 +756,7 @@ export default function ProductDetailClient() {
                   {Array.from({ length: MAX_IMAGES }, (_, i) => (
                     <div
                       key={i}
-                      className={`relative aspect-square w-16 shrink-0 snap-start overflow-hidden rounded-lg border border-dashed border-border bg-muted/30 ${
+                      className={`relative aspect-square w-16 shrink-0 snap-start overflow-hidden rounded-card border border-dashed border-border bg-muted/30 ${
                         (selectedImageIndex ?? firstFilledIndex) === i && imagePreviews[i]
                           ? "ring-2 ring-primary"
                           : ""
@@ -949,7 +949,7 @@ export default function ProductDetailClient() {
                       {Object.entries(product.extra_data).map(([k, v]) => (
                         <div
                           key={k}
-                          className="rounded-lg border border-border/60 bg-muted/20 px-3 py-2"
+                          className="rounded-card border border-border/60 bg-muted/20 px-3 py-2"
                         >
                           <dt className="text-xs text-muted-foreground">{k}</dt>
                           <dd className="font-medium text-foreground break-words">
@@ -971,7 +971,7 @@ export default function ProductDetailClient() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="aspect-square w-full overflow-hidden rounded-lg bg-muted/50">
+                <div className="aspect-square w-full overflow-hidden rounded-card bg-muted/50">
                   {bigPreviewUrl ? (
                     <img
                       src={bigPreviewUrl}
@@ -995,7 +995,7 @@ export default function ProductDetailClient() {
                         key={i}
                         type="button"
                         onClick={() => setSelectedImageIndex(i)}
-                        className={`relative aspect-square w-16 shrink-0 overflow-hidden rounded-lg border border-border ${
+                        className={`relative aspect-square w-16 shrink-0 overflow-hidden rounded-card border border-border ${
                           (selectedImageIndex ?? firstFilledIndex) === i ? "ring-2 ring-primary" : ""
                         }`}
                         aria-label={tPages("productShowImageInPreview", { n: i + 1 })}

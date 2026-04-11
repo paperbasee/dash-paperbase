@@ -380,12 +380,12 @@ export default function VariantsPageClient() {
     <div className="flex flex-col gap-6">
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div className="flex items-start gap-3">
-          <div className="rounded-lg bg-muted/80 px-1 py-1 hidden md:block">
+          <div className="rounded-card bg-muted/80 px-1 py-1 hidden md:block">
             <button
               type="button"
               onClick={() => router.back()}
               aria-label={tPages("goBack")}
-              className="flex items-center justify-center rounded-md p-1 text-muted-foreground hover:bg-muted"
+              className="flex items-center justify-center rounded-ui p-1 text-muted-foreground hover:bg-muted"
             >
               <Undo2 className="h-4 w-4" />
             </button>
@@ -414,7 +414,7 @@ export default function VariantsPageClient() {
       </p>
 
       {error ? (
-        <p className="rounded-lg border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+        <p className="rounded-card border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive">
           {error}
         </p>
       ) : null}
@@ -461,7 +461,7 @@ export default function VariantsPageClient() {
         <button
           type="button"
           onClick={clearVariantFilters}
-          className="h-9 rounded-md border border-border px-3 text-sm hover:bg-muted"
+          className="h-9 rounded-ui border border-border px-3 text-sm hover:bg-muted"
         >
           {tPages("filtersClear")}
         </button>
@@ -597,15 +597,15 @@ export default function VariantsPageClient() {
           {variantsLoading ? (
             <p className="text-sm text-muted-foreground">{tPages("variantsLoadingVariants")}</p>
           ) : variants.length === 0 ? (
-            <p className="rounded-xl border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
+            <p className="rounded-card border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
               {tPages("variantsEmpty")}
             </p>
           ) : filteredVariants.length === 0 ? (
-            <p className="rounded-xl border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
+            <p className="rounded-card border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
               {tPages("variantsEmptyFiltered")}
             </p>
           ) : (
-            <div className="overflow-x-auto rounded-xl border border-border">
+            <div className="overflow-x-auto rounded-card border border-border">
               <table className="w-full min-w-[640px] text-sm">
                 <thead>
                   <tr className="border-b border-border bg-muted/40 text-left text-muted-foreground">

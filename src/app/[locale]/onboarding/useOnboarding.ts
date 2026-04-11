@@ -28,6 +28,11 @@ export interface StoreFormData {
 type StoreFormErrors = Partial<Record<keyof StoreFormData, string>>;
 export type OnboardingStep = 1 | 2 | 3 | 4 | 5;
 
+export type UseOnboardingOptions = {
+  /** Skip intro (step 1); used for /onboarding/create-store after payment. */
+  initialStep?: OnboardingStep;
+};
+
 /** POST /store/ — no api_key; keys are created in Settings → Networking. */
 type StoreCreateResponse = {
   public_id: string;
@@ -44,7 +49,7 @@ interface MeResponse {
   store?: { public_id: string; name: string; role: string } | null;
 }
 
-export function useOnboarding() {
+export function useOnboarding(options?: UseOnboardingOptions) {
   const router = useRouter();
   const t = useTranslations("auth.onboarding");
   const tPages = useTranslations("pages");
@@ -52,7 +57,7 @@ export function useOnboarding() {
   const isAddMode = searchParams.get("add") === "1";
   const { isAuthenticated, isLoading: authLoading, authHydrated } = useAuth();
 
-  const [step, setStep] = useState<OnboardingStep>(1);
+  const [step, setStep] = useState<OnboardingStep>(() => options?.initialStep ?? 1);
   const [loading, setLoading] = useState(false);
   const [stepLoading, setStepLoading] = useState(false);
   const [checking, setChecking] = useState(true);

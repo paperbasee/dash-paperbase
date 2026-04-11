@@ -31,7 +31,7 @@ export function StoreDetailsStep({
   return (
     <div className="space-y-4">
       {error && (
-        <div className="rounded-md border border-destructive/20 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+        <div className="rounded-ui border border-destructive/20 bg-destructive/10 px-3 py-2 text-sm text-destructive">
           {error}
         </div>
       )}
@@ -44,6 +44,7 @@ export function StoreDetailsStep({
           id="name"
           type="text"
           required
+          size="lg"
           value={formData.name}
           onChange={(e) => onFieldChange("name", e.target.value)}
           placeholder="e.g. My Shop"
@@ -61,6 +62,7 @@ export function StoreDetailsStep({
         <Input
           id="store_type"
           type="text"
+          size="lg"
           value={formData.store_type}
           onChange={(e) => onFieldChange("store_type", e.target.value)}
           placeholder="e.g. Fashion, Retail, E-commerce"
@@ -80,6 +82,7 @@ export function StoreDetailsStep({
         <Input
           id="contact_email"
           type="email"
+          size="lg"
           value={formData.contact_email}
           onChange={(e) => onFieldChange("contact_email", e.target.value)}
           placeholder="store@example.com"

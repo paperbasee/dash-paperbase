@@ -72,7 +72,7 @@ export default function DashboardPage() {
         <DateRangeFilter value={range} onChange={setRange} />
 
         {error && (
-          <div className="rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-2 text-sm leading-relaxed text-destructive">
+          <div className="rounded-card border border-destructive/30 bg-destructive/5 px-4 py-2 text-sm leading-relaxed text-destructive">
             {error}
           </div>
         )}
@@ -93,7 +93,7 @@ export default function DashboardPage() {
             {t("noRecentActivity")}
           </p>
         ) : (
-          <div className="overflow-hidden rounded-xl border border-dashed border-border bg-background">
+          <div className="overflow-hidden rounded-card border border-dashed border-border bg-background">
             <div className="overflow-x-auto">
               <div className="min-w-max divide-y divide-border">
                 {recentActivities.map((item) => (

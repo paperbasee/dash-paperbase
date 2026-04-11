@@ -139,9 +139,9 @@ function OrderLineProductCardInner({
   }, [item, snapshotVariant, tPages]);
 
   return (
-    <div className="relative flex h-full min-h-0 min-w-0 flex-col rounded-xl border border-border/80 bg-card p-4 shadow-sm">
+    <div className="relative flex h-full min-h-0 min-w-0 flex-col rounded-card border border-border/80 bg-card p-4 shadow-sm">
       <div className="flex min-w-0 w-full flex-1 flex-col items-center gap-3">
-        <div className="relative w-full shrink-0 aspect-square overflow-hidden rounded-lg bg-muted">
+        <div className="relative w-full shrink-0 aspect-square overflow-hidden rounded-card bg-muted">
           {editing && (
             <Button
               type="button"

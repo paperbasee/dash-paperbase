@@ -78,7 +78,7 @@ export default function SystemNotificationBanner({
         aria-live="polite"
         aria-label={`${notification.title}. ${notification.message}`}
         className={cn(
-          "system-notification-banner rounded-xl border p-3",
+          "system-notification-banner rounded-card border p-3",
           className
         )}
       >

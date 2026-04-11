@@ -39,7 +39,7 @@ export default function AppsSection({
               return (
                 <div
                   key={id}
-                  className="flex items-center gap-3 rounded-lg border border-border bg-muted/30 px-4 py-3"
+                  className="flex items-center gap-3 rounded-card border border-border bg-muted/30 px-4 py-3"
                 >
                   <Icon className="size-5 shrink-0 text-muted-foreground" />
                   <div className="min-w-0 flex-1">
@@ -64,7 +64,7 @@ export default function AppsSection({
               return (
                 <div
                   key={id}
-                  className="flex items-center gap-3 rounded-lg border border-border bg-muted/30 px-4 py-3"
+                  className="flex items-center gap-3 rounded-card border border-border bg-muted/30 px-4 py-3"
                 >
                   <Icon className="size-5 shrink-0 text-muted-foreground" />
                   <div className="min-w-0 flex-1">

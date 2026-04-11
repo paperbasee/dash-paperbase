@@ -10,7 +10,11 @@ import {
   InputGroupAddon,
   InputGroupInput,
 } from "@/components/ui/input-group";
-import { SettingsSectionBody, settingsSectionSurfaceClassName } from "../SettingsSectionBody";
+import {
+  SettingsSectionBody,
+  settingsInvertedButtonClassName,
+  settingsSectionSurfaceClassName,
+} from "../SettingsSectionBody";
 import SocialLinkGlyph from "./SocialLinkGlyph";
 import {
   STORE_SOCIAL_LINK_KEYS,
@@ -200,7 +204,7 @@ export default function StoreInfoSection({
           </div>
         </div>
 
-        <div className="rounded-xl border border-border/80 bg-muted/20 p-3 sm:p-4">
+        <div className="rounded-card border border-border/80 bg-muted/20 p-3 sm:p-4">
           <div className="mb-3 space-y-1">
             <h3 className="text-sm font-semibold tracking-tight text-foreground sm:text-base">
               {t("store.socialHeading")}
@@ -251,7 +255,12 @@ export default function StoreInfoSection({
           </p>
         )}
 
-        <Button type="submit" disabled={storeSaving}>
+        <Button
+          type="submit"
+          variant="outline"
+          className={settingsInvertedButtonClassName}
+          disabled={storeSaving}
+        >
           {storeSaving ? t("saving") : t("store.saveButton")}
         </Button>
         </form>

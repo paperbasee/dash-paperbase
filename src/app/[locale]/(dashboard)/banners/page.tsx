@@ -219,12 +219,12 @@ export default function BannersPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="rounded-lg bg-muted/80 px-1 py-1 hidden md:block">
+          <div className="rounded-card bg-muted/80 px-1 py-1 hidden md:block">
             <button
               type="button"
               onClick={() => router.back()}
               aria-label={tPages("bannersGoBackAria")}
-              className="flex items-center justify-center rounded-md p-1 text-muted-foreground hover:bg-muted"
+              className="flex items-center justify-center rounded-ui p-1 text-muted-foreground hover:bg-muted"
             >
               <Undo2 className="h-4 w-4" />
             </button>
@@ -236,7 +236,7 @@ export default function BannersPage() {
         <button
           type="button"
           onClick={openNew}
-          className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+          className="flex items-center gap-2 rounded-card bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
         >
           {tPages("bannersAdd")}
         </button>
@@ -245,7 +245,7 @@ export default function BannersPage() {
       {editing !== null && (
         <form
           onSubmit={handleSave}
-          className="space-y-4 rounded-xl border border-border bg-card p-6"
+          className="space-y-4 rounded-card border border-border bg-card p-6"
         >
           <h2 className="text-lg font-medium">
             {editing === "new" ? tPages("bannersNew") : tPages("bannersEdit")}
@@ -409,14 +409,14 @@ export default function BannersPage() {
             <button
               type="submit"
               disabled={saving || (editing === "new" && !imageFile)}
-              className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
+              className="rounded-card bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
             >
               {saving ? tCommon("saving") : tCommon("save")}
             </button>
             <button
               type="button"
               onClick={() => setEditing(null)}
-              className="rounded-lg border border-border px-4 py-2 text-sm font-medium hover:bg-muted"
+              className="rounded-card border border-border px-4 py-2 text-sm font-medium hover:bg-muted"
             >
               {tCommon("cancel")}
             </button>
@@ -424,7 +424,7 @@ export default function BannersPage() {
         </form>
       )}
 
-      <div className="overflow-x-auto rounded-xl border border-dashed border-card-border bg-card">
+      <div className="overflow-x-auto rounded-card border border-dashed border-card-border bg-card">
         <table className="w-full text-left text-sm">
           <thead>
             <tr className="border-b border-border bg-muted/40">
@@ -451,7 +451,7 @@ export default function BannersPage() {
                     <img
                       src={b.image}
                       alt=""
-                      className="h-12 w-20 rounded object-cover"
+                      className="h-12 w-20 rounded-ui object-cover"
                     />
                   ) : (
                     <span className="text-muted-foreground">—</span>
@@ -497,7 +497,7 @@ export default function BannersPage() {
       </div>
 
       {banners.length === 0 && !editing && (
-        <div className="rounded-xl border border-dashed border-card-border bg-card py-12 text-center text-sm text-muted-foreground">
+        <div className="rounded-card border border-dashed border-card-border bg-card py-12 text-center text-sm text-muted-foreground">
           {tPages("bannersEmpty")}
         </div>
       )}

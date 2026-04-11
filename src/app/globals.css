@@ -124,7 +124,6 @@
     --card-border: 214 32% 91%;
     --input: 214 32% 91%;
     --ring: 222 84% 56%;
-    --radius: 0;
 
     /* Stats / badge accent hues (light) */
     --accent-blue: 217 91% 60%;
@@ -185,7 +184,6 @@
     --card-border: 220 6% 24%;
     --input: 220 6% 18%;
     --ring: 220 10% 60%;
-    --radius: 0;
 
     /* Stats / badge accent hues (dark) */
     --accent-blue: 217 89% 72%;
@@ -259,12 +257,22 @@
   --color-card-border: hsl(var(--card-border));
   --color-input: hsl(var(--input));
   --color-ring: hsl(var(--ring));
-  --radius-xs: 0;
-  --radius-sm: 0;
-  --radius-md: 0;
-  --radius-lg: 0;
-  --radius-xl: 0;
+
+  /* Border radius: square UI; only `rounded-full` stays circular (see --radius-full) */
+  --radius-xs: 0px;
+  --radius-sm: 0px;
+  --radius-md: 0px;
+  --radius-lg: 0px;
+  --radius-xl: 0px;
+  --radius-2xl: 0px;
+  --radius-3xl: 0px;
+  --radius-4xl: 0px;
   --radius-full: 9999px;
+  /* Bare `rounded` utility */
+  --radius: 0px;
+  /* Semantic aliases */
+  --radius-ui: var(--radius-md);
+  --radius-card: var(--radius-lg);
 }
 
 html[lang="bn"] {
@@ -333,33 +341,6 @@ select {
   color: hsl(var(--accent-red));
 }
 
-.input {
-  width: 100%;
-  border-radius: var(--radius);
-  border: 1px solid var(--border-color);
-  background: var(--bg-primary);
-  padding: 0.5rem 0.75rem;
-  font-size: 0.875rem;
-  color: var(--text-primary);
-  -webkit-text-fill-color: var(--text-primary);
-  outline: none;
-  transition: border-color 0.15s, box-shadow 0.15s;
-}
-
-.input:focus {
-  border-color: hsl(var(--ring));
-  box-shadow: 0 0 0 2px hsl(var(--primary) / 0.2);
-  color: var(--text-primary);
-  -webkit-text-fill-color: var(--text-primary);
-}
-
-.input::placeholder {
-  color: hsl(var(--muted-foreground));
-  -webkit-text-fill-color: hsl(var(--muted-foreground));
-  opacity: 1;
-  font-weight: 400;
-}
-
 /* Themed scrollbars */
 * {
   scrollbar-width: thin;
@@ -377,7 +358,7 @@ select {
 
 *::-webkit-scrollbar-thumb {
   background-color: hsl(var(--border));
-  border-radius: 9999px;
+  border-radius: 0;
 }
 
 .scrollbar-hide {
@@ -406,7 +387,7 @@ select {
 
   /* Pagination prev/next button — duplicated across 9 list pages */
   .btn-page {
-    @apply rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground transition hover:bg-muted disabled:opacity-40 disabled:cursor-not-allowed;
+    @apply rounded-ui border border-border px-4 py-2 text-sm font-medium text-foreground transition hover:bg-muted disabled:opacity-40 disabled:cursor-not-allowed;
   }
 
   /* Form field wrapper — label stacked above input */
@@ -431,7 +412,7 @@ select {
 
   /* Native checkbox / radio — single token-based style */
   .form-checkbox {
-    @apply h-5 w-5 shrink-0 cursor-pointer rounded-[3px] border-2 border-border bg-background text-primary accent-ring focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring md:h-4 md:w-4;
+    @apply h-5 w-5 shrink-0 cursor-pointer rounded-xs border-2 border-border bg-background text-primary accent-ring focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring md:h-4 md:w-4;
   }
 
   .form-radio {
@@ -440,7 +421,7 @@ select {
 
   /* File input control surface */
   .form-file-input {
-    @apply block w-full cursor-pointer rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground file:mr-3 file:cursor-pointer file:rounded-sm file:border-0 file:bg-muted file:px-2 file:py-1 file:text-sm file:font-medium file:text-foreground;
+    @apply block w-full cursor-pointer rounded-ui border border-border bg-background px-3 py-2 text-sm text-foreground file:mr-3 file:cursor-pointer file:rounded-sm file:border-0 file:bg-muted file:px-2 file:py-1 file:text-sm file:font-medium file:text-foreground;
   }
 
   /*

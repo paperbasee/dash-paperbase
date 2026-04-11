@@ -236,12 +236,12 @@ export default function ProductsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <div className="flex items-center gap-3">
-          <div className="rounded-lg bg-muted/80 px-1 py-1 hidden md:block">
+          <div className="rounded-card bg-muted/80 px-1 py-1 hidden md:block">
             <button
               type="button"
               onClick={() => router.back()}
               aria-label={tPages("goBack")}
-              className="flex items-center justify-center rounded-md p-1 text-muted-foreground hover:bg-muted"
+              className="flex items-center justify-center rounded-ui p-1 text-muted-foreground hover:bg-muted"
             >
               <Undo2 className="h-4 w-4" />
             </button>
@@ -255,7 +255,7 @@ export default function ProductsPage() {
             <button
               onClick={handleDeleteSelected}
               disabled={deleting}
-              className="rounded-lg bg-destructive px-4 py-2 text-sm font-semibold text-destructive-foreground transition hover:bg-destructive/90 disabled:opacity-50"
+              className="rounded-card bg-destructive px-4 py-2 text-sm font-semibold text-destructive-foreground transition hover:bg-destructive/90 disabled:opacity-50"
             >
               {deleting
                 ? tPages("deleting")
@@ -270,7 +270,7 @@ export default function ProductsPage() {
           )}
           <Link
             href="/products/new"
-            className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90"
+            className="rounded-card bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90"
           >
             {tPages("addProduct")}
           </Link>
@@ -345,7 +345,7 @@ export default function ProductsPage() {
             setPriceMaxInput("");
             clearFilters();
           }}
-          className="h-9 rounded-md border border-border px-3 text-sm hover:bg-muted"
+          className="h-9 rounded-ui border border-border px-3 text-sm hover:bg-muted"
         >
           {tPages("filtersClear")}
         </button>
@@ -357,7 +357,7 @@ export default function ProductsPage() {
         </div>
       ) : (
         <>
-          <div className="overflow-x-auto rounded-xl border border-dashed border-card-border bg-card">
+          <div className="overflow-x-auto rounded-card border border-dashed border-card-border bg-card">
             <table className="w-full text-left text-sm">
               <thead>
                 <tr className="border-b border-border bg-muted/40">

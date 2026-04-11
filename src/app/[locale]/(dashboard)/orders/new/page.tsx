@@ -50,7 +50,7 @@ export default function NewOrderPage() {
     <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-3">
-          <div className="rounded-lg bg-muted/80 px-1 py-1 hidden md:block">
+          <div className="rounded-card bg-muted/80 px-1 py-1 hidden md:block">
             <Button
               type="button"
               variant="ghost"

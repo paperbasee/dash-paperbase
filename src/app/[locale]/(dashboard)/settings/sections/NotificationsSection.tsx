@@ -100,22 +100,6 @@ export default function NotificationsSection({
             </label>
           </div>
         </div>
-
-        <div className="border-t border-border pt-4">
-          <label className="text-sm font-medium text-foreground">{t("notifications.deliveryHeading")}</label>
-          <p className="mb-2 text-xs text-muted-foreground">{t("notifications.deliverySoon")}</p>
-
-          <div className="flex gap-4">
-            <label className="flex items-center gap-2 text-sm text-muted-foreground">
-              <input type="radio" name="delivery" disabled className="form-radio" />
-              {t("notifications.deliveryEmail")}
-            </label>
-            <label className="flex items-center gap-2 text-sm text-muted-foreground">
-              <input type="radio" name="delivery" disabled className="form-radio" />
-              {t("notifications.deliveryInApp")}
-            </label>
-          </div>
-        </div>
       </SettingsSectionBody>
     </section>
   );

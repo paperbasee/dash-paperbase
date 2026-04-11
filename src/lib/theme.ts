@@ -44,7 +44,12 @@ export function subscribeToSystemThemeChanges(onChange: (applied: AppliedTheme) 
   if (typeof window === "undefined" || !window.matchMedia) return () => {};
   const mq = window.matchMedia("(prefers-color-scheme: dark)");
   const handler = () => onChange(mq.matches ? "dark" : "light");
-  mq.addEventListener("change", handler);
-  return () => mq.removeEventListener("change", handler);
+  if (typeof mq.addEventListener === "function") {
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }
+  // Safari < 14
+  mq.addListener(handler);
+  return () => mq.removeListener(handler);
 }
 

@@ -241,10 +241,10 @@ export default function TrashPage() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-3">
-          <div className="rounded-lg bg-muted/80 px-1 py-1 hidden md:block">
+          <div className="rounded-card bg-muted/80 px-1 py-1 hidden md:block">
             <Link
               href="/"
-              className="flex items-center justify-center rounded-md p-1 text-muted-foreground hover:bg-muted"
+              className="flex items-center justify-center rounded-ui p-1 text-muted-foreground hover:bg-muted"
               aria-label={tPages("goBack")}
             >
               <Undo2 className="h-4 w-4" />
@@ -260,7 +260,7 @@ export default function TrashPage() {
               type="button"
               onClick={handleRestoreSelected}
               disabled={bulkBusy || busyId !== null}
-              className="shrink-0 rounded-lg border border-border bg-secondary px-4 py-2 text-sm font-semibold text-secondary-foreground transition hover:bg-secondary/80 disabled:opacity-50"
+              className="shrink-0 rounded-card border border-border bg-secondary px-4 py-2 text-sm font-semibold text-secondary-foreground transition hover:bg-secondary/80 disabled:opacity-50"
             >
               {bulkRestoring
                 ? tPages("trashRestoring")
@@ -272,7 +272,7 @@ export default function TrashPage() {
               type="button"
               onClick={handleDeleteSelected}
               disabled={bulkBusy || busyId !== null}
-              className="shrink-0 rounded-lg bg-destructive px-4 py-2 text-sm font-semibold text-destructive-foreground transition hover:bg-destructive/90 disabled:opacity-50"
+              className="shrink-0 rounded-card bg-destructive px-4 py-2 text-sm font-semibold text-destructive-foreground transition hover:bg-destructive/90 disabled:opacity-50"
             >
               {bulkDeleting
                 ? tPages("deleting")
@@ -300,7 +300,7 @@ export default function TrashPage() {
         <p className="text-sm text-muted-foreground">{tPages("trashEmpty")}</p>
       ) : (
         <>
-          <div className="overflow-x-auto rounded-xl border border-dashed border-card-border bg-card">
+          <div className="overflow-x-auto rounded-card border border-dashed border-card-border bg-card">
             <table className="w-max min-w-full text-left text-sm">
               <thead>
                 <tr className="border-b border-border bg-muted/40">

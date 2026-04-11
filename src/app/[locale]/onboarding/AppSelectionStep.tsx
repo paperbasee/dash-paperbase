@@ -28,14 +28,14 @@ export function AppSelectionStep({
   return (
     <form onSubmit={onSubmit} className="space-y-4">
       {error && (
-        <div className="rounded-md border border-destructive/20 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+        <div className="rounded-ui border border-destructive/20 bg-destructive/10 px-3 py-2 text-sm text-destructive">
           {error}
         </div>
       )}
 
       <p className="text-sm text-muted-foreground">{t("appsIntro")}</p>
 
-      <div className="rounded-lg border border-border/60 bg-muted/20 p-3 text-sm">
+      <div className="rounded-card border border-border/60 bg-muted/20 p-3 text-sm">
         <p className="mb-2 font-medium text-foreground">{t("reviewHeading")}</p>
         <div className="space-y-1 text-muted-foreground">
           <p>
@@ -61,7 +61,7 @@ export function AppSelectionStep({
             <label
               key={id}
               className={[
-                "flex cursor-pointer items-start gap-3 rounded-md p-2.5 transition",
+                "flex cursor-pointer items-start gap-3 rounded-ui p-2.5 transition",
                 checked
                   ? "bg-primary/5 ring-1 ring-primary/30"
                   : "bg-muted/20 hover:bg-muted/40 ring-1 ring-border/30",

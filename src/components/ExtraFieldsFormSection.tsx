@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 
-const fieldControlClass = "w-full rounded-lg bg-muted/50";
+const fieldControlClass = "w-full rounded-card bg-muted/50";
 
 function Field({
   label,

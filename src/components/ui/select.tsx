@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils"
 
 const selectVariants = cva(
   [
-    "w-full min-w-0 appearance-none rounded-md border border-border bg-background text-sm text-foreground shadow-xs",
+    "w-full min-w-0 appearance-none rounded-ui border border-border bg-background text-sm text-foreground shadow-xs",
     "transition-[color,box-shadow] outline-none",
     "placeholder:text-muted-foreground",
     "disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50",

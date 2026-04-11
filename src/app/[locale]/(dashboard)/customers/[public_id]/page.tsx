@@ -40,12 +40,12 @@ export default function CustomerDetailPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-3">
-        <div className="rounded-lg bg-muted/80 px-1 py-1 hidden md:block">
+        <div className="rounded-card bg-muted/80 px-1 py-1 hidden md:block">
           <button
             type="button"
             onClick={() => router.back()}
             aria-label={tPages("goBack")}
-            className="flex items-center justify-center rounded-md p-1 text-muted-foreground hover:bg-muted"
+            className="flex items-center justify-center rounded-ui p-1 text-muted-foreground hover:bg-muted"
           >
             <Undo2 className="h-4 w-4" />
           </button>
@@ -60,12 +60,12 @@ export default function CustomerDetailPage() {
           <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
         </div>
       ) : error ? (
-        <div className="rounded-xl border border-dashed border-card-border bg-card p-6 text-sm text-red-500">
+        <div className="rounded-card border border-dashed border-card-border bg-card p-6 text-sm text-red-500">
           {error}
         </div>
       ) : data ? (
         <>
-          <section className="rounded-xl border border-dashed border-card-border bg-card p-6">
+          <section className="rounded-card border border-dashed border-card-border bg-card p-6">
             <div className="mb-4 flex items-center justify-between gap-3 flex-wrap">
               <h2 className="text-lg font-medium">{tPages("customerDetailsBasicInfo")}</h2>
               <Button
@@ -85,17 +85,17 @@ export default function CustomerDetailPage() {
           </section>
 
           <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            <div className="rounded-xl border border-dashed border-card-border bg-card p-4">
+            <div className="rounded-card border border-dashed border-card-border bg-card p-4">
               <p className="text-sm text-muted-foreground">{tPages("customerDetailsTotalOrders")}</p>
               <p className="mt-1 text-2xl font-semibold">{data.analytics.total_orders}</p>
             </div>
             <div
-              className="rounded-xl border border-dashed border-card-border bg-card p-4"
+              className="rounded-card border border-dashed border-card-border bg-card p-4"
             >
               <p className="text-sm text-muted-foreground">{tPages("customerDetailsTotalSpent")}</p>
               <p className="mt-1 text-2xl font-semibold">{asCurrency(data.analytics.total_spent)}</p>
             </div>
-            <div className="rounded-xl border border-dashed border-card-border bg-card p-4">
+            <div className="rounded-card border border-dashed border-card-border bg-card p-4">
               <p className="text-sm text-muted-foreground">{tPages("customerDetailsFirstOrderDate")}</p>
               <p className="mt-1 text-base font-medium">
                 {data.analytics.first_order_at
@@ -103,7 +103,7 @@ export default function CustomerDetailPage() {
                   : "—"}
               </p>
             </div>
-            <div className="rounded-xl border border-dashed border-card-border bg-card p-4">
+            <div className="rounded-card border border-dashed border-card-border bg-card p-4">
               <p className="text-sm text-muted-foreground">{tPages("customerDetailsLastOrderDate")}</p>
               <p className="mt-1 text-base font-medium">
                 {data.analytics.last_order_at
@@ -111,13 +111,13 @@ export default function CustomerDetailPage() {
                   : "—"}
               </p>
             </div>
-            <div className="rounded-xl border border-dashed border-card-border bg-card p-4">
+            <div className="rounded-card border border-dashed border-card-border bg-card p-4">
               <p className="text-sm text-muted-foreground">{tPages("customerDetailsRepeatCustomer")}</p>
               <p className="mt-1 text-2xl font-semibold">
                 {data.analytics.is_repeat_customer ? tCommon("yes") : tCommon("no")}
               </p>
             </div>
-            <div className="rounded-xl border border-dashed border-card-border bg-card p-4">
+            <div className="rounded-card border border-dashed border-card-border bg-card p-4">
               <p className="text-sm text-muted-foreground">{tPages("customerDetailsAvgOrderIntervalDays")}</p>
               <p className="mt-1 text-2xl font-semibold">
                 {data.analytics.avg_order_interval_days == null

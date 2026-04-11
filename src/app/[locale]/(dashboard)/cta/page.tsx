@@ -176,12 +176,12 @@ export default function CtaPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="rounded-lg bg-muted/80 px-1 py-1 hidden md:block">
+          <div className="rounded-card bg-muted/80 px-1 py-1 hidden md:block">
             <button
               type="button"
               onClick={() => router.back()}
               aria-label={tPages("ctaGoBackAria")}
-              className="flex items-center justify-center rounded-md p-1 text-muted-foreground hover:bg-muted"
+              className="flex items-center justify-center rounded-ui p-1 text-muted-foreground hover:bg-muted"
             >
               <Undo2 className="h-4 w-4" />
             </button>
@@ -192,7 +192,7 @@ export default function CtaPage() {
         </div>
         <button
           onClick={openNew}
-          className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90"
+          className="rounded-card bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90"
         >
           {tPages("ctaAdd")}
         </button>
@@ -201,7 +201,7 @@ export default function CtaPage() {
       {editing !== null && (
         <form
           onSubmit={handleSave}
-          className="space-y-3 rounded-xl border border-primary/30 bg-primary/5 p-4"
+          className="space-y-3 rounded-card border border-primary/30 bg-primary/5 p-4"
         >
           <p className="text-sm font-semibold text-primary">
             {editing === "new" ? tPages("ctaNew") : tPages("ctaEdit")}
@@ -298,14 +298,14 @@ export default function CtaPage() {
             <button
               type="submit"
               disabled={saving}
-              className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
+              className="rounded-card bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
             >
               {saving ? tCommon("saving") : tPages("ctaSave")}
             </button>
             <button
               type="button"
               onClick={() => setEditing(null)}
-              className="rounded-lg border border-border px-4 py-2 text-sm text-foreground hover:bg-muted"
+              className="rounded-card border border-border px-4 py-2 text-sm text-foreground hover:bg-muted"
             >
               {tCommon("cancel")}
             </button>
@@ -313,7 +313,7 @@ export default function CtaPage() {
         </form>
       )}
 
-      <div className="overflow-x-auto rounded-xl border border-dashed border-card-border bg-card">
+      <div className="overflow-x-auto rounded-card border border-dashed border-card-border bg-card">
         <table className="w-full text-left text-sm">
           <thead>
             <tr className="border-b border-border bg-muted/40">

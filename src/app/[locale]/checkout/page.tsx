@@ -6,7 +6,8 @@ import { Copy } from "lucide-react";
 import { useRouter } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { LoadingButton } from "@/components/ui/loading-button";
-import { logout, getAccessToken } from "@/lib/auth";
+import { getAccessToken } from "@/lib/auth";
+import { invalidateMeRoutingCache } from "@/lib/subscription-access";
 import api from "@/lib/api";
 import { CheckoutSuccessAnimation } from "@/components/checkout/CheckoutSuccessAnimation";
 import { cn } from "@/lib/utils";
@@ -52,7 +53,7 @@ function CopyButton({ value }: { value: string }) {
     <button
       type="button"
       onClick={handleCopy}
-      className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+      className="inline-flex items-center gap-1 rounded-ui px-2 py-1 text-xs text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
       aria-label={copied ? "Copied" : "Copy number"}
     >
       <Copy className="h-3 w-3" aria-hidden />
@@ -63,7 +64,6 @@ function CopyButton({ value }: { value: string }) {
 
 export default function CheckoutPage() {
   const t = useTranslations("checkoutPage");
-  const tCommon = useTranslations("common");
   const locale = useLocale();
   const router = useRouter();
 
@@ -75,6 +75,9 @@ export default function CheckoutPage() {
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [txnIdError, setTxnIdError] = useState<string | null>(null);
+  /** After payment submit: load /auth/me/ to choose dashboard vs create-store CTA. */
+  const [successProfileLoading, setSuccessProfileLoading] = useState(false);
+  const [successHasStore, setSuccessHasStore] = useState(false);
 
   useEffect(() => {
     if (!getAccessToken()) {
@@ -118,6 +121,36 @@ export default function CheckoutPage() {
       cancelled = true;
     };
   }, [router]);
+
+  useEffect(() => {
+    if (screen !== "submitted") return;
+
+    setSuccessProfileLoading(true);
+    let cancelled = false;
+
+    (async () => {
+      try {
+        invalidateMeRoutingCache();
+        const { data } = await api.get<{
+          active_store_public_id: string | null;
+          store?: { public_id: string } | null;
+        }>("auth/me/");
+        if (cancelled) return;
+        const hasStore =
+          Boolean((data.active_store_public_id ?? "").trim()) ||
+          Boolean((data.store?.public_id ?? "").trim());
+        setSuccessHasStore(hasStore);
+      } catch {
+        if (!cancelled) setSuccessHasStore(false);
+      } finally {
+        if (!cancelled) setSuccessProfileLoading(false);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [screen]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -195,7 +228,7 @@ export default function CheckoutPage() {
     );
   }
 
-  // --- Submitted / pending review screen ---
+  // --- Payment successful / under review (no auto-redirect; user picks next step) ---
   if (screen === "submitted") {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-background via-background to-muted/30 px-4 py-10">
@@ -204,14 +237,27 @@ export default function CheckoutPage() {
 
           <div className="space-y-3 text-center">
             <h1 className="text-xl font-semibold tracking-tight text-foreground sm:text-2xl">
-              {t("submittedTitle")}
+              {t("successTitle")}
             </h1>
-            <p className="text-sm leading-relaxed text-muted-foreground">{t("submittedBody")}</p>
+            <p className="text-sm leading-relaxed text-muted-foreground">{t("successBody")}</p>
           </div>
 
-          <Button variant="outline" className="w-full" onClick={() => logout()}>
-            {t("signOut")}
-          </Button>
+          {successProfileLoading ? (
+            <div className="flex justify-center py-4">
+              <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+            </div>
+          ) : successHasStore ? (
+            <Button className="w-full" onClick={() => router.push("/")}>
+              {t("goToDashboard")}
+            </Button>
+          ) : (
+            <Button
+              className="w-full"
+              onClick={() => router.push("/onboarding/create-store")}
+            >
+              {t("createYourStore")}
+            </Button>
+          )}
         </div>
       </div>
     );
@@ -249,7 +295,7 @@ export default function CheckoutPage() {
                 <dt className="text-muted-foreground shrink-0">{t("billingPeriodLabel")}</dt>
                 <dd className="text-right">
                   <span
-                    className={`inline-block rounded-md px-2 py-0.5 text-xs font-semibold ${
+                    className={`inline-block rounded-ui px-2 py-0.5 text-xs font-semibold ${
                       payment.plan.billing_cycle === "monthly"
                         ? "bg-primary/15 text-primary"
                         : "bg-muted text-foreground"
@@ -358,7 +404,7 @@ export default function CheckoutPage() {
                   setTxnIdError(null);
                 }}
                 placeholder={t("transactionIdPlaceholder")}
-                className={`w-full rounded-md border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 ${
+                className={`w-full rounded-ui border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 ${
                   txnIdError ? "border-destructive" : "border-input"
                 }`}
               />
@@ -381,7 +427,7 @@ export default function CheckoutPage() {
                 value={senderNumber}
                 onChange={(e) => setSenderNumber(e.target.value)}
                 placeholder={t("senderNumberPlaceholder")}
-                className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+                className="w-full rounded-ui border border-input bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
               />
             </div>
 
@@ -405,14 +451,6 @@ export default function CheckoutPage() {
             onClick={() => router.push("/plans")}
           >
             {t("backToPlans")}
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="text-muted-foreground hover:text-foreground"
-            onClick={() => logout()}
-          >
-            {tCommon("signOut")}
           </Button>
         </div>
       </div>

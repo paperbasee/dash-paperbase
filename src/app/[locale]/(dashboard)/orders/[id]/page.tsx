@@ -496,7 +496,7 @@ export default function OrderDetailPage() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-col gap-2">
           <div className="flex items-center gap-3">
-            <div className="rounded-lg bg-muted/80 px-1 py-1 hidden md:block">
+            <div className="rounded-card bg-muted/80 px-1 py-1 hidden md:block">
               <Button
                 type="button"
                 variant="ghost"
@@ -533,7 +533,7 @@ export default function OrderDetailPage() {
                 type="button"
                 variant="outline"
                 size="sm"
-                className="rounded-lg"
+                className="rounded-card"
                 onClick={() => {
                   setPricingPreview(null);
                   setEditing(false);
@@ -546,13 +546,13 @@ export default function OrderDetailPage() {
                 form="order-edit-form"
                 size="sm"
                 disabled={saving}
-                className="rounded-lg"
+                className="rounded-card"
               >
                 {saving ? tPages("orderDetailSaving") : tPages("orderDetailSaveChanges")}
               </Button>
             </>
           ) : (
-            <Button size="sm" onClick={startEditing} className="rounded-lg">
+            <Button size="sm" onClick={startEditing} className="rounded-card">
               {tPages("orderDetailEditOrder")}
             </Button>
           )}
@@ -562,7 +562,7 @@ export default function OrderDetailPage() {
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3 lg:items-start">
         {/* Product - left, wider; height locked to Payment + Customer combined on desktop; scrolls when many items */}
         <Card
-          className="flex min-h-0 flex-col gap-0 overflow-hidden rounded-xl border border-dashed border-card-border bg-card py-0 shadow-sm lg:col-span-2"
+          className="flex min-h-0 flex-col gap-0 overflow-hidden rounded-card border border-dashed border-card-border bg-card py-0 shadow-sm lg:col-span-2"
           style={rightColHeight !== null ? { height: rightColHeight } : undefined}
         >
           <CardHeader className="shrink-0 border-b border-border/50 px-4 pb-4 pt-5 sm:px-6">
@@ -654,7 +654,7 @@ export default function OrderDetailPage() {
             </div>
             {editing && editError && (
               <div className="shrink-0 border-t border-border/40 px-4 pt-3 sm:px-6">
-                <div className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+                <div className="rounded-ui border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
                   {editError}
                 </div>
               </div>
@@ -665,7 +665,7 @@ export default function OrderDetailPage() {
         {/* Right column: stacked cards (height drives Product card on desktop) */}
         <div ref={rightColRef} className="flex flex-col gap-6 lg:col-span-1">
         {/* Payment */}
-        <Card className="overflow-hidden rounded-xl border border-dashed border-card-border bg-card shadow-sm">
+        <Card className="overflow-hidden rounded-card border border-dashed border-card-border bg-card shadow-sm">
           <CardHeader className="border-b border-border/50 px-4 pb-4 sm:px-6">
             <CardTitle>{tPages("orderDetailPaymentTitle")}</CardTitle>
             <CardDescription>{tPages("orderDetailPaymentDescription")}</CardDescription>
@@ -820,7 +820,7 @@ export default function OrderDetailPage() {
         </Card>
 
         {!editing && (
-          <Card className="overflow-hidden rounded-xl border border-dashed border-card-border bg-card shadow-sm">
+          <Card className="overflow-hidden rounded-card border border-dashed border-card-border bg-card shadow-sm">
             <CardHeader className="border-b border-border/50 px-4 pb-4 sm:px-6">
               <CardTitle>{tPages("orderDetailOrderStatusTitle")}</CardTitle>
               <CardDescription>
@@ -873,7 +873,7 @@ export default function OrderDetailPage() {
         )}
 
         {/* Customer */}
-        <Card className="overflow-hidden rounded-xl border border-dashed border-card-border bg-card shadow-sm">
+        <Card className="overflow-hidden rounded-card border border-dashed border-card-border bg-card shadow-sm">
           <CardHeader className="border-b border-border/50 px-4 pb-4 sm:px-6">
             <CardTitle>{tPages("orderDetailCustomerTitle")}</CardTitle>
             <CardDescription>{tPages("orderDetailCustomerDescription")}</CardDescription>
@@ -1012,7 +1012,7 @@ export default function OrderDetailPage() {
             ) : (
               <div className="space-y-6">
                 <div className="flex items-start gap-3">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-muted">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-card bg-muted">
                     <User className="size-5 text-muted-foreground" />
                   </div>
                   <div className="min-w-0 flex-1">
@@ -1031,7 +1031,7 @@ export default function OrderDetailPage() {
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-muted">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-card bg-muted">
                     <Home className="size-5 text-muted-foreground" />
                   </div>
                   <div className="min-w-0 flex-1">
@@ -1075,7 +1075,7 @@ export default function OrderDetailPage() {
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-muted">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-card bg-muted">
                     <CreditCard className="size-5 text-muted-foreground" />
                   </div>
                   <div className="min-w-0 flex-1">

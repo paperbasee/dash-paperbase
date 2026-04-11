@@ -181,12 +181,12 @@ export default function ProductAttributesPage() {
     <div className="flex flex-col gap-6">
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div className="flex items-start gap-3">
-          <div className="rounded-lg bg-muted/80 px-1 py-1 hidden md:block">
+          <div className="rounded-card bg-muted/80 px-1 py-1 hidden md:block">
             <button
               type="button"
               onClick={() => router.back()}
               aria-label={tPages("goBack")}
-              className="flex items-center justify-center rounded-md p-1 text-muted-foreground hover:bg-muted"
+              className="flex items-center justify-center rounded-ui p-1 text-muted-foreground hover:bg-muted"
             >
               <Undo2 className="h-4 w-4" />
             </button>
@@ -219,7 +219,7 @@ export default function ProductAttributesPage() {
       </p>
 
       {error ? (
-        <p className="rounded-lg border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+        <p className="rounded-card border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive">
           {error}
         </p>
       ) : null}
@@ -267,7 +267,7 @@ export default function ProductAttributesPage() {
 
       <div className="space-y-4">
         {attributes.length === 0 ? (
-          <p className="rounded-xl border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
+          <p className="rounded-card border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
             {tPages("attributesEmpty")}
           </p>
         ) : (
@@ -325,7 +325,7 @@ export default function ProductAttributesPage() {
                 {editingValue ? (
                   <form
                     onSubmit={saveValue}
-                    className="rounded-lg border border-border bg-muted/20 p-3 space-y-2"
+                    className="rounded-card border border-border bg-muted/20 p-3 space-y-2"
                   >
                     <p className="text-sm font-medium">
                       {editingValue.public_id === "new"
@@ -365,7 +365,7 @@ export default function ProductAttributesPage() {
                 {a.values.length === 0 ? (
                   <p className="text-sm text-muted-foreground">{tPages("attributesNoValues")}</p>
                 ) : (
-                  <ul className="divide-y divide-border rounded-lg border border-border">
+                  <ul className="divide-y divide-border rounded-card border border-border">
                     {a.values.map((v) => (
                       <ClickableListItem
                         key={v.public_id}

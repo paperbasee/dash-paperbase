@@ -42,7 +42,7 @@ export function SettingsActionDialog({
       <DialogContent
         showCloseButton={showCloseButton}
         className={cn(
-          "flex max-h-[min(90dvh,40rem)] w-[min(100%,calc(100vw-1.25rem))] max-w-md flex-col gap-0 overflow-hidden rounded-lg p-0 sm:max-h-[min(88dvh,36rem)] sm:w-full",
+          "flex max-h-[min(90dvh,40rem)] w-[min(100%,calc(100vw-1.25rem))] max-w-md flex-col gap-0 overflow-hidden rounded-card p-0 sm:max-h-[min(88dvh,36rem)] sm:w-full",
           contentClassName
         )}
       >

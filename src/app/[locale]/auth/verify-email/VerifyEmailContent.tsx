@@ -244,7 +244,7 @@ export default function VerifyEmailContent() {
 
       <div className="mx-auto w-11/12 max-w-sm space-y-6 sm:w-full">
         {effectiveEmail ? (
-          <p className="rounded-md border border-border bg-muted/40 px-3 py-2 text-sm text-foreground">
+          <p className="rounded-ui border border-border bg-muted/40 px-3 py-2 text-sm text-foreground">
             {effectiveEmail}
           </p>
         ) : (
@@ -252,6 +252,7 @@ export default function VerifyEmailContent() {
             <Input
               type="email"
               autoComplete="email"
+              size="lg"
               value={emailInput}
               onChange={(e) => setEmailInput(e.target.value)}
               placeholder={t("emailPlaceholder")}
@@ -265,12 +266,12 @@ export default function VerifyEmailContent() {
         </p>
 
         {resendSuccess && (
-          <div className="rounded-md border border-border bg-muted/30 px-3 py-2 text-sm text-foreground">
+          <div className="rounded-ui border border-border bg-muted/30 px-3 py-2 text-sm text-foreground">
             {t("resendSuccess")}
           </div>
         )}
         {resendError ? (
-          <div className="rounded-md border border-destructive/20 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+          <div className="rounded-ui border border-destructive/20 bg-destructive/10 px-3 py-2 text-sm text-destructive">
             {resendError}
           </div>
         ) : null}

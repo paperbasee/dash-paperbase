@@ -16,6 +16,7 @@ import { formatDashboardDate } from "@/lib/datetime-display";
 import { useConfirm } from "@/context/ConfirmDialogContext";
 import { notify } from "@/notifications";
 import { SettingsActionDialog } from "@/components/settings/SettingsActionDialog";
+import { settingsInvertedButtonClassName } from "../SettingsSectionBody";
 
 type ConnectForm = {
   provider: string;
@@ -215,7 +216,12 @@ export default function MarketingIntegration() {
 
       {!loading && modal !== "connect" && integrations.length > 0 ? (
         <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
-          <Button type="button" variant="outline" onClick={() => setModal("connect")}>
+          <Button
+            type="button"
+            variant="outline"
+            className={settingsInvertedButtonClassName}
+            onClick={() => setModal("connect")}
+          >
             {t("add")}
           </Button>
         </div>
@@ -231,7 +237,7 @@ export default function MarketingIntegration() {
       >
         <form onSubmit={handleConnect} className="space-y-3">
           {error ? (
-            <div className="rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-xs text-destructive">
+            <div className="rounded-card border border-destructive/30 bg-destructive/10 px-3 py-2 text-xs text-destructive">
               {error}
             </div>
           ) : null}
@@ -274,12 +280,22 @@ export default function MarketingIntegration() {
           )}
           <div className="flex flex-col gap-2 pt-1 sm:flex-row sm:flex-wrap">
             {!hasFacebook ? (
-              <Button type="submit" disabled={saving}>
+              <Button
+                type="submit"
+                variant="outline"
+                className={settingsInvertedButtonClassName}
+                disabled={saving}
+              >
                 <Save className="mr-1 size-3.5" />
                 {saving ? t("marketing.connecting") : t("marketing.connect")}
               </Button>
             ) : null}
-            <Button type="button" variant="outline" onClick={closeConnectModal}>
+            <Button
+              type="button"
+              variant="outline"
+              className={settingsInvertedButtonClassName}
+              onClick={closeConnectModal}
+            >
               {t("cancel")}
             </Button>
           </div>
@@ -304,13 +320,13 @@ export default function MarketingIntegration() {
             <div>
               <p className="mb-1 text-xs font-medium text-muted-foreground">{t("marketing.pixelLabel")}</p>
               <div className="flex flex-wrap items-center gap-2">
-                <code className="min-w-0 break-all rounded border border-border bg-muted/50 px-2 py-1 font-mono text-xs">
+                <code className="min-w-0 break-all rounded-ui border border-border bg-muted/50 px-2 py-1 font-mono text-xs">
                   {configureIntegration.pixel_id || "—"}
                 </code>
                 {configureIntegration.pixel_id ? (
                   <Button
                     type="button"
-                    variant="outline"
+                    variant="ghost"
                     className="shrink-0"
                     onClick={() => void copyPixelId(configureIntegration.pixel_id)}
                   >
@@ -370,7 +386,12 @@ export default function MarketingIntegration() {
           <p className="text-sm text-muted-foreground">{t("marketing.empty")}</p>
           {modal !== "connect" ? (
             <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
-              <Button type="button" variant="outline" onClick={() => setModal("connect")}>
+              <Button
+                type="button"
+                variant="outline"
+                className={settingsInvertedButtonClassName}
+                onClick={() => setModal("connect")}
+              >
                 {t("marketing.connectCta")}
               </Button>
             </div>
@@ -381,7 +402,7 @@ export default function MarketingIntegration() {
           {integrations.map((integration) => (
             <div
               key={integration.public_id}
-              className="rounded-lg border border-border bg-background p-4"
+              className="rounded-card border border-border bg-background p-4"
             >
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div className="min-w-0 flex-1 space-y-1">
@@ -425,6 +446,7 @@ export default function MarketingIntegration() {
                     <Button
                       type="button"
                       variant="outline"
+                      className={settingsInvertedButtonClassName}
                       onClick={() => setModal({ type: "configure", publicId: integration.public_id })}
                     >
                       {t("marketing.configureEvents")}
@@ -433,6 +455,7 @@ export default function MarketingIntegration() {
                   <Button
                     type="button"
                     variant="outline"
+                    className={settingsInvertedButtonClassName}
                     disabled={togglingId === integration.public_id}
                     onClick={() => handleToggleActive(integration)}
                   >

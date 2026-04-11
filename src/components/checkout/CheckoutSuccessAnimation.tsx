@@ -40,7 +40,7 @@ export function CheckoutSuccessAnimation({ className }: { className?: string }) 
   if (loadState === "loading") {
     return (
       <div
-        className={`flex aspect-square items-center justify-center rounded-3xl bg-muted/30 ${SIZE_WRAP} ${className ?? ""}`}
+        className={`flex aspect-square items-center justify-center rounded-2xl bg-muted/30 ${SIZE_WRAP} ${className ?? ""}`}
         aria-hidden
       >
         <div className="h-10 w-10 animate-pulse rounded-full bg-primary/15 sm:h-12 sm:w-12" />

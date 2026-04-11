@@ -9,8 +9,6 @@ interface AuthPageShellProps {
   appName?: string;
   headline?: string;
   description?: string;
-  /** When false, hides the default legal/footer strip (e.g. login & signup use their own copy). */
-  showFooter?: boolean;
 }
 
 export function AuthPageShell({
@@ -20,7 +18,6 @@ export function AuthPageShell({
   appName = "Paperbase",
   headline,
   description,
-  showFooter = true,
 }: AuthPageShellProps) {
   return (
     <div
@@ -54,11 +51,6 @@ export function AuthPageShell({
           {children}
         </div>
       </main>
-      {showFooter ? (
-        <footer className="pb-4 text-center text-xs text-muted-foreground/90 sm:pb-6">
-          Terms of Service • Privacy Policy • © 2026 Paperbase
-        </footer>
-      ) : null}
     </div>
   );
 }

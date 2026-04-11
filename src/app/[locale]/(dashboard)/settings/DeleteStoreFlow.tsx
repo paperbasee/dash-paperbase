@@ -15,6 +15,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { DELETE_STORE_CONFIRM_PHRASE } from "@/lib/validation";
 import { cn } from "@/lib/utils";
+import { settingsInvertedButtonClassName } from "./SettingsSectionBody";
 import { translateDeletionStep } from "./deletionStepLabels";
 import type { DeleteModalStep } from "./useDeleteStore";
 import { useAuth } from "@/context/AuthContext";
@@ -100,8 +101,8 @@ export default function DeleteStoreFlow({
         <DialogContent
           showCloseButton={false}
           className={cn(
-            "gap-0 p-0 sm:rounded-lg",
-            "max-sm:max-w-[min(20rem,calc(100vw-1.5rem))] max-sm:rounded-lg",
+            "gap-0 p-0 sm:rounded-card",
+            "max-sm:max-w-[min(20rem,calc(100vw-1.5rem))] max-sm:rounded-card",
           )}
           onPointerDownOutside={(e) => {
             if (deleteRequestSubmitting) e.preventDefault();
@@ -185,7 +186,7 @@ export default function DeleteStoreFlow({
             )}
 
             <div
-              className="flex gap-2 rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-xs text-destructive sm:gap-3 sm:rounded-lg sm:px-4 sm:py-3 sm:text-sm"
+              className="flex gap-2 rounded-ui border border-destructive/30 bg-destructive/10 px-3 py-2 text-xs text-destructive sm:gap-3 sm:rounded-card sm:px-4 sm:py-3 sm:text-sm"
               role="alert"
             >
               <AlertCircle className="size-4 shrink-0 sm:size-5" aria-hidden />
@@ -210,7 +211,7 @@ export default function DeleteStoreFlow({
                   type="button"
                   variant="outline"
                   size="sm"
-                  className="sm:h-10 sm:px-4 sm:text-sm"
+                  className={cn("sm:h-10 sm:px-4 sm:text-sm", settingsInvertedButtonClassName)}
                   onClick={() => onDeleteConfirmOpenChange(false)}
                   disabled={deleteRequestSubmitting}
                 >
@@ -240,7 +241,7 @@ export default function DeleteStoreFlow({
                   type="button"
                   variant="outline"
                   size="sm"
-                  className="sm:h-10 sm:px-4 sm:text-sm"
+                  className={cn("sm:h-10 sm:px-4 sm:text-sm", settingsInvertedButtonClassName)}
                   onClick={onBackToPhraseStep}
                   disabled={deleteRequestSubmitting}
                 >
@@ -279,7 +280,7 @@ export default function DeleteStoreFlow({
             if (e.target === e.currentTarget) logout();
           }}
         >
-          <div className="w-full max-w-lg rounded-xl border border-border bg-background p-5 shadow-xl sm:p-6">
+          <div className="w-full max-w-lg rounded-card border border-border bg-background p-5 shadow-xl sm:p-6">
             <div className="flex items-start justify-between gap-4">
               <div className="min-w-0 flex-1">
                 <h3 className="text-base font-semibold text-foreground sm:text-lg">
@@ -293,7 +294,13 @@ export default function DeleteStoreFlow({
                     : t("deleteFlow.overlayWaitBodyImproved")}
                 </p>
               </div>
-              <Button type="button" variant="outline" size="sm" onClick={() => logout()}>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className={settingsInvertedButtonClassName}
+                onClick={() => logout()}
+              >
                 {t("deleteFlow.logout")}
               </Button>
             </div>
@@ -301,7 +308,7 @@ export default function DeleteStoreFlow({
             {!deleteSuccessDisplayed && deleteStatus && (
               <div className="mt-6">
                 {deleteStatus.current_step.includes("Scheduled") ? (
-                  <div className="rounded-lg border border-border bg-muted/20 p-4">
+                  <div className="rounded-card border border-border bg-muted/20 p-4">
                     <p className="text-sm text-muted-foreground">
                       {t("deleteFlow.scheduledBody")}
                     </p>
@@ -357,10 +364,15 @@ export default function DeleteStoreFlow({
             )}
 
             {deleteRequestError && (
-              <div className="mt-6 rounded-lg border border-destructive/30 bg-destructive/5 p-4">
+              <div className="mt-6 rounded-card border border-destructive/30 bg-destructive/5 p-4">
                 <p className="text-sm text-destructive">{deleteRequestError}</p>
                 <div className="mt-4 flex justify-end">
-                  <Button type="button" variant="outline" onClick={onCloseDeletion}>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className={settingsInvertedButtonClassName}
+                    onClick={onCloseDeletion}
+                  >
                     {t("close")}
                   </Button>
                 </div>

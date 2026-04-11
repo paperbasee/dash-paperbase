@@ -43,7 +43,7 @@ export function MiniSitePreview({ placements }: Props) {
 
   if (pages.length === 0) {
     return (
-      <div className="rounded-xl border border-dashed border-border bg-muted/10 py-8 text-center text-sm text-muted-foreground">
+      <div className="rounded-card border border-dashed border-border bg-muted/10 py-8 text-center text-sm text-muted-foreground">
         Select a placement to see the preview
       </div>
     );

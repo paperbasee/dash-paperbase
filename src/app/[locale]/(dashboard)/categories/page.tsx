@@ -81,7 +81,7 @@ function CategoryTreeRows({
                     <button
                       type="button"
                       aria-expanded={isOpen}
-                      className="shrink-0 rounded p-0.5 text-muted-foreground hover:bg-muted"
+                      className="shrink-0 rounded-ui p-0.5 text-muted-foreground hover:bg-muted"
                       onClick={() => onToggle(node.public_id)}
                     >
                       {isOpen ? (
@@ -317,12 +317,12 @@ export default function CategoriesPage() {
     <div className="space-y-8">
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <div className="flex items-center gap-3">
-          <div className="rounded-lg bg-muted/80 px-1 py-1 hidden md:block">
+          <div className="rounded-card bg-muted/80 px-1 py-1 hidden md:block">
             <button
               type="button"
               onClick={() => router.back()}
               aria-label={tPages("categoriesGoBackAria")}
-              className="flex items-center justify-center rounded-md p-1 text-muted-foreground hover:bg-muted"
+              className="flex items-center justify-center rounded-ui p-1 text-muted-foreground hover:bg-muted"
             >
               <Undo2 className="h-4 w-4" />
             </button>
@@ -334,7 +334,7 @@ export default function CategoriesPage() {
           <button
             type="button"
             onClick={openNewRoot}
-            className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+            className="rounded-card bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
           >
             {tPages("categoriesAddRoot")}
           </button>
@@ -345,7 +345,7 @@ export default function CategoriesPage() {
                 setMode("closed");
                 setEditingSlugPreview(null);
               }}
-              className="rounded-lg border border-border px-4 py-2 text-sm text-foreground hover:bg-muted"
+              className="rounded-card border border-border px-4 py-2 text-sm text-foreground hover:bg-muted"
             >
               {tPages("categoriesCancelForm")}
             </button>
@@ -356,7 +356,7 @@ export default function CategoriesPage() {
       {mode !== "closed" ? (
         <form
           onSubmit={saveCategory}
-          className="space-y-3 rounded-xl border border-primary/30 bg-primary/5 p-4"
+          className="space-y-3 rounded-card border border-primary/30 bg-primary/5 p-4"
         >
           <p className="text-sm font-medium text-primary">{formTitle}</p>
           <div className="space-y-1">
@@ -421,7 +421,7 @@ export default function CategoriesPage() {
             <button
               type="submit"
               disabled={saving}
-              className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
+              className="rounded-card bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
             >
               {saving ? tCommon("saving") : tCommon("save")}
             </button>
@@ -435,7 +435,7 @@ export default function CategoriesPage() {
             count: flattenCategoryOptions(tree).length,
           })}
         </h2>
-        <div className="overflow-x-auto rounded-xl border border-dashed border-card-border bg-card">
+        <div className="overflow-x-auto rounded-card border border-dashed border-card-border bg-card">
           <table className="w-full text-left text-sm">
             <thead>
               <tr className="border-b border-border bg-muted/40">

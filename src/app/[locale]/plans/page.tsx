@@ -135,7 +135,7 @@ export default function PlansPage() {
 
         {/* Error loading */}
         {pageState === "error" && (
-          <div className="rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-center text-sm text-destructive">
+          <div className="rounded-card border border-destructive/30 bg-destructive/10 px-4 py-3 text-center text-sm text-destructive">
             {t("errorLoad")}
           </div>
         )}
@@ -151,16 +151,16 @@ export default function PlansPage() {
         {pageState === "ready" && plans.length > 0 && (
           <>
             {selectError && (
-              <div className="mb-6 rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-center text-sm text-red-200">
+              <div className="mb-6 rounded-card border border-red-500/30 bg-red-500/10 px-4 py-3 text-center text-sm text-red-200">
                 {selectError}
               </div>
             )}
 
             <div className="mb-6 flex w-full justify-center">
-              <div className="inline-flex rounded-full border border-border bg-card p-1 shadow-sm">
+              <div className="inline-flex rounded-ui border border-border bg-card p-1 shadow-sm">
                 <button
                   type="button"
-                  className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${
+                  className={`rounded-ui px-4 py-2 text-sm font-medium transition-colors ${
                     billingCycle === "monthly"
                       ? "bg-primary text-primary-foreground"
                       : "text-muted-foreground hover:text-foreground"
@@ -172,7 +172,7 @@ export default function PlansPage() {
                 <button
                   type="button"
                   disabled={!hasAnyYearly}
-                  className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${
+                  className={`rounded-ui px-4 py-2 text-sm font-medium transition-colors ${
                     billingCycle === "yearly"
                       ? "bg-primary text-primary-foreground"
                       : hasAnyYearly
@@ -242,20 +242,20 @@ export default function PlansPage() {
                       <ul className="mt-3 space-y-2">
                         {featureEntries.slice(0, 5).map(([key]) => (
                           <li key={key} className="flex items-start gap-2 text-sm">
-                            <span className="mt-0.5 inline-flex h-5 w-5 items-center justify-center rounded-full bg-foreground text-background">
-                              <Check className="h-3.5 w-3.5" strokeWidth={3} aria-hidden />
+                            <span className="mt-0.5 inline-flex size-4 shrink-0 items-center justify-center rounded-ui bg-foreground text-background">
+                              <Check className="size-2.5" strokeWidth={2.5} aria-hidden />
                             </span>
                             <span className="min-w-0 leading-snug">{key.replace(/_/g, " ")}</span>
                           </li>
                         ))}
                         {limitEntries.slice(0, 3).map(([key, val]) => (
                           <li key={key} className="flex items-start gap-2 text-sm">
-                            <span className="mt-0.5 inline-flex h-5 w-5 items-center justify-center rounded-full bg-foreground text-background">
-                              <Check className="h-3.5 w-3.5" strokeWidth={3} aria-hidden />
+                            <span className="mt-0.5 inline-flex size-4 shrink-0 items-center justify-center rounded-ui bg-foreground text-background">
+                              <Check className="size-2.5" strokeWidth={2.5} aria-hidden />
                             </span>
-                            <span className="min-w-0 leading-snug text-muted-foreground">
+                            <span className="min-w-0 leading-snug text-card-foreground">
                               {key.replace(/_/g, " ")}:{" "}
-                              <span className="font-medium text-foreground">{val}</span>
+                              <span className="font-medium">{val}</span>
                             </span>
                           </li>
                         ))}

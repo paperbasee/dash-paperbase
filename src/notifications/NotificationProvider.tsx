@@ -287,7 +287,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
       >
         <DialogContent
           showCloseButton={false}
-          className="w-[calc(100%-1.5rem)] max-w-md rounded-xl sm:w-full"
+          className="w-[calc(100%-1.5rem)] max-w-md rounded-card sm:w-full"
         >
           <DialogHeader
             className={cn(

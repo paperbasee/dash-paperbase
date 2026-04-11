@@ -35,6 +35,10 @@ const securityHeaders = [
     value: "camera=(), microphone=(), geolocation=()",
   },
   {
+    key: "Accept-CH",
+    value: "Sec-CH-Prefers-Color-Scheme",
+  },
+  {
     // Content-Security-Policy — tighten as third-party integrations are confirmed.
     // 'unsafe-inline' is required for Tailwind/styled-jsx in development;
     // replace with a nonce-based CSP before production.

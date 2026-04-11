@@ -46,9 +46,6 @@
     "next": "Next",
     "search": "Search",
     "close": "Close",
-    "termsOfService": "Terms of Service",
-    "privacyPolicy": "Privacy Policy",
-    "copyrightBrand": "© 2026 Paperbase",
     "active": "Active",
     "inactive": "Inactive",
     "add": "Add",
@@ -739,7 +736,8 @@
     "expiredBannerPay": "Pay & renew",
     "expiredBannerPayLoading": "Opening checkout…",
     "expiredBannerPayError": "Could not start checkout. Try again or pick a plan.",
-    "bannerPayNow": "Pay now"
+    "bannerPayNow": "Pay now",
+    "pendingReviewBannerText": "Your store is under review. It will go live after approval."
   },
   "dashboard": {
     "title": "Dashboard overview",
@@ -1077,6 +1075,7 @@
       "heading": "Networking",
       "subtitle": "Create API keys here to authenticate tenant API and WebSocket requests. Keys are not created automatically when you create a store.",
       "subscriptionExpiredNotice": "Your subscription has expired. Renew your plan to create new API keys and copy the storefront integration prompt.",
+      "storeUnderReviewNotice": "Your store is under review. API key actions and the storefront integration prompt are disabled until your subscription is approved and the storefront goes live.",
       "apiBaseUrl": "API Base URL",
       "loadError": "Could not load API keys.",
       "defaultKeyName": "Default key",
@@ -1089,6 +1088,7 @@
       "msgRevoked": "API key revoked.",
       "msgRevokeFailed": "Could not revoke API key.",
       "newKeyTitle": "New API key (shown once)",
+      "copyApiKey": "Copy API key",
       "loadingKeys": "Loading API keys…",
       "prefix": "Prefix:",
       "created": "Created:",
@@ -1105,7 +1105,10 @@
       "copyStorefrontPrompt": "Copy prompt",
       "promptCopiedTitle": "Copied",
       "promptCopiedDescription": "Storefront API prompt is on your clipboard.",
-      "promptCopyFailed": "Could not copy to clipboard. Check browser permissions."
+      "promptCopyFailed": "Could not copy to clipboard. Check browser permissions.",
+      "apiKeyCopiedTitle": "Copied",
+      "apiKeyCopiedDescription": "API key is on your clipboard.",
+      "apiKeyCopyFailed": "Could not copy API key. Check browser permissions."
     },
     "notifications": {
       "heading": "Notification preferences",
@@ -1116,11 +1119,7 @@
       "premium": "Premium",
       "emailHint": "Control when emails are sent for order events. Order email alerts are a Premium feature.",
       "emailOwnerOnOrder": "Email me when an order is received",
-      "emailCustomerCourier": "Email customer when the order is sent to courier",
-      "deliveryHeading": "Delivery preference",
-      "deliverySoon": "Choose how to receive notifications (coming soon).",
-      "deliveryEmail": "Email",
-      "deliveryInApp": "In-app"
+      "emailCustomerCourier": "Email customer when the order is sent to courier"
     },
     "security": {
       "heading": "Security",
@@ -1405,7 +1404,12 @@
     "submitError": "Submission failed. Please check your transaction ID and try again.",
     "submittedTitle": "Payment received — under review",
     "submittedBody": "We have received your transaction ID. Our team will verify and activate your subscription within a few hours. You will be notified by email.",
+    "successTitle": "Payment submitted successfully",
+    "successBody": "We have received your transaction ID. Our team will verify and activate your subscription within a few hours. You will be notified by email.",
+    "goToDashboard": "Go to dashboard",
+    "createYourStore": "Create your store",
     "backToPlans": "Choose a different plan",
+    "continueToCreateStore": "Create your store",
     "signOut": "Sign out",
     "noPendingPayment": "No pending payment found.",
     "loadingPayment": "Loading payment details…"

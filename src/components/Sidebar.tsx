@@ -322,7 +322,7 @@ function SidebarContent({
           <button
             type="button"
             onClick={() => setSearchOpen(true)}
-            className="relative hidden h-10 w-full items-center gap-2 overflow-hidden rounded-lg border-2 border-border bg-muted/50 pl-9 pr-2 text-left text-sm text-muted-foreground transition-colors hover:bg-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-ring md:flex"
+            className="relative hidden h-10 w-full items-center gap-2 overflow-hidden rounded-card border-2 border-border bg-muted/50 pl-9 pr-2 text-left text-sm text-muted-foreground transition-colors hover:bg-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-ring md:flex"
             aria-label={tSidebar("openSearch")}
           >
             <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 shrink-0 text-muted-foreground pointer-events-none" />
@@ -332,7 +332,7 @@ function SidebarContent({
             <TooltipProvider delayDuration={300}>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <kbd className="shrink-0 rounded border border-border bg-background px-1.5 py-0.5 text-[10px] text-muted-foreground">
+                  <kbd className="shrink-0 rounded-ui border border-border bg-background px-1.5 py-0.5 text-[10px] text-muted-foreground">
                     Ctrl+K
                   </kbd>
                 </TooltipTrigger>
@@ -361,7 +361,7 @@ function SidebarContent({
           href={HOME_NAV.href}
           onClick={handleLinkClick}
           className={cn(
-            "flex min-h-[44px] items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors md:min-h-[40px]",
+            "flex min-h-[44px] items-center gap-3 rounded-card px-3 py-2.5 text-sm font-medium transition-colors md:min-h-[40px]",
             isActive(HOME_NAV.href)
               ? "bg-primary/10 text-primary"
               : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
@@ -392,7 +392,7 @@ function SidebarContent({
                     }
                   }}
                   className={cn(
-                    "flex min-h-[44px] w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors md:min-h-[40px]",
+                    "flex min-h-[44px] w-full items-center gap-3 rounded-card px-3 py-2.5 text-sm font-medium transition-colors md:min-h-[40px]",
                     catalogChildActive && !catalogOpen
                       ? "bg-primary/10 text-primary"
                       : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
@@ -427,7 +427,7 @@ function SidebarContent({
                             href={app.href}
                             onClick={handleLinkClick}
                             className={cn(
-                              "flex items-center justify-between rounded-md px-2 py-2 text-sm",
+                              "flex items-center justify-between rounded-ui px-2 py-2 text-sm",
                               childActive
                                 ? "bg-primary/10 font-medium text-primary"
                                 : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
@@ -462,7 +462,7 @@ function SidebarContent({
               href={app.href!}
               onClick={handleLinkClick}
               className={cn(
-                "flex min-h-[44px] items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors md:min-h-[40px]",
+                "flex min-h-[44px] items-center gap-3 rounded-card px-3 py-2.5 text-sm font-medium transition-colors md:min-h-[40px]",
                 active
                   ? "bg-primary/10 text-primary"
                   : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
@@ -502,7 +502,7 @@ function SidebarContent({
               }
             }}
             className={cn(
-              "flex min-h-[44px] w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors md:min-h-[40px]",
+              "flex min-h-[44px] w-full items-center gap-3 rounded-card px-3 py-2.5 text-sm font-medium transition-colors md:min-h-[40px]",
               moreChildActive && !celeryOpen
                 ? "bg-primary/10 text-primary"
                 : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
@@ -539,7 +539,7 @@ function SidebarContent({
                       href={app.href}
                       onClick={handleLinkClick}
                       className={cn(
-                        "flex items-center justify-between rounded-md px-2 py-2 text-sm",
+                        "flex items-center justify-between rounded-ui px-2 py-2 text-sm",
                         childActive
                           ? "bg-primary/10 font-medium text-primary"
                           : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
@@ -578,7 +578,7 @@ function SidebarContent({
             <button
               type="button"
               className={cn(
-                "flex w-full items-center gap-3 rounded-lg border-0 bg-transparent p-3 text-left transition-colors",
+                "flex w-full items-center gap-3 rounded-card border-0 bg-transparent p-3 text-left transition-colors",
                 "outline-none hover:bg-accent",
                 "focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
                 collapsed && "justify-center"
@@ -605,7 +605,7 @@ function SidebarContent({
             align="center"
             side="top"
             className={cn(
-              "overflow-hidden rounded-xl border border-border/80 p-0 shadow-lg",
+              "overflow-hidden rounded-card border border-border/80 p-0 shadow-lg",
               mobileUserMenuLayout
                 ? // Match profile row width (w-64 sheet minus p-4); ! beats popover defaults
                   "!w-[var(--radix-dropdown-menu-trigger-width)] min-w-[12.5rem] max-w-[min(100vw-1.5rem,14rem)]"
@@ -618,7 +618,7 @@ function SidebarContent({
                 {tSidebar("theme")}
               </p>
               <div
-                className="flex gap-1 rounded-lg bg-muted/60 p-1 dark:bg-muted/25"
+                className="flex gap-1 rounded-card bg-muted/60 p-1 dark:bg-muted/25"
                 role="group"
                 aria-label={tSidebar("theme")}
               >
@@ -634,7 +634,7 @@ function SidebarContent({
                     type="button"
                     onClick={() => handleThemeChange(key)}
                     className={cn(
-                      "flex min-w-0 flex-1 flex-col items-center gap-1 rounded-md py-2 text-xs font-medium transition-colors",
+                      "flex min-w-0 flex-1 flex-col items-center gap-1 rounded-ui py-2 text-xs font-medium transition-colors",
                       theme === key
                         ? "bg-background text-primary shadow-sm ring-1 ring-primary/25 dark:bg-popover"
                         : "text-muted-foreground hover:bg-background/80 hover:text-foreground"
@@ -671,7 +671,7 @@ function SidebarContent({
                       switchUserMenuLocale(loc);
                     }}
                     className={cn(
-                      "cursor-pointer rounded-md px-2 py-2",
+                      "cursor-pointer rounded-ui px-2 py-2",
                       isActive && "bg-accent/80 text-primary focus:bg-accent focus:text-primary"
                     )}
                   >

@@ -204,14 +204,14 @@ export default function NewProductPage() {
     }
   }
 
-  const fieldControlClass = "w-full rounded-lg bg-muted/50";
+  const fieldControlClass = "w-full rounded-card bg-muted/50";
 
   return (
     <div className="space-y-6">
       {/* Page header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-3">
-          <div className="rounded-lg bg-muted/80 px-1 py-1 hidden md:block">
+          <div className="rounded-card bg-muted/80 px-1 py-1 hidden md:block">
             <Button
               type="button"
               variant="ghost"
@@ -238,7 +238,7 @@ export default function NewProductPage() {
       {error && (
         <div
           role="alert"
-          className="rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive"
+          className="rounded-card border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive"
         >
           {error}
         </div>
@@ -285,7 +285,7 @@ export default function NewProductPage() {
                 {slugUsesFallback && baseSlug && (
                   <p
                     id="slug-warning"
-                    className="mt-1 inline-flex items-center rounded-md border border-amber-200 bg-amber-50 px-2 py-1 text-xs text-amber-700 dark:border-amber-900/50 dark:bg-amber-950/20 dark:text-amber-300"
+                    className="mt-1 inline-flex items-center rounded-ui border border-amber-200 bg-amber-50 px-2 py-1 text-xs text-amber-700 dark:border-amber-900/50 dark:bg-amber-950/20 dark:text-amber-300"
                   >
                     {tPages("productSlugFallbackWarning")}
                   </p>
@@ -401,7 +401,7 @@ export default function NewProductPage() {
               </p>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="aspect-square w-full overflow-hidden rounded-lg bg-muted/50">
+              <div className="aspect-square w-full overflow-hidden rounded-card bg-muted/50">
                 {bigPreviewUrl ? (
                   <img
                     src={bigPreviewUrl}
@@ -465,7 +465,7 @@ export default function NewProductPage() {
                 {Array.from({ length: MAX_IMAGES }, (_, i) => (
                   <div
                     key={i}
-                    className={`relative aspect-square w-16 shrink-0 snap-start overflow-hidden rounded-lg border border-dashed border-border bg-muted/30 ${
+                    className={`relative aspect-square w-16 shrink-0 snap-start overflow-hidden rounded-card border border-dashed border-border bg-muted/30 ${
                       (selectedImageIndex ?? firstFilledIndex) === i && imagePreviews[i]
                         ? "ring-2 ring-primary"
                         : ""

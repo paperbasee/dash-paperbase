@@ -42,11 +42,11 @@ export function SettingsSectionNav({
           }}
           className={cn(
             "flex items-center gap-2 text-sm font-medium transition-colors shrink-0",
-            variant === "vertical" && "rounded-lg px-3 py-2.5 text-left",
+            variant === "vertical" && "rounded-card px-3 py-2.5 text-left",
             variant === "horizontal" && "rounded-none border px-4 py-2.5 text-center text-sm whitespace-nowrap",
             variant === "vertical" &&
               (activeSection === id
-                ? "bg-primary/10 text-primary"
+                ? "bg-foreground text-background"
                 : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"),
             variant === "horizontal" &&
               (activeSection === id

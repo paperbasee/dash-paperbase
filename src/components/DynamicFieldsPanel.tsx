@@ -47,7 +47,7 @@ const FIXED_PRODUCT_FIELDS: { key: string; labelKey: string }[] = [
 ];
 
 const inputClass =
-  "w-full rounded-lg bg-muted/50 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-0";
+  "w-full rounded-card bg-muted/50 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-0";
 
 function SortableFieldItem({
   field,
@@ -112,14 +112,14 @@ function SortableFieldItem({
       ref={setNodeRef}
       style={style}
       className={cn(
-        "flex flex-col gap-3 rounded-lg border border-dashed border-border bg-muted/30 p-4",
+        "flex flex-col gap-3 rounded-card border border-dashed border-border bg-muted/30 p-4",
         isDragging && "opacity-80 shadow-md"
       )}
     >
       <div className="flex items-start gap-2">
         <button
           type="button"
-          className="mt-2 cursor-grab touch-none rounded p-1 text-muted-foreground hover:bg-muted hover:text-foreground active:cursor-grabbing"
+          className="mt-2 cursor-grab touch-none rounded-ui p-1 text-muted-foreground hover:bg-muted hover:text-foreground active:cursor-grabbing"
           {...attributes}
           {...listeners}
           aria-label={tp("dragReorderAria")}
@@ -297,7 +297,7 @@ export function DynamicFieldsPanel({
 
   return (
     <div className="w-full space-y-6">
-      <div className="rounded-xl border border-dashed border-border bg-muted/30 p-5">
+      <div className="rounded-card border border-dashed border-border bg-muted/30 p-5">
         <h3 className="text-sm font-semibold text-foreground">
           {tp("fixedHeading")}
         </h3>
@@ -308,7 +308,7 @@ export function DynamicFieldsPanel({
           {FIXED_PRODUCT_FIELDS.map(({ key, labelKey }) => (
             <div
               key={key}
-              className="flex shrink-0 items-center rounded-md border border-border/70 bg-background/80 px-2 py-1.5 text-xs shadow-sm transition-colors hover:border-border"
+              className="flex shrink-0 items-center rounded-ui border border-border/70 bg-background/80 px-2 py-1.5 text-xs shadow-sm transition-colors hover:border-border"
             >
               <span className="font-medium text-foreground">{tp(labelKey)}</span>
             </div>

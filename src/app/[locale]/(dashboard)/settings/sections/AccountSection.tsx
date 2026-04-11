@@ -4,7 +4,11 @@ import type { Dispatch, FormEvent, SetStateAction } from "react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { SettingsSectionBody, settingsSectionSurfaceClassName } from "../SettingsSectionBody";
+import {
+  SettingsSectionBody,
+  settingsInvertedButtonClassName,
+  settingsSectionSurfaceClassName,
+} from "../SettingsSectionBody";
 
 type SettingsMessage = { type: "success" | "error"; text: string } | null;
 
@@ -90,7 +94,12 @@ export default function AccountSection({
             </p>
           )}
 
-          <Button type="submit" disabled={accountSaving}>
+          <Button
+            type="submit"
+            variant="outline"
+            className={settingsInvertedButtonClassName}
+            disabled={accountSaving}
+          >
             {accountSaving ? t("saving") : t("account.saveButton")}
           </Button>
           </form>

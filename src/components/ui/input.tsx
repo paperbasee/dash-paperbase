@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils"
 
 const inputVariants = cva(
   [
-    "w-full min-w-0 rounded-md border border-border bg-background text-base text-foreground shadow-xs",
+    "w-full min-w-0 rounded-ui border border-border bg-background text-base text-foreground shadow-xs",
     "[color-scheme:dark] dark:[-webkit-text-fill-color:hsl(var(--foreground))]",
     "transition-[color,box-shadow] outline-none",
     "selection:bg-primary selection:text-primary-foreground",

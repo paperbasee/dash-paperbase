@@ -9,7 +9,12 @@ import { Button } from "@/components/ui/button";
 import api from "@/lib/api";
 import { useRateLimitCooldown, extractRateLimitInfo } from "@/hooks/useRateLimitCooldown";
 import { notify } from "@/notifications";
-import { SettingsSectionBody, settingsSectionSurfaceClassName } from "../SettingsSectionBody";
+import { cn } from "@/lib/utils";
+import {
+  SettingsSectionBody,
+  settingsInvertedButtonClassName,
+  settingsSectionSurfaceClassName,
+} from "../SettingsSectionBody";
 
 type SecurityModal = "password" | "enable" | "disable" | "recovery" | null;
 
@@ -243,19 +248,39 @@ export default function SecuritySection({ hidden }: { hidden: boolean }) {
           ) : null}
 
           <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
-            <Button type="button" variant="outline" onClick={() => setOpenModal("password")}>
+            <Button
+              type="button"
+              variant="outline"
+              className={settingsInvertedButtonClassName}
+              onClick={() => setOpenModal("password")}
+            >
               {t("security.changePassword")}
             </Button>
             {!isEnabled ? (
-              <Button type="button" variant="outline" onClick={() => setOpenModal("enable")}>
+              <Button
+                type="button"
+                variant="outline"
+                className={settingsInvertedButtonClassName}
+                onClick={() => setOpenModal("enable")}
+              >
                 {t("security.enable2fa")}
               </Button>
             ) : (
               <>
-                <Button type="button" variant="outline" onClick={() => setOpenModal("disable")}>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className={settingsInvertedButtonClassName}
+                  onClick={() => setOpenModal("disable")}
+                >
                   {t("security.disable2fa")}
                 </Button>
-                <Button type="button" variant="outline" onClick={() => setOpenModal("recovery")}>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className={settingsInvertedButtonClassName}
+                  onClick={() => setOpenModal("recovery")}
+                >
                   {t("security.recoveryHeading")}
                 </Button>
               </>
@@ -313,7 +338,8 @@ export default function SecuritySection({ hidden }: { hidden: boolean }) {
           ) : null}
           <Button
             type="button"
-            className="w-full sm:w-auto"
+            variant="outline"
+            className={cn("w-full sm:w-auto", settingsInvertedButtonClassName)}
             onClick={changePassword}
             disabled={passwordLoading}
           >
@@ -337,7 +363,13 @@ export default function SecuritySection({ hidden }: { hidden: boolean }) {
           {!qrCode ? (
             <>
               <p className="text-sm text-muted-foreground">{t("security.modalEnable2faStartHint")}</p>
-              <Button type="button" onClick={startSetup} disabled={loading}>
+              <Button
+                type="button"
+                variant="outline"
+                className={settingsInvertedButtonClassName}
+                onClick={startSetup}
+                disabled={loading}
+              >
                 {t("security.enable2fa")}
               </Button>
             </>
@@ -361,7 +393,13 @@ export default function SecuritySection({ hidden }: { hidden: boolean }) {
                   placeholder={t("security.otpPlaceholder")}
                   autoComplete="one-time-code"
                 />
-                <Button type="button" onClick={verifySetup} disabled={loading} className="shrink-0">
+                <Button
+                  type="button"
+                  variant="outline"
+                  className={cn("shrink-0", settingsInvertedButtonClassName)}
+                  onClick={verifySetup}
+                  disabled={loading}
+                >
                   {t("security.verify")}
                 </Button>
               </div>
@@ -426,7 +464,7 @@ export default function SecuritySection({ hidden }: { hidden: boolean }) {
           <Button
             type="button"
             variant="outline"
-            className="w-full sm:w-auto"
+            className={cn("w-full sm:w-auto", settingsInvertedButtonClassName)}
             onClick={requestRecoveryCode}
             disabled={recoveryRequestLoading || recoveryVerifyLoading || recoveryCooldown.isLimited}
           >
@@ -444,8 +482,8 @@ export default function SecuritySection({ hidden }: { hidden: boolean }) {
           />
           <Button
             type="button"
-            variant="secondary"
-            className="w-full sm:w-auto"
+            variant="outline"
+            className={cn("w-full sm:w-auto", settingsInvertedButtonClassName)}
             onClick={verifyRecoveryAndDisable}
             disabled={recoveryVerifyLoading || !recoveryCode.trim()}
           >

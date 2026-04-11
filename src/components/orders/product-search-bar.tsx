@@ -52,7 +52,7 @@ export function ProductSearchBar({
         <Dialog.Trigger asChild>
           <Button
             type="button"
-            className="h-10 rounded-lg border border-border/70 bg-foreground px-5 text-background hover:bg-foreground/90"
+            className="h-10 rounded-card border border-border/70 bg-foreground px-5 text-background hover:bg-foreground/90"
           >
             Add product
           </Button>
@@ -70,7 +70,7 @@ export function ProductSearchBar({
               "fixed z-50 flex min-h-0 flex-col overflow-hidden bg-background p-0 gap-0",
               "inset-0 rounded-none border-0 shadow-none max-h-[100dvh]",
               "md:inset-auto md:left-1/2 md:top-1/2 md:h-[min(560px,85vh)] md:w-full md:max-w-xl md:-translate-x-1/2 md:-translate-y-1/2",
-              "md:rounded-lg md:border md:border-border md:shadow-lg",
+              "md:rounded-card md:border md:border-border md:shadow-lg",
               "data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95",
               "data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95"
             )}
@@ -93,7 +93,7 @@ export function ProductSearchBar({
                 <Input
                   placeholder={tPages("orderDetailSearchActiveProductsPlaceholder")}
                   className={cn(
-                    "h-12 w-full rounded-lg pr-10 pl-4",
+                    "h-12 w-full rounded-card pr-10 pl-4",
                     "border-2 border-border bg-background focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/20"
                   )}
                   autoFocus
@@ -115,7 +115,7 @@ export function ProductSearchBar({
                 onChange={(e) => onValueChange(e.target.value)}
                 autoComplete="off"
               />
-              <kbd className="shrink-0 rounded border border-border bg-muted px-1.5 py-0.5 text-[10px] text-muted-foreground">
+              <kbd className="shrink-0 rounded-ui border border-border bg-muted px-1.5 py-0.5 text-[10px] text-muted-foreground">
                 esc
               </kbd>
             </div>
@@ -127,7 +127,7 @@ export function ProductSearchBar({
                 </div>
               ) : showProductResults && productResults.length > 0 ? (
                 <div
-                  className="overflow-hidden rounded-lg border border-border bg-popover shadow-sm"
+                  className="overflow-hidden rounded-card border border-border bg-popover shadow-sm"
                   aria-label={tPages("orderDetailProductSearchResultsAria")}
                 >
                   {productResults.map((product) => (

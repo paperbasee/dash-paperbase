@@ -28,7 +28,7 @@ export function IdentityStep({
   return (
     <div className="space-y-4">
       {error && (
-        <div className="rounded-md border border-destructive/20 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+        <div className="rounded-ui border border-destructive/20 bg-destructive/10 px-3 py-2 text-sm text-destructive">
           {error}
         </div>
       )}
@@ -42,6 +42,7 @@ export function IdentityStep({
             id="owner_first_name"
             type="text"
             required
+            size="lg"
             value={formData.owner_first_name}
             onChange={(e) => onFieldChange("owner_first_name", e.target.value)}
             placeholder="e.g. John"
@@ -60,6 +61,7 @@ export function IdentityStep({
             id="owner_last_name"
             type="text"
             required
+            size="lg"
             value={formData.owner_last_name}
             onChange={(e) => onFieldChange("owner_last_name", e.target.value)}
             placeholder="e.g. Doe"

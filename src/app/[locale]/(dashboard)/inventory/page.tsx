@@ -89,12 +89,12 @@ export default function InventoryPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="rounded-lg bg-muted/80 px-1 py-1 hidden md:block">
+          <div className="rounded-card bg-muted/80 px-1 py-1 hidden md:block">
             <button
               type="button"
               onClick={() => router.back()}
               aria-label={tPages("inventoryGoBackAria")}
-              className="flex items-center justify-center rounded-md p-1 text-muted-foreground hover:bg-muted"
+              className="flex items-center justify-center rounded-ui p-1 text-muted-foreground hover:bg-muted"
             >
               <Undo2 className="h-4 w-4" />
             </button>
@@ -165,7 +165,7 @@ export default function InventoryPage() {
             setSearchInput("");
             clearFilters();
           }}
-          className="h-9 rounded-md border border-border px-3 text-sm hover:bg-muted"
+          className="h-9 rounded-ui border border-border px-3 text-sm hover:bg-muted"
         >
           {tPages("filtersClear")}
         </button>
@@ -176,12 +176,12 @@ export default function InventoryPage() {
           <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
         </div>
       ) : inventory.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-card-border bg-card py-12 text-center text-sm text-muted-foreground">
+        <div className="rounded-card border border-dashed border-card-border bg-card py-12 text-center text-sm text-muted-foreground">
           {tPages("inventoryEmpty")}
         </div>
       ) : (
         <>
-          <div className="overflow-x-auto rounded-xl border border-dashed border-card-border bg-card">
+          <div className="overflow-x-auto rounded-card border border-dashed border-card-border bg-card">
             <table className="w-full text-left text-sm">
               <thead>
                 <tr className="border-b border-border bg-muted/40">
@@ -248,7 +248,7 @@ export default function InventoryPage() {
                               parseInt(adjustValue[inv.public_id] || "0", 10)
                             )
                           }
-                          className="rounded border border-border px-3 py-1 text-sm font-medium hover:bg-muted disabled:opacity-50"
+                          className="rounded-ui border border-border px-3 py-1 text-sm font-medium hover:bg-muted disabled:opacity-50"
                         >
                           {adjusting === inv.public_id
                             ? tPages("inventoryApplying")

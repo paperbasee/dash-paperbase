@@ -33,7 +33,7 @@ export function ZoneBlock({
     <div
       ref={ref}
       className={cn(
-        "relative rounded-lg border transition-all duration-300",
+        "relative rounded-card border transition-all duration-300",
         isActive
           ? "scale-[1.02] border-primary/40 bg-primary/10 shadow-md ring-2 ring-primary/30"
           : "border-border/50 bg-muted/20",

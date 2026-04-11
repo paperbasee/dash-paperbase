@@ -120,7 +120,7 @@ export default function PasswordResetConfirmContent() {
         aria-busy={loading}
       >
         {error ? (
-          <div className="rounded-md border border-destructive/20 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+          <div className="rounded-ui border border-destructive/20 bg-destructive/10 px-3 py-2 text-sm text-destructive">
             {error}
           </div>
         ) : null}
@@ -135,6 +135,7 @@ export default function PasswordResetConfirmContent() {
               autoComplete="new-password"
               required
               minLength={8}
+              size="lg"
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
               placeholder={t("passwordPlaceholder")}
@@ -161,6 +162,7 @@ export default function PasswordResetConfirmContent() {
               autoComplete="new-password"
               required
               minLength={8}
+              size="lg"
               value={newPasswordConfirm}
               onChange={(e) => setNewPasswordConfirm(e.target.value)}
               placeholder={t("confirmPlaceholder")}

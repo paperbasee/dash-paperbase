@@ -118,7 +118,7 @@ export default function NotificationsFeedPage() {
 
       {isHydrated && !error && notifications.length > 0 && (
         <>
-          <div className="divide-y divide-border overflow-hidden rounded-xl border border-dashed border-border bg-background">
+          <div className="divide-y divide-border overflow-hidden rounded-card border border-dashed border-border bg-background">
             {notifications.map((notification) => (
               <button
                 key={notification.id}
@@ -151,7 +151,7 @@ export default function NotificationsFeedPage() {
 
           {showActions && (
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
-              <div className="w-full max-w-sm rounded-lg bg-background p-4 shadow-lg">
+              <div className="w-full max-w-sm rounded-card bg-background p-4 shadow-lg">
                 <p className="mb-4 text-sm font-medium text-foreground">
                   {tPages("notificationsManageTitle")}
                 </p>

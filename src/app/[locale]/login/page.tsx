@@ -120,7 +120,6 @@ export default function LoginPage() {
       headline={pendingTwoFactor ? t("twoFactorHeadline") : t("headline")}
       description={pendingTwoFactor ? t("twoFactorDescription") : t("description")}
       containerClassName="space-y-8 sm:space-y-10"
-      showFooter={false}
     >
 
       <form
@@ -129,7 +128,7 @@ export default function LoginPage() {
             aria-busy={loading}
       >
           {error && (
-            <div className="rounded-md border border-destructive/20 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+            <div className="rounded-ui border border-destructive/20 bg-destructive/10 px-3 py-2 text-sm text-destructive">
               {error}
             </div>
           )}

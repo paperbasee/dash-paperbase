@@ -19,7 +19,7 @@ import type {
 } from "@/types";
 
 const multiSelectClass =
-  "w-full min-h-[6rem] rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground shadow-xs outline-none transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50";
+  "w-full min-h-[6rem] rounded-ui border border-border bg-background px-3 py-2 text-sm text-foreground shadow-xs outline-none transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50";
 
 type ZoneForm = {
   name: string;
@@ -319,12 +319,12 @@ export default function ShippingPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="rounded-lg bg-muted/80 px-1 py-1 hidden md:block">
+          <div className="rounded-card bg-muted/80 px-1 py-1 hidden md:block">
             <button
               type="button"
               onClick={() => router.back()}
               aria-label={tPages("shippingGoBackAria")}
-              className="flex items-center justify-center rounded-md p-1 text-muted-foreground hover:bg-muted"
+              className="flex items-center justify-center rounded-ui p-1 text-muted-foreground hover:bg-muted"
             >
               <Undo2 className="h-4 w-4" />
             </button>
@@ -334,13 +334,13 @@ export default function ShippingPage() {
       </div>
 
       {error && (
-        <div className="rounded-xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+        <div className="rounded-card border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
           {error}
         </div>
       )}
 
       <div className="grid gap-6 lg:grid-cols-3">
-        <section className="rounded-xl border border-border bg-card p-5">
+        <section className="rounded-card border border-border bg-card p-5">
           <div className="mb-4 flex items-center justify-between">
             <h2 className="text-lg font-medium">
               {tPages("shippingZonesTitle", { count: zones.length })}
@@ -348,7 +348,7 @@ export default function ShippingPage() {
             <button
               type="button"
               onClick={openNewZone}
-              className="flex items-center gap-2 rounded-lg border border-border bg-background px-3 py-2 text-sm font-medium hover:bg-muted"
+              className="flex items-center gap-2 rounded-card border border-border bg-background px-3 py-2 text-sm font-medium hover:bg-muted"
             >
               <Plus className="h-4 w-4" />
               {tCommon("add")}
@@ -379,14 +379,14 @@ export default function ShippingPage() {
                 <button
                   type="submit"
                   disabled={saving}
-                  className="rounded-lg bg-primary px-3 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
+                  className="rounded-card bg-primary px-3 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
                 >
                   {saving ? tCommon("saving") : tCommon("save")}
                 </button>
                 <button
                   type="button"
                   onClick={() => setEditingZone(null)}
-                  className="rounded-lg border border-border px-3 py-2 text-sm font-medium hover:bg-muted"
+                  className="rounded-card border border-border px-3 py-2 text-sm font-medium hover:bg-muted"
                 >
                   {tCommon("cancel")}
                 </button>
@@ -398,7 +398,7 @@ export default function ShippingPage() {
             {zones.map((z) => (
               <div
                 key={z.public_id}
-                className="rounded-lg border border-border/60 bg-background px-3 py-2"
+                className="rounded-card border border-border/60 bg-background px-3 py-2"
               >
                 <div className="flex items-start justify-between gap-3">
                   <div>
@@ -430,14 +430,14 @@ export default function ShippingPage() {
               </div>
             ))}
             {zones.length === 0 && (
-              <div className="rounded-lg border border-dashed border-border/60 bg-background px-3 py-8 text-center text-sm text-muted-foreground">
+              <div className="rounded-card border border-dashed border-border/60 bg-background px-3 py-8 text-center text-sm text-muted-foreground">
                 {tPages("shippingZonesEmpty")}
               </div>
             )}
           </div>
         </section>
 
-        <section className="rounded-xl border border-border bg-card p-5">
+        <section className="rounded-card border border-border bg-card p-5">
           <div className="mb-4 flex items-center justify-between">
             <h2 className="text-lg font-medium">
               {tPages("shippingMethodsTitle", { count: methods.length })}
@@ -445,7 +445,7 @@ export default function ShippingPage() {
             <button
               type="button"
               onClick={openNewMethod}
-              className="flex items-center gap-2 rounded-lg border border-border bg-background px-3 py-2 text-sm font-medium hover:bg-muted"
+              className="flex items-center gap-2 rounded-card border border-border bg-background px-3 py-2 text-sm font-medium hover:bg-muted"
             >
               <Plus className="h-4 w-4" />
               {tCommon("add")}
@@ -522,14 +522,14 @@ export default function ShippingPage() {
                 <button
                   type="submit"
                   disabled={saving}
-                  className="rounded-lg bg-primary px-3 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
+                  className="rounded-card bg-primary px-3 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
                 >
                   {saving ? tCommon("saving") : tCommon("save")}
                 </button>
                 <button
                   type="button"
                   onClick={() => setEditingMethod(null)}
-                  className="rounded-lg border border-border px-3 py-2 text-sm font-medium hover:bg-muted"
+                  className="rounded-card border border-border px-3 py-2 text-sm font-medium hover:bg-muted"
                 >
                   {tCommon("cancel")}
                 </button>
@@ -541,7 +541,7 @@ export default function ShippingPage() {
             {methods.map((m) => (
               <div
                 key={m.public_id}
-                className="rounded-lg border border-border/60 bg-background px-3 py-2"
+                className="rounded-card border border-border/60 bg-background px-3 py-2"
               >
                 <div className="flex items-start justify-between gap-3">
                   <div>
@@ -580,14 +580,14 @@ export default function ShippingPage() {
               </div>
             ))}
             {methods.length === 0 && (
-              <div className="rounded-lg border border-dashed border-border/60 bg-background px-3 py-8 text-center text-sm text-muted-foreground">
+              <div className="rounded-card border border-dashed border-border/60 bg-background px-3 py-8 text-center text-sm text-muted-foreground">
                 {tPages("shippingMethodsEmpty")}
               </div>
             )}
           </div>
         </section>
 
-        <section className="rounded-xl border border-border bg-card p-5">
+        <section className="rounded-card border border-border bg-card p-5">
           <div className="mb-4 flex items-center justify-between">
             <h2 className="text-lg font-medium">
               {tPages("shippingRatesTitle", { count: rates.length })}
@@ -595,7 +595,7 @@ export default function ShippingPage() {
             <button
               type="button"
               onClick={openNewRate}
-              className="flex items-center gap-2 rounded-lg border border-border bg-background px-3 py-2 text-sm font-medium hover:bg-muted"
+              className="flex items-center gap-2 rounded-card border border-border bg-background px-3 py-2 text-sm font-medium hover:bg-muted"
             >
               <Plus className="h-4 w-4" />
               {tCommon("add")}
@@ -694,14 +694,14 @@ export default function ShippingPage() {
                 <button
                   type="submit"
                   disabled={saving}
-                  className="rounded-lg bg-primary px-3 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
+                  className="rounded-card bg-primary px-3 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
                 >
                   {saving ? tCommon("saving") : tCommon("save")}
                 </button>
                 <button
                   type="button"
                   onClick={() => setEditingRate(null)}
-                  className="rounded-lg border border-border px-3 py-2 text-sm font-medium hover:bg-muted"
+                  className="rounded-card border border-border px-3 py-2 text-sm font-medium hover:bg-muted"
                 >
                   {tCommon("cancel")}
                 </button>
@@ -713,7 +713,7 @@ export default function ShippingPage() {
             {rates.map((r) => (
               <div
                 key={r.public_id}
-                className="rounded-lg border border-border/60 bg-background px-3 py-2"
+                className="rounded-card border border-border/60 bg-background px-3 py-2"
               >
                 <div className="flex items-start justify-between gap-3">
                   <div>
@@ -755,7 +755,7 @@ export default function ShippingPage() {
               </div>
             ))}
             {rates.length === 0 && (
-              <div className="rounded-lg border border-dashed border-border/60 bg-background px-3 py-8 text-center text-sm text-muted-foreground">
+              <div className="rounded-card border border-dashed border-border/60 bg-background px-3 py-8 text-center text-sm text-muted-foreground">
                 {tPages("shippingRatesEmpty")}
               </div>
             )}

@@ -142,7 +142,7 @@ export default function RecoverStorePanel({
 
   return (
     <>
-      <div className="overflow-hidden rounded-xl border border-border bg-background shadow-xs">
+      <div className="overflow-hidden rounded-card border border-border bg-background shadow-xs">
         {showHeader ? (
           <div className="border-b border-border px-4 py-4 sm:px-5">
             <h3 className="text-base font-semibold text-foreground">{t("recover.heading")}</h3>
@@ -167,7 +167,7 @@ export default function RecoverStorePanel({
                 type="button"
                 variant="outline"
                 size="sm"
-                className="shrink-0 rounded-md border-border"
+                className="shrink-0 rounded-ui border-border"
                 onClick={() => openFor(s)}
               >
                 {t("recover.restore")}
@@ -180,7 +180,7 @@ export default function RecoverStorePanel({
       <Dialog open={open} onOpenChange={handleDialogOpenChange}>
         <DialogContent
           showCloseButton={!sendSubmitting && !submitting}
-          className="gap-0 overflow-hidden rounded-xl border-border p-0 shadow-xl max-sm:max-h-[min(90dvh,calc(100vh-1.5rem))] w-full max-sm:max-w-[min(20rem,calc(100vw-1.5rem))] sm:max-w-sm"
+          className="gap-0 overflow-hidden rounded-card border-border p-0 shadow-xl max-sm:max-h-[min(90dvh,calc(100vh-1.5rem))] w-full max-sm:max-w-[min(20rem,calc(100vw-1.5rem))] sm:max-w-sm"
         >
           <DialogHeader className="space-y-1 border-b border-border px-4 pb-3 pt-4 text-left sm:space-y-1.5 sm:px-5 sm:pb-4 sm:pt-5">
             <DialogTitle className="text-base font-semibold tracking-tight text-foreground sm:text-lg">
@@ -195,13 +195,13 @@ export default function RecoverStorePanel({
             {target && !challengeId && (
               <div className="space-y-2 sm:space-y-4">
                 {error ? (
-                  <div className="rounded-md border border-destructive/20 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+                  <div className="rounded-ui border border-destructive/20 bg-destructive/10 px-3 py-2 text-sm text-destructive">
                     {error}
                   </div>
                 ) : null}
                 <LoadingButton
                   type="button"
-                  className="h-9 w-full rounded-md text-sm font-medium sm:h-10 sm:text-base"
+                  className="h-9 w-full rounded-ui text-sm font-medium sm:h-10 sm:text-base"
                   isLoading={sendSubmitting}
                   loadingText={t("recover.sending")}
                   onClick={() => void sendCodes()}
@@ -221,11 +221,12 @@ export default function RecoverStorePanel({
                     id="recover-owner-otp"
                     inputMode="numeric"
                     autoComplete="one-time-code"
+                    size="lg"
                     value={ownerCode}
                     onChange={(e) => setOwnerCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
                     maxLength={6}
                     placeholder="000000"
-                    className="h-9 text-center font-mono text-base tracking-[0.25em] tabular-nums placeholder:tracking-[0.25em] sm:h-11 sm:text-lg"
+                    className="text-center font-mono text-base tracking-[0.25em] tabular-nums placeholder:tracking-[0.25em] sm:text-lg"
                   />
                 </div>
                 {!singleChannel && (
@@ -237,16 +238,17 @@ export default function RecoverStorePanel({
                       id="recover-contact-otp"
                       inputMode="numeric"
                       autoComplete="one-time-code"
+                      size="lg"
                       value={contactCode}
                       onChange={(e) => setContactCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
                       maxLength={6}
                       placeholder="000000"
-                      className="h-9 text-center font-mono text-base tracking-[0.25em] tabular-nums placeholder:tracking-[0.25em] sm:h-11 sm:text-lg"
+                      className="text-center font-mono text-base tracking-[0.25em] tabular-nums placeholder:tracking-[0.25em] sm:text-lg"
                     />
                   </div>
                 )}
                 {error ? (
-                  <div className="rounded-md border border-destructive/20 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+                  <div className="rounded-ui border border-destructive/20 bg-destructive/10 px-3 py-2 text-sm text-destructive">
                     {error}
                   </div>
                 ) : null}
@@ -258,7 +260,7 @@ export default function RecoverStorePanel({
             <DialogFooter className="border-t border-border px-4 py-3 sm:justify-stretch sm:px-5 sm:py-4">
               <LoadingButton
                 type="button"
-                className="h-9 w-full rounded-md text-sm font-medium sm:h-10 sm:text-base"
+                className="h-9 w-full rounded-ui text-sm font-medium sm:h-10 sm:text-base"
                 isLoading={submitting}
                 loadingText={t("recover.verifying")}
                 disabled={!canVerify}
