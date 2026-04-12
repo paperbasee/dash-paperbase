@@ -118,7 +118,7 @@ export default function SettingsPage() {
                 type="button"
                 onClick={() => router.back()}
                 aria-label={tSettings("goBackAria")}
-                className="flex items-center justify-center rounded-ui border border-foreground bg-foreground p-1.5 text-background hover:bg-foreground/90"
+                className="flex items-center justify-center rounded-ui p-1 text-muted-foreground hover:bg-muted"
               >
                 <Undo2 className="h-4 w-4" />
               </button>

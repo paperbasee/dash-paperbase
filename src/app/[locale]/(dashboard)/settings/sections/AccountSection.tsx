@@ -2,6 +2,7 @@
 
 import type { Dispatch, FormEvent, SetStateAction } from "react";
 import { useTranslations } from "next-intl";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -69,9 +70,19 @@ export default function AccountSection({
             </div>
 
             <div className="flex flex-col gap-2">
-              <label htmlFor="owner_email" className="text-sm font-medium leading-normal text-foreground">
-                {t("account.ownerEmail")}
-              </label>
+              <div className="flex flex-wrap items-center gap-2">
+                <label htmlFor="owner_email" className="text-sm font-medium leading-normal text-foreground">
+                  {t("account.ownerEmail")}
+                </label>
+                {ownerEmail.trim() ? (
+                  <Badge
+                    variant="secondary"
+                    className="border-transparent bg-emerald-100 font-normal text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-300"
+                  >
+                    {t("account.emailVerified")}
+                  </Badge>
+                ) : null}
+              </div>
               <Input
                 id="owner_email"
                 type="email"

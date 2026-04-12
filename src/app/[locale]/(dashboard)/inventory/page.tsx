@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
-import { Undo2, AlertTriangle } from "lucide-react";
+import { Undo2 } from "lucide-react";
 import { ClickableTableRow } from "@/components/ui/clickable-table-row";
 import { Input } from "@/components/ui/input";
 import { FilterBar } from "@/components/filters/FilterBar";
@@ -31,6 +31,10 @@ export default function InventoryPage() {
   const [loading, setLoading] = useState(true);
   const [count, setCount] = useState(0);
   const [hasNext, setHasNext] = useState(false);
+  /** Store-wide count of tracked rows at or below low threshold (not limited to current page). */
+  const [lowStockTotal, setLowStockTotal] = useState<number | null>(null);
+  /** Store-wide count of rows with quantity 0 (not limited to current page). */
+  const [outOfStockTotal, setOutOfStockTotal] = useState<number | null>(null);
   const [adjusting, setAdjusting] = useState<string | null>(null);
   const [adjustValue, setAdjustValue] = useState<Record<string, string>>({});
   const [searchInput, setSearchInput] = useState(filters.search || "");
@@ -49,14 +53,22 @@ export default function InventoryPage() {
     if (filters.stock) params.stock = filters.stock;
     if (filters.tracked) params.tracked = filters.tracked;
     if (filters.type) params.type = filters.type;
-    api
-      .get<PaginatedResponse<Inventory>>("admin/inventory/", {
-        params,
-      })
-      .then((res) => {
-        setInventory(res.data.results);
-        setCount(res.data.count);
-        setHasNext(!!res.data.next);
+
+    const listReq = api.get<PaginatedResponse<Inventory>>("admin/inventory/", { params });
+    const lowStockReq = api.get<PaginatedResponse<Inventory>>("admin/inventory/", {
+      params: { stock: "low_stock", page: 1 },
+    });
+    const outOfStockReq = api.get<PaginatedResponse<Inventory>>("admin/inventory/", {
+      params: { stock: "out_of_stock", page: 1 },
+    });
+
+    Promise.all([listReq, lowStockReq, outOfStockReq])
+      .then(([listRes, lowRes, outRes]) => {
+        setInventory(listRes.data.results);
+        setCount(listRes.data.count);
+        setHasNext(!!listRes.data.next);
+        setLowStockTotal(lowRes.data.count);
+        setOutOfStockTotal(outRes.data.count);
       })
       .catch((err) => {
         console.error(err);
@@ -68,6 +80,49 @@ export default function InventoryPage() {
   useEffect(() => {
     fetchData();
   }, [fetchData]);
+
+  const showLowStockOnly = useCallback(() => {
+    setFilter("stock", "low_stock");
+  }, [setFilter]);
+
+  const showOutOfStockOnly = useCallback(() => {
+    setFilter("stock", "out_of_stock");
+  }, [setFilter]);
+
+  const hasLowStockAlert = lowStockTotal !== null && lowStockTotal > 0;
+  const hasOutOfStockAlert = outOfStockTotal !== null && outOfStockTotal > 0;
+  const hasStockSummaryAlerts = hasLowStockAlert || hasOutOfStockAlert;
+
+  const stockSummaryAlertButtons = (
+    <>
+      {hasLowStockAlert && (
+        <button
+          type="button"
+          onClick={showLowStockOnly}
+          aria-label={tPages("inventoryLowStockFilterAria")}
+          className="inline border-0 bg-transparent p-0 align-baseline text-amber-600 underline decoration-amber-600/60 underline-offset-2 hover:text-amber-700 focus-visible:rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 dark:hover:text-amber-400"
+        >
+          {tPages("inventoryLowStock", { count: lowStockTotal ?? 0 })}
+        </button>
+      )}
+      {hasLowStockAlert && hasOutOfStockAlert && (
+        <span className="text-muted-foreground" aria-hidden>
+          {" "}
+          ·{" "}
+        </span>
+      )}
+      {hasOutOfStockAlert && (
+        <button
+          type="button"
+          onClick={showOutOfStockOnly}
+          aria-label={tPages("inventoryOutOfStockFilterAria")}
+          className="inline border-0 bg-transparent p-0 align-baseline text-rose-600 underline decoration-rose-600/60 underline-offset-2 hover:text-rose-700 focus-visible:rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 dark:hover:text-rose-400"
+        >
+          {tPages("inventoryOutOfStockSummary", { count: outOfStockTotal ?? 0 })}
+        </button>
+      )}
+    </>
+  );
 
   async function handleAdjust(publicId: string, change: number) {
     setAdjusting(publicId);
@@ -87,8 +142,6 @@ export default function InventoryPage() {
     }
   }
 
-  const lowStockCount = inventory.filter((i) => i.is_low).length;
-
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -106,26 +159,18 @@ export default function InventoryPage() {
           <div>
             <h1 className="text-2xl font-medium text-foreground">{tPages("inventoryTitle")}</h1>
             <p className="mt-1 text-sm text-muted-foreground md:hidden">
-              {tPages("inventorySubtitle")}{" "}
-              {lowStockCount > 0 && (
-                <span className="flex items-center gap-1 text-amber-600">
-                  <AlertTriangle className="inline h-4 w-4" />
-                  {tPages("inventoryLowStock", { count: lowStockCount })}
-                </span>
-              )}
+              {tPages("inventorySubtitle")}
+              {hasStockSummaryAlerts ? " " : null}
+              {stockSummaryAlertButtons}
             </p>
           </div>
         </div>
       </div>
 
       <p className="hidden text-sm text-muted-foreground md:block">
-        {tPages("inventorySubtitle")}{" "}
-        {lowStockCount > 0 && (
-          <span className="inline-flex items-center gap-1 text-amber-600">
-            <AlertTriangle className="inline h-4 w-4" />
-            {tPages("inventoryLowStock", { count: lowStockCount })}
-          </span>
-        )}
+        {tPages("inventorySubtitle")}
+        {hasStockSummaryAlerts ? " " : null}
+        {stockSummaryAlertButtons}
       </p>
 
       <FilterBar>
