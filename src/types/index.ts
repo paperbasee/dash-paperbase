@@ -420,10 +420,11 @@ export interface ShippingRate {
 }
 
 export interface IntegrationEventSettings {
-  track_purchase: boolean;
-  track_initiate_checkout: boolean;
-  track_view_content: boolean;
-  track_page_view: boolean;
+  track_order_created: boolean;
+  track_checkout_started: boolean;
+  track_product_detail_view: boolean;
+  track_search: boolean;
+  track_support_ticket: boolean;
 }
 
 export interface MarketingIntegration {

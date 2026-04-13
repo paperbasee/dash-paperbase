@@ -33,11 +33,19 @@ const emptyForm: ConnectForm = {
   test_event_code: "",
 };
 
-const EVENT_LABEL_KEYS: { key: keyof IntegrationEventSettings; labelKey: string }[] = [
-  { key: "track_purchase", labelKey: "eventPurchase" },
-  { key: "track_initiate_checkout", labelKey: "eventInitiateCheckout" },
-  { key: "track_view_content", labelKey: "eventViewContent" },
-  { key: "track_page_view", labelKey: "eventPageView" },
+type EventSettingKey =
+  | "track_order_created"
+  | "track_checkout_started"
+  | "track_product_detail_view"
+  | "track_search"
+  | "track_support_ticket";
+
+const EVENT_LABEL_KEYS: { key: EventSettingKey; labelKey: string }[] = [
+  { key: "track_order_created", labelKey: "eventOrderCreated" },
+  { key: "track_checkout_started", labelKey: "eventCheckoutStarted" },
+  { key: "track_product_detail_view", labelKey: "eventProductDetailView" },
+  { key: "track_search", labelKey: "eventSearch" },
+  { key: "track_support_ticket", labelKey: "eventSupportTicket" },
 ];
 
 type MarketingModal =
@@ -169,7 +177,7 @@ export default function MarketingIntegration() {
 
   async function handleEventToggle(
     integration: MarketingIntegrationType,
-    key: keyof IntegrationEventSettings,
+    key: EventSettingKey,
     value: boolean
   ) {
     setEventSavingId(integration.public_id);
