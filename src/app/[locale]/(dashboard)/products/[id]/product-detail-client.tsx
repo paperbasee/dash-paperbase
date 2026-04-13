@@ -712,6 +712,7 @@ export default function ProductDetailClient() {
                 <div className="aspect-square w-full overflow-hidden rounded-card bg-muted/50">
                   {bigPreviewUrl ? (
                     <img
+                      key={`main-${product?.updated_at ?? product?.public_id ?? "new"}`}
                       src={bigPreviewUrl}
                       alt={tPages("productPreviewAlt")}
                       className="h-full w-full object-cover"
@@ -773,6 +774,7 @@ export default function ProductDetailClient() {
                             aria-label={tPages("productShowImageInPreview", { n: i + 1 })}
                           >
                             <img
+                              key={`slot-${i}-${product?.updated_at ?? ""}`}
                               src={imagePreviews[i]!}
                               alt={tPages("productThumbnailN", { n: i + 1 })}
                               className="h-full w-full object-cover"
@@ -976,6 +978,7 @@ export default function ProductDetailClient() {
                 <div className="aspect-square w-full overflow-hidden rounded-card bg-muted/50">
                   {bigPreviewUrl ? (
                     <img
+                      key={`view-main-${product?.updated_at ?? product?.public_id ?? ""}`}
                       src={bigPreviewUrl}
                       alt={tPages("productPreviewAlt")}
                       className="h-full w-full object-cover"
@@ -1003,6 +1006,7 @@ export default function ProductDetailClient() {
                         aria-label={tPages("productShowImageInPreview", { n: i + 1 })}
                       >
                         <img
+                          key={`view-thumb-${i}-${product?.updated_at ?? ""}`}
                           src={imagePreviews[i]!}
                           alt={tPages("productThumbnailN", { n: i + 1 })}
                           className="h-full w-full object-cover"

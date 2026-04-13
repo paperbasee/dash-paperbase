@@ -144,6 +144,8 @@ export interface Product {
   is_active: boolean;
   extra_data?: Record<string, string | number | boolean>;
   images?: ProductImage[];
+  /** Admin list: manual sort index within category. */
+  display_order?: number;
   created_at: string;
   updated_at?: string;
 }

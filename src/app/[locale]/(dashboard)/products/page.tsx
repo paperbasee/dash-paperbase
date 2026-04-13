@@ -1,10 +1,34 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type CSSProperties,
+} from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Link, useRouter } from "@/i18n/navigation";
 import { toLocaleDigits } from "@/lib/locale-digits";
-import { Undo2 } from "lucide-react";
+import {
+  DndContext,
+  KeyboardSensor,
+  PointerSensor,
+  closestCenter,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  arrayMove,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import { GripVertical, Undo2 } from "lucide-react";
 import api from "@/lib/api";
 import { useBranding } from "@/context/BrandingContext";
 import type { AdminCategoryTreeNode, Product, PaginatedResponse } from "@/types";
@@ -30,6 +54,29 @@ import { numberTextClass } from "@/lib/number-font";
 import { cn } from "@/lib/utils";
 
 type CategoryOption = { value: string; label: string };
+
+/** Matches DRF default PageNumberPagination PAGE_SIZE for admin list. */
+const ADMIN_PRODUCTS_PAGE_SIZE = 24;
+
+async function fetchAllProductPublicIdsInCategory(
+  categoryPublicId: string
+): Promise<string[]> {
+  const ids: string[] = [];
+  let p = 1;
+  for (;;) {
+    const res = await api.get<PaginatedResponse<Product>>("admin/products/", {
+      params: {
+        page: p,
+        category: categoryPublicId,
+        ordering: "newest",
+      },
+    });
+    ids.push(...res.data.results.map((x) => x.public_id));
+    if (!res.data.next) break;
+    p += 1;
+  }
+  return ids;
+}
 
 export default function ProductsPage() {
   const router = useRouter();
@@ -63,8 +110,18 @@ export default function ProductsPage() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [deleting, setDeleting] = useState(false);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
+  const reorderBusyRef = useRef(false);
   const { canDelete: canDeleteProducts, isSuperuser: deleteIsSuperuser } =
     useAdminDeleteCapabilities();
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: { distance: 8 },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
 
   useEffect(() => {
     const next = debouncedSearch.trim();
@@ -150,6 +207,58 @@ export default function ProductsPage() {
     fetchProducts();
   }, [fetchProducts]);
 
+  const canReorder = useMemo(() => {
+    if (!filters.category) return false;
+    if (filters.search || filters.status || filters.stock) return false;
+    if (filters.price_min || filters.price_max) return false;
+    const ord = filters.ordering;
+    if (ord && ord !== "newest") return false;
+    if (products.length < 2) return false;
+    const cats = new Set(
+      products.map((p) => p.category_public_id).filter(Boolean)
+    );
+    return cats.size === 1;
+  }, [filters, products]);
+
+  const handleDragEnd = useCallback(
+    async (event: DragEndEvent) => {
+      if (!canReorder) return;
+      if (reorderBusyRef.current || !filters.category) return;
+      const { active, over } = event;
+      if (!over || active.id === over.id) return;
+      const oldIndex = products.findIndex((p) => p.public_id === active.id);
+      const newIndex = products.findIndex((p) => p.public_id === over.id);
+      if (oldIndex < 0 || newIndex < 0) return;
+
+      reorderBusyRef.current = true;
+      const reorderedPage = arrayMove(products, oldIndex, newIndex);
+      setProducts(reorderedPage);
+
+      const catId = filters.category;
+      const start = (page - 1) * ADMIN_PRODUCTS_PAGE_SIZE;
+      try {
+        const fullIds = await fetchAllProductPublicIdsInCategory(catId);
+        const merged = fullIds.slice();
+        const sliceIds = reorderedPage.map((p) => p.public_id);
+        for (let i = 0; i < sliceIds.length; i++) {
+          merged[start + i] = sliceIds[i];
+        }
+        await api.post("admin/products/reorder/", {
+          category_public_id: catId,
+          product_public_ids: merged,
+        });
+        fetchProducts();
+      } catch (err) {
+        console.error(err);
+        notify.error(err);
+        fetchProducts();
+      } finally {
+        reorderBusyRef.current = false;
+      }
+    },
+    [canReorder, filters.category, page, products, fetchProducts]
+  );
+
   const toggleSelect = (id: string) => {
     setSelectedIds((prev) => {
       const next = new Set(prev);
@@ -234,6 +343,11 @@ export default function ProductsPage() {
 
   const allSelected = products.length > 0 && selectedIds.size === products.length;
   const someSelected = selectedIds.size > 0;
+
+  const sortableIds = useMemo(
+    () => products.map((p) => p.public_id),
+    [products]
+  );
 
   return (
     <div className="space-y-6">
@@ -354,6 +468,23 @@ export default function ProductsPage() {
         </button>
       </FilterBar>
 
+      {!loading && canReorder && (
+        <p className="flex items-start gap-2 rounded-card border border-primary/30 bg-primary/5 px-3 py-2 text-sm text-foreground">
+          <GripVertical className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden />
+          {tPages("productsListReorderHintActive")}
+        </p>
+      )}
+      {!loading && !canReorder && filters.category && (
+        <p className="rounded-card border border-border bg-muted/40 px-3 py-2 text-sm text-muted-foreground">
+          {tPages("productsListReorderHintDisabled")}
+        </p>
+      )}
+      {!loading && !filters.category && products.length >= 2 && (
+        <p className="rounded-card border border-dashed border-border px-3 py-2 text-sm text-muted-foreground">
+          {tPages("productsListReorderHintPickCategory")}
+        </p>
+      )}
+
       {loading ? (
         <div className="flex h-64 items-center justify-center">
           <div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-600 border-t-transparent" />
@@ -361,147 +492,85 @@ export default function ProductsPage() {
       ) : (
         <>
           <div className="overflow-x-auto rounded-card border border-dashed border-card-border bg-card">
-            <table className="w-full text-left text-sm">
-              <thead>
-                <tr className="border-b border-border bg-muted/40">
-                  <th className="w-10 px-4 py-3">
-                    {canDeleteProducts && (
-                      <input
-                        type="checkbox"
-                        checked={allSelected}
-                        onChange={toggleSelectAll}
-                        className="form-checkbox"
-                        aria-label={tPages("productsListSelectAllAria")}
-                      />
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragEnd={handleDragEnd}
+            >
+              <table className="w-full text-left text-sm">
+                <thead>
+                  <tr className="border-b border-border bg-muted/40">
+                    {canReorder && (
+                      <th className="w-10 px-2 py-3" aria-hidden />
                     )}
-                  </th>
-                  <th className="th">{tPages("productsListColProduct")}</th>
-                  <th className="th">{tPages("productsListColBrand")}</th>
-                  <th className="th">{tPages("productsListColCategory")}</th>
-                  <th className="th">{tPages("productsListColPrice")}</th>
-                  <th className="th">{tPages("productsListColStock")}</th>
-                  <th className="th">{tPages("productsListColStatus")}</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border/60">
-                {products.map((product) => (
-                  <ClickableTableRow
-                    key={product.public_id}
-                    href={`/products/${product.public_id}`}
-                    aria-label={product.name}
-                  >
-                    <td className="w-10 px-4 py-3">
+                    <th className="w-10 px-4 py-3">
                       {canDeleteProducts && (
                         <input
                           type="checkbox"
-                          checked={selectedIds.has(product.public_id)}
-                          onChange={() => toggleSelect(product.public_id)}
+                          checked={allSelected}
+                          onChange={toggleSelectAll}
                           className="form-checkbox"
-                          aria-label={tPages("productsListSelectRowAria", {
-                            name: product.name,
-                          })}
+                          aria-label={tPages("productsListSelectAllAria")}
                         />
                       )}
-                    </td>
-                    <td className="px-4 py-3 whitespace-nowrap">
-                      <span className="flex max-w-xs items-center font-medium text-foreground">
-                        <span className="truncate">{product.name}</span>
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-foreground whitespace-nowrap">
-                      {product.brand || "—"}
-                    </td>
-                    <td className="px-4 py-3 text-muted-foreground whitespace-nowrap">
-                      {product.category_name ?? "—"}
-                    </td>
-                    <td className={cn("px-4 py-3 whitespace-nowrap text-foreground", numClass)}>
-                      {currencySymbol}
-                      {Number(product.price).toLocaleString()}
-                    </td>
-                    <td className="px-4 py-3 whitespace-nowrap">
-                      {product.variant_count && product.variant_count > 0 ? (
-                        <div className="flex flex-col gap-0.5">
-                          <span
-                            className={cn(
-                              "text-sm font-medium",
-                              numClass,
-                              (product.total_stock ?? 0) === 0
-                                ? "text-destructive"
-                                : "text-foreground"
-                            )}
-                          >
-                            {product.total_stock ?? product.available_quantity ?? 0}
-                          </span>
-                          <ClickableText
-                            href={`/variants?product_public_id=${encodeURIComponent(product.public_id)}`}
-                            className="text-xs underline-offset-2"
-                            title={tPages("productsListVariantStockTitle")}
-                          >
-                            {tPages("productsListVariantsManage", {
-                              count: toLocaleDigits(
-                                String(product.variant_count),
-                                locale
-                              ),
-                            })}
-                          </ClickableText>
-                        </div>
-                      ) : (
-                        <span
-                          className={cn(
-                            "text-sm font-medium",
-                            numClass,
-                            (product.total_stock ?? product.available_quantity ?? 0) === 0
-                              ? "text-destructive"
-                              : "text-foreground"
-                          )}
-                          title={tPages(
-                            "productsListStockManagedFromInventoryTitle"
-                          )}
-                        >
-                          {product.total_stock ?? product.available_quantity ?? 0}
-                        </span>
-                      )}
-                    </td>
-                    <td className="px-4 py-3 whitespace-nowrap">
-                      <Combobox
-                        modal={false}
-                        value={product.is_active ? "active" : "inactive"}
-                        onValueChange={(value) => {
-                          if (!value) return;
-                          handleStatusChange(product, value === "active");
-                        }}
-                        disabled={updatingId === product.public_id}
+                    </th>
+                    <th className="th">{tPages("productsListColProduct")}</th>
+                    <th className="th">{tPages("productsListColBrand")}</th>
+                    <th className="th">{tPages("productsListColCategory")}</th>
+                    <th className="th">{tPages("productsListColPrice")}</th>
+                    <th className="th">{tPages("productsListColStock")}</th>
+                    <th className="th">{tPages("productsListColStatus")}</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border/60">
+                  {canReorder ? (
+                    <SortableContext
+                      items={sortableIds}
+                      strategy={verticalListSortingStrategy}
+                    >
+                      {products.map((product) => (
+                        <SortableProductRow
+                          key={product.public_id}
+                          product={product}
+                          canDeleteProducts={canDeleteProducts}
+                          selectedIds={selectedIds}
+                          onToggleSelect={toggleSelect}
+                          currencySymbol={currencySymbol}
+                          numClass={numClass}
+                          locale={locale}
+                          tPages={tPages}
+                          tCommon={tCommon}
+                          updatingId={updatingId}
+                          onStatusChange={handleStatusChange}
+                        />
+                      ))}
+                    </SortableContext>
+                  ) : (
+                    products.map((product) => (
+                      <ClickableTableRow
+                        key={product.public_id}
+                        href={`/products/${product.public_id}`}
+                        aria-label={product.name}
                       >
-                        <ComboboxInput
-                          placeholder={tPages("productsListStatusPlaceholder")}
-                          showClear={false}
-                          className="w-[110px]"
-                          inputClassName={`cursor-pointer caret-transparent text-xs font-semibold capitalize ${
-                            product.is_active
-                              ? "bg-emerald-500/10 text-emerald-400"
-                              : "bg-muted text-muted-foreground"
-                          }`}
+                        <ProductRowCells
+                          product={product}
+                          canDeleteProducts={canDeleteProducts}
+                          selectedIds={selectedIds}
+                          onToggleSelect={toggleSelect}
+                          currencySymbol={currencySymbol}
+                          numClass={numClass}
+                          locale={locale}
+                          tPages={tPages}
+                          tCommon={tCommon}
+                          updatingId={updatingId}
+                          onStatusChange={handleStatusChange}
                         />
-                        <ComboboxContent>
-                          <ComboboxList>
-                            <ComboboxItem value="active">
-                              <span className="text-xs font-medium capitalize">
-                                {tCommon("active")}
-                              </span>
-                            </ComboboxItem>
-                            <ComboboxItem value="inactive">
-                              <span className="text-xs font-medium capitalize">
-                                {tCommon("inactive")}
-                              </span>
-                            </ComboboxItem>
-                          </ComboboxList>
-                        </ComboboxContent>
-                      </Combobox>
-                    </td>
-                  </ClickableTableRow>
-                ))}
-              </tbody>
-            </table>
+                      </ClickableTableRow>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </DndContext>
           </div>
 
           <div className="flex items-center justify-between">
@@ -528,5 +597,215 @@ export default function ProductsPage() {
         </>
       )}
     </div>
+  );
+}
+
+function SortableProductRow({
+  product,
+  canDeleteProducts,
+  selectedIds,
+  onToggleSelect,
+  currencySymbol,
+  numClass,
+  locale,
+  tPages,
+  tCommon,
+  updatingId,
+  onStatusChange,
+}: {
+  product: Product;
+  canDeleteProducts: boolean;
+  selectedIds: Set<string>;
+  onToggleSelect: (id: string) => void;
+  currencySymbol: string;
+  numClass: string;
+  locale: string;
+  tPages: ReturnType<typeof useTranslations<"pages">>;
+  tCommon: ReturnType<typeof useTranslations<"common">>;
+  updatingId: string | null;
+  onStatusChange: (product: Product, is_active: boolean) => void;
+}) {
+  const tPagesSafe = tPages as (k: string, v?: Record<string, string>) => string;
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: product.public_id });
+  const style: CSSProperties = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.92 : undefined,
+  };
+
+  return (
+    <ClickableTableRow
+      ref={setNodeRef}
+      style={style}
+      href={`/products/${product.public_id}`}
+      aria-label={product.name}
+    >
+      <td className="w-10 px-2 py-3 align-middle" data-row-nav-ignore>
+        <button
+          type="button"
+          className="inline-flex cursor-grab touch-none rounded p-1 text-muted-foreground hover:bg-muted active:cursor-grabbing"
+          aria-label={tPagesSafe("productsListDragHandle")}
+          {...attributes}
+          {...listeners}
+        >
+          <GripVertical className="h-4 w-4 shrink-0" />
+        </button>
+      </td>
+      <ProductRowCells
+        product={product}
+        canDeleteProducts={canDeleteProducts}
+        selectedIds={selectedIds}
+        onToggleSelect={onToggleSelect}
+        currencySymbol={currencySymbol}
+        numClass={numClass}
+        locale={locale}
+        tPages={tPages}
+        tCommon={tCommon}
+        updatingId={updatingId}
+        onStatusChange={onStatusChange}
+      />
+    </ClickableTableRow>
+  );
+}
+
+function ProductRowCells({
+  product,
+  canDeleteProducts,
+  selectedIds,
+  onToggleSelect,
+  currencySymbol,
+  numClass,
+  locale,
+  tPages,
+  tCommon,
+  updatingId,
+  onStatusChange,
+}: {
+  product: Product;
+  canDeleteProducts: boolean;
+  selectedIds: Set<string>;
+  onToggleSelect: (id: string) => void;
+  currencySymbol: string;
+  numClass: string;
+  locale: string;
+  tPages: ReturnType<typeof useTranslations<"pages">>;
+  tCommon: ReturnType<typeof useTranslations<"common">>;
+  updatingId: string | null;
+  onStatusChange: (product: Product, is_active: boolean) => void;
+}) {
+  const tPagesSafe = tPages as (k: string, v?: Record<string, string>) => string;
+  return (
+    <>
+      <td className="w-10 px-4 py-3">
+        {canDeleteProducts && (
+          <input
+            type="checkbox"
+            checked={selectedIds.has(product.public_id)}
+            onChange={() => onToggleSelect(product.public_id)}
+            className="form-checkbox"
+            aria-label={tPagesSafe("productsListSelectRowAria", {
+              name: product.name,
+            })}
+          />
+        )}
+      </td>
+      <td className="px-4 py-3 whitespace-nowrap">
+        <span className="flex max-w-xs items-center font-medium text-foreground">
+          <span className="truncate">{product.name}</span>
+        </span>
+      </td>
+      <td className="px-4 py-3 text-foreground whitespace-nowrap">
+        {product.brand || "—"}
+      </td>
+      <td className="px-4 py-3 text-muted-foreground whitespace-nowrap">
+        {product.category_name ?? "—"}
+      </td>
+      <td className={cn("px-4 py-3 whitespace-nowrap text-foreground", numClass)}>
+        {currencySymbol}
+        {Number(product.price).toLocaleString()}
+      </td>
+      <td className="px-4 py-3 whitespace-nowrap">
+        {product.variant_count && product.variant_count > 0 ? (
+          <div className="flex flex-col gap-0.5">
+            <span
+              className={cn(
+                "text-sm font-medium",
+                numClass,
+                (product.total_stock ?? 0) === 0
+                  ? "text-destructive"
+                  : "text-foreground"
+              )}
+            >
+              {product.total_stock ?? product.available_quantity ?? 0}
+            </span>
+            <ClickableText
+              href={`/variants?product_public_id=${encodeURIComponent(product.public_id)}`}
+              className="text-xs underline-offset-2"
+              title={tPagesSafe("productsListVariantStockTitle")}
+            >
+              {tPagesSafe("productsListVariantsManage", {
+                count: toLocaleDigits(String(product.variant_count), locale),
+              })}
+            </ClickableText>
+          </div>
+        ) : (
+          <span
+            className={cn(
+              "text-sm font-medium",
+              numClass,
+              (product.total_stock ?? product.available_quantity ?? 0) === 0
+                ? "text-destructive"
+                : "text-foreground"
+            )}
+            title={tPagesSafe("productsListStockManagedFromInventoryTitle")}
+          >
+            {product.total_stock ?? product.available_quantity ?? 0}
+          </span>
+        )}
+      </td>
+      <td className="px-4 py-3 whitespace-nowrap">
+        <Combobox
+          modal={false}
+          value={product.is_active ? "active" : "inactive"}
+          onValueChange={(value) => {
+            if (!value) return;
+            onStatusChange(product, value === "active");
+          }}
+          disabled={updatingId === product.public_id}
+        >
+          <ComboboxInput
+            placeholder={tPagesSafe("productsListStatusPlaceholder")}
+            showClear={false}
+            className="w-[110px]"
+            inputClassName={`cursor-pointer caret-transparent text-xs font-semibold capitalize ${
+              product.is_active
+                ? "bg-emerald-500/10 text-emerald-400"
+                : "bg-muted text-muted-foreground"
+            }`}
+          />
+          <ComboboxContent>
+            <ComboboxList>
+              <ComboboxItem value="active">
+                <span className="text-xs font-medium capitalize">
+                  {tCommon("active")}
+                </span>
+              </ComboboxItem>
+              <ComboboxItem value="inactive">
+                <span className="text-xs font-medium capitalize">
+                  {tCommon("inactive")}
+                </span>
+              </ComboboxItem>
+            </ComboboxList>
+          </ComboboxContent>
+        </Combobox>
+      </td>
+    </>
   );
 }

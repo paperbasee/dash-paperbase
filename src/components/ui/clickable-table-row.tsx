@@ -22,15 +22,21 @@ export type ClickableTableRowProps = Omit<
   | { href?: undefined; onNavigate: () => void }
 )
 
-export function ClickableTableRow({
-  children,
-  className,
-  "aria-label": ariaLabel,
-  href,
-  onNavigate,
-  disabled = false,
-  ...trProps
-}: ClickableTableRowProps) {
+export const ClickableTableRow = React.forwardRef<
+  HTMLTableRowElement,
+  ClickableTableRowProps
+>(function ClickableTableRow(
+  {
+    children,
+    className,
+    "aria-label": ariaLabel,
+    href,
+    onNavigate,
+    disabled = false,
+    ...trProps
+  },
+  ref
+) {
   const router = useRouter()
 
   const runNavigate = React.useCallback(() => {
@@ -59,7 +65,12 @@ export function ClickableTableRow({
 
   if (disabled) {
     return (
-      <tr {...trProps} className={cn("hover:bg-muted/40", className)} aria-disabled>
+      <tr
+        ref={ref}
+        {...trProps}
+        className={cn("hover:bg-muted/40", className)}
+        aria-disabled
+      >
         {children}
       </tr>
     )
@@ -67,6 +78,7 @@ export function ClickableTableRow({
 
   return (
     <tr
+      ref={ref}
       {...trProps}
       role={role}
       tabIndex={0}
@@ -78,7 +90,7 @@ export function ClickableTableRow({
       {children}
     </tr>
   )
-}
+})
 
 /** Marks a subtree so clicks do not trigger parent row navigation. */
 export function RowNavIgnore({
