@@ -140,7 +140,7 @@ export default function SettingsPage() {
 
         <div className="flex min-w-0 flex-col gap-6">
         {/* Mobile: in-place expandable section picker */}
-        <div className="lg:hidden">
+        <div className="md:hidden">
           <Collapsible open={mobileNavOpen} onOpenChange={setMobileNavOpen}>
             <CollapsibleTrigger asChild>
               <Button
@@ -171,7 +171,7 @@ export default function SettingsPage() {
         </div>
 
         {/* Desktop: horizontal nav at top */}
-        <div className="hidden min-w-0 lg:block" aria-label={tSettings("navAria")}>
+        <div className="hidden min-w-0 md:block" aria-label={tSettings("navAria")}>
           <SettingsDesktopSectionNav
             activeSection={activeSection}
             onSelect={setActiveSection}

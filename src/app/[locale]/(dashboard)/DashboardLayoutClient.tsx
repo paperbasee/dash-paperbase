@@ -23,6 +23,7 @@ import {
 import { subscriptionIsPaidPeriod } from "@/lib/subscription-access";
 import { resolveSubscriptionUIStateFromMe } from "@/lib/subscription-ui-state";
 import SubscriptionAccessBlock from "@/components/auth/SubscriptionAccessBlock";
+import PaymentSubmittedAwaitingBanner from "@/components/auth/PaymentSubmittedAwaitingBanner";
 import SubscriptionExpirationBanner from "@/components/auth/SubscriptionExpirationBanner";
 
 export default function DashboardLayoutClient({
@@ -181,20 +182,25 @@ export default function DashboardLayoutClient({
               className="fixed inset-x-0 top-0 z-[60] flex flex-col"
             >
               {subscriptionUiState === "pending_review" ? (
-                <div
-                  role="status"
-                  className="border-b border-border bg-amber-50 dark:bg-amber-950"
-                >
-                  <div className="mx-auto flex w-full max-w-[88rem] flex-wrap items-center justify-center gap-x-2 gap-y-1 px-2 py-1 text-center md:gap-x-3 md:px-4 md:py-1">
-                    <div className="flex max-w-3xl flex-wrap items-center justify-center gap-1 sm:gap-1.5">
-                      <p className="text-center text-[11px] leading-snug text-amber-900 sm:text-xs dark:text-amber-100">
-                        {meProfile?.latest_payment_status === "PENDING_REVIEW"
-                          ? tDashboardLayout("paymentPendingBannerText")
-                          : tDashboardLayout("pendingReviewBannerText")}
-                      </p>
+                meProfile?.latest_payment_status === "PENDING_REVIEW" ? (
+                  <PaymentSubmittedAwaitingBanner
+                    endDate={subscription?.end_date ?? null}
+                    storefrontBlocksAt={subscription?.storefront_blocks_at ?? null}
+                  />
+                ) : (
+                  <div
+                    role="status"
+                    className="border-b border-border bg-amber-50 dark:bg-amber-950"
+                  >
+                    <div className="mx-auto flex w-full max-w-[88rem] flex-wrap items-center justify-center gap-x-2 gap-y-1 px-2 py-1 text-center md:gap-x-3 md:px-4 md:py-1">
+                      <div className="flex max-w-3xl flex-wrap items-center justify-center gap-1 sm:gap-1.5">
+                        <p className="text-center text-[11px] leading-snug text-amber-900 sm:text-xs dark:text-amber-100">
+                          {tDashboardLayout("pendingReviewBannerText")}
+                        </p>
+                      </div>
                     </div>
                   </div>
-                </div>
+                )
               ) : null}
               {subscriptionUiState === "grace" || subscriptionUiState === "expired" ? (
                 <SubscriptionExpirationBanner

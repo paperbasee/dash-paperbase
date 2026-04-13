@@ -20,6 +20,11 @@ export interface MeSubscription {
   days_remaining: number;
   /** ISO 8601 instant when storefront API keys start receiving subscription_expired (BD calendar). */
   storefront_blocks_at?: string | null;
+  /**
+   * Calendar state of the latest DB ACTIVE subscription row (if any).
+   * When renewal is PENDING_REVIEW, this can be ACTIVE/GRACE while `subscription_status` stays PENDING_REVIEW.
+   */
+  active_row_calendar_status?: SubscriptionStatus | null;
 }
 
 export interface MeForRouting {
@@ -51,7 +56,9 @@ export function hasSubscriptionPlan(me: MeForRouting): boolean {
 /** Calendar-active paid period (excludes EXPIRED and NONE). */
 export function subscriptionIsPaidPeriod(me: MeForRouting): boolean {
   const s = me.subscription?.subscription_status;
-  return s === "ACTIVE" || s === "GRACE";
+  if (s === "ACTIVE" || s === "GRACE") return true;
+  const cal = me.subscription?.active_row_calendar_status;
+  return cal === "ACTIVE" || cal === "GRACE";
 }
 
 /** Clear cached auth/me (logout, store deletion, etc.). */

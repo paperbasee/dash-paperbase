@@ -745,6 +745,8 @@
     "expiredBannerPayError": "চেকআউট শুরু করা যায়নি। আবার চেষ্টা করুন বা প্ল্যান বেছে নিন।",
     "bannerPayNow": "এখনই পরিশোধ করুন",
     "paymentPendingBannerText": "আপনার পেমেন্ট অনুমোদনের অপেক্ষায়। অনুমোদনের পর স্টোর লাইভ হবে।",
+    "paymentSubmittedBannerOneLine": "পেমেন্ট জমা হয়েছে। অনুমোদন অপেক্ষমাণ। স্টোর সক্রিয়। গ্রেস শেষ হবে {time} এ",
+    "paymentSubmittedBannerOneLineNoTimer": "পেমেন্ট জমা হয়েছে। অনুমোদন অপেক্ষমাণ। স্টোর সক্রিয়।",
     "pendingReviewBannerText": "আপনার স্টোর যাচাইয়াধীন। অনুমোদনের পর স্টোর লাইভ হবে।",
     "inactivePlanBannerText": "আপনার প্ল্যান নিষ্ক্রিয়। স্টোর এখন লাইভ নয়। গ্রাহকদের জন্য স্টোর চালু করতে একটি প্ল্যান বেছে নিন।",
     "inactivePlanBannerPlansLink": "প্ল্যান দেখুন",

@@ -745,6 +745,8 @@
     "expiredBannerPayError": "Could not start checkout. Try again or pick a plan.",
     "bannerPayNow": "Pay now",
     "paymentPendingBannerText": "Your payment is pending. It will go live after approval.",
+    "paymentSubmittedBannerOneLine": "Payment submitted. Approval pending. Store active. Grace ends in {time}",
+    "paymentSubmittedBannerOneLineNoTimer": "Payment submitted. Approval pending. Store active.",
     "pendingReviewBannerText": "Your store is under review. It will go live after approval.",
     "inactivePlanBannerText": "Your plan is inactive. Your store is not live. Choose a plan to enable customer access.",
     "inactivePlanBannerPlansLink": "View plans",

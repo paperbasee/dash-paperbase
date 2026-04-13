@@ -15,7 +15,9 @@ export type SubscriptionUIState =
   | "none";
 
 /**
- * Strict priority: latest payment signal first, then candidate subscription_status.
+ * Resolves a single dashboard banner lane.
+ * Latest payment / candidate PENDING_REVIEW takes precedence over GRACE for messaging
+ * (see payment-submitted banner in dashboard layout).
  */
 export function resolveSubscriptionUIState(
   subscriptionStatus: SubscriptionStatus,
@@ -39,9 +41,21 @@ export function resolveSubscriptionUIStateFromMe(me: MeForRouting): Subscription
   );
 }
 
-/** Networking: store/API keys under review (includes EXPIRED + latest PENDING_REVIEW). */
+/** True if calendar paid period still applies (top-level or DB ACTIVE row on auth/me). */
+export function meInPaidCalendarWindow(me: MeForRouting): boolean {
+  const st = me.subscription?.subscription_status;
+  if (st === "ACTIVE" || st === "GRACE") return true;
+  const cal = me.subscription?.active_row_calendar_status;
+  return cal === "ACTIVE" || cal === "GRACE";
+}
+
+/**
+ * Networking: block API key actions only for blocking pending review (not while still ACTIVE/GRACE).
+ */
 export function isNetworkingStoreUnderReview(me: MeForRouting): boolean {
-  return resolveSubscriptionUIStateFromMe(me) === "pending_review";
+  if (resolveSubscriptionUIStateFromMe(me) !== "pending_review") return false;
+  if (meInPaidCalendarWindow(me)) return false;
+  return true;
 }
 
 export type BillingSettingsStatusKey =

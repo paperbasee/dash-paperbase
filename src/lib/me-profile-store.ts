@@ -5,7 +5,7 @@ import api, {
 import type { MeForRouting } from "@/lib/subscription-access";
 
 /** Persisted profile cache; stored in localStorage for cross-tab `storage` events. */
-export const ME_PROFILE_STORAGE_KEY = "paperbase_me_profile_v5";
+export const ME_PROFILE_STORAGE_KEY = "paperbase_me_profile_v6";
 
 export const ME_PROFILE_PERSIST_EVENT = "paperbase-me-profile-persisted";
 

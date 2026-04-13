@@ -276,7 +276,7 @@ input.font-numbers-date-value::placeholder {
   color: hsl(var(--accent-red));
 }
 
-/* Themed scrollbars */
+/* Themed scrollbars (default thin). Use .scrollbar-hide where the bar is replaced (e.g. settings tabs). */
 * {
   scrollbar-width: thin;
   scrollbar-color: hsl(var(--border)) transparent;
@@ -426,4 +426,38 @@ input.font-numbers-date-value::placeholder {
     color: var(--system-banner-dismiss-hover);
     background-color: var(--system-banner-dismiss-hover-bg);
   }
+}
+
+/*
+ * Settings horizontal tabs: native scrollbars are not styleable on many Windows
+ * Chromium/Edge builds (classic theme shows arrows + ignores ::-webkit rules).
+ * SettingsNav hides the native bar and renders this track + thumb in the DOM.
+ */
+.settings-tabs-hscroll-bar {
+  position: relative;
+  margin-top: 2px;
+  height: 3px;
+  width: 100%;
+  flex-shrink: 0;
+  border-radius: 9999px;
+  background-color: hsl(var(--border) / 0.22);
+}
+
+.settings-tabs-hscroll-bar__thumb {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  border-radius: 9999px;
+  background-color: hsl(var(--border) / 0.48);
+  cursor: grab;
+  touch-action: none;
+}
+
+.settings-tabs-hscroll-bar:hover .settings-tabs-hscroll-bar__thumb {
+  background-color: hsl(var(--border) / 0.82);
+}
+
+.settings-tabs-hscroll-bar__thumb:active {
+  cursor: grabbing;
 }
