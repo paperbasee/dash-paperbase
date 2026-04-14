@@ -4,9 +4,11 @@ import { useCallback, useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Check, Copy, KeyRound, Loader2, RefreshCcw, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { LoadingButton } from "@/components/ui/loading-button";
 import { Input } from "@/components/ui/input";
 import api from "@/lib/api";
 import { formatDashboardDateTimeWithSeconds } from "@/lib/datetime-display";
+import { subscriptionIsPaidPeriod } from "@/lib/subscription-access";
 import { cn } from "@/lib/utils";
 import {
   SettingsSectionBody,
@@ -40,12 +42,21 @@ const LEGACY_AUTO_KEY_NAME = "Bootstrap Public";
 function extractRows(data: unknown): APIKeyRow[] {
   const active = (row: APIKeyRow) =>
     !row.revoked_at && row.name !== LEGACY_AUTO_KEY_NAME;
-  if (Array.isArray(data)) return (data as APIKeyRow[]).filter(active);
-  if (data && typeof data === "object" && "results" in data) {
-    const r = (data as { results?: APIKeyRow[] }).results;
-    return Array.isArray(r) ? r.filter(active) : [];
-  }
-  return [];
+  const rows = Array.isArray(data)
+    ? (data as APIKeyRow[])
+    : data && typeof data === "object" && "results" in data
+      ? (((data as { results?: APIKeyRow[] }).results ?? []) as APIKeyRow[])
+      : [];
+
+  // Backend can return multiple active keys; dashboard UX expects a single "current" key.
+  // Keep the newest active key only.
+  const filtered = rows.filter(active).sort((a, b) => {
+    const ta = Date.parse(a.created_at);
+    const tb = Date.parse(b.created_at);
+    if (!Number.isNaN(ta) && !Number.isNaN(tb)) return tb - ta;
+    return String(b.created_at).localeCompare(String(a.created_at));
+  });
+  return filtered.length ? [filtered[0]] : [];
 }
 
 export default function NetworkingSection({ hidden }: { hidden: boolean }) {
@@ -54,6 +65,17 @@ export default function NetworkingSection({ hidden }: { hidden: boolean }) {
   const tPages = useTranslations("pages");
   const confirm = useConfirm();
   const { meProfile, meProfileStatus } = useAuth();
+  const subscriptionStatus =
+    meProfileStatus === "ready" && meProfile
+      ? meProfile.subscription?.subscription_status ?? null
+      : null;
+  const subscriptionIsActive =
+    meProfileStatus === "ready" && meProfile
+      ? subscriptionIsPaidPeriod(meProfile)
+      : false;
+  const subscriptionIsInactive =
+    subscriptionStatus === "NONE" && !subscriptionIsActive;
+  const subscriptionLocked = subscriptionStatus !== null && !subscriptionIsActive;
   const planExpired =
     meProfileStatus === "ready" &&
     meProfile?.subscription?.subscription_status === "EXPIRED";
@@ -61,7 +83,34 @@ export default function NetworkingSection({ hidden }: { hidden: boolean }) {
     meProfileStatus === "ready" && meProfile
       ? isNetworkingStoreUnderReview(meProfile)
       : false;
-  const networkingActionsLocked = planExpired || storeUnderReview;
+  const showOnboardingInactiveHintEligible =
+    subscriptionIsInactive && !planExpired && !storeUnderReview;
+
+  const showHintKey = "paperbase_show_networking_lock_hint_v1";
+  const [showOnboardingInactiveHint, setShowOnboardingInactiveHint] =
+    useState(false);
+
+  useEffect(() => {
+    if (hidden) return;
+    if (!showOnboardingInactiveHintEligible) {
+      setShowOnboardingInactiveHint(false);
+      return;
+    }
+    try {
+      const raw = window.localStorage.getItem(showHintKey);
+      if (raw === "1") {
+        setShowOnboardingInactiveHint(true);
+        window.localStorage.removeItem(showHintKey);
+      } else {
+        setShowOnboardingInactiveHint(false);
+      }
+    } catch {
+      setShowOnboardingInactiveHint(false);
+    }
+  }, [hidden, showOnboardingInactiveHintEligible]);
+
+  const networkingActionsLocked =
+    subscriptionLocked || planExpired || storeUnderReview;
   const [keys, setKeys] = useState<APIKeyRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -76,6 +125,12 @@ export default function NetworkingSection({ hidden }: { hidden: boolean }) {
   const API_BASE_URL = "https://api.paperbase.me";
 
   const load = useCallback(async () => {
+    if (networkingActionsLocked) {
+      setKeys([]);
+      setError(null);
+      setLoading(false);
+      return;
+    }
     try {
       setLoading(true);
       const { data } = await api.get("settings/network/api-keys/");
@@ -87,11 +142,12 @@ export default function NetworkingSection({ hidden }: { hidden: boolean }) {
     } finally {
       setLoading(false);
     }
-  }, [t]);
+  }, [networkingActionsLocked, t]);
 
   useEffect(() => {
+    if (hidden) return;
     void load();
-  }, [load]);
+  }, [hidden, load]);
 
   useEffect(() => {
     if (!apiUrlCopied) return;
@@ -192,11 +248,13 @@ export default function NetworkingSection({ hidden }: { hidden: boolean }) {
   }
 
   async function copyApiBaseUrl() {
+    if (networkingActionsLocked) return;
     const didCopy = await copy(API_BASE_URL);
     if (didCopy) setApiUrlCopied(true);
   }
 
   async function copyRevealedKey() {
+    if (networkingActionsLocked) return;
     if (!revealedKey) return;
     const didCopy = await copy(revealedKey);
     if (didCopy) {
@@ -246,6 +304,19 @@ export default function NetworkingSection({ hidden }: { hidden: boolean }) {
           <p className="text-sm text-muted-foreground">{t("networking.subtitle")}</p>
         </div>
 
+        {showOnboardingInactiveHint ? (
+          <div
+            role="status"
+            className="rounded-card border border-destructive/35 bg-destructive/5 px-5 py-4"
+          >
+            <div className="min-w-0">
+              <p className="text-sm text-muted-foreground">
+                {t("networking.lockedBody")}
+              </p>
+            </div>
+          </div>
+        ) : null}
+
         {planExpired ? (
           <p
             className="rounded-card border border-destructive/35 bg-destructive/5 px-4 py-3 text-sm text-destructive"
@@ -272,6 +343,7 @@ export default function NetworkingSection({ hidden }: { hidden: boolean }) {
               variant="ghost"
               size="icon"
               className="size-8 shrink-0"
+              disabled={networkingActionsLocked}
               onClick={() => void copyApiBaseUrl()}
             >
               {apiUrlCopied ? <Check className="size-4 text-emerald-600 animate-pulse" /> : <Copy className="size-4" />}
@@ -325,6 +397,7 @@ export default function NetworkingSection({ hidden }: { hidden: boolean }) {
                 size="icon"
                 className="size-8 shrink-0"
                 aria-label={revealedKeyCopied ? t("networking.apiKeyCopiedTitle") : t("networking.copyApiKey")}
+                disabled={networkingActionsLocked}
                 onClick={() => void copyRevealedKey()}
               >
                 {revealedKeyCopied ? (
@@ -399,17 +472,19 @@ export default function NetworkingSection({ hidden }: { hidden: boolean }) {
               disabled={busy || networkingActionsLocked}
               className="sm:flex-1"
             />
-            <Button
+            <LoadingButton
               type="button"
               variant="outline"
               size="sm"
               className={cn("shrink-0", settingsInvertedButtonClassName)}
-              disabled={busy || networkingActionsLocked}
+              isLoading={busy}
+              loadingText={t("networking.creatingKey")}
+              disabled={networkingActionsLocked}
               onClick={() => void createKey()}
             >
               <KeyRound className="mr-2 size-4" />
               {t("networking.createButton")}
-            </Button>
+            </LoadingButton>
           </div>
         </div>
       </SettingsSectionBody>

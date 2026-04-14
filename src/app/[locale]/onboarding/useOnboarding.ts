@@ -13,6 +13,7 @@ import { invalidateMeRoutingCache } from "@/lib/subscription-access";
 import { notify, normalizeError } from "@/notifications";
 
 const STORAGE_KEY = "core_enabled_apps";
+const SHOW_NETWORKING_LOCK_HINT_KEY = "paperbase_show_networking_lock_hint_v1";
 
 export interface StoreFormData {
   name: string;
@@ -231,6 +232,8 @@ export function useOnboarding(options?: UseOnboardingOptions) {
           )
         )
       );
+      // One-time hint: after onboarding, show a networking lock notice if subscription is still inactive.
+      localStorage.setItem(SHOW_NETWORKING_LOCK_HINT_KEY, "1");
 
       clearPendingVerificationEmail();
       router.push(data.redirect_route || "/");

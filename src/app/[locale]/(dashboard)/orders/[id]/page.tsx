@@ -930,6 +930,7 @@ export default function OrderDetailPage() {
                   <div>
                     <label className="mb-1 block text-xs font-medium text-muted-foreground">
                       {tPages("orderNewDeliveryZone")}
+                      <span className="ml-0.5 text-destructive">*</span>
                     </label>
                     <Select
                       value={form.shipping_zone_public_id}
@@ -947,6 +948,7 @@ export default function OrderDetailPage() {
                   <div>
                     <label className="mb-1 block text-xs font-medium text-muted-foreground">
                       {tPages("orderNewName")}
+                      <span className="ml-0.5 text-destructive">*</span>
                     </label>
                     <Input
                       value={form.shipping_name}
@@ -958,6 +960,7 @@ export default function OrderDetailPage() {
                   <div>
                     <label className="mb-1 block text-xs font-medium text-muted-foreground">
                       {tPages("orderNewPhone")}
+                      <span className="ml-0.5 text-destructive">*</span>
                     </label>
                     <Input
                       value={form.phone}
@@ -968,7 +971,7 @@ export default function OrderDetailPage() {
                   </div>
                 </div>
                 <div className="grid gap-3 sm:grid-cols-2">
-                  <div>
+                  <div className="sm:col-span-2">
                     <label className="mb-1 block text-xs font-medium text-muted-foreground">
                       {tPages("orderNewEmail")}
                     </label>
@@ -980,9 +983,10 @@ export default function OrderDetailPage() {
                       }
                     />
                   </div>
-                  <div>
+                  <div className="sm:col-span-2">
                     <label className="mb-1 block text-xs font-medium text-muted-foreground">
                       {tPages("orderFormRoadVillage")}
+                      <span className="ml-0.5 text-destructive">*</span>
                     </label>
                     <Input
                       value={form.village}
@@ -994,6 +998,7 @@ export default function OrderDetailPage() {
                   <div>
                     <label className="mb-1 block text-xs font-medium text-muted-foreground">
                       {tPages("orderFormThana")}
+                      <span className="ml-0.5 text-destructive">*</span>
                     </label>
                     <Input
                       value={form.thana}
@@ -1002,17 +1007,18 @@ export default function OrderDetailPage() {
                       }
                     />
                   </div>
-                </div>
-                <div>
-                  <label className="mb-1 block text-xs font-medium text-muted-foreground">
-                    {tPages("orderFormDistrict")}
-                  </label>
-                  <Input
-                    value={form.district}
-                    onChange={(e) =>
-                      setForm({ ...form, district: e.target.value })
-                    }
-                  />
+                  <div>
+                    <label className="mb-1 block text-xs font-medium text-muted-foreground">
+                      {tPages("orderFormDistrict")}
+                      <span className="ml-0.5 text-destructive">*</span>
+                    </label>
+                    <Input
+                      value={form.district}
+                      onChange={(e) =>
+                        setForm({ ...form, district: e.target.value })
+                      }
+                    />
+                  </div>
                 </div>
               </form>
             ) : (
@@ -1073,11 +1079,6 @@ export default function OrderDetailPage() {
                         </>
                       );
                     })()}
-                    {order.phone && (
-                      <p className="text-sm text-muted-foreground">
-                        {order.phone}
-                      </p>
-                    )}
                   </div>
                 </div>
                 <div className="flex items-start gap-3">

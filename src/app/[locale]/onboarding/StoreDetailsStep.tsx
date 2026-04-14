@@ -27,10 +27,14 @@ export function StoreDetailsStep({
 }: StoreDetailsStepProps) {
   const t = useTranslations("auth.onboarding");
   const tCommon = useTranslations("common");
+  const hasDuplicateInlineError = Object.values(fieldErrors).some(
+    (msg) => typeof msg === "string" && msg.length > 0 && msg === error
+  );
+  const showTopError = Boolean(error) && !hasDuplicateInlineError;
 
   return (
     <div className="space-y-4">
-      {error && (
+      {showTopError && (
         <div className="rounded-ui border border-destructive/20 bg-destructive/10 px-3 py-2 text-sm text-destructive">
           {error}
         </div>

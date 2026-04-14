@@ -39,6 +39,14 @@ export const ClickableTableRow = React.forwardRef<
 ) {
   const router = useRouter()
 
+  const hasTextSelection = React.useCallback(() => {
+    if (typeof window === "undefined") return false
+    const sel = window.getSelection?.()
+    if (!sel) return false
+    if (sel.isCollapsed) return false
+    return sel.toString().trim().length > 0
+  }, [])
+
   const runNavigate = React.useCallback(() => {
     if (href) {
       router.push(href)
@@ -50,6 +58,11 @@ export const ClickableTableRow = React.forwardRef<
   const handleClick = (e: React.MouseEvent<HTMLTableRowElement>) => {
     if (disabled) return
     if (isNestedInteractiveTarget(e.target)) return
+    // Avoid navigating when user is selecting/copying text inside the row.
+    if (hasTextSelection()) return
+    // Only navigate on unmodified primary clicks.
+    if (e.button !== 0) return
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return
     runNavigate()
   }
 
