@@ -336,8 +336,8 @@ export function FraudCheckDialog({
               </div>
 
               <div className="rounded-card border border-border bg-card">
-                <div className="overflow-x-auto">
-                  <div className="min-w-[680px]">
+                <div className="overflow-x-auto md:overflow-x-hidden">
+                  <div className="min-w-[680px] md:min-w-0">
                     <div className="grid grid-cols-12 gap-0 border-b border-border bg-muted/40 px-2 py-1 text-[11px] font-semibold text-muted-foreground">
                       <div className="col-span-2">Logo</div>
                       <div className="col-span-3">Courier</div>

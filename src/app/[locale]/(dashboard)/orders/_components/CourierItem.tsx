@@ -78,6 +78,8 @@ export function CourierItem({ name, ratioPct, logoUrl, className }: CourierItemP
             width={28}
             height={28}
             className="h-7 w-7 object-contain"
+            draggable={false}
+            onDragStart={(e) => e.preventDefault()}
             onError={() => {
               setSrcIndex((prev) => {
                 const next = prev + 1;
@@ -161,6 +163,8 @@ export function CourierLogo({
                     ? "h-18 w-18"
                     : "h-20 w-20"
           )}
+          draggable={false}
+          onDragStart={(e) => e.preventDefault()}
           onError={() => {
             setSrcIndex((prev) => {
               const next = prev + 1;
