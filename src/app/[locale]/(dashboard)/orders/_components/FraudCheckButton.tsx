@@ -1,6 +1,6 @@
 "use client";
 
-import { ShieldCheck } from "lucide-react";
+import { Lock, ShieldCheck } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
@@ -15,6 +15,7 @@ import { cn } from "@/lib/utils";
 type FraudCheckButtonProps = {
   loading: boolean;
   disabled?: boolean;
+  locked?: boolean;
   onClick: () => void;
   className?: string;
 };
@@ -22,10 +23,13 @@ type FraudCheckButtonProps = {
 export function FraudCheckButton({
   loading,
   disabled,
+  locked,
   onClick,
   className,
 }: FraudCheckButtonProps) {
-  const isDisabled = Boolean(disabled || loading);
+  const isDisabled = Boolean(disabled || loading || locked);
+  const label = locked ? "Premium Feature" : "Check";
+  const tooltip = locked ? "Available in Premium plan" : "Check fraud history";
   return (
     <TooltipProvider delayDuration={300}>
       <Tooltip>
@@ -41,15 +45,22 @@ export function FraudCheckButton({
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
+              if (locked) return;
               onClick();
             }}
           >
-            {loading ? <Spinner className="size-3.5" /> : <ShieldCheck className="size-3.5" />}
-            <span>Check</span>
+            {loading ? (
+              <Spinner className="size-3.5" />
+            ) : locked ? (
+              <Lock className="size-3.5" />
+            ) : (
+              <ShieldCheck className="size-3.5" />
+            )}
+            <span>{label}</span>
           </Button>
         </TooltipTrigger>
         <TooltipContent side="top" sideOffset={6}>
-          Check fraud history
+          {tooltip}
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>

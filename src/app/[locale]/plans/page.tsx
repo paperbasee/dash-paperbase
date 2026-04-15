@@ -206,6 +206,7 @@ export default function PlansPage() {
                 const limitEntries = Object.entries(selected.features?.limits ?? {});
                 const isSelecting = selectingId === selected.public_id;
                 const showYearly = billingCycle === "yearly" && !!g.yearly;
+                const isPremium = selected.name.toLowerCase() === "premium";
 
                 return (
                   <div
@@ -268,6 +269,25 @@ export default function PlansPage() {
                           </li>
                         ))}
                       </ul>
+
+                      {isPremium && (
+                        <div className="mt-2">
+                          <ul className="space-y-2">
+                            <li className="flex items-start gap-2 text-sm">
+                              <span className="mt-0.5 inline-flex size-4 shrink-0 items-center justify-center rounded-ui bg-foreground text-background">
+                                <Check className="size-2.5" strokeWidth={2.5} aria-hidden />
+                              </span>
+                              <span className="min-w-0 leading-snug">Check customer risk instantly</span>
+                            </li>
+                            <li className="flex items-start gap-2 text-sm">
+                              <span className="mt-0.5 inline-flex size-4 shrink-0 items-center justify-center rounded-ui bg-foreground text-background">
+                                <Check className="size-2.5" strokeWidth={2.5} aria-hidden />
+                              </span>
+                              <span className="min-w-0 leading-snug">Courier verification system</span>
+                            </li>
+                          </ul>
+                        </div>
+                      )}
                     </div>
 
                     {/* CTA */}

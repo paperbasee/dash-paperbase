@@ -162,6 +162,9 @@ function SidebarContent({
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   /** Mobile sheet: center menu and size below nav panel width (desktop-style inset). */
   const [mobileUserMenuLayout, setMobileUserMenuLayout] = useState(false);
+  // Next.js route prefetching can trigger Chrome warnings in dev about preloaded CSS
+  // not being used "soon enough". Keep prefetch on in prod, disable in dev.
+  const shouldPrefetchLinks = process.env.NODE_ENV === "production";
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -379,6 +382,7 @@ function SidebarContent({
         )}
         <Link
           href={HOME_NAV.href}
+          prefetch={shouldPrefetchLinks}
           onClick={handleLinkClick}
           className={cn(
             "flex min-h-[44px] items-center gap-3 rounded-card px-3 py-2.5 text-sm font-medium transition-colors md:min-h-[40px]",
@@ -445,6 +449,7 @@ function SidebarContent({
                           <Link
                             key={id}
                             href={app.href}
+                            prefetch={shouldPrefetchLinks}
                             onClick={handleLinkClick}
                             className={cn(
                               "flex items-center justify-between rounded-ui px-2 py-2 text-sm",
@@ -485,6 +490,7 @@ function SidebarContent({
             <Link
               key={token}
               href={app.href!}
+              prefetch={shouldPrefetchLinks}
               onClick={handleLinkClick}
               className={cn(
                 "flex min-h-[44px] items-center gap-3 rounded-card px-3 py-2.5 text-sm font-medium transition-colors md:min-h-[40px]",
@@ -565,6 +571,7 @@ function SidebarContent({
                     <Link
                       key={id}
                       href={app.href}
+                      prefetch={shouldPrefetchLinks}
                       onClick={handleLinkClick}
                       className={cn(
                         "flex items-center justify-between rounded-ui px-2 py-2 text-sm",
@@ -764,6 +771,7 @@ function SidebarContent({
               <DropdownMenuItem asChild className="text-[15px] font-medium">
                 <Link
                   href="/settings"
+                  prefetch={shouldPrefetchLinks}
                   onClick={handleLinkClick}
                   className="flex cursor-pointer items-center gap-2"
                 >

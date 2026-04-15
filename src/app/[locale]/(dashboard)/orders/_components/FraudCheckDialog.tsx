@@ -242,9 +242,9 @@ function Tile({ label, value, tone = "neutral" }: TileProps) {
         ? "border-red-600/30 bg-red-950/10 text-red-700"
         : "border-border bg-card text-foreground";
   return (
-    <div className={cn("rounded-card border px-4 py-3", toneCls)}>
+    <div className={cn("rounded-card border px-3 py-2", toneCls)}>
       <div className="text-xs font-semibold text-muted-foreground">{label}</div>
-      <div className="mt-1 text-2xl font-semibold">{value}</div>
+      <div className="mt-0.5 text-xl font-semibold leading-tight">{value}</div>
     </div>
   );
 }
@@ -273,7 +273,7 @@ export function FraudCheckDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[calc(100vh-2rem)] w-[calc(100vw-2rem)] max-w-3xl overflow-y-auto sm:w-full">
+      <DialogContent className="max-h-[calc(100vh-2rem)] w-[calc(100vw-2rem)] max-w-2xl overflow-y-auto sm:w-full">
         <DialogHeader>
           <DialogTitle>Fraud Check</DialogTitle>
           <DialogDescription>
@@ -281,7 +281,7 @@ export function FraudCheckDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4 p-4 sm:p-6">
+        <div className="space-y-3 p-3 sm:p-4">
           {warningText ? (
             <div className="flex items-start gap-2 rounded-ui border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">
               <AlertTriangle className="mt-0.5 size-4 shrink-0" />
@@ -298,19 +298,19 @@ export function FraudCheckDialog({
 
           {loading ? (
             <div className="space-y-3">
-              <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+              <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
                 {Array.from({ length: 4 }).map((_, i) => (
                   <div
                     key={i}
-                    className="h-[78px] animate-pulse rounded-card border border-border bg-muted/40"
+                    className="h-[64px] animate-pulse rounded-card border border-border bg-muted/40"
                   />
                 ))}
               </div>
-              <div className="h-64 animate-pulse rounded-card border border-border bg-muted/40" />
+              <div className="h-56 animate-pulse rounded-card border border-border bg-muted/40" />
             </div>
           ) : (
             <>
-              <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+              <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
                 <Tile
                   label="Total Parcels"
                   value={summary.total === null ? "—" : String(summary.total)}
@@ -337,8 +337,8 @@ export function FraudCheckDialog({
 
               <div className="rounded-card border border-border bg-card">
                 <div className="overflow-x-auto">
-                  <div className="min-w-[780px]">
-                    <div className="grid grid-cols-12 gap-0 border-b border-border bg-muted/40 px-2 py-1.5 text-xs font-semibold text-muted-foreground">
+                  <div className="min-w-[680px]">
+                    <div className="grid grid-cols-12 gap-0 border-b border-border bg-muted/40 px-2 py-1 text-[11px] font-semibold text-muted-foreground">
                       <div className="col-span-2">Logo</div>
                       <div className="col-span-3">Courier</div>
                       <div className="col-span-2">Total</div>
@@ -360,13 +360,13 @@ export function FraudCheckDialog({
                           return (
                             <div
                               key={key || c.name}
-                              className="grid grid-cols-12 items-center gap-0 px-2 py-0.5 text-sm leading-none"
+                              className="grid grid-cols-12 items-center gap-0 px-2 py-0.5 text-[13px] leading-none"
                             >
                               <div className="col-span-2">
                                 <CourierLogo
                                   name={c.name}
                                   logoUrl={c.logoUrl}
-                                  sizeClassName="size-14"
+                                  sizeClassName="size-10"
                                 />
                               </div>
                               <div className="col-span-3 min-w-0 pr-3">
@@ -386,7 +386,7 @@ export function FraudCheckDialog({
                               <div className="col-span-1 flex items-center justify-start gap-3">
                                 <span
                                   className={cn(
-                                    "min-w-[56px] text-left text-sm font-semibold",
+                                    "min-w-[48px] text-left text-[13px] font-semibold",
                                     ratioColor(pct)
                                   )}
                                 >

@@ -29,6 +29,7 @@ import { notify, normalizeError } from "@/notifications";
 import { FraudCheckButton } from "./_components/FraudCheckButton";
 import { FraudCheckDialog } from "./_components/FraudCheckDialog";
 import type { FraudCheckApiOk, FraudCheckState } from "./_components/types";
+import { useFeatures } from "@/hooks/useFeatures";
 
 /** Shown after dispatch: Steadfast consignment id only (not provider name). */
 function courierCell(order: Order): string {
@@ -68,6 +69,20 @@ export default function OrdersPage() {
     {}
   );
   const [fraudDialogOrderId, setFraudDialogOrderId] = useState<string | null>(null);
+  const { hasFeature } = useFeatures();
+  const canFraudCheck = hasFeature("fraud_check");
+
+  function fraudStatus(data: FraudCheckApiOk | null | undefined): string | undefined {
+    return data?.status ? String(data.status) : undefined;
+  }
+
+  function fraudDetail(data: FraudCheckApiOk | null | undefined): string | undefined {
+    const resp = data?.response;
+    if (!resp || typeof resp !== "object") return undefined;
+    if (!("detail" in resp)) return undefined;
+    const val = (resp as Record<string, unknown>).detail;
+    return typeof val === "string" ? val : undefined;
+  }
 
   useEffect(() => {
     const next = debouncedSearch.trim();
@@ -266,7 +281,14 @@ export default function OrdersPage() {
       }));
     } catch (err: unknown) {
       const normalized = normalizeError(err, "Failed to run fraud check.");
-      const status = (err as any)?.response?.status as number | undefined;
+      const status = (() => {
+        if (!err || typeof err !== "object") return undefined;
+        if (!("response" in err)) return undefined;
+        const resp = (err as Record<string, unknown>).response;
+        if (!resp || typeof resp !== "object") return undefined;
+        const s = (resp as Record<string, unknown>).status;
+        return typeof s === "number" ? s : undefined;
+      })();
       setFraudByOrderId((prev) => ({
         ...prev,
         [key]: { kind: "error", message: normalized.message, status },
@@ -411,14 +433,13 @@ export default function OrdersPage() {
               <tbody className="divide-y divide-border/60">
                 {orders.map((order) => {
                   const fraud = fraudByOrderId[order.public_id] || { kind: "idle" };
-                  const readyData =
-                    fraud.kind === "ready" ? fraud.data : null;
+                  const readyData = fraud.kind === "ready" ? fraud.data : null;
 
                   const warningText =
                     fraud.kind === "ready" &&
                     readyData &&
-                    (readyData as any)?.status === "limit_exceeded"
-                      ? String((readyData as any)?.response?.detail || "Limit exceeded.")
+                    fraudStatus(readyData) === "limit_exceeded"
+                      ? fraudDetail(readyData) ?? "Limit exceeded."
                       : null;
 
                   const errorText =
@@ -426,8 +447,8 @@ export default function OrdersPage() {
                       ? fraud.message
                       : fraud.kind === "ready" &&
                           readyData &&
-                          (readyData as any)?.status === "error"
-                        ? String((readyData as any)?.response?.detail || "Fraud check failed.")
+                          fraudStatus(readyData) === "error"
+                        ? fraudDetail(readyData) ?? "Fraud check failed."
                         : null;
 
                   return (
@@ -462,6 +483,7 @@ export default function OrdersPage() {
                           <FraudCheckButton
                             loading={fraud.kind === "loading"}
                             disabled={!order.phone}
+                            locked={!canFraudCheck}
                             onClick={() => handleFraudCheck(order)}
                           />
                         </td>
@@ -595,23 +617,35 @@ export default function OrdersPage() {
             }
             response={
               fraudDialogOrderId && fraudByOrderId[fraudDialogOrderId]?.kind === "ready"
-                ? (fraudByOrderId[fraudDialogOrderId] as any).data?.response
+                ? (fraudByOrderId[fraudDialogOrderId] as { kind: "ready"; data: FraudCheckApiOk }).data
+                    ?.response ?? null
                 : null
             }
             warningText={
               fraudDialogOrderId &&
               fraudByOrderId[fraudDialogOrderId]?.kind === "ready" &&
-              ((fraudByOrderId[fraudDialogOrderId] as any).data?.status === "limit_exceeded")
-                ? String((fraudByOrderId[fraudDialogOrderId] as any).data?.response?.detail || "Limit exceeded.")
+              fraudStatus(
+                (fraudByOrderId[fraudDialogOrderId] as { kind: "ready"; data: FraudCheckApiOk }).data
+              ) === "limit_exceeded"
+                ? fraudDetail(
+                    (fraudByOrderId[fraudDialogOrderId] as { kind: "ready"; data: FraudCheckApiOk })
+                      .data
+                  ) ?? "Limit exceeded."
                 : null
             }
             errorText={
               fraudDialogOrderId && fraudByOrderId[fraudDialogOrderId]?.kind === "error"
-                ? (fraudByOrderId[fraudDialogOrderId] as any).message
+                ? (fraudByOrderId[fraudDialogOrderId] as { kind: "error"; message: string }).message
                 : fraudDialogOrderId &&
                     fraudByOrderId[fraudDialogOrderId]?.kind === "ready" &&
-                    ((fraudByOrderId[fraudDialogOrderId] as any).data?.status === "error")
-                  ? String((fraudByOrderId[fraudDialogOrderId] as any).data?.response?.detail || "Fraud check failed.")
+                    fraudStatus(
+                      (fraudByOrderId[fraudDialogOrderId] as { kind: "ready"; data: FraudCheckApiOk })
+                        .data
+                    ) === "error"
+                  ? fraudDetail(
+                      (fraudByOrderId[fraudDialogOrderId] as { kind: "ready"; data: FraudCheckApiOk })
+                        .data
+                    ) ?? "Fraud check failed."
                   : null
             }
           />
