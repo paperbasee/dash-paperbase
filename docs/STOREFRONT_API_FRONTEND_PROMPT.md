@@ -47,8 +47,13 @@ The store is resolved entirely from the API key. No separate store ID, domain he
 Add this script tag to **every page** (including product pages and checkout):
 
 ```html
-<script src="https://storage.paperbase.me/static/tracker.js"></script>
+<script src="https://storage.paperbase.me/static/tracker.js?v=BUILD_ID"></script>
 ```
+
+**IMPORTANT (caching):**
+- `BUILD_ID` is injected by the backend automatically (read it from `GET /api/v1/store/public/` → `tracker_build_id` / `tracker_script_src`).
+- Store owners must **NOT** manually change `BUILD_ID`.
+- Do **NOT** use an unversioned `tracker.js` URL in production. Always use the versioned `?v=...` form to avoid browser/CDN stale cache.
 
 ### 2. Initialization (IMPORTANT)
 
@@ -67,6 +72,9 @@ Optional debug mode:
 ```js
 tracker.init({ apiKey: "ak_pk_...", debug: true });
 ```
+
+Tracking behavior:
+- `tracker.js` sends events to: `https://api.paperbase.me/tracking/event`
 
 ### 3. Supported events (whitelisted)
 
