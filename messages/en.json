@@ -1178,6 +1178,8 @@
       "currentPassword": "Current password",
       "newPassword": "New password",
       "confirmNewPassword": "Confirm new password",
+      "showPassword": "Show password",
+      "hidePassword": "Hide password",
       "logoutAllDevices": "Log out from all other devices",
       "updatePassword": "Change password",
       "updating": "Updating…",

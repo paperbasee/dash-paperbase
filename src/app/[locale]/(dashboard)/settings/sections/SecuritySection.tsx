@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Eye, EyeOff } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { SettingsActionDialog } from "@/components/settings/SettingsActionDialog";
@@ -17,6 +18,47 @@ import {
 } from "../SettingsSectionBody";
 
 type SecurityModal = "password" | "enable" | "disable" | "recovery" | null;
+
+function SecurityPasswordField({
+  value,
+  onChange,
+  placeholder,
+  autoComplete,
+  visible,
+  onToggleVisible,
+  showLabel,
+  hideLabel,
+}: {
+  value: string;
+  onChange: (value: string) => void;
+  placeholder: string;
+  autoComplete: string;
+  visible: boolean;
+  onToggleVisible: () => void;
+  showLabel: string;
+  hideLabel: string;
+}) {
+  return (
+    <div className="relative">
+      <Input
+        type={visible ? "text" : "password"}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        className="pr-10"
+        autoComplete={autoComplete}
+      />
+      <button
+        type="button"
+        onClick={onToggleVisible}
+        className="absolute inset-y-0 right-0 flex items-center px-3 text-muted-foreground hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+        aria-label={visible ? hideLabel : showLabel}
+      >
+        {visible ? <EyeOff size={16} /> : <Eye size={16} />}
+      </button>
+    </div>
+  );
+}
 
 export default function SecuritySection({ hidden }: { hidden: boolean }) {
   const t = useTranslations("settings");
@@ -41,6 +83,10 @@ export default function SecuritySection({ hidden }: { hidden: boolean }) {
   const [passwordMessage, setPasswordMessage] = useState("");
   const [passwordLoading, setPasswordLoading] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmNewPassword, setShowConfirmNewPassword] = useState(false);
+  const [showDisablePassword, setShowDisablePassword] = useState(false);
   const recoveryCooldown = useRateLimitCooldown();
 
   useEffect(() => {
@@ -52,6 +98,9 @@ export default function SecuritySection({ hidden }: { hidden: boolean }) {
     setCurrentPassword("");
     setNewPassword("");
     setConfirmNewPassword("");
+    setShowCurrentPassword(false);
+    setShowNewPassword(false);
+    setShowConfirmNewPassword(false);
     setLogoutAllDevices(false);
     setPasswordMessage("");
     setPasswordLoading(false);
@@ -68,6 +117,7 @@ export default function SecuritySection({ hidden }: { hidden: boolean }) {
   function clearDisableModal() {
     setDisablePassword("");
     setDisableCode("");
+    setShowDisablePassword(false);
     setDisableModalMessage("");
     setLoading(false);
   }
@@ -301,26 +351,35 @@ export default function SecuritySection({ hidden }: { hidden: boolean }) {
         description={t("security.modalChangePasswordDescription")}
       >
         <div className="space-y-3">
-          <Input
-            type="password"
+          <SecurityPasswordField
             value={currentPassword}
-            onChange={(e) => setCurrentPassword(e.target.value)}
+            onChange={setCurrentPassword}
             placeholder={t("security.currentPassword")}
             autoComplete="current-password"
+            visible={showCurrentPassword}
+            onToggleVisible={() => setShowCurrentPassword((v) => !v)}
+            showLabel={t("security.showPassword")}
+            hideLabel={t("security.hidePassword")}
           />
-          <Input
-            type="password"
+          <SecurityPasswordField
             value={newPassword}
-            onChange={(e) => setNewPassword(e.target.value)}
+            onChange={setNewPassword}
             placeholder={t("security.newPassword")}
             autoComplete="new-password"
+            visible={showNewPassword}
+            onToggleVisible={() => setShowNewPassword((v) => !v)}
+            showLabel={t("security.showPassword")}
+            hideLabel={t("security.hidePassword")}
           />
-          <Input
-            type="password"
+          <SecurityPasswordField
             value={confirmNewPassword}
-            onChange={(e) => setConfirmNewPassword(e.target.value)}
+            onChange={setConfirmNewPassword}
             placeholder={t("security.confirmNewPassword")}
             autoComplete="new-password"
+            visible={showConfirmNewPassword}
+            onToggleVisible={() => setShowConfirmNewPassword((v) => !v)}
+            showLabel={t("security.showPassword")}
+            hideLabel={t("security.hidePassword")}
           />
           <label className="flex items-center gap-2 text-sm text-muted-foreground">
             <input
@@ -425,12 +484,15 @@ export default function SecuritySection({ hidden }: { hidden: boolean }) {
         description={t("security.disableHint")}
       >
         <div className="space-y-3">
-          <Input
-            type="password"
+          <SecurityPasswordField
             value={disablePassword}
-            onChange={(e) => setDisablePassword(e.target.value)}
+            onChange={setDisablePassword}
             placeholder={t("security.currentPassword")}
             autoComplete="current-password"
+            visible={showDisablePassword}
+            onToggleVisible={() => setShowDisablePassword((v) => !v)}
+            showLabel={t("security.showPassword")}
+            hideLabel={t("security.hidePassword")}
           />
           <Input
             value={disableCode}

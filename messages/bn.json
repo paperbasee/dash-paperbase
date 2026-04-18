@@ -1178,6 +1178,8 @@
       "currentPassword": "বর্তমান পাসওয়ার্ড",
       "newPassword": "নতুন পাসওয়ার্ড",
       "confirmNewPassword": "নতুন পাসওয়ার্ড নিশ্চিত করুন",
+      "showPassword": "পাসওয়ার্ড দেখান",
+      "hidePassword": "পাসওয়ার্ড লুকান",
       "logoutAllDevices": "অন্য সব ডিভাইস থেকে লগ আউট",
       "updatePassword": "পাসওয়ার্ড পরিবর্তন",
       "updating": "আপডেট হচ্ছে…",
