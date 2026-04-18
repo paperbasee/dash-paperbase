@@ -90,6 +90,7 @@ export default function ProductsPage() {
   const { page, filters, setFilter, setPage, clearFilters } = useFilters([
     "status",
     "stock",
+    "prepayment_type",
     "category",
     "price_min",
     "price_max",
@@ -173,6 +174,8 @@ export default function ProductsPage() {
     const params: Record<string, string | number> = { page };
     if (filters.status) params.status = filters.status;
     if (filters.stock) params.stock = filters.stock;
+    if (filters.prepayment_type)
+      params.prepayment_type = filters.prepayment_type;
     if (filters.category) params.category = filters.category;
     if (filters.price_min) params.price_min = filters.price_min;
     if (filters.price_max) params.price_max = filters.price_max;
@@ -196,6 +199,7 @@ export default function ProductsPage() {
     filters.category,
     filters.price_max,
     filters.price_min,
+    filters.prepayment_type,
     filters.search,
     filters.ordering,
     filters.status,
@@ -210,6 +214,7 @@ export default function ProductsPage() {
   const canReorder = useMemo(() => {
     if (!filters.category) return false;
     if (filters.search || filters.status || filters.stock) return false;
+    if (filters.prepayment_type) return false;
     if (filters.price_min || filters.price_max) return false;
     const ord = filters.ordering;
     if (ord && ord !== "newest") return false;
@@ -415,6 +420,19 @@ export default function ProductsPage() {
           ]}
         />
         <FilterDropdown
+          value={filters.prepayment_type}
+          onChange={(value) => setFilter("prepayment_type", value)}
+          placeholder={tPages("filtersPrepayment")}
+          options={[
+            { value: "none", label: tPages("productPrepaymentTypeNone") },
+            {
+              value: "delivery_only",
+              label: tPages("productPrepaymentTypeDeliveryOnly"),
+            },
+            { value: "full", label: tPages("productPrepaymentTypeFull") },
+          ]}
+        />
+        <FilterDropdown
           value={filters.category}
           onChange={(value) => setFilter("category", value)}
           placeholder={tPages("filtersCategory")}
@@ -519,6 +537,7 @@ export default function ProductsPage() {
                     <th className="th">{tPages("productsListColCategory")}</th>
                     <th className="th">{tPages("productsListColPrice")}</th>
                     <th className="th">{tPages("productsListColStock")}</th>
+                    <th className="th">{tPages("productsListColPrepayment")}</th>
                     <th className="th">{tPages("productsListColStatus")}</th>
                   </tr>
                 </thead>
@@ -769,6 +788,13 @@ function ProductRowCells({
             {product.total_stock ?? product.available_quantity ?? 0}
           </span>
         )}
+      </td>
+      <td className="px-4 py-3 text-muted-foreground whitespace-nowrap text-xs">
+        {(product.prepayment_type ?? "none") === "delivery_only"
+          ? tPagesSafe("productPrepaymentTypeDeliveryOnly")
+          : (product.prepayment_type ?? "none") === "full"
+            ? tPagesSafe("productPrepaymentTypeFull")
+            : tPagesSafe("productPrepaymentTypeNone")}
       </td>
       <td className="px-4 py-3 whitespace-nowrap">
         <Combobox

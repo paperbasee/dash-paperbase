@@ -106,6 +106,7 @@ export default function OrderDetailPage() {
   const [statusUpdateError, setStatusUpdateError] = useState("");
   const [statusUpdateLoading, setStatusUpdateLoading] = useState(false);
   const [flagUpdateLoading, setFlagUpdateLoading] = useState(false);
+  const [paymentVerifying, setPaymentVerifying] = useState<"verify" | "reject" | null>(null);
   const rightColRef = useRef<HTMLDivElement>(null);
   const [rightColHeight, setRightColHeight] = useState<number | null>(null);
 
@@ -460,6 +461,33 @@ export default function OrderDetailPage() {
     }
   }
 
+  async function handleVerifyPayment(valid: boolean) {
+    if (!order || paymentVerifying) return;
+    setPaymentVerifying(valid ? "verify" : "reject");
+    setStatusUpdateError("");
+    try {
+      const { data } = await api.post<{ order: Order }>(
+        `admin/orders/${order_public_id}/verify-payment/`,
+        { valid },
+      );
+      setOrder(data.order);
+      notify.success(
+        valid
+          ? tPages("orderDetailPaymentVerifiedToast")
+          : tPages("orderDetailPaymentRejectedToast"),
+      );
+    } catch (err: unknown) {
+      const normalized = normalizeError(
+        err,
+        tPages("orderDetailPaymentVerifyFailed"),
+      );
+      setStatusUpdateError(normalized.message);
+      notify.error(normalized.message);
+    } finally {
+      setPaymentVerifying(null);
+    }
+  }
+
   async function handleFlagChange(next: string) {
     if (!order) return;
     const normalized = (next || "").trim().toLowerCase();
@@ -690,6 +718,53 @@ export default function OrderDetailPage() {
 
         {/* Right column: stacked cards (height drives Product card on desktop) */}
         <div ref={rightColRef} className="flex flex-col gap-6 lg:col-span-1">
+        {order.status === "payment_pending" && order.payment_status === "submitted" && (
+          <Card className="overflow-hidden rounded-card border border-dashed border-card-border bg-card shadow-sm">
+            <CardHeader className="border-b border-border/50 px-4 pb-4 sm:px-6">
+              <CardTitle>{tPages("orderDetailVerifyPaymentTitle")}</CardTitle>
+              <CardDescription>
+                {tPages("orderDetailVerifyPaymentDescription")}
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4 px-4 pt-6 sm:px-6">
+              <dl className="space-y-3 text-sm">
+                <div className="flex justify-between">
+                  <dt className="text-muted-foreground">
+                    {tPages("orderDetailTransactionIdLabel")}
+                  </dt>
+                  <dd className={numClass}>{order.transaction_id || "—"}</dd>
+                </div>
+                <div className="flex justify-between">
+                  <dt className="text-muted-foreground">
+                    {tPages("orderDetailPayerNumberLabel")}
+                  </dt>
+                  <dd className={numClass}>{order.payer_number || "—"}</dd>
+                </div>
+              </dl>
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  type="button"
+                  onClick={() => handleVerifyPayment(true)}
+                  disabled={paymentVerifying !== null}
+                >
+                  {paymentVerifying === "verify"
+                    ? tPages("orderDetailVerifyingPayment")
+                    : tPages("orderDetailVerifyPayment")}
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => handleVerifyPayment(false)}
+                  disabled={paymentVerifying !== null}
+                >
+                  {paymentVerifying === "reject"
+                    ? tPages("orderDetailRejectingPayment")
+                    : tPages("orderDetailRejectPayment")}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
         {/* Payment */}
         <Card className="overflow-hidden rounded-card border border-dashed border-card-border bg-card shadow-sm">
           <CardHeader className="border-b border-border/50 px-4 pb-4 sm:px-6">
@@ -870,46 +945,72 @@ export default function OrderDetailPage() {
                       : `${order.unavailable_products_count} products data corrupted.`}
                   </p>
                 ) : (
-                  <div className="space-y-2">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <Select
-                        value={order.status}
-                        onChange={(e) => handleStatusChange(e.target.value)}
-                        disabled={statusUpdateLoading}
-                        className="h-9 w-[180px]"
+                  <div className="grid grid-cols-2 gap-4 sm:gap-6">
+                    <div className="min-w-0">
+                      <label
+                        htmlFor="order-detail-status-select"
+                        className="mb-1 block text-xs font-medium text-muted-foreground"
                       >
-                        {ORDER_STATUS_OPTIONS.map((s) => (
-                          <option key={s} value={s}>
-                            {formatOrderStatusLabel(s, tPages)}
-                          </option>
-                        ))}
-                      </Select>
-                      {statusUpdateLoading ? (
-                        <span className="text-xs text-muted-foreground">
-                          {tPages("orderDetailStatusUpdating")}
-                        </span>
-                      ) : null}
+                        {tPages("orderDetailOrderStatusField")}
+                      </label>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <Select
+                          id="order-detail-status-select"
+                          value={order.status}
+                          onChange={(e) => handleStatusChange(e.target.value)}
+                          disabled={statusUpdateLoading}
+                          className="h-9 w-full min-w-0"
+                        >
+                          {ORDER_STATUS_OPTIONS.filter((s) => {
+                            if (
+                              s === "confirmed" &&
+                              order.status === "payment_pending" &&
+                              order.payment_status !== "verified"
+                            ) {
+                              return false;
+                            }
+                            return true;
+                          }).map((s) => (
+                            <option key={s} value={s}>
+                              {formatOrderStatusLabel(s, tPages)}
+                            </option>
+                          ))}
+                        </Select>
+                        {statusUpdateLoading ? (
+                          <span className="text-xs text-muted-foreground">
+                            {tPages("orderDetailStatusUpdating")}
+                          </span>
+                        ) : null}
+                      </div>
                     </div>
-                    <div className="flex flex-wrap items-center gap-2">
-                      <Select
-                        value={(order.flag || "") as string}
-                        onChange={(e) => handleFlagChange(e.target.value)}
-                        disabled={flagUpdateLoading}
-                        className="h-9 w-[180px]"
-                        aria-label="Order flag"
+                    <div className="min-w-0">
+                      <label
+                        htmlFor="order-detail-flag-select"
+                        className="mb-1 block text-xs font-medium text-muted-foreground"
                       >
-                        <option value="">{formatOrderFlagLabel(null)}</option>
-                        {ORDER_FLAG_OPTIONS.map((f) => (
-                          <option key={f} value={f}>
-                            {formatOrderFlagLabel(f)}
-                          </option>
-                        ))}
-                      </Select>
-                      {flagUpdateLoading ? (
-                        <span className="text-xs text-muted-foreground">
-                          Updating…
-                        </span>
-                      ) : null}
+                        {tPages("orderDetailFlagSelectLabel")}
+                      </label>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <Select
+                          id="order-detail-flag-select"
+                          value={(order.flag || "") as string}
+                          onChange={(e) => handleFlagChange(e.target.value)}
+                          disabled={flagUpdateLoading}
+                          className="h-9 w-full min-w-0"
+                        >
+                          <option value="">{formatOrderFlagLabel(null)}</option>
+                          {ORDER_FLAG_OPTIONS.map((f) => (
+                            <option key={f} value={f}>
+                              {formatOrderFlagLabel(f)}
+                            </option>
+                          ))}
+                        </Select>
+                        {flagUpdateLoading ? (
+                          <span className="text-xs text-muted-foreground">
+                            {tPages("orderDetailStatusUpdating")}
+                          </span>
+                        ) : null}
+                      </div>
                     </div>
                   </div>
                 )}

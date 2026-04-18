@@ -1,9 +1,15 @@
-export const ORDER_STATUS_OPTIONS = ["pending", "confirmed", "cancelled"] as const;
+export const ORDER_STATUS_OPTIONS = [
+  "pending",
+  "payment_pending",
+  "confirmed",
+  "cancelled",
+] as const;
 
 export type OrderStatusValue = (typeof ORDER_STATUS_OPTIONS)[number];
 
 const STATUS_I18N_KEYS: Partial<Record<string, string>> = {
   pending: "orderStatusPending",
+  payment_pending: "orderStatusPaymentPending",
   confirmed: "orderStatusConfirmed",
   cancelled: "orderStatusCancelled",
 };

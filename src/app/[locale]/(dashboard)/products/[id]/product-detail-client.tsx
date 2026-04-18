@@ -105,6 +105,7 @@ export default function ProductDetailClient() {
     description: "",
     stock: "0",
     is_active: true,
+    prepayment_type: "none" as "none" | "delivery_only" | "full",
   });
   const [extraFields, setExtraFields] = useState<ExtraFieldValues>({});
   const [extraFieldsErrors, setExtraFieldsErrors] = useState<Record<string, string>>({});
@@ -193,6 +194,10 @@ export default function ProductDetailClient() {
           description: p.description ?? "",
           stock: String(p.available_quantity ?? p.total_stock ?? ""),
           is_active: p.is_active,
+          prepayment_type: (p.prepayment_type ?? "none") as
+            | "none"
+            | "delivery_only"
+            | "full",
         });
         setExtraFields(
           typeof p.extra_data === "object" && p.extra_data !== null
@@ -349,6 +354,7 @@ export default function ProductDetailClient() {
     formData.append("category", form.category);
     formData.append("description", form.description);
     formData.append("is_active", String(form.is_active));
+    formData.append("prepayment_type", form.prepayment_type);
     const mainFile = imageFiles[0];
     if (mainFile) formData.append("image", mainFile);
     if (removeImage) formData.append("remove_image", "true");
@@ -638,6 +644,34 @@ export default function ProductDetailClient() {
                       disabled
                       title={tPages("productStockManagedInventory")}
                     />
+                  </Field>
+                  <Field label={tPages("productPrepaymentTypeLabel")}>
+                    <Select
+                      value={form.prepayment_type}
+                      onChange={(e) =>
+                        setForm({
+                          ...form,
+                          prepayment_type: e.target.value as
+                            | "none"
+                            | "delivery_only"
+                            | "full",
+                        })
+                      }
+                      className={fieldControlClass}
+                    >
+                      <option value="none">
+                        {tPages("productPrepaymentTypeNone")}
+                      </option>
+                      <option value="delivery_only">
+                        {tPages("productPrepaymentTypeDeliveryOnly")}
+                      </option>
+                      <option value="full">
+                        {tPages("productPrepaymentTypeFull")}
+                      </option>
+                    </Select>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      {tPages("productPrepaymentTypeHelp")}
+                    </p>
                   </Field>
                 </div>
               </CardContent>
@@ -933,6 +967,18 @@ export default function ProductDetailClient() {
                     </p>
                     <p className={cn("text-foreground", numClass)}>
                       {product.available_quantity ?? product.total_stock ?? form.stock}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">
+                      {tPages("productPrepaymentTypeLabel")}
+                    </p>
+                    <p className="text-foreground">
+                      {(product.prepayment_type ?? "none") === "delivery_only"
+                        ? tPages("productPrepaymentTypeDeliveryOnly")
+                        : (product.prepayment_type ?? "none") === "full"
+                          ? tPages("productPrepaymentTypeFull")
+                          : tPages("productPrepaymentTypeNone")}
                     </p>
                   </div>
                 </div>

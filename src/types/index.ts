@@ -86,12 +86,27 @@ export interface OrderPricingPreview {
   lines?: Array<Record<string, string | number>>;
 }
 
+export type OrderStatus =
+  | "pending"
+  | "payment_pending"
+  | "confirmed"
+  | "cancelled";
+
+export type OrderPaymentStatus =
+  | "none"
+  | "submitted"
+  | "verified"
+  | "failed";
+
 export interface Order {
   public_id: string;
   order_number: string;
   user_public_id?: string | null;
   email: string;
-  status: string;
+  status: OrderStatus | string;
+  payment_status?: OrderPaymentStatus;
+  transaction_id?: string | null;
+  payer_number?: string | null;
   flag?: string | null;
   subtotal_before_discount: string;
   discount_total: string;
@@ -147,9 +162,13 @@ export interface Product {
   images?: ProductImage[];
   /** Admin list: manual sort index within category. */
   display_order?: number;
+  /** Prepayment requirement for checkout; applies to all variants. */
+  prepayment_type?: ProductPrepaymentType;
   created_at: string;
   updated_at?: string;
 }
+
+export type ProductPrepaymentType = "none" | "delivery_only" | "full";
 
 export interface ProductImage {
   public_id: string;

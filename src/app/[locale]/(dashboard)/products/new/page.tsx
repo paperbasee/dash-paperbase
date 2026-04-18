@@ -47,6 +47,7 @@ export default function NewProductPage() {
     description: "",
     stock: "0",
     is_active: true,
+    prepayment_type: "none" as "none" | "delivery_only" | "full",
   });
   const [extraFields, setExtraFields] = useState<ExtraFieldValues>({});
   const [extraFieldsErrors, setExtraFieldsErrors] = useState<Record<string, string>>({});
@@ -170,6 +171,7 @@ export default function NewProductPage() {
     formData.append("category", form.category);
     formData.append("description", form.description);
     formData.append("is_active", String(form.is_active));
+    formData.append("prepayment_type", form.prepayment_type);
     const mainImage = imageFiles[0];
     if (mainImage) formData.append("image", mainImage);
     if (Object.keys(extraFields).length > 0) {
@@ -362,6 +364,34 @@ export default function NewProductPage() {
                     disabled
                     title={tPages("productStockNewTitle")}
                   />
+                </Field>
+                <Field label={tPages("productPrepaymentTypeLabel")}>
+                  <Select
+                    value={form.prepayment_type}
+                    onChange={(e) =>
+                      setForm({
+                        ...form,
+                        prepayment_type: e.target.value as
+                          | "none"
+                          | "delivery_only"
+                          | "full",
+                      })
+                    }
+                    className={fieldControlClass}
+                  >
+                    <option value="none">
+                      {tPages("productPrepaymentTypeNone")}
+                    </option>
+                    <option value="delivery_only">
+                      {tPages("productPrepaymentTypeDeliveryOnly")}
+                    </option>
+                    <option value="full">
+                      {tPages("productPrepaymentTypeFull")}
+                    </option>
+                  </Select>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    {tPages("productPrepaymentTypeHelp")}
+                  </p>
                 </Field>
               </div>
             </CardContent>

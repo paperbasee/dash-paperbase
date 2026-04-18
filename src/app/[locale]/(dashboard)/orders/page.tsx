@@ -14,6 +14,7 @@ import { FilterBar } from "@/components/filters/FilterBar";
 import { FilterDropdown } from "@/components/filters/FilterDropdown";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { useFilters } from "@/hooks/useFilters";
+import { useHorizontalWheelScroll } from "@/hooks/useHorizontalWheelScroll";
 import api from "@/lib/api";
 import { useBranding } from "@/context/BrandingContext";
 import { formatDashboardDateTime } from "@/lib/datetime-display";
@@ -21,6 +22,10 @@ import {
   ORDER_STATUS_OPTIONS,
   formatOrderStatusLabel,
 } from "@/lib/orders/order-statuses";
+import {
+  ORDER_PAYMENT_STATUS_OPTIONS,
+  formatOrderPaymentStatusLabel,
+} from "@/lib/orders/payment-statuses";
 import { ORDER_FLAG_OPTIONS, formatOrderFlagLabel } from "@/lib/orders/order-flags";
 import type { Order, PaginatedResponse } from "@/types";
 import { useConfirm } from "@/context/ConfirmDialogContext";
@@ -51,6 +56,7 @@ export default function OrdersPage() {
     "status",
     "flag",
     "date_range",
+    "payment_status",
     "search",
   ]);
   const [searchInput, setSearchInput] = useState(filters.search || "");
@@ -64,6 +70,7 @@ export default function OrdersPage() {
   const [statusUpdatingId, setStatusUpdatingId] = useState<string | null>(null);
   const [flagUpdatingId, setFlagUpdatingId] = useState<string | null>(null);
   const [courierSendingId, setCourierSendingId] = useState<string | null>(null);
+  const setScrollContainer = useHorizontalWheelScroll<HTMLDivElement>();
 
   const [fraudByOrderId, setFraudByOrderId] = useState<Record<string, FraudCheckState>>(
     {}
@@ -97,6 +104,7 @@ export default function OrdersPage() {
     if (filters.status) params.status = filters.status;
     if (filters.flag) params.flag = filters.flag;
     if (filters.date_range) params.date_range = filters.date_range;
+    if (filters.payment_status) params.payment_status = filters.payment_status;
     if (filters.search) params.search = filters.search;
     api
       .get<PaginatedResponse<Order>>("admin/orders/", {
@@ -116,6 +124,7 @@ export default function OrdersPage() {
     filters.customer,
     filters.date_range,
     filters.flag,
+    filters.payment_status,
     filters.search,
     filters.status,
     page,
@@ -382,6 +391,15 @@ export default function OrdersPage() {
             },
           ]}
         />
+        <FilterDropdown
+          value={filters.payment_status}
+          onChange={(value) => setFilter("payment_status", value)}
+          placeholder={tPages("filtersPaymentStatus")}
+          options={ORDER_PAYMENT_STATUS_OPTIONS.map((s) => ({
+            value: s,
+            label: formatOrderPaymentStatusLabel(s, (key) => tPages(key)),
+          }))}
+        />
         <Input
           value={searchInput}
           onChange={(e) => setSearchInput(e.target.value)}
@@ -406,11 +424,14 @@ export default function OrdersPage() {
         </div>
       ) : (
         <>
-          <div className="overflow-x-auto rounded-card border border-dashed border-card-border bg-card">
+          <div
+            ref={setScrollContainer}
+            className="overflow-x-auto rounded-card border border-dashed border-card-border bg-card"
+          >
             <table className="w-full text-left text-sm">
               <thead>
                 <tr className="border-b border-border bg-muted/40">
-                  <th className="w-10 px-2 py-3">
+                  <th className="w-10 px-4 py-3">
                     <input
                       type="checkbox"
                       checked={allSelected}
@@ -427,6 +448,8 @@ export default function OrdersPage() {
                   <th className="th">Flag</th>
                   <th className="th">{tPages("ordersListColTotal")}</th>
                   <th className="th">{tPages("ordersListConsignmentId")}</th>
+                  <th className="th">{tPages("ordersListColPayment")}</th>
+                  <th className="th">{tPages("ordersListColTransactionId")}</th>
                   <th className="th">{tPages("ordersListColDate")}</th>
                 </tr>
               </thead>
@@ -457,7 +480,7 @@ export default function OrdersPage() {
                         href={`/orders/${order.public_id}`}
                         aria-label={String(order.order_number)}
                       >
-                        <td className="w-10 px-2 py-3">
+                        <td className="w-10 px-4 py-3">
                           <input
                             type="checkbox"
                             checked={selectedIds.has(order.public_id)}
@@ -514,7 +537,19 @@ export default function OrdersPage() {
                                   orderNumber: order.order_number,
                                 })}
                               >
-                                {ORDER_STATUS_OPTIONS.map((s) => (
+                                {ORDER_STATUS_OPTIONS.filter((s) => {
+                                  // Prevent manually picking confirmed when a
+                                  // payment-pending order still lacks verification;
+                                  // admins must use the verify-payment action.
+                                  if (
+                                    s === "confirmed" &&
+                                    order.status === "payment_pending" &&
+                                    order.payment_status !== "verified"
+                                  ) {
+                                    return false;
+                                  }
+                                  return true;
+                                }).map((s) => (
                                   <option key={s} value={s}>
                                     {formatOrderStatusLabel(s, (key) => tPages(key))}
                                   </option>
@@ -588,6 +623,19 @@ export default function OrdersPage() {
                               {courierCell(order)}
                             </span>
                           )}
+                        </td>
+                        <td className="px-4 py-3 whitespace-nowrap capitalize text-muted-foreground">
+                          {formatOrderPaymentStatusLabel(
+                            order.payment_status,
+                            (key) => tPages(key),
+                          )}
+                        </td>
+                        <td
+                          className={`px-4 py-3 whitespace-nowrap text-muted-foreground ${numClass}`}
+                        >
+                          {order.transaction_id
+                            ? order.transaction_id
+                            : "—"}
                         </td>
                         <td className="px-4 py-3 text-muted-foreground whitespace-nowrap">
                           {formatDashboardDateTime(order.created_at, locale)}
