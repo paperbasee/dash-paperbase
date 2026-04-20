@@ -30,17 +30,36 @@ interface NotificationState {
 
 const NotificationContext = createContext<NotificationState | undefined>(undefined);
 
-const STORAGE_KEY = "akkho_notification_read_ids";
-const PREFS_KEY = "akkho_notification_prefs";
-const DELETED_KEY = "akkho_notification_deleted_ids";
+const STORAGE_KEY = "paperbase_notification_read_ids";
+const PREFS_KEY = "paperbase_notification_prefs";
+const DELETED_KEY = "paperbase_notification_deleted_ids";
+
+const LEGACY_STORAGE_KEY = "akkho_notification_read_ids";
+const LEGACY_PREFS_KEY = "akkho_notification_prefs";
+const LEGACY_DELETED_KEY = "akkho_notification_deleted_ids";
 
 type NotificationPrefs = {
   orders: boolean;
   supportTickets: boolean;
 };
 
+function migrateLegacyKey(legacyKey: string, nextKey: string) {
+  if (typeof window === "undefined") return;
+  try {
+    const hasNext = window.localStorage.getItem(nextKey) != null;
+    if (hasNext) return;
+    const legacy = window.localStorage.getItem(legacyKey);
+    if (legacy == null) return;
+    window.localStorage.setItem(nextKey, legacy);
+    window.localStorage.removeItem(legacyKey);
+  } catch {
+    // ignore
+  }
+}
+
 function loadReadIds(): Set<string> {
   if (typeof window === "undefined") return new Set();
+  migrateLegacyKey(LEGACY_STORAGE_KEY, STORAGE_KEY);
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY);
     if (!raw) return new Set();
@@ -62,6 +81,7 @@ function saveReadIds(ids: Set<string>) {
 
 function loadDeletedIds(): Set<string> {
   if (typeof window === "undefined") return new Set();
+  migrateLegacyKey(LEGACY_DELETED_KEY, DELETED_KEY);
   try {
     const raw = window.localStorage.getItem(DELETED_KEY);
     if (!raw) return new Set();
@@ -87,6 +107,7 @@ function loadPrefs(): NotificationPrefs {
     supportTickets: true,
   };
   if (typeof window === "undefined") return defaults;
+  migrateLegacyKey(LEGACY_PREFS_KEY, PREFS_KEY);
   try {
     const raw = window.localStorage.getItem(PREFS_KEY);
     if (!raw) return defaults;

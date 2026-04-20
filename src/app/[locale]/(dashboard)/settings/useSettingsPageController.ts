@@ -10,7 +10,8 @@ import { useAccountSettings } from "./useAccountSettings";
 import { useStoreSettings } from "./useStoreSettings";
 import type { DynamicFieldsMessage } from "@/components/DynamicFieldsPanel";
 
-const NOTIFICATION_PREFS_KEY = "akkho_notification_prefs";
+const NOTIFICATION_PREFS_KEY = "paperbase_notification_prefs";
+const LEGACY_NOTIFICATION_PREFS_KEY = "akkho_notification_prefs";
 
 type NotificationPrefs = {
   orders: boolean;
@@ -54,6 +55,16 @@ export default function useSettingsPageController() {
   useEffect(() => {
     if (typeof window === "undefined") return;
     try {
+      if (
+        window.localStorage.getItem(NOTIFICATION_PREFS_KEY) == null &&
+        window.localStorage.getItem(LEGACY_NOTIFICATION_PREFS_KEY) != null
+      ) {
+        window.localStorage.setItem(
+          NOTIFICATION_PREFS_KEY,
+          window.localStorage.getItem(LEGACY_NOTIFICATION_PREFS_KEY) ?? "",
+        );
+        window.localStorage.removeItem(LEGACY_NOTIFICATION_PREFS_KEY);
+      }
       const raw = window.localStorage.getItem(NOTIFICATION_PREFS_KEY);
       if (!raw) return;
       const parsed = JSON.parse(raw) as Partial<NotificationPrefs>;
