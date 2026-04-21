@@ -113,7 +113,6 @@ Always use these prefixed string IDs. Never send raw numeric IDs.
 | `atv_`  | Attribute value   |
 | `ban_`  | Banner            |
 | `blg_`  | Blog post         |
-| `bcg_`  | Blog category     |
 | `btg_`  | Blog tag          |
 | `szn_`  | Shipping zone     |
 | `smt_`  | Shipping method   |
@@ -1188,10 +1187,9 @@ disabled, even for an authenticated storefront API key.
 
 **Query parameters (optional):**
 
-| Param      | Type   | Purpose                                              |
-| ---------- | ------ | ---------------------------------------------------- |
-| `category` | string | Filter by category slug (e.g. `news`)                |
-| `tag`      | string | Filter by tag slug (e.g. `updates`)                  |
+| Param | Type | Purpose |
+| ----- | ---- | ------- |
+| `tag` | string | Filter by tag slug (e.g. `updates`) |
 
 **Response `200 OK`:**
 
@@ -1205,11 +1203,6 @@ disabled, even for an authenticated storefront API key.
     "featured_image_url": "https://storage.paperbase.me/.../featured.jpg",
     "meta_title": "Summer sale 2026",
     "meta_description": "Up to 50% off across…",
-    "category": {
-      "public_id": "bcg_news01",
-      "name": "News",
-      "slug": "news"
-    },
     "tags": [
       { "public_id": "btg_sale01", "name": "Sale", "slug": "sale" }
     ],
@@ -1220,13 +1213,12 @@ disabled, even for an authenticated storefront API key.
 ]
 ```
 
-| Field                 | Type            | Notes                                                  |
-| --------------------- | --------------- | ------------------------------------------------------ |
-| `public_id`           | string          | Prefix: `blg_`                                         |
-| `category.public_id`  | string \| null  | Prefix: `bcg_`; `null` when the post has no category   |
-| `tags[].public_id`    | string          | Prefix: `btg_`                                         |
-| `featured_image_url`  | string \| null  | Absolute URL to the featured image, or `null` if unset |
-| `published_at`        | ISO 8601 \| null| Non-null for every row in this list (posts with a null timestamp never appear here) |
+| Field                | Type            | Notes                                                  |
+| -------------------- | --------------- | ------------------------------------------------------ |
+| `public_id`          | string          | Prefix: `blg_`                                         |
+| `tags[].public_id`   | string          | Prefix: `btg_`                                         |
+| `featured_image_url` | string \| null  | Absolute URL to the featured image, or `null` if unset |
+| `published_at`       | ISO 8601 \| null| Non-null for every row in this list (posts with a null timestamp never appear here) |
 
 The list is not paginated — the backend applies tenant-scoped caching and
 returns the full published set. Storefronts should render the array directly.
@@ -1254,7 +1246,6 @@ Returns the full post including `content` and `author_name`, and increments the
   "featured_image_url": "https://storage.paperbase.me/.../featured.jpg",
   "meta_title": "Summer sale 2026",
   "meta_description": "Up to 50% off across…",
-  "category": { "public_id": "bcg_news01", "name": "News", "slug": "news" },
   "tags": [{ "public_id": "btg_sale01", "name": "Sale", "slug": "sale" }],
   "is_featured": true,
   "views": 1244,

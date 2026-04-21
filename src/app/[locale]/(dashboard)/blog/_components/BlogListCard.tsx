@@ -35,7 +35,7 @@ export function BlogListCard({ blog, locale }: BlogListCardProps) {
     .filter(Boolean)
     .slice(0, 3)
     .join(" • ");
-  const pillText = (tagText || blog.category?.name || "Untagged").toUpperCase();
+  const pillText = (tagText || "Untagged").toUpperCase();
   const byline = blog.author_name?.trim() || "—";
 
   return (

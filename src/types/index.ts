@@ -351,14 +351,6 @@ export interface StockMovement {
   actor_public_id: string | null;
 }
 
-export interface BlogCategory {
-  public_id: string;
-  name: string;
-  slug: string;
-  created_at?: string;
-  updated_at?: string;
-}
-
 export interface BlogTag {
   public_id: string;
   name: string;
@@ -377,7 +369,6 @@ export interface Blog {
   featured_image_url: string | null;
   meta_title: string;
   meta_description: string;
-  category: BlogCategory | null;
   tags: BlogTag[];
   published_at: string | null;
   is_featured: boolean;

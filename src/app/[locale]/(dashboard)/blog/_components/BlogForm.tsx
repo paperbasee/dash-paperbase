@@ -142,7 +142,6 @@ export function BlogForm({ mode, initialBlog }: BlogFormProps) {
     fd.append("content", form.content);
     fd.append("meta_title", form.meta_title);
     fd.append("meta_description", form.meta_description);
-    fd.append("category_public_id", "");
     if (form.tag_public_ids.length > 0) {
       form.tag_public_ids.forEach((id) => fd.append("tag_public_ids", id));
     } else {

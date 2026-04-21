@@ -149,7 +149,7 @@ export const APP_CONFIG: Record<string, AppConfig> = {
     id: "blog",
     label: "Blog",
     icon: Newspaper,
-    description: "Publish blog posts, schedule releases, and manage categories and tags",
+    description: "Publish blog posts and manage tags",
     essential: false,
     href: "/blog",
     countKey: null,
