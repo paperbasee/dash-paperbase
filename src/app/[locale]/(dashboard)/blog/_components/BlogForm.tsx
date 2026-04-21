@@ -13,6 +13,8 @@ import { notify } from "@/notifications";
 import type { Blog, BlogTag, PaginatedResponse } from "@/types";
 import { BlogImageUpload } from "./BlogImageUpload";
 import { useConfirm } from "@/context/ConfirmDialogContext";
+import { useNotificationValidation } from "@/notifications/NotificationProvider";
+import { cn } from "@/lib/utils";
 
 interface BlogFormState {
   title: string;
@@ -31,6 +33,15 @@ interface BlogFormProps {
 }
 
 const BLOG_TITLE_MAX = 255;
+/** Matches `Blog.excerpt` / `Blog.meta_description` in the API (`CharField(max_length=500)`). */
+const BLOG_EXCERPT_MAX = 500;
+const BLOG_META_DESC_MAX = 500;
+
+function countWords(s: string): number {
+  const t = s.trim();
+  if (!t) return 0;
+  return t.split(/\s+/).length;
+}
 
 const EMPTY_STATE: BlogFormState = {
   title: "",
@@ -59,6 +70,7 @@ function stateFromBlog(blog: Blog): BlogFormState {
 export function BlogForm({ mode, initialBlog }: BlogFormProps) {
   const router = useRouter();
   const confirm = useConfirm();
+  const { fieldErrors, clearValidation } = useNotificationValidation("blog-form");
   const [form, setForm] = useState<BlogFormState>(() =>
     initialBlog ? stateFromBlog(initialBlog) : EMPTY_STATE,
   );
@@ -188,7 +200,12 @@ export function BlogForm({ mode, initialBlog }: BlogFormProps) {
           }
           if (Object.keys(fieldErrors).length > 0) {
             notify.validation("blog-form", fieldErrors);
-            notify.warning("Please fix the highlighted fields and try again.");
+            const first = Object.values(fieldErrors)[0];
+            notify.warning(
+              typeof first === "string" && first.trim()
+                ? first
+                : "Some fields could not be saved. See the messages under each field.",
+            );
             return null;
           }
         }
@@ -220,10 +237,29 @@ export function BlogForm({ mode, initialBlog }: BlogFormProps) {
       notify.warning(message);
       return;
     }
+    if (form.excerpt.length > BLOG_EXCERPT_MAX) {
+      const message = `Excerpt must be ${BLOG_EXCERPT_MAX} characters or fewer`;
+      notify.validation("blog-form", { excerpt: message });
+      notify.warning(message);
+      return;
+    }
+    if (form.meta_title.length > BLOG_TITLE_MAX) {
+      const message = `Meta title must be ${BLOG_TITLE_MAX} characters or fewer`;
+      notify.validation("blog-form", { meta_title: message });
+      notify.warning(message);
+      return;
+    }
+    if (form.meta_description.length > BLOG_META_DESC_MAX) {
+      const message = `Meta description must be ${BLOG_META_DESC_MAX} characters or fewer`;
+      notify.validation("blog-form", { meta_description: message });
+      notify.warning(message);
+      return;
+    }
     setSaving(true);
     const saved = await ensureSaved();
     setSaving(false);
     if (!saved) return;
+    clearValidation();
     notify.success("Post saved");
     if (mode === "new") {
       router.push(`/blog/${saved.public_id}/edit`);
@@ -271,11 +307,18 @@ export function BlogForm({ mode, initialBlog }: BlogFormProps) {
               <CardTitle className="text-base font-semibold">Content</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <Field label="Title" required>
+              <Field label="Title" required htmlFor="blog-title" error={fieldErrors.title}>
                 <Input
+                  id="blog-title"
                   required
                   value={form.title}
-                  onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
+                  onChange={(e) => {
+                    clearValidation(["title"]);
+                    setForm((f) => ({ ...f, title: e.target.value }));
+                  }}
+                  maxLength={BLOG_TITLE_MAX}
+                  aria-invalid={!!fieldErrors.title}
+                  className={cn(fieldErrors.title && "border-destructive")}
                   placeholder="A compelling title for your post"
                 />
                 {mode === "edit" && initialBlog?.slug && (
@@ -284,26 +327,55 @@ export function BlogForm({ mode, initialBlog }: BlogFormProps) {
                   </p>
                 )}
               </Field>
-              <Field label="Excerpt">
+              <Field
+                label="Excerpt"
+                htmlFor="blog-excerpt"
+                error={fieldErrors.excerpt}
+                hint="Shown in blog listings and preview cards when set."
+              >
                 <Textarea
+                  id="blog-excerpt"
                   rows={2}
                   value={form.excerpt}
-                  onChange={(e) =>
-                    setForm((f) => ({ ...f, excerpt: e.target.value }))
-                  }
+                  onChange={(e) => {
+                    clearValidation(["excerpt"]);
+                    setForm((f) => ({ ...f, excerpt: e.target.value }));
+                  }}
+                  maxLength={BLOG_EXCERPT_MAX}
+                  aria-invalid={!!fieldErrors.excerpt}
+                  className={cn(
+                    "[field-sizing:fixed] h-24 resize-none overflow-y-auto",
+                    fieldErrors.excerpt && "border-destructive",
+                  )}
                   placeholder="Short summary shown in listings (optional)"
-                  className="[field-sizing:fixed] h-24 resize-none overflow-y-auto"
                 />
+                <p
+                  className={cn(
+                    "mt-1 text-xs tabular-nums",
+                    form.excerpt.length >= BLOG_EXCERPT_MAX
+                      ? "text-destructive"
+                      : "text-muted-foreground",
+                  )}
+                >
+                  {form.excerpt.length} / {BLOG_EXCERPT_MAX} characters · {countWords(form.excerpt)}{" "}
+                  words
+                </p>
               </Field>
-              <Field label="Body">
+              <Field label="Body" htmlFor="blog-content" error={fieldErrors.content}>
                 <Textarea
+                  id="blog-content"
                   rows={14}
                   value={form.content}
-                  onChange={(e) =>
-                    setForm((f) => ({ ...f, content: e.target.value }))
-                  }
+                  onChange={(e) => {
+                    clearValidation(["content"]);
+                    setForm((f) => ({ ...f, content: e.target.value }));
+                  }}
+                  aria-invalid={!!fieldErrors.content}
+                  className={cn(
+                    "[field-sizing:fixed] h-64 resize-none overflow-y-auto font-mono text-sm",
+                    fieldErrors.content && "border-destructive",
+                  )}
                   placeholder="Markdown or HTML. Inline images: paste external URLs."
-                  className="[field-sizing:fixed] h-64 resize-none overflow-y-auto font-mono text-sm"
                 />
                 <p className="mt-1 text-xs text-muted-foreground">
                   The body is stored as plain text — storefront rendering decides
@@ -319,27 +391,53 @@ export function BlogForm({ mode, initialBlog }: BlogFormProps) {
               <CardTitle className="text-base font-semibold">SEO</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <Field label="Meta title">
+              <Field label="Meta title" htmlFor="blog-meta-title" error={fieldErrors.meta_title}>
                 <Input
+                  id="blog-meta-title"
                   value={form.meta_title}
-                  onChange={(e) =>
-                    setForm((f) => ({ ...f, meta_title: e.target.value }))
-                  }
+                  onChange={(e) => {
+                    clearValidation(["meta_title"]);
+                    setForm((f) => ({ ...f, meta_title: e.target.value }));
+                  }}
+                  maxLength={BLOG_TITLE_MAX}
+                  aria-invalid={!!fieldErrors.meta_title}
+                  className={cn(fieldErrors.meta_title && "border-destructive")}
                   placeholder="Defaults to the post title"
                 />
               </Field>
-              <Field label="Meta description">
+              <Field
+                label="Meta description"
+                htmlFor="blog-meta-description"
+                error={fieldErrors.meta_description}
+                hint={`Up to ${BLOG_META_DESC_MAX} characters for search snippets.`}
+              >
                 <Textarea
+                  id="blog-meta-description"
                   rows={2}
                   value={form.meta_description}
-                  onChange={(e) =>
+                  onChange={(e) => {
+                    clearValidation(["meta_description"]);
                     setForm((f) => ({
                       ...f,
                       meta_description: e.target.value,
-                    }))
-                  }
+                    }));
+                  }}
+                  maxLength={BLOG_META_DESC_MAX}
+                  aria-invalid={!!fieldErrors.meta_description}
+                  className={cn(fieldErrors.meta_description && "border-destructive")}
                   placeholder="Shown in search engine result snippets"
                 />
+                <p
+                  className={cn(
+                    "mt-1 text-xs tabular-nums",
+                    form.meta_description.length >= BLOG_META_DESC_MAX
+                      ? "text-destructive"
+                      : "text-muted-foreground",
+                  )}
+                >
+                  {form.meta_description.length} / {BLOG_META_DESC_MAX} characters ·{" "}
+                  {countWords(form.meta_description)} words
+                </p>
               </Field>
             </CardContent>
           </Card>
@@ -489,19 +587,30 @@ export function BlogForm({ mode, initialBlog }: BlogFormProps) {
 function Field({
   label,
   required,
+  htmlFor,
+  hint,
+  error,
   children,
 }: {
   label: string;
   required?: boolean;
+  htmlFor?: string;
+  hint?: string;
+  error?: string;
   children: React.ReactNode;
 }) {
   return (
     <div>
-      <label className="mb-1.5 block text-sm font-medium text-muted-foreground">
+      <label
+        htmlFor={htmlFor}
+        className="mb-1.5 block text-sm font-medium text-muted-foreground"
+      >
         {label}
         {required && <span className="text-destructive"> *</span>}
       </label>
       {children}
+      {hint && !error && <p className="mt-1 text-xs text-muted-foreground">{hint}</p>}
+      {error && <p className="mt-1 text-xs text-destructive">{error}</p>}
     </div>
   );
 }
