@@ -112,6 +112,9 @@ Always use these prefixed string IDs. Never send raw numeric IDs.
 | `atr_`  | Attribute         |
 | `atv_`  | Attribute value   |
 | `ban_`  | Banner            |
+| `blg_`  | Blog post         |
+| `bcg_`  | Blog category     |
+| `btg_`  | Blog tag          |
 | `szn_`  | Shipping zone     |
 | `smt_`  | Shipping method   |
 | `srt_`  | Shipping rate     |
@@ -157,7 +160,9 @@ No other endpoints exist. Do not call any path not listed below.
 | 17| POST   | `/api/v1/orders/<public_id>/payment/`             | Submit transaction for a prepayment order |
 | 18| GET    | `/api/v1/search/`                                 | Combined product + category search        |
 | 19| POST   | `/api/v1/support/tickets/`                        | Submit a support ticket                   |
-| 20| POST   | `/tracking/event`                                 | (Fired by bundled `tracker.js` only)      |
+| 20| GET    | `/api/v1/blogs/`                                  | Published blog posts list                 |
+| 21| GET    | `/api/v1/blogs/<public_id>/`                      | Published blog post detail                |
+| 22| POST   | `/tracking/event`                                 | (Fired by bundled `tracker.js` only)      |
 
 > There is **no** `POST /api/v1/orders/initiate-checkout/`, no `GET /api/v1/orders/...`
 > for customers, no cart endpoint, and no logout / login endpoint. The cart lives
@@ -1166,6 +1171,110 @@ only when sending `attachments`.
 ```
 
 > `status` is always `"new"` on creation.
+
+---
+
+### 7.20 GET `/api/v1/blogs/` — Published blog posts
+
+Returns posts that are **live** for the storefront: `published_at` is set,
+`published_at` is not in the future (relative to server time), `is_public` is
+true, and the row is not soft-deleted. There is no `status` field on the model
+or in API payloads — use `published_at` (and `is_public`) as the source of truth.
+Storefront-side deletion (soft delete) is transparent to this endpoint.
+
+**Feature gate:** returns `403 Forbidden` when the store has
+`modules_enabled.blog !== true`. No posts are leaked when the Blog module is
+disabled, even for an authenticated storefront API key.
+
+**Query parameters (optional):**
+
+| Param      | Type   | Purpose                                              |
+| ---------- | ------ | ---------------------------------------------------- |
+| `category` | string | Filter by category slug (e.g. `news`)                |
+| `tag`      | string | Filter by tag slug (e.g. `updates`)                  |
+
+**Response `200 OK`:**
+
+```json
+[
+  {
+    "public_id": "blg_abc123",
+    "title": "Our summer sale is here",
+    "slug": "our-summer-sale-is-here",
+    "excerpt": "Big deals on every category…",
+    "featured_image_url": "https://storage.paperbase.me/.../featured.jpg",
+    "meta_title": "Summer sale 2026",
+    "meta_description": "Up to 50% off across…",
+    "category": {
+      "public_id": "bcg_news01",
+      "name": "News",
+      "slug": "news"
+    },
+    "tags": [
+      { "public_id": "btg_sale01", "name": "Sale", "slug": "sale" }
+    ],
+    "is_featured": true,
+    "views": 1243,
+    "published_at": "2026-04-20T10:30:00+06:00"
+  }
+]
+```
+
+| Field                 | Type            | Notes                                                  |
+| --------------------- | --------------- | ------------------------------------------------------ |
+| `public_id`           | string          | Prefix: `blg_`                                         |
+| `category.public_id`  | string \| null  | Prefix: `bcg_`; `null` when the post has no category   |
+| `tags[].public_id`    | string          | Prefix: `btg_`                                         |
+| `featured_image_url`  | string \| null  | Absolute URL to the featured image, or `null` if unset |
+| `published_at`        | ISO 8601 \| null| Non-null for every row in this list (posts with a null timestamp never appear here) |
+
+The list is not paginated — the backend applies tenant-scoped caching and
+returns the full published set. Storefronts should render the array directly.
+
+---
+
+### 7.21 GET `/api/v1/blogs/<public_id>/` — Blog post detail
+
+`<public_id>` must be the `blg_...` identifier (slugs are not accepted here).
+Returns the full post including `content` and `author_name`, and increments the
+`views` counter on each call. The same **live** visibility rules as §7.20 apply
+(`published_at`, `is_public`, not soft-deleted).
+
+**Feature gate:** same as §7.20 — returns `403 Forbidden` when
+`modules_enabled.blog !== true`.
+
+**Response `200 OK`:**
+
+```json
+{
+  "public_id": "blg_abc123",
+  "title": "Our summer sale is here",
+  "slug": "our-summer-sale-is-here",
+  "excerpt": "Big deals on every category…",
+  "featured_image_url": "https://storage.paperbase.me/.../featured.jpg",
+  "meta_title": "Summer sale 2026",
+  "meta_description": "Up to 50% off across…",
+  "category": { "public_id": "bcg_news01", "name": "News", "slug": "news" },
+  "tags": [{ "public_id": "btg_sale01", "name": "Sale", "slug": "sale" }],
+  "is_featured": true,
+  "views": 1244,
+  "published_at": "2026-04-20T10:30:00+06:00",
+  "content": "…full body (markdown or HTML as written by the store)…",
+  "author_name": "Alex Chen"
+}
+```
+
+| Field          | Type            | Notes                                                         |
+| -------------- | --------------- | ------------------------------------------------------------- |
+| `content`      | string          | Stored verbatim — storefront decides markdown vs HTML rendering |
+| `author_name`  | string          | May be empty string if the author account was deleted         |
+
+Returns `404 Not Found` when the post has no `published_at`, has a future
+`published_at`, is marked non-public, is soft-deleted, or does not belong to
+the resolved store.
+
+> Inline images inside `content` are not stored on Paperbase — storefronts
+> should expect external image URLs in the body.
 
 ---
 

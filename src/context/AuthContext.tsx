@@ -40,6 +40,8 @@ interface AuthState {
   meProfileFetching: boolean;
   meProfile: MeForRouting | null;
   meProfileStatus: MeProfileStatus;
+  /** Raw error from the last failed ensureMeProfile call; null when status is not "error". */
+  meProfileError: unknown;
   refreshMeProfile: () => Promise<void>;
   login: (email: string, password: string, cf_turnstile_response?: string) => Promise<LoginResult>;
   register: (
@@ -65,6 +67,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const [meProfile, setMeProfile] = useState<MeForRouting | null>(null);
   const [meProfileStatus, setMeProfileStatus] = useState<MeProfileStatus>("idle");
+  const [meProfileError, setMeProfileError] = useState<unknown>(null);
   const [meProfileFetching, setMeProfileFetching] = useState(false);
 
   const isAuthenticatedRef = useRef(isAuthenticated);
@@ -91,13 +94,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!isAuthenticated) {
       setMeProfileFromStore(null, "idle");
+      setMeProfileError(null);
       setMeProfileFetching(false);
       return;
     }
 
     const hydrated = getHydratedMeProfile();
     if (hydrated) {
-      setMeProfileFromStore(hydrated, "ready");
+      // Keep cached me for continuity, but block dashboard render until the
+      // first live auth/me verification completes to avoid dashboard flash.
+      setMeProfile(hydrated);
+      setMeProfileStatus("loading");
     } else {
       setMeProfileFromStore(null, "loading");
     }
@@ -107,10 +114,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     ensureMeProfile()
       .then((m) => {
         if (cancelled) return;
+        setMeProfileError(null);
         setMeProfileFromStore(m, "ready");
       })
-      .catch(() => {
+      .catch((err: unknown) => {
         if (cancelled) return;
+        setMeProfileError(err);
         setMeProfileFromStore(null, "error");
       })
       .finally(() => {
@@ -169,9 +178,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setMeProfileFetching(true);
           ensureMeProfile({ forceNetwork: true })
             .then((m) => {
+              setMeProfileError(null);
               setMeProfileFromStore(m, "ready");
             })
-            .catch(() => {
+            .catch((err: unknown) => {
+              setMeProfileError(err);
               setMeProfileFromStore(null, "error");
             })
             .finally(() => setMeProfileFetching(false));
@@ -198,8 +209,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setMeProfileFetching(true);
     try {
       const m = await ensureMeProfile({ forceNetwork: true });
+      setMeProfileError(null);
       setMeProfileFromStore(m, "ready");
-    } catch {
+    } catch (err: unknown) {
+      setMeProfileError(err);
       setMeProfileFromStore(null, "error");
     } finally {
       setMeProfileFetching(false);
@@ -261,6 +274,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         meProfileFetching,
         meProfile,
         meProfileStatus,
+        meProfileError,
         refreshMeProfile,
         login,
         register,

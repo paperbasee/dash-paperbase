@@ -49,6 +49,7 @@ import { useEnabledApps } from "@/hooks/useEnabledApps";
 import {
   APP_CONFIG,
   CATALOG_SUB_APP_IDS,
+  MAIN_NAV_APP_IDS,
   MORE_APP_IDS,
   type NavCounts,
 } from "@/config/apps";
@@ -70,15 +71,14 @@ import {
 import SystemNotificationBanner from "@/components/system/SystemNotificationBanner";
 import { InventoryStatusDot } from "@/components/inventory/InventoryStatusDot";
 
-/** Top-level nav order; `__catalog__` is the Products / catalog group. */
+/**
+ * Top-level nav order; `__catalog__` is the Products / catalog group.
+ * Built from MAIN_NAV_APP_IDS so new main-nav apps (e.g. blog) appear automatically.
+ */
 const MAIN_NAV_SEQUENCE = [
-  "orders",
+  MAIN_NAV_APP_IDS[0],
   "__catalog__",
-  "customers",
-  "inventory",
-  "shipping",
-  "cta",
-  "banners",
+  ...MAIN_NAV_APP_IDS.slice(1),
 ] as const;
 
 function logoUrl(url: string | null): string | null {

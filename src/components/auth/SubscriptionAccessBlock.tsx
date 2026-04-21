@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { AuthPageShell } from "@/components/auth/AuthPageShell";
 import { logout } from "@/lib/auth";
 
-type Variant = "inactive" | "verifyFailed";
+type Variant = "inactive" | "verifyFailed" | "serverUnreachable";
 
 /**
  * Full-screen messaging for subscription gate failures (dashboard, onboarding, standalone page).
@@ -16,15 +16,24 @@ export default function SubscriptionAccessBlock({ variant }: { variant: Variant 
   const tCommon = useTranslations("common");
 
   const isInactive = variant === "inactive";
+  const isServerUnreachable = variant === "serverUnreachable";
 
   return (
     <AuthPageShell>
       <div className="space-y-2 text-center">
         <h1 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
-          {isInactive ? tPlan("title") : tLayout("subscriptionVerifyTitle")}
+          {isInactive
+            ? tPlan("title")
+            : isServerUnreachable
+              ? tLayout("serverUnreachableTitle")
+              : tLayout("subscriptionVerifyTitle")}
         </h1>
         <p className="text-sm leading-relaxed text-muted-foreground">
-          {isInactive ? tPlan("body") : tLayout("subscriptionVerifyBody")}
+          {isInactive
+            ? tPlan("body")
+            : isServerUnreachable
+              ? tLayout("serverUnreachableBody")
+              : tLayout("subscriptionVerifyBody")}
         </p>
       </div>
 
@@ -35,7 +44,7 @@ export default function SubscriptionAccessBlock({ variant }: { variant: Variant 
           </Button>
         ) : (
           <Button type="button" className="w-full" onClick={() => window.location.reload()}>
-            {tCommon("reload")}
+            {isServerUnreachable ? tCommon("retry") : tCommon("reload")}
           </Button>
         )}
         <Button type="button" variant="outline" className="w-full" onClick={() => logout()}>

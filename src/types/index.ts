@@ -351,6 +351,43 @@ export interface StockMovement {
   actor_public_id: string | null;
 }
 
+export interface BlogCategory {
+  public_id: string;
+  name: string;
+  slug: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface BlogTag {
+  public_id: string;
+  name: string;
+  slug: string;
+  created_at?: string;
+}
+
+/** Admin blog CRUD (`/api/v1/admin/blogs/`). Storefront GET uses `featured_image_url`. */
+export interface Blog {
+  public_id: string;
+  title: string;
+  slug: string;
+  content: string;
+  excerpt: string;
+  featured_image: string | null;
+  featured_image_url: string | null;
+  meta_title: string;
+  meta_description: string;
+  category: BlogCategory | null;
+  tags: BlogTag[];
+  published_at: string | null;
+  is_featured: boolean;
+  is_public: boolean;
+  views: number;
+  author_name: string;
+  created_at: string;
+  updated_at: string;
+}
+
 /** Admin banner CRUD (`/api/v1/admin/banners/`). Storefront GET uses `image_url` and `cta_url`. */
 export interface Banner {
   public_id: string;

@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Link, useRouter } from "@/i18n/navigation";
-import { Undo2, Check, Plus, X } from "lucide-react";
+import { Undo2, Check, ImageIcon, Plus, X } from "lucide-react";
 import api from "@/lib/api";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -63,6 +63,7 @@ export default function NewProductPage() {
   const [slugChecking, setSlugChecking] = useState(false);
   /** Which slot (0…MAX-1) is shown in the big preview; null = first filled or none. */
   const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(0);
+  const [mainImageDragging, setMainImageDragging] = useState(false);
 
   const baseSlug = slugFromName(form.name);
 
@@ -303,7 +304,7 @@ export default function NewProductPage() {
                     setForm({ ...form, description: e.target.value })
                   }
                   placeholder={tPages("productDescriptionPlaceholder")}
-                  className={fieldControlClass}
+                  className={`${fieldControlClass} [field-sizing:fixed] h-40 resize-none overflow-y-auto`}
                 />
               </Field>
               <Field label={tPages("productBrand")}>
@@ -433,18 +434,53 @@ export default function NewProductPage() {
               </p>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="aspect-square w-full overflow-hidden rounded-card bg-muted/50">
+              <div className="aspect-square w-full overflow-hidden rounded-card p-3">
                 {bigPreviewUrl ? (
-                  <img
-                    src={bigPreviewUrl}
-                    alt={tPages("productPreviewAlt")}
-                    className="h-full w-full object-cover"
-                  />
+                  <div className="relative h-full w-full overflow-hidden rounded-ui border border-border/70 bg-card">
+                    <img
+                      src={bigPreviewUrl}
+                      alt={tPages("productPreviewAlt")}
+                      className="h-full w-full object-cover"
+                    />
+                  </div>
                 ) : (
-                  <label className="flex h-full w-full cursor-pointer flex-col items-center justify-center gap-2 text-muted-foreground transition-colors hover:text-foreground">
-                    <Plus className="size-10" />
-                    <span className="text-sm font-medium">
-                      {tPages("productClickUploadMain")}
+                  <label
+                    className={cn(
+                      "flex h-full w-full cursor-pointer flex-col items-center justify-center gap-2 rounded-ui border border-dashed bg-card text-center text-muted-foreground transition-colors hover:text-foreground",
+                      mainImageDragging
+                        ? "border-primary bg-primary/5 text-foreground"
+                        : "border-primary/35 hover:border-primary/60",
+                    )}
+                    onDragOver={(e) => {
+                      e.preventDefault();
+                      setMainImageDragging(true);
+                    }}
+                    onDragEnter={() => setMainImageDragging(true)}
+                    onDragLeave={(e) => {
+                      if (e.currentTarget === e.target) setMainImageDragging(false);
+                    }}
+                    onDrop={(e) => {
+                      e.preventDefault();
+                      setMainImageDragging(false);
+                      const file = e.dataTransfer.files?.[0] ?? null;
+                      if (!file || !canAddMore) return;
+                      setImageFiles((prev) => {
+                        const next = [...prev];
+                        next[0] = file;
+                        return next;
+                      });
+                      setSelectedImageIndex(0);
+                    }}
+                  >
+                    <span className="rounded-ui bg-primary/10 p-2 text-primary">
+                      <ImageIcon className="size-6" />
+                    </span>
+                    <span className="text-sm font-semibold text-foreground">
+                      Drop your image here, or{" "}
+                      <span className="text-primary underline underline-offset-2">browse</span>
+                    </span>
+                    <span className="text-xs text-muted-foreground">
+                      Supports: JPG, JPEG2000, PNG
                     </span>
                     <input
                       type="file"
@@ -466,31 +502,33 @@ export default function NewProductPage() {
                 )}
               </div>
               {imageFiles.some(Boolean) && (
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    const idx = selectedImageIndex ?? firstFilledIndex;
-                    if (idx >= 0) {
-                      setImageFiles((prev) => {
-                        const next = [...prev];
-                        next[idx] = null;
-                        return next;
-                      });
-                      const nextFilled = imagePreviews
-                        .map((u, i) => (u && i !== idx ? i : -1))
-                        .filter((i) => i >= 0)[0];
-                      setSelectedImageIndex(nextFilled ?? null);
-                    }
-                  }}
-                  className="w-full"
-                >
-                  {tPages("productRemoveSelectedImage")}
-                </Button>
+                <div className="px-3">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      const idx = selectedImageIndex ?? firstFilledIndex;
+                      if (idx >= 0) {
+                        setImageFiles((prev) => {
+                          const next = [...prev];
+                          next[idx] = null;
+                          return next;
+                        });
+                        const nextFilled = imagePreviews
+                          .map((u, i) => (u && i !== idx ? i : -1))
+                          .filter((i) => i >= 0)[0];
+                        setSelectedImageIndex(nextFilled ?? null);
+                      }
+                    }}
+                    className="w-full border-destructive/30 text-destructive/80 hover:bg-destructive/10 hover:text-destructive"
+                  >
+                    {tPages("productRemoveSelectedImage")}
+                  </Button>
+                </div>
               )}
               <div
-                className="mt-3 flex gap-2 overflow-x-auto pb-3 -mx-1 px-1 sm:overflow-visible sm:flex-wrap sm:pb-0 sm:mx-0 sm:px-0"
+                className="mt-3 flex gap-2 overflow-x-auto px-3 pb-3 sm:flex-wrap sm:overflow-visible sm:px-3 sm:pb-0"
                 role="list"
                 aria-label={tPages("productImagesAria")}
               >

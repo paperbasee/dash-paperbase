@@ -15,6 +15,7 @@ import SystemNotificationBanner from "@/components/system/SystemNotificationBann
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { isNetworkError } from "@/lib/network-error";
 import { logout } from "@/lib/auth";
 import {
   hasVisitedPlans,
@@ -42,6 +43,7 @@ export default function DashboardLayoutClient({
     authHydrated,
     meProfile,
     meProfileStatus,
+    meProfileError,
   } = useAuth();
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -158,7 +160,9 @@ export default function DashboardLayoutClient({
   }
 
   if (meProfileStatus === "error") {
-    return <SubscriptionAccessBlock variant="verifyFailed" />;
+    return isNetworkError(meProfileError)
+      ? <SubscriptionAccessBlock variant="serverUnreachable" />
+      : <SubscriptionAccessBlock variant="verifyFailed" />;
   }
 
   return (

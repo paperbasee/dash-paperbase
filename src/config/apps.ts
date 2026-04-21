@@ -12,6 +12,7 @@ import {
   Truck,
   Ticket,
   Trash2,
+  Newspaper,
 } from "lucide-react";
 
 export interface NavCounts {
@@ -144,6 +145,16 @@ export const APP_CONFIG: Record<string, AppConfig> = {
     countKey: null,
     parentId: null,
   },
+  blog: {
+    id: "blog",
+    label: "Blog",
+    icon: Newspaper,
+    description: "Publish blog posts, schedule releases, and manage categories and tags",
+    essential: false,
+    href: "/blog",
+    countKey: null,
+    parentId: null,
+  },
   shipping: {
     id: "shipping",
     label: "Shipping",
@@ -170,6 +181,7 @@ export const OPTIONAL_APP_IDS = [
   "cta",
   "customers",
   "banners",
+  "blog",
 ] as const;
 
 /** Collapsible “Catalog” group in the sidebar (Products + related). */
@@ -188,6 +200,7 @@ export const MAIN_NAV_APP_IDS = [
   "shipping",
   "cta",
   "banners",
+  "blog",
 ] as const;
 
 export const MORE_APP_IDS = ["support_tickets", "trash"] as const;

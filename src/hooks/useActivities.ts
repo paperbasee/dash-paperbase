@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import api from "@/lib/api";
+import { isNetworkError } from "@/lib/network-error";
 import type { ActivityLog, PaginatedResponse } from "@/types";
 
 export interface ActivitiesFilters {
@@ -18,6 +19,7 @@ interface ActivitiesState {
   data: PaginatedResponse<ActivityLog> | null;
   loading: boolean;
   error: string | null;
+  networkError: boolean;
 }
 
 export function useActivities(filters: ActivitiesFilters) {
@@ -25,21 +27,22 @@ export function useActivities(filters: ActivitiesFilters) {
     data: null,
     loading: true,
     error: null,
+    networkError: false,
   });
 
   const fetchActivities = useCallback(() => {
-    setState((prev) => ({ ...prev, loading: true, error: null }));
+    setState((prev) => ({ ...prev, loading: true, error: null, networkError: false }));
     api
       .get<PaginatedResponse<ActivityLog>>("admin/activities/", {
         params: filters,
       })
-      .then((res) => setState({ data: res.data, loading: false, error: null }))
+      .then((res) => setState({ data: res.data, loading: false, error: null, networkError: false }))
       .catch((err) => {
-        const message =
-          err?.response?.data?.detail ||
-          err?.message ||
-          "Failed to load activities.";
-        setState({ data: null, loading: false, error: message });
+        const netErr = isNetworkError(err);
+        const message = netErr
+          ? null
+          : (err?.response?.data?.detail || err?.message || "Failed to load activities.");
+        setState({ data: null, loading: false, error: message, networkError: netErr });
       });
   }, [filters]);
 

@@ -25,6 +25,10 @@
     "activities": "Activities",
     "cta": "CTA",
     "banners": "Banners",
+    "blog": "Blog",
+    "blogNew": "New post",
+    "blogEdit": "Edit post",
+    "blogPreview": "Preview post",
     "categories": "Categories",
     "supportTickets": "Support tickets",
     "supportTicketDetail": "Support ticket",
@@ -36,6 +40,7 @@
     "reload": "Reload",
     "signOut": "Sign out",
     "contactSupport": "Contact support",
+    "retry": "Try again",
     "settings": "Settings",
     "store": "Store",
     "cancel": "Cancel",
@@ -73,6 +78,8 @@
     "activities": "Activities",
     "trash": "Trash",
     "banners": "Banners",
+    "blog": "Blog",
+    "blogNew": "New post",
     "shipping": "Shipping",
     "catalog": "Catalog",
     "more": "More",
@@ -180,6 +187,12 @@
     "filtersSearchCustomers": "Search name, email, phone",
     "filtersSearchProducts": "Search product or SKU",
     "filtersSearchTickets": "Search ticket or subject",
+    "filtersPublishedDate": "Published date",
+    "filtersTag": "Tag",
+    "filtersSearchBlog": "Search by title…",
+    "blogListNoMatches": "No posts match your filters.",
+    "blogListEmpty": "No blog posts yet.",
+    "blogSubtitle": "Write posts for your storefront.",
     "filtersToday": "Today",
     "filtersLast7Days": "Last 7 days",
     "filtersLast30Days": "Last 30 days",
@@ -800,7 +813,9 @@
     "inactivePlanBannerText": "Your plan is inactive. Your store is not live. Choose a plan to enable customer access.",
     "inactivePlanBannerPlansLink": "View plans",
     "rejectedPlanBannerText": "Your last subscription request was not approved. You can choose a new plan or contact support.",
-    "rejectedPlanBannerPlansLink": "View plans"
+    "rejectedPlanBannerPlansLink": "View plans",
+    "serverUnreachableTitle": "Unable to connect",
+    "serverUnreachableBody": "Unable to connect to the server. Please check your internet connection or try again later."
   },
   "dashboard": {
     "title": "Dashboard overview",
@@ -821,7 +836,8 @@
     "chartOrders": "Orders",
     "chartProducts": "Products",
     "chartSupportTickets": "Support tickets",
-    "chartCustomers": "Customers"
+    "chartCustomers": "Customers",
+    "serverUnreachable": "Unable to connect to the server. Please check your internet connection or try again later."
   },
   "auth": {
     "turnstileHumanPrompt": "Let us verify you are a human",
@@ -835,6 +851,7 @@
       "twoFactorDescription": "Enter your verification code to continue securely.",
       "wavingHandAria": "waving hand",
       "invalidCredentials": "Invalid credentials. Please try again.",
+      "serverUnreachable": "Unable to connect to the server. Please check your internet connection or try again later.",
       "validCredentialsHint": "Please provide valid credentials.",
       "email": "Email",
       "emailPlaceholder": "e.g. johndoe@email.com",
@@ -1125,6 +1142,10 @@
         "banners": {
           "label": "Banners",
           "description": "Manage banners for homepage, sidebar, footer"
+        },
+        "blog": {
+          "label": "Blog",
+          "description": "Publish blog posts and manage categories and tags"
         },
         "shipping": {
           "label": "Shipping",

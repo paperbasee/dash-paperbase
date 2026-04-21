@@ -2,6 +2,7 @@ import {
   clearMeProfileCache,
   ensureMeProfile,
 } from "@/lib/me-profile-store";
+import { isNetworkError } from "@/lib/network-error";
 
 export type SubscriptionStatus =
   | "NONE"
@@ -85,13 +86,13 @@ export function resolvePostAuthPath(me: MeForRouting): PostAuthPath {
 
 export type PostAuthRouteResult =
   | { ok: true; path: PostAuthPath; me: MeForRouting }
-  | { ok: false; kind: "fetch_error" };
+  | { ok: false; kind: "network_error" | "fetch_error" };
 
 export async function resolvePostAuthRoute(): Promise<PostAuthRouteResult> {
   try {
     const me = await ensureMeProfile();
     return { ok: true, path: resolvePostAuthPath(me), me };
-  } catch {
-    return { ok: false, kind: "fetch_error" };
+  } catch (err) {
+    return { ok: false, kind: isNetworkError(err) ? "network_error" : "fetch_error" };
   }
 }

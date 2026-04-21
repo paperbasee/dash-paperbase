@@ -9,6 +9,7 @@ import {
   type DashboardAnalyticsSummary,
 } from "@/lib/basicAnalyticsService";
 import { todayYmdInBD } from "@/utils/time";
+import { isNetworkError } from "@/lib/network-error";
 
 export type {
   AnalyticsBucket,
@@ -27,6 +28,7 @@ interface AnalyticsState {
   data: DashboardAnalyticsResponse | null;
   loading: boolean;
   error: string | null;
+  networkError: boolean;
 }
 
 export function useDashboardAnalytics(filters: DashboardAnalyticsFilters) {
@@ -34,6 +36,7 @@ export function useDashboardAnalytics(filters: DashboardAnalyticsFilters) {
     data: null,
     loading: true,
     error: null,
+    networkError: false,
   });
   const inFlightRef = useRef(false);
 
@@ -44,6 +47,7 @@ export function useDashboardAnalytics(filters: DashboardAnalyticsFilters) {
       ...prev,
       loading: opts?.silent ? prev.loading : true,
       error: null,
+      networkError: false,
     }));
 
     getBasicAnalyticsOverview({
@@ -52,14 +56,14 @@ export function useDashboardAnalytics(filters: DashboardAnalyticsFilters) {
       bucket: filters.bucket,
     })
       .then((data) => {
-        setState({ data, loading: false, error: null });
+        setState({ data, loading: false, error: null, networkError: false });
       })
       .catch((error) => {
-        const message =
-          error?.response?.data?.detail ||
-          error?.message ||
-          "Failed to load analytics.";
-        setState({ data: null, loading: false, error: message });
+        const netErr = isNetworkError(error);
+        const message = netErr
+          ? null
+          : (error?.response?.data?.detail || error?.message || "Failed to load analytics.");
+        setState({ data: null, loading: false, error: message, networkError: netErr });
       })
       .finally(() => {
         inFlightRef.current = false;

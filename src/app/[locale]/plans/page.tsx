@@ -27,6 +27,14 @@ interface Plan {
 type PageState = "loading" | "ready" | "error";
 type BillingCycle = "monthly" | "yearly";
 
+const OPTION_LABELS: Record<string, string> = {
+  basic_analytics: "basic analytics",
+  order_email_notifications: "order email notifications",
+  fraud_check: "fraud check",
+  max_products: "max products",
+  storefront_requests_per_minute: "storefront requests per minute",
+};
+
 export default function PlansPage() {
   const locale = useLocale();
   const numClass = numberTextClass(locale);
@@ -207,6 +215,56 @@ export default function PlansPage() {
                 const isSelecting = selectingId === selected.public_id;
                 const showYearly = billingCycle === "yearly" && !!g.yearly;
                 const isPremium = selected.name.toLowerCase() === "premium";
+                const selectedName = selected.name.toLowerCase();
+
+                const optionLines: string[] = [];
+
+                if (selectedName === "essential") {
+                  if (selected.features?.features?.basic_analytics) {
+                    optionLines.push(OPTION_LABELS.basic_analytics);
+                  }
+                  const maxProducts = selected.features?.limits?.max_products;
+                  if (typeof maxProducts === "number") {
+                    optionLines.push(`${OPTION_LABELS.max_products}: ${maxProducts}`);
+                  }
+                  const requestsPerMinute = selected.features?.limits?.storefront_requests_per_minute;
+                  if (typeof requestsPerMinute === "number") {
+                    optionLines.push(
+                      `${OPTION_LABELS.storefront_requests_per_minute}: ${requestsPerMinute}`
+                    );
+                  }
+                } else if (selectedName === "premium") {
+                  if (selected.features?.features?.fraud_check) {
+                    optionLines.push(OPTION_LABELS.fraud_check);
+                  }
+                  if (selected.features?.features?.basic_analytics) {
+                    optionLines.push(OPTION_LABELS.basic_analytics);
+                  }
+                  if (selected.features?.features?.order_email_notifications) {
+                    optionLines.push(OPTION_LABELS.order_email_notifications);
+                  }
+                  const maxProducts = selected.features?.limits?.max_products;
+                  if (typeof maxProducts === "number") {
+                    optionLines.push(`${OPTION_LABELS.max_products}: ${maxProducts}`);
+                  }
+                  const requestsPerMinute = selected.features?.limits?.storefront_requests_per_minute;
+                  if (typeof requestsPerMinute === "number") {
+                    optionLines.push(
+                      `${OPTION_LABELS.storefront_requests_per_minute}: ${requestsPerMinute}`
+                    );
+                  }
+                  optionLines.push("Courier verification system");
+                } else {
+                  optionLines.push(
+                    ...featureEntries.map(([key]) => OPTION_LABELS[key] ?? key.replace(/_/g, " "))
+                  );
+                  optionLines.push(
+                    ...limitEntries.map(([key, val]) => {
+                      const label = OPTION_LABELS[key] ?? key.replace(/_/g, " ");
+                      return `${label}: ${val}`;
+                    })
+                  );
+                }
 
                 return (
                   <div
@@ -249,45 +307,15 @@ export default function PlansPage() {
                         {t("featuresLabel")}
                       </p>
                       <ul className="mt-3 space-y-2">
-                        {featureEntries.slice(0, 5).map(([key]) => (
-                          <li key={key} className="flex items-start gap-2 text-sm">
+                        {optionLines.map((line) => (
+                          <li key={line} className="flex items-start gap-2 text-sm">
                             <span className="mt-0.5 inline-flex size-4 shrink-0 items-center justify-center rounded-ui bg-foreground text-background">
                               <Check className="size-2.5" strokeWidth={2.5} aria-hidden />
                             </span>
-                            <span className="min-w-0 leading-snug">{key.replace(/_/g, " ")}</span>
-                          </li>
-                        ))}
-                        {limitEntries.slice(0, 3).map(([key, val]) => (
-                          <li key={key} className="flex items-start gap-2 text-sm">
-                            <span className="mt-0.5 inline-flex size-4 shrink-0 items-center justify-center rounded-ui bg-foreground text-background">
-                              <Check className="size-2.5" strokeWidth={2.5} aria-hidden />
-                            </span>
-                            <span className="min-w-0 leading-snug text-card-foreground">
-                              {key.replace(/_/g, " ")}:{" "}
-                              <span className={cn("font-medium", numClass)}>{val}</span>
-                            </span>
+                            <span className="min-w-0 leading-snug">{line}</span>
                           </li>
                         ))}
                       </ul>
-
-                      {isPremium && (
-                        <div className="mt-2">
-                          <ul className="space-y-2">
-                            <li className="flex items-start gap-2 text-sm">
-                              <span className="mt-0.5 inline-flex size-4 shrink-0 items-center justify-center rounded-ui bg-foreground text-background">
-                                <Check className="size-2.5" strokeWidth={2.5} aria-hidden />
-                              </span>
-                              <span className="min-w-0 leading-snug">Check customer risk instantly</span>
-                            </li>
-                            <li className="flex items-start gap-2 text-sm">
-                              <span className="mt-0.5 inline-flex size-4 shrink-0 items-center justify-center rounded-ui bg-foreground text-background">
-                                <Check className="size-2.5" strokeWidth={2.5} aria-hidden />
-                              </span>
-                              <span className="min-w-0 leading-snug">Courier verification system</span>
-                            </li>
-                          </ul>
-                        </div>
-                      )}
                     </div>
 
                     {/* CTA */}

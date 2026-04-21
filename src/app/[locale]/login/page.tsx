@@ -13,6 +13,7 @@ import { useMinDelayLoading } from "@/hooks/useMinDelayLoading";
 import { loginSchema, parseValidation } from "@/lib/validation";
 import { resolvePostAuthRoute } from "@/lib/subscription-access";
 import { isTurnstileDisabled } from "@/lib/turnstile-env";
+import { isNetworkError } from "@/lib/network-error";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -60,11 +61,19 @@ export default function LoginPage() {
           if (next.ok) {
             router.push(next.path);
           } else {
-            setError(tLayout("subscriptionVerifyBody"));
+            setError(
+              next.kind === "network_error"
+                ? t("serverUnreachable")
+                : tLayout("subscriptionVerifyBody")
+            );
           }
         }
       });
     } catch (err: unknown) {
+      if (isNetworkError(err)) {
+        setError(t("serverUnreachable"));
+        return;
+      }
       const res =
         err && typeof err === "object" && "response" in err
           ? (err as { response?: { status?: number; data?: { code?: string; detail?: unknown } } })
@@ -99,10 +108,18 @@ export default function LoginPage() {
         if (next.ok) {
           router.push(next.path);
         } else {
-          setError(tLayout("subscriptionVerifyBody"));
+          setError(
+            next.kind === "network_error"
+              ? t("serverUnreachable")
+              : tLayout("subscriptionVerifyBody")
+          );
         }
       });
     } catch (err: unknown) {
+      if (isNetworkError(err)) {
+        setError(t("serverUnreachable"));
+        return;
+      }
       const data =
         err && typeof err === "object" && "response" in err
           ? (err as { response?: { status?: number; data?: { code?: string } } }).response

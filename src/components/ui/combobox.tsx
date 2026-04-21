@@ -11,7 +11,17 @@ import {
   InputGroupInput,
 } from "@/components/ui/input-group"
 
-const Combobox = ComboboxPrimitive.Root
+// Workaround for base-ui #4506/#4507: when the store's `open` is left
+// `undefined` on mount and the controlled `value` prop re-renders before the
+// popup has ever been opened, `ComboboxPositioner` evaluates
+// `open && modal && openMethod !== 'touch'` to `undefined` and `useScrollLock`
+// treats that as its default `true`, writing `overflow: hidden` onto `<body>`.
+// Forcing `defaultOpen={false}` initializes `open` as a real boolean so the
+// scroll lock never engages for non-modal comboboxes. Fixed upstream in
+// @base-ui/react >= 1.4.0; kept here defensively.
+function Combobox<Value>(props: ComboboxPrimitive.Root.Props<Value>) {
+  return <ComboboxPrimitive.Root defaultOpen={false} {...props} />
+}
 
 function ComboboxValue({ ...props }: ComboboxPrimitive.Value.Props) {
   return <ComboboxPrimitive.Value data-slot="combobox-value" {...props} />

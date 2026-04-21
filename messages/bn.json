@@ -25,6 +25,10 @@
     "activities": "কার্যকলাপ",
     "cta": "CTA",
     "banners": "ব্যানার",
+    "blog": "ব্লগ",
+    "blogNew": "নতুন পোস্ট",
+    "blogEdit": "পোস্ট এডিট করুন",
+    "blogPreview": "পোস্ট প্রিভিউ",
     "categories": "ক্যাটাগরি",
     "supportTickets": "সাপোর্ট টিকিট",
     "supportTicketDetail": "সাপোর্ট টিকিট",
@@ -36,6 +40,7 @@
     "reload": "পুনরায় লোড",
     "signOut": "সাইন আউট",
     "contactSupport": "সাপোর্টে যোগাযোগ করুন",
+    "retry": "আবার চেষ্টা করুন",
     "settings": "সেটিংস",
     "store": "স্টোর",
     "cancel": "বাতিল",
@@ -73,6 +78,8 @@
     "activities": "কার্যকলাপ",
     "trash": "ট্র্যাশ",
     "banners": "ব্যানার",
+    "blog": "ব্লগ",
+    "blogNew": "নতুন পোস্ট",
     "shipping": "শিপিং",
     "catalog": "ক্যাটালগ",
     "more": "আরও",
@@ -180,6 +187,12 @@
     "filtersSearchCustomers": "নাম, ইমেইল, ফোন খুঁজুন",
     "filtersSearchProducts": "পণ্য বা SKU খুঁজুন",
     "filtersSearchTickets": "টিকিট বা বিষয় খুঁজুন",
+    "filtersPublishedDate": "প্রকাশের তারিখ",
+    "filtersTag": "ট্যাগ",
+    "filtersSearchBlog": "শিরোনাম দিয়ে খুঁজুন…",
+    "blogListNoMatches": "আপনার ফিল্টারে কোনো পোস্ট নেই।",
+    "blogListEmpty": "এখনও কোনো ব্লগ পোস্ট নেই।",
+    "blogSubtitle": "আপনার স্টোরফ্রন্টের জন্য পোস্ট লিখুন।",
     "filtersToday": "আজ",
     "filtersLast7Days": "গত ৭ দিন",
     "filtersLast30Days": "গত ৩০ দিন",
@@ -800,7 +813,9 @@
     "inactivePlanBannerText": "আপনার প্ল্যান নিষ্ক্রিয়। স্টোর এখন লাইভ নয়। গ্রাহকদের জন্য স্টোর চালু করতে একটি প্ল্যান বেছে নিন।",
     "inactivePlanBannerPlansLink": "প্ল্যান দেখুন",
     "rejectedPlanBannerText": "আপনার সর্বশেষ সাবস্ক্রিপশন অনুরোধ অনুমোদিত হয়নি। নতুন প্ল্যান বেছে নিতে পারেন বা সাপোর্টে যোগাযোগ করুন।",
-    "rejectedPlanBannerPlansLink": "প্ল্যান দেখুন"
+    "rejectedPlanBannerPlansLink": "প্ল্যান দেখুন",
+    "serverUnreachableTitle": "সংযোগ করা যাচ্ছে না",
+    "serverUnreachableBody": "সার্ভারে সংযোগ করা যাচ্ছে না। আপনার ইন্টারনেট সংযোগ পরীক্ষা করুন বা পরে আবার চেষ্টা করুন।"
   },
   "dashboard": {
     "title": "ড্যাশবোর্ড সারসংক্ষেপ",
@@ -821,7 +836,8 @@
     "chartOrders": "অর্ডার",
     "chartProducts": "পণ্য",
     "chartSupportTickets": "সাপোর্ট টিকিট",
-    "chartCustomers": "গ্রাহক"
+    "chartCustomers": "গ্রাহক",
+    "serverUnreachable": "সার্ভারে সংযোগ করা যাচ্ছে না। আপনার ইন্টারনেট সংযোগ পরীক্ষা করুন বা পরে আবার চেষ্টা করুন।"
   },
   "auth": {
     "turnstileHumanPrompt": "আমরা যাচাই করি আপনি একজন মানুষ",
@@ -835,6 +851,7 @@
       "twoFactorDescription": "নিরাপদে এগোতে ভেরিফিকেশন কোড দিন।",
       "wavingHandAria": "হাত নাড়ানো",
       "invalidCredentials": "ভুল তথ্য। আবার চেষ্টা করুন।",
+      "serverUnreachable": "সার্ভারে সংযোগ করা যাচ্ছে না। আপনার ইন্টারনেট সংযোগ পরীক্ষা করুন বা পরে আবার চেষ্টা করুন।",
       "validCredentialsHint": "সঠিক লগইন তথ্য দিন।",
       "email": "ইমেইল",
       "emailPlaceholder": "যেমন: johndoe@email.com",
@@ -1125,6 +1142,10 @@
         "banners": {
           "label": "ব্যানার",
           "description": "হোমপেজ, সাইডবার, ফুটারের ব্যানার ব্যবস্থাপনা"
+        },
+        "blog": {
+          "label": "ব্লগ",
+          "description": "ব্লগ পোস্ট প্রকাশ ও ক্যাটাগরি-ট্যাগ ব্যবস্থাপনা"
         },
         "shipping": {
           "label": "শিপিং",
