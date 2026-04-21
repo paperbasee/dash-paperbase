@@ -19,7 +19,9 @@ import {
 // Forcing `defaultOpen={false}` initializes `open` as a real boolean so the
 // scroll lock never engages for non-modal comboboxes. Fixed upstream in
 // @base-ui/react >= 1.4.0; kept here defensively.
-function Combobox<Value>(props: ComboboxPrimitive.Root.Props<Value>) {
+function Combobox<Value, Multiple extends boolean = false>(
+  props: ComboboxPrimitive.Root.Props<Value, Multiple>
+) {
   return <ComboboxPrimitive.Root defaultOpen={false} {...props} />
 }
 
