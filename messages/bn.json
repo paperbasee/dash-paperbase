@@ -780,6 +780,7 @@
   "mobileNav": {
     "openMenu": "মেনু খুলুন",
     "searchAria": "খোঁজ",
+    "activitiesAria": "কার্যকলাপ",
     "docsAria": "ডকুমেন্টেশন"
   },
   "notification": {
@@ -819,7 +820,7 @@
   },
   "dashboard": {
     "title": "ড্যাশবোর্ড সারসংক্ষেপ",
-    "subtitle": "অর্ডার, পণ্য, গ্রাহক ও সাপোর্ট টিকিট কার্যকলাপের সংক্ষিপ্ত চিত্র। মোবাইলে সাম্প্রতিক অ্যাডমিন কার্যকলাপ দেখুন।",
+    "subtitle": "অর্ডার, পণ্য, গ্রাহক ও সাপোর্ট টিকিট কার্যকলাপের সংক্ষিপ্ত চিত্র।",
     "activitiesAria": "কার্যকলাপ",
     "recentActivities": "সাম্প্রতিক কার্যকলাপ",
     "noRecentActivity": "এখনও কোনো সাম্প্রতিক অ্যাডমিন কার্যকলাপ নেই।",
@@ -1190,7 +1191,7 @@
       "createButton": "কী তৈরি করুন",
       "storefrontPromptLabel": "স্টোরফ্রন্ট ইন্টিগ্রেশন প্রম্পট",
       "storefrontPromptHint": "AI-সহায়িত স্টোরফ্রন্ট বা হেডলেস ফ্রন্টএন্ডের জন্য সম্পূর্ণ Markdown প্রম্পট কপি করুন। আপনার API কী ও বেস URL সহ সহায়কে পেস্ট করুন।",
-      "copyStorefrontPrompt": "প্রম্পট কপি করুন",
+      "copyStorefrontPrompt": "ইনস্ট্রাকশন কপি করুন",
       "promptCopiedTitle": "কপি হয়েছে",
       "promptCopiedDescription": "স্টোরফ্রন্ট API প্রম্পট ক্লিপবোর্ডে আছে।",
       "promptCopyFailed": "ক্লিপবোর্ডে কপি করা যায়নি। ব্রাউজারের অনুমতি দেখুন।",

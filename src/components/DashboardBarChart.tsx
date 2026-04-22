@@ -63,6 +63,7 @@ export default function DashboardBarChart({ data }: DashboardBarChartProps) {
 
   const metricFilterBtnBase =
     "min-w-0 max-w-full break-words rounded-ui border px-2 py-1 text-[11px] font-medium leading-relaxed transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-[hsl(var(--card))]";
+  const yAxisWidth = 32;
 
   return (
     <Card className="dashboard-chart-card h-[360px] border border-card-border bg-card">
@@ -81,7 +82,7 @@ export default function DashboardBarChart({ data }: DashboardBarChartProps) {
             {/* Recharts SVG: keep square geometry; not using theme radius tokens */}
             <BarChart
               data={data}
-              margin={{ top: 8, left: 0, right: 0, bottom: 0 }}
+              margin={{ top: 8, left: 0, right: yAxisWidth, bottom: 0 }}
               style={{ background: "hsl(var(--card))", borderRadius: 0 }}
             >
               <CartesianGrid
@@ -107,6 +108,7 @@ export default function DashboardBarChart({ data }: DashboardBarChartProps) {
                 axisLine={false}
                 tickMargin={8}
                 allowDecimals={false}
+                width={yAxisWidth}
                 tick={{
                   fill: "hsl(var(--muted-foreground))",
                   fontSize: 11,
@@ -144,11 +146,11 @@ export default function DashboardBarChart({ data }: DashboardBarChartProps) {
               />
               <Legend
                 verticalAlign="top"
-                height={32}
+                height={40}
                 iconType="circle"
-                wrapperStyle={{ fontSize: 11 }}
+                wrapperStyle={{ fontSize: 11, marginBottom: 10 }}
                 content={() => (
-                  <div className="flex flex-wrap items-center justify-center gap-1 px-2 pb-1">
+                  <div className="flex flex-wrap items-center justify-center gap-1 px-2 pb-2">
                     <button
                       type="button"
                       onClick={() => setActiveMetric("all")}

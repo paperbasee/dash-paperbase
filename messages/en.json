@@ -780,6 +780,7 @@
   "mobileNav": {
     "openMenu": "Open menu",
     "searchAria": "Search",
+    "activitiesAria": "Activities",
     "docsAria": "Documentation"
   },
   "notification": {
@@ -819,7 +820,7 @@
   },
   "dashboard": {
     "title": "Dashboard overview",
-    "subtitle": "High-level snapshot of orders, products, customers, and support ticket activity. On mobile, see your most recent admin activities.",
+    "subtitle": "High-level snapshot of orders, products, customers, and support ticket activity.",
     "activitiesAria": "Activities",
     "recentActivities": "Recent activities",
     "noRecentActivity": "No recent admin activity yet.",
@@ -1190,7 +1191,7 @@
       "createButton": "Create Key",
       "storefrontPromptLabel": "Storefront integration prompt",
       "storefrontPromptHint": "Copy the full Markdown prompt for AI-assisted storefront or headless frontends. Paste it into your assistant with your API key and base URL.",
-      "copyStorefrontPrompt": "Copy prompt",
+      "copyStorefrontPrompt": "copy instructions",
       "promptCopiedTitle": "Copied",
       "promptCopiedDescription": "Storefront API prompt is on your clipboard.",
       "promptCopyFailed": "Could not copy to clipboard. Check browser permissions.",

@@ -1,7 +1,8 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { Menu, Search } from "lucide-react";
+import { History, Menu, Search } from "lucide-react";
+import { Link } from "@/i18n/navigation";
 import { useSearchModal } from "@/context/SearchModalContext";
 import { Button } from "@/components/ui/button";
 import NotificationDropdown from "@/components/NotificationDropdown";
@@ -50,6 +51,16 @@ export default function MobileNavBar({ onMenuClick, bannerVisible = false }: Mob
           className="shrink-0 text-muted-foreground hover:text-foreground"
         >
           <Search className="size-5" />
+        </Button>
+        <Button
+          variant="ghost"
+          size="icon"
+          asChild
+          className="shrink-0 text-muted-foreground hover:text-foreground"
+        >
+          <Link href="/activities" aria-label={tMobile("activitiesAria")}>
+            <History className="size-5" />
+          </Link>
         </Button>
         <NotificationDropdown />
       </div>
