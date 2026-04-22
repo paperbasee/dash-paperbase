@@ -1318,6 +1318,7 @@
       "eventTracking": "Event Tracking",
       "eventPurchase": "Purchase",
       "eventInitiateCheckout": "Initiate checkout",
+      "eventAddToCart": "Add to cart",
       "eventViewContent": "View content",
       "eventSearch": "Search",
       "confirmDisconnect": "Disconnect Facebook CAPI from this store?",

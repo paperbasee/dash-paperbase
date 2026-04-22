@@ -36,12 +36,14 @@ const emptyForm: ConnectForm = {
 type EventSettingKey =
   | "track_purchase"
   | "track_initiate_checkout"
+  | "track_add_to_cart"
   | "track_view_content"
   | "track_search";
 
 const EVENT_LABEL_KEYS: { key: EventSettingKey; labelKey: string }[] = [
   { key: "track_purchase", labelKey: "eventPurchase" },
   { key: "track_initiate_checkout", labelKey: "eventInitiateCheckout" },
+  { key: "track_add_to_cart", labelKey: "eventAddToCart" },
   { key: "track_view_content", labelKey: "eventViewContent" },
   { key: "track_search", labelKey: "eventSearch" },
 ];

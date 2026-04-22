@@ -1318,6 +1318,7 @@
       "eventTracking": "ইভেন্ট ট্র্যাকিং",
       "eventPurchase": "ক্রয় (Purchase)",
       "eventInitiateCheckout": "চেকআউট শুরু (InitiateCheckout)",
+      "eventAddToCart": "কার্টে যোগ করা (AddToCart)",
       "eventViewContent": "কনটেন্ট দেখা (ViewContent)",
       "eventSearch": "সার্চ",
       "confirmDisconnect": "এই স্টোর থেকে Facebook CAPI বিচ্ছিন্ন করবেন?",

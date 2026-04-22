@@ -474,6 +474,7 @@ export interface ShippingRate {
 export interface IntegrationEventSettings {
   track_purchase: boolean;
   track_initiate_checkout: boolean;
+  track_add_to_cart: boolean;
   track_view_content: boolean;
   track_search: boolean;
 }
