@@ -1320,7 +1320,6 @@
       "eventInitiateCheckout": "চেকআউট শুরু (InitiateCheckout)",
       "eventAddToCart": "কার্টে যোগ করা (AddToCart)",
       "eventViewContent": "কনটেন্ট দেখা (ViewContent)",
-      "eventSearch": "সার্চ",
       "confirmDisconnect": "এই স্টোর থেকে Facebook CAPI বিচ্ছিন্ন করবেন?",
       "connectFailed": "Facebook CAPI সংযোগ ব্যর্থ। Dataset ID ও টোকেন যাচাই করুন।",
       "modalConnectTitle": "Facebook Conversions API (CAPI) সংযুক্ত করুন",

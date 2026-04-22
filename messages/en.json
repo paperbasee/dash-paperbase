@@ -1320,7 +1320,6 @@
       "eventInitiateCheckout": "Initiate checkout",
       "eventAddToCart": "Add to cart",
       "eventViewContent": "View content",
-      "eventSearch": "Search",
       "confirmDisconnect": "Disconnect Facebook CAPI from this store?",
       "connectFailed": "Could not connect Facebook CAPI. Check Dataset ID and access token.",
       "modalConnectTitle": "Connect Facebook Conversions API (CAPI)",
