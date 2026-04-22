@@ -598,12 +598,17 @@ export default function CtaPage() {
                   <button
                     onClick={() => toggleActive(n)}
                     className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-semibold ${
-                      n.is_active
+                      n.is_currently_active
                         ? "bg-emerald-500/20 text-emerald-400"
                         : "bg-muted text-muted-foreground"
                     }`}
+                    title={
+                      n.is_active && !n.is_currently_active
+                        ? "Enabled, but outside scheduled time"
+                        : undefined
+                    }
                   >
-                    {n.is_active ? tCommon("active") : tCommon("inactive")}
+                    {n.is_currently_active ? tCommon("active") : tCommon("inactive")}
                   </button>
                 </td>
                 <td className="px-4 py-3 text-xs whitespace-nowrap text-muted-foreground">

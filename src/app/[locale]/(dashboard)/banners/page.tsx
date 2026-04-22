@@ -129,6 +129,22 @@ function formatPlacements(values: string[]): string {
   return values.map((v) => map.get(v) ?? v).join(", ");
 }
 
+function isBannerCurrentlyActiveLive(
+  banner: Pick<Banner, "is_active" | "start_at" | "end_at">,
+  now: Date
+): boolean {
+  if (!banner.is_active) return false;
+  if (banner.start_at) {
+    const start = new Date(banner.start_at);
+    if (!Number.isNaN(start.getTime()) && now < start) return false;
+  }
+  if (banner.end_at) {
+    const end = new Date(banner.end_at);
+    if (!Number.isNaN(end.getTime()) && now > end) return false;
+  }
+  return true;
+}
+
 type PlacementItem = { value: string; label: string };
 
 export default function BannersPage() {
@@ -539,7 +555,7 @@ export default function BannersPage() {
                 </InputGroupAddon>
               </InputGroup>
               {startPickerOpen && (
-                <div className="absolute left-0 top-full z-50 mt-2 w-fit max-w-[calc(100vw-2rem)]">
+                <div className="absolute left-0 top-full z-50 mt-2 w-fit max-w-[calc(100vw-2rem)] md:top-auto md:bottom-full md:mb-2 md:mt-0">
                   <div className="rounded-card border border-border bg-card p-1 shadow-lg">
                     <Calendar
                       mode="single"
@@ -594,7 +610,7 @@ export default function BannersPage() {
                 </InputGroupAddon>
               </InputGroup>
               {endPickerOpen && (
-                <div className="absolute right-0 top-full z-50 mt-2 w-fit max-w-[calc(100vw-2rem)] md:left-0 md:right-auto">
+                <div className="absolute right-0 top-full z-50 mt-2 w-fit max-w-[calc(100vw-2rem)] md:left-0 md:right-auto md:top-auto md:bottom-full md:mb-2 md:mt-0">
                   <div className="rounded-card border border-border bg-card p-1 shadow-lg">
                     <Calendar
                       mode="single"
@@ -739,17 +755,27 @@ export default function BannersPage() {
                     : tPages("ctaScheduleAlways")}
                 </td>
                 <td className="px-4 py-3">
+                  {(() => {
+                    const isCurrentlyActive = isBannerCurrentlyActiveLive(b, now);
+                    return (
                   <button
                     type="button"
                     onClick={() => toggleActive(b)}
                     className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-semibold ${
-                      b.is_active
+                      isCurrentlyActive
                         ? "bg-emerald-500/20 text-emerald-400"
                         : "bg-muted text-muted-foreground"
                     }`}
+                    title={
+                      b.is_active && !isCurrentlyActive
+                        ? "Enabled, but outside scheduled time"
+                        : undefined
+                    }
                   >
-                    {b.is_active ? tCommon("active") : tCommon("inactive")}
+                    {isCurrentlyActive ? tCommon("active") : tCommon("inactive")}
                   </button>
+                    );
+                  })()}
                 </td>
                 <td className="px-4 py-3 text-right">
                   <ClickableText

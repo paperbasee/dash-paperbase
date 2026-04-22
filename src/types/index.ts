@@ -389,6 +389,7 @@ export interface Banner {
   cta_text: string;
   cta_link: string;
   is_active: boolean;
+  is_currently_active: boolean;
   order: number;
   placement_slots: string[];
   start_at: string | null;
