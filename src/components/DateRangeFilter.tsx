@@ -1,12 +1,14 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Button } from "./ui/button";
+import { Calendar } from "./ui/calendar";
 import { Card, CardContent } from "./ui/card";
-import { Input } from "./ui/input";
+import { InputGroup, InputGroupInput } from "./ui/input-group";
 import type { AnalyticsBucket } from "@/hooks/useDashboardAnalytics";
 import { digitsInNumberFont } from "@/lib/number-font";
+import { cn } from "@/lib/utils";
 import {
   dateRangeInputSchema,
   normalizeDateRange,
@@ -24,6 +26,26 @@ interface DateRangeFilterProps {
   onChange: (value: DateRangeValue) => void;
 }
 
+function ymdToDate(ymd: string): Date | undefined {
+  const m = ymd.trim().match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (!m) return undefined;
+  const date = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));
+  return Number.isNaN(date.getTime()) ? undefined : date;
+}
+
+function dateToYmd(date: Date): string {
+  const yyyy = String(date.getFullYear());
+  const mm = String(date.getMonth() + 1).padStart(2, "0");
+  const dd = String(date.getDate()).padStart(2, "0");
+  return `${yyyy}-${mm}-${dd}`;
+}
+
+function startOfDay(date: Date): Date {
+  const d = new Date(date);
+  d.setHours(0, 0, 0, 0);
+  return d;
+}
+
 export default function DateRangeFilter({
   value,
   onChange,
@@ -31,6 +53,18 @@ export default function DateRangeFilter({
   const locale = useLocale();
   const t = useTranslations("pages");
   const today = useMemo(() => new Date(), []);
+  const todayDate = useMemo(() => startOfDay(today), [today]);
+  const minDate = useMemo(() => {
+    const d = new Date(todayDate);
+    d.setDate(d.getDate() - 90);
+    return d;
+  }, [todayDate]);
+  const selectedStart = ymdToDate(value.startDate);
+  const selectedEnd = ymdToDate(value.endDate);
+  const [startPickerOpen, setStartPickerOpen] = useState(false);
+  const [endPickerOpen, setEndPickerOpen] = useState(false);
+  const startPickerRef = useRef<HTMLDivElement | null>(null);
+  const endPickerRef = useRef<HTMLDivElement | null>(null);
 
   const setPreset = (preset: PresetKey) => {
     const endStr = todayYmdInBD(today);
@@ -91,6 +125,20 @@ export default function DateRangeFilter({
     onChange(normalizeDateRange(parsed.data, today));
   };
 
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      const target = event.target as Node;
+      if (startPickerRef.current && !startPickerRef.current.contains(target)) {
+        setStartPickerOpen(false);
+      }
+      if (endPickerRef.current && !endPickerRef.current.contains(target)) {
+        setEndPickerOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   return (
     <Card className="border-none bg-transparent shadow-none">
       <CardContent className="flex flex-col gap-3 px-0 lg:flex-row lg:items-center lg:justify-between">
@@ -134,25 +182,79 @@ export default function DateRangeFilter({
             {t("filtersCustomRange")}
           </span>
           <div className="flex items-center gap-2 lg:contents">
-            <Input
-              type="text"
-              inputMode="numeric"
-              placeholder={t("filtersDatePlaceholder")}
-              className="font-numbers-date-value h-8 w-[120px] sm:w-[110px]"
-              value={value.startDate}
-              onChange={(e) => handleDateInput("startDate", e.target.value)}
-            />
+            <div ref={startPickerRef} className="relative">
+              <InputGroup
+                className="h-8 w-[120px] shrink-0 cursor-pointer sm:w-[110px]"
+                onClick={() => setStartPickerOpen((open) => !open)}
+              >
+                <InputGroupInput
+                  readOnly
+                  placeholder={t("filtersDatePlaceholder")}
+                  className={cn("font-numbers-date-value cursor-pointer")}
+                  value={value.startDate}
+                />
+              </InputGroup>
+              {startPickerOpen && (
+                <div className="absolute left-0 top-full z-50 mt-2 w-fit max-w-[calc(100vw-2rem)]">
+                  <div className="rounded-card border border-border bg-card p-1 shadow-lg">
+                    <Calendar
+                      mode="single"
+                      selected={ymdToDate(value.startDate)}
+                      disabled={(date) => {
+                        const day = startOfDay(date);
+                        if (day < minDate || day > todayDate) return true;
+                        if (selectedEnd && day > startOfDay(selectedEnd)) return true;
+                        return false;
+                      }}
+                      onSelect={(date) => {
+                        if (!date) return;
+                        handleDateInput("startDate", dateToYmd(date));
+                        setStartPickerOpen(false);
+                      }}
+                      className="[--cell-size:--spacing(7)] sm:[--cell-size:--spacing(8)]"
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
             <span className="text-muted-foreground whitespace-nowrap">
               {t("filtersDateRangeTo")}
             </span>
-            <Input
-              type="text"
-              inputMode="numeric"
-              placeholder={t("filtersDatePlaceholder")}
-              className="font-numbers-date-value h-8 w-[120px] sm:w-[110px]"
-              value={value.endDate}
-              onChange={(e) => handleDateInput("endDate", e.target.value)}
-            />
+            <div ref={endPickerRef} className="relative">
+              <InputGroup
+                className="h-8 w-[120px] shrink-0 cursor-pointer sm:w-[110px]"
+                onClick={() => setEndPickerOpen((open) => !open)}
+              >
+                <InputGroupInput
+                  readOnly
+                  placeholder={t("filtersDatePlaceholder")}
+                  className={cn("font-numbers-date-value cursor-pointer")}
+                  value={value.endDate}
+                />
+              </InputGroup>
+              {endPickerOpen && (
+                <div className="absolute right-0 top-full z-50 mt-2 w-fit max-w-[calc(100vw-2rem)]">
+                  <div className="rounded-card border border-border bg-card p-1 shadow-lg">
+                    <Calendar
+                      mode="single"
+                      selected={ymdToDate(value.endDate)}
+                      disabled={(date) => {
+                        const day = startOfDay(date);
+                        if (day < minDate || day > todayDate) return true;
+                        if (selectedStart && day < startOfDay(selectedStart)) return true;
+                        return false;
+                      }}
+                      onSelect={(date) => {
+                        if (!date) return;
+                        handleDateInput("endDate", dateToYmd(date));
+                        setEndPickerOpen(false);
+                      }}
+                      className="[--cell-size:--spacing(7)] sm:[--cell-size:--spacing(8)]"
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </CardContent>

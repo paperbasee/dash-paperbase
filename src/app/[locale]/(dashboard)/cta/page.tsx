@@ -1,17 +1,19 @@
 "use client";
 
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
-import { Undo2 } from "lucide-react";
+import { Clock2Icon, Undo2 } from "lucide-react";
 import api from "@/lib/api";
 import { ClickableTableRow } from "@/components/ui/clickable-table-row";
 import { ClickableText } from "@/components/ui/clickable-text";
+import { Calendar } from "@/components/ui/calendar";
 import { Input } from "@/components/ui/input";
+import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
 import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import type { Notification, PaginatedResponse } from "@/types";
-import { formatDashboardDateOptional } from "@/lib/datetime-display";
+import { formatDashboardDateTime } from "@/lib/datetime-display";
 import { displayInputToApiLocal, isoDatetimeToDisplayInput } from "@/lib/datetime-form";
 import { useConfirm } from "@/context/ConfirmDialogContext";
 import { notify } from "@/notifications";
@@ -40,6 +42,70 @@ const emptyForm: CtaForm = {
   order: "0",
 };
 
+const DISPLAY_DATETIME_RE =
+  /^(\d{2})-(\d{2})-(\d{4})(?:\s+(\d{2}):(\d{2})(?::(\d{2}))?)?$/;
+
+function parseDisplayDateTime(display: string): { date?: Date; time: string } {
+  const match = display.trim().match(DISPLAY_DATETIME_RE);
+  if (!match) return { date: undefined, time: "00:00:00" };
+  const [, dd, mm, yyyy, hh = "00", min = "00", sec = "00"] = match;
+  const date = new Date(Number(yyyy), Number(mm) - 1, Number(dd));
+  if (Number.isNaN(date.getTime())) return { date: undefined, time: "00:00:00" };
+  return { date, time: `${hh}:${min}:${sec}` };
+}
+
+function normalizeTime(value: string): string {
+  const trimmed = value.trim();
+  if (!trimmed) return "00:00:00";
+  if (/^\d{2}:\d{2}$/.test(trimmed)) return `${trimmed}:00`;
+  if (/^\d{2}:\d{2}:\d{2}$/.test(trimmed)) return trimmed;
+  return "00:00:00";
+}
+
+function toDisplayDateTime(date: Date | undefined, time: string): string {
+  if (!date) return "";
+  const dd = String(date.getDate()).padStart(2, "0");
+  const mm = String(date.getMonth() + 1).padStart(2, "0");
+  const yyyy = String(date.getFullYear());
+  const [hh, min] = normalizeTime(time).split(":");
+  return `${dd}-${mm}-${yyyy} ${hh}:${min}`;
+}
+
+function currentTime24h(now = new Date()): string {
+  const hh = String(now.getHours()).padStart(2, "0");
+  const mm = String(now.getMinutes()).padStart(2, "0");
+  const ss = String(now.getSeconds()).padStart(2, "0");
+  return `${hh}:${mm}:${ss}`;
+}
+
+function isSameCalendarDate(a: Date, b: Date): boolean {
+  return (
+    a.getFullYear() === b.getFullYear() &&
+    a.getMonth() === b.getMonth() &&
+    a.getDate() === b.getDate()
+  );
+}
+
+function startOfDay(date: Date): Date {
+  const d = new Date(date);
+  d.setHours(0, 0, 0, 0);
+  return d;
+}
+
+function toDateTime(date: Date, time: string): Date {
+  const [hh, mm, ss] = normalizeTime(time).split(":").map(Number);
+  const d = new Date(date);
+  d.setHours(hh, mm, ss, 0);
+  return d;
+}
+
+function toTime24hWithSeconds(date: Date): string {
+  const hh = String(date.getHours()).padStart(2, "0");
+  const mm = String(date.getMinutes()).padStart(2, "0");
+  const ss = String(date.getSeconds()).padStart(2, "0");
+  return `${hh}:${mm}:${ss}`;
+}
+
 export default function CtaPage() {
   const router = useRouter();
   const locale = useLocale();
@@ -51,7 +117,30 @@ export default function CtaPage() {
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState<string | "new" | null>(null);
   const [form, setForm] = useState<CtaForm>(emptyForm);
+  const [startDate, setStartDate] = useState<Date | undefined>(undefined);
+  const [endDate, setEndDate] = useState<Date | undefined>(undefined);
+  const [startTime, setStartTime] = useState(currentTime24h());
+  const [endTime, setEndTime] = useState("12:30:00");
+  const [startPickerOpen, setStartPickerOpen] = useState(false);
+  const [endPickerOpen, setEndPickerOpen] = useState(false);
+  const startPickerRef = useRef<HTMLDivElement | null>(null);
+  const endPickerRef = useRef<HTMLDivElement | null>(null);
+  const [now, setNow] = useState(() => new Date());
   const [saving, setSaving] = useState(false);
+  const today = new Date(now);
+  today.setHours(0, 0, 0, 0);
+  const currentStartTime = currentTime24h(now);
+  const startDateTime = startDate ? toDateTime(startDate, startTime) : undefined;
+  const minEndDate =
+    startDateTime && startDateTime > today ? startOfDay(startDateTime) : today;
+
+  function applyEndOffsetFromNow(minutes: number) {
+    const baseline = startDateTime && startDateTime > now ? startDateTime : now;
+    const target = new Date(baseline);
+    target.setMinutes(target.getMinutes() + minutes);
+    setEndDate(new Date(target.getFullYear(), target.getMonth(), target.getDate()));
+    setEndTime(toTime24hWithSeconds(target));
+  }
 
   function fetchData() {
     setLoading(true);
@@ -72,9 +161,59 @@ export default function CtaPage() {
     fetchData();
   }, []);
 
+  useEffect(() => {
+    const timer = window.setInterval(() => setNow(new Date()), 1000);
+    return () => window.clearInterval(timer);
+  }, []);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      const target = event.target as Node;
+      if (startPickerRef.current && !startPickerRef.current.contains(target)) {
+        setStartPickerOpen(false);
+      }
+      if (endPickerRef.current && !endPickerRef.current.contains(target)) {
+        setEndPickerOpen(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  useEffect(() => {
+    if (!startDate) return;
+    if (!isSameCalendarDate(startDate, today)) return;
+    if (startTime < currentStartTime) {
+      setStartTime(currentStartTime);
+    }
+  }, [startDate, startTime, today, currentStartTime]);
+
+  useEffect(() => {
+    if (!endDate) return;
+    const endDateOnly = startOfDay(endDate);
+    if (endDateOnly < minEndDate) {
+      setEndDate(new Date(minEndDate));
+      return;
+    }
+    if (startDateTime && isSameCalendarDate(endDate, startDateTime) && endTime < normalizeTime(startTime)) {
+      setEndTime(normalizeTime(startTime));
+      return;
+    }
+    if (isSameCalendarDate(endDate, today) && endTime < currentStartTime) {
+      setEndTime(currentStartTime);
+    }
+  }, [endDate, endTime, today, currentStartTime, minEndDate, startDateTime, startTime]);
+
   function openNew() {
     setEditing("new");
     setForm(emptyForm);
+    setStartDate(undefined);
+    setEndDate(undefined);
+    setStartTime(currentTime24h());
+    setEndTime("12:30:00");
+    setStartPickerOpen(false);
+    setEndPickerOpen(false);
   }
 
   function openEdit(n: Notification) {
@@ -89,19 +228,34 @@ export default function CtaPage() {
       end_date: isoDatetimeToDisplayInput(n.end_date),
       order: String(n.order),
     });
+    const parsedStart = parseDisplayDateTime(isoDatetimeToDisplayInput(n.start_date));
+    const parsedEnd = parseDisplayDateTime(isoDatetimeToDisplayInput(n.end_date));
+    setStartDate(parsedStart.date);
+    setEndDate(parsedEnd.date);
+    setStartTime(parsedStart.time);
+    setEndTime(parsedEnd.time);
+    setStartPickerOpen(false);
+    setEndPickerOpen(false);
   }
 
   async function handleSave(e: FormEvent) {
     e.preventDefault();
 
-    const start_date = displayInputToApiLocal(form.start_date);
-    if (form.start_date.trim() && start_date === null) {
+    const startDisplay = toDisplayDateTime(startDate, startTime);
+    const endDisplay = toDisplayDateTime(endDate, endTime);
+
+    const start_date = displayInputToApiLocal(startDisplay);
+    if (startDisplay.trim() && start_date === null) {
       notify.validation("cta-form", { start_date: tPages("datetimeInputInvalid") });
       return;
     }
-    const end_date = displayInputToApiLocal(form.end_date);
-    if (form.end_date.trim() && end_date === null) {
+    const end_date = displayInputToApiLocal(endDisplay);
+    if (endDisplay.trim() && end_date === null) {
       notify.validation("cta-form", { end_date: tPages("datetimeInputInvalid") });
+      return;
+    }
+    if (start_date && end_date && new Date(`${start_date}:00Z`) > new Date(`${end_date}:00Z`)) {
+      notify.validation("cta-form", { end_date: tPages("ctaEndAfterStartInvalid") });
       return;
     }
 
@@ -265,36 +419,132 @@ export default function CtaPage() {
               className="text-sm"
             />
           </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div>
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+            <div ref={startPickerRef} className="relative">
               <label className="mb-1 block text-xs text-muted-foreground">
                 {tPages("ctaStartOptional")}
               </label>
-              <Input
-                type="text"
-                autoComplete="off"
-                placeholder={tPages("datetimeInputPlaceholder")}
-                value={form.start_date}
-                onChange={(e) =>
-                  setForm({ ...form, start_date: e.target.value })
-                }
-                className={cn("text-sm", numClass)}
-              />
+              <InputGroup
+                className="cursor-pointer"
+                onClick={() => setStartPickerOpen((open) => !open)}
+              >
+                <InputGroupInput
+                  readOnly
+                  value={toDisplayDateTime(startDate, startTime)}
+                  placeholder={tPages("datetimeInputPlaceholder")}
+                  className={cn("cursor-pointer", numClass)}
+                />
+                <InputGroupAddon align="inline-end">
+                  <Clock2Icon className="text-muted-foreground" />
+                </InputGroupAddon>
+              </InputGroup>
+              {startPickerOpen && (
+                <div className="absolute left-0 top-full z-50 mt-2 w-fit max-w-[calc(100vw-2rem)]">
+                  <div className="rounded-card border border-border bg-card p-1 shadow-lg">
+                    <Calendar
+                      mode="single"
+                      selected={startDate}
+                      onSelect={setStartDate}
+                      disabled={(date) => date < today}
+                      className="[--cell-size:--spacing(7)] sm:[--cell-size:--spacing(8)]"
+                    />
+                    <div className="space-y-1 border-t border-border px-2 pt-3 pb-2">
+                      <label
+                        htmlFor="cta-start-time"
+                        className="block text-xs text-muted-foreground"
+                      >
+                        {tPages("ctaStartTime")}
+                      </label>
+                      <InputGroup>
+                        <InputGroupInput
+                          id="cta-start-time"
+                          type="time"
+                          step="1"
+                          min={startDate && isSameCalendarDate(startDate, today) ? currentStartTime : undefined}
+                          value={startTime}
+                          onChange={(e) => setStartTime(normalizeTime(e.target.value))}
+                          className={cn(
+                            "appearance-none [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none",
+                            numClass
+                          )}
+                        />
+                        <InputGroupAddon align="inline-end">
+                          <Clock2Icon className="text-muted-foreground" />
+                        </InputGroupAddon>
+                      </InputGroup>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
-            <div>
+            <div ref={endPickerRef} className="relative">
               <label className="mb-1 block text-xs text-muted-foreground">
                 {tPages("ctaEndOptional")}
               </label>
-              <Input
-                type="text"
-                autoComplete="off"
-                placeholder={tPages("datetimeInputPlaceholder")}
-                value={form.end_date}
-                onChange={(e) =>
-                  setForm({ ...form, end_date: e.target.value })
-                }
-                className={cn("text-sm", numClass)}
-              />
+              <InputGroup
+                className="cursor-pointer"
+                onClick={() => setEndPickerOpen((open) => !open)}
+              >
+                <InputGroupInput
+                  readOnly
+                  value={toDisplayDateTime(endDate, endTime)}
+                  placeholder={tPages("datetimeInputPlaceholder")}
+                  className={cn("cursor-pointer", numClass)}
+                />
+                <InputGroupAddon align="inline-end">
+                  <Clock2Icon className="text-muted-foreground" />
+                </InputGroupAddon>
+              </InputGroup>
+              {endPickerOpen && (
+                <div className="absolute right-0 top-full z-50 mt-2 w-fit max-w-[calc(100vw-2rem)] md:left-0 md:right-auto">
+                  <div className="rounded-card border border-border bg-card p-1 shadow-lg">
+                    <Calendar
+                      mode="single"
+                      selected={endDate}
+                      onSelect={setEndDate}
+                      disabled={(date) => startOfDay(date) < minEndDate}
+                      className="[--cell-size:--spacing(7)] sm:[--cell-size:--spacing(8)]"
+                    />
+                    <div className="space-y-1 border-t border-border px-2 pt-3 pb-2">
+                      <label
+                        className="block text-xs text-muted-foreground"
+                      >
+                        {tPages("ctaEndTime")}
+                      </label>
+                      <div className="grid grid-cols-2 gap-2">
+                        <button
+                          type="button"
+                          onClick={() => applyEndOffsetFromNow(15)}
+                          className="rounded-ui border border-border px-2 py-1.5 text-xs text-foreground hover:bg-muted"
+                        >
+                          +15 min
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => applyEndOffsetFromNow(30)}
+                          className="rounded-ui border border-border px-2 py-1.5 text-xs text-foreground hover:bg-muted"
+                        >
+                          +30 min
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => applyEndOffsetFromNow(60)}
+                          className="rounded-ui border border-border px-2 py-1.5 text-xs text-foreground hover:bg-muted"
+                        >
+                          +1 hr
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => applyEndOffsetFromNow(120)}
+                          className="rounded-ui border border-border px-2 py-1.5 text-xs text-foreground hover:bg-muted"
+                        >
+                          +2 hr
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
           <div className="flex gap-2">
@@ -356,11 +606,11 @@ export default function CtaPage() {
                     {n.is_active ? tCommon("active") : tCommon("inactive")}
                   </button>
                 </td>
-                <td className="px-4 py-3 text-xs text-muted-foreground">
+                <td className="px-4 py-3 text-xs whitespace-nowrap text-muted-foreground">
                   {n.start_date
-                    ? `${formatDashboardDateOptional(n.start_date, locale)} - ${
+                    ? `${formatDashboardDateTime(n.start_date, locale)} - ${
                         n.end_date
-                          ? formatDashboardDateOptional(n.end_date, locale)
+                          ? formatDashboardDateTime(n.end_date, locale)
                           : tPages("ctaScheduleInfinity")
                       }`
                     : tPages("ctaScheduleAlways")}

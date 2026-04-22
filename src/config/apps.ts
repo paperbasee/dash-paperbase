@@ -20,6 +20,8 @@ export interface NavCounts {
   products: number;
   notifications: number;
   supportTickets: number;
+  banners: number;
+  blog: number;
 }
 
 export interface AppConfig {
@@ -142,7 +144,7 @@ export const APP_CONFIG: Record<string, AppConfig> = {
     description: "Manage banners for homepage, sidebar, footer",
     essential: false,
     href: "/banners",
-    countKey: null,
+    countKey: "banners",
     parentId: null,
   },
   blog: {
@@ -152,7 +154,7 @@ export const APP_CONFIG: Record<string, AppConfig> = {
     description: "Publish blog posts and manage tags",
     essential: false,
     href: "/blog",
-    countKey: null,
+    countKey: "blog",
     parentId: null,
   },
   shipping: {

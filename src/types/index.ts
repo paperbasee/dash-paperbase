@@ -285,6 +285,8 @@ export interface DashboardStats {
   category_total: number;
   support_tickets: number;
   notifications: number;
+  banners_count?: number;
+  blogs_count?: number;
   recent_orders: Order[];
 }
 

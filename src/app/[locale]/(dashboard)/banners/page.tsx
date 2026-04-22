@@ -1,14 +1,16 @@
 "use client";
 
-import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
-import { Undo2} from "lucide-react";
+import { Clock2Icon, Undo2 } from "lucide-react";
 import { isAxiosError } from "axios";
 import api from "@/lib/api";
 import { ClickableTableRow } from "@/components/ui/clickable-table-row";
 import { ClickableText } from "@/components/ui/clickable-text";
+import { Calendar } from "@/components/ui/calendar";
 import { Input } from "@/components/ui/input";
+import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
 import {
   Combobox,
   ComboboxChip,
@@ -57,6 +59,70 @@ const emptyForm: BannerForm = {
   end_at: "",
 };
 
+const DISPLAY_DATETIME_RE =
+  /^(\d{2})-(\d{2})-(\d{4})(?:\s+(\d{2}):(\d{2})(?::(\d{2}))?)?$/;
+
+function parseDisplayDateTime(display: string): { date?: Date; time: string } {
+  const match = display.trim().match(DISPLAY_DATETIME_RE);
+  if (!match) return { date: undefined, time: "00:00:00" };
+  const [, dd, mm, yyyy, hh = "00", min = "00", sec = "00"] = match;
+  const date = new Date(Number(yyyy), Number(mm) - 1, Number(dd));
+  if (Number.isNaN(date.getTime())) return { date: undefined, time: "00:00:00" };
+  return { date, time: `${hh}:${min}:${sec}` };
+}
+
+function normalizeTime(value: string): string {
+  const trimmed = value.trim();
+  if (!trimmed) return "00:00:00";
+  if (/^\d{2}:\d{2}$/.test(trimmed)) return `${trimmed}:00`;
+  if (/^\d{2}:\d{2}:\d{2}$/.test(trimmed)) return trimmed;
+  return "00:00:00";
+}
+
+function toDisplayDateTime(date: Date | undefined, time: string): string {
+  if (!date) return "";
+  const dd = String(date.getDate()).padStart(2, "0");
+  const mm = String(date.getMonth() + 1).padStart(2, "0");
+  const yyyy = String(date.getFullYear());
+  const [hh, min] = normalizeTime(time).split(":");
+  return `${dd}-${mm}-${yyyy} ${hh}:${min}`;
+}
+
+function currentTime24h(now = new Date()): string {
+  const hh = String(now.getHours()).padStart(2, "0");
+  const mm = String(now.getMinutes()).padStart(2, "0");
+  const ss = String(now.getSeconds()).padStart(2, "0");
+  return `${hh}:${mm}:${ss}`;
+}
+
+function isSameCalendarDate(a: Date, b: Date): boolean {
+  return (
+    a.getFullYear() === b.getFullYear() &&
+    a.getMonth() === b.getMonth() &&
+    a.getDate() === b.getDate()
+  );
+}
+
+function startOfDay(date: Date): Date {
+  const d = new Date(date);
+  d.setHours(0, 0, 0, 0);
+  return d;
+}
+
+function toDateTime(date: Date, time: string): Date {
+  const [hh, mm, ss] = normalizeTime(time).split(":").map(Number);
+  const d = new Date(date);
+  d.setHours(hh, mm, ss, 0);
+  return d;
+}
+
+function toTime24hWithSeconds(date: Date): string {
+  const hh = String(date.getHours()).padStart(2, "0");
+  const mm = String(date.getMinutes()).padStart(2, "0");
+  const ss = String(date.getSeconds()).padStart(2, "0");
+  return `${hh}:${mm}:${ss}`;
+}
+
 function formatPlacements(values: string[]): string {
   if (!values?.length) return "—";
   const map = new Map(PLACEMENT_OPTIONS.map((o) => [o.value, o.label] as const));
@@ -76,9 +142,24 @@ export default function BannersPage() {
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState<string | "new" | null>(null);
   const [form, setForm] = useState<BannerForm>(emptyForm);
+  const [startDate, setStartDate] = useState<Date | undefined>(undefined);
+  const [endDate, setEndDate] = useState<Date | undefined>(undefined);
+  const [startTime, setStartTime] = useState(currentTime24h());
+  const [endTime, setEndTime] = useState("12:30:00");
+  const [startPickerOpen, setStartPickerOpen] = useState(false);
+  const [endPickerOpen, setEndPickerOpen] = useState(false);
+  const startPickerRef = useRef<HTMLDivElement | null>(null);
+  const endPickerRef = useRef<HTMLDivElement | null>(null);
+  const [now, setNow] = useState(() => new Date());
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [saving, setSaving] = useState(false);
   const placementAnchor = useComboboxAnchor();
+  const today = new Date(now);
+  today.setHours(0, 0, 0, 0);
+  const currentStartTime = currentTime24h(now);
+  const startDateTime = startDate ? toDateTime(startDate, startTime) : undefined;
+  const minEndDate =
+    startDateTime && startDateTime > today ? startOfDay(startDateTime) : today;
 
   const placementItems = useMemo((): PlacementItem[] => {
     const map = new Map(PLACEMENT_OPTIONS.map((o) => [o.value, o.label] as const));
@@ -105,9 +186,59 @@ export default function BannersPage() {
     fetchData();
   }, []);
 
+  useEffect(() => {
+    const timer = window.setInterval(() => setNow(new Date()), 1000);
+    return () => window.clearInterval(timer);
+  }, []);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      const target = event.target as Node;
+      if (startPickerRef.current && !startPickerRef.current.contains(target)) {
+        setStartPickerOpen(false);
+      }
+      if (endPickerRef.current && !endPickerRef.current.contains(target)) {
+        setEndPickerOpen(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  useEffect(() => {
+    if (!startDate) return;
+    if (!isSameCalendarDate(startDate, today)) return;
+    if (startTime < currentStartTime) {
+      setStartTime(currentStartTime);
+    }
+  }, [startDate, startTime, today, currentStartTime]);
+
+  useEffect(() => {
+    if (!endDate) return;
+    const endDateOnly = startOfDay(endDate);
+    if (endDateOnly < minEndDate) {
+      setEndDate(new Date(minEndDate));
+      return;
+    }
+    if (startDateTime && isSameCalendarDate(endDate, startDateTime) && endTime < normalizeTime(startTime)) {
+      setEndTime(normalizeTime(startTime));
+      return;
+    }
+    if (isSameCalendarDate(endDate, today) && endTime < currentStartTime) {
+      setEndTime(currentStartTime);
+    }
+  }, [endDate, endTime, minEndDate, startDateTime, startTime, today, currentStartTime]);
+
   function openNew() {
     setEditing("new");
     setForm(emptyForm);
+    setStartDate(undefined);
+    setEndDate(undefined);
+    setStartTime(currentTime24h());
+    setEndTime("12:30:00");
+    setStartPickerOpen(false);
+    setEndPickerOpen(false);
     setImageFile(null);
   }
 
@@ -124,7 +255,23 @@ export default function BannersPage() {
       start_at: isoDatetimeToDisplayInput(banner.start_at),
       end_at: isoDatetimeToDisplayInput(banner.end_at),
     });
+    const parsedStart = parseDisplayDateTime(isoDatetimeToDisplayInput(banner.start_at));
+    const parsedEnd = parseDisplayDateTime(isoDatetimeToDisplayInput(banner.end_at));
+    setStartDate(parsedStart.date);
+    setEndDate(parsedEnd.date);
+    setStartTime(parsedStart.time);
+    setEndTime(parsedEnd.time);
+    setStartPickerOpen(false);
+    setEndPickerOpen(false);
     setImageFile(null);
+  }
+
+  function applyEndOffsetFromNow(minutes: number) {
+    const baseline = startDateTime && startDateTime > now ? startDateTime : now;
+    const target = new Date(baseline);
+    target.setMinutes(target.getMinutes() + minutes);
+    setEndDate(new Date(target.getFullYear(), target.getMonth(), target.getDate()));
+    setEndTime(toTime24hWithSeconds(target));
   }
 
   async function handleSave(e: FormEvent) {
@@ -143,14 +290,21 @@ export default function BannersPage() {
       return;
     }
 
-    const start_at = displayInputToApiLocal(form.start_at);
-    if (form.start_at.trim() && start_at === null) {
+    const startDisplay = toDisplayDateTime(startDate, startTime);
+    const endDisplay = toDisplayDateTime(endDate, endTime);
+
+    const start_at = displayInputToApiLocal(startDisplay);
+    if (startDisplay.trim() && start_at === null) {
       notify.validation("banners-form", { start_at: tPages("datetimeInputInvalid") });
       return;
     }
-    const end_at = displayInputToApiLocal(form.end_at);
-    if (form.end_at.trim() && end_at === null) {
+    const end_at = displayInputToApiLocal(endDisplay);
+    if (endDisplay.trim() && end_at === null) {
       notify.validation("banners-form", { end_at: tPages("datetimeInputInvalid") });
+      return;
+    }
+    if (start_at && end_at && new Date(`${start_at}:00Z`) > new Date(`${end_at}:00Z`)) {
+      notify.validation("banners-form", { end_at: tPages("ctaEndAfterStartInvalid") });
       return;
     }
 
@@ -204,6 +358,21 @@ export default function BannersPage() {
       await api.delete(`admin/banners/${publicId}/`);
       notify.warning(tPages("bannersDeletedSuccess"));
       fetchData();
+    } catch (err) {
+      console.error(err);
+      notify.error(err);
+    }
+  }
+
+  async function toggleActive(banner: Banner) {
+    try {
+      const { data } = await api.patch<Banner>(
+        `admin/banners/${banner.public_id}/`,
+        { is_active: !banner.is_active }
+      );
+      setBanners((prev) =>
+        prev.map((b) => (b.public_id === data.public_id ? data : b))
+      );
     } catch (err) {
       console.error(err);
       notify.error(err);
@@ -353,31 +522,125 @@ export default function BannersPage() {
                 placeholder={tPages("bannersUrlPlaceholder")}
               />
             </div>
-            <div>
+            <div ref={startPickerRef} className="relative">
               <label className="mb-1 block text-sm font-medium">{tPages("bannersLabelStart")}</label>
-              <Input
-                type="text"
-                autoComplete="off"
-                placeholder={tPages("datetimeInputPlaceholder")}
-                value={form.start_at}
-                onChange={(e) =>
-                  setForm((f) => ({ ...f, start_at: e.target.value }))
-                }
-                className={cn("text-sm", numClass)}
-              />
+              <InputGroup
+                className="cursor-pointer"
+                onClick={() => setStartPickerOpen((open) => !open)}
+              >
+                <InputGroupInput
+                  readOnly
+                  value={toDisplayDateTime(startDate, startTime)}
+                  placeholder={tPages("datetimeInputPlaceholder")}
+                  className={cn("cursor-pointer text-sm", numClass)}
+                />
+                <InputGroupAddon align="inline-end">
+                  <Clock2Icon className="text-muted-foreground" />
+                </InputGroupAddon>
+              </InputGroup>
+              {startPickerOpen && (
+                <div className="absolute left-0 top-full z-50 mt-2 w-fit max-w-[calc(100vw-2rem)]">
+                  <div className="rounded-card border border-border bg-card p-1 shadow-lg">
+                    <Calendar
+                      mode="single"
+                      selected={startDate}
+                      onSelect={setStartDate}
+                      disabled={(date) => date < today}
+                      className="[--cell-size:--spacing(7)] sm:[--cell-size:--spacing(8)]"
+                    />
+                    <div className="space-y-1 border-t border-border px-2 pt-3 pb-2">
+                      <label
+                        htmlFor="banner-start-time"
+                        className="block text-xs text-muted-foreground"
+                      >
+                        {tPages("ctaStartTime")}
+                      </label>
+                      <InputGroup>
+                        <InputGroupInput
+                          id="banner-start-time"
+                          type="time"
+                          step="1"
+                          min={startDate && isSameCalendarDate(startDate, today) ? currentStartTime : undefined}
+                          value={startTime}
+                          onChange={(e) => setStartTime(normalizeTime(e.target.value))}
+                          className={cn(
+                            "appearance-none [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none",
+                            numClass
+                          )}
+                        />
+                        <InputGroupAddon align="inline-end">
+                          <Clock2Icon className="text-muted-foreground" />
+                        </InputGroupAddon>
+                      </InputGroup>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
-            <div>
+            <div ref={endPickerRef} className="relative">
               <label className="mb-1 block text-sm font-medium">{tPages("bannersLabelEnd")}</label>
-              <Input
-                type="text"
-                autoComplete="off"
-                placeholder={tPages("datetimeInputPlaceholder")}
-                value={form.end_at}
-                onChange={(e) =>
-                  setForm((f) => ({ ...f, end_at: e.target.value }))
-                }
-                className={cn("text-sm", numClass)}
-              />
+              <InputGroup
+                className="cursor-pointer"
+                onClick={() => setEndPickerOpen((open) => !open)}
+              >
+                <InputGroupInput
+                  readOnly
+                  value={toDisplayDateTime(endDate, endTime)}
+                  placeholder={tPages("datetimeInputPlaceholder")}
+                  className={cn("cursor-pointer text-sm", numClass)}
+                />
+                <InputGroupAddon align="inline-end">
+                  <Clock2Icon className="text-muted-foreground" />
+                </InputGroupAddon>
+              </InputGroup>
+              {endPickerOpen && (
+                <div className="absolute right-0 top-full z-50 mt-2 w-fit max-w-[calc(100vw-2rem)] md:left-0 md:right-auto">
+                  <div className="rounded-card border border-border bg-card p-1 shadow-lg">
+                    <Calendar
+                      mode="single"
+                      selected={endDate}
+                      onSelect={setEndDate}
+                      disabled={(date) => startOfDay(date) < minEndDate}
+                      className="[--cell-size:--spacing(7)] sm:[--cell-size:--spacing(8)]"
+                    />
+                    <div className="space-y-1 border-t border-border px-2 pt-3 pb-2">
+                      <label className="block text-xs text-muted-foreground">
+                        {tPages("ctaEndTime")}
+                      </label>
+                      <div className="grid grid-cols-2 gap-2">
+                        <button
+                          type="button"
+                          onClick={() => applyEndOffsetFromNow(15)}
+                          className="rounded-ui border border-border px-2 py-1.5 text-xs text-foreground hover:bg-muted"
+                        >
+                          +15 min
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => applyEndOffsetFromNow(30)}
+                          className="rounded-ui border border-border px-2 py-1.5 text-xs text-foreground hover:bg-muted"
+                        >
+                          +30 min
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => applyEndOffsetFromNow(60)}
+                          className="rounded-ui border border-border px-2 py-1.5 text-xs text-foreground hover:bg-muted"
+                        >
+                          +1 hr
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => applyEndOffsetFromNow(120)}
+                          className="rounded-ui border border-border px-2 py-1.5 text-xs text-foreground hover:bg-muted"
+                        >
+                          +2 hr
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
             <div className="sm:col-span-2">
               <label className="mb-1 block text-sm font-medium">{tPages("bannersLabelImage")}</label>
@@ -435,8 +698,7 @@ export default function BannersPage() {
               <th className="th">{tPages("bannersColTitle")}</th>
               <th className="th">Placements</th>
               <th className="th">{tPages("bannersColOrder")}</th>
-              <th className="th">{tPages("bannersColStart")}</th>
-              <th className="th">{tPages("bannersColEnd")}</th>
+              <th className="th">{tPages("ctaColSchedule")}</th>
               <th className="th">{tPages("bannersColStatus")}</th>
               <th className="th text-right">{tPages("bannersColActions")}</th>
             </tr>
@@ -467,14 +729,19 @@ export default function BannersPage() {
                   {formatPlacements(b.placement_slots || [])}
                 </td>
                 <td className="px-4 py-3">{b.order}</td>
-                <td className="px-4 py-3 text-muted-foreground">
-                  {b.start_at ? formatDashboardDateTime(b.start_at, locale) : "—"}
-                </td>
-                <td className="px-4 py-3 text-muted-foreground">
-                  {b.end_at ? formatDashboardDateTime(b.end_at, locale) : "—"}
+                <td className="px-4 py-3 text-xs whitespace-nowrap text-muted-foreground">
+                  {b.start_at
+                    ? `${formatDashboardDateTime(b.start_at, locale)} - ${
+                        b.end_at
+                          ? formatDashboardDateTime(b.end_at, locale)
+                          : tPages("ctaScheduleInfinity")
+                      }`
+                    : tPages("ctaScheduleAlways")}
                 </td>
                 <td className="px-4 py-3">
-                  <span
+                  <button
+                    type="button"
+                    onClick={() => toggleActive(b)}
                     className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-semibold ${
                       b.is_active
                         ? "bg-emerald-500/20 text-emerald-400"
@@ -482,7 +749,7 @@ export default function BannersPage() {
                     }`}
                   >
                     {b.is_active ? tCommon("active") : tCommon("inactive")}
-                  </span>
+                  </button>
                 </td>
                 <td className="px-4 py-3 text-right">
                   <ClickableText
