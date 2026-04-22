@@ -205,6 +205,7 @@ links, policy URLs, and the custom product-field schema.
   "tracker_build_id": "2026041801",
   "tracker_script_src": "https://storage.paperbase.me/static/tracker.js?v=2026041801",
   "tracking_ingest_endpoint": "https://api.paperbase.me/tracking/event",
+  "pixel_id": "1234567890123456",
   "theme_settings": { "primary_color": "#2563eb" },
   "seo": {
     "default_title": "My Store - Best Products",
@@ -245,6 +246,7 @@ links, policy URLs, and the custom product-field schema.
 | `tracker_build_id` | string | Versioning token for `tracker.js` (pass-through from server) |
 | `tracker_script_src` | string | Versioned `tracker.js` URL — use this verbatim |
 | `tracking_ingest_endpoint` | string | Where `tracker.js` POSTs events (informational) |
+| `pixel_id` | string \| null | Meta Pixel ID for this store. `null` when no active Facebook integration is configured in the dashboard. Read by `tracker.js` automatically — **the storefront does not need to use this field directly**. |
 | `theme_settings.primary_color` | string | Hex color (may be empty string) |
 | `seo.default_title` | string | Default page title |
 | `seo.default_description` | string | Default meta description |
@@ -1269,82 +1271,393 @@ the resolved store.
 
 ---
 
-## 8. Meta Pixel + CAPI Tracking (mandatory)
+## 8. Meta Pixel + CAPI Tracking
 
-Do **not** hand-roll Meta Pixel or Conversions API. Every storefront must load the
-bundled `tracker.js`, which handles both the browser-side `fbq` calls and the
-server-side CAPI forwarding with deduplication.
+Do **not** hand-roll Meta Pixel or Conversions API calls. Every storefront must
+load the bundled `tracker.js`. It handles:
 
-### 8.1 Include `tracker.js`
+- Loading Meta's `fbevents.js` and calling `fbq("init", pixelId)` automatically
+- Firing browser-side Pixel events (`fbq("track", ...)`)
+- Forwarding every event to your Django backend (`POST /tracking/event`)
+- Generating a shared `event_id` used by both Pixel and CAPI for deduplication
+- SHA-256 hashing all PII server-side before it reaches Meta
 
-Embed the versioned URL returned by `GET /store/public/` on every page:
+The store owner **never needs to configure a Pixel ID on the storefront**. The Pixel
+ID, Meta access token, and all CAPI credentials are managed exclusively in the
+Paperbase dashboard.
+
+---
+
+### 8.1 What the storefront must provide
+
+The storefront needs exactly **two things** to fully activate tracking:
+
+1. **Load `tracker.js`** on every page
+2. **Expose the publishable API key** to the browser before the script runs
+
+That is all. The Pixel ID is fetched automatically.
+
+---
+
+### 8.2 Loading `tracker.js`
+
+Always use the versioned URL returned by `GET /api/v1/store/public/`:
 
 ```html
-<script src="{tracker_script_src}"></script>
+<!-- Read tracker_script_src from /store/public/ and render it here -->
+<script src="https://storage.paperbase.me/static/tracker.js?v=2026041801" async></script>
 ```
 
-- `tracker_script_src` is the `https://storage.paperbase.me/static/tracker.js?v=<BUILD_ID>` URL returned by `/store/public/`.
-- Do **not** hardcode the URL; always read `tracker_script_src` from the API so a
-  deployment bumps `?v=<BUILD_ID>` and busts the browser cache.
+- Read `tracker_script_src` from the API response — do **not** hardcode the URL.
+  The `?v=<BUILD_ID>` query string busts the browser cache on each deployment.
+- Load it on **every page** — including product pages, cart, checkout, and the
+  order confirmation / thank-you page.
 
-### 8.2 Initialization
+---
 
-`tracker.js` auto-initializes when one of the following is set before or shortly
-after the script loads:
+### 8.3 Providing the API key
 
-- `window.PAPERBASE_PUBLISHABLE_KEY = "ak_pk_...";` **or**
-- `window.__PAPERBASE_API_KEY__ = "ak_pk_...";` **or**
-- `tracker.init({ apiKey: "ak_pk_..." })`
+Set the publishable API key **before** or **immediately after** `tracker.js` loads.
+Use any one of these two methods — they are equivalent:
 
-Optional debug mode:
+**Method A — global variable (recommended for SSR / Next.js):**
+
+```html
+<script>
+  window.PAPERBASE_PUBLISHABLE_KEY = "ak_pk_xxxxxxxxxxxxxxxx";
+</script>
+<!-- tracker.js script tag follows -->
+```
+
+**Method B — `tracker.init()` call:**
 
 ```js
-tracker.init({ apiKey: "ak_pk_...", debug: true });
+tracker.init({ apiKey: "ak_pk_xxxxxxxxxxxxxxxx" });
 ```
 
-Events are POSTed to `https://api.paperbase.me/tracking/event`
-(same as `tracking_ingest_endpoint` in `/store/public/`).
+> If none of these are set, `tracker.js` skips Pixel initialization and all
+> backend POSTs return `401`. No tracking data reaches Meta.
 
-### 8.3 Whitelisted events
+**Optional init parameters:**
 
-Only these events are accepted server-side:
+| Parameter | Type | Default | Notes |
+|---|---|---|---|
+| `apiKey` | string | `""` | Publishable key (`ak_pk_...`) |
+| `currency` | string | `"BDT"` | Default currency code used when not passed per-event |
+| `debug` | boolean | `false` | Logs all events to `console.log` when `true` |
+| `endpoint` | string | `"https://api.paperbase.me/tracking/event"` | Do not change |
+| `pixelId` | string | `""` | Only needed if you want to override the Pixel ID from the dashboard |
 
-- `PageView` (auto-fired on load)
-- `ViewContent`
-- `AddToCart`
-- `InitiateCheckout`
-- `Purchase`
+---
 
-Browser-side Pixel fires **and** server-side CAPI both use the same `event_id` for
-dedup. Do not override or regenerate `event_id` yourself.
+### 8.4 How Pixel ID is resolved (automatic)
 
-### 8.4 Flow
+The storefront does **not** need to know or configure the Pixel ID.
+
+`tracker.js` resolves it automatically in this order, stopping at the first match:
+
+1. **Manual override** — `window.PAPERBASE_PIXEL_ID` (checked synchronously at load time):
+   If this global is set before `tracker.js` runs, it is used immediately and
+   the API fetch is skipped entirely. Use this only if you need to bypass the
+   dashboard value. Set it before the script tag:
+   - `window.PAPERBASE_PIXEL_ID = "1234567890";`
+   - or pass it to `tracker.init({ pixelId: "1234567890" })` (sets the same global)
+
+2. **`GET /api/v1/store/public/`** (fetched asynchronously using the API key):
+   Reads the `pixel_id` field from the response. This value comes from the
+   active Facebook integration configured in the Paperbase dashboard. **This is
+   the normal path** — nothing needs to be set on the storefront.
+
+If `pixel_id` is `null` from the API (no active Facebook integration in the
+dashboard), the browser Pixel is not initialized. CAPI continues to fire normally
+using the dashboard credentials — it does not depend on the browser Pixel ID.
+
+---
+
+### 8.5 Automatic events
+
+`tracker.js` fires these events **automatically** with no storefront code required:
+
+| Event | When fired | Storefront action required |
+|---|---|---|
+| `PageView` | Immediately when `tracker.js` loads on any page | None |
+
+---
+
+### 8.6 Events the storefront must fire manually
+
+Call these methods at the correct moment in your UI. All parameters marked
+"optional" may be omitted entirely — the tracker handles missing data gracefully.
+
+---
+
+#### `tracker.viewContent(product)`
+
+Fire when a user lands on a product detail page.
+
+```js
+tracker.viewContent({
+  id: "prd_abc123",       // string — product public_id, id, publicId, or sku (any one)
+  value: 599,             // number — selling price
+  currency: "BDT",        // string — ISO currency code (optional, defaults to tracker currency)
+  customer: {             // object — optional, only if user is known (e.g. returning customer)
+    email: "user@example.com",
+    phone: "01712345678",
+    first_name: "John",
+    last_name: "Doe",
+    external_id: "cust_abc123",
+    city: "Dhaka",
+    state: "Dhaka",
+    zip_code: "1212",
+    country: "BD",
+  }
+});
+```
+
+> `customer` is entirely optional. If the user is browsing anonymously, omit it.
+> All `customer` fields are optional individually. Provide only what you have.
+
+---
+
+#### `tracker.addToCart(product)`
+
+Fire when a user clicks "Add to Cart" for a product. The cart lives in client
+state — this event fires at the click moment using the data you already have.
+
+```js
+tracker.addToCart({
+  id: "prd_abc123",       // string — product public_id, id, publicId, or sku
+  value: 599,             // number — unit price
+  currency: "BDT",        // string — optional
+  customer: { ... }       // object — optional, same shape as viewContent
+});
+```
+
+---
+
+#### `tracker.initiateCheckout(cart)`
+
+Fire when a user navigates to the checkout page / opens the checkout flow.
+
+```js
+tracker.initiateCheckout({
+  value: 1258,            // number — total cart value including shipping
+  currency: "BDT",        // string — optional
+  items: [                // array — cart line items
+    {
+      id: "prd_abc123",   // string — product public_id, id, publicId, or sku
+      quantity: 2,
+      item_price: 599,    // number — unit price (also accepted as "price")
+    },
+    {
+      id: "prd_xyz789",
+      quantity: 1,
+      item_price: 60,
+    }
+  ],
+  customer: { ... }       // object — optional; populate if user has entered name/phone
+});
+```
+
+> `items` entries accept `id`, `product_id`, `public_id`, `publicId`, or `sku` for
+> the product identifier — use whichever you have in your cart state.
+
+---
+
+#### `tracker.purchase(order)`
+
+Fire on the order confirmation / thank-you page, after `POST /api/v1/orders/`
+returns `201`. Use the order receipt from the API response to populate this.
+
+```js
+// receipt = response from POST /api/v1/orders/
+tracker.purchase({
+  order_id: receipt.public_id,   // string — ord_... public id
+  value: Number(receipt.total),  // number — grand total
+  currency: "BDT",               // string — optional
+  items: receipt.items.map(function(line) {
+    return {
+      id: line.product_public_id || line.product_name,  // use public_id if available
+      quantity: line.quantity,
+      item_price: Number(line.unit_price),
+    };
+  }),
+  customer: {                    // populate from the order form the user just submitted
+    email: form.email,           // optional — include if collected at checkout
+    phone: form.phone,
+    first_name: form.shipping_name.split(" ")[0],
+    last_name: form.shipping_name.split(" ").slice(1).join(" "),
+    city: form.district,
+    country: "BD",
+  }
+});
+```
+
+> `customer` fields are hashed with SHA-256 on your server before being sent to
+> Meta. They are sent over HTTPS to your backend only. They are never stored in
+> any database. Never include raw PII in logs.
+
+---
+
+### 8.7 Complete event flow
 
 ```mermaid
 flowchart TD
-  Browser["Browser action"] --> Gen["tracker.js generates event_id"]
-  Gen --> Pixel["Meta Pixel fires (browser)"]
-  Gen --> Ingest["POST /tracking/event (server)"]
-  Ingest --> Queue["Celery queue"]
-  Queue --> Capi["Meta CAPI send"]
-  Pixel --> Dedup["Meta deduplicates by event_id"]
-  Capi --> Dedup
+    StorePublic["GET /api/v1/store/public/\nreturns pixel_id"] -->|"auto-fetch on load"| TrackerInit["tracker.js\nfbq('init', pixel_id)"]
+    StorefrontJS["Storefront JS\ncalls tracker.purchase(order)"] --> BuildPayload["tracker.js\ngenerates event_id\nbuilds payload"]
+    BuildPayload --> PixelFire["fbq('track', 'Purchase', data,\n{ eventID: event_id })"]
+    BuildPayload --> BackendPost["POST /tracking/event\nAuthorization: Bearer ak_pk_..."]
+    BackendPost --> Django["Django ingest\nvalidates + deduplicates\n(10s cache by event_id)"]
+    Django --> Celery["Celery task\nSHA-256 hashes PII\nbuilds user_data + custom_data"]
+    Celery --> GraphAPI["graph.facebook.com\n/v25.0/{pixel_id}/events"]
+    PixelFire --> Meta["Meta deduplicates\nby event_id"]
+    GraphAPI --> Meta
 ```
 
-### 8.5 Do NOTs
+---
 
-- Do not manually fire `fbq`.
-- Do not manually POST Meta CAPI events.
-- Do not modify `event_id` payloads.
-- Do not modify `tracker.js`.
-- Do not duplicate Pixel setup scripts.
-- Do not use an unversioned `tracker.js` URL.
+### 8.8 PII and customer data security
 
-### 8.6 Troubleshooting
+- PII fields (`email`, `phone`, `first_name`, `last_name`, `external_id`, `city`,
+  `state`, `zip_code`, `country`) are sent **over HTTPS to your backend only**.
+- They are **SHA-256 hashed** on the server before being forwarded to Meta's
+  Conversions API. Raw values never leave your server.
+- They are **never stored** in any database table. The ingest pipeline is
+  pass-through: serializer → Celery task payload → hash → CAPI → discard.
+- Never log PII fields in your frontend. Never send them to any analytics service
+  other than Paperbase tracking.
 
-- **No events**: confirm the publishable API key (`ak_pk_...`) is exposed to the browser before `tracker.js` runs.
-- **Missing `Purchase`**: ensure the "thank you" page renders `tracker.js` and is not blocked by CSP / ad-blockers.
-- **Duplicate server events**: implies your code is overriding `event_id`; it should not happen out of the box.
+---
+
+### 8.9 Accepted events
+
+Only these five event names are accepted by the backend. Any other name is rejected
+with `400`:
+
+| Event | Fired by |
+|---|---|
+| `PageView` | Automatically on every page load |
+| `ViewContent` | `tracker.viewContent(product)` |
+| `AddToCart` | `tracker.addToCart(product)` |
+| `InitiateCheckout` | `tracker.initiateCheckout(cart)` |
+| `Purchase` | `tracker.purchase(order)` |
+
+---
+
+### 8.10 Deduplication
+
+`tracker.js` is the sole source of `event_id`. The same `event_id` is used for:
+
+- The browser Pixel call: `fbq("track", ..., { eventID: event_id })`
+- The backend POST body: `{ "event_id": "event_Purchase_1714000000000_XyZ..." }`
+- The CAPI payload sent to Meta: `{ "event_id": "..." }`
+
+Meta deduplicates the browser and server events into a single signal using this
+shared ID. Do not generate your own `event_id`. Do not modify the payload.
+
+---
+
+### 8.11 Full bootstrapping pattern (Next.js example)
+
+```tsx
+// app/layout.tsx  (or _app.tsx / root layout)
+// 1. Fetch store config once (server-side or on mount)
+const store = await fetch(`${BACKEND}/api/v1/store/public/`, {
+  headers: { Authorization: `Bearer ${API_KEY}` }
+}).then(r => r.json());
+
+// 2. Inject the API key as a global before tracker.js loads
+// 3. Load tracker.js from the versioned URL returned by the API
+```
+
+```html
+<!-- In your <head> — key MUST come before tracker.js -->
+<script>
+  window.PAPERBASE_PUBLISHABLE_KEY = "ak_pk_xxxxxxxxxxxxxxxx";
+</script>
+<script src="{store.tracker_script_src}" async></script>
+```
+
+```tsx
+// Product detail page — fire ViewContent on mount
+useEffect(() => {
+  window.tracker?.viewContent({
+    id: product.public_id,
+    value: Number(product.price),
+    currency: store.currency,
+  });
+}, [product.public_id]);
+
+// Add to cart button handler
+function handleAddToCart(product) {
+  addToLocalCart(product);           // your local cart logic
+  window.tracker?.addToCart({
+    id: product.public_id,
+    value: Number(product.price),
+    currency: store.currency,
+  });
+}
+
+// Checkout page — fire InitiateCheckout on mount
+useEffect(() => {
+  window.tracker?.initiateCheckout({
+    value: cartTotal,
+    currency: store.currency,
+    items: cart.map(line => ({
+      id: line.product_public_id,
+      quantity: line.quantity,
+      item_price: Number(line.price),
+    })),
+  });
+}, []);
+
+// Order confirmation page — fire Purchase after successful order creation
+const receipt = await apiFetch("/orders/", { method: "POST", body: ... });
+window.tracker?.purchase({
+  order_id: receipt.public_id,
+  value: Number(receipt.total),
+  currency: store.currency,
+  items: receipt.items.map(line => ({
+    id: line.product_public_id || line.product_name,
+    quantity: line.quantity,
+    item_price: Number(line.unit_price),
+  })),
+  customer: {
+    email: form.email || "",
+    phone: form.phone || "",
+    first_name: form.shipping_name.split(" ")[0] || "",
+    last_name: form.shipping_name.split(" ").slice(1).join(" ") || "",
+    city: form.district || "",
+    country: "BD",
+  },
+});
+```
+
+---
+
+### 8.12 Do NOTs
+
+- Do **not** manually call `fbq(...)` — `tracker.js` owns all Pixel calls.
+- Do **not** manually POST to `/tracking/event` — `tracker.js` does this.
+- Do **not** configure a Pixel ID on the storefront — it is read from the dashboard automatically.
+- Do **not** hardcode `tracker.js` URL — always read `tracker_script_src` from `/store/public/`.
+- Do **not** generate or override `event_id` — doing so breaks deduplication.
+- Do **not** duplicate the `<script>` tag for `tracker.js` on the same page.
+- Do **not** send `customer` PII to any other service — it goes to your backend only.
+
+---
+
+### 8.13 Troubleshooting
+
+| Symptom | Cause | Fix |
+|---|---|---|
+| No events in Meta Events Manager | API key not set before `tracker.js` loads | Set `window.PAPERBASE_PUBLISHABLE_KEY` before the script tag |
+| Browser Pixel not firing (CAPI works) | No active Facebook integration in dashboard, or `pixel_id` is `null` | Add Facebook integration via the Paperbase dashboard settings |
+| `401` on ingest endpoint | Missing or invalid `ak_pk_` key | Confirm the publishable key is correct and not a secret key (`ak_sk_`) |
+| Duplicate events in Meta | `tracker.js` loaded twice on the same page | Ensure the script tag appears exactly once per page |
+| `Purchase` event missing | Thank-you page loads before `tracker.js` | Ensure `tracker.js` is in the root layout, not just product pages |
+| Low Event Match Quality in Meta | No `customer` object passed to `purchase()` | Populate `customer` with at least `email` and `phone` from the checkout form |
+| Debug: see what tracker fires | — | `tracker.init({ apiKey: "...", debug: true })` — logs to browser console |
 
 ---
 
@@ -1617,9 +1930,14 @@ Treat the responses as safe to cache in-browser for short windows if you wish.
 ### 14.1 Bootstrapping
 
 1. Read `GET /store/public/` once per session (or per SSR). Cache locally.
-2. Use `tracker_script_src` verbatim to inject `tracker.js`.
-3. Set `window.PAPERBASE_PUBLISHABLE_KEY = "ak_pk_..."` **before** the tracker
-   script runs, so `PageView` is attributed correctly.
+2. Set `window.PAPERBASE_PUBLISHABLE_KEY = "ak_pk_..."` **before** the tracker
+   script runs — this must be first or `PageView` fires without a key.
+3. Inject `<script src="{tracker_script_src}" async></script>` using the
+   `tracker_script_src` URL from the API response verbatim. The Pixel ID is
+   fetched automatically from the dashboard; you do not need to configure it on
+   the storefront.
+4. `PageView` fires automatically when the script loads — no call required.
+5. Call the remaining tracker methods at the correct UI moments (section 8.6).
 
 ### 14.2 Catalog screens
 
