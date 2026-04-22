@@ -93,11 +93,12 @@ export default function DateRangeFilter({
 
   return (
     <Card className="border-none bg-transparent shadow-none">
-      <CardContent className="flex flex-col gap-3 px-0 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex flex-wrap gap-2">
+      <CardContent className="flex flex-col gap-3 px-0 lg:flex-row lg:items-center lg:justify-between">
+        <div className="grid grid-cols-2 gap-2 md:grid-cols-4 lg:flex lg:flex-wrap">
           <Button
             size="sm"
             variant={value.preset === "today" ? "default" : "outline"}
+            className="w-full lg:w-auto"
             onClick={() => setPreset("today")}
           >
             {digitsInNumberFont(t("filtersToday"), locale)}
@@ -105,6 +106,7 @@ export default function DateRangeFilter({
           <Button
             size="sm"
             variant={value.preset === "last7" ? "default" : "outline"}
+            className="w-full lg:w-auto"
             onClick={() => setPreset("last7")}
           >
             {digitsInNumberFont(t("filtersLast7Days"), locale)}
@@ -112,6 +114,7 @@ export default function DateRangeFilter({
           <Button
             size="sm"
             variant={value.preset === "last30" ? "default" : "outline"}
+            className="w-full lg:w-auto"
             onClick={() => setPreset("last30")}
           >
             {digitsInNumberFont(t("filtersLast30Days"), locale)}
@@ -119,35 +122,38 @@ export default function DateRangeFilter({
           <Button
             size="sm"
             variant={value.preset === "thisMonth" ? "default" : "outline"}
+            className="w-full lg:w-auto"
             onClick={() => setPreset("thisMonth")}
           >
             {digitsInNumberFont(t("filtersThisMonth"), locale)}
           </Button>
         </div>
 
-        <div className="flex flex-col gap-2 text-xs sm:flex-row sm:items-center sm:gap-3 sm:text-sm sm:flex-nowrap">
+        <div className="flex flex-col gap-2 text-xs sm:text-sm lg:flex-row lg:items-center lg:gap-3 lg:flex-nowrap">
           <span className="text-muted-foreground whitespace-nowrap">
             {t("filtersCustomRange")}
           </span>
-          <Input
-            type="text"
-            inputMode="numeric"
-            placeholder={t("filtersDatePlaceholder")}
-            className="font-numbers-date-value h-8 w-[120px] sm:w-[110px]"
-            value={value.startDate}
-            onChange={(e) => handleDateInput("startDate", e.target.value)}
-          />
-          <span className="text-muted-foreground whitespace-nowrap">
-            {t("filtersDateRangeTo")}
-          </span>
-          <Input
-            type="text"
-            inputMode="numeric"
-            placeholder={t("filtersDatePlaceholder")}
-            className="font-numbers-date-value h-8 w-[120px] sm:w-[110px]"
-            value={value.endDate}
-            onChange={(e) => handleDateInput("endDate", e.target.value)}
-          />
+          <div className="flex items-center gap-2 lg:contents">
+            <Input
+              type="text"
+              inputMode="numeric"
+              placeholder={t("filtersDatePlaceholder")}
+              className="font-numbers-date-value h-8 w-[120px] sm:w-[110px]"
+              value={value.startDate}
+              onChange={(e) => handleDateInput("startDate", e.target.value)}
+            />
+            <span className="text-muted-foreground whitespace-nowrap">
+              {t("filtersDateRangeTo")}
+            </span>
+            <Input
+              type="text"
+              inputMode="numeric"
+              placeholder={t("filtersDatePlaceholder")}
+              className="font-numbers-date-value h-8 w-[120px] sm:w-[110px]"
+              value={value.endDate}
+              onChange={(e) => handleDateInput("endDate", e.target.value)}
+            />
+          </div>
         </div>
       </CardContent>
     </Card>

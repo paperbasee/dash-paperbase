@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import {
   Bar,
@@ -57,6 +57,7 @@ export default function DashboardBarChart({ data }: DashboardBarChartProps) {
   type MetricKey = (typeof metrics)[number]["key"];
 
   const [activeMetric, setActiveMetric] = useState<MetricKey | "all">("all");
+  const [isTabletRange, setIsTabletRange] = useState(false);
 
   const formatTick = (v: string | number) =>
     toLocaleDigits(String(v), locale);
@@ -64,6 +65,15 @@ export default function DashboardBarChart({ data }: DashboardBarChartProps) {
   const metricFilterBtnBase =
     "min-w-0 max-w-full break-words rounded-ui border px-2 py-1 text-[11px] font-medium leading-relaxed transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-[hsl(var(--card))]";
   const yAxisWidth = 32;
+  const legendHeight = isTabletRange ? 68 : 40;
+
+  useEffect(() => {
+    const query = window.matchMedia("(min-width: 768px) and (max-width: 1023px)");
+    const sync = () => setIsTabletRange(query.matches);
+    sync();
+    query.addEventListener("change", sync);
+    return () => query.removeEventListener("change", sync);
+  }, []);
 
   return (
     <Card className="dashboard-chart-card h-[360px] border border-card-border bg-card">
@@ -146,7 +156,7 @@ export default function DashboardBarChart({ data }: DashboardBarChartProps) {
               />
               <Legend
                 verticalAlign="top"
-                height={40}
+                height={legendHeight}
                 iconType="circle"
                 wrapperStyle={{ fontSize: 11, marginBottom: 10 }}
                 content={() => (
