@@ -70,21 +70,34 @@
     --text-secondary: hsl(var(--muted-foreground));
     --border-color: hsl(var(--border));
 
-    /* System notification banner (API-driven; warm amber glass, both themes) */
-    --system-banner-surface: rgba(245, 158, 11, 0.14);
-    --system-banner-border: rgba(245, 158, 11, 0.38);
-    --system-banner-shadow: 0 8px 28px -8px rgba(245, 158, 11, 0.16);
-    --system-banner-title: #1c1917;
-    --system-banner-text: #44403c;
-    --system-banner-text-muted: rgba(68, 64, 60, 0.88);
-    --system-banner-cta: #b45309;
-    --system-banner-cta-decoration: rgba(180, 83, 9, 0.45);
-    --system-banner-cta-decoration-hover: rgba(180, 83, 9, 0.85);
-    --system-banner-dismiss: rgba(68, 64, 60, 0.55);
-    --system-banner-dismiss-hover: #292524;
-    --system-banner-dismiss-hover-bg: rgba(245, 158, 11, 0.08);
+    /* System notification banner (mobile top strip + shared base variant) */
+    --system-banner-surface: rgba(255, 255, 255, 0.96);
+    --system-banner-border: rgba(15, 23, 42, 0.14);
+    --system-banner-shadow: 0 8px 24px -10px rgba(15, 23, 42, 0.2);
+    --system-banner-title: #0f172a;
+    --system-banner-text: #0f172a;
+    --system-banner-text-muted: rgba(15, 23, 42, 0.82);
+    --system-banner-cta: #111827;
+    --system-banner-cta-decoration: rgba(17, 24, 39, 0.42);
+    --system-banner-cta-decoration-hover: rgba(17, 24, 39, 0.82);
+    --system-banner-dismiss: rgba(15, 23, 42, 0.62);
+    --system-banner-dismiss-hover: #020617;
+    --system-banner-dismiss-hover-bg: rgba(15, 23, 42, 0.08);
     /* Fixed top bar (mobile): solid surface so content does not show through */
-    --system-banner-surface-fixed-opaque: #fff7ed;
+    --system-banner-surface-fixed-opaque: #ffffff;
+
+    /* Desktop sidebar notification card */
+    --system-banner-sidebar-surface: #ffffff;
+    --system-banner-sidebar-border: rgba(15, 23, 42, 0.14);
+    --system-banner-sidebar-shadow: 0 10px 28px -16px rgba(15, 23, 42, 0.22);
+    --system-banner-sidebar-title: #0f172a;
+    --system-banner-sidebar-text: rgba(15, 23, 42, 0.78);
+    --system-banner-sidebar-cta-bg: #111827;
+    --system-banner-sidebar-cta-text: #f9fafb;
+    --system-banner-sidebar-cta-bg-hover: #1f2937;
+    --system-banner-sidebar-dismiss: rgba(15, 23, 42, 0.62);
+    --system-banner-sidebar-dismiss-hover: #020617;
+    --system-banner-sidebar-dismiss-hover-bg: rgba(15, 23, 42, 0.08);
   }
 
   :root.dark {
@@ -129,19 +142,31 @@
     --text-secondary: hsl(var(--muted-foreground));
     --border-color: hsl(var(--border));
 
-    --system-banner-surface: rgba(245, 158, 11, 0.1);
-    --system-banner-border: rgba(245, 158, 11, 0.3);
-    --system-banner-shadow: 0 8px 32px -8px rgba(245, 158, 11, 0.12);
+    --system-banner-surface: rgba(15, 17, 21, 0.94);
+    --system-banner-border: rgba(255, 255, 255, 0.16);
+    --system-banner-shadow: 0 8px 30px -10px rgba(0, 0, 0, 0.62);
     --system-banner-title: #ffffff;
-    --system-banner-text: #e5e7eb;
-    --system-banner-text-muted: rgba(229, 231, 235, 0.92);
+    --system-banner-text: #f8fafc;
+    --system-banner-text-muted: rgba(248, 250, 252, 0.86);
     --system-banner-cta: #ffffff;
     --system-banner-cta-decoration: rgba(255, 255, 255, 0.65);
     --system-banner-cta-decoration-hover: rgba(255, 255, 255, 0.95);
     --system-banner-dismiss: rgba(255, 255, 255, 0.65);
     --system-banner-dismiss-hover: #ffffff;
-    --system-banner-dismiss-hover-bg: rgba(245, 158, 11, 0.12);
-    --system-banner-surface-fixed-opaque: hsl(28 22% 9%);
+    --system-banner-dismiss-hover-bg: rgba(255, 255, 255, 0.1);
+    --system-banner-surface-fixed-opaque: #0f1115;
+
+    --system-banner-sidebar-surface: #0f1115;
+    --system-banner-sidebar-border: rgba(255, 255, 255, 0.16);
+    --system-banner-sidebar-shadow: 0 10px 28px -16px rgba(0, 0, 0, 0.75);
+    --system-banner-sidebar-title: #f8fafc;
+    --system-banner-sidebar-text: rgba(226, 232, 240, 0.82);
+    --system-banner-sidebar-cta-bg: #e5e7eb;
+    --system-banner-sidebar-cta-text: #111827;
+    --system-banner-sidebar-cta-bg-hover: #f3f4f6;
+    --system-banner-sidebar-dismiss: rgba(248, 250, 252, 0.74);
+    --system-banner-sidebar-dismiss-hover: #ffffff;
+    --system-banner-sidebar-dismiss-hover-bg: rgba(255, 255, 255, 0.1);
   }
 }
 
@@ -404,6 +429,22 @@ input.font-numbers-date-value::placeholder {
   .system-notification-banner__text-muted {
     color: var(--system-banner-text-muted);
   }
+
+  .system-notification-banner--sidebar {
+    background: var(--system-banner-sidebar-surface);
+    border-color: var(--system-banner-sidebar-border);
+    box-shadow: var(--system-banner-sidebar-shadow);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
+  .system-notification-banner--sidebar .system-notification-banner__title {
+    color: var(--system-banner-sidebar-title);
+  }
+
+  .system-notification-banner--sidebar .system-notification-banner__text-muted {
+    color: var(--system-banner-sidebar-text);
+  }
 }
 
 /* Overrides Button variant utilities (text-primary, hover:text-accent-foreground) */
@@ -425,6 +466,27 @@ input.font-numbers-date-value::placeholder {
   .system-notification-banner .system-notification-banner__dismiss:hover {
     color: var(--system-banner-dismiss-hover);
     background-color: var(--system-banner-dismiss-hover-bg);
+  }
+
+  .system-notification-banner--sidebar .system-notification-banner__cta,
+  .system-notification-banner--sidebar .system-notification-banner__cta:hover {
+    color: var(--system-banner-sidebar-cta-text);
+    background-color: var(--system-banner-sidebar-cta-bg);
+    text-decoration: none;
+  }
+
+  .system-notification-banner--sidebar .system-notification-banner__cta:hover {
+    background-color: var(--system-banner-sidebar-cta-bg-hover);
+    color: var(--system-banner-sidebar-cta-text);
+  }
+
+  .system-notification-banner--sidebar .system-notification-banner__dismiss {
+    color: var(--system-banner-sidebar-dismiss);
+  }
+
+  .system-notification-banner--sidebar .system-notification-banner__dismiss:hover {
+    color: var(--system-banner-sidebar-dismiss-hover);
+    background-color: var(--system-banner-sidebar-dismiss-hover-bg);
   }
 }
 

@@ -78,7 +78,7 @@ export default function SystemNotificationBanner({
         aria-live="polite"
         aria-label={`${notification.title}. ${notification.message}`}
         className={cn(
-          "system-notification-banner rounded-card border p-3",
+          "system-notification-banner system-notification-banner--sidebar rounded-card border p-3.5",
           className
         )}
       >
@@ -114,8 +114,8 @@ export default function SystemNotificationBanner({
         {ctaText && ctaTarget && (
           <Button
             type="button"
-            variant="link"
-            className="system-notification-banner__cta mt-1 h-auto p-0 text-sm underline underline-offset-2"
+            variant="secondary"
+            className="system-notification-banner__cta mt-3 h-9 w-full text-sm font-medium"
             onClick={() => {
               if (ctaTarget.kind === "internal") {
                 router.push(ctaTarget.path);
