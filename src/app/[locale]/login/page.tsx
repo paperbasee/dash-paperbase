@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { useTranslations } from "next-intl";
 import { Link, useRouter } from "@/i18n/navigation";
 import { Eye, EyeOff } from "lucide-react";
@@ -10,6 +10,7 @@ import { LoadingButton } from "@/components/ui/loading-button";
 import { AuthPageShell } from "@/components/auth/AuthPageShell";
 import { TurnstileWidget } from "@/components/auth/TurnstileWidget";
 import { useMinDelayLoading } from "@/hooks/useMinDelayLoading";
+import { useRateLimitCooldown, extractRateLimitInfo } from "@/hooks/useRateLimitCooldown";
 import { loginSchema, parseValidation } from "@/lib/validation";
 import { resolvePostAuthRoute } from "@/lib/subscription-access";
 import { isTurnstileDisabled } from "@/lib/turnstile-env";
@@ -20,20 +21,42 @@ export default function LoginPage() {
   const t = useTranslations("auth.login");
   const tAuth = useTranslations("auth");
   const tLayout = useTranslations("dashboardLayout");
-  const { login, pendingTwoFactor, verifyTwoFactorChallenge } = useAuth();
+  const {
+    login,
+    pendingTwoFactor,
+    verifyTwoFactorChallenge,
+    requestTwoFactorChallengeRecoveryCode,
+    verifyTwoFactorChallengeRecovery,
+  } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
   const [otpCode, setOtpCode] = useState("");
+  const [recoveryEmail, setRecoveryEmail] = useState("");
+  const [recoveryCode, setRecoveryCode] = useState("");
+  const [recoveryMode, setRecoveryMode] = useState<"none" | "email" | "code">("none");
+  const [recoveryRequestLoading, setRecoveryRequestLoading] = useState(false);
+  const [recoveryVerifyLoading, setRecoveryVerifyLoading] = useState(false);
+  const recoveryCooldown = useRateLimitCooldown();
   const { loading, runWithLoading } = useMinDelayLoading();
   const forgotPasswordLabel = t("forgotPassword");
   const noAccountLabel = t("noAccount");
 
+  useEffect(() => {
+    if (!pendingTwoFactor) {
+      setRecoveryMode("none");
+      setRecoveryEmail("");
+      setRecoveryCode("");
+    }
+  }, [pendingTwoFactor]);
+
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setError("");
+    setSuccessMessage("");
     const validation = parseValidation(loginSchema, { email, password });
     if (!validation.success) {
       setError(
@@ -98,6 +121,7 @@ export default function LoginPage() {
     e.preventDefault();
     if (!pendingTwoFactor) return;
     setError("");
+    setSuccessMessage("");
     try {
       await runWithLoading(async () => {
         await verifyTwoFactorChallenge(
@@ -132,6 +156,74 @@ export default function LoginPage() {
     }
   }
 
+  async function handleRecoveryRequest() {
+    if (!pendingTwoFactor) return;
+    setError("");
+    setSuccessMessage("");
+    if (!recoveryEmail.trim()) {
+      setError(t("recoveryEmailRequired"));
+      return;
+    }
+    setRecoveryRequestLoading(true);
+    try {
+      const response = await requestTwoFactorChallengeRecoveryCode(
+        pendingTwoFactor.challenge_public_id,
+        recoveryEmail
+      );
+      if (!response.sent) {
+        setError(t("recoveryEmailNotFound"));
+        return;
+      }
+      setRecoveryMode("code");
+      setSuccessMessage(response.detail || t("recoverySent"));
+    } catch (err: unknown) {
+      const info = extractRateLimitInfo(err);
+      if (info) {
+        recoveryCooldown.startCooldown(info.retryAfter);
+        return;
+      }
+      if (isNetworkError(err)) {
+        setError(t("serverUnreachable"));
+        return;
+      }
+      setError(t("recoverySendFailed"));
+    } finally {
+      setRecoveryRequestLoading(false);
+    }
+  }
+
+  async function handleRecoveryVerify(e: FormEvent) {
+    e.preventDefault();
+    if (!pendingTwoFactor) return;
+    setError("");
+    setSuccessMessage("");
+    setRecoveryVerifyLoading(true);
+    try {
+      await verifyTwoFactorChallengeRecovery(
+        pendingTwoFactor.challenge_public_id,
+        recoveryCode
+      );
+      const next = await resolvePostAuthRoute();
+      if (next.ok) {
+        router.push(next.path);
+      } else {
+        setError(
+          next.kind === "network_error"
+            ? t("serverUnreachable")
+            : tLayout("subscriptionVerifyBody")
+        );
+      }
+    } catch (err: unknown) {
+      if (isNetworkError(err)) {
+        setError(t("serverUnreachable"));
+      } else {
+        setError(t("recoveryInvalid"));
+      }
+    } finally {
+      setRecoveryVerifyLoading(false);
+    }
+  }
+
   return (
     <AuthPageShell
       headline={pendingTwoFactor ? t("twoFactorHeadline") : t("headline")}
@@ -140,13 +232,18 @@ export default function LoginPage() {
     >
 
       <form
-            onSubmit={pendingTwoFactor ? handleOtpSubmit : handleSubmit}
+            onSubmit={pendingTwoFactor ? (recoveryMode === "code" ? handleRecoveryVerify : handleOtpSubmit) : handleSubmit}
             className="mx-auto w-11/12 max-w-sm space-y-6 sm:w-full"
             aria-busy={loading}
       >
           {error && (
             <div className="rounded-ui border border-destructive/20 bg-destructive/10 px-3 py-2 text-sm text-destructive">
               {error}
+            </div>
+          )}
+          {successMessage && (
+            <div className="rounded-ui border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-sm text-emerald-500">
+              {successMessage}
             </div>
           )}
 
@@ -225,33 +322,112 @@ export default function LoginPage() {
             </>
           ) : (
             <div className="form-field">
-              <label htmlFor="otp" className="field-label">
-                {t("verificationCode")}
-              </label>
-              <Input
-                id="otp"
-                type="text"
-                required
-                size="lg"
-                value={otpCode}
-                onChange={(e) => setOtpCode(e.target.value)}
-                placeholder={t("otpPlaceholder")}
-                inputMode="numeric"
-                autoComplete="one-time-code"
-              />
+              {recoveryMode === "email" ? (
+                <>
+                  <label htmlFor="recovery-email" className="field-label">
+                    {t("recoveryEmail")}
+                  </label>
+                  <Input
+                    id="recovery-email"
+                    type="email"
+                    required
+                    size="lg"
+                    value={recoveryEmail}
+                    onChange={(e) => setRecoveryEmail(e.target.value)}
+                    placeholder={t("recoveryEmailPlaceholder")}
+                    autoComplete="email"
+                    inputMode="email"
+                  />
+                  <LoadingButton
+                    type="button"
+                    isLoading={recoveryRequestLoading}
+                    loadingText={t("sendingRecovery")}
+                    onClick={() => void handleRecoveryRequest()}
+                    disabled={recoveryVerifyLoading || recoveryCooldown.isLimited}
+                    className="mt-2 w-full"
+                  >
+                    {recoveryCooldown.isLimited
+                      ? t("retryIn", { seconds: recoveryCooldown.remaining })
+                      : t("sendRecoveryCode")}
+                  </LoadingButton>
+                </>
+              ) : recoveryMode === "code" ? (
+                <>
+                  <label htmlFor="recovery-code" className="field-label">
+                    {t("recoveryCode")}
+                  </label>
+                  <Input
+                    id="recovery-code"
+                    type="text"
+                    required
+                    size="lg"
+                    value={recoveryCode}
+                    onChange={(e) => setRecoveryCode(e.target.value)}
+                    placeholder={t("recoveryPlaceholder")}
+                    autoComplete="one-time-code"
+                  />
+                </>
+              ) : (
+                <>
+                  <label htmlFor="otp" className="field-label">
+                    {t("verificationCode")}
+                  </label>
+                  <Input
+                    id="otp"
+                    type="text"
+                    required
+                    size="lg"
+                    value={otpCode}
+                    onChange={(e) => setOtpCode(e.target.value)}
+                    placeholder={t("otpPlaceholder")}
+                    inputMode="numeric"
+                    autoComplete="one-time-code"
+                  />
+                </>
+              )}
+              <button
+                type="button"
+                onClick={() => {
+                  if (recoveryMode !== "none") {
+                    setRecoveryMode("none");
+                    setError("");
+                    setSuccessMessage("");
+                    return;
+                  }
+                  setRecoveryMode("email");
+                  setError("");
+                  setSuccessMessage("");
+                }}
+                disabled={recoveryVerifyLoading}
+                className="mt-2 text-left text-sm font-medium text-foreground underline-offset-4 hover:underline disabled:cursor-not-allowed disabled:opacity-70"
+              >
+                {recoveryMode !== "none"
+                  ? t("backToOtp")
+                  : t("cantAccess2fa")}
+              </button>
             </div>
           )}
 
-            <LoadingButton
-              type="submit"
-              isLoading={loading}
-              loadingText={
-                pendingTwoFactor ? t("verifyCodeLoading") : t("loginLoading")
-              }
-              className="mt-2 w-full"
-            >
-              {pendingTwoFactor ? t("verifyCode") : t("loginButton")}
-            </LoadingButton>
+            {!(pendingTwoFactor && recoveryMode === "email") ? (
+              <LoadingButton
+                type="submit"
+                isLoading={loading}
+                loadingText={
+                  pendingTwoFactor
+                    ? recoveryMode === "code"
+                      ? t("verifyRecoveryLoading")
+                      : t("verifyCodeLoading")
+                    : t("loginLoading")
+                }
+                className="mt-2 w-full"
+              >
+                {pendingTwoFactor
+                  ? recoveryMode === "code"
+                    ? t("verifyRecovery")
+                    : t("verifyCode")
+                  : t("loginButton")}
+              </LoadingButton>
+            ) : null}
       </form>
 
       <p className="text-center text-sm text-muted-foreground">

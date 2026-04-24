@@ -94,6 +94,37 @@ export async function verifyTwoFactorChallenge(
   return data;
 }
 
+export async function requestTwoFactorChallengeRecoveryCode(
+  challengeId: string,
+  email: string
+): Promise<{ detail: string; sent: boolean }> {
+  const { data } = await axios.post<{ detail: string; sent: boolean }>(
+    `${BASE_URL}/auth/2fa/challenge/recovery/request/`,
+    {
+      challenge_public_id: challengeId,
+      email: email.trim().toLowerCase(),
+    }
+  );
+  return data;
+}
+
+export async function verifyTwoFactorChallengeRecovery(
+  challengeId: string,
+  code: string
+): Promise<LoginResponse> {
+  const { data } = await axios.post<LoginResponse>(
+    `${BASE_URL}/auth/2fa/challenge/recovery/verify/`,
+    {
+      challenge_public_id: challengeId,
+      code,
+    }
+  );
+  localStorage.setItem("access_token", data.access);
+  localStorage.setItem("refresh_token", data.refresh);
+  setAuthSessionCookie();
+  return data;
+}
+
 export function logout() {
   clearMeProfileCache();
   localStorage.removeItem("access_token");

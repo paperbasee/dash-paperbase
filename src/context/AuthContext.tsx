@@ -14,6 +14,8 @@ import {
   register as authRegister,
   logout as authLogout,
   verifyTwoFactorChallenge as authVerifyTwoFactorChallenge,
+  requestTwoFactorChallengeRecoveryCode as authRequestTwoFactorChallengeRecoveryCode,
+  verifyTwoFactorChallengeRecovery as authVerifyTwoFactorChallengeRecovery,
   type LoginResult,
   type LoginResponse,
   type PendingTwoFactorResponse,
@@ -51,6 +53,14 @@ interface AuthState {
     cf_turnstile_response?: string
   ) => Promise<RegisterResponse | PendingTwoFactorResponse>;
   verifyTwoFactorChallenge: (
+    challengeId: string,
+    code: string
+  ) => Promise<LoginResponse>;
+  requestTwoFactorChallengeRecoveryCode: (
+    challengeId: string,
+    email: string
+  ) => Promise<{ detail: string; sent: boolean }>;
+  verifyTwoFactorChallengeRecovery: (
     challengeId: string,
     code: string
   ) => Promise<LoginResponse>;
@@ -258,6 +268,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return result;
   }, []);
 
+  const requestTwoFactorChallengeRecoveryCode = useCallback(async (challengeId: string, email: string) => {
+    return authRequestTwoFactorChallengeRecoveryCode(challengeId, email);
+  }, []);
+
+  const verifyTwoFactorChallengeRecovery = useCallback(async (
+    challengeId: string,
+    code: string
+  ) => {
+    const result = await authVerifyTwoFactorChallengeRecovery(challengeId, code);
+    setPendingTwoFactor(null);
+    setIsAuthenticated(true);
+    clearPendingVerificationEmail();
+    return result;
+  }, []);
+
   const logout = useCallback(() => {
     authLogout();
     setPendingTwoFactor(null);
@@ -279,6 +304,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         login,
         register,
         verifyTwoFactorChallenge,
+        requestTwoFactorChallengeRecoveryCode,
+        verifyTwoFactorChallengeRecovery,
         logout,
       }}
     >
