@@ -10,6 +10,7 @@ import { LocaleSync } from "@/components/LocaleSync";
 import { ThemeSync } from "@/components/ThemeSync";
 import { NotificationProvider } from "@/notifications";
 import { NotificationViewport } from "@/components/notifications/NotificationViewport";
+import StoreProfileSWRProvider from "@/components/StoreProfileSWRProvider";
 
 export const metadata: Metadata = {
   title: "Paperbase",
@@ -36,14 +37,16 @@ export default async function LocaleLayout({
       <LocaleSync />
       <ThemeSync />
       <TooltipProvider>
-        <AuthProvider>
-          <ConfirmDialogProvider>
-            <NotificationProvider>
-              {children}
-              <NotificationViewport />
-            </NotificationProvider>
-          </ConfirmDialogProvider>
-        </AuthProvider>
+        <StoreProfileSWRProvider>
+          <AuthProvider>
+            <ConfirmDialogProvider>
+              <NotificationProvider>
+                {children}
+                <NotificationViewport />
+              </NotificationProvider>
+            </ConfirmDialogProvider>
+          </AuthProvider>
+        </StoreProfileSWRProvider>
       </TooltipProvider>
     </NextIntlClientProvider>
   );

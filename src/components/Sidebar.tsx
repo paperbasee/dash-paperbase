@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -40,7 +41,6 @@ import {
   TooltipProvider,
 } from "@/components/ui/tooltip";
 import { useAuth } from "@/context/AuthContext";
-import { useBranding, defaultBranding } from "@/context/BrandingContext";
 import UserAvatar from "@/components/UserAvatar";
 import { useSearchModal } from "@/context/SearchModalContext";
 import { useNavCounts } from "@/hooks/useNavCounts";
@@ -70,6 +70,7 @@ import {
 } from "@/lib/theme";
 import SystemNotificationBanner from "@/components/system/SystemNotificationBanner";
 import { InventoryStatusDot } from "@/components/inventory/InventoryStatusDot";
+import { useBrandingProfileSWR } from "@/hooks/useBrandingProfileSWR";
 
 /**
  * Top-level nav order; `__catalog__` is the Products / catalog group.
@@ -114,7 +115,7 @@ function SidebarContent({
   const pathname = usePathname();
   const router = useRouter();
   const { logout, isAuthenticated, meProfile, meProfileStatus } = useAuth();
-  const { branding } = useBranding();
+  const { data: branding, isLoading: isBrandingLoading } = useBrandingProfileSWR();
   const { setOpen: setSearchOpen } = useSearchModal();
   const { counts, formatCount } = useNavCounts();
   const { isEnabled } = useEnabledApps();
@@ -205,12 +206,13 @@ function SidebarContent({
     router.replace(pathname, { locale: next });
   };
 
-  const adminName = branding?.admin_name ?? defaultBranding.admin_name;
+  const showBrandingSkeleton = isBrandingLoading && !branding;
+  const adminName = branding?.admin_name?.trim() || tSidebar("setInSettings");
   const storeType = branding?.store_type ?? "";
-  const ownerName = branding?.owner_name || "Owner";
+  const ownerName = branding?.owner_name?.trim() || tSidebar("setInSettings");
   const ownerEmail = branding?.owner_email || "";
   const resolvedLogoUrl = logoUrl(branding?.logo_url ?? null);
-  const initial = adminName.charAt(0).toUpperCase();
+  const initial = adminName.charAt(0).toUpperCase() || "?";
 
   const handleLinkClick = () => {
     onNavigate?.();
@@ -301,7 +303,9 @@ function SidebarContent({
           )
         ) : (
           <>
-            {resolvedLogoUrl ? (
+            {showBrandingSkeleton ? (
+              <Skeleton className="size-10 shrink-0 rounded-full" />
+            ) : resolvedLogoUrl ? (
               <img
                 src={resolvedLogoUrl}
                 alt=""
@@ -313,14 +317,23 @@ function SidebarContent({
               </span>
             )}
             <div className="min-w-0 flex-1">
-              <span className="block truncate text-lg font-medium text-foreground">
-                {adminName}
-              </span>
-              {storeType ? (
-                <span className="block truncate text-xs text-muted-foreground">
-                  {storeType}
-                </span>
-              ) : null}
+              {showBrandingSkeleton ? (
+                <div className="space-y-1.5">
+                  <Skeleton className="h-5 w-36 rounded-ui" />
+                  <Skeleton className="h-3 w-24 rounded-ui" />
+                </div>
+              ) : (
+                <>
+                  <span className="block truncate text-lg font-medium text-foreground">
+                    {adminName}
+                  </span>
+                  {storeType ? (
+                    <span className="block truncate text-xs text-muted-foreground">
+                      {storeType}
+                    </span>
+                  ) : null}
+                </>
+              )}
             </div>
           </>
         )}
@@ -643,12 +656,21 @@ function SidebarContent({
               {!collapsed && (
                 <>
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-medium text-foreground">
-                      {ownerName}
-                    </p>
-                    <p className="truncate text-xs text-muted-foreground">
-                      {ownerEmail || tSidebar("setInSettings")}
-                    </p>
+                    {showBrandingSkeleton ? (
+                      <div className="space-y-1.5">
+                        <Skeleton className="h-4 w-28 rounded-ui" />
+                        <Skeleton className="h-3 w-36 rounded-ui" />
+                      </div>
+                    ) : (
+                      <>
+                        <p className="truncate text-sm font-medium text-foreground">
+                          {ownerName}
+                        </p>
+                        <p className="truncate text-xs text-muted-foreground">
+                          {ownerEmail || tSidebar("setInSettings")}
+                        </p>
+                      </>
+                    )}
                   </div>
                   <ChevronDown className="size-4 shrink-0 text-muted-foreground" />
                 </>

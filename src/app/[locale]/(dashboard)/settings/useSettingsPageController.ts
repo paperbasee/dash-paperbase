@@ -1,10 +1,10 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { useBranding } from "@/context/BrandingContext";
 import { useEnabledApps } from "@/hooks/useEnabledApps";
 import { useFeatures } from "@/hooks/useFeatures";
 import { useAutoExpire } from "@/hooks/useAutoExpire";
+import { useBrandingProfileSWR } from "@/hooks/useBrandingProfileSWR";
 import api from "@/lib/api";
 import { useAccountSettings } from "./useAccountSettings";
 import { useStoreSettings } from "./useStoreSettings";
@@ -28,13 +28,14 @@ const defaultPrefs: NotificationPrefs = {
 };
 
 export default function useSettingsPageController() {
-  const { branding, isHydrated, isFetching, refetch } = useBranding();
+  const { data: branding, isLoading: isBrandingLoading, isValidating: isBrandingValidating } =
+    useBrandingProfileSWR();
   const enabledApps = useEnabledApps();
   const { hasFeature, loading: orderEmailFeatureLoading } = useFeatures();
   const orderEmailNotificationsEnabled = hasFeature("order_email_notifications");
 
-  const account = useAccountSettings({ onSaveSuccess: refetch });
-  const store = useStoreSettings({ onSaveSuccess: refetch });
+  const account = useAccountSettings();
+  const store = useStoreSettings();
 
   useEffect(() => {
     if (!branding) return;
@@ -79,7 +80,7 @@ export default function useSettingsPageController() {
   }, []);
 
   useEffect(() => {
-    if (!isHydrated || isFetching || !branding) return;
+    if (isBrandingLoading || isBrandingValidating || !branding) return;
     let cancelled = false;
     (async () => {
       try {
@@ -100,7 +101,7 @@ export default function useSettingsPageController() {
     return () => {
       cancelled = true;
     };
-  }, [isHydrated, isFetching, branding]);
+  }, [isBrandingLoading, isBrandingValidating, branding]);
 
   const updateEmailNotificationPref = useCallback(
     async (key: "emailMeOnOrderReceived" | "emailCustomerOnOrderConfirmed", value: boolean) => {
@@ -142,7 +143,7 @@ export default function useSettingsPageController() {
     });
   }
 
-  const isLoading = !isHydrated || branding === null;
+  const isLoading = isBrandingLoading && !branding;
 
   return {
     isLoading,

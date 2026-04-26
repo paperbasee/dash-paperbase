@@ -12,6 +12,8 @@ import {
   mergeSocialLinksFromApi,
   type StoreSocialLinkKey,
 } from "@/lib/storeSocialLinks";
+import { mutate } from "swr";
+import { BRANDING_PROFILE_SWR_KEY } from "@/hooks/useBrandingProfileSWR";
 
 function resolveLogoUrl(url: string | null): string | null {
   if (!url) return null;
@@ -110,6 +112,7 @@ export function useStoreSettings({ onSaveSuccess }: UseStoreSettingsOptions = {}
       formData.append("social_links", JSON.stringify(socialLinks));
 
       await api.patch("admin/branding/", formData);
+      await mutate(BRANDING_PROFILE_SWR_KEY);
       onSaveSuccess?.();
 
       setLogoFile(null);
