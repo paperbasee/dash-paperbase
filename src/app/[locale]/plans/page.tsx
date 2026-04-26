@@ -6,7 +6,7 @@ import { Check } from "lucide-react";
 import { useRouter } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { LoadingButton } from "@/components/ui/loading-button";
-import { logout, getAccessToken } from "@/lib/auth";
+import { getAccessToken } from "@/lib/auth";
 import api from "@/lib/api";
 import { numberTextClass } from "@/lib/number-font";
 import { cn } from "@/lib/utils";
@@ -39,7 +39,6 @@ export default function PlansPage() {
   const locale = useLocale();
   const numClass = numberTextClass(locale);
   const t = useTranslations("plansPage");
-  const tCommon = useTranslations("common");
   const router = useRouter();
 
   const [pageState, setPageState] = useState<PageState>("loading");
@@ -291,9 +290,9 @@ export default function PlansPage() {
 
                     {showYearly ? (
                       <p className="mt-2 text-sm text-muted-foreground">
-                        {`Billed yearly (`}
+                        {t("billedYearlyPrefix")}
                         <span className={numClass}>{formatYearlyTotal(selected.price)}</span>
-                        {` total)`}
+                        {t("billedYearlySuffix")}
                       </p>
                     ) : (
                       <p className="mt-2 text-sm text-muted-foreground">
@@ -337,15 +336,15 @@ export default function PlansPage() {
           </>
         )}
 
-        {/* Sign-out link */}
+        {/* Back home link */}
         <div className="mt-10 text-center">
           <Button
             variant="ghost"
             size="sm"
             className="text-muted-foreground hover:text-foreground"
-            onClick={() => logout()}
+            onClick={() => router.push("/")}
           >
-            {tCommon("signOut")}
+            {t("backHome")}
           </Button>
         </div>
       </div>

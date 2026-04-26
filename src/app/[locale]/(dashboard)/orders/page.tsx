@@ -1,6 +1,7 @@
 "use client";
 
 import { Fragment, useCallback, useEffect, useState } from "react";
+import dynamic from "next/dynamic";
 import { useLocale, useTranslations } from "next-intl";
 import { Link, useRouter } from "@/i18n/navigation";
 import { toLocaleDigits } from "@/lib/locale-digits";
@@ -32,7 +33,6 @@ import { useConfirm } from "@/context/ConfirmDialogContext";
 import { notify, normalizeError } from "@/notifications";
 
 import { FraudCheckButton } from "./_components/FraudCheckButton";
-import { FraudCheckDialog } from "./_components/FraudCheckDialog";
 import type { FraudCheckApiOk, FraudCheckState } from "./_components/types";
 import { useFeatures } from "@/hooks/useFeatures";
 import { useAuth } from "@/context/AuthContext";
@@ -40,6 +40,11 @@ import {
   canUserDeleteProducts,
   type MeForProductDeletePermission,
 } from "@/lib/product-delete-permission";
+
+const FraudCheckDialog = dynamic(
+  () => import("./_components/FraudCheckDialog").then((mod) => mod.FraudCheckDialog),
+  { ssr: false, loading: () => null }
+);
 
 type OrderExportPollResponse = {
   status: string;

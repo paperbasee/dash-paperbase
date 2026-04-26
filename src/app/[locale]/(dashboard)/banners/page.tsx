@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
+import dynamic from "next/dynamic";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { Clock2Icon, Undo2 } from "lucide-react";
@@ -8,7 +9,6 @@ import { isAxiosError } from "axios";
 import api from "@/lib/api";
 import { ClickableTableRow } from "@/components/ui/clickable-table-row";
 import { ClickableText } from "@/components/ui/clickable-text";
-import { Calendar } from "@/components/ui/calendar";
 import { Input } from "@/components/ui/input";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
 import {
@@ -30,6 +30,14 @@ import { PLACEMENT_OPTIONS } from "@/components/preview-system/placementConfig";
 import { MiniSitePreview } from "@/components/preview-system/MiniSitePreview";
 import { numberTextClass } from "@/lib/number-font";
 import { cn } from "@/lib/utils";
+
+const Calendar = dynamic(
+  () => import("@/components/ui/calendar").then((mod) => mod.Calendar),
+  {
+    ssr: false,
+    loading: () => <div className="h-56 w-64 animate-pulse rounded-card bg-muted/40" />,
+  }
+);
 
 const ALLOWED_PLACEMENTS = new Set([
   "home_top",

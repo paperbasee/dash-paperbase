@@ -1,13 +1,16 @@
 import type { ReactNode } from "react";
 import { cookies, headers } from "next/headers";
 import Script from "next/script";
-import "@fontsource/poppins/400.css";
-import "@fontsource/poppins/500.css";
-import "@fontsource/poppins/600.css";
-import "@fontsource/poppins/700.css";
+import { Poppins } from "next/font/google";
 import "./globals.css";
 import { isTurnstileDisabled } from "@/lib/turnstile-env";
 import { CORE_THEME_COOKIE_KEY } from "@/lib/theme";
+
+const poppins = Poppins({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  display: "swap",
+});
 
 /** Runs before paint: align <html> with localStorage/cookie + live prefers-color-scheme when preference is system. */
 const THEME_BOOT_SCRIPT = `
@@ -72,7 +75,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
           dangerouslySetInnerHTML={{ __html: THEME_BOOT_SCRIPT }}
         />
       </head>
-      <body className="antialiased font-sans">
+      <body className={`${poppins.className} antialiased font-sans`}>
         {children}
         {!isTurnstileDisabled() ? (
           <Script

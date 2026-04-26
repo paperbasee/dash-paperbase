@@ -1411,8 +1411,11 @@
     "perMonth": "/ month",
     "perYear": "/ year",
     "currency": "BDT",
+    "billedYearlyPrefix": "Billed yearly (",
+    "billedYearlySuffix": " total)",
     "initiating": "Redirecting…",
-    "initiateError": "Failed to initiate payment. Please try again."
+    "initiateError": "Failed to initiate payment. Please try again.",
+    "backHome": "Back to home"
   },
   "checkoutPage": {
     "title": "Complete your payment",

@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import dynamic from "next/dynamic";
 import { useLocale, useTranslations } from "next-intl";
 import { Button } from "./ui/button";
-import { Calendar } from "./ui/calendar";
 import { Card, CardContent } from "./ui/card";
 import { InputGroup, InputGroupInput } from "./ui/input-group";
 import type { AnalyticsBucket } from "@/hooks/useDashboardAnalytics";
@@ -20,6 +20,14 @@ import {
   startOfMonthYmdInBD,
   todayYmdInBD,
 } from "@/utils/time";
+
+const Calendar = dynamic(
+  () => import("./ui/calendar").then((mod) => mod.Calendar),
+  {
+    ssr: false,
+    loading: () => <div className="h-56 w-64 animate-pulse rounded-card bg-muted/40" />,
+  }
+);
 
 interface DateRangeFilterProps {
   value: DateRangeValue;
