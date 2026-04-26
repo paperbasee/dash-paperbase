@@ -1,13 +1,14 @@
 "use client";
 
 import { useMemo, type ReactNode } from "react";
-import { SWRConfig } from "swr";
+import { SWRConfig, type Cache } from "swr";
 import { STORE_PROFILE_SWR_PREFIX } from "@/hooks/useBrandingProfileSWR";
 
 const STORE_PROFILE_CACHE_STORAGE_KEY = "store-profile-cache";
 
 type SWRCacheKey = string;
-type SWRCacheValue = unknown;
+type SWRCacheValue = any;
+type SWRCache = Cache<any>;
 
 function canUseStorage(): boolean {
   if (typeof window === "undefined") return false;
@@ -38,11 +39,15 @@ function readPersistedEntries(): Array<[SWRCacheKey, SWRCacheValue]> {
   }
 }
 
-function writePersistedEntries(map: Map<SWRCacheKey, SWRCacheValue>) {
+function writePersistedEntries(map: SWRCache) {
   try {
-    const storeProfileEntries = Array.from(map.entries()).filter(([key]) =>
-      key.startsWith(STORE_PROFILE_SWR_PREFIX)
-    );
+    const storeProfileEntries: Array<[SWRCacheKey, SWRCacheValue]> = [];
+    for (const key of map.keys()) {
+      if (!key.startsWith(STORE_PROFILE_SWR_PREFIX)) continue;
+      const value = map.get(key);
+      if (typeof value === "undefined") continue;
+      storeProfileEntries.push([key, value]);
+    }
     window.localStorage.setItem(
       STORE_PROFILE_CACHE_STORAGE_KEY,
       JSON.stringify(storeProfileEntries)
@@ -52,12 +57,12 @@ function writePersistedEntries(map: Map<SWRCacheKey, SWRCacheValue>) {
   }
 }
 
-function localStorageProvider() {
+function localStorageProvider(): SWRCache {
   if (!canUseStorage()) {
-    return new Map<SWRCacheKey, SWRCacheValue>();
+    return new Map();
   }
 
-  const map = new Map<SWRCacheKey, SWRCacheValue>(readPersistedEntries());
+  const map = new Map(readPersistedEntries()) as SWRCache;
   const persist = () => writePersistedEntries(map);
 
   const originalSet = map.set.bind(map);
@@ -76,12 +81,6 @@ function localStorageProvider() {
       persist();
     }
     return deleted;
-  };
-
-  const originalClear = map.clear.bind(map);
-  map.clear = () => {
-    originalClear();
-    persist();
   };
 
   window.addEventListener("beforeunload", persist);
