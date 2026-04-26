@@ -823,7 +823,7 @@
     "paymentPendingBannerText": "Your payment is pending. It will go live after approval.",
     "paymentSubmittedBannerOneLineNoTimer": "Payment submitted. Waiting for approval.",
     "pendingReviewBannerText": "Your store is under review. It will go live after approval.",
-    "inactivePlanBannerText": "Your plan is inactive. Your store is not live. Choose a plan to enable customer access.",
+    "inactivePlanBannerText": "Your plan is inactive. Your store is not live. Choose a plan to enable API access.",
     "inactivePlanBannerPlansLink": "View plans",
     "rejectedPlanBannerText": "Your last subscription request was not approved. You can choose a new plan or contact support.",
     "rejectedPlanBannerPlansLink": "View plans",
