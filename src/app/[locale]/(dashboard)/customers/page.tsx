@@ -33,6 +33,7 @@ export default function CustomersPage() {
   const tPages = useTranslations("pages");
   const { page, filters, setFilter, setPage, clearFilters } = useFilters([
     "joined_date",
+    "is_repeat_customer",
     "search",
   ]);
   const [searchInput, setSearchInput] = useState(filters.search || "");
@@ -52,6 +53,9 @@ export default function CustomersPage() {
     setLoading(true);
     const params: Record<string, string | number> = { page };
     if (filters.joined_date) params.joined_date = filters.joined_date;
+    if (filters.is_repeat_customer) {
+      params.is_repeat_customer = filters.is_repeat_customer;
+    }
     if (filters.search) params.search = filters.search;
     api
       .get<PaginatedResponse<Customer>>("admin/customers/", {
@@ -71,7 +75,7 @@ export default function CustomersPage() {
 
   useEffect(() => {
     fetchData();
-  }, [filters.joined_date, filters.search, page]);
+  }, [filters.joined_date, filters.is_repeat_customer, filters.search, page]);
 
   return (
     <div className="space-y-6">
@@ -124,6 +128,15 @@ export default function CustomersPage() {
                 locale
               ),
             },
+          ]}
+        />
+        <FilterDropdown
+          value={filters.is_repeat_customer}
+          onChange={(value) => setFilter("is_repeat_customer", value)}
+          placeholder={tPages("filtersRepeatedCustomer")}
+          options={[
+            { value: "true", label: tPages("filtersRepeatedCustomerYes") },
+            { value: "false", label: tPages("filtersRepeatedCustomerNo") },
           ]}
         />
         <Input
