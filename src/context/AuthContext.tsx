@@ -29,6 +29,7 @@ import {
   ME_PROFILE_PERSIST_EVENT,
   ME_PROFILE_STORAGE_KEY,
 } from "@/lib/me-profile-store";
+import { refreshAccessTokenOrThrow } from "@/lib/api";
 
 export type MeProfileStatus = "idle" | "loading" | "ready" | "error";
 
@@ -69,6 +70,20 @@ interface AuthState {
 
 const AuthContext = createContext<AuthState | undefined>(undefined);
 
+function isTokenExpired(token: string): boolean {
+  try {
+    const parts = token.split(".");
+    if (parts.length < 2) return true;
+    const normalized = parts[1].replace(/-/g, "+").replace(/_/g, "/");
+    const padded = normalized.padEnd(Math.ceil(normalized.length / 4) * 4, "=");
+    const payload = JSON.parse(atob(padded)) as { exp?: unknown };
+    if (typeof payload.exp !== "number") return true;
+    return payload.exp * 1000 <= Date.now();
+  } catch {
+    return true;
+  }
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [pendingTwoFactor, setPendingTwoFactor] = useState<PendingTwoFactorResponse | null>(null);
@@ -97,8 +112,48 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 
   useEffect(() => {
-    setAuthHydrated(true);
-    setIsAuthenticated(!!localStorage.getItem("access_token"));
+    let cancelled = false;
+
+    const bootstrapAuth = async () => {
+      const accessToken = localStorage.getItem("access_token");
+      const refreshToken = localStorage.getItem("refresh_token");
+
+      if (accessToken && !isTokenExpired(accessToken)) {
+        if (!cancelled) {
+          setIsAuthenticated(true);
+          setAuthHydrated(true);
+        }
+        return;
+      }
+
+      if (!refreshToken) {
+        if (!cancelled) {
+          setIsAuthenticated(false);
+          setAuthHydrated(true);
+        }
+        return;
+      }
+
+      try {
+        await refreshAccessTokenOrThrow();
+        if (!cancelled) {
+          setIsAuthenticated(true);
+        }
+      } catch {
+        if (!cancelled) {
+          setIsAuthenticated(false);
+        }
+      } finally {
+        if (!cancelled) {
+          setAuthHydrated(true);
+        }
+      }
+    };
+
+    void bootstrapAuth();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   useEffect(() => {

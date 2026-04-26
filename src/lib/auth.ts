@@ -1,7 +1,12 @@
 import axios from "axios";
 import { clearMeProfileCache } from "@/lib/me-profile-store";
+import {
+  setAuthSessionCookie,
+  clearAuthSessionCookie,
+} from "@/lib/auth-session-cookie";
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+const LAST_ROTATED_AT_KEY = "paperbase_token_rotated_at";
 
 export interface LoginResponse {
   access: string;
@@ -26,19 +31,6 @@ export interface RegisterPayload {
 export interface RegisterResponse {
   detail: string;
   email_verification_required: true;
-}
-
-/**
- * Set a lightweight routing cookie for the Next.js edge middleware.
- * This is NOT the JWT itself — it is only a hint that a session exists.
- * The Django backend independently verifies the JWT on every API call.
- */
-function setAuthSessionCookie() {
-  document.cookie = "auth_session=1; path=/; SameSite=Strict";
-}
-
-function clearAuthSessionCookie() {
-  document.cookie = "auth_session=; path=/; max-age=0; SameSite=Strict";
 }
 
 export async function register(
@@ -129,7 +121,10 @@ export function logout() {
   clearMeProfileCache();
   localStorage.removeItem("access_token");
   localStorage.removeItem("refresh_token");
+  localStorage.removeItem(LAST_ROTATED_AT_KEY);
   clearAuthSessionCookie();
+  delete axios.defaults.headers.common.Authorization;
+  delete axios.defaults.headers.common["X-Store-Public-ID"];
   window.location.href = "/login";
 }
 

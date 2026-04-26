@@ -10,6 +10,7 @@ import { CATALOG_INCLUDED_APP_IDS, OPTIONAL_APP_IDS } from "@/config/apps";
 import { parseValidation, storeCreateSchema } from "@/lib/validation";
 import { clearPendingVerificationEmail } from "@/lib/verification-state";
 import { invalidateMeRoutingCache } from "@/lib/subscription-access";
+import { setAuthSessionCookie } from "@/lib/auth-session-cookie";
 import { notify, normalizeError } from "@/notifications";
 
 const STORAGE_KEY = "core_enabled_apps";
@@ -223,6 +224,7 @@ export function useOnboarding(options?: UseOnboardingOptions) {
 
       localStorage.setItem("access_token", data.access);
       localStorage.setItem("refresh_token", data.refresh);
+      setAuthSessionCookie();
       invalidateMeRoutingCache();
       localStorage.setItem(
         STORAGE_KEY,
