@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useTranslations } from "next-intl";
 import { Link, useRouter } from "@/i18n/navigation";
 import { Eye, EyeOff } from "lucide-react";
@@ -10,6 +10,7 @@ import { LoadingButton } from "@/components/ui/loading-button";
 import { AuthPageShell } from "@/components/auth/AuthPageShell";
 import { TurnstileWidget } from "@/components/auth/TurnstileWidget";
 import { useMinDelayLoading } from "@/hooks/useMinDelayLoading";
+import { useEnterNavigation } from "@/hooks/useEnterNavigation";
 import { useRateLimitCooldown, extractRateLimitInfo } from "@/hooks/useRateLimitCooldown";
 import { loginSchema, parseValidation } from "@/lib/validation";
 import { resolvePostAuthRoute } from "@/lib/subscription-access";
@@ -17,6 +18,7 @@ import { isTurnstileDisabled } from "@/lib/turnstile-env";
 import { isNetworkError } from "@/lib/network-error";
 
 export default function LoginPage() {
+  const formRef = useRef<HTMLFormElement>(null);
   const router = useRouter();
   const t = useTranslations("auth.login");
   const tAuth = useTranslations("auth");
@@ -38,18 +40,21 @@ export default function LoginPage() {
   const [recoveryEmail, setRecoveryEmail] = useState("");
   const [recoveryCode, setRecoveryCode] = useState("");
   const [recoveryMode, setRecoveryMode] = useState<"none" | "email" | "code">("none");
+  const [recoveryVerified, setRecoveryVerified] = useState(false);
   const [recoveryRequestLoading, setRecoveryRequestLoading] = useState(false);
   const [recoveryVerifyLoading, setRecoveryVerifyLoading] = useState(false);
   const recoveryCooldown = useRateLimitCooldown();
   const { loading, runWithLoading } = useMinDelayLoading();
   const forgotPasswordLabel = t("forgotPassword");
   const noAccountLabel = t("noAccount");
+  const { handleKeyDown } = useEnterNavigation(() => formRef.current?.requestSubmit());
 
   useEffect(() => {
     if (!pendingTwoFactor) {
       setRecoveryMode("none");
       setRecoveryEmail("");
       setRecoveryCode("");
+      setRecoveryVerified(false);
     }
   }, [pendingTwoFactor]);
 
@@ -192,6 +197,11 @@ export default function LoginPage() {
     }
   }
 
+  function handleRecoveryEmailSubmit(e: FormEvent) {
+    e.preventDefault();
+    void handleRecoveryRequest();
+  }
+
   async function handleRecoveryVerify(e: FormEvent) {
     e.preventDefault();
     if (!pendingTwoFactor) return;
@@ -203,16 +213,8 @@ export default function LoginPage() {
         pendingTwoFactor.challenge_public_id,
         recoveryCode
       );
-      const next = await resolvePostAuthRoute();
-      if (next.ok) {
-        router.push(next.path);
-      } else {
-        setError(
-          next.kind === "network_error"
-            ? t("serverUnreachable")
-            : tLayout("subscriptionVerifyBody")
-        );
-      }
+      setRecoveryVerified(true);
+      setSuccessMessage("2FA has been disabled successfully.");
     } catch (err: unknown) {
       if (isNetworkError(err)) {
         setError(t("serverUnreachable"));
@@ -231,8 +233,32 @@ export default function LoginPage() {
       containerClassName="space-y-8 sm:space-y-10"
     >
 
+      {recoveryVerified ? (
+        <div className="mx-auto w-11/12 max-w-sm space-y-4 rounded-ui border border-emerald-500/30 bg-emerald-500/10 px-4 py-5 text-center sm:w-full">
+          <p className="text-sm font-medium text-emerald-500">
+            {successMessage || "2FA has been disabled successfully."}
+          </p>
+          <LoadingButton
+            type="button"
+            className="w-full"
+            loadingText={t("loginLoading")}
+            onClick={() => router.push("/")}
+          >
+            Go to home
+          </LoadingButton>
+        </div>
+      ) : (
       <form
-            onSubmit={pendingTwoFactor ? (recoveryMode === "code" ? handleRecoveryVerify : handleOtpSubmit) : handleSubmit}
+            ref={formRef}
+            onSubmit={
+              pendingTwoFactor
+                ? recoveryMode === "email"
+                  ? handleRecoveryEmailSubmit
+                  : recoveryMode === "code"
+                    ? handleRecoveryVerify
+                    : handleOtpSubmit
+                : handleSubmit
+            }
             className="mx-auto w-11/12 max-w-sm space-y-6 sm:w-full"
             aria-busy={loading}
       >
@@ -263,6 +289,7 @@ export default function LoginPage() {
                   placeholder={t("emailPlaceholder")}
                   autoComplete="email"
                   inputMode="email"
+                  onKeyDown={handleKeyDown}
                 />
               </div>
 
@@ -281,6 +308,7 @@ export default function LoginPage() {
                     placeholder={t("passwordPlaceholder")}
                     className="pr-10"
                     autoComplete="current-password"
+                    onKeyDown={handleKeyDown}
                   />
                   <button
                     type="button"
@@ -301,6 +329,7 @@ export default function LoginPage() {
                     type="checkbox"
                     checked={rememberMe}
                     onChange={(e) => setRememberMe(e.target.checked)}
+                    onKeyDown={handleKeyDown}
                     className="form-checkbox"
                     disabled={!!pendingTwoFactor}
                   />
@@ -337,6 +366,7 @@ export default function LoginPage() {
                     placeholder={t("recoveryEmailPlaceholder")}
                     autoComplete="email"
                     inputMode="email"
+                    onKeyDown={handleKeyDown}
                   />
                   <LoadingButton
                     type="button"
@@ -365,6 +395,7 @@ export default function LoginPage() {
                     onChange={(e) => setRecoveryCode(e.target.value)}
                     placeholder={t("recoveryPlaceholder")}
                     autoComplete="one-time-code"
+                    onKeyDown={handleKeyDown}
                   />
                 </>
               ) : (
@@ -382,6 +413,7 @@ export default function LoginPage() {
                     placeholder={t("otpPlaceholder")}
                     inputMode="numeric"
                     autoComplete="one-time-code"
+                    onKeyDown={handleKeyDown}
                   />
                 </>
               )}
@@ -390,11 +422,13 @@ export default function LoginPage() {
                 onClick={() => {
                   if (recoveryMode !== "none") {
                     setRecoveryMode("none");
+                    setRecoveryVerified(false);
                     setError("");
                     setSuccessMessage("");
                     return;
                   }
                   setRecoveryMode("email");
+                  setRecoveryVerified(false);
                   setError("");
                   setSuccessMessage("");
                 }}
@@ -429,6 +463,7 @@ export default function LoginPage() {
               </LoadingButton>
             ) : null}
       </form>
+      )}
 
       <p className="text-center text-sm text-muted-foreground">
         {noAccountLabel.replace("?", "")}

@@ -20,6 +20,7 @@ import { notify } from "@/notifications";
 import { useAuth } from "@/context/AuthContext";
 import { isNetworkingStoreUnderReview } from "@/lib/subscription-ui-state";
 import { SettingsSectionSkeleton } from "@/components/skeletons/dashboard-skeletons";
+import { useEnterNavigation } from "@/hooks/useEnterNavigation";
 
 type APIKeyRow = {
   public_id: string;
@@ -124,6 +125,11 @@ export default function NetworkingSection({ hidden }: { hidden: boolean }) {
   const [promptCopied, setPromptCopied] = useState(false);
   const [promptLoading, setPromptLoading] = useState(false);
   const API_BASE_URL = "https://api.paperbase.me";
+  const { handleKeyDown } = useEnterNavigation(() => {
+    if (!busy && !networkingActionsLocked) {
+      void createKey();
+    }
+  });
 
   const load = useCallback(async () => {
     if (networkingActionsLocked) {
@@ -467,6 +473,7 @@ export default function NetworkingSection({ hidden }: { hidden: boolean }) {
               placeholder={t("networking.namePlaceholder")}
               value={newKeyName}
               onChange={(e) => setNewKeyName(e.target.value)}
+              onKeyDown={handleKeyDown}
               disabled={busy || networkingActionsLocked}
               className="sm:flex-1"
             />

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Truck } from "lucide-react";
 import api from "@/lib/api";
@@ -9,6 +9,7 @@ import { formatDashboardDate } from "@/lib/datetime-display";
 import type { Courier, PaginatedResponse } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useEnterNavigation } from "@/hooks/useEnterNavigation";
 import { useConfirm } from "@/context/ConfirmDialogContext";
 import { notify } from "@/notifications";
 import { SettingsActionDialog } from "@/components/settings/SettingsActionDialog";
@@ -38,6 +39,8 @@ export default function CourierIntegration() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [togglingId, setTogglingId] = useState<string | null>(null);
+  const connectFormRef = useRef<HTMLFormElement>(null);
+  const { handleKeyDown } = useEnterNavigation(() => connectFormRef.current?.requestSubmit());
 
   const fetchCouriers = useCallback(() => {
     setLoading(true);
@@ -151,7 +154,7 @@ export default function CourierIntegration() {
         title={t("courier.modalConnectTitle")}
         description={t("courier.modalConnectDescription")}
       >
-        <form onSubmit={handleConnect} className="space-y-3">
+        <form ref={connectFormRef} onSubmit={handleConnect} className="space-y-3">
           {error ? (
             <div className="rounded-card border border-destructive/30 bg-destructive/10 px-3 py-2 text-xs text-destructive">
               {error}
@@ -166,6 +169,7 @@ export default function CourierIntegration() {
               onChange={(e) => setForm({ ...form, api_key: e.target.value })}
               placeholder={t("courier.apiKeyPlaceholder")}
               autoComplete="off"
+              onKeyDown={handleKeyDown}
             />
           </div>
           <div className="flex flex-col gap-1.5">
@@ -177,6 +181,7 @@ export default function CourierIntegration() {
               onChange={(e) => setForm({ ...form, secret_key: e.target.value })}
               placeholder={t("courier.secretKeyPlaceholder")}
               autoComplete="off"
+              onKeyDown={handleKeyDown}
             />
           </div>
           <div className="flex flex-col gap-2 pt-1 sm:flex-row sm:flex-wrap">

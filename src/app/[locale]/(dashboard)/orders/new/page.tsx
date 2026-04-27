@@ -11,6 +11,7 @@ import { FormField } from "@/components/ui/form-field";
 import { numberTextClass } from "@/lib/number-font";
 import { cn } from "@/lib/utils";
 import { useNewOrder } from "./useNewOrder";
+import { useEnterNavigation } from "@/hooks/useEnterNavigation";
 
 export default function NewOrderPage() {
   const locale = useLocale();
@@ -48,6 +49,10 @@ export default function NewOrderPage() {
   const hasItemInlineErrors = Object.keys(fieldErrors).some(
     (k) => k === "items" || k.startsWith("items."),
   );
+  const { handleKeyDown } = useEnterNavigation(() => {
+    const form = document.getElementById("order-form");
+    if (form instanceof HTMLFormElement) form.requestSubmit();
+  });
 
   return (
     <div className="space-y-6">
@@ -160,6 +165,7 @@ export default function NewOrderPage() {
                     placeholder={tPages("orderNewNamePlaceholder")}
                     aria-invalid={!!fieldErrors.shipping_name}
                     className={cn(fieldErrors.shipping_name && "border-destructive")}
+                    onKeyDown={handleKeyDown}
                   />
                 </FormField>
 
@@ -173,6 +179,7 @@ export default function NewOrderPage() {
                     placeholder={tPages("orderNewPhonePlaceholder")}
                     aria-invalid={!!fieldErrors.phone}
                     className={cn(fieldErrors.phone && "border-destructive")}
+                    onKeyDown={handleKeyDown}
                   />
                 </FormField>
 
@@ -185,6 +192,7 @@ export default function NewOrderPage() {
                     placeholder={tPages("orderNewEmailPlaceholder")}
                     aria-invalid={!!fieldErrors.email}
                     className={cn(fieldErrors.email && "border-destructive")}
+                    onKeyDown={handleKeyDown}
                   />
                 </FormField>
 
@@ -202,6 +210,7 @@ export default function NewOrderPage() {
                     placeholder={tPages("orderFormRoadVillagePlaceholder")}
                     aria-invalid={!!fieldErrors.village}
                     className={cn(fieldErrors.village && "border-destructive")}
+                    onKeyDown={handleKeyDown}
                   />
                 </FormField>
 
@@ -219,6 +228,7 @@ export default function NewOrderPage() {
                     placeholder={tPages("orderFormThanaPlaceholder")}
                     aria-invalid={!!fieldErrors.thana}
                     className={cn(fieldErrors.thana && "border-destructive")}
+                    onKeyDown={handleKeyDown}
                   />
                 </FormField>
 
@@ -238,6 +248,7 @@ export default function NewOrderPage() {
                       placeholder={tPages("orderFormDistrictPlaceholder")}
                       aria-invalid={!!fieldErrors.district}
                       className={cn(fieldErrors.district && "border-destructive")}
+                      onKeyDown={handleKeyDown}
                     />
                   </FormField>
                 </div>
@@ -260,6 +271,7 @@ export default function NewOrderPage() {
                   onChange={(e) => handleSearch(e.target.value)}
                   onFocus={() => results.length > 0 && setShowResults(true)}
                   placeholder={tPages("orderNewSearchProductsPlaceholder")}
+                  onKeyDown={handleKeyDown}
                 />
                 {searching && (
                   <div className="absolute right-3 top-1/2 -translate-y-1/2">
@@ -417,6 +429,7 @@ export default function NewOrderPage() {
                                   rowQtyErr && "border-destructive",
                                 )}
                                 aria-invalid={!!rowQtyErr}
+                                onKeyDown={handleKeyDown}
                               />
                               {rowQtyErr && (
                                 <p className="mt-1 text-xs text-destructive">{rowQtyErr}</p>
@@ -434,6 +447,7 @@ export default function NewOrderPage() {
                                 }
                                 className={cn("w-28", numClass, rowPriceErr && "border-destructive")}
                                 aria-invalid={!!rowPriceErr}
+                                onKeyDown={handleKeyDown}
                               />
                               {rowPriceErr && (
                                 <p className="mt-1 text-xs text-destructive">{rowPriceErr}</p>

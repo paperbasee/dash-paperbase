@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { Plus, Undo2 } from "lucide-react";
@@ -18,6 +18,7 @@ import type {
   PaginatedResponse,
 } from "@/types";
 import { DashboardDetailSkeleton } from "@/components/skeletons/dashboard-skeletons";
+import { useEnterNavigation } from "@/hooks/useEnterNavigation";
 
 const multiSelectClass =
   "w-full min-h-[6rem] rounded-ui border border-border bg-background px-3 py-2 text-sm text-foreground shadow-xs outline-none transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50";
@@ -114,6 +115,14 @@ export default function ShippingPage() {
   const [rateForm, setRateForm] = useState<RateForm>(emptyRate);
 
   const [saving, setSaving] = useState(false);
+  const zoneFormRef = useRef<HTMLFormElement>(null);
+  const methodFormRef = useRef<HTMLFormElement>(null);
+  const rateFormRef = useRef<HTMLFormElement>(null);
+  const { handleKeyDown } = useEnterNavigation(() => {
+    if (editingRate) rateFormRef.current?.requestSubmit();
+    else if (editingMethod) methodFormRef.current?.requestSubmit();
+    else if (editingZone) zoneFormRef.current?.requestSubmit();
+  });
 
   const methodByPublicId = useMemo(() => {
     const m = new Map<string, ShippingMethod>();
@@ -353,13 +362,14 @@ export default function ShippingPage() {
           </div>
 
           {editingZone && (
-            <form onSubmit={saveZone} className="mb-4 space-y-3">
+            <form ref={zoneFormRef} onSubmit={saveZone} className="mb-4 space-y-3">
               <Input
                 value={zoneForm.name}
                 onChange={(e) => setZoneForm((f) => ({ ...f, name: e.target.value }))}
                 className="text-sm"
                 placeholder={tPages("shippingZoneNamePlaceholder")}
                 required
+                onKeyDown={handleKeyDown}
               />
               <label className="flex items-center gap-2 text-sm">
                 <input
@@ -369,6 +379,7 @@ export default function ShippingPage() {
                   onChange={(e) =>
                     setZoneForm((f) => ({ ...f, is_active: e.target.checked }))
                   }
+                  onKeyDown={handleKeyDown}
                 />
                 {tCommon("active")}
               </label>
@@ -450,13 +461,14 @@ export default function ShippingPage() {
           </div>
 
           {editingMethod && (
-            <form onSubmit={saveMethod} className="mb-4 space-y-3">
+            <form ref={methodFormRef} onSubmit={saveMethod} className="mb-4 space-y-3">
               <Input
                 value={methodForm.name}
                 onChange={(e) => setMethodForm((f) => ({ ...f, name: e.target.value }))}
                 className="text-sm"
                 placeholder={tPages("shippingMethodNamePlaceholder")}
                 required
+                onKeyDown={handleKeyDown}
               />
               <div className="grid grid-cols-2 gap-3">
                 <Select
@@ -479,6 +491,7 @@ export default function ShippingPage() {
                   onChange={(e) => setMethodForm((f) => ({ ...f, order: e.target.value }))}
                   className="text-sm"
                   placeholder={tPages("shippingSortOrderPlaceholder")}
+                  onKeyDown={handleKeyDown}
                 />
               </div>
               <div>
@@ -512,6 +525,7 @@ export default function ShippingPage() {
                   onChange={(e) =>
                     setMethodForm((f) => ({ ...f, is_active: e.target.checked }))
                   }
+                  onKeyDown={handleKeyDown}
                 />
                 {tCommon("active")}
               </label>
@@ -600,7 +614,7 @@ export default function ShippingPage() {
           </div>
 
           {editingRate && (
-            <form onSubmit={saveRate} className="mb-4 space-y-3">
+            <form ref={rateFormRef} onSubmit={saveRate} className="mb-4 space-y-3">
               <Select
                 value={rateForm.shipping_method_public_id}
                 onChange={(e) =>
@@ -656,6 +670,7 @@ export default function ShippingPage() {
                   className="text-sm"
                   placeholder={tPages("shippingPricePlaceholder")}
                   required
+                  onKeyDown={handleKeyDown}
                 />
               </div>
               <div className="grid grid-cols-2 gap-3">
@@ -666,6 +681,7 @@ export default function ShippingPage() {
                   }
                   className="text-sm"
                   placeholder={tPages("shippingMinOrderPlaceholder")}
+                  onKeyDown={handleKeyDown}
                 />
                 <Input
                   value={rateForm.max_order_total}
@@ -674,6 +690,7 @@ export default function ShippingPage() {
                   }
                   className="text-sm"
                   placeholder={tPages("shippingMaxOrderPlaceholder")}
+                  onKeyDown={handleKeyDown}
                 />
               </div>
               <label className="flex items-center gap-2 text-sm">
@@ -684,6 +701,7 @@ export default function ShippingPage() {
                   onChange={(e) =>
                     setRateForm((f) => ({ ...f, is_active: e.target.checked }))
                   }
+                  onKeyDown={handleKeyDown}
                 />
                 {tCommon("active")}
               </label>

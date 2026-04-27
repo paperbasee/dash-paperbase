@@ -20,6 +20,7 @@ import { notify } from "@/notifications";
 import { numberTextClass } from "@/lib/number-font";
 import { cn } from "@/lib/utils";
 import { DashboardDetailSkeleton } from "@/components/skeletons/dashboard-skeletons";
+import { useEnterNavigation } from "@/hooks/useEnterNavigation";
 
 const Calendar = dynamic(
   () => import("@/components/ui/calendar").then((mod) => mod.Calendar),
@@ -136,6 +137,10 @@ export default function CtaPage() {
   const endPickerRef = useRef<HTMLDivElement | null>(null);
   const [now, setNow] = useState(() => new Date());
   const [saving, setSaving] = useState(false);
+  const { handleKeyDown } = useEnterNavigation(() => {
+    const formEl = document.querySelector("#cta-form") ?? document.querySelector("form");
+    if (formEl instanceof HTMLFormElement) formEl.requestSubmit();
+  });
   const today = new Date(now);
   today.setHours(0, 0, 0, 0);
   const currentStartTime = currentTime24h(now);
@@ -362,6 +367,7 @@ export default function CtaPage() {
 
       {editing !== null && (
         <form
+          id="cta-form"
           onSubmit={handleSave}
           className="space-y-3 rounded-card border border-primary/30 bg-primary/5 p-4"
         >
@@ -394,6 +400,7 @@ export default function CtaPage() {
               value={form.order}
               onChange={(e) => setForm({ ...form, order: e.target.value })}
               className="text-sm"
+              onKeyDown={handleKeyDown}
             />
             <label className="flex items-center gap-2 text-sm text-foreground">
               <input
@@ -403,6 +410,7 @@ export default function CtaPage() {
                 onChange={(e) =>
                   setForm({ ...form, is_active: e.target.checked })
                 }
+                onKeyDown={handleKeyDown}
               />{" "}
               {tCommon("active")}
             </label>
@@ -414,6 +422,7 @@ export default function CtaPage() {
               value={form.link}
               onChange={(e) => setForm({ ...form, link: e.target.value })}
               className="text-sm"
+              onKeyDown={handleKeyDown}
             />
             <Input
               placeholder={tPages("ctaLinkTextOptional")}
@@ -422,6 +431,7 @@ export default function CtaPage() {
                 setForm({ ...form, link_text: e.target.value })
               }
               className="text-sm"
+              onKeyDown={handleKeyDown}
             />
           </div>
           <div className="grid grid-cols-1 gap-3 md:grid-cols-2">

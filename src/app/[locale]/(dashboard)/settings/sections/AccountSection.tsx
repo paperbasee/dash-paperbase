@@ -1,10 +1,11 @@
 "use client";
 
-import type { Dispatch, FormEvent, SetStateAction } from "react";
+import { useRef, type Dispatch, type FormEvent, type SetStateAction } from "react";
 import { useTranslations } from "next-intl";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useEnterNavigation } from "@/hooks/useEnterNavigation";
 import {
   SettingsSectionBody,
   settingsInvertedButtonClassName,
@@ -34,6 +35,8 @@ export default function AccountSection({
   onSubmit: (e: FormEvent) => void;
 }) {
   const t = useTranslations("settings");
+  const formRef = useRef<HTMLFormElement>(null);
+  const { handleKeyDown } = useEnterNavigation(() => formRef.current?.requestSubmit());
   return (
     <section
       id="panel-account"
@@ -48,7 +51,7 @@ export default function AccountSection({
         </SettingsSectionBody>
       ) : (
         <SettingsSectionBody>
-          <form onSubmit={onSubmit} className="w-full space-y-6">
+          <form ref={formRef} onSubmit={onSubmit} className="w-full space-y-6">
           <div className="space-y-1">
             <h2 className="text-lg font-medium text-foreground">{t("account.heading")}</h2>
             <p className="text-sm text-muted-foreground">{t("account.subtitle")}</p>
@@ -65,6 +68,7 @@ export default function AccountSection({
                 onChange={(e) => onOwnerNameChange(e.target.value)}
                 placeholder={t("account.ownerNamePlaceholder")}
                 className="w-full"
+                onKeyDown={handleKeyDown}
               />
             </div>
 
@@ -89,6 +93,7 @@ export default function AccountSection({
                 readOnly
                 tabIndex={-1}
                 className="w-full cursor-not-allowed bg-muted text-muted-foreground"
+                onKeyDown={handleKeyDown}
               />
               <p className="text-xs text-muted-foreground">{t("account.emailReadonlyHint")}</p>
             </div>

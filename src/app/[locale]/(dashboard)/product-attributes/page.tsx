@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { Plus, Undo2 } from "lucide-react";
@@ -10,6 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ClickableListItem } from "@/components/ui/clickable-list-item";
 import { ClickableText } from "@/components/ui/clickable-text";
 import { Input } from "@/components/ui/input";
+import { useEnterNavigation } from "@/hooks/useEnterNavigation";
 import type {
   ProductAttributeAdmin,
   ProductAttributeValueAdmin,
@@ -48,6 +49,12 @@ export default function ProductAttributesPage() {
   >(null);
   const [valueForm, setValueForm] = useState<ValueForm>(emptyValue);
   const [valueSaving, setValueSaving] = useState(false);
+  const attrFormRef = useRef<HTMLFormElement>(null);
+  const valueFormRef = useRef<HTMLFormElement>(null);
+  const { handleKeyDown } = useEnterNavigation(() => {
+    if (valueEditing) valueFormRef.current?.requestSubmit();
+    else attrFormRef.current?.requestSubmit();
+  });
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -253,7 +260,7 @@ export default function ProductAttributesPage() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <form onSubmit={saveAttr} className="grid gap-3 sm:max-w-md">
+            <form ref={attrFormRef} onSubmit={saveAttr} className="grid gap-3 sm:max-w-md">
               <label className="space-y-1">
                 <span className="text-xs text-muted-foreground">{tPages("attributesNameRequired")}</span>
                 <Input
@@ -261,6 +268,7 @@ export default function ProductAttributesPage() {
                   className="w-full text-sm"
                   value={attrForm.name}
                   onChange={(e) => setAttrForm({ ...attrForm, name: e.target.value })}
+                  onKeyDown={handleKeyDown}
                 />
                 <p className="text-xs text-muted-foreground">{tPages("attributesNameAutoSlugHint")}</p>
               </label>
@@ -271,6 +279,7 @@ export default function ProductAttributesPage() {
                   className={cn("w-full text-sm", numClass)}
                   value={attrForm.order}
                   onChange={(e) => setAttrForm({ ...attrForm, order: e.target.value })}
+                  onKeyDown={handleKeyDown}
                 />
               </label>
               <div className="flex gap-2">
@@ -345,6 +354,7 @@ export default function ProductAttributesPage() {
 
                 {editingValue ? (
                   <form
+                    ref={valueFormRef}
                     onSubmit={saveValue}
                     className="rounded-card border border-border bg-muted/20 p-3 space-y-2"
                   >
@@ -359,6 +369,7 @@ export default function ProductAttributesPage() {
                       value={valueForm.value}
                       onChange={(e) => setValueForm({ ...valueForm, value: e.target.value })}
                       placeholder={tPages("attributesValuePlaceholder")}
+                      onKeyDown={handleKeyDown}
                     />
                     <Input
                       type="number"
@@ -366,6 +377,7 @@ export default function ProductAttributesPage() {
                       value={valueForm.order}
                       onChange={(e) => setValueForm({ ...valueForm, order: e.target.value })}
                       title={tPages("attributesOrder")}
+                      onKeyDown={handleKeyDown}
                     />
                     <div className="flex gap-2">
                       <Button type="submit" size="sm" disabled={valueSaving}>

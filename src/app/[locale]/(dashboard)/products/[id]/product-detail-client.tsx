@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Link, useRouter } from "@/i18n/navigation";
 import { useParams, usePathname } from "next/navigation";
@@ -14,6 +14,7 @@ import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { ExtraFieldsFormSection } from "@/components/ExtraFieldsFormSection";
 import { useExtraFieldsSchema } from "@/hooks/useExtraFieldsSchema";
+import { useEnterNavigation } from "@/hooks/useEnterNavigation";
 import type { ExtraFieldValues } from "@/types/extra-fields";
 import type { Product, AdminCategoryTreeNode } from "@/types";
 import { flattenCategoryOptions } from "@/lib/category-tree";
@@ -78,6 +79,7 @@ function findCategoryLabel(
 }
 
 export default function ProductDetailClient() {
+  const formRef = useRef<HTMLFormElement>(null);
   const pathname = usePathname();
   const isEditMode = pathname.replace(/\/$/, "").endsWith("/edit");
 
@@ -434,6 +436,7 @@ export default function ProductDetailClient() {
   }
 
   const fieldControlClass = "w-full rounded-card bg-muted/50";
+  const { handleKeyDown } = useEnterNavigation(() => formRef.current?.requestSubmit());
 
   if (loading) {
     return <DashboardDetailSkeleton />;
@@ -505,6 +508,7 @@ export default function ProductDetailClient() {
       {isEditMode ? (
         <form
           id="product-form"
+          ref={formRef}
           onSubmit={handleSubmit}
           className="grid grid-cols-1 gap-6 lg:grid-cols-3"
         >
@@ -524,6 +528,7 @@ export default function ProductDetailClient() {
                     onChange={(e) => setForm({ ...form, name: e.target.value })}
                     placeholder={tPages("productNamePlaceholder")}
                     className={fieldControlClass}
+                    onKeyDown={handleKeyDown}
                   />
                   <div className="mt-1.5 flex items-center gap-2">
                     <p
@@ -566,6 +571,7 @@ export default function ProductDetailClient() {
                     onChange={(e) => setForm({ ...form, brand: e.target.value })}
                     placeholder={tPages("productBrandPlaceholder")}
                     className={fieldControlClass}
+                    onKeyDown={handleKeyDown}
                   />
                 </Field>
                 <label className="flex cursor-pointer items-center gap-2">
@@ -576,6 +582,7 @@ export default function ProductDetailClient() {
                       setForm({ ...form, is_active: e.target.checked })
                     }
                     className="form-checkbox"
+                    onKeyDown={handleKeyDown}
                   />
                   <span className="text-sm font-medium text-foreground">
                     {tPages("productActiveVisible")}
@@ -618,6 +625,7 @@ export default function ProductDetailClient() {
                       }
                       placeholder="0.00"
                       className={cn(numClass, fieldControlClass)}
+                      onKeyDown={handleKeyDown}
                     />
                   </Field>
                   <Field label={tPages("productCompareAt")}>
@@ -630,6 +638,7 @@ export default function ProductDetailClient() {
                       }
                       placeholder={tCommon("optional")}
                       className={cn(numClass, fieldControlClass)}
+                      onKeyDown={handleKeyDown}
                     />
                   </Field>
                   <Field label={tPages("productStockInventoryDerived")}>
@@ -641,6 +650,7 @@ export default function ProductDetailClient() {
                       className={cn(numClass, fieldControlClass)}
                       disabled
                       title={tPages("productStockManagedInventory")}
+                      onKeyDown={handleKeyDown}
                     />
                   </Field>
                   <Field label={tPages("productPrepaymentTypeLabel")}>

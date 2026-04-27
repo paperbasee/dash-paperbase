@@ -55,6 +55,7 @@ import { numberTextClass } from "@/lib/number-font";
 import { notify, normalizeError } from "@/notifications";
 import { cn } from "@/lib/utils";
 import { DashboardDetailSkeleton } from "@/components/skeletons/dashboard-skeletons";
+import { useEnterNavigation } from "@/hooks/useEnterNavigation";
 
 type EditForm = {
   shipping_name: string;
@@ -110,6 +111,10 @@ export default function OrderDetailPage() {
   const [paymentVerifying, setPaymentVerifying] = useState<"verify" | "reject" | null>(null);
   const rightColRef = useRef<HTMLDivElement>(null);
   const [rightColHeight, setRightColHeight] = useState<number | null>(null);
+  const { handleKeyDown } = useEnterNavigation(() => {
+    const form = document.getElementById("order-edit-form");
+    if (form instanceof HTMLFormElement) form.requestSubmit();
+  });
 
   useEffect(() => {
     api
@@ -1035,6 +1040,7 @@ export default function OrderDetailPage() {
                     value={order.order_number}
                     readOnly
                     className={cn("bg-muted/50", numClass)}
+                    onKeyDown={handleKeyDown}
                   />
                 </div>
                 <div>
@@ -1045,6 +1051,7 @@ export default function OrderDetailPage() {
                     value={formatOrderStatusLabel(order.status, tPages)}
                     readOnly
                     className="cursor-default bg-muted/50"
+                    onKeyDown={handleKeyDown}
                   />
                   <p className="mt-1 text-xs text-muted-foreground">
                     {tPages("orderDetailStatusChangeHint")}
@@ -1095,6 +1102,7 @@ export default function OrderDetailPage() {
                       onChange={(e) =>
                         setForm({ ...form, shipping_name: e.target.value })
                       }
+                      onKeyDown={handleKeyDown}
                     />
                   </div>
                   <div>
@@ -1107,6 +1115,7 @@ export default function OrderDetailPage() {
                       onChange={(e) =>
                         setForm({ ...form, phone: e.target.value })
                       }
+                      onKeyDown={handleKeyDown}
                     />
                   </div>
                 </div>
@@ -1121,6 +1130,7 @@ export default function OrderDetailPage() {
                       onChange={(e) =>
                         setForm({ ...form, email: e.target.value })
                       }
+                      onKeyDown={handleKeyDown}
                     />
                   </div>
                   <div className="sm:col-span-2">
@@ -1133,6 +1143,7 @@ export default function OrderDetailPage() {
                       onChange={(e) =>
                         setForm({ ...form, village: e.target.value })
                       }
+                      onKeyDown={handleKeyDown}
                     />
                   </div>
                   <div>
@@ -1145,6 +1156,7 @@ export default function OrderDetailPage() {
                       onChange={(e) =>
                         setForm({ ...form, thana: e.target.value })
                       }
+                      onKeyDown={handleKeyDown}
                     />
                   </div>
                   <div>
@@ -1157,6 +1169,7 @@ export default function OrderDetailPage() {
                       onChange={(e) =>
                         setForm({ ...form, district: e.target.value })
                       }
+                      onKeyDown={handleKeyDown}
                     />
                   </div>
                 </div>

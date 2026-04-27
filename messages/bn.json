@@ -1295,7 +1295,7 @@
       "modalEnable2faStartHint": "QR কোড ও সিক্রেট তৈরি করুন, তারপর অ্যাপ থেকে কোড লিখুন।",
       "modalDisable2faTitle": "দুই-ধাপ যাচাইকরণ বন্ধ করুন",
       "modalRecoveryTitle": "অ্যাকাউন্টে প্রবেশ পুনরুদ্ধার",
-      "modalRecoveryDescription": "অথেন্টিকেটর ডিভাইস না থাকলে ইমেইলে রিকভারি কোড চান।"
+      "modalRecoveryDescription": "অথেন্টিকেটর ডিভাইস না থাকলে অ্যাকাউন্ট ইমেইলে রিকভারি কোড চান।"
     },
     "billing": {
       "heading": "বিলিং ও প্ল্যান",

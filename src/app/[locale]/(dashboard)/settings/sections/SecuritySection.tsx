@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import api from "@/lib/api";
 import { useRateLimitCooldown, extractRateLimitInfo } from "@/hooks/useRateLimitCooldown";
+import { useEnterNavigation } from "@/hooks/useEnterNavigation";
 import { notify } from "@/notifications";
 import { cn } from "@/lib/utils";
 import {
@@ -19,6 +20,24 @@ import {
 
 type SecurityModal = "password" | "enable" | "disable" | "recovery" | null;
 
+function normalizeOtpCodeInput(raw: string): string {
+  // Convert common unicode digits (e.g. Bangla/Arabic-Indic) to ASCII digits,
+  // then keep digits only so payload format is always backend-friendly.
+  const asciiDigits = Array.from(raw)
+    .map((ch) => {
+      const code = ch.charCodeAt(0);
+      // Bangla digits ০-৯
+      if (code >= 0x09e6 && code <= 0x09ef) return String(code - 0x09e6);
+      // Arabic-Indic digits ٠-٩
+      if (code >= 0x0660 && code <= 0x0669) return String(code - 0x0660);
+      // Eastern Arabic-Indic digits ۰-۹
+      if (code >= 0x06f0 && code <= 0x06f9) return String(code - 0x06f0);
+      return ch;
+    })
+    .join("");
+  return asciiDigits.replace(/\D/g, "");
+}
+
 function SecurityPasswordField({
   value,
   onChange,
@@ -28,6 +47,7 @@ function SecurityPasswordField({
   onToggleVisible,
   showLabel,
   hideLabel,
+  onKeyDown,
 }: {
   value: string;
   onChange: (value: string) => void;
@@ -37,6 +57,7 @@ function SecurityPasswordField({
   onToggleVisible: () => void;
   showLabel: string;
   hideLabel: string;
+  onKeyDown: (e: React.KeyboardEvent<HTMLElement>) => void;
 }) {
   return (
     <div className="relative">
@@ -47,6 +68,7 @@ function SecurityPasswordField({
         placeholder={placeholder}
         className="pr-10"
         autoComplete={autoComplete}
+        onKeyDown={onKeyDown}
       />
       <button
         type="button"
@@ -73,8 +95,10 @@ export default function SecuritySection({ hidden }: { hidden: boolean }) {
   const [recoveryRequestLoading, setRecoveryRequestLoading] = useState(false);
   const [recoveryVerifyLoading, setRecoveryVerifyLoading] = useState(false);
   const [recoveryMessage, setRecoveryMessage] = useState("");
+  const [recoveryMessageTone, setRecoveryMessageTone] = useState<"success" | "error">("success");
   const [statusLoadError, setStatusLoadError] = useState("");
   const [enableModalMessage, setEnableModalMessage] = useState("");
+  const [enableModalMessageTone, setEnableModalMessageTone] = useState<"success" | "error">("success");
   const [disableModalMessage, setDisableModalMessage] = useState("");
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -87,7 +111,32 @@ export default function SecuritySection({ hidden }: { hidden: boolean }) {
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmNewPassword, setShowConfirmNewPassword] = useState(false);
   const [showDisablePassword, setShowDisablePassword] = useState(false);
+  const [twoFaLockedUntil, setTwoFaLockedUntil] = useState<string | null>(null);
+  const [lockRemainingSeconds, setLockRemainingSeconds] = useState(0);
   const recoveryCooldown = useRateLimitCooldown();
+  const { handleKeyDown } = useEnterNavigation(() => {
+    if (openModal === "password") {
+      void changePassword();
+      return;
+    }
+    if (openModal === "enable") {
+      if (qrCode) {
+        void verifySetup();
+      } else {
+        void startSetup();
+      }
+      return;
+    }
+    if (openModal === "disable") {
+      void disable2FA();
+      return;
+    }
+    if (openModal === "recovery") {
+      if (recoveryCode.trim()) {
+        void verifyRecoveryAndDisable();
+      }
+    }
+  });
 
   useEffect(() => {
     if (hidden) return;
@@ -111,6 +160,7 @@ export default function SecuritySection({ hidden }: { hidden: boolean }) {
     setSecret("");
     setSetupCode("");
     setEnableModalMessage("");
+    setEnableModalMessageTone("success");
     setLoading(false);
   }
 
@@ -125,19 +175,44 @@ export default function SecuritySection({ hidden }: { hidden: boolean }) {
   function clearRecoveryModal() {
     setRecoveryCode("");
     setRecoveryMessage("");
+    setRecoveryMessageTone("success");
     setRecoveryRequestLoading(false);
     setRecoveryVerifyLoading(false);
   }
 
   async function loadStatus() {
     try {
-      const { data } = await api.get<{ is_enabled: boolean }>("auth/2fa/status/");
+      const { data } = await api.get<{ is_enabled: boolean; locked_until?: string | null }>(
+        "auth/2fa/status/"
+      );
       setIsEnabled(!!data.is_enabled);
+      setTwoFaLockedUntil(data.locked_until ?? null);
       setStatusLoadError("");
     } catch {
       setStatusLoadError(t("security.loadStatusFailed"));
     }
   }
+
+  useEffect(() => {
+    if (!twoFaLockedUntil) {
+      setLockRemainingSeconds(0);
+      return;
+    }
+    const tick = () => {
+      const untilMs = new Date(twoFaLockedUntil).getTime();
+      if (Number.isNaN(untilMs)) {
+        setLockRemainingSeconds(0);
+        return;
+      }
+      const remaining = Math.max(0, Math.ceil((untilMs - Date.now()) / 1000));
+      setLockRemainingSeconds(remaining);
+    };
+    tick();
+    const timer = window.setInterval(tick, 1000);
+    return () => window.clearInterval(timer);
+  }, [twoFaLockedUntil]);
+
+  const isTwoFaTemporarilyLocked = lockRemainingSeconds > 0;
 
   async function startSetup() {
     setLoading(true);
@@ -147,26 +222,51 @@ export default function SecuritySection({ hidden }: { hidden: boolean }) {
       setQrCode(data.qr_code);
       setSecret(data.secret);
       setEnableModalMessage(t("security.setupScanHint"));
+      setEnableModalMessageTone("success");
     } catch {
       setEnableModalMessage(t("security.setupStartFailed"));
+      setEnableModalMessageTone("error");
     } finally {
       setLoading(false);
     }
   }
 
   async function verifySetup() {
+    if (loading) return;
+    if (isTwoFaTemporarilyLocked) {
+      setEnableModalMessage(`Too many invalid attempts. Try again in ${lockRemainingSeconds}s.`);
+      setEnableModalMessageTone("error");
+      return;
+    }
+    const normalizedCode = normalizeOtpCodeInput(setupCode);
+    if (!normalizedCode) {
+      setEnableModalMessage(t("security.invalidOtp"));
+      setEnableModalMessageTone("error");
+      return;
+    }
     setLoading(true);
     setEnableModalMessage("");
     try {
-      await api.post("auth/2fa/verify/", { code: setupCode });
+      await api.post("auth/2fa/verify/", { code: normalizedCode });
       setIsEnabled(true);
       setQrCode("");
       setSecret("");
       setSetupCode("");
       setOpenModal(null);
       notify.success(t("security.enabledSuccess"));
-    } catch {
-      setEnableModalMessage(t("security.invalidOtp"));
+    } catch (err: unknown) {
+      const detail =
+        err &&
+        typeof err === "object" &&
+        "response" in err &&
+        (err as { response?: { data?: { detail?: unknown } } }).response?.data?.detail;
+      const resolvedMessage =
+        typeof detail === "string" && detail.trim() ? detail : t("security.invalidOtp");
+      setEnableModalMessage(resolvedMessage);
+      setEnableModalMessageTone("error");
+      if (resolvedMessage.toLowerCase().includes("too many invalid attempts")) {
+        await loadStatus();
+      }
     } finally {
       setLoading(false);
     }
@@ -178,6 +278,7 @@ export default function SecuritySection({ hidden }: { hidden: boolean }) {
     try {
       await api.post("auth/2fa/recovery/request/");
       setRecoveryMessage(t("security.recoverySent"));
+      setRecoveryMessageTone("success");
     } catch (err: unknown) {
       const info = extractRateLimitInfo(err);
       if (info) {
@@ -185,6 +286,7 @@ export default function SecuritySection({ hidden }: { hidden: boolean }) {
         setRecoveryMessage("");
       } else {
         setRecoveryMessage(t("security.recoverySendFailed"));
+        setRecoveryMessageTone("error");
       }
     } finally {
       setRecoveryRequestLoading(false);
@@ -208,6 +310,7 @@ export default function SecuritySection({ hidden }: { hidden: boolean }) {
       notify.success(data.detail ?? t("security.toastDisabledDetail"));
     } catch {
       setRecoveryMessage(t("security.recoveryInvalid"));
+      setRecoveryMessageTone("error");
     } finally {
       setRecoveryVerifyLoading(false);
     }
@@ -360,6 +463,7 @@ export default function SecuritySection({ hidden }: { hidden: boolean }) {
             onToggleVisible={() => setShowCurrentPassword((v) => !v)}
             showLabel={t("security.showPassword")}
             hideLabel={t("security.hidePassword")}
+            onKeyDown={handleKeyDown}
           />
           <SecurityPasswordField
             value={newPassword}
@@ -370,6 +474,7 @@ export default function SecuritySection({ hidden }: { hidden: boolean }) {
             onToggleVisible={() => setShowNewPassword((v) => !v)}
             showLabel={t("security.showPassword")}
             hideLabel={t("security.hidePassword")}
+            onKeyDown={handleKeyDown}
           />
           <SecurityPasswordField
             value={confirmNewPassword}
@@ -380,6 +485,7 @@ export default function SecuritySection({ hidden }: { hidden: boolean }) {
             onToggleVisible={() => setShowConfirmNewPassword((v) => !v)}
             showLabel={t("security.showPassword")}
             hideLabel={t("security.hidePassword")}
+            onKeyDown={handleKeyDown}
           />
           <label className="flex items-center gap-2 text-sm text-muted-foreground">
             <input
@@ -387,6 +493,7 @@ export default function SecuritySection({ hidden }: { hidden: boolean }) {
               checked={logoutAllDevices}
               onChange={(e) => setLogoutAllDevices(e.target.checked)}
               className="form-checkbox"
+              onKeyDown={handleKeyDown}
             />
             <span>{t("security.logoutAllDevices")}</span>
           </label>
@@ -451,21 +558,33 @@ export default function SecuritySection({ hidden }: { hidden: boolean }) {
                   onChange={(e) => setSetupCode(e.target.value)}
                   placeholder={t("security.otpPlaceholder")}
                   autoComplete="one-time-code"
+                  onKeyDown={handleKeyDown}
                 />
                 <Button
                   type="button"
                   variant="outline"
                   className={cn("shrink-0", settingsInvertedButtonClassName)}
                   onClick={verifySetup}
-                  disabled={loading}
+                  disabled={loading || isTwoFaTemporarilyLocked}
                 >
                   {t("security.verify")}
                 </Button>
               </div>
+              {isTwoFaTemporarilyLocked ? (
+                <p className="text-sm text-destructive" role="status">
+                  Too many invalid attempts. Try again in {lockRemainingSeconds}s.
+                </p>
+              ) : null}
             </>
           )}
           {enableModalMessage ? (
-            <p className="text-sm text-muted-foreground" role="status">
+            <p
+              className={cn(
+                "text-sm",
+                enableModalMessageTone === "success" ? "text-muted-foreground" : "text-destructive"
+              )}
+              role="status"
+            >
               {enableModalMessage}
             </p>
           ) : null}
@@ -493,12 +612,14 @@ export default function SecuritySection({ hidden }: { hidden: boolean }) {
             onToggleVisible={() => setShowDisablePassword((v) => !v)}
             showLabel={t("security.showPassword")}
             hideLabel={t("security.hidePassword")}
+            onKeyDown={handleKeyDown}
           />
           <Input
             value={disableCode}
             onChange={(e) => setDisableCode(e.target.value)}
             placeholder={t("security.currentOtp")}
             autoComplete="one-time-code"
+            onKeyDown={handleKeyDown}
           />
           {disableModalMessage ? (
             <p className="text-sm text-destructive" role="alert">
@@ -541,6 +662,7 @@ export default function SecuritySection({ hidden }: { hidden: boolean }) {
             onChange={(e) => setRecoveryCode(e.target.value)}
             placeholder={t("security.recoveryPlaceholder")}
             autoComplete="one-time-code"
+            onKeyDown={handleKeyDown}
           />
           <Button
             type="button"
@@ -552,7 +674,13 @@ export default function SecuritySection({ hidden }: { hidden: boolean }) {
             {recoveryVerifyLoading ? t("security.verifying") : t("security.verifyDisable")}
           </Button>
           {recoveryMessage ? (
-            <p className="text-sm text-muted-foreground" role="status">
+            <p
+              className={cn(
+                "text-sm",
+                recoveryMessageTone === "success" ? "text-emerald-600" : "text-destructive"
+              )}
+              role="status"
+            >
               {recoveryMessage}
             </p>
           ) : null}

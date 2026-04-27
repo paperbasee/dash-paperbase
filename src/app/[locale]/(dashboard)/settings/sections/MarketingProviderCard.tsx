@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Save, Copy, Check } from "lucide-react";
 import api from "@/lib/api";
@@ -10,6 +10,7 @@ import type {
 } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useEnterNavigation } from "@/hooks/useEnterNavigation";
 import { numberTextClass } from "@/lib/number-font";
 import { useConfirm } from "@/context/ConfirmDialogContext";
 import { notify } from "@/notifications";
@@ -67,6 +68,8 @@ export default function MarketingProviderCard({ provider }: { provider: Marketin
   const [togglingId, setTogglingId] = useState<string | null>(null);
   const [eventSavingId, setEventSavingId] = useState<string | null>(null);
   const [pixelCopied, setPixelCopied] = useState(false);
+  const connectFormRef = useRef<HTMLFormElement>(null);
+  const { handleKeyDown } = useEnterNavigation(() => connectFormRef.current?.requestSubmit());
 
   const integration: MarketingIntegrationType | undefined = allFetched?.find(
     (i) => i.provider === provider
@@ -270,7 +273,7 @@ export default function MarketingProviderCard({ provider }: { provider: Marketin
             : c("modalConnectDescription")
         }
       >
-        <form onSubmit={handleConnect} className="space-y-3">
+        <form ref={connectFormRef} onSubmit={handleConnect} className="space-y-3">
           {error ? (
             <div className="rounded-card border border-destructive/30 bg-destructive/10 px-3 py-2 text-xs text-destructive">
               {error}
@@ -287,6 +290,7 @@ export default function MarketingProviderCard({ provider }: { provider: Marketin
                   value={form.pixel_id}
                   onChange={(e) => setForm({ ...form, pixel_id: e.target.value, provider })}
                   placeholder={c("pixelPlaceholder")}
+                  onKeyDown={handleKeyDown}
                 />
                 {showHelper ? (
                   <p className="text-xs text-muted-foreground">{c("pixelHelper")}</p>
@@ -303,6 +307,7 @@ export default function MarketingProviderCard({ provider }: { provider: Marketin
                   onChange={(e) => setForm({ ...form, access_token: e.target.value, provider })}
                   placeholder={c("accessTokenPlaceholder")}
                   autoComplete="off"
+                  onKeyDown={handleKeyDown}
                 />
                 {showHelper ? (
                   <p className="text-xs text-muted-foreground">{c("accessTokenHelper")}</p>
@@ -317,6 +322,7 @@ export default function MarketingProviderCard({ provider }: { provider: Marketin
                   value={form.test_event_code}
                   onChange={(e) => setForm({ ...form, test_event_code: e.target.value, provider })}
                   placeholder={c("testEventPlaceholder")}
+                  onKeyDown={handleKeyDown}
                 />
                 {showHelper ? (
                   <p className="text-xs text-muted-foreground">{c("testEventHelper")}</p>

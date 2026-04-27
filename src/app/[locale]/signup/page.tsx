@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useRef, useState, type FormEvent } from "react";
 import { useTranslations } from "next-intl";
 import { Link, useRouter } from "@/i18n/navigation";
 import { Eye, EyeOff } from "lucide-react";
@@ -10,11 +10,13 @@ import { LoadingButton } from "@/components/ui/loading-button";
 import { AuthPageShell } from "@/components/auth/AuthPageShell";
 import { TurnstileWidget } from "@/components/auth/TurnstileWidget";
 import { useMinDelayLoading } from "@/hooks/useMinDelayLoading";
+import { useEnterNavigation } from "@/hooks/useEnterNavigation";
 import { parseValidation, registerSchema } from "@/lib/validation";
 import { resolvePostAuthRoute } from "@/lib/subscription-access";
 import { isTurnstileDisabled } from "@/lib/turnstile-env";
 
 export default function SignupPage() {
+  const formRef = useRef<HTMLFormElement>(null);
   const router = useRouter();
   const t = useTranslations("auth.signup");
   const tAuth = useTranslations("auth");
@@ -29,6 +31,7 @@ export default function SignupPage() {
   const [otpCode, setOtpCode] = useState("");
   const { loading, runWithLoading } = useMinDelayLoading();
   const hasAccountLabel = t("hasAccount");
+  const { handleKeyDown } = useEnterNavigation(() => formRef.current?.requestSubmit());
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -132,6 +135,7 @@ export default function SignupPage() {
     >
 
       <form
+            ref={formRef}
             onSubmit={pendingTwoFactor ? handleOtpSubmit : handleSubmit}
             className="mx-auto w-11/12 max-w-sm space-y-6 sm:w-full"
             aria-busy={loading}
@@ -158,6 +162,7 @@ export default function SignupPage() {
                   placeholder={t("emailPlaceholder")}
                   autoComplete="email"
                   inputMode="email"
+                  onKeyDown={handleKeyDown}
                 />
               </div>
 
@@ -177,6 +182,7 @@ export default function SignupPage() {
                     placeholder={t("passwordPlaceholder")}
                     className="pr-10"
                     autoComplete="new-password"
+                    onKeyDown={handleKeyDown}
                   />
                   <button
                     type="button"
@@ -205,6 +211,7 @@ export default function SignupPage() {
                     placeholder={t("confirmPlaceholder")}
                     className="pr-10"
                     autoComplete="new-password"
+                    onKeyDown={handleKeyDown}
                   />
                   <button
                     type="button"
@@ -236,6 +243,7 @@ export default function SignupPage() {
                 placeholder={t("otpPlaceholder")}
                 inputMode="numeric"
                 autoComplete="one-time-code"
+                onKeyDown={handleKeyDown}
               />
             </div>
           )}

@@ -15,6 +15,7 @@ import { BlogImageUpload } from "./BlogImageUpload";
 import { useConfirm } from "@/context/ConfirmDialogContext";
 import { useNotificationValidation } from "@/notifications/NotificationProvider";
 import { cn } from "@/lib/utils";
+import { useEnterNavigation } from "@/hooks/useEnterNavigation";
 
 interface BlogFormState {
   title: string;
@@ -79,6 +80,10 @@ export function BlogForm({ mode, initialBlog }: BlogFormProps) {
   const [tags, setTags] = useState<BlogTag[]>([]);
   const [newTagName, setNewTagName] = useState("");
   const [saving, setSaving] = useState(false);
+  const { handleKeyDown } = useEnterNavigation(() => {
+    const form = document.getElementById("blog-form");
+    if (form instanceof HTMLFormElement) form.requestSubmit();
+  });
 
   const remoteImageUrl = removeRemoteImage
     ? null
@@ -320,6 +325,7 @@ export function BlogForm({ mode, initialBlog }: BlogFormProps) {
                   aria-invalid={!!fieldErrors.title}
                   className={cn(fieldErrors.title && "border-destructive")}
                   placeholder="A compelling title for your post"
+                  onKeyDown={handleKeyDown}
                 />
                 {mode === "edit" && initialBlog?.slug && (
                   <p className="mt-1 text-xs text-muted-foreground">
@@ -403,6 +409,7 @@ export function BlogForm({ mode, initialBlog }: BlogFormProps) {
                   aria-invalid={!!fieldErrors.meta_title}
                   className={cn(fieldErrors.meta_title && "border-destructive")}
                   placeholder="Defaults to the post title"
+                  onKeyDown={handleKeyDown}
                 />
               </Field>
               <Field
@@ -481,6 +488,7 @@ export function BlogForm({ mode, initialBlog }: BlogFormProps) {
                   onChange={(e) =>
                     setForm((f) => ({ ...f, is_public: e.target.checked }))
                   }
+                  onKeyDown={handleKeyDown}
                 />
                 Public (visible on storefront)
               </label>
@@ -491,6 +499,7 @@ export function BlogForm({ mode, initialBlog }: BlogFormProps) {
                   onChange={(e) =>
                     setForm((f) => ({ ...f, is_featured: e.target.checked }))
                   }
+                  onKeyDown={handleKeyDown}
                 />
                 Featured post
               </label>
@@ -534,6 +543,7 @@ export function BlogForm({ mode, initialBlog }: BlogFormProps) {
                         type="checkbox"
                         checked={form.tag_public_ids.includes(t.public_id)}
                         onChange={() => toggleTag(t.public_id)}
+                        onKeyDown={handleKeyDown}
                       />
                       {t.name}
                     </label>
@@ -553,6 +563,7 @@ export function BlogForm({ mode, initialBlog }: BlogFormProps) {
                   value={newTagName}
                   onChange={(e) => setNewTagName(e.target.value)}
                   placeholder="New tag"
+                  onKeyDown={handleKeyDown}
                 />
                 <Button
                   type="button"

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useRef, useState, type FormEvent } from "react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { useRouter } from "@/i18n/navigation";
@@ -10,9 +10,11 @@ import { AuthPageShell } from "@/components/auth/AuthPageShell";
 import { requestPasswordReset } from "@/lib/auth-email";
 import { useRateLimitCooldown, extractRateLimitInfo } from "@/hooks/useRateLimitCooldown";
 import { useMinDelayLoading } from "@/hooks/useMinDelayLoading";
+import { useEnterNavigation } from "@/hooks/useEnterNavigation";
 import { emailSchema } from "@/lib/validation";
 
 export default function PasswordResetRequestPage() {
+  const formRef = useRef<HTMLFormElement>(null);
   const router = useRouter();
   const t = useTranslations("auth.passwordReset");
   const tCommon = useTranslations("common");
@@ -21,6 +23,7 @@ export default function PasswordResetRequestPage() {
   const [error, setError] = useState("");
   const { loading, runWithLoading } = useMinDelayLoading();
   const cooldown = useRateLimitCooldown();
+  const { handleKeyDown } = useEnterNavigation(() => formRef.current?.requestSubmit());
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -50,6 +53,7 @@ export default function PasswordResetRequestPage() {
     <AuthPageShell headline={t("headline")} description={t("description")}>
 
       <form
+        ref={formRef}
         onSubmit={handleSubmit}
         className="mx-auto w-11/12 max-w-sm space-y-6 sm:w-full"
         aria-busy={loading}
@@ -72,6 +76,7 @@ export default function PasswordResetRequestPage() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="e.g. you@example.com"
+            onKeyDown={handleKeyDown}
           />
         </div>
         <label className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -79,6 +84,7 @@ export default function PasswordResetRequestPage() {
             type="checkbox"
             checked={logoutAllDevices}
             onChange={(e) => setLogoutAllDevices(e.target.checked)}
+            onKeyDown={handleKeyDown}
             className="form-checkbox"
           />
           <span>{t("logoutAllDevices")}</span>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useRef, useState, type FormEvent } from "react";
 import { useTranslations } from "next-intl";
 import { Link, useRouter } from "@/i18n/navigation";
 import { useSearchParams } from "next/navigation";
@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { LoadingButton } from "@/components/ui/loading-button";
 import { useMinDelayLoading } from "@/hooks/useMinDelayLoading";
+import { useEnterNavigation } from "@/hooks/useEnterNavigation";
 import { confirmPasswordReset } from "@/lib/auth-email";
 import { parseValidation, passwordResetConfirmSchema } from "@/lib/validation";
 
@@ -32,6 +33,7 @@ function extractMessage(err: unknown, generic: string): string {
 }
 
 export default function PasswordResetConfirmContent() {
+  const formRef = useRef<HTMLFormElement>(null);
   const router = useRouter();
   const t = useTranslations("auth.passwordReset");
   const tSignup = useTranslations("auth.signup");
@@ -50,6 +52,7 @@ export default function PasswordResetConfirmContent() {
   const [showPasswordConfirm, setShowPasswordConfirm] = useState(false);
   const [error, setError] = useState("");
   const { loading, runWithLoading } = useMinDelayLoading();
+  const { handleKeyDown } = useEnterNavigation(() => formRef.current?.requestSubmit());
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -115,6 +118,7 @@ export default function PasswordResetConfirmContent() {
       </div>
 
       <form
+        ref={formRef}
         onSubmit={handleSubmit}
         className="mx-auto w-11/12 max-w-sm space-y-6 sm:w-full"
         aria-busy={loading}
@@ -140,6 +144,7 @@ export default function PasswordResetConfirmContent() {
               onChange={(e) => setNewPassword(e.target.value)}
               placeholder={t("passwordPlaceholder")}
               className="pr-10"
+              onKeyDown={handleKeyDown}
             />
             <button
               type="button"
@@ -167,6 +172,7 @@ export default function PasswordResetConfirmContent() {
               onChange={(e) => setNewPasswordConfirm(e.target.value)}
               placeholder={t("confirmPlaceholder")}
               className="pr-10"
+              onKeyDown={handleKeyDown}
             />
             <button
               type="button"
@@ -185,6 +191,7 @@ export default function PasswordResetConfirmContent() {
             type="checkbox"
             checked={logoutAllDevices}
             onChange={(e) => setLogoutAllDevices(e.target.checked)}
+            onKeyDown={handleKeyDown}
             className="form-checkbox"
           />
           <span>{t("logoutAllDevices")}</span>

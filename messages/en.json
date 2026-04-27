@@ -1295,7 +1295,7 @@
       "modalEnable2faStartHint": "Generate a QR code and secret, then enter the code from your app.",
       "modalDisable2faTitle": "Disable two-factor authentication",
       "modalRecoveryTitle": "Recover account access",
-      "modalRecoveryDescription": "If you cannot access your authenticator device, request a recovery code by email."
+      "modalRecoveryDescription": "If you cannot access your authenticator device, request a recovery code by account email."
     },
     "billing": {
       "heading": "Billing & Plan",

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Link, useRouter } from "@/i18n/navigation";
 import { Undo2, Check, ImageIcon, Plus, X } from "lucide-react";
@@ -12,6 +12,7 @@ import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { ExtraFieldsFormSection } from "@/components/ExtraFieldsFormSection";
 import { useExtraFieldsSchema } from "@/hooks/useExtraFieldsSchema";
+import { useEnterNavigation } from "@/hooks/useEnterNavigation";
 import type { ExtraFieldValues } from "@/types/extra-fields";
 import type { AdminCategoryTreeNode } from "@/types";
 import { flattenCategoryOptions } from "@/lib/category-tree";
@@ -29,6 +30,7 @@ import { cn } from "@/lib/utils";
 const MAX_IMAGES = MAX_PRODUCT_IMAGES;
 
 export default function NewProductPage() {
+  const formRef = useRef<HTMLFormElement>(null);
   const router = useRouter();
   const locale = useLocale();
   const numClass = numberTextClass(locale);
@@ -212,6 +214,7 @@ export default function NewProductPage() {
   }
 
   const fieldControlClass = "w-full rounded-card bg-muted/50";
+  const { handleKeyDown } = useEnterNavigation(() => formRef.current?.requestSubmit());
 
   return (
     <div className="space-y-6">
@@ -251,6 +254,7 @@ export default function NewProductPage() {
 
       <form
         id="product-form"
+        ref={formRef}
         onSubmit={handleSubmit}
         className="grid grid-cols-1 gap-6 lg:grid-cols-3"
       >
@@ -272,6 +276,7 @@ export default function NewProductPage() {
                   onChange={(e) => setForm({ ...form, name: e.target.value })}
                   placeholder={tPages("productNamePlaceholder")}
                   className={fieldControlClass}
+                  onKeyDown={handleKeyDown}
                 />
                 <div className="mt-1.5 flex items-center gap-2">
                   <p
@@ -314,6 +319,7 @@ export default function NewProductPage() {
                   onChange={(e) => setForm({ ...form, brand: e.target.value })}
                   placeholder={tPages("productBrandPlaceholder")}
                   className={fieldControlClass}
+                  onKeyDown={handleKeyDown}
                 />
               </Field>
             </CardContent>
@@ -339,6 +345,7 @@ export default function NewProductPage() {
                     }
                     placeholder="0.00"
                     className={cn(numClass, fieldControlClass)}
+                    onKeyDown={handleKeyDown}
                   />
                 </Field>
                 <Field label={tPages("productCompareAt")}>
@@ -351,6 +358,7 @@ export default function NewProductPage() {
                     }
                     placeholder={tCommon("optional")}
                     className={cn(numClass, fieldControlClass)}
+                    onKeyDown={handleKeyDown}
                   />
                 </Field>
                 <Field label={tPages("productStock")}>
@@ -364,6 +372,7 @@ export default function NewProductPage() {
                     className={cn(numClass, fieldControlClass)}
                     disabled
                     title={tPages("productStockNewTitle")}
+                    onKeyDown={handleKeyDown}
                   />
                 </Field>
                 <Field label={tPages("productPrepaymentTypeLabel")}>

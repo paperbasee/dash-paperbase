@@ -34,6 +34,7 @@ import { numberTextClass } from "@/lib/number-font";
 import { cn } from "@/lib/utils";
 import { DashboardTableSkeleton } from "@/components/skeletons/dashboard-skeletons";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useEnterNavigation } from "@/hooks/useEnterNavigation";
 
 async function fetchAllProducts(): Promise<Product[]> {
   const out: Product[] = [];
@@ -137,6 +138,10 @@ export default function VariantsPageClient() {
   const [form, setForm] = useState<VariantForm | null>(null);
   const [saving, setSaving] = useState(false);
   const [togglingVariantId, setTogglingVariantId] = useState<string | null>(null);
+  const { handleKeyDown } = useEnterNavigation(() => {
+    const form = document.querySelector('form');
+    if (form instanceof HTMLFormElement) form.requestSubmit();
+  });
 
   useLayoutEffect(() => {
     unlockDocumentScroll();
@@ -538,6 +543,7 @@ export default function VariantsPageClient() {
                         value={form.price_override}
                         onChange={(e) => setForm({ ...form, price_override: e.target.value })}
                         placeholder={tPages("variantsPriceOverridePlaceholder")}
+                        onKeyDown={handleKeyDown}
                       />
                     </label>
                   </div>
@@ -597,6 +603,7 @@ export default function VariantsPageClient() {
                         checked={form.is_active}
                         onChange={(e) => setForm({ ...form, is_active: e.target.checked })}
                         className="form-checkbox"
+                        onKeyDown={handleKeyDown}
                       />
                       <span className="text-sm text-foreground">{tCommon("active")}</span>
                     </label>

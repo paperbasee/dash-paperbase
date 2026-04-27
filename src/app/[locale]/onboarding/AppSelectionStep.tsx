@@ -1,6 +1,8 @@
+import { useRef } from "react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { OPTIONAL_APP_IDS, APP_CONFIG, type AppConfig } from "@/config/apps";
+import { useEnterNavigation } from "@/hooks/useEnterNavigation";
 import type { StoreFormData } from "./useOnboarding";
 
 interface AppSelectionStepProps {
@@ -22,11 +24,13 @@ export function AppSelectionStep({
   onSubmit,
   onBack,
 }: AppSelectionStepProps) {
+  const formRef = useRef<HTMLFormElement>(null);
   const t = useTranslations("auth.onboarding");
   const tCommon = useTranslations("common");
+  const { handleKeyDown } = useEnterNavigation(() => formRef.current?.requestSubmit());
 
   return (
-    <form onSubmit={onSubmit} className="space-y-4">
+    <form ref={formRef} onSubmit={onSubmit} className="space-y-4">
       {error && (
         <div className="rounded-ui border border-destructive/20 bg-destructive/10 px-3 py-2 text-sm text-destructive">
           {error}
@@ -71,6 +75,7 @@ export function AppSelectionStep({
                 type="checkbox"
                 checked={checked}
                 onChange={() => onToggleApp(id)}
+                onKeyDown={handleKeyDown}
                 className="form-checkbox mt-1"
               />
               <div className="min-w-0 flex-1">

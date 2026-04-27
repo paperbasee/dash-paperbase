@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import Image from "next/image";
 import { Check, Copy, ShoppingCart } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { LoadingButton } from "@/components/ui/loading-button";
 import { cn } from "@/lib/utils";
+import { useEnterNavigation } from "@/hooks/useEnterNavigation";
 
 export type ManualPaymentProvider = "bkash" | "nagad";
 
@@ -209,6 +210,8 @@ export function CheckoutProviderPaymentCard({
 }) {
   const t = useTranslations("checkoutPage");
   const canConfirm = transactionId.trim().length > 0;
+  const formRef = useRef<HTMLFormElement>(null);
+  const { handleKeyDown } = useEnterNavigation(() => formRef.current?.requestSubmit());
 
   const brandPanel =
     provider === "bkash"
@@ -265,7 +268,7 @@ export function CheckoutProviderPaymentCard({
         </p>
       </div>
 
-      <form onSubmit={onSubmit} noValidate>
+      <form ref={formRef} onSubmit={onSubmit} noValidate>
         {/* Instructions */}
         <div className="border-b border-border bg-amber-50/90 px-4 py-4 dark:bg-amber-950/25">
           <h2 className="text-sm font-bold uppercase tracking-wide text-foreground">
@@ -324,6 +327,7 @@ export function CheckoutProviderPaymentCard({
                   numClass,
                   txnIdError && "ring-2 ring-amber-200"
                 )}
+                onKeyDown={handleKeyDown}
               />
               {txnIdError && (
                 <p className="mt-1.5 text-left text-xs text-amber-100">{txnIdError}</p>
@@ -348,6 +352,7 @@ export function CheckoutProviderPaymentCard({
                   "w-full rounded-lg border-0 bg-background px-3 py-2.5 text-left text-sm text-foreground shadow-inner placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-white/50",
                   numClass
                 )}
+                onKeyDown={handleKeyDown}
               />
             </div>
           </div>

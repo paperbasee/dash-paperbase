@@ -31,6 +31,7 @@ import { MiniSitePreview } from "@/components/preview-system/MiniSitePreview";
 import { DashboardDetailSkeleton } from "@/components/skeletons/dashboard-skeletons";
 import { numberTextClass } from "@/lib/number-font";
 import { cn } from "@/lib/utils";
+import { useEnterNavigation } from "@/hooks/useEnterNavigation";
 
 const Calendar = dynamic(
   () => import("@/components/ui/calendar").then((mod) => mod.Calendar),
@@ -178,6 +179,10 @@ export default function BannersPage() {
   const [now, setNow] = useState(() => new Date());
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [saving, setSaving] = useState(false);
+  const { handleKeyDown } = useEnterNavigation(() => {
+    const formEl = document.querySelector("#banner-form") ?? document.querySelector("form");
+    if (formEl instanceof HTMLFormElement) formEl.requestSubmit();
+  });
   const placementAnchor = useComboboxAnchor();
   const today = new Date(now);
   today.setHours(0, 0, 0, 0);
@@ -437,6 +442,7 @@ export default function BannersPage() {
 
       {editing !== null && (
         <form
+          id="banner-form"
           onSubmit={handleSave}
           className="space-y-4 rounded-card border border-border bg-card p-6"
         >
@@ -503,6 +509,7 @@ export default function BannersPage() {
                 }
                 className="text-sm"
                 placeholder={tCommon("optional")}
+                onKeyDown={handleKeyDown}
               />
             </div>
             <div>
@@ -517,6 +524,7 @@ export default function BannersPage() {
                   setForm((f) => ({ ...f, order: e.target.value }))
                 }
                 className="text-sm"
+                onKeyDown={handleKeyDown}
               />
             </div>
             <div className="sm:col-span-2">
@@ -529,6 +537,7 @@ export default function BannersPage() {
                 }
                 className="text-sm"
                 placeholder={tPages("bannersCtaPlaceholder")}
+                onKeyDown={handleKeyDown}
               />
             </div>
             <div className="sm:col-span-2">
@@ -541,6 +550,7 @@ export default function BannersPage() {
                 }
                 className="text-sm"
                 placeholder={tPages("bannersUrlPlaceholder")}
+                onKeyDown={handleKeyDown}
               />
             </div>
             <div ref={startPickerRef} className="relative">
@@ -670,6 +680,7 @@ export default function BannersPage() {
                 accept="image/*"
                 onChange={(e) => setImageFile(e.target.files?.[0] ?? null)}
                 className="form-file-input text-sm"
+                onKeyDown={handleKeyDown}
               />
               {editing !== "new" && !imageFile && (
                 <p className="mt-1 text-xs text-muted-foreground">
@@ -686,6 +697,7 @@ export default function BannersPage() {
                 onChange={(e) =>
                   setForm((f) => ({ ...f, is_active: e.target.checked }))
                 }
+                onKeyDown={handleKeyDown}
               />
               <label htmlFor="is_active" className="text-sm">
                 {tCommon("active")}

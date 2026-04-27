@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment, useCallback, useEffect, useState, type FormEvent } from "react";
+import { Fragment, useCallback, useEffect, useRef, useState, type FormEvent } from "react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { ChevronDown, ChevronRight, Undo2 } from "lucide-react";
@@ -9,6 +9,7 @@ import { ClickableTableRow } from "@/components/ui/clickable-table-row";
 import { ClickableText } from "@/components/ui/clickable-text";
 import { FilterDropdown } from "@/components/filters/FilterDropdown";
 import { Input } from "@/components/ui/input";
+import { useEnterNavigation } from "@/hooks/useEnterNavigation";
 import type { AdminCategoryTreeNode } from "@/types";
 import {
   collectDescendantPublicIds,
@@ -173,6 +174,8 @@ export default function CategoriesPage() {
   const [editingSlugPreview, setEditingSlugPreview] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [saving, setSaving] = useState(false);
+  const formRef = useRef<HTMLFormElement>(null);
+  const { handleKeyDown } = useEnterNavigation(() => formRef.current?.requestSubmit());
 
   const fetchTree = useCallback(() => {
     setLoading(true);
@@ -364,6 +367,7 @@ export default function CategoriesPage() {
 
       {mode !== "closed" ? (
         <form
+          ref={formRef}
           onSubmit={saveCategory}
           className="space-y-3 rounded-card border border-primary/30 bg-primary/5 p-4"
         >
@@ -375,6 +379,7 @@ export default function CategoriesPage() {
               value={form.name}
               onChange={(e) => setForm({ ...form, name: e.target.value })}
               className="max-w-xl"
+              onKeyDown={handleKeyDown}
             />
             {mode === "edit" && editingSlugPreview ? (
               <p className="text-xs text-muted-foreground">
@@ -390,6 +395,7 @@ export default function CategoriesPage() {
             placeholder={tPages("categoriesPlaceholderDescription")}
             value={form.description}
             onChange={(e) => setForm({ ...form, description: e.target.value })}
+            onKeyDown={handleKeyDown}
           />
           <div className="grid grid-cols-2 gap-3">
             <FilterDropdown
@@ -405,6 +411,7 @@ export default function CategoriesPage() {
               placeholder={tPages("categoriesPlaceholderOrder")}
               value={form.order}
               onChange={(e) => setForm({ ...form, order: e.target.value })}
+              onKeyDown={handleKeyDown}
             />
           </div>
           <div className="flex flex-wrap items-center gap-3">
@@ -413,6 +420,7 @@ export default function CategoriesPage() {
               accept="image/*"
               onChange={(e) => setImageFile(e.target.files?.[0] ?? null)}
               className="form-file-input"
+              onKeyDown={handleKeyDown}
             />
             <label className="flex items-center gap-2 text-sm text-foreground">
               <input
@@ -422,6 +430,7 @@ export default function CategoriesPage() {
                   setForm({ ...form, is_active: e.target.checked })
                 }
                 className="form-checkbox"
+                onKeyDown={handleKeyDown}
               />{" "}
               {tPages("categoriesActiveLabel")}
             </label>

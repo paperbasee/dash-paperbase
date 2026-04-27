@@ -1,6 +1,6 @@
 "use client";
 
-import type { Dispatch, FormEvent, SetStateAction } from "react";
+import { useRef, type Dispatch, type FormEvent, type SetStateAction } from "react";
 import type React from "react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
@@ -10,6 +10,7 @@ import {
   InputGroupAddon,
   InputGroupInput,
 } from "@/components/ui/input-group";
+import { useEnterNavigation } from "@/hooks/useEnterNavigation";
 import {
   SettingsSectionBody,
   settingsInvertedButtonClassName,
@@ -71,6 +72,8 @@ export default function StoreInfoSection({
   onSubmit: (e: FormEvent) => void;
 }) {
   const t = useTranslations("settings");
+  const formRef = useRef<HTMLFormElement>(null);
+  const { handleKeyDown } = useEnterNavigation(() => formRef.current?.requestSubmit());
   return (
     <section
       id="panel-store"
@@ -85,7 +88,7 @@ export default function StoreInfoSection({
           <p className="text-sm text-muted-foreground">{t("store.subtitle")}</p>
         </div>
 
-        <form onSubmit={onSubmit} className="w-full space-y-6">
+        <form ref={formRef} onSubmit={onSubmit} className="w-full space-y-6">
         <div className="space-y-2">
           <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
             {t("store.logo")}
@@ -113,6 +116,7 @@ export default function StoreInfoSection({
                   onLogoFileChange(f || null);
                   if (f) onClearLogoChange(false);
                 }}
+                onKeyDown={handleKeyDown}
               />
 
               {currentLogoUrl && (
@@ -125,6 +129,7 @@ export default function StoreInfoSection({
                       onClearLogoChange(e.target.checked);
                       if (e.target.checked) onLogoFileChange(null);
                     }}
+                    onKeyDown={handleKeyDown}
                   />
                   {t("store.removeLogo")}
                 </label>
@@ -144,6 +149,7 @@ export default function StoreInfoSection({
               onChange={(e) => onStoreNameChange(e.target.value)}
               placeholder={t("store.storeNamePlaceholder")}
               className="w-full"
+              onKeyDown={handleKeyDown}
             />
           </div>
 
@@ -158,6 +164,7 @@ export default function StoreInfoSection({
               placeholder={t("store.storeTypePlaceholder")}
               className="w-full"
               maxLength={60}
+              onKeyDown={handleKeyDown}
             />
             <p className="text-xs text-muted-foreground">{t("store.storeTypeHint")}</p>
           </div>
@@ -173,6 +180,7 @@ export default function StoreInfoSection({
               onChange={(e) => onContactEmailChange(e.target.value)}
               placeholder={t("store.contactEmailPlaceholder")}
               className="w-full"
+              onKeyDown={handleKeyDown}
             />
           </div>
 
@@ -187,6 +195,7 @@ export default function StoreInfoSection({
               onChange={(e) => onPhoneChange(e.target.value)}
               placeholder={t("store.phonePlaceholder")}
               className="w-full"
+              onKeyDown={handleKeyDown}
             />
           </div>
 
@@ -200,6 +209,7 @@ export default function StoreInfoSection({
               onChange={(e) => onAddressChange(e.target.value)}
               placeholder={t("store.addressPlaceholder")}
               className="w-full"
+              onKeyDown={handleKeyDown}
             />
           </div>
         </div>
@@ -240,6 +250,7 @@ export default function StoreInfoSection({
                     placeholder={`Enter ${key} URL`}
                     aria-label={label}
                     className="min-w-0 text-xs sm:text-sm"
+                    onKeyDown={handleKeyDown}
                   />
                 </InputGroup>
               );
