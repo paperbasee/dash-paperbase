@@ -19,6 +19,7 @@ import { useConfirm } from "@/context/ConfirmDialogContext";
 import { notify } from "@/notifications";
 import { useAuth } from "@/context/AuthContext";
 import { isNetworkingStoreUnderReview } from "@/lib/subscription-ui-state";
+import { SettingsSectionSkeleton } from "@/components/skeletons/dashboard-skeletons";
 
 type APIKeyRow = {
   public_id: string;
@@ -411,10 +412,7 @@ export default function NetworkingSection({ hidden }: { hidden: boolean }) {
         )}
 
         {loading ? (
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Loader2 className="size-4 animate-spin" />
-            {t("networking.loadingKeys")}
-          </div>
+          <SettingsSectionSkeleton />
         ) : (
           <div className="space-y-3">
             {keys.map((k) => (

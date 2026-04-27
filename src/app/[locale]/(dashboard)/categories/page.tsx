@@ -17,6 +17,8 @@ import {
 } from "@/lib/category-tree";
 import { useConfirm } from "@/context/ConfirmDialogContext";
 import { notify } from "@/notifications";
+import { DashboardTableSkeleton } from "@/components/skeletons/dashboard-skeletons";
+import { Skeleton } from "@/components/ui/skeleton";
 
 type FormMode = "closed" | "new_root" | "new_child" | "edit";
 
@@ -298,8 +300,15 @@ export default function CategoriesPage() {
 
   if (loading) {
     return (
-      <div className="flex h-64 items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-600 border-t-transparent" />
+      <div className="space-y-8">
+        <div className="flex items-center justify-between gap-4 flex-wrap">
+          <div className="flex items-center gap-3">
+            <Skeleton className="hidden h-8 w-8 rounded-ui md:block" />
+            <Skeleton className="h-8 w-44" />
+          </div>
+          <Skeleton className="h-10 w-36" />
+        </div>
+        <DashboardTableSkeleton columns={4} rows={6} showHeader={false} showFilters={false} />
       </div>
     );
   }

@@ -29,6 +29,7 @@ import { notify } from "@/notifications";
 import { useAdminDeleteCapabilities } from "@/hooks/useAdminDeleteCapabilities";
 import { numberTextClass } from "@/lib/number-font";
 import { cn } from "@/lib/utils";
+import { DashboardDetailSkeleton } from "@/components/skeletons/dashboard-skeletons";
 
 const MAX_IMAGES = MAX_PRODUCT_IMAGES;
 
@@ -435,11 +436,7 @@ export default function ProductDetailClient() {
   const fieldControlClass = "w-full rounded-card bg-muted/50";
 
   if (loading) {
-    return (
-      <div className="flex h-64 items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-      </div>
-    );
+    return <DashboardDetailSkeleton />;
   }
 
   if (!product) {

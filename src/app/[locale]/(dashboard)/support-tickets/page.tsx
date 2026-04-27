@@ -23,6 +23,7 @@ import type { SupportTicket, PaginatedResponse } from "@/types";
 import { formatDashboardDateTime } from "@/lib/datetime-display";
 import { useConfirm } from "@/context/ConfirmDialogContext";
 import { notify } from "@/notifications";
+import { DashboardTableSkeleton } from "@/components/skeletons/dashboard-skeletons";
 
 type EditableField = "status" | "priority" | "category";
 
@@ -257,9 +258,7 @@ export default function SupportTicketsPage() {
       </FilterBar>
 
       {loading ? (
-        <div className="flex h-64 items-center justify-center">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-        </div>
+        <DashboardTableSkeleton columns={8} rows={5} showHeader={false} showFilters={false} />
       ) : (
         <>
           <div className="overflow-x-auto rounded-card border border-dashed border-card-border bg-card">

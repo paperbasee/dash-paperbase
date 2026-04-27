@@ -32,6 +32,8 @@ import { useConfirm } from "@/context/ConfirmDialogContext";
 import { notify, normalizeError } from "@/notifications";
 import { numberTextClass } from "@/lib/number-font";
 import { cn } from "@/lib/utils";
+import { DashboardTableSkeleton } from "@/components/skeletons/dashboard-skeletons";
+import { Skeleton } from "@/components/ui/skeleton";
 
 async function fetchAllProducts(): Promise<Product[]> {
   const out: Product[] = [];
@@ -375,7 +377,18 @@ export default function VariantsPageClient() {
 
   if (loading && products.length === 0) {
     return (
-      <div className="text-sm text-muted-foreground">{tPages("variantsLoadingCatalog")}</div>
+      <div className="flex flex-col gap-6">
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div className="flex items-start gap-3">
+            <Skeleton className="hidden h-8 w-8 rounded-ui md:block" />
+            <div className="space-y-2">
+              <Skeleton className="h-8 w-40" />
+            </div>
+          </div>
+        </div>
+        <Skeleton className="h-4 w-80" />
+        <DashboardTableSkeleton columns={6} rows={5} showHeader={false} showFilters={false} />
+      </div>
     );
   }
 
@@ -603,7 +616,13 @@ export default function VariantsPageClient() {
           ) : null}
 
           {variantsLoading ? (
-            <p className="text-sm text-muted-foreground">{tPages("variantsLoadingVariants")}</p>
+            <DashboardTableSkeleton
+              columns={6}
+              rows={5}
+              showHeader={false}
+              showFilters={false}
+              showPagination={false}
+            />
           ) : variants.length === 0 ? (
             <p className="rounded-card border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
               {tPages("variantsEmpty")}

@@ -28,6 +28,7 @@ import { useConfirm } from "@/context/ConfirmDialogContext";
 import { notify } from "@/notifications";
 import { PLACEMENT_OPTIONS } from "@/components/preview-system/placementConfig";
 import { MiniSitePreview } from "@/components/preview-system/MiniSitePreview";
+import { DashboardDetailSkeleton } from "@/components/skeletons/dashboard-skeletons";
 import { numberTextClass } from "@/lib/number-font";
 import { cn } from "@/lib/utils";
 
@@ -404,11 +405,7 @@ export default function BannersPage() {
   }
 
   if (loading) {
-    return (
-      <div className="flex h-64 items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-      </div>
-    );
+    return <DashboardDetailSkeleton />;
   }
 
   return (

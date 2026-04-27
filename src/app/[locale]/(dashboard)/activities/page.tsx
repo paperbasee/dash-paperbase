@@ -5,6 +5,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { Select } from "@/components/ui/select";
 import { useActivities } from "@/hooks/useActivities";
 import { formatDashboardDateTimeWithSeconds } from "@/lib/datetime-display";
+import { DashboardTableSkeleton } from "@/components/skeletons/dashboard-skeletons";
 
 const ACTION_BADGE_STYLES: Record<string, string> = {
   create: "bg-emerald-600 text-white dark:bg-emerald-500",
@@ -173,9 +174,7 @@ export default function ActivitiesPage() {
       </div>
 
       {loading ? (
-        <div className="flex h-40 items-center justify-center">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-        </div>
+        <DashboardTableSkeleton columns={3} rows={5} showHeader={false} showFilters={false} />
       ) : error ? (
         <p className="text-sm text-destructive">{error}</p>
       ) : results.length === 0 ? (

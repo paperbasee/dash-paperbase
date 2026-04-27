@@ -16,6 +16,7 @@ import api from "@/lib/api";
 import type { Customer, PaginatedResponse } from "@/types";
 import { formatDashboardDate } from "@/lib/datetime-display";
 import { notify } from "@/notifications";
+import { DashboardTableSkeleton } from "@/components/skeletons/dashboard-skeletons";
 
 function customerTotalSpentDisplay(c: Customer): string {
   const raw = c.total_spent;
@@ -158,9 +159,7 @@ export default function CustomersPage() {
       </FilterBar>
 
       {loading ? (
-        <div className="flex h-64 items-center justify-center">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-        </div>
+        <DashboardTableSkeleton columns={6} rows={5} showHeader={false} showFilters={false} />
       ) : customers.length === 0 ? (
         <div className="rounded-card border border-dashed border-card-border bg-card py-12 text-center text-sm text-muted-foreground">
           {tPages("customersEmpty")}

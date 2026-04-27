@@ -16,6 +16,7 @@ import { notify } from "@/notifications";
 import { numberTextClass } from "@/lib/number-font";
 import { cn } from "@/lib/utils";
 import { INVENTORY_STATUS_REFRESH_EVENT } from "@/hooks/useInventoryStatus";
+import { DashboardTableSkeleton } from "@/components/skeletons/dashboard-skeletons";
 
 export default function InventoryPage() {
   const router = useRouter();
@@ -225,9 +226,7 @@ export default function InventoryPage() {
       </FilterBar>
 
       {loading ? (
-        <div className="flex h-64 items-center justify-center">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-        </div>
+        <DashboardTableSkeleton columns={6} rows={5} showHeader={false} showFilters={false} />
       ) : inventory.length === 0 ? (
         <div className="rounded-card border border-dashed border-card-border bg-card py-12 text-center text-sm text-muted-foreground">
           {tPages("inventoryEmpty")}

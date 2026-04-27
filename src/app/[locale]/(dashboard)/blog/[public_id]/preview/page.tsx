@@ -10,6 +10,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { notify } from "@/notifications";
 import { formatDashboardDateTime } from "@/lib/datetime-display";
 import type { Blog } from "@/types";
+import { DashboardDetailSkeleton } from "@/components/skeletons/dashboard-skeletons";
 
 export default function PreviewBlogPage({
   params,
@@ -44,11 +45,7 @@ export default function PreviewBlogPage({
   }, [public_id]);
 
   if (loading) {
-    return (
-      <div className="flex h-64 items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-      </div>
-    );
+    return <DashboardDetailSkeleton />;
   }
   if (error || !blog) {
     return (

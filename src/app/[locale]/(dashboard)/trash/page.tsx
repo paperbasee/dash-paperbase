@@ -13,6 +13,7 @@ import type { PaginatedResponse, TrashEntityType, TrashItem } from "@/types";
 import { useConfirm } from "@/context/ConfirmDialogContext";
 import { notify, normalizeError } from "@/notifications";
 import { useAdminDeleteCapabilities } from "@/hooks/useAdminDeleteCapabilities";
+import { DashboardTableSkeleton } from "@/components/skeletons/dashboard-skeletons";
 
 export default function TrashPage() {
   const locale = useLocale();
@@ -293,9 +294,7 @@ export default function TrashPage() {
       {!capsLoading && !canDelete ? (
         <p className="text-sm text-muted-foreground">{tPages("trashForbidden")}</p>
       ) : loading ? (
-        <div className="flex h-40 items-center justify-center">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-        </div>
+        <DashboardTableSkeleton columns={7} rows={5} showHeader={false} showFilters={false} />
       ) : error ? (
         <p className="text-sm text-destructive">{error}</p>
       ) : rows.length === 0 ? (

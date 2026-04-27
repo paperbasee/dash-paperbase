@@ -52,6 +52,7 @@ import { notify } from "@/notifications";
 import { useAdminDeleteCapabilities } from "@/hooks/useAdminDeleteCapabilities";
 import { numberTextClass } from "@/lib/number-font";
 import { cn } from "@/lib/utils";
+import { DashboardTableSkeleton } from "@/components/skeletons/dashboard-skeletons";
 
 type CategoryOption = { value: string; label: string };
 
@@ -504,9 +505,7 @@ export default function ProductsPage() {
       )}
 
       {loading ? (
-        <div className="flex h-64 items-center justify-center">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-600 border-t-transparent" />
-        </div>
+        <DashboardTableSkeleton columns={9} rows={5} showHeader={false} showFilters={false} />
       ) : (
         <>
           <div className="overflow-x-auto rounded-card border border-dashed border-card-border bg-card">

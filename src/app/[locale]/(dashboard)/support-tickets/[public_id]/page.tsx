@@ -9,6 +9,7 @@ import { Undo2 } from "lucide-react";
 import api from "@/lib/api";
 import type { SupportTicket } from "@/types";
 import { formatDashboardDateTime } from "@/lib/datetime-display";
+import { DashboardDetailSkeleton } from "@/components/skeletons/dashboard-skeletons";
 
 function labelFromValue(value: string): string {
   if (!value) return "—";
@@ -63,9 +64,7 @@ export default function SupportTicketDetailPage() {
       </div>
 
       {loading ? (
-        <div className="flex h-64 items-center justify-center">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-        </div>
+        <DashboardDetailSkeleton />
       ) : error ? (
         <div className="rounded-card border border-dashed border-card-border bg-card p-6 text-sm text-destructive">
           {error}

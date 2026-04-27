@@ -6,6 +6,7 @@ import { useCallback, useRef, useState } from "react";
 import { useNotifications } from "@/context/NotificationContext";
 import { getNotificationLink } from "@/lib/notifications";
 import { Button } from "@/components/ui/button";
+import { DashboardTableSkeleton } from "@/components/skeletons/dashboard-skeletons";
 import { formatDashboardDateTimeWithSeconds } from "@/lib/datetime-display";
 
 export default function NotificationsFeedPage() {
@@ -103,9 +104,7 @@ export default function NotificationsFeedPage() {
       </div>
 
       {showBootSpinner && (
-        <div className="flex h-40 items-center justify-center">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-        </div>
+        <DashboardTableSkeleton columns={3} rows={5} showHeader={false} showFilters={false} />
       )}
 
       {isHydrated && !isFetching && error && (

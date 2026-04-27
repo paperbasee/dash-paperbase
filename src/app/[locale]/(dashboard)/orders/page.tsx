@@ -31,6 +31,7 @@ import { ORDER_FLAG_OPTIONS, formatOrderFlagLabel } from "@/lib/orders/order-fla
 import type { Order, PaginatedResponse } from "@/types";
 import { useConfirm } from "@/context/ConfirmDialogContext";
 import { notify, normalizeError } from "@/notifications";
+import { DashboardTableSkeleton } from "@/components/skeletons/dashboard-skeletons";
 
 import { FraudCheckButton } from "./_components/FraudCheckButton";
 import type { FraudCheckApiOk, FraudCheckState } from "./_components/types";
@@ -705,9 +706,7 @@ export default function OrdersPage() {
       ) : null}
 
       {loading ? (
-        <div className="flex h-64 items-center justify-center">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-600 border-t-transparent" />
-        </div>
+        <DashboardTableSkeleton columns={12} rows={5} showHeader={false} showFilters={false} />
       ) : (
         <>
           <div

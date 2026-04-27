@@ -13,6 +13,7 @@ import { useConfirm } from "@/context/ConfirmDialogContext";
 import { notify } from "@/notifications";
 import { SettingsActionDialog } from "@/components/settings/SettingsActionDialog";
 import { settingsInvertedButtonClassName } from "../SettingsSectionBody";
+import { SettingsSectionSkeleton } from "@/components/skeletons/dashboard-skeletons";
 
 type ConnectForm = {
   api_key: string;
@@ -200,9 +201,7 @@ export default function CourierIntegration() {
       </SettingsActionDialog>
 
       {loading ? (
-        <div className="flex h-24 items-center justify-center">
-          <div className="h-6 w-6 animate-spin rounded-full border-3 border-primary border-t-transparent" />
-        </div>
+        <SettingsSectionSkeleton />
       ) : couriers.length === 0 ? (
         <div className="flex flex-col gap-2 py-2">
           <p className="text-sm text-muted-foreground">{t("courier.empty")}</p>

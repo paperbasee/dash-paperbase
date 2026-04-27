@@ -10,6 +10,7 @@ import {
   settingsInvertedButtonClassName,
   settingsSectionSurfaceClassName,
 } from "../SettingsSectionBody";
+import { SettingsSectionSkeleton } from "@/components/skeletons/dashboard-skeletons";
 
 type SettingsMessage = { type: "success" | "error"; text: string } | null;
 
@@ -43,9 +44,7 @@ export default function AccountSection({
     >
       {isLoading ? (
         <SettingsSectionBody>
-          <div className="flex h-48 items-center justify-center">
-            <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-          </div>
+          <SettingsSectionSkeleton />
         </SettingsSectionBody>
       ) : (
         <SettingsSectionBody>

@@ -10,6 +10,7 @@ import type { CustomerDetailsResponse } from "@/types";
 import { formatDashboardDateTime } from "@/lib/datetime-display";
 import { Button } from "@/components/ui/button";
 import { numberTextClass } from "@/lib/number-font";
+import { DashboardDetailSkeleton } from "@/components/skeletons/dashboard-skeletons";
 
 function asCurrency(value: string | number) {
   const number = Number(value ?? "0");
@@ -58,9 +59,7 @@ export default function CustomerDetailPage() {
       </div>
 
       {loading ? (
-        <div className="flex h-64 items-center justify-center">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-        </div>
+        <DashboardDetailSkeleton />
       ) : error ? (
         <div className="rounded-card border border-dashed border-card-border bg-card p-6 text-sm text-red-500">
           {error}

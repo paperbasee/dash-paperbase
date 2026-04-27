@@ -26,6 +26,20 @@ import { resolveSubscriptionUIStateFromMe } from "@/lib/subscription-ui-state";
 import SubscriptionAccessBlock from "@/components/auth/SubscriptionAccessBlock";
 import PaymentSubmittedAwaitingBanner from "@/components/auth/PaymentSubmittedAwaitingBanner";
 import SubscriptionExpirationBanner from "@/components/auth/SubscriptionExpirationBanner";
+import { Skeleton } from "@/components/ui/skeleton";
+
+const DASHBOARD_SERVER_UNREACHABLE_KEY = "paperbase_dashboard_server_unreachable";
+
+function getBackendHealthUrl(): string {
+  const raw = process.env.NEXT_PUBLIC_API_URL ?? "";
+  try {
+    const apiUrl = new URL(raw);
+    // NEXT_PUBLIC_API_URL points to API base (often /api/v1). Health lives at backend root.
+    return `${apiUrl.origin}/health`;
+  } catch {
+    return "/health";
+  }
+}
 
 export default function DashboardLayoutClient({
   children,
@@ -44,10 +58,12 @@ export default function DashboardLayoutClient({
     meProfile,
     meProfileStatus,
     meProfileError,
+    isLoggingOut,
   } = useAuth();
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [mobileSystemBannerVisible, setMobileSystemBannerVisible] = useState(false);
+  const [networkGateReady, setNetworkGateReady] = useState(false);
   const subscriptionBannerStackRef = useRef<HTMLDivElement>(null);
   const subscription =
     meProfileStatus === "ready" ? (meProfile?.subscription ?? null) : null;
@@ -86,6 +102,33 @@ export default function DashboardLayoutClient({
   const authCheckReady = authHydrated && !isLoading;
 
   useEffect(() => {
+    if (typeof window === "undefined") return;
+    const hadPreviousUnreachable = sessionStorage.getItem(DASHBOARD_SERVER_UNREACHABLE_KEY) === "1";
+    if (!hadPreviousUnreachable) {
+      setNetworkGateReady(true);
+      return;
+    }
+    const controller = new AbortController();
+    const healthUrl = getBackendHealthUrl();
+    fetch(healthUrl, { method: "GET", signal: controller.signal, cache: "no-store" })
+      .then((res) => {
+        if (res.status === 404) {
+          // Do not trap users if this environment has no health endpoint.
+          sessionStorage.removeItem(DASHBOARD_SERVER_UNREACHABLE_KEY);
+          setNetworkGateReady(true);
+          return;
+        }
+        if (!res.ok) throw new Error("Health check failed");
+        sessionStorage.removeItem(DASHBOARD_SERVER_UNREACHABLE_KEY);
+        setNetworkGateReady(true);
+      })
+      .catch(() => {
+        router.replace("/server-unreachable");
+      });
+    return () => controller.abort();
+  }, [router]);
+
+  useEffect(() => {
     // Wait for client auth hydration before deciding user is unauthenticated.
     // Without this guard, refresh can momentarily see `isAuthenticated=false`
     // and incorrectly trigger a hard logout.
@@ -99,6 +142,14 @@ export default function DashboardLayoutClient({
     if (!shouldRedirectToOnboarding) return;
     router.replace("/onboarding");
   }, [shouldRedirectToOnboarding, router]);
+
+  useEffect(() => {
+    if (meProfileStatus !== "error" || !isNetworkError(meProfileError)) return;
+    if (typeof window !== "undefined") {
+      sessionStorage.setItem(DASHBOARD_SERVER_UNREACHABLE_KEY, "1");
+    }
+    router.replace("/server-unreachable");
+  }, [meProfileStatus, meProfileError, router]);
 
   /** One-time: new store owners with no subscription row → /plans (flag prevents loops). */
   useEffect(() => {
@@ -151,18 +202,40 @@ export default function DashboardLayoutClient({
     meProfileStatus === "loading" ||
     (meProfileStatus === "idle" && isAuthenticated);
 
+  if (isLoggingOut) return null;
+  if (!networkGateReady) return null;
+
   if (authBlocking || shouldRedirectToOnboarding) {
     return (
-      <div className="flex h-screen items-center justify-center bg-background">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+      <div className="min-h-screen bg-background pt-[var(--subscription-banner-offset,0px)]">
+        <div
+          className={cn(
+            "min-h-screen transition-[margin,padding-top] duration-300",
+            collapsed ? "md:ml-16" : "md:ml-72"
+          )}
+        >
+          <div className="hidden h-[var(--header-height)] border-b border-border bg-background/95 md:block" />
+          <main className="py-4 md:pt-6 md:pb-6">
+            <div className={cn(contentContainerClass, "space-y-6")}>
+              <Skeleton className="h-8 w-48" />
+              <Skeleton className="h-4 w-72" />
+              <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+                <Skeleton className="h-28 w-full" />
+                <Skeleton className="h-28 w-full" />
+                <Skeleton className="h-28 w-full" />
+                <Skeleton className="h-28 w-full" />
+              </div>
+              <Skeleton className="h-72 w-full" />
+            </div>
+          </main>
+        </div>
       </div>
     );
   }
 
   if (meProfileStatus === "error") {
-    return isNetworkError(meProfileError)
-      ? <SubscriptionAccessBlock variant="serverUnreachable" />
-      : <SubscriptionAccessBlock variant="verifyFailed" />;
+    if (isNetworkError(meProfileError)) return null;
+    return <SubscriptionAccessBlock variant="verifyFailed" />;
   }
 
   return (

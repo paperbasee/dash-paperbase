@@ -18,6 +18,7 @@ import { Card } from "@/components/ui/card";
 import { notify } from "@/notifications";
 import type { Blog, BlogTag, PaginatedResponse } from "@/types";
 import { BlogListCard } from "./_components/BlogListCard";
+import { DashboardCardGridSkeleton } from "@/components/skeletons/dashboard-skeletons";
 
 export default function BlogListPage() {
   const router = useRouter();
@@ -188,9 +189,7 @@ export default function BlogListPage() {
       </FilterBar>
 
       {loading ? (
-        <div className="flex h-64 items-center justify-center">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-        </div>
+        <DashboardCardGridSkeleton cards={6} />
       ) : blogs.length === 0 ? (
         <Card className="flex flex-col items-center justify-center gap-3 py-12 text-center">
           <p className="text-sm text-muted-foreground">

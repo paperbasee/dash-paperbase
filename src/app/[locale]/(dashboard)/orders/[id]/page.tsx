@@ -54,6 +54,7 @@ import { formatDashboardDateTime } from "@/lib/datetime-display";
 import { numberTextClass } from "@/lib/number-font";
 import { notify, normalizeError } from "@/notifications";
 import { cn } from "@/lib/utils";
+import { DashboardDetailSkeleton } from "@/components/skeletons/dashboard-skeletons";
 
 type EditForm = {
   shipping_name: string;
@@ -507,12 +508,7 @@ export default function OrderDetailPage() {
   }
 
   if (loading) {
-    return (
-      <div className="flex h-64 flex-col items-center justify-center gap-2">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-        <span className="sr-only">{tCommon("loading")}</span>
-      </div>
-    );
+    return <DashboardDetailSkeleton />;
   }
 
   if (!order) {
