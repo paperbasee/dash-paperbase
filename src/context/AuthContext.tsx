@@ -37,6 +37,7 @@ interface AuthState {
   isAuthenticated: boolean;
   pendingTwoFactor: PendingTwoFactorResponse | null;
   isLoading: boolean;
+  isLoggingOut: boolean;
   /** True after first client mount (avoids SSR/client hydration mismatch for auth-derived UI). */
   authHydrated: boolean;
   /** True while a network refresh of `me` is in flight (may be true while status is already `ready`). */
@@ -88,6 +89,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [pendingTwoFactor, setPendingTwoFactor] = useState<PendingTwoFactorResponse | null>(null);
   const [isLoading] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [authHydrated, setAuthHydrated] = useState(false);
 
   const [meProfile, setMeProfile] = useState<MeForRouting | null>(null);
@@ -339,6 +341,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const logout = useCallback(() => {
+    setIsLoggingOut(true);
     authLogout();
     setPendingTwoFactor(null);
     setIsAuthenticated(false);
@@ -350,6 +353,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         isAuthenticated,
         pendingTwoFactor,
         isLoading,
+        isLoggingOut,
         authHydrated,
         meProfileFetching,
         meProfile,

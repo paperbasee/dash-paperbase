@@ -118,6 +118,7 @@ export async function verifyTwoFactorChallengeRecovery(
 }
 
 export function logout() {
+  window.location.replace("/login");
   clearMeProfileCache();
   localStorage.removeItem("access_token");
   localStorage.removeItem("refresh_token");
@@ -125,7 +126,6 @@ export function logout() {
   clearAuthSessionCookie();
   delete axios.defaults.headers.common.Authorization;
   delete axios.defaults.headers.common["X-Store-Public-ID"];
-  window.location.href = "/login";
 }
 
 export function getAccessToken(): string | null {
