@@ -8,8 +8,10 @@ import type { MeForRouting } from "@/lib/subscription-access";
 export const ME_PROFILE_STORAGE_KEY = "paperbase_me_profile_v6";
 
 export const ME_PROFILE_PERSIST_EVENT = "paperbase-me-profile-persisted";
+const ME_PROFILE_CACHE_MAX_AGE_MS = 86_400_000;
 
 type StoredPayload = {
+  timestamp?: number;
   profileKey: string;
   me: MeForRouting;
 };
@@ -73,6 +75,13 @@ function readStored(profileKey: string): MeForRouting | null {
     if (!raw) return null;
     const parsed = JSON.parse(raw) as StoredPayload;
     if (
+      typeof parsed?.timestamp === "number" &&
+      Date.now() - parsed.timestamp > ME_PROFILE_CACHE_MAX_AGE_MS
+    ) {
+      localStorage.removeItem(ME_PROFILE_STORAGE_KEY);
+      return null;
+    }
+    if (
       parsed &&
       parsed.profileKey === profileKey &&
       parsed.me &&
@@ -94,7 +103,7 @@ function writeStored(profileKey: string, me: MeForRouting) {
   try {
     localStorage.setItem(
       ME_PROFILE_STORAGE_KEY,
-      JSON.stringify({ profileKey, me } satisfies StoredPayload)
+      JSON.stringify({ timestamp: Date.now(), profileKey, me } satisfies StoredPayload)
     );
     dispatchPersisted();
   } catch {

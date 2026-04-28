@@ -5,6 +5,7 @@ import { SWRConfig, type Cache } from "swr";
 import { STORE_PROFILE_SWR_PREFIX } from "@/hooks/useBrandingProfileSWR";
 
 const STORE_PROFILE_CACHE_STORAGE_KEY = "store-profile-cache";
+const STORE_PROFILE_CACHE_MAX_AGE_MS = 86_400_000;
 
 type SWRCacheKey = string;
 type SWRCacheValue = any;
@@ -26,9 +27,22 @@ function readPersistedEntries(): Array<[SWRCacheKey, SWRCacheValue]> {
   try {
     const raw = window.localStorage.getItem(STORE_PROFILE_CACHE_STORAGE_KEY);
     if (!raw) return [];
-    const parsed = JSON.parse(raw) as Array<[SWRCacheKey, SWRCacheValue]>;
-    if (!Array.isArray(parsed)) return [];
-    return parsed.filter(
+    const parsed = JSON.parse(raw) as
+      | Array<[SWRCacheKey, SWRCacheValue]>
+      | { timestamp?: number; entries?: Array<[SWRCacheKey, SWRCacheValue]> };
+    const entries = Array.isArray(parsed) ? parsed : parsed?.entries;
+    const timestamp = !Array.isArray(parsed) ? parsed?.timestamp : undefined;
+
+    if (
+      typeof timestamp === "number" &&
+      Date.now() - timestamp > STORE_PROFILE_CACHE_MAX_AGE_MS
+    ) {
+      window.localStorage.removeItem(STORE_PROFILE_CACHE_STORAGE_KEY);
+      return [];
+    }
+
+    if (!Array.isArray(entries)) return [];
+    return entries.filter(
       (entry): entry is [SWRCacheKey, SWRCacheValue] =>
         Array.isArray(entry) &&
         typeof entry[0] === "string" &&
@@ -50,7 +64,7 @@ function writePersistedEntries(map: SWRCache) {
     }
     window.localStorage.setItem(
       STORE_PROFILE_CACHE_STORAGE_KEY,
-      JSON.stringify(storeProfileEntries)
+      JSON.stringify({ timestamp: Date.now(), entries: storeProfileEntries })
     );
   } catch {
     // localStorage can throw in private mode/quota scenarios. Fail silently.
