@@ -5,7 +5,6 @@ import { useLocale, useTranslations } from "next-intl";
 import { Check } from "lucide-react";
 import { useRouter } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
-import { LoadingButton } from "@/components/ui/loading-button";
 import { getAccessToken } from "@/lib/auth";
 import api from "@/lib/api";
 import { numberTextClass } from "@/lib/number-font";
@@ -99,6 +98,7 @@ export default function PlansPage() {
         }
       }
       setSelectError(msg);
+    } finally {
       setSelectingId(null);
     }
   }
@@ -319,15 +319,14 @@ export default function PlansPage() {
 
                     {/* CTA */}
                     <div className="mt-6">
-                      <LoadingButton
+                      <Button
                         className="w-full rounded-2xl"
-                        isLoading={isSelecting}
-                        loadingText={t("initiating")}
+                        loading={isSelecting}
                         disabled={selectingId !== null}
                         onClick={() => handleSelectPlan(selected)}
                       >
                         {t("selectPlan")}
-                      </LoadingButton>
+                      </Button>
                     </div>
                   </div>
                 );

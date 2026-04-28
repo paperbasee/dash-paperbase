@@ -6,8 +6,9 @@ import { Link, useRouter } from "@/i18n/navigation";
 import { Eye, EyeOff } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { Input } from "@/components/ui/input";
-import { LoadingButton } from "@/components/ui/loading-button";
+import { Button } from "@/components/ui/button";
 import { AuthPageShell } from "@/components/auth/AuthPageShell";
+import { MailSentIllustration } from "@/components/auth/MailSentIllustration";
 import { TurnstileWidget } from "@/components/auth/TurnstileWidget";
 import { useMinDelayLoading } from "@/hooks/useMinDelayLoading";
 import { useEnterNavigation } from "@/hooks/useEnterNavigation";
@@ -48,6 +49,7 @@ export default function LoginPage() {
   const forgotPasswordLabel = t("forgotPassword");
   const noAccountLabel = t("noAccount");
   const { handleKeyDown } = useEnterNavigation(() => formRef.current?.requestSubmit());
+  const showRecoverySentIllustration = pendingTwoFactor && recoveryMode === "code" && !!successMessage;
 
   useEffect(() => {
     if (!pendingTwoFactor) {
@@ -228,8 +230,14 @@ export default function LoginPage() {
 
   return (
     <AuthPageShell
-      headline={pendingTwoFactor ? t("twoFactorHeadline") : t("headline")}
-      description={pendingTwoFactor ? t("twoFactorDescription") : t("description")}
+      headline={showRecoverySentIllustration ? undefined : pendingTwoFactor ? t("twoFactorHeadline") : t("headline")}
+      description={
+        showRecoverySentIllustration
+          ? undefined
+          : pendingTwoFactor
+            ? t("twoFactorDescription")
+            : t("description")
+      }
       containerClassName="space-y-8 sm:space-y-10"
     >
 
@@ -238,14 +246,13 @@ export default function LoginPage() {
           <p className="text-sm font-medium text-emerald-500">
             {successMessage || "2FA has been disabled successfully."}
           </p>
-          <LoadingButton
+          <Button
             type="button"
             className="w-full"
-            loadingText={t("loginLoading")}
             onClick={() => router.push("/")}
           >
             Go to home
-          </LoadingButton>
+          </Button>
         </div>
       ) : (
       <form
@@ -263,15 +270,26 @@ export default function LoginPage() {
             aria-busy={loading}
       >
           {error && (
-            <div className="rounded-ui border border-destructive/20 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+            <div className="rounded-ui border border-destructive/20 bg-destructive/10 px-3 py-2 text-center text-sm text-destructive">
               {error}
             </div>
           )}
           {successMessage && (
-            <div className="rounded-ui border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-sm text-emerald-500">
+            <div className="rounded-ui border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-center text-sm text-emerald-500">
               {successMessage}
             </div>
           )}
+          {showRecoverySentIllustration ? (
+            <div className="space-y-2 text-center">
+              <MailSentIllustration className="-mt-1" />
+              <h1 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
+                {t("twoFactorHeadline")}
+              </h1>
+              <p className="mx-auto max-w-[32ch] text-sm leading-relaxed text-muted-foreground">
+                {t("twoFactorDescription")}
+              </p>
+            </div>
+          ) : null}
 
           {!pendingTwoFactor ? (
             <>
@@ -368,10 +386,9 @@ export default function LoginPage() {
                     inputMode="email"
                     onKeyDown={handleKeyDown}
                   />
-                  <LoadingButton
+                  <Button
                     type="button"
-                    isLoading={recoveryRequestLoading}
-                    loadingText={t("sendingRecovery")}
+                    loading={recoveryRequestLoading}
                     onClick={() => void handleRecoveryRequest()}
                     disabled={recoveryVerifyLoading || recoveryCooldown.isLimited}
                     className="mt-2 w-full"
@@ -379,7 +396,7 @@ export default function LoginPage() {
                     {recoveryCooldown.isLimited
                       ? t("retryIn", { seconds: recoveryCooldown.remaining })
                       : t("sendRecoveryCode")}
-                  </LoadingButton>
+                  </Button>
                 </>
               ) : recoveryMode === "code" ? (
                 <>
@@ -443,16 +460,9 @@ export default function LoginPage() {
           )}
 
             {!(pendingTwoFactor && recoveryMode === "email") ? (
-              <LoadingButton
+              <Button
                 type="submit"
-                isLoading={loading}
-                loadingText={
-                  pendingTwoFactor
-                    ? recoveryMode === "code"
-                      ? t("verifyRecoveryLoading")
-                      : t("verifyCodeLoading")
-                    : t("loginLoading")
-                }
+                loading={loading}
                 className="mt-2 w-full"
               >
                 {pendingTwoFactor
@@ -460,7 +470,7 @@ export default function LoginPage() {
                     ? t("verifyRecovery")
                     : t("verifyCode")
                   : t("loginButton")}
-              </LoadingButton>
+              </Button>
             ) : null}
       </form>
       )}

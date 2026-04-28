@@ -339,10 +339,11 @@ export function BlogForm({ mode, initialBlog }: BlogFormProps) {
         <Button
           type="button"
           onClick={() => void handleSave()}
+          loading={saving}
           disabled={saving || uploadStatus === "uploading"}
-          className="w-full shrink-0 sm:w-auto"
+          className="w-full shrink-0 gap-2 sm:w-auto"
         >
-          {saving || uploadStatus === "uploading" ? "Saving…" : "Save post"}
+          Save post
         </Button>
       </div>
 

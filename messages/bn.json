@@ -1202,6 +1202,7 @@
       "defaultKeyName": "ডিফল্ট কী",
       "msgCreated": "API কী তৈরি হয়েছে। এখনই সংরক্ষণ করুন; আর দেখাবে না।",
       "msgCreateFailed": "API কী তৈরি ব্যর্থ।",
+      "confirmCreate": "এখন একটি নতুন API কী তৈরি করবেন?",
       "confirmRegenerate": "এই API কী পুনর্জন্ম করবেন? পুরনো কী বাতিল হবে।",
       "msgRegenerated": "API কী পুনর্জন্ম হয়েছে। নতুন কী এখনই সংরক্ষণ করুন; আর দেখাবে না।",
       "msgRegenerateFailed": "API কী পুনর্জন্ম করা যায়নি।",

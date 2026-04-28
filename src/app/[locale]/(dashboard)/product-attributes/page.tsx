@@ -283,8 +283,8 @@ export default function ProductAttributesPage() {
                 />
               </label>
               <div className="flex gap-2">
-                <Button type="submit" disabled={attrSaving}>
-                  {attrSaving ? tCommon("saving") : tCommon("save")}
+                <Button type="submit" loading={attrSaving} disabled={attrSaving} className="gap-2">
+                  {tCommon("save")}
                 </Button>
                 <Button type="button" variant="outline" onClick={() => setAttrEditing(null)}>
                   {tCommon("cancel")}
@@ -380,7 +380,7 @@ export default function ProductAttributesPage() {
                       onKeyDown={handleKeyDown}
                     />
                     <div className="flex gap-2">
-                      <Button type="submit" size="sm" disabled={valueSaving}>
+                      <Button type="submit" size="sm" loading={valueSaving} disabled={valueSaving} className="gap-2">
                         {tCommon("save")}
                       </Button>
                       <Button

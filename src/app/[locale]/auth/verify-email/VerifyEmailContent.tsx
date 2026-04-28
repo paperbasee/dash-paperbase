@@ -6,8 +6,8 @@ import { Link } from "@/i18n/navigation";
 import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { LoadingButton } from "@/components/ui/loading-button";
 import { Spinner } from "@/components/ui/spinner";
+import { MailSentIllustration } from "@/components/auth/MailSentIllustration";
 import {
   resendVerificationEmail,
   verifyEmailFromLink,
@@ -235,6 +235,7 @@ export default function VerifyEmailContent() {
 
   return (
     <div className="space-y-8 sm:space-y-10">
+      <MailSentIllustration className="-mt-2" />
       <div className="space-y-2 text-center">
         <h1 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
           {t("checkTitle")}
@@ -271,23 +272,22 @@ export default function VerifyEmailContent() {
           </div>
         )}
         {resendError ? (
-          <div className="rounded-ui border border-destructive/20 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+          <div className="rounded-ui border border-destructive/20 bg-destructive/10 px-3 py-2 text-center text-sm text-destructive">
             {resendError}
           </div>
         ) : null}
 
-        <LoadingButton
+        <Button
           type="button"
           className="mt-2 w-full"
           disabled={cooldownLimited || resendLoading}
-          isLoading={resendLoading}
-          loadingText={t("sending")}
+          loading={resendLoading}
           onClick={handleResend}
         >
           {cooldownLimited
             ? t("resendAvailableInSeconds", { seconds: cooldownRemaining })
             : t("resendEmail")}
-        </LoadingButton>
+        </Button>
       </div>
 
       <p className="text-center text-sm text-muted-foreground">

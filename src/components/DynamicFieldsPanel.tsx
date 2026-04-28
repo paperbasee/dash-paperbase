@@ -256,6 +256,7 @@ export function DynamicFieldsPanel({
       coordinateGetter: sortableKeyboardCoordinates,
     })
   );
+  const [saveLoading, setSaveLoading] = useState(false);
 
   const handleDragEnd = useCallback(
     (event: DragEndEvent) => {
@@ -384,13 +385,22 @@ export function DynamicFieldsPanel({
               variant="outline"
               size="default"
               className="gap-2"
-              onClick={async () => {
-                const result = await save();
-                if (result.success) {
-                  onMessage({ type: "success", text: tp("saved") });
-                } else {
-                  onMessage({ type: "error", text: result.error ?? tp("saveFailed") });
-                }
+              loading={saveLoading}
+              onClick={() => {
+                if (saveLoading) return;
+                void (async () => {
+                  setSaveLoading(true);
+                  try {
+                    const result = await save();
+                    if (result.success) {
+                      onMessage({ type: "success", text: tp("saved") });
+                    } else {
+                      onMessage({ type: "error", text: result.error ?? tp("saveFailed") });
+                    }
+                  } finally {
+                    setSaveLoading(false);
+                  }
+                })();
               }}
             >
               <Save className="size-4" />

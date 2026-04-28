@@ -89,6 +89,7 @@ export default function SystemNotificationBanner({
           <Button
             variant="ghost"
             size="icon-xs"
+            loading={isDismissing}
             onClick={async () => {
               if (isDismissing) return;
               setIsDismissing(true);
@@ -101,7 +102,6 @@ export default function SystemNotificationBanner({
                 setIsDismissing(false);
               }
             }}
-            disabled={isDismissing}
             aria-label={t("dismissAria")}
             className="system-notification-banner__dismiss shrink-0"
           >
@@ -167,6 +167,7 @@ export default function SystemNotificationBanner({
       <Button
         variant="ghost"
         size="icon-xs"
+        loading={isDismissing}
         onClick={async () => {
           if (isDismissing) return;
           setIsDismissing(true);
@@ -179,7 +180,6 @@ export default function SystemNotificationBanner({
             setIsDismissing(false);
           }
         }}
-        disabled={isDismissing}
         aria-label={t("dismissAria")}
         className="system-notification-banner__dismiss absolute right-3 top-1/2 shrink-0 -translate-y-1/2 sm:right-4"
       >

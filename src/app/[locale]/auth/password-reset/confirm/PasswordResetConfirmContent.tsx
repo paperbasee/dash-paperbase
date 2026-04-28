@@ -7,7 +7,6 @@ import { useSearchParams } from "next/navigation";
 import { Eye, EyeOff } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { LoadingButton } from "@/components/ui/loading-button";
 import { useMinDelayLoading } from "@/hooks/useMinDelayLoading";
 import { useEnterNavigation } from "@/hooks/useEnterNavigation";
 import { confirmPasswordReset } from "@/lib/auth-email";
@@ -124,7 +123,7 @@ export default function PasswordResetConfirmContent() {
         aria-busy={loading}
       >
         {error ? (
-          <div className="rounded-ui border border-destructive/20 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+          <div className="rounded-ui border border-destructive/20 bg-destructive/10 px-3 py-2 text-center text-sm text-destructive">
             {error}
           </div>
         ) : null}
@@ -196,14 +195,13 @@ export default function PasswordResetConfirmContent() {
           />
           <span>{t("logoutAllDevices")}</span>
         </label>
-        <LoadingButton
+        <Button
           type="submit"
           className="mt-2 w-full"
-          isLoading={loading}
-          loadingText={t("resetPasswordLoading")}
+          loading={loading}
         >
           {t("resetPassword")}
-        </LoadingButton>
+        </Button>
       </form>
     </div>
   );

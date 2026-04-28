@@ -6,7 +6,7 @@ import { Link, useRouter } from "@/i18n/navigation";
 import { Eye, EyeOff } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { Input } from "@/components/ui/input";
-import { LoadingButton } from "@/components/ui/loading-button";
+import { Button } from "@/components/ui/button";
 import { AuthPageShell } from "@/components/auth/AuthPageShell";
 import { TurnstileWidget } from "@/components/auth/TurnstileWidget";
 import { useMinDelayLoading } from "@/hooks/useMinDelayLoading";
@@ -141,7 +141,7 @@ export default function SignupPage() {
             aria-busy={loading}
       >
           {error && (
-            <div className="rounded-ui border border-destructive/20 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+            <div className="rounded-ui border border-destructive/20 bg-destructive/10 px-3 py-2 text-center text-sm text-destructive">
               {error}
             </div>
           )}
@@ -249,16 +249,13 @@ export default function SignupPage() {
           )}
 
             <div className="mt-2 space-y-2">
-              <LoadingButton
+              <Button
                 type="submit"
-                isLoading={loading}
-                loadingText={
-                  pendingTwoFactor ? t("verifyCodeLoading") : t("createAccountLoading")
-                }
+                loading={loading}
                 className="w-full"
               >
                 {pendingTwoFactor ? t("verifyCode") : t("createAccount")}
-              </LoadingButton>
+              </Button>
               {!pendingTwoFactor ? (
                 <p className="text-center text-xs leading-relaxed text-muted-foreground">
                   {t("termsAgreementPlain")}

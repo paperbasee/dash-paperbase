@@ -281,9 +281,15 @@ export default function NewProductPage() {
           </h1>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <Button type="submit" form="product-form" disabled={saving || anyUploading} className="gap-2">
-            <Check className="size-4" />
-            {saving ? tPages("productSavingButton") : tPages("productAddProduct")}
+          <Button
+            type="submit"
+            form="product-form"
+            loading={saving}
+            disabled={saving || anyUploading}
+            className="gap-2"
+          >
+            {!saving ? <Check className="size-4" /> : null}
+            {tPages("productAddProduct")}
           </Button>
         </div>
       </div>

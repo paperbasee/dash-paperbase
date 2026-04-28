@@ -5,7 +5,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { toLocaleDigits } from "@/lib/locale-digits";
 import { numberTextClass } from "@/lib/number-font";
-import { Undo2, Trash2 } from "lucide-react";
+import { Loader2, Undo2, Trash2 } from "lucide-react";
 import api from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { formatDashboardDateTime } from "@/lib/datetime-display";
@@ -382,7 +382,11 @@ export default function TrashPage() {
                             disabled={busy || bulkBusy || isOrderRow(row)}
                             onClick={() => handlePermanentDelete(row)}
                           >
-                            <Trash2 className="mr-1 size-3.5 shrink-0" />
+                            {busy ? (
+                              <Loader2 className="mr-1 size-3.5 shrink-0 animate-spin" />
+                            ) : (
+                              <Trash2 className="mr-1 size-3.5 shrink-0" />
+                            )}
                             {tPages("trashPermanentDelete")}
                           </Button>
                         </div>

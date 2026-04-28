@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { useRouter } from "@/i18n/navigation";
 import { Input } from "@/components/ui/input";
-import { LoadingButton } from "@/components/ui/loading-button";
+import { Button } from "@/components/ui/button";
 import { AuthPageShell } from "@/components/auth/AuthPageShell";
 import { requestPasswordReset } from "@/lib/auth-email";
 import { useRateLimitCooldown, extractRateLimitInfo } from "@/hooks/useRateLimitCooldown";
@@ -59,7 +59,7 @@ export default function PasswordResetRequestPage() {
         aria-busy={loading}
       >
         {error ? (
-          <div className="rounded-ui border border-destructive/20 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+          <div className="rounded-ui border border-destructive/20 bg-destructive/10 px-3 py-2 text-center text-sm text-destructive">
             {error}
           </div>
         ) : null}
@@ -89,17 +89,16 @@ export default function PasswordResetRequestPage() {
           />
           <span>{t("logoutAllDevices")}</span>
         </label>
-        <LoadingButton
+        <Button
           type="submit"
           className="mt-2 w-full"
-          isLoading={loading}
-          loadingText={t("sendResetLinkLoading")}
+          loading={loading}
           disabled={cooldown.isLimited}
         >
           {cooldown.isLimited
             ? tCommon("retryInSeconds", { seconds: cooldown.remaining })
             : t("sendResetLink")}
-        </LoadingButton>
+        </Button>
       </form>
 
       <p className="text-center text-sm text-muted-foreground">

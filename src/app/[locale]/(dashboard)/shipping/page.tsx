@@ -6,6 +6,7 @@ import { useRouter } from "@/i18n/navigation";
 import { Plus, Undo2 } from "lucide-react";
 
 import api from "@/lib/api";
+import { Button } from "@/components/ui/button";
 import { ClickableText } from "@/components/ui/clickable-text";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
@@ -384,13 +385,14 @@ export default function ShippingPage() {
                 {tCommon("active")}
               </label>
               <div className="flex gap-2">
-                <button
+                <Button
                   type="submit"
+                  loading={saving}
                   disabled={saving}
-                  className="rounded-card bg-primary px-3 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
+                  className="inline-flex items-center gap-2 rounded-card bg-primary px-3 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
                 >
-                  {saving ? tCommon("saving") : tCommon("save")}
-                </button>
+                  {tCommon("save")}
+                </Button>
                 <button
                   type="button"
                   onClick={() => setEditingZone(null)}
@@ -530,13 +532,14 @@ export default function ShippingPage() {
                 {tCommon("active")}
               </label>
               <div className="flex gap-2">
-                <button
+                <Button
                   type="submit"
+                  loading={saving}
                   disabled={saving}
-                  className="rounded-card bg-primary px-3 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
+                  className="inline-flex items-center gap-2 rounded-card bg-primary px-3 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
                 >
-                  {saving ? tCommon("saving") : tCommon("save")}
-                </button>
+                  {tCommon("save")}
+                </Button>
                 <button
                   type="button"
                   onClick={() => setEditingMethod(null)}
@@ -706,13 +709,14 @@ export default function ShippingPage() {
                 {tCommon("active")}
               </label>
               <div className="flex gap-2">
-                <button
+                <Button
                   type="submit"
+                  loading={saving}
                   disabled={saving}
-                  className="rounded-card bg-primary px-3 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
+                  className="inline-flex items-center gap-2 rounded-card bg-primary px-3 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
                 >
-                  {saving ? tCommon("saving") : tCommon("save")}
-                </button>
+                  {tCommon("save")}
+                </Button>
                 <button
                   type="button"
                   onClick={() => setEditingRate(null)}

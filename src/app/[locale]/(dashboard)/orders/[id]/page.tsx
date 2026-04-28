@@ -600,10 +600,11 @@ export default function OrderDetailPage() {
                 type="submit"
                 form="order-edit-form"
                 size="sm"
+                loading={saving}
                 disabled={saving}
-                className="rounded-card"
+                className="gap-2 rounded-card"
               >
-                {saving ? tPages("orderDetailSaving") : tPages("orderDetailSaveChanges")}
+                {tPages("orderDetailSaveChanges")}
               </Button>
             </>
           ) : (

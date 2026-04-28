@@ -1202,6 +1202,7 @@
       "defaultKeyName": "Default key",
       "msgCreated": "API key created. Save it now; it will not be shown again.",
       "msgCreateFailed": "Failed to create API key.",
+      "confirmCreate": "Create a new API key now?",
       "confirmRegenerate": "Regenerate this API key? The old key will be revoked.",
       "msgRegenerated": "API key regenerated. Save the new key now; it will not be shown again.",
       "msgRegenerateFailed": "Could not regenerate API key.",

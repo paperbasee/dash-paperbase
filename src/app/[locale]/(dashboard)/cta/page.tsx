@@ -6,6 +6,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { Clock2Icon, Undo2 } from "lucide-react";
 import api from "@/lib/api";
+import { Button } from "@/components/ui/button";
 import { ClickableTableRow } from "@/components/ui/clickable-table-row";
 import { ClickableText } from "@/components/ui/clickable-text";
 import { Input } from "@/components/ui/input";
@@ -563,13 +564,14 @@ export default function CtaPage() {
             </div>
           </div>
           <div className="flex gap-2">
-            <button
+            <Button
               type="submit"
+              loading={saving}
               disabled={saving}
-              className="rounded-card bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
+              className="inline-flex items-center gap-2 rounded-card bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
             >
-              {saving ? tCommon("saving") : tPages("ctaSave")}
-            </button>
+              {tPages("ctaSave")}
+            </Button>
             <button
               type="button"
               onClick={() => setEditing(null)}

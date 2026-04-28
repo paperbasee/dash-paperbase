@@ -4,7 +4,7 @@ import { useRef, useState } from "react";
 import Image from "next/image";
 import { Check, Copy, ShoppingCart } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { LoadingButton } from "@/components/ui/loading-button";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useEnterNavigation } from "@/hooks/useEnterNavigation";
 
@@ -373,10 +373,9 @@ export function CheckoutProviderPaymentCard({
           >
             {t("close")}
           </button>
-          <LoadingButton
+          <Button
             type="submit"
-            isLoading={submitting}
-            loadingText={t("submitting")}
+            loading={submitting}
             disabled={!canConfirm}
             className={cn(
               "h-auto min-h-0 rounded-none py-3.5 text-sm font-bold uppercase tracking-wide",
@@ -386,7 +385,7 @@ export function CheckoutProviderPaymentCard({
             )}
           >
             {t("confirm")}
-          </LoadingButton>
+          </Button>
         </div>
       </form>
 

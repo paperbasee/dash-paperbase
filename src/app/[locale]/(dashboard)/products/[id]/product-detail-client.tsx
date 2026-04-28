@@ -545,8 +545,14 @@ export default function ProductDetailClient() {
             </Button>
           )}
           {isEditMode && (
-            <Button type="submit" form="product-form" disabled={saving || anyUploading} className="gap-2">
-              {saving ? tPages("productSavingButton") : tPages("productSaveChanges")}
+            <Button
+              type="submit"
+              form="product-form"
+              loading={saving}
+              disabled={saving || anyUploading}
+              className="gap-2"
+            >
+              {tPages("productSaveChanges")}
             </Button>
           )}
         </div>

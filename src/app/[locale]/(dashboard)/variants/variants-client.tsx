@@ -610,8 +610,8 @@ export default function VariantsPageClient() {
                   </div>
 
                   <div className="flex flex-wrap gap-3">
-                    <Button type="submit" disabled={saving}>
-                      {saving ? tCommon("saving") : tCommon("save")}
+                    <Button type="submit" loading={saving} disabled={saving} className="gap-2">
+                      {tCommon("save")}
                     </Button>
                     <Button type="button" variant="outline" onClick={closePanel}>
                       {tCommon("cancel")}

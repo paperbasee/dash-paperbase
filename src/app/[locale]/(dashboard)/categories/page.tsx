@@ -7,6 +7,7 @@ import { ChevronDown, ChevronRight, Undo2 } from "lucide-react";
 import api from "@/lib/api";
 import { ClickableTableRow } from "@/components/ui/clickable-table-row";
 import { ClickableText } from "@/components/ui/clickable-text";
+import { Button } from "@/components/ui/button";
 import { FilterDropdown } from "@/components/filters/FilterDropdown";
 import { Input } from "@/components/ui/input";
 import { useEnterNavigation } from "@/hooks/useEnterNavigation";
@@ -528,13 +529,14 @@ export default function CategoriesPage() {
             </label>
           </div>
           <div className="flex gap-2">
-            <button
+            <Button
               type="submit"
+              loading={saving}
               disabled={saving || uploadStatus === "uploading"}
-              className="rounded-card bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
+              className="inline-flex items-center gap-2 rounded-card bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
             >
-              {saving ? tCommon("saving") : tCommon("save")}
-            </button>
+              {tCommon("save")}
+            </Button>
           </div>
         </form>
       ) : null}

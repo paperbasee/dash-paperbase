@@ -2,9 +2,8 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { Check, Copy, KeyRound, Loader2, RefreshCcw, Trash2 } from "lucide-react";
+import { Check, Copy, KeyRound, RefreshCcw, Trash } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { LoadingButton } from "@/components/ui/loading-button";
 import { Input } from "@/components/ui/input";
 import api from "@/lib/api";
 import { formatDashboardDateTimeWithSeconds } from "@/lib/datetime-display";
@@ -180,6 +179,12 @@ export default function NetworkingSection({ hidden }: { hidden: boolean }) {
 
   async function createKey() {
     if (networkingActionsLocked) return;
+    const ok = await confirm({
+      title: t("networking.createHeading"),
+      message: t("networking.confirmCreate"),
+      variant: "default",
+    });
+    if (!ok) return;
     setBusy(true);
     setMessage(null);
     setRevealedKey(null);
@@ -367,12 +372,11 @@ export default function NetworkingSection({ hidden }: { hidden: boolean }) {
               variant="ghost"
               size="sm"
               className="shrink-0"
-              disabled={promptLoading || networkingActionsLocked}
+              loading={promptLoading}
+              disabled={networkingActionsLocked}
               onClick={() => void copyStorefrontPrompt()}
             >
-              {promptLoading ? (
-                <Loader2 className="mr-2 size-4 animate-spin" />
-              ) : promptCopied ? (
+              {promptCopied ? (
                 <Check className="mr-2 size-4 text-emerald-600" />
               ) : (
                 <Copy className="mr-2 size-4" />
@@ -455,7 +459,7 @@ export default function NetworkingSection({ hidden }: { hidden: boolean }) {
                     aria-label={t("networking.deleteKeyAria")}
                     onClick={() => void revokeKey(k.public_id)}
                   >
-                    <Trash2 className="size-4" />
+                    <Trash className="size-4" />
                   </Button>
                 </div>
               </div>
@@ -477,19 +481,18 @@ export default function NetworkingSection({ hidden }: { hidden: boolean }) {
               disabled={busy || networkingActionsLocked}
               className="sm:flex-1"
             />
-            <LoadingButton
+            <Button
               type="button"
               variant="outline"
               size="sm"
               className={cn("shrink-0", settingsInvertedButtonClassName)}
-              isLoading={busy}
-              loadingText={t("networking.creatingKey")}
+              loading={busy}
               disabled={networkingActionsLocked}
               onClick={() => void createKey()}
             >
               <KeyRound className="mr-2 size-4" />
               {t("networking.createButton")}
-            </LoadingButton>
+            </Button>
           </div>
         </div>
       </SettingsSectionBody>

@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import api from "@/lib/api";
-import { LoadingButton } from "@/components/ui/loading-button";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { numberTextClass } from "@/lib/number-font";
 import {
@@ -97,16 +97,15 @@ export default function SubscriptionExpirationBanner({
           </p>
         </div>
         <div className="flex flex-col items-center gap-1">
-          <LoadingButton
+          <Button
             type="button"
             variant="link"
             className={payLinkClass}
-            isLoading={payLoading}
-            loadingText={t("expiredBannerPayLoading")}
+            loading={payLoading}
             onClick={() => void handlePay()}
           >
             {variant === "grace" ? t("bannerPayNow") : t("expiredBannerPay")}
-          </LoadingButton>
+          </Button>
           {payError ? (
             <span className="text-xs text-red-800 dark:text-red-200">{payError}</span>
           ) : null}
