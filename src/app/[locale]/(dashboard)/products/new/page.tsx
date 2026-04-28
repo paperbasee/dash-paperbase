@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Link, useRouter } from "@/i18n/navigation";
-import { Undo2, Check, ImageIcon, Plus, X } from "lucide-react";
+import { Undo2, Check, ImageIcon, Plus, X, Loader2, AlertCircle } from "lucide-react";
 import api from "@/lib/api";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -26,11 +26,18 @@ import {
 import { notify } from "@/notifications";
 import { numberTextClass } from "@/lib/number-font";
 import { cn } from "@/lib/utils";
+import { buildPublicMediaUrlFromKey, uploadFile } from "@/hooks/usePresignedUpload";
 
 const MAX_IMAGES = MAX_PRODUCT_IMAGES;
+type UploadStatus = "idle" | "uploading" | "uploaded" | "error";
 
 export default function NewProductPage() {
   const formRef = useRef<HTMLFormElement>(null);
+  const tempUploadGroupIdRef = useRef<string>(
+    typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
+      ? `tmp_${crypto.randomUUID()}`
+      : `tmp_${Date.now()}`
+  );
   const router = useRouter();
   const locale = useLocale();
   const numClass = numberTextClass(locale);
@@ -55,6 +62,18 @@ export default function NewProductPage() {
   const [extraFieldsErrors, setExtraFieldsErrors] = useState<Record<string, string>>({});
   const { schema: extraFieldsSchema } = useExtraFieldsSchema("product");
   const [imageFiles, setImageFiles] = useState<(File | null)[]>(
+    () => Array(MAX_IMAGES).fill(null)
+  );
+  const [imageKeys, setImageKeys] = useState<(string | null)[]>(
+    () => Array(MAX_IMAGES).fill(null)
+  );
+  const [uploadStatus, setUploadStatus] = useState<UploadStatus[]>(
+    () => Array(MAX_IMAGES).fill("idle")
+  );
+  const [uploadProgress, setUploadProgress] = useState<number[]>(
+    () => Array(MAX_IMAGES).fill(0)
+  );
+  const [uploadErrors, setUploadErrors] = useState<(string | null)[]>(
     () => Array(MAX_IMAGES).fill(null)
   );
   const [imagePreviews, setImagePreviews] = useState<(string | null)[]>(
@@ -99,11 +118,31 @@ export default function NewProductPage() {
     [categoryTree]
   );
 
-  useEffect(() => {
-    const slugs = imageFiles.map((f) => (f ? URL.createObjectURL(f) : null));
-    setImagePreviews(slugs);
-    return () => slugs.forEach((u) => u && URL.revokeObjectURL(u));
-  }, [imageFiles]);
+  const anyUploading = uploadStatus.some((s) => s === "uploading");
+
+  async function uploadSlotFile(index: number, file: File) {
+    setUploadStatus((prev) => prev.map((s, i) => (i === index ? "uploading" : s)));
+    setUploadProgress((prev) => prev.map((p, i) => (i === index ? 0 : p)));
+    setUploadErrors((prev) => prev.map((e, i) => (i === index ? null : e)));
+    try {
+      const { key } = await uploadFile(file, {
+        entity: "product",
+        entityPublicId: tempUploadGroupIdRef.current,
+        isGallery: index > 0,
+        onProgress: (percent) =>
+          setUploadProgress((prev) => prev.map((p, i) => (i === index ? percent : p))),
+      });
+      setImageKeys((prev) => prev.map((k, i) => (i === index ? key : k)));
+      setImagePreviews((prev) =>
+        prev.map((u, i) => (i === index ? buildPublicMediaUrlFromKey(key) : u))
+      );
+      setUploadStatus((prev) => prev.map((s, i) => (i === index ? "uploaded" : s)));
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Upload failed.";
+      setUploadErrors((prev) => prev.map((e, i) => (i === index ? message : e)));
+      setUploadStatus((prev) => prev.map((s, i) => (i === index ? "error" : s)));
+    }
+  }
 
   useEffect(() => {
     if (!baseSlug) {
@@ -162,6 +201,12 @@ export default function NewProductPage() {
     }
     setExtraFieldsErrors({});
 
+    const hasIncompleteUpload = imageFiles.some((file, i) => Boolean(file) && !imageKeys[i]);
+    if (hasIncompleteUpload || anyUploading) {
+      setError("Please complete image uploads before saving.");
+      return;
+    }
+
     setSaving(true);
     setError("");
 
@@ -175,8 +220,8 @@ export default function NewProductPage() {
     formData.append("description", form.description);
     formData.append("is_active", String(form.is_active));
     formData.append("prepayment_type", form.prepayment_type);
-    const mainImage = imageFiles[0];
-    if (mainImage) formData.append("image", mainImage);
+    const mainImageKey = imageKeys[0];
+    if (mainImageKey) formData.append("image_key", mainImageKey);
     if (Object.keys(extraFields).length > 0) {
       formData.append("extra_data", JSON.stringify(extraFields));
     }
@@ -185,11 +230,11 @@ export default function NewProductPage() {
       const { data } = await api.post<{ public_id: string }>("admin/products/", formData);
       const productId = data.public_id;
       for (let i = 1; i < MAX_IMAGES; i++) {
-        const file = imageFiles[i];
-        if (!file) continue;
+        const key = imageKeys[i];
+        if (!key) continue;
         const galleryData = new FormData();
         galleryData.append("product_public_id", productId);
-        galleryData.append("image", file);
+        galleryData.append("image_key", key);
         galleryData.append("order", String(i));
         await api.post("admin/product-images/", galleryData);
       }
@@ -236,7 +281,7 @@ export default function NewProductPage() {
           </h1>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <Button type="submit" form="product-form" disabled={saving} className="gap-2">
+          <Button type="submit" form="product-form" disabled={saving || anyUploading} className="gap-2">
             <Check className="size-4" />
             {saving ? tPages("productSavingButton") : tPages("productAddProduct")}
           </Button>
@@ -478,6 +523,7 @@ export default function NewProductPage() {
                         next[0] = file;
                         return next;
                       });
+                      void uploadSlotFile(0, file);
                       setSelectedImageIndex(0);
                     }}
                   >
@@ -503,6 +549,7 @@ export default function NewProductPage() {
                           next[0] = file;
                           return next;
                         });
+                        void uploadSlotFile(0, file);
                         setSelectedImageIndex(0);
                         e.target.value = "";
                       }}
@@ -524,6 +571,11 @@ export default function NewProductPage() {
                           next[idx] = null;
                           return next;
                         });
+                        setImageKeys((prev) => prev.map((k, i) => (i === idx ? null : k)));
+                        setImagePreviews((prev) => prev.map((u, i) => (i === idx ? null : u)));
+                        setUploadStatus((prev) => prev.map((s, i) => (i === idx ? "idle" : s)));
+                        setUploadProgress((prev) => prev.map((p, i) => (i === idx ? 0 : p)));
+                        setUploadErrors((prev) => prev.map((e, i) => (i === idx ? null : e)));
                         const nextFilled = imagePreviews
                           .map((u, i) => (u && i !== idx ? i : -1))
                           .filter((i) => i >= 0)[0];
@@ -573,6 +625,11 @@ export default function NewProductPage() {
                               next[i] = null;
                               return next;
                             });
+                            setImageKeys((prev) => prev.map((k, j) => (j === i ? null : k)));
+                            setImagePreviews((prev) => prev.map((u, j) => (j === i ? null : u)));
+                            setUploadStatus((prev) => prev.map((s, j) => (j === i ? "idle" : s)));
+                            setUploadProgress((prev) => prev.map((p, j) => (j === i ? 0 : p)));
+                            setUploadErrors((prev) => prev.map((e, j) => (j === i ? null : e)));
                             if (selectedImageIndex === i) {
                               const nextFilled = imagePreviews
                                 .map((u, j) => (u && j !== i ? j : -1))
@@ -610,6 +667,7 @@ export default function NewProductPage() {
                               next[i] = file;
                               return next;
                             });
+                            void uploadSlotFile(i, file);
                             setSelectedImageIndex(i);
                             e.target.value = "";
                           }}
@@ -619,6 +677,30 @@ export default function NewProductPage() {
                   </div>
                 ))}
               </div>
+              {(uploadStatus[selectedImageIndex ?? 0] !== "idle" || uploadErrors[selectedImageIndex ?? 0]) && (
+                <div className="px-3 text-xs text-muted-foreground">
+                  {uploadStatus[selectedImageIndex ?? 0] === "uploading" && (
+                    <span className="inline-flex items-center gap-1"><Loader2 className="size-3 animate-spin" /> Uploading {uploadProgress[selectedImageIndex ?? 0]}%</span>
+                  )}
+                  {uploadStatus[selectedImageIndex ?? 0] === "uploaded" && (
+                    <span className="inline-flex items-center gap-1"><Check className="size-3" /> Replace</span>
+                  )}
+                  {uploadStatus[selectedImageIndex ?? 0] === "error" && (
+                    <button
+                      type="button"
+                      className="inline-flex items-center gap-1 text-destructive underline"
+                      onClick={() => {
+                        const idx = selectedImageIndex ?? 0;
+                        const file = imageFiles[idx];
+                        if (file) void uploadSlotFile(idx, file);
+                      }}
+                    ><AlertCircle className="size-3" /> Failed. Retry</button>
+                  )}
+                  {uploadErrors[selectedImageIndex ?? 0] && (
+                    <p className="mt-1 text-destructive">{uploadErrors[selectedImageIndex ?? 0]}</p>
+                  )}
+                </div>
+              )}
             </CardContent>
           </Card>
 

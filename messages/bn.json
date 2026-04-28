@@ -82,6 +82,7 @@
     "blogNew": "নতুন পোস্ট",
     "shipping": "শিপিং",
     "catalog": "ক্যাটালগ",
+    "marketing": "মার্কেটিং",
     "more": "আরও",
     "navigation": "নেভিগেশন",
     "notifications_feed": "নোটিফিকেশন"
@@ -542,6 +543,7 @@
     "bannersLabelStart": "শুরু",
     "bannersLabelEnd": "শেষ",
     "bannersLabelImage": "ছবি",
+    "bannersImagesHint": "প্রতি ব্যানারে সর্বোচ্চ {max}টি ছবি (প্রতিটি স্লটে প্রতিস্থাপন বা সরান)।",
     "bannersKeepImageHint": "বর্তমান ছবি রাখতে খালি রাখুন",
     "bannersColPreview": "প্রিভিউ",
     "bannersColTitle": "শিরোনাম",

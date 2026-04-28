@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useState, type FormEvent } from "react";
-import { Trash2, Undo2, X } from "lucide-react";
+import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
+import { Trash2, Undo2, X, Loader2, AlertCircle, CheckCircle2 } from "lucide-react";
 import { isAxiosError } from "axios";
 import api from "@/lib/api";
 import { useRouter } from "@/i18n/navigation";
@@ -16,6 +16,7 @@ import { useConfirm } from "@/context/ConfirmDialogContext";
 import { useNotificationValidation } from "@/notifications/NotificationProvider";
 import { cn } from "@/lib/utils";
 import { useEnterNavigation } from "@/hooks/useEnterNavigation";
+import { buildPublicMediaUrlFromKey, uploadFile } from "@/hooks/usePresignedUpload";
 
 interface BlogFormState {
   title: string;
@@ -72,10 +73,20 @@ export function BlogForm({ mode, initialBlog }: BlogFormProps) {
   const router = useRouter();
   const confirm = useConfirm();
   const { fieldErrors, clearValidation } = useNotificationValidation("blog-form");
+  const tempBlogUploadIdRef = useRef<string>(
+    typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
+      ? `blg_${crypto.randomUUID().replace(/-/g, "").slice(0, 20)}`
+      : `blg_${Date.now()}`
+  );
   const [form, setForm] = useState<BlogFormState>(() =>
     initialBlog ? stateFromBlog(initialBlog) : EMPTY_STATE,
   );
   const [imageFile, setImageFile] = useState<File | null>(null);
+  const [uploadedImageKey, setUploadedImageKey] = useState<string | null>(null);
+  const [uploadedImageUrl, setUploadedImageUrl] = useState<string | null>(null);
+  const [uploadStatus, setUploadStatus] = useState<"idle" | "uploading" | "uploaded" | "error">("idle");
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [uploadError, setUploadError] = useState<string | null>(null);
   const [removeRemoteImage, setRemoveRemoteImage] = useState(false);
   const [tags, setTags] = useState<BlogTag[]>([]);
   const [newTagName, setNewTagName] = useState("");
@@ -87,7 +98,37 @@ export function BlogForm({ mode, initialBlog }: BlogFormProps) {
 
   const remoteImageUrl = removeRemoteImage
     ? null
-    : initialBlog?.featured_image_url ?? null;
+    : uploadedImageUrl ?? initialBlog?.featured_image_url ?? null;
+
+  async function handleImageSelect(file: File | null) {
+    if (!file) {
+      setImageFile(null);
+      setUploadedImageKey(null);
+      setUploadedImageUrl(null);
+      setUploadStatus("idle");
+      setUploadProgress(0);
+      setUploadError(null);
+      return;
+    }
+    setImageFile(file);
+    setUploadStatus("uploading");
+    setUploadProgress(0);
+    setUploadError(null);
+    try {
+      const { key } = await uploadFile(file, {
+        entity: "blog",
+        entityPublicId: initialBlog?.public_id || tempBlogUploadIdRef.current,
+        onProgress: (percent) => setUploadProgress(percent),
+      });
+      setUploadedImageKey(key);
+      setUploadedImageUrl(buildPublicMediaUrlFromKey(key));
+      setUploadStatus("uploaded");
+      setRemoveRemoteImage(false);
+    } catch (err) {
+      setUploadStatus("error");
+      setUploadError(err instanceof Error ? err.message : "Upload failed.");
+    }
+  }
 
   useEffect(() => {
     void fetchTags();
@@ -152,7 +193,7 @@ export function BlogForm({ mode, initialBlog }: BlogFormProps) {
     }
   }
 
-  function buildFormData(): FormData {
+  async function buildFormData(): Promise<FormData> {
     const fd = new FormData();
     fd.append("title", form.title);
     fd.append("excerpt", form.excerpt);
@@ -166,13 +207,13 @@ export function BlogForm({ mode, initialBlog }: BlogFormProps) {
     }
     fd.append("is_featured", String(form.is_featured));
     fd.append("is_public", String(form.is_public));
-    if (imageFile) fd.append("featured_image", imageFile);
+    if (uploadedImageKey) fd.append("featured_image_key", uploadedImageKey);
     if (removeRemoteImage && !imageFile) fd.append("remove_featured_image", "true");
     return fd;
   }
 
   async function ensureSaved(): Promise<Blog | null> {
-    const fd = buildFormData();
+    const fd = await buildFormData();
     try {
       if (mode === "new") {
         const { data } = await api.post<Blog>("admin/blogs/", fd);
@@ -260,6 +301,10 @@ export function BlogForm({ mode, initialBlog }: BlogFormProps) {
       notify.warning(message);
       return;
     }
+    if (imageFile && uploadStatus !== "uploaded") {
+      notify.warning(uploadError || "Image upload is not complete yet.");
+      return;
+    }
     setSaving(true);
     const saved = await ensureSaved();
     setSaving(false);
@@ -294,10 +339,10 @@ export function BlogForm({ mode, initialBlog }: BlogFormProps) {
         <Button
           type="button"
           onClick={() => void handleSave()}
-          disabled={saving}
+          disabled={saving || uploadStatus === "uploading"}
           className="w-full shrink-0 sm:w-auto"
         >
-          {saving ? "Saving…" : "Save post"}
+          {saving || uploadStatus === "uploading" ? "Saving…" : "Save post"}
         </Button>
       </div>
 
@@ -459,18 +504,46 @@ export function BlogForm({ mode, initialBlog }: BlogFormProps) {
             </CardHeader>
             <CardContent>
               <BlogImageUpload
-                value={imageFile}
+                value={null}
                 onChange={(file) => {
-                  setImageFile(file);
-                  if (file) setRemoveRemoteImage(false);
+                  void handleImageSelect(file);
                 }}
                 remoteUrl={remoteImageUrl}
                 onRemoveRemote={() => {
                   setRemoveRemoteImage(true);
                   setImageFile(null);
+                  setUploadedImageKey(null);
+                  setUploadedImageUrl(null);
+                  setUploadStatus("idle");
+                  setUploadProgress(0);
+                  setUploadError(null);
                 }}
-                disabled={saving}
+                disabled={saving || uploadStatus === "uploading"}
               />
+              <div className="mt-2 text-xs">
+                {uploadStatus === "uploading" && (
+                  <span className="inline-flex items-center gap-1 text-muted-foreground">
+                    <Loader2 className="size-3 animate-spin" /> Uploading {uploadProgress}%
+                  </span>
+                )}
+                {uploadStatus === "uploaded" && (
+                  <span className="inline-flex items-center gap-1 text-emerald-600">
+                    <CheckCircle2 className="size-3" /> Replace
+                  </span>
+                )}
+                {uploadStatus === "error" && (
+                  <button
+                    type="button"
+                    className="inline-flex items-center gap-1 text-destructive underline"
+                    onClick={() => {
+                      if (imageFile) void handleImageSelect(imageFile);
+                    }}
+                  >
+                    <AlertCircle className="size-3" /> Failed. Retry
+                  </button>
+                )}
+                {uploadError && <p className="mt-1 text-destructive">{uploadError}</p>}
+              </div>
             </CardContent>
           </Card>
 

@@ -381,10 +381,20 @@ export interface Blog {
   updated_at: string;
 }
 
-/** Admin banner CRUD (`/api/v1/admin/banners/`). Storefront GET uses `image_url` and `cta_url`. */
+/** Single gallery image row from `GET/PATCH admin/banners/`. */
+export interface BannerImage {
+  public_id: string;
+  image_url: string | null;
+  order: number;
+  created_at: string;
+}
+
+/** Admin banner CRUD (`/api/v1/admin/banners/`). Storefront GET uses `images`, `image_url`, and `cta_url`. */
 export interface Banner {
   public_id: string;
-  image: string;
+  /** Thumbnail: first gallery image, else legacy main image URL. */
+  image: string | null;
+  images?: BannerImage[];
   title: string;
   cta_text: string;
   cta_link: string;
@@ -502,6 +512,7 @@ export interface StoreAPIKey {
 
 export type {
   StorefrontBanner,
+  StorefrontBannerImage,
   StorefrontCategory,
   StorefrontCTA,
   StorefrontOrderItem,

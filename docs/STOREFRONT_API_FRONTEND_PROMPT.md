@@ -14,6 +14,7 @@ may issue against the storefront. If something is not listed here, it does not e
 - **DO NOT** send unknown fields in any request body — `POST /api/v1/orders/` rejects unknown top-level fields with `400`.
 - **DO NOT** use internal numeric IDs — always use prefixed `public_id` strings (see section 4).
 - **DO NOT** fire Meta Pixel / CAPI events yourself — the supplied `tracker.js` handles that.
+- **DO** treat all media URL fields (e.g. `image_url`, `featured_image_url`, `logo_url`) as opaque absolute URLs. Do not parse, rewrite, or rely on key/path segment patterns.
 
 ---
 
@@ -183,7 +184,7 @@ links, policy URLs, and the custom product-field schema.
 ```json
 {
   "store_name": "My Store",
-  "logo_url": "https://api.example.com/media/stores/str_xxx/logo/main.png",
+  "logo_url": "https://storage.paperbase.me/media/...",
   "currency": "BDT",
   "currency_symbol": "৳",
   "country": "BD",
@@ -289,7 +290,7 @@ links, policy URLs, and the custom product-field schema.
       "brand": "BrandX",
       "price": "599.00",
       "original_price": "799.00",
-      "image_url": "https://api.example.com/media/.../main.jpg",
+      "image_url": "https://storage.paperbase.me/media/...",
       "category_public_id": "cat_def456",
       "category_slug": "clothing",
       "category_name": "Clothing",
@@ -342,11 +343,11 @@ automatically by prefix).
   "slug": "premium-t-shirt",
   "price": "599.00",
   "original_price": "799.00",
-  "image_url": "https://api.example.com/media/.../main.jpg",
+  "image_url": "https://storage.paperbase.me/media/...",
   "images": [
     {
       "public_id": "img_xyz789",
-      "image_url": "https://api.example.com/media/.../gallery-1.jpg",
+        "image_url": "https://storage.paperbase.me/media/...",
       "alt": "Front view",
       "order": 0
     }
@@ -497,7 +498,7 @@ Search matches `name`, `brand`, and `description` (case-insensitive).
       "name": "Clothing",
       "slug": "clothing",
       "description": "All clothing items",
-      "image_url": "https://api.example.com/media/.../cat.jpg",
+      "image_url": "https://storage.paperbase.me/media/...",
       "parent_public_id": null,
       "order": 0
     }
@@ -605,6 +606,14 @@ brands / price bounds that appear on **active** products are returned.
 
 Active, in-schedule banners for the tenant.
 
+Each banner includes **`images`**: an ordered array of every image the storefront should
+show (absolute URLs from this API), up to five. Gallery rows come first (`order`, then
+`id`); if the legacy main field (`Banner.image`) points at a **different** storage file
+than any gallery row, it is appended last. Duplicate storage keys are omitted.
+
+**`image_url`** is kept for backward compatibility: it is always the first entry in
+`images` when the list is non-empty, otherwise `null`.
+
 **Query params:**
 
 | Param | Type | Notes |
@@ -618,7 +627,19 @@ Active, in-schedule banners for the tenant.
   {
     "public_id": "ban_abc123",
     "title": "Summer Sale - 30% Off",
-    "image_url": "https://api.example.com/media/.../banner.jpg",
+    "image_url": "https://storage.paperbase.me/media/...",
+    "images": [
+      {
+        "public_id": "bni_gal001",
+        "image_url": "https://storage.paperbase.me/media/...",
+        "order": 0
+      },
+      {
+        "public_id": "bni_gal002",
+        "image_url": "https://storage.paperbase.me/media/...",
+        "order": 1
+      }
+    ],
     "cta_text": "Shop Now",
     "cta_url": "https://mystore.com/sale",
     "order": 0,
@@ -635,7 +656,8 @@ Active, in-schedule banners for the tenant.
 |---|---|---|
 | `public_id` | string | Prefix: `ban_` |
 | `title` | string | Banner title |
-| `image_url` | string \| null | Banner image URL |
+| `image_url` | string \| null | First image URL; mirrors `images[0].image_url` or `null` |
+| `images` | object[] | Ordered slides; each object: `public_id` (`bni_` for gallery rows; if the only image is the legacy main with no gallery rows, `public_id` may be the banner’s `ban_…`), `image_url` (absolute), `order` (integer) |
 | `cta_text` | string | Button text |
 | `cta_url` | string | Button link (may be empty string) |
 | `order` | integer | Display order (sort ascending) |
@@ -650,6 +672,8 @@ Active, in-schedule banners for the tenant.
   the API.
 - A banner may appear in multiple slots.
 - Sort by `order` ascending.
+- For carousels or multi-image hero UI, iterate **`images`** (or fall back to a
+  single-image layout using **`image_url`** / `images[0]` only).
 
 **Errors:**
 - `400 { "slot": "Invalid placement slot selected" }` — unknown slot value.
@@ -2105,6 +2129,8 @@ await fetch(`${API}/support/tickets/`, {
   `payer_number` are always included in both the `POST /orders/` and
   `POST /orders/<id>/payment/` responses. They are **not** optional — frontends
   can rely on their presence.
+- Storefront `GET /api/v1/banners/` returns **`images`** (ordered list of absolute
+  URLs and metadata) plus **`image_url`** as the first image for older clients.
 - `POST /orders/initiate-checkout/` does **not** exist; the `InitiateCheckout`
   Meta event is fired by `tracker.js`.
 - `GET /api/v1/orders/<public_id>/` is an **admin-only** route (requires a

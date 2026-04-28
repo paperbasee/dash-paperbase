@@ -80,10 +80,20 @@ export interface StorefrontCategory {
   children?: StorefrontCategory[];
 }
 
+/** One storefront banner image (gallery `bni_…` or legacy main `ban_…` when no gallery row). */
+export interface StorefrontBannerImage {
+  public_id: string;
+  image_url: string;
+  order: number;
+}
+
 export interface StorefrontBanner {
   public_id: string;
   title: string;
+  /** First image URL; same as `images[0]?.image_url` when `images` is non-empty. */
   image_url: string | null;
+  /** All banner images in display order (API absolute URLs), up to five. */
+  images: StorefrontBannerImage[];
   cta_text: string;
   cta_url: string;
   order: number;

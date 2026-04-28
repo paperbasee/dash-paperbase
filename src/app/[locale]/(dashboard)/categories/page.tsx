@@ -20,6 +20,8 @@ import { useConfirm } from "@/context/ConfirmDialogContext";
 import { notify } from "@/notifications";
 import { DashboardTableSkeleton } from "@/components/skeletons/dashboard-skeletons";
 import { Skeleton } from "@/components/ui/skeleton";
+import { buildPublicMediaUrlFromKey, uploadFile } from "@/hooks/usePresignedUpload";
+import { Loader2, CheckCircle2, AlertCircle } from "lucide-react";
 
 type FormMode = "closed" | "new_root" | "new_child" | "edit";
 
@@ -173,8 +175,18 @@ export default function CategoriesPage() {
   /** Slug from API when editing (read-only; backend regenerates from name on save). */
   const [editingSlugPreview, setEditingSlugPreview] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imageKey, setImageKey] = useState<string | null>(null);
+  const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
+  const [uploadStatus, setUploadStatus] = useState<"idle" | "uploading" | "uploaded" | "error">("idle");
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [uploadError, setUploadError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
+  const tempCategoryUploadIdRef = useRef<string>(
+    typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
+      ? `cat_${crypto.randomUUID().replace(/-/g, "").slice(0, 20)}`
+      : `cat_${Date.now()}`
+  );
   const { handleKeyDown } = useEnterNavigation(() => formRef.current?.requestSubmit());
 
   const fetchTree = useCallback(() => {
@@ -208,20 +220,67 @@ export default function CategoriesPage() {
     });
   }
 
+  async function handleCategoryImageSelect(file: File | null) {
+    if (!file) {
+      setImageFile(null);
+      setImageKey(null);
+      setImagePreviewUrl(null);
+      setUploadStatus("idle");
+      setUploadProgress(0);
+      setUploadError(null);
+      return;
+    }
+    setImageFile(file);
+    setUploadStatus("uploading");
+    setUploadProgress(0);
+    setUploadError(null);
+    try {
+      const { key } = await uploadFile(file, {
+        entity: "category",
+        entityPublicId: editingPublicId || tempCategoryUploadIdRef.current,
+        onProgress: (percent) => setUploadProgress(percent),
+      });
+      setImageKey(key);
+      setImagePreviewUrl(buildPublicMediaUrlFromKey(key));
+      setUploadStatus("uploaded");
+    } catch (err) {
+      setUploadStatus("error");
+      setUploadError(err instanceof Error ? err.message : "Upload failed.");
+    }
+  }
+
   function openNewRoot() {
     setMode("new_root");
+    tempCategoryUploadIdRef.current =
+      typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
+        ? `cat_${crypto.randomUUID().replace(/-/g, "").slice(0, 20)}`
+        : `cat_${Date.now()}`;
     setEditingPublicId(null);
     setEditingSlugPreview(null);
     setForm({ ...emptyForm, parent: "" });
     setImageFile(null);
+    setImageKey(null);
+    setImagePreviewUrl(null);
+    setUploadStatus("idle");
+    setUploadProgress(0);
+    setUploadError(null);
   }
 
   function openNewChild(parentPublicId: string) {
     setMode("new_child");
+    tempCategoryUploadIdRef.current =
+      typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
+        ? `cat_${crypto.randomUUID().replace(/-/g, "").slice(0, 20)}`
+        : `cat_${Date.now()}`;
     setEditingPublicId(null);
     setEditingSlugPreview(null);
     setForm({ ...emptyForm, parent: parentPublicId });
     setImageFile(null);
+    setImageKey(null);
+    setImagePreviewUrl(null);
+    setUploadStatus("idle");
+    setUploadProgress(0);
+    setUploadError(null);
   }
 
   function openEdit(node: AdminCategoryTreeNode) {
@@ -236,6 +295,11 @@ export default function CategoriesPage() {
       is_active: node.is_active,
     });
     setImageFile(null);
+    setImageKey(null);
+    setImagePreviewUrl(null);
+    setUploadStatus("idle");
+    setUploadProgress(0);
+    setUploadError(null);
   }
 
   const parentOptions = (() => {
@@ -252,6 +316,14 @@ export default function CategoriesPage() {
 
   async function saveCategory(e: FormEvent) {
     e.preventDefault();
+    if (uploadStatus === "uploading") {
+      notify.warning("Please wait for image upload to finish.");
+      return;
+    }
+    if (imageFile && !imageKey) {
+      notify.warning(uploadError || "Image upload failed. Retry before saving.");
+      return;
+    }
     setSaving(true);
     const fd = new FormData();
     fd.append("name", form.name);
@@ -263,9 +335,7 @@ export default function CategoriesPage() {
     } else if (mode === "edit") {
       fd.append("parent", "");
     }
-    if (imageFile) {
-      fd.append("image", imageFile);
-    }
+    if (imageKey) fd.append("image_key", imageKey);
     try {
       if (mode === "edit" && editingPublicId) {
         await api.patch(`admin/categories/${editingPublicId}/`, fd);
@@ -418,10 +488,32 @@ export default function CategoriesPage() {
             <input
               type="file"
               accept="image/*"
-              onChange={(e) => setImageFile(e.target.files?.[0] ?? null)}
+              onChange={(e) => void handleCategoryImageSelect(e.target.files?.[0] ?? null)}
               className="form-file-input"
               onKeyDown={handleKeyDown}
+              disabled={saving || uploadStatus === "uploading"}
             />
+            {imagePreviewUrl && (
+              <img src={imagePreviewUrl} alt="Category preview" className="h-12 w-12 rounded object-cover" />
+            )}
+            <div className="text-xs text-muted-foreground">
+              {uploadStatus === "uploading" && (
+                <span className="inline-flex items-center gap-1"><Loader2 className="size-3 animate-spin" /> Uploading {uploadProgress}%</span>
+              )}
+              {uploadStatus === "uploaded" && (
+                <span className="inline-flex items-center gap-1 text-emerald-600"><CheckCircle2 className="size-3" /> Replace</span>
+              )}
+              {uploadStatus === "error" && (
+                <button
+                  type="button"
+                  className="inline-flex items-center gap-1 text-destructive underline"
+                  onClick={() => {
+                    if (imageFile) void handleCategoryImageSelect(imageFile);
+                  }}
+                ><AlertCircle className="size-3" /> Failed. Retry</button>
+              )}
+              {uploadError && <p className="text-destructive">{uploadError}</p>}
+            </div>
             <label className="flex items-center gap-2 text-sm text-foreground">
               <input
                 type="checkbox"
@@ -438,7 +530,7 @@ export default function CategoriesPage() {
           <div className="flex gap-2">
             <button
               type="submit"
-              disabled={saving}
+              disabled={saving || uploadStatus === "uploading"}
               className="rounded-card bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
             >
               {saving ? tCommon("saving") : tCommon("save")}

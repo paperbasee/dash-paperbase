@@ -13,6 +13,7 @@ import {
   LogOut,
   Settings,
   LayoutGrid,
+  Megaphone,
   Copy,
   Check,
   Sun,
@@ -49,6 +50,7 @@ import { useEnabledApps } from "@/hooks/useEnabledApps";
 import {
   APP_CONFIG,
   CATALOG_SUB_APP_IDS,
+  MARKETING_SUB_APP_IDS,
   MAIN_NAV_APP_IDS,
   MORE_APP_IDS,
   type NavCounts,
@@ -79,7 +81,9 @@ import { useBrandingProfileSWR } from "@/hooks/useBrandingProfileSWR";
 const MAIN_NAV_SEQUENCE = [
   MAIN_NAV_APP_IDS[0],
   "__catalog__",
-  ...MAIN_NAV_APP_IDS.slice(1),
+  ...MAIN_NAV_APP_IDS.slice(1, 4),
+  "__marketing__",
+  ...MAIN_NAV_APP_IDS.slice(4),
 ] as const;
 
 function logoUrl(url: string | null): string | null {
@@ -131,6 +135,7 @@ function SidebarContent({
     (meProfile?.subscription?.subscription_status === "GRACE" ||
       meProfile?.subscription?.subscription_status === "EXPIRED");
   const [catalogOpen, setCatalogOpen] = useState(false);
+  const [marketingOpen, setMarketingOpen] = useState(false);
 
   const isActive = (href: string) => {
     if (href === "/") return pathname === "/";
@@ -149,6 +154,19 @@ function SidebarContent({
   useEffect(() => {
     if (showCatalog && catalogChildActive) setCatalogOpen(true);
   }, [pathname, showCatalog, catalogChildActive]);
+
+  const marketingLinks = MARKETING_SUB_APP_IDS.filter(
+    (id) => isEnabled(id) && APP_CONFIG[id]?.href
+  );
+  const showMarketing = marketingLinks.length > 0;
+  const marketingChildActive = marketingLinks.some((id) => {
+    const href = APP_CONFIG[id]?.href;
+    return href ? isActive(href) : false;
+  });
+
+  useEffect(() => {
+    if (showMarketing && marketingChildActive) setMarketingOpen(true);
+  }, [pathname, showMarketing, marketingChildActive]);
 
   const showMore = MORE_APP_IDS.some((id) => isEnabled(id) && APP_CONFIG[id]?.href);
   const moreLinks = MORE_APP_IDS.filter((id) => isEnabled(id) && APP_CONFIG[id]?.href);
@@ -454,6 +472,88 @@ function SidebarContent({
                   {!collapsed && (
                     <div className="ml-4 mt-2 space-y-1 border-l border-border pl-3">
                       {catalogLinks.map((id) => {
+                        const app = APP_CONFIG[id];
+                        if (!app?.href) return null;
+                        const childActive = isActive(app.href);
+                        return (
+                          <Link
+                            key={id}
+                            href={app.href}
+                            prefetch={shouldPrefetchLinks}
+                            onClick={handleLinkClick}
+                            className={cn(
+                              "flex items-center justify-between rounded-ui px-2 py-2 text-sm",
+                              childActive
+                                ? "bg-primary/10 font-medium text-primary"
+                                : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                            )}
+                          >
+                            <span className="min-w-0 break-words leading-relaxed">
+                              {tNav(app.id)}
+                            </span>
+                            {app.countKey &&
+                              counts != null &&
+                              counts[app.countKey] > 0 && (
+                                <Badge
+                                  className={cn(
+                                    "h-5 min-w-5 rounded-full border-0 bg-primary/15 px-1.5 text-xs font-medium text-primary",
+                                    numClass
+                                  )}
+                                >
+                                  {formatCount(counts[app.countKey])}
+                                </Badge>
+                              )}
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  )}
+                </CollapsibleContent>
+              </Collapsible>
+            );
+          }
+          if (token === "__marketing__") {
+            if (!showMarketing) return null;
+            return (
+              <Collapsible
+                key="marketing"
+                open={marketingOpen}
+                onOpenChange={setMarketingOpen}
+              >
+                <CollapsibleTrigger
+                  onClick={() => {
+                    if (collapsed && onToggle) {
+                      onToggle();
+                      setMarketingOpen(true);
+                    }
+                  }}
+                  className={cn(
+                    "flex min-h-[44px] w-full items-center gap-3 rounded-card px-3 py-2.5 text-sm font-medium transition-colors md:min-h-[40px]",
+                    marketingChildActive && !marketingOpen
+                      ? "bg-primary/10 text-primary"
+                      : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
+                    collapsed && "justify-center px-2"
+                  )}
+                >
+                  <Megaphone className="size-5 shrink-0" />
+                  {!collapsed && (
+                    <>
+                      <span className="flex-1 min-w-0 truncate text-left leading-relaxed">
+                        {tNav("marketing")}
+                      </span>
+                      <ChevronRight
+                        className={cn(
+                          "size-4 shrink-0 transition-transform",
+                          marketingOpen && "rotate-90"
+                        )}
+                      />
+                    </>
+                  )}
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  {!collapsed && (
+                    <div className="ml-4 mt-2 space-y-1 border-l border-border pl-3">
+                      {marketingLinks.map((id) => {
                         const app = APP_CONFIG[id];
                         if (!app?.href) return null;
                         const childActive = isActive(app.href);

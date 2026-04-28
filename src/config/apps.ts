@@ -194,14 +194,15 @@ export const CATALOG_SUB_APP_IDS = [
   "product_attributes",
 ] as const;
 
+/** Collapsible “Marketing” group in the sidebar (CTA + Banners). */
+export const MARKETING_SUB_APP_IDS = ["cta", "banners"] as const;
+
 /** Top-level nav items (excluding catalog children). */
 export const MAIN_NAV_APP_IDS = [
   "orders",
   "customers",
   "inventory",
   "shipping",
-  "cta",
-  "banners",
   "blog",
 ] as const;
 

@@ -82,6 +82,7 @@
     "blogNew": "New post",
     "shipping": "Shipping",
     "catalog": "Catalog",
+    "marketing": "Marketing",
     "more": "More",
     "navigation": "Navigation",
     "notifications_feed": "Notifications"
@@ -542,6 +543,7 @@
     "bannersLabelStart": "Start",
     "bannersLabelEnd": "End",
     "bannersLabelImage": "Image",
+    "bannersImagesHint": "Up to {max} images per banner (replace or remove per slot).",
     "bannersKeepImageHint": "Leave empty to keep current image",
     "bannersColPreview": "Preview",
     "bannersColTitle": "Title",

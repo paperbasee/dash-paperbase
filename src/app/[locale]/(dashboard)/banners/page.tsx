@@ -32,6 +32,7 @@ import { DashboardDetailSkeleton } from "@/components/skeletons/dashboard-skelet
 import { numberTextClass } from "@/lib/number-font";
 import { cn } from "@/lib/utils";
 import { useEnterNavigation } from "@/hooks/useEnterNavigation";
+import { buildPublicMediaUrlFromKey, uploadFile } from "@/hooks/usePresignedUpload";
 
 const Calendar = dynamic(
   () => import("@/components/ui/calendar").then((mod) => mod.Calendar),
@@ -46,6 +47,51 @@ const ALLOWED_PLACEMENTS = new Set([
   "home_mid",
   "home_bottom",
 ]);
+
+const MAX_BANNER_IMAGES = 5;
+
+type BannerImageSlot =
+  | { kind: "empty" }
+  | { kind: "remote"; publicId: string; url: string }
+  | { kind: "legacy"; url: string }
+  | {
+      kind: "local";
+      file: File;
+      previewUrl: string;
+      uploadedKey: string;
+      /** Replace legacy main image (multipart `image`). */
+      uploadAsMain?: boolean;
+      /** Gallery row being replaced (delete + new gallery file). */
+      replacePublicId?: string;
+    };
+
+function emptyBannerSlots(): BannerImageSlot[] {
+  return Array.from({ length: MAX_BANNER_IMAGES }, () => ({ kind: "empty" as const }));
+}
+
+function slotsFromBanner(banner: Banner): BannerImageSlot[] {
+  const slots = emptyBannerSlots();
+  const imgs = [...(banner.images ?? [])].sort((a, b) => a.order - b.order);
+  let i = 0;
+  for (const im of imgs) {
+    if (i >= MAX_BANNER_IMAGES) break;
+    const u = im.image_url?.trim();
+    if (u) {
+      slots[i] = { kind: "remote", publicId: im.public_id, url: u };
+      i += 1;
+    }
+  }
+  if (i === 0 && banner.image?.trim()) {
+    slots[0] = { kind: "legacy", url: banner.image.trim() };
+  }
+  return slots;
+}
+
+function countFilledSlots(slots: BannerImageSlot[]): number {
+  return slots.filter((s) => s.kind !== "empty").length;
+}
+
+function revokeSlotPreview(_slot: BannerImageSlot) {}
 
 type BannerForm = {
   title: string;
@@ -177,7 +223,17 @@ export default function BannersPage() {
   const startPickerRef = useRef<HTMLDivElement | null>(null);
   const endPickerRef = useRef<HTMLDivElement | null>(null);
   const [now, setNow] = useState(() => new Date());
-  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imageSlots, setImageSlots] = useState<BannerImageSlot[]>(emptyBannerSlots);
+  const [pendingDeleteImagePublicIds, setPendingDeleteImagePublicIds] = useState<string[]>([]);
+  const [slotStatus, setSlotStatus] = useState<("idle" | "uploading" | "uploaded" | "error")[]>(
+    () => Array(MAX_BANNER_IMAGES).fill("idle")
+  );
+  const [slotProgress, setSlotProgress] = useState<number[]>(
+    () => Array(MAX_BANNER_IMAGES).fill(0)
+  );
+  const [slotError, setSlotError] = useState<(string | null)[]>(
+    () => Array(MAX_BANNER_IMAGES).fill(null)
+  );
   const [saving, setSaving] = useState(false);
   const { handleKeyDown } = useEnterNavigation(() => {
     const formEl = document.querySelector("#banner-form") ?? document.querySelector("form");
@@ -196,6 +252,68 @@ export default function BannersPage() {
     const values = form.placement_slots || [];
     return values.map((value) => ({ value, label: map.get(value) ?? value }));
   }, [form.placement_slots]);
+
+  function clearImageSlot(index: number) {
+    setImageSlots((prev) => {
+      const cur = prev[index];
+      const rid = cur.kind === "local" && cur.replacePublicId ? cur.replacePublicId : null;
+      revokeSlotPreview(cur);
+      const next = [...prev];
+      next[index] = { kind: "empty" };
+      if (rid) {
+        setPendingDeleteImagePublicIds((p) => (p.includes(rid) ? p : [...p, rid]));
+      }
+      return next;
+    });
+    setSlotStatus((prev) => prev.map((s, i) => (i === index ? "idle" : s)));
+    setSlotProgress((prev) => prev.map((p, i) => (i === index ? 0 : p)));
+    setSlotError((prev) => prev.map((e, i) => (i === index ? null : e)));
+  }
+
+  function removeRemoteSlot(index: number, publicId: string) {
+    setPendingDeleteImagePublicIds((p) => (p.includes(publicId) ? p : [...p, publicId]));
+    clearImageSlot(index);
+  }
+
+  async function onSlotFileInputChange(index: number, file: File | null) {
+    if (!file) return;
+    setSlotStatus((prev) => prev.map((s, i) => (i === index ? "uploading" : s)));
+    setSlotProgress((prev) => prev.map((p, i) => (i === index ? 0 : p)));
+    setSlotError((prev) => prev.map((e, i) => (i === index ? null : e)));
+    let uploadedKey = "";
+    try {
+      const result = await uploadFile(file, {
+        entity: "banner",
+        onProgress: (percent) =>
+          setSlotProgress((prev) => prev.map((p, i) => (i === index ? percent : p))),
+      });
+      uploadedKey = result.key;
+    } catch (err) {
+      setSlotStatus((prev) => prev.map((s, i) => (i === index ? "error" : s)));
+      setSlotError((prev) =>
+        prev.map((e, i) => (i === index ? (err instanceof Error ? err.message : "Upload failed.") : e))
+      );
+      return;
+    }
+    setImageSlots((prev) => {
+      const cur = prev[index];
+      if (cur.kind === "empty" && countFilledSlots(prev) >= MAX_BANNER_IMAGES) {
+        return prev;
+      }
+      const previewUrl = buildPublicMediaUrlFromKey(uploadedKey);
+      const next = [...prev];
+      revokeSlotPreview(next[index]);
+      if (cur.kind === "legacy") {
+        next[index] = { kind: "local", file, previewUrl, uploadedKey, uploadAsMain: true };
+      } else if (cur.kind === "remote") {
+        next[index] = { kind: "local", file, previewUrl, uploadedKey, replacePublicId: cur.publicId };
+      } else {
+        next[index] = { kind: "local", file, previewUrl, uploadedKey };
+      }
+      return next;
+    });
+    setSlotStatus((prev) => prev.map((s, i) => (i === index ? "uploaded" : s)));
+  }
 
   function fetchData() {
     setLoading(true);
@@ -269,7 +387,11 @@ export default function BannersPage() {
     setEndTime("12:30:00");
     setStartPickerOpen(false);
     setEndPickerOpen(false);
-    setImageFile(null);
+    setImageSlots(emptyBannerSlots());
+    setPendingDeleteImagePublicIds([]);
+    setSlotStatus(Array(MAX_BANNER_IMAGES).fill("idle"));
+    setSlotProgress(Array(MAX_BANNER_IMAGES).fill(0));
+    setSlotError(Array(MAX_BANNER_IMAGES).fill(null));
   }
 
   function openEdit(banner: Banner) {
@@ -293,7 +415,11 @@ export default function BannersPage() {
     setEndTime(parsedEnd.time);
     setStartPickerOpen(false);
     setEndPickerOpen(false);
-    setImageFile(null);
+    setImageSlots(slotsFromBanner(banner));
+    setPendingDeleteImagePublicIds([]);
+    setSlotStatus(Array(MAX_BANNER_IMAGES).fill("idle"));
+    setSlotProgress(Array(MAX_BANNER_IMAGES).fill(0));
+    setSlotError(Array(MAX_BANNER_IMAGES).fill(null));
   }
 
   function applyEndOffsetFromNow(minutes: number) {
@@ -337,6 +463,17 @@ export default function BannersPage() {
       notify.validation("banners-form", { end_at: tPages("ctaEndAfterStartInvalid") });
       return;
     }
+    if (slotStatus.some((s) => s === "uploading")) {
+      notify.warning("Please wait for image uploads to finish.");
+      return;
+    }
+    const hasIncompleteUpload = imageSlots.some(
+      (slot) => slot.kind === "local" && !slot.uploadedKey
+    );
+    if (hasIncompleteUpload) {
+      notify.warning("One or more image uploads failed. Retry before saving.");
+      return;
+    }
 
     setSaving(true);
     const fd = new FormData();
@@ -348,7 +485,26 @@ export default function BannersPage() {
     fd.append("placement_slots", JSON.stringify(form.placement_slots));
     if (start_at) fd.append("start_at", start_at);
     if (end_at) fd.append("end_at", end_at);
-    if (imageFile) fd.append("image", imageFile);
+    const deleteIds = new Set<string>(pendingDeleteImagePublicIds);
+    for (const s of imageSlots) {
+      if (s.kind === "local" && s.replacePublicId) {
+        deleteIds.add(s.replacePublicId);
+      }
+    }
+    fd.append("image_public_ids_to_delete", JSON.stringify([...deleteIds]));
+
+    let appendedMain = false;
+    for (const s of imageSlots) {
+      if (s.kind !== "local") continue;
+      if (s.uploadAsMain) {
+        if (!appendedMain) {
+          fd.append("image_key", s.uploadedKey);
+          appendedMain = true;
+        }
+      } else {
+        fd.append("uploaded_image_keys", s.uploadedKey);
+      }
+    }
 
     try {
       if (editing === "new") {
@@ -673,16 +829,98 @@ export default function BannersPage() {
                 </div>
               )}
             </div>
-            <div className="sm:col-span-2">
+            <div className="sm:col-span-2 space-y-2">
               <label className="mb-1 block text-sm font-medium">{tPages("bannersLabelImage")}</label>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={(e) => setImageFile(e.target.files?.[0] ?? null)}
-                className="form-file-input text-sm"
-                onKeyDown={handleKeyDown}
-              />
-              {editing !== "new" && !imageFile && (
+              <p className="text-xs text-muted-foreground">
+                {tPages("bannersImagesHint", { max: MAX_BANNER_IMAGES })}
+              </p>
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 min-[520px]:grid-cols-3 lg:grid-cols-5">
+                {imageSlots.map((slot, index) => {
+                  const filled = countFilledSlots(imageSlots);
+                  const showPreview =
+                    slot.kind === "remote" || slot.kind === "legacy" || slot.kind === "local";
+                  const previewSrc =
+                    slot.kind === "local"
+                      ? slot.previewUrl
+                      : slot.kind === "remote"
+                        ? slot.url
+                        : slot.kind === "legacy"
+                          ? slot.url
+                          : null;
+                  const canAddInEmpty =
+                    slot.kind === "empty" && filled < MAX_BANNER_IMAGES;
+                  return (
+                    <div
+                      key={index}
+                      className="flex min-w-0 flex-col overflow-hidden rounded-xl border border-border bg-card p-2 shadow-sm ring-1 ring-border/40"
+                    >
+                      <div className="mb-1.5 flex items-center justify-between gap-1">
+                        <span className="truncate text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                          {index + 1}
+                        </span>
+                        {(slot.kind === "remote" || slot.kind === "local") && (
+                          <button
+                            type="button"
+                            title={tCommon("delete")}
+                            className="inline-flex h-7 min-w-7 shrink-0 items-center justify-center rounded-ui border border-border text-sm leading-none text-muted-foreground hover:border-destructive/50 hover:bg-destructive/10 hover:text-destructive"
+                            onClick={() => {
+                              if (slot.kind === "remote") {
+                                removeRemoteSlot(index, slot.publicId);
+                              } else {
+                                clearImageSlot(index);
+                              }
+                            }}
+                          >
+                            ×
+                          </button>
+                        )}
+                      </div>
+                      <div className="relative aspect-[4/3] w-full overflow-hidden rounded-lg border border-border/80 bg-muted/30">
+                        {showPreview && previewSrc ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            src={previewSrc}
+                            alt=""
+                            className="h-full w-full object-cover"
+                          />
+                        ) : (
+                          <div className="flex h-full min-h-[72px] w-full items-center justify-center text-xs text-muted-foreground">
+                            —
+                          </div>
+                        )}
+                      </div>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        disabled={(slot.kind === "empty" && !canAddInEmpty) || slotStatus[index] === "uploading"}
+                        onChange={(e) => {
+                          const f = e.target.files?.[0] ?? null;
+                          e.target.value = "";
+                          void onSlotFileInputChange(index, f);
+                        }}
+                        className="form-file-input mt-2 w-full min-w-0 text-[11px] file:mr-2 file:rounded-md file:border-0 file:bg-primary/15 file:px-2 file:py-1 file:text-[11px] file:font-medium file:text-foreground hover:file:bg-primary/25"
+                        onKeyDown={handleKeyDown}
+                      />
+                      <p className="mt-1 text-[11px] text-muted-foreground">
+                        {slotStatus[index] === "uploading" ? `Uploading ${slotProgress[index]}%` : slotStatus[index] === "uploaded" ? "Replace" : slotStatus[index] === "error" ? (
+                          <button
+                            type="button"
+                            className="text-destructive underline"
+                            onClick={() => {
+                              const local = imageSlots[index];
+                              if (local.kind === "local") void onSlotFileInputChange(index, local.file);
+                            }}
+                          >
+                            Failed. Retry
+                          </button>
+                        ) : "Upload Image"}
+                      </p>
+                      {slotError[index] && <p className="text-[11px] text-destructive">{slotError[index]}</p>}
+                    </div>
+                  );
+                })}
+              </div>
+              {editing !== "new" && countFilledSlots(imageSlots) === 0 && (
                 <p className="mt-1 text-xs text-muted-foreground">
                   {tPages("bannersKeepImageHint")}
                 </p>
@@ -707,7 +945,7 @@ export default function BannersPage() {
           <div className="flex gap-2">
             <button
               type="submit"
-              disabled={saving || (editing === "new" && !imageFile)}
+              disabled={saving || slotStatus.some((s) => s === "uploading") || (editing === "new" && countFilledSlots(imageSlots) === 0)}
               className="rounded-card bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
             >
               {saving ? tCommon("saving") : tCommon("save")}
