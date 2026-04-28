@@ -73,14 +73,14 @@ export function BlogImageUpload({
             }}
             onDrop={handleDrop}
           >
-            <span className="rounded-ui bg-primary/10 p-2 text-primary">
-              <ImageIcon className="size-6" />
+            <span className="text-primary">
+              <ImageIcon className="size-7" />
             </span>
-            <span className="text-sm font-semibold text-foreground">
+            <span className="text-xs font-semibold text-foreground">
               Drop your image here, or{" "}
               <span className="text-primary underline underline-offset-2">browse</span>
             </span>
-            <span className="text-xs text-muted-foreground">Supports: JPG, JPEG2000, PNG</span>
+            <span className="text-[11px] text-muted-foreground">Supports: JPG, JPEG2000, PNG</span>
             <input
               ref={inputRef}
               type="file"
@@ -106,7 +106,7 @@ export function BlogImageUpload({
             disabled={disabled}
             className="h-10 w-full justify-center"
           >
-            Replace image
+            Replace
           </Button>
           <Button
             type="button"

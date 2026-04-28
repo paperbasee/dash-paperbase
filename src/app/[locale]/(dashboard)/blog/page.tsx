@@ -91,6 +91,10 @@ export default function BlogListPage() {
     void fetchBlogs();
   }, [fetchBlogs]);
 
+  const handleDeleteBlog = useCallback((publicId: string) => {
+    setBlogs((prev) => prev.filter((blog) => blog.public_id !== publicId));
+  }, []);
+
   const tagOptions = tags.map((t) => ({
     value: t.public_id,
     label: t.name,
@@ -219,7 +223,12 @@ export default function BlogListPage() {
         <div className="rounded-card border border-dashed border-card-border bg-card p-3">
           <div className="grid min-w-0 grid-cols-1 justify-items-stretch gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {blogs.map((blog) => (
-              <BlogListCard key={blog.public_id} blog={blog} locale={locale} />
+              <BlogListCard
+                key={blog.public_id}
+                blog={blog}
+                locale={locale}
+                onDelete={handleDeleteBlog}
+              />
             ))}
           </div>
         </div>

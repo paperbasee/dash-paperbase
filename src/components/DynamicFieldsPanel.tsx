@@ -18,7 +18,7 @@ import {
   useSortable,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { Plus, Trash2, GripVertical, Save } from "lucide-react";
+import { Plus, Trash, GripVertical, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
@@ -215,7 +215,7 @@ function SortableFieldItem({
               }}
               aria-label={tp("removeFieldAria")}
             >
-              <Trash2 className="size-4" />
+              <Trash className="size-4" />
               {tp("remove")}
             </Button>
           </div>

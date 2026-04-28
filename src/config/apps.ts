@@ -11,7 +11,7 @@ import {
   Image as ImageIcon,
   Truck,
   Ticket,
-  Trash2,
+  Trash,
   Newspaper,
 } from "lucide-react";
 
@@ -130,7 +130,7 @@ export const APP_CONFIG: Record<string, AppConfig> = {
   trash: {
     id: "trash",
     label: "Trash",
-    icon: Trash2,
+    icon: Trash,
     description: "Restore or permanently delete removed products and orders",
     essential: false,
     href: "/trash",

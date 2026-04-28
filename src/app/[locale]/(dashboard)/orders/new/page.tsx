@@ -1,7 +1,7 @@
 "use client";
 
 import { useLocale, useTranslations } from "next-intl";
-import { Undo2, Trash2 } from "lucide-react";
+import { Undo2, Trash } from "lucide-react";
 import { useBranding } from "@/context/BrandingContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -462,7 +462,7 @@ export default function NewOrderPage() {
                                 className="text-muted-foreground hover:text-destructive"
                                 aria-label={tPages("orderNewRemoveItemAria")}
                               >
-                                <Trash2 className="size-4" />
+                                <Trash className="size-4" />
                               </Button>
                             </td>
                           </tr>

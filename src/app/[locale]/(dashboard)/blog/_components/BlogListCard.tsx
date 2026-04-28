@@ -1,9 +1,14 @@
 "use client";
 
+import { useState } from "react";
+import { Loader2, Trash } from "lucide-react";
 import { Link } from "@/i18n/navigation";
+import api from "@/lib/api";
 import type { Blog } from "@/types";
 import { formatDashboardDateOptional } from "@/lib/datetime-display";
 import { cn } from "@/lib/utils";
+import { notify } from "@/notifications";
+import { useConfirm } from "@/context/ConfirmDialogContext";
 
 function estimateReadingMinutesFromHtml(html: string | undefined): number {
   if (!html?.trim()) return 1;
@@ -25,9 +30,12 @@ function blogDisplayDateIso(blog: Blog): string | null {
 type BlogListCardProps = {
   blog: Blog;
   locale: string;
+  onDelete: (publicId: string) => void;
 };
 
-export function BlogListCard({ blog, locale }: BlogListCardProps) {
+export function BlogListCard({ blog, locale, onDelete }: BlogListCardProps) {
+  const confirm = useConfirm();
+  const [deleting, setDeleting] = useState(false);
   const readMins = estimateReadingMinutesFromHtml(blog.content);
   const dateStr = formatDashboardDateOptional(blogDisplayDateIso(blog), locale);
   const tagText = (blog.tags || [])
@@ -38,14 +46,28 @@ export function BlogListCard({ blog, locale }: BlogListCardProps) {
   const pillText = (tagText || "Untagged").toUpperCase();
   const byline = blog.author_name?.trim() || "—";
 
+  async function handleDelete() {
+    if (deleting) return;
+    const ok = await confirm({
+      title: "Delete blog post?",
+      message: `Delete "${blog.title || "Untitled post"}"? This action cannot be undone.`,
+      variant: "danger",
+    });
+    if (!ok) return;
+    try {
+      setDeleting(true);
+      await api.delete(`admin/blogs/${blog.public_id}/`);
+      onDelete(blog.public_id);
+    } catch (err) {
+      notify.error(err);
+    } finally {
+      setDeleting(false);
+    }
+  }
+
   return (
-    <Link
-      href={`/blog/${blog.public_id}/edit`}
-      className="block h-full min-w-0 w-full"
-    >
-      <article
-        className="flex h-full min-w-0 flex-col overflow-hidden rounded-2xl border border-border/70 bg-card p-5 shadow-md"
-      >
+    <article className="group flex h-full min-w-0 flex-col overflow-hidden rounded-2xl border border-border/70 bg-card p-5 shadow-md">
+      <Link href={`/blog/${blog.public_id}/edit`} className="block min-w-0 w-full flex-1">
         <div className="relative mb-4 min-h-0 w-full">
           <div
             className={cn(
@@ -65,6 +87,23 @@ export function BlogListCard({ blog, locale }: BlogListCardProps) {
                 <span className="text-xs text-muted-foreground">No cover image</span>
               </div>
             )}
+            <button
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                void handleDelete();
+              }}
+              aria-label={`Delete blog ${blog.title || blog.public_id}`}
+              disabled={deleting}
+              className="absolute top-2 right-2 inline-flex h-8 w-8 items-center justify-center rounded-ui bg-black/60 text-white opacity-0 transition-opacity hover:bg-black/70 group-hover:opacity-100 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {deleting ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Trash className="h-4 w-4" />
+              )}
+            </button>
           </div>
         </div>
 
@@ -95,7 +134,7 @@ export function BlogListCard({ blog, locale }: BlogListCardProps) {
             </div>
           </div>
         </div>
-      </article>
-    </Link>
+      </Link>
+    </article>
   );
 }

@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } fro
 import { useLocale, useTranslations } from "next-intl";
 import { Link, useRouter } from "@/i18n/navigation";
 import { useParams, usePathname } from "next/navigation";
-import { ImageIcon, Undo2, Plus, X, AlertCircle, Loader2 } from "lucide-react";
+import { ImageIcon, Undo2, Plus, X, AlertCircle, Loader2} from "lucide-react";
 import api from "@/lib/api";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -528,11 +528,11 @@ export default function ProductDetailClient() {
           {canDeleteProduct && (
             <Button
               type="button"
-              variant="outline"
-              size="sm"
+              variant="destructive"
+              loading={deleting}
               disabled={deleting || saving}
               onClick={() => void handleDeleteProduct()}
-              className="rounded-card border-destructive text-destructive hover:bg-destructive/10"
+              className="gap-2"
             >
               {deleting ? tPages("deleting") : tPages("productDetailDeleteProduct")}
             </Button>
@@ -847,14 +847,14 @@ export default function ProductDetailClient() {
                         onPickFile(0, file);
                       }}
                     >
-                      <span className="rounded-ui bg-primary/10 p-2 text-primary">
-                        <ImageIcon className="size-6" />
+                      <span className="text-primary">
+                        <ImageIcon className="size-7" />
                       </span>
-                      <span className="text-sm font-semibold text-foreground">
+                      <span className="text-xs font-semibold text-foreground">
                         Drop your image here, or{" "}
                         <span className="text-primary underline underline-offset-2">browse</span>
                       </span>
-                      <span className="text-xs text-muted-foreground">
+                      <span className="text-[11px] text-muted-foreground">
                         Supports: JPG, JPEG2000, PNG
                       </span>
                       <input

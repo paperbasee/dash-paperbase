@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
-import { Trash2, Undo2, X, Loader2, AlertCircle, CheckCircle2 } from "lucide-react";
+import { Trash, Undo2, X, Loader2, AlertCircle, CheckCircle2 } from "lucide-react";
 import { isAxiosError } from "axios";
 import api from "@/lib/api";
 import { useRouter } from "@/i18n/navigation";
@@ -32,6 +32,8 @@ interface BlogFormState {
 interface BlogFormProps {
   mode: "new" | "edit";
   initialBlog?: Blog;
+  onDelete?: () => void;
+  deleteLoading?: boolean;
 }
 
 const BLOG_TITLE_MAX = 255;
@@ -69,7 +71,12 @@ function stateFromBlog(blog: Blog): BlogFormState {
   };
 }
 
-export function BlogForm({ mode, initialBlog }: BlogFormProps) {
+export function BlogForm({
+  mode,
+  initialBlog,
+  onDelete,
+  deleteLoading = false,
+}: BlogFormProps) {
   const router = useRouter();
   const confirm = useConfirm();
   const { fieldErrors, clearValidation } = useNotificationValidation("blog-form");
@@ -336,15 +343,29 @@ export function BlogForm({ mode, initialBlog }: BlogFormProps) {
             {mode === "new" ? "New blog post" : "Edit blog post"}
           </h1>
         </div>
-        <Button
-          type="button"
-          onClick={() => void handleSave()}
-          loading={saving}
-          disabled={saving || uploadStatus === "uploading"}
-          className="w-full shrink-0 gap-2 sm:w-auto"
-        >
-          Save post
-        </Button>
+        <div className="flex w-full shrink-0 gap-2 sm:w-auto">
+          {mode === "edit" && onDelete ? (
+            <Button
+              type="button"
+              variant="destructive"
+              className="flex-1 gap-2 sm:flex-none"
+              onClick={onDelete}
+              loading={deleteLoading}
+              disabled={deleteLoading || saving || uploadStatus === "uploading"}
+            >
+              Delete post
+            </Button>
+          ) : null}
+          <Button
+            type="button"
+            onClick={() => void handleSave()}
+            loading={saving}
+            disabled={saving || uploadStatus === "uploading" || deleteLoading}
+            className="flex-1 gap-2 sm:flex-none"
+          >
+            Save post
+          </Button>
+        </div>
       </div>
 
       <form
@@ -627,7 +648,7 @@ export function BlogForm({ mode, initialBlog }: BlogFormProps) {
                       aria-label={`Delete tag ${t.name}`}
                       className="inline-flex h-7 w-7 items-center justify-center rounded-ui text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
                     >
-                      <Trash2 className="size-3.5" />
+                      <Trash className="size-3.5" />
                     </button>
                   </div>
                 ))}

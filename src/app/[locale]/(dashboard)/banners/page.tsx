@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import dynamic from "next/dynamic";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
-import { Clock2Icon, Undo2 } from "lucide-react";
+import { Clock2Icon, ImageIcon, Undo2 } from "lucide-react";
 import { isAxiosError } from "axios";
 import api from "@/lib/api";
 import { Button } from "@/components/ui/button";
@@ -885,23 +885,50 @@ export default function BannersPage() {
                             className="h-full w-full object-cover"
                           />
                         ) : (
-                          <div className="flex h-full min-h-[72px] w-full items-center justify-center text-xs text-muted-foreground">
-                            —
-                          </div>
+                          <label
+                            className={cn(
+                              "flex h-full w-full cursor-pointer flex-col items-center justify-center gap-2 bg-card px-3 text-center",
+                              !canAddInEmpty && "cursor-not-allowed opacity-60",
+                            )}
+                            title={!canAddInEmpty ? tPages("bannersImagesHint", { max: MAX_BANNER_IMAGES }) : undefined}
+                          >
+                            <span className="inline-flex text-primary">
+                              <ImageIcon className="size-7" />
+                            </span>
+                            <p className="text-[11px] font-semibold text-foreground">
+                              Drop your image here, or{" "}
+                              <span className="underline underline-offset-2">browse</span>
+                            </p>
+                            <p className="text-[10px] text-muted-foreground">Supports: JPG, JPEG2000, PNG</p>
+                            <input
+                              type="file"
+                              accept="image/*"
+                              disabled={!canAddInEmpty || slotStatus[index] === "uploading"}
+                              onChange={(e) => {
+                                const f = e.target.files?.[0] ?? null;
+                                e.target.value = "";
+                                void onSlotFileInputChange(index, f);
+                              }}
+                              className="hidden"
+                              onKeyDown={handleKeyDown}
+                            />
+                          </label>
                         )}
                       </div>
-                      <input
-                        type="file"
-                        accept="image/*"
-                        disabled={(slot.kind === "empty" && !canAddInEmpty) || slotStatus[index] === "uploading"}
-                        onChange={(e) => {
-                          const f = e.target.files?.[0] ?? null;
-                          e.target.value = "";
-                          void onSlotFileInputChange(index, f);
-                        }}
-                        className="form-file-input mt-2 w-full min-w-0 text-[11px] file:mr-2 file:rounded-md file:border-0 file:bg-primary/15 file:px-2 file:py-1 file:text-[11px] file:font-medium file:text-foreground hover:file:bg-primary/25"
-                        onKeyDown={handleKeyDown}
-                      />
+                      {showPreview ? (
+                        <input
+                          type="file"
+                          accept="image/*"
+                          disabled={slotStatus[index] === "uploading"}
+                          onChange={(e) => {
+                            const f = e.target.files?.[0] ?? null;
+                            e.target.value = "";
+                            void onSlotFileInputChange(index, f);
+                          }}
+                          className="form-file-input mt-2 w-full min-w-0 text-[11px] file:mr-2 file:rounded-md file:border-0 file:bg-primary/15 file:px-2 file:py-1 file:text-[11px] file:font-medium file:text-foreground hover:file:bg-primary/25"
+                          onKeyDown={handleKeyDown}
+                        />
+                      ) : null}
                       <p className="mt-1 text-[11px] text-muted-foreground">
                         {slotStatus[index] === "uploading" ? `Uploading ${slotProgress[index]}%` : slotStatus[index] === "uploaded" ? "Replace" : slotStatus[index] === "error" ? (
                           <button

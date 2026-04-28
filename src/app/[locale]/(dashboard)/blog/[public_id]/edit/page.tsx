@@ -1,21 +1,26 @@
 "use client";
 
 import { use, useEffect, useState } from "react";
+import { useRouter } from "@/i18n/navigation";
 import api from "@/lib/api";
 import { notify } from "@/notifications";
 import type { Blog } from "@/types";
 import { BlogForm } from "../../_components/BlogForm";
 import { DashboardDetailSkeleton } from "@/components/skeletons/dashboard-skeletons";
+import { useConfirm } from "@/context/ConfirmDialogContext";
 
 export default function EditBlogPage({
   params,
 }: {
   params: Promise<{ public_id: string }>;
 }) {
+  const router = useRouter();
+  const confirm = useConfirm();
   const { public_id } = use(params);
   const [blog, setBlog] = useState<Blog | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -48,5 +53,33 @@ export default function EditBlogPage({
       </div>
     );
   }
-  return <BlogForm mode="edit" initialBlog={blog} />;
+  const currentBlog = blog;
+
+  async function handleDelete() {
+    const ok = await confirm({
+      title: "Delete blog post?",
+      message: `Delete "${currentBlog.title || "Untitled post"}"? This action cannot be undone.`,
+      variant: "danger",
+    });
+    if (!ok) return;
+    try {
+      setDeleting(true);
+      await api.delete(`admin/blogs/${currentBlog.public_id}/`);
+      notify.warning("Post deleted");
+      router.push("/blog");
+    } catch (err) {
+      notify.error(err);
+    } finally {
+      setDeleting(false);
+    }
+  }
+
+  return (
+    <BlogForm
+      mode="edit"
+      initialBlog={currentBlog}
+      onDelete={() => void handleDelete()}
+      deleteLoading={deleting}
+    />
+  );
 }
