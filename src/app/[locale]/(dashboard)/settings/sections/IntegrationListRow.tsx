@@ -104,13 +104,10 @@ export function MarketingIntegrationListRow({
             variant="outline"
             className={settingsInvertedButtonClassName}
             disabled={togglingId === integration.public_id}
+            loading={togglingId === integration.public_id}
             onClick={onToggleActive}
           >
-            {togglingId === integration.public_id
-              ? t("marketing.ellipsis")
-              : integration.is_active
-                ? t("marketing.deactivate")
-                : t("marketing.activate")}
+            {integration.is_active ? t("marketing.deactivate") : t("marketing.activate")}
           </Button>
           <Button
             type="button"

@@ -1,7 +1,7 @@
 "use client";
 
 import { useLocale, useTranslations } from "next-intl";
-import { Undo2, Trash } from "lucide-react";
+import { Loader2, Undo2, Trash } from "lucide-react";
 import { useBranding } from "@/context/BrandingContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -87,7 +87,8 @@ export default function NewOrderPage() {
             disabled={saving || items.length === 0}
             className="gap-2"
           >
-            {saving ? tPages("orderNewCreating") : tPages("orderNewCreateOrder")}
+            {saving && <Loader2 className="size-4 animate-spin" />}
+            {tPages("orderNewCreateOrder")}
           </Button>
         </div>
       </div>

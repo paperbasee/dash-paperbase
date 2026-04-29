@@ -339,9 +339,10 @@ export default function MarketingProviderCard({ provider }: { provider: Marketin
                 variant="outline"
                 className={settingsInvertedButtonClassName}
                 disabled={saving}
+                loading={saving}
               >
                 <Save className="mr-1 size-3.5" />
-                {saving ? t("marketing.connecting") : t("marketing.connect")}
+                {t("marketing.connect")}
               </Button>
             ) : null}
             <Button

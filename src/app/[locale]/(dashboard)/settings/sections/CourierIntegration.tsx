@@ -190,8 +190,9 @@ export default function CourierIntegration() {
               variant="outline"
               className={settingsInvertedButtonClassName}
               disabled={saving}
+              loading={saving}
             >
-              {saving ? t("courier.connecting") : t("courier.connect")}
+              {t("courier.connect")}
             </Button>
             <Button
               type="button"
@@ -265,13 +266,10 @@ export default function CourierIntegration() {
                   variant="outline"
                   className={settingsInvertedButtonClassName}
                   disabled={togglingId === c.public_id}
+                  loading={togglingId === c.public_id}
                   onClick={() => handleToggleActive(c)}
                 >
-                  {togglingId === c.public_id
-                    ? t("courier.ellipsis")
-                    : c.is_active
-                      ? t("courier.deactivate")
-                      : t("courier.activate")}
+                  {c.is_active ? t("courier.deactivate") : t("courier.activate")}
                 </Button>
                 <Button
                   type="button"

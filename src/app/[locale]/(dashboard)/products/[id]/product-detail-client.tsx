@@ -534,7 +534,7 @@ export default function ProductDetailClient() {
               onClick={() => void handleDeleteProduct()}
               className="gap-2"
             >
-              {deleting ? tPages("deleting") : tPages("productDetailDeleteProduct")}
+              {tPages("productDetailDeleteProduct")}
             </Button>
           )}
           {!isEditMode && (

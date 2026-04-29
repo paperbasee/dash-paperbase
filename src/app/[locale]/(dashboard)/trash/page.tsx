@@ -263,25 +263,23 @@ export default function TrashPage() {
               type="button"
               onClick={handleRestoreSelected}
               disabled={bulkBusy || busyId !== null}
-              className="shrink-0 rounded-card border border-border bg-secondary px-4 py-2 text-sm font-semibold text-secondary-foreground transition hover:bg-secondary/80 disabled:opacity-50"
+              className="inline-flex shrink-0 items-center gap-2 rounded-card border border-border bg-secondary px-4 py-2 text-sm font-semibold text-secondary-foreground transition hover:bg-secondary/80 disabled:opacity-50"
             >
-              {bulkRestoring
-                ? tPages("trashRestoring")
-                : tPages("trashRestoreSelected", {
-                    count: toLocaleDigits(String(selectedIds.size), locale),
-                  })}
+              {bulkRestoring && <Loader2 className="size-4 animate-spin" />}
+              {tPages("trashRestoreSelected", {
+                count: toLocaleDigits(String(selectedIds.size), locale),
+              })}
             </button>
             <button
               type="button"
               onClick={handleDeleteSelected}
               disabled={bulkBusy || busyId !== null}
-              className="shrink-0 rounded-card bg-destructive px-4 py-2 text-sm font-semibold text-destructive-foreground transition hover:bg-destructive/90 disabled:opacity-50"
+              className="inline-flex shrink-0 items-center gap-2 rounded-card bg-destructive px-4 py-2 text-sm font-semibold text-destructive-foreground transition hover:bg-destructive/90 disabled:opacity-50"
             >
-              {bulkDeleting
-                ? tPages("deleting")
-                : tPages("deleteSelectedPermanent", {
-                    count: toLocaleDigits(String(selectedIds.size), locale),
-                  })}
+              {bulkDeleting && <Loader2 className="size-4 animate-spin" />}
+              {tPages("deleteSelectedPermanent", {
+                count: toLocaleDigits(String(selectedIds.size), locale),
+              })}
             </button>
           </div>
         )}

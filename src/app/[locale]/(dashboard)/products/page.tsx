@@ -28,7 +28,7 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { GripVertical, Undo2 } from "lucide-react";
+import { GripVertical, Loader2, Undo2 } from "lucide-react";
 import api from "@/lib/api";
 import { useBranding } from "@/context/BrandingContext";
 import type { AdminCategoryTreeNode, Product, PaginatedResponse } from "@/types";
@@ -378,17 +378,16 @@ export default function ProductsPage() {
             <button
               onClick={handleDeleteSelected}
               disabled={deleting}
-              className="rounded-card bg-destructive px-4 py-2 text-sm font-semibold text-destructive-foreground transition hover:bg-destructive/90 disabled:opacity-50"
+              className="inline-flex items-center gap-2 rounded-card bg-destructive px-4 py-2 text-sm font-semibold text-destructive-foreground transition hover:bg-destructive/90 disabled:opacity-50"
             >
-              {deleting
-                ? tPages("deleting")
-                : deleteIsSuperuser
-                  ? tPages("deleteSelectedPermanent", {
-                      count: toLocaleDigits(String(selectedIds.size), locale),
-                    })
-                  : tPages("moveToTrashSelected", {
-                      count: toLocaleDigits(String(selectedIds.size), locale),
-                    })}
+              {deleting && <Loader2 className="size-4 animate-spin" />}
+              {deleteIsSuperuser
+                ? tPages("deleteSelectedPermanent", {
+                    count: toLocaleDigits(String(selectedIds.size), locale),
+                  })
+                : tPages("moveToTrashSelected", {
+                    count: toLocaleDigits(String(selectedIds.size), locale),
+                  })}
             </button>
           )}
           <Link

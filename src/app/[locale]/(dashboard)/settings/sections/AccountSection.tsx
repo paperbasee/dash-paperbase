@@ -2,6 +2,7 @@
 
 import { useRef, type Dispatch, type FormEvent, type SetStateAction } from "react";
 import { useTranslations } from "next-intl";
+import { Loader2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -112,10 +113,11 @@ export default function AccountSection({
           <Button
             type="submit"
             variant="outline"
-            className={settingsInvertedButtonClassName}
+            className={`${settingsInvertedButtonClassName} gap-2`}
             disabled={accountSaving}
           >
-            {accountSaving ? t("saving") : t("account.saveButton")}
+            {accountSaving && <Loader2 className="size-4 animate-spin" />}
+            {t("account.saveButton")}
           </Button>
           </form>
         </SettingsSectionBody>

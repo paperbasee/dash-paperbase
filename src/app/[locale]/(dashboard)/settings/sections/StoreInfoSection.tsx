@@ -3,6 +3,7 @@
 import { useRef, type Dispatch, type FormEvent, type SetStateAction } from "react";
 import type React from "react";
 import { useTranslations } from "next-intl";
+import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -267,10 +268,11 @@ export default function StoreInfoSection({
         <Button
           type="submit"
           variant="outline"
-          className={settingsInvertedButtonClassName}
+          className={`${settingsInvertedButtonClassName} gap-2`}
           disabled={storeSaving}
         >
-          {storeSaving ? t("saving") : t("store.saveButton")}
+          {storeSaving && <Loader2 className="size-4 animate-spin" />}
+          {t("store.saveButton")}
         </Button>
         </form>
       </SettingsSectionBody>
