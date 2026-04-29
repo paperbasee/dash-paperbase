@@ -15,6 +15,34 @@ function sanitizeMessage(input: unknown): string | null {
   return value;
 }
 
+function extractApiMessage(payload: unknown): string | null {
+  if (!payload) return null;
+  if (typeof payload === "string") return sanitizeMessage(payload);
+  if (Array.isArray(payload)) {
+    for (const item of payload) {
+      const msg = extractApiMessage(item);
+      if (msg) return msg;
+    }
+    return null;
+  }
+  if (typeof payload !== "object") return null;
+
+  const obj = payload as Record<string, unknown>;
+
+  const direct =
+    sanitizeMessage(obj.detail) ??
+    sanitizeMessage(obj.message) ??
+    sanitizeMessage(obj.error);
+  if (direct) return direct;
+
+  // Some APIs return nested detail objects/arrays:
+  // { detail: { detail: "..." } } or { detail: ["..."] }.
+  const nestedDetail = extractApiMessage(obj.detail);
+  if (nestedDetail) return nestedDetail;
+
+  return null;
+}
+
 function flattenFieldErrors(value: unknown, prefix = "", out: FieldErrors = {}): FieldErrors {
   if (!value) return out;
   if (Array.isArray(value)) {
@@ -42,10 +70,20 @@ function flattenFieldErrors(value: unknown, prefix = "", out: FieldErrors = {}):
 }
 
 export function normalizeError(error: unknown, fallbackMessage?: string): NormalizedError {
+  if (typeof error === "string") {
+    return {
+      message: sanitizeMessage(error) ?? fallbackMessage ?? SAFE_FALLBACK,
+      raw: error,
+    };
+  }
+
   if (axios.isAxiosError(error)) {
     const responseData = error.response?.data;
-    const detail = sanitizeMessage((responseData as { detail?: unknown } | undefined)?.detail);
-    const message = detail ?? sanitizeMessage(error.message) ?? fallbackMessage ?? SAFE_FALLBACK;
+    const message =
+      extractApiMessage(responseData) ??
+      sanitizeMessage(error.message) ??
+      fallbackMessage ??
+      SAFE_FALLBACK;
     const fieldErrors = flattenFieldErrors(responseData);
     const code = sanitizeMessage((responseData as { code?: unknown } | undefined)?.code) ?? undefined;
     return {
@@ -58,8 +96,8 @@ export function normalizeError(error: unknown, fallbackMessage?: string): Normal
 
   if (error && typeof error === "object") {
     const obj = error as Record<string, unknown>;
-    const detail = sanitizeMessage(obj.detail);
-    const message = detail ?? sanitizeMessage(obj.message) ?? fallbackMessage ?? SAFE_FALLBACK;
+    const message =
+      extractApiMessage(obj) ?? sanitizeMessage(obj.message) ?? fallbackMessage ?? SAFE_FALLBACK;
     const fieldErrors = flattenFieldErrors(obj);
     return {
       message,

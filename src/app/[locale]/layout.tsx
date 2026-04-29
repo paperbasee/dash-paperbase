@@ -13,8 +13,8 @@ import { NotificationViewport } from "@/components/notifications/NotificationVie
 import StoreProfileSWRProvider from "@/components/StoreProfileSWRProvider";
 
 export const metadata: Metadata = {
-  title: "Paperbase",
-  description: "Paperbase dashboard",
+  title: "paperbase",
+  description: "paperbase dashboard",
 };
 
 export default async function LocaleLayout({
