@@ -7,6 +7,7 @@ import {
   Layers,
   Tags,
   Bell,
+  MessageSquare,
   PackageSearch,
   Image as ImageIcon,
   Truck,
@@ -147,6 +148,16 @@ export const APP_CONFIG: Record<string, AppConfig> = {
     countKey: "banners",
     parentId: null,
   },
+  popup: {
+    id: "popup",
+    label: "Pop-up",
+    icon: MessageSquare,
+    description: "Marketing pop-up modal announcement",
+    essential: false,
+    href: "/popup",
+    countKey: null,
+    parentId: null,
+  },
   blog: {
     id: "blog",
     label: "Blog",
@@ -183,6 +194,7 @@ export const OPTIONAL_APP_IDS = [
   "cta",
   "customers",
   "banners",
+  "popup",
   "blog",
 ] as const;
 
@@ -195,7 +207,7 @@ export const CATALOG_SUB_APP_IDS = [
 ] as const;
 
 /** Collapsible “Marketing” group in the sidebar (CTA + Banners). */
-export const MARKETING_SUB_APP_IDS = ["cta", "banners"] as const;
+export const MARKETING_SUB_APP_IDS = ["cta", "banners", "popup"] as const;
 
 /** Top-level nav items (excluding catalog children). */
 export const MAIN_NAV_APP_IDS = [

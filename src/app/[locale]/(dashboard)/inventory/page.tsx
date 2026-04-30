@@ -255,13 +255,13 @@ export default function InventoryPage() {
                       inv.is_low ? "bg-amber-50/50 dark:bg-amber-950/20" : undefined
                     }
                   >
-                    <td className="px-4 py-3 font-medium text-foreground">
+                    <td className="px-4 py-3 font-medium text-foreground whitespace-nowrap">
                       {inv.product_name}
                     </td>
-                    <td className="px-4 py-3 text-muted-foreground">
+                    <td className="px-4 py-3 text-muted-foreground whitespace-nowrap">
                       {inv.variant_sku || "—"}
                     </td>
-                    <td className="px-4 py-3 text-muted-foreground">
+                    <td className="px-4 py-3 text-muted-foreground whitespace-nowrap">
                       {inv.option_labels?.length
                         ? inv.option_labels.join(" · ")
                         : "—"}

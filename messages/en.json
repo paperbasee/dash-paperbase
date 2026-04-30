@@ -25,6 +25,7 @@
     "activities": "Activities",
     "cta": "CTA",
     "banners": "Banners",
+    "popup": "Pop-up",
     "blog": "Blog",
     "blogNew": "New post",
     "blogEdit": "Edit post",
@@ -78,6 +79,7 @@
     "activities": "Activities",
     "trash": "Trash",
     "banners": "Banners",
+    "popup": "Pop-up",
     "blog": "Blog",
     "blogNew": "New post",
     "shipping": "Shipping",
@@ -593,7 +595,7 @@
     "shippingRateMeta": "{status} · {rateType} · price: {price}",
     "shippingRateRange": "· range: {min} – {max}",
     "ctaGoBackAria": "Go back",
-    "ctaTitle": "CTA banners ({count})",
+    "ctaTitle": "Call to Action ({count})",
     "ctaAdd": "Add CTA",
     "ctaNew": "New CTA",
     "ctaEdit": "Edit CTA",
@@ -836,8 +838,12 @@
     "serverUnreachableBody": "Unable to connect to the server. Please check your internet connection or try again later."
   },
   "dashboard": {
-    "title": "Dashboard overview",
-    "subtitle": "High-level snapshot of orders, products, customers, and support ticket activity.",
+    "title": "{greeting}, {name} 👋",
+    "greetingMorning": "Morning",
+    "greetingAfternoon": "Afternoon",
+    "greetingEvening": "Evening",
+    "greetingLateNight": "Late night",
+    "subtitle": "Here’s a detailed overview of what’s currently happening in your store, including recent activities and important updates.",
     "activitiesAria": "Activities",
     "recentActivities": "Recent activities",
     "noRecentActivity": "No recent admin activity yet.",
@@ -1075,18 +1081,19 @@
       "phonePlaceholder": "01XXXXXXXXX",
       "address": "Address",
       "addressPlaceholder": "123 Main St, City, Country",
+      "language": "Language",
+      "languageOptions": {
+        "en": "English (en)",
+        "bn": "বাংলা (bn)"
+      },
       "socialHeading": "Social links",
       "socialSubtitle": "Public URLs for your storefront footer or header (Facebook, Instagram, etc.). Saved with your store settings.",
       "socialUrlPlaceholder": "your-social-link",
       "socialLabels": {
         "facebook": "Facebook",
         "instagram": "Instagram",
-        "twitter": "X (Twitter)",
-        "youtube": "YouTube",
-        "linkedin": "LinkedIn",
-        "tiktok": "TikTok",
-        "pinterest": "Pinterest",
-        "website": "Website"
+        "whatsapp": "WhatsApp",
+        "tiktok": "TikTok"
       },
       "saveButton": "Save store settings",
       "saved": "Store settings saved.",
@@ -1176,6 +1183,10 @@
         "banners": {
           "label": "Banners",
           "description": "Manage banners for homepage, sidebar, footer"
+        },
+        "popup": {
+          "label": "Pop-up",
+          "description": "Marketing pop-up modal announcement"
         },
         "blog": {
           "label": "Blog",

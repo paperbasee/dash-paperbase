@@ -14,12 +14,6 @@ export const PLACEMENT_CONFIG: Record<string, PlacementEntry> = {
     zone: "top",
     label: "Home Top — Navbar / Hero area",
   },
-  home_mid: {
-    placement: "home_mid",
-    page: "home",
-    zone: "mid",
-    label: "Home Mid — Main content area",
-  },
   home_bottom: {
     placement: "home_bottom",
     page: "home",

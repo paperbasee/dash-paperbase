@@ -142,30 +142,36 @@ No other endpoints exist. Do not call any path not listed below.
 | # | Method | Path                                              | Purpose                                   |
 | - | ------ | ------------------------------------------------- | ----------------------------------------- |
 | 1 | GET    | `/api/v1/store/public/`                           | Store branding and public config          |
-| 2 | GET    | `/api/v1/products/`                               | List products (paginated)                 |
-| 3 | GET    | `/api/v1/products/<identifier>/`                  | Single product detail (id or slug)        |
-| 4 | GET    | `/api/v1/products/<identifier>/related/`          | Related products for a product           |
-| 5 | GET    | `/api/v1/products/search/`                        | Product-only search (paginated)           |
-| 6 | GET    | `/api/v1/categories/`                             | List categories (flat or tree)            |
-| 7 | GET    | `/api/v1/categories/<slug>/`                      | Single category by slug                   |
-| 8 | GET    | `/api/v1/catalog/filters/`                        | Filter sidebar metadata                   |
-| 9 | GET    | `/api/v1/banners/`                                | Active promotional banners                |
-| 10| GET    | `/api/v1/notifications/active/`                   | Active CTA notifications                  |
-| 11| GET    | `/api/v1/shipping/zones/`                         | Shipping zones with merged cost rules     |
-| 12| GET    | `/api/v1/shipping/options/`                       | Shipping methods for a zone               |
-| 13| POST   | `/api/v1/shipping/preview/`                       | Server-side shipping quote                |
-| 14| POST   | `/api/v1/pricing/preview/`                        | Single-product pricing preview            |
-| 15| POST   | `/api/v1/pricing/breakdown/`                      | Full-cart pricing breakdown               |
-| 16| POST   | `/api/v1/orders/`                                 | Create an order                           |
-| 17| POST   | `/api/v1/orders/<public_id>/payment/`             | Submit transaction for a prepayment order |
-| 18| GET    | `/api/v1/search/`                                 | Combined product + category search        |
-| 19| POST   | `/api/v1/support/tickets/`                        | Submit a support ticket                   |
-| 20| GET    | `/api/v1/blogs/`                                  | Published blog posts list                 |
-| 21| GET    | `/api/v1/blogs/<public_id>/`                      | Published blog post detail                |
-| 22| POST   | `/tracking/event`                                 | (Fired by bundled `tracker.js` only)      |
+| 2 | GET    | `/api/v1/storefront/home/`                        | Home sections (categories + products)     |
+| 3 | GET    | `/api/v1/products/`                               | List products (paginated)                 |
+| 4 | GET    | `/api/v1/products/<identifier>/`                  | Single product detail (id or slug)        |
+| 5 | GET    | `/api/v1/products/<identifier>/related/`          | Related products for a product            |
+| 6 | GET    | `/api/v1/products/search/`                        | Product-only search (paginated, legacy)   |
+| 7 | GET    | `/api/v1/categories/`                             | List categories (flat or tree)            |
+| 8 | GET    | `/api/v1/categories/<slug>/`                      | Single category by slug                   |
+| 9 | GET    | `/api/v1/catalog/filters/`                        | Filter sidebar metadata                   |
+| 10| GET    | `/api/v1/banners/`                                | Active promotional banners                |
+| 10a| GET   | `/api/v1/popups/`                                 | Active storefront popup                   |
+| 11| GET    | `/api/v1/notifications/active/`                   | Active CTA notifications                  |
+| 12| GET    | `/api/v1/shipping/zones/`                         | Shipping zones with merged cost rules     |
+| 13| GET    | `/api/v1/shipping/options/`                       | Shipping methods for a zone               |
+| 14| POST   | `/api/v1/shipping/preview/`                       | Server-side shipping quote                |
+| 15| POST   | `/api/v1/pricing/preview/`                        | Single-product pricing preview            |
+| 16| POST   | `/api/v1/pricing/breakdown/`                      | Full-cart pricing breakdown               |
+| 17| POST   | `/api/v1/orders/`                                 | Create an order                           |
+| 18| POST   | `/api/v1/orders/<public_id>/payment/`             | Submit transaction for a prepayment order |
+| 19| GET    | `/api/v1/orders/<public_id>/invoice/`             | Download generated invoice PDF            |
+| 20| GET    | `/api/v1/orders/<public_id>/invoice/status/`      | Poll invoice readiness                    |
+| 21| GET    | `/api/v1/orders/<public_id>/invoice/stream/`      | SSE stream for invoice readiness          |
+| 22| GET    | `/api/v1/search/`                                 | Combined product + category search        |
+| 23| POST   | `/api/v1/support/tickets/`                        | Submit a support ticket                   |
+| 24| GET    | `/api/v1/blogs/`                                  | Published blog posts list                 |
+| 25| GET    | `/api/v1/blogs/<public_id>/`                      | Published blog post detail                |
+| 26| POST   | `/tracking/event`                                 | (Fired by bundled `tracker.js` only)      |
 
-> There is **no** `POST /api/v1/orders/initiate-checkout/`, no `GET /api/v1/orders/...`
-> for customers, no cart endpoint, and no logout / login endpoint. The cart lives
+> There is **no** `POST /api/v1/orders/initiate-checkout/`, no generic
+> `GET /api/v1/orders/<public_id>/` customer detail endpoint, no cart endpoint, and
+> no logout / login endpoint. The cart lives
 > entirely in client state (see section 12).
 
 ---
@@ -220,12 +226,8 @@ links, policy URLs, and the custom product-field schema.
   "social_links": {
     "facebook": "https://facebook.com/mystore",
     "instagram": "https://instagram.com/mystore",
-    "twitter": "",
-    "youtube": "",
-    "linkedin": "",
-    "tiktok": "",
-    "pinterest": "",
-    "website": "https://mystore.com"
+    "whatsapp": "",
+    "tiktok": ""
   }
 }
 ```
@@ -252,9 +254,50 @@ links, policy URLs, and the custom product-field schema.
 | `seo.default_title` | string | Default page title |
 | `seo.default_description` | string | Default meta description |
 | `policy_urls.returns` / `refund` / `privacy` | string | Policy URLs (may be empty) |
-| `social_links` | object | 8 keys are **always** present: `facebook`, `instagram`, `twitter`, `youtube`, `linkedin`, `tiktok`, `pinterest`, `website`. Missing links are empty strings. |
+| `social_links` | object | 4 keys are **always** present: `facebook`, `instagram`, `whatsapp`, `tiktok`. Missing links are empty strings. |
 
 **Errors:** auth-only (section 10).
+
+---
+
+### 7.1a GET `/api/v1/storefront/home/` — Home sections (aggregated)
+
+Returns homepage sections in one payload, where each section includes a category
+and a limited product list for that category.
+
+**Query params:**
+
+| Param | Required | Notes |
+|---|---|---|
+| `limit` | no | Per-category product cap. Server clamps to `1..24`. Default `8`. |
+
+**Response `200`:**
+
+```json
+{
+  "sections": [
+    {
+      "category": {
+        "public_id": "cat_abc123",
+        "name": "Clothing",
+        "slug": "clothing"
+      },
+      "products": [
+        {
+          "public_id": "prd_abc123",
+          "name": "Premium T-Shirt"
+        }
+      ]
+    }
+  ]
+}
+```
+
+**Notes:**
+
+- `sections` omits categories that currently have no active storefront products.
+- Product objects use the same shape as the standard product-list serializer used
+  by `GET /api/v1/products/`.
 
 ---
 
@@ -618,7 +661,7 @@ than any gallery row, it is appended last. Duplicate storage keys are omitted.
 
 | Param | Type | Notes |
 |---|---|---|
-| `slot` | string | Optional. If provided, must be one of `home_top`, `home_mid`, `home_bottom`. |
+| `slot` | string | Optional. If provided, must be one of `home_top`, `home_bottom`. |
 
 **Response `200`:**
 
@@ -661,7 +704,7 @@ than any gallery row, it is appended last. Duplicate storage keys are omitted.
 | `cta_text` | string | Button text |
 | `cta_url` | string | Button link (may be empty string) |
 | `order` | integer | Display order (sort ascending) |
-| `placement_slots` | string[] | One or more of `home_top`, `home_mid`, `home_bottom` |
+| `placement_slots` | string[] | One or more of `home_top`, `home_bottom` |
 | `start_at` | string \| null | ISO 8601 schedule start |
 | `end_at` | string \| null | ISO 8601 schedule end |
 
@@ -720,6 +763,93 @@ Unpaginated array.
 
 > Only render notifications where `is_currently_active === true`. The list already
 > filters on `is_active`, but the schedule window is evaluated client-side.
+
+---
+
+### 7.10a GET `/api/v1/popups/` — Storefront popup
+
+Single object or `null`.
+
+The endpoint returns `null` when:
+- No popup exists for the tenant
+- `is_active !== true`
+- `show_on_all_pages !== true`
+
+Otherwise it returns the popup object.
+
+**Response `200` (object):**
+
+```json
+{
+  "public_id": "pop_abc123",
+  "title": "Limited time offer",
+  "description": "Get 20% off your first order.",
+  "button_text": "Shop now",
+  "button_link": "https://mystore.com/collections/new",
+  "delay_seconds": 5,
+  "show_frequency": "session",
+  "show_on_all_pages": true,
+  "is_active": true,
+  "images": [
+    {
+      "public_id": "pim_img001",
+      "image_url": "https://storage.paperbase.me/media/...",
+      "order": 0
+    },
+    {
+      "public_id": "pim_img002",
+      "image_url": "https://storage.paperbase.me/media/...",
+      "order": 1
+    }
+  ],
+  "created_at": "2026-04-29T12:00:00+06:00",
+  "updated_at": "2026-04-29T12:15:00+06:00"
+}
+```
+
+**Response `200` (no popup):**
+
+```json
+null
+```
+
+**Fields:**
+
+| Field | Type | Notes |
+|---|---|---|
+| `public_id` | string | Prefix: `pop_` |
+| `title` | string | Popup title (may be empty string) |
+| `description` | string | Popup body text (may be empty string) |
+| `button_text` | string | CTA button label (may be empty string) |
+| `button_link` | string | CTA destination URL (may be empty string) |
+| `delay_seconds` | integer | Delay before showing popup |
+| `show_frequency` | string | `"session"`, `"daily"`, or `"always"` |
+| `show_on_all_pages` | boolean | Current visibility gate; if `false`, endpoint returns `null` |
+| `is_active` | boolean | Admin toggle; if `false`, endpoint returns `null` |
+| `images` | object[] | Ordered popup images (max 3); each object has `public_id`, `image_url`, `order` |
+| `created_at` | string | ISO 8601 |
+| `updated_at` | string | ISO 8601 |
+
+**Image object:**
+
+| Field | Type | Notes |
+|---|---|---|
+| `public_id` | string | Prefix: `pim_` |
+| `image_url` | string \| null | Absolute URL |
+| `order` | integer | Display order (ascending) |
+
+**Rendering rules:**
+- Render only when the response is an object (if it is `null`, show nothing).
+- Apply a client delay of `delay_seconds` before opening.
+- Render `images` as a carousel when `images.length > 1`; single-image layout is valid when only one image exists.
+- Max popup images is `3`; consume in `order` ascending.
+- `show_frequency` handling:
+  - `session`: store dismissal/open state in `sessionStorage`; suppress for the rest of the browser session.
+  - `daily`: store dismissal/open state in `localStorage` with a date key; suppress for the rest of the current day.
+  - `always`: show on every page load after `delay_seconds`.
+- `show_on_all_pages: false` currently means "show nowhere" (no page-targeting API yet).
+- Closing via the X/close button should apply the same suppression logic as the selected `show_frequency`.
+- If `button_link` is non-empty, clicking the button should navigate to that URL.
 
 ---
 
@@ -1113,6 +1243,67 @@ Called only for orders whose creation response had `requires_payment === true`.
 
 ---
 
+### 7.17a GET `/api/v1/orders/<public_id>/invoice/status/` — Invoice readiness status
+
+Quick check endpoint for the invoice generation state.
+
+**Response `200`:**
+
+```json
+{
+  "ready": true,
+  "url": "https://storage.paperbase.me/media/orders/invoice_abc.pdf"
+}
+```
+
+**Fields:**
+
+| Field | Type | Notes |
+|---|---|---|
+| `ready` | boolean | `true` when invoice is generated and available |
+| `url` | string | Absolute file URL when ready, else empty string |
+
+---
+
+### 7.17b GET `/api/v1/orders/<public_id>/invoice/stream/` — Invoice readiness stream (SSE)
+
+Server-Sent Events endpoint for near-real-time invoice readiness updates.
+
+**Response content type:** `text/event-stream`
+
+**Event payload shape (`data:` lines):**
+
+```json
+{ "ready": false, "url": "" }
+```
+
+When polling window expires before readiness:
+
+```json
+{ "ready": false, "timeout": true, "url": "" }
+```
+
+When ready:
+
+```json
+{ "ready": true, "url": "https://storage.paperbase.me/media/orders/invoice_abc.pdf" }
+```
+
+**Frontend guidance:**
+
+- Use `EventSource` and close the stream once `ready === true` or `timeout === true`.
+- On `timeout`, either retry stream once or fall back to `/invoice/status/`.
+
+---
+
+### 7.17c GET `/api/v1/orders/<public_id>/invoice/` — Download invoice PDF
+
+Returns/redirects to the generated invoice file when available.
+
+**Errors:** `404` when order does not belong to the API-key store.
+
+---
+
 ### 7.18 GET `/api/v1/search/` — Combined product + category search
 
 **Query params:**
@@ -1140,7 +1331,8 @@ Called only for orders whose creation response had `requires_payment === true`.
 | `suggestions` | string[] | Up to 10 name suggestions (empty when `trending=1`) |
 | `trending` | boolean | Mirrors whether the response was served in trending mode |
 
-> For **paginated** product-only search, use `GET /api/v1/products/search/?q=` instead.
+> `GET /api/v1/products/search/?q=` remains available for paginated product-only
+> flows, but storefront search UX should prefer this unified endpoint.
 
 ---
 
@@ -1884,9 +2076,9 @@ stateDiagram-v2
 `payment_submitted` is a composite label (`status == "payment_pending"`,
 `payment_status == "submitted"`) — it is **not** a distinct `status` value.
 
-There is no storefront endpoint to poll order state. To observe verification
-outcomes, rely on the confirmation email / server-sent notification issued by the
-admin.
+Order detail polling is not available over storefront API keys, but invoice
+readiness can be tracked via `GET /api/v1/orders/<public_id>/invoice/status/` or
+`GET /api/v1/orders/<public_id>/invoice/stream/`.
 
 ### 13.2 Prepayment resolution (strongest-wins)
 
@@ -2023,7 +2215,7 @@ fired automatically by `tracker.js` when the user navigates to the checkout rout
   (`smt_...`). `/shipping/options/` returns both `rate_public_id` (`srt_...`) and
   `method_public_id` — send the method id, not the rate id.
 - **Banner slots**: if you build a custom slot (e.g. `home_right`), the server will
-  `400`. Stick to `home_top`, `home_mid`, `home_bottom`.
+  `400`. Stick to `home_top`, `home_bottom`.
 - **Notifications**: render only `is_currently_active === true`. The `is_active`
   flag alone is **not** sufficient.
 - **Category parent filter**: `GET /categories/?parent=<slug>` returns children
@@ -2032,8 +2224,7 @@ fired automatically by `tracker.js` when the user navigates to the checkout rout
   `/products/<identifier>/...` routes. Prefer the slug in URLs and the id in code.
 - **Empty catalog**: `/catalog/filters/` returns `price_range: { min: 0.0, max: 0.0 }`
   when there are no active products. Guard your price slider against this.
-- **Social links**: all 8 keys (`facebook`, `instagram`, `twitter`, `youtube`,
-  `linkedin`, `tiktok`, `pinterest`, `website`) are always present; missing links
+- **Social links**: all 4 keys (`facebook`, `instagram`, `whatsapp`, `tiktok`) are always present; missing links
   are empty strings, not `null`.
 - **Date handling**: all timestamps are ISO 8601 with timezone offsets. Parse with
   your date library; never string-compare across time zones.
@@ -2136,3 +2327,7 @@ await fetch(`${API}/support/tickets/`, {
 - `GET /api/v1/orders/<public_id>/` is an **admin-only** route (requires a
   dashboard JWT); storefront API keys are denied with `403`. Do not call it from
   the storefront.
+- `GET /api/v1/storefront/home/` is the preferred aggregated homepage data route
+  (category + products sections in one payload).
+- Invoice retrieval and readiness endpoints are available for storefront clients:
+  `/api/v1/orders/<public_id>/invoice/`, `/invoice/status/`, and `/invoice/stream/`.

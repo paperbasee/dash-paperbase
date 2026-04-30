@@ -48,13 +48,14 @@ export default function SettingsPage() {
     setPhone,
     address,
     setAddress,
+    language,
+    setLanguage,
     socialLinks,
     setSocialLink,
     previewUrl,
     currentLogoUrl,
     clearLogo,
     setClearLogo,
-    logoFile,
     setLogoFile,
     fileInputRef,
     accountSaving,
@@ -171,11 +172,13 @@ export default function SettingsPage() {
             contactEmail={contactEmail}
             phone={phone}
             address={address}
+            language={language}
             onStoreNameChange={setStoreName}
             onStoreTypeChange={setStoreType}
             onContactEmailChange={setContactEmail}
             onPhoneChange={setPhone}
             onAddressChange={setAddress}
+            onLanguageChange={setLanguage}
             socialLinks={socialLinks}
             onSocialLinkChange={setSocialLink}
             storeSaving={storeSaving}

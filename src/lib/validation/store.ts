@@ -41,6 +41,7 @@ export function buildStoreUpdateSchema(messages: ValidationMessages = defaultVal
       }),
     phone: phoneSchema(messages),
     address: z.string().trim(),
+    language: z.enum(["en", "bn"]),
   });
 }
 

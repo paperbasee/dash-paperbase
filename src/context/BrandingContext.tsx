@@ -36,6 +36,7 @@ const defaultBranding: Branding = {
   contact_email: "",
   phone: "",
   address: "",
+  language: "en",
   social_links: emptySocialLinks(),
 };
 

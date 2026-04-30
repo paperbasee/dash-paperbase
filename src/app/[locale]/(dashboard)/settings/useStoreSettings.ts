@@ -35,6 +35,7 @@ export function useStoreSettings({ onSaveSuccess }: UseStoreSettingsOptions = {}
   const [contactEmail, setContactEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
+  const [language, setLanguage] = useState<"en" | "bn">("en");
   const [socialLinks, setSocialLinks] = useState(emptySocialLinks);
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [clearLogo, setClearLogo] = useState(false);
@@ -51,12 +52,14 @@ export function useStoreSettings({ onSaveSuccess }: UseStoreSettingsOptions = {}
     address?: string | null;
     logo_url?: string | null;
     social_links?: Record<string, string> | null;
+    language?: string | null;
   }) {
     if (branding.admin_name) setStoreName(branding.admin_name);
     setStoreType(branding.store_type ?? "");
     setContactEmail(branding.contact_email ?? "");
     setPhone(branding.phone ?? "");
     setAddress(branding.address ?? "");
+    setLanguage(branding.language === "bn" ? "bn" : "en");
     setCurrentLogoUrl(resolveLogoUrl(branding.logo_url ?? null));
     setSocialLinks(mergeSocialLinksFromApi(branding.social_links ?? undefined));
   }
@@ -79,6 +82,7 @@ export function useStoreSettings({ onSaveSuccess }: UseStoreSettingsOptions = {}
         contactEmail,
         phone,
         address,
+        language,
       });
       if (!validation.success) {
         const e = validation.errors;
@@ -106,6 +110,7 @@ export function useStoreSettings({ onSaveSuccess }: UseStoreSettingsOptions = {}
       formData.append("contact_email", validation.data.contactEmail);
       formData.append("phone", validation.data.phone.slice(0, 50));
       formData.append("address", validation.data.address);
+      formData.append("language", validation.data.language);
 
       if (logoFile) formData.append("logo", logoFile);
       if (clearLogo) formData.append("clear_logo", "true");
@@ -140,6 +145,8 @@ export function useStoreSettings({ onSaveSuccess }: UseStoreSettingsOptions = {}
     setAddress,
     socialLinks,
     setSocialLink,
+    language,
+    setLanguage,
     logoFile,
     setLogoFile,
     clearLogo,

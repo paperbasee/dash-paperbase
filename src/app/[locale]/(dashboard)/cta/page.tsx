@@ -289,6 +289,11 @@ export default function CtaPage() {
 
     try {
       if (editing === "new") {
+        if (ctas.length > 0) {
+          notify.warning("A CTA already exists for this store. Edit the existing CTA instead.");
+          setEditing(ctas[0]?.public_id ?? null);
+          return;
+        }
         await api.post("admin/notifications/", payload);
       } else {
         await api.patch(`admin/notifications/${editing}/`, payload);
@@ -358,12 +363,14 @@ export default function CtaPage() {
             {tPages("ctaTitle", { count: ctas.length })}
           </h1>
         </div>
-        <button
-          onClick={openNew}
-          className="rounded-card bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90"
-        >
-          {tPages("ctaAdd")}
-        </button>
+        {editing === null && ctas.length === 0 ? (
+          <button
+            onClick={openNew}
+            className="rounded-card bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90"
+          >
+            {tPages("ctaAdd")}
+          </button>
+        ) : null}
       </div>
 
       {editing !== null && (

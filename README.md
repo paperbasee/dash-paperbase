@@ -43,7 +43,6 @@ Use that document as the single source of truth for headless/front-end clients. 
 Only the following banner placement values are supported:
 
 - `home_top`: Top of homepage
-- `home_mid`: Middle content area of homepage
 - `home_bottom`: Bottom section of homepage
 
 Any other placement value is invalid and will be rejected.

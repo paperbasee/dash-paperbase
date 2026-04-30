@@ -25,6 +25,7 @@
     "activities": "কার্যকলাপ",
     "cta": "CTA",
     "banners": "ব্যানার",
+    "popup": "পপ-আপ",
     "blog": "ব্লগ",
     "blogNew": "নতুন পোস্ট",
     "blogEdit": "পোস্ট এডিট করুন",
@@ -78,6 +79,7 @@
     "activities": "কার্যকলাপ",
     "trash": "ট্র্যাশ",
     "banners": "ব্যানার",
+    "popup": "পপ-আপ",
     "blog": "ব্লগ",
     "blogNew": "নতুন পোস্ট",
     "shipping": "শিপিং",
@@ -593,7 +595,7 @@
     "shippingRateMeta": "{status} · {rateType} · মূল্য: {price}",
     "shippingRateRange": "· পরিসর: {min} – {max}",
     "ctaGoBackAria": "পিছনে যান",
-    "ctaTitle": "সিটিএ ব্যানার ({count})",
+    "ctaTitle": "কল টু একশন ({count})",
     "ctaAdd": "সিটিএ যোগ করুন",
     "ctaNew": "নতুন সিটিএ",
     "ctaEdit": "সিটিএ সম্পাদনা",
@@ -836,8 +838,12 @@
     "serverUnreachableBody": "সার্ভারে সংযোগ করা যাচ্ছে না। আপনার ইন্টারনেট সংযোগ পরীক্ষা করুন বা পরে আবার চেষ্টা করুন।"
   },
   "dashboard": {
-    "title": "ড্যাশবোর্ড সারসংক্ষেপ",
-    "subtitle": "অর্ডার, পণ্য, গ্রাহক ও সাপোর্ট টিকিট কার্যকলাপের সংক্ষিপ্ত চিত্র।",
+    "title": "{greeting}, {name} 👋",
+    "greetingMorning": "সুপ্রভাত",
+    "greetingAfternoon": "শুভ অপরাহ্ন",
+    "greetingEvening": "শুভ সন্ধ্যা",
+    "greetingLateNight": "গভীর রাত",
+    "subtitle": "এখানে আপনার স্টোরে বর্তমানে কী ঘটছে তার একটি বিস্তারিত বিবরণ দেওয়া হলো, যেখানে সাম্প্রতিক কার্যক্রম এবং গুরুত্বপূর্ণ আপডেটগুলো অন্তর্ভুক্ত রয়েছে।",
     "activitiesAria": "কার্যকলাপ",
     "recentActivities": "সাম্প্রতিক কার্যকলাপ",
     "noRecentActivity": "এখনও কোনো সাম্প্রতিক অ্যাডমিন কার্যকলাপ নেই।",
@@ -1075,18 +1081,19 @@
       "phonePlaceholder": "01XXXXXXXXX",
       "address": "ঠিকানা",
       "addressPlaceholder": "১২৩ মেইন স্ট্রিট, শহর, দেশ",
+      "language": "ভাষা",
+      "languageOptions": {
+        "en": "English (en)",
+        "bn": "বাংলা (bn)"
+      },
       "socialHeading": "সোশ্যাল লিংক",
       "socialSubtitle": "স্টোরফ্রন্ট ফুটার বা হেডারের জন্য পাবলিক সোশ্যাল প্রোফাইলের URL (ফেসবুক, ইনস্টাগ্রাম ইত্যাদি)। স্টোর সেটিংসের সাথে সংরক্ষিত হয়।",
       "socialUrlPlaceholder": "আপনার-সোশ্যাল-লিংক",
       "socialLabels": {
         "facebook": "Facebook",
         "instagram": "Instagram",
-        "twitter": "X (Twitter)",
-        "youtube": "YouTube",
-        "linkedin": "LinkedIn",
-        "tiktok": "TikTok",
-        "pinterest": "Pinterest",
-        "website": "ওয়েবসাইট"
+        "whatsapp": "WhatsApp",
+        "tiktok": "TikTok"
       },
       "saveButton": "স্টোর সেটিংস সংরক্ষণ",
       "saved": "স্টোর সেটিংস সংরক্ষিত হয়েছে।",
@@ -1176,6 +1183,10 @@
         "banners": {
           "label": "ব্যানার",
           "description": "হোমপেজ, সাইডবার, ফুটারের ব্যানার ব্যবস্থাপনা"
+        },
+        "popup": {
+          "label": "পপ-আপ",
+          "description": "মার্কেটিং পপ-আপ মডাল ঘোষণা"
         },
         "blog": {
           "label": "ব্লগ",

@@ -2,12 +2,8 @@
 export const STORE_SOCIAL_LINK_KEYS = [
   "facebook",
   "instagram",
-  "twitter",
-  "youtube",
-  "linkedin",
+  "whatsapp",
   "tiktok",
-  "pinterest",
-  "website",
 ] as const;
 
 export type StoreSocialLinkKey = (typeof STORE_SOCIAL_LINK_KEYS)[number];

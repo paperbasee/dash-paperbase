@@ -45,7 +45,6 @@ const Calendar = dynamic(
 
 const ALLOWED_PLACEMENTS = new Set([
   "home_top",
-  "home_mid",
   "home_bottom",
 ]);
 

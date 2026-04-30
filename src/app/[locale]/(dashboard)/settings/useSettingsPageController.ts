@@ -166,6 +166,8 @@ export default function useSettingsPageController() {
     setPhone: store.setPhone,
     address: store.address,
     setAddress: store.setAddress,
+    language: store.language,
+    setLanguage: store.setLanguage,
     socialLinks: store.socialLinks,
     setSocialLink: store.setSocialLink,
     previewUrl: store.previewUrl,

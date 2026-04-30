@@ -3,12 +3,8 @@ export type BrandingSocialLinks = Partial<
   Record<
     | "facebook"
     | "instagram"
-    | "twitter"
-    | "youtube"
-    | "linkedin"
-    | "tiktok"
-    | "pinterest"
-    | "website",
+    | "whatsapp"
+    | "tiktok",
     string
   >
 >;
@@ -24,6 +20,7 @@ export interface Branding {
   contact_email: string;
   phone: string;
   address: string;
+  language?: "en" | "bn";
   social_links?: BrandingSocialLinks;
   brand_showcase?: Array<{
     public_id: string;
@@ -404,6 +401,32 @@ export interface Banner {
   placement_slots: string[];
   start_at: string | null;
   end_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+/** Store popup image row for `GET/PATCH admin/popups/` + storefront modal payload. */
+export interface StorePopupImage {
+  public_id: string;
+  image_url: string | null;
+  order: number;
+  created_at?: string;
+}
+
+export type StorePopupShowFrequency = "session" | "daily" | "always";
+
+/** Store popup payload for editor + storefront modal. */
+export interface StorePopup {
+  public_id: string;
+  title: string;
+  description: string;
+  button_text: string;
+  button_link: string;
+  delay_seconds: number;
+  show_frequency: StorePopupShowFrequency;
+  show_on_all_pages: boolean;
+  is_active: boolean;
+  images: StorePopupImage[];
   created_at: string;
   updated_at: string;
 }

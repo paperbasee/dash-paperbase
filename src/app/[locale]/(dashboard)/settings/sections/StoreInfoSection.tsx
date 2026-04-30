@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Select } from "@/components/ui/select";
 import {
   InputGroup,
   InputGroupAddon,
@@ -38,6 +39,7 @@ export default function StoreInfoSection({
   contactEmail,
   phone,
   address,
+  language,
   socialLinks,
   onSocialLinkChange,
   onStoreNameChange,
@@ -45,6 +47,7 @@ export default function StoreInfoSection({
   onContactEmailChange,
   onPhoneChange,
   onAddressChange,
+  onLanguageChange,
   storeSaving,
   storeMessage,
   onSubmit,
@@ -61,6 +64,7 @@ export default function StoreInfoSection({
   contactEmail: string;
   phone: string;
   address: string;
+  language: "en" | "bn";
   socialLinks: Record<StoreSocialLinkKey, string>;
   onSocialLinkChange: (key: StoreSocialLinkKey, value: string) => void;
   onStoreNameChange: Dispatch<SetStateAction<string>>;
@@ -68,6 +72,7 @@ export default function StoreInfoSection({
   onContactEmailChange: Dispatch<SetStateAction<string>>;
   onPhoneChange: Dispatch<SetStateAction<string>>;
   onAddressChange: Dispatch<SetStateAction<string>>;
+  onLanguageChange: Dispatch<SetStateAction<"en" | "bn">>;
   storeSaving: boolean;
   storeMessage: SettingsMessage;
   onSubmit: (e: FormEvent) => void;
@@ -213,6 +218,21 @@ export default function StoreInfoSection({
               onKeyDown={handleKeyDown}
             />
           </div>
+
+          <div className="flex flex-col gap-2">
+            <label htmlFor="store_language" className="text-sm font-medium leading-normal text-foreground">
+              {t("store.language")}
+            </label>
+            <Select
+              id="store_language"
+              value={language}
+              onChange={(e) => onLanguageChange(e.target.value as "en" | "bn")}
+              onKeyDown={handleKeyDown}
+            >
+              <option value="en">{t("store.languageOptions.en")}</option>
+              <option value="bn">{t("store.languageOptions.bn")}</option>
+            </Select>
+          </div>
         </div>
 
         <div className="rounded-card border border-border/80 bg-muted/20 p-3 sm:p-4">
@@ -243,12 +263,12 @@ export default function StoreInfoSection({
                   </InputGroupAddon>
                   <InputGroupInput
                     id={`social_${key}`}
-                    type="url"
-                    inputMode="url"
+                    type={key === "whatsapp" ? "text" : "url"}
+                    inputMode={key === "whatsapp" ? "tel" : "url"}
                     autoComplete="off"
                     value={socialLinks[key]}
                     onChange={(e) => onSocialLinkChange(key, e.target.value)}
-                    placeholder={`Enter ${key} URL`}
+                    placeholder={key === "whatsapp" ? "Enter WhatsApp number or URL" : `Enter ${key} URL`}
                     aria-label={label}
                     className="min-w-0 text-xs sm:text-sm"
                     onKeyDown={handleKeyDown}

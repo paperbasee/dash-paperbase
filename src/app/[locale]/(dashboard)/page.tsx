@@ -10,10 +10,12 @@ import DateRangeFilter, {
 import { useDashboardAnalytics } from "@/hooks/useDashboardAnalytics";
 import { toLocaleDigits } from "@/lib/locale-digits";
 import { todayYmdInBD } from "@/utils/time";
+import { useBranding } from "@/context/BrandingContext";
 
 export default function DashboardPage() {
   const locale = useLocale();
   const t = useTranslations("dashboard");
+  const { branding } = useBranding();
   const today = useMemo(() => new Date(), []);
 
   const [range, setRange] = useState<DateRangeValue>(() => {
@@ -25,6 +27,16 @@ export default function DashboardPage() {
       preset: "today",
     };
   });
+
+  const accountName = branding?.owner_name?.trim() || branding?.admin_name?.trim() || "there";
+  const greeting = useMemo(() => {
+    const hourLocal = new Date().getHours();
+
+    if (hourLocal >= 5 && hourLocal < 12) return t("greetingMorning");
+    if (hourLocal >= 12 && hourLocal < 17) return t("greetingAfternoon");
+    if (hourLocal >= 17 && hourLocal < 23) return t("greetingEvening");
+    return t("greetingLateNight");
+  }, [t]);
 
   const { data, loading, error, networkError: analyticsNetworkError } = useDashboardAnalytics({
     startDate: range.startDate,
@@ -39,20 +51,22 @@ export default function DashboardPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <header className="order-0 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="min-w-0">
-          <h1 className="text-2xl font-medium leading-relaxed tracking-tight text-foreground">
-            {t("title")}
-          </h1>
-          <p className="mt-1 text-sm leading-relaxed text-muted-foreground md:hidden">
-            {t("subtitle")}
-          </p>
-        </div>
-      </header>
+      <div className="flex flex-col gap-0">
+        <header className="order-0 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="min-w-0">
+            <h1 className="text-[1.65rem] sm:text-[1.85rem] font-medium leading-relaxed tracking-tight text-foreground">
+              {t("title", { greeting, name: accountName })}
+            </h1>
+            <p className="mt-0 text-sm leading-relaxed text-muted-foreground md:hidden">
+              {t("subtitle")}
+            </p>
+          </div>
+        </header>
 
-      <p className="order-0 hidden text-sm leading-relaxed text-muted-foreground md:block">
-        {t("subtitle")}
-      </p>
+        <p className="order-0 hidden text-sm leading-relaxed text-muted-foreground md:block">
+          {t("subtitle")}
+        </p>
+      </div>
 
       <div className="order-1 space-y-3 md:order-1">
         <DateRangeFilter value={range} onChange={setRange} />
