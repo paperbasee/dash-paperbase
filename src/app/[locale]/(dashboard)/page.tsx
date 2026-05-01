@@ -8,14 +8,14 @@ import DateRangeFilter, {
   DateRangeValue,
 } from "@/components/DateRangeFilter";
 import { useDashboardAnalytics } from "@/hooks/useDashboardAnalytics";
+import { useBrandingProfileSWR } from "@/hooks/useBrandingProfileSWR";
 import { toLocaleDigits } from "@/lib/locale-digits";
 import { todayYmdInBD } from "@/utils/time";
-import { useBranding } from "@/context/BrandingContext";
 
 export default function DashboardPage() {
   const locale = useLocale();
   const t = useTranslations("dashboard");
-  const { branding } = useBranding();
+  const { data: branding } = useBrandingProfileSWR();
   const today = useMemo(() => new Date(), []);
 
   const [range, setRange] = useState<DateRangeValue>(() => {
