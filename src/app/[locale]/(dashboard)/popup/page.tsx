@@ -141,6 +141,19 @@ export default function PopupEditorPage() {
       .finally(() => setLoading(false));
   }
 
+  async function toggleActive(p: any) {
+    if (!p?.public_id) return;
+    try {
+      const { data } = await api.patch<any>(`admin/popups/${p.public_id}/`, {
+        is_active: !p.is_active,
+      });
+      setPopup(data ?? null);
+    } catch (err) {
+      console.error(err);
+      notify.error(err);
+    }
+  }
+
   useEffect(() => {
     fetchData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -609,7 +622,13 @@ export default function PopupEditorPage() {
                     </span>
                   </td>
                 <td className="px-4 py-3">
-                  <span
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      void toggleActive(popup);
+                    }}
                     className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ${
                       popup.is_active
                         ? "bg-emerald-500/20 text-emerald-400"
@@ -617,7 +636,7 @@ export default function PopupEditorPage() {
                     }`}
                   >
                     {popup.is_active ? tCommon("active") : tCommon("inactive")}
-                  </span>
+                  </button>
                 </td>
                 <td className="px-4 py-3 text-right">
                   <div className="flex items-center justify-end gap-4">

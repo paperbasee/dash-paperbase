@@ -19,6 +19,7 @@ import { useHorizontalWheelScroll } from "@/hooks/useHorizontalWheelScroll";
 import api from "@/lib/api";
 import { useBranding } from "@/context/BrandingContext";
 import { formatDashboardDateTime } from "@/lib/datetime-display";
+import { flattenCategoryOptions } from "@/lib/category-tree";
 import {
   ORDER_STATUS_OPTIONS,
   formatOrderStatusLabel,
@@ -28,7 +29,7 @@ import {
   formatOrderPaymentStatusLabel,
 } from "@/lib/orders/payment-statuses";
 import { ORDER_FLAG_OPTIONS, formatOrderFlagLabel } from "@/lib/orders/order-flags";
-import type { Order, PaginatedResponse } from "@/types";
+import type { AdminCategoryTreeNode, Order, PaginatedResponse } from "@/types";
 import { useConfirm } from "@/context/ConfirmDialogContext";
 import { notify, normalizeError } from "@/notifications";
 import { DashboardTableSkeleton } from "@/components/skeletons/dashboard-skeletons";
@@ -101,6 +102,7 @@ export default function OrdersPage() {
     "flag",
     "date_range",
     "payment_status",
+    "category",
     "search",
   ]);
   const [searchInput, setSearchInput] = useState(filters.search || "");
@@ -132,6 +134,7 @@ export default function OrdersPage() {
   const [exportSubmitting, setExportSubmitting] = useState(false);
   const [activeExportJobId, setActiveExportJobId] = useState<string | null>(null);
   const [exportPoll, setExportPoll] = useState<OrderExportPollResponse | null>(null);
+  const [categoryOptions, setCategoryOptions] = useState<{ value: string; label: string }[]>([]);
 
   function fraudStatus(data: FraudCheckApiOk | null | undefined): string | undefined {
     return data?.status ? String(data.status) : undefined;
@@ -151,6 +154,18 @@ export default function OrdersPage() {
     setFilter("search", next);
   }, [debouncedSearch, filters.search, setFilter]);
 
+  useEffect(() => {
+    api
+      .get<AdminCategoryTreeNode[]>("admin/categories/?tree=1")
+      .then((res) => {
+        const tree = Array.isArray(res.data) ? res.data : [];
+        setCategoryOptions(flattenCategoryOptions(tree));
+      })
+      .catch((err) => {
+        console.error(err);
+      });
+  }, []);
+
   const fetchOrders = useCallback(() => {
     setLoading(true);
     const params: Record<string, string | number> = { page };
@@ -159,6 +174,7 @@ export default function OrdersPage() {
     if (filters.flag) params.flag = filters.flag;
     if (filters.date_range) params.date_range = filters.date_range;
     if (filters.payment_status) params.payment_status = filters.payment_status;
+    if (filters.category) params.category = filters.category;
     if (filters.search) params.search = filters.search;
     api
       .get<PaginatedResponse<Order>>("admin/orders/", {
@@ -178,6 +194,7 @@ export default function OrdersPage() {
     filters.customer,
     filters.date_range,
     filters.flag,
+    filters.category,
     filters.payment_status,
     filters.search,
     filters.status,
@@ -194,6 +211,7 @@ export default function OrdersPage() {
     filters.customer,
     filters.date_range,
     filters.flag,
+    filters.category,
     filters.payment_status,
     filters.search,
     filters.status,
@@ -279,6 +297,7 @@ export default function OrdersPage() {
               flag: filters.flag || "",
               date_range: filters.date_range || "",
               payment_status: filters.payment_status || "",
+              category: filters.category || "",
               search: filters.search || "",
             },
           }
@@ -620,6 +639,12 @@ export default function OrdersPage() {
             value: s,
             label: formatOrderPaymentStatusLabel(s, (key) => tPages(key)),
           }))}
+        />
+        <FilterDropdown
+          value={filters.category}
+          onChange={(value) => setFilter("category", value)}
+          placeholder="Category"
+          options={categoryOptions}
         />
         <Input
           value={searchInput}
