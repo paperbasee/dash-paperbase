@@ -9,11 +9,13 @@ import {
   User,
   Shield,
   CreditCard,
+  Palette,
 } from "lucide-react";
 
 export type SettingsSection =
   | "account"
   | "store"
+  | "customization"
   | "eav"
   | "apps"
   | "integrations"
@@ -24,6 +26,7 @@ export type SettingsSection =
 
 export type SettingsSectionLabelKey =
   | "sectionStore"
+  | "sectionCustomization"
   | "sectionEav"
   | "sectionApps"
   | "sectionIntegrations"
@@ -39,6 +42,7 @@ export const SECTIONS: {
   icon: LucideIcon;
 }[] = [
   { id: "store", labelKey: "sectionStore", icon: Store },
+  { id: "customization", labelKey: "sectionCustomization", icon: Palette },
   { id: "eav", labelKey: "sectionEav", icon: Layers },
   { id: "apps", labelKey: "sectionApps", icon: LayoutGrid },
   { id: "integrations", labelKey: "sectionIntegrations", icon: Plug },

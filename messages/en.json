@@ -1031,6 +1031,7 @@
     "goBackAria": "Go back",
     "navAria": "Settings sections",
     "sectionStore": "Store Info",
+    "sectionCustomization": "Customization",
     "sectionEav": "Dynamic Fields",
     "sectionApps": "Apps",
     "sectionIntegrations": "Integrations",
@@ -1103,6 +1104,19 @@
       "validationContactEmail": "Please enter a valid contact email.",
       "validationPhone": "Phone number must start with 01 and be exactly 11 digits.",
       "validationGeneric": "Please correct the highlighted fields."
+    },
+    "customization": {
+      "heading": "Customization",
+      "subtitle": "Choose a color palette for your storefront. Changes apply to the live storefront.",
+      "saved": "Theme updated.",
+      "saveFailed": "Could not save theme. Try again.",
+      "loadingTheme": "Loading theme…",
+      "loadingPresets": "Loading palettes…",
+      "presetsError": "Could not load palettes.",
+      "paletteIvory": "Warm & minimal",
+      "paletteObsidian": "Dark luxury",
+      "paletteArctic": "Clean & modern",
+      "paletteSage": "Organic & natural"
     },
     "dynamicFields": {
       "heading": "Dynamic Fields",

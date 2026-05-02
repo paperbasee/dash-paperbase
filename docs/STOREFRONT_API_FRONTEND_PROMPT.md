@@ -22,11 +22,22 @@ may issue against the storefront. If something is not listed here, it does not e
 
 | Setting         | Value                                    |
 | --------------- | ---------------------------------------- |
-| **Base URL**    | `{BACKEND_ORIGIN}/api/v1/`               |
+| **Base URL**    | `{API_BASE}` — must include the `/api/v1/` path (e.g. `https://api.paperbase.me/api/v1/`). |
 | **Auth method** | Bearer token (publishable API key)       |
 | **Key prefix**  | `ak_pk_...`                              |
 | **Response**    | Bare JSON (never wrapped in `{ "data" }`) |
 | **Page size**   | 24 items per page (paginated endpoints)  |
+
+### Reference Next.js storefront (`storefront-paperbase`)
+
+The official Paperbase storefront uses **two** environment variables:
+
+| Variable | Purpose |
+| -------- | ------- |
+| `PAPERBASE_API_URL` | Full API base URL including `/api/v1`, e.g. `http://localhost:8000/api/v1` or `https://api.paperbase.me/api/v1`. |
+| `PAPERBASE_PUBLISHABLE_KEY` | Publishable key (`ak_pk_...`). Use **server-side only** — never prefix with `NEXT_PUBLIC_`. |
+
+All Django calls run from Next.js server routes or SSR; the browser talks to same-origin `/api/*` proxies. In **development**, `tracker.js` POSTs are rewritten to same-origin `/api/tracker/*`, which forwards to the API using `PAPERBASE_API_URL` and the publishable key, so you do not need a `NEXT_PUBLIC_*` backend origin for the tracker shim. Treat product and media `image_url` (and similar) fields as **absolute URLs**; the API is the source of truth for image hosts.
 
 ### Required headers
 
@@ -1529,6 +1540,8 @@ Always use the versioned URL returned by `GET /api/v1/store/public/`:
 - Load it on **every page** — including product pages, cart, checkout, and the
   order confirmation / thank-you page.
 
+**Reference Next.js storefront:** In local development, the layout injects a small `fetch` shim so calls that would go to the hardcoded production API host for tracker ingest are sent to same-origin `POST /api/tracker/...` instead. A server route proxies those requests to your `PAPERBASE_API_URL` with `Authorization: Bearer <publishable key>`. In production, the default behavior (direct to the production API) applies unless you change that wiring.
+
 ---
 
 ### 8.3 Providing the API key
@@ -2147,7 +2160,9 @@ Treat the responses as safe to cache in-browser for short windows if you wish.
 
 1. Read `GET /store/public/` once per session (or per SSR). Cache locally.
 2. Set `window.PAPERBASE_PUBLISHABLE_KEY = "ak_pk_..."` **before** the tracker
-   script runs — this must be first or `PageView` fires without a key.
+   script runs — this must be first or `PageView` fires without a key. (In the
+   reference Next app, the key is injected at runtime from server config — still
+   not a `NEXT_PUBLIC_*` env var.)
 3. Inject `<script src="{tracker_script_src}" async></script>` using the
    `tracker_script_src` URL from the API response verbatim. The Pixel ID is
    fetched automatically from the dashboard; you do not need to configure it on
@@ -2235,12 +2250,16 @@ fired automatically by `tracker.js` when the user navigates to the checkout rout
 
 ### 15.1 Fetch helper
 
+Use this pattern only in **server-side** code (Route Handlers, Server Actions, or
+RSC) so `PAPERBASE_PUBLISHABLE_KEY` is never exposed via `NEXT_PUBLIC_*`.
+
 ```ts
-const API = process.env.NEXT_PUBLIC_BACKEND_ORIGIN + "/api/v1";
-const KEY = process.env.NEXT_PUBLIC_PAPERBASE_PUBLISHABLE_KEY!;
+const API_BASE = process.env.PAPERBASE_API_URL!.replace(/\/+$/, "");
+const KEY = process.env.PAPERBASE_PUBLISHABLE_KEY!;
 
 async function apiFetch<T>(path: string, init: RequestInit = {}): Promise<T> {
-  const res = await fetch(`${API}${path}`, {
+  const url = `${API_BASE}/${path.replace(/^\/+/, "")}`;
+  const res = await fetch(url, {
     ...init,
     headers: {
       Authorization: `Bearer ${KEY}`,

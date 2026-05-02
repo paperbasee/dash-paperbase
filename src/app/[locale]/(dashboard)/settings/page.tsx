@@ -20,6 +20,7 @@ import NetworkingSection from "./sections/NetworkingSection";
 import NotificationsSection from "./sections/NotificationsSection";
 import SecuritySection from "./sections/SecuritySection";
 import BillingSection from "./sections/BillingSection";
+import CustomizationSection from "./sections/CustomizationSection";
 import { SettingsDesktopSectionNav, SettingsSectionNav } from "./SettingsNav";
 import { SECTIONS, type SettingsSection } from "./settingsSections";
 import { settingsInvertedButtonClassName } from "./SettingsSectionBody";
@@ -185,6 +186,8 @@ export default function SettingsPage() {
             storeMessage={storeMessage}
             onSubmit={handleStoreSubmit}
           />
+
+          <CustomizationSection hidden={activeSection !== "customization"} />
 
           <DynamicFieldsSection
             hidden={activeSection !== "eav"}

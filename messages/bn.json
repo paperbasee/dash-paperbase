@@ -1031,6 +1031,7 @@
     "goBackAria": "পিছনে যান",
     "navAria": "সেটিংস বিভাগ",
     "sectionStore": "স্টোর তথ্য",
+    "sectionCustomization": "কাস্টমাইজেশন",
     "sectionEav": "ডায়নামিক ফিল্ড",
     "sectionApps": "অ্যাপ",
     "sectionIntegrations": "ইন্টিগ্রেশন",
@@ -1103,6 +1104,19 @@
       "validationContactEmail": "বৈধ যোগাযোগের ইমেইল দিন।",
       "validationPhone": "ফোন নম্বর ০১ দিয়ে শুরু হতে হবে এবং ঠিক ১১ সংখ্যার হতে হবে।",
       "validationGeneric": "চিহ্নিত ক্ষেত্রগুলো ঠিক করুন।"
+    },
+    "customization": {
+      "heading": "কাস্টমাইজেশন",
+      "subtitle": "আপনার স্টোরফ্রন্টের জন্য একটি রঙের প্যালেট বেছে নিন। পরিবর্তনগুলো লাইভ স্টোরফ্রন্টে প্রযোজ্য হয়।",
+      "saved": "থিম আপডেট হয়েছে।",
+      "saveFailed": "থিম সংরক্ষণ করা যায়নি। আবার চেষ্টা করুন।",
+      "loadingTheme": "থিম লোড হচ্ছে…",
+      "loadingPresets": "প্যালেট লোড হচ্ছে…",
+      "presetsError": "প্যালেট লোড করা যায়নি।",
+      "paletteIvory": "উষ্ণ ও মিনিমাল",
+      "paletteObsidian": "ডার্ক লাক্সারি",
+      "paletteArctic": "পরিষ্কার ও আধুনিক",
+      "paletteSage": "জৈব ও প্রাকৃতিক"
     },
     "dynamicFields": {
       "heading": "ডায়নামিক ফিল্ড",
