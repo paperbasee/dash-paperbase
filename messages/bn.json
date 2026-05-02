@@ -1114,9 +1114,10 @@
       "loadingPresets": "প্যালেট লোড হচ্ছে…",
       "presetsError": "প্যালেট লোড করা যায়নি।",
       "paletteIvory": "উষ্ণ ও মিনিমাল",
-      "paletteObsidian": "ডার্ক লাক্সারি",
+      "paletteNoir": "খাঁটি কালো ও সাদা",
       "paletteArctic": "পরিষ্কার ও আধুনিক",
-      "paletteSage": "জৈব ও প্রাকৃতিক"
+      "paletteSage": "জৈব ও প্রাকৃতিক",
+      "paletteUnderDevelopment": "উন্নয়নাধীন — এখনও বেছে নেওয়া যাবে না।"
     },
     "dynamicFields": {
       "heading": "ডায়নামিক ফিল্ড",

@@ -18,12 +18,15 @@ type PresetsPayload = {
   presets: PresetRow[];
 };
 
-const DESCRIPTION_KEYS: Record<string, "paletteIvory" | "paletteObsidian" | "paletteArctic" | "paletteSage"> = {
+const DESCRIPTION_KEYS: Record<string, "paletteIvory" | "paletteNoir" | "paletteArctic" | "paletteSage"> = {
   ivory: "paletteIvory",
-  obsidian: "paletteObsidian",
+  noir: "paletteNoir",
   arctic: "paletteArctic",
   sage: "paletteSage",
 };
+
+/** Palettes shown in the API but not selectable in the dashboard yet. */
+const PRESET_UNAVAILABLE = new Set<string>(["noir"]);
 
 export function PalettePicker({
   selectedPalette,
@@ -78,22 +81,29 @@ export function PalettePicker({
     <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
       {presets.map((p) => {
         const selected = selectedPalette === p.key;
+        const unavailable = PRESET_UNAVAILABLE.has(p.key);
         const descKey = DESCRIPTION_KEYS[p.key];
-        const description = descKey ? t(descKey) : "";
+        const description = unavailable ? t("paletteUnderDevelopment") : descKey ? t(descKey) : "";
         const bg = p.tokens.background ?? "#fff";
         const surfaceSwatch = p.tokens.card ?? p.tokens.surface ?? "#eee";
         const accent = p.tokens.accent ?? "#999";
         const primary = p.tokens.primary ?? "#000";
+        const isDisabled = Boolean(disabled) || unavailable;
         return (
           <button
             key={p.key}
             type="button"
-            disabled={disabled}
-            onClick={() => onSelect(p.key, p.tokens)}
+            disabled={isDisabled}
+            onClick={() => {
+              if (unavailable) return;
+              onSelect(p.key, p.tokens);
+            }}
             className={cn(
               "rounded-card border p-4 text-left transition-shadow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
               selected ? "border-foreground ring-2 ring-foreground/20" : "border-border hover:border-foreground/40",
-              disabled && "pointer-events-none opacity-60"
+              unavailable && "hover:border-border",
+              isDisabled && "pointer-events-none opacity-60",
+              unavailable && selected && "opacity-100"
             )}
           >
             <div className="flex items-start justify-between gap-2">

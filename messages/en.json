@@ -1114,9 +1114,10 @@
       "loadingPresets": "Loading palettes…",
       "presetsError": "Could not load palettes.",
       "paletteIvory": "Warm & minimal",
-      "paletteObsidian": "Dark luxury",
+      "paletteNoir": "Pure black & white",
       "paletteArctic": "Clean & modern",
-      "paletteSage": "Organic & natural"
+      "paletteSage": "Organic & natural",
+      "paletteUnderDevelopment": "Under development — not available to select yet."
     },
     "dynamicFields": {
       "heading": "Dynamic Fields",
