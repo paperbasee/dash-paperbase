@@ -87,6 +87,8 @@ export default function useSettingsPageController() {
         const { data } = await api.get<{
           email_notify_owner_on_order_received: boolean;
           email_customer_on_order_confirmed: boolean;
+          storefront_url?: string | null;
+          revalidate_secret?: string | null;
         }>("store/settings/current/");
         if (cancelled) return;
         setNotificationPrefs((prev) => ({
@@ -94,6 +96,7 @@ export default function useSettingsPageController() {
           emailMeOnOrderReceived: data.email_notify_owner_on_order_received,
           emailCustomerOnOrderConfirmed: data.email_customer_on_order_confirmed,
         }));
+        store.syncStoreIntegrationFromSettings(data);
       } catch {
         // keep email defaults from state
       }
@@ -183,6 +186,11 @@ export default function useSettingsPageController() {
     languageSaving: store.languageSaving,
     languageMessage: store.languageMessage,
     persistLanguage: store.persistLanguage,
+
+    storefrontUrl: store.storefrontUrl,
+    setStorefrontUrl: store.setStorefrontUrl,
+    revalidateSecret: store.revalidateSecret,
+    setRevalidateSecret: store.setRevalidateSecret,
 
     dynamicFieldsMessage,
     setDynamicFieldsMessage,

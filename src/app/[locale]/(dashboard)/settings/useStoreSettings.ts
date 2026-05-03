@@ -44,6 +44,8 @@ export function useStoreSettings({ onSaveSuccess }: UseStoreSettingsOptions = {}
   const [languageSaving, setLanguageSaving] = useState(false);
   const [message, setMessage] = useState<SettingsMessage>(null);
   const [languageMessage, setLanguageMessage] = useState<SettingsMessage>(null);
+  const [storefrontUrl, setStorefrontUrl] = useState("");
+  const [revalidateSecret, setRevalidateSecret] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   function syncFromBranding(branding: {
@@ -64,6 +66,14 @@ export function useStoreSettings({ onSaveSuccess }: UseStoreSettingsOptions = {}
     setLanguage(branding.language === "bn" ? "bn" : "en");
     setCurrentLogoUrl(resolveLogoUrl(branding.logo_url ?? null));
     setSocialLinks(mergeSocialLinksFromApi(branding.social_links ?? undefined));
+  }
+
+  function syncStoreIntegrationFromSettings(row: {
+    storefront_url?: string | null;
+    revalidate_secret?: string | null;
+  }) {
+    setStorefrontUrl((row.storefront_url ?? "").trim());
+    setRevalidateSecret(row.revalidate_secret ?? "");
   }
 
   function setSocialLink(key: StoreSocialLinkKey, value: string) {
@@ -119,6 +129,10 @@ export function useStoreSettings({ onSaveSuccess }: UseStoreSettingsOptions = {}
       formData.append("social_links", JSON.stringify(socialLinks));
 
       await api.patch("admin/branding/", formData);
+      await api.patch("store/settings/current/", {
+        storefront_url: storefrontUrl.trim(),
+        revalidate_secret: revalidateSecret,
+      });
       await mutate(BRANDING_PROFILE_SWR_KEY);
       onSaveSuccess?.();
 
@@ -185,5 +199,11 @@ export function useStoreSettings({ onSaveSuccess }: UseStoreSettingsOptions = {}
     syncFromBranding,
     handleSubmit,
     persistLanguage,
+
+    storefrontUrl,
+    setStorefrontUrl,
+    revalidateSecret,
+    setRevalidateSecret,
+    syncStoreIntegrationFromSettings,
   };
 }

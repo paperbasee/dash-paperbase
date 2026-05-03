@@ -74,6 +74,10 @@ export default function SettingsPage() {
     languageSaving,
     languageMessage,
     persistLanguage,
+    storefrontUrl,
+    setStorefrontUrl,
+    revalidateSecret,
+    setRevalidateSecret,
   } = controller;
 
   const activeSectionMeta = SECTIONS.find((s) => s.id === activeSection);
@@ -185,6 +189,10 @@ export default function SettingsPage() {
             storeSaving={storeSaving}
             storeMessage={storeMessage}
             onSubmit={handleStoreSubmit}
+            storefrontUrl={storefrontUrl}
+            onStorefrontUrlChange={setStorefrontUrl}
+            revalidateSecret={revalidateSecret}
+            onRevalidateSecretChange={setRevalidateSecret}
           />
 
           <CustomizationSection

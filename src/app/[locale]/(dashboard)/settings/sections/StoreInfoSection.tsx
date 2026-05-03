@@ -1,9 +1,9 @@
 "use client";
 
-import { useRef, type Dispatch, type FormEvent, type SetStateAction } from "react";
+import { useRef, useState, type Dispatch, type FormEvent, type SetStateAction } from "react";
 import type React from "react";
 import { useTranslations } from "next-intl";
-import { Loader2 } from "lucide-react";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -24,6 +24,17 @@ import {
 } from "@/lib/storeSocialLinks";
 
 type SettingsMessage = { type: "success" | "error"; text: string } | null;
+
+function generateRevalidateSecret(): string {
+  const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  const bytes = new Uint8Array(32);
+  crypto.getRandomValues(bytes);
+  let out = "";
+  for (let i = 0; i < 32; i++) {
+    out += alphabet[bytes[i]! % alphabet.length]!;
+  }
+  return out;
+}
 
 export default function StoreInfoSection({
   hidden,
@@ -48,6 +59,10 @@ export default function StoreInfoSection({
   storeSaving,
   storeMessage,
   onSubmit,
+  storefrontUrl,
+  onStorefrontUrlChange,
+  revalidateSecret,
+  onRevalidateSecretChange,
 }: {
   hidden: boolean;
   previewUrl: string | null;
@@ -71,8 +86,13 @@ export default function StoreInfoSection({
   storeSaving: boolean;
   storeMessage: SettingsMessage;
   onSubmit: (e: FormEvent) => void;
+  storefrontUrl: string;
+  onStorefrontUrlChange: Dispatch<SetStateAction<string>>;
+  revalidateSecret: string;
+  onRevalidateSecretChange: Dispatch<SetStateAction<string>>;
 }) {
   const t = useTranslations("settings");
+  const [revealSecret, setRevealSecret] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
   const { handleKeyDown } = useEnterNavigation(() => formRef.current?.requestSubmit());
   return (
@@ -212,6 +232,88 @@ export default function StoreInfoSection({
               className="w-full"
               onKeyDown={handleKeyDown}
             />
+          </div>
+        </div>
+
+        <div className="rounded-card border border-border/80 bg-muted/20 p-3 sm:p-4">
+          <div className="mb-3 space-y-1">
+            <h3 className="text-sm font-semibold tracking-tight text-foreground sm:text-base">
+              {t("store.storefrontIntegrationHeading")}
+            </h3>
+            <p className="text-xs leading-snug text-muted-foreground sm:text-sm sm:leading-relaxed">
+              {t("store.storefrontIntegrationSubtitle")}
+            </p>
+          </div>
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <div className="flex flex-col gap-2 md:col-span-2">
+              <label
+                htmlFor="storefront_url"
+                className="text-sm font-medium leading-normal text-foreground"
+              >
+                {t("store.storefrontUrlLabel")}
+              </label>
+              <Input
+                id="storefront_url"
+                type="url"
+                inputMode="url"
+                autoComplete="off"
+                value={storefrontUrl}
+                onChange={(e) => onStorefrontUrlChange(e.target.value)}
+                placeholder={t("store.storefrontUrlPlaceholder")}
+                className="w-full"
+                onKeyDown={handleKeyDown}
+              />
+              <p className="text-xs text-muted-foreground">{t("store.storefrontUrlHelp")}</p>
+            </div>
+            <div className="flex flex-col gap-2 md:col-span-2">
+              <label
+                htmlFor="revalidate_secret"
+                className="text-sm font-medium leading-normal text-foreground"
+              >
+                {t("store.revalidateSecretLabel")}
+              </label>
+              <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-stretch">
+                <Input
+                  id="revalidate_secret"
+                  type={revealSecret ? "text" : "password"}
+                  autoComplete="new-password"
+                  value={revalidateSecret}
+                  onChange={(e) => onRevalidateSecretChange(e.target.value)}
+                  className="min-w-0 flex-1 font-mono text-sm"
+                  maxLength={64}
+                  onKeyDown={handleKeyDown}
+                />
+                <div className="flex shrink-0 gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className={settingsInvertedButtonClassName}
+                    onClick={() => setRevealSecret((v) => !v)}
+                    aria-pressed={revealSecret}
+                    aria-label={
+                      revealSecret ? t("store.revalidateSecretHideAria") : t("store.revalidateSecretShowAria")
+                    }
+                  >
+                    {revealSecret ? (
+                      <EyeOff className="size-4" aria-hidden />
+                    ) : (
+                      <Eye className="size-4" aria-hidden />
+                    )}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className={settingsInvertedButtonClassName}
+                    onClick={() => onRevalidateSecretChange(generateRevalidateSecret())}
+                  >
+                    {t("store.revalidateSecretGenerate")}
+                  </Button>
+                </div>
+              </div>
+              <p className="text-xs text-muted-foreground">{t("store.revalidateSecretHelp")}</p>
+            </div>
           </div>
         </div>
 
