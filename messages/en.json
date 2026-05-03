@@ -1107,7 +1107,9 @@
     },
     "customization": {
       "heading": "Customization",
-      "subtitle": "Choose a color palette for your storefront. Changes apply to the live storefront.",
+      "subtitle": "Set your storefront language and choose a color palette. Changes apply to the live storefront.",
+      "languageSaved": "Storefront language updated.",
+      "languageSaveFailed": "Could not update language. Try again.",
       "saved": "Theme updated.",
       "saveFailed": "Could not save theme. Try again.",
       "loadingTheme": "Loading theme…",

@@ -180,6 +180,9 @@ export default function useSettingsPageController() {
     storeSaving: store.saving,
     storeMessage: store.message,
     handleStoreSubmit: store.handleSubmit,
+    languageSaving: store.languageSaving,
+    languageMessage: store.languageMessage,
+    persistLanguage: store.persistLanguage,
 
     dynamicFieldsMessage,
     setDynamicFieldsMessage,

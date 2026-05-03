@@ -50,7 +50,6 @@ export default function SettingsPage() {
     address,
     setAddress,
     language,
-    setLanguage,
     socialLinks,
     setSocialLink,
     previewUrl,
@@ -72,6 +71,9 @@ export default function SettingsPage() {
     emailPrefsSaving,
     handleAccountSubmit,
     handleStoreSubmit,
+    languageSaving,
+    languageMessage,
+    persistLanguage,
   } = controller;
 
   const activeSectionMeta = SECTIONS.find((s) => s.id === activeSection);
@@ -173,13 +175,11 @@ export default function SettingsPage() {
             contactEmail={contactEmail}
             phone={phone}
             address={address}
-            language={language}
             onStoreNameChange={setStoreName}
             onStoreTypeChange={setStoreType}
             onContactEmailChange={setContactEmail}
             onPhoneChange={setPhone}
             onAddressChange={setAddress}
-            onLanguageChange={setLanguage}
             socialLinks={socialLinks}
             onSocialLinkChange={setSocialLink}
             storeSaving={storeSaving}
@@ -187,7 +187,13 @@ export default function SettingsPage() {
             onSubmit={handleStoreSubmit}
           />
 
-          <CustomizationSection hidden={activeSection !== "customization"} />
+          <CustomizationSection
+            hidden={activeSection !== "customization"}
+            language={language}
+            onLanguageChange={persistLanguage}
+            languageSaving={languageSaving}
+            languageMessage={languageMessage}
+          />
 
           <DynamicFieldsSection
             hidden={activeSection !== "eav"}

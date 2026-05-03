@@ -25,8 +25,8 @@ const DESCRIPTION_KEYS: Record<string, "paletteIvory" | "paletteNoir" | "palette
   sage: "paletteSage",
 };
 
-/** Palettes shown in the API but not selectable in the dashboard yet. */
-const PRESET_UNAVAILABLE = new Set<string>(["noir"]);
+/** Palettes from the API that are not yet selectable. Add keys here to disable a preset in the UI. */
+const PRESET_UNAVAILABLE = new Set<string>();
 
 export function PalettePicker({
   selectedPalette,
