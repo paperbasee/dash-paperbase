@@ -1,17 +1,19 @@
 "use client";
 
-import { useRef, useState, type Dispatch, type FormEvent, type SetStateAction } from "react";
+import { useEffect, useRef, useState, type Dispatch, type FormEvent, type SetStateAction } from "react";
 import type React from "react";
 import { useTranslations } from "next-intl";
-import { Eye, EyeOff, Loader2 } from "lucide-react";
+import { Check, Copy, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
 import {
   InputGroup,
   InputGroupAddon,
   InputGroupInput,
 } from "@/components/ui/input-group";
 import { useEnterNavigation } from "@/hooks/useEnterNavigation";
+import { useConfirm } from "@/context/ConfirmDialogContext";
 import {
   SettingsSectionBody,
   settingsInvertedButtonClassName,
@@ -92,7 +94,61 @@ export default function StoreInfoSection({
   onRevalidateSecretChange: Dispatch<SetStateAction<string>>;
 }) {
   const t = useTranslations("settings");
-  const [revealSecret, setRevealSecret] = useState(false);
+  const confirm = useConfirm();
+  const [secretRevealed, setSecretRevealed] = useState(false);
+  const [secretFieldFocused, setSecretFieldFocused] = useState(false);
+  const [secretCopied, setSecretCopied] = useState(false);
+  const secretInputRef = useRef<HTMLInputElement>(null);
+  const hasRevalidateSecret = revalidateSecret.trim().length > 0;
+  const showPlainSecretInput =
+    !hasRevalidateSecret || secretRevealed || secretFieldFocused;
+
+  useEffect(() => {
+    if (!hasRevalidateSecret) setSecretRevealed(false);
+  }, [hasRevalidateSecret]);
+
+  useEffect(() => {
+    if (!secretRevealed) setSecretCopied(false);
+  }, [secretRevealed]);
+
+  useEffect(() => {
+    if (!secretCopied) return;
+    const timer = window.setTimeout(() => setSecretCopied(false), 1500);
+    return () => window.clearTimeout(timer);
+  }, [secretCopied]);
+
+  async function copyRevalidateSecret() {
+    const text = revalidateSecret.trim();
+    if (!text) return;
+    try {
+      await navigator.clipboard.writeText(text);
+      setSecretCopied(true);
+    } catch {
+      /* ignore */
+    }
+  }
+
+  async function handleSecretGenerateClick() {
+    if (hasRevalidateSecret) {
+      const ok = await confirm({
+        title: t("store.revalidateSecretRegenerateDialogTitle"),
+        message: t("store.revalidateSecretRegenerateDialogBody"),
+        confirmText: t("store.revalidateSecretRegenerate"),
+        variant: "warning",
+      });
+      if (!ok) return;
+    } else {
+      const ok = await confirm({
+        title: t("store.revalidateSecretGenerateDialogTitle"),
+        message: t("store.revalidateSecretGenerateDialogBody"),
+        confirmText: t("store.revalidateSecretGenerate"),
+        variant: "default",
+      });
+      if (!ok) return;
+    }
+    onRevalidateSecretChange(generateRevalidateSecret());
+    setSecretRevealed(true);
+  }
   const formRef = useRef<HTMLFormElement>(null);
   const { handleKeyDown } = useEnterNavigation(() => formRef.current?.requestSubmit());
   return (
@@ -273,44 +329,84 @@ export default function StoreInfoSection({
                 {t("store.revalidateSecretLabel")}
               </label>
               <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-stretch">
-                <Input
-                  id="revalidate_secret"
-                  type={revealSecret ? "text" : "password"}
-                  autoComplete="new-password"
-                  value={revalidateSecret}
-                  onChange={(e) => onRevalidateSecretChange(e.target.value)}
-                  className="min-w-0 flex-1 font-mono text-sm"
-                  maxLength={64}
-                  onKeyDown={handleKeyDown}
-                />
-                <div className="flex shrink-0 gap-2">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    className={settingsInvertedButtonClassName}
-                    onClick={() => setRevealSecret((v) => !v)}
-                    aria-pressed={revealSecret}
-                    aria-label={
-                      revealSecret ? t("store.revalidateSecretHideAria") : t("store.revalidateSecretShowAria")
-                    }
-                  >
-                    {revealSecret ? (
-                      <EyeOff className="size-4" aria-hidden />
-                    ) : (
-                      <Eye className="size-4" aria-hidden />
-                    )}
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    className={settingsInvertedButtonClassName}
-                    onClick={() => onRevalidateSecretChange(generateRevalidateSecret())}
-                  >
-                    {t("store.revalidateSecretGenerate")}
-                  </Button>
+                <div className="flex min-w-0 flex-1 items-stretch gap-2">
+                  {hasRevalidateSecret && !showPlainSecretInput ? (
+                    <button
+                      type="button"
+                      id="revalidate_secret"
+                      title={t("store.revalidateSecretClickToReveal")}
+                      aria-label={t("store.revalidateSecretClickToReveal")}
+                      onClick={() => {
+                        setSecretRevealed(true);
+                        queueMicrotask(() => secretInputRef.current?.focus());
+                      }}
+                      className={cn(
+                        "flex h-9 min-w-0 w-full cursor-pointer items-center rounded-ui border border-border bg-background px-3 py-1 text-left font-mono text-sm text-foreground shadow-xs",
+                        "transition-[color,box-shadow] outline-none hover:bg-muted/40",
+                        "focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50",
+                      )}
+                    >
+                      <span className="truncate tracking-[0.2em] text-muted-foreground" aria-hidden>
+                        {"•".repeat(Math.min(revalidateSecret.length, 48))}
+                      </span>
+                    </button>
+                  ) : (
+                    <Input
+                      ref={secretInputRef}
+                      id="revalidate_secret"
+                      type="text"
+                      autoComplete="new-password"
+                      value={revalidateSecret}
+                      onChange={(e) => onRevalidateSecretChange(e.target.value)}
+                      onFocus={() => setSecretFieldFocused(true)}
+                      onBlur={() => {
+                        setSecretFieldFocused(false);
+                        if (revalidateSecret.trim().length > 0) {
+                          setSecretRevealed(false);
+                        }
+                      }}
+                      className="min-w-0 flex-1 font-mono text-sm"
+                      maxLength={64}
+                      onKeyDown={handleKeyDown}
+                      placeholder={
+                        hasRevalidateSecret ? undefined : t("store.revalidateSecretPlaceholder")
+                      }
+                    />
+                  )}
+                  {hasRevalidateSecret && showPlainSecretInput && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      title={t("store.revalidateSecretClickToCopy")}
+                      aria-label={
+                        secretCopied
+                          ? t("store.revalidateSecretCopiedShort")
+                          : t("store.revalidateSecretClickToCopy")
+                      }
+                      className="size-9 shrink-0"
+                      onMouseDown={(e) => e.preventDefault()}
+                      onClick={() => void copyRevalidateSecret()}
+                    >
+                      {secretCopied ? (
+                        <Check className="size-4 text-emerald-600" aria-hidden />
+                      ) : (
+                        <Copy className="size-4" aria-hidden />
+                      )}
+                    </Button>
+                  )}
                 </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className={`${settingsInvertedButtonClassName} shrink-0 sm:self-stretch`}
+                  onClick={() => void handleSecretGenerateClick()}
+                >
+                  {hasRevalidateSecret
+                    ? t("store.revalidateSecretRegenerate")
+                    : t("store.revalidateSecretGenerate")}
+                </Button>
               </div>
               <p className="text-xs text-muted-foreground">{t("store.revalidateSecretHelp")}</p>
             </div>
