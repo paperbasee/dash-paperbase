@@ -5,6 +5,7 @@ import { Loader2 } from "lucide-react";
 
 import { Select } from "@/components/ui/select";
 import { CustomizationShell } from "../_components/CustomizationShell";
+import { CardVariantPicker } from "../_components/CardVariantPicker";
 import { PalettePicker } from "../_components/PalettePicker";
 import { useThemeEditor } from "../_hooks/useThemeEditor";
 import { settingsSectionSurfaceClassName } from "../SettingsSectionBody";
@@ -26,7 +27,7 @@ export default function CustomizationSection({
 }) {
   const t = useTranslations("settings");
   const tc = useTranslations("settings.customization");
-  const { theme, loading, saving, error, selectPalette } = useThemeEditor();
+  const { theme, loading, saving, error, selectPalette, selectCardVariant } = useThemeEditor();
 
   return (
     <section
@@ -81,6 +82,11 @@ export default function CustomizationSection({
             <PalettePicker
               selectedPalette={theme?.palette ?? null}
               onSelect={selectPalette}
+              disabled={saving}
+            />
+            <CardVariantPicker
+              selectedVariant={theme?.card_variant ?? null}
+              onSelect={selectCardVariant}
               disabled={saving}
             />
             {saving ? (

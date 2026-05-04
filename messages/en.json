@@ -1129,7 +1129,11 @@
       "paletteNoir": "Pure black & white",
       "paletteArctic": "Clean & modern",
       "paletteSage": "Organic & natural",
-      "paletteUnderDevelopment": "Under development — not available to select yet."
+      "paletteUnderDevelopment": "Under development — not available to select yet.",
+      "productCardsHeading": "Product cards",
+      "loadingCardVariants": "Loading card styles…",
+      "cardVariantsError": "Could not load card styles.",
+      "shelfPreviewOrderNow": "Order now"
     },
     "dynamicFields": {
       "heading": "Dynamic Fields",

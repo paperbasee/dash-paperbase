@@ -1129,7 +1129,11 @@
       "paletteNoir": "খাঁটি কালো ও সাদা",
       "paletteArctic": "পরিষ্কার ও আধুনিক",
       "paletteSage": "জৈব ও প্রাকৃতিক",
-      "paletteUnderDevelopment": "উন্নয়নাধীন — এখনও বেছে নেওয়া যাবে না।"
+      "paletteUnderDevelopment": "উন্নয়নাধীন — এখনও বেছে নেওয়া যাবে না।",
+      "productCardsHeading": "পণ্যের কার্ড",
+      "loadingCardVariants": "কার্ড স্টাইল লোড হচ্ছে…",
+      "cardVariantsError": "কার্ড স্টাইল লোড করা যায়নি।",
+      "shelfPreviewOrderNow": "এখনই অর্ডার করুন"
     },
     "dynamicFields": {
       "heading": "ডায়নামিক ফিল্ড",
