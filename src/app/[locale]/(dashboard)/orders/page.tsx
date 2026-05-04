@@ -33,6 +33,7 @@ import type { AdminCategoryTreeNode, Order, PaginatedResponse } from "@/types";
 import { useConfirm } from "@/context/ConfirmDialogContext";
 import { notify, normalizeError } from "@/notifications";
 import { DashboardTableSkeleton } from "@/components/skeletons/dashboard-skeletons";
+import { BelowFoldScrollHint } from "@/components/BelowFoldScrollHint";
 
 import { FraudCheckButton } from "./_components/FraudCheckButton";
 import type { FraudCheckApiOk, FraudCheckState } from "./_components/types";
@@ -1015,6 +1016,7 @@ export default function OrdersPage() {
           </div>
         </>
       )}
+      <BelowFoldScrollHint />
     </div>
   );
 }

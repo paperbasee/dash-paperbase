@@ -17,6 +17,7 @@ import { numberTextClass } from "@/lib/number-font";
 import { cn } from "@/lib/utils";
 import { INVENTORY_STATUS_REFRESH_EVENT } from "@/hooks/useInventoryStatus";
 import { DashboardTableSkeleton } from "@/components/skeletons/dashboard-skeletons";
+import { BelowFoldScrollHint } from "@/components/BelowFoldScrollHint";
 
 export default function InventoryPage() {
   const router = useRouter();
@@ -337,6 +338,7 @@ export default function InventoryPage() {
           )}
         </>
       )}
+      <BelowFoldScrollHint />
     </div>
   );
 }

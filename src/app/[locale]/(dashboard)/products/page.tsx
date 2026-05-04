@@ -53,6 +53,7 @@ import { useAdminDeleteCapabilities } from "@/hooks/useAdminDeleteCapabilities";
 import { numberTextClass } from "@/lib/number-font";
 import { cn } from "@/lib/utils";
 import { DashboardTableSkeleton } from "@/components/skeletons/dashboard-skeletons";
+import { BelowFoldScrollHint } from "@/components/BelowFoldScrollHint";
 
 type CategoryOption = { value: string; label: string };
 
@@ -613,6 +614,7 @@ export default function ProductsPage() {
           </div>
         </>
       )}
+      <BelowFoldScrollHint />
     </div>
   );
 }

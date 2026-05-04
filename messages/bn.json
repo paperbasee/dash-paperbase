@@ -61,7 +61,8 @@
     "none": "কোনোটিই নয়",
     "all": "সব",
     "optional": "ঐচ্ছিক",
-    "retryInSeconds": "{seconds} সেকেন্ড পর আবার চেষ্টা করুন"
+    "retryInSeconds": "{seconds} সেকেন্ড পর আবার চেষ্টা করুন",
+    "scrollMoreBelow": "নিচে আরও কনটেন্ট দেখতে স্ক্রল করুন"
   },
   "nav": {
     "home": "হোম",

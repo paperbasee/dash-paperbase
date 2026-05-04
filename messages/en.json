@@ -61,7 +61,8 @@
     "none": "None",
     "all": "All",
     "optional": "Optional",
-    "retryInSeconds": "Retry in {seconds}s"
+    "retryInSeconds": "Retry in {seconds}s",
+    "scrollMoreBelow": "Scroll to more content below"
   },
   "nav": {
     "home": "Home",
