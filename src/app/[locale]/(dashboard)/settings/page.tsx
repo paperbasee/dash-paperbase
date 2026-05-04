@@ -21,6 +21,7 @@ import NotificationsSection from "./sections/NotificationsSection";
 import SecuritySection from "./sections/SecuritySection";
 import BillingSection from "./sections/BillingSection";
 import CustomizationSection from "./sections/CustomizationSection";
+import CheckoutSettingsSection from "./sections/CheckoutSettingsSection";
 import { SettingsDesktopSectionNav, SettingsSectionNav } from "./SettingsNav";
 import { SECTIONS, type SettingsSection } from "./settingsSections";
 import { settingsInvertedButtonClassName } from "./SettingsSectionBody";
@@ -82,7 +83,9 @@ export default function SettingsPage() {
 
   const activeSectionMeta = SECTIONS.find((s) => s.id === activeSection);
   const activeLabel = activeSectionMeta
-    ? tSettings(activeSectionMeta.labelKey)
+    ? "labelKey" in activeSectionMeta
+      ? tSettings(activeSectionMeta.labelKey)
+      : activeSectionMeta.displayLabel
     : tSettings("title");
   const ActiveIcon = activeSectionMeta?.icon;
 
@@ -202,6 +205,8 @@ export default function SettingsPage() {
             languageSaving={languageSaving}
             languageMessage={languageMessage}
           />
+
+          <CheckoutSettingsSection hidden={activeSection !== "checkout"} />
 
           <DynamicFieldsSection
             hidden={activeSection !== "eav"}

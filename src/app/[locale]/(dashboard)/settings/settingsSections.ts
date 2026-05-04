@@ -10,12 +10,14 @@ import {
   Shield,
   CreditCard,
   Palette,
+  ShoppingCart,
 } from "lucide-react";
 
 export type SettingsSection =
   | "account"
   | "store"
   | "customization"
+  | "checkout"
   | "eav"
   | "apps"
   | "integrations"
@@ -36,13 +38,23 @@ export type SettingsSectionLabelKey =
   | "sectionSecurity"
   | "sectionBilling";
 
-export const SECTIONS: {
-  id: SettingsSection;
-  labelKey: SettingsSectionLabelKey;
-  icon: LucideIcon;
-}[] = [
+/** Nav row: translated label key or literal label (checkout; English-only for now). */
+export type SettingsSectionNavItem =
+  | {
+      id: Exclude<SettingsSection, "checkout">;
+      labelKey: SettingsSectionLabelKey;
+      icon: LucideIcon;
+    }
+  | { id: "checkout"; displayLabel: string; icon: LucideIcon };
+
+export const SECTIONS: SettingsSectionNavItem[] = [
   { id: "store", labelKey: "sectionStore", icon: Store },
   { id: "customization", labelKey: "sectionCustomization", icon: Palette },
+  {
+    id: "checkout",
+    displayLabel: "Checkout",
+    icon: ShoppingCart,
+  },
   { id: "eav", labelKey: "sectionEav", icon: Layers },
   { id: "apps", labelKey: "sectionApps", icon: LayoutGrid },
   { id: "integrations", labelKey: "sectionIntegrations", icon: Plug },

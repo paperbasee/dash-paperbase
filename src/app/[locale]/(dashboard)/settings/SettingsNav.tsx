@@ -59,7 +59,11 @@ export function SettingsSectionNav({
       role="tablist"
       aria-label={t("navAria")}
     >
-      {SECTIONS.map(({ id, labelKey, icon: Icon }) => (
+      {SECTIONS.map((row) => {
+        const { id, icon: Icon } = row;
+        const label =
+          "labelKey" in row ? t(row.labelKey) : row.displayLabel;
+        return (
         <button
           key={id}
           type="button"
@@ -86,9 +90,10 @@ export function SettingsSectionNav({
           )}
         >
           <Icon className="size-4 shrink-0" />
-          {t(labelKey)}
+          {label}
         </button>
-      ))}
+        );
+      })}
     </nav>
   );
 }

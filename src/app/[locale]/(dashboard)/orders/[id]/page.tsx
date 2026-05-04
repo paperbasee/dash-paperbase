@@ -1206,6 +1206,10 @@ export default function OrderDetailPage() {
                     </p>
                     {(() => {
                       const addr = splitShippingAddressForForm(order.shipping_address);
+                      // Minimal-mode orders store only thana in shipping_address (no village segment).
+                      // When village is populated but thana is empty, treat the value as thana instead.
+                      const displayVillage = addr.thana ? addr.village : "";
+                      const displayThana = addr.thana ? addr.thana : addr.village;
                       const districtLine =
                         order.district?.trim() ||
                         addr.trailingDistrict ||
@@ -1216,13 +1220,13 @@ export default function OrderDetailPage() {
                             <span className="text-muted-foreground">
                               {tPages("orderFormRoadVillage")}:{" "}
                             </span>
-                            {addr.village || "—"}
+                            {displayVillage || "—"}
                           </p>
                           <p className="text-sm text-foreground">
                             <span className="text-muted-foreground">
                               {tPages("orderDetailCityThana")}:{" "}
                             </span>
-                            {addr.thana || "—"}
+                            {displayThana || "—"}
                           </p>
                           <p className="text-sm text-foreground">
                             <span className="text-muted-foreground">
