@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
 
 interface MobileNavBarProps {
   onMenuClick: () => void;
-  /** When true, nav bar sticks below the announcement banner (top-16). When false, sticks at top-0. */
+  /** When true, nav bar sticks below the system notification banner. */
   bannerVisible?: boolean;
 }
 
@@ -22,9 +22,7 @@ export default function MobileNavBar({ onMenuClick, bannerVisible = false }: Mob
     <div
       className={cn(
         "sticky z-40 flex h-14 items-center justify-between border-b border-border bg-background px-4 md:hidden",
-        bannerVisible
-          ? "top-[calc(var(--subscription-banner-offset,0px)+var(--header-height))]"
-          : "top-[var(--subscription-banner-offset,0px)]"
+        bannerVisible ? "top-[var(--header-height)]" : "top-0"
       )}
     >
       <Button

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
 import { useTranslations } from "next-intl";
 import { Link, usePathname, useRouter } from "@/i18n/navigation";
 import { History } from "lucide-react";
@@ -64,8 +64,6 @@ export default function DashboardLayoutClient({
   const [mobileOpen, setMobileOpen] = useState(false);
   const [mobileSystemBannerVisible, setMobileSystemBannerVisible] = useState(false);
   const [networkGateReady, setNetworkGateReady] = useState(false);
-  const [subscriptionBannerOffset, setSubscriptionBannerOffset] = useState("0px");
-  const subscriptionBannerStackRef = useRef<HTMLDivElement>(null);
   const subscription =
     meProfileStatus === "ready" ? (meProfile?.subscription ?? null) : null;
   const subscriptionUiState =
@@ -87,10 +85,14 @@ export default function DashboardLayoutClient({
     meProfileStatus === "ready" &&
     subscriptionUiState !== null &&
     subscriptionUiState !== "none";
-  const reserveTopBannerStripSpace =
-    showTopBannerStrip ||
-    meProfileStatus === "loading" ||
-    (meProfileStatus === "idle" && isAuthenticated);
+  const isPendingReviewWithPaymentBanner =
+    subscriptionUiState === "pending_review" &&
+    meProfile?.latest_payment_status === "PENDING_REVIEW";
+  const subscriptionBannerOffset = showTopBannerStrip
+    ? isPendingReviewWithPaymentBanner
+      ? "30px"
+      : "24px"
+    : "0px";
 
   const normalizedPlan = (subscription?.plan ?? "").toLowerCase();
   const isEligiblePlan =
@@ -182,46 +184,13 @@ export default function DashboardLayoutClient({
     meProfileStatus === "loading" ||
     (meProfileStatus === "idle" && isAuthenticated);
 
-  /**
-   * Keep a stable pre-hydration offset to prevent first-paint overlap, then
-   * switch to measured fixed-banner height once the banner element is present.
-   */
-  useLayoutEffect(() => {
-    const fallback = reserveTopBannerStripSpace ? "40px" : "0px";
-
-    if (!networkGateReady || authBlocking || !showTopBannerStrip) {
-      setSubscriptionBannerOffset(fallback);
-      return;
-    }
-
-    const el = subscriptionBannerStackRef.current;
-    if (!el) {
-      setSubscriptionBannerOffset(fallback);
-      return;
-    }
-
-    const apply = () => {
-      const h = el.getBoundingClientRect().height;
-      setSubscriptionBannerOffset(`${Math.max(0, Math.ceil(h))}px`);
-    };
-
-    apply();
-    const rafId = window.requestAnimationFrame(apply);
-    const ro = new ResizeObserver(apply);
-    ro.observe(el);
-    return () => {
-      window.cancelAnimationFrame(rafId);
-      ro.disconnect();
-    };
-  }, [networkGateReady, authBlocking, showTopBannerStrip, reserveTopBannerStripSpace]);
-
   if (isLoggingOut) return null;
   if (!networkGateReady) return null;
 
   if (authBlocking || shouldRedirectToOnboarding) {
     return (
       <div
-        className="min-h-screen bg-background pt-[var(--subscription-banner-offset,0px)]"
+        className="min-h-screen bg-background md:pt-[var(--subscription-banner-offset,0px)]"
         style={{ "--subscription-banner-offset": subscriptionBannerOffset } as CSSProperties}
       >
         <div
@@ -260,8 +229,7 @@ export default function DashboardLayoutClient({
         <NotificationProvider>
           {showTopBannerStrip && subscriptionUiState ? (
             <div
-              ref={subscriptionBannerStackRef}
-              className="fixed inset-x-0 top-0 z-[60] flex flex-col"
+              className="z-[60] flex flex-col md:fixed md:inset-x-0 md:top-0"
             >
               {subscriptionUiState === "pending_review" ? (
                 meProfile?.latest_payment_status === "PENDING_REVIEW" ? (
@@ -336,7 +304,7 @@ export default function DashboardLayoutClient({
           ) : null}
 
           <div
-            className="min-h-screen pt-[var(--subscription-banner-offset,0px)]"
+            className="min-h-screen md:pt-[var(--subscription-banner-offset,0px)]"
             style={{ "--subscription-banner-offset": subscriptionBannerOffset } as CSSProperties}
           >
             <SystemNotificationBanner
