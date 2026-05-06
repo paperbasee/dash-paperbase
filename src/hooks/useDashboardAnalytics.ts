@@ -11,6 +11,9 @@ import {
 import { todayYmdInBD } from "@/utils/time";
 import { isNetworkError } from "@/lib/network-error";
 
+const LIVE_RANGE_REFETCH_MS = 300_000;
+const FOREGROUND_REFETCH_COOLDOWN_MS = 5_000;
+
 export type {
   AnalyticsBucket,
   DashboardAnalyticsPoint,
@@ -39,6 +42,7 @@ export function useDashboardAnalytics(filters: DashboardAnalyticsFilters) {
     networkError: false,
   });
   const inFlightRef = useRef(false);
+  const lastForegroundFetchAtRef = useRef(0);
 
   const fetchAnalytics = useCallback((opts?: { silent?: boolean }) => {
     if (inFlightRef.current) return;
@@ -70,6 +74,19 @@ export function useDashboardAnalytics(filters: DashboardAnalyticsFilters) {
       });
   }, [filters.startDate, filters.endDate, filters.bucket]);
 
+  const shouldSkipBackgroundFetch = () =>
+    (typeof document !== "undefined" && document.hidden) ||
+    (typeof navigator !== "undefined" && navigator.onLine === false);
+
+  const shouldSkipForegroundFetch = () => {
+    const now = Date.now();
+    if (now - lastForegroundFetchAtRef.current < FOREGROUND_REFETCH_COOLDOWN_MS) {
+      return true;
+    }
+    lastForegroundFetchAtRef.current = now;
+    return false;
+  };
+
   useEffect(() => {
     fetchAnalytics();
   }, [fetchAnalytics]);
@@ -81,18 +98,33 @@ export function useDashboardAnalytics(filters: DashboardAnalyticsFilters) {
     const isLiveRange = filters.endDate >= today;
     if (!isLiveRange) return;
 
-    const intervalMs = 20_000;
+    const intervalMs = LIVE_RANGE_REFETCH_MS;
     const tick = () => {
-      if (typeof document !== "undefined" && document.hidden) return;
+      if (shouldSkipBackgroundFetch()) return;
       fetchAnalytics({ silent: true });
     };
     const id = window.setInterval(tick, intervalMs);
 
-    const onFocus = () => tick();
+    const onForeground = () => {
+      if (shouldSkipBackgroundFetch() || shouldSkipForegroundFetch()) return;
+      fetchAnalytics({ silent: true });
+    };
+    const onVisibilityChange = () => {
+      if (typeof document !== "undefined" && document.visibilityState === "visible") {
+        onForeground();
+      }
+    };
+    const onOnline = () => onForeground();
+
+    const onFocus = () => onForeground();
     window.addEventListener("focus", onFocus);
+    document.addEventListener("visibilitychange", onVisibilityChange);
+    window.addEventListener("online", onOnline);
     return () => {
       window.clearInterval(id);
       window.removeEventListener("focus", onFocus);
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+      window.removeEventListener("online", onOnline);
     };
   }, [filters.endDate, fetchAnalytics]);
 

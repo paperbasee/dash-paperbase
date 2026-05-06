@@ -1,12 +1,13 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { useLocale } from "next-intl";
 import api from "@/lib/api";
 import type { Banner, Blog, DashboardStats, PaginatedResponse } from "@/types";
 import { formatCountLocalized } from "@/lib/locale-digits";
 
-const REFETCH_MS = 30_000; // 30 seconds
+const REFETCH_MS = 60_000; // 60 seconds
+const FOREGROUND_REFETCH_COOLDOWN_MS = 5_000;
 
 function formatCountBase(n: number): string {
   if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
@@ -18,6 +19,8 @@ export function useNavCounts() {
   const locale = useLocale();
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
+  const inFlightRef = useRef(false);
+  const lastForegroundFetchAtRef = useRef(0);
 
   const formatCount = useCallback(
     (n: number) => formatCountLocalized(n, locale, formatCountBase),
@@ -25,6 +28,8 @@ export function useNavCounts() {
   );
 
   const fetchCounts = useCallback(() => {
+    if (inFlightRef.current) return;
+    inFlightRef.current = true;
     Promise.all([
       api.get<DashboardStats>("admin/stats/"),
       api.get<PaginatedResponse<Banner> | Banner[]>("admin/banners/?page_size=1"),
@@ -42,19 +47,55 @@ export function useNavCounts() {
         })
       )
       .catch(() => setStats(null))
-      .finally(() => setLoading(false));
+      .finally(() => {
+        setLoading(false);
+        inFlightRef.current = false;
+      });
   }, []);
+
+  const shouldSkipBackgroundFetch = () =>
+    (typeof document !== "undefined" && document.hidden) ||
+    (typeof navigator !== "undefined" && navigator.onLine === false);
+
+  const shouldSkipForegroundFetch = () => {
+    const now = Date.now();
+    if (now - lastForegroundFetchAtRef.current < FOREGROUND_REFETCH_COOLDOWN_MS) {
+      return true;
+    }
+    lastForegroundFetchAtRef.current = now;
+    return false;
+  };
 
   useEffect(() => {
     fetchCounts();
-    const interval = setInterval(fetchCounts, REFETCH_MS);
+    const interval = setInterval(() => {
+      if (shouldSkipBackgroundFetch()) return;
+      fetchCounts();
+    }, REFETCH_MS);
     return () => clearInterval(interval);
   }, [fetchCounts]);
 
   useEffect(() => {
-    const handleFocus = () => fetchCounts();
+    const onForeground = () => {
+      if (shouldSkipBackgroundFetch() || shouldSkipForegroundFetch()) return;
+      fetchCounts();
+    };
+    const handleFocus = () => onForeground();
+    const handleVisibility = () => {
+      if (typeof document !== "undefined" && document.visibilityState === "visible") {
+        onForeground();
+      }
+    };
+    const handleOnline = () => onForeground();
+
     window.addEventListener("focus", handleFocus);
-    return () => window.removeEventListener("focus", handleFocus);
+    document.addEventListener("visibilitychange", handleVisibility);
+    window.addEventListener("online", handleOnline);
+    return () => {
+      window.removeEventListener("focus", handleFocus);
+      document.removeEventListener("visibilitychange", handleVisibility);
+      window.removeEventListener("online", handleOnline);
+    };
   }, [fetchCounts]);
 
   if (loading || !stats) {

@@ -6,6 +6,7 @@ import {
   useEffect,
   useState,
   useCallback,
+  useRef,
   type ReactNode,
 } from "react";
 import {
@@ -37,6 +38,9 @@ const DELETED_KEY = "paperbase_notification_deleted_ids";
 const LEGACY_STORAGE_KEY = "akkho_notification_read_ids";
 const LEGACY_PREFS_KEY = "akkho_notification_prefs";
 const LEGACY_DELETED_KEY = "akkho_notification_deleted_ids";
+
+const NOTIFICATIONS_REFETCH_MS = 300_000;
+const FOREGROUND_REFETCH_COOLDOWN_MS = 5_000;
 
 type NotificationPrefs = {
   orders: boolean;
@@ -140,6 +144,8 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
   const [isHydrated, setIsHydrated] = useState(false);
   const [isFetching, setIsFetching] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const inFlightRef = useRef(false);
+  const lastForegroundFetchAtRef = useRef(0);
 
   const applyReadState = useCallback((list: DashboardNotification[]): DashboardNotification[] => {
     const readIds = loadReadIds();
@@ -147,6 +153,8 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const refresh = useCallback(async () => {
+    if (inFlightRef.current) return;
+    inFlightRef.current = true;
     setIsFetching(true);
     try {
       setError(null);
@@ -158,8 +166,22 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
       setError("Failed to load notifications.");
     } finally {
       setIsFetching(false);
+      inFlightRef.current = false;
     }
   }, [applyReadState]);
+
+  const shouldSkipBackgroundFetch = () =>
+    (typeof document !== "undefined" && document.hidden) ||
+    (typeof navigator !== "undefined" && navigator.onLine === false);
+
+  const shouldSkipForegroundFetch = () => {
+    const now = Date.now();
+    if (now - lastForegroundFetchAtRef.current < FOREGROUND_REFETCH_COOLDOWN_MS) {
+      return true;
+    }
+    lastForegroundFetchAtRef.current = now;
+    return false;
+  };
 
   useEffect(() => {
     setIsHydrated(true);
@@ -168,19 +190,34 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!isHydrated) return;
     refresh();
-    const interval = window.setInterval(refresh, 10000);
+
+    const interval = window.setInterval(() => {
+      if (shouldSkipBackgroundFetch()) return;
+      refresh();
+    }, NOTIFICATIONS_REFETCH_MS);
+
+    const handleForeground = () => {
+      if (shouldSkipBackgroundFetch() || shouldSkipForegroundFetch()) return;
+      refresh();
+    };
 
     const handleVisibilityChange = () => {
-      if (document.visibilityState === "visible") {
-        refresh();
+      if (typeof document !== "undefined" && document.visibilityState === "visible") {
+        handleForeground();
       }
     };
 
+    const handleOnline = () => {
+      handleForeground();
+    };
+
     document.addEventListener("visibilitychange", handleVisibilityChange);
+    window.addEventListener("online", handleOnline);
 
     return () => {
       window.clearInterval(interval);
       document.removeEventListener("visibilitychange", handleVisibilityChange);
+      window.removeEventListener("online", handleOnline);
     };
   }, [isHydrated, refresh]);
 
