@@ -401,7 +401,7 @@ function SidebarContent({
       {/* Navigation */}
       <nav
         className={cn(
-          "flex-1 space-y-0.5 overflow-y-auto px-4 pb-6",
+          "min-h-0 flex-1 space-y-0.5 overflow-y-auto px-4 pb-6",
           collapsed && "pt-2"
         )}
       >
@@ -781,7 +781,7 @@ function SidebarContent({
             align="center"
             side="top"
             className={cn(
-              "overflow-hidden rounded-card border border-border/80 p-0 shadow-lg",
+              "z-[80] overflow-hidden rounded-card border border-border/80 p-0 shadow-lg",
               mobileUserMenuLayout
                 ? // Match profile row width (w-64 sheet minus p-4); ! beats popover defaults
                   "!w-[var(--radix-dropdown-menu-trigger-width)] min-w-[12.5rem] max-w-[min(100vw-1.5rem,14rem)]"

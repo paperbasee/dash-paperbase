@@ -13,7 +13,7 @@ import { cn } from "@/lib/utils";
 interface SystemNotificationBannerProps {
   className?: string;
   sidebarCollapsed?: boolean;
-  placement?: "top" | "sidebar";
+  placement?: "top" | "sidebar" | "mobileFlow";
   /** When the banner should affect layout offset (has content and should show chrome). */
   onPresenceChange?: (visible: boolean) => void;
 }
@@ -131,13 +131,70 @@ export default function SystemNotificationBanner({
     );
   }
 
+  if (placement === "mobileFlow") {
+    return (
+      <div
+        role="banner"
+        aria-live="polite"
+        aria-label={`${notification.title}. ${notification.message}`}
+        className={cn(
+          "system-notification-banner relative z-50 flex h-[var(--header-height)] shrink-0 items-center border-b px-4 text-sm",
+          className
+        )}
+      >
+        <div className="flex min-w-0 flex-1 items-center justify-center gap-x-3 gap-y-1 px-8 pr-12 text-center sm:px-10 sm:pr-14">
+          <p className="system-notification-banner__text max-w-[min(100%,36rem)] truncate">
+            {notification.message}
+          </p>
+          {ctaText && ctaTarget && (
+            <Button
+              type="button"
+              variant="link"
+              className="system-notification-banner__cta h-auto shrink-0 p-0 underline underline-offset-4"
+              onClick={() => {
+                if (ctaTarget.kind === "internal") {
+                  router.push(ctaTarget.path);
+                  return;
+                }
+                window.open(ctaTarget.href, "_blank", "noopener,noreferrer");
+              }}
+            >
+              {ctaText}
+            </Button>
+          )}
+        </div>
+        <Button
+          variant="ghost"
+          size="icon-xs"
+          loading={isDismissing}
+          onClick={async () => {
+            if (isDismissing) return;
+            setIsDismissing(true);
+            setHiddenPublicId(notification.public_id);
+            try {
+              await dismissSystemNotification(notification.public_id);
+            } catch {
+              setHiddenPublicId(null);
+            } finally {
+              setIsDismissing(false);
+            }
+          }}
+          aria-label={t("dismissAria")}
+          className="system-notification-banner__dismiss absolute right-3 top-1/2 shrink-0 -translate-y-1/2 sm:right-4"
+        >
+          <X className="size-4" />
+        </Button>
+      </div>
+    );
+  }
+
   return (
     <div
       role="banner"
       aria-live="polite"
       aria-label={`${notification.title}. ${notification.message}`}
       className={cn(
-        "system-notification-banner fixed right-0 top-[var(--subscription-banner-offset,0px)] z-50 flex h-[var(--header-height)] shrink-0 items-center border-b px-4 text-sm transition-[left] duration-300",
+        "system-notification-banner fixed right-0 top-[var(--subscription-banner-offset,0px)] z-50 relative flex h-[var(--header-height)] shrink-0 items-center border-b px-4 text-sm transition-[left] duration-300",
         "left-0 md:left-16",
         !sidebarCollapsed && "md:left-72",
         className

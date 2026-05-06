@@ -62,7 +62,6 @@ export default function DashboardLayoutClient({
   } = useAuth();
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [mobileSystemBannerVisible, setMobileSystemBannerVisible] = useState(false);
   const [networkGateReady, setNetworkGateReady] = useState(false);
   const subscription =
     meProfileStatus === "ready" ? (meProfile?.subscription ?? null) : null;
@@ -308,8 +307,8 @@ export default function DashboardLayoutClient({
             style={{ "--subscription-banner-offset": subscriptionBannerOffset } as CSSProperties}
           >
             <SystemNotificationBanner
+              placement="mobileFlow"
               className="md:hidden"
-              onPresenceChange={setMobileSystemBannerVisible}
             />
 
             <Sidebar
@@ -320,7 +319,7 @@ export default function DashboardLayoutClient({
             <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
               <SheetContent
                 side="left"
-                className="z-[70] w-64 p-0 flex flex-col"
+                className="z-[70] min-h-0 w-64 p-0 flex flex-col"
                 showCloseButton={true}
               >
                 <SheetTitle className="sr-only">
@@ -338,13 +337,10 @@ export default function DashboardLayoutClient({
               className={cn(
                 "min-h-screen transition-[margin,padding-top] duration-300",
                 collapsed ? "md:ml-16" : "md:ml-72"
-                ,
-                mobileSystemBannerVisible && "pt-[var(--header-height)] md:pt-0"
               )}
             >
               <MobileNavBar
                 onMenuClick={() => setMobileOpen(true)}
-                bannerVisible={mobileSystemBannerVisible}
               />
 
               <div className="sticky top-[var(--subscription-banner-offset,0px)] z-30 hidden h-[var(--header-height)] border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 md:block">

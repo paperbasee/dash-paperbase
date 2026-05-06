@@ -10,11 +10,9 @@ import { cn } from "@/lib/utils";
 
 interface MobileNavBarProps {
   onMenuClick: () => void;
-  /** When true, nav bar sticks below the system notification banner. */
-  bannerVisible?: boolean;
 }
 
-export default function MobileNavBar({ onMenuClick, bannerVisible = false }: MobileNavBarProps) {
+export default function MobileNavBar({ onMenuClick }: MobileNavBarProps) {
   const { setOpen: setSearchOpen } = useSearchModal();
   const tMobile = useTranslations("mobileNav");
 
@@ -22,7 +20,7 @@ export default function MobileNavBar({ onMenuClick, bannerVisible = false }: Mob
     <div
       className={cn(
         "sticky z-40 flex h-14 items-center justify-between border-b border-border bg-background px-4 md:hidden",
-        bannerVisible ? "top-[var(--header-height)]" : "top-0"
+        "top-0"
       )}
     >
       <Button
