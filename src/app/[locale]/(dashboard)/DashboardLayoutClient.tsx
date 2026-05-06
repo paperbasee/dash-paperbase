@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from "react";
 import { useTranslations } from "next-intl";
 import { Link, usePathname, useRouter } from "@/i18n/navigation";
 import { History } from "lucide-react";
@@ -64,6 +64,7 @@ export default function DashboardLayoutClient({
   const [mobileOpen, setMobileOpen] = useState(false);
   const [mobileSystemBannerVisible, setMobileSystemBannerVisible] = useState(false);
   const [networkGateReady, setNetworkGateReady] = useState(false);
+  const [subscriptionBannerOffset, setSubscriptionBannerOffset] = useState("0px");
   const subscriptionBannerStackRef = useRef<HTMLDivElement>(null);
   const subscription =
     meProfileStatus === "ready" ? (meProfile?.subscription ?? null) : null;
@@ -86,6 +87,10 @@ export default function DashboardLayoutClient({
     meProfileStatus === "ready" &&
     subscriptionUiState !== null &&
     subscriptionUiState !== "none";
+  const reserveTopBannerStripSpace =
+    showTopBannerStrip ||
+    meProfileStatus === "loading" ||
+    (meProfileStatus === "idle" && isAuthenticated);
 
   const normalizedPlan = (subscription?.plan ?? "").toLowerCase();
   const isEligiblePlan =
@@ -170,31 +175,6 @@ export default function DashboardLayoutClient({
     return () => window.removeEventListener("resize", syncDashboardInset);
   }, [collapsed]);
 
-  /** Match actual fixed subscription/pending strip height so nav & system banner sit flush (no hardcoded gap). */
-  useLayoutEffect(() => {
-    const root = document.documentElement;
-    if (!showTopBannerStrip) {
-      root.style.setProperty("--subscription-banner-offset", "0px");
-      return;
-    }
-    const el = subscriptionBannerStackRef.current;
-    if (!el) {
-      root.style.setProperty("--subscription-banner-offset", "0px");
-      return;
-    }
-    const apply = () => {
-      const h = el.getBoundingClientRect().height;
-      root.style.setProperty("--subscription-banner-offset", `${Math.max(0, Math.ceil(h))}px`);
-    };
-    apply();
-    const ro = new ResizeObserver(apply);
-    ro.observe(el);
-    return () => {
-      ro.disconnect();
-      root.style.setProperty("--subscription-banner-offset", "0px");
-    };
-  }, [showTopBannerStrip]);
-
   const authBlocking =
     !authHydrated ||
     isLoading ||
@@ -202,12 +182,48 @@ export default function DashboardLayoutClient({
     meProfileStatus === "loading" ||
     (meProfileStatus === "idle" && isAuthenticated);
 
+  /**
+   * Keep a stable pre-hydration offset to prevent first-paint overlap, then
+   * switch to measured fixed-banner height once the banner element is present.
+   */
+  useLayoutEffect(() => {
+    const fallback = reserveTopBannerStripSpace ? "40px" : "0px";
+
+    if (!networkGateReady || authBlocking || !showTopBannerStrip) {
+      setSubscriptionBannerOffset(fallback);
+      return;
+    }
+
+    const el = subscriptionBannerStackRef.current;
+    if (!el) {
+      setSubscriptionBannerOffset(fallback);
+      return;
+    }
+
+    const apply = () => {
+      const h = el.getBoundingClientRect().height;
+      setSubscriptionBannerOffset(`${Math.max(0, Math.ceil(h))}px`);
+    };
+
+    apply();
+    const rafId = window.requestAnimationFrame(apply);
+    const ro = new ResizeObserver(apply);
+    ro.observe(el);
+    return () => {
+      window.cancelAnimationFrame(rafId);
+      ro.disconnect();
+    };
+  }, [networkGateReady, authBlocking, showTopBannerStrip, reserveTopBannerStripSpace]);
+
   if (isLoggingOut) return null;
   if (!networkGateReady) return null;
 
   if (authBlocking || shouldRedirectToOnboarding) {
     return (
-      <div className="min-h-screen bg-background pt-[var(--subscription-banner-offset,0px)]">
+      <div
+        className="min-h-screen bg-background pt-[var(--subscription-banner-offset,0px)]"
+        style={{ "--subscription-banner-offset": subscriptionBannerOffset } as CSSProperties}
+      >
         <div
           className={cn(
             "min-h-screen transition-[margin,padding-top] duration-300",
@@ -319,7 +335,10 @@ export default function DashboardLayoutClient({
             </div>
           ) : null}
 
-          <div className="min-h-screen pt-[var(--subscription-banner-offset,0px)]">
+          <div
+            className="min-h-screen pt-[var(--subscription-banner-offset,0px)]"
+            style={{ "--subscription-banner-offset": subscriptionBannerOffset } as CSSProperties}
+          >
             <SystemNotificationBanner
               className="md:hidden"
               onPresenceChange={setMobileSystemBannerVisible}
@@ -333,7 +352,7 @@ export default function DashboardLayoutClient({
             <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
               <SheetContent
                 side="left"
-                className="w-64 p-0 flex flex-col"
+                className="z-[70] w-64 p-0 flex flex-col"
                 showCloseButton={true}
               >
                 <SheetTitle className="sr-only">
