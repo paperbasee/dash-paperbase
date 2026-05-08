@@ -28,6 +28,10 @@ import {
   ORDER_PAYMENT_STATUS_OPTIONS,
   formatOrderPaymentStatusLabel,
 } from "@/lib/orders/payment-statuses";
+import {
+  ORDER_DELIVERY_STATUS_OPTIONS,
+  formatOrderDeliveryStatusLabel,
+} from "@/lib/orders/delivery-statuses";
 import { ORDER_FLAG_OPTIONS, formatOrderFlagLabel } from "@/lib/orders/order-flags";
 import type { AdminCategoryTreeNode, Order, PaginatedResponse } from "@/types";
 import { useConfirm } from "@/context/ConfirmDialogContext";
@@ -145,6 +149,7 @@ export default function OrdersPage() {
     "flag",
     "date_range",
     "payment_status",
+    "delivery_status",
     "category",
     "search",
   ]);
@@ -217,6 +222,7 @@ export default function OrdersPage() {
     if (filters.flag) params.flag = filters.flag;
     if (filters.date_range) params.date_range = filters.date_range;
     if (filters.payment_status) params.payment_status = filters.payment_status;
+    if (filters.delivery_status) params.delivery_status = filters.delivery_status;
     if (filters.category) params.category = filters.category;
     if (filters.search) params.search = filters.search;
     api
@@ -239,6 +245,7 @@ export default function OrdersPage() {
     filters.flag,
     filters.category,
     filters.payment_status,
+    filters.delivery_status,
     filters.search,
     filters.status,
     page,
@@ -256,6 +263,7 @@ export default function OrdersPage() {
     filters.flag,
     filters.category,
     filters.payment_status,
+    filters.delivery_status,
     filters.search,
     filters.status,
   ]);
@@ -340,6 +348,7 @@ export default function OrdersPage() {
               flag: filters.flag || "",
               date_range: filters.date_range || "",
               payment_status: filters.payment_status || "",
+              delivery_status: filters.delivery_status || "",
               category: filters.category || "",
               search: filters.search || "",
             },
@@ -684,6 +693,15 @@ export default function OrdersPage() {
           }))}
         />
         <FilterDropdown
+          value={filters.delivery_status}
+          onChange={(value) => setFilter("delivery_status", value)}
+          placeholder={tPages("filtersDeliveryStatus")}
+          options={ORDER_DELIVERY_STATUS_OPTIONS.map((s) => ({
+            value: s,
+            label: formatOrderDeliveryStatusLabel(s, (key) => tPages(key)),
+          }))}
+        />
+        <FilterDropdown
           value={filters.category}
           onChange={(value) => setFilter("category", value)}
           placeholder="Category"
@@ -799,7 +817,7 @@ export default function OrdersPage() {
                   <th className="th">Fraud Check</th>
                   <th className="th">Action</th>
                   <th className="th">Flag</th>
-                  <th className="th">Status</th>
+                  <th className="th">Delivery Status</th>
                   <th className="th">{tPages("ordersListColTotal")}</th>
                   <th className="th">{tPages("ordersListConsignmentId")}</th>
                   <th className="th">{tPages("ordersListColPayment")}</th>
