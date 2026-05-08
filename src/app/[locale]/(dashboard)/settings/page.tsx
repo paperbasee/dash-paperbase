@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
+import { usePathname, useRouter as useNextRouter, useSearchParams } from "next/navigation";
 import { Undo2, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -29,9 +30,34 @@ import useSettingsPageController from "./useSettingsPageController";
 
 export default function SettingsPage() {
   const router = useRouter();
+  const nextRouter = useNextRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const tSettings = useTranslations("settings");
   const [activeSection, setActiveSection] = useState<SettingsSection>("store");
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
+
+  const validSectionIds = useMemo(() => new Set(SECTIONS.map((s) => s.id)), []);
+
+  useEffect(() => {
+    const raw = (searchParams.get("tab") || "").trim();
+    if (!raw) return;
+    if (!validSectionIds.has(raw as SettingsSection)) return;
+    const next = raw as SettingsSection;
+    setActiveSection((prev) => (prev === next ? prev : next));
+  }, [searchParams, validSectionIds]);
+
+  function setSection(next: SettingsSection) {
+    setActiveSection(next);
+
+    const current = (searchParams.get("tab") || "").trim();
+    if (current === next) return;
+
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("tab", next);
+    const qs = params.toString();
+    nextRouter.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+  }
 
   const controller = useSettingsPageController();
   const {
@@ -141,7 +167,7 @@ export default function SettingsPage() {
                 <SettingsSectionNav
                   activeSection={activeSection}
                   onSelect={(id) => {
-                    setActiveSection(id);
+                    setSection(id);
                     setMobileNavOpen(false);
                   }}
                 />
@@ -153,7 +179,7 @@ export default function SettingsPage() {
         <div className="hidden min-w-0 md:block" aria-label={tSettings("navAria")}>
           <SettingsDesktopSectionNav
             activeSection={activeSection}
-            onSelect={setActiveSection}
+            onSelect={setSection}
           />
         </div>
 

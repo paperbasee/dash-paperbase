@@ -89,6 +89,48 @@ function courierCell(order: Order): string {
   return c || "—";
 }
 
+function deliveryStatusBadge(order: Order) {
+  const s = order.delivery_status || "unknown";
+  const cfg: Record<
+    string,
+    { label: string; className: string }
+  > = {
+    not_dispatched: {
+      label: "Not Dispatched",
+      className: "bg-muted text-muted-foreground",
+    },
+    in_transit: {
+      label: "In Transit",
+      className: "bg-blue-600/10 text-blue-700 dark:text-blue-300",
+    },
+    delivered: {
+      label: "Delivered",
+      className: "bg-emerald-600/10 text-emerald-700 dark:text-emerald-300",
+    },
+    partial_delivered: {
+      label: "Partial Delivered",
+      className: "bg-amber-600/10 text-amber-700 dark:text-amber-300",
+    },
+    cancelled: {
+      label: "Delivery Failed",
+      className: "bg-rose-600/10 text-rose-700 dark:text-rose-300",
+    },
+    unknown: {
+      label: "Unknown",
+      className: "bg-muted text-muted-foreground",
+    },
+  };
+  const hit = cfg[s] || cfg.unknown;
+  return (
+    <span
+      className={`inline-flex items-center rounded-ui px-2 py-0.5 text-xs font-medium whitespace-nowrap ${hit.className}`}
+      aria-label={`Delivery status: ${hit.label}`}
+    >
+      {hit.label}
+    </span>
+  );
+}
+
 export default function OrdersPage() {
   const router = useRouter();
   const locale = useLocale();
@@ -593,7 +635,7 @@ export default function OrdersPage() {
         <FilterDropdown
           value={filters.status}
           onChange={(value) => setFilter("status", value)}
-          placeholder={tPages("filtersStatus")}
+          placeholder="Action"
           options={ORDER_STATUS_OPTIONS.map((s) => ({
             value: s,
             label: formatOrderStatusLabel(s, (key) => tPages(key)),
@@ -755,8 +797,9 @@ export default function OrdersPage() {
                   <th className="th">{tPages("ordersListColCustomer")}</th>
                   <th className="th">{tPages("ordersListColPhone")}</th>
                   <th className="th">Fraud Check</th>
-                  <th className="th">{tPages("filtersStatus")}</th>
+                  <th className="th">Action</th>
                   <th className="th">Flag</th>
+                  <th className="th">Status</th>
                   <th className="th">{tPages("ordersListColTotal")}</th>
                   <th className="th">{tPages("ordersListConsignmentId")}</th>
                   <th className="th">{tPages("ordersListColPayment")}</th>
@@ -882,6 +925,9 @@ export default function OrdersPage() {
                               </option>
                             ))}
                           </Select>
+                        </td>
+                        <td className="px-4 py-3 whitespace-nowrap">
+                          {deliveryStatusBadge(order)}
                         </td>
                         <td
                           className={`px-4 py-3 whitespace-nowrap text-foreground ${numClass}`}

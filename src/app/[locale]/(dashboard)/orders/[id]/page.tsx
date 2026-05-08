@@ -542,6 +542,41 @@ export default function OrderDetailPage() {
           .join(" · ") || "—"
       : "—";
 
+  function deliveryStatusBadge() {
+    const s = order.delivery_status || "unknown";
+    const cfg: Record<string, { label: string; className: string }> = {
+      not_dispatched: { label: "Not Dispatched", className: "bg-muted text-muted-foreground" },
+      in_transit: { label: "In Transit", className: "bg-blue-600/10 text-blue-700 dark:text-blue-300" },
+      delivered: { label: "Delivered", className: "bg-emerald-600/10 text-emerald-700 dark:text-emerald-300" },
+      partial_delivered: { label: "Partial Delivered", className: "bg-amber-600/10 text-amber-700 dark:text-amber-300" },
+      cancelled: { label: "Delivery Failed", className: "bg-rose-600/10 text-rose-700 dark:text-rose-300" },
+      unknown: { label: "Unknown", className: "bg-muted text-muted-foreground" },
+    };
+    const hit = cfg[s] || cfg.unknown;
+    return (
+      <span className={`inline-flex items-center rounded-ui px-2 py-0.5 text-xs font-medium ${hit.className}`}>
+        {hit.label}
+      </span>
+    );
+  }
+
+  function relativeTime(iso: string): string {
+    const d = new Date(iso);
+    const ms = d.getTime();
+    if (Number.isNaN(ms)) return "—";
+    const diff = Date.now() - ms;
+    const sec = Math.round(diff / 1000);
+    const abs = Math.abs(sec);
+    const fmt = (n: number, unit: string) => `${n}${unit} ago`;
+    if (abs < 60) return fmt(abs, "s");
+    const min = Math.round(abs / 60);
+    if (min < 60) return fmt(min, "m");
+    const hr = Math.round(min / 60);
+    if (hr < 24) return fmt(hr, "h");
+    const day = Math.round(hr / 24);
+    return fmt(day, "d");
+  }
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -814,6 +849,22 @@ export default function OrderDetailPage() {
                   <dt className="text-muted-foreground">{tPages("orderDetailCourier")}</dt>
                   <dd className="text-muted-foreground">{courierSummary}</dd>
                 </div>
+                <div className="flex justify-between items-start gap-3">
+                  <dt className="text-muted-foreground">Delivery Status</dt>
+                  <dd className="text-right">
+                    {deliveryStatusBadge()}
+                    {order.last_tracking_message ? (
+                      <p className="mt-1 text-xs text-muted-foreground max-w-[240px] break-words">
+                        {order.last_tracking_message}
+                      </p>
+                    ) : null}
+                    {order.delivery_status_updated_at ? (
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        Last updated: {relativeTime(order.delivery_status_updated_at)}
+                      </p>
+                    ) : null}
+                  </dd>
+                </div>
                 <div className="flex justify-between border-t border-border pt-3 text-base font-semibold">
                   <dt>{tPages("orderDetailTotal")}</dt>
                   <dd className={numClass}>
@@ -953,7 +1004,7 @@ export default function OrderDetailPage() {
                         htmlFor="order-detail-status-select"
                         className="mb-1 block text-xs font-medium text-muted-foreground"
                       >
-                        {tPages("orderDetailOrderStatusField")}
+                        Action
                       </label>
                       <div className="flex flex-wrap items-center gap-2">
                         <Select
@@ -1046,7 +1097,7 @@ export default function OrderDetailPage() {
                 </div>
                 <div>
                   <label className="mb-1 block text-xs font-medium text-muted-foreground">
-                    {tPages("orderDetailOrderStatusField")}
+                    Action
                   </label>
                   <Input
                     value={formatOrderStatusLabel(order.status, tPages)}

@@ -120,6 +120,15 @@ export interface Order {
   courier_consignment_id?: string;
   sent_to_courier?: boolean;
   customer_confirmation_sent_at?: string | null;
+  delivery_status:
+    | "not_dispatched"
+    | "in_transit"
+    | "delivered"
+    | "partial_delivered"
+    | "cancelled"
+    | "unknown";
+  delivery_status_updated_at: string | null;
+  last_tracking_message: string;
   items?: OrderItem[];
   items_count?: number;
   has_unavailable_products?: boolean;
@@ -489,6 +498,7 @@ export interface Courier {
   provider: "steadfast";
   api_key_masked: string;
   secret_key_masked: string;
+  has_webhook_token?: boolean;
   is_active: boolean;
   created_at: string;
   updated_at: string;
