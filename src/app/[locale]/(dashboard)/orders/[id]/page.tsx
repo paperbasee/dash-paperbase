@@ -542,8 +542,8 @@ export default function OrderDetailPage() {
           .join(" · ") || "—"
       : "—";
 
-  function deliveryStatusBadge() {
-    const s = order.delivery_status || "unknown";
+  function deliveryStatusBadge(o: Order) {
+    const s = o.delivery_status || "unknown";
     const cfg: Record<string, { label: string; className: string }> = {
       not_dispatched: { label: "Not Dispatched", className: "bg-muted text-muted-foreground" },
       in_transit: { label: "In Transit", className: "bg-blue-600/10 text-blue-700 dark:text-blue-300" },
@@ -852,7 +852,7 @@ export default function OrderDetailPage() {
                 <div className="flex justify-between items-start gap-3">
                   <dt className="text-muted-foreground">Delivery Status</dt>
                   <dd className="text-right">
-                    {deliveryStatusBadge()}
+                    {deliveryStatusBadge(order)}
                     {order.last_tracking_message ? (
                       <p className="mt-1 text-xs text-muted-foreground max-w-[240px] break-words">
                         {order.last_tracking_message}
