@@ -17,6 +17,10 @@ export const metadata: Metadata = {
   description: "paperbase dashboard",
 };
 
+export const viewport = {
+  themeColor: "#ffffff",
+};
+
 export default async function LocaleLayout({
   children,
   params,
