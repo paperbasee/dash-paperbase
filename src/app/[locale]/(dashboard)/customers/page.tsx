@@ -64,7 +64,7 @@ export default function CustomersPage() {
       })
       .then((res) => {
         setCustomers(res.data.results);
-        setCount(res.data.count);
+        setCount(res.data.count ?? 0);
         setHasNext(!!res.data.next);
       })
       .catch((err) => {

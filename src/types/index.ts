@@ -297,10 +297,11 @@ export interface DashboardStats {
 }
 
 export interface PaginatedResponse<T> {
-  count: number;
   next: string | null;
   previous: string | null;
   results: T[];
+  /** PageNumberPagination only; cursor lists omit this. */
+  count?: number;
 }
 
 export type TrashEntityType = "product" | "order";

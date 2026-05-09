@@ -129,7 +129,7 @@ export default function SupportTicketsPage() {
       })
       .then((res) => {
         setTickets(res.data.results);
-        setCount(res.data.count);
+        setCount(res.data.count ?? 0);
         setHasNext(!!res.data.next);
       })
       .catch((err) => {

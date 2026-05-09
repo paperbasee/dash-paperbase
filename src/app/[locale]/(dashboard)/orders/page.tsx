@@ -1,10 +1,11 @@
 "use client";
 
-import { Fragment, useCallback, useEffect, useState } from "react";
+import { Fragment, useCallback, useEffect, useLayoutEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import { useLocale, useTranslations } from "next-intl";
 import { Link, useRouter } from "@/i18n/navigation";
 import { toLocaleDigits } from "@/lib/locale-digits";
+import { cursorFromLink } from "@/lib/cursor-from-link";
 import { digitsInNumberFont, numberTextClass } from "@/lib/number-font";
 import { Download, Loader2, Truck, Undo2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -143,7 +144,7 @@ export default function OrdersPage() {
   const tPages = useTranslations("pages");
   const { currencySymbol } = useBranding();
   const confirm = useConfirm();
-  const { page, filters, setFilter, setPage, clearFilters } = useFilters([
+  const { filters, setFilter, clearFilters } = useFilters([
     "customer",
     "status",
     "flag",
@@ -157,8 +158,9 @@ export default function OrdersPage() {
   const debouncedSearch = useDebouncedValue(searchInput);
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
-  const [count, setCount] = useState(0);
-  const [hasNext, setHasNext] = useState(false);
+  const [listCursor, setListCursor] = useState<string | null>(null);
+  const [nextLink, setNextLink] = useState<string | null>(null);
+  const [prevLink, setPrevLink] = useState<string | null>(null);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [bulkDispatching, setBulkDispatching] = useState(false);
   const [statusUpdatingId, setStatusUpdatingId] = useState<string | null>(null);
@@ -216,7 +218,8 @@ export default function OrdersPage() {
 
   const fetchOrders = useCallback(() => {
     setLoading(true);
-    const params: Record<string, string | number> = { page };
+    const params: Record<string, string> = {};
+    if (listCursor) params.cursor = listCursor;
     if (filters.customer) params.customer = filters.customer;
     if (filters.status) params.status = filters.status;
     if (filters.flag) params.flag = filters.flag;
@@ -231,8 +234,8 @@ export default function OrdersPage() {
       })
       .then((res) => {
         setOrders(res.data.results);
-        setCount(res.data.count);
-        setHasNext(!!res.data.next);
+        setNextLink(res.data.next);
+        setPrevLink(res.data.previous);
       })
       .catch((err) => {
         console.error(err);
@@ -248,12 +251,27 @@ export default function OrdersPage() {
     filters.delivery_status,
     filters.search,
     filters.status,
-    page,
+    listCursor,
   ]);
 
   useEffect(() => {
     fetchOrders();
   }, [fetchOrders]);
+
+  useLayoutEffect(() => {
+    setListCursor(null);
+    setNextLink(null);
+    setPrevLink(null);
+  }, [
+    filters.customer,
+    filters.date_range,
+    filters.flag,
+    filters.category,
+    filters.payment_status,
+    filters.delivery_status,
+    filters.search,
+    filters.status,
+  ]);
 
   useEffect(() => {
     setGlobalSelectActive(false);
@@ -583,13 +601,12 @@ export default function OrdersPage() {
             </button>
           </div>
           <h1 className="text-2xl font-medium leading-relaxed text-foreground">
-            {tNav("orders")} (
-            <span className={numClass}>{toLocaleDigits(String(count), locale)}</span>)
+            {tNav("orders")}
           </h1>
         </div>
         <div className="flex items-center gap-2 flex-wrap justify-end">
           {canExportOrders &&
-          count > 0 &&
+          orders.length > 0 &&
           selectedIds.size > 0 &&
           !globalSelectActive ? (
             <button
@@ -597,9 +614,7 @@ export default function OrdersPage() {
               onClick={selectAllMatchingFilters}
               className="rounded-card border border-border bg-card px-4 py-2 text-sm font-semibold text-foreground transition hover:bg-muted whitespace-nowrap"
             >
-              {tPages("ordersExportSelectAllMatching", {
-                count: toLocaleDigits(String(count), locale),
-              })}
+              {tPages("ordersExportSelectAllMatching")}
             </button>
           ) : null}
           {canExportOrders && someSelected && (
@@ -727,9 +742,7 @@ export default function OrdersPage() {
 
       {globalSelectActive ? (
         <div className="rounded-card border border-primary/30 bg-primary/5 px-4 py-3 text-sm text-foreground">
-          {tPages("ordersExportGlobalSelectionBanner", {
-            count: toLocaleDigits(String(count), locale),
-          })}
+          {tPages("ordersExportGlobalSelectionBanner")}
         </div>
       ) : null}
 
@@ -1057,26 +1070,23 @@ export default function OrdersPage() {
             }
           />
 
-          <div className="flex items-center justify-between">
-            <button
-              disabled={page <= 1}
-              onClick={() => setPage(page - 1)}
-              className="btn-page"
+          <div className="flex items-center justify-between gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              disabled={!prevLink}
+              onClick={() => setListCursor(cursorFromLink(prevLink))}
             >
               {tPages("supportTicketsPrevious")}
-            </button>
-            <span className="text-sm text-muted-foreground">
-              {tPages("supportTicketsPageLabel", {
-                page: toLocaleDigits(String(page), locale),
-              })}
-            </span>
-            <button
-              disabled={!hasNext}
-              onClick={() => setPage(page + 1)}
-              className="btn-page"
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              disabled={!nextLink}
+              onClick={() => setListCursor(cursorFromLink(nextLink))}
             >
               {tPages("supportTicketsNext")}
-            </button>
+            </Button>
           </div>
         </>
       )}

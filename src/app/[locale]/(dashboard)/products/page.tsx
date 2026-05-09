@@ -3,6 +3,7 @@
 import {
   useCallback,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -11,6 +12,7 @@ import {
 import { useLocale, useTranslations } from "next-intl";
 import { Link, useRouter } from "@/i18n/navigation";
 import { toLocaleDigits } from "@/lib/locale-digits";
+import { cursorFromLink } from "@/lib/cursor-from-link";
 import {
   DndContext,
   KeyboardSensor,
@@ -42,6 +44,7 @@ import {
 } from "@/components/ui/combobox";
 import { ClickableTableRow } from "@/components/ui/clickable-table-row";
 import { ClickableText } from "@/components/ui/clickable-text";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { FilterBar } from "@/components/filters/FilterBar";
 import { FilterDropdown } from "@/components/filters/FilterDropdown";
@@ -57,27 +60,28 @@ import { BelowFoldScrollHint } from "@/components/BelowFoldScrollHint";
 
 type CategoryOption = { value: string; label: string };
 
-/** Matches DRF default PageNumberPagination PAGE_SIZE for admin list. */
-const ADMIN_PRODUCTS_PAGE_SIZE = 24;
-
 async function fetchAllProductPublicIdsInCategory(
   categoryPublicId: string
 ): Promise<string[]> {
-  const ids: string[] = [];
-  let p = 1;
+  const rows: Product[] = [];
+  let cursor: string | null = null;
   for (;;) {
+    const params: Record<string, string> = { category: categoryPublicId };
+    if (cursor) params.cursor = cursor;
     const res = await api.get<PaginatedResponse<Product>>("admin/products/", {
-      params: {
-        page: p,
-        category: categoryPublicId,
-        ordering: "newest",
-      },
+      params,
     });
-    ids.push(...res.data.results.map((x) => x.public_id));
-    if (!res.data.next) break;
-    p += 1;
+    rows.push(...res.data.results);
+    const next = res.data.next ? cursorFromLink(res.data.next) : null;
+    if (!next) break;
+    cursor = next;
   }
-  return ids;
+  rows.sort(
+    (a, b) =>
+      (a.display_order ?? 0) - (b.display_order ?? 0) ||
+      (a.name || "").localeCompare(b.name || "")
+  );
+  return rows.map((x) => x.public_id);
 }
 
 export default function ProductsPage() {
@@ -89,7 +93,7 @@ export default function ProductsPage() {
   const tCommon = useTranslations("common");
   const { currencySymbol } = useBranding();
   const confirm = useConfirm();
-  const { page, filters, setFilter, setPage, clearFilters } = useFilters([
+  const { filters, setFilter, clearFilters } = useFilters([
     "status",
     "stock",
     "prepayment_type",
@@ -108,8 +112,9 @@ export default function ProductsPage() {
   const [categoryTree, setCategoryTree] = useState<AdminCategoryTreeNode[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
-  const [count, setCount] = useState(0);
-  const [hasNext, setHasNext] = useState(false);
+  const [listCursor, setListCursor] = useState<string | null>(null);
+  const [nextLink, setNextLink] = useState<string | null>(null);
+  const [prevLink, setPrevLink] = useState<string | null>(null);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [deleting, setDeleting] = useState(false);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
@@ -173,7 +178,8 @@ export default function ProductsPage() {
 
   const fetchProducts = useCallback(() => {
     setLoading(true);
-    const params: Record<string, string | number> = { page };
+    const params: Record<string, string> = {};
+    if (listCursor) params.cursor = listCursor;
     if (filters.status) params.status = filters.status;
     if (filters.stock) params.stock = filters.stock;
     if (filters.prepayment_type)
@@ -189,8 +195,8 @@ export default function ProductsPage() {
       })
       .then((res) => {
         setProducts(res.data.results);
-        setCount(res.data.count);
-        setHasNext(!!res.data.next);
+        setNextLink(res.data.next);
+        setPrevLink(res.data.previous);
       })
       .catch((err) => {
         console.error(err);
@@ -206,7 +212,22 @@ export default function ProductsPage() {
     filters.ordering,
     filters.status,
     filters.stock,
-    page,
+    listCursor,
+  ]);
+
+  useLayoutEffect(() => {
+    setListCursor(null);
+    setNextLink(null);
+    setPrevLink(null);
+  }, [
+    filters.category,
+    filters.price_max,
+    filters.price_min,
+    filters.prepayment_type,
+    filters.search,
+    filters.ordering,
+    filters.status,
+    filters.stock,
   ]);
 
   useEffect(() => {
@@ -242,11 +263,30 @@ export default function ProductsPage() {
       setProducts(reorderedPage);
 
       const catId = filters.category;
-      const start = (page - 1) * ADMIN_PRODUCTS_PAGE_SIZE;
       try {
         const fullIds = await fetchAllProductPublicIdsInCategory(catId);
-        const merged = fullIds.slice();
         const sliceIds = reorderedPage.map((p) => p.public_id);
+        const positions = sliceIds
+          .map((id) => fullIds.indexOf(id))
+          .filter((i) => i >= 0);
+        if (positions.length === 0) {
+          reorderBusyRef.current = false;
+          return;
+        }
+        positions.sort((a, b) => a - b);
+        const contiguous = positions.every(
+          (p, i) => i === 0 || p === positions[i - 1] + 1
+        );
+        if (!contiguous) {
+          notify.error(new Error("reorder_range"), {
+            fallbackMessage:
+              "These rows are not a consecutive block in category order. Load adjacent products or narrow filters, then try again.",
+          });
+          fetchProducts();
+          return;
+        }
+        const start = positions[0];
+        const merged = [...fullIds];
         for (let i = 0; i < sliceIds.length; i++) {
           merged[start + i] = sliceIds[i];
         }
@@ -263,7 +303,7 @@ export default function ProductsPage() {
         reorderBusyRef.current = false;
       }
     },
-    [canReorder, filters.category, page, products, fetchProducts]
+    [canReorder, filters.category, products, fetchProducts]
   );
 
   const toggleSelect = (id: string) => {
@@ -371,7 +411,7 @@ export default function ProductsPage() {
             </button>
           </div>
           <h1 className="text-2xl font-medium leading-relaxed text-foreground">
-            {tNav("products")} ({toLocaleDigits(String(count), locale)})
+            {tNav("products")}
           </h1>
         </div>
         <div className="flex items-center gap-2">
@@ -591,26 +631,23 @@ export default function ProductsPage() {
             </DndContext>
           </div>
 
-          <div className="flex items-center justify-between">
-            <button
-              disabled={page <= 1}
-              onClick={() => setPage(page - 1)}
-              className="btn-page"
+          <div className="flex items-center justify-between gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              disabled={!prevLink}
+              onClick={() => setListCursor(cursorFromLink(prevLink))}
             >
               {tPages("supportTicketsPrevious")}
-            </button>
-            <span className="text-sm text-muted-foreground">
-              {tPages("supportTicketsPageLabel", {
-                page: toLocaleDigits(String(page), locale),
-              })}
-            </span>
-            <button
-              disabled={!hasNext}
-              onClick={() => setPage(page + 1)}
-              className="btn-page"
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              disabled={!nextLink}
+              onClick={() => setListCursor(cursorFromLink(nextLink))}
             >
               {tPages("supportTicketsNext")}
-            </button>
+            </Button>
           </div>
         </>
       )}

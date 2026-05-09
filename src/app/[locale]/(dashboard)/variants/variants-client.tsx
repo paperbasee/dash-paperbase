@@ -32,20 +32,24 @@ import { useConfirm } from "@/context/ConfirmDialogContext";
 import { notify, normalizeError } from "@/notifications";
 import { numberTextClass } from "@/lib/number-font";
 import { cn } from "@/lib/utils";
+import { cursorFromLink } from "@/lib/cursor-from-link";
 import { DashboardTableSkeleton } from "@/components/skeletons/dashboard-skeletons";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useEnterNavigation } from "@/hooks/useEnterNavigation";
 
 async function fetchAllProducts(): Promise<Product[]> {
   const out: Product[] = [];
-  let page = 1;
+  let cursor: string | null = null;
   while (true) {
+    const params: Record<string, string> = { page_size: "100" };
+    if (cursor) params.cursor = cursor;
     const { data } = await api.get<PaginatedResponse<Product>>("admin/products/", {
-      params: { page, page_size: 100 },
+      params,
     });
     out.push(...data.results);
-    if (!data.next) break;
-    page += 1;
+    const next = data.next ? cursorFromLink(data.next) : null;
+    if (!next) break;
+    cursor = next;
   }
   return out;
 }

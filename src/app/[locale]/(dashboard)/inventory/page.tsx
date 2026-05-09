@@ -68,10 +68,10 @@ export default function InventoryPage() {
     Promise.all([listReq, lowStockReq, outOfStockReq])
       .then(([listRes, lowRes, outRes]) => {
         setInventory(listRes.data.results);
-        setCount(listRes.data.count);
+        setCount(listRes.data.count ?? 0);
         setHasNext(!!listRes.data.next);
-        setLowStockTotal(lowRes.data.count);
-        setOutOfStockTotal(outRes.data.count);
+        setLowStockTotal(lowRes.data.count ?? 0);
+        setOutOfStockTotal(outRes.data.count ?? 0);
       })
       .catch((err) => {
         console.error(err);

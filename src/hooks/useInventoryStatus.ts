@@ -28,8 +28,8 @@ export function useInventoryStatus(enabled: boolean) {
       }),
     ])
       .then(([outRes, lowRes]) => {
-        setOutCount(outRes.data.count);
-        setLowInStockCount(lowRes.data.count);
+        setOutCount(outRes.data.count ?? 0);
+        setLowInStockCount(lowRes.data.count ?? 0);
       })
       .catch(() => {
         setOutCount(0);
