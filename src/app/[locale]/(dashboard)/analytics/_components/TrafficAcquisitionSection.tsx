@@ -106,20 +106,20 @@ export function TrafficAcquisitionSection({
                     type="monotone"
                     dataKey={key}
                     name={key}
-                    stackId="utm"
                     stroke={CHART_COLORS[idx % 5]}
+                    strokeWidth={2}
                     fill={CHART_COLORS[idx % 5]}
-                    fillOpacity={0.35}
+                    fillOpacity={0.15}
                   />
                 ))}
                 <Area
                   type="monotone"
                   dataKey="other"
                   name="other"
-                  stackId="utm"
                   stroke={CHART_COLORS[5]}
+                  strokeWidth={2}
                   fill={CHART_COLORS[5]}
-                  fillOpacity={0.25}
+                  fillOpacity={0.15}
                 />
               </AreaChart>
             </ResponsiveContainer>
