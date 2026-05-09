@@ -20,7 +20,7 @@ export function buildDateRangeInputSchema(messages: ValidationMessages = default
   return z.object({
     startDate: z.string().trim().min(1, messages.startDateRequired),
     endDate: z.string().trim().min(1, messages.endDateRequired),
-    bucket: z.enum(["day", "week", "month"]),
+    bucket: z.enum(["hour", "day", "week", "month"]),
     preset: z.enum(["today", "last7", "last30", "thisMonth", "custom"]),
   });
 }
@@ -48,9 +48,17 @@ export function normalizeDateRange(raw: DateRangeValue, anchorDate: Date): DateR
     startStr = endStr;
   }
 
+  let bucket: AnalyticsBucket = raw.bucket;
+  if (startStr === endStr) {
+    bucket = "hour";
+  } else if (bucket === "hour") {
+    bucket = "day";
+  }
+
   return {
     ...raw,
     startDate: startStr,
     endDate: endStr,
+    bucket,
   };
 }

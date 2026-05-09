@@ -2,9 +2,8 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
-import { useRouter } from "@/i18n/navigation";
 import { usePathname, useRouter as useNextRouter, useSearchParams } from "next/navigation";
-import { Undo2, ChevronDown } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import {
@@ -23,13 +22,12 @@ import SecuritySection from "./sections/SecuritySection";
 import BillingSection from "./sections/BillingSection";
 import CustomizationSection from "./sections/CustomizationSection";
 import CheckoutSettingsSection from "./sections/CheckoutSettingsSection";
-import { SettingsDesktopSectionNav, SettingsSectionNav } from "./SettingsNav";
+import { SettingsSectionNav } from "./SettingsNav";
 import { SECTIONS, type SettingsSection } from "./settingsSections";
 import { settingsInvertedButtonClassName } from "./SettingsSectionBody";
 import useSettingsPageController from "./useSettingsPageController";
 
 export default function SettingsPage() {
-  const router = useRouter();
   const nextRouter = useNextRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -118,18 +116,8 @@ export default function SettingsPage() {
   return (
     <div className="w-full">
       <div className="flex w-full flex-col gap-6">
-        <header className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <header className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between md:hidden">
           <div className="flex items-center gap-3">
-            <div className="hidden rounded-card bg-muted/80 px-1 py-1 md:block">
-              <button
-                type="button"
-                onClick={() => router.back()}
-                aria-label={tSettings("goBackAria")}
-                className="flex items-center justify-center rounded-ui p-1 text-muted-foreground hover:bg-muted"
-              >
-                <Undo2 className="h-4 w-4" />
-              </button>
-            </div>
             <div>
               <h1 className="text-2xl font-semibold tracking-tight text-foreground">
                 {tSettings("title")}
@@ -140,10 +128,6 @@ export default function SettingsPage() {
             </div>
           </div>
         </header>
-
-        <p className="hidden text-sm text-muted-foreground md:block">
-          {tSettings("subtitle")}
-        </p>
 
         <div className="flex min-w-0 flex-col gap-6">
         <div className="md:hidden">
@@ -174,13 +158,6 @@ export default function SettingsPage() {
               </div>
             </CollapsibleContent>
           </Collapsible>
-        </div>
-
-        <div className="hidden min-w-0 md:block" aria-label={tSettings("navAria")}>
-          <SettingsDesktopSectionNav
-            activeSection={activeSection}
-            onSelect={setSection}
-          />
         </div>
 
         <main className="min-w-0 w-full flex-1">

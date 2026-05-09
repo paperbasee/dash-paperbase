@@ -23,7 +23,7 @@ export default function DashboardPage() {
     return {
       startDate: iso,
       endDate: iso,
-      bucket: "day",
+      bucket: "hour",
       preset: "today",
     };
   });
@@ -115,7 +115,7 @@ export default function DashboardPage() {
 
       <section className="order-3 hidden md:order-3 md:block">
         <div className="grid w-full min-h-[260px] gap-4 lg:grid-cols-[minmax(0,2fr)]">
-          <DashboardBarChart data={data?.series ?? []} />
+          <DashboardBarChart data={data?.series ?? []} bucket={range.bucket} />
         </div>
       </section>
     </div>

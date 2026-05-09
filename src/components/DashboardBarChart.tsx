@@ -13,16 +13,20 @@ import {
   YAxis,
 } from "recharts";
 
-import type { DashboardAnalyticsPoint } from "@/hooks/useDashboardAnalytics";
+import type {
+  AnalyticsBucket,
+  DashboardAnalyticsPoint,
+} from "@/hooks/useDashboardAnalytics";
 import { toLocaleDigits } from "@/lib/locale-digits";
 import { numberTextClass } from "@/lib/number-font";
 import { Card, CardContent } from "./ui/card";
 
 interface DashboardBarChartProps {
   data: DashboardAnalyticsPoint[];
+  bucket?: AnalyticsBucket;
 }
 
-export default function DashboardBarChart({ data }: DashboardBarChartProps) {
+export default function DashboardBarChart({ data, bucket = "day" }: DashboardBarChartProps) {
   const t = useTranslations("dashboard");
   const locale = useLocale();
   const numClass = numberTextClass(locale);
@@ -59,8 +63,27 @@ export default function DashboardBarChart({ data }: DashboardBarChartProps) {
   const [activeMetric, setActiveMetric] = useState<MetricKey | "all">("all");
   const [isTabletRange, setIsTabletRange] = useState(false);
 
-  const formatTick = (v: string | number) =>
+  const formatCountTick = (v: string | number) =>
     toLocaleDigits(String(v), locale);
+
+  /** X-axis uses `label` (dates or ISO hour starts); only there treat hour bucket as time-of-day. */
+  const formatCategoryTick = (v: string | number) => {
+    const s = String(v);
+    if (bucket === "hour") {
+      try {
+        const d = new Date(s);
+        if (Number.isNaN(d.getTime())) return formatCountTick(v);
+        const formatted = d.toLocaleTimeString(locale, {
+          hour: "numeric",
+          minute: "2-digit",
+        });
+        return toLocaleDigits(formatted, locale);
+      } catch {
+        return formatCountTick(v);
+      }
+    }
+    return formatCountTick(v);
+  };
 
   const metricFilterBtnBase =
     "min-w-0 max-w-full break-words rounded-ui border px-2 py-1 text-[11px] font-medium leading-relaxed transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-[hsl(var(--card))]";
@@ -111,7 +134,7 @@ export default function DashboardBarChart({ data }: DashboardBarChartProps) {
                   fontSize: 11,
                   className: numClass,
                 }}
-                tickFormatter={formatTick}
+                tickFormatter={formatCategoryTick}
               />
               <YAxis
                 tickLine={false}
@@ -124,7 +147,7 @@ export default function DashboardBarChart({ data }: DashboardBarChartProps) {
                   fontSize: 11,
                   className: numClass,
                 }}
-                tickFormatter={formatTick}
+                tickFormatter={formatCountTick}
               />
               <Tooltip
                 labelClassName="text-xs font-medium"
@@ -147,10 +170,7 @@ export default function DashboardBarChart({ data }: DashboardBarChartProps) {
                   )
                 }
                 labelFormatter={(label) =>
-                  toLocaleDigits(
-                    label === undefined || label === null ? "" : String(label),
-                    locale
-                  )
+                  formatCategoryTick(label === undefined || label === null ? "" : label)
                 }
               />
               <Legend

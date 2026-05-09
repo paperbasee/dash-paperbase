@@ -89,7 +89,7 @@ export default function DateRangeFilter({
       bucket = "day";
     } else if (preset === "today") {
       startStr = endStr;
-      bucket = "day";
+      bucket = "hour";
     } else {
       // custom – keep existing dates/bucket
       onChange({ ...value, preset });

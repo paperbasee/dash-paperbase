@@ -64,6 +64,7 @@ export default function DashboardLayoutClient({
   const [mobileOpen, setMobileOpen] = useState(false);
   const [mobileSidebarMounted, setMobileSidebarMounted] = useState(false);
   const [networkGateReady, setNetworkGateReady] = useState(false);
+  const isSettingsMode = pathname.startsWith("/settings");
   const subscription =
     meProfileStatus === "ready" ? (meProfile?.subscription ?? null) : null;
   const subscriptionUiState =
@@ -315,6 +316,7 @@ export default function DashboardLayoutClient({
             <Sidebar
               collapsed={collapsed}
               onToggle={() => setCollapsed(!collapsed)}
+              navVariant={isSettingsMode ? "settings" : "app"}
             />
 
             <Sheet

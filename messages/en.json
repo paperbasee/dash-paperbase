@@ -68,6 +68,7 @@
     "home": "Home",
     "products": "Products",
     "orders": "Orders",
+    "analytics": "Analytics",
     "customers": "Customers",
     "categories": "Categories",
     "support_tickets": "Support tickets",
@@ -89,6 +90,49 @@
     "more": "More",
     "navigation": "Navigation",
     "notifications_feed": "Notifications"
+  },
+  "analyticsPage": {
+    "metrics": {
+      "pageviews": "Total times pages on your store were loaded in the selected period.",
+      "sessions": "Distinct visits to your store; one session can include multiple pageviews.",
+      "bounce_rate": "Share of sessions that viewed only one page before leaving.",
+      "avg_session_duration": "Average time visitors spent per session on your store.",
+      "revenue": "Total sales revenue recorded in the selected period.",
+      "orders": "Number of completed orders in the selected period.",
+      "aov": "Average order value — mean revenue per completed order.",
+      "return_rate": "Percentage of delivered parcels that were returned."
+    },
+    "deviceBreakdown": {
+      "title": "Device breakdown",
+      "names": {
+        "mobile": "Mobile",
+        "tablet": "Tablet",
+        "desktop": "Desktop"
+      },
+      "ofSessions": "of {count} sessions",
+      "sessionsShort": "sessions",
+      "empty": "No device session data for this period.",
+      "leadingLabel": "Leading device",
+      "mixLabel": "Traffic mix",
+      "leadingDescription": "{device} accounts for {percent}% of sessions in this period.",
+      "mixDescription": "Keep key storefront flows fast and clear on every screen size."
+    },
+    "parcelStatus": {
+      "title": "Parcel status",
+      "names": {
+        "delivered": "Delivered",
+        "returned": "Returned",
+        "in_transit": "In transit",
+        "unknown": "Unknown"
+      },
+      "ofParcels": "of {count} parcels",
+      "parcelsShort": "parcels",
+      "empty": "No parcel data for this period.",
+      "leadingLabel": "Leading status",
+      "leadingDescription": "{status} makes up {percent}% of tracked parcel outcomes in this period.",
+      "returnRateLabel": "Return rate",
+      "returnRateDescription": "Returned parcels as a share of deliveries—useful for courier and product quality checks."
+    }
   },
   "pages": {
     "goBack": "Go back",
@@ -1202,6 +1246,10 @@
       "enabled": "Enabled",
       "disabled": "Disabled",
       "items": {
+        "analytics": {
+          "label": "Analytics",
+          "description": "Advanced analytics dashboard (sessions, revenue, devices, top pages)"
+        },
         "products": {
           "label": "Products",
           "description": "Product catalog; categories, variants, and attributes are always available with it"

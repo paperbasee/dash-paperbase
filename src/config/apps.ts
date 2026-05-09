@@ -3,6 +3,7 @@ import {
   Package,
   Box,
   Boxes,
+  ChartSpline,
   Users,
   Layers,
   Tags,
@@ -37,6 +38,16 @@ export interface AppConfig {
 }
 
 export const APP_CONFIG: Record<string, AppConfig> = {
+  analytics: {
+    id: "analytics",
+    label: "Analytics",
+    icon: ChartSpline,
+    description: "Advanced analytics dashboard (sessions, revenue, devices, top pages)",
+    essential: false,
+    href: "/analytics",
+    countKey: null,
+    parentId: null,
+  },
   products: {
     id: "products",
     label: "Products",
@@ -190,6 +201,7 @@ export const CATALOG_INCLUDED_APP_IDS = [
 ] as const;
 
 export const OPTIONAL_APP_IDS = [
+  "analytics",
   "support_tickets",
   "cta",
   "customers",
@@ -212,6 +224,7 @@ export const MARKETING_SUB_APP_IDS = ["cta", "banners", "popup"] as const;
 /** Top-level nav items (excluding catalog children). */
 export const MAIN_NAV_APP_IDS = [
   "orders",
+  "analytics",
   "customers",
   "inventory",
   "shipping",

@@ -2,18 +2,15 @@
 
 import { useTranslations } from "next-intl";
 import { Link, usePathname, useRouter } from "@/i18n/navigation";
+import { useSearchParams } from "next/navigation";
 import {
   Birdhouse,
-  ListTodo,
   ChevronsUpDown,
-  ChevronRight,
   PanelRightOpen,
   PanelRightClose,
   Search,
   LogOut,
-  Settings,
-  LayoutGrid,
-  Megaphone,
+  Cog,
   Copy,
   Check,
   Sun,
@@ -21,7 +18,6 @@ import {
   Laptop,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   DropdownMenu,
@@ -30,11 +26,6 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
 import {
   Tooltip,
   TooltipContent,
@@ -47,6 +38,7 @@ import { useSearchModal } from "@/context/SearchModalContext";
 import { useNavCounts } from "@/hooks/useNavCounts";
 import { useInventoryStatus } from "@/hooks/useInventoryStatus";
 import { useEnabledApps } from "@/hooks/useEnabledApps";
+import { useFeatures } from "@/hooks/useFeatures";
 import {
   APP_CONFIG,
   CATALOG_SUB_APP_IDS,
@@ -71,8 +63,10 @@ import {
 } from "@/lib/theme";
 import { runThemeTransition } from "@/lib/theme-transition/transition";
 import SystemNotificationBanner from "@/components/system/SystemNotificationBanner";
-import { InventoryStatusDot } from "@/components/inventory/InventoryStatusDot";
 import { useBrandingProfileSWR } from "@/hooks/useBrandingProfileSWR";
+import { SECTIONS, type SettingsSection } from "@/app/[locale]/(dashboard)/settings/settingsSections";
+import AppSidebarNav from "@/components/sidebar/AppSidebarNav";
+import SettingsSidebarNav from "@/components/sidebar/SettingsSidebarNav";
 
 /**
  * Top-level nav order; `__catalog__` is the Products / catalog group.
@@ -99,30 +93,46 @@ const HOME_NAV = {
   countKey: null as keyof NavCounts | null,
 };
 
+type SidebarNavVariant = "app" | "settings";
+
+const DEFAULT_SETTINGS_SECTION: SettingsSection = "store";
+
+function resolveActiveSettingsSection(raw: string | null): SettingsSection {
+  const candidate = (raw ?? "").trim();
+  const ids = new Set(SECTIONS.map((s) => s.id));
+  if (ids.has(candidate as SettingsSection)) return candidate as SettingsSection;
+  return DEFAULT_SETTINGS_SECTION;
+}
+
 function SidebarContent({
   collapsed,
   onNavigate,
   onToggle,
   showSystemNotification = true,
+  navVariant = "app",
 }: {
   collapsed: boolean;
   onNavigate?: () => void;
   onToggle?: () => void;
   showSystemNotification?: boolean;
+  navVariant?: SidebarNavVariant;
 }) {
   const tNav = useTranslations("nav");
   const tSidebar = useTranslations("sidebar");
   const tCommon = useTranslations("common");
   const tLang = useTranslations("language");
+  const tSettings = useTranslations("settings");
   const locale = useLocale();
   const numClass = numberTextClass(locale);
   const pathname = usePathname();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { logout, isAuthenticated, meProfile, meProfileStatus } = useAuth();
   const { data: branding, isLoading: isBrandingLoading } = useBrandingProfileSWR();
   const { setOpen: setSearchOpen } = useSearchModal();
   const { counts, formatCount } = useNavCounts();
   const { isEnabled } = useEnabledApps();
+  const { hasFeature } = useFeatures();
   const { status: inventoryNavStatus } = useInventoryStatus(
     isEnabled("inventory")
   );
@@ -236,6 +246,13 @@ function SidebarContent({
   const handleLinkClick = () => {
     onNavigate?.();
   };
+
+  const isSettingsRoute = pathname.startsWith("/settings");
+
+  const settingsActiveSection =
+    navVariant === "settings"
+      ? resolveActiveSettingsSection(searchParams.get("tab"))
+      : DEFAULT_SETTINGS_SECTION;
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -404,350 +421,52 @@ function SidebarContent({
           collapsed ? "px-2 pt-2" : "px-4"
         )}
       >
-        {!collapsed && (
-          <p className="mb-2 px-1 py-2.5 text-xs font-medium uppercase tracking-wider text-muted-foreground">
-            {tNav("navigation")}
-          </p>
-        )}
-        <Link
-          href={HOME_NAV.href}
-          prefetch={shouldPrefetchLinks}
-          onClick={handleLinkClick}
-          className={cn(
-            "group flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-xs text-sm font-normal w-full transition-colors",
-            isActive(HOME_NAV.href)
-              ? "bg-accent text-foreground dark:bg-white/[0.12] dark:text-white/95"
-              : "text-muted-foreground hover:bg-accent hover:text-foreground dark:text-white/70 dark:hover:bg-white/[0.07] dark:hover:text-white/90",
-            collapsed && "justify-center px-2"
-          )}
-          title={collapsed ? tNav("home") : undefined}
-        >
-          <span
-            className={cn(
-              "flex items-center gap-2",
-              collapsed ? "justify-center" : "min-w-0 flex-1"
-            )}
-          >
-            <HOME_NAV.icon className="size-5 shrink-0" />
-            {!collapsed && <span className="truncate">{tNav("home")}</span>}
-          </span>
-        </Link>
-
-        {MAIN_NAV_SEQUENCE.map((token) => {
-          if (token === "__catalog__") {
-            if (!showCatalog) return null;
-            return (
-              <Collapsible
-                key="catalog"
-                open={catalogOpen}
-                onOpenChange={setCatalogOpen}
-              >
-                <CollapsibleTrigger
-                  onClick={() => {
-                    if (collapsed && onToggle) {
-                      onToggle();
-                      setCatalogOpen(true);
-                    }
-                  }}
-                  className={cn(
-                    "group flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-xs text-sm font-normal w-full transition-colors",
-                    catalogChildActive && !catalogOpen
-                      ? "bg-accent text-foreground dark:bg-white/[0.12] dark:text-white/95"
-                      : "text-muted-foreground hover:bg-accent hover:text-foreground dark:text-white/70 dark:hover:bg-white/[0.07] dark:hover:text-white/90",
-                    collapsed && "justify-center px-2"
-                  )}
-                >
-                  <span
-                    className={cn(
-                      "flex items-center gap-2",
-                      collapsed ? "justify-center" : "min-w-0 flex-1"
-                    )}
-                  >
-                    <LayoutGrid className="size-5 shrink-0" />
-                    {!collapsed && <span className="truncate">{tNav("catalog")}</span>}
-                  </span>
-                  {!collapsed && (
-                    <span className="flex shrink-0 items-center gap-1.5">
-                      <ChevronRight
-                        className={cn(
-                          "size-4 shrink-0 transition-transform text-muted-foreground dark:text-white/50",
-                          catalogOpen && "rotate-90"
-                        )}
-                      />
-                    </span>
-                  )}
-                </CollapsibleTrigger>
-                <CollapsibleContent>
-                  {!collapsed && (
-                    <div className="ml-4 mt-2 space-y-1 border-l border-border pl-3">
-                      {catalogLinks.map((id) => {
-                        const app = APP_CONFIG[id];
-                        if (!app?.href) return null;
-                        const childActive = isActive(app.href);
-                        return (
-                          <Link
-                            key={id}
-                            href={app.href}
-                            prefetch={shouldPrefetchLinks}
-                            onClick={handleLinkClick}
-                            className={cn(
-                              "group flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-xs text-sm font-normal w-full transition-colors",
-                              childActive
-                                ? "bg-accent text-foreground dark:bg-white/[0.12] dark:text-white/95"
-                                : "text-muted-foreground hover:bg-accent hover:text-foreground dark:text-white/70 dark:hover:bg-white/[0.07] dark:hover:text-white/90"
-                            )}
-                          >
-                            <span className="min-w-0 flex-1 truncate">
-                              {tNav(app.id)}
-                            </span>
-                            {app.countKey &&
-                              counts != null &&
-                              counts[app.countKey] > 0 && (
-                                <Badge
-                                  className={cn(
-                                    "h-5 min-w-5 rounded-full border-0 bg-muted px-1.5 text-xs font-medium text-muted-foreground dark:bg-white/10 dark:text-white/55",
-                                    numClass
-                                  )}
-                                >
-                                  {formatCount(counts[app.countKey])}
-                                </Badge>
-                              )}
-                          </Link>
-                        );
-                      })}
-                    </div>
-                  )}
-                </CollapsibleContent>
-              </Collapsible>
-            );
-          }
-          if (token === "__marketing__") {
-            if (!showMarketing) return null;
-            return (
-              <Collapsible
-                key="marketing"
-                open={marketingOpen}
-                onOpenChange={setMarketingOpen}
-              >
-                <CollapsibleTrigger
-                  onClick={() => {
-                    if (collapsed && onToggle) {
-                      onToggle();
-                      setMarketingOpen(true);
-                    }
-                  }}
-                  className={cn(
-                    "group flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-xs text-sm font-normal w-full transition-colors",
-                    marketingChildActive && !marketingOpen
-                      ? "bg-accent text-foreground dark:bg-white/[0.12] dark:text-white/95"
-                      : "text-muted-foreground hover:bg-accent hover:text-foreground dark:text-white/70 dark:hover:bg-white/[0.07] dark:hover:text-white/90",
-                    collapsed && "justify-center px-2"
-                  )}
-                >
-                  <span
-                    className={cn(
-                      "flex items-center gap-2",
-                      collapsed ? "justify-center" : "min-w-0 flex-1"
-                    )}
-                  >
-                    <Megaphone className="size-5 shrink-0" />
-                    {!collapsed && <span className="truncate">{tNav("marketing")}</span>}
-                  </span>
-                  {!collapsed && (
-                    <span className="flex shrink-0 items-center gap-1.5">
-                      <ChevronRight
-                        className={cn(
-                          "size-4 shrink-0 transition-transform text-muted-foreground dark:text-white/50",
-                          marketingOpen && "rotate-90"
-                        )}
-                      />
-                    </span>
-                  )}
-                </CollapsibleTrigger>
-                <CollapsibleContent>
-                  {!collapsed && (
-                    <div className="ml-4 mt-2 space-y-1 border-l border-border pl-3">
-                      {marketingLinks.map((id) => {
-                        const app = APP_CONFIG[id];
-                        if (!app?.href) return null;
-                        const childActive = isActive(app.href);
-                        return (
-                          <Link
-                            key={id}
-                            href={app.href}
-                            prefetch={shouldPrefetchLinks}
-                            onClick={handleLinkClick}
-                            className={cn(
-                              "group flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-xs text-sm font-normal w-full transition-colors",
-                              childActive
-                                ? "bg-accent text-foreground dark:bg-white/[0.12] dark:text-white/95"
-                                : "text-muted-foreground hover:bg-accent hover:text-foreground dark:text-white/70 dark:hover:bg-white/[0.07] dark:hover:text-white/90"
-                            )}
-                          >
-                            <span className="min-w-0 flex-1 truncate">
-                              {tNav(app.id)}
-                            </span>
-                            {app.countKey &&
-                              counts != null &&
-                              counts[app.countKey] > 0 && (
-                                <Badge
-                                  className={cn(
-                                    "h-5 min-w-5 rounded-full border-0 bg-muted px-1.5 text-xs font-medium text-muted-foreground dark:bg-white/10 dark:text-white/55",
-                                    numClass
-                                  )}
-                                >
-                                  {formatCount(counts[app.countKey])}
-                                </Badge>
-                              )}
-                          </Link>
-                        );
-                      })}
-                    </div>
-                  )}
-                </CollapsibleContent>
-              </Collapsible>
-            );
-          }
-          if (!isEnabled(token) || !APP_CONFIG[token]?.href) return null;
-          const app = APP_CONFIG[token];
-          const Icon = app.icon;
-          const active = isActive(app.href!);
-          return (
-            <Link
-              key={token}
-              href={app.href!}
-              prefetch={shouldPrefetchLinks}
-              onClick={handleLinkClick}
-              className={cn(
-                "group flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-xs text-sm font-normal w-full transition-colors",
-                active
-                  ? "bg-accent text-foreground dark:bg-white/[0.12] dark:text-white/95"
-                  : "text-muted-foreground hover:bg-accent hover:text-foreground dark:text-white/70 dark:hover:bg-white/[0.07] dark:hover:text-white/90",
-                collapsed && "justify-center px-2"
-              )}
-              title={collapsed ? tNav(app.id) : undefined}
-            >
-              <span
-                className={cn(
-                  "flex items-center gap-2",
-                  collapsed ? "justify-center" : "min-w-0 flex-1"
-                )}
-              >
-                <Icon className="size-5 shrink-0" />
-                {!collapsed && <span className="truncate">{tNav(app.id)}</span>}
-              </span>
-              {!collapsed && (
-                <span className="flex shrink-0 items-center gap-2">
-                  {token === "inventory" && (
-                    <>
-                      <InventoryStatusDot status={inventoryNavStatus} />
-                      {inventoryNavStatus !== "none" && (
-                        <span className="sr-only">
-                          {inventoryNavStatus === "red"
-                            ? tNav("inventoryStatusStockOut")
-                            : tNav("inventoryStatusLowStock")}
-                        </span>
-                      )}
-                    </>
-                  )}
-                  {app.countKey &&
-                    counts != null &&
-                    counts[app.countKey] > 0 && (
-                      <Badge
-                        className={cn(
-                          "h-5 min-w-5 rounded-full border-0 bg-muted px-1.5 text-xs font-medium text-muted-foreground dark:bg-white/10 dark:text-white/55",
-                          numClass
-                        )}
-                      >
-                        {formatCount(counts[app.countKey])}
-                      </Badge>
-                    )}
-                </span>
-              )}
-            </Link>
-          );
-        })}
-
-        {/* Collapsible: More */}
-        {showMore && (
-        <Collapsible open={celeryOpen} onOpenChange={setCeleryOpen}>
-          <CollapsibleTrigger
-            onClick={() => {
-              if (collapsed && onToggle) {
-                onToggle();
-                setCeleryOpen(true);
-              }
-            }}
-            className={cn(
-              "group flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-xs text-sm font-normal w-full transition-colors",
-              moreChildActive && !celeryOpen
-                ? "bg-accent text-foreground dark:bg-white/[0.12] dark:text-white/95"
-                : "text-muted-foreground hover:bg-accent hover:text-foreground dark:text-white/70 dark:hover:bg-white/[0.07] dark:hover:text-white/90",
-              collapsed && "justify-center px-2"
-            )}
-          >
-            <span
-              className={cn(
-                "flex items-center gap-2",
-                collapsed ? "justify-center" : "min-w-0 flex-1"
-              )}
-            >
-              <ListTodo className="size-5 shrink-0" />
-              {!collapsed && <span className="truncate">{tNav("more")}</span>}
-            </span>
-            {!collapsed && (
-              <span className="flex shrink-0 items-center gap-1.5">
-                <ChevronRight
-                  className={cn(
-                    "size-4 shrink-0 transition-transform text-muted-foreground dark:text-white/50",
-                    celeryOpen && "rotate-90"
-                  )}
-                />
-              </span>
-            )}
-          </CollapsibleTrigger>
-          <CollapsibleContent>
-            {!collapsed && (
-              <div className="ml-4 mt-2 space-y-1 border-l border-border pl-3">
-                {moreLinks.map((id) => {
-                  const app = APP_CONFIG[id];
-                  if (!app?.href) return null;
-                  const childActive = isActive(app.href);
-                  return (
-                    <Link
-                      key={id}
-                      href={app.href}
-                      prefetch={shouldPrefetchLinks}
-                      onClick={handleLinkClick}
-                      className={cn(
-                        "group flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-xs text-sm font-normal w-full transition-colors",
-                        childActive
-                          ? "bg-accent text-foreground dark:bg-white/[0.12] dark:text-white/95"
-                          : "text-muted-foreground hover:bg-accent hover:text-foreground dark:text-white/70 dark:hover:bg-white/[0.07] dark:hover:text-white/90"
-                      )}
-                    >
-                      <span className="min-w-0 flex-1 truncate">
-                        {tNav(app.id)}
-                      </span>
-                      {app.countKey &&
-                        counts != null &&
-                        counts[app.countKey] > 0 && (
-                          <Badge
-                            className={cn(
-                              "h-5 min-w-5 rounded-full border-0 bg-muted px-1.5 text-xs font-medium text-muted-foreground dark:bg-white/10 dark:text-white/55",
-                              numClass
-                            )}
-                          >
-                            {formatCount(counts[app.countKey])}
-                          </Badge>
-                        )}
-                    </Link>
-                  );
-                })}
-              </div>
-            )}
-          </CollapsibleContent>
-        </Collapsible>
+        {navVariant === "settings" ? (
+          <SettingsSidebarNav
+            collapsed={collapsed}
+            pathname={pathname}
+            settingsActiveSection={settingsActiveSection}
+            shouldPrefetchLinks={shouldPrefetchLinks}
+            onNavigate={handleLinkClick}
+            tCommonSettingsLabel={tCommon("settings")}
+            tBackToHomeLabel={tSettings("goBackAria")}
+            tSettings={tSettings}
+          />
+        ) : (
+          <AppSidebarNav
+            collapsed={collapsed}
+            pathname={pathname}
+            shouldPrefetchLinks={shouldPrefetchLinks}
+            onNavigate={handleLinkClick}
+            tNavLabel={tNav("navigation")}
+            tCatalogLabel={tNav("catalog")}
+            tMarketingLabel={tNav("marketing")}
+            tMoreLabel={tNav("more")}
+            tAppLabel={tNav}
+            hasFeature={hasFeature}
+            counts={counts}
+            formatCount={formatCount}
+            numClass={numClass}
+            homeHref={HOME_NAV.href}
+            homeIcon={HOME_NAV.icon}
+            catalogLinks={catalogLinks}
+            showCatalog={showCatalog}
+            catalogChildActive={catalogChildActive}
+            catalogOpen={catalogOpen}
+            setCatalogOpen={setCatalogOpen}
+            marketingLinks={marketingLinks}
+            showMarketing={showMarketing}
+            marketingChildActive={marketingChildActive}
+            marketingOpen={marketingOpen}
+            setMarketingOpen={setMarketingOpen}
+            showMore={showMore}
+            moreLinks={moreLinks}
+            moreChildActive={moreChildActive}
+            celeryOpen={celeryOpen}
+            setCeleryOpen={setCeleryOpen}
+            inventoryNavStatus={inventoryNavStatus}
+            mainNavSequence={MAIN_NAV_SEQUENCE as unknown as string[]}
+          />
         )}
       </nav>
 
@@ -904,7 +623,7 @@ function SidebarContent({
 
             <DropdownMenuSeparator className="my-0" />
 
-            <div className="p-1">
+            <div className="space-y-1 p-1">
               {activeStoreId ? (
                 <DropdownMenuItem
                   onSelect={(event) => {
@@ -928,14 +647,20 @@ function SidebarContent({
                   </span>
                 </DropdownMenuItem>
               ) : null}
-              <DropdownMenuItem asChild className="text-[15px] font-medium">
+              <DropdownMenuItem asChild className="p-0 text-[15px] font-medium focus:bg-transparent">
                 <Link
                   href="/settings"
                   prefetch={shouldPrefetchLinks}
                   onClick={handleLinkClick}
-                  className="flex cursor-pointer items-center gap-2"
+                  className={cn(
+                    "flex w-full cursor-pointer items-center gap-2 rounded-xs px-2 py-2 outline-none select-none",
+                    isSettingsRoute
+                      ? "bg-accent text-foreground dark:bg-white/[0.12] dark:text-white/95"
+                      : "text-popover-foreground hover:bg-accent hover:text-accent-foreground focus-visible:bg-accent focus-visible:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
+                  )}
+                  aria-current={isSettingsRoute ? "page" : undefined}
                 >
-                  <Settings className="size-[1.125rem]" />
+                  <Cog className="size-[1.125rem]" />
                   {tCommon("settings")}
                 </Link>
               </DropdownMenuItem>
@@ -970,9 +695,10 @@ interface SidebarProps {
   collapsed: boolean;
   onToggle: () => void;
   onNavigate?: () => void;
+  navVariant?: SidebarNavVariant;
 }
 
-export default function Sidebar({ collapsed, onToggle, onNavigate }: SidebarProps) {
+export default function Sidebar({ collapsed, onToggle, onNavigate, navVariant }: SidebarProps) {
   return (
     <aside
       className={cn(
@@ -984,6 +710,7 @@ export default function Sidebar({ collapsed, onToggle, onNavigate }: SidebarProp
         collapsed={collapsed}
         onNavigate={onNavigate}
         onToggle={onToggle}
+        navVariant={navVariant}
       />
     </aside>
   );
