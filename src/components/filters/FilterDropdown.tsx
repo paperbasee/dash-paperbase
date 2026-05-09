@@ -83,7 +83,7 @@ export function FilterDropdown({
         disabled={disabled}
         placeholder={placeholder}
         showClear={false}
-        className={className || "w-[160px]"}
+        className={className || "w-[calc(50%-0.25rem)] sm:w-[160px]"}
         inputClassName="cursor-pointer caret-transparent text-xs font-medium"
       />
       <ComboboxContent>

@@ -66,16 +66,16 @@ export default function SupportTicketDetailPage() {
       {loading ? (
         <DashboardDetailSkeleton />
       ) : error ? (
-        <div className="rounded-card border border-dashed border-card-border bg-card p-6 text-sm text-destructive">
+        <div className="rounded-card border border-card-border bg-card p-6 text-sm text-destructive">
           {error}
         </div>
       ) : !ticket ? (
-        <div className="rounded-card border border-dashed border-card-border bg-card p-6 text-sm text-muted-foreground">
+        <div className="rounded-card border border-card-border bg-card p-6 text-sm text-muted-foreground">
           {tPages("supportTicketDetailNotFound")}
         </div>
       ) : (
         <>
-          <section className="rounded-card border border-dashed border-card-border bg-card p-6">
+          <section className="rounded-card border border-card-border bg-card p-6">
             <h2 className="mb-4 text-lg font-medium text-foreground">
               {tPages("supportTicketDetailCustomerInfo")}
             </h2>
@@ -102,25 +102,25 @@ export default function SupportTicketDetailPage() {
           </section>
 
           <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <div className="rounded-card border border-dashed border-card-border bg-card p-4">
+            <div className="rounded-card border border-card-border bg-card p-4">
               <p className="text-sm text-muted-foreground">{tPages("supportTicketsStatus")}</p>
               <p className="mt-1 text-lg font-semibold text-foreground">
                 {labelFromValue(ticket.status)}
               </p>
             </div>
-            <div className="rounded-card border border-dashed border-card-border bg-card p-4">
+            <div className="rounded-card border border-card-border bg-card p-4">
               <p className="text-sm text-muted-foreground">{tPages("supportTicketsPriority")}</p>
               <p className="mt-1 text-lg font-semibold text-foreground">
                 {labelFromValue(ticket.priority)}
               </p>
             </div>
-            <div className="rounded-card border border-dashed border-card-border bg-card p-4">
+            <div className="rounded-card border border-card-border bg-card p-4">
               <p className="text-sm text-muted-foreground">{tPages("supportTicketsCategory")}</p>
               <p className="mt-1 text-lg font-semibold text-foreground">
                 {labelFromValue(ticket.category)}
               </p>
             </div>
-            <div className="rounded-card border border-dashed border-card-border bg-card p-4">
+            <div className="rounded-card border border-card-border bg-card p-4">
               <p className="text-sm text-muted-foreground">{tPages("supportTicketDetailCreatedAt")}</p>
               <p className="mt-1 text-base font-medium text-foreground">
                 {formatDashboardDateTime(ticket.created_at, locale)}
@@ -128,14 +128,14 @@ export default function SupportTicketDetailPage() {
             </div>
           </section>
 
-          <section className="rounded-card border border-dashed border-card-border bg-card p-6">
+          <section className="rounded-card border border-card-border bg-card p-6">
             <h2 className="mb-3 text-lg font-medium text-foreground">
               {tPages("supportTicketsSubject")}
             </h2>
             <p className="text-sm text-foreground">{ticket.subject || "—"}</p>
           </section>
 
-          <section className="rounded-card border border-dashed border-card-border bg-card p-6">
+          <section className="rounded-card border border-card-border bg-card p-6">
             <h2 className="mb-3 text-lg font-medium text-foreground">
               {tPages("supportTicketDetailMessage")}
             </h2>
@@ -144,7 +144,7 @@ export default function SupportTicketDetailPage() {
             </div>
           </section>
 
-          <section className="rounded-card border border-dashed border-card-border bg-card p-6">
+          <section className="rounded-card border border-card-border bg-card p-6">
             <h2 className="mb-3 text-lg font-medium text-foreground">
               {tPages("supportTicketDetailAttachments", { count: attachmentCount })}
             </h2>
@@ -188,7 +188,7 @@ export default function SupportTicketDetailPage() {
             )}
           </section>
 
-          <section className="rounded-card border border-dashed border-card-border bg-card p-6">
+          <section className="rounded-card border border-card-border bg-card p-6">
             <h2 className="mb-3 text-lg font-medium text-foreground">
               {tPages("supportTicketDetailInternalNotes")}
             </h2>

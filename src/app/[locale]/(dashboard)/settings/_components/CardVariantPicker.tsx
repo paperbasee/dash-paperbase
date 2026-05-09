@@ -25,7 +25,7 @@ const sk = "animate-pulse rounded bg-muted";
 function ClassicPreview() {
   return (
     <div
-      className="pointer-events-none mt-3 overflow-hidden rounded-md border border-border/90 bg-card shadow-sm antialiased"
+      className="pointer-events-none mt-3 overflow-hidden rounded-card border border-border/90 bg-card shadow-sm antialiased"
       aria-hidden
     >
       <article className="flex min-w-0 flex-col text-center">
@@ -52,7 +52,7 @@ function ClassicPreview() {
 function ShelfPreview() {
   return (
     <div
-      className="pointer-events-none mt-3 overflow-hidden rounded-md border border-border/90 bg-card shadow-sm antialiased"
+      className="pointer-events-none mt-3 overflow-hidden rounded-card border border-border/90 bg-card shadow-sm antialiased"
       aria-hidden
     >
       <article className="flex min-w-0 flex-col">

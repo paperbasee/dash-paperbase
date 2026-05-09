@@ -28,7 +28,7 @@ export default function NotificationDropdown() {
     >
       <MessageCircle className="size-5" />
       {unreadCount > 0 && (
-        <Badge className="absolute -right-1 -top-1 min-w-[1.25rem] justify-center rounded-full px-1 text-[0.65rem] leading-none">
+        <Badge className="absolute -right-1 -top-1 min-w-[1.25rem] justify-center px-1 text-[0.65rem] leading-none">
           {toLocaleDigits(String(unreadCount), locale)}
         </Badge>
       )}

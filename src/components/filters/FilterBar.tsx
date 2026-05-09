@@ -9,7 +9,7 @@ export function FilterBar({
   className?: string;
 }) {
   return (
-    <div className="rounded-card border border-dashed border-card-border bg-card p-3">
+    <div className="rounded-card border border-card-border bg-card p-3">
       <div
         className={cn(
           "flex min-w-0 flex-wrap items-center gap-2",

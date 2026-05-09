@@ -112,7 +112,7 @@ function SortableFieldItem({
       ref={setNodeRef}
       style={style}
       className={cn(
-        "flex flex-col gap-3 rounded-card border border-dashed border-border bg-muted/30 p-4",
+        "flex flex-col gap-3 rounded-card border border-border bg-muted/30 p-4",
         isDragging && "opacity-80 shadow-md"
       )}
     >
@@ -298,7 +298,7 @@ export function DynamicFieldsPanel({
 
   return (
     <div className="w-full space-y-6">
-      <div className="rounded-card border border-dashed border-border bg-muted/30 p-5">
+      <div className="rounded-card border border-border bg-muted/30 p-5">
         <h3 className="text-sm font-semibold text-foreground">
           {tp("fixedHeading")}
         </h3>

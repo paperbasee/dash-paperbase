@@ -590,7 +590,7 @@ export default function CtaPage() {
         </form>
       )}
 
-      <div className="overflow-x-auto rounded-card border border-dashed border-card-border bg-card">
+      <div className="overflow-x-auto rounded-card border border-card-border bg-card">
         <table className="w-full text-left text-sm">
           <thead>
             <tr className="border-b border-border bg-muted/40">
@@ -621,7 +621,7 @@ export default function CtaPage() {
                 <td className="px-4 py-3">
                   <button
                     onClick={() => toggleActive(n)}
-                    className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+                    className={`inline-block rounded-tooltip px-2.5 py-0.5 text-xs font-semibold ${
                       n.is_currently_active
                         ? "bg-emerald-500/20 text-emerald-400"
                         : "bg-muted text-muted-foreground"

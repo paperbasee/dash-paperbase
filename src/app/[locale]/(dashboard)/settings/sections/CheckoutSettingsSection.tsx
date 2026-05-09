@@ -127,7 +127,7 @@ export default function CheckoutSettingsSection({
               >
                 <label
                   className={cn(
-                    "flex cursor-pointer gap-3 rounded-md border border-border p-4 transition-colors",
+                    "flex cursor-pointer gap-3 rounded-xs border border-border p-4 transition-colors",
                     selectedVariant === "extended" && "border-foreground/40 bg-muted/30"
                   )}
                 >
@@ -152,7 +152,7 @@ export default function CheckoutSettingsSection({
 
                 <label
                   className={cn(
-                    "flex cursor-pointer gap-3 rounded-md border border-border p-4 transition-colors",
+                    "flex cursor-pointer gap-3 rounded-xs border border-border p-4 transition-colors",
                     selectedVariant === "minimal" && "border-foreground/40 bg-muted/30"
                   )}
                 >

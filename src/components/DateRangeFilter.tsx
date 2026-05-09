@@ -4,8 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import { useLocale, useTranslations } from "next-intl";
 import { Button } from "./ui/button";
-import { Card, CardContent } from "./ui/card";
-import { InputGroup, InputGroupInput } from "./ui/input-group";
+import { Input } from "./ui/input";
 import type { AnalyticsBucket } from "@/hooks/useDashboardAnalytics";
 import { digitsInNumberFont } from "@/lib/number-font";
 import { cn } from "@/lib/utils";
@@ -25,7 +24,7 @@ const Calendar = dynamic(
   () => import("./ui/calendar").then((mod) => mod.Calendar),
   {
     ssr: false,
-    loading: () => <div className="h-56 w-64 animate-pulse rounded-card bg-muted/40" />,
+    loading: () => <div className="h-56 w-64 animate-pulse rounded-xs bg-muted/40" />,
   }
 );
 
@@ -148,37 +147,52 @@ export default function DateRangeFilter({
   }, []);
 
   return (
-    <Card className="border-none bg-transparent shadow-none">
-      <CardContent className="flex flex-col gap-3 px-0 lg:flex-row lg:items-center lg:justify-between">
+    <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
         <div className="grid grid-cols-2 gap-2 md:grid-cols-4 lg:flex lg:flex-wrap">
           <Button
             size="sm"
-            variant={value.preset === "today" ? "default" : "outline"}
-            className="w-full lg:w-auto"
+            variant="outline"
+            className={cn(
+              "w-full lg:w-auto",
+              value.preset === "today" &&
+                "bg-accent text-foreground border-border hover:bg-accent/80 dark:bg-white/[0.08] dark:text-white dark:border-white/[0.12] dark:hover:bg-white/[0.12]"
+            )}
             onClick={() => setPreset("today")}
           >
             {digitsInNumberFont(t("filtersToday"), locale)}
           </Button>
           <Button
             size="sm"
-            variant={value.preset === "last7" ? "default" : "outline"}
-            className="w-full lg:w-auto"
+            variant="outline"
+            className={cn(
+              "w-full lg:w-auto",
+              value.preset === "last7" &&
+                "bg-accent text-foreground border-border hover:bg-accent/80 dark:bg-white/[0.08] dark:text-white dark:border-white/[0.12] dark:hover:bg-white/[0.12]"
+            )}
             onClick={() => setPreset("last7")}
           >
             {digitsInNumberFont(t("filtersLast7Days"), locale)}
           </Button>
           <Button
             size="sm"
-            variant={value.preset === "last30" ? "default" : "outline"}
-            className="w-full lg:w-auto"
+            variant="outline"
+            className={cn(
+              "w-full lg:w-auto",
+              value.preset === "last30" &&
+                "bg-accent text-foreground border-border hover:bg-accent/80 dark:bg-white/[0.08] dark:text-white dark:border-white/[0.12] dark:hover:bg-white/[0.12]"
+            )}
             onClick={() => setPreset("last30")}
           >
             {digitsInNumberFont(t("filtersLast30Days"), locale)}
           </Button>
           <Button
             size="sm"
-            variant={value.preset === "thisMonth" ? "default" : "outline"}
-            className="w-full lg:w-auto"
+            variant="outline"
+            className={cn(
+              "w-full lg:w-auto",
+              value.preset === "thisMonth" &&
+                "bg-accent text-foreground border-border hover:bg-accent/80 dark:bg-white/[0.08] dark:text-white dark:border-white/[0.12] dark:hover:bg-white/[0.12]"
+            )}
             onClick={() => setPreset("thisMonth")}
           >
             {digitsInNumberFont(t("filtersThisMonth"), locale)}
@@ -191,20 +205,19 @@ export default function DateRangeFilter({
           </span>
           <div className="flex items-center gap-2 lg:contents">
             <div ref={startPickerRef} className="relative">
-              <InputGroup
-                className="h-8 w-[120px] shrink-0 cursor-pointer sm:w-[110px]"
+              <Input
+                readOnly
+                placeholder={t("filtersDatePlaceholder")}
+                className={cn(
+                  "h-8 w-[122px] shrink-0 cursor-pointer bg-input-surface sm:w-[110px]",
+                  "font-numbers-date-value"
+                )}
+                value={value.startDate}
                 onClick={() => setStartPickerOpen((open) => !open)}
-              >
-                <InputGroupInput
-                  readOnly
-                  placeholder={t("filtersDatePlaceholder")}
-                  className={cn("font-numbers-date-value cursor-pointer")}
-                  value={value.startDate}
-                />
-              </InputGroup>
+              />
               {startPickerOpen && (
                 <div className="absolute left-0 top-full z-50 mt-2 w-fit max-w-[calc(100vw-2rem)]">
-                  <div className="rounded-card border border-border bg-card p-1 shadow-lg">
+                  <div className="rounded-xs border border-border bg-card p-1 shadow-lg">
                     <Calendar
                       mode="single"
                       selected={ymdToDate(value.startDate)}
@@ -229,20 +242,19 @@ export default function DateRangeFilter({
               {t("filtersDateRangeTo")}
             </span>
             <div ref={endPickerRef} className="relative">
-              <InputGroup
-                className="h-8 w-[120px] shrink-0 cursor-pointer sm:w-[110px]"
+              <Input
+                readOnly
+                placeholder={t("filtersDatePlaceholder")}
+                className={cn(
+                  "h-8 w-[122px] shrink-0 cursor-pointer bg-input-surface sm:w-[110px]",
+                  "font-numbers-date-value"
+                )}
+                value={value.endDate}
                 onClick={() => setEndPickerOpen((open) => !open)}
-              >
-                <InputGroupInput
-                  readOnly
-                  placeholder={t("filtersDatePlaceholder")}
-                  className={cn("font-numbers-date-value cursor-pointer")}
-                  value={value.endDate}
-                />
-              </InputGroup>
+              />
               {endPickerOpen && (
                 <div className="absolute right-0 top-full z-50 mt-2 w-fit max-w-[calc(100vw-2rem)]">
-                  <div className="rounded-card border border-border bg-card p-1 shadow-lg">
+                  <div className="rounded-xs border border-border bg-card p-1 shadow-lg">
                     <Calendar
                       mode="single"
                       selected={ymdToDate(value.endDate)}
@@ -265,8 +277,7 @@ export default function DateRangeFilter({
             </div>
           </div>
         </div>
-      </CardContent>
-    </Card>
+    </div>
   );
 }
 

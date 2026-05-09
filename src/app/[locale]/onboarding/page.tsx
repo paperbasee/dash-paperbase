@@ -60,9 +60,9 @@ export function OnboardingPageContent({
           <p className="text-center text-sm text-muted-foreground">
             {t("stepProgress", { current: step, total: 5 })}
           </p>
-          <div className="h-2 overflow-hidden rounded-full bg-muted">
+          <div className="h-2 overflow-hidden rounded-xs bg-muted">
             <div
-              className="h-full rounded-full bg-primary transition-all duration-300 ease-out"
+              className="h-full rounded-xs bg-primary transition-all duration-300 ease-out"
               style={{ width: `${progress}%` }}
             />
           </div>

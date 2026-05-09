@@ -852,7 +852,7 @@ export default function BannersPage() {
                   return (
                     <div
                       key={index}
-                      className="flex min-w-0 flex-col overflow-hidden rounded-xl border border-border bg-card p-2 shadow-sm ring-1 ring-border/40"
+                      className="flex min-w-0 flex-col overflow-hidden rounded-card border border-border bg-card p-2 shadow-sm ring-1 ring-border/40"
                     >
                       <div className="mb-1.5 flex items-center justify-between gap-1">
                         <span className="truncate text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
@@ -875,7 +875,7 @@ export default function BannersPage() {
                           </button>
                         )}
                       </div>
-                      <div className="relative aspect-[4/3] w-full overflow-hidden rounded-lg border border-border/80 bg-muted/30">
+                      <div className="relative aspect-[4/3] w-full overflow-hidden rounded-card border border-border/80 bg-muted/30">
                         {showPreview && previewSrc ? (
                           // eslint-disable-next-line @next/next/no-img-element
                           <img
@@ -924,7 +924,7 @@ export default function BannersPage() {
                             e.target.value = "";
                             void onSlotFileInputChange(index, f);
                           }}
-                          className="form-file-input mt-2 w-full min-w-0 text-[11px] file:mr-2 file:rounded-md file:border-0 file:bg-primary/15 file:px-2 file:py-1 file:text-[11px] file:font-medium file:text-foreground hover:file:bg-primary/25"
+                          className="form-file-input mt-2 w-full min-w-0 text-[11px] file:mr-2 file:rounded-sm file:border-0 file:bg-primary/15 file:px-2 file:py-1 file:text-[11px] file:font-medium file:text-foreground hover:file:bg-primary/25"
                           onKeyDown={handleKeyDown}
                         />
                       ) : null}
@@ -989,7 +989,7 @@ export default function BannersPage() {
         </form>
       )}
 
-      <div className="overflow-x-auto rounded-card border border-dashed border-card-border bg-card">
+      <div className="overflow-x-auto rounded-card border border-card-border bg-card">
         <table className="w-full text-left text-sm">
           <thead>
             <tr className="border-b border-border bg-muted/40">
@@ -1044,7 +1044,7 @@ export default function BannersPage() {
                   <button
                     type="button"
                     onClick={() => toggleActive(b)}
-                    className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+                    className={`inline-block rounded-tooltip px-2.5 py-0.5 text-xs font-semibold ${
                       isCurrentlyActive
                         ? "bg-emerald-500/20 text-emerald-400"
                         : "bg-muted text-muted-foreground"
@@ -1076,7 +1076,7 @@ export default function BannersPage() {
       </div>
 
       {banners.length === 0 && !editing && (
-        <div className="rounded-card border border-dashed border-card-border bg-card py-12 text-center text-sm text-muted-foreground">
+        <div className="rounded-card border border-card-border bg-card py-12 text-center text-sm text-muted-foreground">
           {tPages("bannersEmpty")}
         </div>
       )}

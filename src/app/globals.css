@@ -46,8 +46,8 @@
     --accent-foreground: 222 47% 11%;
     --destructive: 0 84% 60%;
     --destructive-foreground: 210 40% 98%;
-    --border: 214 32% 91%;
-    --card-border: 214 32% 91%;
+    --border: 214 32% 93%;
+    --card-border: 214 32% 92%;
     --input: 214 32% 91%;
     --ring: 222 84% 56%;
 
@@ -59,9 +59,19 @@
 
     /* Chart series colors (light) */
     --chart-orders: 222 84% 56%;
-    --chart-products: 221 83% 53%;
+    --chart-products: 160 72% 38%;
     --chart-support-tickets: 0 84% 60%;
     --chart-customers: 43 96% 45%;
+
+    /* Input surface — slightly off-white, distinct from card */
+    --input-surface: 210 40% 98%;
+    /* Input border — slightly softer than global border */
+    --input-border: 214 32% 91%;
+
+    /* Soft border system (for “melted” UI) */
+    --border-subtle: 214 32% 93%;
+    --border-hover: 214 32% 88%;
+    --border-divider: 214 32% 93%;
 
     /* Semantic aliases (reference HSL tokens above) */
     --bg-primary: hsl(var(--background));
@@ -105,7 +115,7 @@
     --background: 220 8% 7%;
     --foreground: 210 20% 96%;
     /* Keep card surface close to base bg (avoid “double background” feel). */
-    --card: 220 8% 8%;
+    --card: 220 8% 11%;
     --card-foreground: 210 20% 96%;
     --popover: 220 8% 8%;
     --popover-foreground: 210 20% 96%;
@@ -120,9 +130,15 @@
     --destructive: 0 63% 38%;
     --destructive-foreground: 210 40% 98%;
     --border: 220 6% 18%;
-    --card-border: 220 6% 24%;
-    --input: 220 6% 18%;
+    --card-border: 220 6% 20%;
+    --input: 220 6% 13%;
     --ring: 220 10% 60%;
+    --input-surface: 220 8% 9%;
+    --input-border: 220 6% 14%;
+
+    --border-subtle: 220 6% 18%;
+    --border-hover: 220 6% 16%;
+    --border-divider: 220 6% 12%;
 
     /* Stats / badge accent hues (dark) */
     --accent-blue: 217 89% 72%;
@@ -131,9 +147,9 @@
     --accent-red: 0 84% 70%;
 
     /* Chart series colors (dark) */
-    --chart-orders: 212 96% 78%;
-    --chart-products: 221 83% 66%;
-    --chart-support-tickets: 0 84% 70%;
+    --chart-orders: 212 80% 58%;
+    --chart-products: 160 70% 52%;
+    --chart-support-tickets: 0 75% 60%;
     --chart-customers: 43 96% 58%;
 
     --bg-primary: hsl(var(--background));
@@ -205,25 +221,50 @@
   --color-destructive: hsl(var(--destructive));
   --color-destructive-foreground: hsl(var(--destructive-foreground));
   --color-border: hsl(var(--border));
+  --color-border-subtle: hsl(var(--border-subtle));
+  --color-border-hover: hsl(var(--border-hover));
+  --color-border-divider: hsl(var(--border-divider));
   --color-card-border: hsl(var(--card-border));
   --color-input: hsl(var(--input));
+  --color-input-border: hsl(var(--input-border));
+  --color-input-surface: hsl(var(--input-surface));
   --color-ring: hsl(var(--ring));
 
-  /* Border radius: square UI; only `rounded-full` stays circular (see --radius-full) */
-  --radius-xs: 0px;
-  --radius-sm: 0px;
-  --radius-md: 0px;
-  --radius-lg: 0px;
-  --radius-xl: 0px;
-  --radius-2xl: 0px;
-  --radius-3xl: 0px;
-  --radius-4xl: 0px;
+  /* Border radius scale (centralized, no arbitrary values) */
+  --radius-xs: 3px;
+  --radius-sm: 3px;
+  --radius-md: 3px;
+  --radius-lg: 3px;
+  --radius-xl: 3px;
   --radius-full: 9999px;
   /* Bare `rounded` utility */
-  --radius: 0px;
-  /* Semantic aliases */
+  --radius: var(--radius-md);
+
+  /* Semantic aliases (use these in components) */
+  --radius-input: var(--radius-md);
+  --radius-tooltip: var(--radius-sm);
+  --radius-button-sm: var(--radius-sm);
   --radius-ui: var(--radius-md);
+  --radius-button: var(--radius-md);
+  --radius-popover: var(--radius-md);
   --radius-card: var(--radius-lg);
+  --radius-container: var(--radius-lg);
+  --radius-dialog: var(--radius-xl);
+
+  /* Shadows (layered, enterprise-subtle) */
+  --shadow-card: none;
+  --shadow-input:
+    inset 0 1px 0 rgba(255, 255, 255, 0.04),
+    0 1px 1px rgba(0, 0, 0, 0.04),
+    0 2px 6px rgba(0, 0, 0, 0.05);
+  --shadow-popover:
+    0 1px 2px rgba(0, 0, 0, 0.06),
+    0 4px 16px rgba(0, 0, 0, 0.08),
+    0 12px 36px rgba(0, 0, 0, 0.08);
+  --shadow-dialog:
+    0 2px 4px rgba(0, 0, 0, 0.06),
+    0 8px 32px rgba(0, 0, 0, 0.12),
+    0 24px 64px rgba(0, 0, 0, 0.10);
 }
 
 html[lang="bn"] {
@@ -318,7 +359,7 @@ input.font-numbers-date-value::placeholder {
 
 *::-webkit-scrollbar-thumb {
   background-color: hsl(var(--border));
-  border-radius: 0;
+  border-radius: var(--radius-xs);
 }
 
 .scrollbar-hide {
@@ -347,7 +388,9 @@ input.font-numbers-date-value::placeholder {
 
   /* Pagination prev/next button — duplicated across 9 list pages */
   .btn-page {
-    @apply rounded-ui border border-border px-4 py-2 text-sm font-medium text-foreground transition hover:bg-muted disabled:opacity-40 disabled:cursor-not-allowed;
+    @apply rounded-ui border border-border-subtle px-4 py-2 text-sm font-medium text-foreground
+           transition-[background-color,border-color,box-shadow,transform] duration-[180ms] ease-in-out
+           hover:border-border-hover hover:bg-muted disabled:opacity-40 disabled:cursor-not-allowed;
   }
 
   /* Form field wrapper — label stacked above input */
@@ -362,7 +405,8 @@ input.font-numbers-date-value::placeholder {
 
   /* Page-level section card */
   .page-card {
-    @apply border border-card-border bg-card p-6;
+    @apply border border-border-subtle bg-card p-6 overflow-hidden
+           transition-[box-shadow,border-color] duration-[180ms] ease-in-out;
   }
 
   /* Page header row (title + actions) */
@@ -372,16 +416,16 @@ input.font-numbers-date-value::placeholder {
 
   /* Native checkbox / radio — single token-based style */
   .form-checkbox {
-    @apply h-5 w-5 shrink-0 cursor-pointer rounded-xs border-2 border-border bg-background text-primary accent-ring focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring md:h-4 md:w-4;
+    @apply h-5 w-5 shrink-0 cursor-pointer rounded-xs border-2 border-border-subtle bg-background text-primary accent-ring focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring md:h-4 md:w-4;
   }
 
   .form-radio {
-    @apply h-4 w-4 shrink-0 cursor-pointer border border-border bg-background text-primary accent-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring;
+    @apply h-4 w-4 shrink-0 cursor-pointer border border-border-subtle bg-background text-primary accent-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring;
   }
 
   /* File input control surface */
   .form-file-input {
-    @apply block w-full cursor-pointer rounded-ui border border-border bg-background px-3 py-2 text-sm text-foreground file:mr-3 file:cursor-pointer file:rounded-sm file:border-0 file:bg-muted file:px-2 file:py-1 file:text-sm file:font-medium file:text-foreground;
+    @apply block w-full cursor-pointer rounded-ui border border-input-border bg-input-surface px-3 py-2 text-sm text-foreground [box-shadow:var(--shadow-input)] file:mr-3 file:cursor-pointer file:rounded-sm file:border-0 file:bg-muted file:px-2 file:py-1 file:text-sm file:font-medium file:text-foreground;
   }
 
   /*
@@ -501,7 +545,7 @@ input.font-numbers-date-value::placeholder {
   height: 3px;
   width: 100%;
   flex-shrink: 0;
-  border-radius: 9999px;
+  border-radius: var(--radius-xs);
   background-color: hsl(var(--border) / 0.22);
 }
 
@@ -510,7 +554,7 @@ input.font-numbers-date-value::placeholder {
   top: 0;
   left: 0;
   height: 100%;
-  border-radius: 9999px;
+  border-radius: var(--radius-xs);
   background-color: hsl(var(--border) / 0.48);
   cursor: grab;
   touch-action: none;

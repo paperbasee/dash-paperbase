@@ -268,14 +268,14 @@ export default function PlansPage() {
                 return (
                   <div
                     key={`${g.name}-${selected.public_id}`}
-                    className={`flex w-full flex-col rounded-2xl bg-card p-6 text-card-foreground shadow-sm ring-1 ring-border ${
+                    className={`flex w-full flex-col rounded-dialog bg-card p-6 text-card-foreground shadow-sm ring-1 ring-border ${
                       selected.is_default ? "ring-2 ring-primary/50" : ""
                     }`}
                   >
                     <div className="flex items-center justify-between">
                       <h2 className="text-base font-semibold">{selected.name}</h2>
                       {selected.is_default && (
-                        <span className="rounded-full bg-primary/10 px-2.5 py-1 text-xs font-semibold text-primary">
+                        <span className="rounded-tooltip bg-primary/10 px-2.5 py-1 text-xs font-semibold text-primary">
                           Best offer
                         </span>
                       )}
@@ -320,7 +320,7 @@ export default function PlansPage() {
                     {/* CTA */}
                     <div className="mt-6">
                       <Button
-                        className="w-full rounded-2xl"
+                        className="w-full"
                         loading={isSelecting}
                         disabled={selectingId !== null}
                         onClick={() => handleSelectPlan(selected)}

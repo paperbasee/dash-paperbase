@@ -5,7 +5,7 @@ import { Link, usePathname, useRouter } from "@/i18n/navigation";
 import {
   Birdhouse,
   ListTodo,
-  ChevronDown,
+  ChevronsUpDown,
   ChevronRight,
   PanelRightOpen,
   PanelRightClose,
@@ -300,22 +300,21 @@ function SidebarContent({
       {/* Header: when collapsed show only toggle button; when expanded show logo + name + subtitle + toggle */}
       <div
         className={cn(
-          "flex shrink-0 items-center gap-2 border-b border-border px-4",
-          collapsed ? "justify-center" : "justify-between"
+          "flex shrink-0 items-center gap-2 border-b border-border",
+          collapsed ? "justify-center px-2" : "justify-between px-4"
         )}
         style={{ height: "var(--header-height)" }}
       >
         {collapsed ? (
           onToggle ? (
-            <Button
-              variant="ghost"
-              size="icon"
+            <button
+              type="button"
               onClick={onToggle}
-              className="flex shrink-0 text-muted-foreground hover:text-foreground md:flex"
+              className="flex w-full shrink-0 items-center justify-center rounded-xs px-2 py-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground dark:text-white/70 dark:hover:bg-white/[0.07] dark:hover:text-white/90 md:flex"
               aria-label={tSidebar("expandSidebar")}
             >
               <PanelRightClose className="size-5" />
-            </Button>
+            </button>
           ) : (
             <span className="size-9 shrink-0" />
           )
@@ -337,8 +336,8 @@ function SidebarContent({
             <div className="min-w-0 flex-1">
               {showBrandingSkeleton ? (
                 <div className="space-y-1.5">
-                  <Skeleton className="h-5 w-36 rounded-ui" />
-                  <Skeleton className="h-3 w-24 rounded-ui" />
+                  <Skeleton className="h-5 w-36 rounded-xs" />
+                  <Skeleton className="h-3 w-24 rounded-xs" />
                 </div>
               ) : (
                 <>
@@ -356,15 +355,14 @@ function SidebarContent({
           </>
         )}
         {!collapsed && onToggle && (
-          <Button
-            variant="ghost"
-            size="icon-xs"
+          <button
+            type="button"
             onClick={onToggle}
-            className="hidden shrink-0 text-muted-foreground hover:text-foreground md:flex"
+            className="hidden shrink-0 items-center justify-center rounded-xs px-2 py-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground dark:text-white/70 dark:hover:bg-white/[0.07] dark:hover:text-white/90 md:flex"
             aria-label={tSidebar("collapseSidebar")}
           >
             <PanelRightOpen className="size-4" />
-          </Button>
+          </button>
         )}
       </div>
 
@@ -375,7 +373,7 @@ function SidebarContent({
           <button
             type="button"
             onClick={() => setSearchOpen(true)}
-            className="relative hidden h-10 w-full items-center gap-2 overflow-hidden rounded-card border-2 border-border bg-muted/50 pl-9 pr-2 text-left text-sm text-muted-foreground transition-colors hover:bg-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-ring md:flex"
+            className="relative hidden h-10 w-full items-center gap-2 overflow-hidden rounded-xs border border-border bg-muted/50 pl-9 pr-2 text-left text-sm text-muted-foreground transition-colors hover:bg-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-ring md:flex"
             aria-label={tSidebar("openSearch")}
           >
             <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 shrink-0 text-muted-foreground pointer-events-none" />
@@ -385,8 +383,8 @@ function SidebarContent({
             <TooltipProvider delayDuration={300}>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <kbd className="shrink-0 rounded-ui border border-border bg-background px-1.5 py-0.5 text-[10px] text-muted-foreground">
-                    Ctrl+K
+                  <kbd className="shrink-0 rounded-xs border border-border bg-background h-5 px-2 text-[10px] text-muted-foreground inline-flex items-center justify-center leading-none">
+                    <span className="translate-y-px">CTRL+K</span>
                   </kbd>
                 </TooltipTrigger>
                 <TooltipContent side="bottom">
@@ -401,8 +399,8 @@ function SidebarContent({
       {/* Navigation */}
       <nav
         className={cn(
-          "min-h-0 flex-1 space-y-0.5 overflow-y-auto px-4 pb-6",
-          collapsed && "pt-2"
+          "min-h-0 flex-1 space-y-0.5 overflow-y-auto pb-6",
+          collapsed ? "px-2 pt-2" : "px-4"
         )}
       >
         {!collapsed && (
@@ -415,18 +413,23 @@ function SidebarContent({
           prefetch={shouldPrefetchLinks}
           onClick={handleLinkClick}
           className={cn(
-            "flex min-h-[44px] items-center gap-3 rounded-card px-3 py-2.5 text-sm font-medium transition-colors md:min-h-[40px]",
+            "group flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-xs text-sm font-normal w-full transition-colors",
             isActive(HOME_NAV.href)
-              ? "bg-primary/10 text-primary"
-              : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
+              ? "bg-accent text-foreground dark:bg-white/[0.12] dark:text-white/95"
+              : "text-muted-foreground hover:bg-accent hover:text-foreground dark:text-white/70 dark:hover:bg-white/[0.07] dark:hover:text-white/90",
             collapsed && "justify-center px-2"
           )}
           title={collapsed ? tNav("home") : undefined}
         >
-          <HOME_NAV.icon className="size-5 shrink-0" />
-          {!collapsed && (
-            <span className="flex-1 truncate">{tNav("home")}</span>
-          )}
+          <span
+            className={cn(
+              "flex items-center gap-2",
+              collapsed ? "justify-center" : "min-w-0 flex-1"
+            )}
+          >
+            <HOME_NAV.icon className="size-5 shrink-0" />
+            {!collapsed && <span className="truncate">{tNav("home")}</span>}
+          </span>
         </Link>
 
         {MAIN_NAV_SEQUENCE.map((token) => {
@@ -446,26 +449,31 @@ function SidebarContent({
                     }
                   }}
                   className={cn(
-                    "flex min-h-[44px] w-full items-center gap-3 rounded-card px-3 py-2.5 text-sm font-medium transition-colors md:min-h-[40px]",
+                    "group flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-xs text-sm font-normal w-full transition-colors",
                     catalogChildActive && !catalogOpen
-                      ? "bg-primary/10 text-primary"
-                      : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
+                      ? "bg-accent text-foreground dark:bg-white/[0.12] dark:text-white/95"
+                      : "text-muted-foreground hover:bg-accent hover:text-foreground dark:text-white/70 dark:hover:bg-white/[0.07] dark:hover:text-white/90",
                     collapsed && "justify-center px-2"
                   )}
                 >
-                  <LayoutGrid className="size-5 shrink-0" />
+                  <span
+                    className={cn(
+                      "flex items-center gap-2",
+                      collapsed ? "justify-center" : "min-w-0 flex-1"
+                    )}
+                  >
+                    <LayoutGrid className="size-5 shrink-0" />
+                    {!collapsed && <span className="truncate">{tNav("catalog")}</span>}
+                  </span>
                   {!collapsed && (
-                    <>
-                      <span className="flex-1 min-w-0 truncate text-left leading-relaxed">
-                        {tNav("catalog")}
-                      </span>
+                    <span className="flex shrink-0 items-center gap-1.5">
                       <ChevronRight
                         className={cn(
-                          "size-4 shrink-0 transition-transform",
+                          "size-4 shrink-0 transition-transform text-muted-foreground dark:text-white/50",
                           catalogOpen && "rotate-90"
                         )}
                       />
-                    </>
+                    </span>
                   )}
                 </CollapsibleTrigger>
                 <CollapsibleContent>
@@ -482,13 +490,13 @@ function SidebarContent({
                             prefetch={shouldPrefetchLinks}
                             onClick={handleLinkClick}
                             className={cn(
-                              "flex items-center justify-between rounded-ui px-2 py-2 text-sm",
+                              "group flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-xs text-sm font-normal w-full transition-colors",
                               childActive
-                                ? "bg-primary/10 font-medium text-primary"
-                                : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                                ? "bg-accent text-foreground dark:bg-white/[0.12] dark:text-white/95"
+                                : "text-muted-foreground hover:bg-accent hover:text-foreground dark:text-white/70 dark:hover:bg-white/[0.07] dark:hover:text-white/90"
                             )}
                           >
-                            <span className="min-w-0 break-words leading-relaxed">
+                            <span className="min-w-0 flex-1 truncate">
                               {tNav(app.id)}
                             </span>
                             {app.countKey &&
@@ -496,7 +504,7 @@ function SidebarContent({
                               counts[app.countKey] > 0 && (
                                 <Badge
                                   className={cn(
-                                    "h-5 min-w-5 rounded-full border-0 bg-primary/15 px-1.5 text-xs font-medium text-primary",
+                                    "h-5 min-w-5 rounded-full border-0 bg-muted px-1.5 text-xs font-medium text-muted-foreground dark:bg-white/10 dark:text-white/55",
                                     numClass
                                   )}
                                 >
@@ -528,26 +536,31 @@ function SidebarContent({
                     }
                   }}
                   className={cn(
-                    "flex min-h-[44px] w-full items-center gap-3 rounded-card px-3 py-2.5 text-sm font-medium transition-colors md:min-h-[40px]",
+                    "group flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-xs text-sm font-normal w-full transition-colors",
                     marketingChildActive && !marketingOpen
-                      ? "bg-primary/10 text-primary"
-                      : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
+                      ? "bg-accent text-foreground dark:bg-white/[0.12] dark:text-white/95"
+                      : "text-muted-foreground hover:bg-accent hover:text-foreground dark:text-white/70 dark:hover:bg-white/[0.07] dark:hover:text-white/90",
                     collapsed && "justify-center px-2"
                   )}
                 >
-                  <Megaphone className="size-5 shrink-0" />
+                  <span
+                    className={cn(
+                      "flex items-center gap-2",
+                      collapsed ? "justify-center" : "min-w-0 flex-1"
+                    )}
+                  >
+                    <Megaphone className="size-5 shrink-0" />
+                    {!collapsed && <span className="truncate">{tNav("marketing")}</span>}
+                  </span>
                   {!collapsed && (
-                    <>
-                      <span className="flex-1 min-w-0 truncate text-left leading-relaxed">
-                        {tNav("marketing")}
-                      </span>
+                    <span className="flex shrink-0 items-center gap-1.5">
                       <ChevronRight
                         className={cn(
-                          "size-4 shrink-0 transition-transform",
+                          "size-4 shrink-0 transition-transform text-muted-foreground dark:text-white/50",
                           marketingOpen && "rotate-90"
                         )}
                       />
-                    </>
+                    </span>
                   )}
                 </CollapsibleTrigger>
                 <CollapsibleContent>
@@ -564,13 +577,13 @@ function SidebarContent({
                             prefetch={shouldPrefetchLinks}
                             onClick={handleLinkClick}
                             className={cn(
-                              "flex items-center justify-between rounded-ui px-2 py-2 text-sm",
+                              "group flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-xs text-sm font-normal w-full transition-colors",
                               childActive
-                                ? "bg-primary/10 font-medium text-primary"
-                                : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                                ? "bg-accent text-foreground dark:bg-white/[0.12] dark:text-white/95"
+                                : "text-muted-foreground hover:bg-accent hover:text-foreground dark:text-white/70 dark:hover:bg-white/[0.07] dark:hover:text-white/90"
                             )}
                           >
-                            <span className="min-w-0 break-words leading-relaxed">
+                            <span className="min-w-0 flex-1 truncate">
                               {tNav(app.id)}
                             </span>
                             {app.countKey &&
@@ -578,7 +591,7 @@ function SidebarContent({
                               counts[app.countKey] > 0 && (
                                 <Badge
                                   className={cn(
-                                    "h-5 min-w-5 rounded-full border-0 bg-primary/15 px-1.5 text-xs font-medium text-primary",
+                                    "h-5 min-w-5 rounded-full border-0 bg-muted px-1.5 text-xs font-medium text-muted-foreground dark:bg-white/10 dark:text-white/55",
                                     numClass
                                   )}
                                 >
@@ -605,20 +618,25 @@ function SidebarContent({
               prefetch={shouldPrefetchLinks}
               onClick={handleLinkClick}
               className={cn(
-                "flex min-h-[44px] items-center gap-3 rounded-card px-3 py-2.5 text-sm font-medium transition-colors md:min-h-[40px]",
+                "group flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-xs text-sm font-normal w-full transition-colors",
                 active
-                  ? "bg-primary/10 text-primary"
-                  : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
+                  ? "bg-accent text-foreground dark:bg-white/[0.12] dark:text-white/95"
+                  : "text-muted-foreground hover:bg-accent hover:text-foreground dark:text-white/70 dark:hover:bg-white/[0.07] dark:hover:text-white/90",
                 collapsed && "justify-center px-2"
               )}
               title={collapsed ? tNav(app.id) : undefined}
             >
-              <Icon className="size-5 shrink-0" />
+              <span
+                className={cn(
+                  "flex items-center gap-2",
+                  collapsed ? "justify-center" : "min-w-0 flex-1"
+                )}
+              >
+                <Icon className="size-5 shrink-0" />
+                {!collapsed && <span className="truncate">{tNav(app.id)}</span>}
+              </span>
               {!collapsed && (
-                <>
-                  <span className="flex-1 min-w-0 truncate leading-relaxed">
-                    {tNav(app.id)}
-                  </span>
+                <span className="flex shrink-0 items-center gap-2">
                   {token === "inventory" && (
                     <>
                       <InventoryStatusDot status={inventoryNavStatus} />
@@ -636,14 +654,14 @@ function SidebarContent({
                     counts[app.countKey] > 0 && (
                       <Badge
                         className={cn(
-                          "h-5 min-w-5 rounded-full border-0 bg-primary/15 px-1.5 text-xs font-medium text-primary",
+                          "h-5 min-w-5 rounded-full border-0 bg-muted px-1.5 text-xs font-medium text-muted-foreground dark:bg-white/10 dark:text-white/55",
                           numClass
                         )}
                       >
                         {formatCount(counts[app.countKey])}
                       </Badge>
                     )}
-                </>
+                </span>
               )}
             </Link>
           );
@@ -660,23 +678,31 @@ function SidebarContent({
               }
             }}
             className={cn(
-              "flex min-h-[44px] w-full items-center gap-3 rounded-card px-3 py-2.5 text-sm font-medium transition-colors md:min-h-[40px]",
+              "group flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-xs text-sm font-normal w-full transition-colors",
               moreChildActive && !celeryOpen
-                ? "bg-primary/10 text-primary"
-                : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
+                ? "bg-accent text-foreground dark:bg-white/[0.12] dark:text-white/95"
+                : "text-muted-foreground hover:bg-accent hover:text-foreground dark:text-white/70 dark:hover:bg-white/[0.07] dark:hover:text-white/90",
               collapsed && "justify-center px-2"
             )}
           >
-            <ListTodo className="size-5 shrink-0" />
+            <span
+              className={cn(
+                "flex items-center gap-2",
+                collapsed ? "justify-center" : "min-w-0 flex-1"
+              )}
+            >
+              <ListTodo className="size-5 shrink-0" />
+              {!collapsed && <span className="truncate">{tNav("more")}</span>}
+            </span>
             {!collapsed && (
-              <>
-                <span className="flex-1 min-w-0 truncate text-left leading-relaxed">
-                  {tNav("more")}
-                </span>
+              <span className="flex shrink-0 items-center gap-1.5">
                 <ChevronRight
-                  className={cn("size-4 shrink-0 transition-transform", celeryOpen && "rotate-90")}
+                  className={cn(
+                    "size-4 shrink-0 transition-transform text-muted-foreground dark:text-white/50",
+                    celeryOpen && "rotate-90"
+                  )}
                 />
-              </>
+              </span>
             )}
           </CollapsibleTrigger>
           <CollapsibleContent>
@@ -693,13 +719,13 @@ function SidebarContent({
                       prefetch={shouldPrefetchLinks}
                       onClick={handleLinkClick}
                       className={cn(
-                        "flex items-center justify-between rounded-ui px-2 py-2 text-sm",
+                        "group flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-xs text-sm font-normal w-full transition-colors",
                         childActive
-                          ? "bg-primary/10 font-medium text-primary"
-                          : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                          ? "bg-accent text-foreground dark:bg-white/[0.12] dark:text-white/95"
+                          : "text-muted-foreground hover:bg-accent hover:text-foreground dark:text-white/70 dark:hover:bg-white/[0.07] dark:hover:text-white/90"
                       )}
                     >
-                      <span className="min-w-0 break-words leading-relaxed">
+                      <span className="min-w-0 flex-1 truncate">
                         {tNav(app.id)}
                       </span>
                       {app.countKey &&
@@ -707,7 +733,7 @@ function SidebarContent({
                         counts[app.countKey] > 0 && (
                           <Badge
                             className={cn(
-                              "h-5 min-w-5 rounded-full border-0 bg-primary/15 px-1.5 text-xs font-medium text-primary",
+                              "h-5 min-w-5 rounded-full border-0 bg-muted px-1.5 text-xs font-medium text-muted-foreground dark:bg-white/10 dark:text-white/55",
                               numClass
                             )}
                           >
@@ -734,7 +760,7 @@ function SidebarContent({
       <div
         className={cn(
           "shrink-0 border-t border-border",
-          collapsed ? "px-1 py-2" : "p-4"
+          collapsed ? "px-1 pt-2 pb-1" : "px-4 pt-3 pb-2"
         )}
       >
         <DropdownMenu open={userMenuOpen} onOpenChange={handleUserMenuOpenChange}>
@@ -742,7 +768,7 @@ function SidebarContent({
             <button
               type="button"
               className={cn(
-                "flex w-full items-center gap-3 rounded-card border-0 bg-transparent text-left transition-colors",
+                "flex w-full items-center gap-3 rounded-xs border-0 bg-transparent text-left transition-colors",
                 "outline-none hover:bg-accent",
                 "focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
                 collapsed ? "justify-center px-0 py-2" : "p-3",
@@ -772,7 +798,7 @@ function SidebarContent({
                       </>
                     )}
                   </div>
-                  <ChevronDown className="size-4 shrink-0 text-muted-foreground" />
+                  <ChevronsUpDown className="size-4 shrink-0 text-muted-foreground" />
                 </>
               )}
             </button>
@@ -781,7 +807,7 @@ function SidebarContent({
             align="center"
             side="top"
             className={cn(
-              "z-[80] overflow-hidden rounded-card border border-border/80 p-0 shadow-lg",
+              "z-[80] overflow-hidden rounded-xs border border-border/80 p-0 shadow-lg",
               mobileUserMenuLayout
                 ? // Match profile row width (w-64 sheet minus p-4); ! beats popover defaults
                   "!w-[var(--radix-dropdown-menu-trigger-width)] min-w-[12.5rem] max-w-[min(100vw-1.5rem,14rem)]"
@@ -794,7 +820,7 @@ function SidebarContent({
                 {tSidebar("theme")}
               </p>
               <div
-                className="flex gap-1 rounded-card bg-muted/60 p-1 dark:bg-muted/25"
+                className="flex gap-1 rounded-xs bg-muted/60 p-1 dark:bg-muted/25"
                 role="group"
                 aria-label={tSidebar("theme")}
               >
@@ -810,7 +836,7 @@ function SidebarContent({
                     type="button"
                     onClick={() => handleThemeChange(key)}
                     className={cn(
-                      "flex min-w-0 flex-1 flex-col items-center gap-1 rounded-ui py-2 text-xs font-medium transition-colors",
+                      "flex min-w-0 flex-1 flex-col items-center gap-1 rounded-xs py-2 text-xs font-medium transition-colors",
                       theme === key
                         ? "bg-background text-primary shadow-sm ring-1 ring-primary/25 dark:bg-popover"
                         : "text-muted-foreground hover:bg-background/80 hover:text-foreground"
@@ -834,40 +860,45 @@ function SidebarContent({
               <p className="mb-1 px-2 pt-1 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
                 {tSidebar("language")}
               </p>
-              {routing.locales.map((loc) => {
-                const isActive = locale === loc;
-                const label = loc === "en" ? tLang("switchToEnglish") : tLang("switchToBengali");
-                const code = loc.toUpperCase();
-                const flag = loc === "en" ? "🇺🇸" : "🇧🇩";
-                return (
-                  <DropdownMenuItem
-                    key={loc}
-                    onSelect={(event) => {
-                      event.preventDefault();
-                      switchUserMenuLocale(loc);
-                    }}
-                    className={cn(
-                      "cursor-pointer rounded-ui px-2 py-2",
-                      isActive && "bg-accent/80 text-primary focus:bg-accent focus:text-primary"
-                    )}
-                  >
-                    <span className="flex min-w-0 flex-1 items-center gap-2.5">
-                      <span className="text-lg leading-none" aria-hidden>
-                        {flag}
-                      </span>
-                      <span className="truncate font-medium">{label}</span>
-                    </span>
-                    <span
+              <div className="space-y-1">
+                {routing.locales.map((loc) => {
+                  const isActive = locale === loc;
+                  const label =
+                    loc === "en" ? tLang("switchToEnglish") : tLang("switchToBengali");
+                  const code = loc.toUpperCase();
+                  const flag = loc === "en" ? "🇺🇸" : "🇧🇩";
+                  return (
+                    <DropdownMenuItem
+                      key={loc}
+                      onSelect={(event) => {
+                        event.preventDefault();
+                        switchUserMenuLocale(loc);
+                      }}
                       className={cn(
-                        "shrink-0 text-xs tabular-nums text-muted-foreground",
-                        isActive && "text-primary"
+                        "cursor-pointer w-full rounded-xs px-2 py-2",
+                        "grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3",
+                        isActive &&
+                          "bg-accent/80 text-primary focus:bg-accent focus:text-primary"
                       )}
                     >
-                      {code}
-                    </span>
-                  </DropdownMenuItem>
-                );
-              })}
+                      <span className="flex min-w-0 items-center gap-2.5">
+                        <span className="text-lg leading-none" aria-hidden>
+                          {flag}
+                        </span>
+                        <span className="truncate font-medium">{label}</span>
+                      </span>
+                      <span
+                        className={cn(
+                          "shrink-0 text-xs tabular-nums text-muted-foreground",
+                          isActive && "text-primary"
+                        )}
+                      >
+                        {code}
+                      </span>
+                    </DropdownMenuItem>
+                  );
+                })}
+              </div>
             </div>
 
             <DropdownMenuSeparator className="my-0" />

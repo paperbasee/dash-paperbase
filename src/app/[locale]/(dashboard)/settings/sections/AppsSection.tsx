@@ -47,7 +47,7 @@ export default function AppsSection({
                     <p className="font-medium text-foreground">{t(`apps.items.${id}.label` as never)}</p>
                     <p className="text-xs text-muted-foreground">{t(`apps.items.${id}.description` as never)}</p>
                   </div>
-                  <span className="shrink-0 justify-self-end whitespace-nowrap rounded-full bg-primary/15 px-2.5 py-0.5 text-xs font-medium text-primary">
+                  <span className="shrink-0 justify-self-end whitespace-nowrap rounded-tooltip bg-primary/15 px-2.5 py-0.5 text-xs font-medium text-primary">
                     {t("apps.alwaysOn")}
                   </span>
                 </div>

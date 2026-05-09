@@ -499,7 +499,7 @@ export default function ProductsPage() {
         </p>
       )}
       {!loading && !filters.category && products.length >= 2 && (
-        <p className="rounded-card border border-dashed border-border px-3 py-2 text-sm text-muted-foreground">
+        <p className="rounded-card border border-border px-3 py-2 text-sm text-muted-foreground">
           {tPages("productsListReorderHintPickCategory")}
         </p>
       )}
@@ -508,7 +508,7 @@ export default function ProductsPage() {
         <DashboardTableSkeleton columns={9} rows={5} showHeader={false} showFilters={false} />
       ) : (
         <>
-          <div className="overflow-x-auto rounded-card border border-dashed border-card-border bg-card">
+          <div className="overflow-x-auto rounded-card border border-card-border bg-card">
             <DndContext
               sensors={sensors}
               collisionDetection={closestCenter}

@@ -163,7 +163,7 @@ export default function SettingsPage() {
               </Button>
             </CollapsibleTrigger>
             <CollapsibleContent>
-              <div className="mt-2 rounded-card border border-dashed border-border bg-muted/30 p-3">
+              <div className="mt-2 rounded-card border border-border bg-muted/30 p-3">
                 <SettingsSectionNav
                   activeSection={activeSection}
                   onSelect={(id) => {

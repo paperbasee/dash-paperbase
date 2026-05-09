@@ -78,7 +78,7 @@ export function Toast({ variant, message, title, action, iconName }: ToastProps)
       role="status"
       aria-live="polite"
       className={cn(
-        "pointer-events-auto relative flex h-[4.5rem] w-full items-center overflow-hidden rounded-xl border border-border/80",
+        "pointer-events-auto relative flex h-[4.5rem] w-full items-center overflow-hidden rounded-xs border border-border/80",
         "bg-card text-foreground shadow-[0_6px_18px_-12px_rgba(0,0,0,0.45)] ring-1 ring-border/35",
         "px-3.5 py-2 transition-all duration-250 ease-out",
         "data-[state=open]:animate-in data-[state=open]:slide-in-from-bottom-3 data-[state=open]:fade-in-0",
@@ -89,7 +89,7 @@ export function Toast({ variant, message, title, action, iconName }: ToastProps)
         <div
           aria-hidden="true"
           className={cn(
-            "flex h-10 w-10 shrink-0 items-center justify-center rounded-md",
+            "flex h-10 w-10 shrink-0 items-center justify-center rounded-xs",
             iconTone.tile,
           )}
         >
@@ -104,7 +104,7 @@ export function Toast({ variant, message, title, action, iconName }: ToastProps)
               <button
                 type="button"
                 onClick={action.onClick}
-                className="shrink-0 rounded-md border border-border bg-muted px-2 py-1 text-[11px] font-medium leading-none text-foreground transition hover:bg-muted/80"
+                className="shrink-0 rounded-xs border border-border bg-muted px-2 py-1 text-[11px] font-medium leading-none text-foreground transition hover:bg-muted/80"
               >
                 {action.label}
               </button>

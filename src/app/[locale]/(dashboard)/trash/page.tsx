@@ -299,7 +299,7 @@ export default function TrashPage() {
         <p className="text-sm text-muted-foreground">{tPages("trashEmpty")}</p>
       ) : (
         <>
-          <div className="overflow-x-auto rounded-card border border-dashed border-card-border bg-card">
+          <div className="overflow-x-auto rounded-card border border-card-border bg-card">
             <table className="w-max min-w-full text-left text-sm">
               <thead>
                 <tr className="border-b border-border bg-muted/40">

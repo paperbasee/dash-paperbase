@@ -64,7 +64,7 @@ export default function NotificationsSection({
           <div className="flex flex-wrap items-center gap-2">
             <label className="text-sm font-medium text-foreground">{t("notifications.emailSection")}</label>
             {!orderEmailFeatureLoading && !orderEmailNotificationsEnabled && (
-              <span className="inline-flex items-center gap-1 rounded-full border border-border bg-muted/50 px-2 py-0.5 text-xs text-muted-foreground">
+              <span className="inline-flex items-center gap-1 rounded-tooltip border border-border bg-muted/50 px-2 py-0.5 text-xs text-muted-foreground">
                 <Lock className="size-3 shrink-0" aria-hidden />
                 {t("notifications.premium")}
               </span>

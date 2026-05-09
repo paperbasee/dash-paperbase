@@ -151,7 +151,7 @@ function OrderLineProductCardInner({
               type="button"
               variant="destructive"
               size="icon"
-              className="absolute right-1.5 top-1.5 z-10 h-8 w-8 shrink-0 rounded-full shadow-md"
+              className="absolute right-1.5 top-1.5 z-10 h-8 w-8 shrink-0 rounded-button-sm shadow-md"
               aria-label={tPages("orderNewRemoveItemAria")}
               onClick={onRemove}
             >

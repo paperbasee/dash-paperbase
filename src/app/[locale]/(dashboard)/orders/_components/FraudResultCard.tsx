@@ -166,7 +166,7 @@ export function FraudResultCard({
   return (
     <Card
       className={cn(
-        "overflow-hidden rounded-card border border-dashed border-card-border bg-card shadow-sm",
+        "overflow-hidden rounded-card border border-card-border bg-card shadow-sm",
         className
       )}
     >

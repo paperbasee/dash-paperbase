@@ -93,7 +93,7 @@ export default function DashboardBarChart({ data }: DashboardBarChartProps) {
             <BarChart
               data={data}
               margin={{ top: 8, left: 0, right: yAxisWidth, bottom: 0 }}
-              style={{ background: "hsl(var(--card))", borderRadius: 0 }}
+              style={{ background: "hsl(var(--card))" }}
             >
               <CartesianGrid
                 strokeDasharray="3 3"
@@ -134,7 +134,6 @@ export default function DashboardBarChart({ data }: DashboardBarChartProps) {
                 }}
                 contentStyle={{
                   /* Tooltip is Recharts inline style; square corners match chart */
-                  borderRadius: 0,
                   border: "1px solid hsl(var(--border))",
                   boxShadow: "0 10px 25px rgba(0, 0, 0, 0.25)",
                   fontSize: 12,

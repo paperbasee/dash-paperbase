@@ -120,10 +120,10 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
         <Dialog.Content
           className={cn(
             "fixed z-50 flex min-h-0 flex-col overflow-hidden bg-background p-0 gap-0",
-            "inset-0 rounded-none border-0 shadow-none max-h-[100dvh]",
+            "inset-0 border-0 shadow-none max-h-[100dvh]",
             /* Desktop: viewport-centered; fixed height prevents size/position shift while results load */
             "md:inset-auto md:left-1/2 md:top-1/2 md:h-[min(560px,85vh)] md:w-full md:max-w-xl md:-translate-x-1/2 md:-translate-y-1/2",
-            "md:rounded-card md:border md:border-border md:shadow-lg",
+            "md:rounded-xs md:border md:border-border md:shadow-lg",
             "data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95",
             "data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95"
           )}
@@ -149,7 +149,7 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
               <Input
                 placeholder={tSidebar("searchPlaceholder")}
                 className={cn(
-                  "h-12 w-full rounded-card pr-10 pl-4",
+                  "h-12 w-full rounded-xs pr-10 pl-4",
                   "border-2 border-border bg-background focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/20"
                 )}
                 autoFocus
@@ -170,7 +170,7 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
             />
-            <kbd className="shrink-0 rounded-ui border border-border bg-muted px-1.5 py-0.5 text-[10px] text-muted-foreground">
+            <kbd className="shrink-0 rounded-xs border border-border bg-muted px-1.5 py-0.5 text-[10px] text-muted-foreground">
               esc
             </kbd>
           </div>
@@ -206,7 +206,7 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
                           key={item.public_id}
                           type="button"
                           onClick={() => goTo(`/products/${item.public_id}`)}
-                          className="w-full rounded-ui border border-transparent px-3 py-2 text-left transition hover:border-border hover:bg-muted/50"
+                          className="w-full rounded-xs border border-transparent px-3 py-2 text-left transition hover:border-border hover:bg-muted/50"
                         >
                           <p className="truncate text-sm font-medium text-foreground">{item.title}</p>
                           {item.subtitle ? (
@@ -228,7 +228,7 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
                           key={item.public_id}
                           type="button"
                           onClick={() => goTo(`/orders/${item.public_id}`)}
-                          className="w-full rounded-ui border border-transparent px-3 py-2 text-left transition hover:border-border hover:bg-muted/50"
+                          className="w-full rounded-xs border border-transparent px-3 py-2 text-left transition hover:border-border hover:bg-muted/50"
                         >
                           <p className="truncate text-sm font-medium text-foreground">{item.title}</p>
                           {item.subtitle ? (
@@ -250,7 +250,7 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
                           key={item.public_id}
                           type="button"
                           onClick={() => goTo(`/customers/${item.public_id}`)}
-                          className="w-full rounded-ui border border-transparent px-3 py-2 text-left transition hover:border-border hover:bg-muted/50"
+                          className="w-full rounded-xs border border-transparent px-3 py-2 text-left transition hover:border-border hover:bg-muted/50"
                         >
                           <p className="truncate text-sm font-medium text-foreground">{item.title}</p>
                           {item.subtitle ? (
@@ -272,7 +272,7 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
                           key={item.public_id}
                           type="button"
                           onClick={() => goTo(`/support-tickets/${item.public_id}`)}
-                          className="w-full rounded-ui border border-transparent px-3 py-2 text-left transition hover:border-border hover:bg-muted/50"
+                          className="w-full rounded-xs border border-transparent px-3 py-2 text-left transition hover:border-border hover:bg-muted/50"
                         >
                           <p className="truncate text-sm font-medium text-foreground">{item.title}</p>
                           {item.subtitle ? (

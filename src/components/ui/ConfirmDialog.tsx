@@ -46,9 +46,8 @@ export function ConfirmDialog({
       <DialogContent
         showCloseButton={false}
         className={cn(
-          "w-[min(100%,calc(100vw-2.5rem))] max-w-[380px] gap-0 rounded-2xl border border-border/80 p-0 sm:max-w-[420px]",
-          "bg-white text-zinc-900 shadow-[0_20px_40px_-22px_rgba(15,23,42,0.5)]",
-          "dark:bg-zinc-900 dark:text-zinc-100 dark:shadow-[0_20px_40px_-22px_rgba(0,0,0,0.7)]",
+          "w-[min(100%,calc(100vw-2.5rem))] max-w-[380px] gap-0 rounded-xs border border-border-subtle p-0 sm:max-w-[420px]",
+          "bg-background text-foreground",
         )}
         onPointerDownOutside={(e) => {
           if (busy) e.preventDefault();
@@ -75,8 +74,7 @@ export function ConfirmDialog({
             disabled={busy}
             onClick={onCancel}
             className={cn(
-              "h-10 min-w-28 rounded-full border-zinc-400/70 bg-transparent px-5 text-base font-medium text-zinc-800 shadow-sm sm:h-11 sm:min-w-32 sm:px-6 sm:text-lg",
-              "hover:bg-zinc-100 dark:border-zinc-600 dark:text-zinc-100 dark:hover:bg-zinc-800",
+              "h-10 min-w-28 px-5 text-base font-medium sm:h-11 sm:min-w-32 sm:px-6 sm:text-lg",
             )}
           >
             {cancelText}
@@ -86,7 +84,7 @@ export function ConfirmDialog({
             loading={busy}
             onClick={onConfirm}
             className={cn(
-              "h-10 min-w-28 rounded-full px-5 text-base font-semibold shadow-sm sm:h-11 sm:min-w-32 sm:px-6 sm:text-lg",
+              "h-10 min-w-28 px-5 text-base font-semibold sm:h-11 sm:min-w-32 sm:px-6 sm:text-lg",
               confirmButtonTone,
             )}
           >

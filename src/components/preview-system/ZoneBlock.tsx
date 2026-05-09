@@ -41,7 +41,7 @@ export function ZoneBlock({
       )}
     >
       {isActive && (
-        <span className="absolute top-2 left-2 z-10 rounded-full bg-primary px-2.5 py-0.5 text-[10px] font-semibold tracking-wide text-primary-foreground uppercase shadow-sm">
+        <span className="absolute top-2 left-2 z-10 rounded-tooltip bg-primary px-2.5 py-0.5 text-[10px] font-semibold tracking-wide text-primary-foreground uppercase shadow-sm">
           {label}
         </span>
       )}

@@ -506,7 +506,7 @@ export default function NewProductPage() {
                 ) : (
                   <label
                     className={cn(
-                      "flex h-full w-full cursor-pointer flex-col items-center justify-center gap-2 rounded-ui border border-dashed bg-card text-center text-muted-foreground transition-colors hover:text-foreground",
+                      "flex h-full w-full cursor-pointer flex-col items-center justify-center gap-2 rounded-ui border bg-card text-center text-muted-foreground transition-colors hover:text-foreground",
                       mainImageDragging
                         ? "border-primary bg-primary/5 text-foreground"
                         : "border-primary/35 hover:border-primary/60",
@@ -602,7 +602,7 @@ export default function NewProductPage() {
                 {Array.from({ length: MAX_IMAGES }, (_, i) => (
                   <div
                     key={i}
-                    className={`relative aspect-square w-16 shrink-0 snap-start overflow-hidden rounded-card border border-dashed border-border bg-muted/30 ${
+                    className={`relative aspect-square w-16 shrink-0 snap-start overflow-hidden rounded-card border border-border bg-muted/30 ${
                       (selectedImageIndex ?? firstFilledIndex) === i && imagePreviews[i]
                         ? "ring-2 ring-primary"
                         : ""
@@ -643,7 +643,7 @@ export default function NewProductPage() {
                               setSelectedImageIndex(nextFilled ?? null);
                             }
                           }}
-                          className="absolute right-1 top-1 rounded-full bg-destructive/90 p-0.5 text-primary-foreground hover:bg-destructive"
+                          className="absolute right-1 top-1 rounded-button-sm bg-destructive/90 p-0.5 text-primary-foreground hover:bg-destructive"
                           aria-label={tPages("productRemoveImageN", { n: i + 1 })}
                         >
                           <X className="size-3" />

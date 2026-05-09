@@ -177,7 +177,7 @@ export default function StoreInfoSection({
                 <img src={previewUrl} alt={t("store.logoPreviewAlt")} className="size-full object-cover" />
               </div>
             ) : (
-              <div className="flex size-20 items-center justify-center rounded-full border border-dashed border-border bg-muted text-muted-foreground">
+              <div className="flex size-20 items-center justify-center rounded-full border border-border bg-muted text-muted-foreground">
                 {t("store.noLogo")}
               </div>
             )}

@@ -66,12 +66,12 @@ export function BlogListCard({ blog, locale, onDelete }: BlogListCardProps) {
   }
 
   return (
-    <article className="group flex h-full min-w-0 flex-col overflow-hidden rounded-2xl border border-border/70 bg-card p-5 shadow-md">
+    <article className="group flex h-full min-w-0 flex-col overflow-hidden rounded-card border border-border/70 bg-card p-5 shadow-md">
       <Link href={`/blog/${blog.public_id}/edit`} className="block min-w-0 w-full flex-1">
         <div className="relative mb-4 min-h-0 w-full">
           <div
             className={cn(
-              "relative w-full overflow-hidden rounded-xl bg-muted/60",
+              "relative w-full overflow-hidden rounded-card bg-muted/60",
               "aspect-[4/3]",
               "shadow-sm ring-1 ring-foreground/5 dark:ring-white/10",
             )}
@@ -108,7 +108,7 @@ export function BlogListCard({ blog, locale, onDelete }: BlogListCardProps) {
         </div>
 
         <div className="flex min-w-0 flex-1 flex-col gap-3">
-          <span className="w-fit rounded-md border border-border/70 bg-muted/50 px-2.5 py-1 text-[10px] font-medium uppercase tracking-wide text-slate-900 dark:bg-muted/30 dark:text-white">
+          <span className="w-fit rounded-tooltip border border-border/70 bg-muted/50 px-2.5 py-1 text-[10px] font-medium uppercase tracking-wide text-slate-900 dark:bg-muted/30 dark:text-white">
             {pillText}
           </span>
 

@@ -118,7 +118,7 @@ export function PalettePicker({
               </div>
               <p className="mt-1 text-xs text-muted-foreground">{description}</p>
               <div
-                className="mt-3 flex h-8 w-full overflow-hidden rounded-md border border-border"
+                className="mt-3 flex h-8 w-full overflow-hidden rounded-input border border-border"
                 aria-hidden
               >
                 <span className="flex-1" style={{ backgroundColor: bg }} />

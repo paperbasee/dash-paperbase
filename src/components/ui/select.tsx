@@ -6,11 +6,12 @@ import { cn } from "@/lib/utils"
 
 const selectVariants = cva(
   [
-    "w-full min-w-0 appearance-none rounded-ui border border-border bg-background text-sm text-foreground shadow-xs",
-    "transition-[color,box-shadow] outline-none",
+    "w-full min-w-0 appearance-none rounded-xs border border-input-border bg-input-surface text-sm text-foreground [box-shadow:var(--shadow-input)]",
+    "transition-[background-color,border-color,box-shadow,color] duration-[180ms] ease-in-out outline-none",
     "placeholder:text-muted-foreground",
     "disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50",
-    "focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50",
+    "hover:border-border",
+    "focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/20",
     "bg-no-repeat pr-8",
   ],
   {

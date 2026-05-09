@@ -631,11 +631,11 @@ export default function VariantsPageClient() {
               showPagination={false}
             />
           ) : variants.length === 0 ? (
-            <p className="rounded-card border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
+            <p className="rounded-card border border-border p-8 text-center text-sm text-muted-foreground">
               {tPages("variantsEmpty")}
             </p>
           ) : filteredVariants.length === 0 ? (
-            <p className="rounded-card border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
+            <p className="rounded-card border border-border p-8 text-center text-sm text-muted-foreground">
               {tPages("variantsEmptyFiltered")}
             </p>
           ) : (

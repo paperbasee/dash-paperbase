@@ -39,7 +39,7 @@ export function DashboardTableSkeleton({
         </div>
       ) : null}
 
-      <div className="overflow-hidden rounded-card border border-dashed border-card-border bg-card">
+      <div className="overflow-hidden rounded-card border border-card-border bg-card">
         <div className="border-b border-border bg-muted/40 p-4">
           <div className="grid gap-4" style={{ gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))` }}>
             {Array.from({ length: columns }).map((_, i) => (
@@ -77,7 +77,7 @@ export function DashboardCardGridSkeleton({ cards = 6 }: { cards?: number }) {
   const { isLoggingOut } = useAuth();
   if (isLoggingOut) return null;
   return (
-    <div className="rounded-card border border-dashed border-card-border bg-card p-3">
+    <div className="rounded-card border border-card-border bg-card p-3">
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {Array.from({ length: cards }).map((_, i) => (
           <div key={i} className="space-y-3 rounded-card border border-border p-4">
@@ -113,7 +113,7 @@ export function DashboardDetailSkeleton() {
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {Array.from({ length: 3 }).map((_, i) => (
-          <div key={i} className="rounded-card border border-dashed border-card-border bg-card p-4">
+          <div key={i} className="rounded-card border border-card-border bg-card p-4">
             <Skeleton className="h-4 w-28" />
             <Skeleton className="mt-3 h-8 w-20" />
           </div>
@@ -122,7 +122,7 @@ export function DashboardDetailSkeleton() {
 
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="space-y-4 lg:col-span-2">
-          <div className="rounded-card border border-dashed border-card-border bg-card p-4">
+          <div className="rounded-card border border-card-border bg-card p-4">
             <Skeleton className="h-5 w-44" />
             <div className="mt-4 space-y-3">
               {Array.from({ length: 5 }).map((_, i) => (
@@ -132,7 +132,7 @@ export function DashboardDetailSkeleton() {
           </div>
         </div>
         <div className="space-y-4">
-          <div className="rounded-card border border-dashed border-card-border bg-card p-4">
+          <div className="rounded-card border border-card-border bg-card p-4">
             <Skeleton className="h-5 w-32" />
             <div className="mt-4 space-y-3">
               <Skeleton className="h-4 w-full" />
@@ -150,7 +150,7 @@ export function SettingsSectionSkeleton() {
   const { isLoggingOut } = useAuth();
   if (isLoggingOut) return null;
   return (
-    <div className="rounded-card border border-dashed border-card-border bg-card p-4">
+    <div className="rounded-card border border-card-border bg-card p-4">
       <Skeleton className="h-5 w-48" />
       <Skeleton className="mt-2 h-4 w-72" />
       <div className="mt-4 space-y-3">

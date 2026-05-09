@@ -547,7 +547,7 @@ export default function CategoriesPage() {
             count: flattenCategoryOptions(tree).length,
           })}
         </h2>
-        <div className="overflow-x-auto rounded-card border border-dashed border-card-border bg-card">
+        <div className="overflow-x-auto rounded-card border border-card-border bg-card">
           <table className="w-full text-left text-sm">
             <thead>
               <tr className="border-b border-border bg-muted/40">
@@ -601,7 +601,7 @@ function ActiveBadge({
 }) {
   return (
     <span
-      className={`inline-block whitespace-nowrap rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+      className={`inline-block whitespace-nowrap rounded-tooltip px-2.5 py-0.5 text-xs font-semibold ${
         active
           ? "bg-emerald-500/20 text-emerald-400"
           : "bg-muted text-muted-foreground"

@@ -653,7 +653,7 @@ export default function OrderDetailPage() {
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3 lg:items-start">
         {/* Product - left, wider; height locked to Payment + Customer combined on desktop; scrolls when many items */}
         <Card
-          className="flex min-h-0 flex-col gap-0 overflow-hidden rounded-card border border-dashed border-card-border bg-card py-0 shadow-sm lg:col-span-2"
+          className="flex min-h-0 flex-col gap-0 overflow-hidden rounded-card border border-card-border bg-card py-0 shadow-sm lg:col-span-2"
           style={rightColHeight !== null ? { height: rightColHeight } : undefined}
         >
           <CardHeader className="shrink-0 border-b border-border/50 px-4 pb-4 pt-5 sm:px-6">
@@ -676,7 +676,7 @@ export default function OrderDetailPage() {
           )}
           <CardContent className="flex min-h-0 flex-1 flex-col gap-0 px-0 pb-4 pt-0">
             <div
-              className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto scroll-smooth px-4 pt-4 sm:px-6 [scrollbar-width:thin] max-h-[70vh] lg:max-h-none [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-none [&::-webkit-scrollbar-thumb]:bg-border [&::-webkit-scrollbar-track]:bg-transparent"
+              className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto scroll-smooth px-4 pt-4 sm:px-6 [scrollbar-width:thin] max-h-[70vh] lg:max-h-none [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-xs [&::-webkit-scrollbar-thumb]:bg-border [&::-webkit-scrollbar-track]:bg-transparent"
             >
               <ProductGrid
                 hasItems={displayItems.length > 0}
@@ -756,7 +756,7 @@ export default function OrderDetailPage() {
         {/* Right column: stacked cards (height drives Product card on desktop) */}
         <div ref={rightColRef} className="flex flex-col gap-6 lg:col-span-1">
         {order.status === "payment_pending" && order.payment_status === "submitted" && (
-          <Card className="overflow-hidden rounded-card border border-dashed border-card-border bg-card shadow-sm">
+          <Card className="overflow-hidden rounded-card border border-card-border bg-card shadow-sm">
             <CardHeader className="border-b border-border/50 px-4 pb-4 sm:px-6">
               <CardTitle>{tPages("orderDetailVerifyPaymentTitle")}</CardTitle>
               <CardDescription>
@@ -803,7 +803,7 @@ export default function OrderDetailPage() {
           </Card>
         )}
         {/* Payment */}
-        <Card className="overflow-hidden rounded-card border border-dashed border-card-border bg-card shadow-sm">
+        <Card className="overflow-hidden rounded-card border border-card-border bg-card shadow-sm">
           <CardHeader className="border-b border-border/50 px-4 pb-4 sm:px-6">
             <CardTitle>{tPages("orderDetailPaymentTitle")}</CardTitle>
             <CardDescription>{tPages("orderDetailPaymentDescription")}</CardDescription>
@@ -974,7 +974,7 @@ export default function OrderDetailPage() {
         </Card>
 
         {!editing && (
-          <Card className="overflow-hidden rounded-card border border-dashed border-card-border bg-card shadow-sm">
+          <Card className="overflow-hidden rounded-card border border-card-border bg-card shadow-sm">
             <CardHeader className="border-b border-border/50 px-4 pb-4 sm:px-6">
               <CardTitle>{tPages("orderDetailOrderStatusTitle")}</CardTitle>
               <CardDescription>
@@ -1076,7 +1076,7 @@ export default function OrderDetailPage() {
         )}
 
         {/* Customer */}
-        <Card className="overflow-hidden rounded-card border border-dashed border-card-border bg-card shadow-sm">
+        <Card className="overflow-hidden rounded-card border border-card-border bg-card shadow-sm">
           <CardHeader className="border-b border-border/50 px-4 pb-4 sm:px-6">
             <CardTitle>{tPages("orderDetailCustomerTitle")}</CardTitle>
             <CardDescription>{tPages("orderDetailCustomerDescription")}</CardDescription>

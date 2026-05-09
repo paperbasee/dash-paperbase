@@ -220,7 +220,7 @@ export default function BlogListPage() {
           )}
         </Card>
       ) : (
-        <div className="rounded-card border border-dashed border-card-border bg-card p-3">
+        <div className="rounded-card border border-card-border bg-card p-3">
           <div className="grid min-w-0 grid-cols-1 justify-items-stretch gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {blogs.map((blog) => (
               <BlogListCard

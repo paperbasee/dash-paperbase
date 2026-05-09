@@ -756,7 +756,7 @@ export default function OrdersPage() {
                   ? tPages("ordersExportStatusPending")
                   : tPages("ordersExportStatusProcessing")}
               </p>
-              <div className="h-2 w-full rounded-full bg-muted overflow-hidden">
+              <div className="h-2 w-full rounded-xs bg-muted overflow-hidden">
                 <div
                   className="h-full bg-primary transition-[width] duration-300"
                   style={{ width: `${Math.min(100, Math.max(0, exportPoll.progress))}%` }}
@@ -797,7 +797,7 @@ export default function OrdersPage() {
         <>
           <div
             ref={setScrollContainer}
-            className="overflow-x-auto rounded-card border border-dashed border-card-border bg-card"
+            className="overflow-x-auto rounded-card border border-card-border bg-card"
           >
             <table className="w-full text-left text-sm">
               <thead>

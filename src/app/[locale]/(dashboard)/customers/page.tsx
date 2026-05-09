@@ -161,12 +161,12 @@ export default function CustomersPage() {
       {loading ? (
         <DashboardTableSkeleton columns={6} rows={5} showHeader={false} showFilters={false} />
       ) : customers.length === 0 ? (
-        <div className="rounded-card border border-dashed border-card-border bg-card py-12 text-center text-sm text-muted-foreground">
+        <div className="rounded-card border border-card-border bg-card py-12 text-center text-sm text-muted-foreground">
           {tPages("customersEmpty")}
         </div>
       ) : (
         <>
-          <div className="overflow-x-auto rounded-card border border-dashed border-card-border bg-card">
+          <div className="overflow-x-auto rounded-card border border-card-border bg-card">
                 <table className="w-full text-left text-sm">
                   <thead>
                     <tr className="border-b border-border bg-muted/40">

@@ -483,7 +483,7 @@ export default function PopupEditorPage() {
               return (
                 <div
                   key={index}
-                  className="flex min-w-0 flex-col overflow-hidden rounded-xl border border-border bg-card p-2 shadow-sm"
+                  className="flex min-w-0 flex-col overflow-hidden rounded-card border border-border bg-card p-2 shadow-sm"
                 >
                   <div className="mb-2 flex items-center justify-between gap-2">
                     <span className="truncate text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
@@ -504,7 +504,7 @@ export default function PopupEditorPage() {
                     )}
                   </div>
 
-                  <div className="relative aspect-[4/3] w-full overflow-hidden rounded-lg border border-border/80 bg-muted/30">
+                  <div className="relative aspect-[4/3] w-full overflow-hidden rounded-card border border-border/80 bg-muted/30">
                     {showPreview && previewSrc ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img src={previewSrc} alt="" className="h-full w-full object-cover" />
@@ -574,7 +574,7 @@ export default function PopupEditorPage() {
       )}
 
       {/* List state (table stays visible while editing, like CTA/Banners). */}
-      <div className="overflow-x-auto rounded-card border border-dashed border-card-border bg-card">
+      <div className="overflow-x-auto rounded-card border border-card-border bg-card">
           <table className="w-full text-left text-sm">
           <thead>
             <tr className="border-b border-border bg-muted/40">
@@ -629,7 +629,7 @@ export default function PopupEditorPage() {
                       e.stopPropagation();
                       void toggleActive(popup);
                     }}
-                    className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+                    className={`inline-flex rounded-tooltip px-2.5 py-0.5 text-xs font-semibold ${
                       popup.is_active
                         ? "bg-emerald-500/20 text-emerald-400"
                         : "bg-muted text-muted-foreground"
@@ -653,7 +653,7 @@ export default function PopupEditorPage() {
             ) : !editing ? (
               <tr>
                   <td colSpan={5} className="px-4 py-8">
-                  <div className="rounded-card border border-dashed border-card-border bg-card py-12 text-center text-sm text-muted-foreground">
+                  <div className="rounded-card border border-card-border bg-card py-12 text-center text-sm text-muted-foreground">
                     This store has no popup yet.
                   </div>
                 </td>

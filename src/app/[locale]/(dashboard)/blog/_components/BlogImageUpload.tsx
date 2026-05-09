@@ -61,7 +61,7 @@ export function BlogImageUpload({
           </div>
         ) : (
           <label
-            className={`flex h-full w-full cursor-pointer flex-col items-center justify-center gap-2 rounded-ui border border-dashed bg-card text-center text-muted-foreground transition-colors hover:text-foreground ${isDragging ? "border-primary bg-primary/5 text-foreground" : "border-primary/35 hover:border-primary/60"} ${disabledClass}`}
+            className={`flex h-full w-full cursor-pointer flex-col items-center justify-center gap-2 rounded-ui border bg-card text-center text-muted-foreground transition-colors hover:text-foreground ${isDragging ? "border-primary bg-primary/5 text-foreground" : "border-primary/35 hover:border-primary/60"} ${disabledClass}`}
             onDragOver={(e) => {
               e.preventDefault();
               setIsDragging(true);

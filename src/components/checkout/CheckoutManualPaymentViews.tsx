@@ -63,7 +63,7 @@ function CopyNumberButton({ value, copiedLabel, copyLabel }: { value: string; co
       type="button"
       onClick={handleCopy}
       className={cn(
-        "inline-flex shrink-0 items-center justify-center rounded-md border border-solid p-2.5 shadow-sm transition-all duration-200 ease-out",
+        "inline-flex shrink-0 items-center justify-center rounded-xs border border-solid p-2.5 shadow-sm transition-all duration-200 ease-out",
         "active:scale-95",
         "hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
         copied
@@ -116,7 +116,7 @@ export function CheckoutProviderPicker({
   const t = useTranslations("checkoutPage");
 
   return (
-    <div className="mx-auto w-full max-w-md rounded-xl border border-border bg-card p-10 shadow-sm">
+    <div className="mx-auto w-full max-w-md rounded-xs border border-border bg-card p-10 shadow-sm">
       <div className="space-y-2 text-left">
         <h1 className="text-xl font-bold tracking-tight text-foreground sm:text-2xl">
           {t("selectPaymentTitle")}
@@ -132,7 +132,7 @@ export function CheckoutProviderPicker({
               type="button"
               onClick={onSelectBkash}
               className={cn(
-                "flex h-24 w-full items-center justify-center rounded-xl border border-border bg-card",
+                "flex h-24 w-full items-center justify-center rounded-xs border border-border bg-card",
                 "transition-colors hover:border-primary/40 hover:bg-muted/40",
                 "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               )}
@@ -156,7 +156,7 @@ export function CheckoutProviderPicker({
               type="button"
               onClick={onSelectNagad}
               className={cn(
-                "flex h-24 w-full items-center justify-center rounded-xl border border-border bg-card",
+                "flex h-24 w-full items-center justify-center rounded-xs border border-border bg-card",
                 "transition-colors hover:border-primary/40 hover:bg-muted/40",
                 "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               )}
@@ -222,7 +222,7 @@ export function CheckoutProviderPaymentCard({
     provider === "bkash" ? t("sendMoneyBodyBkash") : t("sendMoneyBodyNagad");
 
   return (
-    <div className="mx-auto w-full max-w-md overflow-hidden rounded-xl border border-border bg-card shadow-md">
+    <div className="mx-auto w-full max-w-md overflow-hidden rounded-xs border border-border bg-card shadow-md">
       {/* Brand header — match picker logo scale; compact padding limits vertical growth */}
       <div className="bg-card px-4 pt-3 pb-1.5">
         <div className="flex items-center justify-center">
@@ -278,7 +278,7 @@ export function CheckoutProviderPaymentCard({
             {instructionBody}
           </p>
           {phoneNumber ? (
-            <div className="mt-4 flex items-stretch gap-2 rounded-lg border-2 border-amber-400/80 bg-background px-3 py-3 dark:border-amber-500/50">
+            <div className="mt-4 flex items-stretch gap-2 rounded-xs border-2 border-amber-400/80 bg-background px-3 py-3 dark:border-amber-500/50">
               <p
                 className={cn(
                   "min-w-0 flex-1 self-center text-[1.65rem] font-bold leading-tight tracking-tight text-foreground sm:text-[2rem] sm:leading-none",
@@ -301,7 +301,7 @@ export function CheckoutProviderPaymentCard({
         {/* Form — brand panel */}
         <div className={cn(brandPanel, "px-4 py-5")}>
           {submitError && (
-            <div className="mb-4 rounded-md border border-white/25 bg-black/10 px-3 py-2 text-center text-xs text-white">
+            <div className="mb-4 rounded-xs border border-white/25 bg-black/10 px-3 py-2 text-center text-xs text-white">
               {submitError}
             </div>
           )}
@@ -323,7 +323,7 @@ export function CheckoutProviderPaymentCard({
                 onChange={(e) => onTransactionIdChange(e.target.value)}
                 placeholder={t("transactionIdPlaceholder")}
                 className={cn(
-                  "w-full rounded-lg border-0 bg-background px-3 py-2.5 text-left text-sm text-foreground shadow-inner placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-white/50",
+                  "w-full rounded-xs border-0 bg-background px-3 py-2.5 text-left text-sm text-foreground shadow-inner placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-white/50",
                   numClass,
                   txnIdError && "ring-2 ring-amber-200"
                 )}
@@ -349,7 +349,7 @@ export function CheckoutProviderPaymentCard({
                 onChange={(e) => onSenderNumberChange(e.target.value)}
                 placeholder={t("phoneNumberPlaceholder")}
                 className={cn(
-                  "w-full rounded-lg border-0 bg-background px-3 py-2.5 text-left text-sm text-foreground shadow-inner placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-white/50",
+                  "w-full rounded-xs border-0 bg-background px-3 py-2.5 text-left text-sm text-foreground shadow-inner placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-white/50",
                   numClass
                 )}
                 onKeyDown={handleKeyDown}
@@ -378,7 +378,7 @@ export function CheckoutProviderPaymentCard({
             loading={submitting}
             disabled={!canConfirm}
             className={cn(
-              "h-auto min-h-0 rounded-none py-3.5 text-sm font-bold uppercase tracking-wide",
+              "h-auto min-h-0 rounded-xs py-3.5 text-sm font-bold uppercase tracking-wide",
               canConfirm
                 ? "bg-zinc-500 text-white hover:bg-zinc-400 dark:bg-zinc-700 dark:hover:bg-zinc-600"
                 : "cursor-not-allowed bg-zinc-600/80 text-zinc-400 dark:bg-zinc-800 dark:text-zinc-500"

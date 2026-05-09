@@ -440,7 +440,7 @@ export default function ShippingPage() {
               </div>
             ))}
             {zones.length === 0 && (
-              <div className="rounded-card border border-dashed border-border/60 bg-background px-3 py-8 text-center text-sm text-muted-foreground">
+              <div className="rounded-card border border-border/60 bg-background px-3 py-8 text-center text-sm text-muted-foreground">
                 {tPages("shippingZonesEmpty")}
               </div>
             )}
@@ -594,7 +594,7 @@ export default function ShippingPage() {
               </div>
             ))}
             {methods.length === 0 && (
-              <div className="rounded-card border border-dashed border-border/60 bg-background px-3 py-8 text-center text-sm text-muted-foreground">
+              <div className="rounded-card border border-border/60 bg-background px-3 py-8 text-center text-sm text-muted-foreground">
                 {tPages("shippingMethodsEmpty")}
               </div>
             )}
@@ -774,7 +774,7 @@ export default function ShippingPage() {
               </div>
             ))}
             {rates.length === 0 && (
-              <div className="rounded-card border border-dashed border-border/60 bg-background px-3 py-8 text-center text-sm text-muted-foreground">
+              <div className="rounded-card border border-border/60 bg-background px-3 py-8 text-center text-sm text-muted-foreground">
                 {tPages("shippingRatesEmpty")}
               </div>
             )}

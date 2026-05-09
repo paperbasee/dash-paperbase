@@ -117,7 +117,7 @@ export default function NotificationsFeedPage() {
 
       {isHydrated && !error && notifications.length > 0 && (
         <>
-          <div className="divide-y divide-border overflow-hidden rounded-card border border-dashed border-border bg-background">
+          <div className="divide-y divide-border overflow-hidden rounded-card border border-border bg-background">
             {notifications.map((notification) => (
               <button
                 key={notification.id}
