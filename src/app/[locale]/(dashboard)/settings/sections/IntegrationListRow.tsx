@@ -26,6 +26,7 @@ export const EVENT_LABEL_KEYS: { key: EventSettingKey; labelKey: string }[] = [
 export function MarketingIntegrationListRow({
   integration,
   providerTitle,
+  rowLabel,
   pixelLineLabel,
   tokenLineLabel,
   testCodeLineLabel,
@@ -39,6 +40,7 @@ export function MarketingIntegrationListRow({
 }: {
   integration: MarketingIntegrationType;
   providerTitle: string;
+  rowLabel?: string;
   pixelLineLabel: string;
   /** Defaults to `marketing.tokenLabel` */
   tokenLineLabel?: string;
@@ -60,6 +62,9 @@ export function MarketingIntegrationListRow({
         <div className="min-w-0 flex-1 space-y-1">
           <div className="flex items-center gap-2">
             <span className="text-sm font-medium text-foreground">{providerTitle}</span>
+            {rowLabel ? (
+              <span className="text-xs text-muted-foreground">{rowLabel}</span>
+            ) : null}
             <span
               className={cn(
                 "inline-flex items-center rounded-tooltip px-2 py-0.5 text-xs font-medium",

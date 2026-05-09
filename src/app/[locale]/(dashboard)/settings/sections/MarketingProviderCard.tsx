@@ -71,9 +71,8 @@ export default function MarketingProviderCard({ provider }: { provider: Marketin
   const connectFormRef = useRef<HTMLFormElement>(null);
   const { handleKeyDown } = useEnterNavigation(() => connectFormRef.current?.requestSubmit());
 
-  const integration: MarketingIntegrationType | undefined = allFetched?.find(
-    (i) => i.provider === provider
-  );
+  const providerIntegrations = (allFetched ?? []).filter((i) => i.provider === provider);
+  const canAddPixel = providerIntegrations.length < 3;
 
   const fetchIntegrations = useCallback(() => {
     setLoading(true);
@@ -218,9 +217,7 @@ export default function MarketingProviderCard({ provider }: { provider: Marketin
     }
   }
 
-  const hasThisProvider = !!integration;
-  const showOrphanedAdd = !loading && !integration && (allFetched?.length ?? 0) > 0;
-  const showFullEmpty = !loading && !integration && (allFetched?.length ?? 0) === 0;
+  const showFullEmpty = !loading && providerIntegrations.length === 0;
 
   const providerTitle =
     provider === "facebook" ? t("marketing.providerFacebook") : c("heading");
@@ -245,7 +242,7 @@ export default function MarketingProviderCard({ provider }: { provider: Marketin
         </p>
       </div>
 
-      {showOrphanedAdd ? (
+      {!loading && providerIntegrations.length > 0 && canAddPixel ? (
         <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
           <Button
             type="button"
@@ -256,7 +253,7 @@ export default function MarketingProviderCard({ provider }: { provider: Marketin
               setModal("connect");
             }}
           >
-            {t("add")}
+            Add Pixel
           </Button>
         </div>
       ) : null}
@@ -279,7 +276,7 @@ export default function MarketingProviderCard({ provider }: { provider: Marketin
               {error}
             </div>
           ) : null}
-          {!hasThisProvider ? (
+          {canAddPixel ? (
             <>
               <div className="flex flex-col gap-1.5">
                 <label className="text-sm font-medium text-foreground">
@@ -330,10 +327,12 @@ export default function MarketingProviderCard({ provider }: { provider: Marketin
               </div>
             </>
           ) : (
-            <p className="text-sm text-muted-foreground">{c("alreadyConnected")}</p>
+            <p className="text-sm text-muted-foreground">
+              Maximum 3 integrations allowed per provider.
+            </p>
           )}
           <div className="flex flex-col gap-2 pt-1 sm:flex-row sm:flex-wrap">
-            {!hasThisProvider ? (
+            {canAddPixel ? (
               <Button
                 type="submit"
                 variant="outline"
@@ -342,7 +341,7 @@ export default function MarketingProviderCard({ provider }: { provider: Marketin
                 loading={saving}
               >
                 <Save className="mr-1 size-3.5" />
-                {t("marketing.connect")}
+                Add Pixel
               </Button>
             ) : null}
             <Button
@@ -437,7 +436,7 @@ export default function MarketingProviderCard({ provider }: { provider: Marketin
           <p className="text-sm text-muted-foreground">
             {provider === "facebook" ? t("marketing.empty") : c("empty")}
           </p>
-          {modal !== "connect" ? (
+          {modal !== "connect" && canAddPixel ? (
             <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
               <Button
                 type="button"
@@ -448,27 +447,31 @@ export default function MarketingProviderCard({ provider }: { provider: Marketin
                   setModal("connect");
                 }}
               >
-                {provider === "facebook" ? t("marketing.connectCta") : c("connectCta")}
+                Add Pixel
               </Button>
             </div>
           ) : null}
         </div>
-      ) : integration ? (
+      ) : providerIntegrations.length > 0 ? (
         <div className="space-y-4">
-          <MarketingIntegrationListRow
-            integration={integration}
-            providerTitle={providerTitle}
-            pixelLineLabel={provider === "facebook" ? t("marketing.pixelLabel") : c("pixelLabel")}
-            tokenLineLabel={provider === "tiktok" ? c("tokenLabel") : undefined}
-            testCodeLineLabel={provider === "tiktok" ? c("testCodeLabel") : undefined}
-            numClass={numClass}
-            locale={locale}
-            togglingId={togglingId}
-            t={t as (key: string) => string}
-            onConfigure={() => setModal({ type: "configure", publicId: integration.public_id })}
-            onToggleActive={() => void handleToggleActive(integration)}
-            onDisconnect={() => requestDisconnect(integration.public_id)}
-          />
+          {providerIntegrations.map((integration, index) => (
+            <MarketingIntegrationListRow
+              key={integration.public_id}
+              integration={integration}
+              providerTitle={providerTitle}
+              rowLabel={`Pixel ${index + 1}`}
+              pixelLineLabel={provider === "facebook" ? t("marketing.pixelLabel") : c("pixelLabel")}
+              tokenLineLabel={provider === "tiktok" ? c("tokenLabel") : undefined}
+              testCodeLineLabel={provider === "tiktok" ? c("testCodeLabel") : undefined}
+              numClass={numClass}
+              locale={locale}
+              togglingId={togglingId}
+              t={t as (key: string) => string}
+              onConfigure={() => setModal({ type: "configure", publicId: integration.public_id })}
+              onToggleActive={() => void handleToggleActive(integration)}
+              onDisconnect={() => requestDisconnect(integration.public_id)}
+            />
+          ))}
         </div>
       ) : null}
     </div>
