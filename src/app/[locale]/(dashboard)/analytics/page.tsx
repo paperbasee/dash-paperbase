@@ -60,22 +60,25 @@ export default function AnalyticsPage() {
 
   useEffect(() => {
     if (!hasAdvancedAnalytics) return;
+
     let cancelled = false;
     setLoading(true);
-    Promise.all([
-      api.get<OverviewData>(`admin/analytics/overview/?range=${range}`),
-      api.get<{ data: PageviewsPoint[] }>(`admin/analytics/pageviews/?range=${range}`),
-      api.get<{ data: { date: string; revenue: string; orders: number; aov: string }[] }>(
-        `admin/analytics/revenue/?range=${range}`
-      ),
-      api.get<{ data: PageRow[] }>(`admin/analytics/pages/?range=${range}`),
-      api.get<{ data: { product_id: string; product_name: string; views: number; add_to_cart: number; purchases: number; revenue: string; conversion_rate: number }[] }>(
-        `admin/analytics/products/?range=${range}`
-      ),
-      api.get<ParcelsData>(`admin/analytics/parcels/?range=${range}`),
-      api.get<DevicesData>(`admin/analytics/devices/?range=${range}`),
-    ])
-      .then(([o, pv, rev, pages, prods, parcels, devices]) => {
+
+    (async () => {
+      try {
+        const [o, pv, rev, pages, prods, parcels, devices] = await Promise.all([
+          api.get<OverviewData>(`admin/analytics/overview/?range=${range}`),
+          api.get<{ data: PageviewsPoint[] }>(`admin/analytics/pageviews/?range=${range}`),
+          api.get<{ data: { date: string; revenue: string; orders: number; aov: string }[] }>(
+            `admin/analytics/revenue/?range=${range}`
+          ),
+          api.get<{ data: PageRow[] }>(`admin/analytics/pages/?range=${range}`),
+          api.get<{ data: { product_id: string; product_name: string; views: number; add_to_cart: number; purchases: number; revenue: string; conversion_rate: number }[] }>(
+            `admin/analytics/products/?range=${range}`
+          ),
+          api.get<ParcelsData>(`admin/analytics/parcels/?range=${range}`),
+          api.get<DevicesData>(`admin/analytics/devices/?range=${range}`),
+        ]);
         if (cancelled) return;
         setOverview(o.data);
         setPageviewsData(Array.isArray(pv.data.data) ? pv.data.data : []);
@@ -101,13 +104,13 @@ export default function AnalyticsPage() {
         );
         setParcelsData(parcels.data);
         setDevicesData(Array.isArray(devices.data.data) ? devices.data.data : []);
-      })
-      .catch((err) => {
+      } catch (err) {
         console.error(err);
-      })
-      .finally(() => {
         if (!cancelled) setLoading(false);
-      });
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
 
     return () => {
       cancelled = true;
@@ -124,7 +127,7 @@ export default function AnalyticsPage() {
       .finally(() => setUtmLoading(false));
   }, [utmDimension, hasAdvancedAnalytics, range]);
 
-  if (featuresLoading || loading) {
+  if (featuresLoading) {
     return (
       <div className="space-y-6">
         <DashboardTableSkeleton columns={4} rows={3} showHeader={true} showFilters={false} />
@@ -133,8 +136,17 @@ export default function AnalyticsPage() {
     );
   }
 
-  if (!featuresLoading && !hasAdvancedAnalytics) {
+  if (!hasAdvancedAnalytics) {
     return <AnalyticsUpgradeWall />;
+  }
+
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <DashboardTableSkeleton columns={4} rows={3} showHeader={true} showFilters={false} />
+        <DashboardTableSkeleton columns={6} rows={6} showHeader={false} showFilters={false} />
+      </div>
+    );
   }
 
   if (metricAllZero(overview)) {

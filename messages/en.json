@@ -1550,7 +1550,8 @@
     "billedYearlySuffix": " total)",
     "initiating": "Redirecting…",
     "initiateError": "Failed to initiate payment. Please try again.",
-    "backHome": "Back to home"
+    "backHome": "Back to home",
+    "premiumIncludesEssential": "Everything in Essential, plus:"
   },
   "checkoutPage": {
     "title": "Complete your payment",

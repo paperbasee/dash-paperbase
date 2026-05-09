@@ -1612,7 +1612,8 @@
     "billedYearlySuffix": " মোট)",
     "initiating": "রিডাইরেক্ট হচ্ছে…",
     "initiateError": "পেমেন্ট শুরু করা যায়নি। অনুগ্রহ করে আবার চেষ্টা করুন।",
-    "backHome": "হোমে ফিরুন"
+    "backHome": "হোমে ফিরুন",
+    "premiumIncludesEssential": "এসেনশিয়ালের সবকিছু অন্তর্ভুক্ত, আরও যা আছে:"
   },
   "errors": {
     "notFoundTitle": "পৃষ্ঠা পাওয়া যায়নি",

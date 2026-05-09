@@ -28,6 +28,7 @@ type BillingCycle = "monthly" | "yearly";
 
 const OPTION_LABELS: Record<string, string> = {
   basic_analytics: "basic analytics",
+  advanced_analytics: "advanced analytics",
   order_email_notifications: "order email notifications",
   fraud_check: "fraud check",
   max_products: "max products",
@@ -213,10 +214,10 @@ export default function PlansPage() {
                 const limitEntries = Object.entries(selected.features?.limits ?? {});
                 const isSelecting = selectingId === selected.public_id;
                 const showYearly = billingCycle === "yearly" && !!g.yearly;
-                const isPremium = selected.name.toLowerCase() === "premium";
                 const selectedName = selected.name.toLowerCase();
 
                 const optionLines: string[] = [];
+                let featuresLeadLine: string | null = null;
 
                 if (selectedName === "essential") {
                   if (selected.features?.features?.basic_analytics) {
@@ -233,11 +234,12 @@ export default function PlansPage() {
                     );
                   }
                 } else if (selectedName === "premium") {
+                  featuresLeadLine = t("premiumIncludesEssential");
                   if (selected.features?.features?.fraud_check) {
                     optionLines.push(OPTION_LABELS.fraud_check);
                   }
-                  if (selected.features?.features?.basic_analytics) {
-                    optionLines.push(OPTION_LABELS.basic_analytics);
+                  if (selected.features?.features?.advanced_analytics) {
+                    optionLines.push(OPTION_LABELS.advanced_analytics);
                   }
                   if (selected.features?.features?.order_email_notifications) {
                     optionLines.push(OPTION_LABELS.order_email_notifications);
@@ -252,7 +254,6 @@ export default function PlansPage() {
                       `${OPTION_LABELS.storefront_requests_per_minute}: ${requestsPerMinute}`
                     );
                   }
-                  optionLines.push("Courier verification system");
                 } else {
                   optionLines.push(
                     ...featureEntries.map(([key]) => OPTION_LABELS[key] ?? key.replace(/_/g, " "))
@@ -302,7 +303,15 @@ export default function PlansPage() {
 
                     {/* Features & limits */}
                     <div className="mt-6 flex-1">
-                      <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                      {featuresLeadLine ? (
+                        <p className="text-sm font-medium leading-snug text-foreground">{featuresLeadLine}</p>
+                      ) : null}
+                      <p
+                        className={cn(
+                          "text-xs font-semibold uppercase tracking-wide text-muted-foreground",
+                          featuresLeadLine ? "mt-3" : ""
+                        )}
+                      >
                         {t("featuresLabel")}
                       </p>
                       <ul className="mt-3 space-y-2">
