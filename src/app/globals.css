@@ -279,7 +279,35 @@ body {
   color: hsl(var(--foreground));
 }
 
+html {
+  @media (prefers-reduced-motion: no-preference) {
+    transition:
+      background-color 150ms ease-in-out,
+      color 150ms ease-in-out;
+  }
+}
+
 /* Prevent transition flash while pre-paint script applies initial theme. */
+html.theme-preload {
+  transition: none !important;
+}
+
+/* View Transitions: keep snapshots static; ripple animates clip-path on the "new" view. */
+::view-transition-old(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+/* Avoid double-animating (CSS transition + view transition) during theme ripple. */
+html[data-theme-ripple="1"] {
+  transition: none !important;
+}
+
 html.theme-preload *,
 html.theme-preload *::before,
 html.theme-preload *::after {

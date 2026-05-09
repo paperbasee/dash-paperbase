@@ -62,6 +62,7 @@ export default function DashboardLayoutClient({
   } = useAuth();
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [mobileSidebarMounted, setMobileSidebarMounted] = useState(false);
   const [networkGateReady, setNetworkGateReady] = useState(false);
   const subscription =
     meProfileStatus === "ready" ? (meProfile?.subscription ?? null) : null;
@@ -316,7 +317,15 @@ export default function DashboardLayoutClient({
               onToggle={() => setCollapsed(!collapsed)}
             />
 
-            <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
+            <Sheet
+              open={mobileOpen}
+              onOpenChange={(open) => {
+                setMobileOpen(open);
+                if (open) {
+                  requestAnimationFrame(() => setMobileSidebarMounted(true));
+                }
+              }}
+            >
               <SheetContent
                 side="left"
                 className="z-[70] min-h-0 w-64 p-0 flex flex-col"
@@ -325,11 +334,15 @@ export default function DashboardLayoutClient({
                 <SheetTitle className="sr-only">
                   {tSheet("navigationMenu")}
                 </SheetTitle>
-                <SidebarContent
-                  collapsed={false}
-                  onNavigate={() => setMobileOpen(false)}
-                  showSystemNotification={false}
-                />
+                {mobileSidebarMounted ? (
+                  <SidebarContent
+                    collapsed={false}
+                    onNavigate={() => setMobileOpen(false)}
+                    showSystemNotification={false}
+                  />
+                ) : (
+                  <div className="flex-1" />
+                )}
               </SheetContent>
             </Sheet>
 
@@ -340,7 +353,10 @@ export default function DashboardLayoutClient({
               )}
             >
               <MobileNavBar
-                onMenuClick={() => setMobileOpen(true)}
+                onMenuClick={() => {
+                  setMobileOpen(true);
+                  requestAnimationFrame(() => setMobileSidebarMounted(true));
+                }}
               />
 
               <div className="sticky top-[var(--subscription-banner-offset,0px)] z-30 hidden h-[var(--header-height)] border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 md:block">
