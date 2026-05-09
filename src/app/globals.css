@@ -26,6 +26,10 @@
     --dashboard-content-max-width: 88rem;
     --dashboard-content-inline-padding: 1rem;
     --dashboard-main-left-inset: 0rem;
+
+    /* Theme transition perf controls (default visuals preserved). */
+    --surface-blur: 8px;
+    --shadow-elevated: var(--system-banner-shadow);
   }
 
   :root {
@@ -183,6 +187,10 @@
     --system-banner-sidebar-dismiss: rgba(248, 250, 252, 0.74);
     --system-banner-sidebar-dismiss-hover: #ffffff;
     --system-banner-sidebar-dismiss-hover-bg: rgba(255, 255, 255, 0.1);
+
+    /* Theme transition perf controls (default visuals preserved). */
+    --surface-blur: 8px;
+    --shadow-elevated: var(--system-banner-shadow);
   }
 }
 
@@ -306,6 +314,17 @@ html.theme-preload {
 /* Avoid double-animating (CSS transition + view transition) during theme ripple. */
 html[data-theme-ripple="1"] {
   transition: none !important;
+}
+
+/* Tier-2 fade: suppress html transition; VT handles the fade. */
+html[data-theme-fade="1"] {
+  transition: none !important;
+}
+
+/* During theme transitions, temporarily remove paint-heavy effects on mobile/low-end. */
+html.theme-transitioning {
+  --surface-blur: 0px;
+  --shadow-elevated: none;
 }
 
 html.theme-preload *,
@@ -476,9 +495,9 @@ input.font-numbers-date-value::placeholder {
   .system-notification-banner {
     background-color: var(--system-banner-surface);
     border-color: var(--system-banner-border);
-    box-shadow: var(--system-banner-shadow);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
+    box-shadow: var(--shadow-elevated);
+    backdrop-filter: blur(var(--surface-blur));
+    -webkit-backdrop-filter: blur(var(--surface-blur));
   }
 
   /* Mobile fixed strip: opaque bg — glass + rgba surface lets page content show through */

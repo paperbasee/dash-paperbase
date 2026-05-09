@@ -67,9 +67,9 @@ import { routing, type AppLocale } from "@/i18n/routing";
 import {
   applyThemePreference,
   getStoredThemePreference,
-  persistThemePreference,
   type ThemePreference,
 } from "@/lib/theme";
+import { runThemeTransition } from "@/lib/theme-transition/transition";
 import SystemNotificationBanner from "@/components/system/SystemNotificationBanner";
 import { InventoryStatusDot } from "@/components/inventory/InventoryStatusDot";
 import { useBrandingProfileSWR } from "@/hooks/useBrandingProfileSWR";
@@ -209,69 +209,11 @@ function SidebarContent({
   }, [collapsed]);
 
   const handleThemeChange = (next: ThemePreference, event: React.MouseEvent) => {
-    if (typeof window === "undefined") return;
-
-    const { clientX: x, clientY: y } = event;
-
-    const prefersReducedMotion = window.matchMedia?.(
-      "(prefers-reduced-motion: reduce)"
-    ).matches;
-
-    if (prefersReducedMotion || typeof document.startViewTransition !== "function") {
-      persistThemePreference(next);
-      applyThemePreference(next);
-      requestAnimationFrame(() => setTheme(next));
-      return;
-    }
-
-    const endRadius = Math.hypot(
-      Math.max(x, window.innerWidth - x),
-      Math.max(y, window.innerHeight - y)
-    );
-
-    const root = document.documentElement;
-    root.style.setProperty("--ripple-x", `${x}px`);
-    root.style.setProperty("--ripple-y", `${y}px`);
-    root.style.setProperty("--ripple-radius", `${endRadius}px`);
-    root.setAttribute("data-theme-ripple", "1");
-
-    const transition = document.startViewTransition(() => {
-      applyThemePreference(next);
-      persistThemePreference(next);
-      setTheme(next);
+    runThemeTransition({
+      next,
+      event,
+      setThemePreferenceState: setTheme,
     });
-
-    transition.ready
-      .then(() => {
-        root.animate(
-          {
-            clipPath: [
-              `circle(0px at ${x}px ${y}px)`,
-              `circle(${endRadius}px at ${x}px ${y}px)`,
-            ],
-          },
-          {
-            duration: 400,
-            easing: "cubic-bezier(0.4, 0, 0.2, 1)",
-            pseudoElement: "::view-transition-new(root)",
-          }
-        );
-      })
-      .catch(() => {
-        // If the transition fails to initialize, fall back to the immediate switch.
-        persistThemePreference(next);
-        applyThemePreference(next);
-        requestAnimationFrame(() => setTheme(next));
-      })
-      .finally(() => {
-        // Ensure we restore CSS transitions even if the view transition is interrupted.
-        void transition.finished.finally(() => {
-          root.style.removeProperty("--ripple-x");
-          root.style.removeProperty("--ripple-y");
-          root.style.removeProperty("--ripple-radius");
-          root.removeAttribute("data-theme-ripple");
-        });
-      });
   };
 
   const switchUserMenuLocale = (next: AppLocale) => {

@@ -24,13 +24,23 @@ export function resolveAppliedTheme(pref: ThemePreference): AppliedTheme {
   return pref === "system" ? getSystemAppliedTheme() : pref;
 }
 
-export function applyThemePreference(pref: ThemePreference): AppliedTheme {
+export function applyThemePreferenceToDom(pref: ThemePreference): AppliedTheme {
   if (typeof window === "undefined") return "light";
   const applied = resolveAppliedTheme(pref);
   const root = document.documentElement;
   root.classList.toggle("dark", applied === "dark");
   root.setAttribute("data-theme", applied);
+  return applied;
+}
+
+export function persistAppliedTheme(applied: AppliedTheme) {
+  if (typeof window === "undefined") return;
   document.cookie = `${CORE_THEME_APPLIED_COOKIE_KEY}=${applied}; path=/; max-age=31536000; samesite=lax`;
+}
+
+export function applyThemePreference(pref: ThemePreference): AppliedTheme {
+  const applied = applyThemePreferenceToDom(pref);
+  persistAppliedTheme(applied);
   return applied;
 }
 
