@@ -59,55 +59,71 @@ export function TrafficAcquisitionSection({
           Sessions by {utmDimension} over time
         </div>
         {utmLoading ? (
-          <div className="h-48 w-full rounded-card bg-muted animate-pulse" />
+          <div className="h-48 w-full rounded-card bg-muted animate-pulse md:h-72" />
         ) : (
-          <ResponsiveContainer width="100%" height={260}>
-            <AreaChart data={utmData?.chart ?? []} margin={{ top: 8, left: 0, right: 24, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={chartGridStroke} />
-              <XAxis
-                dataKey="date"
-                tickLine={false}
-                axisLine={false}
-                tickMargin={8}
-                minTickGap={24}
-                tick={{ fill: axisTickFill, fontSize: 11 }}
-                tickFormatter={(v) => formatChartAxisLabel(String(v), range)}
-              />
-              <YAxis
-                tickLine={false}
-                axisLine={false}
-                tickMargin={8}
-                allowDecimals={false}
-                tick={{ fill: axisTickFill, fontSize: 11 }}
-              />
-              <RechartsTooltip
-                contentStyle={tooltipStyle}
-                labelFormatter={(l) => formatChartAxisLabel(String(l), range)}
-              />
-              <Legend verticalAlign="bottom" height={44} />
-              {(utmData?.top_values ?? []).map((key, idx) => (
-                <Area
-                  key={key}
-                  type="monotone"
-                  dataKey={key}
-                  name={key}
-                  stackId="utm"
-                  stroke={CHART_COLORS[idx % 5]}
-                  fill={CHART_COLORS[idx % 5]}
-                  fillOpacity={0.35}
+          <div className="h-48 w-full md:h-72">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={utmData?.chart ?? []} margin={{ top: 8, left: 0, right: 24, bottom: 0 }}>
+                <CartesianGrid
+                  strokeDasharray="3 3"
+                  vertical={false}
+                  stroke={chartGridStroke}
+                  opacity={0.4}
                 />
-              ))}
-              <Area
-                type="monotone"
-                dataKey="other"
-                name="other"
-                stackId="utm"
-                stroke={CHART_COLORS[5]}
-                fill={CHART_COLORS[5]}
-                fillOpacity={0.25}
-              />
-            </AreaChart>
-          </ResponsiveContainer>
+                <XAxis
+                  dataKey="date"
+                  tickLine={false}
+                  axisLine={false}
+                  tickMargin={8}
+                  minTickGap={24}
+                  tick={{ fill: axisTickFill, fontSize: 11 }}
+                  tickCount={5}
+                  interval="preserveStartEnd"
+                  tickFormatter={(v) => formatChartAxisLabel(String(v), range)}
+                />
+                <YAxis
+                  tickLine={false}
+                  axisLine={false}
+                  tickMargin={8}
+                  allowDecimals={false}
+                  tick={{ fill: axisTickFill, fontSize: 11 }}
+                  width={40}
+                />
+                <RechartsTooltip
+                  contentStyle={tooltipStyle}
+                  labelFormatter={(l) => formatChartAxisLabel(String(l), range)}
+                />
+                <Legend
+                  wrapperStyle={{ fontSize: "11px", paddingTop: "8px" }}
+                  layout="horizontal"
+                  verticalAlign="bottom"
+                  align="center"
+                  height={44}
+                />
+                {(utmData?.top_values ?? []).map((key, idx) => (
+                  <Area
+                    key={key}
+                    type="monotone"
+                    dataKey={key}
+                    name={key}
+                    stackId="utm"
+                    stroke={CHART_COLORS[idx % 5]}
+                    fill={CHART_COLORS[idx % 5]}
+                    fillOpacity={0.35}
+                  />
+                ))}
+                <Area
+                  type="monotone"
+                  dataKey="other"
+                  name="other"
+                  stackId="utm"
+                  stroke={CHART_COLORS[5]}
+                  fill={CHART_COLORS[5]}
+                  fillOpacity={0.25}
+                />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
         )}
       </div>
 
