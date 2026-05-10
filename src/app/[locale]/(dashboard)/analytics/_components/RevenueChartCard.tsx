@@ -235,7 +235,7 @@ export function RevenueChartCard({ revenueData, range, currencySymbol }: Revenue
                       content={(props) => (
                         <CustomRevenueTooltip
                           active={props.active}
-                          payload={props.payload as TooltipPayloadEntry[] | undefined}
+                          payload={props.payload as unknown as TooltipPayloadEntry[] | undefined}
                           label={props.label !== undefined ? String(props.label) : undefined}
                           currencySymbol={currencySymbol}
                           range={range}

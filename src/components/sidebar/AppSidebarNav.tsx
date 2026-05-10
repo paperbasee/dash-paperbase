@@ -50,6 +50,7 @@ export default function AppSidebarNav({
   setCeleryOpen,
   inventoryNavStatus,
   mainNavSequence,
+  onExpandIfCollapsed,
 }: {
   collapsed: boolean;
   pathname: string;
@@ -83,6 +84,7 @@ export default function AppSidebarNav({
   setCeleryOpen: (open: boolean) => void;
   inventoryNavStatus: InventoryStatusLevel;
   mainNavSequence: readonly (string)[]; // tokens like __catalog__
+  onExpandIfCollapsed?: () => void;
 }) {
   const isActive = (href: string) => {
     if (href === "/") return pathname === "/";
@@ -123,7 +125,10 @@ export default function AppSidebarNav({
             <Collapsible key="catalog" open={catalogOpen} onOpenChange={setCatalogOpen}>
               <CollapsibleTrigger
                 onClick={() => {
-                  if (collapsed) setCatalogOpen(true);
+                  if (collapsed) {
+                    setCatalogOpen(true);
+                    onExpandIfCollapsed?.();
+                  }
                 }}
                 className={cn(
                   "group flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-xs text-sm font-normal w-full transition-colors",
@@ -195,7 +200,10 @@ export default function AppSidebarNav({
             <Collapsible key="marketing" open={marketingOpen} onOpenChange={setMarketingOpen}>
               <CollapsibleTrigger
                 onClick={() => {
-                  if (collapsed) setMarketingOpen(true);
+                  if (collapsed) {
+                    setMarketingOpen(true);
+                    onExpandIfCollapsed?.();
+                  }
                 }}
                 className={cn(
                   "group flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-xs text-sm font-normal w-full transition-colors",
@@ -323,7 +331,10 @@ export default function AppSidebarNav({
         <Collapsible open={celeryOpen} onOpenChange={setCeleryOpen}>
           <CollapsibleTrigger
             onClick={() => {
-              if (collapsed) setCeleryOpen(true);
+              if (collapsed) {
+                setCeleryOpen(true);
+                onExpandIfCollapsed?.();
+              }
             }}
             className={cn(
               "group flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-xs text-sm font-normal w-full transition-colors",

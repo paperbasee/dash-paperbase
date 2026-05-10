@@ -270,7 +270,7 @@ export function PageviewsSessionsChart({ pageviewsData, range }: PageviewsSessio
                     content={(props) => (
                       <CustomPageviewsTooltip
                         active={props.active}
-                        payload={props.payload as TooltipPayloadEntry[] | undefined}
+                        payload={props.payload as unknown as TooltipPayloadEntry[] | undefined}
                         label={props.label !== undefined ? String(props.label) : undefined}
                         range={range}
                         showComparison={hasPreviousData}
