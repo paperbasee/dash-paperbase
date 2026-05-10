@@ -47,7 +47,7 @@ import {
 } from "@/config/apps";
 import { numberTextClass } from "@/lib/number-font";
 import { cn } from "@/lib/utils";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useLocale } from "next-intl";
 import {
   CORE_LOCALE_STORAGE_KEY,
@@ -115,6 +115,12 @@ function SidebarContent({
   showSystemNotification?: boolean;
   navVariant?: SidebarNavVariant;
 }) {
+  const expandIfCollapsed = useCallback(() => {
+    if (collapsed) {
+      onToggle?.();
+    }
+  }, [collapsed, onToggle]);
+
   const tNav = useTranslations("nav");
   const tSidebar = useTranslations("sidebar");
   const tCommon = useTranslations("common");
@@ -464,6 +470,7 @@ function SidebarContent({
             setCeleryOpen={setCeleryOpen}
             inventoryNavStatus={inventoryNavStatus}
             mainNavSequence={MAIN_NAV_SEQUENCE as unknown as string[]}
+            onExpandIfCollapsed={expandIfCollapsed}
           />
         )}
       </nav>
