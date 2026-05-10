@@ -1,13 +1,16 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Undo2 } from "lucide-react";
 
 import api from "@/lib/api";
 import { DashboardTableSkeleton } from "@/components/skeletons/dashboard-skeletons";
 import { useBranding } from "@/context/BrandingContext";
 import { useFeatures } from "@/hooks/useFeatures";
+import { useRefreshCountdown } from "@/hooks/useRefreshCountdown";
 import { useRouter } from "@/i18n/navigation";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { useLocale } from "next-intl";
 
 import { AnalyticsUpgradeWall } from "./_components/AnalyticsUpgradeWall";
 import { DeviceBreakdownCard } from "./_components/DeviceBreakdownCard";
@@ -34,10 +37,13 @@ import type {
 
 export default function AnalyticsPage() {
   const router = useRouter();
+  const locale = useLocale();
   const { currencySymbol } = useBranding();
   const [range, setRange] = useState<RangeOption>("30");
   const [deltaMode, setDeltaMode] = useState<DeltaMode>("mom");
   const [overview, setOverview] = useState<OverviewData | null>(null);
+  const [cachedAt, setCachedAt] = useState<number>(() => Date.now() / 1000);
+  const [ttlSeconds, setTtlSeconds] = useState<number>(300);
   const [pageviewsData, setPageviewsData] = useState<PageviewsPoint[]>([]);
   const [revenueData, setRevenueData] = useState<RevenuePoint[]>([]);
   const [pagesData, setPagesData] = useState<PageRow[]>([]);
@@ -51,6 +57,9 @@ export default function AnalyticsPage() {
   const { hasFeature, loading: featuresLoading } = useFeatures();
   const hasAdvancedAnalytics = hasFeature("advanced_analytics");
 
+  const mainGenRef = useRef(0);
+  const utmGenRef = useRef(0);
+
   const RANGE_OPTIONS: { value: RangeOption; label: string }[] = [
     { value: "today", label: "Today" },
     { value: "7", label: "7d" },
@@ -58,16 +67,18 @@ export default function AnalyticsPage() {
     { value: "30", label: "30d" },
   ];
 
-  useEffect(() => {
-    if (!hasAdvancedAnalytics) return;
-
-    let cancelled = false;
-    setLoading(true);
-
-    (async () => {
+  const loadMainAnalytics = useCallback(
+    async (opts?: { silent?: boolean }) => {
+      const silent = opts?.silent ?? false;
+      const gen = ++mainGenRef.current;
+      if (!silent) setLoading(true);
       try {
+        type OverviewApiResponse = OverviewData & {
+          cached_at?: number;
+          cache_ttl_seconds?: number;
+        };
         const [o, pv, rev, pages, prods, parcels, devices] = await Promise.all([
-          api.get<OverviewData>(`admin/analytics/overview/?range=${range}`),
+          api.get<OverviewApiResponse>(`admin/analytics/overview/?range=${range}`),
           api.get<{ data: PageviewsPoint[] }>(`admin/analytics/pageviews/?range=${range}`),
           api.get<{ data: { date: string; revenue: string; orders: number; aov: string }[] }>(
             `admin/analytics/revenue/?range=${range}`
@@ -79,8 +90,12 @@ export default function AnalyticsPage() {
           api.get<ParcelsData>(`admin/analytics/parcels/?range=${range}`),
           api.get<DevicesData>(`admin/analytics/devices/?range=${range}`),
         ]);
-        if (cancelled) return;
+        if (gen !== mainGenRef.current) return;
         setOverview(o.data);
+        setCachedAt(typeof o.data.cached_at === "number" ? o.data.cached_at : Date.now() / 1000);
+        setTtlSeconds(
+          typeof o.data.cache_ttl_seconds === "number" ? o.data.cache_ttl_seconds : 300
+        );
         setPageviewsData(Array.isArray(pv.data.data) ? pv.data.data : []);
         setRevenueData(
           (Array.isArray(rev.data.data) ? rev.data.data : []).map((r) => ({
@@ -106,26 +121,49 @@ export default function AnalyticsPage() {
         setDevicesData(Array.isArray(devices.data.data) ? devices.data.data : []);
       } catch (err) {
         console.error(err);
-        if (!cancelled) setLoading(false);
       } finally {
-        if (!cancelled) setLoading(false);
+        if (gen === mainGenRef.current && !silent) setLoading(false);
       }
-    })();
+    },
+    [range]
+  );
 
-    return () => {
-      cancelled = true;
-    };
-  }, [hasAdvancedAnalytics, range]);
+  const loadUtm = useCallback(async () => {
+    const gen = ++utmGenRef.current;
+    setUtmLoading(true);
+    try {
+      const res = await api.get<UTMData>(
+        `admin/analytics/utm/?range=${range}&dimension=${utmDimension}`
+      );
+      if (gen !== utmGenRef.current) return;
+      setUtmData(res.data);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      if (gen === utmGenRef.current) setUtmLoading(false);
+    }
+  }, [range, utmDimension]);
+
+  const handleCountdownExpire = useCallback(async () => {
+    await Promise.all([loadMainAnalytics({ silent: true }), loadUtm()]);
+  }, [loadMainAnalytics, loadUtm]);
+
+  const { secondsLeft, isRefreshing } = useRefreshCountdown({
+    cachedAt,
+    ttlSeconds,
+    enabled: hasAdvancedAnalytics && !featuresLoading && !loading,
+    onExpire: handleCountdownExpire,
+  });
 
   useEffect(() => {
     if (!hasAdvancedAnalytics) return;
-    setUtmLoading(true);
-    api
-      .get<UTMData>(`admin/analytics/utm/?range=${range}&dimension=${utmDimension}`)
-      .then((res) => setUtmData(res.data))
-      .catch((err) => console.error(err))
-      .finally(() => setUtmLoading(false));
-  }, [utmDimension, hasAdvancedAnalytics, range]);
+    void loadMainAnalytics({ silent: false });
+  }, [hasAdvancedAnalytics, range, loadMainAnalytics]);
+
+  useEffect(() => {
+    if (!hasAdvancedAnalytics) return;
+    void loadUtm();
+  }, [utmDimension, hasAdvancedAnalytics, range, loadUtm]);
 
   if (featuresLoading) {
     return (
@@ -159,65 +197,101 @@ export default function AnalyticsPage() {
     );
   }
 
+  const mm = Math.floor(secondsLeft / 60);
+  const ss = secondsLeft % 60;
+  const mmStr = String(mm).padStart(2, "0");
+  const ssStr = String(ss).padStart(2, "0");
+  const countdownLabel = `${mmStr}:${ssStr}`;
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between gap-4 flex-wrap">
-        <div className="flex items-center gap-3">
-          <div className="rounded-card bg-muted/80 px-1 py-1 hidden md:block">
-            <button
-              type="button"
-              onClick={() => router.back()}
-              aria-label="Go back"
-              className="flex items-center justify-center rounded-ui p-1 text-muted-foreground hover:bg-muted"
-            >
-              <Undo2 className="h-4 w-4" />
-            </button>
-          </div>
-          <h1 className="text-2xl font-medium leading-relaxed text-foreground">Analytics</h1>
-        </div>
-        <div className="flex items-center gap-2 flex-wrap">
-          <div className="flex items-center gap-1 rounded-ui border border-border bg-muted/70 p-1 text-sm shadow-xs">
-            <button
-              type="button"
-              onClick={() => setDeltaMode("mom")}
-              className={`rounded-ui px-3 py-1.5 font-medium transition ${
-                deltaMode === "mom"
-                  ? "bg-foreground text-background"
-                  : "text-muted-foreground hover:bg-background/70 hover:text-foreground"
-              }`}
-            >
-              MoM
-            </button>
-            <button
-              type="button"
-              onClick={() => setDeltaMode("yoy")}
-              className={`rounded-ui px-3 py-1.5 font-medium transition ${
-                deltaMode === "yoy"
-                  ? "bg-foreground text-background"
-                  : "text-muted-foreground hover:bg-background/70 hover:text-foreground"
-              }`}
-            >
-              YoY
-            </button>
-          </div>
-          <div className="flex items-center gap-1 rounded-ui border border-border bg-muted/70 p-1 text-sm shadow-xs">
-            {RANGE_OPTIONS.map((opt) => (
+          <div className="flex items-center gap-3">
+            <div className="rounded-card bg-muted/80 px-1 py-1 hidden md:block">
               <button
-                key={opt.value}
                 type="button"
-                onClick={() => setRange(opt.value)}
+                onClick={() => router.back()}
+                aria-label="Go back"
+                className="flex items-center justify-center rounded-ui p-1 text-muted-foreground hover:bg-muted"
+              >
+                <Undo2 className="h-4 w-4" />
+              </button>
+            </div>
+            <h1 className="text-2xl font-medium leading-relaxed text-foreground">Analytics</h1>
+          </div>
+          <div className="flex items-stretch gap-2 flex-wrap">
+            <Tooltip delayDuration={200}>
+              <TooltipTrigger asChild>
+                <div
+                  role="status"
+                  aria-live="polite"
+                  aria-label={
+                    isRefreshing
+                      ? "Refreshing analytics data"
+                      : `Page automatically refreshes in ${countdownLabel}`
+                  }
+                  tabIndex={0}
+                  className="flex min-h-0 shrink-0 items-center gap-1 rounded-ui border border-border bg-muted/70 p-1 text-sm shadow-xs outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                >
+                  <span
+                    className={`rounded-ui px-3 py-1.5 font-medium tabular-nums leading-none ${
+                      isRefreshing ? "text-muted-foreground" : "text-foreground"
+                    }`}
+                  >
+                    {isRefreshing ? "Refreshing…" : `${mmStr}:${ssStr}`}
+                  </span>
+                </div>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" sideOffset={8} variant="light">
+                <p lang={locale === "bn" ? "bn" : "en"} className="leading-relaxed text-balance">
+                  {isRefreshing
+                    ? "Refreshing analytics data"
+                    : `Page automatically refreshes in ${countdownLabel}`}
+                </p>
+              </TooltipContent>
+            </Tooltip>
+            <div className="flex min-h-0 items-center gap-1 rounded-ui border border-border bg-muted/70 p-1 text-sm shadow-xs">
+              <button
+                type="button"
+                onClick={() => setDeltaMode("mom")}
                 className={`rounded-ui px-3 py-1.5 font-medium transition ${
-                  range === opt.value
+                  deltaMode === "mom"
                     ? "bg-foreground text-background"
                     : "text-muted-foreground hover:bg-background/70 hover:text-foreground"
                 }`}
               >
-                {opt.label}
+                MoM
               </button>
-            ))}
+              <button
+                type="button"
+                onClick={() => setDeltaMode("yoy")}
+                className={`rounded-ui px-3 py-1.5 font-medium transition ${
+                  deltaMode === "yoy"
+                    ? "bg-foreground text-background"
+                    : "text-muted-foreground hover:bg-background/70 hover:text-foreground"
+                }`}
+              >
+                YoY
+              </button>
+            </div>
+            <div className="flex min-h-0 items-center gap-1 rounded-ui border border-border bg-muted/70 p-1 text-sm shadow-xs">
+              {RANGE_OPTIONS.map((opt) => (
+                <button
+                  key={opt.value}
+                  type="button"
+                  onClick={() => setRange(opt.value)}
+                  className={`rounded-ui px-3 py-1.5 font-medium transition ${
+                    range === opt.value
+                      ? "bg-foreground text-background"
+                      : "text-muted-foreground hover:bg-background/70 hover:text-foreground"
+                  }`}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
-      </div>
 
       <OverviewMetricGrids overview={overview} deltaMode={deltaMode} currencySymbol={currencySymbol} />
 

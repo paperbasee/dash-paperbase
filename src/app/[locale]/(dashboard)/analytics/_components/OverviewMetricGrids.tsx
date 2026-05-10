@@ -1,8 +1,7 @@
 "use client";
 
-import { CoinsIcon, PackageIcon, KeyReturnIcon, DivideIcon } from "@phosphor-icons/react";
+import { CoinsIcon, PackageIcon, KeyReturnIcon, SpeedometerIcon, VisorIcon } from "@phosphor-icons/react";
 import {
-  Activity,
   Clock,
   MousePointerClick,
   Percent,
@@ -39,7 +38,7 @@ export function OverviewMetricGrids({
           mom={overview?.sessions.mom ?? null}
           yoy={overview?.sessions.yoy ?? null}
           deltaMode={deltaMode}
-          icon={Activity}
+          icon={VisorIcon}
         />
         <MetricCard
           metricKey="bounce_rate"
@@ -87,7 +86,7 @@ export function OverviewMetricGrids({
           mom={overview?.aov.mom ?? null}
           yoy={overview?.aov.yoy ?? null}
           deltaMode={deltaMode}
-          icon={DivideIcon}
+          icon={SpeedometerIcon}
         />
         <MetricCard
           metricKey="return_rate"
