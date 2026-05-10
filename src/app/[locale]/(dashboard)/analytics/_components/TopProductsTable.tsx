@@ -12,7 +12,7 @@ export function TopProductsTable({
   return (
     <div className="rounded-card border border-card-border bg-card p-4">
       <div className="mb-4 text-sm font-medium text-foreground">Top Products</div>
-      <div className="overflow-auto max-h-[360px] md:max-h-[520px]">
+      <div className="max-h-[360px] overflow-x-auto overflow-y-auto md:max-h-[520px]">
         <table className="w-full text-left text-sm">
           <thead>
             <tr className="border-b border-border bg-muted sticky top-0 z-10">
