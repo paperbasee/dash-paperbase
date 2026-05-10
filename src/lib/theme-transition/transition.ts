@@ -18,11 +18,13 @@ export type ThemeTransitionOptions = {
 function startThemeTransitioning() {
   const root = document.documentElement;
   root.classList.add("theme-transitioning");
+  root.setAttribute("data-theme-switching", "1");
 }
 
 function stopThemeTransitioning() {
   const root = document.documentElement;
   root.classList.remove("theme-transitioning");
+  root.removeAttribute("data-theme-switching");
   root.removeAttribute("data-theme-ripple");
   root.removeAttribute("data-theme-fade");
   root.style.removeProperty("--ripple-x");

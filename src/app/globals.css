@@ -356,6 +356,11 @@ html[data-theme-fade="1"] {
   transition: none !important;
 }
 
+/* Central suppression: active while JS-owned theme switch runs (see startThemeTransitioning). */
+html[data-theme-switching="1"] {
+  transition: none !important;
+}
+
 /* During theme transitions, temporarily remove paint-heavy effects on mobile/low-end. */
 html.theme-transitioning {
   --surface-blur: 0px;
