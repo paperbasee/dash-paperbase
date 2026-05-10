@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect, useMemo } from "react";
+import { useState, useCallback, useMemo, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import {
   DndContext,
@@ -18,14 +18,13 @@ import {
   useSortable,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { Plus, Trash, GripVertical, Save } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Select } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
+import { GripVertical, ChevronDown, Plus, Trash2 } from "lucide-react";
 import { useExtraFieldsSchema } from "@/hooks/useExtraFieldsSchema";
 import type { ExtraFieldDefinition, ExtraFieldType } from "@/types/extra-fields";
 import { cn } from "@/lib/utils";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+
+const REMOVE_DANGER = "#ef4444";
 
 const FIELD_TYPES: { value: ExtraFieldType; labelKey: string }[] = [
   { value: "text", labelKey: "fieldTypeText" },
@@ -46,19 +45,70 @@ const FIXED_PRODUCT_FIELDS: { key: string; labelKey: string }[] = [
   { key: "is_active", labelKey: "fixedActive" },
 ];
 
-const inputClass =
-  "w-full rounded-card bg-muted/50 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-0";
+const transitionStyle = "transition-[border-color,opacity,transform,background-color] duration-150 ease";
+
+const inputSurfaceClass = cn(
+  "w-full border-[0.5px] bg-[var(--color-background-secondary)] text-[var(--color-text-primary)] outline-none",
+  "px-2.5 py-[7px] text-[13px] font-normal leading-snug",
+  "rounded-[var(--border-radius-md)] border-[var(--color-border-secondary)]",
+  "focus:border-[var(--color-border-primary)] focus:bg-[var(--color-background-primary)]",
+  transitionStyle
+);
+
+const labelClass =
+  "mb-1 block text-[11px] font-medium uppercase tracking-wide text-[var(--color-text-secondary)]";
+
+function DropdownOptionsEditor({
+  field,
+  onUpdate,
+  tp,
+}: {
+  field: ExtraFieldDefinition;
+  onUpdate: (id: string, updates: Partial<ExtraFieldDefinition>) => void;
+  tp: (key: string) => string;
+}) {
+  const [optionsInput, setOptionsInput] = useState(
+    () => field.options?.join(", ") ?? ""
+  );
+  const handleBlur = () => {
+    const options = optionsInput
+      .split(/[,\n]/)
+      .map((o) => o.trim())
+      .filter(Boolean);
+    onUpdate(field.id, { options: options.length ? options : undefined });
+  };
+  return (
+    <div>
+      <label className={labelClass} htmlFor={`df-options-${field.id}`}>
+        {tp("dropdownOptions")}
+      </label>
+      <textarea
+        id={`df-options-${field.id}`}
+        value={optionsInput}
+        onChange={(e) => setOptionsInput(e.target.value)}
+        onBlur={handleBlur}
+        placeholder={tp("dropdownOptionsPlaceholder")}
+        rows={3}
+        className={cn(inputSurfaceClass, "min-h-[4.5rem] resize-y")}
+      />
+    </div>
+  );
+}
 
 function SortableFieldItem({
   field,
+  isExpanded,
+  onToggleExpand,
   onUpdate,
-  onRemove,
+  onRequestRemove,
   namesExceptThis,
   onMessage,
 }: {
   field: ExtraFieldDefinition;
+  isExpanded: boolean;
+  onToggleExpand: () => void;
   onUpdate: (id: string, updates: Partial<ExtraFieldDefinition>) => void;
-  onRemove: (id: string) => void;
+  onRequestRemove: (id: string) => void;
   namesExceptThis: string[];
   onMessage: (msg: DynamicFieldsMessage) => void;
 }) {
@@ -78,6 +128,8 @@ function SortableFieldItem({
     transition,
   };
 
+  const displayName = field.name.trim() || tp("untitledField");
+
   const handleNameChange = (name: string) => {
     const normalized = name.trim().toLowerCase().replace(/\s+/g, "_");
     const isDuplicate = namesExceptThis.some(
@@ -89,83 +141,127 @@ function SortableFieldItem({
     onUpdate(field.id, { name });
   };
 
-  const [optionsInput, setOptionsInput] = useState(
-    field.options?.join(", ") ?? ""
+  const typeLabel = tp(
+    FIELD_TYPES.find((x) => x.value === field.fieldType)?.labelKey ?? "fieldTypeText"
   );
-  useEffect(() => {
-    setOptionsInput(field.options?.join(", ") ?? "");
-  }, [field.id, field.fieldType]);
-
-  const handleOptionsChange = (value: string) => {
-    setOptionsInput(value);
-  };
-  const handleOptionsBlur = () => {
-    const options = optionsInput
-      .split(/[,\n]/)
-      .map((o) => o.trim())
-      .filter(Boolean);
-    onUpdate(field.id, { options: options.length ? options : undefined });
-  };
 
   return (
     <div
       ref={setNodeRef}
       style={style}
       className={cn(
-        "flex flex-col gap-3 rounded-card border border-border bg-muted/30 p-4",
-        isDragging && "opacity-80 shadow-md"
+        "flex flex-col overflow-hidden rounded-[var(--border-radius-lg)] border-[0.5px] bg-[var(--color-background-primary)]",
+        isExpanded
+          ? "border-[var(--color-border-secondary)]"
+          : "border-[var(--color-border-tertiary)]",
+        transitionStyle,
+        "hover:border-[var(--color-border-secondary)]",
+        isDragging && "opacity-80"
       )}
     >
-      <div className="flex items-start gap-2">
+      <div className="flex min-h-[44px] items-stretch">
         <button
           type="button"
-          className="mt-2 cursor-grab touch-none rounded-ui p-1 text-muted-foreground hover:bg-muted hover:text-foreground active:cursor-grabbing"
+          className={cn(
+            "flex touch-none cursor-grab items-center justify-center pl-3 text-[var(--color-text-secondary)] active:cursor-grabbing",
+            transitionStyle,
+            "hover:text-[var(--color-text-primary)]"
+          )}
           {...attributes}
           {...listeners}
           aria-label={tp("dragReorderAria")}
+          onClick={(e) => e.stopPropagation()}
         >
-          <GripVertical className="size-4" />
+          <GripVertical className="size-4 shrink-0" strokeWidth={1.75} aria-hidden />
         </button>
-        <div className="min-w-0 flex-1 space-y-3">
+        <button
+          type="button"
+          className={cn(
+            "flex min-w-0 flex-1 items-center gap-2 py-2.5 pr-3 text-left",
+            transitionStyle
+          )}
+          onClick={onToggleExpand}
+          aria-expanded={isExpanded}
+        >
+          <span className="truncate text-[13px] font-medium text-[var(--color-text-primary)]">
+            {displayName}
+          </span>
+          <span
+            className={cn(
+              "shrink-0 rounded-[var(--border-radius-md)] bg-[var(--color-background-secondary)] px-1.5 py-0.5 text-[11px] font-normal text-[var(--color-text-primary)]",
+              "border-[0.5px] border-[var(--color-border-tertiary)]"
+            )}
+          >
+            {typeLabel}
+          </span>
+          <span className="flex w-2 shrink-0 justify-center" title={field.required ? tp("required") : undefined}>
+            {field.required ? (
+              <span
+                className="size-1.5 rounded-full bg-[hsl(var(--accent-green))]"
+                aria-hidden
+              />
+            ) : null}
+          </span>
+          <ChevronDown
+            className={cn(
+              "ml-auto size-4 shrink-0 text-[var(--color-text-secondary)]",
+              transitionStyle,
+              isExpanded && "rotate-180"
+            )}
+            strokeWidth={1.75}
+            aria-hidden
+          />
+        </button>
+      </div>
+
+      {isExpanded ? (
+        <div
+          className="border-t-[0.5px] border-[var(--color-border-tertiary)] px-3 pb-3 pt-3"
+          onClick={(e) => e.stopPropagation()}
+        >
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div>
-              <label className="mb-1 block text-xs font-medium text-muted-foreground">
+              <label className={labelClass} htmlFor={`df-name-${field.id}`}>
                 {tp("fieldName")}
               </label>
-              <Input
+              <input
+                id={`df-name-${field.id}`}
                 value={field.name}
                 onChange={(e) => handleNameChange(e.target.value)}
                 placeholder={tp("fieldNamePlaceholder")}
-                className={inputClass}
+                className={inputSurfaceClass}
               />
             </div>
             <div>
-              <label className="mb-1 block text-xs font-medium text-muted-foreground">
+              <label className={labelClass} htmlFor={`df-type-${field.id}`}>
                 {tp("fieldType")}
               </label>
-              <Select
+              <select
+                id={`df-type-${field.id}`}
                 value={field.fieldType}
                 onChange={(e) =>
                   onUpdate(field.id, {
                     fieldType: e.target.value as ExtraFieldType,
                   })
                 }
-                className={inputClass}
+                className={cn(inputSurfaceClass, "appearance-none cursor-pointer")}
               >
                 {FIELD_TYPES.map((opt) => (
                   <option key={opt.value} value={opt.value}>
                     {tp(opt.labelKey)}
                   </option>
                 ))}
-              </Select>
+              </select>
             </div>
           </div>
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <div>
-              <label className="mb-1 block text-xs font-medium text-muted-foreground">
+
+          <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <div className={field.fieldType === "dropdown" ? undefined : "sm:col-span-2"}>
+              <label className={labelClass} htmlFor={`df-default-${field.id}`}>
                 {tp("defaultValue")}
               </label>
-              <Input
+              <input
+                id={`df-default-${field.id}`}
                 value={field.defaultValue ?? ""}
                 onChange={(e) =>
                   onUpdate(field.id, {
@@ -173,54 +269,71 @@ function SortableFieldItem({
                   })
                 }
                 placeholder={tp("defaultPlaceholder")}
-                className={inputClass}
+                className={inputSurfaceClass}
               />
             </div>
-            {field.fieldType === "dropdown" && (
-              <div className="sm:col-span-2">
-                <label className="mb-1 block text-xs font-medium text-muted-foreground">
-                  {tp("dropdownOptions")}
-                </label>
-                <Textarea
-                  value={optionsInput}
-                  onChange={(e) => handleOptionsChange(e.target.value)}
-                  onBlur={handleOptionsBlur}
-                  placeholder={tp("dropdownOptionsPlaceholder")}
-                  rows={2}
-                  className={inputClass}
-                />
-              </div>
-            )}
-          </div>
-          <div className="flex flex-wrap items-center gap-4">
-            <label className="flex cursor-pointer items-center gap-2 text-sm">
-              <input
-                type="checkbox"
-                checked={field.required}
-                onChange={(e) =>
-                  onUpdate(field.id, { required: e.target.checked })
-                }
-                className="form-checkbox"
+            {field.fieldType === "dropdown" ? (
+              <DropdownOptionsEditor
+                key={`${field.id}-dropdown-options`}
+                field={field}
+                onUpdate={onUpdate}
+                tp={tp}
               />
-              <span className="text-muted-foreground">{tp("required")}</span>
-            </label>
-            <Button
+            ) : null}
+          </div>
+
+          <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                role="switch"
+                aria-checked={field.required}
+                onClick={() => onUpdate(field.id, { required: !field.required })}
+                className={cn(
+                  "relative h-4 w-7 shrink-0 rounded-full border-[0.5px]",
+                  "border-[var(--color-border-secondary)]",
+                  "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-border-primary)]",
+                  transitionStyle
+                )}
+                style={{
+                  backgroundColor: field.required
+                    ? "hsl(var(--accent-green))"
+                    : "var(--color-background-secondary)",
+                }}
+              >
+                <span
+                  aria-hidden
+                  className={cn(
+                    "pointer-events-none absolute size-3 rounded-full",
+                    "border-[0.5px] border-[var(--color-border-secondary)]",
+                    "bg-[hsl(var(--primary))] shadow-none",
+                    "transition-[left,background-color,border-color] duration-150 ease"
+                  )}
+                  style={{
+                    top: "calc(50% - 6px)",
+                    left: field.required ? 14 : 2,
+                  }}
+                />
+              </button>
+              <span className="text-[12px] text-[var(--color-text-primary)]">{tp("required")}</span>
+            </div>
+            <button
               type="button"
-              variant="ghost"
-              size="sm"
-              className="text-destructive hover:bg-destructive/10 hover:text-destructive"
-              onClick={() => {
-                onRemove(field.id);
-                onMessage({ type: "success", text: tp("msgFieldRemoved") });
-              }}
+              className={cn(
+                "inline-flex items-center gap-1 rounded-[var(--border-radius-md)] px-1.5 py-1 text-[12px] font-medium",
+                transitionStyle,
+                "border-0 bg-transparent hover:bg-[color-mix(in_srgb,#ef4444_10%,transparent)]"
+              )}
+              style={{ color: REMOVE_DANGER }}
+              onClick={() => onRequestRemove(field.id)}
               aria-label={tp("removeFieldAria")}
             >
-              <Trash className="size-4" />
+              <Trash2 className="size-3.5 shrink-0" strokeWidth={1.75} aria-hidden />
               {tp("remove")}
-            </Button>
+            </button>
           </div>
         </div>
-      </div>
+      ) : null}
     </div>
   );
 }
@@ -238,7 +351,14 @@ export function DynamicFieldsPanel({
   onMessage: (msg: DynamicFieldsMessage) => void;
 }) {
   const t = useTranslations("settings");
-  const tp = useMemo(() => (key: string) => t(`dynamicFields.panel.${key}`), [t]);
+  const tp = useMemo(
+    () =>
+      (key: string, values?: Record<string, string | number | boolean | Date>) =>
+        values === undefined
+          ? t(`dynamicFields.panel.${key}`)
+          : t(`dynamicFields.panel.${key}`, values),
+    [t]
+  );
   const {
     schema,
     addField,
@@ -257,6 +377,43 @@ export function DynamicFieldsPanel({
     })
   );
   const [saveLoading, setSaveLoading] = useState(false);
+  const [expandedIds, setExpandedIds] = useState<Set<string>>(() => new Set());
+  const [saveFlashKey, setSaveFlashKey] = useState(0);
+  const [removeTargetId, setRemoveTargetId] = useState<string | null>(null);
+
+  const removeTargetField = useMemo(
+    () => (removeTargetId ? schema.find((f) => f.id === removeTargetId) ?? null : null),
+    [removeTargetId, schema]
+  );
+
+  useEffect(() => {
+    if (removeTargetId && !schema.some((f) => f.id === removeTargetId)) {
+      setRemoveTargetId(null);
+    }
+  }, [removeTargetId, schema]);
+
+  const closeRemoveDialog = useCallback(() => setRemoveTargetId(null), []);
+
+  const confirmRemoveField = useCallback(() => {
+    if (!removeTargetId) return;
+    removeField(removeTargetId);
+    setExpandedIds((prev) => {
+      const next = new Set(prev);
+      next.delete(removeTargetId);
+      return next;
+    });
+    onMessage({ type: "success", text: tp("msgFieldRemoved") });
+    setRemoveTargetId(null);
+  }, [removeTargetId, removeField, onMessage, tp]);
+
+  const toggleExpand = useCallback((id: string) => {
+    setExpandedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }, []);
 
   const handleDragEnd = useCallback(
     (event: DragEndEvent) => {
@@ -297,52 +454,67 @@ export function DynamicFieldsPanel({
   });
 
   return (
-    <div className="w-full space-y-6">
-      <div className="rounded-card border border-border bg-muted/30 p-5">
-        <h3 className="text-sm font-semibold text-foreground">
+    <div className="w-full space-y-8">
+      <ConfirmDialog
+        isOpen={removeTargetId != null}
+        onOpenChange={(open) => {
+          if (!open) closeRemoveDialog();
+        }}
+        title={tp("removeConfirmTitle")}
+        description={
+          removeTargetField
+            ? tp("removeConfirmDescription", {
+                name: removeTargetField.name.trim() || tp("untitledField"),
+              })
+            : ""
+        }
+        confirmText={tp("removeConfirmAction")}
+        cancelText={t("cancel")}
+        variant="danger"
+        onCancel={closeRemoveDialog}
+        onConfirm={confirmRemoveField}
+      />
+      <div>
+        <p className="text-[11px] font-medium uppercase tracking-wide text-[var(--color-text-secondary)]">
           {tp("fixedHeading")}
-        </h3>
-        <p className="mt-1 text-xs text-muted-foreground">
-          {tp("fixedHint")}
         </p>
-        <div className="mt-4 flex flex-wrap gap-1.5 lg:flex-nowrap lg:overflow-x-auto lg:pb-1 [scrollbar-width:thin]">
+        <div className="mt-2 flex flex-wrap gap-1.5">
           {FIXED_PRODUCT_FIELDS.map(({ key, labelKey }) => (
-            <div
+            <span
               key={key}
-              className="flex shrink-0 items-center rounded-ui border border-border/70 bg-background/80 px-2 py-1.5 text-xs shadow-sm transition-colors hover:border-border"
+              className={cn(
+                "inline-flex items-center rounded-[6px] border-[0.5px] border-[var(--color-border-secondary)] bg-[var(--color-background-secondary)] px-2 py-1 text-[12px] font-normal text-[var(--color-text-primary)]",
+                transitionStyle
+              )}
             >
-              <span className="font-medium text-foreground">{tp(labelKey)}</span>
-            </div>
+              {tp(labelKey)}
+            </span>
           ))}
         </div>
       </div>
 
       <div>
-        <h3 className="text-sm font-medium text-foreground">
+        <p className="text-[11px] font-medium uppercase tracking-wide text-[var(--color-text-secondary)]">
           {tp("extraHeading")}
-        </h3>
-        <p className="mt-1 text-xs text-muted-foreground">
-          {tp("extraHint")}
         </p>
 
-        {message && (
+        {message ? (
           <p
             className={cn(
-              "mt-3 text-sm",
+              "mt-3 text-[13px]",
+              transitionStyle,
               message.type === "success"
-                ? "text-green-600 dark:text-green-500"
-                : "text-destructive"
+                ? "text-[var(--color-text-secondary)]"
+                : "text-[hsl(var(--destructive))]"
             )}
           >
             {message.text}
           </p>
-        )}
+        ) : null}
 
-        {hasDuplicateNames && (
-          <p className="mt-2 text-sm text-destructive">
-            {tp("duplicateNames")}
-          </p>
-        )}
+        {hasDuplicateNames ? (
+          <p className="mt-2 text-[13px] text-[hsl(var(--destructive))]">{tp("duplicateNames")}</p>
+        ) : null}
 
         <DndContext
           sensors={sensors}
@@ -353,13 +525,15 @@ export function DynamicFieldsPanel({
             items={schema.map((f) => f.id)}
             strategy={verticalListSortingStrategy}
           >
-            <div className="mt-4 space-y-3">
+            <div className="mt-4 space-y-2">
               {schema.map((field) => (
                 <SortableFieldItem
                   key={field.id}
                   field={field}
+                  isExpanded={expandedIds.has(field.id)}
+                  onToggleExpand={() => toggleExpand(field.id)}
                   onUpdate={updateField}
-                  onRemove={removeField}
+                  onRequestRemove={setRemoveTargetId}
                   namesExceptThis={getNamesExcept(field.id)}
                   onMessage={onMessage}
                 />
@@ -369,46 +543,59 @@ export function DynamicFieldsPanel({
         </DndContext>
 
         <div className="mt-4 flex flex-wrap items-center gap-2">
-          <Button
+          <button
             type="button"
-            variant="outline"
-            size="default"
-            className="gap-2"
+            className={cn(
+              "inline-flex h-9 items-center gap-1.5 rounded-[var(--border-radius-md)] border-[0.5px] border-[var(--color-border-secondary)] bg-[var(--color-background-secondary)] px-2.5 text-[13px] font-normal text-[var(--color-text-primary)]",
+              transitionStyle,
+              "hover:border-[var(--color-border-primary)]"
+            )}
             onClick={handleAddField}
           >
-            <Plus className="size-4" />
+            <Plus className="size-3.5 shrink-0" strokeWidth={1.75} aria-hidden />
             {tp("addField")}
-          </Button>
-          {schema.length > 0 && (
-            <Button
-              type="button"
-              variant="outline"
-              size="default"
-              className="gap-2"
-              loading={saveLoading}
-              onClick={() => {
-                if (saveLoading) return;
-                void (async () => {
-                  setSaveLoading(true);
-                  try {
-                    const result = await save();
-                    if (result.success) {
-                      onMessage({ type: "success", text: tp("saved") });
-                    } else {
-                      onMessage({ type: "error", text: result.error ?? tp("saveFailed") });
-                    }
-                  } finally {
-                    setSaveLoading(false);
+          </button>
+          <button
+            type="button"
+            disabled={saveLoading}
+            className={cn(
+              "inline-flex h-9 items-center gap-1.5 rounded-[var(--border-radius-md)] border-[0.5px] border-[var(--color-border-primary)] bg-[var(--color-text-primary)] px-2.5 text-[13px] font-medium text-[var(--color-background-primary)]",
+              transitionStyle,
+              "disabled:cursor-not-allowed disabled:opacity-50",
+              "hover:opacity-90"
+            )}
+            onClick={() => {
+              if (saveLoading) return;
+              void (async () => {
+                setSaveLoading(true);
+                try {
+                  const result = await save();
+                  if (result.success) {
+                    setSaveFlashKey((k) => k + 1);
+                  } else {
+                    onMessage({ type: "error", text: result.error ?? tp("saveFailed") });
                   }
-                })();
+                } finally {
+                  setSaveLoading(false);
+                }
+              })();
+            }}
+          >
+            {t("save")}
+          </button>
+          {saveFlashKey > 0 ? (
+            <span
+              key={saveFlashKey}
+              className="text-[12px] text-[var(--color-text-tertiary)]"
+              style={{
+                animation: "pb-dynamic-fields-saved 2s ease forwards",
               }}
+              onAnimationEnd={() => setSaveFlashKey(0)}
             >
-              <Save className="size-4" />
-              {t("save")}
-            </Button>
-          )}
+              {tp("savedFlash")}
+            </span>
+          ) : null}
         </div>
-
       </div>
     </div>
   );
