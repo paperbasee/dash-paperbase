@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import axios from "axios";
+import { isApiHttpError } from "@/lib/api-client";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import api from "@/lib/api";
@@ -18,7 +18,7 @@ type CustomerFormVariant = "minimal" | "extended";
 type SettingsMessage = { type: "success" | "error"; text: string } | null;
 
 function errorMessage(err: unknown): string {
-  if (axios.isAxiosError(err)) {
+  if (isApiHttpError(err)) {
     const data = err.response?.data as { detail?: unknown } | undefined;
     const d = data?.detail;
     if (typeof d === "string" && d.trim()) return d;

@@ -1,4 +1,4 @@
-import axios from "axios";
+import { apiClient } from "@/lib/api-client";
 import { clearMeProfileCache } from "@/lib/me-profile-store";
 import {
   setAuthSessionCookie,
@@ -39,7 +39,7 @@ export async function register(
   password_confirm: string,
   cf_turnstile_response?: string
 ): Promise<RegisterResponse | PendingTwoFactorResponse> {
-  const { data } = await axios.post<RegisterResponse | PendingTwoFactorResponse>(
+  return apiClient.post<RegisterResponse | PendingTwoFactorResponse>(
     `${BASE_URL}/auth/register/`,
     {
       email: email.trim().toLowerCase(),
@@ -48,7 +48,6 @@ export async function register(
       ...(cf_turnstile_response ? { cf_turnstile_response } : {}),
     }
   );
-  return data;
 }
 
 export async function login(
@@ -56,7 +55,7 @@ export async function login(
   password: string,
   cf_turnstile_response?: string
 ): Promise<LoginResult> {
-  const { data } = await axios.post<LoginResult>(`${BASE_URL}/auth/token/`, {
+  const data = await apiClient.post<LoginResult>(`${BASE_URL}/auth/token/`, {
     email: email.trim().toLowerCase(),
     password,
     ...(cf_turnstile_response ? { cf_turnstile_response } : {}),
@@ -73,7 +72,7 @@ export async function verifyTwoFactorChallenge(
   challengeId: string,
   code: string
 ): Promise<LoginResponse> {
-  const { data } = await axios.post<LoginResponse>(
+  const data = await apiClient.post<LoginResponse>(
     `${BASE_URL}/auth/2fa/challenge/verify/`,
     {
       challenge_public_id: challengeId,
@@ -90,21 +89,20 @@ export async function requestTwoFactorChallengeRecoveryCode(
   challengeId: string,
   email: string
 ): Promise<{ detail: string; sent: boolean }> {
-  const { data } = await axios.post<{ detail: string; sent: boolean }>(
+  return apiClient.post<{ detail: string; sent: boolean }>(
     `${BASE_URL}/auth/2fa/challenge/recovery/request/`,
     {
       challenge_public_id: challengeId,
       email: email.trim().toLowerCase(),
     }
   );
-  return data;
 }
 
 export async function verifyTwoFactorChallengeRecovery(
   challengeId: string,
   code: string
 ): Promise<LoginResponse> {
-  const { data } = await axios.post<LoginResponse>(
+  const data = await apiClient.post<LoginResponse>(
     `${BASE_URL}/auth/2fa/challenge/recovery/verify/`,
     {
       challenge_public_id: challengeId,
@@ -124,8 +122,6 @@ export function logout() {
   localStorage.removeItem("refresh_token");
   localStorage.removeItem(LAST_ROTATED_AT_KEY);
   clearAuthSessionCookie();
-  delete axios.defaults.headers.common.Authorization;
-  delete axios.defaults.headers.common["X-Store-Public-ID"];
 }
 
 export function getAccessToken(): string | null {

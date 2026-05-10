@@ -4,7 +4,7 @@ import { useEffect, useState, type FormEvent } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { ImageIcon, Undo2 } from "lucide-react";
-import { isAxiosError } from "axios";
+import { isApiHttpError } from "@/lib/api-client";
 
 import api from "@/lib/api";
 import { Button } from "@/components/ui/button";
@@ -297,7 +297,7 @@ export default function PopupEditorPage() {
       setEditing(null);
       fetchData();
     } catch (err) {
-      if (isAxiosError(err)) {
+      if (isApiHttpError(err)) {
         console.error("Popup save failed:", err.response?.data || err.message);
         notify.error(err, { fallbackMessage: tCommon("pleaseWait") });
       } else {

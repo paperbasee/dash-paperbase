@@ -1430,7 +1430,7 @@
     },
     "marketing": {
       "heading": "Facebook Conversions API (CAPI)",
-      "intro": "This integration is Meta’s server-side Conversions API (CAPI): Paperbase sends events from the server to Meta for measurement. Provide your Dataset ID plus a CAPI access token from Meta Events Manager. Credentials are stored only on your store.",
+      "intro": "Meta CAPI: Paperbase sends server-side events to Meta. Add your Dataset ID and access token. Stored only on your store.",
       "connectTitle": "Connect Facebook CAPI",
       "pixelId": "Dataset ID",
       "pixelPlaceholder": "e.g. 123456789012345 (used for CAPI events endpoint)",
@@ -1475,7 +1475,7 @@
       "addFacebookPixel": "Add Facebook pixel",
       "tiktok": {
         "heading": "TikTok Events API",
-        "intro": "Connect TikTok’s server-side Events API: Paperbase sends web events from the server to TikTok for measurement. Add your Pixel Code and an Events API access token. Credentials are stored only on your store. (Browser TikTok Pixel is not used; this is server-side only.)",
+        "intro": "TikTok Events API: Server-side events to TikTok. Add your Pixel Code and access token. Stored only on your store.",
         "pixelId": "TikTok Pixel Code",
         "pixelHelper": "Found in TikTok Ads Manager > Assets > Events > Web Events > Pixel",
         "pixelPlaceholder": "e.g. your pixel ID from Events",

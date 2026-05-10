@@ -1430,7 +1430,7 @@
     },
     "marketing": {
       "heading": "Facebook Conversions API (CAPI)",
-      "intro": "এটি Meta-র সার্ভার-সাইড Conversions API (CAPI): Paperbase সার্ভার থেকে Meta-তে ইভেন্ট পাঠায়। Meta Events Manager থেকে Dataset ID ও CAPI অ্যাক্সেস টোকেন দিন। ক্রেডেনশিয়াল শুধু আপনার স্টোরে সংরক্ষিত।",
+      "intro": "Meta CAPI: Paperbase sends server-side events to Meta. Add your Dataset ID and access token. Stored only on your store.",
       "connectTitle": "Facebook CAPI সংযুক্ত করুন",
       "pixelId": "Dataset ID",
       "pixelPlaceholder": "যেমন 123456789012345 (CAPI events endpoint এ ব্যবহৃত)",
@@ -1475,7 +1475,7 @@
       "addFacebookPixel": "Facebook পিক্সেল যোগ করুন",
       "tiktok": {
         "heading": "TikTok Events API",
-        "intro": "TikTok-এর সার্ভার-সাইড Events API সংযুক্ত করুন: Paperbase সার্ভার থেকে টিকটকে ইভেন্ট পাঠায়। Pixel Code ও Events API অ্যাক্সেস টোকেন দিন। ক্রেডেনশিয়াল শুধু আপনার স্টোরে। (ব্রাউজার TikTok Pixel এখানে ব্যবহার হয় না; শুধু সার্ভার-সাইড)।",
+        "intro": "TikTok Events API: Server-side events to TikTok. Add your Pixel Code and access token. Stored only on your store.",
         "pixelId": "TikTok পিক্সেল কোড",
         "pixelHelper": "TikTok Ads Manager > Assets > Events > Web Events > Pixel এ পাবেন",
         "accessToken": "অ্যাক্সেস টোকেন",

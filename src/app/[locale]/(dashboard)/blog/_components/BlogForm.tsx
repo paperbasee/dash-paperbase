@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { Trash, Undo2, X, Loader2, AlertCircle, CheckCircle2 } from "lucide-react";
-import { isAxiosError } from "axios";
+import { isApiHttpError } from "@/lib/api-client";
 import api from "@/lib/api";
 import { useRouter } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
@@ -232,9 +232,9 @@ export function BlogForm({
       );
       return data;
     } catch (err) {
-      if (isAxiosError(err)) {
+      if (isApiHttpError(err)) {
         const responseData = err.response?.data as Record<string, unknown> | undefined;
-        const titleErr = err.response?.data?.title;
+        const titleErr = responseData?.title;
         const titleMsg = Array.isArray(titleErr) ? titleErr[0] : titleErr;
         if (typeof titleMsg === "string" && titleMsg.trim()) {
           notify.validation("blog-form", { title: titleMsg });

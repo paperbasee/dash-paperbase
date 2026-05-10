@@ -13,6 +13,7 @@ import {
 import { areaPrimary, axisTickFill, chartGridStroke, tooltipStyle } from "./constants";
 import { formatChartAxisLabel } from "./format";
 import type { RangeOption, RevenuePoint } from "./types";
+import { RechartsSizedContainer } from "@/components/RechartsSizedContainer";
 
 export function RevenueChartCard({
   data,
@@ -28,8 +29,12 @@ export function RevenueChartCard({
       <div className="mb-4 shrink-0 text-sm font-medium text-foreground">Revenue over time</div>
       {/* Mobile: no flex-1 / min-height so the card height matches h-48 chart; lg+: grow with grid stretch */}
       <div className="flex w-full min-w-0 flex-col lg:flex-1 lg:min-h-0">
-        <div className="h-48 w-full md:h-72 lg:h-auto lg:min-h-72 lg:flex-1">
-          <ResponsiveContainer width="100%" height="100%">
+        <RechartsSizedContainer
+          className="h-48 w-full md:h-72 lg:h-auto lg:min-h-72 lg:flex-1"
+          style={{ minHeight: 192 }}
+        >
+          {({ width, height }) => (
+            <ResponsiveContainer width={width} height={height} minWidth={0}>
             <AreaChart data={data} margin={{ top: 8, left: 0, right: 24, bottom: 8 }}>
               <defs>
                 <linearGradient id="revFill" x1="0" y1="0" x2="0" y2="1">
@@ -74,7 +79,8 @@ export function RevenueChartCard({
               <Area type="monotone" dataKey="revenue" name="Revenue" stroke={areaPrimary} fill="url(#revFill)" />
             </AreaChart>
           </ResponsiveContainer>
-        </div>
+          )}
+        </RechartsSizedContainer>
       </div>
     </div>
   );

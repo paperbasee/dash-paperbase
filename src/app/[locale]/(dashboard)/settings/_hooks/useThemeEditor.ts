@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { isAxiosError } from "axios";
+import { isApiHttpError } from "@/lib/api-client";
 
 import api from "@/lib/api";
 
@@ -36,7 +36,7 @@ export function useThemeEditor() {
         }
       } catch (e) {
         if (!cancelled) {
-          setError(isAxiosError(e) ? (e.response?.data as { detail?: string })?.detail ?? e.message : "load_failed");
+          setError(isApiHttpError(e) ? (e.response?.data as { detail?: string })?.detail ?? e.message : "load_failed");
         }
       } finally {
         if (!cancelled) setLoading(false);

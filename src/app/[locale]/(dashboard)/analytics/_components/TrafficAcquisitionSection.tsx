@@ -14,6 +14,7 @@ import {
 import { CHART_COLORS, axisTickFill, chartGridStroke, tooltipStyle } from "./constants";
 import { formatChartAxisLabel } from "./format";
 import type { RangeOption, UTMData } from "./types";
+import { RechartsSizedContainer } from "@/components/RechartsSizedContainer";
 
 export function TrafficAcquisitionSection({
   utmData,
@@ -61,8 +62,9 @@ export function TrafficAcquisitionSection({
         {utmLoading ? (
           <div className="h-48 w-full rounded-card bg-muted animate-pulse md:h-72" />
         ) : (
-          <div className="h-48 w-full md:h-72">
-            <ResponsiveContainer width="100%" height="100%">
+          <RechartsSizedContainer className="h-48 w-full md:h-72" style={{ minHeight: 192 }}>
+            {({ width, height }) => (
+              <ResponsiveContainer width={width} height={height} minWidth={0}>
               <AreaChart data={utmData?.chart ?? []} margin={{ top: 8, left: 0, right: 24, bottom: 0 }}>
                 <CartesianGrid
                   strokeDasharray="3 3"
@@ -123,7 +125,8 @@ export function TrafficAcquisitionSection({
                 />
               </AreaChart>
             </ResponsiveContainer>
-          </div>
+            )}
+          </RechartsSizedContainer>
         )}
       </div>
 

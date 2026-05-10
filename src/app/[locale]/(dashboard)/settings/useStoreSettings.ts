@@ -2,7 +2,7 @@
 
 import { useState, useRef, useCallback, type FormEvent } from "react";
 import { useTranslations } from "next-intl";
-import { isAxiosError } from "axios";
+import { isApiHttpError } from "@/lib/api-client";
 import api from "@/lib/api";
 import { defaultBranding } from "@/context/BrandingContext";
 import type { SettingsMessage } from "./useAccountSettings";
@@ -143,8 +143,11 @@ export function useStoreSettings({ onSaveSuccess }: UseStoreSettingsOptions = {}
         });
       } catch (err: unknown) {
         storeSettingsPatchErrorHandled = true;
-        if (isAxiosError(err) && err.response?.data?.storefront_url) {
-          const raw = err.response.data.storefront_url;
+        const patchData = isApiHttpError(err)
+          ? (err.response?.data as Record<string, unknown> | undefined)
+          : undefined;
+        if (patchData?.storefront_url) {
+          const raw = patchData.storefront_url;
           const extracted =
             Array.isArray(raw) && raw.length > 0 && typeof raw[0] === "string"
               ? raw[0]

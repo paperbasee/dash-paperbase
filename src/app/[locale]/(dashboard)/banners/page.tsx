@@ -5,7 +5,7 @@ import dynamic from "next/dynamic";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { Clock2Icon, ImageIcon, Undo2 } from "lucide-react";
-import { isAxiosError } from "axios";
+import { isApiHttpError } from "@/lib/api-client";
 import api from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { ClickableTableRow } from "@/components/ui/clickable-table-row";
@@ -521,7 +521,7 @@ export default function BannersPage() {
       notify.success(tPages("bannersSavedSuccess"));
       fetchData();
     } catch (err) {
-      if (isAxiosError(err)) {
+      if (isApiHttpError(err)) {
         console.error("Banner save failed:", err.response?.data || err.message);
         notify.error(err, { fallbackMessage: tCommon("pleaseWait") });
       } else {
