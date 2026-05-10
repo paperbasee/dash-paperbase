@@ -1,11 +1,10 @@
 "use client";
 
 import { useMemo } from "react";
-import { Cell, Pie, PieChart, ResponsiveContainer } from "recharts";
+import { Cell, Pie, PieChart } from "recharts";
 import { Layers, Monitor, Smartphone, Tablet } from "lucide-react";
 import { useTranslations } from "next-intl";
 
-import { RechartsSizedContainer } from "@/components/RechartsSizedContainer";
 import { DEVICE_SLICE_COLORS } from "./constants";
 import type { PieSlice } from "./types";
 
@@ -25,6 +24,11 @@ export function DeviceBreakdownCard({ devicesData }: { devicesData: { device: st
     ];
   }, [devicesData]);
 
+  const devicePieVisible = useMemo(
+    () => devicePie.filter((d) => d.value > 0),
+    [devicePie]
+  );
+
   const deviceInsights = useMemo(() => {
     const total = devicePie.reduce((s, d) => s + d.value, 0);
     const sorted = [...devicePie].sort((a, b) => b.value - a.value);
@@ -42,10 +46,6 @@ export function DeviceBreakdownCard({ devicesData }: { devicesData: { device: st
         ? tDevice("names.desktop")
         : tDevice("names.mobile");
 
-  /** Single-slice 100% rings otherwise show a gap where arc ends meet (paddingAngle / cornerRadius). */
-  const donutBlendFullCircle =
-    deviceInsights.total > 0 && devicePie.filter((s) => s.value > 0).length <= 1;
-
   return (
     <div className="flex h-full min-h-0 flex-col rounded-xl border border-border/80 bg-card p-5 shadow-[0_4px_24px_-6px_rgba(15,23,42,0.08)] lg:col-span-2 dark:border-border dark:shadow-none">
       <div className="mb-6 flex items-start justify-between gap-3">
@@ -60,35 +60,26 @@ export function DeviceBreakdownCard({ devicesData }: { devicesData: { device: st
         <>
           <div className="flex flex-col items-stretch gap-8 lg:flex-row lg:items-center lg:gap-10">
             <div className="relative mx-auto h-[208px] w-[208px] shrink-0 lg:mx-0 lg:h-[220px] lg:w-[220px]">
-              <RechartsSizedContainer className="h-full w-full lg:min-h-[220px]" style={{ minHeight: 208 }}>
-                {({ width, height }) => (
-              <ResponsiveContainer
-                width={width}
-                height={height}
-                minWidth={0}
-                minHeight={208}
-                initialDimension={{ width: 220, height: 220 }}
-              >
-                <PieChart margin={{ top: 4, right: 4, bottom: 4, left: 4 }}>
+              <div className="absolute inset-0 flex items-center justify-center">
+                <PieChart width={208} height={208} margin={{ top: 4, right: 4, bottom: 4, left: 4 }}>
                   <Pie
-                    data={devicePie}
+                    data={devicePieVisible}
                     dataKey="value"
                     nameKey="key"
                     innerRadius="58%"
                     outerRadius="92%"
-                    paddingAngle={donutBlendFullCircle ? 0 : 2}
-                    cornerRadius={donutBlendFullCircle ? 0 : 6}
-                    stroke={donutBlendFullCircle ? "none" : "hsl(var(--card))"}
-                    strokeWidth={donutBlendFullCircle ? 0 : 3}
+                    paddingAngle={0}
+                    cornerRadius={0}
+                    stroke="none"
+                    strokeWidth={0}
+                    isAnimationActive={false}
                   >
-                    {devicePie.map((entry) => (
+                    {devicePieVisible.map((entry) => (
                       <Cell key={entry.key} fill={DEVICE_SLICE_COLORS[entry.key] ?? "#94a3b8"} />
                     ))}
                   </Pie>
                 </PieChart>
-              </ResponsiveContainer>
-                )}
-              </RechartsSizedContainer>
+              </div>
               <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center px-6 text-center">
                 <span className="text-[1.65rem] font-bold leading-none tracking-tight text-foreground tabular-nums">
                   {deviceInsights.top?.value.toLocaleString() ?? 0}
