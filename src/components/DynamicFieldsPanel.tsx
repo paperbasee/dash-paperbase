@@ -353,7 +353,7 @@ export function DynamicFieldsPanel({
   const t = useTranslations("settings");
   const tp = useMemo(
     () =>
-      (key: string, values?: Record<string, string | number | boolean | Date>) =>
+      (key: string, values?: Record<string, string | number | Date>) =>
         values === undefined
           ? t(`dynamicFields.panel.${key}`)
           : t(`dynamicFields.panel.${key}`, values),
