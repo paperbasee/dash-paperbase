@@ -27,11 +27,12 @@ import type {
   DeltaMode,
   OverviewData,
   PageRow,
+  PageviewsComparison,
   PageviewsPoint,
   ParcelsData,
   ProductRow,
   RangeOption,
-  RevenuePoint,
+  RevenueComparison,
   UTMData,
 } from "./_components/types";
 
@@ -44,8 +45,8 @@ export default function AnalyticsPage() {
   const [overview, setOverview] = useState<OverviewData | null>(null);
   const [cachedAt, setCachedAt] = useState<number>(() => Date.now() / 1000);
   const [ttlSeconds, setTtlSeconds] = useState<number>(300);
-  const [pageviewsData, setPageviewsData] = useState<PageviewsPoint[]>([]);
-  const [revenueData, setRevenueData] = useState<RevenuePoint[]>([]);
+  const [pageviewsData, setPageviewsData] = useState<PageviewsComparison | null>(null);
+  const [revenueData, setRevenueData] = useState<RevenueComparison | null>(null);
   const [pagesData, setPagesData] = useState<PageRow[]>([]);
   const [productsData, setProductsData] = useState<ProductRow[]>([]);
   const [parcelsData, setParcelsData] = useState<ParcelsData | null>(null);
@@ -79,10 +80,27 @@ export default function AnalyticsPage() {
         };
         const [o, pv, rev, pages, prods, parcels, devices] = await Promise.all([
           api.get<OverviewApiResponse>(`admin/analytics/overview/?range=${range}`),
-          api.get<{ data: PageviewsPoint[] }>(`admin/analytics/pageviews/?range=${range}`),
-          api.get<{ data: { date: string; revenue: string; orders: number; aov: string }[] }>(
-            `admin/analytics/revenue/?range=${range}`
-          ),
+          api.get<{
+            data: PageviewsPoint[];
+            comparison: PageviewsPoint[];
+            summary: {
+              current_pageviews: number;
+              previous_pageviews: number;
+              pageviews_pct_change: number | null;
+              current_sessions: number;
+              previous_sessions: number;
+              sessions_pct_change: number | null;
+            };
+          }>(`admin/analytics/pageviews/?range=${range}`),
+          api.get<{
+            data: { date: string; revenue: string; orders: number; aov: string }[];
+            comparison: { date: string; revenue: string; orders: number; aov: string }[];
+            summary: {
+              current_revenue: string;
+              previous_revenue: string;
+              pct_change: number | null;
+            };
+          }>(`admin/analytics/revenue/?range=${range}`),
           api.get<{ data: PageRow[] }>(`admin/analytics/pages/?range=${range}`),
           api.get<{ data: { product_id: string; product_name: string; views: number; add_to_cart: number; purchases: number; revenue: string; conversion_rate: number }[] }>(
             `admin/analytics/products/?range=${range}`
@@ -96,15 +114,37 @@ export default function AnalyticsPage() {
         setTtlSeconds(
           typeof o.data.cache_ttl_seconds === "number" ? o.data.cache_ttl_seconds : 300
         );
-        setPageviewsData(Array.isArray(pv.data.data) ? pv.data.data : []);
-        setRevenueData(
-          (Array.isArray(rev.data.data) ? rev.data.data : []).map((r) => ({
+        setPageviewsData({
+          data: Array.isArray(pv.data.data) ? pv.data.data : [],
+          comparison: Array.isArray(pv.data.comparison) ? pv.data.comparison : [],
+          summary: {
+            current_pageviews: pv.data.summary?.current_pageviews ?? 0,
+            previous_pageviews: pv.data.summary?.previous_pageviews ?? 0,
+            pageviews_pct_change: pv.data.summary?.pageviews_pct_change ?? null,
+            current_sessions: pv.data.summary?.current_sessions ?? 0,
+            previous_sessions: pv.data.summary?.previous_sessions ?? 0,
+            sessions_pct_change: pv.data.summary?.sessions_pct_change ?? null,
+          },
+        });
+        setRevenueData({
+          data: (rev.data.data ?? []).map((r) => ({
             date: r.date,
             revenue: Number(r.revenue || 0),
             orders: Number(r.orders || 0),
             aov: Number(r.aov || 0),
-          }))
-        );
+          })),
+          comparison: (rev.data.comparison ?? []).map((r) => ({
+            date: r.date,
+            revenue: Number(r.revenue || 0),
+            orders: Number(r.orders || 0),
+            aov: Number(r.aov || 0),
+          })),
+          summary: {
+            current_revenue: rev.data.summary?.current_revenue ?? "0",
+            previous_revenue: rev.data.summary?.previous_revenue ?? "0",
+            pct_change: rev.data.summary?.pct_change ?? null,
+          },
+        });
         setPagesData(Array.isArray(pages.data.data) ? pages.data.data : []);
         setProductsData(
           (Array.isArray(prods.data.data) ? prods.data.data : []).map((p) => ({
@@ -295,10 +335,10 @@ export default function AnalyticsPage() {
 
       <OverviewMetricGrids overview={overview} deltaMode={deltaMode} currencySymbol={currencySymbol} />
 
-      <PageviewsSessionsChart data={pageviewsData} range={range} />
+      <PageviewsSessionsChart pageviewsData={pageviewsData} range={range} />
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-5 lg:items-stretch">
-        <RevenueChartCard data={revenueData} range={range} currencySymbol={currencySymbol} />
+        <RevenueChartCard revenueData={revenueData} range={range} currencySymbol={currencySymbol} />
         <DeviceBreakdownCard devicesData={devicesData} />
       </div>
 
