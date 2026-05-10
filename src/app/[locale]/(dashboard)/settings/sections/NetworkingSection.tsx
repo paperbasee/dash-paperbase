@@ -2,7 +2,8 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { Check, Copy, KeyRound, RefreshCcw, Trash } from "lucide-react";
+import { CopyIcon } from "@phosphor-icons/react";
+import { Check, KeyRound, RefreshCcw, Trash } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import api from "@/lib/api";
@@ -358,7 +359,7 @@ export default function NetworkingSection({ hidden }: { hidden: boolean }) {
               disabled={networkingActionsLocked}
               onClick={() => void copyApiBaseUrl()}
             >
-              {apiUrlCopied ? <Check className="size-4 text-emerald-600 animate-pulse" /> : <Copy className="size-4" />}
+              {apiUrlCopied ? <Check className="size-4 text-emerald-600 animate-pulse" /> : <CopyIcon className="size-4" />}
             </Button>
           </div>
         </div>
@@ -379,7 +380,7 @@ export default function NetworkingSection({ hidden }: { hidden: boolean }) {
               {promptCopied ? (
                 <Check className="mr-2 size-4 text-emerald-600" />
               ) : (
-                <Copy className="mr-2 size-4" />
+                <CopyIcon className="mr-2 size-4" />
               )}
               {t("networking.copyStorefrontPrompt")}
             </Button>
@@ -414,7 +415,7 @@ export default function NetworkingSection({ hidden }: { hidden: boolean }) {
                 {revealedKeyCopied ? (
                   <Check className="size-4 text-emerald-600 animate-pulse" />
                 ) : (
-                  <Copy className="size-4" />
+                  <CopyIcon className="size-4" />
                 )}
               </Button>
             </div>
