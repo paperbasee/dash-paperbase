@@ -19,6 +19,7 @@ import type {
 } from "@/hooks/useDashboardAnalytics";
 import { toLocaleDigits } from "@/lib/locale-digits";
 import { numberTextClass } from "@/lib/number-font";
+import { RechartsSizedContainer } from "@/components/RechartsSizedContainer";
 import { Card, CardContent } from "./ui/card";
 
 interface DashboardBarChartProps {
@@ -106,8 +107,10 @@ export default function DashboardBarChart({ data, bucket = "day" }: DashboardBar
             {t("chartNoActivity")}
           </div>
         ) : (
+          <RechartsSizedContainer className="h-full min-h-[260px] w-full" style={{ minHeight: 260 }}>
+            {({ width }) => (
           <ResponsiveContainer
-            width="100%"
+            width={width}
             height={260}
             minWidth={0}
             minHeight={260}
@@ -236,6 +239,8 @@ export default function DashboardBarChart({ data, bucket = "day" }: DashboardBar
               })}
             </BarChart>
           </ResponsiveContainer>
+            )}
+          </RechartsSizedContainer>
         )}
       </CardContent>
     </Card>

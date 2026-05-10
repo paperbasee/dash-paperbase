@@ -478,16 +478,16 @@ input.font-numbers-date-value::placeholder {
   /*
    * Recharts: clicking the chart focuses the SVG; the browser default focus
    * outline reads as a harsh white box on dark themes. Use no outline here —
-   * keyboard users use the metric filter buttons above the chart instead.
+   * keyboard users use controls outside the plot (e.g. metric filters) where provided.
    */
-  .dashboard-chart-card .recharts-responsive-container:focus,
-  .dashboard-chart-card .recharts-responsive-container:focus-visible,
-  .dashboard-chart-card .recharts-wrapper:focus,
-  .dashboard-chart-card .recharts-wrapper:focus-visible,
-  .dashboard-chart-card .recharts-surface:focus,
-  .dashboard-chart-card .recharts-surface:focus-visible,
-  .dashboard-chart-card svg.recharts-surface:focus,
-  .dashboard-chart-card svg.recharts-surface:focus-visible {
+  .recharts-responsive-container:focus,
+  .recharts-responsive-container:focus-visible,
+  .recharts-wrapper:focus,
+  .recharts-wrapper:focus-visible,
+  .recharts-surface:focus,
+  .recharts-surface:focus-visible,
+  svg.recharts-surface:focus,
+  svg.recharts-surface:focus-visible {
     outline: none;
   }
 

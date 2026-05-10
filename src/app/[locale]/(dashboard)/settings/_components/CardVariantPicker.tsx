@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
-import { isAxiosError } from "axios";
 import { Check, Loader2 } from "lucide-react";
 
 import api from "@/lib/api";
@@ -98,7 +97,7 @@ export function CardVariantPicker({
         }
       } catch (e) {
         if (!cancelled) {
-          setLoadError(isAxiosError(e) ? e.message : "failed");
+          setLoadError(e instanceof Error ? e.message : "failed");
         }
       } finally {
         if (!cancelled) {

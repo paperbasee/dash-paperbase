@@ -1,4 +1,4 @@
-import axios from "axios";
+import { apiClient } from "@/lib/api-client";
 
 const baseUrl = () => {
   const url = process.env.NEXT_PUBLIC_API_URL;
@@ -10,21 +10,18 @@ const baseUrl = () => {
  * POST /auth/email/verify/ — unauthenticated; used when user opens link from email.
  */
 export async function verifyEmailFromLink(uid: string, token: string) {
-  const { data } = await axios.post(`${baseUrl()}/auth/email/verify/`, {
-    uid,
-    token,
-  });
-  return data as { detail?: string };
+  baseUrl();
+  return apiClient.post("auth/email/verify/", { uid, token }) as Promise<{ detail?: string }>;
 }
 
 /**
  * POST /auth/email/resend-verification/ — unauthenticated, email-driven, enumeration-safe response.
  */
 export async function resendVerificationEmail(email: string) {
-  const { data } = await axios.post(`${baseUrl()}/auth/email/resend-verification/`, {
+  baseUrl();
+  return apiClient.post("auth/email/resend-verification/", {
     email: email.trim().toLowerCase(),
-  });
-  return data as { message?: string };
+  }) as Promise<{ message?: string }>;
 }
 
 /**
@@ -34,11 +31,11 @@ export async function requestPasswordReset(
   email: string,
   logoutAllDevices = false
 ) {
-  const { data } = await axios.post(`${baseUrl()}/auth/password/reset/`, {
+  baseUrl();
+  return apiClient.post("auth/password/reset/", {
     email: email.trim().toLowerCase(),
     logout_all_devices: logoutAllDevices,
-  });
-  return data as { detail?: string };
+  }) as Promise<{ detail?: string }>;
 }
 
 /**
@@ -51,9 +48,6 @@ export async function confirmPasswordReset(payload: {
   new_password_confirm: string;
   logout_all_devices?: boolean;
 }) {
-  const { data } = await axios.post(
-    `${baseUrl()}/auth/password/reset/confirm/`,
-    payload
-  );
-  return data as { detail?: string };
+  baseUrl();
+  return apiClient.post("auth/password/reset/confirm/", payload) as Promise<{ detail?: string }>;
 }

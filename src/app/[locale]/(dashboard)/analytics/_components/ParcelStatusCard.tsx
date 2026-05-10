@@ -5,6 +5,7 @@ import { Cell, Pie, PieChart, ResponsiveContainer } from "recharts";
 import { AlertCircle, PackageCheck, Percent, Truck, Undo2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 
+import { RechartsSizedContainer } from "@/components/RechartsSizedContainer";
 import { PARCEL_SLICE_COLORS } from "./constants";
 import type { ParcelsData, PieSlice } from "./types";
 
@@ -56,9 +57,11 @@ export function ParcelStatusCard({ parcelsData }: { parcelsData: ParcelsData | n
         <>
           <div className="flex flex-col items-stretch gap-8 lg:flex-row lg:items-center lg:gap-10">
             <div className="relative mx-auto h-[208px] w-[208px] shrink-0 lg:mx-0 lg:h-[220px] lg:w-[220px]">
+              <RechartsSizedContainer className="h-full w-full lg:min-h-[220px]" style={{ minHeight: 208 }}>
+                {({ width, height }) => (
               <ResponsiveContainer
-                width="100%"
-                height="100%"
+                width={width}
+                height={height}
                 minWidth={0}
                 minHeight={208}
                 initialDimension={{ width: 220, height: 220 }}
@@ -81,6 +84,8 @@ export function ParcelStatusCard({ parcelsData }: { parcelsData: ParcelsData | n
                   </Pie>
                 </PieChart>
               </ResponsiveContainer>
+                )}
+              </RechartsSizedContainer>
               <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center px-6 text-center">
                 <span className="text-[1.65rem] font-bold leading-none tracking-tight text-foreground tabular-nums">
                   {parcelInsights.top?.value.toLocaleString() ?? 0}

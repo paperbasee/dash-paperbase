@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import axios from "axios";
+import { isApiHttpError } from "@/lib/api-client";
 
 export interface RateLimitInfo {
   action: string;
@@ -11,7 +11,7 @@ export interface RateLimitInfo {
  * Returns `null` if the error is not a rate-limit response.
  */
 export function extractRateLimitInfo(err: unknown): RateLimitInfo | null {
-  if (!axios.isAxiosError(err)) return null;
+  if (!isApiHttpError(err)) return null;
   const { response } = err;
   if (response?.status !== 429) return null;
   const data = response.data as Record<string, unknown> | undefined;

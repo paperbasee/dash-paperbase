@@ -20,6 +20,7 @@ import {
 } from "./constants";
 import { formatChartAxisLabel } from "./format";
 import type { PageviewsPoint, RangeOption } from "./types";
+import { RechartsSizedContainer } from "@/components/RechartsSizedContainer";
 
 export function PageviewsSessionsChart({
   data,
@@ -31,8 +32,9 @@ export function PageviewsSessionsChart({
   return (
     <div className="rounded-card border border-card-border bg-card p-4">
       <div className="mb-4 text-sm font-medium text-foreground">Pageviews & Sessions over time</div>
-      <div className="h-48 w-full md:h-72">
-        <ResponsiveContainer width="100%" height="100%">
+      <RechartsSizedContainer className="h-48 w-full md:h-72" style={{ minHeight: 192 }}>
+        {({ width, height }) => (
+          <ResponsiveContainer width={width} height={height} minWidth={0}>
           <AreaChart data={data} margin={{ top: 8, left: 0, right: 24, bottom: 0 }}>
             <defs>
               <linearGradient id="pvFill" x1="0" y1="0" x2="0" y2="1">
@@ -91,7 +93,8 @@ export function PageviewsSessionsChart({
             />
           </AreaChart>
         </ResponsiveContainer>
-      </div>
+        )}
+      </RechartsSizedContainer>
     </div>
   );
 }

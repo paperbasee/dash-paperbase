@@ -1,5 +1,5 @@
-import axios from "axios";
 import type { FieldErrors, NormalizedError } from "./types";
+import { isApiHttpError } from "@/lib/api-client";
 
 const SAFE_FALLBACK = "Something went wrong. Please try again.";
 
@@ -77,7 +77,7 @@ export function normalizeError(error: unknown, fallbackMessage?: string): Normal
     };
   }
 
-  if (axios.isAxiosError(error)) {
+  if (isApiHttpError(error)) {
     const responseData = error.response?.data;
     const message =
       extractApiMessage(responseData) ??
@@ -89,7 +89,7 @@ export function normalizeError(error: unknown, fallbackMessage?: string): Normal
     return {
       message,
       fieldErrors: Object.keys(fieldErrors).length > 0 ? fieldErrors : undefined,
-      code: code ?? error.code,
+      code: code ?? undefined,
       raw: responseData ?? error,
     };
   }
