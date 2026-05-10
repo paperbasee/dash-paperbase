@@ -18,7 +18,28 @@ export type OverviewData = {
 };
 
 export type PageviewsPoint = { date: string; pageviews: number; sessions: number };
+export type PageviewsComparison = {
+  data: PageviewsPoint[];
+  comparison: PageviewsPoint[];
+  summary: {
+    current_pageviews: number;
+    previous_pageviews: number;
+    pageviews_pct_change: number | null;
+    current_sessions: number;
+    previous_sessions: number;
+    sessions_pct_change: number | null;
+  };
+};
 export type RevenuePoint = { date: string; revenue: number; orders: number; aov: number };
+export type RevenueComparison = {
+  data: RevenuePoint[];
+  comparison: RevenuePoint[];
+  summary: {
+    current_revenue: string;
+    previous_revenue: string;
+    pct_change: number | null;
+  };
+};
 export type PageRow = { page_path: string; views: number; unique_sessions: number };
 export type ProductRow = {
   product_id: string;
