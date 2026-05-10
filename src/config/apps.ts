@@ -1,6 +1,7 @@
 import type { LucideIcon } from "lucide-react";
+import type { Icon as PhosphorIcon } from "@phosphor-icons/react";
+import { NewspaperClippingIcon, TruckIcon, PackageIcon } from "@phosphor-icons/react";
 import {
-  Package,
   Box,
   Boxes,
   ChartSpline,
@@ -11,11 +12,12 @@ import {
   MessageSquare,
   PackageSearch,
   Image as ImageIcon,
-  Truck,
   Ticket,
   Trash,
-  Newspaper,
 } from "lucide-react";
+
+/** Lucide or Phosphor icon for main nav / apps list. */
+export type AppNavIcon = LucideIcon | PhosphorIcon;
 
 export interface NavCounts {
   orders: number;
@@ -29,7 +31,7 @@ export interface NavCounts {
 export interface AppConfig {
   id: string;
   label: string;
-  icon: LucideIcon;
+  icon: AppNavIcon;
   description: string;
   essential: boolean;
   href: string | null;
@@ -62,7 +64,7 @@ export const APP_CONFIG: Record<string, AppConfig> = {
   orders: {
     id: "orders",
     label: "Orders",
-    icon: Package,
+    icon: PackageIcon,
     description: "Order management, status flow, and fulfillment",
     essential: true,
     href: "/orders",
@@ -172,7 +174,7 @@ export const APP_CONFIG: Record<string, AppConfig> = {
   blog: {
     id: "blog",
     label: "Blog",
-    icon: Newspaper,
+    icon: NewspaperClippingIcon,
     description: "Publish blog posts and manage tags",
     essential: false,
     href: "/blog",
@@ -182,7 +184,7 @@ export const APP_CONFIG: Record<string, AppConfig> = {
   shipping: {
     id: "shipping",
     label: "Shipping",
-    icon: Truck,
+    icon: TruckIcon,
     description: "Shipping zones, methods, and rates",
     essential: true,
     href: "/shipping",

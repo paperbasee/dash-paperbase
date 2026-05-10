@@ -3,7 +3,8 @@
 import { useEffect, useRef, useState, type Dispatch, type FormEvent, type SetStateAction } from "react";
 import type React from "react";
 import { useTranslations } from "next-intl";
-import { Check, Copy, Loader2 } from "lucide-react";
+import { CopyIcon } from "@phosphor-icons/react";
+import { Check, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
@@ -390,7 +391,7 @@ export default function StoreInfoSection({
                       {secretCopied ? (
                         <Check className="size-4 text-emerald-600" aria-hidden />
                       ) : (
-                        <Copy className="size-4" aria-hidden />
+                        <CopyIcon className="size-4" aria-hidden />
                       )}
                     </Button>
                   )}

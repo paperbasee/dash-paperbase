@@ -2,7 +2,9 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { Save, Copy, Check, Facebook, Music2 } from "lucide-react";
+import { MetaLogoIcon, TiktokLogoIcon } from "@phosphor-icons/react";
+import { CopyIcon } from "@phosphor-icons/react";
+import { Check } from "lucide-react";
 import api from "@/lib/api";
 import type {
   MarketingIntegration as MarketingIntegrationType,
@@ -225,9 +227,9 @@ export default function MarketingProviderCard({ provider }: { provider: Marketin
 
   const providerIcon =
     provider === "facebook" ? (
-      <Facebook className="h-5 w-5 shrink-0 text-muted-foreground" aria-hidden />
+      <MetaLogoIcon className="h-5 w-5 shrink-0 text-muted-foreground" aria-hidden />
     ) : (
-      <Music2 className="h-5 w-5 shrink-0 text-muted-foreground" aria-hidden />
+      <TiktokLogoIcon className="h-5 w-5 shrink-0 text-muted-foreground" aria-hidden />
     );
 
   return (
@@ -314,7 +316,6 @@ export default function MarketingProviderCard({ provider }: { provider: Marketin
                 disabled={saving}
                 loading={saving}
               >
-                <Save className="mr-1 size-3.5" />
                 Add Pixel
               </Button>
             ) : null}
@@ -371,7 +372,7 @@ export default function MarketingProviderCard({ provider }: { provider: Marketin
                       </>
                     ) : (
                       <>
-                        <Copy className="mr-1 size-3.5" />
+                        <CopyIcon className="mr-1 size-3.5" />
                         {provider === "facebook" ? t("marketing.copyPixel") : c("copyPixel")}
                       </>
                     )}

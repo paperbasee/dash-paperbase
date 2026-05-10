@@ -2,7 +2,8 @@
 
 import { useCallback, useEffect, useRef, useState, type Dispatch, type SetStateAction } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { Check, Copy, Truck, ChevronRight } from "lucide-react";
+import { CopyIcon } from "@phosphor-icons/react";
+import { Check, Truck, ChevronRight } from "lucide-react";
 import api from "@/lib/api";
 import { formatAdminApiErrorFromAxios } from "@/lib/admin-api-error";
 import { formatDashboardDate } from "@/lib/datetime-display";
@@ -197,7 +198,7 @@ function SteadfastCourierRow({
                         className="min-h-[36px] shrink-0 sm:min-h-0"
                         onClick={() => void copyToClipboard(STEADFAST_WEBHOOK_CALLBACK_URL)}
                       >
-                        <Copy className="h-3.5 w-3.5" aria-hidden />
+                        <CopyIcon className="h-3.5 w-3.5" aria-hidden />
                       </Button>
                     </div>
                   </div>
@@ -312,7 +313,7 @@ function SteadfastCourierRow({
                                   {copied ? (
                                     <Check className="size-4 text-emerald-600" aria-hidden />
                                   ) : (
-                                    <Copy className="size-4" aria-hidden />
+                                    <CopyIcon className="size-4" aria-hidden />
                                   )}
                                 </Button>
                               ) : null}

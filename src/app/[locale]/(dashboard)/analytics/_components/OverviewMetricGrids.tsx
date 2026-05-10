@@ -1,14 +1,11 @@
 "use client";
 
+import { CoinsIcon, PackageIcon, KeyReturnIcon, DivideIcon } from "@phosphor-icons/react";
 import {
   Activity,
   Clock,
   MousePointerClick,
-  Package,
-  PackageOpen,
   Percent,
-  Truck,
-  Wallet,
 } from "lucide-react";
 
 import type { DeltaMode, OverviewData } from "./types";
@@ -72,7 +69,7 @@ export function OverviewMetricGrids({
           mom={overview?.revenue.mom ?? null}
           yoy={overview?.revenue.yoy ?? null}
           deltaMode={deltaMode}
-          icon={Wallet}
+          icon={CoinsIcon}
         />
         <MetricCard
           metricKey="orders"
@@ -81,7 +78,7 @@ export function OverviewMetricGrids({
           mom={overview?.orders.mom ?? null}
           yoy={overview?.orders.yoy ?? null}
           deltaMode={deltaMode}
-          icon={PackageOpen}
+          icon={PackageIcon}
         />
         <MetricCard
           metricKey="aov"
@@ -90,7 +87,7 @@ export function OverviewMetricGrids({
           mom={overview?.aov.mom ?? null}
           yoy={overview?.aov.yoy ?? null}
           deltaMode={deltaMode}
-          icon={Package}
+          icon={DivideIcon}
         />
         <MetricCard
           metricKey="return_rate"
@@ -99,7 +96,7 @@ export function OverviewMetricGrids({
           mom={overview?.return_rate.mom ?? null}
           yoy={overview?.return_rate.yoy ?? null}
           deltaMode={deltaMode}
-          icon={Truck}
+          icon={KeyReturnIcon}
         />
       </div>
     </>

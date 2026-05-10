@@ -3,15 +3,13 @@
 import { useTranslations } from "next-intl";
 import { Link, usePathname, useRouter } from "@/i18n/navigation";
 import { useSearchParams } from "next/navigation";
+import { CopyIcon, SidebarSimpleIcon } from "@phosphor-icons/react";
 import {
   Birdhouse,
   ChevronsUpDown,
-  PanelRightOpen,
-  PanelRightClose,
   Search,
   LogOut,
   Cog,
-  Copy,
   Check,
   Sun,
   Moon,
@@ -331,7 +329,7 @@ function SidebarContent({
               className="flex w-full shrink-0 items-center justify-center rounded-xs px-2 py-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground dark:text-white/70 dark:hover:bg-white/[0.07] dark:hover:text-white/90 md:flex"
               aria-label={tSidebar("expandSidebar")}
             >
-              <PanelRightClose className="size-5" />
+              <SidebarSimpleIcon className="size-5" />
             </button>
           ) : (
             <span className="size-9 shrink-0" />
@@ -379,7 +377,7 @@ function SidebarContent({
             className="hidden shrink-0 items-center justify-center rounded-xs px-2 py-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground dark:text-white/70 dark:hover:bg-white/[0.07] dark:hover:text-white/90 md:flex"
             aria-label={tSidebar("collapseSidebar")}
           >
-            <PanelRightOpen className="size-4" />
+            <SidebarSimpleIcon className="size-4" />
           </button>
         )}
       </div>
@@ -638,7 +636,7 @@ function SidebarContent({
                       aria-hidden
                     />
                   ) : (
-                    <Copy className="size-[1.125rem]" aria-hidden />
+                    <CopyIcon className="size-[1.125rem]" aria-hidden />
                   )}
                   <span>
                     {copiedStoreId === activeStoreId
