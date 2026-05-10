@@ -1,10 +1,12 @@
 "use client";
 
+import { useState } from "react";
+import { ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { maskCredentialPreview } from "@/lib/mask-credential-preview";
 import { formatDashboardDate } from "@/lib/datetime-display";
 import type { MarketingIntegration as MarketingIntegrationType, IntegrationEventSettings } from "@/types";
-import { settingsInvertedButtonClassName } from "../SettingsSectionBody";
 
 export type EventSettingKey =
   | "track_purchase"
@@ -19,6 +21,10 @@ export const EVENT_LABEL_KEYS: { key: EventSettingKey; labelKey: string }[] = [
   { key: "track_view_content", labelKey: "eventViewContent" },
 ];
 
+function fieldLabel(raw: string) {
+  return raw.replace(/:\s*$/, "").trim();
+}
+
 /**
  * List row: provider title, status badge, pixel/token lines, action buttons.
  * pixelLineLabel: full label prefix, e.g. "Dataset ID:" or "TikTok Pixel Code:"
@@ -26,7 +32,6 @@ export const EVENT_LABEL_KEYS: { key: EventSettingKey; labelKey: string }[] = [
 export function MarketingIntegrationListRow({
   integration,
   providerTitle,
-  rowLabel,
   pixelLineLabel,
   tokenLineLabel,
   testCodeLineLabel,
@@ -40,7 +45,6 @@ export function MarketingIntegrationListRow({
 }: {
   integration: MarketingIntegrationType;
   providerTitle: string;
-  rowLabel?: string;
   pixelLineLabel: string;
   /** Defaults to `marketing.tokenLabel` */
   tokenLineLabel?: string;
@@ -54,76 +58,107 @@ export function MarketingIntegrationListRow({
   togglingId: string | null;
   t: (key: string) => string;
 }) {
+  const [open, setOpen] = useState(false);
   const tok = tokenLineLabel ?? t("marketing.tokenLabel");
   const testL = testCodeLineLabel ?? t("marketing.testCodeLabel");
+  const maskedPixel = maskCredentialPreview(integration.pixel_id);
+  const titleLine = maskedPixel ? `${providerTitle} · ${maskedPixel}` : providerTitle;
+
   return (
-    <div className="rounded-card border border-border bg-background p-4">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="min-w-0 flex-1 space-y-1">
-          <div className="flex items-center gap-2">
-            <span className="text-sm font-medium text-foreground">{providerTitle}</span>
-            {rowLabel ? (
-              <span className="text-xs text-muted-foreground">{rowLabel}</span>
-            ) : null}
-            <span
-              className={cn(
-                "inline-flex items-center rounded-tooltip px-2 py-0.5 text-xs font-medium",
-                integration.is_active
-                  ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400"
-                  : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
-              )}
-            >
-              {integration.is_active ? t("active") : t("inactive")}
-            </span>
-          </div>
-          <div className="flex flex-wrap gap-x-4 gap-y-0.5 text-xs text-muted-foreground">
-            <span>
-              {pixelLineLabel} <code className={numClass}>{integration.pixel_id || "---"}</code>
-            </span>
-            <span>
-              {tok} <code className="font-mono">{integration.access_token_masked || "---"}</code>
-            </span>
-            {integration.test_event_code ? (
-              <span>
-                {testL} <code className={numClass}>{integration.test_event_code}</code>
+    <div className="flex flex-col">
+      <button
+        type="button"
+        className="flex w-full cursor-pointer items-center gap-3 px-3.5 py-[11px] text-left transition-colors hover:bg-muted/40"
+        onClick={() => setOpen((v) => !v)}
+      >
+        <span className="min-w-0 flex-1 text-[13px] font-medium text-foreground">{titleLine}</span>
+        <span className="flex shrink-0 items-center gap-1.5 text-[12px] text-muted-foreground">
+          <span
+            className={cn(
+              "h-1.5 w-1.5 shrink-0 rounded-full",
+              integration.is_active ? "bg-green-500" : "bg-muted-foreground",
+            )}
+            aria-hidden
+          />
+          {integration.is_active ? t("integrations.statusConnected") : t("inactive")}
+        </span>
+        <ChevronRight
+          className={cn(
+            "h-3.5 w-3.5 shrink-0 text-muted-foreground transition-transform duration-150",
+            open && "rotate-90",
+          )}
+          aria-hidden
+        />
+      </button>
+      {open ? (
+        <div className="flex flex-col">
+          <div className="flex flex-wrap gap-8 border-b border-border px-3.5 py-2.5">
+            <div>
+              <span className="mb-0.5 block text-[11px] text-muted-foreground">
+                {fieldLabel(pixelLineLabel)}
               </span>
+              <span className={cn("text-[12px] font-mono text-muted-foreground", numClass)}>
+                {integration.pixel_id || "—"}
+              </span>
+            </div>
+            <div>
+              <span className="mb-0.5 block text-[11px] text-muted-foreground">{fieldLabel(tok)}</span>
+              <span className="font-mono text-[12px] text-muted-foreground">
+                {integration.access_token_masked || "—"}
+              </span>
+            </div>
+            {integration.test_event_code ? (
+              <div>
+                <span className="mb-0.5 block text-[11px] text-muted-foreground">{fieldLabel(testL)}</span>
+                <span className={cn("text-[12px] font-mono text-muted-foreground", numClass)}>
+                  {integration.test_event_code}
+                </span>
+              </div>
             ) : null}
-            <span>
-              {t("marketing.connectedOn")} {formatDashboardDate(integration.created_at, locale)}
-            </span>
+            <div>
+              <span className="mb-0.5 block text-[11px] text-muted-foreground">
+                {t("marketing.connectedOn")}
+              </span>
+              <span className="font-mono text-[12px] text-muted-foreground">
+                {formatDashboardDate(integration.created_at, locale)}
+              </span>
+            </div>
           </div>
-        </div>
-        <div className="flex shrink-0 flex-col gap-2 sm:flex-row sm:flex-wrap">
-          {integration.event_settings ? (
+          <div className="flex flex-wrap items-center gap-2 px-3.5 py-2.5">
+            {integration.event_settings ? (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="min-h-[36px] text-[12px] sm:min-h-0"
+                onClick={onConfigure}
+              >
+                {t("marketing.configureEvents")}
+              </Button>
+            ) : null}
             <Button
               type="button"
               variant="outline"
-              className={settingsInvertedButtonClassName}
-              onClick={onConfigure}
+              size="sm"
+              className="min-h-[36px] text-[12px] sm:min-h-0"
+              disabled={togglingId === integration.public_id}
+              loading={togglingId === integration.public_id}
+              onClick={onToggleActive}
             >
-              {t("marketing.configureEvents")}
+              {integration.is_active ? t("marketing.deactivate") : t("marketing.activate")}
             </Button>
-          ) : null}
-          <Button
-            type="button"
-            variant="outline"
-            className={settingsInvertedButtonClassName}
-            disabled={togglingId === integration.public_id}
-            loading={togglingId === integration.public_id}
-            onClick={onToggleActive}
-          >
-            {integration.is_active ? t("marketing.deactivate") : t("marketing.activate")}
-          </Button>
-          <Button
-            type="button"
-            variant="outline"
-            onClick={onDisconnect}
-            className="border-destructive text-destructive hover:bg-destructive/10"
-          >
-            {t("marketing.disconnect")}
-          </Button>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="min-h-[36px] border-none text-[12px] text-destructive hover:bg-destructive/10 sm:min-h-0"
+              onClick={onDisconnect}
+            >
+              {t("marketing.disconnect")}
+            </Button>
+          </div>
         </div>
-      </div>
+      ) : null}
     </div>
   );
 }

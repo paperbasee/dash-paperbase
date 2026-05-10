@@ -2,6 +2,7 @@
 
 import { useState, useRef, useCallback, type FormEvent } from "react";
 import { useTranslations } from "next-intl";
+import { isAxiosError } from "axios";
 import api from "@/lib/api";
 import { defaultBranding } from "@/context/BrandingContext";
 import type { SettingsMessage } from "./useAccountSettings";
@@ -87,6 +88,7 @@ export function useStoreSettings({ onSaveSuccess }: UseStoreSettingsOptions = {}
     setSaving(true);
     setMessage(null);
 
+    let storeSettingsPatchErrorHandled = false;
     try {
       const validation = parseValidation(storeUpdateSchema, {
         storeName,
@@ -129,10 +131,33 @@ export function useStoreSettings({ onSaveSuccess }: UseStoreSettingsOptions = {}
       formData.append("social_links", JSON.stringify(socialLinks));
 
       await api.patch("admin/branding/", formData);
-      await api.patch("store/settings/current/", {
-        storefront_url: storefrontUrl.trim(),
-        revalidate_secret: revalidateSecret,
-      });
+      const normalizedUrl = storefrontUrl.trim()
+        ? storefrontUrl.trim().startsWith("http://") || storefrontUrl.trim().startsWith("https://")
+          ? storefrontUrl.trim()
+          : `https://${storefrontUrl.trim()}`
+        : "";
+      try {
+        await api.patch("store/settings/current/", {
+          storefront_url: normalizedUrl,
+          revalidate_secret: revalidateSecret,
+        });
+      } catch (err: unknown) {
+        storeSettingsPatchErrorHandled = true;
+        if (isAxiosError(err) && err.response?.data?.storefront_url) {
+          const raw = err.response.data.storefront_url;
+          const extracted =
+            Array.isArray(raw) && raw.length > 0 && typeof raw[0] === "string"
+              ? raw[0]
+              : null;
+          setMessage({
+            type: "error",
+            text: extracted ?? t("store.saveFailed"),
+          });
+        } else {
+          setMessage({ type: "error", text: t("store.saveFailed") });
+        }
+        throw err;
+      }
       await mutate(BRANDING_PROFILE_SWR_KEY);
       onSaveSuccess?.();
 
@@ -142,7 +167,9 @@ export function useStoreSettings({ onSaveSuccess }: UseStoreSettingsOptions = {}
 
       notify.success(t("store.saved"));
     } catch {
-      setMessage({ type: "error", text: t("store.saveFailed") });
+      if (!storeSettingsPatchErrorHandled) {
+        setMessage({ type: "error", text: t("store.saveFailed") });
+      }
     } finally {
       setSaving(false);
     }

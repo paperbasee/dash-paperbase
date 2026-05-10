@@ -310,8 +310,7 @@ export default function StoreInfoSection({
               </label>
               <Input
                 id="storefront_url"
-                type="url"
-                inputMode="url"
+                type="text"
                 autoComplete="off"
                 value={storefrontUrl}
                 onChange={(e) => onStorefrontUrlChange(e.target.value)}

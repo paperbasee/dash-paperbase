@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import MarketingProviderCard from "./MarketingProviderCard";
 import OtherMarketingIntegrations from "./OtherMarketingIntegrations";
 
@@ -8,11 +9,19 @@ import OtherMarketingIntegrations from "./OtherMarketingIntegrations";
  * then any other marketing providers (e.g. Google Analytics) list below.
  */
 export default function MarketingIntegration() {
+  const t = useTranslations("settings");
   return (
-    <div className="space-y-8">
-      <MarketingProviderCard provider="facebook" />
-      <MarketingProviderCard provider="tiktok" />
-      <OtherMarketingIntegrations />
+    <div className="mb-6 min-w-0 w-full">
+      <p className="mb-2 text-[11px] font-medium uppercase tracking-[0.06em] text-muted-foreground">
+        {t("integrations.sectionMarketing")}
+      </p>
+      <div className="flex min-w-0 w-full flex-col divide-y divide-border overflow-hidden rounded-lg border border-border">
+        <MarketingProviderCard provider="facebook" />
+        <MarketingProviderCard provider="tiktok" />
+      </div>
+      <div className="mt-6">
+        <OtherMarketingIntegrations />
+      </div>
     </div>
   );
 }

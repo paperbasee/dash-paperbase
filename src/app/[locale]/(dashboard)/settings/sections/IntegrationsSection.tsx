@@ -2,6 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { SettingsSectionBody, settingsSectionSurfaceClassName } from "../SettingsSectionBody";
+import { cn } from "@/lib/utils";
 import CourierIntegration from "./CourierIntegration";
 import MarketingIntegration from "./MarketingIntegration";
 
@@ -17,15 +18,15 @@ export default function IntegrationsSection({
       role="tabpanel"
       aria-labelledby="tab-integrations"
       hidden={hidden}
-      className={settingsSectionSurfaceClassName}
+      className={cn(settingsSectionSurfaceClassName, "min-w-0")}
     >
-      <SettingsSectionBody gap="compact">
+      <SettingsSectionBody>
         <div className="space-y-1">
-          <h2 className="text-lg font-medium text-foreground">{t("integrations.heading")}</h2>
-          <p className="text-sm text-muted-foreground">{t("integrations.subtitle")}</p>
+          <h2 className="mb-1 text-[15px] font-medium text-foreground">{t("integrations.heading")}</h2>
+          <p className="text-[13px] text-muted-foreground">{t("integrations.subtitle")}</p>
         </div>
 
-        <div className="space-y-4">
+        <div className="flex min-w-0 w-full flex-col gap-0">
           <MarketingIntegration />
           <CourierIntegration />
         </div>

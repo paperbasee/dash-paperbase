@@ -154,7 +154,7 @@ export default function OtherMarketingIntegrations() {
   if (list.length === 0) return null;
 
   return (
-    <div className="space-y-3">
+    <div className="min-w-0 w-full space-y-3">
       {list.map((integration) => (
         <MarketingIntegrationListRow
           key={integration.public_id}

@@ -1142,8 +1142,8 @@
       "storefrontIntegrationHeading": "স্টোরফ্রন্ট ইন্টিগ্রেশন",
       "storefrontIntegrationSubtitle": "ওয়েবহুক ভিত্তিক রিভ্যালিডেশনের জন্য লাইভ স্টোরফ্রন্ট সংযুক্ত করুন।",
       "storefrontUrlLabel": "স্টোরফ্রন্ট URL",
-      "storefrontUrlPlaceholder": "store.yourdomain.com",
-      "storefrontUrlHelp": "আপনার ডিপ্লয় করা স্টোরফ্রন্টের বেস URL",
+      "storefrontUrlPlaceholder": "yourdomain.com",
+      "storefrontUrlHelp": "প্রিফিক্স ছাড়াই আপনার ডোমেইন লিখুন — আমরা স্বয়ংক্রিয়ভাবে যোগ করব",
       "revalidateSecretLabel": "রিভ্যালিডেশন সিক্রেট",
       "revalidateSecretHelp": "স্টোরফ্রন্ট ওয়েবহুক যাচাইয়ের জন্য ভাগ করা সিক্রেট",
       "revalidateSecretGenerate": "জেনারেট",
@@ -1294,7 +1294,11 @@
     },
     "integrations": {
       "heading": "ইন্টিগ্রেশন",
-      "subtitle": "মার্কেটিং ও ডেলিভারি টুল আপনার স্টোরে সংযুক্ত করুন। সময়ের সাথে আরও ইন্টিগ্রেশন যোগ হবে।"
+      "subtitle": "মার্কেটিং ও ডেলিভারি টুল আপনার স্টোরে সংযুক্ত করুন। সময়ের সাথে আরও ইন্টিগ্রেশন যোগ হবে।",
+      "sectionMarketing": "মার্কেটিং",
+      "sectionDelivery": "ডেলিভারি",
+      "statusNotConnected": "সংযুক্ত নয়",
+      "statusConnected": "সংযুক্ত"
     },
     "networking": {
       "heading": "নেটওয়ার্কিং",
@@ -1468,6 +1472,7 @@
       "copyPixel": "Dataset ID কপি করুন",
       "pixelCopied": "কপি হয়েছে",
       "copyFailed": "ক্লিপবোর্ডে কপি করা যায়নি।",
+      "addFacebookPixel": "Facebook পিক্সেল যোগ করুন",
       "tiktok": {
         "heading": "TikTok Events API",
         "intro": "TikTok-এর সার্ভার-সাইড Events API সংযুক্ত করুন: Paperbase সার্ভার থেকে টিকটকে ইভেন্ট পাঠায়। Pixel Code ও Events API অ্যাক্সেস টোকেন দিন। ক্রেডেনশিয়াল শুধু আপনার স্টোরে। (ব্রাউজার TikTok Pixel এখানে ব্যবহার হয় না; শুধু সার্ভার-সাইড)।",
@@ -1493,7 +1498,8 @@
         "modalConfigureDescription": "পিক্সেল, টোকেন মাস্ক এবং (থাকলে) ইভেন্ট বিকল্প।",
         "modalDisconnectTitle": "TikTok Events API বিচ্ছিন্ন করবেন?",
         "modalDisconnectDescription": "আবার না সংযুক্ত করা পর্যন্ত TikTok-এ সার্ভার-সাইড ইভেন্ট পাঠানো বন্ধ থাকবে।",
-        "copyPixel": "পিক্সেল কোড কপি করুন"
+        "copyPixel": "পিক্সেল কোড কপি করুন",
+        "addTiktokPixel": "TikTok পিক্সেল যোগ করুন"
       }
     },
     "courier": {
@@ -1509,6 +1515,7 @@
       "empty": "এখনও কোনো কুরিয়ার সংযুক্ত নয়।",
       "connectCta": "Steadfast সংযুক্ত করুন",
       "providerName": "Steadfast",
+      "addCourier": "কুরিয়ার যোগ করুন",
       "apiKeyLabel": "API কী:",
       "secretLabel": "সিক্রেট:",
       "connectedOn": "সংযুক্ত",

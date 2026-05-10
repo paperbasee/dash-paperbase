@@ -1,21 +1,23 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, type Dispatch, type SetStateAction } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { Check, Copy, Truck } from "lucide-react";
+import { Check, Copy, Truck, ChevronRight } from "lucide-react";
 import api from "@/lib/api";
 import { formatAdminApiErrorFromAxios } from "@/lib/admin-api-error";
 import { formatDashboardDate } from "@/lib/datetime-display";
 import type { Courier, PaginatedResponse } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { useEnterNavigation } from "@/hooks/useEnterNavigation";
 import { useConfirm } from "@/context/ConfirmDialogContext";
 import { notify } from "@/notifications";
 import { SettingsActionDialog } from "@/components/settings/SettingsActionDialog";
 import { settingsInvertedButtonClassName } from "../SettingsSectionBody";
-import { SettingsSectionSkeleton } from "@/components/skeletons/dashboard-skeletons";
+
+const STEADFAST_WEBHOOK_CALLBACK_URL = "https://api.paperbase.me/api/v1/webhooks/steadfast/";
 
 type ConnectForm = {
   api_key: string;
@@ -29,6 +31,352 @@ const emptyForm: ConnectForm = {
 
 type CourierModal = null | "connect";
 
+type SteadfastCourierRowProps = {
+  c: Courier;
+  locale: string;
+  t: (key: string) => string;
+  togglingId: string | null;
+  savingWebhookTokenId: string | null;
+  generatedTokenByCourierId: Record<string, string>;
+  setGeneratedTokenByCourierId: Dispatch<SetStateAction<Record<string, string>>>;
+  tokenRevealedByCourierId: Record<string, boolean>;
+  setTokenRevealedByCourierId: Dispatch<SetStateAction<Record<string, boolean>>>;
+  tokenFieldFocusedByCourierId: Record<string, boolean>;
+  setTokenFieldFocusedByCourierId: Dispatch<SetStateAction<Record<string, boolean>>>;
+  tokenCopiedByCourierId: Record<string, boolean>;
+  setTokenCopiedByCourierId: Dispatch<SetStateAction<Record<string, boolean>>>;
+  copyToClipboard: (text: string) => void | Promise<void>;
+  onToggleActive: (courier: Courier) => void;
+  onDisconnect: (publicId: string) => void;
+  onGenerateToken: (courierPublicId: string) => void;
+  onSaveWebhookToken: (courierPublicId: string) => void;
+};
+
+function SteadfastCourierRow({
+  c,
+  locale,
+  t,
+  togglingId,
+  savingWebhookTokenId,
+  generatedTokenByCourierId,
+  setGeneratedTokenByCourierId,
+  tokenRevealedByCourierId,
+  setTokenRevealedByCourierId,
+  tokenFieldFocusedByCourierId,
+  setTokenFieldFocusedByCourierId,
+  tokenCopiedByCourierId,
+  setTokenCopiedByCourierId,
+  copyToClipboard,
+  onToggleActive,
+  onDisconnect,
+  onGenerateToken,
+  onSaveWebhookToken,
+}: SteadfastCourierRowProps) {
+  const [open, setOpen] = useState(false);
+  const [webhookOpen, setWebhookOpen] = useState(false);
+
+  return (
+    <div className="flex flex-col">
+      <button
+        type="button"
+        className="flex w-full cursor-pointer items-center gap-3 px-3.5 py-[11px] text-left transition-colors hover:bg-muted/40"
+        onClick={() => setOpen((v) => !v)}
+      >
+        <span className="min-w-0 flex-1 text-[13px] font-medium text-foreground">
+          {t("courier.providerName")}
+        </span>
+        <span className="flex shrink-0 items-center gap-1.5 text-[12px] text-muted-foreground">
+          <span
+            className={cn(
+              "h-1.5 w-1.5 shrink-0 rounded-full",
+              c.is_active ? "bg-green-500" : "bg-muted-foreground",
+            )}
+            aria-hidden
+          />
+          {c.is_active ? t("integrations.statusConnected") : t("inactive")}
+        </span>
+        <ChevronRight
+          className={cn(
+            "h-3.5 w-3.5 shrink-0 text-muted-foreground transition-transform duration-150",
+            open && "rotate-90",
+          )}
+          aria-hidden
+        />
+      </button>
+      {open ? (
+        <div className="flex flex-col">
+          <div className="flex flex-wrap gap-8 border-b border-border px-3.5 py-2.5">
+            <div>
+              <span className="mb-0.5 block text-[11px] text-muted-foreground">{t("courier.apiKey")}</span>
+              <span className="font-mono text-[12px] text-muted-foreground">{c.api_key_masked || "—"}</span>
+            </div>
+            {c.secret_key_masked ? (
+              <div>
+                <span className="mb-0.5 block text-[11px] text-muted-foreground">{t("courier.secretKey")}</span>
+                <span className="font-mono text-[12px] text-muted-foreground">{c.secret_key_masked}</span>
+              </div>
+            ) : null}
+            <div>
+              <span className="mb-0.5 block text-[11px] text-muted-foreground">{t("courier.connectedOn")}</span>
+              <span className="font-mono text-[12px] text-muted-foreground">
+                {formatDashboardDate(c.created_at, locale)}
+              </span>
+            </div>
+          </div>
+          <div className="flex flex-wrap items-center gap-2 border-b border-border px-3.5 py-2.5">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="min-h-[36px] text-[12px] sm:min-h-0"
+              disabled={togglingId === c.public_id}
+              loading={togglingId === c.public_id}
+              onClick={() => onToggleActive(c)}
+            >
+              {c.is_active ? t("courier.deactivate") : t("courier.activate")}
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="min-h-[36px] border-none text-[12px] text-destructive hover:bg-destructive/10 sm:min-h-0"
+              onClick={() => onDisconnect(c.public_id)}
+            >
+              {t("courier.disconnect")}
+            </Button>
+          </div>
+          {c.is_active ? (
+            <>
+              <button
+                type="button"
+                className="flex w-full cursor-pointer items-center gap-1.5 border-b border-border px-3.5 py-2.5 text-left text-[12px] text-muted-foreground transition-colors hover:bg-muted/40"
+                onClick={() => setWebhookOpen((v) => !v)}
+              >
+                <ChevronRight
+                  className={cn(
+                    "h-3 w-3 shrink-0 transition-transform duration-150",
+                    webhookOpen && "rotate-90",
+                  )}
+                  aria-hidden
+                />
+                <span>
+                  Webhook setup
+                  <span className="ml-1 text-[11px] text-muted-foreground/60">
+                    — enable live delivery status updates
+                  </span>
+                </span>
+              </button>
+              {webhookOpen ? (
+                <div className="flex flex-col gap-3.5 px-3.5 py-3.5">
+                  <div className="flex flex-col gap-1">
+                    <div className="flex items-baseline gap-1.5">
+                      <span className="shrink-0 text-[11px] text-muted-foreground">1</span>
+                      <span className="text-[12px] font-medium text-foreground">Go to your Steadfast portal</span>
+                    </div>
+                    <p className="text-[12px] text-muted-foreground">
+                      Log in to portal.packzy.com and navigate to the Webhook settings page.
+                    </p>
+                  </div>
+
+                  <div className="flex flex-col gap-1">
+                    <div className="flex items-baseline gap-1.5">
+                      <span className="shrink-0 text-[11px] text-muted-foreground">2</span>
+                      <span className="text-[12px] font-medium text-foreground">Set your Callback URL</span>
+                    </div>
+                    <p className="text-[12px] text-muted-foreground">
+                      Copy the callback URL below into your Steadfast webhook settings.
+                    </p>
+                    <div className="mt-1 flex items-center gap-2 rounded-md bg-muted px-2.5 py-1.5">
+                      <span className="flex-1 break-all font-mono text-[11px] text-muted-foreground">
+                        {STEADFAST_WEBHOOK_CALLBACK_URL}
+                      </span>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="min-h-[36px] shrink-0 sm:min-h-0"
+                        onClick={() => void copyToClipboard(STEADFAST_WEBHOOK_CALLBACK_URL)}
+                      >
+                        <Copy className="h-3.5 w-3.5" aria-hidden />
+                      </Button>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col gap-1">
+                    <div className="flex items-baseline gap-1.5">
+                      <span className="shrink-0 text-[11px] text-muted-foreground">3</span>
+                      <span className="text-[12px] font-medium text-foreground">
+                        Generate and set your Auth Token
+                      </span>
+                    </div>
+                    <p className="text-[12px] text-muted-foreground">
+                      Generate a secure random token, save it in your Steadfast portal, and keep a copy — you will
+                      need it later for your server configuration.
+                    </p>
+                    {(() => {
+                      const token = (generatedTokenByCourierId[c.public_id] || "").trim();
+                      const hasLocalToken = token.length > 0;
+                      const hasStoredToken = Boolean(c.has_webhook_token);
+                      const hasToken = hasLocalToken || hasStoredToken;
+                      const revealed = Boolean(tokenRevealedByCourierId[c.public_id]);
+                      const focused = Boolean(tokenFieldFocusedByCourierId[c.public_id]);
+                      const showPlain = !hasToken || revealed || focused;
+                      const copied = Boolean(tokenCopiedByCourierId[c.public_id]);
+                      return (
+                        <div className="mt-1 flex flex-col gap-1">
+                          <label
+                            htmlFor={`steadfast_webhook_token_${c.public_id}`}
+                            className="text-[11px] text-muted-foreground"
+                          >
+                            Auth Token
+                          </label>
+                          <div className="mt-1 flex min-w-0 flex-col gap-2 sm:flex-row sm:items-stretch">
+                            <div className="flex min-w-0 flex-1 items-stretch gap-2">
+                              {hasToken && !showPlain ? (
+                                <button
+                                  type="button"
+                                  id={`steadfast_webhook_token_${c.public_id}`}
+                                  title="Click to reveal"
+                                  aria-label="Click to reveal"
+                                  onClick={() =>
+                                    setTokenRevealedByCourierId((prev) => ({
+                                      ...prev,
+                                      [c.public_id]: true,
+                                    }))
+                                  }
+                                  className={cn(
+                                    "flex h-8 min-w-0 w-full cursor-pointer items-center rounded-md border border-border bg-background px-2.5 py-1 text-left font-mono text-[12px] text-foreground shadow-xs",
+                                    "transition-[color,box-shadow] outline-none hover:bg-muted/40",
+                                    "focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50",
+                                  )}
+                                >
+                                  <span
+                                    className="truncate tracking-[0.2em] text-muted-foreground"
+                                    aria-hidden
+                                  >
+                                    {"•".repeat(Math.min(hasLocalToken ? token.length : 32, 48))}
+                                  </span>
+                                </button>
+                              ) : (
+                                <Input
+                                  id={`steadfast_webhook_token_${c.public_id}`}
+                                  type="text"
+                                  autoComplete="new-password"
+                                  value={token}
+                                  onChange={(e) =>
+                                    setGeneratedTokenByCourierId((prev) => ({
+                                      ...prev,
+                                      [c.public_id]: e.target.value,
+                                    }))
+                                  }
+                                  onFocus={() =>
+                                    setTokenFieldFocusedByCourierId((prev) => ({
+                                      ...prev,
+                                      [c.public_id]: true,
+                                    }))
+                                  }
+                                  onBlur={() =>
+                                    setTokenFieldFocusedByCourierId((prev) => ({
+                                      ...prev,
+                                      [c.public_id]: false,
+                                    }))
+                                  }
+                                  className="h-8 min-w-0 flex-1 font-mono text-[12px]"
+                                  placeholder={
+                                    hasStoredToken && !hasLocalToken
+                                      ? "Token is set (hidden). Paste a new token to rotate"
+                                      : hasToken
+                                        ? "Paste a new token to rotate"
+                                        : "Generate a token"
+                                  }
+                                />
+                              )}
+
+                              {hasLocalToken && showPlain ? (
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="icon"
+                                  title="Copy token"
+                                  aria-label={copied ? "Copied" : "Copy token"}
+                                  className="size-9 min-h-[36px] shrink-0 sm:min-h-0"
+                                  onMouseDown={(e) => e.preventDefault()}
+                                  onClick={async () => {
+                                    await copyToClipboard(token);
+                                    setTokenCopiedByCourierId((prev) => ({
+                                      ...prev,
+                                      [c.public_id]: true,
+                                    }));
+                                  }}
+                                >
+                                  {copied ? (
+                                    <Check className="size-4 text-emerald-600" aria-hidden />
+                                  ) : (
+                                    <Copy className="size-4" aria-hidden />
+                                  )}
+                                </Button>
+                              ) : null}
+                            </div>
+
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              className="min-h-[36px] shrink-0 text-[12px] sm:min-h-0"
+                              onClick={() => onGenerateToken(c.public_id)}
+                            >
+                              {hasToken ? "Regenerate Token" : "Generate Token"}
+                            </Button>
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              className="min-h-[36px] shrink-0 text-[12px] sm:min-h-0"
+                              disabled={!hasLocalToken || savingWebhookTokenId === c.public_id}
+                              loading={savingWebhookTokenId === c.public_id}
+                              onClick={() => void onSaveWebhookToken(c.public_id)}
+                            >
+                              Save
+                            </Button>
+                          </div>
+
+                          <p className="mt-1 text-[11px] text-muted-foreground">
+                            Save this token somewhere safe. It will not be stored here.
+                          </p>
+                          <p className="text-[11px] text-muted-foreground">
+                            This saves your token securely to Paperbase so incoming webhooks can be verified.
+                          </p>
+                          {hasStoredToken && !hasLocalToken ? (
+                            <p className="text-[11px] text-muted-foreground">
+                              A token is already saved for this courier, but it cannot be displayed here. Paste a new
+                              one to replace it.
+                            </p>
+                          ) : null}
+                        </div>
+                      );
+                    })()}
+                  </div>
+
+                  <div className="flex flex-col gap-1">
+                    <div className="flex items-baseline gap-1.5">
+                      <span className="shrink-0 text-[11px] text-muted-foreground">4</span>
+                      <span className="text-[12px] font-medium text-foreground">Save in Steadfast portal</span>
+                    </div>
+                    <p className="text-[12px] text-muted-foreground">
+                      Click Save in your Steadfast portal. Your dashboard will now receive live delivery status updates
+                      automatically.
+                    </p>
+                  </div>
+                </div>
+              ) : null}
+            </>
+          ) : null}
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
 export default function CourierIntegration() {
   const locale = useLocale();
   const t = useTranslations("settings");
@@ -41,10 +389,10 @@ export default function CourierIntegration() {
   const [error, setError] = useState("");
   const [togglingId, setTogglingId] = useState<string | null>(null);
   const [generatedTokenByCourierId, setGeneratedTokenByCourierId] = useState<Record<string, string>>(
-    {}
+    {},
   );
   const [tokenRevealedByCourierId, setTokenRevealedByCourierId] = useState<Record<string, boolean>>(
-    {}
+    {},
   );
   const [tokenFieldFocusedByCourierId, setTokenFieldFocusedByCourierId] = useState<
     Record<string, boolean>
@@ -221,29 +569,10 @@ export default function CourierIntegration() {
     }
   }
 
+  const tStr = t as (key: string) => string;
+
   return (
-    <div className="space-y-4">
-      <div className="space-y-1">
-        <div className="flex items-center gap-2">
-          <Truck className="size-5 text-muted-foreground" aria-hidden />
-          <h3 className="text-lg font-medium text-foreground">{t("courier.heading")}</h3>
-        </div>
-        <p className="text-sm text-muted-foreground">{t("courier.intro")}</p>
-      </div>
-
-      {!loading && modal !== "connect" && couriers.length > 0 ? (
-        <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
-          <Button
-            type="button"
-            variant="outline"
-            className={settingsInvertedButtonClassName}
-            onClick={() => setModal("connect")}
-          >
-            {t("add")}
-          </Button>
-        </div>
-      ) : null}
-
+    <div className="min-w-0 w-full">
       <SettingsActionDialog
         open={modal === "connect"}
         onOpenChange={(next) => {
@@ -304,286 +633,89 @@ export default function CourierIntegration() {
         </form>
       </SettingsActionDialog>
 
-      {loading ? (
-        <SettingsSectionSkeleton />
-      ) : couriers.length === 0 ? (
-        <div className="flex flex-col gap-2 py-2">
-          <p className="text-sm text-muted-foreground">{t("courier.empty")}</p>
-          {modal !== "connect" ? (
-            <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
-              <Button
-                type="button"
-                variant="outline"
-                className={settingsInvertedButtonClassName}
-                onClick={() => setModal("connect")}
-              >
-                {t("courier.connectCta")}
-              </Button>
+      <p className="mb-2 text-[11px] font-medium uppercase tracking-[0.06em] text-muted-foreground">
+        {t("integrations.sectionDelivery")}
+      </p>
+      <div className="mb-6 flex min-w-0 w-full flex-col divide-y divide-border overflow-hidden rounded-lg border border-border">
+        {loading ? (
+          <div className="flex flex-wrap items-center gap-3 px-3.5 py-[11px]">
+            <div className="min-w-0 flex-1 space-y-1.5">
+              <Skeleton className="h-3.5 w-40 max-w-full" />
+              <Skeleton className="h-3 w-full max-w-lg" />
             </div>
-          ) : null}
-        </div>
-      ) : (
-        <div className="space-y-3">
-          {couriers.map((c) => (
-            <div key={c.public_id} className="space-y-3">
-              <div className="flex flex-col gap-3 rounded-card border border-border bg-background p-3 sm:flex-row sm:items-center sm:justify-between">
-                <div className="min-w-0 flex-1 space-y-1">
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium capitalize text-foreground">
-                      {t("courier.providerName")}
-                    </span>
-                    <span
-                      className={`inline-flex items-center rounded-tooltip px-2 py-0.5 text-xs font-medium ${
-                        c.is_active
-                          ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400"
-                          : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
-                      }`}
-                    >
-                      {c.is_active ? t("active") : t("inactive")}
-                    </span>
-                  </div>
-                  <div className="flex flex-wrap gap-x-4 gap-y-0.5 text-xs text-muted-foreground">
-                    <span>
-                      {t("courier.apiKeyLabel")}{" "}
-                      <code className="font-mono">{c.api_key_masked || "---"}</code>
-                    </span>
-                    {c.secret_key_masked ? (
-                      <span>
-                        {t("courier.secretLabel")}{" "}
-                        <code className="font-mono">{c.secret_key_masked}</code>
-                      </span>
-                    ) : null}
-                    <span>
-                      {t("courier.connectedOn")} {formatDashboardDate(c.created_at, locale)}
-                    </span>
-                  </div>
-                </div>
-                <div className="flex shrink-0 flex-col gap-2 sm:flex-row sm:flex-wrap">
+            <Skeleton className="h-8 w-28 shrink-0 rounded-md" />
+          </div>
+        ) : couriers.length === 0 ? (
+          <div className="flex flex-wrap items-center gap-3 px-3.5 py-[11px]">
+            <Truck className="h-5 w-5 shrink-0 text-muted-foreground" aria-hidden />
+            <div className="min-w-0 flex-1">
+              <p className="text-[13px] font-medium text-foreground">{t("courier.heading")}</p>
+              <p className="text-[12px] text-muted-foreground">{t("courier.intro")}</p>
+              <p className="mt-0.5 text-[12px] text-muted-foreground">{t("courier.empty")}</p>
+            </div>
+            <div className="flex shrink-0 flex-wrap items-center gap-2 sm:justify-end">
+              <span className="flex items-center gap-1.5 text-[12px] text-muted-foreground">
+                <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-muted-foreground" aria-hidden />
+                {t("integrations.statusNotConnected")}
+              </span>
+              {modal !== "connect" ? (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="min-h-[36px] text-[12px] sm:min-h-0"
+                  onClick={() => setModal("connect")}
+                >
+                  {t("courier.connectCta")}
+                </Button>
+              ) : null}
+            </div>
+          </div>
+        ) : (
+          <>
+            {!loading && modal !== "connect" ? (
+              <div className="flex flex-wrap items-center gap-3 px-3.5 py-[11px]">
+                <Truck className="h-5 w-5 shrink-0 text-muted-foreground" aria-hidden />
+                <p className="min-w-0 flex-1 text-[13px] font-medium text-foreground">{t("courier.addCourier")}</p>
+                <div className="flex shrink-0 flex-wrap items-center gap-2 sm:justify-end">
                   <Button
                     type="button"
                     variant="outline"
-                    className={settingsInvertedButtonClassName}
-                    disabled={togglingId === c.public_id}
-                    loading={togglingId === c.public_id}
-                    onClick={() => handleToggleActive(c)}
+                    size="sm"
+                    className="min-h-[36px] text-[12px] sm:min-h-0"
+                    onClick={() => setModal("connect")}
                   >
-                    {c.is_active ? t("courier.deactivate") : t("courier.activate")}
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => requestDisconnect(c.public_id)}
-                    className="border-destructive text-destructive hover:bg-destructive/10"
-                  >
-                    {t("courier.disconnect")}
+                    {t("courier.addCourier")}
                   </Button>
                 </div>
               </div>
-
-              {c.is_active ? (
-                <div className="rounded-card border border-border bg-background p-3 space-y-3">
-                  <div className="space-y-1">
-                    <h4 className="text-sm font-medium text-foreground">Webhook Setup</h4>
-                    <p className="text-xs text-muted-foreground">
-                      Follow these steps to enable live delivery status updates.
-                    </p>
-                  </div>
-
-                  <ol className="space-y-4 text-sm">
-                    <li className="space-y-1">
-                      <p className="font-medium text-foreground">1. Go to your Steadfast portal</p>
-                      <p className="text-xs text-muted-foreground">
-                        Log in to portal.packzy.com and navigate to the Webhook settings page.
-                      </p>
-                    </li>
-
-                    <li className="space-y-2">
-                      <div className="space-y-1">
-                        <p className="font-medium text-foreground">2. Set your Callback URL</p>
-                      </div>
-                      <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-                        <Input
-                          readOnly
-                          value="https://api.paperbase.me/api/v1/webhooks/steadfast/"
-                          className="font-mono text-xs"
-                        />
-                        <Button
-                          type="button"
-                          variant="outline"
-                          className={settingsInvertedButtonClassName}
-                          onClick={() =>
-                            copyToClipboard("https://api.paperbase.me/api/v1/webhooks/steadfast/")
-                          }
-                        >
-                          Copy
-                        </Button>
-                      </div>
-                    </li>
-
-                    <li className="space-y-2">
-                      <div className="space-y-1">
-                        <p className="font-medium text-foreground">3. Generate and set your Auth Token</p>
-                        <p className="text-xs text-muted-foreground">
-                          Generate a secure random token, save it in your Steadfast portal, and keep a
-                          copy — you will need it later for your server configuration.
-                        </p>
-                      </div>
-
-                      {(() => {
-                        const token = (generatedTokenByCourierId[c.public_id] || "").trim();
-                        const hasLocalToken = token.length > 0;
-                        const hasStoredToken = Boolean(c.has_webhook_token);
-                        const hasToken = hasLocalToken || hasStoredToken;
-                        const revealed = Boolean(tokenRevealedByCourierId[c.public_id]);
-                        const focused = Boolean(tokenFieldFocusedByCourierId[c.public_id]);
-                        const showPlain = !hasToken || revealed || focused;
-                        const copied = Boolean(tokenCopiedByCourierId[c.public_id]);
-                        return (
-                          <div className="space-y-1">
-                            <label
-                              htmlFor={`steadfast_webhook_token_${c.public_id}`}
-                              className="text-sm font-medium leading-normal text-foreground"
-                            >
-                              Auth Token
-                            </label>
-                            <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-stretch">
-                              <div className="flex min-w-0 flex-1 items-stretch gap-2">
-                                {hasToken && !showPlain ? (
-                                  <button
-                                    type="button"
-                                    id={`steadfast_webhook_token_${c.public_id}`}
-                                    title="Click to reveal"
-                                    aria-label="Click to reveal"
-                                    onClick={() =>
-                                      setTokenRevealedByCourierId((prev) => ({
-                                        ...prev,
-                                        [c.public_id]: true,
-                                      }))
-                                    }
-                                    className={cn(
-                                      "flex h-9 min-w-0 w-full cursor-pointer items-center rounded-ui border border-border bg-background px-3 py-1 text-left font-mono text-sm text-foreground shadow-xs",
-                                      "transition-[color,box-shadow] outline-none hover:bg-muted/40",
-                                      "focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50",
-                                    )}
-                                  >
-                                    <span className="truncate tracking-[0.2em] text-muted-foreground" aria-hidden>
-                                      {"•".repeat(Math.min((hasLocalToken ? token.length : 32), 48))}
-                                    </span>
-                                  </button>
-                                ) : (
-                                  <Input
-                                    id={`steadfast_webhook_token_${c.public_id}`}
-                                    type="text"
-                                    autoComplete="new-password"
-                                    value={token}
-                                    onChange={(e) =>
-                                      setGeneratedTokenByCourierId((prev) => ({
-                                        ...prev,
-                                        [c.public_id]: e.target.value,
-                                      }))
-                                    }
-                                    onFocus={() =>
-                                      setTokenFieldFocusedByCourierId((prev) => ({
-                                        ...prev,
-                                        [c.public_id]: true,
-                                      }))
-                                    }
-                                    onBlur={() =>
-                                      setTokenFieldFocusedByCourierId((prev) => ({
-                                        ...prev,
-                                        [c.public_id]: false,
-                                      }))
-                                    }
-                                    className="min-w-0 flex-1 font-mono text-sm"
-                                    placeholder={
-                                      hasStoredToken && !hasLocalToken
-                                        ? "Token is set (hidden). Paste a new token to rotate"
-                                        : hasToken
-                                          ? "Paste a new token to rotate"
-                                          : "Generate a token"
-                                    }
-                                  />
-                                )}
-
-                                {hasLocalToken && showPlain && (
-                                  <Button
-                                    type="button"
-                                    variant="ghost"
-                                    size="icon"
-                                    title="Copy token"
-                                    aria-label={copied ? "Copied" : "Copy token"}
-                                    className="size-9 shrink-0"
-                                    onMouseDown={(e) => e.preventDefault()}
-                                    onClick={async () => {
-                                      await copyToClipboard(token);
-                                      setTokenCopiedByCourierId((prev) => ({
-                                        ...prev,
-                                        [c.public_id]: true,
-                                      }));
-                                    }}
-                                  >
-                                    {copied ? (
-                                      <Check className="size-4 text-emerald-600" aria-hidden />
-                                    ) : (
-                                      <Copy className="size-4" aria-hidden />
-                                    )}
-                                  </Button>
-                                )}
-                              </div>
-
-                              <Button
-                                type="button"
-                                variant="outline"
-                                size="sm"
-                                className={`${settingsInvertedButtonClassName} shrink-0 sm:self-stretch`}
-                                onClick={() => handleGenerateToken(c.public_id)}
-                              >
-                                {hasToken ? "Regenerate Token" : "Generate Token"}
-                              </Button>
-                              <Button
-                                type="button"
-                                variant="outline"
-                                size="sm"
-                                className={`${settingsInvertedButtonClassName} shrink-0 sm:self-stretch`}
-                                disabled={!hasLocalToken || savingWebhookTokenId === c.public_id}
-                                loading={savingWebhookTokenId === c.public_id}
-                                onClick={() => void handleSaveWebhookToken(c.public_id)}
-                              >
-                                Save
-                              </Button>
-                            </div>
-
-                            <p className="text-xs text-muted-foreground">
-                              Save this token somewhere safe. It will not be stored here.
-                            </p>
-                            <p className="text-xs text-muted-foreground">
-                              This saves your token securely to Paperbase so incoming webhooks can be verified.
-                            </p>
-                            {hasStoredToken && !hasLocalToken ? (
-                              <p className="text-xs text-muted-foreground">
-                                A token is already saved for this courier, but it cannot be displayed here. Paste a
-                                new one to replace it.
-                              </p>
-                            ) : null}
-                          </div>
-                        );
-                      })()}
-                    </li>
-
-                    <li className="space-y-1">
-                      <p className="font-medium text-foreground">4. Save in Steadfast portal</p>
-                      <p className="text-xs text-muted-foreground">
-                        Click Save in your Steadfast portal. Your dashboard will now receive live
-                        delivery status updates automatically.
-                      </p>
-                    </li>
-                  </ol>
-                </div>
-              ) : null}
-            </div>
-          ))}
-        </div>
-      )}
+            ) : null}
+            {couriers.map((c) => (
+              <SteadfastCourierRow
+                key={c.public_id}
+                c={c}
+                locale={locale}
+                t={tStr}
+                togglingId={togglingId}
+                savingWebhookTokenId={savingWebhookTokenId}
+                generatedTokenByCourierId={generatedTokenByCourierId}
+                setGeneratedTokenByCourierId={setGeneratedTokenByCourierId}
+                tokenRevealedByCourierId={tokenRevealedByCourierId}
+                setTokenRevealedByCourierId={setTokenRevealedByCourierId}
+                tokenFieldFocusedByCourierId={tokenFieldFocusedByCourierId}
+                setTokenFieldFocusedByCourierId={setTokenFieldFocusedByCourierId}
+                tokenCopiedByCourierId={tokenCopiedByCourierId}
+                setTokenCopiedByCourierId={setTokenCopiedByCourierId}
+                copyToClipboard={copyToClipboard}
+                onToggleActive={handleToggleActive}
+                onDisconnect={requestDisconnect}
+                onGenerateToken={handleGenerateToken}
+                onSaveWebhookToken={handleSaveWebhookToken}
+              />
+            ))}
+          </>
+        )}
+      </div>
     </div>
   );
 }

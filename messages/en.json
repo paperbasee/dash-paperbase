@@ -1142,8 +1142,8 @@
       "storefrontIntegrationHeading": "Storefront Integration",
       "storefrontIntegrationSubtitle": "Connect your live storefront for webhook-based revalidation.",
       "storefrontUrlLabel": "Storefront URL",
-      "storefrontUrlPlaceholder": "store.yourdomain.com",
-      "storefrontUrlHelp": "Your deployed storefront base URL",
+      "storefrontUrlPlaceholder": "yourdomain.com",
+      "storefrontUrlHelp": "Enter your domain without any prefix — we'll add it automatically",
       "revalidateSecretLabel": "Revalidation Secret",
       "revalidateSecretHelp": "Shared secret for storefront webhook verification",
       "revalidateSecretGenerate": "Generate",
@@ -1294,7 +1294,11 @@
     },
     "integrations": {
       "heading": "Integrations",
-      "subtitle": "Connect marketing and delivery tools to your store. More integrations are added over time."
+      "subtitle": "Connect marketing and delivery tools to your store. More integrations are added over time.",
+      "sectionMarketing": "Marketing",
+      "sectionDelivery": "Delivery",
+      "statusNotConnected": "Not connected",
+      "statusConnected": "Connected"
     },
     "networking": {
       "heading": "Networking",
@@ -1468,6 +1472,7 @@
       "copyPixel": "Copy Dataset ID",
       "pixelCopied": "Copied",
       "copyFailed": "Could not copy to clipboard.",
+      "addFacebookPixel": "Add Facebook pixel",
       "tiktok": {
         "heading": "TikTok Events API",
         "intro": "Connect TikTok’s server-side Events API: Paperbase sends web events from the server to TikTok for measurement. Add your Pixel Code and an Events API access token. Credentials are stored only on your store. (Browser TikTok Pixel is not used; this is server-side only.)",
@@ -1493,7 +1498,8 @@
         "modalConfigureDescription": "Your pixel code, token mask, and event options when available.",
         "modalDisconnectTitle": "Disconnect TikTok Events API?",
         "modalDisconnectDescription": "Stops sending server-side events to TikTok until you connect again.",
-        "copyPixel": "Copy Pixel Code"
+        "copyPixel": "Copy Pixel Code",
+        "addTiktokPixel": "Add TikTok pixel"
       }
     },
     "courier": {
@@ -1509,6 +1515,7 @@
       "empty": "No courier connected yet.",
       "connectCta": "Connect Steadfast",
       "providerName": "Steadfast",
+      "addCourier": "Add courier",
       "apiKeyLabel": "API Key:",
       "secretLabel": "Secret:",
       "connectedOn": "Connected",

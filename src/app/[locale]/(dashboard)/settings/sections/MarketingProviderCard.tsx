@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { Save, Copy, Check } from "lucide-react";
+import { Save, Copy, Check, Facebook, Music2 } from "lucide-react";
 import api from "@/lib/api";
 import type {
   MarketingIntegration as MarketingIntegrationType,
@@ -16,8 +16,7 @@ import { useConfirm } from "@/context/ConfirmDialogContext";
 import { notify } from "@/notifications";
 import { SettingsActionDialog } from "@/components/settings/SettingsActionDialog";
 import { settingsInvertedButtonClassName } from "../SettingsSectionBody";
-import { SettingsSectionSkeleton } from "@/components/skeletons/dashboard-skeletons";
-import SocialLinkGlyph from "./SocialLinkGlyph";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   MarketingIntegrationListRow,
   EventTogglesBlock,
@@ -224,40 +223,15 @@ export default function MarketingProviderCard({ provider }: { provider: Marketin
 
   const showHelper = provider === "tiktok";
 
+  const providerIcon =
+    provider === "facebook" ? (
+      <Facebook className="h-5 w-5 shrink-0 text-muted-foreground" aria-hidden />
+    ) : (
+      <Music2 className="h-5 w-5 shrink-0 text-muted-foreground" aria-hidden />
+    );
+
   return (
-    <div className="space-y-4">
-      <div className="space-y-1">
-        <div className="flex items-center gap-2">
-          {provider === "facebook" ? (
-            <SocialLinkGlyph platform="facebook" />
-          ) : (
-            <SocialLinkGlyph platform="tiktok" />
-          )}
-          <h3 className="text-lg font-medium text-foreground">
-            {provider === "facebook" ? t("marketing.heading") : c("heading")}
-          </h3>
-        </div>
-        <p className="text-sm text-muted-foreground">
-          {provider === "facebook" ? t("marketing.intro") : c("intro")}
-        </p>
-      </div>
-
-      {!loading && providerIntegrations.length > 0 && canAddPixel ? (
-        <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
-          <Button
-            type="button"
-            variant="outline"
-            className={settingsInvertedButtonClassName}
-            onClick={() => {
-              setForm(empty(provider));
-              setModal("connect");
-            }}
-          >
-            Add Pixel
-          </Button>
-        </div>
-      ) : null}
-
+    <div className="min-w-0 w-full">
       <SettingsActionDialog
         open={modal === "connect"}
         onOpenChange={(next) => {
@@ -429,51 +403,94 @@ export default function MarketingProviderCard({ provider }: { provider: Marketin
         ) : null}
       </SettingsActionDialog>
 
-      {loading ? (
-        <SettingsSectionSkeleton />
-      ) : showFullEmpty ? (
-        <div className="flex flex-col gap-2 py-2">
-          <p className="text-sm text-muted-foreground">
-            {provider === "facebook" ? t("marketing.empty") : c("empty")}
-          </p>
-          {modal !== "connect" && canAddPixel ? (
-            <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
-              <Button
-                type="button"
-                variant="outline"
-                className={settingsInvertedButtonClassName}
-                onClick={() => {
-                  setForm(empty(provider));
-                  setModal("connect");
-                }}
-              >
-                Add Pixel
-              </Button>
+      <div className="flex min-w-0 w-full flex-col divide-y divide-border">
+        {loading ? (
+          <div className="flex flex-wrap items-center gap-3 px-3.5 py-[11px]">
+            <div className="min-w-0 flex-1 space-y-1.5">
+              <Skeleton className="h-3.5 w-48 max-w-full" />
+              <Skeleton className="h-3 w-full max-w-md" />
             </div>
-          ) : null}
-        </div>
-      ) : providerIntegrations.length > 0 ? (
-        <div className="space-y-4">
-          {providerIntegrations.map((integration, index) => (
-            <MarketingIntegrationListRow
-              key={integration.public_id}
-              integration={integration}
-              providerTitle={providerTitle}
-              rowLabel={`Pixel ${index + 1}`}
-              pixelLineLabel={provider === "facebook" ? t("marketing.pixelLabel") : c("pixelLabel")}
-              tokenLineLabel={provider === "tiktok" ? c("tokenLabel") : undefined}
-              testCodeLineLabel={provider === "tiktok" ? c("testCodeLabel") : undefined}
-              numClass={numClass}
-              locale={locale}
-              togglingId={togglingId}
-              t={t as (key: string) => string}
-              onConfigure={() => setModal({ type: "configure", publicId: integration.public_id })}
-              onToggleActive={() => void handleToggleActive(integration)}
-              onDisconnect={() => requestDisconnect(integration.public_id)}
-            />
-          ))}
-        </div>
-      ) : null}
+            <Skeleton className="h-8 w-24 shrink-0 rounded-md" />
+          </div>
+        ) : showFullEmpty ? (
+          <div className="flex flex-wrap items-center gap-3 px-3.5 py-[11px]">
+            {providerIcon}
+            <div className="min-w-0 flex-1">
+              <p className="text-[13px] font-medium text-foreground">
+                {provider === "facebook" ? t("marketing.heading") : c("heading")}
+              </p>
+              <p className="text-[12px] text-muted-foreground">
+                {provider === "facebook" ? t("marketing.intro") : c("intro")}
+              </p>
+              <p className="mt-0.5 text-[12px] text-muted-foreground">
+                {provider === "facebook" ? t("marketing.empty") : c("empty")}
+              </p>
+            </div>
+            <div className="flex shrink-0 flex-wrap items-center gap-2 sm:justify-end">
+              <span className="flex items-center gap-1.5 text-[12px] text-muted-foreground">
+                <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-muted-foreground" aria-hidden />
+                {t("integrations.statusNotConnected")}
+              </span>
+              {modal !== "connect" && canAddPixel ? (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="min-h-[36px] text-[12px] sm:min-h-0"
+                  onClick={() => {
+                    setForm(empty(provider));
+                    setModal("connect");
+                  }}
+                >
+                  {provider === "facebook" ? t("marketing.connectCta") : c("connectCta")}
+                </Button>
+              ) : null}
+            </div>
+          </div>
+        ) : providerIntegrations.length > 0 ? (
+          <>
+            {!loading && providerIntegrations.length > 0 && canAddPixel ? (
+              <div className="flex flex-wrap items-center gap-3 px-3.5 py-[11px]">
+                {providerIcon}
+                <p className="min-w-0 flex-1 text-[13px] font-medium text-foreground">
+                  {provider === "facebook" ? t("marketing.addFacebookPixel") : c("addTiktokPixel")}
+                </p>
+                <div className="flex shrink-0 flex-wrap items-center gap-2 sm:justify-end">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="min-h-[36px] text-[12px] sm:min-h-0"
+                    onClick={() => {
+                      setForm(empty(provider));
+                      setModal("connect");
+                    }}
+                  >
+                    {provider === "facebook" ? t("marketing.addFacebookPixel") : c("addTiktokPixel")}
+                  </Button>
+                </div>
+              </div>
+            ) : null}
+            {providerIntegrations.map((integration) => (
+              <MarketingIntegrationListRow
+                key={integration.public_id}
+                integration={integration}
+                providerTitle={providerTitle}
+                pixelLineLabel={provider === "facebook" ? t("marketing.pixelLabel") : c("pixelLabel")}
+                tokenLineLabel={provider === "tiktok" ? c("tokenLabel") : undefined}
+                testCodeLineLabel={provider === "tiktok" ? c("testCodeLabel") : undefined}
+                numClass={numClass}
+                locale={locale}
+                togglingId={togglingId}
+                t={t as (key: string) => string}
+                onConfigure={() => setModal({ type: "configure", publicId: integration.public_id })}
+                onToggleActive={() => void handleToggleActive(integration)}
+                onDisconnect={() => requestDisconnect(integration.public_id)}
+              />
+            ))}
+          </>
+        ) : null}
+      </div>
     </div>
   );
 }
