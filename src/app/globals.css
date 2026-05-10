@@ -84,6 +84,19 @@
     --text-secondary: hsl(var(--muted-foreground));
     --border-color: hsl(var(--border));
 
+    /* Semantic tokens (settings / dynamic fields) */
+    --color-background-primary: hsl(var(--background));
+    --color-background-secondary: hsl(var(--muted));
+    --color-background-tertiary: hsl(var(--accent));
+    --color-text-primary: hsl(var(--foreground));
+    --color-text-secondary: hsl(var(--muted-foreground));
+    --color-text-tertiary: hsl(var(--muted-foreground) / 0.72);
+    --color-border-tertiary: hsl(var(--border-subtle));
+    --color-border-secondary: hsl(var(--border));
+    --color-border-primary: hsl(var(--ring));
+    --border-radius-md: 6px;
+    --border-radius-lg: 10px;
+
     /* System notification banner (mobile top strip + shared base variant) */
     --system-banner-surface: rgba(255, 255, 255, 0.96);
     --system-banner-border: rgba(15, 23, 42, 0.14);
@@ -161,6 +174,18 @@
     --text-primary: hsl(var(--foreground));
     --text-secondary: hsl(var(--muted-foreground));
     --border-color: hsl(var(--border));
+
+    --color-background-primary: hsl(var(--background));
+    --color-background-secondary: hsl(var(--muted));
+    --color-background-tertiary: hsl(var(--accent));
+    --color-text-primary: hsl(var(--foreground));
+    --color-text-secondary: hsl(var(--muted-foreground));
+    --color-text-tertiary: hsl(var(--muted-foreground) / 0.72);
+    --color-border-tertiary: hsl(var(--border-subtle));
+    --color-border-secondary: hsl(var(--border));
+    --color-border-primary: hsl(var(--ring));
+    --border-radius-md: 6px;
+    --border-radius-lg: 10px;
 
     --system-banner-surface: rgba(15, 17, 21, 0.94);
     --system-banner-border: rgba(255, 255, 255, 0.16);
@@ -298,6 +323,16 @@ html {
 /* Prevent transition flash while pre-paint script applies initial theme. */
 html.theme-preload {
   transition: none !important;
+}
+
+@keyframes pb-dynamic-fields-saved {
+  0%,
+  92.5% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
 }
 
 /* View Transitions: keep snapshots static; ripple animates clip-path on the "new" view. */

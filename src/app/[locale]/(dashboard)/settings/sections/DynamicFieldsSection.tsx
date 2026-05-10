@@ -22,10 +22,14 @@ export default function DynamicFieldsSection({
       hidden={hidden}
       className={settingsSectionSurfaceClassName}
     >
-      <SettingsSectionBody>
+      <SettingsSectionBody gap="compact">
         <div className="space-y-1">
-          <h2 className="text-lg font-medium text-foreground">{t("dynamicFields.heading")}</h2>
-          <p className="text-sm text-muted-foreground">{t("dynamicFields.subtitle")}</p>
+          <h2 className="text-[16px] font-medium text-[var(--color-text-primary)]">
+            {t("dynamicFields.heading")}
+          </h2>
+          <p className="text-[13px] leading-snug text-[var(--color-text-secondary)]">
+            {t("dynamicFields.subtitle")}
+          </p>
         </div>
         <DynamicFieldsPanel message={message} onMessage={onMessage} />
       </SettingsSectionBody>
