@@ -56,6 +56,7 @@ import { notify, normalizeError } from "@/notifications";
 import { cn } from "@/lib/utils";
 import { DashboardDetailSkeleton } from "@/components/skeletons/dashboard-skeletons";
 import { useEnterNavigation } from "@/hooks/useEnterNavigation";
+import { useConfirm } from "@/context/ConfirmDialogContext";
 
 type EditForm = {
   shipping_name: string;
@@ -76,6 +77,7 @@ export default function OrderDetailPage() {
   const tPages = useTranslations("pages");
   const tNav = useTranslations("nav");
   const tCommon = useTranslations("common");
+  const confirm = useConfirm();
   const { currencySymbol } = useBranding();
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
@@ -449,6 +451,16 @@ export default function OrderDetailPage() {
       order.has_unavailable_products
     ) {
       return;
+    }
+    if (next === "cancelled") {
+      const ok = await confirm({
+        title: tPages("confirmDialogTitleCancelOrder"),
+        message: tPages("confirmCancelOrder"),
+        confirmText: tPages("orderStatusCancelled"),
+        cancelText: tCommon("cancel"),
+        variant: "danger",
+      });
+      if (!ok) return;
     }
     setStatusUpdateError("");
     setStatusUpdateLoading(true);

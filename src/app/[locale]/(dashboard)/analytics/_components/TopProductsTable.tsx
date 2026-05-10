@@ -33,7 +33,6 @@ export function TopProductsTable({
                     <div className="max-w-[18rem] font-medium whitespace-nowrap overflow-hidden text-ellipsis">
                       {p.product_name || p.product_id}
                     </div>
-                    <div className="text-xs text-muted-foreground">{p.product_id}</div>
                   </td>
                   <td className="px-4 py-3 text-muted-foreground">{p.views}</td>
                   <td className="px-4 py-3 text-muted-foreground">{p.add_to_cart}</td>

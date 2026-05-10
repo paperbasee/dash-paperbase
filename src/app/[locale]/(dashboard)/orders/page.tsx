@@ -142,6 +142,7 @@ export default function OrdersPage() {
   const numClass = numberTextClass(locale);
   const tNav = useTranslations("nav");
   const tPages = useTranslations("pages");
+  const tCommon = useTranslations("common");
   const { currencySymbol } = useBranding();
   const confirm = useConfirm();
   const { filters, setFilter, clearFilters } = useFilters([
@@ -486,6 +487,16 @@ export default function OrdersPage() {
       next === order.status
     ) {
       return;
+    }
+    if (next === "cancelled") {
+      const ok = await confirm({
+        title: tPages("confirmDialogTitleCancelOrder"),
+        message: tPages("confirmCancelOrder"),
+        confirmText: tPages("orderStatusCancelled"),
+        cancelText: tCommon("cancel"),
+        variant: "danger",
+      });
+      if (!ok) return;
     }
     setStatusUpdatingId(order.public_id);
     try {
