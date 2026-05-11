@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react";
 import Image from "next/image";
-import { CopyIcon } from "@phosphor-icons/react";
+import { ClipboardTextIcon } from "@phosphor-icons/react";
 import { Check, ShoppingCart } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
@@ -83,7 +83,7 @@ function CopyNumberButton({ value, copiedLabel, copyLabel }: { value: string; co
             aria-hidden
           />
         ) : (
-          <CopyIcon key="copy" className="h-4 w-4" aria-hidden />
+          <ClipboardTextIcon key="copy" className="h-4 w-4" aria-hidden />
         )}
       </span>
     </button>

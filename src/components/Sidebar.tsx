@@ -3,7 +3,7 @@
 import { useTranslations } from "next-intl";
 import { Link, usePathname, useRouter } from "@/i18n/navigation";
 import { useSearchParams } from "next/navigation";
-import { CopyIcon, SidebarSimpleIcon } from "@phosphor-icons/react";
+import { ClipboardTextIcon, SidebarSimpleIcon } from "@phosphor-icons/react";
 import {
   Birdhouse,
   ChevronsUpDown,
@@ -54,6 +54,12 @@ import {
   setLocalePreferenceCookie,
 } from "@/lib/locale-storage";
 import { routing, type AppLocale } from "@/i18n/routing";
+
+/** Static PNGs under `public/assets/flags/` — reliable across OSes (emoji flags are not). */
+const SIDEBAR_LOCALE_FLAG_SRC = {
+  en: "/assets/flags/united-states.png",
+  bn: "/assets/flags/bangladesh.png",
+} as const satisfies Record<AppLocale, string>;
 import {
   applyThemePreference,
   getStoredThemePreference,
@@ -591,7 +597,7 @@ function SidebarContent({
                   const label =
                     loc === "en" ? tLang("switchToEnglish") : tLang("switchToBengali");
                   const code = loc.toUpperCase();
-                  const flag = loc === "en" ? "🇺🇸" : "🇧🇩";
+                  const flagSrc = SIDEBAR_LOCALE_FLAG_SRC[loc];
                   return (
                     <DropdownMenuItem
                       key={loc}
@@ -607,9 +613,14 @@ function SidebarContent({
                       )}
                     >
                       <span className="flex min-w-0 items-center gap-2.5">
-                        <span className="text-lg leading-none" aria-hidden>
-                          {flag}
-                        </span>
+                        <img
+                          src={flagSrc}
+                          alt=""
+                          width={20}
+                          height={15}
+                          className="h-5 w-auto max-w-[1.75rem] shrink-0 rounded-sm object-cover"
+                          draggable={false}
+                        />
                         <span className="truncate font-medium">{label}</span>
                       </span>
                       <span
@@ -643,7 +654,7 @@ function SidebarContent({
                       aria-hidden
                     />
                   ) : (
-                    <CopyIcon className="size-[1.125rem]" aria-hidden />
+                    <ClipboardTextIcon className="size-[1.125rem]" aria-hidden />
                   )}
                   <span>
                     {copiedStoreId === activeStoreId

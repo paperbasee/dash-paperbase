@@ -1,13 +1,20 @@
 "use client";
 
-import { Fragment, useCallback, useEffect, useLayoutEffect, useState } from "react";
+import {
+  Fragment,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useState,
+  type ReactNode,
+} from "react";
 import dynamic from "next/dynamic";
 import { useLocale, useTranslations } from "next-intl";
 import { Link, useRouter } from "@/i18n/navigation";
 import { toLocaleDigits } from "@/lib/locale-digits";
 import { cursorFromLink } from "@/lib/cursor-from-link";
 import { digitsInNumberFont, numberTextClass } from "@/lib/number-font";
-import { Download, Loader2, Truck, Undo2 } from "lucide-react";
+import { Download, Loader2, FunnelIcon, Truck, Undo2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ClickableTableRow } from "@/components/ui/clickable-table-row";
 import { Input } from "@/components/ui/input";
@@ -20,7 +27,7 @@ import { useHorizontalWheelScroll } from "@/hooks/useHorizontalWheelScroll";
 import api from "@/lib/api";
 import { useBranding } from "@/context/BrandingContext";
 import { formatDashboardDateTime } from "@/lib/datetime-display";
-import { flattenCategoryOptions } from "@/lib/category-tree";
+import { flattenCategoryOptionsRich } from "@/lib/category-tree";
 import {
   ORDER_STATUS_OPTIONS,
   formatOrderStatusLabel,
@@ -44,6 +51,7 @@ import { FraudCheckButton } from "./_components/FraudCheckButton";
 import type { FraudCheckApiOk, FraudCheckState } from "./_components/types";
 import { useFeatures } from "@/hooks/useFeatures";
 import { useAuth } from "@/context/AuthContext";
+import { useNavCounts } from "@/hooks/useNavCounts";
 import {
   canUserDeleteProducts,
   type MeForProductDeletePermission,
@@ -133,7 +141,9 @@ export default function OrdersPage() {
   const [searchInput, setSearchInput] = useState(filters.search || "");
   const debouncedSearch = useDebouncedValue(searchInput);
   const [orders, setOrders] = useState<Order[]>([]);
+  const [ordersCount, setOrdersCount] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
+  const [filtersOpen, setFiltersOpen] = useState(false);
   const [listCursor, setListCursor] = useState<string | null>(null);
   const [nextLink, setNextLink] = useState<string | null>(null);
   const [prevLink, setPrevLink] = useState<string | null>(null);
@@ -151,16 +161,147 @@ export default function OrdersPage() {
   const { hasFeature } = useFeatures();
   const canFraudCheck = hasFeature("fraud_check");
   const { meProfile } = useAuth();
+  const { counts: navCounts } = useNavCounts();
   const canExportOrders = Boolean(
     meProfile &&
       canUserDeleteProducts(meProfile as MeForProductDeletePermission)
   );
 
+  const deliveryPillOptions: { value: string; label: string }[] = [
+    { value: "", label: "All" },
+    ...ORDER_DELIVERY_STATUS_OPTIONS.map((s) => ({
+      value: s,
+      label: formatOrderDeliveryStatusLabel(s, (key) => tPages(key)),
+    })),
+  ];
+
+  function statusSelectToneClass(status: string | null | undefined): string {
+    const s = (status || "").toLowerCase();
+    if (s === "confirmed") {
+      return [
+        // Light theme: darker text + slightly stronger tint
+        "[&_[data-slot=select]]:bg-emerald-50",
+        "[&_[data-slot=select]]:text-emerald-950",
+        // Dark theme: brighter text + stronger tint for contrast
+        "dark:[&_[data-slot=select]]:bg-emerald-500/20",
+        "dark:[&_[data-slot=select]]:text-emerald-200",
+      ].join(" ");
+    }
+    if (s === "cancelled") {
+      return [
+        "[&_[data-slot=select]]:bg-rose-50",
+        "[&_[data-slot=select]]:text-rose-950",
+        "dark:[&_[data-slot=select]]:bg-rose-500/20",
+        "dark:[&_[data-slot=select]]:text-rose-200",
+      ].join(" ");
+    }
+    if (s === "pending" || s === "payment_pending") {
+      return [
+        "[&_[data-slot=select]]:bg-amber-50",
+        "[&_[data-slot=select]]:text-amber-950",
+        "dark:[&_[data-slot=select]]:bg-amber-500/20",
+        "dark:[&_[data-slot=select]]:text-amber-200",
+      ].join(" ");
+    }
+    return "";
+  }
+
+  const statusOptionStyle: React.CSSProperties = {
+    backgroundColor: "#0b0b0c",
+    color: "#ffffff",
+  };
+
+  const [isDarkTheme, setIsDarkTheme] = useState(true);
+  useEffect(() => {
+    const root = document.documentElement;
+    const read = () => setIsDarkTheme(root.classList.contains("dark"));
+    read();
+    const obs = new MutationObserver(read);
+    obs.observe(root, { attributes: true, attributeFilter: ["class"] });
+    return () => obs.disconnect();
+  }, []);
+
+  function themedOptionBaseStyle(): React.CSSProperties {
+    return isDarkTheme
+      ? { backgroundColor: "#0b0b0c", color: "#ffffff" }
+      : { backgroundColor: "#ffffff", color: "#0b0b0c" };
+  }
+
+  function statusOptionStyleFor(status: string): React.CSSProperties {
+    const base = themedOptionBaseStyle();
+    const s = (status || "").toLowerCase();
+    // Note: option styling support varies by OS/browser; keep high contrast.
+    if (s === "confirmed") return { ...base, color: "#34d399" }; // emerald-400
+    if (s === "cancelled") return { ...base, color: "#fb7185" }; // rose-400
+    if (s === "pending" || s === "payment_pending") return { ...base, color: "#fbbf24" }; // amber-400
+    return base;
+  }
+
+  function flagSelectToneClass(flag: string | null | undefined): string {
+    const f = (flag || "").trim().toLowerCase();
+    if (!f) return "";
+    if (f === "high_priority") {
+      return [
+        "[&_[data-slot=select]]:bg-rose-50",
+        "[&_[data-slot=select]]:text-rose-950",
+        "dark:[&_[data-slot=select]]:bg-rose-500/20",
+        "dark:[&_[data-slot=select]]:text-rose-200",
+      ].join(" ");
+    }
+    if (f === "wrong_number") {
+      return [
+        "[&_[data-slot=select]]:bg-amber-50",
+        "[&_[data-slot=select]]:text-amber-950",
+        "dark:[&_[data-slot=select]]:bg-amber-500/20",
+        "dark:[&_[data-slot=select]]:text-amber-200",
+      ].join(" ");
+    }
+    if (f === "call_later") {
+      return [
+        "[&_[data-slot=select]]:bg-blue-50",
+        "[&_[data-slot=select]]:text-blue-950",
+        "dark:[&_[data-slot=select]]:bg-blue-500/20",
+        "dark:[&_[data-slot=select]]:text-blue-200",
+      ].join(" ");
+    }
+    if (f === "no_response") {
+      return [
+        "[&_[data-slot=select]]:bg-slate-50",
+        "[&_[data-slot=select]]:text-slate-950",
+        "dark:[&_[data-slot=select]]:bg-slate-500/20",
+        "dark:[&_[data-slot=select]]:text-slate-200",
+      ].join(" ");
+    }
+    if (f === "busy") {
+      return [
+        "[&_[data-slot=select]]:bg-violet-50",
+        "[&_[data-slot=select]]:text-violet-950",
+        "dark:[&_[data-slot=select]]:bg-violet-500/20",
+        "dark:[&_[data-slot=select]]:text-violet-200",
+      ].join(" ");
+    }
+    return "";
+  }
+
+  function flagOptionStyle(flag: string): React.CSSProperties {
+    const base = themedOptionBaseStyle();
+    const f = (flag || "").trim().toLowerCase();
+    // Note: option styling support varies by OS/browser; keep high contrast.
+    if (f === "high_priority") return { ...base, color: "#fb7185" }; // rose-400
+    if (f === "wrong_number") return { ...base, color: "#fbbf24" }; // amber-400
+    if (f === "call_later") return { ...base, color: "#60a5fa" }; // blue-400
+    if (f === "busy") return { ...base, color: "#c4b5fd" }; // violet-300
+    if (f === "no_response") return { ...base, color: "#cbd5e1" }; // slate-300
+    return base;
+  }
+
   const [globalSelectActive, setGlobalSelectActive] = useState(false);
   const [exportSubmitting, setExportSubmitting] = useState(false);
   const [activeExportJobId, setActiveExportJobId] = useState<string | null>(null);
   const [exportPoll, setExportPoll] = useState<OrderExportPollResponse | null>(null);
-  const [categoryOptions, setCategoryOptions] = useState<{ value: string; label: string }[]>([]);
+  const [categoryOptions, setCategoryOptions] = useState<
+    { value: string; label: string; labelDisplay: ReactNode }[]
+  >([]);
 
   function fraudStatus(data: FraudCheckApiOk | null | undefined): string | undefined {
     return data?.status ? String(data.status) : undefined;
@@ -185,7 +326,7 @@ export default function OrdersPage() {
       .get<AdminCategoryTreeNode[]>("admin/categories/?tree=1")
       .then((res) => {
         const tree = Array.isArray(res.data) ? res.data : [];
-        setCategoryOptions(flattenCategoryOptions(tree));
+        setCategoryOptions(flattenCategoryOptionsRich(tree));
       })
       .catch((err) => {
         console.error(err);
@@ -210,6 +351,7 @@ export default function OrdersPage() {
       })
       .then((res) => {
         setOrders(res.data.results);
+        setOrdersCount(typeof res.data.count === "number" ? res.data.count : null);
         setNextLink(res.data.next);
         setPrevLink(res.data.previous);
       })
@@ -238,6 +380,7 @@ export default function OrdersPage() {
     setListCursor(null);
     setNextLink(null);
     setPrevLink(null);
+    setOrdersCount(null);
   }, [
     filters.customer,
     filters.date_range,
@@ -261,6 +404,32 @@ export default function OrdersPage() {
     filters.search,
     filters.status,
   ]);
+
+  useEffect(() => {
+    const hasAnyValue = Boolean(
+      (filters.customer || "").trim() ||
+        (filters.status || "").trim() ||
+        (filters.flag || "").trim() ||
+        (filters.date_range || "").trim() ||
+        (filters.payment_status || "").trim() ||
+        (filters.delivery_status || "").trim() ||
+        (filters.category || "").trim() ||
+        (filters.search || "").trim()
+    );
+    if (!hasAnyValue) setFiltersOpen(false);
+  }, [
+    filters.category,
+    filters.customer,
+    filters.date_range,
+    filters.delivery_status,
+    filters.flag,
+    filters.payment_status,
+    filters.search,
+    filters.status,
+  ]);
+
+  const pageOrdersCount = orders.length;
+  const totalOrdersCount = ordersCount ?? navCounts?.orders ?? null;
 
   useEffect(() => {
     if (!activeExportJobId) return;
@@ -633,90 +802,124 @@ export default function OrdersPage() {
         </div>
       </div>
 
-      <FilterBar>
-        <FilterDropdown
-          value={filters.status}
-          onChange={(value) => setFilter("status", value)}
-          placeholder="Action"
-          options={ORDER_STATUS_OPTIONS.map((s) => ({
-            value: s,
-            label: formatOrderStatusLabel(s, (key) => tPages(key)),
-          }))}
-        />
-        <FilterDropdown
-          value={filters.flag}
-          onChange={(value) => setFilter("flag", value)}
-          placeholder="Flag"
-          options={ORDER_FLAG_OPTIONS.map((f) => ({
-            value: f,
-            label: formatOrderFlagLabel(f),
-          }))}
-        />
-        <FilterDropdown
-          value={filters.date_range}
-          onChange={(value) => setFilter("date_range", value)}
-          placeholder={tPages("filtersDateRange")}
-          options={[
-            { value: "today", label: tPages("filtersToday") },
-            {
-              value: "last_7_days",
-              label: tPages("filtersLast7Days"),
-              labelDisplay: digitsInNumberFont(
-                tPages("filtersLast7Days"),
-                locale
-              ),
-            },
-            {
-              value: "last_30_days",
-              label: tPages("filtersLast30Days"),
-              labelDisplay: digitsInNumberFont(
-                tPages("filtersLast30Days"),
-                locale
-              ),
-            },
-          ]}
-        />
-        <FilterDropdown
-          value={filters.payment_status}
-          onChange={(value) => setFilter("payment_status", value)}
-          placeholder={tPages("filtersPaymentStatus")}
-          options={ORDER_PAYMENT_STATUS_OPTIONS.map((s) => ({
-            value: s,
-            label: formatOrderPaymentStatusLabel(s, (key) => tPages(key)),
-          }))}
-        />
-        <FilterDropdown
-          value={filters.delivery_status}
-          onChange={(value) => setFilter("delivery_status", value)}
-          placeholder={tPages("filtersDeliveryStatus")}
-          options={ORDER_DELIVERY_STATUS_OPTIONS.map((s) => ({
-            value: s,
-            label: formatOrderDeliveryStatusLabel(s, (key) => tPages(key)),
-          }))}
-        />
-        <FilterDropdown
-          value={filters.category}
-          onChange={(value) => setFilter("category", value)}
-          placeholder="Category"
-          options={categoryOptions}
-        />
-        <Input
-          value={searchInput}
-          onChange={(e) => setSearchInput(e.target.value)}
-          placeholder={tPages("filtersSearchOrders")}
-          className="w-full md:w-72"
-        />
-        <button
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2 flex-wrap min-w-0">
+          {deliveryPillOptions.map((opt) => {
+            const active = (filters.delivery_status || "") === opt.value;
+            return (
+              <button
+                key={opt.value || "__all__"}
+                type="button"
+                onClick={() => setFilter("delivery_status", opt.value)}
+                aria-pressed={active}
+                className={[
+                  "h-9 rounded-ui border px-3 text-sm font-medium transition whitespace-nowrap",
+                  active
+                    ? "border-primary/40 bg-primary text-primary-foreground"
+                    : "border-border bg-card text-foreground hover:bg-muted",
+                ].join(" ")}
+              >
+                {opt.label}
+              </button>
+            );
+          })}
+        </div>
+        <Button
           type="button"
-          onClick={() => {
-            setSearchInput("");
-            clearFilters();
-          }}
-          className="h-9 rounded-ui border border-border px-3 text-sm hover:bg-muted"
+          variant="outline"
+          size="sm"
+          className="h-9 px-3"
+          aria-label="Toggle filters"
+          aria-expanded={filtersOpen}
+          onClick={() => setFiltersOpen((v) => !v)}
         >
-          {tPages("filtersClear")}
-        </button>
-      </FilterBar>
+          <FunnelIcon className="size-4" aria-hidden />
+        </Button>
+      </div>
+
+      <p className="text-xs text-muted-foreground">
+        {loading
+          ? tCommon("loading")
+          : totalOrdersCount === null
+            ? tPages("ordersListCountPageOnly", { pageCount: pageOrdersCount })
+            : tPages("ordersListCountWithTotal", {
+                pageCount: pageOrdersCount,
+                totalCount: totalOrdersCount,
+              })}
+      </p>
+
+      {filtersOpen ? (
+        <FilterBar>
+          <FilterDropdown
+            value={filters.status}
+            onChange={(value) => setFilter("status", value)}
+            placeholder="Action"
+            options={ORDER_STATUS_OPTIONS.map((s) => ({
+              value: s,
+              label: formatOrderStatusLabel(s, (key) => tPages(key)),
+            }))}
+          />
+          <FilterDropdown
+            value={filters.flag}
+            onChange={(value) => setFilter("flag", value)}
+            placeholder="Flag"
+            options={ORDER_FLAG_OPTIONS.map((f) => ({
+              value: f,
+              label: formatOrderFlagLabel(f),
+            }))}
+          />
+          <FilterDropdown
+            value={filters.date_range}
+            onChange={(value) => setFilter("date_range", value)}
+            placeholder={tPages("filtersDateRange")}
+            options={[
+              { value: "today", label: tPages("filtersToday") },
+              {
+                value: "last_7_days",
+                label: tPages("filtersLast7Days"),
+                labelDisplay: digitsInNumberFont(tPages("filtersLast7Days"), locale),
+              },
+              {
+                value: "last_30_days",
+                label: tPages("filtersLast30Days"),
+                labelDisplay: digitsInNumberFont(tPages("filtersLast30Days"), locale),
+              },
+            ]}
+          />
+          <FilterDropdown
+            value={filters.payment_status}
+            onChange={(value) => setFilter("payment_status", value)}
+            placeholder={tPages("filtersPaymentStatus")}
+            options={ORDER_PAYMENT_STATUS_OPTIONS.map((s) => ({
+              value: s,
+              label: formatOrderPaymentStatusLabel(s, (key) => tPages(key)),
+            }))}
+          />
+          <FilterDropdown
+            value={filters.category}
+            onChange={(value) => setFilter("category", value)}
+            placeholder="Category"
+            options={categoryOptions}
+            className="min-w-[180px]"
+          />
+          <Input
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            placeholder={tPages("filtersSearchOrders")}
+            className="w-full md:w-72"
+          />
+          <button
+            type="button"
+            onClick={() => {
+              setSearchInput("");
+              clearFilters();
+            }}
+            className="h-9 rounded-ui border border-border px-3 text-sm hover:bg-muted"
+          >
+            {tPages("filtersClear")}
+          </button>
+        </FilterBar>
+      ) : null}
 
       {globalSelectActive ? (
         <div className="rounded-card border border-primary/30 bg-primary/5 px-4 py-3 text-sm text-foreground">
@@ -783,7 +986,7 @@ export default function OrdersPage() {
       ) : null}
 
       {loading ? (
-        <DashboardTableSkeleton columns={12} rows={5} showHeader={false} showFilters={false} />
+        <DashboardTableSkeleton columns={10} rows={5} showHeader={false} showFilters={false} />
       ) : (
         <>
           <div
@@ -811,8 +1014,6 @@ export default function OrdersPage() {
                   <th className="th">Delivery Status</th>
                   <th className="th">{tPages("ordersListColTotal")}</th>
                   <th className="th">{tPages("ordersListConsignmentId")}</th>
-                  <th className="th">{tPages("ordersListColPayment")}</th>
-                  <th className="th">{tPages("ordersListColTransactionId")}</th>
                   <th className="th">{tPages("ordersListColDate")}</th>
                 </tr>
               </thead>
@@ -860,7 +1061,7 @@ export default function OrdersPage() {
                         <td className="px-4 py-3 whitespace-nowrap">
                           <div className="space-y-1">
                             {order.has_unavailable_products ? (
-                              <p className="text-xs text-muted-foreground">
+                              <p className="text-xs text-rose-600 dark:text-rose-400">
                                 {formatOrderStatusLabel(order.status, (key) =>
                                   tPages(key)
                                 )}{" "}
@@ -871,7 +1072,7 @@ export default function OrdersPage() {
                               </p>
                             ) : (
                               <Select
-                                className="w-[180px] capitalize"
+                                className={`w-[180px] capitalize ${statusSelectToneClass(order.status)}`}
                                 value={order.status}
                                 disabled={
                                   order.status === "cancelled" ||
@@ -897,7 +1098,7 @@ export default function OrdersPage() {
                                   }
                                   return true;
                                 }).map((s) => (
-                                  <option key={s} value={s}>
+                                  <option key={s} value={s} style={statusOptionStyleFor(s)}>
                                     {formatOrderStatusLabel(s, (key) => tPages(key))}
                                   </option>
                                 ))}
@@ -905,7 +1106,7 @@ export default function OrdersPage() {
                             )}
                             {!order.has_unavailable_products &&
                             (order.unavailable_products_count ?? 0) > 0 ? (
-                              <p className="text-xs text-muted-foreground">
+                              <p className="text-xs text-rose-600 dark:text-rose-400">
                                 {formatOrderStatusLabel(order.status, (key) =>
                                   tPages(key)
                                 )}{" "}
@@ -919,7 +1120,7 @@ export default function OrdersPage() {
                         </td>
                         <td className="px-4 py-3 whitespace-nowrap">
                           <Select
-                            className="w-[180px]"
+                            className={`w-[180px] ${flagSelectToneClass(order.flag as string)}`}
                             value={(order.flag || "") as string}
                             disabled={flagUpdatingId === order.public_id}
                             onChange={(e) =>
@@ -927,9 +1128,11 @@ export default function OrdersPage() {
                             }
                             aria-label={`Flag for order ${order.order_number}`}
                           >
-                            <option value="">{formatOrderFlagLabel(null)}</option>
+                            <option value="" style={themedOptionBaseStyle()}>
+                              {formatOrderFlagLabel(null)}
+                            </option>
                             {ORDER_FLAG_OPTIONS.map((f) => (
-                              <option key={f} value={f}>
+                              <option key={f} value={f} style={flagOptionStyle(f)}>
                                 {formatOrderFlagLabel(f)}
                               </option>
                             ))}
@@ -973,19 +1176,6 @@ export default function OrdersPage() {
                               {courierCell(order)}
                             </span>
                           )}
-                        </td>
-                        <td className="px-4 py-3 whitespace-nowrap capitalize text-muted-foreground">
-                          {formatOrderPaymentStatusLabel(
-                            order.payment_status,
-                            (key) => tPages(key),
-                          )}
-                        </td>
-                        <td
-                          className={`px-4 py-3 whitespace-nowrap text-muted-foreground ${numClass}`}
-                        >
-                          {order.transaction_id
-                            ? order.transaction_id
-                            : "—"}
                         </td>
                         <td className="px-4 py-3 text-muted-foreground whitespace-nowrap">
                           {formatDashboardDateTime(order.created_at, locale)}

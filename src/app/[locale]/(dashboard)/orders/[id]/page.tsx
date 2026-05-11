@@ -17,6 +17,7 @@ import {
   formatOrderStatusLabel,
 } from "@/lib/orders/order-statuses";
 import { ORDER_FLAG_OPTIONS, formatOrderFlagLabel } from "@/lib/orders/order-flags";
+import { formatOrderPaymentStatusLabel } from "@/lib/orders/payment-statuses";
 import type {
   Order,
   OrderPricingPreview,
@@ -554,6 +555,14 @@ export default function OrderDetailPage() {
           .filter(Boolean)
           .join(" · ") || "—"
       : "—";
+  const hasPaymentMeta = Boolean(
+    (order.transaction_id || "").trim() ||
+      (order.payer_number || "").trim() ||
+      ((order.payment_status || "").trim() &&
+        String(order.payment_status).toLowerCase() !== "none")
+  );
+  const canVerifyPayment =
+    order.status === "payment_pending" && order.payment_status === "submitted";
 
   function deliveryStatusBadge(o: Order) {
     const s = o.delivery_status || "unknown";
@@ -768,53 +777,67 @@ export default function OrderDetailPage() {
 
         {/* Right column: stacked cards (height drives Product card on desktop) */}
         <div ref={rightColRef} className="flex flex-col gap-6 lg:col-span-1">
-        {order.status === "payment_pending" && order.payment_status === "submitted" && (
+        {canVerifyPayment || hasPaymentMeta ? (
           <Card className="overflow-hidden rounded-card border border-card-border bg-card shadow-sm">
             <CardHeader className="border-b border-border/50 px-4 pb-4 sm:px-6">
-              <CardTitle>{tPages("orderDetailVerifyPaymentTitle")}</CardTitle>
+              <CardTitle>
+                {canVerifyPayment
+                  ? tPages("orderDetailVerifyPaymentTitle")
+                  : tPages("orderDetailPaymentMetaTitle")}
+              </CardTitle>
               <CardDescription>
-                {tPages("orderDetailVerifyPaymentDescription")}
+                {canVerifyPayment
+                  ? tPages("orderDetailVerifyPaymentDescription")
+                  : tPages("orderDetailPaymentMetaDescription")}
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4 px-4 pt-6 sm:px-6">
+            <CardContent className={cn("px-4 pt-6 sm:px-6", canVerifyPayment && "space-y-4")}>
               <dl className="space-y-3 text-sm">
-                <div className="flex justify-between">
-                  <dt className="text-muted-foreground">
-                    {tPages("orderDetailTransactionIdLabel")}
-                  </dt>
-                  <dd className={numClass}>{order.transaction_id || "—"}</dd>
+                <div className="flex justify-between gap-3">
+                  <dt className="text-muted-foreground">{tPages("orderDetailPaymentTitle")}</dt>
+                  <dd className="text-right text-muted-foreground">
+                    {formatOrderPaymentStatusLabel(order.payment_status, (key) => tPages(key))}
+                  </dd>
                 </div>
-                <div className="flex justify-between">
-                  <dt className="text-muted-foreground">
-                    {tPages("orderDetailPayerNumberLabel")}
-                  </dt>
-                  <dd className={numClass}>{order.payer_number || "—"}</dd>
+                <div className="flex justify-between gap-3">
+                  <dt className="text-muted-foreground">{tPages("orderDetailTransactionIdLabel")}</dt>
+                  <dd className={cn("text-right break-all", numClass)}>
+                    {order.transaction_id || "—"}
+                  </dd>
+                </div>
+                <div className="flex justify-between gap-3">
+                  <dt className="text-muted-foreground">{tPages("orderDetailPayerNumberLabel")}</dt>
+                  <dd className={cn("text-right break-all", numClass)}>
+                    {order.payer_number || "—"}
+                  </dd>
                 </div>
               </dl>
-              <div className="flex flex-wrap gap-2">
-                <Button
-                  type="button"
-                  onClick={() => handleVerifyPayment(true)}
-                  disabled={paymentVerifying !== null}
-                >
-                  {paymentVerifying === "verify"
-                    ? tPages("orderDetailVerifyingPayment")
-                    : tPages("orderDetailVerifyPayment")}
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => handleVerifyPayment(false)}
-                  disabled={paymentVerifying !== null}
-                >
-                  {paymentVerifying === "reject"
-                    ? tPages("orderDetailRejectingPayment")
-                    : tPages("orderDetailRejectPayment")}
-                </Button>
-              </div>
+              {canVerifyPayment ? (
+                <div className="flex flex-wrap gap-2">
+                  <Button
+                    type="button"
+                    onClick={() => handleVerifyPayment(true)}
+                    disabled={paymentVerifying !== null}
+                  >
+                    {paymentVerifying === "verify"
+                      ? tPages("orderDetailVerifyingPayment")
+                      : tPages("orderDetailVerifyPayment")}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => handleVerifyPayment(false)}
+                    disabled={paymentVerifying !== null}
+                  >
+                    {paymentVerifying === "reject"
+                      ? tPages("orderDetailRejectingPayment")
+                      : tPages("orderDetailRejectPayment")}
+                  </Button>
+                </div>
+              ) : null}
             </CardContent>
           </Card>
-        )}
+        ) : null}
         {/* Payment */}
         <Card className="overflow-hidden rounded-card border border-card-border bg-card shadow-sm">
           <CardHeader className="border-b border-border/50 px-4 pb-4 sm:px-6">

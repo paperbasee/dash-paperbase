@@ -8,6 +8,7 @@ import {
   useRef,
   useState,
   type CSSProperties,
+  type ReactNode,
 } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Link, useRouter } from "@/i18n/navigation";
@@ -30,11 +31,11 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { GripVertical, Loader2, Undo2 } from "lucide-react";
+import { FunnelIcon, GripVertical, Loader2, Undo2 } from "lucide-react";
 import api from "@/lib/api";
 import { useBranding } from "@/context/BrandingContext";
 import type { AdminCategoryTreeNode, Product, PaginatedResponse } from "@/types";
-import { flattenCategoryOptions } from "@/lib/category-tree";
+import { flattenCategoryOptionsRich } from "@/lib/category-tree";
 import {
   Combobox,
   ComboboxContent,
@@ -49,16 +50,18 @@ import { Input } from "@/components/ui/input";
 import { FilterBar } from "@/components/filters/FilterBar";
 import { FilterDropdown } from "@/components/filters/FilterDropdown";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
+import { useHorizontalWheelScroll } from "@/hooks/useHorizontalWheelScroll";
 import { useFilters } from "@/hooks/useFilters";
 import { useConfirm } from "@/context/ConfirmDialogContext";
 import { notify } from "@/notifications";
 import { useAdminDeleteCapabilities } from "@/hooks/useAdminDeleteCapabilities";
+import { useNavCounts } from "@/hooks/useNavCounts";
 import { numberTextClass } from "@/lib/number-font";
 import { cn } from "@/lib/utils";
 import { DashboardTableSkeleton } from "@/components/skeletons/dashboard-skeletons";
 import { BelowFoldScrollHint } from "@/components/BelowFoldScrollHint";
 
-type CategoryOption = { value: string; label: string };
+type CategoryOption = { value: string; label: string; labelDisplay: ReactNode };
 
 async function fetchAllProductPublicIdsInCategory(
   categoryPublicId: string
@@ -95,7 +98,6 @@ export default function ProductsPage() {
   const confirm = useConfirm();
   const { filters, setFilter, clearFilters } = useFilters([
     "status",
-    "stock",
     "prepayment_type",
     "category",
     "price_min",
@@ -111,7 +113,10 @@ export default function ProductsPage() {
   const debouncedPriceMax = useDebouncedValue(priceMaxInput);
   const [categoryTree, setCategoryTree] = useState<AdminCategoryTreeNode[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
+  const [productsCount, setProductsCount] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const { counts: navCounts } = useNavCounts();
   const [listCursor, setListCursor] = useState<string | null>(null);
   const [nextLink, setNextLink] = useState<string | null>(null);
   const [prevLink, setPrevLink] = useState<string | null>(null);
@@ -119,6 +124,7 @@ export default function ProductsPage() {
   const [deleting, setDeleting] = useState(false);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
   const reorderBusyRef = useRef(false);
+  const setScrollContainer = useHorizontalWheelScroll<HTMLDivElement>();
   const { canDelete: canDeleteProducts, isSuperuser: deleteIsSuperuser } =
     useAdminDeleteCapabilities();
 
@@ -168,20 +174,23 @@ export default function ProductsPage() {
   }, []);
 
   const categoryOptions = useMemo<CategoryOption[]>(
-    () =>
-      flattenCategoryOptions(categoryTree).map((c) => ({
-        value: c.value,
-        label: c.label,
-      })),
+    () => flattenCategoryOptionsRich(categoryTree),
     [categoryTree]
   );
+
+  const sortPillOptions: { value: string; label: string }[] = [
+    { value: "", label: tPages("productsListSortPlaceholder") },
+    { value: "newest", label: tPages("productsListSortNewest") },
+    { value: "price_asc", label: tPages("productsListSortPriceAsc") },
+    { value: "price_desc", label: tPages("productsListSortPriceDesc") },
+    { value: "popularity", label: tPages("productsListSortPopularity") },
+  ];
 
   const fetchProducts = useCallback(() => {
     setLoading(true);
     const params: Record<string, string> = {};
     if (listCursor) params.cursor = listCursor;
     if (filters.status) params.status = filters.status;
-    if (filters.stock) params.stock = filters.stock;
     if (filters.prepayment_type)
       params.prepayment_type = filters.prepayment_type;
     if (filters.category) params.category = filters.category;
@@ -195,6 +204,7 @@ export default function ProductsPage() {
       })
       .then((res) => {
         setProducts(res.data.results);
+        setProductsCount(typeof res.data.count === "number" ? res.data.count : null);
         setNextLink(res.data.next);
         setPrevLink(res.data.previous);
       })
@@ -211,7 +221,6 @@ export default function ProductsPage() {
     filters.search,
     filters.ordering,
     filters.status,
-    filters.stock,
     listCursor,
   ]);
 
@@ -219,6 +228,7 @@ export default function ProductsPage() {
     setListCursor(null);
     setNextLink(null);
     setPrevLink(null);
+    setProductsCount(null);
   }, [
     filters.category,
     filters.price_max,
@@ -227,16 +237,34 @@ export default function ProductsPage() {
     filters.search,
     filters.ordering,
     filters.status,
-    filters.stock,
   ]);
 
   useEffect(() => {
     fetchProducts();
   }, [fetchProducts]);
 
+  useEffect(() => {
+    const hasAnyValue = Boolean(
+      (filters.status || "").trim() ||
+        (filters.prepayment_type || "").trim() ||
+        (filters.category || "").trim() ||
+        (filters.price_min || "").trim() ||
+        (filters.price_max || "").trim() ||
+        (filters.search || "").trim()
+    );
+    if (!hasAnyValue) setFiltersOpen(false);
+  }, [
+    filters.category,
+    filters.prepayment_type,
+    filters.price_max,
+    filters.price_min,
+    filters.search,
+    filters.status,
+  ]);
+
   const canReorder = useMemo(() => {
     if (!filters.category) return false;
-    if (filters.search || filters.status || filters.stock) return false;
+    if (filters.search || filters.status) return false;
     if (filters.prepayment_type) return false;
     if (filters.price_min || filters.price_max) return false;
     const ord = filters.ordering;
@@ -391,6 +419,9 @@ export default function ProductsPage() {
   const allSelected = products.length > 0 && selectedIds.size === products.length;
   const someSelected = selectedIds.size > 0;
 
+  const pageProductsCount = products.length;
+  const totalProductsCount = productsCount ?? navCounts?.products ?? null;
+
   const sortableIds = useMemo(
     () => products.map((p) => p.public_id),
     [products]
@@ -440,6 +471,53 @@ export default function ProductsPage() {
         </div>
       </div>
 
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2 flex-wrap min-w-0">
+          {sortPillOptions.map((opt) => {
+            const active = (filters.ordering || "") === opt.value;
+            return (
+              <button
+                key={opt.value || "__default__"}
+                type="button"
+                onClick={() => setFilter("ordering", opt.value)}
+                aria-pressed={active}
+                className={[
+                  "h-9 rounded-ui border px-3 text-sm font-medium transition whitespace-nowrap",
+                  active
+                    ? "border-primary/40 bg-primary text-primary-foreground"
+                    : "border-border bg-card text-foreground hover:bg-muted",
+                ].join(" ")}
+              >
+                {opt.label}
+              </button>
+            );
+          })}
+        </div>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          className="h-9 px-3"
+          aria-label="Toggle filters"
+          aria-expanded={filtersOpen}
+          onClick={() => setFiltersOpen((v) => !v)}
+        >
+          <FunnelIcon className="size-4" aria-hidden />
+        </Button>
+      </div>
+
+      <p className="text-xs text-muted-foreground">
+        {loading
+          ? tCommon("loading")
+          : totalProductsCount === null
+            ? tPages("productsListCountPageOnly", { pageCount: pageProductsCount })
+            : tPages("productsListCountWithTotal", {
+                pageCount: pageProductsCount,
+                totalCount: totalProductsCount,
+              })}
+      </p>
+
+      {filtersOpen ? (
       <FilterBar>
         <FilterDropdown
           value={filters.status}
@@ -448,16 +526,6 @@ export default function ProductsPage() {
           options={[
             { value: "active", label: tCommon("active") },
             { value: "inactive", label: tCommon("inactive") },
-          ]}
-        />
-        <FilterDropdown
-          value={filters.stock}
-          onChange={(value) => setFilter("stock", value)}
-          placeholder={tPages("filtersStock")}
-          options={[
-            { value: "in_stock", label: tPages("inventoryStockInStock") },
-            { value: "low_stock", label: tPages("inventoryStockLow") },
-            { value: "out_of_stock", label: tPages("inventoryStockOut") },
           ]}
         />
         <FilterDropdown
@@ -502,17 +570,6 @@ export default function ProductsPage() {
           placeholder={tPages("filtersSearchProducts")}
           className="w-full md:w-64"
         />
-        <FilterDropdown
-          value={filters.ordering}
-          onChange={(value) => setFilter("ordering", value)}
-          placeholder={tPages("productsListSortPlaceholder")}
-          options={[
-            { value: "newest", label: tPages("productsListSortNewest") },
-            { value: "price_asc", label: tPages("productsListSortPriceAsc") },
-            { value: "price_desc", label: tPages("productsListSortPriceDesc") },
-            { value: "popularity", label: tPages("productsListSortPopularity") },
-          ]}
-        />
         <button
           type="button"
           onClick={() => {
@@ -526,6 +583,7 @@ export default function ProductsPage() {
           {tPages("filtersClear")}
         </button>
       </FilterBar>
+      ) : null}
 
       {!loading && canReorder && (
         <p className="flex items-start gap-2 rounded-card border border-primary/30 bg-primary/5 px-3 py-2 text-sm text-foreground">
@@ -538,17 +596,14 @@ export default function ProductsPage() {
           {tPages("productsListReorderHintDisabled")}
         </p>
       )}
-      {!loading && !filters.category && products.length >= 2 && (
-        <p className="rounded-card border border-border px-3 py-2 text-sm text-muted-foreground">
-          {tPages("productsListReorderHintPickCategory")}
-        </p>
-      )}
-
       {loading ? (
         <DashboardTableSkeleton columns={9} rows={5} showHeader={false} showFilters={false} />
       ) : (
         <>
-          <div className="overflow-x-auto rounded-card border border-card-border bg-card">
+          <div
+            ref={setScrollContainer}
+            className="overflow-x-auto rounded-card border border-card-border bg-card"
+          >
             <DndContext
               sensors={sensors}
               collisionDetection={closestCenter}

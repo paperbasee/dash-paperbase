@@ -2,8 +2,11 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { MetaLogoIcon, TiktokLogoIcon } from "@phosphor-icons/react";
-import { CopyIcon } from "@phosphor-icons/react";
+import {
+  ClipboardTextIcon,
+  MetaLogoIcon,
+  TiktokLogoIcon,
+} from "@phosphor-icons/react";
 import { Check } from "lucide-react";
 import api from "@/lib/api";
 import type {
@@ -372,7 +375,7 @@ export default function MarketingProviderCard({ provider }: { provider: Marketin
                       </>
                     ) : (
                       <>
-                        <CopyIcon className="mr-1 size-3.5" />
+                        <ClipboardTextIcon className="mr-1 size-3.5" />
                         {provider === "facebook" ? t("marketing.copyPixel") : c("copyPixel")}
                       </>
                     )}

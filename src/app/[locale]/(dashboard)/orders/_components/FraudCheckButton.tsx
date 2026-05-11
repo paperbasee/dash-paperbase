@@ -1,6 +1,7 @@
 "use client";
 
-import { Lock, ShieldCheck } from "lucide-react";
+import { ShieldCheckIcon } from "@phosphor-icons/react";
+import { Lock } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
@@ -38,7 +39,7 @@ export function FraudCheckButton({
             type="button"
             variant="outline"
             size="sm"
-            className={cn("h-8 gap-1 px-2.5 text-xs", className)}
+            className={cn("h-9 gap-2 px-3 text-xs", className)}
             disabled={isDisabled}
             aria-disabled={isDisabled}
             aria-busy={loading}
@@ -54,7 +55,7 @@ export function FraudCheckButton({
             ) : locked ? (
               <Lock className="size-3.5" />
             ) : (
-              <ShieldCheck className="size-3.5" />
+              <ShieldCheckIcon className="size-3.5" weight="bold" />
             )}
             <span>{label}</span>
           </Button>

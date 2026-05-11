@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { CopyIcon } from "@phosphor-icons/react";
+import { ClipboardTextIcon } from "@phosphor-icons/react";
 import { Check } from "lucide-react";
 import api from "@/lib/api";
 import type { MarketingIntegration as MarketingIntegrationType, PaginatedResponse } from "@/types";
@@ -204,7 +204,7 @@ export default function OtherMarketingIntegrations() {
                       </>
                     ) : (
                       <>
-                        <CopyIcon className="mr-1 size-3.5" />
+                        <ClipboardTextIcon className="mr-1 size-3.5" />
                         {t("marketing.copyPixel")}
                       </>
                     )}
