@@ -9,11 +9,15 @@ import { Loader2, Undo2, Trash } from "lucide-react";
 import api from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { formatDashboardDateTime } from "@/lib/datetime-display";
-import type { PaginatedResponse, TrashEntityType, TrashItem } from "@/types";
+import type { PaginatedResponse, TrashItem } from "@/types";
 import { useConfirm } from "@/context/ConfirmDialogContext";
 import { notify, normalizeError } from "@/notifications";
 import { useAdminDeleteCapabilities } from "@/hooks/useAdminDeleteCapabilities";
 import { DashboardTableSkeleton } from "@/components/skeletons/dashboard-skeletons";
+
+function rowKey(row: TrashItem): string {
+  return row.public_id;
+}
 
 export default function TrashPage() {
   const locale = useLocale();
@@ -28,18 +32,10 @@ export default function TrashPage() {
   const [hasNext, setHasNext] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [busyId, setBusyId] = useState<number | null>(null);
-  const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
+  const [busyPublicId, setBusyPublicId] = useState<string | null>(null);
+  const [selectedPublicIds, setSelectedPublicIds] = useState<Set<string>>(new Set());
   const [bulkDeleting, setBulkDeleting] = useState(false);
   const [bulkRestoring, setBulkRestoring] = useState(false);
-
-  const isOrderRow = useCallback((row: TrashItem) => row.entity_type === "order", []);
-
-  const typeLabel = useCallback(
-    (t: TrashEntityType) =>
-      t === "order" ? tPages("trashTypeOrder") : tPages("trashTypeProduct"),
-    [tPages],
-  );
 
   const fetchTrash = useCallback(() => {
     if (!canDelete) {
@@ -82,20 +78,20 @@ export default function TrashPage() {
     fetchTrash();
   }, [capsLoading, fetchTrash]);
 
-  const toggleSelect = (id: number) => {
-    setSelectedIds((prev) => {
+  const toggleSelect = (publicId: string) => {
+    setSelectedPublicIds((prev) => {
       const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
+      if (next.has(publicId)) next.delete(publicId);
+      else next.add(publicId);
       return next;
     });
   };
 
   const toggleSelectAll = () => {
-    const pageIds = rows.map((r) => r.id);
+    const pageIds = rows.map((r) => r.public_id);
     const allOnPage =
-      pageIds.length > 0 && pageIds.every((id) => selectedIds.has(id));
-    setSelectedIds((prev) => {
+      pageIds.length > 0 && pageIds.every((id) => selectedPublicIds.has(id));
+    setSelectedPublicIds((prev) => {
       const next = new Set(prev);
       if (allOnPage) {
         pageIds.forEach((id) => next.delete(id));
@@ -107,14 +103,14 @@ export default function TrashPage() {
   };
 
   const allSelected =
-    rows.length > 0 && rows.every((r) => selectedIds.has(r.id));
-  const someSelected = selectedIds.size > 0;
+    rows.length > 0 && rows.every((r) => selectedPublicIds.has(r.public_id));
+  const someSelected = selectedPublicIds.size > 0;
 
   const bulkBusy = bulkDeleting || bulkRestoring;
 
   async function handleRestoreSelected() {
-    if (selectedIds.size === 0) return;
-    const n = selectedIds.size;
+    if (selectedPublicIds.size === 0) return;
+    const n = selectedPublicIds.size;
     const ok = await confirm({
       title: tPages("confirmDialogTitleRestoreFromTrashBulk", {
         count: n,
@@ -126,16 +122,12 @@ export default function TrashPage() {
     });
     if (!ok) return;
     setBulkRestoring(true);
-    const ids = Array.from(selectedIds);
+    const ids = Array.from(selectedPublicIds);
     try {
-      // Sequential: parallel restores each run sync_product_stock_cache(select_for_update on
-      // all store products/inventory) and can deadlock the DB.
-      for (const id of ids) {
-        const row = rows.find((r) => r.id === id);
-        if (row && isOrderRow(row)) continue;
-        await api.post(`admin/trash/${id}/restore/`);
+      for (const publicId of ids) {
+        await api.post(`admin/trash/${publicId}/restore/`);
       }
-      setSelectedIds(new Set());
+      setSelectedPublicIds(new Set());
       notify.success(
         tPages("trashBulkRestoreSuccess", {
           count: toLocaleDigits(String(n), locale),
@@ -151,8 +143,8 @@ export default function TrashPage() {
   }
 
   async function handleDeleteSelected() {
-    if (selectedIds.size === 0) return;
-    const n = selectedIds.size;
+    if (selectedPublicIds.size === 0) return;
+    const n = selectedPublicIds.size;
     const ok = await confirm({
       title: tPages("confirmDialogTitleDeleteFromTrashBulk", {
         count: n,
@@ -164,14 +156,12 @@ export default function TrashPage() {
     });
     if (!ok) return;
     setBulkDeleting(true);
-    const ids = Array.from(selectedIds);
+    const ids = Array.from(selectedPublicIds);
     try {
-      for (const id of ids) {
-        const row = rows.find((r) => r.id === id);
-        if (row && isOrderRow(row)) continue;
-        await api.delete(`admin/trash/${id}/`);
+      for (const publicId of ids) {
+        await api.delete(`admin/trash/${publicId}/`);
       }
-      setSelectedIds(new Set());
+      setSelectedPublicIds(new Set());
       notify.warning(
         tPages("trashBulkRemovedSuccess", {
           count: toLocaleDigits(String(n), locale),
@@ -187,21 +177,20 @@ export default function TrashPage() {
   }
 
   async function handleRestore(row: TrashItem) {
-    if (isOrderRow(row)) return;
     const ok = await confirm({
       title: tPages("confirmDialogTitleRestoreFromTrash", {
-        type: typeLabel(row.entity_type),
+        type: tPages("trashTypeProduct"),
       }),
-      message: tPages("trashConfirmRestore", { type: typeLabel(row.entity_type) }),
+      message: tPages("trashConfirmRestore", { type: tPages("trashTypeProduct") }),
       variant: "default",
     });
     if (!ok) return;
-    setBusyId(row.id);
+    setBusyPublicId(row.public_id);
     try {
-      await api.post(`admin/trash/${row.id}/restore/`);
-      setSelectedIds((prev) => {
+      await api.post(`admin/trash/${row.public_id}/restore/`);
+      setSelectedPublicIds((prev) => {
         const next = new Set(prev);
-        next.delete(row.id);
+        next.delete(row.public_id);
         return next;
       });
       notify.success(tPages("trashRestoredSuccess"));
@@ -210,24 +199,23 @@ export default function TrashPage() {
       console.error(err);
       notify.error(err, { fallbackMessage: tPages("trashRestoreFailed") });
     } finally {
-      setBusyId(null);
+      setBusyPublicId(null);
     }
   }
 
   async function handlePermanentDelete(row: TrashItem) {
-    if (isOrderRow(row)) return;
     const ok = await confirm({
       title: tPages("confirmDialogTitleDeleteFromTrashRow"),
       message: tPages("trashConfirmPermanent"),
       variant: "danger",
     });
     if (!ok) return;
-    setBusyId(row.id);
+    setBusyPublicId(row.public_id);
     try {
-      await api.delete(`admin/trash/${row.id}/`);
-      setSelectedIds((prev) => {
+      await api.delete(`admin/trash/${row.public_id}/`);
+      setSelectedPublicIds((prev) => {
         const next = new Set(prev);
-        next.delete(row.id);
+        next.delete(row.public_id);
         return next;
       });
       notify.warning(tPages("trashRemovedSuccess"));
@@ -236,7 +224,7 @@ export default function TrashPage() {
       console.error(err);
       notify.error(err, { fallbackMessage: tPages("trashPermanentFailed") });
     } finally {
-      setBusyId(null);
+      setBusyPublicId(null);
     }
   }
 
@@ -262,23 +250,23 @@ export default function TrashPage() {
             <button
               type="button"
               onClick={handleRestoreSelected}
-              disabled={bulkBusy || busyId !== null}
+              disabled={bulkBusy || busyPublicId !== null}
               className="inline-flex shrink-0 items-center gap-2 rounded-card border border-border bg-secondary px-4 py-2 text-sm font-semibold text-secondary-foreground transition hover:bg-secondary/80 disabled:opacity-50"
             >
               {bulkRestoring && <Loader2 className="size-4 animate-spin" />}
               {tPages("trashRestoreSelected", {
-                count: toLocaleDigits(String(selectedIds.size), locale),
+                count: toLocaleDigits(String(selectedPublicIds.size), locale),
               })}
             </button>
             <button
               type="button"
               onClick={handleDeleteSelected}
-              disabled={bulkBusy || busyId !== null}
+              disabled={bulkBusy || busyPublicId !== null}
               className="inline-flex shrink-0 items-center gap-2 rounded-card bg-destructive px-4 py-2 text-sm font-semibold text-destructive-foreground transition hover:bg-destructive/90 disabled:opacity-50"
             >
               {bulkDeleting && <Loader2 className="size-4 animate-spin" />}
               {tPages("deleteSelectedPermanent", {
-                count: toLocaleDigits(String(selectedIds.size), locale),
+                count: toLocaleDigits(String(selectedPublicIds.size), locale),
               })}
             </button>
           </div>
@@ -308,7 +296,7 @@ export default function TrashPage() {
                       type="checkbox"
                       checked={allSelected}
                       onChange={toggleSelectAll}
-                      disabled={bulkBusy || busyId !== null}
+                      disabled={bulkBusy || busyPublicId !== null}
                       className="form-checkbox"
                       aria-label={tPages("trashListSelectAllAria")}
                     />
@@ -323,25 +311,26 @@ export default function TrashPage() {
               </thead>
               <tbody className="divide-y divide-border/60">
                 {rows.map((row) => {
-                  const pub = (row.entity_public_id || "").trim();
-                  const busy = busyId === row.id;
-                  const displayName = (row.entity_name || "").trim();
+                  const pub = (row.public_id || "").trim();
+                  const busy = busyPublicId === row.public_id;
+                  const displayName = (row.name || "").trim();
+                  const rk = rowKey(row);
                   return (
-                    <tr key={row.id} className="hover:bg-muted/40">
+                    <tr key={rk} className="hover:bg-muted/40">
                       <td className="w-10 whitespace-nowrap px-3 py-3 align-middle">
                         <input
                           type="checkbox"
-                          checked={selectedIds.has(row.id)}
-                          onChange={() => toggleSelect(row.id)}
+                          checked={selectedPublicIds.has(row.public_id)}
+                          onChange={() => toggleSelect(row.public_id)}
                           onClick={(e) => e.stopPropagation()}
                           disabled={bulkBusy || busy}
                           className="form-checkbox"
                           aria-label={tPages("trashListSelectRowAria", {
-                            name: displayName || pub || String(row.id),
+                            name: displayName || pub || rk,
                           })}
                         />
                       </td>
-                      <td className="whitespace-nowrap px-3 py-3 align-middle">{typeLabel(row.entity_type)}</td>
+                      <td className="whitespace-nowrap px-3 py-3 align-middle">{tPages("trashTypeProduct")}</td>
                       <td
                         className="whitespace-nowrap px-3 py-3 align-middle text-foreground"
                         title={displayName}
@@ -354,7 +343,7 @@ export default function TrashPage() {
                         {pub || "—"}
                       </td>
                       <td className="whitespace-nowrap px-3 py-3 align-middle text-muted-foreground">
-                        {formatDashboardDateTime(row.deleted_at, locale)}
+                        {formatDashboardDateTime(row.trashed_at, locale)}
                       </td>
                       <td className="whitespace-nowrap px-3 py-3 align-middle text-muted-foreground">
                         {formatDashboardDateTime(row.expires_at, locale)}
@@ -366,7 +355,7 @@ export default function TrashPage() {
                             variant="secondary"
                             size="sm"
                             className="shrink-0 whitespace-nowrap"
-                            disabled={busy || bulkBusy || isOrderRow(row)}
+                            disabled={busy || bulkBusy}
                             onClick={() => handleRestore(row)}
                           >
                             <Undo2 className="mr-1 size-3.5 shrink-0" />
@@ -377,7 +366,7 @@ export default function TrashPage() {
                             variant="destructive"
                             size="sm"
                             className="shrink-0 whitespace-nowrap"
-                            disabled={busy || bulkBusy || isOrderRow(row)}
+                            disabled={busy || bulkBusy}
                             onClick={() => handlePermanentDelete(row)}
                           >
                             {busy ? (

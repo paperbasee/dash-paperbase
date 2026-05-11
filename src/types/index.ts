@@ -304,19 +304,13 @@ export interface PaginatedResponse<T> {
   count?: number;
 }
 
-export type TrashEntityType = "product" | "order";
-
-/** Admin trash row (`GET/DELETE admin/trash/`, `POST admin/trash/{id}/restore/`). */
+/** Admin trashed product row (`GET/DELETE admin/trash/`, `POST admin/trash/{public_id}/restore/`). */
 export interface TrashItem {
-  id: number;
-  entity_type: TrashEntityType;
-  entity_id: string;
-  entity_public_id: string;
-  /** Display name from snapshot (product name; order shipping name + number). */
-  entity_name: string;
-  deleted_at: string;
+  id: string;
+  public_id: string;
+  name: string;
+  trashed_at: string;
   expires_at: string;
-  is_restored: boolean;
 }
 
 export interface ActivityActor {

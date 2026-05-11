@@ -37,6 +37,7 @@ import {
   CardDescription,
   CardContent,
 } from "@/components/ui/card";
+import { OrderInvoiceButton } from "@/components/orders/OrderInvoiceButton";
 import { ProductSearchBar } from "@/components/orders/product-search-bar";
 import { ProductGrid } from "@/components/orders/product-grid";
 import { OrderLineProductCard } from "@/components/orders/order-line-product-card";
@@ -885,6 +886,11 @@ export default function OrderDetailPage() {
                   </dd>
                 </div>
               </dl>
+            )}
+            {!editing && order && (
+              <div className="border-t border-border pt-4 mt-2">
+                <OrderInvoiceButton orderPublicId={order.public_id} />
+              </div>
             )}
             {editing && (
               <div className="space-y-6">
