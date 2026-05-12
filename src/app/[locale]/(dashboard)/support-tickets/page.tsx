@@ -133,8 +133,10 @@ export default function SupportTicketsPage() {
         setHasNext(!!res.data.next);
       })
       .catch((err) => {
-        console.error(err);
-        notify.error(err);
+        notify.error(err, {
+          title: tPages("toastTitleTicketsFailedToLoad"),
+          fallbackMessage: tPages("toastDescTicketsFailedToLoad"),
+        });
       })
       .finally(() => setLoading(false));
   }, [filters.priority, filters.search, filters.status, page]);
@@ -150,9 +152,14 @@ export default function SupportTicketsPage() {
       await api.delete(`admin/support-tickets/${publicId}/`);
       setTickets((prev) => prev.filter((t) => t.public_id !== publicId));
       setCount((c) => c - 1);
+      notify.success(tPages("toastDescTicketDeleted"), {
+        title: tPages("toastTitleTicketDeleted"),
+      });
     } catch (err) {
-      console.error(err);
-      notify.error(err);
+      notify.error(err, {
+        title: tPages("toastTitleTicketNotDeleted"),
+        fallbackMessage: tPages("toastDescTicketNotDeleted"),
+      });
     }
   }
 
@@ -181,7 +188,6 @@ export default function SupportTicketsPage() {
     try {
       await api.patch(`admin/support-tickets/${publicId}/`, { [field]: nextValue });
     } catch (err) {
-      console.error(err);
       setTickets((prev) =>
         prev.map((ticket) =>
           ticket.public_id === publicId ? { ...ticket, [field]: previous[field] } : ticket
@@ -191,6 +197,10 @@ export default function SupportTicketsPage() {
         ...prev,
         [publicId]: tPages("supportTicketsUpdateFailed", { field }),
       }));
+      notify.error(err, {
+        title: tPages("toastTitleTicketUpdateFailed"),
+        fallbackMessage: tPages("toastDescTicketUpdateFailed"),
+      });
     } finally {
       setSaving((prev) => ({
         ...prev,

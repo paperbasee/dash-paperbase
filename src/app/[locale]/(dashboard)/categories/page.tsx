@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment, useCallback, useEffect, useRef, useState, type FormEvent } from "react";
+import { Fragment, useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { ChevronDown, ChevronRight, Undo2 } from "lucide-react";
@@ -15,7 +15,7 @@ import type { AdminCategoryTreeNode } from "@/types";
 import {
   collectDescendantPublicIds,
   findCategoryNode,
-  flattenCategoryOptions,
+  flattenCategoryOptionsRich,
 } from "@/lib/category-tree";
 import { useConfirm } from "@/context/ConfirmDialogContext";
 import { notify } from "@/notifications";
@@ -199,11 +199,13 @@ export default function CategoriesPage() {
         setTree(Array.isArray(d) ? d : []);
       })
       .catch((err) => {
-        console.error(err);
-        notify.error(err);
+        notify.error(err, {
+          title: tPages("toastTitleCategoriesUnavailable"),
+          fallbackMessage: tPages("toastDescCategoriesUnavailable"),
+        });
       })
       .finally(() => setLoading(false));
-  }, []);
+  }, [tPages]);
 
   useEffect(() => {
     fetchTree();
@@ -303,26 +305,30 @@ export default function CategoriesPage() {
     setUploadError(null);
   }
 
-  const parentOptions = (() => {
-    const flat = flattenCategoryOptions(tree);
+  const parentOptions = useMemo(() => {
+    const rich = flattenCategoryOptionsRich(tree);
     if (mode === "edit" && editingPublicId) {
       const node = findCategoryNode(tree, editingPublicId);
       if (node) {
         const ban = collectDescendantPublicIds(node);
-        return flat.filter((o) => !ban.has(o.value));
+        return rich.filter((o) => !ban.has(o.value));
       }
     }
-    return flat;
-  })();
+    return rich;
+  }, [tree, mode, editingPublicId]);
 
   async function saveCategory(e: FormEvent) {
     e.preventDefault();
     if (uploadStatus === "uploading") {
-      notify.warning("Please wait for image upload to finish.");
+      notify.warning(tPages("toastDescUploadsStillInProgressCategory"), {
+        title: tPages("toastTitleUploadsStillInProgress"),
+      });
       return;
     }
     if (imageFile && !imageKey) {
-      notify.warning(uploadError || "Image upload failed. Retry before saving.");
+      notify.warning(tPages("toastDescUploadsStillInProgressCategory"), {
+        title: tPages("toastTitleUploadsStillInProgress"),
+      });
       return;
     }
     setSaving(true);
@@ -347,8 +353,10 @@ export default function CategoriesPage() {
       setEditingSlugPreview(null);
       fetchTree();
     } catch (err) {
-      console.error(err);
-      notify.error(err);
+      notify.error(err, {
+        title: tPages("toastTitleCategoryChangeFailed"),
+        fallbackMessage: tPages("toastDescCategoryChangeFailed"),
+      });
     } finally {
       setSaving(false);
     }
@@ -367,8 +375,10 @@ export default function CategoriesPage() {
       await api.delete(`admin/categories/${publicId}/`);
       fetchTree();
     } catch (err) {
-      console.error(err);
-      notify.error(err);
+      notify.error(err, {
+        title: tPages("toastTitleCategoryChangeFailed"),
+        fallbackMessage: tPages("toastDescCategoryChangeFailed"),
+      });
     }
   }
 
@@ -544,7 +554,7 @@ export default function CategoriesPage() {
       <section>
         <h2 className="mb-4 text-lg font-medium text-foreground">
           {tPages("categoriesTreeHeading", {
-            count: flattenCategoryOptions(tree).length,
+            count: flattenCategoryOptionsRich(tree).length,
           })}
         </h2>
         <div className="overflow-x-auto rounded-card border border-card-border bg-card">

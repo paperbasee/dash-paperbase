@@ -10,6 +10,7 @@ import api from "@/lib/api";
 import type { SupportTicket } from "@/types";
 import { formatDashboardDateTime } from "@/lib/datetime-display";
 import { DashboardDetailSkeleton } from "@/components/skeletons/dashboard-skeletons";
+import { notify } from "@/notifications";
 
 function labelFromValue(value: string): string {
   if (!value) return "—";
@@ -35,7 +36,13 @@ export default function SupportTicketDetailPage() {
     api
       .get<SupportTicket>(`admin/support-tickets/${publicId}/`)
       .then((res) => setTicket(res.data))
-      .catch(() => setError(tPages("supportTicketDetailLoadError")))
+      .catch((err) => {
+        setError(tPages("supportTicketDetailLoadError"));
+        notify.error(err, {
+          title: tPages("toastTitleTicketThreadUnavailable"),
+          fallbackMessage: tPages("toastDescTicketThreadUnavailable"),
+        });
+      })
       .finally(() => setLoading(false));
   }, [publicId, tPages]);
 

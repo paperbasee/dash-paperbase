@@ -38,7 +38,7 @@ export default function ProductAttributesPage() {
   const confirm = useConfirm();
   const [attributes, setAttributes] = useState<ProductAttributeAdmin[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const [error, setError] = useState(""); // kept for legacy; do not render inline
 
   const [attrEditing, setAttrEditing] = useState<string | "new" | null>(null);
   const [attrForm, setAttrForm] = useState<AttrForm>(emptyAttr);
@@ -72,8 +72,11 @@ export default function ProductAttributesPage() {
         page += 1;
       }
       setAttributes(acc);
-    } catch {
-      setError(tPages("attributesLoadFailed"));
+    } catch (err) {
+      notify.error(err, {
+        title: tPages("toastTitleAttributesFailedToLoad"),
+        fallbackMessage: tPages("toastDescAttributesFailedToLoad"),
+      });
     } finally {
       setLoading(false);
     }
@@ -112,9 +115,10 @@ export default function ProductAttributesPage() {
       setAttrEditing(null);
       await fetchData();
     } catch (err: unknown) {
-      const normalized = normalizeError(err, tPages("attributesSaveFailed"));
-      setError(normalized.message);
-      notify.error(normalized.message);
+      notify.error(err, {
+        title: tPages("toastTitleAttributeNotSaved"),
+        fallbackMessage: tPages("toastDescAttributeNotSaved"),
+      });
     } finally {
       setAttrSaving(false);
     }
@@ -130,8 +134,12 @@ export default function ProductAttributesPage() {
     try {
       await api.delete(`admin/product-attributes/${publicId}/`);
       await fetchData();
-    } catch {
-      setError(tPages("attributesDeleteAttrFailed"));
+      notify.success(tPages("toastDescAttributeDeleted"), { title: tPages("toastTitleAttributeDeleted") });
+    } catch (err) {
+      notify.error(err, {
+        title: tPages("toastTitleAttributeNotDeleted"),
+        fallbackMessage: tPages("toastDescAttributeNotDeleted"),
+      });
     }
   }
 
@@ -163,9 +171,10 @@ export default function ProductAttributesPage() {
       setValueEditing(null);
       await fetchData();
     } catch (err: unknown) {
-      const normalized = normalizeError(err, tPages("attributesSaveFailed"));
-      setError(normalized.message);
-      notify.error(normalized.message);
+      notify.error(err, {
+        title: tPages("toastTitleAttributeNotSaved"),
+        fallbackMessage: tPages("toastDescAttributeNotSaved"),
+      });
     } finally {
       setValueSaving(false);
     }
@@ -181,8 +190,12 @@ export default function ProductAttributesPage() {
     try {
       await api.delete(`admin/product-attribute-values/${publicId}/`);
       await fetchData();
-    } catch {
-      setError(tPages("attributesDeleteValueFailed"));
+      notify.success(tPages("toastDescValueDeleted"), { title: tPages("toastTitleValueDeleted") });
+    } catch (err) {
+      notify.error(err, {
+        title: tPages("toastTitleValueNotDeleted"),
+        fallbackMessage: tPages("toastDescValueNotDeleted"),
+      });
     }
   }
 
@@ -246,11 +259,7 @@ export default function ProductAttributesPage() {
         {tPages("attributesSubtitleAfter")}
       </p>
 
-      {error ? (
-        <p className="rounded-card border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive">
-          {error}
-        </p>
-      ) : null}
+      {/* Inline error text moved to toasts (keep form states only). */}
 
       {attrEditing !== null ? (
         <Card className="border-primary/30 shadow-sm">

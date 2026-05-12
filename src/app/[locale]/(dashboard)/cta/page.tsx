@@ -166,8 +166,10 @@ export default function CtaPage() {
         setCtas(Array.isArray(data) ? data : data.results);
       })
       .catch((err) => {
-        console.error(err);
-        notify.error(err);
+        notify.error(err, {
+          title: tPages("toastTitleCtaNotSaved"),
+          fallbackMessage: tPages("toastDescCtaNotSaved"),
+        });
       })
       .finally(() => setLoading(false));
   }
@@ -271,6 +273,10 @@ export default function CtaPage() {
     }
     if (start_date && end_date && new Date(`${start_date}:00Z`) > new Date(`${end_date}:00Z`)) {
       notify.validation("cta-form", { end_date: tPages("ctaEndAfterStartInvalid") });
+      notify.error(new Error("cta_schedule_invalid"), {
+        title: tPages("toastTitleInvalidScheduleDates"),
+        fallbackMessage: tPages("toastDescInvalidScheduleDates"),
+      });
       return;
     }
 
@@ -290,7 +296,9 @@ export default function CtaPage() {
     try {
       if (editing === "new") {
         if (ctas.length > 0) {
-          notify.warning("A CTA already exists for this store. Edit the existing CTA instead.");
+          notify.warning(tPages("toastDescDuplicateCta"), {
+            title: tPages("toastTitleDuplicateCta"),
+          });
           setEditing(ctas[0]?.public_id ?? null);
           return;
         }
@@ -300,11 +308,13 @@ export default function CtaPage() {
       }
       setEditing(null);
       notify.clearValidation("cta-form");
-      notify.success(tPages("ctaSavedSuccess"));
+      notify.success(tPages("toastDescCtaSaved"), { title: tPages("toastTitleCtaSaved") });
       fetchData();
     } catch (err) {
-      console.error(err);
-      notify.error(err);
+      notify.error(err, {
+        title: tPages("toastTitleCtaNotSaved"),
+        fallbackMessage: tPages("toastDescCtaNotSaved"),
+      });
     } finally {
       setSaving(false);
     }
@@ -320,7 +330,10 @@ export default function CtaPage() {
         prev.map((x) => (x.public_id === data.public_id ? data : x))
       );
     } catch (err) {
-      console.error(err);
+      notify.error(err, {
+        title: tPages("toastTitleCtaNotSaved"),
+        fallbackMessage: tPages("toastDescCtaNotSaved"),
+      });
     }
   }
 
@@ -334,10 +347,12 @@ export default function CtaPage() {
     try {
       await api.delete(`admin/notifications/${publicId}/`);
       setCtas((prev) => prev.filter((n) => n.public_id !== publicId));
-      notify.warning(tPages("ctaDeletedSuccess"));
+      notify.success(tPages("toastDescCtaRemoved"), { title: tPages("toastTitleCtaRemoved") });
     } catch (err) {
-      console.error(err);
-      notify.error(err);
+      notify.error(err, {
+        title: tPages("toastTitleCtaNotSaved"),
+        fallbackMessage: tPages("toastDescCtaNotSaved"),
+      });
     }
   }
 

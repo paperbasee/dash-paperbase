@@ -381,6 +381,7 @@ function SteadfastCourierRow({
 export default function CourierIntegration() {
   const locale = useLocale();
   const t = useTranslations("settings");
+  const tPages = useTranslations("pages");
   const confirm = useConfirm();
   const [couriers, setCouriers] = useState<Courier[]>([]);
   const [loading, setLoading] = useState(true);
@@ -420,10 +421,14 @@ export default function CourierIntegration() {
         document.execCommand("copy");
         el.remove();
       }
-      notify.success("Copied!");
+      notify.success(tPages("toastDescApiKeyCopied"), {
+        title: tPages("toastTitleApiKeyCopied"),
+      });
     } catch (err) {
-      console.error(err);
-      notify.error(err);
+      notify.error(err, {
+        title: tPages("toastTitleClipboardBlocked"),
+        fallbackMessage: tPages("toastDescClipboardBlocked"),
+      });
     }
   }
 
@@ -479,11 +484,15 @@ export default function CourierIntegration() {
     setSavingWebhookTokenId(courierPublicId);
     try {
       await api.patch(`admin/couriers/${courierPublicId}/`, { webhook_token: raw });
-      notify.success("Webhook token saved successfully");
+      notify.success(tPages("toastDescWebhookSaved"), {
+        title: tPages("toastTitleWebhookSaved"),
+      });
       fetchCouriers();
     } catch (err) {
-      console.error(err);
-      notify.error(err);
+      notify.error(err, {
+        title: tPages("toastTitleCourierTestFailed"),
+        fallbackMessage: tPages("toastDescCourierTestFailed"),
+      });
     } finally {
       setSavingWebhookTokenId(null);
     }
@@ -498,8 +507,10 @@ export default function CourierIntegration() {
         setCouriers(list ?? []);
       })
       .catch((err) => {
-        console.error(err);
-        notify.error(err);
+        notify.error(err, {
+          title: tPages("toastTitleCourierTestFailed"),
+          fallbackMessage: tPages("toastDescCourierTestFailed"),
+        });
       })
       .finally(() => setLoading(false));
   }, []);
@@ -547,8 +558,10 @@ export default function CourierIntegration() {
           await api.delete(`admin/couriers/${publicId}/`);
           fetchCouriers();
         } catch (err) {
-          console.error(err);
-          notify.error(err);
+          notify.error(err, {
+            title: tPages("toastTitleCourierTestFailed"),
+            fallbackMessage: tPages("toastDescCourierTestFailed"),
+          });
           throw err;
         }
       },
@@ -563,8 +576,10 @@ export default function CourierIntegration() {
       });
       fetchCouriers();
     } catch (err) {
-      console.error(err);
-      notify.error(err);
+      notify.error(err, {
+        title: tPages("toastTitleCourierTestFailed"),
+        fallbackMessage: tPages("toastDescCourierTestFailed"),
+      });
     } finally {
       setTogglingId(null);
     }

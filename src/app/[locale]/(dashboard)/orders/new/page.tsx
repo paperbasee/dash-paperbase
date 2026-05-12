@@ -21,7 +21,6 @@ export default function NewOrderPage() {
   const { currencySymbol } = useBranding();
   const {
     saving,
-    error,
     fieldErrors,
     form,
     updateForm,
@@ -46,9 +45,7 @@ export default function NewOrderPage() {
     handleSubmit,
     router,
   } = useNewOrder();
-  const hasItemInlineErrors = Object.keys(fieldErrors).some(
-    (k) => k === "items" || k.startsWith("items."),
-  );
+  // Error text is handled via toasts; keep inline field highlighting only.
   const { handleKeyDown } = useEnterNavigation(() => {
     const form = document.getElementById("order-form");
     if (form instanceof HTMLFormElement) form.requestSubmit();
@@ -97,14 +94,7 @@ export default function NewOrderPage() {
         {tPages("orderNewSubtitle")}
       </p>
 
-      {error && !hasItemInlineErrors && (
-        <div
-          role="alert"
-          className="border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive"
-        >
-          {error}
-        </div>
-      )}
+      {/* Inline error text moved to toasts (keep field highlights only). */}
 
       <form
         id="order-form"

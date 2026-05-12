@@ -119,6 +119,81 @@ function deliveryStatusBadge(order: Order) {
   );
 }
 
+type BulkCourierResultRow = { public_id: string; ok: boolean; error: string | null };
+
+/** Strip legacy API blobs like ``ErrorDetail(string='…', code='…')`` from bulk error strings. */
+function humanizeBulkDispatchError(message: string): string {
+  const s = message.trim();
+  if (!s.includes("ErrorDetail(string=")) return s;
+  const m = s.match(/ErrorDetail\(string=['"]([^'"]*)['"]/);
+  return (m?.[1] ?? s).trim();
+}
+
+const BULK_DISPATCH_DETAIL_MAX = 160;
+
+function truncateBulkDetail(text: string, max = BULK_DISPATCH_DETAIL_MAX): string {
+  const t = text.trim();
+  if (t.length <= max) return t;
+  return `${t.slice(0, max - 1)}…`;
+}
+
+/** One readable toast body: no per-order ID spam when every row failed for the same reason. */
+function bulkDispatchFailureBody(
+  results: BulkCourierResultRow[],
+  summary: { ok: number; failed: number },
+  locale: string,
+  tPages: (key: string, values?: Record<string, string>) => string,
+): string {
+  const okStr = toLocaleDigits(String(summary.ok), locale);
+  const failedStr = toLocaleDigits(String(summary.failed), locale);
+  const intro = tPages("ordersBulkDispatchIntro", { ok: okStr, failed: failedStr });
+
+  const failedRows = results.filter((r) => !r.ok);
+  if (failedRows.length === 0) return intro;
+
+  const normalized = failedRows.map((r) => {
+    const e = humanizeBulkDispatchError((r.error || "").trim());
+    return e || tPages("ordersBulkDispatchRowFailed");
+  });
+
+  const nNoCourier = normalized.filter((m) => m.includes("No active courier configured")).length;
+  if (nNoCourier > 0 && nNoCourier < failedRows.length) {
+    const other = failedRows.length - nNoCourier;
+    return tPages("ordersBulkDispatchMixedShort", {
+      failed: failedStr,
+      ok: okStr,
+      other: toLocaleDigits(String(other), locale),
+    });
+  }
+
+  const unique = [...new Set(normalized)];
+
+  if (unique.length === 1) {
+    const only = unique[0];
+    if (only.includes("No active courier configured")) {
+      return tPages("ordersBulkDispatchAllNoCourier", { failed: failedStr, ok: okStr });
+    }
+    if (only.includes("already been sent to a courier")) {
+      return tPages("ordersBulkDispatchAllAlreadySent", { failed: failedStr, ok: okStr });
+    }
+    return `${intro}\n${truncateBulkDetail(only)}`;
+  }
+
+  const counts = new Map<string, number>();
+  for (const msg of normalized) {
+    counts.set(msg, (counts.get(msg) || 0) + 1);
+  }
+  const sorted = [...counts.entries()].sort((a, b) => b[1] - a[1]);
+  const lines = sorted.slice(0, 8).map(([msg, n]) =>
+    tPages("ordersBulkDispatchGroupedErrorLine", {
+      count: toLocaleDigits(String(n), locale),
+      message: truncateBulkDetail(msg, 96),
+    }),
+  );
+  const trailing = sorted.length > 8 ? `\n${tPages("ordersBulkDispatchMoreErrors")}` : "";
+  return `${intro}\n${lines.join("\n")}${trailing}`;
+}
+
 export default function OrdersPage() {
   const router = useRouter();
   const locale = useLocale();
@@ -329,9 +404,12 @@ export default function OrdersPage() {
         setCategoryOptions(flattenCategoryOptionsRich(tree));
       })
       .catch((err) => {
-        console.error(err);
+        notify.error(err, {
+          title: tPages("toastTitleCategoryFiltersUnavailable"),
+          fallbackMessage: tPages("toastDescCategoryFiltersUnavailable"),
+        });
       });
-  }, []);
+  }, [tPages]);
 
   const fetchOrders = useCallback(() => {
     setLoading(true);
@@ -356,8 +434,10 @@ export default function OrdersPage() {
         setPrevLink(res.data.previous);
       })
       .catch((err) => {
-        console.error(err);
-        notify.error(err);
+        notify.error(err, {
+          title: tPages("toastTitleOrdersFailedToLoad"),
+          fallbackMessage: tPages("toastDescOrdersFailedToLoad"),
+        });
       })
       .finally(() => setLoading(false));
   }, [
@@ -446,8 +526,12 @@ export default function OrdersPage() {
         setExportPoll(data);
         return terminal.has(data.status);
       } catch (e) {
-        console.error(e);
-        if (!cancelled) notify.error(e, { fallbackMessage: tPages("ordersExportPollFailed") });
+        if (!cancelled) {
+          notify.error(e, {
+            title: tPages("toastTitleExportStatusUnavailable"),
+            fallbackMessage: tPages("toastDescExportStatusUnavailable"),
+          });
+        }
         return true;
       }
     }
@@ -525,10 +609,14 @@ export default function OrdersPage() {
         download_url: null,
         expires_at: null,
       });
-      notify.success(tPages("ordersExportStarted"));
+      notify.success(tPages("toastDescCsvExportQueued"), {
+        title: tPages("toastTitleCsvExportQueued"),
+      });
     } catch (err) {
-      console.error(err);
-      notify.error(err, { fallbackMessage: tPages("ordersExportStartFailed") });
+      notify.error(err, {
+        title: tPages("toastTitleExportCouldntStart"),
+        fallbackMessage: tPages("toastDescExportCouldntStart"),
+      });
     } finally {
       setExportSubmitting(false);
     }
@@ -542,7 +630,10 @@ export default function OrdersPage() {
       const { data } = await api.get<DownloadMeta>(path);
       const href = typeof data?.url === "string" ? data.url.trim() : "";
       if (!href) {
-        notify.error(null, { fallbackMessage: tPages("ordersExportDownloadFailed") });
+        notify.error(null, {
+          title: tPages("toastTitleDownloadLinkNotReady"),
+          fallbackMessage: tPages("toastDescDownloadLinkNotReady"),
+        });
         return;
       }
       const filename =
@@ -557,8 +648,10 @@ export default function OrdersPage() {
       a.click();
       a.remove();
     } catch (err) {
-      console.error(err);
-      notify.error(err, { fallbackMessage: tPages("ordersExportDownloadFailed") });
+      notify.error(err, {
+        title: tPages("toastTitleDownloadFailed"),
+        fallbackMessage: tPages("toastDescDownloadFailed"),
+      });
     }
   }
 
@@ -590,27 +683,23 @@ export default function OrdersPage() {
         { order_public_ids: Array.from(selectedIds) }
       );
       const { summary, results } = data;
-      const failedMsgs = results
-        .filter((r) => !r.ok)
-        .map(
-          (r) =>
-            `${r.public_id}: ${r.error || tPages("ordersBulkDispatchRowFailed")}`
-        );
       if (summary.failed > 0) {
-        notify.warning(
-          tPages("ordersBulkDispatchSummary", {
-            ok: toLocaleDigits(String(summary.ok), locale),
-            failed: toLocaleDigits(String(summary.failed), locale),
-            details: `${failedMsgs.slice(0, 8).join("\n")}${failedMsgs.length > 8 ? "\n…" : ""}`,
-          })
-        );
+        notify.warning(bulkDispatchFailureBody(results, summary, locale, tPages), {
+          title: tPages("toastTitleSomeOrdersNotDispatched"),
+        });
       }
-      if (summary.ok > 0) notify.success(tPages("ordersConfirmSendCourier"));
+      if (summary.ok > 0) {
+        notify.success(tPages("toastDescCourierDispatchConfirmed"), {
+          title: tPages("toastTitleCourierDispatchConfirmed"),
+        });
+      }
       setSelectedIds(new Set());
       fetchOrders();
     } catch (err) {
-      console.error(err);
-      notify.error(err, { fallbackMessage: tPages("ordersBulkDispatchFailed") });
+      notify.error(err, {
+        title: tPages("toastTitleBulkDispatchFailed"),
+        fallbackMessage: tPages("toastDescBulkDispatchFailed"),
+      });
     } finally {
       setBulkDispatching(false);
     }
@@ -644,8 +733,10 @@ export default function OrdersPage() {
         prev.map((o) => (o.public_id === order.public_id ? data.order : o))
       );
     } catch (e) {
-      console.error(e);
-      notify.error(e, { fallbackMessage: tPages("orderDetailStatusUpdateFailed") });
+      notify.error(e, {
+        title: tPages("toastTitleOrderStatusNotUpdated"),
+        fallbackMessage: tPages("toastDescOrderStatusNotUpdated"),
+      });
     } finally {
       setStatusUpdatingId(null);
     }
@@ -666,8 +757,10 @@ export default function OrdersPage() {
         prev.map((o) => (o.public_id === order.public_id ? data : o))
       );
     } catch (e) {
-      console.error(e);
-      notify.error(e, { fallbackMessage: "Failed to update flag." });
+      notify.error(e, {
+        title: tPages("toastTitleFlagNotSaved"),
+        fallbackMessage: tPages("toastDescFlagNotSaved"),
+      });
     } finally {
       setFlagUpdatingId(null);
     }
@@ -685,7 +778,9 @@ export default function OrdersPage() {
       );
     } catch (err: unknown) {
       const normalized = normalizeError(err, tPages("ordersSendToCourierErrorFallback"));
-      notify.error(normalized.message);
+      notify.error(normalized.message, {
+        title: tPages("toastTitleCourierHandoffFailed"),
+      });
     } finally {
       setCourierSendingId(null);
     }
@@ -986,7 +1081,7 @@ export default function OrdersPage() {
       ) : null}
 
       {loading ? (
-        <DashboardTableSkeleton columns={10} rows={5} showHeader={false} showFilters={false} />
+        <DashboardTableSkeleton columns={12} rows={5} showHeader={false} showFilters={false} />
       ) : (
         <>
           <div
@@ -1013,6 +1108,7 @@ export default function OrdersPage() {
                   <th className="th">Flag</th>
                   <th className="th">Delivery Status</th>
                   <th className="th">{tPages("ordersListColTotal")}</th>
+                  <th className="th">{tPages("ordersListColPayment")}</th>
                   <th className="th">{tPages("ordersListConsignmentId")}</th>
                   <th className="th">{tPages("ordersListColDate")}</th>
                 </tr>
@@ -1146,6 +1242,11 @@ export default function OrdersPage() {
                         >
                           {currencySymbol}
                           {Number(order.total).toLocaleString()}
+                        </td>
+                        <td className="px-4 py-3 whitespace-nowrap text-foreground">
+                          {formatOrderPaymentStatusLabel(order.payment_status, (key) =>
+                            tPages(key)
+                          )}
                         </td>
                         <td
                           className={`px-4 py-3 text-muted-foreground whitespace-nowrap max-w-[220px] ${numClass}`}

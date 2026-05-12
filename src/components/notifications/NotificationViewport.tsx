@@ -21,7 +21,7 @@ export function NotificationViewport() {
       toastOptions={{
         classNames: {
           toast:
-            "group w-[min(92vw,20rem)] sm:w-[20rem] border-none bg-transparent p-0 shadow-none transition-all duration-300 ease-out",
+            "group w-[min(92vw,22rem)] sm:w-[22rem] border-none bg-transparent p-0 shadow-none transition-all duration-300 ease-out",
         },
       }}
     />

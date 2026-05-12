@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Loader2, Trash } from "lucide-react";
 import { Link } from "@/i18n/navigation";
+import { useTranslations } from "next-intl";
 import api from "@/lib/api";
 import type { Blog } from "@/types";
 import { formatDashboardDateOptional } from "@/lib/datetime-display";
@@ -35,6 +36,7 @@ type BlogListCardProps = {
 
 export function BlogListCard({ blog, locale, onDelete }: BlogListCardProps) {
   const confirm = useConfirm();
+  const tPages = useTranslations("pages");
   const [deleting, setDeleting] = useState(false);
   const readMins = estimateReadingMinutesFromHtml(blog.content);
   const dateStr = formatDashboardDateOptional(blogDisplayDateIso(blog), locale);
@@ -58,8 +60,14 @@ export function BlogListCard({ blog, locale, onDelete }: BlogListCardProps) {
       setDeleting(true);
       await api.delete(`admin/blogs/${blog.public_id}/`);
       onDelete(blog.public_id);
+      notify.success(tPages("toastDescPostDeleted"), {
+        title: tPages("toastTitlePostDeleted"),
+      });
     } catch (err) {
-      notify.error(err);
+      notify.error(err, {
+        title: tPages("toastTitlePostNotDeleted"),
+        fallbackMessage: tPages("toastDescPostNotDeleted"),
+      });
     } finally {
       setDeleting(false);
     }

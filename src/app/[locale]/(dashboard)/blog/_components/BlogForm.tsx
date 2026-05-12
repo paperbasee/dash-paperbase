@@ -5,6 +5,7 @@ import { Trash, Undo2, X, Loader2, AlertCircle, CheckCircle2 } from "lucide-reac
 import { isApiHttpError } from "@/lib/api-client";
 import api from "@/lib/api";
 import { useRouter } from "@/i18n/navigation";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -79,6 +80,7 @@ export function BlogForm({
 }: BlogFormProps) {
   const router = useRouter();
   const confirm = useConfirm();
+  const tPages = useTranslations("pages");
   const { fieldErrors, clearValidation } = useNotificationValidation("blog-form");
   const tempBlogUploadIdRef = useRef<string>(
     typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
@@ -148,8 +150,10 @@ export function BlogForm({
       );
       setTags(Array.isArray(data) ? data : data.results);
     } catch (err) {
-      console.error(err);
-      notify.error(err);
+      notify.error(err, {
+        title: tPages("toastTitleTagsUnavailable"),
+        fallbackMessage: tPages("toastDescTagsUnavailable"),
+      });
     }
   }
 
@@ -174,9 +178,12 @@ export function BlogForm({
       setTags((prev) => [...prev, data]);
       setForm((f) => ({ ...f, tag_public_ids: [...f.tag_public_ids, data.public_id] }));
       setNewTagName("");
-      notify.success("Tag created");
+      notify.success(tPages("toastDescTagAdded"), { title: tPages("toastTitleTagAdded") });
     } catch (err) {
-      notify.error(err);
+      notify.error(err, {
+        title: tPages("toastTitleTagsUnavailable"),
+        fallbackMessage: tPages("toastDescTagsUnavailable"),
+      });
     }
   }
 
@@ -194,9 +201,12 @@ export function BlogForm({
         ...f,
         tag_public_ids: f.tag_public_ids.filter((id) => id !== tag.public_id),
       }));
-      notify.warning("Tag deleted");
+      notify.success(tPages("toastDescValueDeleted"), { title: tPages("toastTitleValueDeleted") });
     } catch (err) {
-      notify.error(err);
+      notify.error(err, {
+        title: tPages("toastTitleTagNotRemoved"),
+        fallbackMessage: tPages("toastDescTagNotRemoved"),
+      });
     }
   }
 
@@ -263,11 +273,13 @@ export function BlogForm({
           }
         }
         notify.error(err, {
-          fallbackMessage: "Unable to save post. Please check your input and try again.",
+          title: tPages("toastTitlePostNotSaved"),
+          fallbackMessage: tPages("toastDescPostNotSaved"),
         });
       } else {
         notify.error(err, {
-          fallbackMessage: "Unable to save post. Please try again.",
+          title: tPages("toastTitlePostNotSaved"),
+          fallbackMessage: tPages("toastDescPostNotSaved"),
         });
       }
       return null;
@@ -309,7 +321,9 @@ export function BlogForm({
       return;
     }
     if (imageFile && uploadStatus !== "uploaded") {
-      notify.warning(uploadError || "Image upload is not complete yet.");
+      notify.warning(tPages("toastDescUploadsStillInProgressBanner"), {
+        title: tPages("toastTitleUploadsStillInProgress"),
+      });
       return;
     }
     setSaving(true);
@@ -317,7 +331,7 @@ export function BlogForm({
     setSaving(false);
     if (!saved) return;
     clearValidation();
-    notify.success("Post saved");
+    notify.success(tPages("toastDescPostSaved"), { title: tPages("toastTitlePostSaved") });
     if (mode === "new") {
       router.push(`/blog/${saved.public_id}/edit`);
     } else {

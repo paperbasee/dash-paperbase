@@ -168,8 +168,11 @@ export default function VariantsPageClient() {
       const [prods, attrs] = await Promise.all([fetchAllProducts(), fetchAllAttributes()]);
       setProducts(prods);
       setAttributes(attrs);
-    } catch {
-      setError(tPages("variantsLoadMetaFailed"));
+    } catch (err) {
+      notify.error(err, {
+        title: tPages("toastTitleVariantsFailedToLoad"),
+        fallbackMessage: tPages("toastDescVariantsFailedToLoad"),
+      });
     } finally {
       setLoading(false);
     }
@@ -263,7 +266,10 @@ export default function VariantsPageClient() {
       setVariants(acc);
     } catch {
       setVariants([]);
-      setError(tPages("variantsLoadVariantsFailed"));
+      notify.error(new Error("variants_load_failed"), {
+        title: tPages("toastTitleVariantsFailedToLoad"),
+        fallbackMessage: tPages("toastDescVariantsFailedToLoad"),
+      });
     } finally {
       setVariantsLoading(false);
     }
@@ -332,9 +338,10 @@ export default function VariantsPageClient() {
       await loadVariants();
       await loadMeta();
     } catch (err: unknown) {
-      const normalized = normalizeError(err, tPages("variantsSaveFailed"));
-      setError(normalized.message);
-      notify.error(normalized.message);
+      notify.error(err, {
+        title: tPages("toastTitleVariantNotSaved"),
+        fallbackMessage: tPages("toastDescVariantNotSaved"),
+      });
     } finally {
       setSaving(false);
     }
@@ -351,8 +358,12 @@ export default function VariantsPageClient() {
       await api.delete(`admin/product-variants/${v.public_id}/`);
       await loadVariants();
       await loadMeta();
-    } catch {
-      setError(tPages("variantsDeleteFailed"));
+      notify.success(tPages("toastDescVariantDeleted"), { title: tPages("toastTitleVariantDeleted") });
+    } catch (err) {
+      notify.error(err, {
+        title: tPages("toastTitleVariantNotDeleted"),
+        fallbackMessage: tPages("toastDescVariantNotDeleted"),
+      });
     }
   }
 
@@ -369,7 +380,10 @@ export default function VariantsPageClient() {
       );
       await loadMeta();
     } catch {
-      setError(tPages("variantsStatusUpdateFailed"));
+      notify.error(new Error("variant_status_update_failed"), {
+        title: tPages("toastTitleVariantStatusNotSaved"),
+        fallbackMessage: tPages("toastDescVariantStatusNotSaved"),
+      });
       await loadVariants();
     } finally {
       setTogglingVariantId(null);
@@ -438,11 +452,7 @@ export default function VariantsPageClient() {
         {tPages("variantsSubtitleAfter")}
       </p>
 
-      {error ? (
-        <p className="rounded-card border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive">
-          {error}
-        </p>
-      ) : null}
+      {/* Inline error text moved to toasts (keep form states only). */}
 
       <FilterBar className="flex-nowrap overflow-x-auto overflow-y-clip [-webkit-overflow-scrolling:touch] sm:flex-wrap sm:overflow-x-visible sm:overflow-y-visible">
         <Select

@@ -128,15 +128,15 @@ export default function TrashPage() {
         await api.post(`admin/trash/${publicId}/restore/`);
       }
       setSelectedPublicIds(new Set());
-      notify.success(
-        tPages("trashBulkRestoreSuccess", {
-          count: toLocaleDigits(String(n), locale),
-        })
-      );
+      notify.success(tPages("toastDescAllItemsRestored"), {
+        title: tPages("toastTitleAllItemsRestored"),
+      });
       fetchTrash();
     } catch (err) {
-      console.error(err);
-      notify.error(err, { fallbackMessage: tPages("trashRestoreFailed") });
+      notify.error(err, {
+        title: tPages("toastTitleRestoreFailed"),
+        fallbackMessage: tPages("toastDescRestoreFailed"),
+      });
     } finally {
       setBulkRestoring(false);
     }
@@ -162,15 +162,15 @@ export default function TrashPage() {
         await api.delete(`admin/trash/${publicId}/`);
       }
       setSelectedPublicIds(new Set());
-      notify.warning(
-        tPages("trashBulkRemovedSuccess", {
-          count: toLocaleDigits(String(n), locale),
-        })
-      );
+      notify.success(tPages("toastDescTrashEmptied"), {
+        title: tPages("toastTitleTrashEmptied"),
+      });
       fetchTrash();
     } catch (err) {
-      console.error(err);
-      notify.error(err, { fallbackMessage: tPages("trashPermanentFailed") });
+      notify.error(err, {
+        title: tPages("toastTitleTrashNotEmptied"),
+        fallbackMessage: tPages("toastDescTrashNotEmptied"),
+      });
     } finally {
       setBulkDeleting(false);
     }
@@ -193,11 +193,15 @@ export default function TrashPage() {
         next.delete(row.public_id);
         return next;
       });
-      notify.success(tPages("trashRestoredSuccess"));
+      notify.success(tPages("toastDescItemRestored"), {
+        title: tPages("toastTitleItemRestored"),
+      });
       fetchTrash();
     } catch (err) {
-      console.error(err);
-      notify.error(err, { fallbackMessage: tPages("trashRestoreFailed") });
+      notify.error(err, {
+        title: tPages("toastTitleRestoreFailed"),
+        fallbackMessage: tPages("toastDescRestoreFailed"),
+      });
     } finally {
       setBusyPublicId(null);
     }
@@ -218,11 +222,15 @@ export default function TrashPage() {
         next.delete(row.public_id);
         return next;
       });
-      notify.warning(tPages("trashRemovedSuccess"));
+      notify.success(tPages("toastDescPermanentlyDeleted"), {
+        title: tPages("toastTitlePermanentlyDeleted"),
+      });
       fetchTrash();
     } catch (err) {
-      console.error(err);
-      notify.error(err, { fallbackMessage: tPages("trashPermanentFailed") });
+      notify.error(err, {
+        title: tPages("toastTitleDeletionFailed"),
+        fallbackMessage: tPages("toastDescDeletionFailed"),
+      });
     } finally {
       setBusyPublicId(null);
     }

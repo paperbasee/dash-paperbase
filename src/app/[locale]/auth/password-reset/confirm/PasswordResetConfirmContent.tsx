@@ -36,7 +36,6 @@ export default function PasswordResetConfirmContent() {
   const router = useRouter();
   const t = useTranslations("auth.passwordReset");
   const tSignup = useTranslations("auth.signup");
-  const tPages = useTranslations("pages");
   const searchParams = useSearchParams();
   const uid = searchParams.get("uid") ?? "";
   const token = searchParams.get("token") ?? "";
@@ -68,7 +67,7 @@ export default function PasswordResetConfirmContent() {
       setError(
         validation.errors.newPasswordConfirm ??
           validation.errors.newPassword ??
-          tPages("formFixHighlighted")
+          t("genericError")
       );
       return;
     }

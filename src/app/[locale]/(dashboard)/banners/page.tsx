@@ -324,8 +324,10 @@ export default function BannersPage() {
         setBanners(Array.isArray(data) ? data : data.results);
       })
       .catch((err) => {
-        console.error(err);
-        notify.error(err);
+        notify.error(err, {
+          title: tPages("toastTitleBannersFailedToLoad"),
+          fallbackMessage: tPages("toastDescBannersFailedToLoad"),
+        });
       })
       .finally(() => setLoading(false));
   }
@@ -464,14 +466,18 @@ export default function BannersPage() {
       return;
     }
     if (slotStatus.some((s) => s === "uploading")) {
-      notify.warning("Please wait for image uploads to finish.");
+      notify.warning(tPages("toastDescUploadsStillInProgressBanner"), {
+        title: tPages("toastTitleUploadsStillInProgress"),
+      });
       return;
     }
     const hasIncompleteUpload = imageSlots.some(
       (slot) => slot.kind === "local" && !slot.uploadedKey
     );
     if (hasIncompleteUpload) {
-      notify.warning("One or more image uploads failed. Retry before saving.");
+      notify.warning(tPages("toastDescUploadsStillInProgressBanner"), {
+        title: tPages("toastTitleUploadsStillInProgress"),
+      });
       return;
     }
 
@@ -518,15 +524,19 @@ export default function BannersPage() {
       }
       setEditing(null);
       notify.clearValidation("banners-form");
-      notify.success(tPages("bannersSavedSuccess"));
+      notify.success(tPages("toastDescBannerSaved"), { title: tPages("toastTitleBannerSaved") });
       fetchData();
     } catch (err) {
       if (isApiHttpError(err)) {
-        console.error("Banner save failed:", err.response?.data || err.message);
-        notify.error(err, { fallbackMessage: tCommon("pleaseWait") });
+        notify.error(err, {
+          title: tPages("toastTitleBannerOperationFailed"),
+          fallbackMessage: tPages("toastDescBannerOperationFailed"),
+        });
       } else {
-        console.error(err);
-        notify.error(err);
+        notify.error(err, {
+          title: tPages("toastTitleBannerOperationFailed"),
+          fallbackMessage: tPages("toastDescBannerOperationFailed"),
+        });
       }
     } finally {
       setSaving(false);
@@ -542,11 +552,13 @@ export default function BannersPage() {
     if (!ok) return;
     try {
       await api.delete(`admin/banners/${publicId}/`);
-      notify.warning(tPages("bannersDeletedSuccess"));
+      notify.success(tPages("toastDescBannerDeleted"), { title: tPages("toastTitleBannerDeleted") });
       fetchData();
     } catch (err) {
-      console.error(err);
-      notify.error(err);
+      notify.error(err, {
+        title: tPages("toastTitleBannerOperationFailed"),
+        fallbackMessage: tPages("toastDescBannerOperationFailed"),
+      });
     }
   }
 
@@ -560,8 +572,10 @@ export default function BannersPage() {
         prev.map((b) => (b.public_id === data.public_id ? data : b))
       );
     } catch (err) {
-      console.error(err);
-      notify.error(err);
+      notify.error(err, {
+        title: tPages("toastTitleBannerOperationFailed"),
+        fallbackMessage: tPages("toastDescBannerOperationFailed"),
+      });
     }
   }
 

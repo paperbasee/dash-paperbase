@@ -115,8 +115,6 @@ export default function NetworkingSection({ hidden }: { hidden: boolean }) {
     subscriptionLocked || planExpired || storeUnderReview;
   const [keys, setKeys] = useState<APIKeyRow[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [message, setMessage] = useState<string | null>(null);
   const [newKeyName, setNewKeyName] = useState("");
   const [revealedKey, setRevealedKey] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -134,7 +132,6 @@ export default function NetworkingSection({ hidden }: { hidden: boolean }) {
   const load = useCallback(async () => {
     if (networkingActionsLocked) {
       setKeys([]);
-      setError(null);
       setLoading(false);
       return;
     }
@@ -142,10 +139,12 @@ export default function NetworkingSection({ hidden }: { hidden: boolean }) {
       setLoading(true);
       const { data } = await api.get("settings/network/api-keys/");
       setKeys(extractRows(data));
-      setError(null);
     } catch {
-      setError(t("networking.loadError"));
       setKeys([]);
+      notify.error(new Error("networking_keys_load_failed"), {
+        title: tPages("toastTitleThemeNotLoaded"),
+        fallbackMessage: t("networking.loadError"),
+      });
     } finally {
       setLoading(false);
     }
@@ -187,17 +186,21 @@ export default function NetworkingSection({ hidden }: { hidden: boolean }) {
     });
     if (!ok) return;
     setBusy(true);
-    setMessage(null);
     setRevealedKey(null);
     try {
       const payload = { name: newKeyName.trim() || t("networking.defaultKeyName") };
       const { data } = await api.post<APIKeyCreateResponse>("settings/network/api-keys/", payload);
       setNewKeyName("");
       setRevealedKey(data.api_key);
-      setMessage(t("networking.msgCreated"));
+      notify.success(t("networking.msgCreated"), {
+        title: tPages("toastTitleKeyOperationFailed"),
+      });
       await load();
     } catch {
-      setMessage(t("networking.msgCreateFailed"));
+      notify.error(new Error("networking_key_create_failed"), {
+        title: tPages("toastTitleKeyOperationFailed"),
+        fallbackMessage: tPages("toastDescKeyOperationFailed"),
+      });
     } finally {
       setBusy(false);
     }
@@ -212,7 +215,6 @@ export default function NetworkingSection({ hidden }: { hidden: boolean }) {
     });
     if (!ok) return;
     setBusy(true);
-    setMessage(null);
     setRevealedKey(null);
     try {
       const { data } = await api.post<APIKeyCreateResponse>(
@@ -220,10 +222,15 @@ export default function NetworkingSection({ hidden }: { hidden: boolean }) {
         { name: currentName }
       );
       setRevealedKey(data.api_key);
-      setMessage(t("networking.msgRegenerated"));
+      notify.success(t("networking.msgRegenerated"), {
+        title: tPages("toastTitleKeyOperationFailed"),
+      });
       await load();
     } catch {
-      setMessage(t("networking.msgRegenerateFailed"));
+      notify.error(new Error("networking_key_regenerate_failed"), {
+        title: tPages("toastTitleKeyOperationFailed"),
+        fallbackMessage: tPages("toastDescKeyOperationFailed"),
+      });
     } finally {
       setBusy(false);
     }
@@ -238,14 +245,18 @@ export default function NetworkingSection({ hidden }: { hidden: boolean }) {
     });
     if (!ok) return;
     setBusy(true);
-    setMessage(null);
     try {
       await api.delete(`settings/network/api-keys/${publicId}/`);
       // Remove immediately so deleted keys disappear from the screen.
       setKeys((prev) => prev.filter((row) => row.public_id !== publicId));
-      setMessage(t("networking.msgRevoked"));
+      notify.success(t("networking.msgRevoked"), {
+        title: tPages("toastTitleIntegrationDisconnected"),
+      });
     } catch {
-      setMessage(t("networking.msgRevokeFailed"));
+      notify.error(new Error("networking_key_revoke_failed"), {
+        title: tPages("toastTitleKeyOperationFailed"),
+        fallbackMessage: tPages("toastDescKeyOperationFailed"),
+      });
     } finally {
       setBusy(false);
     }
@@ -276,7 +287,10 @@ export default function NetworkingSection({ hidden }: { hidden: boolean }) {
         title: t("networking.apiKeyCopiedTitle"),
       });
     } else {
-      notify.warning(t("networking.apiKeyCopyFailed"));
+      notify.error(new Error("clipboard_blocked"), {
+        title: tPages("toastTitleClipboardBlocked"),
+        fallbackMessage: tPages("toastDescClipboardBlocked"),
+      });
     }
   }
 
@@ -294,10 +308,16 @@ export default function NetworkingSection({ hidden }: { hidden: boolean }) {
           title: t("networking.promptCopiedTitle"),
         });
       } else {
-        notify.warning(t("networking.promptCopyFailed"));
+        notify.error(new Error("clipboard_blocked"), {
+          title: tPages("toastTitleClipboardBlocked"),
+          fallbackMessage: tPages("toastDescClipboardBlocked"),
+        });
       }
     } catch {
-      notify.warning(t("networking.promptCopyFailed"));
+      notify.error(new Error("clipboard_blocked"), {
+        title: tPages("toastTitleClipboardBlocked"),
+        fallbackMessage: tPages("toastDescClipboardBlocked"),
+      });
     } finally {
       setPromptLoading(false);
     }
@@ -387,16 +407,7 @@ export default function NetworkingSection({ hidden }: { hidden: boolean }) {
           </div>
         </div>
 
-        {error && (
-          <p className="text-sm text-destructive" role="alert">
-            {error}
-          </p>
-        )}
-        {message && (
-          <p className="text-sm text-muted-foreground" role="status">
-            {message}
-          </p>
-        )}
+        {/* Inline error/status text moved to toasts. */}
 
         {revealedKey && (
           <div className="rounded-card border border-primary/40 bg-primary/5 p-3 text-sm">

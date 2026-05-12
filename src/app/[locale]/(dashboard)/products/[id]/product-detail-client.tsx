@@ -228,8 +228,10 @@ export default function ProductDetailClient() {
         );
       })
       .catch((err) => {
-        console.error(err);
-        notify.error(err);
+        notify.error(err, {
+          title: tPages("toastTitleProductDidntLoad"),
+          fallbackMessage: tPages("toastDescProductDidntLoad"),
+        });
       })
       .finally(() => setLoading(false));
   }, [product_public_id]);
@@ -378,6 +380,11 @@ export default function ProductDetailClient() {
           formValidation.errors.category ??
           tPages("formFixHighlighted")
       );
+      notify.validation("productEdit", formValidation.errors);
+      notify.error(new Error("product_validation"), {
+        title: tPages("toastTitleChangesNotSavedProduct"),
+        fallbackMessage: tPages("toastDescChangesNotSavedProduct"),
+      });
       return;
     }
 
@@ -386,6 +393,11 @@ export default function ProductDetailClient() {
     if (Object.keys(extraErrors).length > 0) {
       setExtraFieldsErrors(extraErrors);
       setError(tPages("productFillExtraFields"));
+      notify.validation("productEdit", extraErrors);
+      notify.error(new Error("product_validation"), {
+        title: tPages("toastTitleChangesNotSavedProduct"),
+        fallbackMessage: tPages("toastDescChangesNotSavedProduct"),
+      });
       return;
     }
     setExtraFieldsErrors({});
@@ -393,6 +405,9 @@ export default function ProductDetailClient() {
     const hasIncompleteUpload = imageFiles.some((file, i) => Boolean(file) && !imageKeys[i]);
     if (hasIncompleteUpload || anyUploading) {
       setError("Please complete image uploads before saving.");
+      notify.warning("Please complete image uploads before saving.", {
+        title: tPages("toastTitleUploadsStillInProgress"),
+      });
       return;
     }
 
@@ -465,6 +480,10 @@ export default function ProductDetailClient() {
         text = (message as { slug: string[] }).slug[0] ?? text;
       }
       setError(text || tPages("productUpdateFailed"));
+      notify.error(err, {
+        title: tPages("toastTitleChangesNotSavedProduct"),
+        fallbackMessage: tPages("toastDescChangesNotSavedProduct"),
+      });
     } finally {
       setSaving(false);
     }
@@ -484,8 +503,10 @@ export default function ProductDetailClient() {
       await api.delete(`admin/products/${product_public_id}/`);
       router.push("/products");
     } catch (err) {
-      console.error(err);
-      notify.error(err);
+      notify.error(err, {
+        title: tPages("toastTitleProductNotDeleted"),
+        fallbackMessage: tPages("toastDescProductNotDeleted"),
+      });
     } finally {
       setDeleting(false);
     }
@@ -558,14 +579,7 @@ export default function ProductDetailClient() {
         </div>
       </div>
 
-      {error && (
-        <div
-          role="alert"
-          className="rounded-card border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive"
-        >
-          {error}
-        </div>
-      )}
+      {/* Inline error text moved to toasts (keep validation highlights only). */}
 
       {isEditMode ? (
         <form

@@ -101,7 +101,7 @@ export default function ShippingPage() {
     [tPages],
   );
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string>("");
+  const [error, setError] = useState<string>(""); // kept for legacy; do not render inline
 
   const [zones, setZones] = useState<ShippingZone[]>([]);
   const [methods, setMethods] = useState<ShippingMethod[]>([]);
@@ -155,10 +155,10 @@ export default function ShippingPage() {
       setMethods(unwrap(m.data));
       setRates(unwrap(r.data));
     } catch (e) {
-      console.error(e);
-      const normalized = normalizeError(e, tPages("shippingLoadFailed"));
-      setError(normalized.message);
-      notify.error(normalized.message);
+      notify.error(e, {
+        title: tPages("toastTitleShippingSettingsNotSaved"),
+        fallbackMessage: tPages("toastDescShippingSettingsNotSaved"),
+      });
     } finally {
       setLoading(false);
     }
@@ -229,10 +229,10 @@ export default function ShippingPage() {
       setEditingZone(null);
       fetchAll();
     } catch (e) {
-      console.error(e);
-      const normalized = normalizeError(e, tPages("shippingSaveZoneFailed"));
-      setError(normalized.message);
-      notify.error(normalized.message);
+      notify.error(e, {
+        title: tPages("toastTitleShippingSettingsNotSaved"),
+        fallbackMessage: tPages("toastDescShippingSettingsNotSaved"),
+      });
     } finally {
       setSaving(false);
     }
@@ -258,10 +258,10 @@ export default function ShippingPage() {
       setEditingMethod(null);
       fetchAll();
     } catch (e) {
-      console.error(e);
-      const normalized = normalizeError(e, tPages("shippingSaveMethodFailed"));
-      setError(normalized.message);
-      notify.error(normalized.message);
+      notify.error(e, {
+        title: tPages("toastTitleShippingSettingsNotSaved"),
+        fallbackMessage: tPages("toastDescShippingSettingsNotSaved"),
+      });
     } finally {
       setSaving(false);
     }
@@ -290,10 +290,10 @@ export default function ShippingPage() {
       setEditingRate(null);
       fetchAll();
     } catch (e) {
-      console.error(e);
-      const normalized = normalizeError(e, tPages("shippingSaveRateFailed"));
-      setError(normalized.message);
-      notify.error(normalized.message);
+      notify.error(e, {
+        title: tPages("toastTitleShippingSettingsNotSaved"),
+        fallbackMessage: tPages("toastDescShippingSettingsNotSaved"),
+      });
     } finally {
       setSaving(false);
     }
@@ -309,12 +309,21 @@ export default function ShippingPage() {
     setError("");
     try {
       await api.delete(`admin/shipping-${kind}/${publicId}/`);
-      notify.warning(tPages("shippingDeletedSuccess"));
+      if (kind === "methods") {
+        notify.success(tPages("toastDescShippingMethodRemoved"), {
+          title: tPages("toastTitleShippingMethodRemoved"),
+        });
+      } else {
+        notify.success(tPages("shippingDeletedSuccess"), {
+          title: tPages("toastTitleShippingMethodRemoved"),
+        });
+      }
       fetchAll();
     } catch (e) {
-      console.error(e);
-      setError(tPages("shippingDeleteFailed"));
-      notify.error(e, { fallbackMessage: tPages("shippingDeleteFailed") });
+      notify.error(e, {
+        title: tPages("toastTitleShippingSettingsNotSaved"),
+        fallbackMessage: tPages("toastDescShippingSettingsNotSaved"),
+      });
     }
   }
 
@@ -340,11 +349,7 @@ export default function ShippingPage() {
         </div>
       </div>
 
-      {error && (
-        <div className="rounded-card border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
-          {error}
-        </div>
-      )}
+      {/* Inline error text moved to toasts (keep field highlights only). */}
 
       <div className="grid gap-6 lg:grid-cols-3">
         <section className="rounded-card border border-border bg-card p-5">

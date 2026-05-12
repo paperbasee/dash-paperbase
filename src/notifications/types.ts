@@ -51,6 +51,7 @@ export type NotifyOptions = {
     | "information"
     | "warning"
     | "error"
+    | "notice"
     | "server-error"
     | "trash"
     | "undo";

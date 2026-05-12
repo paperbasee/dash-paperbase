@@ -106,10 +106,8 @@ export default function OrderDetailPage() {
   const [productResults, setProductResults] = useState<Product[]>([]);
   const [searchingProducts, setSearchingProducts] = useState(false);
   const [showProductResults, setShowProductResults] = useState(false);
-  const [editError, setEditError] = useState("");
   const [shippingZones, setShippingZones] = useState<ShippingZone[]>([]);
   const [shippingMethods, setShippingMethods] = useState<ShippingMethod[]>([]);
-  const [statusUpdateError, setStatusUpdateError] = useState("");
   const [statusUpdateLoading, setStatusUpdateLoading] = useState(false);
   const [flagUpdateLoading, setFlagUpdateLoading] = useState(false);
   const [paymentVerifying, setPaymentVerifying] = useState<"verify" | "reject" | null>(null);
@@ -125,8 +123,10 @@ export default function OrderDetailPage() {
       .get<Order>(`admin/orders/${order_public_id}/`)
       .then((res) => setOrder(res.data))
       .catch((err) => {
-        console.error(err);
-        notify.error(err);
+        notify.error(err, {
+          title: tPages("toastTitleOrderDataIncomplete"),
+          fallbackMessage: tPages("toastDescOrderDataIncomplete"),
+        });
       })
       .finally(() => setLoading(false));
   }, [order_public_id]);
@@ -170,7 +170,6 @@ export default function OrderDetailPage() {
 
   function startEditing() {
     if (!order) return;
-    setEditError("");
     setPricingPreview(null);
     const addr = splitShippingAddressForForm(order.shipping_address);
     setForm({
@@ -348,7 +347,6 @@ export default function OrderDetailPage() {
 
   function addProductToEditableOrder(product: Product) {
     if (!product.public_id) return;
-    setEditError("");
     ensureVariantsLoaded(product.public_id);
     setEditableItems((prev) => [
       ...prev,
@@ -376,23 +374,26 @@ export default function OrderDetailPage() {
   }
 
   function removeEditableItem(itemKey: string) {
-    setEditError("");
     setEditableItems((prev) => prev.filter((item) => item.key !== itemKey));
   }
 
   async function handleSave(e: FormEvent) {
     e.preventDefault();
     if (editableItems.length === 0) {
-      setEditError("");
-      notify.warning("product list can't be empty");
+      notify.warning(tPages("toastDescAddAtLeastOneProduct"), {
+        title: tPages("toastTitleAddAtLeastOneProduct"),
+      });
       return;
     }
     if (!form.village.trim() || !form.thana.trim() || !form.district.trim()) {
-      setEditError(tPages("orderEditAddressFieldsRequired"));
+      notify.validation("orderEdit", {
+        village: tPages("orderEditAddressFieldsRequired"),
+        thana: tPages("orderEditAddressFieldsRequired"),
+        district: tPages("orderEditAddressFieldsRequired"),
+      });
       return;
     }
     setSaving(true);
-    setEditError("");
     try {
       const removedExistingIds = orderItems
         .filter((existingItem) => !editableItems.some((item) => item.public_id === existingItem.public_id))
@@ -437,9 +438,10 @@ export default function OrderDetailPage() {
       setPricingPreview(null);
       setEditing(false);
     } catch (err: unknown) {
-      const normalized = normalizeError(err, tPages("orderDetailSaveFailed"));
-      setEditError(normalized.message);
-      notify.error(normalized.message);
+      notify.error(err, {
+        title: tPages("toastTitleChangesNotSavedOrder"),
+        fallbackMessage: tPages("toastDescChangesNotSavedOrder"),
+      });
     } finally {
       setSaving(false);
     }
@@ -464,7 +466,6 @@ export default function OrderDetailPage() {
       });
       if (!ok) return;
     }
-    setStatusUpdateError("");
     setStatusUpdateLoading(true);
     try {
       const { data } = await api.patch<{ order: Order }>(
@@ -473,9 +474,10 @@ export default function OrderDetailPage() {
       );
       setOrder(data.order);
     } catch (err: unknown) {
-      const normalized = normalizeError(err, tPages("orderDetailStatusUpdateFailed"));
-      setStatusUpdateError(normalized.message);
-      notify.error(normalized.message);
+      notify.error(err, {
+        title: tPages("toastTitleStatusNotUpdated"),
+        fallbackMessage: tPages("toastDescStatusNotUpdated"),
+      });
     } finally {
       setStatusUpdateLoading(false);
     }
@@ -484,25 +486,20 @@ export default function OrderDetailPage() {
   async function handleVerifyPayment(valid: boolean) {
     if (!order || paymentVerifying) return;
     setPaymentVerifying(valid ? "verify" : "reject");
-    setStatusUpdateError("");
     try {
       const { data } = await api.post<{ order: Order }>(
         `admin/orders/${order_public_id}/verify-payment/`,
         { valid },
       );
       setOrder(data.order);
-      notify.success(
-        valid
-          ? tPages("orderDetailPaymentVerifiedToast")
-          : tPages("orderDetailPaymentRejectedToast"),
-      );
+      notify.success(tPages("toastDescPaymentReviewRecorded"), {
+        title: tPages("toastTitlePaymentReviewRecorded"),
+      });
     } catch (err: unknown) {
-      const normalized = normalizeError(
-        err,
-        tPages("orderDetailPaymentVerifyFailed"),
-      );
-      setStatusUpdateError(normalized.message);
-      notify.error(normalized.message);
+      notify.error(err, {
+        title: tPages("toastTitlePaymentReviewFailed"),
+        fallbackMessage: tPages("toastDescPaymentReviewFailed"),
+      });
     } finally {
       setPaymentVerifying(null);
     }
@@ -519,8 +516,10 @@ export default function OrderDetailPage() {
       const { data } = await api.patch<Order>(`admin/orders/${order_public_id}/`, payload);
       setOrder(data);
     } catch (err: unknown) {
-      const normalizedErr = normalizeError(err, "Failed to update flag.");
-      notify.error(normalizedErr.message);
+      notify.error(err, {
+        title: tPages("toastTitleOrderFlagNotSaved"),
+        fallbackMessage: tPages("toastDescOrderFlagNotSaved"),
+      });
     } finally {
       setFlagUpdateLoading(false);
     }
@@ -765,13 +764,7 @@ export default function OrderDetailPage() {
                 })}
               </ProductGrid>
             </div>
-            {editing && editError && (
-              <div className="shrink-0 border-t border-border/40 px-4 pt-3 sm:px-6">
-                <div className="rounded-ui border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
-                  {editError}
-                </div>
-              </div>
-            )}
+            {/* Inline error text moved to toasts (keep field highlights only). */}
           </CardContent>
         </Card>
 
@@ -1107,9 +1100,6 @@ export default function OrderDetailPage() {
                       </div>
                     </div>
                   </div>
-                )}
-                {statusUpdateError && (
-                  <p className="text-xs text-destructive">{statusUpdateError}</p>
                 )}
               </div>
             </CardContent>

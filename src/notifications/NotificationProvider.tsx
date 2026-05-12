@@ -68,6 +68,7 @@ function inferToastIconName(input: {
     info: "information",
     warning: "warning",
     error: "error",
+    default: "notice",
   };
 
   return defaultIconNameByVariant[input.variant];
@@ -96,6 +97,14 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
 
   const makeId = () => `${Date.now()}-${Math.random().toString(16).slice(2)}`;
 
+  const defaultDurationMsByVariant: Record<ToastVariant, number> = {
+    success: 4000,
+    info: 5000,
+    warning: 6000,
+    error: Number.POSITIVE_INFINITY,
+    default: 5000,
+  };
+
   const showToast = useCallback(
     ({
       id,
@@ -116,6 +125,10 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
       persistent?: boolean;
       iconName?: ToastIconName;
     }) => {
+      const duration =
+        persistent
+          ? Number.POSITIVE_INFINITY
+          : (durationMs ?? defaultDurationMsByVariant[variant] ?? DEFAULT_DURATION_MS);
       toast.custom(
         () => (
           <Toast
@@ -124,9 +137,10 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
             message={message}
             action={action}
             iconName={iconName}
+            onClose={() => toast.dismiss(id)}
           />
         ),
-        { id, duration: persistent ? Number.POSITIVE_INFINITY : (durationMs ?? DEFAULT_DURATION_MS) },
+        { id, duration },
       );
       return id;
     },

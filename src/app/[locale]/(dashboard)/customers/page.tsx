@@ -68,8 +68,10 @@ export default function CustomersPage() {
         setHasNext(!!res.data.next);
       })
       .catch((err) => {
-        console.error(err);
-        notify.error(err);
+        notify.error(err, {
+          title: tPages("toastTitleCustomersFailedToLoad"),
+          fallbackMessage: tPages("toastDescCustomersFailedToLoad"),
+        });
       })
       .finally(() => setLoading(false));
   }

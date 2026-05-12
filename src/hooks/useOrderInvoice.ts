@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 import api from "@/lib/api";
 import { isApiHttpError } from "@/lib/api-client";
+import { notify } from "@/notifications";
 
 type InvoiceState =
   | { status: "idle" }
@@ -45,6 +46,10 @@ export function useOrderInvoice(orderPublicId: string) {
         pollCount.current += 1;
         if (pollCount.current > MAX_POLLS) {
           stopPolling();
+          notify.error(new Error("invoice_timeout"), {
+            title: { key: "pages.toastTitleInvoiceTimedOut" },
+            fallbackMessage: { key: "pages.toastDescInvoiceTimedOut" },
+          });
           setState({
             status: "error",
             message: "Invoice generation timed out. Please try again.",
@@ -82,6 +87,10 @@ export function useOrderInvoice(orderPublicId: string) {
         startPolling();
       }
     } catch (err: unknown) {
+      notify.error(err, {
+        title: { key: "pages.toastTitleInvoiceRequestFailed" },
+        fallbackMessage: { key: "pages.toastDescInvoiceRequestFailed" },
+      });
       let message = "Failed to request invoice. Please try again.";
       if (isApiHttpError(err)) {
         message = err.message || message;

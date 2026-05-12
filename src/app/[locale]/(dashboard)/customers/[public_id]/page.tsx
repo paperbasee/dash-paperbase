@@ -11,6 +11,7 @@ import { formatDashboardDateTime } from "@/lib/datetime-display";
 import { Button } from "@/components/ui/button";
 import { numberTextClass } from "@/lib/number-font";
 import { DashboardDetailSkeleton } from "@/components/skeletons/dashboard-skeletons";
+import { notify } from "@/notifications";
 
 function asCurrency(value: string | number) {
   const number = Number(value ?? "0");
@@ -28,7 +29,6 @@ export default function CustomerDetailPage() {
   const publicId = params.public_id;
 
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
   const [data, setData] = useState<CustomerDetailsResponse | null>(null);
 
   useEffect(() => {
@@ -36,7 +36,12 @@ export default function CustomerDetailPage() {
     api
       .get<CustomerDetailsResponse>(`admin/customers/${publicId}/details/`)
       .then((res) => setData(res.data))
-      .catch(() => setError(tPages("customerDetailsLoadError")))
+      .catch((err) => {
+        notify.error(err, {
+          title: tPages("toastTitleCustomerProfileUnavailable"),
+          fallbackMessage: tPages("toastDescCustomerProfileUnavailable"),
+        });
+      })
       .finally(() => setLoading(false));
   }, [publicId, tPages]);
 
@@ -60,10 +65,6 @@ export default function CustomerDetailPage() {
 
       {loading ? (
         <DashboardDetailSkeleton />
-      ) : error ? (
-        <div className="rounded-card border border-card-border bg-card p-6 text-sm text-red-500">
-          {error}
-        </div>
       ) : data ? (
         <>
           <section className="rounded-card border border-card-border bg-card p-6">

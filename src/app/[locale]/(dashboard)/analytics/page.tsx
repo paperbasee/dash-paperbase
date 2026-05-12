@@ -10,7 +10,8 @@ import { useFeatures } from "@/hooks/useFeatures";
 import { useRefreshCountdown } from "@/hooks/useRefreshCountdown";
 import { useRouter } from "@/i18n/navigation";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
+import { notify } from "@/notifications";
 
 import { AnalyticsUpgradeWall } from "./_components/AnalyticsUpgradeWall";
 import { DeviceBreakdownCard } from "./_components/DeviceBreakdownCard";
@@ -39,6 +40,8 @@ import type {
 export default function AnalyticsPage() {
   const router = useRouter();
   const locale = useLocale();
+  const tCommon = useTranslations("common");
+  const tPages = useTranslations("pages");
   const { currencySymbol } = useBranding();
   const [range, setRange] = useState<RangeOption>("30");
   const [deltaMode, setDeltaMode] = useState<DeltaMode>("mom");
@@ -160,7 +163,14 @@ export default function AnalyticsPage() {
         setParcelsData(parcels.data);
         setDevicesData(Array.isArray(devices.data.data) ? devices.data.data : []);
       } catch (err) {
-        console.error(err);
+        notify.error(err, {
+          title: { key: "pages.toastTitleAnalyticsFailedToLoad" },
+          fallbackMessage: { key: "pages.toastDescAnalyticsFailedToLoad" },
+          action: {
+            label: tCommon("toastActionRetry"),
+            onClick: () => window.location.reload(),
+          },
+        });
       } finally {
         if (gen === mainGenRef.current && !silent) setLoading(false);
       }
@@ -178,7 +188,10 @@ export default function AnalyticsPage() {
       if (gen !== utmGenRef.current) return;
       setUtmData(res.data);
     } catch (err) {
-      console.error(err);
+      notify.error(err, {
+        title: { key: "pages.toastTitleUtmBreakdownUnavailable" },
+        fallbackMessage: { key: "pages.toastDescUtmBreakdownUnavailable" },
+      });
     } finally {
       if (gen === utmGenRef.current) setUtmLoading(false);
     }

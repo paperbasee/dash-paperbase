@@ -53,6 +53,7 @@ export default function MarketingProviderCard({ provider }: { provider: Marketin
   const locale = useLocale();
   const numClass = numberTextClass(locale);
   const t = useTranslations("settings");
+  const tPages = useTranslations("pages");
   const confirm = useConfirm();
 
   const c = useCallback(
@@ -89,8 +90,10 @@ export default function MarketingProviderCard({ provider }: { provider: Marketin
         setAllFetched(list ?? []);
       })
       .catch((err) => {
-        console.error(err);
-        notify.error(err);
+        notify.error(err, {
+          title: tPages("toastTitleMarketingLinkFailed"),
+          fallbackMessage: tPages("toastDescMarketingLinkFailed"),
+        });
         setAllFetched(null);
       })
       .finally(() => setLoading(false));
@@ -167,9 +170,14 @@ export default function MarketingProviderCard({ provider }: { provider: Marketin
         try {
           await api.delete(`admin/marketing-integrations/${publicId}/`);
           fetchIntegrations();
+          notify.success(tPages("toastDescIntegrationDisconnected"), {
+            title: tPages("toastTitleIntegrationDisconnected"),
+          });
         } catch (err) {
-          console.error(err);
-          notify.error(err);
+          notify.error(err, {
+            title: tPages("toastTitleMarketingLinkFailed"),
+            fallbackMessage: tPages("toastDescMarketingLinkFailed"),
+          });
           throw err;
         }
       },
@@ -185,8 +193,10 @@ export default function MarketingProviderCard({ provider }: { provider: Marketin
       });
       fetchIntegrations();
     } catch (err) {
-      console.error(err);
-      notify.error(err);
+      notify.error(err, {
+        title: tPages("toastTitleMarketingLinkFailed"),
+        fallbackMessage: tPages("toastDescMarketingLinkFailed"),
+      });
     } finally {
       setTogglingId(null);
     }
@@ -205,8 +215,10 @@ export default function MarketingProviderCard({ provider }: { provider: Marketin
       });
       fetchIntegrations();
     } catch (err) {
-      console.error(err);
-      notify.error(err);
+      notify.error(err, {
+        title: tPages("toastTitleMarketingLinkFailed"),
+        fallbackMessage: tPages("toastDescMarketingLinkFailed"),
+      });
     } finally {
       setEventSavingId(null);
     }
@@ -217,7 +229,10 @@ export default function MarketingProviderCard({ provider }: { provider: Marketin
       await navigator.clipboard.writeText(pixelId);
       setPixelCopied(true);
     } catch {
-      notify.error(t("marketing.copyFailed"));
+      notify.error(new Error("clipboard_blocked"), {
+        title: tPages("toastTitleClipboardBlocked"),
+        fallbackMessage: tPages("toastDescClipboardBlocked"),
+      });
     }
   }
 

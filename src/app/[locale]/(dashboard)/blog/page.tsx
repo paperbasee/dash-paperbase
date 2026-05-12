@@ -58,7 +58,12 @@ export default function BlogListPage() {
           setTags(Array.isArray(data) ? data : data.results);
         }
       } catch (err) {
-        if (!cancelled) console.error(err);
+        if (!cancelled) {
+          notify.error(err, {
+            title: tPages("toastTitleTagsUnavailable"),
+            fallbackMessage: tPages("toastDescTagsUnavailable"),
+          });
+        }
       }
     }
     void loadTags();

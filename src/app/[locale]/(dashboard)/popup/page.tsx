@@ -82,6 +82,7 @@ function countFilled(slots: PopupImageSlot[]) {
 export default function PopupEditorPage() {
   const router = useRouter();
   const locale = useLocale();
+  const tPages = useTranslations("pages");
   const tCommon = useTranslations("common");
 
   const confirm = useConfirm();
@@ -135,8 +136,10 @@ export default function PopupEditorPage() {
       .get<any>("admin/popups/")
       .then((res) => setPopup(res.data ?? null))
       .catch((err) => {
-        console.error(err);
-        notify.error(err);
+        notify.error(err, {
+          title: tPages("toastTitlePopupOperationFailed"),
+          fallbackMessage: tPages("toastDescPopupOperationFailed"),
+        });
       })
       .finally(() => setLoading(false));
   }
@@ -149,8 +152,10 @@ export default function PopupEditorPage() {
       });
       setPopup(data ?? null);
     } catch (err) {
-      console.error(err);
-      notify.error(err);
+      notify.error(err, {
+        title: tPages("toastTitlePopupOperationFailed"),
+        fallbackMessage: tPages("toastDescPopupOperationFailed"),
+      });
     }
   }
 
@@ -242,13 +247,17 @@ export default function PopupEditorPage() {
     e.preventDefault();
 
     if (slotStatus.some((s) => s === "uploading")) {
-      notify.warning("Please wait for image uploads to finish.");
+      notify.warning(tPages("toastDescUploadsStillInProgressPopup"), {
+        title: tPages("toastTitleUploadsStillInProgress"),
+      });
       return;
     }
 
     const hasIncomplete = imageSlots.some((s) => s.kind === "local" && !s.uploadedKey);
     if (hasIncomplete) {
-      notify.warning("One or more image uploads failed. Retry before saving.");
+      notify.warning(tPages("toastDescUploadsStillInProgressPopup"), {
+        title: tPages("toastTitleUploadsStillInProgress"),
+      });
       return;
     }
 
@@ -280,7 +289,9 @@ export default function PopupEditorPage() {
     try {
       if (editing === "new") {
         if (popup?.public_id) {
-          notify.warning("A popup already exists for this store. Edit the existing popup instead.");
+          notify.warning(tPages("toastDescDuplicatePopup"), {
+            title: tPages("toastTitleDuplicatePopup"),
+          });
           setEditing(popup.public_id);
           return;
         }
@@ -293,16 +304,20 @@ export default function PopupEditorPage() {
         });
       }
 
-      notify.success("Popup saved successfully.");
+      notify.success(tPages("toastDescPopupSaved"), { title: tPages("toastTitlePopupSaved") });
       setEditing(null);
       fetchData();
     } catch (err) {
       if (isApiHttpError(err)) {
-        console.error("Popup save failed:", err.response?.data || err.message);
-        notify.error(err, { fallbackMessage: tCommon("pleaseWait") });
+        notify.error(err, {
+          title: tPages("toastTitlePopupOperationFailed"),
+          fallbackMessage: tPages("toastDescPopupOperationFailed"),
+        });
       } else {
-        console.error(err);
-        notify.error(err);
+        notify.error(err, {
+          title: tPages("toastTitlePopupOperationFailed"),
+          fallbackMessage: tPages("toastDescPopupOperationFailed"),
+        });
       }
     } finally {
       setSaving(false);
@@ -320,11 +335,13 @@ export default function PopupEditorPage() {
     try {
       await api.delete(`admin/popups/${publicId}/`);
       setEditing(null);
-      notify.warning("Popup deleted successfully.");
+      notify.success(tPages("toastDescPopupRemoved"), { title: tPages("toastTitlePopupRemoved") });
       fetchData();
     } catch (err) {
-      console.error(err);
-      notify.error(err);
+      notify.error(err, {
+        title: tPages("toastTitlePopupOperationFailed"),
+        fallbackMessage: tPages("toastDescPopupOperationFailed"),
+      });
     }
   }
 

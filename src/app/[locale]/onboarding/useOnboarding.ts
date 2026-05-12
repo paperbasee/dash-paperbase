@@ -242,7 +242,10 @@ export function useOnboarding(options?: UseOnboardingOptions) {
     } catch (err: unknown) {
       const normalized = normalizeError(err, t("createStoreFailed"));
       setError(normalized.message);
-      notify.error(normalized.message);
+      notify.error(err, {
+        title: tPages("toastTitleStoreSetupNotSaved"),
+        fallbackMessage: tPages("toastDescStoreSetupNotSaved"),
+      });
     } finally {
       setLoading(false);
     }

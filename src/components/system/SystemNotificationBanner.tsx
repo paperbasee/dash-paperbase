@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 
 import { Button } from "@/components/ui/button";
+import { ShineBorder } from "@/components/ui/shine-border";
 import { useSystemNotification } from "@/hooks/useSystemNotification";
 import { dismissSystemNotification } from "@/lib/api/systemNotification";
 import { cn } from "@/lib/utils";
@@ -78,55 +79,63 @@ export default function SystemNotificationBanner({
         aria-live="polite"
         aria-label={`${notification.title}. ${notification.message}`}
         className={cn(
-          "system-notification-banner system-notification-banner--sidebar rounded-card border p-3.5",
+          "system-notification-banner system-notification-banner--sidebar relative overflow-hidden rounded-card border bg-background p-3.5",
           className
         )}
       >
-        <div className="flex items-start gap-2">
-          <p className="system-notification-banner__title min-w-0 flex-1 text-sm font-semibold">
-            {notification.title}
+        <ShineBorder
+          borderWidth={1}
+          duration={12}
+          shineColor={["hsl(var(--primary) / 0.55)", "hsl(199 89% 48% / 0.45)"]}
+          className="hidden md:block"
+        />
+        <div className="relative z-10">
+          <div className="flex items-start gap-2">
+            <p className="system-notification-banner__title min-w-0 flex-1 text-sm font-semibold">
+              {notification.title}
+            </p>
+            <Button
+              variant="ghost"
+              size="icon-xs"
+              loading={isDismissing}
+              onClick={async () => {
+                if (isDismissing) return;
+                setIsDismissing(true);
+                setHiddenPublicId(notification.public_id);
+                try {
+                  await dismissSystemNotification(notification.public_id);
+                } catch {
+                  setHiddenPublicId(null);
+                } finally {
+                  setIsDismissing(false);
+                }
+              }}
+              aria-label={t("dismissAria")}
+              className="system-notification-banner__dismiss shrink-0"
+            >
+              <X className="size-4" />
+            </Button>
+          </div>
+          <p className="system-notification-banner__text-muted mt-1 line-clamp-3 text-sm">
+            {notification.message}
           </p>
-          <Button
-            variant="ghost"
-            size="icon-xs"
-            loading={isDismissing}
-            onClick={async () => {
-              if (isDismissing) return;
-              setIsDismissing(true);
-              setHiddenPublicId(notification.public_id);
-              try {
-                await dismissSystemNotification(notification.public_id);
-              } catch {
-                setHiddenPublicId(null);
-              } finally {
-                setIsDismissing(false);
-              }
-            }}
-            aria-label={t("dismissAria")}
-            className="system-notification-banner__dismiss shrink-0"
-          >
-            <X className="size-4" />
-          </Button>
+          {ctaText && ctaTarget && (
+            <Button
+              type="button"
+              variant="secondary"
+              className="system-notification-banner__cta mt-3 h-9 w-full text-sm font-medium"
+              onClick={() => {
+                if (ctaTarget.kind === "internal") {
+                  router.push(ctaTarget.path);
+                  return;
+                }
+                window.open(ctaTarget.href, "_blank", "noopener,noreferrer");
+              }}
+            >
+              {ctaText}
+            </Button>
+          )}
         </div>
-        <p className="system-notification-banner__text-muted mt-1 line-clamp-3 text-sm">
-          {notification.message}
-        </p>
-        {ctaText && ctaTarget && (
-          <Button
-            type="button"
-            variant="secondary"
-            className="system-notification-banner__cta mt-3 h-9 w-full text-sm font-medium"
-            onClick={() => {
-              if (ctaTarget.kind === "internal") {
-                router.push(ctaTarget.path);
-                return;
-              }
-              window.open(ctaTarget.href, "_blank", "noopener,noreferrer");
-            }}
-          >
-            {ctaText}
-          </Button>
-        )}
       </div>
     );
   }

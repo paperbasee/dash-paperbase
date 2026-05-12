@@ -74,8 +74,10 @@ export default function InventoryPage() {
         setOutOfStockTotal(outRes.data.count ?? 0);
       })
       .catch((err) => {
-        console.error(err);
-        notify.error(err);
+        notify.error(err, {
+          title: tPages("toastTitleInventoryUpdateFailed"),
+          fallbackMessage: tPages("toastDescInventoryUpdateFailed"),
+        });
       })
       .finally(() => setLoading(false));
   }, [filters.search, filters.stock, filters.tracked, filters.type, page]);
@@ -141,8 +143,10 @@ export default function InventoryPage() {
         window.dispatchEvent(new Event(INVENTORY_STATUS_REFRESH_EVENT));
       }
     } catch (err) {
-      console.error(err);
-      notify.error(err);
+      notify.error(err, {
+        title: tPages("toastTitleInventoryUpdateFailed"),
+        fallbackMessage: tPages("toastDescInventoryUpdateFailed"),
+      });
     } finally {
       setAdjusting(null);
     }

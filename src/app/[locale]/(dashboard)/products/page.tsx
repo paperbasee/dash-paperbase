@@ -165,13 +165,15 @@ export default function ProductsPage() {
         setCategoryTree(Array.isArray(d) ? d : []);
       })
       .catch((err) => {
-        console.error(err);
-        notify.error(err);
+        notify.error(err, {
+          title: tPages("toastTitleCategoriesUnavailable"),
+          fallbackMessage: tPages("toastDescCategoriesUnavailable"),
+        });
       });
     return () => {
       active = false;
     };
-  }, []);
+  }, [tPages]);
 
   const categoryOptions = useMemo<CategoryOption[]>(
     () => flattenCategoryOptionsRich(categoryTree),
@@ -209,8 +211,10 @@ export default function ProductsPage() {
         setPrevLink(res.data.previous);
       })
       .catch((err) => {
-        console.error(err);
-        notify.error(err);
+        notify.error(err, {
+          title: tPages("toastTitleProductsFailedToLoad"),
+          fallbackMessage: tPages("toastDescProductsFailedToLoad"),
+        });
       })
       .finally(() => setLoading(false));
   }, [
@@ -307,8 +311,8 @@ export default function ProductsPage() {
         );
         if (!contiguous) {
           notify.error(new Error("reorder_range"), {
-            fallbackMessage:
-              "These rows are not a consecutive block in category order. Load adjacent products or narrow filters, then try again.",
+            title: tPages("toastTitleReorderBlocked"),
+            fallbackMessage: tPages("toastDescReorderBlocked"),
           });
           fetchProducts();
           return;
@@ -324,8 +328,10 @@ export default function ProductsPage() {
         });
         fetchProducts();
       } catch (err) {
-        console.error(err);
-        notify.error(err);
+        notify.error(err, {
+          title: tPages("toastTitleNewOrderNotSaved"),
+          fallbackMessage: tPages("toastDescNewOrderNotSaved"),
+        });
         fetchProducts();
       } finally {
         reorderBusyRef.current = false;
@@ -376,19 +382,15 @@ export default function ProductsPage() {
         await api.delete(`admin/products/${id}/`);
       }
       setSelectedIds(new Set());
-      notify.warning(
-        deleteIsSuperuser
-          ? tPages("productsDeletedPermanentSuccess", {
-              count: toLocaleDigits(String(deletedCount), locale),
-            })
-          : tPages("productsMovedToTrashSuccess", {
-              count: toLocaleDigits(String(deletedCount), locale),
-            })
-      );
+      notify.success(tPages("toastDescProductsRemoved"), {
+        title: tPages("toastTitleProductsRemoved"),
+      });
       fetchProducts();
     } catch (err) {
-      console.error(err);
-      notify.error(err);
+      notify.error(err, {
+        title: tPages("toastTitleBulkDeleteIncomplete"),
+        fallbackMessage: tPages("toastDescBulkDeleteIncomplete"),
+      });
     } finally {
       setDeleting(false);
     }
@@ -404,7 +406,10 @@ export default function ProductsPage() {
         )
       );
     } catch (err) {
-      console.error(err);
+      notify.error(err, {
+        title: tPages("toastTitleProductStatusNotSaved"),
+        fallbackMessage: tPages("toastDescProductStatusNotSaved"),
+      });
     } finally {
       setUpdatingId(null);
     }

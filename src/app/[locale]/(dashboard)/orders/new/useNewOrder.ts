@@ -4,6 +4,7 @@ import { useEffect, useState, useRef, useMemo, type FormEvent } from "react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import api from "@/lib/api";
+import { notify } from "@/notifications";
 import type {
   Product,
   PaginatedResponse,
@@ -40,6 +41,7 @@ export interface OrderForm {
 export function useNewOrder() {
   const router = useRouter();
   const t = useTranslations("pages");
+  const tCommon = useTranslations("common");
   const orderCreateSchema = useMemo(
     () =>
       buildOrderCreateSchema({
@@ -55,7 +57,7 @@ export function useNewOrder() {
     [t],
   );
   const [saving, setSaving] = useState(false);
-  const [error, setError] = useState("");
+  const [error, setError] = useState(""); // kept for legacy callers; do not render inline
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   const [form, setForm] = useState<OrderForm>({
@@ -95,9 +97,13 @@ export function useNewOrder() {
         setShippingZones(Array.isArray(z.data) ? z.data : (z.data.results ?? []));
         setShippingMethods(Array.isArray(m.data) ? m.data : (m.data.results ?? []));
       })
-      .catch(() => {
+      .catch((err) => {
         setShippingZones([]);
         setShippingMethods([]);
+        notify.error(err, {
+          title: t("toastTitleShippingSetupUnavailable"),
+          fallbackMessage: t("toastDescShippingSetupUnavailable"),
+        });
       });
   }, []);
 
@@ -129,8 +135,12 @@ export function useNewOrder() {
         });
         setResults(data.results);
         setShowResults(true);
-      } catch {
+      } catch (err) {
         setResults([]);
+        notify.error(err, {
+          title: t("toastTitleProductSearchFailed"),
+          fallbackMessage: t("toastDescProductSearchFailed"),
+        });
       } finally {
         setSearching(false);
       }
@@ -148,8 +158,12 @@ export function useNewOrder() {
       );
       const list = Array.isArray(data) ? data : data.results;
       setVariantsByProductId((p) => ({ ...p, [productId]: list ?? [] }));
-    } catch {
+    } catch (err) {
       setVariantsByProductId((p) => ({ ...p, [productId]: [] }));
+      notify.error(err, {
+        title: t("toastTitleVariantsUnavailable"),
+        fallbackMessage: t("toastDescVariantsUnavailable"),
+      });
     } finally {
       setVariantsLoadingByProductId((p) => ({ ...p, [productId]: false }));
     }
@@ -222,8 +236,13 @@ export function useNewOrder() {
           { signal: ac.signal }
         )
         .then(({ data }) => setPricingPreview(data))
-        .catch(() => {
-          if (!ac.signal.aborted) setPricingPreview(null);
+        .catch((err) => {
+          if (ac.signal.aborted) return;
+          setPricingPreview(null);
+          notify.info(t("toastDescTotalsPreviewPaused"), {
+            title: t("toastTitleTotalsPreviewPaused"),
+            dedupeKey: "orderNewTotalsPreviewPaused",
+          });
         });
     }, 250);
     return () => {
@@ -249,12 +268,19 @@ export function useNewOrder() {
           : {}
       );
       setError("");
+      notify.validation(
+        "orderNew",
+        firstMissingIndex >= 0
+          ? { [`items.${firstMissingIndex}.variant_public_id`]: t("orderValidationVariantRequired") }
+          : {},
+      );
       return;
     }
 
     const validation = parseValidation(orderCreateSchema, { ...form, items });
     if (!validation.success) {
       setFieldErrors(validation.errors);
+      notify.validation("orderNew", validation.errors);
       const hasItemErrors = Object.keys(validation.errors).some(
         (k) => k === "items" || k.startsWith("items."),
       );
@@ -291,6 +317,13 @@ export function useNewOrder() {
         })),
       };
       await api.post("admin/orders/", payload);
+      notify.success(t("toastDescOrderCreated"), {
+        title: t("toastTitleOrderCreated"),
+        action: {
+          label: tCommon("toastActionViewOrders"),
+          onClick: () => router.push("/orders"),
+        },
+      });
       router.push("/orders");
     } catch (err: unknown) {
       const data =
@@ -314,11 +347,20 @@ export function useNewOrder() {
       }
       if (Object.keys(backendFieldErrors).length > 0) {
         setFieldErrors(backendFieldErrors);
+        notify.validation("orderNew", backendFieldErrors);
       }
       if (backendDetail) {
         setError(backendDetail);
+        notify.error(err, {
+          title: t("toastTitleOrderNotCreated"),
+          fallbackMessage: t("toastDescOrderNotCreated"),
+        });
       } else {
         setError(t("orderNewCreateFailed"));
+        notify.error(err, {
+          title: t("toastTitleOrderNotCreated"),
+          fallbackMessage: t("toastDescOrderNotCreated"),
+        });
       }
     } finally {
       setSaving(false);

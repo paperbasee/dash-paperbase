@@ -2,6 +2,7 @@
 
 import { use, useEffect, useState } from "react";
 import { useRouter } from "@/i18n/navigation";
+import { useTranslations } from "next-intl";
 import api from "@/lib/api";
 import { notify } from "@/notifications";
 import type { Blog } from "@/types";
@@ -16,6 +17,7 @@ export default function EditBlogPage({
 }) {
   const router = useRouter();
   const confirm = useConfirm();
+  const tPages = useTranslations("pages");
   const { public_id } = use(params);
   const [blog, setBlog] = useState<Blog | null>(null);
   const [loading, setLoading] = useState(true);
@@ -30,8 +32,11 @@ export default function EditBlogPage({
         if (!cancelled) setBlog(data);
       } catch (err) {
         if (!cancelled) {
-          setError("Unable to load blog post.");
-          notify.error(err);
+          setError(tPages("toastDescPostCouldntLoad"));
+          notify.error(err, {
+            title: tPages("toastTitlePostCouldntLoad"),
+            fallbackMessage: tPages("toastDescPostCouldntLoad"),
+          });
         }
       } finally {
         if (!cancelled) setLoading(false);
@@ -65,10 +70,15 @@ export default function EditBlogPage({
     try {
       setDeleting(true);
       await api.delete(`admin/blogs/${currentBlog.public_id}/`);
-      notify.warning("Post deleted");
+      notify.success(tPages("toastDescPostDeleted"), {
+        title: tPages("toastTitlePostDeleted"),
+      });
       router.push("/blog");
     } catch (err) {
-      notify.error(err);
+      notify.error(err, {
+        title: tPages("toastTitlePostNotDeleted"),
+        fallbackMessage: tPages("toastDescPostNotDeleted"),
+      });
     } finally {
       setDeleting(false);
     }

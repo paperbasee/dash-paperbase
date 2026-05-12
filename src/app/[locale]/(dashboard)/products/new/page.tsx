@@ -108,10 +108,12 @@ export default function NewProductPage() {
         setCategoryTree(Array.isArray(d) ? d : []);
       })
       .catch((err) => {
-        console.error(err);
-        notify.error(err);
+        notify.error(err, {
+          title: tPages("toastTitleProductTemplateUnavailable"),
+          fallbackMessage: tPages("toastDescProductTemplateUnavailable"),
+        });
       });
-  }, []);
+  }, [tPages]);
 
   const categorySelectOptions = useMemo(
     () => flattenCategoryOptions(categoryTree),
@@ -189,6 +191,11 @@ export default function NewProductPage() {
           formValidation.errors.category ??
           tPages("formFixHighlighted")
       );
+      notify.validation("productNew", formValidation.errors);
+      notify.error(new Error("product_validation"), {
+        title: tPages("toastTitleProductNotCreated"),
+        fallbackMessage: tPages("toastDescProductNotCreated"),
+      });
       return;
     }
 
@@ -197,6 +204,11 @@ export default function NewProductPage() {
     if (Object.keys(extraErrors).length > 0) {
       setExtraFieldsErrors(extraErrors);
       setError(tPages("productFillExtraFields"));
+      notify.validation("productNew", extraErrors);
+      notify.error(new Error("product_validation"), {
+        title: tPages("toastTitleProductNotCreated"),
+        fallbackMessage: tPages("toastDescProductNotCreated"),
+      });
       return;
     }
     setExtraFieldsErrors({});
@@ -204,6 +216,9 @@ export default function NewProductPage() {
     const hasIncompleteUpload = imageFiles.some((file, i) => Boolean(file) && !imageKeys[i]);
     if (hasIncompleteUpload || anyUploading) {
       setError("Please complete image uploads before saving.");
+      notify.warning("Please complete image uploads before saving.", {
+        title: tPages("toastTitleUploadsStillInProgress"),
+      });
       return;
     }
 
@@ -253,6 +268,10 @@ export default function NewProductPage() {
               : String((message as { slug: unknown }).slug)
             : tPages("productCreateFailed");
       setError(text || tPages("productCreateFailed"));
+      notify.error(err, {
+        title: tPages("toastTitleProductNotCreated"),
+        fallbackMessage: tPages("toastDescProductNotCreated"),
+      });
     } finally {
       setSaving(false);
     }
@@ -294,14 +313,7 @@ export default function NewProductPage() {
         </div>
       </div>
 
-      {error && (
-        <div
-          role="alert"
-          className="rounded-card border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive"
-        >
-          {error}
-        </div>
-      )}
+      {/* Inline error text moved to toasts (keep validation highlights only). */}
 
       <form
         id="product-form"
