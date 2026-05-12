@@ -29,7 +29,7 @@ import { useConfirm } from "@/context/ConfirmDialogContext";
 import { notify } from "@/notifications";
 import { PLACEMENT_OPTIONS } from "@/components/preview-system/placementConfig";
 import { MiniSitePreview } from "@/components/preview-system/MiniSitePreview";
-import { DashboardDetailSkeleton } from "@/components/skeletons/dashboard-skeletons";
+import { DashboardTableSkeleton } from "@/components/skeletons/dashboard-skeletons";
 import { numberTextClass } from "@/lib/number-font";
 import { cn } from "@/lib/utils";
 import { useEnterNavigation } from "@/hooks/useEnterNavigation";
@@ -211,6 +211,7 @@ export default function BannersPage() {
   const tCommon = useTranslations("common");
   const confirm = useConfirm();
   const [banners, setBanners] = useState<Banner[]>([]);
+  const [bannersTotalCount, setBannersTotalCount] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState<string | "new" | null>(null);
   const [form, setForm] = useState<BannerForm>(emptyForm);
@@ -321,7 +322,13 @@ export default function BannersPage() {
       .get<PaginatedResponse<Banner> | Banner[]>("admin/banners/")
       .then((res) => {
         const data = res.data;
-        setBanners(Array.isArray(data) ? data : data.results);
+        if (Array.isArray(data)) {
+          setBanners(data);
+          setBannersTotalCount(null);
+        } else {
+          setBanners(data.results);
+          setBannersTotalCount(typeof data.count === "number" ? data.count : null);
+        }
       })
       .catch((err) => {
         notify.error(err, {
@@ -579,13 +586,9 @@ export default function BannersPage() {
     }
   }
 
-  if (loading) {
-    return <DashboardDetailSkeleton />;
-  }
-
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-4 flex-wrap">
         <div className="flex items-center gap-3">
           <div className="rounded-card bg-muted/80 px-1 py-1 hidden md:block">
             <button
@@ -597,8 +600,8 @@ export default function BannersPage() {
               <Undo2 className="h-4 w-4" />
             </button>
           </div>
-          <h1 className="text-2xl font-medium text-foreground">
-            {tPages("bannersTitle", { count: banners.length })}
+          <h1 className="text-2xl font-medium leading-relaxed text-foreground">
+            {tPages("bannersTitle")}
           </h1>
         </div>
         <button
@@ -609,6 +612,17 @@ export default function BannersPage() {
           {tPages("bannersAdd")}
         </button>
       </div>
+
+      <p className="text-xs text-muted-foreground">
+        {loading
+          ? tCommon("loading")
+          : bannersTotalCount === null
+            ? tPages("bannersListCountPageOnly", { pageCount: banners.length })
+            : tPages("bannersListCountWithTotal", {
+                pageCount: banners.length,
+                totalCount: bannersTotalCount,
+              })}
+      </p>
 
       {editing !== null && (
         <form
@@ -1003,93 +1017,97 @@ export default function BannersPage() {
         </form>
       )}
 
-      <div className="overflow-x-auto rounded-card border border-card-border bg-card">
-        <table className="w-full text-left text-sm">
-          <thead>
-            <tr className="border-b border-border bg-muted/40">
-              <th className="th">{tPages("bannersColPreview")}</th>
-              <th className="th">{tPages("bannersColTitle")}</th>
-              <th className="th">Placements</th>
-              <th className="th">{tPages("bannersColOrder")}</th>
-              <th className="th">{tPages("ctaColSchedule")}</th>
-              <th className="th">{tPages("bannersColStatus")}</th>
-              <th className="th text-right">{tPages("bannersColActions")}</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-border/60">
-            {banners.map((b) => (
-              <ClickableTableRow
-                key={b.public_id}
-                onNavigate={() => openEdit(b)}
-                aria-label={b.title?.trim() ? b.title : `Banner ${b.public_id}`}
-              >
-                <td className="px-4 py-3">
-                  {b.image ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={b.image}
-                      alt=""
-                      className="h-12 w-20 rounded-ui object-cover"
-                    />
-                  ) : (
-                    <span className="text-muted-foreground">—</span>
-                  )}
-                </td>
-                <td className="px-4 py-3 font-medium text-foreground">
-                  {b.title || "—"}
-                </td>
-                <td className="px-4 py-3 text-muted-foreground">
-                  {formatPlacements(b.placement_slots || [])}
-                </td>
-                <td className="px-4 py-3">{b.order}</td>
-                <td className="px-4 py-3 text-xs whitespace-nowrap text-muted-foreground">
-                  {b.start_at
-                    ? `${formatDashboardDateTime(b.start_at, locale)} - ${
-                        b.end_at
-                          ? formatDashboardDateTime(b.end_at, locale)
-                          : tPages("ctaScheduleInfinity")
-                      }`
-                    : tPages("ctaScheduleAlways")}
-                </td>
-                <td className="px-4 py-3">
-                  {(() => {
-                    const isCurrentlyActive = isBannerCurrentlyActiveLive(b, now);
-                    return (
-                  <button
-                    type="button"
-                    onClick={() => toggleActive(b)}
-                    className={`inline-block rounded-tooltip px-2.5 py-0.5 text-xs font-semibold ${
-                      isCurrentlyActive
-                        ? "bg-emerald-500/20 text-emerald-400"
-                        : "bg-muted text-muted-foreground"
-                    }`}
-                    title={
-                      b.is_active && !isCurrentlyActive
-                        ? "Enabled, but outside scheduled time"
-                        : undefined
-                    }
-                  >
-                    {isCurrentlyActive ? tCommon("active") : tCommon("inactive")}
-                  </button>
-                    );
-                  })()}
-                </td>
-                <td className="px-4 py-3 text-right">
-                  <ClickableText
-                    variant="destructive"
-                    onClick={() => handleDelete(b.public_id)}
-                    className="text-sm"
-                  >
-                    {tCommon("delete")}
-                  </ClickableText>
-                </td>
-              </ClickableTableRow>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      {loading ? (
+        <DashboardTableSkeleton columns={7} rows={5} showHeader={false} showFilters={false} />
+      ) : (
+        <div className="overflow-x-auto rounded-card border border-card-border bg-card">
+          <table className="w-full text-left text-sm">
+            <thead>
+              <tr className="border-b border-border bg-muted/40">
+                <th className="th">{tPages("bannersColPreview")}</th>
+                <th className="th">{tPages("bannersColTitle")}</th>
+                <th className="th">Placements</th>
+                <th className="th">{tPages("bannersColOrder")}</th>
+                <th className="th">{tPages("ctaColSchedule")}</th>
+                <th className="th">{tPages("bannersColStatus")}</th>
+                <th className="th text-right">{tPages("bannersColActions")}</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-border/60">
+              {banners.map((b) => (
+                <ClickableTableRow
+                  key={b.public_id}
+                  onNavigate={() => openEdit(b)}
+                  aria-label={b.title?.trim() ? b.title : `Banner ${b.public_id}`}
+                >
+                  <td className="px-4 py-3">
+                    {b.image ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={b.image}
+                        alt=""
+                        className="h-12 w-20 rounded-ui object-cover"
+                      />
+                    ) : (
+                      <span className="text-muted-foreground">—</span>
+                    )}
+                  </td>
+                  <td className="px-4 py-3 font-medium text-foreground">
+                    {b.title || "—"}
+                  </td>
+                  <td className="px-4 py-3 text-muted-foreground">
+                    {formatPlacements(b.placement_slots || [])}
+                  </td>
+                  <td className="px-4 py-3">{b.order}</td>
+                  <td className="px-4 py-3 text-xs whitespace-nowrap text-muted-foreground">
+                    {b.start_at
+                      ? `${formatDashboardDateTime(b.start_at, locale)} - ${
+                          b.end_at
+                            ? formatDashboardDateTime(b.end_at, locale)
+                            : tPages("ctaScheduleInfinity")
+                        }`
+                      : tPages("ctaScheduleAlways")}
+                  </td>
+                  <td className="px-4 py-3">
+                    {(() => {
+                      const isCurrentlyActive = isBannerCurrentlyActiveLive(b, now);
+                      return (
+                    <button
+                      type="button"
+                      onClick={() => toggleActive(b)}
+                      className={`inline-block rounded-tooltip px-2.5 py-0.5 text-xs font-semibold ${
+                        isCurrentlyActive
+                          ? "bg-emerald-500/20 text-emerald-400"
+                          : "bg-muted text-muted-foreground"
+                      }`}
+                      title={
+                        b.is_active && !isCurrentlyActive
+                          ? "Enabled, but outside scheduled time"
+                          : undefined
+                      }
+                    >
+                      {isCurrentlyActive ? tCommon("active") : tCommon("inactive")}
+                    </button>
+                      );
+                    })()}
+                  </td>
+                  <td className="px-4 py-3 text-right">
+                    <ClickableText
+                      variant="destructive"
+                      onClick={() => handleDelete(b.public_id)}
+                      className="text-sm"
+                    >
+                      {tCommon("delete")}
+                    </ClickableText>
+                  </td>
+                </ClickableTableRow>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
 
-      {banners.length === 0 && !editing && (
+      {!loading && banners.length === 0 && !editing && (
         <div className="rounded-card border border-card-border bg-card py-12 text-center text-sm text-muted-foreground">
           {tPages("bannersEmpty")}
         </div>

@@ -375,7 +375,7 @@ export default function CtaPage() {
             </button>
           </div>
           <h1 className="text-2xl font-medium text-foreground">
-            {tPages("ctaTitle", { count: ctas.length })}
+            {tPages("ctaTitle")}
           </h1>
         </div>
         {editing === null && ctas.length === 0 ? (

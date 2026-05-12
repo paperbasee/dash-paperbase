@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
-import { Undo2 } from "lucide-react";
+import { FunnelIcon, Undo2 } from "lucide-react";
 import { ClickableTableRow } from "@/components/ui/clickable-table-row";
 import { Input } from "@/components/ui/input";
 import { FilterBar } from "@/components/filters/FilterBar";
@@ -18,12 +18,14 @@ import { cn } from "@/lib/utils";
 import { INVENTORY_STATUS_REFRESH_EVENT } from "@/hooks/useInventoryStatus";
 import { DashboardTableSkeleton } from "@/components/skeletons/dashboard-skeletons";
 import { BelowFoldScrollHint } from "@/components/BelowFoldScrollHint";
+import { Button } from "@/components/ui/button";
 
 export default function InventoryPage() {
   const router = useRouter();
   const locale = useLocale();
   const numClass = numberTextClass(locale);
   const tPages = useTranslations("pages");
+  const tCommon = useTranslations("common");
   const { page, filters, setFilter, setPage, clearFilters } = useFilters([
     "search",
     "stock",
@@ -42,6 +44,11 @@ export default function InventoryPage() {
   const [adjustValue, setAdjustValue] = useState<Record<string, string>>({});
   const [searchInput, setSearchInput] = useState(filters.search || "");
   const debouncedSearch = useDebouncedValue(searchInput);
+  const [filtersOpen, setFiltersOpen] = useState(false);
+
+  useEffect(() => {
+    setSearchInput(filters.search || "");
+  }, [filters.search]);
 
   useEffect(() => {
     const next = debouncedSearch.trim();
@@ -98,6 +105,13 @@ export default function InventoryPage() {
   const hasOutOfStockAlert = outOfStockTotal !== null && outOfStockTotal > 0;
   const hasStockSummaryAlerts = hasLowStockAlert || hasOutOfStockAlert;
 
+  const stockPillOptions: { value: string; label: string }[] = [
+    { value: "", label: tCommon("all") },
+    { value: "in_stock", label: tPages("inventoryStockInStock") },
+    { value: "low_stock", label: tPages("inventoryStockLow") },
+    { value: "out_of_stock", label: tPages("inventoryStockOut") },
+  ];
+
   const stockSummaryAlertButtons = (
     <>
       {hasLowStockAlert && (
@@ -129,6 +143,17 @@ export default function InventoryPage() {
     </>
   );
 
+  const filtersActive = Boolean(
+    (filters.search || "").trim() ||
+      (filters.stock || "").trim() ||
+      (filters.tracked || "").trim() ||
+      (filters.type || "").trim(),
+  );
+
+  useEffect(() => {
+    if (!filtersActive) setFiltersOpen(false);
+  }, [filters.search, filters.stock, filters.tracked, filters.type]);
+
   async function handleAdjust(publicId: string, change: number) {
     setAdjusting(publicId);
     try {
@@ -154,7 +179,7 @@ export default function InventoryPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-4 flex-wrap">
         <div className="flex items-center gap-3">
           <div className="rounded-card bg-muted/80 px-1 py-1 hidden md:block">
             <button
@@ -166,69 +191,108 @@ export default function InventoryPage() {
               <Undo2 className="h-4 w-4" />
             </button>
           </div>
-          <div>
-            <h1 className="text-2xl font-medium text-foreground">{tPages("inventoryTitle")}</h1>
-            <p className="mt-1 text-sm text-muted-foreground md:hidden">
-              {tPages("inventorySubtitle")}
-              {hasStockSummaryAlerts ? " " : null}
-              {stockSummaryAlertButtons}
-            </p>
-          </div>
+          <h1 className="text-2xl font-medium leading-relaxed text-foreground">
+            {tPages("inventoryTitle")}
+          </h1>
         </div>
       </div>
 
-      <p className="hidden text-sm text-muted-foreground md:block">
-        {tPages("inventorySubtitle")}
-        {hasStockSummaryAlerts ? " " : null}
-        {stockSummaryAlertButtons}
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex flex-1 items-center gap-2 flex-wrap min-w-0">
+          {stockPillOptions.map((opt) => {
+            const active = (filters.stock || "") === opt.value;
+            return (
+              <button
+                key={opt.value || "__all__"}
+                type="button"
+                onClick={() => setFilter("stock", opt.value)}
+                aria-pressed={active}
+                className={[
+                  "h-9 rounded-ui border px-3 text-sm font-medium transition whitespace-nowrap",
+                  active
+                    ? "border-primary/40 bg-primary text-primary-foreground"
+                    : "border-border bg-card text-foreground hover:bg-muted",
+                ].join(" ")}
+              >
+                {opt.label}
+              </button>
+            );
+          })}
+        </div>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          className="h-9 shrink-0 self-start px-3"
+          aria-label="Toggle filters"
+          aria-expanded={filtersOpen}
+          onClick={() => setFiltersOpen((v) => !v)}
+        >
+          <FunnelIcon className="size-4" aria-hidden />
+        </Button>
+      </div>
+
+      <p className="text-xs text-muted-foreground flex flex-wrap items-baseline gap-x-1.5 gap-y-1">
+        {loading ? (
+          tCommon("loading")
+        ) : (
+          <>
+            <span className="min-w-0">
+              {tPages("inventoryListCountWithTotal", {
+                pageCount: inventory.length,
+                totalCount: count,
+              })}
+            </span>
+            {hasStockSummaryAlerts ? (
+              <>
+                <span className="shrink-0 text-muted-foreground" aria-hidden>
+                  ·
+                </span>
+                <span className="min-w-0">{stockSummaryAlertButtons}</span>
+              </>
+            ) : null}
+          </>
+        )}
       </p>
 
-      <FilterBar>
-        <Input
-          value={searchInput}
-          onChange={(e) => setSearchInput(e.target.value)}
-          placeholder={tPages("inventorySearchPlaceholder")}
-          className="w-full md:w-72"
-        />
-        <FilterDropdown
-          value={filters.stock}
-          onChange={(value) => setFilter("stock", value)}
-          placeholder={tPages("inventoryFilterStock")}
-          options={[
-            { value: "in_stock", label: tPages("inventoryStockInStock") },
-            { value: "low_stock", label: tPages("inventoryStockLow") },
-            { value: "out_of_stock", label: tPages("inventoryStockOut") },
-          ]}
-        />
-        <FilterDropdown
-          value={filters.tracked}
-          onChange={(value) => setFilter("tracked", value)}
-          placeholder={tPages("inventoryFilterTracking")}
-          options={[
-            { value: "tracked", label: tPages("inventoryTracked") },
-            { value: "untracked", label: tPages("inventoryUntracked") },
-          ]}
-        />
-        <FilterDropdown
-          value={filters.type}
-          onChange={(value) => setFilter("type", value)}
-          placeholder={tPages("inventoryFilterRecordType")}
-          options={[
-            { value: "product", label: tPages("inventoryTypeProduct") },
-            { value: "variant", label: tPages("inventoryTypeVariant") },
-          ]}
-        />
-        <button
-          type="button"
-          onClick={() => {
-            setSearchInput("");
-            clearFilters();
-          }}
-          className="h-9 rounded-ui border border-border px-3 text-sm hover:bg-muted"
-        >
-          {tPages("filtersClear")}
-        </button>
-      </FilterBar>
+      {filtersOpen ? (
+        <FilterBar>
+          <Input
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            placeholder={tPages("inventorySearchPlaceholder")}
+            className="w-full md:w-72"
+          />
+          <FilterDropdown
+            value={filters.tracked}
+            onChange={(value) => setFilter("tracked", value)}
+            placeholder={tPages("inventoryFilterTracking")}
+            options={[
+              { value: "tracked", label: tPages("inventoryTracked") },
+              { value: "untracked", label: tPages("inventoryUntracked") },
+            ]}
+          />
+          <FilterDropdown
+            value={filters.type}
+            onChange={(value) => setFilter("type", value)}
+            placeholder={tPages("inventoryFilterRecordType")}
+            options={[
+              { value: "product", label: tPages("inventoryTypeProduct") },
+              { value: "variant", label: tPages("inventoryTypeVariant") },
+            ]}
+          />
+          <button
+            type="button"
+            onClick={() => {
+              setSearchInput("");
+              clearFilters();
+            }}
+            className="h-9 rounded-ui border border-border px-3 text-sm hover:bg-muted"
+          >
+            {tPages("filtersClear")}
+          </button>
+        </FilterBar>
+      ) : null}
 
       {loading ? (
         <DashboardTableSkeleton columns={6} rows={5} showHeader={false} showFilters={false} />

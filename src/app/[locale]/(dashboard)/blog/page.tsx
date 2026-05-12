@@ -1,11 +1,9 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, type ReactNode } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Link, useRouter } from "@/i18n/navigation";
-import { Undo2 } from "lucide-react";
-import { toLocaleDigits } from "@/lib/locale-digits";
-import { numberTextClass } from "@/lib/number-font";
+import { FunnelIcon, Undo2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { FilterBar } from "@/components/filters/FilterBar";
 import { FilterDropdown } from "@/components/filters/FilterDropdown";
@@ -23,9 +21,9 @@ import { DashboardCardGridSkeleton } from "@/components/skeletons/dashboard-skel
 export default function BlogListPage() {
   const router = useRouter();
   const locale = useLocale();
-  const numClass = numberTextClass(locale);
   const tNav = useTranslations("nav");
   const tPages = useTranslations("pages");
+  const tCommon = useTranslations("common");
   const { filters, setFilter, clearFilters } = useFilters([
     "published_date",
     "tag",
@@ -36,6 +34,7 @@ export default function BlogListPage() {
   const [blogs, setBlogs] = useState<Blog[]>([]);
   const [tags, setTags] = useState<BlogTag[]>([]);
   const [loading, setLoading] = useState(true);
+  const [filtersOpen, setFiltersOpen] = useState(false);
 
   useEffect(() => {
     setSearchInput(filters.search || "");
@@ -105,14 +104,31 @@ export default function BlogListPage() {
     label: t.name,
   }));
 
-  const hasActiveFilters = Boolean(
+  const publishedDatePillOptions: { value: string; label: ReactNode }[] = [
+    { value: "", label: tCommon("all") },
+    { value: "today", label: tPages("filtersToday") },
+    {
+      value: "last_7_days",
+      label: digitsInNumberFont(tPages("filtersLast7Days"), locale),
+    },
+    {
+      value: "last_30_days",
+      label: digitsInNumberFont(tPages("filtersLast30Days"), locale),
+    },
+  ];
+
+  const filtersActive = Boolean(
     filters.search?.trim() || filters.tag?.trim() || filters.published_date?.trim(),
   );
 
+  useEffect(() => {
+    if (!filtersActive) setFiltersOpen(false);
+  }, [filters.published_date, filters.search, filters.tag]);
+
   return (
     <div className="min-w-0 space-y-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex min-w-0 flex-wrap items-center gap-3">
+      <div className="flex items-center justify-between gap-4 flex-wrap">
+        <div className="flex items-center gap-3">
           <div className="rounded-card bg-muted/80 px-1 py-1 hidden md:block">
             <button
               type="button"
@@ -123,90 +139,94 @@ export default function BlogListPage() {
               <Undo2 className="h-4 w-4" />
             </button>
           </div>
-          <div className="min-w-0">
-            <h1 className="text-2xl font-medium leading-relaxed text-foreground">
-              {tNav("blog")} (
-              <span className={numClass}>
-                {toLocaleDigits(String(blogs.length), locale)}
-              </span>
-              )
-            </h1>
-            <p className="mt-1 text-sm leading-relaxed text-muted-foreground md:hidden">
-              {tPages("blogSubtitle")}
-            </p>
-          </div>
+          <h1 className="text-2xl font-medium leading-relaxed text-foreground">{tNav("blog")}</h1>
         </div>
-        <Button asChild className="w-full shrink-0 sm:w-auto">
-          <Link href="/blog/new">{tNav("blogNew")}</Link>
+        <Link
+          href="/blog/new"
+          className="shrink-0 rounded-card bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90"
+        >
+          {tNav("blogNew")}
+        </Link>
+      </div>
+
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex flex-1 items-center gap-2 flex-wrap min-w-0">
+          {publishedDatePillOptions.map((opt) => {
+            const active = (filters.published_date || "") === opt.value;
+            return (
+              <button
+                key={opt.value || "__all__"}
+                type="button"
+                onClick={() => setFilter("published_date", opt.value)}
+                aria-pressed={active}
+                className={[
+                  "h-9 rounded-ui border px-3 text-sm font-medium transition whitespace-nowrap",
+                  active
+                    ? "border-primary/40 bg-primary text-primary-foreground"
+                    : "border-border bg-card text-foreground hover:bg-muted",
+                ].join(" ")}
+              >
+                {opt.label}
+              </button>
+            );
+          })}
+        </div>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          className="h-9 shrink-0 self-start px-3"
+          aria-label="Toggle filters"
+          aria-expanded={filtersOpen}
+          onClick={() => setFiltersOpen((v) => !v)}
+        >
+          <FunnelIcon className="size-4" aria-hidden />
         </Button>
       </div>
 
-      <p className="hidden text-sm leading-relaxed text-muted-foreground md:block">
-        {tPages("blogSubtitle")}
+      <p className="text-xs text-muted-foreground">
+        {loading
+          ? tCommon("loading")
+          : tPages("blogListCount", { count: blogs.length })}
       </p>
 
-      <FilterBar>
-        <FilterDropdown
-          value={filters.published_date}
-          onChange={(value) => setFilter("published_date", value)}
-          placeholder={tPages("filtersPublishedDate")}
-          options={[
-            { value: "today", label: tPages("filtersToday") },
-            {
-              value: "last_7_days",
-              label: tPages("filtersLast7Days"),
-              labelDisplay: digitsInNumberFont(
-                tPages("filtersLast7Days"),
-                locale,
-              ),
-            },
-            {
-              value: "last_30_days",
-              label: tPages("filtersLast30Days"),
-              labelDisplay: digitsInNumberFont(
-                tPages("filtersLast30Days"),
-                locale,
-              ),
-            },
-          ]}
-          className="min-w-[10.5rem]"
-        />
-        <FilterDropdown
-          value={filters.tag}
-          onChange={(value) => setFilter("tag", value)}
-          placeholder={tPages("filtersTag")}
-          options={tagOptions}
-          className="min-w-[10rem] md:min-w-[12rem]"
-          disabled={tags.length === 0}
-        />
-        <Input
-          value={searchInput}
-          onChange={(e) => setSearchInput(e.target.value)}
-          placeholder={tPages("filtersSearchBlog")}
-          className="h-9 min-w-0 flex-1 md:max-w-md"
-        />
-        <button
-          type="button"
-          onClick={() => {
-            setSearchInput("");
-            clearFilters();
-          }}
-          className="h-9 shrink-0 rounded-ui border border-border px-3 text-sm hover:bg-muted"
-        >
-          {tPages("filtersClear")}
-        </button>
-      </FilterBar>
+      {filtersOpen ? (
+        <FilterBar>
+          <FilterDropdown
+            value={filters.tag}
+            onChange={(value) => setFilter("tag", value)}
+            placeholder={tPages("filtersTag")}
+            options={tagOptions}
+            className="min-w-[10rem] md:min-w-[12rem]"
+            disabled={tags.length === 0}
+          />
+          <Input
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            placeholder={tPages("filtersSearchBlog")}
+            className="h-9 min-w-0 flex-1 md:max-w-md"
+          />
+          <button
+            type="button"
+            onClick={() => {
+              setSearchInput("");
+              clearFilters();
+            }}
+            className="h-9 shrink-0 rounded-ui border border-border px-3 text-sm hover:bg-muted"
+          >
+            {tPages("filtersClear")}
+          </button>
+        </FilterBar>
+      ) : null}
 
       {loading ? (
         <DashboardCardGridSkeleton cards={6} />
       ) : blogs.length === 0 ? (
         <Card className="flex flex-col items-center justify-center gap-3 py-12 text-center">
           <p className="text-sm text-muted-foreground">
-            {hasActiveFilters
-              ? tPages("blogListNoMatches")
-              : tPages("blogListEmpty")}
+            {filtersActive ? tPages("blogListNoMatches") : tPages("blogListEmpty")}
           </p>
-          {hasActiveFilters ? (
+          {filtersActive ? (
             <Button
               type="button"
               variant="outline"
@@ -218,11 +238,7 @@ export default function BlogListPage() {
             >
               {tPages("filtersClear")}
             </Button>
-          ) : (
-            <Button asChild variant="outline" size="sm">
-              <Link href="/blog/new">Write your first post</Link>
-            </Button>
-          )}
+          ) : null}
         </Card>
       ) : (
         <div className="rounded-card border border-card-border bg-card p-3">

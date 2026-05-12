@@ -2,11 +2,12 @@
 
 import { useEffect, useRef, useState, type Dispatch, type FormEvent, type SetStateAction } from "react";
 import type React from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { ClipboardTextIcon } from "@phosphor-icons/react";
 import { Check, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import {
   InputGroup,
@@ -95,6 +96,7 @@ export default function StoreInfoSection({
   onRevalidateSecretChange: Dispatch<SetStateAction<string>>;
 }) {
   const t = useTranslations("settings");
+  const locale = useLocale();
   const confirm = useConfirm();
   const [secretRevealed, setSecretRevealed] = useState(false);
   const [secretFieldFocused, setSecretFieldFocused] = useState(false);
@@ -322,38 +324,50 @@ export default function StoreInfoSection({
               <p className="text-xs text-muted-foreground">{t("store.storefrontUrlHelp")}</p>
             </div>
             <div className="flex flex-col gap-2 md:col-span-2">
-              <label
-                htmlFor="revalidate_secret"
+              <div
+                id="store_revalidate_secret_label"
                 className="text-sm font-medium leading-normal text-foreground"
               >
                 {t("store.revalidateSecretLabel")}
-              </label>
+              </div>
               <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-stretch">
                 <div className="flex min-w-0 flex-1 items-stretch gap-2">
                   {hasRevalidateSecret && !showPlainSecretInput ? (
-                    <button
-                      type="button"
-                      id="revalidate_secret"
-                      title={t("store.revalidateSecretClickToReveal")}
-                      aria-label={t("store.revalidateSecretClickToReveal")}
-                      onClick={() => {
-                        setSecretRevealed(true);
-                        queueMicrotask(() => secretInputRef.current?.focus());
-                      }}
-                      className={cn(
-                        "flex h-9 min-w-0 w-full cursor-pointer items-center rounded-ui border border-border bg-background px-3 py-1 text-left font-mono text-sm text-foreground shadow-xs",
-                        "transition-[color,box-shadow] outline-none hover:bg-muted/40",
-                        "focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50",
-                      )}
-                    >
-                      <span className="truncate tracking-[0.2em] text-muted-foreground" aria-hidden>
-                        {"•".repeat(Math.min(revalidateSecret.length, 48))}
-                      </span>
-                    </button>
+                    <Tooltip delayDuration={200}>
+                      <TooltipTrigger asChild>
+                        <button
+                          type="button"
+                          id="revalidate_secret"
+                          aria-labelledby="store_revalidate_secret_label"
+                          onClick={() => {
+                            setSecretRevealed(true);
+                            queueMicrotask(() => secretInputRef.current?.focus());
+                          }}
+                          className={cn(
+                            "flex h-9 min-w-0 w-full cursor-pointer items-center rounded-ui border border-border bg-background px-3 py-1 text-left font-mono text-sm text-foreground shadow-xs",
+                            "transition-[color,box-shadow] outline-none hover:bg-muted/40",
+                            "focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50",
+                          )}
+                        >
+                          <span className="truncate tracking-[0.2em] text-muted-foreground" aria-hidden>
+                            {"•".repeat(Math.min(revalidateSecret.length, 48))}
+                          </span>
+                        </button>
+                      </TooltipTrigger>
+                      <TooltipContent side="bottom" sideOffset={8} variant="light">
+                        <p
+                          lang={locale === "bn" ? "bn" : "en"}
+                          className="leading-relaxed text-balance"
+                        >
+                          {t("store.revalidateSecretClickToReveal")}
+                        </p>
+                      </TooltipContent>
+                    </Tooltip>
                   ) : (
                     <Input
                       ref={secretInputRef}
                       id="revalidate_secret"
+                      aria-labelledby="store_revalidate_secret_label"
                       name="storefront_revalidate_secret"
                       type="text"
                       autoComplete="off"
@@ -381,26 +395,39 @@ export default function StoreInfoSection({
                     />
                   )}
                   {hasRevalidateSecret && showPlainSecretInput && (
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      title={t("store.revalidateSecretClickToCopy")}
-                      aria-label={
-                        secretCopied
-                          ? t("store.revalidateSecretCopiedShort")
-                          : t("store.revalidateSecretClickToCopy")
-                      }
-                      className="size-9 shrink-0"
-                      onMouseDown={(e) => e.preventDefault()}
-                      onClick={() => void copyRevalidateSecret()}
-                    >
-                      {secretCopied ? (
-                        <Check className="size-4 text-emerald-600" aria-hidden />
-                      ) : (
-                        <ClipboardTextIcon className="size-4" aria-hidden />
-                      )}
-                    </Button>
+                    <Tooltip delayDuration={200}>
+                      <TooltipTrigger asChild>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          aria-label={
+                            secretCopied
+                              ? t("store.revalidateSecretCopiedShort")
+                              : t("store.revalidateSecretClickToCopy")
+                          }
+                          className="size-9 shrink-0"
+                          onMouseDown={(e) => e.preventDefault()}
+                          onClick={() => void copyRevalidateSecret()}
+                        >
+                          {secretCopied ? (
+                            <Check className="size-4 text-emerald-600" aria-hidden />
+                          ) : (
+                            <ClipboardTextIcon className="size-4" aria-hidden />
+                          )}
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent side="bottom" sideOffset={8} variant="light">
+                        <p
+                          lang={locale === "bn" ? "bn" : "en"}
+                          className="leading-relaxed text-balance"
+                        >
+                          {secretCopied
+                            ? t("store.revalidateSecretCopiedShort")
+                            : t("store.revalidateSecretClickToCopy")}
+                        </p>
+                      </TooltipContent>
+                    </Tooltip>
                   )}
                 </div>
                 <Button

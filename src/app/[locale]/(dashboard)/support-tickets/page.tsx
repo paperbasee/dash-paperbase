@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
-import { Undo2 } from "lucide-react";
+import { FunnelIcon, Undo2 } from "lucide-react";
 import { ClickableTableRow } from "@/components/ui/clickable-table-row";
 import { ClickableText } from "@/components/ui/clickable-text";
 import { Input } from "@/components/ui/input";
@@ -24,6 +24,7 @@ import { formatDashboardDateTime } from "@/lib/datetime-display";
 import { useConfirm } from "@/context/ConfirmDialogContext";
 import { notify } from "@/notifications";
 import { DashboardTableSkeleton } from "@/components/skeletons/dashboard-skeletons";
+import { Button } from "@/components/ui/button";
 
 type EditableField = "status" | "priority" | "category";
 
@@ -40,6 +41,20 @@ const PRIORITY_OPTIONS = [
   { value: "high", label: "High" },
   { value: "urgent", label: "Urgent" },
 ] as const;
+
+const STATUS_I18N: Record<(typeof STATUS_OPTIONS)[number]["value"], string> = {
+  new: "supportTicketsStatusNew",
+  in_progress: "supportTicketsStatusInProgress",
+  resolved: "supportTicketsStatusResolved",
+  closed: "supportTicketsStatusClosed",
+};
+
+const PRIORITY_I18N: Record<(typeof PRIORITY_OPTIONS)[number]["value"], string> = {
+  low: "supportTicketsPriorityLow",
+  medium: "supportTicketsPriorityMedium",
+  high: "supportTicketsPriorityHigh",
+  urgent: "supportTicketsPriorityUrgent",
+};
 
 const CATEGORY_OPTIONS = [
   { value: "general", label: "General" },
@@ -110,6 +125,40 @@ export default function SupportTicketsPage() {
   const [hasNext, setHasNext] = useState(false);
   const [saving, setSaving] = useState<Record<string, Partial<Record<EditableField, boolean>>>>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const tCommon = useTranslations("common");
+
+  const statusOptionsTranslated = STATUS_OPTIONS.map((o) => ({
+    value: o.value,
+    label: tPages(STATUS_I18N[o.value]),
+  }));
+
+  const priorityOptionsTranslated = PRIORITY_OPTIONS.map((o) => ({
+    value: o.value,
+    label: tPages(PRIORITY_I18N[o.value]),
+  }));
+
+  const priorityPillOptions = [
+    { value: "", label: tCommon("all") },
+    ...PRIORITY_OPTIONS.map((o) => ({
+      value: o.value,
+      label: tPages(PRIORITY_I18N[o.value]),
+    })),
+  ];
+
+  const filtersActive = Boolean(
+    (filters.search || "").trim() ||
+      (filters.status || "").trim() ||
+      (filters.priority || "").trim(),
+  );
+
+  useEffect(() => {
+    setSearchInput(filters.search || "");
+  }, [filters.search]);
+
+  useEffect(() => {
+    if (!filtersActive) setFiltersOpen(false);
+  }, [filters.search, filters.status, filters.priority]);
 
   useEffect(() => {
     const next = debouncedSearch.trim();
@@ -214,58 +263,94 @@ export default function SupportTicketsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-3">
-        <div className="rounded-card bg-muted/80 px-1 py-1 hidden md:block">
-          <button
-            type="button"
-            onClick={() => router.back()}
-            aria-label={tPages("goBack")}
-            className="flex items-center justify-center rounded-ui p-1 text-muted-foreground hover:bg-muted"
-          >
-            <Undo2 className="h-4 w-4" />
-          </button>
+      <div className="flex items-center justify-between gap-4 flex-wrap">
+        <div className="flex items-center gap-3">
+          <div className="rounded-card bg-muted/80 px-1 py-1 hidden md:block">
+            <button
+              type="button"
+              onClick={() => router.back()}
+              aria-label={tPages("goBack")}
+              className="flex items-center justify-center rounded-ui p-1 text-muted-foreground hover:bg-muted"
+            >
+              <Undo2 className="h-4 w-4" />
+            </button>
+          </div>
+          <h1 className="text-2xl font-medium leading-relaxed text-foreground">
+            {tPages("supportTicketsTitle")}
+          </h1>
         </div>
-        <h1 className="text-2xl font-medium text-foreground">
-          {tPages("supportTicketsTitle")} ({count})
-        </h1>
       </div>
 
-      <FilterBar>
-        <FilterDropdown
-          value={filters.status}
-          onChange={(value) => setFilter("status", value)}
-          placeholder={tPages("filtersStatus")}
-          options={STATUS_OPTIONS.map((option) => ({
-            value: option.value,
-            label: option.label,
-          }))}
-        />
-        <FilterDropdown
-          value={filters.priority}
-          onChange={(value) => setFilter("priority", value)}
-          placeholder={tPages("supportTicketsPriority")}
-          options={PRIORITY_OPTIONS.map((option) => ({
-            value: option.value,
-            label: option.label,
-          }))}
-        />
-        <Input
-          value={searchInput}
-          onChange={(e) => setSearchInput(e.target.value)}
-          placeholder={tPages("filtersSearchTickets")}
-          className="w-full md:w-72"
-        />
-        <button
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex flex-1 items-center gap-2 flex-wrap min-w-0">
+          {priorityPillOptions.map((opt) => {
+            const active = (filters.priority || "") === opt.value;
+            return (
+              <button
+                key={opt.value || "__all__"}
+                type="button"
+                onClick={() => setFilter("priority", opt.value)}
+                aria-pressed={active}
+                className={[
+                  "h-9 rounded-ui border px-3 text-sm font-medium transition whitespace-nowrap",
+                  active
+                    ? "border-primary/40 bg-primary text-primary-foreground"
+                    : "border-border bg-card text-foreground hover:bg-muted",
+                ].join(" ")}
+              >
+                {opt.label}
+              </button>
+            );
+          })}
+        </div>
+        <Button
           type="button"
-          onClick={() => {
-            setSearchInput("");
-            clearFilters();
-          }}
-          className="h-9 rounded-ui border border-border px-3 text-sm hover:bg-muted"
+          variant="outline"
+          size="sm"
+          className="h-9 shrink-0 self-start px-3"
+          aria-label="Toggle filters"
+          aria-expanded={filtersOpen}
+          onClick={() => setFiltersOpen((v) => !v)}
         >
-          {tPages("filtersClear")}
-        </button>
-      </FilterBar>
+          <FunnelIcon className="size-4" aria-hidden />
+        </Button>
+      </div>
+
+      <p className="text-xs text-muted-foreground">
+        {loading
+          ? tCommon("loading")
+          : tPages("supportTicketsListCountWithTotal", {
+              pageCount: tickets.length,
+              totalCount: count,
+            })}
+      </p>
+
+      {filtersOpen ? (
+        <FilterBar>
+          <FilterDropdown
+            value={filters.status}
+            onChange={(value) => setFilter("status", value)}
+            placeholder={tPages("filtersStatus")}
+            options={statusOptionsTranslated}
+          />
+          <Input
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            placeholder={tPages("filtersSearchTickets")}
+            className="w-full md:w-72"
+          />
+          <button
+            type="button"
+            onClick={() => {
+              setSearchInput("");
+              clearFilters();
+            }}
+            className="h-9 rounded-ui border border-border px-3 text-sm hover:bg-muted"
+          >
+            {tPages("filtersClear")}
+          </button>
+        </FilterBar>
+      ) : null}
 
       {loading ? (
         <DashboardTableSkeleton columns={8} rows={5} showHeader={false} showFilters={false} />
@@ -311,7 +396,7 @@ export default function SupportTicketsPage() {
                     <td className="px-4 py-3 whitespace-nowrap">
                       <InlineSelect
                         value={ticket.status}
-                        options={STATUS_OPTIONS}
+                        options={statusOptionsTranslated}
                         saving={!!saving[ticket.public_id]?.status}
                         widthClassName="w-[120px]"
                         onChange={(next) =>
@@ -322,7 +407,7 @@ export default function SupportTicketsPage() {
                     <td className="px-4 py-3 whitespace-nowrap">
                       <InlineSelect
                         value={ticket.priority}
-                        options={PRIORITY_OPTIONS}
+                        options={priorityOptionsTranslated}
                         saving={!!saving[ticket.public_id]?.priority}
                         widthClassName="w-[120px]"
                         onChange={(next) =>

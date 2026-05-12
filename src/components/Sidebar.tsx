@@ -3,7 +3,11 @@
 import { useTranslations } from "next-intl";
 import { Link, usePathname, useRouter } from "@/i18n/navigation";
 import { useSearchParams } from "next/navigation";
-import { ClipboardTextIcon, SidebarSimpleIcon } from "@phosphor-icons/react";
+import {
+  ClipboardTextIcon,
+  CommandIcon,
+  SidebarSimpleIcon,
+} from "@phosphor-icons/react";
 import {
   Birdhouse,
   ChevronsUpDown,
@@ -47,7 +51,7 @@ import {
 } from "@/config/apps";
 import { numberTextClass } from "@/lib/number-font";
 import { cn } from "@/lib/utils";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useLocale } from "next-intl";
 import {
   CORE_LOCALE_STORAGE_KEY,
@@ -143,6 +147,16 @@ function SidebarContent({
   const { counts, formatCount } = useNavCounts();
   const { isEnabled } = useEnabledApps();
   const { hasFeature } = useFeatures();
+
+  const mainNavSequence = useMemo(
+    () =>
+      (MAIN_NAV_SEQUENCE as readonly string[]).filter((token) => {
+        if (token === "__catalog__" || token === "__marketing__") return true;
+        if (!APP_CONFIG[token]?.href) return false;
+        return isEnabled(token);
+      }),
+    [isEnabled]
+  );
   const { status: inventoryNavStatus } = useInventoryStatus(
     isEnabled("inventory")
   );
@@ -411,8 +425,9 @@ function SidebarContent({
             <TooltipProvider delayDuration={300}>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <kbd className="shrink-0 rounded-xs border border-border bg-background h-5 px-2 text-[10px] text-muted-foreground inline-flex items-center justify-center leading-none">
-                    <span className="translate-y-px">CTRL+K</span>
+                  <kbd className="inline-flex h-5 shrink-0 items-center justify-center gap-0.5 rounded-xs border border-border bg-background px-1.5 text-[10px] leading-none text-muted-foreground">
+                    <CommandIcon className="size-3 shrink-0" aria-hidden />
+                    <span className="translate-y-px">K</span>
                   </kbd>
                 </TooltipTrigger>
                 <TooltipContent side="bottom">
@@ -475,7 +490,7 @@ function SidebarContent({
             celeryOpen={celeryOpen}
             setCeleryOpen={setCeleryOpen}
             inventoryNavStatus={inventoryNavStatus}
-            mainNavSequence={MAIN_NAV_SEQUENCE as unknown as string[]}
+            mainNavSequence={mainNavSequence}
             onExpandIfCollapsed={expandIfCollapsed}
           />
         )}
