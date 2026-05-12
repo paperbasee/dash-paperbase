@@ -241,8 +241,6 @@ export default function MarketingProviderCard({ provider }: { provider: Marketin
   const providerTitle =
     provider === "facebook" ? t("marketing.providerFacebook") : c("heading");
 
-  const showHelper = provider === "tiktok";
-
   const providerIcon =
     provider === "facebook" ? (
       <MetaLogoIcon className="h-5 w-5 shrink-0 text-muted-foreground" aria-hidden />
@@ -264,7 +262,12 @@ export default function MarketingProviderCard({ provider }: { provider: Marketin
             : c("modalConnectDescription")
         }
       >
-        <form ref={connectFormRef} onSubmit={handleConnect} className="space-y-3">
+        <form
+          ref={connectFormRef}
+          onSubmit={handleConnect}
+          className="space-y-3"
+          autoComplete="off"
+        >
           {error ? (
             <div className="rounded-card border border-destructive/30 bg-destructive/10 px-3 py-2 text-xs text-destructive">
               {error}
@@ -273,51 +276,74 @@ export default function MarketingProviderCard({ provider }: { provider: Marketin
           {canAddPixel ? (
             <>
               <div className="flex flex-col gap-1.5">
-                <label className="text-sm font-medium text-foreground">
+                <label
+                  htmlFor={`marketing-pixel-id-${provider}`}
+                  className="text-sm font-medium text-foreground"
+                >
                   {c("pixelId")}
                 </label>
                 <Input
                   required
+                  name={`marketing_pixel_id_${provider}`}
+                  id={`marketing-pixel-id-${provider}`}
                   value={form.pixel_id}
                   onChange={(e) => setForm({ ...form, pixel_id: e.target.value, provider })}
                   placeholder={c("pixelPlaceholder")}
+                  autoComplete="off"
+                  spellCheck={false}
+                  data-1p-ignore
+                  data-lpignore="true"
+                  data-bwignore
                   onKeyDown={handleKeyDown}
                 />
-                {showHelper ? (
-                  <p className="text-xs text-muted-foreground">{c("pixelHelper")}</p>
-                ) : null}
               </div>
               <div className="flex flex-col gap-1.5">
-                <label className="text-sm font-medium text-foreground">
+                <label
+                  htmlFor={`marketing-access-token-${provider}`}
+                  className="text-sm font-medium text-foreground"
+                >
                   {c("accessToken")}
                 </label>
                 <Input
-                  type="password"
+                  type="text"
                   required
+                  name={`marketing_access_token_${provider}`}
+                  id={`marketing-access-token-${provider}`}
                   value={form.access_token}
                   onChange={(e) => setForm({ ...form, access_token: e.target.value, provider })}
                   placeholder={c("accessTokenPlaceholder")}
                   autoComplete="off"
+                  spellCheck={false}
+                  autoCapitalize="off"
+                  autoCorrect="off"
+                  className="font-mono"
+                  data-1p-ignore
+                  data-lpignore="true"
+                  data-bwignore
                   onKeyDown={handleKeyDown}
                 />
-                {showHelper ? (
-                  <p className="text-xs text-muted-foreground">{c("accessTokenHelper")}</p>
-                ) : null}
               </div>
               <div className="flex flex-col gap-1.5">
-                <label className="text-sm font-medium text-foreground">
+                <label
+                  htmlFor={`marketing-test-event-${provider}`}
+                  className="text-sm font-medium text-foreground"
+                >
                   {c("testEventCode")}{" "}
                   <span className="font-normal text-muted-foreground">{t("optionalTag")}</span>
                 </label>
                 <Input
+                  name={`marketing_test_event_code_${provider}`}
+                  id={`marketing-test-event-${provider}`}
                   value={form.test_event_code}
                   onChange={(e) => setForm({ ...form, test_event_code: e.target.value, provider })}
                   placeholder={c("testEventPlaceholder")}
+                  autoComplete="off"
+                  spellCheck={false}
+                  data-1p-ignore
+                  data-lpignore="true"
+                  data-bwignore
                   onKeyDown={handleKeyDown}
                 />
-                {showHelper ? (
-                  <p className="text-xs text-muted-foreground">{c("testEventHelper")}</p>
-                ) : null}
               </div>
             </>
           ) : (

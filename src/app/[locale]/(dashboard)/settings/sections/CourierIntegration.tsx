@@ -261,8 +261,15 @@ function SteadfastCourierRow({
                               ) : (
                                 <Input
                                   id={`steadfast_webhook_token_${c.public_id}`}
+                                  name={`steadfast_webhook_token_${c.public_id}`}
                                   type="text"
-                                  autoComplete="new-password"
+                                  autoComplete="off"
+                                  spellCheck={false}
+                                  autoCapitalize="off"
+                                  autoCorrect="off"
+                                  data-1p-ignore
+                                  data-lpignore="true"
+                                  data-bwignore
                                   value={token}
                                   onChange={(e) =>
                                     setGeneratedTokenByCourierId((prev) => ({
@@ -597,33 +604,60 @@ export default function CourierIntegration() {
         title={t("courier.modalConnectTitle")}
         description={t("courier.modalConnectDescription")}
       >
-        <form ref={connectFormRef} onSubmit={handleConnect} className="space-y-3">
+        <form
+          ref={connectFormRef}
+          onSubmit={handleConnect}
+          className="space-y-3"
+          autoComplete="off"
+        >
           {error ? (
             <div className="rounded-card border border-destructive/30 bg-destructive/10 px-3 py-2 text-xs text-destructive">
               {error}
             </div>
           ) : null}
           <div className="flex flex-col gap-1.5">
-            <label className="text-sm font-medium text-foreground">{t("courier.apiKey")}</label>
+            <label htmlFor="courier_steadfast_api_key" className="text-sm font-medium text-foreground">
+              {t("courier.apiKey")}
+            </label>
             <Input
-              type="password"
+              id="courier_steadfast_api_key"
+              name="courier_steadfast_api_key"
+              type="text"
               required
               value={form.api_key}
               onChange={(e) => setForm({ ...form, api_key: e.target.value })}
               placeholder={t("courier.apiKeyPlaceholder")}
               autoComplete="off"
+              spellCheck={false}
+              autoCapitalize="off"
+              autoCorrect="off"
+              className="font-mono"
+              data-1p-ignore
+              data-lpignore="true"
+              data-bwignore
               onKeyDown={handleKeyDown}
             />
           </div>
           <div className="flex flex-col gap-1.5">
-            <label className="text-sm font-medium text-foreground">{t("courier.secretKey")}</label>
+            <label htmlFor="courier_steadfast_secret_key" className="text-sm font-medium text-foreground">
+              {t("courier.secretKey")}
+            </label>
             <Input
-              type="password"
+              id="courier_steadfast_secret_key"
+              name="courier_steadfast_secret_key"
+              type="text"
               required
               value={form.secret_key}
               onChange={(e) => setForm({ ...form, secret_key: e.target.value })}
               placeholder={t("courier.secretKeyPlaceholder")}
               autoComplete="off"
+              spellCheck={false}
+              autoCapitalize="off"
+              autoCorrect="off"
+              className="font-mono"
+              data-1p-ignore
+              data-lpignore="true"
+              data-bwignore
               onKeyDown={handleKeyDown}
             />
           </div>

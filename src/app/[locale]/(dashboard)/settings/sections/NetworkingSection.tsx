@@ -483,14 +483,24 @@ export default function NetworkingSection({ hidden }: { hidden: boolean }) {
         )}
 
         <div className="space-y-2">
-          <p className="text-sm font-medium text-foreground">{t("networking.createHeading")}</p>
+          <label htmlFor="networking_api_key_display_name" className="text-sm font-medium text-foreground">
+            {t("networking.createHeading")}
+          </label>
           <div className="flex max-w-xl flex-col gap-2 sm:flex-row sm:items-center">
             <Input
+              id="networking_api_key_display_name"
+              name="networking_api_key_display_name"
+              type="text"
               placeholder={t("networking.namePlaceholder")}
               value={newKeyName}
               onChange={(e) => setNewKeyName(e.target.value)}
               onKeyDown={handleKeyDown}
               disabled={busy || networkingActionsLocked}
+              autoComplete="off"
+              spellCheck={false}
+              data-1p-ignore
+              data-lpignore="true"
+              data-bwignore
               className="sm:flex-1"
             />
             <Button

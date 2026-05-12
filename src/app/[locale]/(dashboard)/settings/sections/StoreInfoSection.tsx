@@ -354,8 +354,15 @@ export default function StoreInfoSection({
                     <Input
                       ref={secretInputRef}
                       id="revalidate_secret"
+                      name="storefront_revalidate_secret"
                       type="text"
-                      autoComplete="new-password"
+                      autoComplete="off"
+                      spellCheck={false}
+                      autoCapitalize="off"
+                      autoCorrect="off"
+                      data-1p-ignore
+                      data-lpignore="true"
+                      data-bwignore
                       value={revalidateSecret}
                       onChange={(e) => onRevalidateSecretChange(e.target.value)}
                       onFocus={() => setSecretFieldFocused(true)}
