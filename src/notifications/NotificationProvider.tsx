@@ -23,6 +23,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
+import { extractRateLimitInfo } from "@/hooks/useRateLimitCooldown";
 import { normalizeError, UNKNOWN_ERROR_FALLBACK } from "./normalizeError";
 import { registerNotifyDispatcher } from "./notify";
 import type {
@@ -210,6 +211,31 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
         error: unknown,
         options?: NotifyOptions & { fallbackMessage?: MessageDescriptor },
       ): NotificationId => {
+        const rl = extractRateLimitInfo(error);
+        if (rl) {
+          const seconds = Math.max(1, Math.ceil(rl.retryAfter));
+          const durationMs = Math.min(
+            60_000,
+            Math.max(8_000, Math.min(45_000, seconds * 1000)),
+          );
+          return pushToast(
+            "warning",
+            {
+              key: "notifyRateLimit.body",
+              values: { seconds },
+              fallback: `Too many attempts. Please wait ${seconds} seconds, then try again.`,
+            },
+            {
+              ...options,
+              title: {
+                key: "notifyRateLimit.title",
+                fallback: "Slow down",
+              },
+              durationMs: options?.durationMs ?? durationMs,
+              iconName: "warning",
+            },
+          );
+        }
         const fallbackText = options?.fallbackMessage
           ? resolveMessage(options.fallbackMessage)
           : UNKNOWN_ERROR_FALLBACK;

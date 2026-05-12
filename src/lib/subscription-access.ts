@@ -6,6 +6,7 @@ import { isNetworkError } from "@/lib/network-error";
 
 export type SubscriptionStatus =
   | "NONE"
+  | "MODERATOR"
   | "PENDING_REVIEW"
   | "REJECTED"
   | "ACTIVE"
@@ -31,6 +32,7 @@ export interface MeSubscription {
 export interface MeForRouting {
   /** User public_id from auth/me/; used for cache key when JWT omits user_public_id. */
   public_id?: string;
+  is_moderator?: boolean;
   active_store_public_id: string | null;
   /**
    * Latest subscription row by server `updated_at` (REJECTED / PENDING_REVIEW only).

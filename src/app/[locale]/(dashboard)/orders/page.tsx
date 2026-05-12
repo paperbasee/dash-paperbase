@@ -485,18 +485,19 @@ export default function OrdersPage() {
     filters.status,
   ]);
 
+  const filtersActive = Boolean(
+    (filters.customer || "").trim() ||
+      (filters.status || "").trim() ||
+      (filters.flag || "").trim() ||
+      (filters.date_range || "").trim() ||
+      (filters.payment_status || "").trim() ||
+      (filters.delivery_status || "").trim() ||
+      (filters.category || "").trim() ||
+      (filters.search || "").trim()
+  );
+
   useEffect(() => {
-    const hasAnyValue = Boolean(
-      (filters.customer || "").trim() ||
-        (filters.status || "").trim() ||
-        (filters.flag || "").trim() ||
-        (filters.date_range || "").trim() ||
-        (filters.payment_status || "").trim() ||
-        (filters.delivery_status || "").trim() ||
-        (filters.category || "").trim() ||
-        (filters.search || "").trim()
-    );
-    if (!hasAnyValue) setFiltersOpen(false);
+    if (!filtersActive) setFiltersOpen(false);
   }, [
     filters.category,
     filters.customer,
@@ -509,7 +510,9 @@ export default function OrdersPage() {
   ]);
 
   const pageOrdersCount = orders.length;
-  const totalOrdersCount = ordersCount ?? navCounts?.orders ?? null;
+  const totalOrdersCount = filtersActive
+    ? ordersCount ?? null
+    : ordersCount ?? navCounts?.orders ?? null;
 
   useEffect(() => {
     if (!activeExportJobId) return;

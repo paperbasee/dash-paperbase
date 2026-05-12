@@ -67,6 +67,7 @@ export default function DashboardLayoutClient({
   const isSettingsMode = pathname.startsWith("/settings");
   const subscription =
     meProfileStatus === "ready" ? (meProfile?.subscription ?? null) : null;
+  const isModerator = meProfile?.is_moderator === true;
   const subscriptionUiState =
     meProfileStatus === "ready" && meProfile
       ? resolveSubscriptionUIStateFromMe(meProfile)
@@ -103,6 +104,7 @@ export default function DashboardLayoutClient({
   const shouldRedirectToOnboarding =
     meReady &&
     meProfile !== null &&
+    !isModerator &&
     pathname === "/" &&
     subscriptionIsPaidPeriod(meProfile) &&
     isEligiblePlan &&
@@ -259,6 +261,7 @@ export default function DashboardLayoutClient({
                   planPublicId={subscription?.plan_public_id ?? null}
                   storefrontBlocksAt={subscription?.storefront_blocks_at ?? null}
                   endDate={subscription?.end_date ?? null}
+                  moderatorNotice={isModerator}
                 />
               ) : null}
               {subscriptionUiState === "inactive" ? (

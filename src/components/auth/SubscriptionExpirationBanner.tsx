@@ -21,6 +21,11 @@ interface SubscriptionExpirationBannerProps {
   /** From auth/me; fallback computed from `endDate` when absent (older caches). */
   storefrontBlocksAt?: string | null;
   endDate?: string | null;
+  /**
+   * Moderators see the active store’s subscription (owner billing), not their own.
+   * Uses store-focused copy and hides pay/renew (only the owner can renew).
+   */
+  moderatorNotice?: boolean;
 }
 
 export default function SubscriptionExpirationBanner({
@@ -28,6 +33,7 @@ export default function SubscriptionExpirationBanner({
   planPublicId,
   storefrontBlocksAt,
   endDate,
+  moderatorNotice = false,
 }: SubscriptionExpirationBannerProps) {
   const locale = useLocale();
   const numClass = numberTextClass(locale);
@@ -51,6 +57,9 @@ export default function SubscriptionExpirationBanner({
   }, [variant, deadlineMs]);
 
   const messageKey = variant === "grace" ? "graceBannerText" : "expiredBannerText";
+  const moderatorMessageKey =
+    variant === "grace" ? "moderatorGraceBannerText" : "moderatorExpiredBannerText";
+  const moderatorNoTimerKey = "moderatorGraceBannerTextNoTimer";
   const showGraceTimer = variant === "grace" && deadlineMs != null;
   const timeLeftHm = showGraceTimer
     ? formatTimeLeftHm(deadlineMs - now)
@@ -87,15 +96,26 @@ export default function SubscriptionExpirationBanner({
           <p className="text-center text-[11px] leading-snug text-red-800 sm:text-xs dark:text-red-200">
             {variant === "grace" ? (
               <span className={cn("font-medium", numClass)}>
-                {timeLeftHm != null
-                  ? t("graceBannerText", { time: timeLeftHm })
-                  : t("graceBannerTextNoTimer")}
+                {moderatorNotice ? (
+                  timeLeftHm != null ? (
+                    t(moderatorMessageKey, { time: timeLeftHm })
+                  ) : (
+                    t(moderatorNoTimerKey)
+                  )
+                ) : timeLeftHm != null ? (
+                  t("graceBannerText", { time: timeLeftHm })
+                ) : (
+                  t("graceBannerTextNoTimer")
+                )}
               </span>
+            ) : moderatorNotice ? (
+              <span>{t(moderatorMessageKey)}</span>
             ) : (
               <span>{t(messageKey)}</span>
             )}
           </p>
         </div>
+        {!moderatorNotice ? (
         <div className="flex flex-col items-center gap-1">
           <Button
             type="button"
@@ -110,6 +130,7 @@ export default function SubscriptionExpirationBanner({
             <span className="text-xs text-red-800 dark:text-red-200">{payError}</span>
           ) : null}
         </div>
+        ) : null}
       </div>
     </div>
   );

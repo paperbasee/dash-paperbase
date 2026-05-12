@@ -247,16 +247,17 @@ export default function ProductsPage() {
     fetchProducts();
   }, [fetchProducts]);
 
+  const filtersActive = Boolean(
+    (filters.status || "").trim() ||
+      (filters.prepayment_type || "").trim() ||
+      (filters.category || "").trim() ||
+      (filters.price_min || "").trim() ||
+      (filters.price_max || "").trim() ||
+      (filters.search || "").trim()
+  );
+
   useEffect(() => {
-    const hasAnyValue = Boolean(
-      (filters.status || "").trim() ||
-        (filters.prepayment_type || "").trim() ||
-        (filters.category || "").trim() ||
-        (filters.price_min || "").trim() ||
-        (filters.price_max || "").trim() ||
-        (filters.search || "").trim()
-    );
-    if (!hasAnyValue) setFiltersOpen(false);
+    if (!filtersActive) setFiltersOpen(false);
   }, [
     filters.category,
     filters.prepayment_type,
@@ -425,7 +426,9 @@ export default function ProductsPage() {
   const someSelected = selectedIds.size > 0;
 
   const pageProductsCount = products.length;
-  const totalProductsCount = productsCount ?? navCounts?.products ?? null;
+  const totalProductsCount = filtersActive
+    ? productsCount ?? null
+    : productsCount ?? navCounts?.products ?? null;
 
   const sortableIds = useMemo(
     () => products.map((p) => p.public_id),
