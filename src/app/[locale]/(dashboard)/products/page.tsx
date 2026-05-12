@@ -82,7 +82,8 @@ async function fetchAllProductPublicIdsInCategory(
   rows.sort(
     (a, b) =>
       (a.display_order ?? 0) - (b.display_order ?? 0) ||
-      (a.name || "").localeCompare(b.name || "")
+      (a.name || "").localeCompare(b.name || "") ||
+      (a.public_id || "").localeCompare(b.public_id || "")
   );
   return rows.map((x) => x.public_id);
 }
@@ -199,7 +200,19 @@ export default function ProductsPage() {
     if (filters.price_min) params.price_min = filters.price_min;
     if (filters.price_max) params.price_max = filters.price_max;
     if (filters.search) params.search = filters.search;
-    if (filters.ordering) params.ordering = filters.ordering;
+    if (filters.ordering) {
+      params.ordering = filters.ordering;
+    } else if (
+      filters.category &&
+      !filters.search &&
+      !filters.status &&
+      !filters.prepayment_type &&
+      !filters.price_min &&
+      !filters.price_max
+    ) {
+      // List must match display_order so drag-reorder matches fetchAllProductPublicIdsInCategory.
+      params.ordering = "display_order";
+    }
     api
       .get<PaginatedResponse<Product>>("admin/products/", {
         params,
@@ -273,7 +286,7 @@ export default function ProductsPage() {
     if (filters.prepayment_type) return false;
     if (filters.price_min || filters.price_max) return false;
     const ord = filters.ordering;
-    if (ord && ord !== "newest") return false;
+    if (ord && ord !== "display_order") return false;
     if (products.length < 2) return false;
     const cats = new Set(
       products.map((p) => p.category_public_id).filter(Boolean)
