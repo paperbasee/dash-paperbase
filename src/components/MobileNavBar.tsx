@@ -5,7 +5,6 @@ import { History, Menu, Search } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { useSearchModal } from "@/context/SearchModalContext";
 import { Button } from "@/components/ui/button";
-import NotificationDropdown from "@/components/NotificationDropdown";
 import { cn } from "@/lib/utils";
 
 interface MobileNavBarProps {
@@ -33,12 +32,6 @@ export default function MobileNavBar({ onMenuClick }: MobileNavBarProps) {
         <Menu className="size-5" />
       </Button>
       <div className="flex items-center gap-1 -mr-2">
-        <a
-          href="https://docs.paperbase.me"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-        </a>
         <Button
           variant="ghost"
           size="icon"
@@ -58,7 +51,6 @@ export default function MobileNavBar({ onMenuClick }: MobileNavBarProps) {
             <History className="size-5" />
           </Link>
         </Button>
-        <NotificationDropdown />
       </div>
     </div>
   );

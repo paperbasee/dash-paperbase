@@ -3,13 +3,7 @@
 import { useTranslations } from "next-intl";
 import { Lock } from "lucide-react";
 import { SettingsSectionBody, settingsSectionSurfaceClassName } from "../SettingsSectionBody";
-
-type NotificationPrefs = {
-  orders: boolean;
-  supportTickets: boolean;
-  emailMeOnOrderReceived: boolean;
-  emailCustomerOnOrderConfirmed: boolean;
-};
+import type { EmailNotificationPrefs } from "../useSettingsPageController";
 
 export default function NotificationsSection({
   hidden,
@@ -20,8 +14,8 @@ export default function NotificationsSection({
   emailPrefsSaving,
 }: {
   hidden: boolean;
-  notificationPrefs: NotificationPrefs;
-  onUpdatePref: (key: keyof NotificationPrefs, value: boolean) => void;
+  notificationPrefs: EmailNotificationPrefs;
+  onUpdatePref: (key: keyof EmailNotificationPrefs, value: boolean) => void;
   orderEmailNotificationsEnabled: boolean;
   orderEmailFeatureLoading: boolean;
   emailPrefsSaving: boolean;
@@ -43,65 +37,42 @@ export default function NotificationsSection({
           <p className="text-sm text-muted-foreground">{t("notifications.subtitle")}</p>
         </div>
 
-        <div className="space-y-3">
-          <label className="flex items-center justify-between gap-4 text-sm">
-            <span className="text-foreground">{t("notifications.orders")}</span>
-            <input type="checkbox" className="form-checkbox" checked={notificationPrefs.orders} onChange={(e) => onUpdatePref("orders", e.target.checked)} />
-          </label>
+        {!orderEmailFeatureLoading && !orderEmailNotificationsEnabled && (
+          <span className="inline-flex items-center gap-1 rounded-tooltip border border-border bg-muted/50 px-2 py-0.5 text-xs text-muted-foreground">
+            <Lock className="size-3 shrink-0" aria-hidden />
+            {t("notifications.premium")}
+          </span>
+        )}
+        <p className="mb-3 text-xs text-muted-foreground">{t("notifications.emailHint")}</p>
 
-          <label className="flex items-center justify-between gap-4 text-sm">
-            <span className="text-foreground">{t("notifications.supportTickets")}</span>
+        <div className="space-y-3">
+          <label
+            className={`flex items-center justify-between gap-4 text-sm ${emailLocked ? "cursor-not-allowed opacity-70" : ""}`}
+          >
+            <span className="text-foreground">{t("notifications.emailOwnerOnOrder")}</span>
             <input
               type="checkbox"
               className="form-checkbox"
-              checked={notificationPrefs.supportTickets}
-              onChange={(e) => onUpdatePref("supportTickets", e.target.checked)}
+              disabled={emailLocked}
+              checked={notificationPrefs.emailMeOnOrderReceived}
+              onChange={(e) => onUpdatePref("emailMeOnOrderReceived", e.target.checked)}
             />
           </label>
-        </div>
 
-        <div className="border-t border-border pt-4">
-          <div className="flex flex-wrap items-center gap-2">
-            <label className="text-sm font-medium text-foreground">{t("notifications.emailSection")}</label>
-            {!orderEmailFeatureLoading && !orderEmailNotificationsEnabled && (
-              <span className="inline-flex items-center gap-1 rounded-tooltip border border-border bg-muted/50 px-2 py-0.5 text-xs text-muted-foreground">
-                <Lock className="size-3 shrink-0" aria-hidden />
-                {t("notifications.premium")}
-              </span>
-            )}
-          </div>
-          <p className="mb-3 text-xs text-muted-foreground">{t("notifications.emailHint")}</p>
-
-          <div className="space-y-3">
-            <label
-              className={`flex items-center justify-between gap-4 text-sm ${emailLocked ? "cursor-not-allowed opacity-70" : ""}`}
-            >
-              <span className="text-foreground">{t("notifications.emailOwnerOnOrder")}</span>
-              <input
-                type="checkbox"
-                className="form-checkbox"
-                disabled={emailLocked}
-                checked={notificationPrefs.emailMeOnOrderReceived}
-                onChange={(e) => onUpdatePref("emailMeOnOrderReceived", e.target.checked)}
-              />
-            </label>
-
-            <label
-              className={`flex items-center justify-between gap-4 text-sm ${emailLocked ? "cursor-not-allowed opacity-70" : ""}`}
-            >
-              <span className="text-foreground">{t("notifications.emailCustomerCourier")}</span>
-              <input
-                type="checkbox"
-                className="form-checkbox"
-                disabled={emailLocked}
-                checked={notificationPrefs.emailCustomerOnOrderConfirmed}
-                onChange={(e) => onUpdatePref("emailCustomerOnOrderConfirmed", e.target.checked)}
-              />
-            </label>
-          </div>
+          <label
+            className={`flex items-center justify-between gap-4 text-sm ${emailLocked ? "cursor-not-allowed opacity-70" : ""}`}
+          >
+            <span className="text-foreground">{t("notifications.emailCustomerCourier")}</span>
+            <input
+              type="checkbox"
+              className="form-checkbox"
+              disabled={emailLocked}
+              checked={notificationPrefs.emailCustomerOnOrderConfirmed}
+              onChange={(e) => onUpdatePref("emailCustomerOnOrderConfirmed", e.target.checked)}
+            />
+          </label>
         </div>
       </SettingsSectionBody>
     </section>
   );
 }
-

@@ -21,7 +21,6 @@
     "attributes": "অ্যাট্রিবিউট",
     "variants": "ভেরিয়েন্ট",
     "shipping": "শিপিং",
-    "notificationsFeed": "নোটিফিকেশন",
     "activities": "কার্যকলাপ",
     "cta": "CTA",
     "banners": "ব্যানার",
@@ -92,8 +91,7 @@
     "catalog": "ক্যাটালগ",
     "marketing": "মার্কেটিং",
     "more": "আরও",
-    "navigation": "নেভিগেশন",
-    "notifications_feed": "নোটিফিকেশন"
+    "navigation": "নেভিগেশন"
   },
   "analyticsPage": {
     "metrics": {
@@ -837,13 +835,6 @@
     "trashRestoreSelected": "নির্বাচিত পুনরুদ্ধার ({count})",
     "trashBulkConfirmRestore": "{count, plural, one {এই আইটেমটি স্টোরে ফিরিয়ে আনবেন?} other {#টি আইটেম স্টোরে ফিরিয়ে আনবেন?}}",
     "trashBulkRestoreSuccess": "{count}টি আইটেম পুনরুদ্ধার হয়েছে।",
-    "notificationsFeedTitle": "নোটিফিকেশন",
-    "notificationsCountInParens": "({count})",
-    "notificationsMarkAllRead": "সব পঠিত চিহ্নিত করুন",
-    "notificationsEmpty": "আপনি আপ টু ডেট। এখনও কোনো নোটিফিকেশন নেই।",
-    "notificationsManageTitle": "নোটিফিকেশন পরিচালনা",
-    "notificationsDeleteThis": "এই নোটিফিকেশন মুছুন",
-    "notificationsDeleteAll": "সব নির্বাচন ও মুছুন",
 
     "toastTitleOrdersFailedToLoad": "অর্ডার লোড হয়নি",
     "toastDescOrdersFailedToLoad": "অর্ডার তালিকা আনা যায়নি। ইন্টারনেট সংযোগ পরীক্ষা করে রিফ্রেশ করুন।",
@@ -1101,9 +1092,6 @@
     "toastTitleVerificationFailed": "যাচাই ব্যর্থ",
     "toastDescVerificationFailed": "কোডটি ভুল বা মেয়াদোত্তীর্ণ। নতুন কোড অনুরোধ করুন।",
 
-    "toastTitleNotificationsUnavailable": "নোটিফিকেশন পাওয়া যাচ্ছে না",
-    "toastDescNotificationsUnavailable": "অপঠিত নোটিফিকেশন কাউন্ট সার্ভার থেকে সিঙ্ক করা যায়নি।",
-
     "toastTitleSessionVerificationFailed": "সেশন যাচাই ব্যর্থ",
     "toastDescSessionVerificationFailed": "আপনার প্রোফাইল রিফ্রেশ করা যায়নি। আবার সাইন ইন করতে হতে পারে।",
 
@@ -1155,11 +1143,7 @@
   "mobileNav": {
     "openMenu": "মেনু খুলুন",
     "searchAria": "খোঁজ",
-    "activitiesAria": "কার্যকলাপ",
-    "docsAria": "ডকুমেন্টেশন"
-  },
-  "notification": {
-    "aria": "নোটিফিকেশন"
+    "activitiesAria": "কার্যকলাপ"
   },
   "systemBanner": {
     "dismissAria": "ঘোষণা বন্ধ করুন"
@@ -1652,11 +1636,8 @@
       "apiKeyCopyFailed": "API কী কপি করা যায়নি। ব্রাউজারের অনুমতি দেখুন।"
     },
     "notifications": {
-      "heading": "নোটিফিকেশন পছন্দ",
-      "subtitle": "কোন ঘটনায় উপরের বারে নোটিফিকেশন হবে তা বেছে নিন।",
-      "orders": "অর্ডার",
-      "supportTickets": "সাপোর্ট টিকিট",
-      "emailSection": "ইমেইল নোটিফিকেশন",
+      "heading": "ইমেইল নোটিফিকেশন",
+      "subtitle": "অর্ডার ইভেন্টে কখন ইমেইল যাবে তা নিয়ন্ত্রণ করুন।",
       "premium": "প্রিমিয়াম",
       "emailHint": "অর্ডার ইভেন্টে কখন ইমেইল যাবে তা নিয়ন্ত্রণ করুন। অর্ডার ইমেইল সতর্কতা প্রিমিয়াম ফিচার।",
       "emailOwnerOnOrder": "অর্ডার পেলে আমাকে ইমেইল করুন",

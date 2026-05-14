@@ -7,10 +7,8 @@ import { History } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { BrandingProvider } from "@/context/BrandingContext";
 import { SearchModalProvider } from "@/context/SearchModalContext";
-import { NotificationProvider } from "@/context/NotificationContext";
 import Sidebar, { SidebarContent } from "@/components/Sidebar";
 import MobileNavBar from "@/components/MobileNavBar";
-import NotificationDropdown from "@/components/NotificationDropdown";
 import SystemNotificationBanner from "@/components/system/SystemNotificationBanner";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
@@ -229,7 +227,7 @@ export default function DashboardLayoutClient({
   return (
     <BrandingProvider>
       <SearchModalProvider>
-        <NotificationProvider>
+        <>
           {showTopBannerStrip && subscriptionUiState ? (
             <div
               className="z-[60] flex flex-col md:fixed md:inset-x-0 md:top-0"
@@ -377,13 +375,6 @@ export default function DashboardLayoutClient({
                         <History className="size-5" />
                       </Button>
                     </Link>
-                    <a
-                      href="https://docs.paperbase.me"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                    </a>
-                    <NotificationDropdown />
                   </div>
                 </div>
               </div>
@@ -395,7 +386,7 @@ export default function DashboardLayoutClient({
               </main>
             </div>
           </div>
-        </NotificationProvider>
+        </>
       </SearchModalProvider>
     </BrandingProvider>
   );

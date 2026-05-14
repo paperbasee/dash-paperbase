@@ -21,7 +21,6 @@
     "attributes": "Attributes",
     "variants": "Variants",
     "shipping": "Shipping",
-    "notificationsFeed": "Notifications",
     "activities": "Activities",
     "cta": "CTA",
     "banners": "Banners",
@@ -92,8 +91,7 @@
     "catalog": "Catalog",
     "marketing": "Marketing",
     "more": "More",
-    "navigation": "Navigation",
-    "notifications_feed": "Notifications"
+    "navigation": "Navigation"
   },
   "analyticsPage": {
     "metrics": {
@@ -837,13 +835,6 @@
     "trashRestoreSelected": "Restore selected ({count})",
     "trashBulkConfirmRestore": "{count, plural, one {Restore this item to your store?} other {Restore # items to your store?}}",
     "trashBulkRestoreSuccess": "{count} item(s) restored.",
-    "notificationsFeedTitle": "Notifications",
-    "notificationsCountInParens": "({count})",
-    "notificationsMarkAllRead": "Mark all as read",
-    "notificationsEmpty": "You're all caught up. No notifications yet.",
-    "notificationsManageTitle": "Manage notification",
-    "notificationsDeleteThis": "Delete this notification",
-    "notificationsDeleteAll": "Select all & delete",
 
     "toastTitleOrdersFailedToLoad": "Orders failed to load",
     "toastDescOrdersFailedToLoad": "The order list could not be fetched. Check your connection and refresh.",
@@ -1101,9 +1092,6 @@
     "toastTitleVerificationFailed": "Verification failed",
     "toastDescVerificationFailed": "The code entered was invalid or has expired. Request a new one.",
 
-    "toastTitleNotificationsUnavailable": "Notifications unavailable",
-    "toastDescNotificationsUnavailable": "Unread notification counts could not be synced from the server.",
-
     "toastTitleSessionVerificationFailed": "Session verification failed",
     "toastDescSessionVerificationFailed": "Your profile could not be refreshed. You may need to sign in again.",
 
@@ -1155,11 +1143,7 @@
   "mobileNav": {
     "openMenu": "Open menu",
     "searchAria": "Search",
-    "activitiesAria": "Activities",
-    "docsAria": "Documentation"
-  },
-  "notification": {
-    "aria": "Notifications"
+    "activitiesAria": "Activities"
   },
   "systemBanner": {
     "dismissAria": "Dismiss announcement"
@@ -1652,11 +1636,8 @@
       "apiKeyCopyFailed": "Could not copy API key. Check browser permissions."
     },
     "notifications": {
-      "heading": "Notification preferences",
-      "subtitle": "Choose which events should generate notifications in the top bar.",
-      "orders": "Orders",
-      "supportTickets": "Support tickets",
-      "emailSection": "Email notifications",
+      "heading": "Email notifications",
+      "subtitle": "Control when emails are sent for order events.",
       "premium": "Premium",
       "emailHint": "Control when emails are sent for order events. Order email alerts are a Premium feature.",
       "emailOwnerOnOrder": "Email me when an order is received",

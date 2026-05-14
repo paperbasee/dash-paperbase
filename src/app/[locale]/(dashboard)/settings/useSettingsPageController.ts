@@ -10,19 +10,12 @@ import { useAccountSettings } from "./useAccountSettings";
 import { useStoreSettings } from "./useStoreSettings";
 import type { DynamicFieldsMessage } from "@/components/DynamicFieldsPanel";
 
-const NOTIFICATION_PREFS_KEY = "paperbase_notification_prefs";
-const LEGACY_NOTIFICATION_PREFS_KEY = "akkho_notification_prefs";
-
-type NotificationPrefs = {
-  orders: boolean;
-  supportTickets: boolean;
+export type EmailNotificationPrefs = {
   emailMeOnOrderReceived: boolean;
   emailCustomerOnOrderConfirmed: boolean;
 };
 
-const defaultPrefs: NotificationPrefs = {
-  orders: true,
-  supportTickets: true,
+const defaultPrefs: EmailNotificationPrefs = {
   emailMeOnOrderReceived: false,
   emailCustomerOnOrderConfirmed: false,
 };
@@ -50,34 +43,8 @@ export default function useSettingsPageController() {
   useAutoExpire(dynamicFieldsMessage, setDynamicFieldsMessage);
 
   const [notificationPrefs, setNotificationPrefs] =
-    useState<NotificationPrefs>(defaultPrefs);
+    useState<EmailNotificationPrefs>(defaultPrefs);
   const [emailPrefsSaving, setEmailPrefsSaving] = useState(false);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    try {
-      if (
-        window.localStorage.getItem(NOTIFICATION_PREFS_KEY) == null &&
-        window.localStorage.getItem(LEGACY_NOTIFICATION_PREFS_KEY) != null
-      ) {
-        window.localStorage.setItem(
-          NOTIFICATION_PREFS_KEY,
-          window.localStorage.getItem(LEGACY_NOTIFICATION_PREFS_KEY) ?? "",
-        );
-        window.localStorage.removeItem(LEGACY_NOTIFICATION_PREFS_KEY);
-      }
-      const raw = window.localStorage.getItem(NOTIFICATION_PREFS_KEY);
-      if (!raw) return;
-      const parsed = JSON.parse(raw) as Partial<NotificationPrefs>;
-      setNotificationPrefs((prev) => ({
-        ...prev,
-        orders: parsed.orders ?? prev.orders,
-        supportTickets: parsed.supportTickets ?? prev.supportTickets,
-      }));
-    } catch {
-      // ignore and keep defaults
-    }
-  }, []);
 
   useEffect(() => {
     if (isBrandingLoading || isBrandingValidating || !branding) return;
@@ -107,7 +74,7 @@ export default function useSettingsPageController() {
   }, [isBrandingLoading, isBrandingValidating, branding]);
 
   const updateEmailNotificationPref = useCallback(
-    async (key: "emailMeOnOrderReceived" | "emailCustomerOnOrderConfirmed", value: boolean) => {
+    async (key: keyof EmailNotificationPrefs, value: boolean) => {
       if (!orderEmailNotificationsEnabled) return;
       const patchKey =
         key === "emailMeOnOrderReceived"
@@ -126,24 +93,8 @@ export default function useSettingsPageController() {
     [orderEmailNotificationsEnabled],
   );
 
-  function updateNotificationPref(key: keyof NotificationPrefs, value: boolean) {
-    if (key === "emailMeOnOrderReceived" || key === "emailCustomerOnOrderConfirmed") {
-      void updateEmailNotificationPref(key, value);
-      return;
-    }
-    setNotificationPrefs((prev) => {
-      const next = { ...prev, [key]: value };
-      if (typeof window !== "undefined") {
-        window.localStorage.setItem(
-          NOTIFICATION_PREFS_KEY,
-          JSON.stringify({
-            orders: next.orders,
-            supportTickets: next.supportTickets,
-          }),
-        );
-      }
-      return next;
-    });
+  function updateNotificationPref(key: keyof EmailNotificationPrefs, value: boolean) {
+    void updateEmailNotificationPref(key, value);
   }
 
   const isLoading = isBrandingLoading && !branding;
