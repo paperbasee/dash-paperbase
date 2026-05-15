@@ -6,6 +6,7 @@ import { Link, usePathname, useRouter } from "@/i18n/navigation";
 import { History } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { BrandingProvider } from "@/context/BrandingContext";
+import { EnabledAppsProvider } from "@/context/EnabledAppsContext";
 import { SearchModalProvider } from "@/context/SearchModalContext";
 import Sidebar, { SidebarContent } from "@/components/Sidebar";
 import MobileNavBar from "@/components/MobileNavBar";
@@ -226,6 +227,7 @@ export default function DashboardLayoutClient({
 
   return (
     <BrandingProvider>
+      <EnabledAppsProvider>
       <SearchModalProvider>
         <>
           {showTopBannerStrip && subscriptionUiState ? (
@@ -388,6 +390,7 @@ export default function DashboardLayoutClient({
           </div>
         </>
       </SearchModalProvider>
+      </EnabledAppsProvider>
     </BrandingProvider>
   );
 }

@@ -3,8 +3,9 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 import { useLocale } from "next-intl";
 import api from "@/lib/api";
-import type { Banner, Blog, DashboardStats, PaginatedResponse } from "@/types";
+import type { DashboardStats } from "@/types";
 import { formatCountLocalized } from "@/lib/locale-digits";
+import { useEnabledApps } from "@/hooks/useEnabledApps";
 
 const REFETCH_MS = 60_000; // 60 seconds
 const FOREGROUND_REFETCH_COOLDOWN_MS = 5_000;
@@ -17,6 +18,7 @@ function formatCountBase(n: number): string {
 
 export function useNavCounts() {
   const locale = useLocale();
+  const { enabledOptional } = useEnabledApps();
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
   const inFlightRef = useRef(false);
@@ -30,28 +32,16 @@ export function useNavCounts() {
   const fetchCounts = useCallback(() => {
     if (inFlightRef.current) return;
     inFlightRef.current = true;
-    Promise.all([
-      api.get<DashboardStats>("admin/stats/"),
-      api.get<PaginatedResponse<Banner> | Banner[]>("admin/banners/?page_size=1"),
-      api.get<PaginatedResponse<Blog> | Blog[]>("admin/blogs/?page_size=1"),
-    ])
-      .then(([statsRes, bannersRes, blogsRes]) =>
-        setStats({
-          ...statsRes.data,
-          banners_count: Array.isArray(bannersRes.data)
-            ? bannersRes.data.length
-            : bannersRes.data.count ?? 0,
-          blogs_count: Array.isArray(blogsRes.data)
-            ? blogsRes.data.length
-            : blogsRes.data.count ?? 0,
-        })
-      )
-      .catch(() => setStats(null))
+
+    api
+      .get<DashboardStats>("admin/stats/")
+      .then((res) => setStats(res.data))
+      .catch(() => setStats((prev) => prev))
       .finally(() => {
         setLoading(false);
         inFlightRef.current = false;
       });
-  }, []);
+  }, [enabledOptional]);
 
   const shouldSkipBackgroundFetch = () =>
     (typeof document !== "undefined" && document.hidden) ||
@@ -118,4 +108,3 @@ export function useNavCounts() {
     formatCount,
   };
 }
-
