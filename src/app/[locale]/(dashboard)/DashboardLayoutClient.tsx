@@ -26,6 +26,7 @@ import SubscriptionAccessBlock from "@/components/auth/SubscriptionAccessBlock";
 import PaymentSubmittedAwaitingBanner from "@/components/auth/PaymentSubmittedAwaitingBanner";
 import SubscriptionExpirationBanner from "@/components/auth/SubscriptionExpirationBanner";
 import { Skeleton } from "@/components/ui/skeleton";
+import { DashboardSidebarSkeleton } from "@/components/skeletons/dashboard-skeletons";
 
 const DASHBOARD_SERVER_UNREACHABLE_KEY = "paperbase_dashboard_server_unreachable";
 
@@ -195,6 +196,8 @@ export default function DashboardLayoutClient({
         className="min-h-screen bg-background md:pt-[var(--subscription-banner-offset,0px)]"
         style={{ "--subscription-banner-offset": subscriptionBannerOffset } as CSSProperties}
       >
+        <DashboardSidebarSkeleton collapsed={collapsed} />
+
         <div
           className={cn(
             "min-h-screen transition-[margin,padding-top] duration-300",

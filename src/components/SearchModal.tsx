@@ -118,6 +118,7 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
           )}
         />
         <Dialog.Content
+          onOpenAutoFocus={(event) => event.preventDefault()}
           className={cn(
             "fixed z-50 flex min-h-0 flex-col overflow-hidden bg-background p-0 gap-0",
             "inset-0 border-0 shadow-none max-h-[100dvh]",

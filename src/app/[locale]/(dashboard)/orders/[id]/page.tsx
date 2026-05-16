@@ -8,8 +8,8 @@ import {
   Undo2,
   CreditCard,
   User,
-  Home,
 } from "lucide-react";
+import { AddressBookIcon } from "@phosphor-icons/react";
 import api from "@/lib/api";
 import { useBranding } from "@/context/BrandingContext";
 import {
@@ -1280,7 +1280,7 @@ export default function OrderDetailPage() {
                 </div>
                 <div className="flex items-start gap-3">
                   <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-card bg-muted">
-                    <Home className="size-5 text-muted-foreground" />
+                    <AddressBookIcon className="size-5 text-muted-foreground" aria-hidden />
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">

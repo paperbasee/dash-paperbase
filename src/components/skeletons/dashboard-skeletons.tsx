@@ -1,7 +1,93 @@
 "use client";
 
 import { Skeleton } from "@/components/ui/skeleton";
+import { cn } from "@/lib/utils";
 import { useAuth } from "@/context/AuthContext";
+
+/** Desktop sidebar placeholder while dashboard auth / me profile is loading. */
+export function DashboardSidebarSkeleton({ collapsed = false }: { collapsed?: boolean }) {
+  const { isLoggingOut } = useAuth();
+  if (isLoggingOut) return null;
+
+  const navRowCount = collapsed ? 6 : 8;
+
+  return (
+    <aside
+      className={cn(
+        "fixed left-0 top-[var(--subscription-banner-offset,0px)] z-40 hidden h-[calc(100vh-var(--subscription-banner-offset,0px))] flex-col border-r border-border bg-background transition-[width] duration-300 md:flex",
+        collapsed ? "w-16" : "w-72"
+      )}
+      aria-hidden
+    >
+      <div
+        className={cn(
+          "flex shrink-0 items-center gap-2 border-b border-border",
+          collapsed ? "justify-center px-2" : "justify-between px-4"
+        )}
+        style={{ height: "var(--header-height)" }}
+      >
+        {collapsed ? (
+          <Skeleton className="size-9 rounded-xs" />
+        ) : (
+          <>
+            <Skeleton className="size-10 shrink-0 rounded-full" />
+            <div className="min-w-0 flex-1 space-y-1.5">
+              <Skeleton className="h-5 w-36 rounded-xs" />
+              <Skeleton className="h-3 w-24 rounded-xs" />
+            </div>
+            <Skeleton className="size-8 shrink-0 rounded-xs" />
+          </>
+        )}
+      </div>
+
+      {!collapsed ? (
+        <div className="hidden px-4 py-4 md:block">
+          <Skeleton className="h-10 w-full rounded-xs" />
+        </div>
+      ) : null}
+
+      <nav
+        className={cn(
+          "min-h-0 flex-1 space-y-1 overflow-y-auto pb-6",
+          collapsed ? "px-2 pt-2" : "px-4 pt-2"
+        )}
+      >
+        {Array.from({ length: navRowCount }).map((_, i) => (
+          <div
+            key={i}
+            className={cn(
+              "flex items-center gap-3",
+              collapsed ? "justify-center py-2" : "px-2 py-2"
+            )}
+          >
+            <Skeleton className={cn("shrink-0 rounded-xs", collapsed ? "size-9" : "size-5")} />
+            {!collapsed ? <Skeleton className="h-4 max-w-[9rem] flex-1 rounded-xs" /> : null}
+          </div>
+        ))}
+      </nav>
+
+      <div
+        className={cn(
+          "shrink-0 border-t border-border p-3",
+          collapsed ? "flex justify-center" : "px-4"
+        )}
+      >
+        {collapsed ? (
+          <Skeleton className="size-9 rounded-full" />
+        ) : (
+          <div className="flex w-full items-center gap-3">
+            <Skeleton className="size-9 shrink-0 rounded-full" />
+            <div className="min-w-0 flex-1 space-y-1.5">
+              <Skeleton className="h-4 w-28 rounded-xs" />
+              <Skeleton className="h-3 w-36 rounded-xs" />
+            </div>
+            <Skeleton className="size-4 shrink-0 rounded-xs" />
+          </div>
+        )}
+      </div>
+    </aside>
+  );
+}
 
 export function DashboardTableSkeleton({
   columns = 6,

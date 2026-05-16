@@ -119,6 +119,7 @@ export interface Order {
   courier_provider?: string;
   courier_consignment_id?: string;
   sent_to_courier?: boolean;
+  courier_dispatch_pending?: boolean;
   customer_confirmation_sent_at?: string | null;
   delivery_status:
     | "not_dispatched"

@@ -2,9 +2,11 @@
 
 import { useMemo } from "react";
 import { AlertTriangle } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogDescription,
   DialogHeader,
@@ -268,13 +270,25 @@ export function FraudCheckDialog({
   errorText,
   warningText,
 }: FraudCheckDialogProps) {
+  const tCommon = useTranslations("common");
   const summary = useMemo(() => parseSummary(response), [response]);
   const couriers = useMemo(() => parseCouriers(response), [response]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[calc(100vh-2rem)] w-[calc(100vw-2rem)] max-w-2xl overflow-y-auto sm:w-full">
-        <DialogHeader>
+      <DialogContent
+        showCloseButton={false}
+        className="max-h-[calc(100vh-2rem)] w-[calc(100vw-2rem)] max-w-2xl overflow-y-auto sm:w-full"
+      >
+        <DialogClose
+          className={cn(
+            "absolute right-4 top-4 z-10 text-sm font-medium text-muted-foreground transition-colors",
+            "hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+          )}
+        >
+          {tCommon("close")}
+        </DialogClose>
+        <DialogHeader className="pr-14">
           <DialogTitle>Fraud Check</DialogTitle>
           <DialogDescription>
             {phone ? `Phone: ${phone}` : "Phone: —"}

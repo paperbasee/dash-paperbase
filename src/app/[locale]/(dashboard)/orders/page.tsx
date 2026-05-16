@@ -47,6 +47,7 @@ import { notify, normalizeError } from "@/notifications";
 import { DashboardTableSkeleton } from "@/components/skeletons/dashboard-skeletons";
 import { BelowFoldScrollHint } from "@/components/BelowFoldScrollHint";
 
+import { OrderPreviewTriggerButton } from "@/components/orders/order-preview";
 import { FraudCheckButton } from "./_components/FraudCheckButton";
 import type { FraudCheckApiOk, FraudCheckState } from "./_components/types";
 import { useFeatures } from "@/hooks/useFeatures";
@@ -62,6 +63,12 @@ const FraudCheckDialog = dynamic(
   { ssr: false, loading: () => null }
 );
 
+const OrderPreviewDialog = dynamic(
+  () =>
+    import("@/components/orders/order-preview").then((mod) => mod.OrderPreviewDialog),
+  { ssr: false, loading: () => null }
+);
+
 type OrderExportPollResponse = {
   status: string;
   progress: number;
@@ -72,6 +79,7 @@ type OrderExportPollResponse = {
 
 /** Shown after dispatch: Steadfast consignment id only (not provider name). */
 function courierCell(order: Order): string {
+  if (order.courier_dispatch_pending) return "…";
   if (!order.sent_to_courier) return "—";
   const c = (order.courier_consignment_id || "").trim();
   return c || "—";
@@ -233,6 +241,10 @@ export default function OrdersPage() {
     {}
   );
   const [fraudDialogOrderId, setFraudDialogOrderId] = useState<string | null>(null);
+  const [previewOrder, setPreviewOrder] = useState<{
+    public_id: string;
+    order_number: string;
+  } | null>(null);
   const { hasFeature } = useFeatures();
   const canFraudCheck = hasFeature("fraud_check");
   const { meProfile } = useAuth();
@@ -770,7 +782,13 @@ export default function OrdersPage() {
   }
 
   async function handleSendToCourierRow(order: Order) {
-    if (order.status !== "confirmed" || order.sent_to_courier) return;
+    if (
+      order.status !== "confirmed" ||
+      order.sent_to_courier ||
+      order.courier_dispatch_pending
+    ) {
+      return;
+    }
     setCourierSendingId(order.public_id);
     try {
       const { data } = await api.post<Order>(
@@ -1138,10 +1156,23 @@ export default function OrdersPage() {
                             })}
                           />
                         </td>
-                        <td
-                          className={`px-4 py-3 whitespace-nowrap font-medium text-foreground ${numClass}`}
-                        >
-                          {order.order_number}
+                        <td className="px-4 py-3 whitespace-nowrap">
+                          <div className="flex items-center gap-3">
+                            <OrderPreviewTriggerButton
+                              orderNumber={String(order.order_number)}
+                              onClick={() =>
+                                setPreviewOrder({
+                                  public_id: order.public_id,
+                                  order_number: String(order.order_number),
+                                })
+                              }
+                            />
+                            <span
+                              className={`text-sm font-medium leading-none text-foreground ${numClass}`}
+                            >
+                              {order.order_number}
+                            </span>
+                          </div>
                         </td>
                         <td className="px-4 py-3 text-foreground whitespace-nowrap">
                           {order.shipping_name || "—"}
@@ -1254,7 +1285,9 @@ export default function OrdersPage() {
                         <td
                           className={`px-4 py-3 text-muted-foreground whitespace-nowrap max-w-[220px] ${numClass}`}
                         >
-                          {order.status === "confirmed" && !order.sent_to_courier ? (
+                          {order.status === "confirmed" &&
+                          !order.sent_to_courier &&
+                          !order.courier_dispatch_pending ? (
                             <Button
                               type="button"
                               variant="outline"
@@ -1275,6 +1308,13 @@ export default function OrdersPage() {
                                 ? tPages("ordersSending")
                                 : tPages("ordersSendToCourier")}
                             </Button>
+                          ) : order.courier_dispatch_pending ? (
+                            <span className="text-muted-foreground text-xs">
+                              {courierSendingId === order.public_id ||
+                              order.courier_dispatch_pending
+                                ? tPages("ordersSending")
+                                : courierCell(order)}
+                            </span>
                           ) : (
                             <span className="block truncate" title={courierCell(order)}>
                               {courierCell(order)}
@@ -1291,6 +1331,15 @@ export default function OrdersPage() {
               </tbody>
             </table>
           </div>
+
+          <OrderPreviewDialog
+            open={Boolean(previewOrder)}
+            onOpenChange={(open) => {
+              if (!open) setPreviewOrder(null);
+            }}
+            orderPublicId={previewOrder?.public_id ?? null}
+            orderNumber={previewOrder?.order_number ?? null}
+          />
 
           <FraudCheckDialog
             open={Boolean(fraudDialogOrderId)}
