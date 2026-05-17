@@ -79,7 +79,6 @@ type OrderExportPollResponse = {
 
 /** Shown after dispatch: Steadfast consignment id only (not provider name). */
 function courierCell(order: Order): string {
-  if (order.courier_dispatch_pending) return "…";
   if (!order.sent_to_courier) return "—";
   const c = (order.courier_consignment_id || "").trim();
   return c || "—";
@@ -235,6 +234,9 @@ export default function OrdersPage() {
   const [statusUpdatingId, setStatusUpdatingId] = useState<string | null>(null);
   const [flagUpdatingId, setFlagUpdatingId] = useState<string | null>(null);
   const [courierSendingId, setCourierSendingId] = useState<string | null>(null);
+  const [pendingCourierDispatchIds, setPendingCourierDispatchIds] = useState<Set<string>>(
+    new Set()
+  );
   const setScrollContainer = useHorizontalWheelScroll<HTMLDivElement>();
 
   const [fraudByOrderId, setFraudByOrderId] = useState<Record<string, FraudCheckState>>(
@@ -292,11 +294,6 @@ export default function OrdersPage() {
     }
     return "";
   }
-
-  const statusOptionStyle: React.CSSProperties = {
-    backgroundColor: "#0b0b0c",
-    color: "#ffffff",
-  };
 
   const [isDarkTheme, setIsDarkTheme] = useState(true);
   useEffect(() => {
@@ -441,6 +438,13 @@ export default function OrdersPage() {
       })
       .then((res) => {
         setOrders(res.data.results);
+        setPendingCourierDispatchIds((prev) => {
+          const next = new Set(prev);
+          res.data.results
+            .filter((o) => o.courier_dispatch_pending)
+            .forEach((o) => next.add(o.public_id));
+          return next;
+        });
         setOrdersCount(typeof res.data.count === "number" ? res.data.count : null);
         setNextLink(res.data.next);
         setPrevLink(res.data.previous);
@@ -566,6 +570,57 @@ export default function OrdersPage() {
       if (interval) clearInterval(interval);
     };
   }, [activeExportJobId, tPages]);
+
+  useEffect(() => {
+    if (pendingCourierDispatchIds.size === 0) return;
+
+    let cancelled = false;
+
+    async function pollOrder(publicId: string) {
+      let attempts = 0;
+      while (!cancelled && attempts < 20) {
+        await new Promise((resolve) => setTimeout(resolve, 1500));
+        if (cancelled) break;
+        attempts++;
+        try {
+          const { data } = await api.get<Order>(`admin/orders/${publicId}/`);
+          if (cancelled) break;
+          setOrders((prev) => prev.map((o) => (o.public_id === publicId ? data : o)));
+          if (!data.courier_dispatch_pending) {
+            setPendingCourierDispatchIds((prev) => {
+              const next = new Set(prev);
+              next.delete(publicId);
+              return next;
+            });
+            break;
+          }
+        } catch {
+          if (cancelled) break;
+          setPendingCourierDispatchIds((prev) => {
+            const next = new Set(prev);
+            next.delete(publicId);
+            return next;
+          });
+          break;
+        }
+      }
+      if (attempts >= 20) {
+        setPendingCourierDispatchIds((prev) => {
+          const next = new Set(prev);
+          next.delete(publicId);
+          return next;
+        });
+      }
+    }
+
+    for (const publicId of pendingCourierDispatchIds) {
+      pollOrder(publicId);
+    }
+
+    return () => {
+      cancelled = true;
+    };
+  }, [pendingCourierDispatchIds]);
 
   const toggleSelect = (id: string) => {
     setGlobalSelectActive(false);
@@ -797,6 +852,9 @@ export default function OrdersPage() {
       setOrders((prev) =>
         prev.map((o) => (o.public_id === order.public_id ? data : o))
       );
+      if (data.courier_dispatch_pending) {
+        setPendingCourierDispatchIds((prev) => new Set(prev).add(order.public_id));
+      }
     } catch (err: unknown) {
       const normalized = normalizeError(err, tPages("ordersSendToCourierErrorFallback"));
       notify.error(normalized.message, {
@@ -1285,15 +1343,35 @@ export default function OrdersPage() {
                         <td
                           className={`px-4 py-3 text-muted-foreground whitespace-nowrap max-w-[220px] ${numClass}`}
                         >
-                          {order.status === "confirmed" &&
-                          !order.sent_to_courier &&
-                          !order.courier_dispatch_pending ? (
+                          {courierSendingId === order.public_id ? (
                             <Button
                               type="button"
                               variant="outline"
                               size="sm"
                               className="h-8 gap-1 px-2.5 text-xs"
-                              disabled={courierSendingId === order.public_id}
+                              disabled
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                              }}
+                              aria-label={tPages("ordersListSendCourierAria", {
+                                orderNumber: order.order_number,
+                              })}
+                            >
+                              <Truck className="size-3.5 shrink-0" />
+                              {tPages("ordersSending")}
+                            </Button>
+                          ) : pendingCourierDispatchIds.has(order.public_id) ||
+                            order.courier_dispatch_pending ? (
+                            <span className="text-muted-foreground text-xs">
+                              {tPages("ordersSending")}
+                            </span>
+                          ) : order.status === "confirmed" && !order.sent_to_courier ? (
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              className="h-8 gap-1 px-2.5 text-xs"
                               onClick={(e) => {
                                 e.preventDefault();
                                 e.stopPropagation();
@@ -1304,17 +1382,8 @@ export default function OrdersPage() {
                               })}
                             >
                               <Truck className="size-3.5 shrink-0" />
-                              {courierSendingId === order.public_id
-                                ? tPages("ordersSending")
-                                : tPages("ordersSendToCourier")}
+                              {tPages("ordersSendToCourier")}
                             </Button>
-                          ) : order.courier_dispatch_pending ? (
-                            <span className="text-muted-foreground text-xs">
-                              {courierSendingId === order.public_id ||
-                              order.courier_dispatch_pending
-                                ? tPages("ordersSending")
-                                : courierCell(order)}
-                            </span>
                           ) : (
                             <span className="block truncate" title={courierCell(order)}>
                               {courierCell(order)}

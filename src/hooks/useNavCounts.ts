@@ -11,8 +11,6 @@ const REFETCH_MS = 60_000; // 60 seconds
 const FOREGROUND_REFETCH_COOLDOWN_MS = 5_000;
 
 function formatCountBase(n: number): string {
-  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
-  if (n >= 1_000) return `${(n / 1_000).toFixed(1)}K`;
   return String(n);
 }
 
