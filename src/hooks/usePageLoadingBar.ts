@@ -8,7 +8,8 @@ import { useNavigationLoadingOptional } from "@/context/NavigationLoadingContext
 export function usePageLoadingBar(isQueryLoading: boolean): void {
   const ctx = useNavigationLoadingOptional();
   const isRestoring = useIsRestoring();
-  const showBar = isQueryLoading && !isRestoring;
+  const isJustNavigated = ctx?.isJustNavigated ?? false;
+  const showBar = isQueryLoading && !isRestoring && !isJustNavigated;
 
   useEffect(() => {
     if (!ctx) return;

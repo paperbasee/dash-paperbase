@@ -21,9 +21,11 @@ import { getPrefetchFn } from "@/lib/navigation/route-prefetch-registry";
 
 const NAVIGATION_TIMEOUT_MS = 8_000;
 const NAVIGATION_FINISH_FALLBACK_MS = 5_000;
+const NAVIGATION_COOLDOWN_MS = 300;
 
 type NavigationLoadingContextValue = {
   isNavigating: boolean;
+  isJustNavigated: boolean;
   startNavigation: (href: string, fetchFn?: () => Promise<void>) => Promise<void>;
   cancelNavigation: () => void;
   registerPageLoading: (active: boolean) => void;
@@ -54,15 +56,41 @@ export function NavigationLoadingProvider({ children }: { children: ReactNode })
   const searchParams = useSearchParams();
   const [isNavigating, setIsNavigating] = useState(false);
   const [pageLoading, setPageLoading] = useState(false);
+  const [isJustNavigated, setIsJustNavigated] = useState(false);
 
   const epochRef = useRef(0);
   const abortRef = useRef<AbortController | null>(null);
   const pageLoadingCountRef = useRef(0);
+  const justNavigatedRef = useRef(false);
+  const justNavigatedTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const clearJustNavigated = useCallback(() => {
+    if (justNavigatedTimeoutRef.current) {
+      clearTimeout(justNavigatedTimeoutRef.current);
+      justNavigatedTimeoutRef.current = null;
+    }
+    justNavigatedRef.current = false;
+    setIsJustNavigated(false);
+  }, []);
+
+  const markJustNavigated = useCallback(() => {
+    if (justNavigatedTimeoutRef.current) {
+      clearTimeout(justNavigatedTimeoutRef.current);
+    }
+    justNavigatedRef.current = true;
+    setIsJustNavigated(true);
+    justNavigatedTimeoutRef.current = setTimeout(() => {
+      justNavigatedRef.current = false;
+      setIsJustNavigated(false);
+      justNavigatedTimeoutRef.current = null;
+    }, NAVIGATION_COOLDOWN_MS);
+  }, []);
 
   const cancelNavigation = useCallback(() => {
     abortRef.current?.abort();
     abortRef.current = null;
-  }, []);
+    clearJustNavigated();
+  }, [clearJustNavigated]);
 
   const registerPageLoading = useCallback((active: boolean) => {
     if (active) {
@@ -86,12 +114,14 @@ export function NavigationLoadingProvider({ children }: { children: ReactNode })
       const controller = new AbortController();
       abortRef.current = controller;
 
+      clearJustNavigated();
       setIsNavigating(true);
 
       const finishNavigation = () => {
         if (epoch !== epochRef.current) return;
         setIsNavigating(false);
         abortRef.current = null;
+        markJustNavigated();
       };
 
       const fallbackId = window.setTimeout(
@@ -126,17 +156,24 @@ export function NavigationLoadingProvider({ children }: { children: ReactNode })
         finishNavigation();
       }
     },
-    [cancelNavigation, pathname, router, searchParams]
+    [cancelNavigation, clearJustNavigated, markJustNavigated, pathname, router, searchParams]
   );
 
   const value = useMemo(
     () => ({
       isNavigating,
+      isJustNavigated,
       startNavigation,
       cancelNavigation,
       registerPageLoading,
     }),
-    [cancelNavigation, isNavigating, registerPageLoading, startNavigation]
+    [
+      cancelNavigation,
+      isJustNavigated,
+      isNavigating,
+      registerPageLoading,
+      startNavigation,
+    ]
   );
 
   return (
