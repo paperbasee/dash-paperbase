@@ -904,7 +904,7 @@ export default function OrderDetailPage() {
               </dl>
             )}
             {!editing && order && (
-              <div className="border-t border-border pt-4 mt-2">
+              <div className="pt-4 mt-2">
                 <OrderInvoiceButton orderPublicId={order.public_id} />
               </div>
             )}
