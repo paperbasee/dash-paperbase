@@ -115,7 +115,7 @@ export default function NetworkingSection({ hidden }: { hidden: boolean }) {
     subscriptionLocked || planExpired || storeUnderReview;
   const [keys, setKeys] = useState<APIKeyRow[]>([]);
   const [loading, setLoading] = useState(true);
-  usePageLoadingBar(!hidden && loading);
+  usePageLoadingBar(!hidden && loading && keys.length === 0);
   const [newKeyName, setNewKeyName] = useState("");
   const [revealedKey, setRevealedKey] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);

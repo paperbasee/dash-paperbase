@@ -396,7 +396,7 @@ export default function CourierIntegration({
   const confirm = useConfirm();
   const [couriers, setCouriers] = useState<Courier[]>([]);
   const [loading, setLoading] = useState(true);
-  usePageLoadingBar(!panelHidden && loading);
+  usePageLoadingBar(!panelHidden && loading && couriers.length === 0);
   const [modal, setModal] = useState<CourierModal>(null);
   const [form, setForm] = useState<ConnectForm>({ ...emptyForm });
   const [saving, setSaving] = useState(false);

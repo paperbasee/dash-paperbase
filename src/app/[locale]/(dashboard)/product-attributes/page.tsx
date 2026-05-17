@@ -37,7 +37,7 @@ export default function ProductAttributesPage() {
   const confirm = useConfirm();
   const [attributes, setAttributes] = useState<ProductAttributeAdmin[]>([]);
   const [loading, setLoading] = useState(true);
-  usePageLoadingBar(loading);
+  usePageLoadingBar(loading && attributes.length === 0);
   const [error, setError] = useState(""); // kept for legacy; do not render inline
 
   const [attrEditing, setAttrEditing] = useState<string | "new" | null>(null);

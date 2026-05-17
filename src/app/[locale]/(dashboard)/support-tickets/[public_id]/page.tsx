@@ -52,7 +52,7 @@ export default function SupportTicketDetailPage() {
 
   const attachmentCount = useMemo(() => ticket?.attachments?.length ?? 0, [ticket]);
 
-  usePageLoadingBar(loading);
+  usePageLoadingBar(loading && !ticket);
 
   return (
     <div className="space-y-6">

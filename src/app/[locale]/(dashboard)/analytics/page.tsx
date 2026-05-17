@@ -58,8 +58,10 @@ export default function AnalyticsPage() {
   const [utmDimension, setUtmDimension] = useState<"source" | "medium" | "campaign">("source");
   const [utmLoading, setUtmLoading] = useState(false);
   const [loading, setLoading] = useState(true);
-  const { hasFeature, loading: featuresLoading } = useFeatures();
-  usePageLoadingBar(featuresLoading || loading);
+  const { hasFeature, loading: featuresLoading, features } = useFeatures();
+  usePageLoadingBar(
+    (featuresLoading && features == null) || (loading && overview == null)
+  );
   const hasAdvancedAnalytics = hasFeature("advanced_analytics");
 
   const mainGenRef = useRef(0);

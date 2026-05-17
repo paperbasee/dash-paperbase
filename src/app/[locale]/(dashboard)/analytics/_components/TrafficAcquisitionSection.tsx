@@ -32,7 +32,7 @@ export function TrafficAcquisitionSection({
   range: RangeOption;
   currencySymbol: string;
 }) {
-  usePageLoadingBar(utmLoading);
+  usePageLoadingBar(utmLoading && !utmData);
 
   return (
     <div className="rounded-card border border-border bg-card p-4 space-y-4">

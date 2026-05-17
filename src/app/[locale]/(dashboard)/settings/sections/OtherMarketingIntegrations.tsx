@@ -35,7 +35,7 @@ export default function OtherMarketingIntegrations({
   const confirm = useConfirm();
   const [list, setList] = useState<MarketingIntegrationType[]>([]);
   const [loading, setLoading] = useState(true);
-  usePageLoadingBar(!panelHidden && loading);
+  usePageLoadingBar(!panelHidden && loading && list.length === 0);
   const [togglingId, setTogglingId] = useState<string | null>(null);
   const [eventSavingId, setEventSavingId] = useState<string | null>(null);
   const [configurePublicId, setConfigurePublicId] = useState<string | null>(null);

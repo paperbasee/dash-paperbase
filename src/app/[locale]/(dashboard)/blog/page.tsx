@@ -35,7 +35,7 @@ export default function BlogListPage() {
   const [blogs, setBlogs] = useState<Blog[]>([]);
   const [tags, setTags] = useState<BlogTag[]>([]);
   const [loading, setLoading] = useState(true);
-  usePageLoadingBar(loading);
+  usePageLoadingBar(loading && blogs.length === 0);
   const [filtersOpen, setFiltersOpen] = useState(false);
 
   useEffect(() => {

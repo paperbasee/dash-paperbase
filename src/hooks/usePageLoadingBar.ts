@@ -16,3 +16,11 @@ export function usePageLoadingBar(isQueryLoading: boolean): void {
     return () => ctx.registerPageLoading(false);
   }, [ctx, showBar]);
 }
+
+/**
+ * Show the bar only on cold load (no data yet). Skips when React Query serves
+ * prefetched/cached data after deferred navigation; never shows for isFetching alone.
+ */
+export function useQueryPageLoadingBar(isLoading: boolean, data: unknown): void {
+  usePageLoadingBar(Boolean(isLoading && data == null));
+}

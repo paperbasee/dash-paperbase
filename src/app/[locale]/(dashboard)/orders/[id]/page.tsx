@@ -84,7 +84,7 @@ export default function OrderDetailPage() {
   const { currencySymbol } = useBranding();
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
-  usePageLoadingBar(loading);
+  usePageLoadingBar(loading && !order);
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState<EditForm>({
     shipping_name: "",

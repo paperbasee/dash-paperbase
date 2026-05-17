@@ -101,7 +101,9 @@ export default function ShippingPage() {
     [tPages],
   );
   const [loading, setLoading] = useState(true);
-  usePageLoadingBar(loading);
+  usePageLoadingBar(
+    loading && zones.length === 0 && methods.length === 0 && rates.length === 0
+  );
   const [error, setError] = useState<string>(""); // kept for legacy; do not render inline
 
   const [zones, setZones] = useState<ShippingZone[]>([]);

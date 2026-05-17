@@ -213,7 +213,7 @@ export default function BannersPage() {
   const [banners, setBanners] = useState<Banner[]>([]);
   const [bannersTotalCount, setBannersTotalCount] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
-  usePageLoadingBar(loading);
+  usePageLoadingBar(loading && banners.length === 0 && bannersTotalCount === null);
   const [editing, setEditing] = useState<string | "new" | null>(null);
   const [form, setForm] = useState<BannerForm>(emptyForm);
   const [startDate, setStartDate] = useState<Date | undefined>(undefined);

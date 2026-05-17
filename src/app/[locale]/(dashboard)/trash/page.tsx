@@ -31,7 +31,7 @@ export default function TrashPage() {
   const [count, setCount] = useState(0);
   const [hasNext, setHasNext] = useState(false);
   const [loading, setLoading] = useState(true);
-  usePageLoadingBar(loading);
+  usePageLoadingBar(loading && rows.length === 0 && count === 0);
   const [error, setError] = useState<string | null>(null);
   const [busyPublicId, setBusyPublicId] = useState<string | null>(null);
   const [selectedPublicIds, setSelectedPublicIds] = useState<Set<string>>(new Set());

@@ -34,7 +34,6 @@ export default function InventoryPage() {
   ]);
   const [inventory, setInventory] = useState<Inventory[]>([]);
   const [loading, setLoading] = useState(true);
-  usePageLoadingBar(loading);
   const [count, setCount] = useState(0);
   const [hasNext, setHasNext] = useState(false);
   /** Store-wide count of tracked rows at or below low threshold (not limited to current page). */
@@ -46,6 +45,10 @@ export default function InventoryPage() {
   const [searchInput, setSearchInput] = useState(filters.search || "");
   const debouncedSearch = useDebouncedValue(searchInput);
   const [filtersOpen, setFiltersOpen] = useState(false);
+
+  usePageLoadingBar(
+    loading && inventory.length === 0 && count === 0 && lowStockTotal === null
+  );
 
   useEffect(() => {
     setSearchInput(filters.search || "");

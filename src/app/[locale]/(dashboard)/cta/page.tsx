@@ -126,7 +126,7 @@ export default function CtaPage() {
   const confirm = useConfirm();
   const [ctas, setCtas] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
-  usePageLoadingBar(loading);
+  usePageLoadingBar(loading && ctas.length === 0);
   const [editing, setEditing] = useState<string | "new" | null>(null);
   const [form, setForm] = useState<CtaForm>(emptyForm);
   const [startDate, setStartDate] = useState<Date | undefined>(undefined);

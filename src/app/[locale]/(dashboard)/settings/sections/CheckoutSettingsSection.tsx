@@ -92,7 +92,7 @@ export default function CheckoutSettingsSection({
   const unchanged =
     loadedVariant !== null && selectedVariant === loadedVariant;
 
-  usePageLoadingBar(!hidden && loading);
+  usePageLoadingBar(!hidden && loading && loadedVariant === null);
 
   return (
     <section

@@ -109,7 +109,7 @@ export default function ActivitiesPage() {
   );
 
   const { data, loading, error } = useActivities(filters);
-  usePageLoadingBar(loading);
+  usePageLoadingBar(loading && !data);
 
   const results = data?.results ?? [];
   const count = data?.count ?? 0;

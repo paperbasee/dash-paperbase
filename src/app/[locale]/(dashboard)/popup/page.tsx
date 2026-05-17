@@ -89,7 +89,7 @@ export default function PopupEditorPage() {
   const numClass = numberTextClass(locale);
 
   const [loading, setLoading] = useState(true);
-  usePageLoadingBar(loading);
+  usePageLoadingBar(loading && popup == null);
   const [popup, setPopup] = useState<any | null>(null);
   const [editing, setEditing] = useState<string | "new" | null>(null);
   const [form, setForm] = useState<PopupForm>(emptyForm);

@@ -48,7 +48,7 @@ export default function EditBlogPage({
     };
   }, [public_id]);
 
-  usePageLoadingBar(loading);
+  usePageLoadingBar(loading && !blog);
 
   if (loading) {
     return null;
