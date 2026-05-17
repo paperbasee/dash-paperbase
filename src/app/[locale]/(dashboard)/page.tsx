@@ -7,15 +7,16 @@ import DashboardBarChart from "@/components/DashboardBarChart";
 import DateRangeFilter, {
   DateRangeValue,
 } from "@/components/DateRangeFilter";
-import { useDashboardAnalytics } from "@/hooks/useDashboardAnalytics";
-import { useBrandingProfileSWR } from "@/hooks/useBrandingProfileSWR";
+import { useDashboardAnalyticsQuery } from "@/hooks/useDashboardAnalyticsQuery";
+import { usePageLoadingBar } from "@/hooks/usePageLoadingBar";
+import { useBrandingQuery } from "@/hooks/useBrandingQuery";
 import { toLocaleDigits } from "@/lib/locale-digits";
 import { todayYmdInBD } from "@/utils/time";
 
 export default function DashboardPage() {
   const locale = useLocale();
   const t = useTranslations("dashboard");
-  const { data: branding } = useBrandingProfileSWR();
+  const { data: branding } = useBrandingQuery();
   const today = useMemo(() => new Date(), []);
 
   const [range, setRange] = useState<DateRangeValue>(() => {
@@ -38,11 +39,14 @@ export default function DashboardPage() {
     return t("greetingLateNight");
   }, [t]);
 
-  const { data, loading, error, networkError: analyticsNetworkError } = useDashboardAnalytics({
-    startDate: range.startDate,
-    endDate: range.endDate,
-    bucket: range.bucket,
-  });
+  const { data, isLoading, error, networkError: analyticsNetworkError } =
+    useDashboardAnalyticsQuery({
+      startDate: range.startDate,
+      endDate: range.endDate,
+      bucket: range.bucket,
+    });
+
+  usePageLoadingBar(isLoading);
 
   const summary = data?.summary;
 
@@ -81,14 +85,14 @@ export default function DashboardPage() {
       <section className="order-2 grid grid-cols-2 gap-4 md:order-2 md:grid-cols-2 lg:grid-cols-4">
         <StatsCard
           title={t("totalOrders")}
-          value={loading || !summary ? "--" : fmtStat(summary.totalOrders)}
+          value={!summary ? "--" : fmtStat(summary.totalOrders)}
           accent="blue"
           subtitle={t("withinPeriod")}
           numberFont={locale === "bn" ? "sans" : "mono"}
         />
         <StatsCard
           title={t("totalProducts")}
-          value={loading || !summary ? "--" : fmtStat(summary.totalProducts)}
+          value={!summary ? "--" : fmtStat(summary.totalProducts)}
           accent="green"
           subtitle={t("addedInPeriod")}
           numberFont={locale === "bn" ? "sans" : "mono"}
@@ -96,7 +100,7 @@ export default function DashboardPage() {
         <StatsCard
           title={t("totalCustomers")}
           value={
-            loading || !summary ? "--" : fmtStat(summary.totalCustomers)
+            !summary ? "--" : fmtStat(summary.totalCustomers)
           }
           accent="yellow"
           subtitle={t("customersInPeriod")}
@@ -105,7 +109,7 @@ export default function DashboardPage() {
         <StatsCard
           title={t("supportTickets")}
           value={
-            loading || !summary ? "--" : fmtStat(summary.totalSupportTickets)
+            !summary ? "--" : fmtStat(summary.totalSupportTickets)
           }
           accent="red"
           subtitle={t("supportAndInquiries")}

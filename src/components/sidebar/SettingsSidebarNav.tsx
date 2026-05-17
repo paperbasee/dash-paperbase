@@ -1,6 +1,6 @@
 "use client";
 
-import { Link } from "@/i18n/navigation";
+import { DeferredNavLink } from "@/components/navigation/DeferredNavLink";
 import { ArrowLeft } from "lucide-react";
 import type { SettingsSection } from "@/app/[locale]/(dashboard)/settings/settingsSections";
 import { SECTIONS } from "@/app/[locale]/(dashboard)/settings/settingsSections";
@@ -33,10 +33,9 @@ export default function SettingsSidebarNav({
         </p>
       )}
 
-      <Link
+      <DeferredNavLink
         href="/"
-        prefetch={shouldPrefetchLinks}
-        onClick={onNavigate}
+        onNavigate={onNavigate}
         className={cn(
           "group flex items-center justify-between gap-2 rounded-xs px-2.5 py-1.5 text-sm font-normal w-full transition-colors",
           "text-muted-foreground hover:bg-accent hover:text-foreground dark:text-white/70 dark:hover:bg-white/[0.07] dark:hover:text-white/90",
@@ -54,7 +53,7 @@ export default function SettingsSidebarNav({
           <ArrowLeft className="size-5 shrink-0" />
           {!collapsed && <span className="truncate">{tBackToHomeLabel}</span>}
         </span>
-      </Link>
+      </DeferredNavLink>
 
       {SECTIONS.map((row) => {
         const id = row.id;
@@ -63,11 +62,10 @@ export default function SettingsSidebarNav({
         const active = settingsActiveSection === id;
         const href = `/settings?tab=${encodeURIComponent(id)}`;
         return (
-          <Link
+          <DeferredNavLink
             key={id}
             href={href}
-            prefetch={shouldPrefetchLinks}
-            onClick={onNavigate}
+            onNavigate={onNavigate}
             aria-current={active ? "page" : undefined}
             className={cn(
               "group flex items-center justify-between gap-2 rounded-xs px-2.5 py-1.5 text-sm font-normal w-full transition-colors",
@@ -87,7 +85,7 @@ export default function SettingsSidebarNav({
               <Icon className="size-5 shrink-0" />
               {!collapsed && <span className="truncate">{label}</span>}
             </span>
-          </Link>
+          </DeferredNavLink>
         );
       })}
     </>

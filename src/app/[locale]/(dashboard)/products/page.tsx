@@ -11,7 +11,8 @@ import {
   type ReactNode,
 } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { Link, useRouter } from "@/i18n/navigation";
+import { useRouter } from "@/i18n/navigation";
+import { DeferredNavLink } from "@/components/navigation/DeferredNavLink";
 import { toLocaleDigits } from "@/lib/locale-digits";
 import { cursorFromLink } from "@/lib/cursor-from-link";
 import {
@@ -58,8 +59,11 @@ import { useAdminDeleteCapabilities } from "@/hooks/useAdminDeleteCapabilities";
 import { useNavCounts } from "@/hooks/useNavCounts";
 import { numberTextClass } from "@/lib/number-font";
 import { cn } from "@/lib/utils";
-import { DashboardTableSkeleton } from "@/components/skeletons/dashboard-skeletons";
 import { BelowFoldScrollHint } from "@/components/BelowFoldScrollHint";
+import { usePageLoadingBar } from "@/hooks/usePageLoadingBar";
+import { useProductsQuery } from "@/hooks/useProductsQuery";
+import { productsListQueryKey } from "@/lib/query-keys";
+import { useQueryClient } from "@tanstack/react-query";
 
 type CategoryOption = { value: string; label: string; labelDisplay: ReactNode };
 
@@ -96,6 +100,7 @@ export default function ProductsPage() {
   const tPages = useTranslations("pages");
   const tCommon = useTranslations("common");
   const { currencySymbol } = useBranding();
+  const queryClient = useQueryClient();
   const confirm = useConfirm();
   const { filters, setFilter, clearFilters } = useFilters([
     "status",
@@ -113,14 +118,9 @@ export default function ProductsPage() {
   const debouncedPriceMin = useDebouncedValue(priceMinInput);
   const debouncedPriceMax = useDebouncedValue(priceMaxInput);
   const [categoryTree, setCategoryTree] = useState<AdminCategoryTreeNode[]>([]);
-  const [products, setProducts] = useState<Product[]>([]);
-  const [productsCount, setProductsCount] = useState<number | null>(null);
-  const [loading, setLoading] = useState(true);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const { counts: navCounts } = useNavCounts();
   const [listCursor, setListCursor] = useState<string | null>(null);
-  const [nextLink, setNextLink] = useState<string | null>(null);
-  const [prevLink, setPrevLink] = useState<string | null>(null);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [deleting, setDeleting] = useState(false);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
@@ -128,6 +128,73 @@ export default function ProductsPage() {
   const setScrollContainer = useHorizontalWheelScroll<HTMLDivElement>();
   const { canDelete: canDeleteProducts, isSuperuser: deleteIsSuperuser } =
     useAdminDeleteCapabilities();
+
+  const listParams = useMemo(() => {
+    const params: Record<string, string> = {};
+    if (listCursor) params.cursor = listCursor;
+    if (filters.status) params.status = filters.status;
+    if (filters.prepayment_type) params.prepayment_type = filters.prepayment_type;
+    if (filters.category) params.category = filters.category;
+    if (filters.price_min) params.price_min = filters.price_min;
+    if (filters.price_max) params.price_max = filters.price_max;
+    if (filters.search) params.search = filters.search;
+    if (filters.ordering) {
+      params.ordering = filters.ordering;
+    } else if (
+      filters.category &&
+      !filters.search &&
+      !filters.status &&
+      !filters.prepayment_type &&
+      !filters.price_min &&
+      !filters.price_max
+    ) {
+      params.ordering = "display_order";
+    }
+    return params;
+  }, [
+    listCursor,
+    filters.category,
+    filters.ordering,
+    filters.prepayment_type,
+    filters.price_max,
+    filters.price_min,
+    filters.search,
+    filters.status,
+  ]);
+
+  const { data: productsPage, isLoading, isError, error } = useProductsQuery(listParams);
+  usePageLoadingBar(isLoading);
+
+  const products = productsPage?.results ?? [];
+  const productsCount =
+    typeof productsPage?.count === "number" ? productsPage.count : null;
+  const nextLink = productsPage?.next ?? null;
+  const prevLink = productsPage?.previous ?? null;
+
+  const invalidateProductsList = useCallback(() => {
+    void queryClient.invalidateQueries({ queryKey: ["products", "list"] });
+  }, [queryClient]);
+
+  const patchProductsList = useCallback(
+    (updater: (results: Product[]) => Product[]) => {
+      queryClient.setQueryData(
+        productsListQueryKey(listParams),
+        (old: PaginatedResponse<Product> | undefined) => {
+          if (!old) return old;
+          return { ...old, results: updater(old.results) };
+        }
+      );
+    },
+    [queryClient, listParams]
+  );
+
+  useEffect(() => {
+    if (!isError || !error) return;
+    notify.error(error, {
+      title: tPages("toastTitleProductsFailedToLoad"),
+      fallbackMessage: tPages("toastDescProductsFailedToLoad"),
+    });
+  }, [isError, error, tPages]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -189,63 +256,8 @@ export default function ProductsPage() {
     { value: "popularity", label: tPages("productsListSortPopularity") },
   ];
 
-  const fetchProducts = useCallback(() => {
-    setLoading(true);
-    const params: Record<string, string> = {};
-    if (listCursor) params.cursor = listCursor;
-    if (filters.status) params.status = filters.status;
-    if (filters.prepayment_type)
-      params.prepayment_type = filters.prepayment_type;
-    if (filters.category) params.category = filters.category;
-    if (filters.price_min) params.price_min = filters.price_min;
-    if (filters.price_max) params.price_max = filters.price_max;
-    if (filters.search) params.search = filters.search;
-    if (filters.ordering) {
-      params.ordering = filters.ordering;
-    } else if (
-      filters.category &&
-      !filters.search &&
-      !filters.status &&
-      !filters.prepayment_type &&
-      !filters.price_min &&
-      !filters.price_max
-    ) {
-      // List must match display_order so drag-reorder matches fetchAllProductPublicIdsInCategory.
-      params.ordering = "display_order";
-    }
-    api
-      .get<PaginatedResponse<Product>>("admin/products/", {
-        params,
-      })
-      .then((res) => {
-        setProducts(res.data.results);
-        setProductsCount(typeof res.data.count === "number" ? res.data.count : null);
-        setNextLink(res.data.next);
-        setPrevLink(res.data.previous);
-      })
-      .catch((err) => {
-        notify.error(err, {
-          title: tPages("toastTitleProductsFailedToLoad"),
-          fallbackMessage: tPages("toastDescProductsFailedToLoad"),
-        });
-      })
-      .finally(() => setLoading(false));
-  }, [
-    filters.category,
-    filters.price_max,
-    filters.price_min,
-    filters.prepayment_type,
-    filters.search,
-    filters.ordering,
-    filters.status,
-    listCursor,
-  ]);
-
   useLayoutEffect(() => {
     setListCursor(null);
-    setNextLink(null);
-    setPrevLink(null);
-    setProductsCount(null);
   }, [
     filters.category,
     filters.price_max,
@@ -255,10 +267,6 @@ export default function ProductsPage() {
     filters.ordering,
     filters.status,
   ]);
-
-  useEffect(() => {
-    fetchProducts();
-  }, [fetchProducts]);
 
   const filtersActive = Boolean(
     (filters.status || "").trim() ||
@@ -306,7 +314,7 @@ export default function ProductsPage() {
 
       reorderBusyRef.current = true;
       const reorderedPage = arrayMove(products, oldIndex, newIndex);
-      setProducts(reorderedPage);
+      patchProductsList(() => reorderedPage);
 
       const catId = filters.category;
       try {
@@ -328,7 +336,7 @@ export default function ProductsPage() {
             title: tPages("toastTitleReorderBlocked"),
             fallbackMessage: tPages("toastDescReorderBlocked"),
           });
-          fetchProducts();
+          invalidateProductsList();
           return;
         }
         const start = positions[0];
@@ -340,18 +348,18 @@ export default function ProductsPage() {
           category_public_id: catId,
           product_public_ids: merged,
         });
-        fetchProducts();
+        invalidateProductsList();
       } catch (err) {
         notify.error(err, {
           title: tPages("toastTitleNewOrderNotSaved"),
           fallbackMessage: tPages("toastDescNewOrderNotSaved"),
         });
-        fetchProducts();
+        invalidateProductsList();
       } finally {
         reorderBusyRef.current = false;
       }
     },
-    [canReorder, filters.category, products, fetchProducts]
+    [canReorder, filters.category, products, invalidateProductsList, patchProductsList, tPages]
   );
 
   const toggleSelect = (id: string) => {
@@ -399,7 +407,7 @@ export default function ProductsPage() {
       notify.success(tPages("toastDescProductsRemoved"), {
         title: tPages("toastTitleProductsRemoved"),
       });
-      fetchProducts();
+      invalidateProductsList();
     } catch (err) {
       notify.error(err, {
         title: tPages("toastTitleBulkDeleteIncomplete"),
@@ -414,7 +422,7 @@ export default function ProductsPage() {
     setUpdatingId(product.public_id);
     try {
       await api.patch(`admin/products/${product.public_id}/`, payload);
-      setProducts((prev) =>
+      patchProductsList((prev) =>
         prev.map((p) =>
           p.public_id === product.public_id ? { ...p, ...payload } : p
         )
@@ -483,12 +491,12 @@ export default function ProductsPage() {
                   })}
             </button>
           )}
-          <Link
+          <DeferredNavLink
             href="/products/new"
             className="rounded-card bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90"
           >
             {tPages("addProduct")}
-          </Link>
+          </DeferredNavLink>
         </div>
       </div>
 
@@ -527,16 +535,16 @@ export default function ProductsPage() {
         </Button>
       </div>
 
-      <p className="text-xs text-muted-foreground">
-        {loading
-          ? tCommon("loading")
-          : totalProductsCount === null
+      {!isLoading ? (
+        <p className="text-xs text-muted-foreground">
+          {totalProductsCount === null
             ? tPages("productsListCountPageOnly", { pageCount: pageProductsCount })
             : tPages("productsListCountWithTotal", {
                 pageCount: pageProductsCount,
                 totalCount: totalProductsCount,
               })}
-      </p>
+        </p>
+      ) : null}
 
       {filtersOpen ? (
       <FilterBar>
@@ -606,20 +614,18 @@ export default function ProductsPage() {
       </FilterBar>
       ) : null}
 
-      {!loading && canReorder && (
+      {!isLoading && canReorder && (
         <p className="flex items-start gap-2 rounded-card border border-primary/30 bg-primary/5 px-3 py-2 text-sm text-foreground">
           <GripVertical className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden />
           {tPages("productsListReorderHintActive")}
         </p>
       )}
-      {!loading && !canReorder && filters.category && (
+      {!isLoading && !canReorder && filters.category && (
         <p className="rounded-card border border-border bg-muted/40 px-3 py-2 text-sm text-muted-foreground">
           {tPages("productsListReorderHintDisabled")}
         </p>
       )}
-      {loading ? (
-        <DashboardTableSkeleton columns={9} rows={5} showHeader={false} showFilters={false} />
-      ) : (
+      {!isLoading ? (
         <>
           <div
             ref={setScrollContainer}
@@ -726,7 +732,7 @@ export default function ProductsPage() {
             </Button>
           </div>
         </>
-      )}
+      ) : null}
       <BelowFoldScrollHint />
     </div>
   );

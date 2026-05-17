@@ -13,8 +13,8 @@ import {
   mergeSocialLinksFromApi,
   type StoreSocialLinkKey,
 } from "@/lib/storeSocialLinks";
-import { mutate } from "swr";
-import { BRANDING_PROFILE_SWR_KEY } from "@/hooks/useBrandingProfileSWR";
+import { queryClient } from "@/components/QueryProvider";
+import { brandingQueryKey } from "@/lib/query-keys";
 
 function resolveLogoUrl(url: string | null): string | null {
   if (!url) return null;
@@ -161,7 +161,7 @@ export function useStoreSettings({ onSaveSuccess }: UseStoreSettingsOptions = {}
         }
         throw err;
       }
-      await mutate(BRANDING_PROFILE_SWR_KEY);
+      await queryClient.invalidateQueries({ queryKey: brandingQueryKey });
       onSaveSuccess?.();
 
       setLogoFile(null);
@@ -187,11 +187,11 @@ export function useStoreSettings({ onSaveSuccess }: UseStoreSettingsOptions = {}
         const formData = new FormData();
         formData.append("language", next);
         await api.patch("admin/branding/", formData);
-        await mutate(BRANDING_PROFILE_SWR_KEY);
+        await queryClient.invalidateQueries({ queryKey: brandingQueryKey });
         onSaveSuccess?.();
         notify.success(t("customization.languageSaved"));
       } catch {
-        await mutate(BRANDING_PROFILE_SWR_KEY);
+        await queryClient.invalidateQueries({ queryKey: brandingQueryKey });
         setLanguageMessage({ type: "error", text: t("customization.languageSaveFailed") });
       } finally {
         setLanguageSaving(false);

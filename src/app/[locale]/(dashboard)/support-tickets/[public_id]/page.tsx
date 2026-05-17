@@ -9,8 +9,8 @@ import { Undo2 } from "lucide-react";
 import api from "@/lib/api";
 import type { SupportTicket } from "@/types";
 import { formatDashboardDateTime } from "@/lib/datetime-display";
-import { DashboardDetailSkeleton } from "@/components/skeletons/dashboard-skeletons";
 import { notify } from "@/notifications";
+import { usePageLoadingBar } from "@/hooks/usePageLoadingBar";
 
 function labelFromValue(value: string): string {
   if (!value) return "—";
@@ -52,6 +52,8 @@ export default function SupportTicketDetailPage() {
 
   const attachmentCount = useMemo(() => ticket?.attachments?.length ?? 0, [ticket]);
 
+  usePageLoadingBar(loading);
+
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-3">
@@ -70,17 +72,15 @@ export default function SupportTicketDetailPage() {
         </h1>
       </div>
 
-      {loading ? (
-        <DashboardDetailSkeleton />
-      ) : error ? (
+      {!loading && error ? (
         <div className="rounded-card border border-card-border bg-card p-6 text-sm text-destructive">
           {error}
         </div>
-      ) : !ticket ? (
+      ) : !loading && !ticket ? (
         <div className="rounded-card border border-card-border bg-card p-6 text-sm text-muted-foreground">
           {tPages("supportTicketDetailNotFound")}
         </div>
-      ) : (
+      ) : !loading && ticket ? (
         <>
           <section className="rounded-card border border-card-border bg-card p-6">
             <h2 className="mb-4 text-lg font-medium text-foreground">
@@ -204,7 +204,7 @@ export default function SupportTicketDetailPage() {
             </div>
           </section>
         </>
-      )}
+      ) : null}
     </div>
   );
 }

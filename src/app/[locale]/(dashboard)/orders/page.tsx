@@ -5,12 +5,14 @@ import {
   useCallback,
   useEffect,
   useLayoutEffect,
+  useMemo,
   useState,
   type ReactNode,
 } from "react";
 import dynamic from "next/dynamic";
 import { useLocale, useTranslations } from "next-intl";
-import { Link, useRouter } from "@/i18n/navigation";
+import { useRouter } from "@/i18n/navigation";
+import { DeferredNavLink } from "@/components/navigation/DeferredNavLink";
 import { toLocaleDigits } from "@/lib/locale-digits";
 import { cursorFromLink } from "@/lib/cursor-from-link";
 import { digitsInNumberFont, numberTextClass } from "@/lib/number-font";
@@ -44,8 +46,11 @@ import { ORDER_FLAG_OPTIONS, formatOrderFlagLabel } from "@/lib/orders/order-fla
 import type { AdminCategoryTreeNode, Order, PaginatedResponse } from "@/types";
 import { useConfirm } from "@/context/ConfirmDialogContext";
 import { notify, normalizeError } from "@/notifications";
-import { DashboardTableSkeleton } from "@/components/skeletons/dashboard-skeletons";
 import { BelowFoldScrollHint } from "@/components/BelowFoldScrollHint";
+import { usePageLoadingBar } from "@/hooks/usePageLoadingBar";
+import { useOrdersQuery } from "@/hooks/useOrdersQuery";
+import { ordersListQueryKey } from "@/lib/query-keys";
+import { useQueryClient } from "@tanstack/react-query";
 
 import { OrderPreviewTriggerButton } from "@/components/orders/order-preview";
 import { FraudCheckButton } from "./_components/FraudCheckButton";
@@ -209,6 +214,7 @@ export default function OrdersPage() {
   const tPages = useTranslations("pages");
   const tCommon = useTranslations("common");
   const { currencySymbol } = useBranding();
+  const queryClient = useQueryClient();
   const confirm = useConfirm();
   const { filters, setFilter, clearFilters } = useFilters([
     "customer",
@@ -222,13 +228,8 @@ export default function OrdersPage() {
   ]);
   const [searchInput, setSearchInput] = useState(filters.search || "");
   const debouncedSearch = useDebouncedValue(searchInput);
-  const [orders, setOrders] = useState<Order[]>([]);
-  const [ordersCount, setOrdersCount] = useState<number | null>(null);
-  const [loading, setLoading] = useState(true);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [listCursor, setListCursor] = useState<string | null>(null);
-  const [nextLink, setNextLink] = useState<string | null>(null);
-  const [prevLink, setPrevLink] = useState<string | null>(null);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [bulkDispatching, setBulkDispatching] = useState(false);
   const [statusUpdatingId, setStatusUpdatingId] = useState<string | null>(null);
@@ -238,6 +239,75 @@ export default function OrdersPage() {
     new Set()
   );
   const setScrollContainer = useHorizontalWheelScroll<HTMLDivElement>();
+
+  const listParams = useMemo(() => {
+    const params: Record<string, string> = {};
+    if (listCursor) params.cursor = listCursor;
+    if (filters.customer) params.customer = filters.customer;
+    if (filters.status) params.status = filters.status;
+    if (filters.flag) params.flag = filters.flag;
+    if (filters.date_range) params.date_range = filters.date_range;
+    if (filters.payment_status) params.payment_status = filters.payment_status;
+    if (filters.delivery_status) params.delivery_status = filters.delivery_status;
+    if (filters.category) params.category = filters.category;
+    if (filters.search) params.search = filters.search;
+    return params;
+  }, [
+    listCursor,
+    filters.customer,
+    filters.date_range,
+    filters.flag,
+    filters.category,
+    filters.payment_status,
+    filters.delivery_status,
+    filters.search,
+    filters.status,
+  ]);
+
+  const { data: ordersPage, isLoading, isError, error } = useOrdersQuery(listParams);
+  usePageLoadingBar(isLoading);
+
+  const orders = ordersPage?.results ?? [];
+  const ordersCount =
+    typeof ordersPage?.count === "number" ? ordersPage.count : null;
+  const nextLink = ordersPage?.next ?? null;
+  const prevLink = ordersPage?.previous ?? null;
+
+  const invalidateOrdersList = useCallback(() => {
+    void queryClient.invalidateQueries({ queryKey: ["orders", "list"] });
+  }, [queryClient]);
+
+  const patchOrdersList = useCallback(
+    (updater: (results: Order[]) => Order[]) => {
+      queryClient.setQueryData(
+        ordersListQueryKey(listParams),
+        (old: PaginatedResponse<Order> | undefined) => {
+          if (!old) return old;
+          return { ...old, results: updater(old.results) };
+        }
+      );
+    },
+    [queryClient, listParams]
+  );
+
+  useEffect(() => {
+    if (!isError || !error) return;
+    notify.error(error, {
+      title: tPages("toastTitleOrdersFailedToLoad"),
+      fallbackMessage: tPages("toastDescOrdersFailedToLoad"),
+    });
+  }, [isError, error, tPages]);
+
+  useEffect(() => {
+    if (!ordersPage?.results?.length) return;
+    setPendingCourierDispatchIds((prev) => {
+      const next = new Set(prev);
+      for (const o of ordersPage.results) {
+        if (o.courier_dispatch_pending) next.add(o.public_id);
+      }
+      return next;
+    });
+  }, [ordersPage]);
 
   const [fraudByOrderId, setFraudByOrderId] = useState<Record<string, FraudCheckState>>(
     {}
@@ -420,63 +490,8 @@ export default function OrdersPage() {
       });
   }, [tPages]);
 
-  const fetchOrders = useCallback(() => {
-    setLoading(true);
-    const params: Record<string, string> = {};
-    if (listCursor) params.cursor = listCursor;
-    if (filters.customer) params.customer = filters.customer;
-    if (filters.status) params.status = filters.status;
-    if (filters.flag) params.flag = filters.flag;
-    if (filters.date_range) params.date_range = filters.date_range;
-    if (filters.payment_status) params.payment_status = filters.payment_status;
-    if (filters.delivery_status) params.delivery_status = filters.delivery_status;
-    if (filters.category) params.category = filters.category;
-    if (filters.search) params.search = filters.search;
-    api
-      .get<PaginatedResponse<Order>>("admin/orders/", {
-        params,
-      })
-      .then((res) => {
-        setOrders(res.data.results);
-        setPendingCourierDispatchIds((prev) => {
-          const next = new Set(prev);
-          res.data.results
-            .filter((o) => o.courier_dispatch_pending)
-            .forEach((o) => next.add(o.public_id));
-          return next;
-        });
-        setOrdersCount(typeof res.data.count === "number" ? res.data.count : null);
-        setNextLink(res.data.next);
-        setPrevLink(res.data.previous);
-      })
-      .catch((err) => {
-        notify.error(err, {
-          title: tPages("toastTitleOrdersFailedToLoad"),
-          fallbackMessage: tPages("toastDescOrdersFailedToLoad"),
-        });
-      })
-      .finally(() => setLoading(false));
-  }, [
-    filters.customer,
-    filters.date_range,
-    filters.flag,
-    filters.category,
-    filters.payment_status,
-    filters.delivery_status,
-    filters.search,
-    filters.status,
-    listCursor,
-  ]);
-
-  useEffect(() => {
-    fetchOrders();
-  }, [fetchOrders]);
-
   useLayoutEffect(() => {
     setListCursor(null);
-    setNextLink(null);
-    setPrevLink(null);
-    setOrdersCount(null);
   }, [
     filters.customer,
     filters.date_range,
@@ -585,7 +600,9 @@ export default function OrdersPage() {
         try {
           const { data } = await api.get<Order>(`admin/orders/${publicId}/`);
           if (cancelled) break;
-          setOrders((prev) => prev.map((o) => (o.public_id === publicId ? data : o)));
+          patchOrdersList((prev) =>
+            prev.map((o) => (o.public_id === publicId ? data : o))
+          );
           if (!data.courier_dispatch_pending) {
             setPendingCourierDispatchIds((prev) => {
               const next = new Set(prev);
@@ -620,7 +637,7 @@ export default function OrdersPage() {
     return () => {
       cancelled = true;
     };
-  }, [pendingCourierDispatchIds]);
+  }, [pendingCourierDispatchIds, patchOrdersList]);
 
   const toggleSelect = (id: string) => {
     setGlobalSelectActive(false);
@@ -764,7 +781,7 @@ export default function OrdersPage() {
         });
       }
       setSelectedIds(new Set());
-      fetchOrders();
+      invalidateOrdersList();
     } catch (err) {
       notify.error(err, {
         title: tPages("toastTitleBulkDispatchFailed"),
@@ -799,7 +816,7 @@ export default function OrdersPage() {
         `admin/orders/${order.public_id}/status/`,
         { status: next }
       );
-      setOrders((prev) =>
+      patchOrdersList((prev) =>
         prev.map((o) => (o.public_id === order.public_id ? data.order : o))
       );
     } catch (e) {
@@ -823,7 +840,7 @@ export default function OrdersPage() {
         `admin/orders/${order.public_id}/`,
         payload
       );
-      setOrders((prev) =>
+      patchOrdersList((prev) =>
         prev.map((o) => (o.public_id === order.public_id ? data : o))
       );
     } catch (e) {
@@ -849,7 +866,7 @@ export default function OrdersPage() {
       const { data } = await api.post<Order>(
         `admin/orders/${order.public_id}/send-to-courier/`
       );
-      setOrders((prev) =>
+      patchOrdersList((prev) =>
         prev.map((o) => (o.public_id === order.public_id ? data : o))
       );
       if (data.courier_dispatch_pending) {
@@ -967,12 +984,12 @@ export default function OrdersPage() {
               </button>
             </>
           )}
-          <Link
+          <DeferredNavLink
             href="/orders/new"
             className="rounded-card bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90"
           >
             {tPages("addOrder")}
-          </Link>
+          </DeferredNavLink>
         </div>
       </div>
 
@@ -1011,16 +1028,16 @@ export default function OrdersPage() {
         </Button>
       </div>
 
-      <p className="text-xs text-muted-foreground">
-        {loading
-          ? tCommon("loading")
-          : totalOrdersCount === null
+      {!isLoading ? (
+        <p className="text-xs text-muted-foreground">
+          {totalOrdersCount === null
             ? tPages("ordersListCountPageOnly", { pageCount: pageOrdersCount })
             : tPages("ordersListCountWithTotal", {
                 pageCount: pageOrdersCount,
                 totalCount: totalOrdersCount,
               })}
-      </p>
+        </p>
+      ) : null}
 
       {filtersOpen ? (
         <FilterBar>
@@ -1159,9 +1176,7 @@ export default function OrdersPage() {
         </div>
       ) : null}
 
-      {loading ? (
-        <DashboardTableSkeleton columns={12} rows={5} showHeader={false} showFilters={false} />
-      ) : (
+      {!isLoading ? (
         <>
           <div
             ref={setScrollContainer}
@@ -1479,7 +1494,7 @@ export default function OrdersPage() {
             </Button>
           </div>
         </>
-      )}
+      ) : null}
       <BelowFoldScrollHint />
     </div>
   );

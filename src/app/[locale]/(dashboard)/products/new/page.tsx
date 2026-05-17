@@ -2,7 +2,9 @@
 
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { Link, useRouter } from "@/i18n/navigation";
+import { useRouter } from "@/i18n/navigation";
+import { DeferredNavLink } from "@/components/navigation/DeferredNavLink";
+import { useDeferredNavigate } from "@/hooks/useDeferredNavigate";
 import { Undo2, Check, ImageIcon, Plus, X, Loader2, AlertCircle } from "lucide-react";
 import api from "@/lib/api";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -39,6 +41,7 @@ export default function NewProductPage() {
       : `tmp_${Date.now()}`
   );
   const router = useRouter();
+  const navigate = useDeferredNavigate();
   const locale = useLocale();
   const numClass = numberTextClass(locale);
   const tPages = useTranslations("pages");
@@ -253,7 +256,7 @@ export default function NewProductPage() {
         galleryData.append("order", String(i));
         await api.post("admin/product-images/", galleryData);
       }
-      router.push("/products");
+      void navigate("/products");
     } catch (err: unknown) {
       const message =
         err && typeof err === "object" && "response" in err
@@ -748,10 +751,10 @@ export default function NewProductPage() {
                 </Select>
               </Field>
               <Button variant="outline" className="w-full gap-2" asChild>
-                <Link href="/categories">
+                <DeferredNavLink href="/categories">
                   <Plus className="size-4" />
                   {tPages("productAddCategory")}
-                </Link>
+                </DeferredNavLink>
               </Button>
             </CardContent>
           </Card>

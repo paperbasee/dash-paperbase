@@ -16,7 +16,7 @@ import { notify } from "@/notifications";
 import { numberTextClass } from "@/lib/number-font";
 import { cn } from "@/lib/utils";
 import { INVENTORY_STATUS_REFRESH_EVENT } from "@/hooks/useInventoryStatus";
-import { DashboardTableSkeleton } from "@/components/skeletons/dashboard-skeletons";
+import { usePageLoadingBar } from "@/hooks/usePageLoadingBar";
 import { BelowFoldScrollHint } from "@/components/BelowFoldScrollHint";
 import { Button } from "@/components/ui/button";
 
@@ -34,6 +34,7 @@ export default function InventoryPage() {
   ]);
   const [inventory, setInventory] = useState<Inventory[]>([]);
   const [loading, setLoading] = useState(true);
+  usePageLoadingBar(loading);
   const [count, setCount] = useState(0);
   const [hasNext, setHasNext] = useState(false);
   /** Store-wide count of tracked rows at or below low threshold (not limited to current page). */
@@ -294,13 +295,11 @@ export default function InventoryPage() {
         </FilterBar>
       ) : null}
 
-      {loading ? (
-        <DashboardTableSkeleton columns={6} rows={5} showHeader={false} showFilters={false} />
-      ) : inventory.length === 0 ? (
+      {!loading && inventory.length === 0 ? (
         <div className="rounded-card border border-card-border bg-card py-12 text-center text-sm text-muted-foreground">
           {tPages("inventoryEmpty")}
         </div>
-      ) : (
+      ) : !loading ? (
         <>
           <div className="overflow-x-auto rounded-card border border-card-border bg-card">
             <table className="w-full text-left text-sm">
@@ -405,7 +404,7 @@ export default function InventoryPage() {
             </div>
           )}
         </>
-      )}
+      ) : null}
       <BelowFoldScrollHint />
     </div>
   );

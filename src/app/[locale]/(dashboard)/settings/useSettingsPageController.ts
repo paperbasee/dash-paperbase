@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useEnabledApps } from "@/hooks/useEnabledApps";
 import { useFeatures } from "@/hooks/useFeatures";
 import { useAutoExpire } from "@/hooks/useAutoExpire";
-import { useBrandingProfileSWR } from "@/hooks/useBrandingProfileSWR";
+import { useBrandingQuery } from "@/hooks/useBrandingQuery";
 import api from "@/lib/api";
 import { useAccountSettings } from "./useAccountSettings";
 import { useStoreSettings } from "./useStoreSettings";
@@ -21,8 +21,11 @@ const defaultPrefs: EmailNotificationPrefs = {
 };
 
 export default function useSettingsPageController() {
-  const { data: branding, isLoading: isBrandingLoading, isValidating: isBrandingValidating } =
-    useBrandingProfileSWR();
+  const {
+    data: branding,
+    isLoading: isBrandingLoading,
+    isFetching: isBrandingValidating,
+  } = useBrandingQuery();
   const enabledApps = useEnabledApps();
   const { hasFeature, loading: orderEmailFeatureLoading } = useFeatures();
   const orderEmailNotificationsEnabled = hasFeature("order_email_notifications");

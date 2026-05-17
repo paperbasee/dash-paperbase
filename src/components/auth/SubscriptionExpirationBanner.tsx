@@ -3,6 +3,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
+import { useDeferredNavigate } from "@/hooks/useDeferredNavigate";
+import { getPrefetchFn } from "@/lib/navigation/route-prefetch-registry";
 import api from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -39,6 +41,7 @@ export default function SubscriptionExpirationBanner({
   const numClass = numberTextClass(locale);
   const t = useTranslations("dashboardLayout");
   const router = useRouter();
+  const navigate = useDeferredNavigate();
   const [payLoading, setPayLoading] = useState(false);
   const [payError, setPayError] = useState<string | null>(null);
   const [now, setNow] = useState(() => Date.now());
@@ -68,7 +71,8 @@ export default function SubscriptionExpirationBanner({
   async function handlePay() {
     const id = (planPublicId ?? "").trim();
     if (!id) {
-      router.push("/plans");
+      const prefetch = getPrefetchFn("/plans");
+      void navigate("/plans", () => prefetch());
       return;
     }
     setPayError(null);

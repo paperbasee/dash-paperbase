@@ -18,8 +18,8 @@ import type {
   ShippingZone,
   PaginatedResponse,
 } from "@/types";
-import { DashboardDetailSkeleton } from "@/components/skeletons/dashboard-skeletons";
 import { useEnterNavigation } from "@/hooks/useEnterNavigation";
+import { usePageLoadingBar } from "@/hooks/usePageLoadingBar";
 
 const multiSelectClass =
   "w-full min-h-[6rem] rounded-ui border border-border bg-background px-3 py-2 text-sm text-foreground shadow-xs outline-none transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50";
@@ -101,6 +101,7 @@ export default function ShippingPage() {
     [tPages],
   );
   const [loading, setLoading] = useState(true);
+  usePageLoadingBar(loading);
   const [error, setError] = useState<string>(""); // kept for legacy; do not render inline
 
   const [zones, setZones] = useState<ShippingZone[]>([]);
@@ -328,7 +329,7 @@ export default function ShippingPage() {
   }
 
   if (loading) {
-    return <DashboardDetailSkeleton />;
+    return null;
   }
 
   return (

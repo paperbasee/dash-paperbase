@@ -2,12 +2,14 @@
 
 import { useEffect, useState, type CSSProperties } from "react";
 import { useTranslations } from "next-intl";
-import { Link, usePathname, useRouter } from "@/i18n/navigation";
+import { usePathname, useRouter } from "@/i18n/navigation";
 import { History } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { BrandingProvider } from "@/context/BrandingContext";
 import { EnabledAppsProvider } from "@/context/EnabledAppsContext";
 import { SearchModalProvider } from "@/context/SearchModalContext";
+import { NavigationLoadingProvider } from "@/context/NavigationLoadingContext";
+import { DeferredNavLink } from "@/components/navigation/DeferredNavLink";
 import Sidebar, { SidebarContent } from "@/components/Sidebar";
 import MobileNavBar from "@/components/MobileNavBar";
 import SystemNotificationBanner from "@/components/system/SystemNotificationBanner";
@@ -25,8 +27,7 @@ import { resolveSubscriptionUIStateFromMe } from "@/lib/subscription-ui-state";
 import SubscriptionAccessBlock from "@/components/auth/SubscriptionAccessBlock";
 import PaymentSubmittedAwaitingBanner from "@/components/auth/PaymentSubmittedAwaitingBanner";
 import SubscriptionExpirationBanner from "@/components/auth/SubscriptionExpirationBanner";
-import { Skeleton } from "@/components/ui/skeleton";
-import { DashboardSidebarSkeleton } from "@/components/skeletons/dashboard-skeletons";
+import { TopLoadingBar } from "@/components/TopLoadingBar";
 
 const DASHBOARD_SERVER_UNREACHABLE_KEY = "paperbase_dashboard_server_unreachable";
 
@@ -196,29 +197,7 @@ export default function DashboardLayoutClient({
         className="min-h-screen bg-background md:pt-[var(--subscription-banner-offset,0px)]"
         style={{ "--subscription-banner-offset": subscriptionBannerOffset } as CSSProperties}
       >
-        <DashboardSidebarSkeleton collapsed={collapsed} />
-
-        <div
-          className={cn(
-            "min-h-screen transition-[margin,padding-top] duration-300",
-            collapsed ? "md:ml-16" : "md:ml-72"
-          )}
-        >
-          <div className="hidden h-[var(--header-height)] border-b border-border bg-background/95 md:block" />
-          <main className="py-4 md:pt-6 md:pb-6">
-            <div className={cn(contentContainerClass, "space-y-6")}>
-              <Skeleton className="h-8 w-48" />
-              <Skeleton className="h-4 w-72" />
-              <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-                <Skeleton className="h-28 w-full" />
-                <Skeleton className="h-28 w-full" />
-                <Skeleton className="h-28 w-full" />
-                <Skeleton className="h-28 w-full" />
-              </div>
-              <Skeleton className="h-72 w-full" />
-            </div>
-          </main>
-        </div>
+        <TopLoadingBar isLoading />
       </div>
     );
   }
@@ -231,6 +210,7 @@ export default function DashboardLayoutClient({
   return (
     <BrandingProvider>
       <EnabledAppsProvider>
+      <NavigationLoadingProvider>
       <SearchModalProvider>
         <>
           {showTopBannerStrip && subscriptionUiState ? (
@@ -276,12 +256,12 @@ export default function DashboardLayoutClient({
                     <div className="flex max-w-3xl flex-wrap items-center justify-center gap-1 sm:gap-1.5">
                       <p className="text-center text-[11px] leading-snug text-amber-900 sm:text-xs dark:text-amber-100">
                         {tDashboardLayout("inactivePlanBannerText")}{" "}
-                        <Link
+                        <DeferredNavLink
                           href="/plans"
                           className="font-medium underline underline-offset-2 hover:text-amber-950 dark:hover:text-amber-50"
                         >
                           {tDashboardLayout("inactivePlanBannerPlansLink")}
-                        </Link>
+                        </DeferredNavLink>
                       </p>
                     </div>
                   </div>
@@ -296,12 +276,12 @@ export default function DashboardLayoutClient({
                     <div className="flex max-w-3xl flex-wrap items-center justify-center gap-1 sm:gap-1.5">
                       <p className="text-center text-[11px] leading-snug text-orange-900 sm:text-xs dark:text-orange-100">
                         {tDashboardLayout("rejectedPlanBannerText")}{" "}
-                        <Link
+                        <DeferredNavLink
                           href="/plans"
                           className="font-medium underline underline-offset-2 hover:text-orange-950 dark:hover:text-orange-50"
                         >
                           {tDashboardLayout("rejectedPlanBannerPlansLink")}
-                        </Link>
+                        </DeferredNavLink>
                       </p>
                     </div>
                   </div>
@@ -311,7 +291,7 @@ export default function DashboardLayoutClient({
           ) : null}
 
           <div
-            className="min-h-screen md:pt-[var(--subscription-banner-offset,0px)]"
+            className="md:pt-[var(--subscription-banner-offset,0px)]"
             style={{ "--subscription-banner-offset": subscriptionBannerOffset } as CSSProperties}
           >
             <SystemNotificationBanner
@@ -356,7 +336,7 @@ export default function DashboardLayoutClient({
 
             <div
               className={cn(
-                "min-h-screen transition-[margin,padding-top] duration-300",
+                "flex flex-col min-h-[calc(100dvh-var(--subscription-banner-offset,0px))] transition-[margin,padding-top] duration-300",
                 collapsed ? "md:ml-16" : "md:ml-72"
               )}
             >
@@ -367,24 +347,21 @@ export default function DashboardLayoutClient({
                 }}
               />
 
-              <div className="sticky top-[var(--subscription-banner-offset,0px)] z-30 hidden h-[var(--header-height)] border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 md:block">
+              <div className="sticky top-[var(--subscription-banner-offset,0px)] z-30 hidden h-[var(--header-height)] shrink-0 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 md:block">
                 <div className={cn(contentContainerClass, "flex h-full items-center justify-end")}>
                   <div className="flex items-center">
-                    <Link href="/activities">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        aria-label={tDashboard("activitiesAria")}
-                        className="shrink-0 text-muted-foreground hover:text-foreground"
-                      >
-                        <History className="size-5" />
-                      </Button>
-                    </Link>
+                    <DeferredNavLink
+                      href="/activities"
+                      aria-label={tDashboard("activitiesAria")}
+                      className="inline-flex size-9 shrink-0 items-center justify-center rounded-md text-muted-foreground transition hover:bg-accent hover:text-foreground"
+                    >
+                      <History className="size-5" />
+                    </DeferredNavLink>
                   </div>
                 </div>
               </div>
 
-              <main className="py-4 md:pt-6 md:pb-6">
+              <main className="py-4 md:pt-6 pb-8 md:pb-10">
                 <div className={contentContainerClass}>
                   {children}
                 </div>
@@ -393,6 +370,7 @@ export default function DashboardLayoutClient({
           </div>
         </>
       </SearchModalProvider>
+      </NavigationLoadingProvider>
       </EnabledAppsProvider>
     </BrandingProvider>
   );

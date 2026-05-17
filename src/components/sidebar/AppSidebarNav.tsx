@@ -1,6 +1,6 @@
 "use client";
 
-import { Link } from "@/i18n/navigation";
+import { DeferredNavLink } from "@/components/navigation/DeferredNavLink";
 import { Badge } from "@/components/ui/badge";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import {
@@ -99,10 +99,9 @@ export default function AppSidebarNav({
         </p>
       )}
 
-      <Link
+      <DeferredNavLink
         href={homeHref}
-        prefetch={shouldPrefetchLinks}
-        onClick={onNavigate}
+        onNavigate={onNavigate}
         className={cn(
           "group flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-xs text-sm font-normal w-full transition-colors",
           isActive(homeHref)
@@ -116,7 +115,7 @@ export default function AppSidebarNav({
           <HomeIcon className="size-5 shrink-0" />
           {!collapsed && <span className="truncate">{tAppLabel("home")}</span>}
         </span>
-      </Link>
+      </DeferredNavLink>
 
       {mainNavSequence.map((token) => {
         if (token === "__catalog__") {
@@ -161,11 +160,10 @@ export default function AppSidebarNav({
                       if (!app?.href) return null;
                       const childActive = isActive(app.href);
                       return (
-                        <Link
+                        <DeferredNavLink
                           key={id}
                           href={app.href}
-                          prefetch={shouldPrefetchLinks}
-                          onClick={onNavigate}
+                          onNavigate={onNavigate}
                           className={cn(
                             "group flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-xs text-sm font-normal w-full transition-colors",
                             childActive
@@ -184,7 +182,7 @@ export default function AppSidebarNav({
                               {formatCount(counts[app.countKey])}
                             </Badge>
                           )}
-                        </Link>
+                        </DeferredNavLink>
                       );
                     })}
                   </div>
@@ -236,11 +234,10 @@ export default function AppSidebarNav({
                       if (!app?.href) return null;
                       const childActive = isActive(app.href);
                       return (
-                        <Link
+                        <DeferredNavLink
                           key={id}
                           href={app.href}
-                          prefetch={shouldPrefetchLinks}
-                          onClick={onNavigate}
+                          onNavigate={onNavigate}
                           className={cn(
                             "group flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-xs text-sm font-normal w-full transition-colors",
                             childActive
@@ -259,7 +256,7 @@ export default function AppSidebarNav({
                               {formatCount(counts[app.countKey])}
                             </Badge>
                           )}
-                        </Link>
+                        </DeferredNavLink>
                       );
                     })}
                   </div>
@@ -276,11 +273,10 @@ export default function AppSidebarNav({
         const active = isActive(app.href);
 
         return (
-          <Link
+          <DeferredNavLink
             key={token}
             href={app.href}
-            prefetch={shouldPrefetchLinks}
-            onClick={onNavigate}
+            onNavigate={onNavigate}
             className={cn(
               "group flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-xs text-sm font-normal w-full transition-colors",
               active
@@ -323,7 +319,7 @@ export default function AppSidebarNav({
                 )}
               </span>
             )}
-          </Link>
+          </DeferredNavLink>
         );
       })}
 
@@ -367,11 +363,10 @@ export default function AppSidebarNav({
                   if (!app?.href) return null;
                   const childActive = isActive(app.href);
                   return (
-                    <Link
+                    <DeferredNavLink
                       key={id}
                       href={app.href}
-                      prefetch={shouldPrefetchLinks}
-                      onClick={onNavigate}
+                      onNavigate={onNavigate}
                       className={cn(
                         "group flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-xs text-sm font-normal w-full transition-colors",
                         childActive
@@ -390,7 +385,7 @@ export default function AppSidebarNav({
                           {formatCount(counts[app.countKey])}
                         </Badge>
                       )}
-                    </Link>
+                    </DeferredNavLink>
                   );
                 })}
               </div>

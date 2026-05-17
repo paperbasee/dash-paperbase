@@ -2,7 +2,9 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { Link, useRouter } from "@/i18n/navigation";
+import { useRouter } from "@/i18n/navigation";
+import { DeferredNavLink } from "@/components/navigation/DeferredNavLink";
+import { useDeferredNavigate } from "@/hooks/useDeferredNavigate";
 import { useParams, usePathname } from "next/navigation";
 import { ImageIcon, Undo2, Plus, X, AlertCircle, Loader2} from "lucide-react";
 import api from "@/lib/api";
@@ -30,7 +32,8 @@ import { notify } from "@/notifications";
 import { useAdminDeleteCapabilities } from "@/hooks/useAdminDeleteCapabilities";
 import { numberTextClass } from "@/lib/number-font";
 import { cn } from "@/lib/utils";
-import { DashboardDetailSkeleton } from "@/components/skeletons/dashboard-skeletons";
+import { takeRoutePrefetch } from "@/lib/navigation/route-prefetch-cache";
+import { usePageLoadingBar } from "@/hooks/usePageLoadingBar";
 import { buildPublicMediaUrlFromKey, uploadFile } from "@/hooks/usePresignedUpload";
 
 const MAX_IMAGES = MAX_PRODUCT_IMAGES;
@@ -87,6 +90,7 @@ export default function ProductDetailClient() {
 
   const { id: product_public_id } = useParams<{ locale: string; id: string }>();
   const router = useRouter();
+  const navigate = useDeferredNavigate();
   const locale = useLocale();
   const numClass = numberTextClass(locale);
   const tPages = useTranslations("pages");
@@ -96,6 +100,7 @@ export default function ProductDetailClient() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
+  usePageLoadingBar(loading);
   const { canDelete: canDeleteProduct, isSuperuser: deleteIsSuperuser } =
     useAdminDeleteCapabilities();
   const confirm = useConfirm();
@@ -197,34 +202,54 @@ export default function ProductDetailClient() {
   }, [isEditMode, product_public_id]);
 
   useEffect(() => {
+    const cacheKey = `/products/${product_public_id}`;
+    const prefetched = takeRoutePrefetch<{
+      product: Product;
+      categories: AdminCategoryTreeNode[];
+    }>(cacheKey);
+
+    const applyProduct = (p: Product, d: AdminCategoryTreeNode[]) => {
+      setProduct(p);
+      setCategoryTree(Array.isArray(d) ? d : []);
+      const catRef = p.category ?? p.category_public_id ?? "";
+      setForm({
+        name: p.name,
+        brand: p.brand ?? "",
+        price: p.price,
+        original_price: p.original_price ?? "",
+        category: String(catRef),
+        description: p.description ?? "",
+        stock: String(p.available_quantity ?? p.total_stock ?? ""),
+        is_active: p.is_active,
+        prepayment_type: (p.prepayment_type ?? "none") as
+          | "none"
+          | "delivery_only"
+          | "full",
+      });
+      setExtraFields(
+        typeof p.extra_data === "object" && p.extra_data !== null
+          ? (p.extra_data as ExtraFieldValues)
+          : {}
+      );
+    };
+
+    if (prefetched) {
+      applyProduct(
+        prefetched.product,
+        Array.isArray(prefetched.categories) ? prefetched.categories : []
+      );
+      setLoading(false);
+      return;
+    }
+
     Promise.all([
       api.get<Product>(`admin/products/${product_public_id}/`),
       api.get<AdminCategoryTreeNode[]>("admin/categories/?tree=1"),
     ])
       .then(([prodRes, treeRes]) => {
-        const p = prodRes.data;
-        const d = treeRes.data;
-        setProduct(p);
-        setCategoryTree(Array.isArray(d) ? d : []);
-        const catRef = p.category ?? p.category_public_id ?? "";
-        setForm({
-          name: p.name,
-          brand: p.brand ?? "",
-          price: p.price,
-          original_price: p.original_price ?? "",
-          category: String(catRef),
-          description: p.description ?? "",
-          stock: String(p.available_quantity ?? p.total_stock ?? ""),
-          is_active: p.is_active,
-          prepayment_type: (p.prepayment_type ?? "none") as
-            | "none"
-            | "delivery_only"
-            | "full",
-        });
-        setExtraFields(
-          typeof p.extra_data === "object" && p.extra_data !== null
-            ? (p.extra_data as ExtraFieldValues)
-            : {}
+        applyProduct(
+          prodRes.data,
+          Array.isArray(treeRes.data) ? treeRes.data : []
         );
       })
       .catch((err) => {
@@ -234,7 +259,7 @@ export default function ProductDetailClient() {
         });
       })
       .finally(() => setLoading(false));
-  }, [product_public_id]);
+  }, [product_public_id, tPages]);
 
   const categorySelectOptions = useMemo(
     () => flattenCategoryOptions(categoryTree),
@@ -464,7 +489,7 @@ export default function ProductDetailClient() {
       setUploadStatus(Array(MAX_IMAGES).fill("idle"));
       setUploadProgress(Array(MAX_IMAGES).fill(0));
       setUploadErrors(Array(MAX_IMAGES).fill(null));
-      router.push(`/products/${product_public_id}`);
+      void navigate(`/products/${product_public_id}`);
     } catch (err: unknown) {
       const message =
         err && typeof err === "object" && "response" in err
@@ -501,7 +526,7 @@ export default function ProductDetailClient() {
     setDeleting(true);
     try {
       await api.delete(`admin/products/${product_public_id}/`);
-      router.push("/products");
+      void navigate("/products");
     } catch (err) {
       notify.error(err, {
         title: tPages("toastTitleProductNotDeleted"),
@@ -515,8 +540,8 @@ export default function ProductDetailClient() {
   const fieldControlClass = "w-full rounded-card bg-muted/50";
   const { handleKeyDown } = useEnterNavigation(() => formRef.current?.requestSubmit());
 
-  if (loading) {
-    return <DashboardDetailSkeleton />;
+  if (loading && !product) {
+    return null;
   }
 
   if (!product) {
@@ -560,9 +585,9 @@ export default function ProductDetailClient() {
           )}
           {!isEditMode && (
             <Button type="button" className="gap-2" asChild>
-              <Link href={`/products/${product_public_id}/edit`}>
+              <DeferredNavLink href={`/products/${product_public_id}/edit`}>
                 {tPages("productEditProductButton")}
-              </Link>
+              </DeferredNavLink>
             </Button>
           )}
           {isEditMode && (
@@ -1017,10 +1042,10 @@ export default function ProductDetailClient() {
                   </Select>
                 </Field>
                 <Button variant="outline" className="w-full gap-2" asChild>
-                  <Link href="/categories">
+                  <DeferredNavLink href="/categories">
                     <Plus className="size-4" />
                     {tPages("productAddCategory")}
-                  </Link>
+                  </DeferredNavLink>
                 </Button>
               </CardContent>
             </Card>

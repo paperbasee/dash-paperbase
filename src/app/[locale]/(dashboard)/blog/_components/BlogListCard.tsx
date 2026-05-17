@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Loader2, Trash } from "lucide-react";
-import { Link } from "@/i18n/navigation";
+import { DeferredNavLink } from "@/components/navigation/DeferredNavLink";
 import { useTranslations } from "next-intl";
 import api from "@/lib/api";
 import type { Blog } from "@/types";
@@ -75,7 +75,7 @@ export function BlogListCard({ blog, locale, onDelete }: BlogListCardProps) {
 
   return (
     <article className="group flex h-full min-w-0 flex-col overflow-hidden rounded-card border border-border/70 bg-card p-5 shadow-md">
-      <Link href={`/blog/${blog.public_id}/edit`} className="block min-w-0 w-full flex-1">
+      <DeferredNavLink href={`/blog/${blog.public_id}/edit`} className="block min-w-0 w-full flex-1">
         <div className="relative mb-4 min-h-0 w-full">
           <div
             className={cn(
@@ -142,7 +142,7 @@ export function BlogListCard({ blog, locale, onDelete }: BlogListCardProps) {
             </div>
           </div>
         </div>
-      </Link>
+      </DeferredNavLink>
     </article>
   );
 }

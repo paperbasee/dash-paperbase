@@ -20,14 +20,14 @@ import { useConfirm } from "@/context/ConfirmDialogContext";
 import { notify } from "@/notifications";
 import { numberTextClass } from "@/lib/number-font";
 import { cn } from "@/lib/utils";
-import { DashboardDetailSkeleton } from "@/components/skeletons/dashboard-skeletons";
 import { useEnterNavigation } from "@/hooks/useEnterNavigation";
+import { usePageLoadingBar } from "@/hooks/usePageLoadingBar";
 
 const Calendar = dynamic(
   () => import("@/components/ui/calendar").then((mod) => mod.Calendar),
   {
     ssr: false,
-    loading: () => <div className="h-56 w-64 animate-pulse rounded-card bg-muted/40" />,
+    loading: () => null,
   }
 );
 
@@ -126,6 +126,7 @@ export default function CtaPage() {
   const confirm = useConfirm();
   const [ctas, setCtas] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
+  usePageLoadingBar(loading);
   const [editing, setEditing] = useState<string | "new" | null>(null);
   const [form, setForm] = useState<CtaForm>(emptyForm);
   const [startDate, setStartDate] = useState<Date | undefined>(undefined);
@@ -357,7 +358,7 @@ export default function CtaPage() {
   }
 
   if (loading) {
-    return <DashboardDetailSkeleton />;
+    return null;
   }
 
   return (

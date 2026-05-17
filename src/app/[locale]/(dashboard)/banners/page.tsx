@@ -7,6 +7,7 @@ import { useRouter } from "@/i18n/navigation";
 import { Clock2Icon, ImageIcon, Undo2 } from "lucide-react";
 import { isApiHttpError } from "@/lib/api-client";
 import api from "@/lib/api";
+import { usePageLoadingBar } from "@/hooks/usePageLoadingBar";
 import { Button } from "@/components/ui/button";
 import { ClickableTableRow } from "@/components/ui/clickable-table-row";
 import { ClickableText } from "@/components/ui/clickable-text";
@@ -29,7 +30,6 @@ import { useConfirm } from "@/context/ConfirmDialogContext";
 import { notify } from "@/notifications";
 import { PLACEMENT_OPTIONS } from "@/components/preview-system/placementConfig";
 import { MiniSitePreview } from "@/components/preview-system/MiniSitePreview";
-import { DashboardTableSkeleton } from "@/components/skeletons/dashboard-skeletons";
 import { numberTextClass } from "@/lib/number-font";
 import { cn } from "@/lib/utils";
 import { useEnterNavigation } from "@/hooks/useEnterNavigation";
@@ -39,7 +39,7 @@ const Calendar = dynamic(
   () => import("@/components/ui/calendar").then((mod) => mod.Calendar),
   {
     ssr: false,
-    loading: () => <div className="h-56 w-64 animate-pulse rounded-card bg-muted/40" />,
+    loading: () => null,
   }
 );
 
@@ -213,6 +213,7 @@ export default function BannersPage() {
   const [banners, setBanners] = useState<Banner[]>([]);
   const [bannersTotalCount, setBannersTotalCount] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
+  usePageLoadingBar(loading);
   const [editing, setEditing] = useState<string | "new" | null>(null);
   const [form, setForm] = useState<BannerForm>(emptyForm);
   const [startDate, setStartDate] = useState<Date | undefined>(undefined);
@@ -1017,9 +1018,7 @@ export default function BannersPage() {
         </form>
       )}
 
-      {loading ? (
-        <DashboardTableSkeleton columns={7} rows={5} showHeader={false} showFilters={false} />
-      ) : (
+      {!loading ? (
         <div className="overflow-x-auto rounded-card border border-card-border bg-card">
           <table className="w-full text-left text-sm">
             <thead>
@@ -1105,7 +1104,7 @@ export default function BannersPage() {
             </tbody>
           </table>
         </div>
-      )}
+      ) : null}
 
       {!loading && banners.length === 0 && !editing && (
         <div className="rounded-card border border-card-border bg-card py-12 text-center text-sm text-muted-foreground">

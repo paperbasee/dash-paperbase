@@ -19,11 +19,11 @@ import {
   ComboboxList,
 } from "@/components/ui/combobox";
 import api from "@/lib/api";
+import { usePageLoadingBar } from "@/hooks/usePageLoadingBar";
 import type { SupportTicket, PaginatedResponse } from "@/types";
 import { formatDashboardDateTime } from "@/lib/datetime-display";
 import { useConfirm } from "@/context/ConfirmDialogContext";
 import { notify } from "@/notifications";
-import { DashboardTableSkeleton } from "@/components/skeletons/dashboard-skeletons";
 import { Button } from "@/components/ui/button";
 
 type EditableField = "status" | "priority" | "category";
@@ -121,6 +121,7 @@ export default function SupportTicketsPage() {
   const debouncedSearch = useDebouncedValue(searchInput);
   const [tickets, setTickets] = useState<SupportTicket[]>([]);
   const [loading, setLoading] = useState(true);
+  usePageLoadingBar(loading);
   const [count, setCount] = useState(0);
   const [hasNext, setHasNext] = useState(false);
   const [saving, setSaving] = useState<Record<string, Partial<Record<EditableField, boolean>>>>({});
@@ -352,9 +353,7 @@ export default function SupportTicketsPage() {
         </FilterBar>
       ) : null}
 
-      {loading ? (
-        <DashboardTableSkeleton columns={8} rows={5} showHeader={false} showFilters={false} />
-      ) : (
+      {!loading ? (
         <>
           <div className="overflow-x-auto rounded-card border border-card-border bg-card">
             <table className="w-full text-left text-sm">
@@ -473,7 +472,7 @@ export default function SupportTicketsPage() {
             </button>
           </div>
         </>
-      )}
+      ) : null}
     </div>
   );
 }

@@ -16,14 +16,18 @@ import {
   EventTogglesBlock,
   type EventSettingKey,
 } from "./IntegrationListRow";
-import { SettingsSectionSkeleton } from "@/components/skeletons/dashboard-skeletons";
+import { usePageLoadingBar } from "@/hooks/usePageLoadingBar";
 
 /**
  * Google Analytics and any other marketing providers not shown on the dedicated
  * Facebook / TikTok cards. Uses the same list row and configure flow as the legacy
  * all-in-one marketing list.
  */
-export default function OtherMarketingIntegrations() {
+export default function OtherMarketingIntegrations({
+  panelHidden = false,
+}: {
+  panelHidden?: boolean;
+}) {
   const locale = useLocale();
   const numClass = numberTextClass(locale);
   const t = useTranslations("settings");
@@ -31,6 +35,7 @@ export default function OtherMarketingIntegrations() {
   const confirm = useConfirm();
   const [list, setList] = useState<MarketingIntegrationType[]>([]);
   const [loading, setLoading] = useState(true);
+  usePageLoadingBar(!panelHidden && loading);
   const [togglingId, setTogglingId] = useState<string | null>(null);
   const [eventSavingId, setEventSavingId] = useState<string | null>(null);
   const [configurePublicId, setConfigurePublicId] = useState<string | null>(null);
@@ -164,7 +169,7 @@ export default function OtherMarketingIntegrations() {
   };
 
   if (loading) {
-    return <SettingsSectionSkeleton />;
+    return null;
   }
 
   if (list.length === 0) return null;

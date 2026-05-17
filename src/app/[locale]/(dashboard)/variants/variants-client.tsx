@@ -33,9 +33,8 @@ import { notify, normalizeError } from "@/notifications";
 import { numberTextClass } from "@/lib/number-font";
 import { cn } from "@/lib/utils";
 import { cursorFromLink } from "@/lib/cursor-from-link";
-import { DashboardTableSkeleton } from "@/components/skeletons/dashboard-skeletons";
-import { Skeleton } from "@/components/ui/skeleton";
 import { useEnterNavigation } from "@/hooks/useEnterNavigation";
+import { usePageLoadingBar } from "@/hooks/usePageLoadingBar";
 
 async function fetchAllProducts(): Promise<Product[]> {
   const out: Product[] = [];
@@ -136,6 +135,8 @@ export default function VariantsPageClient() {
   const [variants, setVariants] = useState<ProductVariant[]>([]);
   const [loading, setLoading] = useState(true);
   const [variantsLoading, setVariantsLoading] = useState(false);
+  usePageLoadingBar(loading && products.length === 0);
+  usePageLoadingBar(variantsLoading);
   const [error, setError] = useState("");
 
   const [editing, setEditing] = useState<string | "new" | null>(null);
@@ -399,20 +400,7 @@ export default function VariantsPageClient() {
   const variantStatusValue = filters.variant_status || "";
 
   if (loading && products.length === 0) {
-    return (
-      <div className="flex flex-col gap-6">
-        <div className="flex flex-wrap items-start justify-between gap-4">
-          <div className="flex items-start gap-3">
-            <Skeleton className="hidden h-8 w-8 rounded-ui md:block" />
-            <div className="space-y-2">
-              <Skeleton className="h-8 w-40" />
-            </div>
-          </div>
-        </div>
-        <Skeleton className="h-4 w-80" />
-        <DashboardTableSkeleton columns={6} rows={5} showHeader={false} showFilters={false} />
-      </div>
-    );
+    return null;
   }
 
   return (
@@ -636,15 +624,7 @@ export default function VariantsPageClient() {
             </Card>
           ) : null}
 
-          {variantsLoading ? (
-            <DashboardTableSkeleton
-              columns={6}
-              rows={5}
-              showHeader={false}
-              showFilters={false}
-              showPagination={false}
-            />
-          ) : variants.length === 0 ? (
+          {variantsLoading ? null : variants.length === 0 ? (
             <p className="rounded-card border border-border p-8 text-center text-sm text-muted-foreground">
               {tPages("variantsEmpty")}
             </p>

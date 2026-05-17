@@ -2,7 +2,8 @@
 
 import { useCallback, useEffect, useState, type ReactNode } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { Link, useRouter } from "@/i18n/navigation";
+import { useRouter } from "@/i18n/navigation";
+import { DeferredNavLink } from "@/components/navigation/DeferredNavLink";
 import { FunnelIcon, Undo2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { FilterBar } from "@/components/filters/FilterBar";
@@ -16,7 +17,7 @@ import { Card } from "@/components/ui/card";
 import { notify } from "@/notifications";
 import type { Blog, BlogTag, PaginatedResponse } from "@/types";
 import { BlogListCard } from "./_components/BlogListCard";
-import { DashboardCardGridSkeleton } from "@/components/skeletons/dashboard-skeletons";
+import { usePageLoadingBar } from "@/hooks/usePageLoadingBar";
 
 export default function BlogListPage() {
   const router = useRouter();
@@ -34,6 +35,7 @@ export default function BlogListPage() {
   const [blogs, setBlogs] = useState<Blog[]>([]);
   const [tags, setTags] = useState<BlogTag[]>([]);
   const [loading, setLoading] = useState(true);
+  usePageLoadingBar(loading);
   const [filtersOpen, setFiltersOpen] = useState(false);
 
   useEffect(() => {
@@ -141,12 +143,12 @@ export default function BlogListPage() {
           </div>
           <h1 className="text-2xl font-medium leading-relaxed text-foreground">{tNav("blog")}</h1>
         </div>
-        <Link
+        <DeferredNavLink
           href="/blog/new"
           className="shrink-0 rounded-card bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90"
         >
           {tNav("blogNew")}
-        </Link>
+        </DeferredNavLink>
       </div>
 
       <div className="flex items-start justify-between gap-3">
@@ -219,9 +221,7 @@ export default function BlogListPage() {
         </FilterBar>
       ) : null}
 
-      {loading ? (
-        <DashboardCardGridSkeleton cards={6} />
-      ) : blogs.length === 0 ? (
+      {!loading && blogs.length === 0 ? (
         <Card className="flex flex-col items-center justify-center gap-3 py-12 text-center">
           <p className="text-sm text-muted-foreground">
             {filtersActive ? tPages("blogListNoMatches") : tPages("blogListEmpty")}
@@ -240,7 +240,7 @@ export default function BlogListPage() {
             </Button>
           ) : null}
         </Card>
-      ) : (
+      ) : !loading ? (
         <div className="rounded-card border border-card-border bg-card p-3">
           <div className="grid min-w-0 grid-cols-1 justify-items-stretch gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {blogs.map((blog) => (
@@ -253,7 +253,7 @@ export default function BlogListPage() {
             ))}
           </div>
         </div>
-      )}
+      ) : null}
     </div>
   );
 }

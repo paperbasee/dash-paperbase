@@ -4,13 +4,14 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
+import { useDeferredNavigate } from "@/hooks/useDeferredNavigate";
 import { Undo2 } from "lucide-react";
 import api from "@/lib/api";
 import type { CustomerDetailsResponse } from "@/types";
 import { formatDashboardDateTime } from "@/lib/datetime-display";
 import { Button } from "@/components/ui/button";
 import { numberTextClass } from "@/lib/number-font";
-import { DashboardDetailSkeleton } from "@/components/skeletons/dashboard-skeletons";
+import { usePageLoadingBar } from "@/hooks/usePageLoadingBar";
 import { notify } from "@/notifications";
 
 function asCurrency(value: string | number) {
@@ -25,10 +26,12 @@ export default function CustomerDetailPage() {
   const tPages = useTranslations("pages");
   const tCommon = useTranslations("common");
   const router = useRouter();
+  const navigate = useDeferredNavigate();
   const params = useParams<{ public_id: string }>();
   const publicId = params.public_id;
 
   const [loading, setLoading] = useState(true);
+  usePageLoadingBar(loading);
   const [data, setData] = useState<CustomerDetailsResponse | null>(null);
 
   useEffect(() => {
@@ -63,9 +66,7 @@ export default function CustomerDetailPage() {
         </h1>
       </div>
 
-      {loading ? (
-        <DashboardDetailSkeleton />
-      ) : data ? (
+      {!loading && data ? (
         <>
           <section className="rounded-card border border-card-border bg-card p-6">
             <div className="mb-4 flex items-center justify-between gap-3 flex-wrap">
@@ -73,7 +74,9 @@ export default function CustomerDetailPage() {
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => router.push(`/orders?customer=${encodeURIComponent(publicId)}`)}
+                onClick={() =>
+                  void navigate(`/orders?customer=${encodeURIComponent(publicId)}`)
+                }
               >
                 {tPages("customerDetailsViewOrders")}
               </Button>

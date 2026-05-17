@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef, useMemo, type FormEvent } from "react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
+import { useDeferredNavigate } from "@/hooks/useDeferredNavigate";
 import api from "@/lib/api";
 import { notify } from "@/notifications";
 import type {
@@ -40,6 +41,7 @@ export interface OrderForm {
 
 export function useNewOrder() {
   const router = useRouter();
+  const navigate = useDeferredNavigate();
   const t = useTranslations("pages");
   const tCommon = useTranslations("common");
   const orderCreateSchema = useMemo(
@@ -321,10 +323,10 @@ export function useNewOrder() {
         title: t("toastTitleOrderCreated"),
         action: {
           label: tCommon("toastActionViewOrders"),
-          onClick: () => router.push("/orders"),
+          onClick: () => void navigate("/orders"),
         },
       });
-      router.push("/orders");
+      void navigate("/orders");
     } catch (err: unknown) {
       const data =
         err && typeof err === "object" && "response" in err
@@ -393,5 +395,6 @@ export function useNewOrder() {
     ensureVariantsLoaded,
     handleSubmit,
     router,
+    navigate,
   };
 }

@@ -2,7 +2,9 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
-import { useRouter } from "@/i18n/navigation";
+import { useDeferredNavigate } from "@/hooks/useDeferredNavigate";
+import { getPrefetchFn } from "@/lib/navigation/route-prefetch-registry";
+import { normalizeNavigationHref } from "@/lib/navigation/normalize-navigation-href";
 import { Loader2, Search, X } from "lucide-react";
 import { Dialog } from "radix-ui";
 import { Input } from "@/components/ui/input";
@@ -39,7 +41,7 @@ const EMPTY_RESULTS: SearchResponse = {
 export function SearchModal({ open, onOpenChange }: SearchModalProps) {
   const tCommon = useTranslations("common");
   const tSidebar = useTranslations("sidebar");
-  const router = useRouter();
+  const navigate = useDeferredNavigate();
   const [query, setQuery] = useState("");
   const debouncedQuery = useDebouncedValue(query, 300);
   const [loading, setLoading] = useState(false);
@@ -104,8 +106,11 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
   }, [results]);
 
   const goTo = (href: string) => {
-    router.push(href);
-    onOpenChange(false);
+    const normalized = normalizeNavigationHref(href);
+    const prefetch = getPrefetchFn(normalized);
+    void navigate(normalized, () => prefetch()).then(() => {
+      onOpenChange(false);
+    });
   };
 
   return (

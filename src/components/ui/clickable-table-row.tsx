@@ -1,7 +1,9 @@
 "use client"
 
 import * as React from "react"
-import { useRouter } from "@/i18n/navigation"
+import { useDeferredNavigate } from "@/hooks/useDeferredNavigate"
+import { getPrefetchFn } from "@/lib/navigation/route-prefetch-registry"
+import { normalizeNavigationHref } from "@/lib/navigation/normalize-navigation-href"
 import { cn } from "@/lib/utils"
 import { isNestedInteractiveTarget } from "@/lib/row-nav"
 
@@ -37,7 +39,7 @@ export const ClickableTableRow = React.forwardRef<
   },
   ref
 ) {
-  const router = useRouter()
+  const navigate = useDeferredNavigate()
 
   const hasTextSelection = React.useCallback(() => {
     if (typeof window === "undefined") return false
@@ -49,11 +51,13 @@ export const ClickableTableRow = React.forwardRef<
 
   const runNavigate = React.useCallback(() => {
     if (href) {
-      router.push(href)
+      const normalized = normalizeNavigationHref(href)
+      const prefetch = getPrefetchFn(normalized)
+      void navigate(normalized, () => prefetch())
     } else if (onNavigate) {
       onNavigate()
     }
-  }, [href, onNavigate, router])
+  }, [href, onNavigate, navigate])
 
   const handleClick = (e: React.MouseEvent<HTMLTableRowElement>) => {
     if (disabled) return

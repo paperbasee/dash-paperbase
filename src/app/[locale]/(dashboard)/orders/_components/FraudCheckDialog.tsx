@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import { AlertTriangle } from "lucide-react";
+import { AlertTriangle, Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import {
@@ -311,16 +311,8 @@ export function FraudCheckDialog({
           ) : null}
 
           {loading ? (
-            <div className="space-y-3">
-              <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
-                {Array.from({ length: 4 }).map((_, i) => (
-                  <div
-                    key={i}
-                    className="h-[64px] animate-pulse rounded-card border border-border bg-muted/40"
-                  />
-                ))}
-              </div>
-              <div className="h-56 animate-pulse rounded-card border border-border bg-muted/40" />
+            <div className="flex min-h-[14rem] items-center justify-center py-8">
+              <Loader2 className="size-8 animate-spin text-muted-foreground" aria-hidden />
             </div>
           ) : (
             <>

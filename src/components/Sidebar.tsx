@@ -1,7 +1,8 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { Link, usePathname, useRouter } from "@/i18n/navigation";
+import { usePathname, useRouter } from "@/i18n/navigation";
+import { DeferredNavLink } from "@/components/navigation/DeferredNavLink";
 import { useSearchParams } from "next/navigation";
 import {
   ClipboardTextIcon,
@@ -71,7 +72,7 @@ import {
 } from "@/lib/theme";
 import { runThemeTransition } from "@/lib/theme-transition/transition";
 import SystemNotificationBanner from "@/components/system/SystemNotificationBanner";
-import { useBrandingProfileSWR } from "@/hooks/useBrandingProfileSWR";
+import { useBrandingQuery } from "@/hooks/useBrandingQuery";
 import { SECTIONS, type SettingsSection } from "@/app/[locale]/(dashboard)/settings/settingsSections";
 import AppSidebarNav from "@/components/sidebar/AppSidebarNav";
 import SettingsSidebarNav from "@/components/sidebar/SettingsSidebarNav";
@@ -142,7 +143,7 @@ function SidebarContent({
   const router = useRouter();
   const searchParams = useSearchParams();
   const { logout, isAuthenticated, meProfile, meProfileStatus } = useAuth();
-  const { data: branding, isLoading: isBrandingLoading } = useBrandingProfileSWR();
+  const { data: branding, isLoading: isBrandingLoading } = useBrandingQuery();
   const { setOpen: setSearchOpen } = useSearchModal();
   const { counts, formatCount } = useNavCounts();
   const { isEnabled } = useEnabledApps();
@@ -679,10 +680,9 @@ function SidebarContent({
                 </DropdownMenuItem>
               ) : null}
               <DropdownMenuItem asChild className="p-0 text-[15px] font-medium focus:bg-transparent">
-                <Link
+                <DeferredNavLink
                   href="/settings"
-                  prefetch={shouldPrefetchLinks}
-                  onClick={handleLinkClick}
+                  onNavigate={handleLinkClick}
                   className={cn(
                     "flex w-full cursor-pointer items-center gap-2 rounded-xs px-2 py-2 outline-none select-none",
                     isSettingsRoute
@@ -693,7 +693,7 @@ function SidebarContent({
                 >
                   <Cog className="size-[1.125rem]" />
                   {tCommon("settings")}
-                </Link>
+                </DeferredNavLink>
               </DropdownMenuItem>
             </div>
 

@@ -10,8 +10,8 @@ import {
   settingsInvertedButtonClassName,
   settingsSectionSurfaceClassName,
 } from "../SettingsSectionBody";
-import { SettingsSectionSkeleton } from "@/components/skeletons/dashboard-skeletons";
 import { cn } from "@/lib/utils";
+import { usePageLoadingBar } from "@/hooks/usePageLoadingBar";
 
 type CustomerFormVariant = "minimal" | "extended";
 
@@ -92,6 +92,8 @@ export default function CheckoutSettingsSection({
   const unchanged =
     loadedVariant !== null && selectedVariant === loadedVariant;
 
+  usePageLoadingBar(!hidden && loading);
+
   return (
     <section
       id="panel-checkout"
@@ -100,11 +102,7 @@ export default function CheckoutSettingsSection({
       hidden={hidden}
       className={settingsSectionSurfaceClassName}
     >
-      {loading ? (
-        <SettingsSectionBody>
-          <SettingsSectionSkeleton />
-        </SettingsSectionBody>
-      ) : (
+      {!loading ? (
         <SettingsSectionBody>
           <div className="w-full space-y-6">
             <div className="space-y-1">
@@ -199,7 +197,7 @@ export default function CheckoutSettingsSection({
             </Button>
           </div>
         </SettingsSectionBody>
-      )}
+      ) : null}
     </section>
   );
 }

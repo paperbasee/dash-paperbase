@@ -116,6 +116,14 @@ export async function verifyTwoFactorChallengeRecovery(
 }
 
 export function logout() {
+  if (typeof window !== "undefined") {
+    void (async () => {
+      const { queryClient } = await import("@/components/QueryProvider");
+      const { idbPersister } = await import("@/lib/queryPersister");
+      queryClient.clear();
+      await idbPersister.removeClient();
+    })();
+  }
   window.location.replace("/login");
   clearMeProfileCache();
   localStorage.removeItem("access_token");

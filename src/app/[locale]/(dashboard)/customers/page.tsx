@@ -13,11 +13,12 @@ import { FilterBar } from "@/components/filters/FilterBar";
 import { FilterDropdown } from "@/components/filters/FilterDropdown";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { useFilters } from "@/hooks/useFilters";
-import api from "@/lib/api";
-import type { Customer, PaginatedResponse } from "@/types";
+import type { Customer } from "@/types";
 import { formatDashboardDate } from "@/lib/datetime-display";
 import { notify } from "@/notifications";
-import { DashboardTableSkeleton } from "@/components/skeletons/dashboard-skeletons";
+import { usePageLoadingBar } from "@/hooks/usePageLoadingBar";
+import { useCustomersQuery } from "@/hooks/useCustomersQuery";
+import type { CustomersListParams } from "@/lib/query-keys";
 
 function customerTotalSpentDisplay(c: Customer): string {
   const raw = c.total_spent;
@@ -41,11 +42,32 @@ export default function CustomersPage() {
   ]);
   const [searchInput, setSearchInput] = useState(filters.search || "");
   const debouncedSearch = useDebouncedValue(searchInput);
-  const [customers, setCustomers] = useState<Customer[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [count, setCount] = useState(0);
-  const [hasNext, setHasNext] = useState(false);
   const [filtersOpen, setFiltersOpen] = useState(false);
+
+  const listParams = useMemo((): CustomersListParams => {
+    const params: CustomersListParams = { page };
+    if (filters.joined_date) params.joined_date = filters.joined_date;
+    if (filters.is_repeat_customer) {
+      params.is_repeat_customer = filters.is_repeat_customer;
+    }
+    if (filters.search) params.search = filters.search;
+    return params;
+  }, [page, filters.joined_date, filters.is_repeat_customer, filters.search]);
+
+  const { data, isLoading, isError, error } = useCustomersQuery(listParams);
+  usePageLoadingBar(isLoading);
+
+  useEffect(() => {
+    if (!isError || !error) return;
+    notify.error(error, {
+      title: tPages("toastTitleCustomersFailedToLoad"),
+      fallbackMessage: tPages("toastDescCustomersFailedToLoad"),
+    });
+  }, [isError, error, tPages]);
+
+  const customers = data?.results ?? [];
+  const count = data?.count ?? 0;
+  const hasNext = !!data?.next;
 
   const filtersActive = useMemo(
     () =>
@@ -64,36 +86,6 @@ export default function CustomersPage() {
     if (next === (filters.search || "")) return;
     setFilter("search", next);
   }, [debouncedSearch, filters.search, setFilter]);
-
-  function fetchData() {
-    setLoading(true);
-    const params: Record<string, string | number> = { page };
-    if (filters.joined_date) params.joined_date = filters.joined_date;
-    if (filters.is_repeat_customer) {
-      params.is_repeat_customer = filters.is_repeat_customer;
-    }
-    if (filters.search) params.search = filters.search;
-    api
-      .get<PaginatedResponse<Customer>>("admin/customers/", {
-        params,
-      })
-      .then((res) => {
-        setCustomers(res.data.results);
-        setCount(res.data.count ?? 0);
-        setHasNext(!!res.data.next);
-      })
-      .catch((err) => {
-        notify.error(err, {
-          title: tPages("toastTitleCustomersFailedToLoad"),
-          fallbackMessage: tPages("toastDescCustomersFailedToLoad"),
-        });
-      })
-      .finally(() => setLoading(false));
-  }
-
-  useEffect(() => {
-    fetchData();
-  }, [filters.joined_date, filters.is_repeat_customer, filters.search, page]);
 
   const customerTypePillOptions = useMemo(
     () => [
@@ -162,7 +154,7 @@ export default function CustomersPage() {
       </div>
 
       <p className="text-xs text-muted-foreground">
-        {loading
+        {isLoading
           ? tCommon("loading")
           : tPages("customersListCountWithTotal", {
               pageCount: pageCustomersCount,
@@ -215,13 +207,11 @@ export default function CustomersPage() {
         </FilterBar>
       ) : null}
 
-      {loading ? (
-        <DashboardTableSkeleton columns={6} rows={5} showHeader={false} showFilters={false} />
-      ) : customers.length === 0 ? (
+      {!isLoading && customers.length === 0 && !isError ? (
         <div className="rounded-card border border-card-border bg-card py-12 text-center text-sm text-muted-foreground">
           {tPages("customersEmpty")}
         </div>
-      ) : (
+      ) : !isLoading ? (
         <>
           <div className="overflow-x-auto rounded-card border border-card-border bg-card">
             <table className="w-full text-left text-sm">
@@ -294,7 +284,7 @@ export default function CustomersPage() {
             </div>
           )}
         </>
-      )}
+      ) : null}
     </div>
   );
 }

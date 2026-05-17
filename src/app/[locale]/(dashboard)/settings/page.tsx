@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
-import { usePathname, useRouter as useNextRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -26,11 +26,11 @@ import { SettingsSectionNav } from "./SettingsNav";
 import { SECTIONS, type SettingsSection } from "./settingsSections";
 import { settingsInvertedButtonClassName } from "./SettingsSectionBody";
 import useSettingsPageController from "./useSettingsPageController";
+import { useDeferredNavigate } from "@/hooks/useDeferredNavigate";
 
 export default function SettingsPage() {
-  const nextRouter = useNextRouter();
-  const pathname = usePathname();
   const searchParams = useSearchParams();
+  const navigate = useDeferredNavigate();
   const tSettings = useTranslations("settings");
   const [activeSection, setActiveSection] = useState<SettingsSection>("store");
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
@@ -46,15 +46,14 @@ export default function SettingsPage() {
   }, [searchParams, validSectionIds]);
 
   function setSection(next: SettingsSection) {
-    setActiveSection(next);
-
     const current = (searchParams.get("tab") || "").trim();
     if (current === next) return;
 
     const params = new URLSearchParams(searchParams.toString());
     params.set("tab", next);
     const qs = params.toString();
-    nextRouter.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+    const href = qs ? `/settings?${qs}` : "/settings";
+    void navigate(href);
   }
 
   const controller = useSettingsPageController();

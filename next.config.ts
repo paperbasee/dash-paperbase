@@ -59,6 +59,12 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  env: {
+    NEXT_PUBLIC_BUILD_ID:
+      process.env.NEXT_PUBLIC_BUILD_ID ??
+      process.env.VERCEL_GIT_COMMIT_SHA ??
+      "dev",
+  },
   // Courier logos from BD Courier API (fraud-check response `logo` URLs).
   images: {
     remotePatterns: [

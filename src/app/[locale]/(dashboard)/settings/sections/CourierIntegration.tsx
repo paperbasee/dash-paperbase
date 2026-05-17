@@ -10,7 +10,7 @@ import { formatDashboardDate } from "@/lib/datetime-display";
 import type { Courier, PaginatedResponse } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Skeleton } from "@/components/ui/skeleton";
+import { usePageLoadingBar } from "@/hooks/usePageLoadingBar";
 import { cn } from "@/lib/utils";
 import { useEnterNavigation } from "@/hooks/useEnterNavigation";
 import { useConfirm } from "@/context/ConfirmDialogContext";
@@ -385,13 +385,18 @@ function SteadfastCourierRow({
   );
 }
 
-export default function CourierIntegration() {
+export default function CourierIntegration({
+  panelHidden = false,
+}: {
+  panelHidden?: boolean;
+}) {
   const locale = useLocale();
   const t = useTranslations("settings");
   const tPages = useTranslations("pages");
   const confirm = useConfirm();
   const [couriers, setCouriers] = useState<Courier[]>([]);
   const [loading, setLoading] = useState(true);
+  usePageLoadingBar(!panelHidden && loading);
   const [modal, setModal] = useState<CourierModal>(null);
   const [form, setForm] = useState<ConnectForm>({ ...emptyForm });
   const [saving, setSaving] = useState(false);
@@ -687,15 +692,7 @@ export default function CourierIntegration() {
         {t("integrations.sectionDelivery")}
       </p>
       <div className="mb-6 flex min-w-0 w-full flex-col divide-y divide-border overflow-hidden rounded-lg border border-border">
-        {loading ? (
-          <div className="flex flex-wrap items-center gap-3 px-3.5 py-[11px]">
-            <div className="min-w-0 flex-1 space-y-1.5">
-              <Skeleton className="h-3.5 w-40 max-w-full" />
-              <Skeleton className="h-3 w-full max-w-lg" />
-            </div>
-            <Skeleton className="h-8 w-28 shrink-0 rounded-md" />
-          </div>
-        ) : couriers.length === 0 ? (
+        {loading ? null : couriers.length === 0 ? (
           <div className="flex flex-wrap items-center gap-3 px-3.5 py-[11px]">
             <Truck className="h-5 w-5 shrink-0 text-muted-foreground" aria-hidden />
             <div className="min-w-0 flex-1">

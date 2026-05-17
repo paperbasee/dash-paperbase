@@ -148,9 +148,7 @@ export function RevenueChartCard({ revenueData, range, currencySymbol }: Revenue
     <div className="flex h-auto min-h-0 flex-col rounded-card border border-card-border bg-card p-4 lg:col-span-3 lg:h-full">
       <div className="mb-4 shrink-0 text-sm font-medium text-foreground">Revenue over time</div>
 
-      {revenueData === null ? (
-        <div className="h-48 w-full animate-pulse rounded-card bg-muted" />
-      ) : (
+      {revenueData === null ? null : (
         <>
           <div className="mb-2 flex flex-wrap items-center gap-2">
             <span className="text-xl font-semibold tabular-nums text-foreground">

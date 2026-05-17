@@ -21,7 +21,7 @@ import { useConfirm } from "@/context/ConfirmDialogContext";
 import { notify } from "@/notifications";
 import { SettingsActionDialog } from "@/components/settings/SettingsActionDialog";
 import { settingsInvertedButtonClassName } from "../SettingsSectionBody";
-import { Skeleton } from "@/components/ui/skeleton";
+import { usePageLoadingBar } from "@/hooks/usePageLoadingBar";
 import {
   MarketingIntegrationListRow,
   EventTogglesBlock,
@@ -49,7 +49,13 @@ type MarketingModal =
   | "connect"
   | { type: "configure"; publicId: string };
 
-export default function MarketingProviderCard({ provider }: { provider: MarketingProvider }) {
+export default function MarketingProviderCard({
+  provider,
+  panelHidden = false,
+}: {
+  provider: MarketingProvider;
+  panelHidden?: boolean;
+}) {
   const locale = useLocale();
   const numClass = numberTextClass(locale);
   const t = useTranslations("settings");
@@ -66,6 +72,7 @@ export default function MarketingProviderCard({ provider }: { provider: Marketin
 
   const [allFetched, setAllFetched] = useState<MarketingIntegrationType[] | null>(null);
   const [loading, setLoading] = useState(true);
+  usePageLoadingBar(!panelHidden && loading);
   const [modal, setModal] = useState<MarketingModal>(null);
   const [form, setForm] = useState<ConnectForm>(empty(provider));
   const [saving, setSaving] = useState(false);
@@ -449,15 +456,7 @@ export default function MarketingProviderCard({ provider }: { provider: Marketin
       </SettingsActionDialog>
 
       <div className="flex min-w-0 w-full flex-col divide-y divide-border">
-        {loading ? (
-          <div className="flex flex-wrap items-center gap-3 px-3.5 py-[11px]">
-            <div className="min-w-0 flex-1 space-y-1.5">
-              <Skeleton className="h-3.5 w-48 max-w-full" />
-              <Skeleton className="h-3 w-full max-w-md" />
-            </div>
-            <Skeleton className="h-8 w-24 shrink-0 rounded-md" />
-          </div>
-        ) : showFullEmpty ? (
+        {loading ? null : showFullEmpty ? (
           <div className="flex flex-wrap items-center gap-3 px-3.5 py-[11px]">
             {providerIcon}
             <div className="min-w-0 flex-1">

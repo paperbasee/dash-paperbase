@@ -14,10 +14,10 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select } from "@/components/ui/select";
 import { notify } from "@/notifications";
-import { DashboardDetailSkeleton } from "@/components/skeletons/dashboard-skeletons";
 import { numberTextClass } from "@/lib/number-font";
 import { cn } from "@/lib/utils";
 import { useConfirm } from "@/context/ConfirmDialogContext";
+import { usePageLoadingBar } from "@/hooks/usePageLoadingBar";
 
 import { buildPublicMediaUrlFromKey, uploadFile } from "@/hooks/usePresignedUpload";
 
@@ -89,6 +89,7 @@ export default function PopupEditorPage() {
   const numClass = numberTextClass(locale);
 
   const [loading, setLoading] = useState(true);
+  usePageLoadingBar(loading);
   const [popup, setPopup] = useState<any | null>(null);
   const [editing, setEditing] = useState<string | "new" | null>(null);
   const [form, setForm] = useState<PopupForm>(emptyForm);
@@ -345,7 +346,7 @@ export default function PopupEditorPage() {
     }
   }
 
-  if (loading) return <DashboardDetailSkeleton />;
+  if (loading) return null;
 
   return (
     <div className="space-y-6">

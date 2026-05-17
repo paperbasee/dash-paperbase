@@ -7,12 +7,12 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useEnterNavigation } from "@/hooks/useEnterNavigation";
+import { usePageLoadingBar } from "@/hooks/usePageLoadingBar";
 import {
   SettingsSectionBody,
   settingsInvertedButtonClassName,
   settingsSectionSurfaceClassName,
 } from "../SettingsSectionBody";
-import { SettingsSectionSkeleton } from "@/components/skeletons/dashboard-skeletons";
 
 type SettingsMessage = { type: "success" | "error"; text: string } | null;
 
@@ -38,6 +38,7 @@ export default function AccountSection({
   const t = useTranslations("settings");
   const formRef = useRef<HTMLFormElement>(null);
   const { handleKeyDown } = useEnterNavigation(() => formRef.current?.requestSubmit());
+  usePageLoadingBar(!hidden && isLoading);
   return (
     <section
       id="panel-account"
@@ -46,11 +47,7 @@ export default function AccountSection({
       hidden={hidden}
       className={settingsSectionSurfaceClassName}
     >
-      {isLoading ? (
-        <SettingsSectionBody>
-          <SettingsSectionSkeleton />
-        </SettingsSectionBody>
-      ) : (
+      {!isLoading ? (
         <SettingsSectionBody>
           <form ref={formRef} onSubmit={onSubmit} className="w-full space-y-6">
           <div className="space-y-1">
@@ -121,7 +118,7 @@ export default function AccountSection({
           </Button>
           </form>
         </SettingsSectionBody>
-      )}
+      ) : null}
     </section>
   );
 }

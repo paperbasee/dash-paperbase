@@ -2,7 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { History, Menu, Search } from "lucide-react";
-import { Link } from "@/i18n/navigation";
+import { DeferredNavLink } from "@/components/navigation/DeferredNavLink";
 import { useSearchModal } from "@/context/SearchModalContext";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -47,9 +47,9 @@ export default function MobileNavBar({ onMenuClick }: MobileNavBarProps) {
           asChild
           className="shrink-0 text-muted-foreground hover:text-foreground"
         >
-          <Link href="/activities" aria-label={tMobile("activitiesAria")}>
+          <DeferredNavLink href="/activities" aria-label={tMobile("activitiesAria")}>
             <History className="size-5" />
-          </Link>
+          </DeferredNavLink>
         </Button>
       </div>
     </div>

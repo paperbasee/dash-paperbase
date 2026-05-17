@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Undo2 } from "lucide-react";
 
 import api from "@/lib/api";
-import { DashboardTableSkeleton } from "@/components/skeletons/dashboard-skeletons";
+import { usePageLoadingBar } from "@/hooks/usePageLoadingBar";
 import { useBranding } from "@/context/BrandingContext";
 import { useFeatures } from "@/hooks/useFeatures";
 import { useRefreshCountdown } from "@/hooks/useRefreshCountdown";
@@ -59,6 +59,7 @@ export default function AnalyticsPage() {
   const [utmLoading, setUtmLoading] = useState(false);
   const [loading, setLoading] = useState(true);
   const { hasFeature, loading: featuresLoading } = useFeatures();
+  usePageLoadingBar(featuresLoading || loading);
   const hasAdvancedAnalytics = hasFeature("advanced_analytics");
 
   const mainGenRef = useRef(0);
@@ -219,12 +220,7 @@ export default function AnalyticsPage() {
   }, [utmDimension, hasAdvancedAnalytics, range, loadUtm]);
 
   if (featuresLoading) {
-    return (
-      <div className="space-y-6">
-        <DashboardTableSkeleton columns={4} rows={3} showHeader={true} showFilters={false} />
-        <DashboardTableSkeleton columns={6} rows={6} showHeader={false} showFilters={false} />
-      </div>
-    );
+    return null;
   }
 
   if (!hasAdvancedAnalytics) {
@@ -232,12 +228,7 @@ export default function AnalyticsPage() {
   }
 
   if (loading) {
-    return (
-      <div className="space-y-6">
-        <DashboardTableSkeleton columns={4} rows={3} showHeader={true} showFilters={false} />
-        <DashboardTableSkeleton columns={6} rows={6} showHeader={false} showFilters={false} />
-      </div>
-    );
+    return null;
   }
 
   if (metricAllZero(overview)) {

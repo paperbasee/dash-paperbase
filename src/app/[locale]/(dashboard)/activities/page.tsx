@@ -4,8 +4,8 @@ import { useMemo, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Select } from "@/components/ui/select";
 import { useActivities } from "@/hooks/useActivities";
+import { usePageLoadingBar } from "@/hooks/usePageLoadingBar";
 import { formatDashboardDateTimeWithSeconds } from "@/lib/datetime-display";
-import { DashboardTableSkeleton } from "@/components/skeletons/dashboard-skeletons";
 
 const ACTION_BADGE_STYLES: Record<string, string> = {
   create: "bg-emerald-600 text-white dark:bg-emerald-500",
@@ -109,6 +109,7 @@ export default function ActivitiesPage() {
   );
 
   const { data, loading, error } = useActivities(filters);
+  usePageLoadingBar(loading);
 
   const results = data?.results ?? [];
   const count = data?.count ?? 0;
@@ -173,13 +174,11 @@ export default function ActivitiesPage() {
         </Select>
       </div>
 
-      {loading ? (
-        <DashboardTableSkeleton columns={3} rows={5} showHeader={false} showFilters={false} />
-      ) : error ? (
+      {!loading && error ? (
         <p className="text-sm text-destructive">{error}</p>
-      ) : results.length === 0 ? (
+      ) : !loading && results.length === 0 ? (
         <p className="text-sm text-muted-foreground">{tPages("activitiesEmpty")}</p>
-      ) : (
+      ) : !loading ? (
         <>
           <div className="overflow-hidden rounded-card border border-border bg-muted/30">
             <div className="divide-y divide-border/60">
@@ -247,7 +246,7 @@ export default function ActivitiesPage() {
             </button>
           </div>
         </>
-      )}
+      ) : null}
     </div>
   );
 }

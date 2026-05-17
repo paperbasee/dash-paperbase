@@ -15,6 +15,7 @@ import { CHART_COLORS, axisTickFill, chartGridStroke, tooltipStyle } from "./con
 import { formatChartAxisLabel } from "./format";
 import type { RangeOption, UTMData } from "./types";
 import { RechartsSizedContainer } from "@/components/RechartsSizedContainer";
+import { usePageLoadingBar } from "@/hooks/usePageLoadingBar";
 
 export function TrafficAcquisitionSection({
   utmData,
@@ -31,6 +32,8 @@ export function TrafficAcquisitionSection({
   range: RangeOption;
   currencySymbol: string;
 }) {
+  usePageLoadingBar(utmLoading);
+
   return (
     <div className="rounded-card border border-border bg-card p-4 space-y-4">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
@@ -59,9 +62,7 @@ export function TrafficAcquisitionSection({
         <div className="mb-3 text-sm font-medium text-foreground">
           Sessions by {utmDimension} over time
         </div>
-        {utmLoading ? (
-          <div className="h-48 w-full rounded-card bg-muted animate-pulse md:h-72" />
-        ) : (
+        {utmLoading ? null : (
           <RechartsSizedContainer className="h-48 w-full md:h-72" style={{ minHeight: 192 }}>
             {({ width, height }) => (
               <ResponsiveContainer width={width} height={height} minWidth={0}>
@@ -144,30 +145,7 @@ export function TrafficAcquisitionSection({
               </tr>
             </thead>
             <tbody className="divide-y divide-border/60">
-              {utmLoading ? (
-                Array.from({ length: 5 }).map((_, i) => (
-                  <tr key={i}>
-                    <td className="px-4 py-3">
-                      <div className="h-4 w-40 rounded-ui bg-muted animate-pulse" />
-                    </td>
-                    <td className="px-4 py-3">
-                      <div className="h-4 w-16 rounded-ui bg-muted animate-pulse" />
-                    </td>
-                    <td className="px-4 py-3">
-                      <div className="h-4 w-20 rounded-ui bg-muted animate-pulse" />
-                    </td>
-                    <td className="px-4 py-3">
-                      <div className="h-4 w-14 rounded-ui bg-muted animate-pulse" />
-                    </td>
-                    <td className="px-4 py-3">
-                      <div className="h-4 w-24 rounded-ui bg-muted animate-pulse" />
-                    </td>
-                    <td className="px-4 py-3">
-                      <div className="h-4 w-16 rounded-ui bg-muted animate-pulse" />
-                    </td>
-                  </tr>
-                ))
-              ) : (utmData?.table?.length ?? 0) === 0 ? (
+              {utmLoading ? null : (utmData?.table?.length ?? 0) === 0 ? (
                 <tr>
                   <td colSpan={6} className="px-4 py-10 text-center text-sm text-muted-foreground">
                     No {utmDimension} data for this period

@@ -3,7 +3,9 @@
 import { useEffect, useState } from "react";
 import { X } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useRouter } from "@/i18n/navigation";
+import { useDeferredNavigate } from "@/hooks/useDeferredNavigate";
+import { getPrefetchFn } from "@/lib/navigation/route-prefetch-registry";
+import { normalizeNavigationHref } from "@/lib/navigation/normalize-navigation-href";
 
 import { Button } from "@/components/ui/button";
 import { ShineBorder } from "@/components/ui/shine-border";
@@ -47,8 +49,14 @@ export default function SystemNotificationBanner({
   placement = "top",
   onPresenceChange,
 }: SystemNotificationBannerProps) {
-  const router = useRouter();
+  const navigate = useDeferredNavigate();
   const t = useTranslations("systemBanner");
+
+  const goInternal = (path: string) => {
+    const normalized = normalizeNavigationHref(path);
+    const prefetch = getPrefetchFn(normalized);
+    void navigate(normalized, () => prefetch());
+  };
   const { notification, isLoading, isError } = useSystemNotification();
   const [hiddenPublicId, setHiddenPublicId] = useState<string | null>(null);
   const [isDismissing, setIsDismissing] = useState(false);
@@ -126,7 +134,7 @@ export default function SystemNotificationBanner({
               className="system-notification-banner__cta mt-3 h-9 w-full text-sm font-medium"
               onClick={() => {
                 if (ctaTarget.kind === "internal") {
-                  router.push(ctaTarget.path);
+                  goInternal(ctaTarget.path);
                   return;
                 }
                 window.open(ctaTarget.href, "_blank", "noopener,noreferrer");
@@ -162,7 +170,7 @@ export default function SystemNotificationBanner({
               className="system-notification-banner__cta h-auto shrink-0 p-0 underline underline-offset-4"
               onClick={() => {
                 if (ctaTarget.kind === "internal") {
-                  router.push(ctaTarget.path);
+                  goInternal(ctaTarget.path);
                   return;
                 }
                 window.open(ctaTarget.href, "_blank", "noopener,noreferrer");
@@ -220,7 +228,7 @@ export default function SystemNotificationBanner({
             className="system-notification-banner__cta h-auto shrink-0 p-0 underline underline-offset-4"
             onClick={() => {
               if (ctaTarget.kind === "internal") {
-                router.push(ctaTarget.path);
+                goInternal(ctaTarget.path);
                 return;
               }
               window.open(ctaTarget.href, "_blank", "noopener,noreferrer");

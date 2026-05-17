@@ -1,21 +1,21 @@
 "use client";
 
 import { use, useEffect, useState } from "react";
-import { useRouter } from "@/i18n/navigation";
+import { useDeferredNavigate } from "@/hooks/useDeferredNavigate";
 import { useTranslations } from "next-intl";
 import api from "@/lib/api";
 import { notify } from "@/notifications";
 import type { Blog } from "@/types";
 import { BlogForm } from "../../_components/BlogForm";
-import { DashboardDetailSkeleton } from "@/components/skeletons/dashboard-skeletons";
 import { useConfirm } from "@/context/ConfirmDialogContext";
+import { usePageLoadingBar } from "@/hooks/usePageLoadingBar";
 
 export default function EditBlogPage({
   params,
 }: {
   params: Promise<{ public_id: string }>;
 }) {
-  const router = useRouter();
+  const navigate = useDeferredNavigate();
   const confirm = useConfirm();
   const tPages = useTranslations("pages");
   const { public_id } = use(params);
@@ -48,8 +48,10 @@ export default function EditBlogPage({
     };
   }, [public_id]);
 
+  usePageLoadingBar(loading);
+
   if (loading) {
-    return <DashboardDetailSkeleton />;
+    return null;
   }
   if (error || !blog) {
     return (
@@ -73,7 +75,7 @@ export default function EditBlogPage({
       notify.success(tPages("toastDescPostDeleted"), {
         title: tPages("toastTitlePostDeleted"),
       });
-      router.push("/blog");
+      void navigate("/blog");
     } catch (err) {
       notify.error(err, {
         title: tPages("toastTitlePostNotDeleted"),

@@ -2,18 +2,18 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { Link } from "@/i18n/navigation";
+import { DeferredNavLink } from "@/components/navigation/DeferredNavLink";
 import { toLocaleDigits } from "@/lib/locale-digits";
 import { numberTextClass } from "@/lib/number-font";
 import { Loader2, Undo2, Trash } from "lucide-react";
 import api from "@/lib/api";
+import { usePageLoadingBar } from "@/hooks/usePageLoadingBar";
 import { Button } from "@/components/ui/button";
 import { formatDashboardDateTime } from "@/lib/datetime-display";
 import type { PaginatedResponse, TrashItem } from "@/types";
 import { useConfirm } from "@/context/ConfirmDialogContext";
 import { notify, normalizeError } from "@/notifications";
 import { useAdminDeleteCapabilities } from "@/hooks/useAdminDeleteCapabilities";
-import { DashboardTableSkeleton } from "@/components/skeletons/dashboard-skeletons";
 
 function rowKey(row: TrashItem): string {
   return row.public_id;
@@ -31,6 +31,7 @@ export default function TrashPage() {
   const [count, setCount] = useState(0);
   const [hasNext, setHasNext] = useState(false);
   const [loading, setLoading] = useState(true);
+  usePageLoadingBar(loading);
   const [error, setError] = useState<string | null>(null);
   const [busyPublicId, setBusyPublicId] = useState<string | null>(null);
   const [selectedPublicIds, setSelectedPublicIds] = useState<Set<string>>(new Set());
@@ -241,13 +242,13 @@ export default function TrashPage() {
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <div className="rounded-card bg-muted/80 px-1 py-1 hidden md:block">
-            <Link
+            <DeferredNavLink
               href="/"
               className="flex items-center justify-center rounded-ui p-1 text-muted-foreground hover:bg-muted"
               aria-label={tPages("goBack")}
             >
               <Undo2 className="h-4 w-4" />
-            </Link>
+            </DeferredNavLink>
           </div>
           <div>
             <h1 className="text-2xl font-medium text-foreground">{tNav("trash")}</h1>
@@ -287,13 +288,11 @@ export default function TrashPage() {
 
       {!capsLoading && !canDelete ? (
         <p className="text-sm text-muted-foreground">{tPages("trashForbidden")}</p>
-      ) : loading ? (
-        <DashboardTableSkeleton columns={7} rows={5} showHeader={false} showFilters={false} />
-      ) : error ? (
+      ) : !loading && error ? (
         <p className="text-sm text-destructive">{error}</p>
-      ) : rows.length === 0 ? (
+      ) : !loading && rows.length === 0 ? (
         <p className="text-sm text-muted-foreground">{tPages("trashEmpty")}</p>
-      ) : (
+      ) : !loading ? (
         <>
           <div className="overflow-x-auto rounded-card border border-card-border bg-card">
             <table className="w-max min-w-full text-left text-sm">
@@ -419,7 +418,7 @@ export default function TrashPage() {
             </div>
           </div>
         </>
-      )}
+      ) : null}
     </div>
   );
 }

@@ -1,7 +1,9 @@
 "use client"
 
 import * as React from "react"
-import { useRouter } from "@/i18n/navigation"
+import { useDeferredNavigate } from "@/hooks/useDeferredNavigate"
+import { getPrefetchFn } from "@/lib/navigation/route-prefetch-registry"
+import { normalizeNavigationHref } from "@/lib/navigation/normalize-navigation-href"
 import { cn } from "@/lib/utils"
 import { isNestedInteractiveTarget } from "@/lib/row-nav"
 
@@ -29,12 +31,17 @@ export function ClickableListItem({
   disabled = false,
   ...liProps
 }: ClickableListItemProps) {
-  const router = useRouter()
+  const navigate = useDeferredNavigate()
 
   const runNavigate = React.useCallback(() => {
-    if (href) router.push(href)
-    else onNavigate?.()
-  }, [href, onNavigate, router])
+    if (href) {
+      const normalized = normalizeNavigationHref(href)
+      const prefetch = getPrefetchFn(normalized)
+      void navigate(normalized, () => prefetch())
+    } else {
+      onNavigate?.()
+    }
+  }, [href, onNavigate, navigate])
 
   const handleClick = (e: React.MouseEvent<HTMLLIElement>) => {
     if (disabled) return

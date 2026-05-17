@@ -27,8 +27,8 @@ export default function IntegrationsSection({
         </div>
 
         <div className="flex min-w-0 w-full flex-col gap-0">
-          <MarketingIntegration />
-          <CourierIntegration />
+          <MarketingIntegration panelHidden={hidden} />
+          <CourierIntegration panelHidden={hidden} />
         </div>
       </SettingsSectionBody>
     </section>

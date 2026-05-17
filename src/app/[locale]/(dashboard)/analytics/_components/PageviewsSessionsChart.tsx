@@ -180,9 +180,7 @@ export function PageviewsSessionsChart({ pageviewsData, range }: PageviewsSessio
     <div className="rounded-card border border-card-border bg-card p-4">
       <div className="mb-4 text-sm font-medium text-foreground">Pageviews & Sessions over time</div>
 
-      {pageviewsData === null ? (
-        <div className="h-48 w-full animate-pulse rounded-card bg-muted" />
-      ) : (
+      {pageviewsData === null ? null : (
         <>
           <div className="mb-2 flex flex-wrap items-start gap-x-10 gap-y-3">
             <div className="flex flex-wrap items-center gap-2">

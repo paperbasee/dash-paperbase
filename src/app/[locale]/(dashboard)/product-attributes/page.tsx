@@ -20,8 +20,7 @@ import { useConfirm } from "@/context/ConfirmDialogContext";
 import { notify, normalizeError } from "@/notifications";
 import { numberTextClass } from "@/lib/number-font";
 import { cn } from "@/lib/utils";
-import { DashboardTableSkeleton } from "@/components/skeletons/dashboard-skeletons";
-import { Skeleton } from "@/components/ui/skeleton";
+import { usePageLoadingBar } from "@/hooks/usePageLoadingBar";
 
 type AttrForm = { name: string; order: string };
 type ValueForm = { value: string; order: string };
@@ -38,6 +37,7 @@ export default function ProductAttributesPage() {
   const confirm = useConfirm();
   const [attributes, setAttributes] = useState<ProductAttributeAdmin[]>([]);
   const [loading, setLoading] = useState(true);
+  usePageLoadingBar(loading);
   const [error, setError] = useState(""); // kept for legacy; do not render inline
 
   const [attrEditing, setAttrEditing] = useState<string | "new" | null>(null);
@@ -197,25 +197,6 @@ export default function ProductAttributesPage() {
         fallbackMessage: tPages("toastDescValueNotDeleted"),
       });
     }
-  }
-
-  if (loading) {
-    return (
-      <div className="flex flex-col gap-6">
-        <div className="flex flex-wrap items-start justify-between gap-4">
-          <div className="flex items-start gap-3">
-            <Skeleton className="hidden h-8 w-8 rounded-ui md:block" />
-            <div className="space-y-2">
-              <Skeleton className="h-8 w-52" />
-              <Skeleton className="h-4 w-80" />
-            </div>
-          </div>
-          <Skeleton className="h-9 w-40" />
-        </div>
-        <Skeleton className="hidden h-4 w-96 md:block" />
-        <DashboardTableSkeleton columns={4} rows={5} showHeader={false} showFilters={false} />
-      </div>
-    );
   }
 
   return (

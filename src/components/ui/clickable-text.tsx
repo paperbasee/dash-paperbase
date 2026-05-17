@@ -1,7 +1,8 @@
-import * as React from "react"
-import { Link } from "@/i18n/navigation"
+"use client";
 
-import { cn } from "@/lib/utils"
+import * as React from "react";
+import { DeferredNavLink } from "@/components/navigation/DeferredNavLink";
+import { cn } from "@/lib/utils";
 
 const variantClass = {
   default:
@@ -10,40 +11,43 @@ const variantClass = {
     "font-medium text-destructive underline decoration-destructive/80 underline-offset-4 hover:decoration-destructive",
   muted:
     "font-medium text-foreground underline decoration-foreground/50 underline-offset-4 hover:decoration-foreground",
-} as const
+} as const;
 
 export type ClickableTextProps = {
-  className?: string
-  variant?: keyof typeof variantClass
+  className?: string;
+  variant?: keyof typeof variantClass;
   /** Narrow overflow for table cells */
-  truncate?: boolean
-  children: React.ReactNode
+  truncate?: boolean;
+  children: React.ReactNode;
 } & (
-  | ({ href: string } & Omit<React.ComponentProps<typeof Link>, "className" | "children">)
+  | ({ href: string } & Omit<
+      React.ComponentProps<typeof DeferredNavLink>,
+      "className" | "children" | "href"
+    >)
   | ({ href?: undefined } & React.ButtonHTMLAttributes<HTMLButtonElement>)
-)
+);
 
 function ClickableText(props: ClickableTextProps) {
-  const { className, variant = "default", truncate, children } = props
+  const { className, variant = "default", truncate, children } = props;
   const cls = cn(
     "inline cursor-pointer",
     variantClass[variant],
     truncate && "min-w-0 max-w-xs truncate",
     className
-  )
+  );
 
   if ("href" in props && props.href != null) {
-    const { variant: _v, truncate: _t, className: _c, ...linkProps } =
-      props as Extract<ClickableTextProps, { href: string }>
+    const { variant: _v, truncate: _t, className: _c, href, ...linkProps } =
+      props as Extract<ClickableTextProps, { href: string }>;
     return (
-      <Link {...linkProps} className={cls}>
+      <DeferredNavLink href={href} {...linkProps} className={cls}>
         {children}
-      </Link>
-    )
+      </DeferredNavLink>
+    );
   }
 
   const { variant: _v, truncate: _t, className: _c, ...buttonProps } =
-    props as Extract<ClickableTextProps, { href?: undefined }>
+    props as Extract<ClickableTextProps, { href?: undefined }>;
   return (
     <button
       type="button"
@@ -52,7 +56,7 @@ function ClickableText(props: ClickableTextProps) {
     >
       {children}
     </button>
-  )
+  );
 }
 
-export { ClickableText }
+export { ClickableText };

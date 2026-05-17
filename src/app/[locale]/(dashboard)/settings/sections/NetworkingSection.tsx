@@ -19,8 +19,8 @@ import { useConfirm } from "@/context/ConfirmDialogContext";
 import { notify } from "@/notifications";
 import { useAuth } from "@/context/AuthContext";
 import { isNetworkingStoreUnderReview } from "@/lib/subscription-ui-state";
-import { SettingsSectionSkeleton } from "@/components/skeletons/dashboard-skeletons";
 import { useEnterNavigation } from "@/hooks/useEnterNavigation";
+import { usePageLoadingBar } from "@/hooks/usePageLoadingBar";
 
 type APIKeyRow = {
   public_id: string;
@@ -115,6 +115,7 @@ export default function NetworkingSection({ hidden }: { hidden: boolean }) {
     subscriptionLocked || planExpired || storeUnderReview;
   const [keys, setKeys] = useState<APIKeyRow[]>([]);
   const [loading, setLoading] = useState(true);
+  usePageLoadingBar(!hidden && loading);
   const [newKeyName, setNewKeyName] = useState("");
   const [revealedKey, setRevealedKey] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -433,9 +434,7 @@ export default function NetworkingSection({ hidden }: { hidden: boolean }) {
           </div>
         )}
 
-        {loading ? (
-          <SettingsSectionSkeleton />
-        ) : (
+        {!loading ? (
           <div className="space-y-3">
             {keys.map((k) => (
               <div
@@ -480,7 +479,7 @@ export default function NetworkingSection({ hidden }: { hidden: boolean }) {
               <p className="text-sm text-muted-foreground">{t("networking.noKeys")}</p>
             )}
           </div>
-        )}
+        ) : null}
 
         <div className="space-y-2">
           <label htmlFor="networking_api_key_display_name" className="text-sm font-medium text-foreground">

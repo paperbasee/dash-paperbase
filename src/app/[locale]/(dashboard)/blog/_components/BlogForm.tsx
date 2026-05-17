@@ -5,6 +5,7 @@ import { Trash, Undo2, X, Loader2, AlertCircle, CheckCircle2 } from "lucide-reac
 import { isApiHttpError } from "@/lib/api-client";
 import api from "@/lib/api";
 import { useRouter } from "@/i18n/navigation";
+import { useDeferredNavigate } from "@/hooks/useDeferredNavigate";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -79,6 +80,7 @@ export function BlogForm({
   deleteLoading = false,
 }: BlogFormProps) {
   const router = useRouter();
+  const navigate = useDeferredNavigate();
   const confirm = useConfirm();
   const tPages = useTranslations("pages");
   const { fieldErrors, clearValidation } = useNotificationValidation("blog-form");
@@ -333,9 +335,9 @@ export function BlogForm({
     clearValidation();
     notify.success(tPages("toastDescPostSaved"), { title: tPages("toastTitlePostSaved") });
     if (mode === "new") {
-      router.push(`/blog/${saved.public_id}/edit`);
+      void navigate(`/blog/${saved.public_id}/edit`);
     } else {
-      router.push("/blog");
+      void navigate("/blog");
     }
   }
 

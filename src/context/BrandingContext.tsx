@@ -5,12 +5,11 @@ import {
   useContext,
   useEffect,
   useState,
-  useCallback,
   type ReactNode,
 } from "react";
-import api from "@/lib/api";
 import type { Branding } from "@/types";
 import { emptySocialLinks } from "@/lib/storeSocialLinks";
+import { useBrandingQuery } from "@/hooks/useBrandingQuery";
 
 interface BrandingState {
   branding: Branding | null;
@@ -43,31 +42,14 @@ const defaultBranding: Branding = {
 const BrandingContext = createContext<BrandingState | undefined>(undefined);
 
 export function BrandingProvider({ children }: { children: ReactNode }) {
-  const [branding, setBranding] = useState<Branding | null>(null);
   const [isHydrated, setIsHydrated] = useState(false);
-  const [isFetching, setIsFetching] = useState(false);
-
-  const fetchBranding = useCallback(async () => {
-    setIsFetching(true);
-    try {
-      const { data } = await api.get<Branding>("admin/branding/");
-      setBranding(data);
-    } catch {
-      setBranding(defaultBranding);
-    } finally {
-      setIsFetching(false);
-    }
-  }, []);
+  const { data, isFetching, refetch } = useBrandingQuery();
 
   useEffect(() => {
     setIsHydrated(true);
   }, []);
 
-  useEffect(() => {
-    if (!isHydrated) return;
-    fetchBranding();
-  }, [isHydrated, fetchBranding]);
-
+  const branding = data ?? null;
   const currencySymbol = branding?.currency_symbol ?? defaultBranding.currency_symbol;
 
   return (
@@ -77,7 +59,9 @@ export function BrandingProvider({ children }: { children: ReactNode }) {
         isHydrated,
         isFetching,
         isLoading: isFetching,
-        refetch: fetchBranding,
+        refetch: async () => {
+          await refetch();
+        },
         currencySymbol,
       }}
     >

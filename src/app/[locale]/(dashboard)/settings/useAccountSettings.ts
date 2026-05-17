@@ -5,8 +5,8 @@ import { useTranslations } from "next-intl";
 import api from "@/lib/api";
 import { useAutoExpire } from "@/hooks/useAutoExpire";
 import { accountSettingsSchema, parseValidation } from "@/lib/validation";
-import { mutate } from "swr";
-import { BRANDING_PROFILE_SWR_KEY } from "@/hooks/useBrandingProfileSWR";
+import { queryClient } from "@/components/QueryProvider";
+import { brandingQueryKey } from "@/lib/query-keys";
 
 export type SettingsMessage = { type: "success" | "error"; text: string } | null;
 
@@ -44,7 +44,7 @@ export function useAccountSettings({ onSaveSuccess }: UseAccountSettingsOptions 
       const formData = new FormData();
       formData.append("owner_name", validation.data.ownerName.slice(0, 255));
       await api.patch("admin/branding/", formData);
-      await mutate(BRANDING_PROFILE_SWR_KEY);
+      await queryClient.invalidateQueries({ queryKey: brandingQueryKey });
       onSaveSuccess?.();
       setMessage({ type: "success", text: t("account.saved") });
     } catch {
