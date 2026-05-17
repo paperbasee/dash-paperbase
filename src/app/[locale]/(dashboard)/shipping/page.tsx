@@ -101,14 +101,14 @@ export default function ShippingPage() {
     [tPages],
   );
   const [loading, setLoading] = useState(true);
-  usePageLoadingBar(
-    loading && zones.length === 0 && methods.length === 0 && rates.length === 0
-  );
   const [error, setError] = useState<string>(""); // kept for legacy; do not render inline
 
   const [zones, setZones] = useState<ShippingZone[]>([]);
   const [methods, setMethods] = useState<ShippingMethod[]>([]);
   const [rates, setRates] = useState<ShippingRate[]>([]);
+  usePageLoadingBar(
+    loading && zones.length === 0 && methods.length === 0 && rates.length === 0
+  );
 
   const [editingZone, setEditingZone] = useState<string | "new" | null>(null);
   const [editingMethod, setEditingMethod] = useState<string | "new" | null>(null);

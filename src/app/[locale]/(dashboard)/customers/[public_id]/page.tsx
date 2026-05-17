@@ -31,8 +31,8 @@ export default function CustomerDetailPage() {
   const publicId = params.public_id;
 
   const [loading, setLoading] = useState(true);
-  usePageLoadingBar(loading && !data);
   const [data, setData] = useState<CustomerDetailsResponse | null>(null);
+  usePageLoadingBar(loading && !data);
 
   useEffect(() => {
     if (!publicId) return;

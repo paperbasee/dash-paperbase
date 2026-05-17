@@ -121,8 +121,8 @@ export default function SupportTicketsPage() {
   const debouncedSearch = useDebouncedValue(searchInput);
   const [tickets, setTickets] = useState<SupportTicket[]>([]);
   const [loading, setLoading] = useState(true);
-  usePageLoadingBar(loading && tickets.length === 0 && count === 0);
   const [count, setCount] = useState(0);
+  usePageLoadingBar(loading && tickets.length === 0 && count === 0);
   const [hasNext, setHasNext] = useState(false);
   const [saving, setSaving] = useState<Record<string, Partial<Record<EditableField, boolean>>>>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
