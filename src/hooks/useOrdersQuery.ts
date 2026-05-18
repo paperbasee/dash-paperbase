@@ -14,9 +14,13 @@ export async function fetchOrdersList(
   return data;
 }
 
-export function useOrdersQuery(params: OrdersListParams) {
+export function useOrdersQuery(
+  params: OrdersListParams,
+  options?: { enabled?: boolean }
+) {
   return useQuery({
     queryKey: ordersListQueryKey(params),
     queryFn: () => fetchOrdersList(params),
+    enabled: options?.enabled ?? true,
   });
 }

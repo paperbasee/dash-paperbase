@@ -10,7 +10,7 @@ const FIFTEEN_DAYS_MS = 15 * 24 * 60 * 60 * 1000;
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 5 * 60 * 1000,
+      staleTime: 2 * 60 * 1000,
       gcTime: FIFTEEN_DAYS_MS,
       refetchOnWindowFocus: true,
       refetchOnReconnect: true,

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type CSSProperties } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { useTranslations } from "next-intl";
 import { usePathname, useRouter } from "@/i18n/navigation";
 import { History } from "lucide-react";
@@ -29,6 +29,8 @@ import SubscriptionAccessBlock from "@/components/auth/SubscriptionAccessBlock";
 import PaymentSubmittedAwaitingBanner from "@/components/auth/PaymentSubmittedAwaitingBanner";
 import SubscriptionExpirationBanner from "@/components/auth/SubscriptionExpirationBanner";
 import { TopLoadingBar } from "@/components/TopLoadingBar";
+import { DashboardRefreshProvider } from "@/context/DashboardRefreshContext";
+import { useStoreSocket } from "@/hooks/useStoreSocket";
 
 const DASHBOARD_SERVER_UNREACHABLE_KEY = "paperbase_dashboard_server_unreachable";
 
@@ -111,6 +113,17 @@ export default function DashboardLayoutClient({
     isEligiblePlan &&
     storeCount === 0;
   const authCheckReady = authHydrated && !isLoading;
+
+  const markRefreshedRef = useRef<(() => void) | null>(null);
+  const socketEnabled =
+    isAuthenticated &&
+    meProfileStatus === "ready" &&
+    Boolean(meProfile?.active_store_public_id?.trim());
+  const { isConnected: isSocketConnected } = useStoreSocket({
+    enabled: socketEnabled,
+    onConnect: () => markRefreshedRef.current?.(),
+    onAfterInvalidate: () => markRefreshedRef.current?.(),
+  });
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -210,6 +223,11 @@ export default function DashboardLayoutClient({
   return (
     <BrandingProvider>
       <EnabledAppsProvider>
+      <DashboardRefreshProvider
+        storePublicId={meProfile?.active_store_public_id ?? ""}
+        socketConnected={isSocketConnected}
+        markRefreshedRef={markRefreshedRef}
+      >
       <NavigationLoadingProvider>
       <SearchModalProvider>
         <div className="md:flex md:h-screen md:flex-col md:overflow-hidden">
@@ -356,6 +374,7 @@ export default function DashboardLayoutClient({
         </div>
       </SearchModalProvider>
       </NavigationLoadingProvider>
+      </DashboardRefreshProvider>
       </EnabledAppsProvider>
     </BrandingProvider>
   );

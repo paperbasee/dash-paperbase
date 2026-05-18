@@ -20,14 +20,23 @@ import type {
 import { toLocaleDigits } from "@/lib/locale-digits";
 import { numberTextClass } from "@/lib/number-font";
 import { RechartsSizedContainer } from "@/components/RechartsSizedContainer";
+import { cn } from "@/lib/utils";
 import { Card, CardContent } from "./ui/card";
 
 interface DashboardBarChartProps {
   data: DashboardAnalyticsPoint[];
   bucket?: AnalyticsBucket;
+  /** When true, omit outer card (parent provides section chrome). */
+  embedded?: boolean;
+  className?: string;
 }
 
-export default function DashboardBarChart({ data, bucket = "day" }: DashboardBarChartProps) {
+export default function DashboardBarChart({
+  data,
+  bucket = "day",
+  embedded = false,
+  className,
+}: DashboardBarChartProps) {
   const t = useTranslations("dashboard");
   const locale = useLocale();
   const numClass = numberTextClass(locale);
@@ -86,10 +95,15 @@ export default function DashboardBarChart({ data, bucket = "day" }: DashboardBar
     return formatCountTick(v);
   };
 
-  const metricFilterBtnBase =
-    "min-w-0 max-w-full break-words rounded-ui border px-2 py-1 text-[11px] font-medium leading-relaxed transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-[hsl(var(--card))]";
+  const metricSegmentClass = (active: boolean) =>
+    cn(
+      "inline-flex min-w-0 max-w-full items-center gap-1 rounded-ui px-2 py-1 text-xs font-medium transition whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-[hsl(var(--card))]",
+      active
+        ? "bg-foreground text-background"
+        : "text-muted-foreground hover:bg-background/70 hover:text-foreground"
+    );
   const yAxisWidth = 32;
-  const legendHeight = isTabletRange ? 68 : 40;
+  const legendHeight = isTabletRange ? 60 : 44;
 
   useEffect(() => {
     const query = window.matchMedia("(min-width: 768px) and (max-width: 1023px)");
@@ -99,9 +113,8 @@ export default function DashboardBarChart({ data, bucket = "day" }: DashboardBar
     return () => query.removeEventListener("change", sync);
   }, []);
 
-  return (
-    <Card className="dashboard-chart-card h-[360px] border border-card-border bg-card">
-      <CardContent className="h-full pb-2 pt-4">
+  const chartBody = (
+    <>
         {data.length === 0 ? (
           <div className="flex h-full items-center justify-center px-2 text-center text-sm leading-relaxed text-muted-foreground">
             {t("chartNoActivity")}
@@ -118,7 +131,7 @@ export default function DashboardBarChart({ data, bucket = "day" }: DashboardBar
             {/* Recharts SVG: keep square geometry; not using theme radius tokens */}
             <BarChart
               data={data}
-              margin={{ top: 8, left: 0, right: yAxisWidth, bottom: 0 }}
+              margin={{ top: 20, left: 0, right: yAxisWidth, bottom: 0 }}
               style={{ background: "hsl(var(--card))" }}
             >
               <CartesianGrid
@@ -180,48 +193,42 @@ export default function DashboardBarChart({ data, bucket = "day" }: DashboardBar
                 verticalAlign="top"
                 height={legendHeight}
                 iconType="circle"
-                wrapperStyle={{ fontSize: 11, marginBottom: 10 }}
+                wrapperStyle={{ fontSize: 11, marginBottom: 16 }}
                 content={() => (
-                  <div className="flex flex-wrap items-center justify-center gap-1 px-2 pb-2">
-                    <button
-                      type="button"
-                      onClick={() => setActiveMetric("all")}
-                      className={[
-                        metricFilterBtnBase,
-                        activeMetric === "all"
-                          ? "border-primary/30 bg-primary/10 text-foreground"
-                          : "border-border bg-background text-muted-foreground hover:text-foreground",
-                      ].join(" ")}
+                  <div className="flex justify-center px-2">
+                    <div
+                      className="flex min-h-0 flex-wrap items-center justify-center gap-0.5 rounded-ui border border-border bg-muted/70 p-0.5 text-xs shadow-xs"
+                      role="group"
                     >
-                      {t("chartAll")}
-                    </button>
-                    {metrics.map((m) => {
-                      const active = activeMetric === m.key;
-                      return (
-                        <button
-                          key={m.key}
-                          type="button"
-                          onClick={() => setActiveMetric(m.key)}
-                          className={[
-                            "inline-flex items-center gap-1.5",
-                            metricFilterBtnBase,
-                            active
-                              ? "border-primary/30 bg-primary/10 text-foreground"
-                              : "border-border bg-background text-muted-foreground hover:text-foreground",
-                          ].join(" ")}
-                        >
-                          <span
-                            className="size-2 shrink-0 rounded-full"
-                            style={{
-                              backgroundColor: m.color,
-                              opacity: active ? 1 : 0.35,
-                            }}
-                            aria-hidden="true"
-                          />
-                          <span className="min-w-0">{m.label}</span>
-                        </button>
-                      );
-                    })}
+                      <button
+                        type="button"
+                        onClick={() => setActiveMetric("all")}
+                        className={metricSegmentClass(activeMetric === "all")}
+                      >
+                        {t("chartAll")}
+                      </button>
+                      {metrics.map((m) => {
+                        const active = activeMetric === m.key;
+                        return (
+                          <button
+                            key={m.key}
+                            type="button"
+                            onClick={() => setActiveMetric(m.key)}
+                            className={metricSegmentClass(active)}
+                          >
+                            <span
+                              className="size-1.5 shrink-0 rounded-full"
+                              style={{
+                                backgroundColor: m.color,
+                                opacity: active ? 1 : 0.5,
+                              }}
+                              aria-hidden="true"
+                            />
+                            <span className="min-w-0">{m.label}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
                   </div>
                 )}
               />
@@ -242,7 +249,20 @@ export default function DashboardBarChart({ data, bucket = "day" }: DashboardBar
             )}
           </RechartsSizedContainer>
         )}
-      </CardContent>
+    </>
+  );
+
+  if (embedded) {
+    return (
+      <div className={cn("dashboard-chart-card h-[300px] sm:h-[360px]", className)}>
+        <div className="h-full pb-2 pt-1">{chartBody}</div>
+      </div>
+    );
+  }
+
+  return (
+    <Card className={cn("dashboard-chart-card h-[360px] border border-card-border bg-card", className)}>
+      <CardContent className="h-full pb-2 pt-4">{chartBody}</CardContent>
     </Card>
   );
 }

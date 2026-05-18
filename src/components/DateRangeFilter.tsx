@@ -3,9 +3,11 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import { useLocale, useTranslations } from "next-intl";
+import DateRangePresetPicker from "./DateRangePresetPicker";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import type { AnalyticsBucket } from "@/hooks/useDashboardAnalytics";
+import { dateToYmd, startOfDay, ymdToDate } from "@/lib/date-range-ui";
 import { digitsInNumberFont } from "@/lib/number-font";
 import { cn } from "@/lib/utils";
 import {
@@ -31,31 +33,18 @@ const Calendar = dynamic(
 interface DateRangeFilterProps {
   value: DateRangeValue;
   onChange: (value: DateRangeValue) => void;
-}
-
-function ymdToDate(ymd: string): Date | undefined {
-  const m = ymd.trim().match(/^(\d{4})-(\d{2})-(\d{2})$/);
-  if (!m) return undefined;
-  const date = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));
-  return Number.isNaN(date.getTime()) ? undefined : date;
-}
-
-function dateToYmd(date: Date): string {
-  const yyyy = String(date.getFullYear());
-  const mm = String(date.getMonth() + 1).padStart(2, "0");
-  const dd = String(date.getDate()).padStart(2, "0");
-  return `${yyyy}-${mm}-${dd}`;
-}
-
-function startOfDay(date: Date): Date {
-  const d = new Date(date);
-  d.setHours(0, 0, 0, 0);
-  return d;
+  /** Compact row for dashboard top bar; default is stacked layout. */
+  layout?: "default" | "compact";
+  className?: string;
+  onPanelOpenChange?: (open: boolean) => void;
 }
 
 export default function DateRangeFilter({
   value,
   onChange,
+  layout = "default",
+  className,
+  onPanelOpenChange,
 }: DateRangeFilterProps) {
   const locale = useLocale();
   const t = useTranslations("pages");
@@ -146,58 +135,51 @@ export default function DateRangeFilter({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  const isCompact = layout === "compact";
+
+  const PRESET_OPTIONS: { key: PresetKey; labelKey: "filtersToday" | "filtersLast7Days" | "filtersLast30Days" | "filtersThisMonth" }[] = [
+    { key: "today", labelKey: "filtersToday" },
+    { key: "last7", labelKey: "filtersLast7Days" },
+    { key: "last30", labelKey: "filtersLast30Days" },
+    { key: "thisMonth", labelKey: "filtersThisMonth" },
+  ];
+
   return (
-    <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-        <div className="grid grid-cols-2 gap-2 md:grid-cols-4 lg:flex lg:flex-wrap">
-          <Button
-            size="sm"
-            variant="outline"
-            className={cn(
-              "w-full lg:w-auto",
-              value.preset === "today" &&
-                "bg-accent text-foreground border-border hover:bg-accent/80 dark:bg-white/[0.08] dark:text-white dark:border-white/[0.12] dark:hover:bg-white/[0.12]"
-            )}
-            onClick={() => setPreset("today")}
-          >
-            {digitsInNumberFont(t("filtersToday"), locale)}
-          </Button>
-          <Button
-            size="sm"
-            variant="outline"
-            className={cn(
-              "w-full lg:w-auto",
-              value.preset === "last7" &&
-                "bg-accent text-foreground border-border hover:bg-accent/80 dark:bg-white/[0.08] dark:text-white dark:border-white/[0.12] dark:hover:bg-white/[0.12]"
-            )}
-            onClick={() => setPreset("last7")}
-          >
-            {digitsInNumberFont(t("filtersLast7Days"), locale)}
-          </Button>
-          <Button
-            size="sm"
-            variant="outline"
-            className={cn(
-              "w-full lg:w-auto",
-              value.preset === "last30" &&
-                "bg-accent text-foreground border-border hover:bg-accent/80 dark:bg-white/[0.08] dark:text-white dark:border-white/[0.12] dark:hover:bg-white/[0.12]"
-            )}
-            onClick={() => setPreset("last30")}
-          >
-            {digitsInNumberFont(t("filtersLast30Days"), locale)}
-          </Button>
-          <Button
-            size="sm"
-            variant="outline"
-            className={cn(
-              "w-full lg:w-auto",
-              value.preset === "thisMonth" &&
-                "bg-accent text-foreground border-border hover:bg-accent/80 dark:bg-white/[0.08] dark:text-white dark:border-white/[0.12] dark:hover:bg-white/[0.12]"
-            )}
-            onClick={() => setPreset("thisMonth")}
-          >
-            {digitsInNumberFont(t("filtersThisMonth"), locale)}
-          </Button>
-        </div>
+    <div
+      className={cn(
+        isCompact
+          ? "flex flex-col gap-3"
+          : "flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between",
+        className
+      )}
+    >
+        {isCompact ? (
+          <DateRangePresetPicker
+            value={value}
+            onChange={onChange}
+            anchorDate={today}
+            className="w-full"
+            onPanelOpenChange={onPanelOpenChange}
+          />
+        ) : (
+          <>
+          <div className="grid grid-cols-2 gap-2 md:grid-cols-4 lg:flex lg:flex-wrap">
+            {PRESET_OPTIONS.map((opt) => (
+              <Button
+                key={opt.key}
+                size="sm"
+                variant="outline"
+                className={cn(
+                  "w-full lg:w-auto",
+                  value.preset === opt.key &&
+                    "bg-accent text-foreground border-border hover:bg-accent/80 dark:bg-white/[0.08] dark:text-white dark:border-white/[0.12] dark:hover:bg-white/[0.12]"
+                )}
+                onClick={() => setPreset(opt.key)}
+              >
+                {digitsInNumberFont(t(opt.labelKey), locale)}
+              </Button>
+            ))}
+          </div>
 
         <div className="flex flex-col gap-2 text-xs sm:text-sm lg:flex-row lg:items-center lg:gap-3 lg:flex-nowrap">
           <span className="text-muted-foreground whitespace-nowrap">
@@ -277,6 +259,8 @@ export default function DateRangeFilter({
             </div>
           </div>
         </div>
+        </>
+        )}
     </div>
   );
 }

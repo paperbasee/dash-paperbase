@@ -62,3 +62,55 @@ export function normalizeDateRange(raw: DateRangeValue, anchorDate: Date): DateR
     bucket,
   };
 }
+
+function inclusiveDayCount(startYmd: string, endYmd: string): number {
+  const [ys, ms, ds] = startYmd.split("-").map(Number);
+  const [ye, me, de] = endYmd.split("-").map(Number);
+  const start = Date.UTC(ys, ms - 1, ds);
+  const end = Date.UTC(ye, me - 1, de);
+  return Math.max(1, Math.round((end - start) / 86_400_000) + 1);
+}
+
+/** Shift the current window backward/forward by its length (Grafana-style). */
+export function shiftDateRange(
+  value: DateRangeValue,
+  direction: -1 | 1,
+  anchorDate: Date
+): DateRangeValue {
+  const todayStr = todayYmdInBD(anchorDate);
+  const span = inclusiveDayCount(value.startDate, value.endDate);
+  const delta = direction * span;
+  let endStr = addCalendarDaysYmd(value.endDate, delta);
+  let startStr = addCalendarDaysYmd(value.startDate, delta);
+
+  if (endStr > todayStr) {
+    endStr = todayStr;
+    startStr = addCalendarDaysYmd(endStr, -(span - 1));
+  }
+
+  const minStartStr = addCalendarDaysYmd(todayStr, -90);
+  if (startStr < minStartStr) {
+    startStr = minStartStr;
+    endStr = addCalendarDaysYmd(startStr, span - 1);
+    if (endStr > todayStr) {
+      endStr = todayStr;
+    }
+  }
+
+  return normalizeDateRange(
+    {
+      ...value,
+      startDate: startStr,
+      endDate: endStr,
+      preset: "custom",
+    },
+    anchorDate
+  );
+}
+
+export function canShiftDateRangeForward(
+  value: DateRangeValue,
+  anchorDate: Date
+): boolean {
+  return value.endDate < todayYmdInBD(anchorDate);
+}

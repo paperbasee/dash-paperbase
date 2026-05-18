@@ -10,7 +10,6 @@ import {
 } from "@/lib/basicAnalyticsService";
 import { isNetworkError } from "@/lib/network-error";
 import { dashboardAnalyticsQueryKey } from "@/lib/query-keys";
-import { todayYmdInBD } from "@/utils/time";
 
 export type {
   AnalyticsBucket,
@@ -36,13 +35,7 @@ export function useDashboardAnalyticsQuery(filters: DashboardAnalyticsFilters) {
         end_date: filters.endDate,
         bucket: filters.bucket,
       }),
-    refetchInterval: (q) => {
-      const today = todayYmdInBD(new Date());
-      const isLiveRange = filters.endDate >= today;
-      if (!isLiveRange) return false;
-      return 300_000;
-    },
-    refetchIntervalInBackground: false,
+    staleTime: 2 * 60 * 1000,
   });
 
   const networkError = query.isError && isNetworkError(query.error);

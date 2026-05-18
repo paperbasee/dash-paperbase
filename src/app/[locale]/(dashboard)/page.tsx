@@ -1,22 +1,39 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import StatsCard from "@/components/StatsCard";
-import DashboardBarChart from "@/components/DashboardBarChart";
-import DateRangeFilter, {
-  DateRangeValue,
-} from "@/components/DateRangeFilter";
+import DashboardHero from "@/components/dashboard/DashboardHero";
+import DashboardKpiCard from "@/components/dashboard/DashboardKpiCard";
+import DashboardActivityTimeline from "@/components/dashboard/DashboardActivityTimeline";
+import DashboardComingSoonCard from "@/components/dashboard/DashboardComingSoonCard";
+import DashboardStatusFooter from "@/components/dashboard/DashboardStatusFooter";
+import type { DateRangeValue } from "@/components/DateRangeFilter";
 import { useDashboardAnalyticsQuery } from "@/hooks/useDashboardAnalyticsQuery";
+import { useDashboardStatsQuery } from "@/hooks/useDashboardStatsQuery";
 import { useBrandingQuery } from "@/hooks/useBrandingQuery";
+import { useDashboardRefresh } from "@/context/DashboardRefreshContext";
+import { computeTrend } from "@/lib/dashboard/compute-trend";
+import { getPreviousDateRange } from "@/lib/dashboard/previous-date-range";
 import { toLocaleDigits } from "@/lib/locale-digits";
 import { todayYmdInBD } from "@/utils/time";
+
+function formatLastUpdated(lastRefreshedAt: Date | null, now: number): string | null {
+  if (!lastRefreshedAt) return null;
+  const seconds = Math.floor((now - lastRefreshedAt.getTime()) / 1000);
+  if (seconds < 30) return "just now";
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes}m ago`;
+  const hours = Math.floor(minutes / 60);
+  return `${hours}h ago`;
+}
 
 export default function DashboardPage() {
   const locale = useLocale();
   const t = useTranslations("dashboard");
   const { data: branding } = useBrandingQuery();
+  const { interval, lastRefreshedAt } = useDashboardRefresh();
   const today = useMemo(() => new Date(), []);
+  const [now, setNow] = useState(() => Date.now());
 
   const [range, setRange] = useState<DateRangeValue>(() => {
     const iso = todayYmdInBD(today);
@@ -28,98 +45,141 @@ export default function DashboardPage() {
     };
   });
 
-  const accountName = branding?.owner_name?.trim() || branding?.admin_name?.trim() || "there";
+  const previousRange = useMemo(() => getPreviousDateRange(range), [range]);
+
+  const accountName =
+    branding?.owner_name?.trim() || branding?.admin_name?.trim() || "there";
+
   const greeting = useMemo(() => {
     const hourLocal = new Date().getHours();
-
     if (hourLocal >= 5 && hourLocal < 12) return t("greetingMorning");
     if (hourLocal >= 12 && hourLocal < 17) return t("greetingAfternoon");
     if (hourLocal >= 17 && hourLocal < 23) return t("greetingEvening");
     return t("greetingLateNight");
   }, [t]);
 
-  const { data, isLoading, error, networkError: analyticsNetworkError } =
-    useDashboardAnalyticsQuery({
-      startDate: range.startDate,
-      endDate: range.endDate,
-      bucket: range.bucket,
-    });
+  const {
+    data,
+    isLoading,
+    error,
+    networkError: analyticsNetworkError,
+  } = useDashboardAnalyticsQuery({
+    startDate: range.startDate,
+    endDate: range.endDate,
+    bucket: range.bucket,
+  });
 
+  const { data: previousData } = useDashboardAnalyticsQuery({
+    startDate: previousRange.startDate,
+    endDate: previousRange.endDate,
+    bucket: previousRange.bucket,
+  });
+
+  const { isError: statsError } = useDashboardStatsQuery();
 
   const summary = data?.summary;
+  const previousSummary = previousData?.summary;
+  const series = data?.series ?? [];
+  const numberFont = locale === "bn" ? "sans" : "mono";
 
   const fmtStat = (n: number | undefined) =>
     n == null ? "--" : toLocaleDigits(String(n), locale);
 
+  const kpiTrend = (
+    current: number | undefined,
+    previous: number | undefined
+  ) => {
+    if (current == null || previous == null) return undefined;
+    return computeTrend(current, previous);
+  };
+
+  const lastUpdatedLabel = formatLastUpdated(lastRefreshedAt, now);
+  const apiHealthy = !analyticsNetworkError && !statsError && !error;
+
+  useEffect(() => {
+    const id = window.setInterval(() => setNow(Date.now()), 30_000);
+    return () => window.clearInterval(id);
+  }, []);
+
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex flex-col gap-0">
-        <header className="order-0 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="min-w-0">
-            <h1 className="text-[1.65rem] sm:text-[1.85rem] font-medium leading-relaxed tracking-tight text-foreground">
-              {t("title", { greeting, name: accountName })}
-            </h1>
-            <p className="mt-0 text-sm leading-relaxed text-muted-foreground md:hidden">
-              {t("subtitle")}
-            </p>
-          </div>
-        </header>
+    <div className="flex flex-col gap-6 pb-2">
+      <DashboardHero
+        greeting={greeting}
+        accountName={accountName}
+        lastUpdatedLabel={lastUpdatedLabel}
+        autoRefreshInterval={interval}
+        range={range}
+        onRangeChange={setRange}
+      />
 
-        <p className="order-0 hidden text-sm leading-relaxed text-muted-foreground md:block">
-          {t("subtitle")}
-        </p>
-      </div>
+      {(error || analyticsNetworkError) && (
+        <div className="rounded-card border border-destructive/30 bg-destructive/5 px-4 py-2 text-sm text-destructive">
+          {analyticsNetworkError ? t("serverUnreachable") : error}
+        </div>
+      )}
 
-      <div className="order-1 space-y-3 md:order-1">
-        <DateRangeFilter value={range} onChange={setRange} />
-
-        {(error || analyticsNetworkError) && (
-          <div className="rounded-card border border-destructive/30 bg-destructive/5 px-4 py-2 text-sm leading-relaxed text-destructive">
-            {analyticsNetworkError ? t("serverUnreachable") : error}
-          </div>
-        )}
-      </div>
-
-      <section className="order-2 grid grid-cols-2 gap-4 md:order-2 md:grid-cols-2 lg:grid-cols-4">
-        <StatsCard
+      <section className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
+        <DashboardKpiCard
           title={t("totalOrders")}
           value={!summary ? "--" : fmtStat(summary.totalOrders)}
-          accent="blue"
           subtitle={t("withinPeriod")}
-          numberFont={locale === "bn" ? "sans" : "mono"}
+          accent="blue"
+          trend={kpiTrend(summary?.totalOrders, previousSummary?.totalOrders)}
+          numberFont={numberFont}
+          loading={isLoading}
         />
-        <StatsCard
+        <DashboardKpiCard
           title={t("totalProducts")}
           value={!summary ? "--" : fmtStat(summary.totalProducts)}
-          accent="green"
           subtitle={t("addedInPeriod")}
-          numberFont={locale === "bn" ? "sans" : "mono"}
+          accent="green"
+          trend={kpiTrend(summary?.totalProducts, previousSummary?.totalProducts)}
+          numberFont={numberFont}
+          loading={isLoading}
         />
-        <StatsCard
+        <DashboardKpiCard
           title={t("totalCustomers")}
-          value={
-            !summary ? "--" : fmtStat(summary.totalCustomers)
-          }
-          accent="yellow"
+          value={!summary ? "--" : fmtStat(summary.totalCustomers)}
           subtitle={t("customersInPeriod")}
-          numberFont={locale === "bn" ? "sans" : "mono"}
+          accent="yellow"
+          trend={kpiTrend(summary?.totalCustomers, previousSummary?.totalCustomers)}
+          numberFont={numberFont}
+          loading={isLoading}
         />
-        <StatsCard
+        <DashboardKpiCard
           title={t("supportTickets")}
-          value={
-            !summary ? "--" : fmtStat(summary.totalSupportTickets)
-          }
-          accent="red"
+          value={!summary ? "--" : fmtStat(summary.totalSupportTickets)}
           subtitle={t("supportAndInquiries")}
-          numberFont={locale === "bn" ? "sans" : "mono"}
+          accent="red"
+          trend={kpiTrend(
+            summary?.totalSupportTickets,
+            previousSummary?.totalSupportTickets
+          )}
+          numberFont={numberFont}
+          loading={isLoading}
         />
       </section>
 
-      <section className="order-3 hidden md:order-3 md:block">
-        <div className="grid w-full min-h-[260px] gap-4 lg:grid-cols-[minmax(0,2fr)]">
-          <DashboardBarChart data={data?.series ?? []} bucket={range.bucket} />
+      <div className="hidden sm:block">
+        <DashboardActivityTimeline data={series} bucket={range.bucket} />
+      </div>
+
+      <section className="hidden gap-4 sm:grid lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
+        <DashboardComingSoonCard
+          className="h-full"
+          minHeightClass="min-h-[16rem] lg:min-h-[20rem]"
+        />
+        <div className="flex flex-col gap-4">
+          <DashboardComingSoonCard />
+          <DashboardComingSoonCard />
         </div>
       </section>
+
+      <div className="hidden sm:block">
+        <DashboardComingSoonCard minHeightClass="min-h-[14rem]" />
+      </div>
+
+      <DashboardStatusFooter apiHealthy={apiHealthy} latencyMs={null} />
     </div>
   );
 }

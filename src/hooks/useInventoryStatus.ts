@@ -10,7 +10,7 @@ import {
 } from "@/lib/inventory-status";
 import { inventoryStatusQueryKey } from "@/lib/query-keys";
 
-const REFETCH_MS = 30_000;
+const STALE_MS = 60 * 1000;
 
 export const INVENTORY_STATUS_REFRESH_EVENT = "pb:inventory-status-refresh";
 
@@ -41,9 +41,7 @@ export function useInventoryStatus(enabled: boolean) {
     queryKey: inventoryStatusQueryKey,
     queryFn: fetchInventoryStatus,
     enabled,
-    staleTime: REFETCH_MS,
-    refetchInterval: enabled ? REFETCH_MS : false,
-    refetchIntervalInBackground: true,
+    staleTime: STALE_MS,
     refetchOnWindowFocus: enabled,
     refetchOnReconnect: enabled,
   });

@@ -46,6 +46,8 @@ export function FilterDropdown({
   options,
   className = "",
   disabled = false,
+  showEmptyOption = true,
+  inputAriaLabel,
 }: {
   value?: string;
   onChange: (value: string) => void;
@@ -53,6 +55,9 @@ export function FilterDropdown({
   options: FilterOption[];
   className?: string;
   disabled?: boolean;
+  /** When false, the placeholder row is omitted (value must always be a real option). */
+  showEmptyOption?: boolean;
+  inputAriaLabel?: string;
 }) {
   const emptyItem = useMemo(
     (): ComboItem => ({
@@ -83,14 +88,17 @@ export function FilterDropdown({
         disabled={disabled}
         placeholder={placeholder}
         showClear={false}
+        aria-label={inputAriaLabel}
         className={className || "w-[calc(50%-0.25rem)] sm:w-[160px]"}
         inputClassName="cursor-pointer caret-transparent text-xs font-medium"
       />
       <ComboboxContent>
         <ComboboxList>
-          <ComboboxItem value={emptyItem}>
-            <span className="text-xs font-medium">{placeholder}</span>
-          </ComboboxItem>
+          {showEmptyOption ? (
+            <ComboboxItem value={emptyItem}>
+              <span className="text-xs font-medium">{placeholder}</span>
+            </ComboboxItem>
+          ) : null}
           {options.map((option) => {
             const item: ComboItem = {
               value: option.value,

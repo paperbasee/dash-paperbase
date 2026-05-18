@@ -13,6 +13,13 @@ const apiOrigin = process.env.NEXT_PUBLIC_API_URL
   ? "http://localhost:8000"
   : "";
 
+const wsOrigin = process.env.NEXT_PUBLIC_API_URL
+  ? new URL(process.env.NEXT_PUBLIC_API_URL).origin
+      .replace(/^http/, "ws")
+  : isDev
+  ? "ws://localhost:8000"
+  : "";
+
 const securityHeaders = [
   {
     key: "X-DNS-Prefetch-Control",
@@ -52,7 +59,7 @@ const securityHeaders = [
       `img-src 'self' data: blob: https: ${apiOrigin}`,
       "font-src 'self' data:",
       // Allow the backend API origin explicitly (http in dev, https in prod).
-      `connect-src 'self' https: ${apiOrigin} https://challenges.cloudflare.com`,
+      `connect-src 'self' https: ${apiOrigin} ${wsOrigin} https://challenges.cloudflare.com`,
       "frame-ancestors 'none'",
     ].join("; "),
   },
