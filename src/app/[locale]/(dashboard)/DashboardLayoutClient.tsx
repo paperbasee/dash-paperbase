@@ -212,11 +212,9 @@ export default function DashboardLayoutClient({
       <EnabledAppsProvider>
       <NavigationLoadingProvider>
       <SearchModalProvider>
-        <>
+        <div className="md:flex md:h-screen md:flex-col md:overflow-hidden">
           {showTopBannerStrip && subscriptionUiState ? (
-            <div
-              className="z-[60] flex flex-col md:fixed md:inset-x-0 md:top-0"
-            >
+            <div className="z-[60] flex flex-col md:shrink-0">
               {subscriptionUiState === "pending_review" ? (
                 meProfile?.latest_payment_status === "PENDING_REVIEW" ? (
                   <PaymentSubmittedAwaitingBanner
@@ -291,7 +289,7 @@ export default function DashboardLayoutClient({
           ) : null}
 
           <div
-            className="md:pt-[var(--subscription-banner-offset,0px)]"
+            className="md:flex md:min-h-0 md:flex-1 md:overflow-hidden"
             style={{ "--subscription-banner-offset": subscriptionBannerOffset } as CSSProperties}
           >
             <SystemNotificationBanner
@@ -300,11 +298,42 @@ export default function DashboardLayoutClient({
             />
 
             <SidebarDataProvider>
+            <div className="md:flex md:min-h-0 md:flex-1 md:overflow-hidden md:w-full">
             <Sidebar
               collapsed={collapsed}
               onToggle={() => setCollapsed(!collapsed)}
               navVariant={isSettingsMode ? "settings" : "app"}
             />
+
+            <div
+              className={cn(
+                "flex flex-col min-h-[calc(100dvh-var(--subscription-banner-offset,0px))] transition-[margin,padding-top] duration-300",
+                "md:min-h-0 md:flex md:flex-1 md:flex-col md:overflow-hidden"
+              )}
+            >
+              <MobileNavBar onMenuClick={() => setMobileOpen(true)} />
+
+              <div className="sticky top-[var(--subscription-banner-offset,0px)] z-30 hidden h-[var(--header-height)] shrink-0 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 md:static md:block md:shrink-0">
+                <div className={cn(contentContainerClass, "flex h-full items-center justify-end")}>
+                  <div className="flex items-center">
+                    <DeferredNavLink
+                      href="/activities"
+                      aria-label={tDashboard("activitiesAria")}
+                      className="inline-flex size-9 shrink-0 items-center justify-center rounded-md text-muted-foreground transition hover:bg-accent hover:text-foreground"
+                    >
+                      <History className="size-5" />
+                    </DeferredNavLink>
+                  </div>
+                </div>
+              </div>
+
+              <main className="py-4 md:min-h-0 md:flex-1 md:overflow-y-auto md:pt-6 pb-8 md:pb-10">
+                <div className={contentContainerClass}>
+                  {children}
+                </div>
+              </main>
+            </div>
+            </div>
 
             <Sheet modal={false} open={mobileOpen} onOpenChange={setMobileOpen}>
               <SheetContent
@@ -323,37 +352,8 @@ export default function DashboardLayoutClient({
               </SheetContent>
             </Sheet>
             </SidebarDataProvider>
-
-            <div
-              className={cn(
-                "flex flex-col min-h-[calc(100dvh-var(--subscription-banner-offset,0px))] transition-[margin,padding-top] duration-300",
-                collapsed ? "md:ml-16" : "md:ml-72"
-              )}
-            >
-              <MobileNavBar onMenuClick={() => setMobileOpen(true)} />
-
-              <div className="sticky top-[var(--subscription-banner-offset,0px)] z-30 hidden h-[var(--header-height)] shrink-0 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 md:block">
-                <div className={cn(contentContainerClass, "flex h-full items-center justify-end")}>
-                  <div className="flex items-center">
-                    <DeferredNavLink
-                      href="/activities"
-                      aria-label={tDashboard("activitiesAria")}
-                      className="inline-flex size-9 shrink-0 items-center justify-center rounded-md text-muted-foreground transition hover:bg-accent hover:text-foreground"
-                    >
-                      <History className="size-5" />
-                    </DeferredNavLink>
-                  </div>
-                </div>
-              </div>
-
-              <main className="py-4 md:pt-6 pb-8 md:pb-10">
-                <div className={contentContainerClass}>
-                  {children}
-                </div>
-              </main>
-            </div>
           </div>
-        </>
+        </div>
       </SearchModalProvider>
       </NavigationLoadingProvider>
       </EnabledAppsProvider>

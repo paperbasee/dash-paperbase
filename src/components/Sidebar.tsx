@@ -732,7 +732,7 @@ export default function Sidebar({ collapsed, onToggle, onNavigate, navVariant }:
   return (
     <aside
       className={cn(
-        "fixed left-0 top-[var(--subscription-banner-offset,0px)] z-40 hidden h-[calc(100vh-var(--subscription-banner-offset,0px))] flex-col border-r border-border bg-background transition-[width] duration-300 md:flex",
+        "z-40 hidden flex-col border-r border-border bg-background transition-[width] duration-300 md:relative md:flex md:h-full md:min-h-0 md:shrink-0 md:flex-col md:overflow-hidden",
         collapsed ? "w-16" : "w-72"
       )}
     >
