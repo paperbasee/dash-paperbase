@@ -15,6 +15,7 @@ import { formatOrderStatusLabel } from "@/lib/orders/order-statuses";
 import { toLocaleDigits } from "@/lib/locale-digits";
 import { numberTextClass } from "@/lib/number-font";
 import { useBranding } from "@/context/BrandingContext";
+import type { OrdersListParams } from "@/lib/query-keys";
 import type { Order } from "@/types";
 
 interface DashboardOrdersLogProps {
@@ -27,17 +28,16 @@ export default function DashboardOrdersLog({
   const locale = useLocale();
   const t = useTranslations("dashboard");
   const tPages = useTranslations("pages");
-  const branding = useBranding();
-  const currency = branding?.currency_symbol ?? "৳";
+  const { currencySymbol } = useBranding();
   const numClass = numberTextClass(locale);
 
   const [filter, setFilter] = useState("");
   const debouncedFilter = useDebouncedValue(filter, 300);
 
-  const listParams = useMemo(
-    () => (debouncedFilter.trim() ? { search: debouncedFilter.trim() } : {}),
-    [debouncedFilter]
-  );
+  const listParams = useMemo((): OrdersListParams => {
+    const q = debouncedFilter.trim();
+    return q ? { search: q } : {};
+  }, [debouncedFilter]);
 
   const { data, isLoading } = useOrdersQuery(listParams, {
     enabled: Boolean(debouncedFilter.trim()),
@@ -123,7 +123,7 @@ export default function DashboardOrdersLog({
                   )}
                 </td>
                 <td className={`px-4 py-3 font-medium text-[hsl(var(--chart-products))] ${numClass}`}>
-                  {currency}
+                  {currencySymbol}
                   {toLocaleDigits(order.total, locale)}
                 </td>
                 <td className="px-4 py-3">
