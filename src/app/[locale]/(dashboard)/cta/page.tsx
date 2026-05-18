@@ -21,7 +21,6 @@ import { notify } from "@/notifications";
 import { numberTextClass } from "@/lib/number-font";
 import { cn } from "@/lib/utils";
 import { useEnterNavigation } from "@/hooks/useEnterNavigation";
-import { usePageLoadingBar } from "@/hooks/usePageLoadingBar";
 
 const Calendar = dynamic(
   () => import("@/components/ui/calendar").then((mod) => mod.Calendar),
@@ -126,7 +125,6 @@ export default function CtaPage() {
   const confirm = useConfirm();
   const [ctas, setCtas] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
-  usePageLoadingBar(loading && ctas.length === 0);
   const [editing, setEditing] = useState<string | "new" | null>(null);
   const [form, setForm] = useState<CtaForm>(emptyForm);
   const [startDate, setStartDate] = useState<Date | undefined>(undefined);

@@ -34,7 +34,6 @@ import { numberTextClass } from "@/lib/number-font";
 import { cn } from "@/lib/utils";
 import { cursorFromLink } from "@/lib/cursor-from-link";
 import { useEnterNavigation } from "@/hooks/useEnterNavigation";
-import { usePageLoadingBar } from "@/hooks/usePageLoadingBar";
 
 async function fetchAllProducts(): Promise<Product[]> {
   const out: Product[] = [];
@@ -135,8 +134,6 @@ export default function VariantsPageClient() {
   const [variants, setVariants] = useState<ProductVariant[]>([]);
   const [loading, setLoading] = useState(true);
   const [variantsLoading, setVariantsLoading] = useState(false);
-  usePageLoadingBar(loading && products.length === 0);
-  usePageLoadingBar(variantsLoading && variants.length === 0);
   const [error, setError] = useState("");
 
   const [editing, setEditing] = useState<string | "new" | null>(null);

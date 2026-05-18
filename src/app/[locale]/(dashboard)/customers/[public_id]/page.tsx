@@ -11,7 +11,6 @@ import type { CustomerDetailsResponse } from "@/types";
 import { formatDashboardDateTime } from "@/lib/datetime-display";
 import { Button } from "@/components/ui/button";
 import { numberTextClass } from "@/lib/number-font";
-import { usePageLoadingBar } from "@/hooks/usePageLoadingBar";
 import { notify } from "@/notifications";
 
 function asCurrency(value: string | number) {
@@ -32,7 +31,6 @@ export default function CustomerDetailPage() {
 
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<CustomerDetailsResponse | null>(null);
-  usePageLoadingBar(loading && !data);
 
   useEffect(() => {
     if (!publicId) return;

@@ -47,7 +47,6 @@ import type { AdminCategoryTreeNode, Order, PaginatedResponse } from "@/types";
 import { useConfirm } from "@/context/ConfirmDialogContext";
 import { notify, normalizeError } from "@/notifications";
 import { BelowFoldScrollHint } from "@/components/BelowFoldScrollHint";
-import { useQueryPageLoadingBar } from "@/hooks/usePageLoadingBar";
 import { useOrdersQuery } from "@/hooks/useOrdersQuery";
 import { ordersListQueryKey } from "@/lib/query-keys";
 import { useQueryClient } from "@tanstack/react-query";
@@ -265,7 +264,6 @@ export default function OrdersPage() {
   ]);
 
   const { data: ordersPage, isLoading, isError, error } = useOrdersQuery(listParams);
-  useQueryPageLoadingBar(isLoading, ordersPage);
 
   const orders = ordersPage?.results ?? [];
   const ordersCount =

@@ -16,7 +16,6 @@ import { useFilters } from "@/hooks/useFilters";
 import type { Customer } from "@/types";
 import { formatDashboardDate } from "@/lib/datetime-display";
 import { notify } from "@/notifications";
-import { useQueryPageLoadingBar } from "@/hooks/usePageLoadingBar";
 import { useCustomersQuery } from "@/hooks/useCustomersQuery";
 import type { CustomersListParams } from "@/lib/query-keys";
 
@@ -55,7 +54,6 @@ export default function CustomersPage() {
   }, [page, filters.joined_date, filters.is_repeat_customer, filters.search]);
 
   const { data, isLoading, isError, error } = useCustomersQuery(listParams);
-  useQueryPageLoadingBar(isLoading, data);
 
   useEffect(() => {
     if (!isError || !error) return;

@@ -11,7 +11,6 @@ import {
   settingsSectionSurfaceClassName,
 } from "../SettingsSectionBody";
 import { cn } from "@/lib/utils";
-import { usePageLoadingBar } from "@/hooks/usePageLoadingBar";
 
 type CustomerFormVariant = "minimal" | "extended";
 
@@ -92,7 +91,6 @@ export default function CheckoutSettingsSection({
   const unchanged =
     loadedVariant !== null && selectedVariant === loadedVariant;
 
-  usePageLoadingBar(!hidden && loading && loadedVariant === null);
 
   return (
     <section

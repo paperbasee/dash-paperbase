@@ -56,8 +56,6 @@ import { formatDashboardDateTime } from "@/lib/datetime-display";
 import { numberTextClass } from "@/lib/number-font";
 import { notify, normalizeError } from "@/notifications";
 import { cn } from "@/lib/utils";
-import { takeRoutePrefetch } from "@/lib/navigation/route-prefetch-cache";
-import { usePageLoadingBar } from "@/hooks/usePageLoadingBar";
 import { useEnterNavigation } from "@/hooks/useEnterNavigation";
 import { useConfirm } from "@/context/ConfirmDialogContext";
 
@@ -84,7 +82,6 @@ export default function OrderDetailPage() {
   const { currencySymbol } = useBranding();
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
-  usePageLoadingBar(loading && !order);
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState<EditForm>({
     shipping_name: "",
@@ -121,14 +118,6 @@ export default function OrderDetailPage() {
   });
 
   useEffect(() => {
-    const cacheKey = `/orders/${order_public_id}`;
-    const prefetched = takeRoutePrefetch<Order>(cacheKey);
-    if (prefetched) {
-      setOrder(prefetched);
-      setLoading(false);
-      return;
-    }
-
     api
       .get<Order>(`admin/orders/${order_public_id}/`)
       .then((res) => setOrder(res.data))

@@ -1,80 +1,83 @@
 "use client";
 
-import { useEffect, useState, useCallback, useRef } from "react";
+import { useCallback, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { useLocale } from "next-intl";
 import api from "@/lib/api";
 import type { DashboardStats } from "@/types";
+import type { NavCounts } from "@/config/apps";
 import { formatCountLocalized } from "@/lib/locale-digits";
-import { useEnabledApps } from "@/hooks/useEnabledApps";
+import { navCountsQueryKey } from "@/lib/query-keys";
 
-const REFETCH_MS = 60_000; // 60 seconds
+const REFETCH_MS = 60_000;
 const FOREGROUND_REFETCH_COOLDOWN_MS = 5_000;
+
+let lastForegroundFetchAt = 0;
 
 function formatCountBase(n: number): string {
   return String(n);
 }
 
+function mapStatsToNavCounts(stats: DashboardStats): NavCounts {
+  return {
+    orders: stats.orders.total,
+    products: stats.products.active,
+    notifications: stats.notifications,
+    supportTickets: stats.support_tickets,
+    banners: stats.banners_count ?? 0,
+    blog: stats.blogs_count ?? 0,
+  };
+}
+
+export async function fetchNavCounts(): Promise<NavCounts> {
+  const { data } = await api.get<DashboardStats>("admin/stats/");
+  return mapStatsToNavCounts(data);
+}
+
+function shouldSkipForegroundRefetch(): boolean {
+  const now = Date.now();
+  if (now - lastForegroundFetchAt < FOREGROUND_REFETCH_COOLDOWN_MS) {
+    return true;
+  }
+  lastForegroundFetchAt = now;
+  return false;
+}
+
 export function useNavCounts() {
   const locale = useLocale();
-  const { enabledOptional } = useEnabledApps();
-  const [stats, setStats] = useState<DashboardStats | null>(null);
-  const [loading, setLoading] = useState(true);
-  const inFlightRef = useRef(false);
-  const lastForegroundFetchAtRef = useRef(0);
 
   const formatCount = useCallback(
     (n: number) => formatCountLocalized(n, locale, formatCountBase),
     [locale]
   );
 
-  const fetchCounts = useCallback(() => {
-    if (inFlightRef.current) return;
-    inFlightRef.current = true;
+  const query = useQuery({
+    queryKey: navCountsQueryKey,
+    queryFn: fetchNavCounts,
+    staleTime: REFETCH_MS,
+    refetchInterval: REFETCH_MS,
+    refetchIntervalInBackground: true,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: true,
+  });
 
-    api
-      .get<DashboardStats>("admin/stats/")
-      .then((res) => setStats(res.data))
-      .catch(() => setStats((prev) => prev))
-      .finally(() => {
-        setLoading(false);
-        inFlightRef.current = false;
-      });
-  }, [enabledOptional]);
-
-  const shouldSkipBackgroundFetch = () =>
-    (typeof document !== "undefined" && document.hidden) ||
-    (typeof navigator !== "undefined" && navigator.onLine === false);
-
-  const shouldSkipForegroundFetch = () => {
-    const now = Date.now();
-    if (now - lastForegroundFetchAtRef.current < FOREGROUND_REFETCH_COOLDOWN_MS) {
-      return true;
-    }
-    lastForegroundFetchAtRef.current = now;
-    return false;
-  };
+  const { refetch } = query;
 
   useEffect(() => {
-    fetchCounts();
-    const interval = setInterval(() => {
-      if (shouldSkipBackgroundFetch()) return;
-      fetchCounts();
-    }, REFETCH_MS);
-    return () => clearInterval(interval);
-  }, [fetchCounts]);
-
-  useEffect(() => {
-    const onForeground = () => {
-      if (shouldSkipBackgroundFetch() || shouldSkipForegroundFetch()) return;
-      fetchCounts();
+    const tryForegroundRefetch = () => {
+      if (typeof document !== "undefined" && document.hidden) return;
+      if (typeof navigator !== "undefined" && navigator.onLine === false) return;
+      if (shouldSkipForegroundRefetch()) return;
+      void refetch();
     };
-    const handleFocus = () => onForeground();
+
+    const handleFocus = () => tryForegroundRefetch();
     const handleVisibility = () => {
       if (typeof document !== "undefined" && document.visibilityState === "visible") {
-        onForeground();
+        tryForegroundRefetch();
       }
     };
-    const handleOnline = () => onForeground();
+    const handleOnline = () => tryForegroundRefetch();
 
     window.addEventListener("focus", handleFocus);
     document.addEventListener("visibilitychange", handleVisibility);
@@ -84,9 +87,9 @@ export function useNavCounts() {
       document.removeEventListener("visibilitychange", handleVisibility);
       window.removeEventListener("online", handleOnline);
     };
-  }, [fetchCounts]);
+  }, [refetch]);
 
-  if (loading || !stats) {
+  if (query.isLoading || !query.data) {
     return {
       counts: null,
       formatCount,
@@ -94,15 +97,7 @@ export function useNavCounts() {
   }
 
   return {
-    counts: {
-      orders: stats.orders.total,
-      products: stats.products.active,
-      notifications: stats.notifications,
-      brands: 0,
-      supportTickets: stats.support_tickets,
-      banners: stats.banners_count ?? 0,
-      blog: stats.blogs_count ?? 0,
-    },
+    counts: query.data,
     formatCount,
   };
 }

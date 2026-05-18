@@ -20,7 +20,6 @@ import { notify } from "@/notifications";
 import { useAuth } from "@/context/AuthContext";
 import { isNetworkingStoreUnderReview } from "@/lib/subscription-ui-state";
 import { useEnterNavigation } from "@/hooks/useEnterNavigation";
-import { usePageLoadingBar } from "@/hooks/usePageLoadingBar";
 
 type APIKeyRow = {
   public_id: string;
@@ -115,7 +114,6 @@ export default function NetworkingSection({ hidden }: { hidden: boolean }) {
     subscriptionLocked || planExpired || storeUnderReview;
   const [keys, setKeys] = useState<APIKeyRow[]>([]);
   const [loading, setLoading] = useState(true);
-  usePageLoadingBar(!hidden && loading && keys.length === 0);
   const [newKeyName, setNewKeyName] = useState("");
   const [revealedKey, setRevealedKey] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);

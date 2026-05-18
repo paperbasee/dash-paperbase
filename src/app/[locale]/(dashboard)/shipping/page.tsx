@@ -19,7 +19,6 @@ import type {
   PaginatedResponse,
 } from "@/types";
 import { useEnterNavigation } from "@/hooks/useEnterNavigation";
-import { usePageLoadingBar } from "@/hooks/usePageLoadingBar";
 
 const multiSelectClass =
   "w-full min-h-[6rem] rounded-ui border border-border bg-background px-3 py-2 text-sm text-foreground shadow-xs outline-none transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50";
@@ -106,9 +105,6 @@ export default function ShippingPage() {
   const [zones, setZones] = useState<ShippingZone[]>([]);
   const [methods, setMethods] = useState<ShippingMethod[]>([]);
   const [rates, setRates] = useState<ShippingRate[]>([]);
-  usePageLoadingBar(
-    loading && zones.length === 0 && methods.length === 0 && rates.length === 0
-  );
 
   const [editingZone, setEditingZone] = useState<string | "new" | null>(null);
   const [editingMethod, setEditingMethod] = useState<string | "new" | null>(null);

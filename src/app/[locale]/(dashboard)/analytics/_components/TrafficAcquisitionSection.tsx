@@ -15,7 +15,6 @@ import { CHART_COLORS, axisTickFill, chartGridStroke, tooltipStyle } from "./con
 import { formatChartAxisLabel } from "./format";
 import type { RangeOption, UTMData } from "./types";
 import { RechartsSizedContainer } from "@/components/RechartsSizedContainer";
-import { usePageLoadingBar } from "@/hooks/usePageLoadingBar";
 
 export function TrafficAcquisitionSection({
   utmData,
@@ -32,7 +31,6 @@ export function TrafficAcquisitionSection({
   range: RangeOption;
   currencySymbol: string;
 }) {
-  usePageLoadingBar(utmLoading && !utmData);
 
   return (
     <div className="rounded-card border border-border bg-card p-4 space-y-4">

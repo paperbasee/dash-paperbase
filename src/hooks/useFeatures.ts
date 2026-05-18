@@ -1,61 +1,47 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useCallback } from "react";
+import { useQuery } from "@tanstack/react-query";
 import api from "@/lib/api";
+import { featuresQueryKey } from "@/lib/query-keys";
 
 interface FeaturesResponse {
   features: Record<string, boolean>;
   limits: Record<string, number>;
 }
 
-interface FeaturesState {
-  features: Record<string, boolean> | null;
-  limits: Record<string, number> | null;
-  loading: boolean;
+const FEATURES_STALE_MS = 5 * 60 * 1000;
+
+export async function fetchFeatures(): Promise<FeaturesResponse> {
+  const { data } = await api.get<FeaturesResponse>("auth/features/");
+  return {
+    features: data.features ?? {},
+    limits: data.limits ?? {},
+  };
 }
 
 export function useFeatures() {
-  const [state, setState] = useState<FeaturesState>({
-    features: null,
-    limits: null,
-    loading: true,
+  const query = useQuery({
+    queryKey: featuresQueryKey,
+    queryFn: fetchFeatures,
+    staleTime: FEATURES_STALE_MS,
   });
 
-  useEffect(() => {
-    let cancelled = false;
-
-    async function fetch() {
-      try {
-        const { data } = await api.get<FeaturesResponse>("auth/features/");
-        if (cancelled) return;
-        setState({
-          features: data.features ?? {},
-          limits: data.limits ?? {},
-          loading: false,
-        });
-      } catch {
-        if (!cancelled) {
-          setState({ features: {}, limits: {}, loading: false });
-        }
-      }
-    }
-
-    fetch();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+  const features = query.data?.features ?? null;
+  const limits = query.data?.limits ?? null;
 
   const hasFeature = useCallback(
     (key: string): boolean => {
-      if (!state.features) return false;
-      return state.features[key] === true;
+      if (!features) return false;
+      return features[key] === true;
     },
-    [state.features],
+    [features]
   );
 
   return {
-    ...state,
+    features,
+    limits,
+    loading: query.isLoading,
     hasFeature,
   };
 }

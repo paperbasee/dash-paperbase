@@ -104,6 +104,7 @@ export default function useSettingsPageController() {
 
   return {
     isLoading,
+    branding,
     enabledApps,
 
     ownerName: account.ownerName,

@@ -60,7 +60,6 @@ import { useNavCounts } from "@/hooks/useNavCounts";
 import { numberTextClass } from "@/lib/number-font";
 import { cn } from "@/lib/utils";
 import { BelowFoldScrollHint } from "@/components/BelowFoldScrollHint";
-import { useQueryPageLoadingBar } from "@/hooks/usePageLoadingBar";
 import { useProductsQuery } from "@/hooks/useProductsQuery";
 import { productsListQueryKey } from "@/lib/query-keys";
 import { useQueryClient } from "@tanstack/react-query";
@@ -163,7 +162,6 @@ export default function ProductsPage() {
   ]);
 
   const { data: productsPage, isLoading, isError, error } = useProductsQuery(listParams);
-  useQueryPageLoadingBar(isLoading, productsPage);
 
   const products = productsPage?.results ?? [];
   const productsCount =

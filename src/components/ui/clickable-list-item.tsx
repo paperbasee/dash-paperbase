@@ -2,7 +2,6 @@
 
 import * as React from "react"
 import { useDeferredNavigate } from "@/hooks/useDeferredNavigate"
-import { getPrefetchFn } from "@/lib/navigation/route-prefetch-registry"
 import { normalizeNavigationHref } from "@/lib/navigation/normalize-navigation-href"
 import { cn } from "@/lib/utils"
 import { isNestedInteractiveTarget } from "@/lib/row-nav"
@@ -35,9 +34,7 @@ export function ClickableListItem({
 
   const runNavigate = React.useCallback(() => {
     if (href) {
-      const normalized = normalizeNavigationHref(href)
-      const prefetch = getPrefetchFn(normalized)
-      void navigate(normalized, () => prefetch())
+      navigate(normalizeNavigationHref(href))
     } else {
       onNavigate?.()
     }

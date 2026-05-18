@@ -16,7 +16,6 @@ import { notify } from "@/notifications";
 import { numberTextClass } from "@/lib/number-font";
 import { cn } from "@/lib/utils";
 import { INVENTORY_STATUS_REFRESH_EVENT } from "@/hooks/useInventoryStatus";
-import { usePageLoadingBar } from "@/hooks/usePageLoadingBar";
 import { BelowFoldScrollHint } from "@/components/BelowFoldScrollHint";
 import { Button } from "@/components/ui/button";
 
@@ -46,9 +45,6 @@ export default function InventoryPage() {
   const debouncedSearch = useDebouncedValue(searchInput);
   const [filtersOpen, setFiltersOpen] = useState(false);
 
-  usePageLoadingBar(
-    loading && inventory.length === 0 && count === 0 && lowStockTotal === null
-  );
 
   useEffect(() => {
     setSearchInput(filters.search || "");

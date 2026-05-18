@@ -327,8 +327,8 @@ body {
 html {
   @media (prefers-reduced-motion: no-preference) {
     transition:
-      background-color 150ms ease-in-out,
-      color 150ms ease-in-out;
+      background-color 220ms ease-out,
+      color 220ms ease-out;
   }
 }
 

@@ -1,75 +1,68 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "@/lib/api";
 import type { PaginatedResponse } from "@/types";
 import {
   inventoryStatusFromCounts,
   type InventoryStatusLevel,
 } from "@/lib/inventory-status";
+import { inventoryStatusQueryKey } from "@/lib/query-keys";
 
 const REFETCH_MS = 30_000;
 
 export const INVENTORY_STATUS_REFRESH_EVENT = "pb:inventory-status-refresh";
 
+type InventoryStatusData = {
+  outCount: number;
+  lowInStockCount: number;
+};
+
+async function fetchInventoryStatus(): Promise<InventoryStatusData> {
+  const [outRes, lowRes] = await Promise.all([
+    api.get<PaginatedResponse<unknown>>("admin/inventory/", {
+      params: { stock: "out_of_stock", page: 1 },
+    }),
+    api.get<PaginatedResponse<unknown>>("admin/inventory/", {
+      params: { stock: "low_in_stock", page: 1 },
+    }),
+  ]);
+  return {
+    outCount: outRes.data.count ?? 0,
+    lowInStockCount: lowRes.data.count ?? 0,
+  };
+}
+
 export function useInventoryStatus(enabled: boolean) {
-  const [outCount, setOutCount] = useState(0);
-  const [lowInStockCount, setLowInStockCount] = useState(0);
-  const [ready, setReady] = useState(false);
+  const queryClient = useQueryClient();
 
-  const fetchStatus = useCallback(() => {
-    if (!enabled) return;
-    Promise.all([
-      api.get<PaginatedResponse<unknown>>("admin/inventory/", {
-        params: { stock: "out_of_stock", page: 1 },
-      }),
-      api.get<PaginatedResponse<unknown>>("admin/inventory/", {
-        params: { stock: "low_in_stock", page: 1 },
-      }),
-    ])
-      .then(([outRes, lowRes]) => {
-        setOutCount(outRes.data.count ?? 0);
-        setLowInStockCount(lowRes.data.count ?? 0);
-      })
-      .catch(() => {
-        setOutCount(0);
-        setLowInStockCount(0);
-      })
-      .finally(() => setReady(true));
-  }, [enabled]);
+  const query = useQuery({
+    queryKey: inventoryStatusQueryKey,
+    queryFn: fetchInventoryStatus,
+    enabled,
+    staleTime: REFETCH_MS,
+    refetchInterval: enabled ? REFETCH_MS : false,
+    refetchIntervalInBackground: true,
+    refetchOnWindowFocus: enabled,
+    refetchOnReconnect: enabled,
+  });
 
-  useEffect(() => {
-    if (!enabled) {
-      setOutCount(0);
-      setLowInStockCount(0);
-      setReady(false);
-      return;
-    }
-    setReady(false);
-    fetchStatus();
-    const interval = setInterval(fetchStatus, REFETCH_MS);
-    return () => clearInterval(interval);
-  }, [enabled, fetchStatus]);
-
-  useEffect(() => {
-    if (!enabled) return;
-    const onFocus = () => fetchStatus();
-    window.addEventListener("focus", onFocus);
-    return () => window.removeEventListener("focus", onFocus);
-  }, [enabled, fetchStatus]);
+  const refresh = useCallback(() => {
+    void queryClient.invalidateQueries({ queryKey: inventoryStatusQueryKey });
+  }, [queryClient]);
 
   useEffect(() => {
     if (!enabled || typeof window === "undefined") return;
-    const onRefresh = () => fetchStatus();
+    const onRefresh = () => refresh();
     window.addEventListener(INVENTORY_STATUS_REFRESH_EVENT, onRefresh);
-    return () =>
-      window.removeEventListener(INVENTORY_STATUS_REFRESH_EVENT, onRefresh);
-  }, [enabled, fetchStatus]);
+    return () => window.removeEventListener(INVENTORY_STATUS_REFRESH_EVENT, onRefresh);
+  }, [enabled, refresh]);
 
   const status: InventoryStatusLevel = useMemo(() => {
-    if (!enabled || !ready) return "none";
-    return inventoryStatusFromCounts(outCount, lowInStockCount);
-  }, [enabled, ready, outCount, lowInStockCount]);
+    if (!enabled || query.isLoading || !query.data) return "none";
+    return inventoryStatusFromCounts(query.data.outCount, query.data.lowInStockCount);
+  }, [enabled, query.isLoading, query.data]);
 
-  return { status, refresh: fetchStatus };
+  return { status, refresh };
 }

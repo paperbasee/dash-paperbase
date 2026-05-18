@@ -2,6 +2,12 @@ import type { AnalyticsBucket } from "@/lib/basicAnalyticsService";
 
 export const brandingQueryKey = ["branding", "admin"] as const;
 
+export const navCountsQueryKey = ["nav-counts"] as const;
+
+export const featuresQueryKey = ["features"] as const;
+
+export const inventoryStatusQueryKey = ["inventory-status"] as const;
+
 export function dashboardAnalyticsQueryKey(filters: {
   startDate: string;
   endDate: string;

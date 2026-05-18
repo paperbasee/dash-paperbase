@@ -21,7 +21,6 @@ import { useConfirm } from "@/context/ConfirmDialogContext";
 import { notify } from "@/notifications";
 import { SettingsActionDialog } from "@/components/settings/SettingsActionDialog";
 import { settingsInvertedButtonClassName } from "../SettingsSectionBody";
-import { usePageLoadingBar } from "@/hooks/usePageLoadingBar";
 import {
   MarketingIntegrationListRow,
   EventTogglesBlock,
@@ -72,7 +71,6 @@ export default function MarketingProviderCard({
 
   const [allFetched, setAllFetched] = useState<MarketingIntegrationType[] | null>(null);
   const [loading, setLoading] = useState(true);
-  usePageLoadingBar(!panelHidden && loading && allFetched === null);
   const [modal, setModal] = useState<MarketingModal>(null);
   const [form, setForm] = useState<ConnectForm>(empty(provider));
   const [saving, setSaving] = useState(false);

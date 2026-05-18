@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useDeferredNavigate } from "@/hooks/useDeferredNavigate";
-import { getPrefetchFn } from "@/lib/navigation/route-prefetch-registry";
 import { normalizeNavigationHref } from "@/lib/navigation/normalize-navigation-href";
 
 import { Button } from "@/components/ui/button";
@@ -53,9 +52,7 @@ export default function SystemNotificationBanner({
   const t = useTranslations("systemBanner");
 
   const goInternal = (path: string) => {
-    const normalized = normalizeNavigationHref(path);
-    const prefetch = getPrefetchFn(normalized);
-    void navigate(normalized, () => prefetch());
+    navigate(normalizeNavigationHref(path));
   };
   const { notification, isLoading, isError } = useSystemNotification();
   const [hiddenPublicId, setHiddenPublicId] = useState<string | null>(null);

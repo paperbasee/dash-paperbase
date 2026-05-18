@@ -7,7 +7,6 @@ import { useRouter } from "@/i18n/navigation";
 import { Clock2Icon, ImageIcon, Undo2 } from "lucide-react";
 import { isApiHttpError } from "@/lib/api-client";
 import api from "@/lib/api";
-import { usePageLoadingBar } from "@/hooks/usePageLoadingBar";
 import { Button } from "@/components/ui/button";
 import { ClickableTableRow } from "@/components/ui/clickable-table-row";
 import { ClickableText } from "@/components/ui/clickable-text";
@@ -213,7 +212,6 @@ export default function BannersPage() {
   const [banners, setBanners] = useState<Banner[]>([]);
   const [bannersTotalCount, setBannersTotalCount] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
-  usePageLoadingBar(loading && banners.length === 0 && bannersTotalCount === null);
   const [editing, setEditing] = useState<string | "new" | null>(null);
   const [form, setForm] = useState<BannerForm>(emptyForm);
   const [startDate, setStartDate] = useState<Date | undefined>(undefined);

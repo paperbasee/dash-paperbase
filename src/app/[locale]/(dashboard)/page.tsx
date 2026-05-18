@@ -8,7 +8,6 @@ import DateRangeFilter, {
   DateRangeValue,
 } from "@/components/DateRangeFilter";
 import { useDashboardAnalyticsQuery } from "@/hooks/useDashboardAnalyticsQuery";
-import { useQueryPageLoadingBar } from "@/hooks/usePageLoadingBar";
 import { useBrandingQuery } from "@/hooks/useBrandingQuery";
 import { toLocaleDigits } from "@/lib/locale-digits";
 import { todayYmdInBD } from "@/utils/time";
@@ -46,7 +45,6 @@ export default function DashboardPage() {
       bucket: range.bucket,
     });
 
-  useQueryPageLoadingBar(isLoading, data);
 
   const summary = data?.summary;
 

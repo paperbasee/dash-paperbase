@@ -7,7 +7,6 @@ import { toLocaleDigits } from "@/lib/locale-digits";
 import { numberTextClass } from "@/lib/number-font";
 import { Loader2, Undo2, Trash } from "lucide-react";
 import api from "@/lib/api";
-import { usePageLoadingBar } from "@/hooks/usePageLoadingBar";
 import { Button } from "@/components/ui/button";
 import { formatDashboardDateTime } from "@/lib/datetime-display";
 import type { PaginatedResponse, TrashItem } from "@/types";
@@ -31,7 +30,6 @@ export default function TrashPage() {
   const [count, setCount] = useState(0);
   const [hasNext, setHasNext] = useState(false);
   const [loading, setLoading] = useState(true);
-  usePageLoadingBar(loading && rows.length === 0 && count === 0);
   const [error, setError] = useState<string | null>(null);
   const [busyPublicId, setBusyPublicId] = useState<string | null>(null);
   const [selectedPublicIds, setSelectedPublicIds] = useState<Set<string>>(new Set());

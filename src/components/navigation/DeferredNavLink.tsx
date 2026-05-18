@@ -7,7 +7,6 @@ import {
 } from "react";
 import { Link } from "@/i18n/navigation";
 import { useDeferredNavigate } from "@/hooks/useDeferredNavigate";
-import { getPrefetchFn } from "@/lib/navigation/route-prefetch-registry";
 import { normalizeNavigationHref } from "@/lib/navigation/normalize-navigation-href";
 
 type DeferredNavLinkProps = ComponentProps<typeof Link> & {
@@ -26,7 +25,7 @@ function isModifiedClick(event: MouseEvent<HTMLAnchorElement>): boolean {
 
 export const DeferredNavLink = forwardRef<HTMLAnchorElement, DeferredNavLinkProps>(
   function DeferredNavLink(
-    { href, onClick, onNavigate, prefetch: _prefetch, ...props },
+    { href, onClick, onNavigate, ...props },
     ref
   ) {
     const navigate = useDeferredNavigate();
@@ -36,7 +35,6 @@ export const DeferredNavLink = forwardRef<HTMLAnchorElement, DeferredNavLinkProp
       <Link
         ref={ref}
         href={href}
-        prefetch={false}
         {...props}
         onClick={(event) => {
           onClick?.(event);
@@ -45,10 +43,8 @@ export const DeferredNavLink = forwardRef<HTMLAnchorElement, DeferredNavLinkProp
 
           event.preventDefault();
           const normalized = normalizeNavigationHref(hrefString);
-          const fetchFn = getPrefetchFn(normalized);
-          void navigate(normalized, () => fetchFn()).then(() => {
-            onNavigate?.();
-          });
+          navigate(normalized);
+          onNavigate?.();
         }}
       />
     );

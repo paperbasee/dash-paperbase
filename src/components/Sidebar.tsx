@@ -38,10 +38,8 @@ import {
 import { useAuth } from "@/context/AuthContext";
 import UserAvatar from "@/components/UserAvatar";
 import { useSearchModal } from "@/context/SearchModalContext";
-import { useNavCounts } from "@/hooks/useNavCounts";
-import { useInventoryStatus } from "@/hooks/useInventoryStatus";
 import { useEnabledApps } from "@/hooks/useEnabledApps";
-import { useFeatures } from "@/hooks/useFeatures";
+import { useSidebarData } from "@/context/SidebarDataContext";
 import {
   APP_CONFIG,
   CATALOG_SUB_APP_IDS,
@@ -72,7 +70,6 @@ import {
 } from "@/lib/theme";
 import { runThemeTransition } from "@/lib/theme-transition/transition";
 import SystemNotificationBanner from "@/components/system/SystemNotificationBanner";
-import { useBrandingQuery } from "@/hooks/useBrandingQuery";
 import { SECTIONS, type SettingsSection } from "@/app/[locale]/(dashboard)/settings/settingsSections";
 import AppSidebarNav from "@/components/sidebar/AppSidebarNav";
 import SettingsSidebarNav from "@/components/sidebar/SettingsSidebarNav";
@@ -143,11 +140,12 @@ function SidebarContent({
   const router = useRouter();
   const searchParams = useSearchParams();
   const { logout, isAuthenticated, meProfile, meProfileStatus } = useAuth();
-  const { data: branding, isLoading: isBrandingLoading } = useBrandingQuery();
+  const { branding, navCounts, features, inventoryStatus } = useSidebarData();
+  const { data: brandingData, isLoading: isBrandingLoading } = branding;
+  const { counts, formatCount } = navCounts;
+  const { hasFeature } = features;
   const { setOpen: setSearchOpen } = useSearchModal();
-  const { counts, formatCount } = useNavCounts();
   const { isEnabled } = useEnabledApps();
-  const { hasFeature } = useFeatures();
 
   const mainNavSequence = useMemo(
     () =>
@@ -158,9 +156,7 @@ function SidebarContent({
       }),
     [isEnabled]
   );
-  const { status: inventoryNavStatus } = useInventoryStatus(
-    isEnabled("inventory")
-  );
+  const inventoryNavStatus = inventoryStatus.status;
   const userPublicId =
     meProfileStatus === "ready" ? (meProfile?.public_id ?? null) : null;
   const userPlan =
@@ -186,10 +182,6 @@ function SidebarContent({
     return href ? isActive(href) : false;
   });
 
-  useEffect(() => {
-    if (showCatalog && catalogChildActive) setCatalogOpen(true);
-  }, [pathname, showCatalog, catalogChildActive]);
-
   const marketingLinks = MARKETING_SUB_APP_IDS.filter(
     (id) => isEnabled(id) && APP_CONFIG[id]?.href
   );
@@ -199,10 +191,6 @@ function SidebarContent({
     return href ? isActive(href) : false;
   });
 
-  useEffect(() => {
-    if (showMarketing && marketingChildActive) setMarketingOpen(true);
-  }, [pathname, showMarketing, marketingChildActive]);
-
   const showMore = MORE_APP_IDS.some((id) => isEnabled(id) && APP_CONFIG[id]?.href);
   const moreLinks = MORE_APP_IDS.filter((id) => isEnabled(id) && APP_CONFIG[id]?.href);
   const moreChildActive = moreLinks.some((id) => {
@@ -210,9 +198,20 @@ function SidebarContent({
     return href ? isActive(href) : false;
   });
   const [celeryOpen, setCeleryOpen] = useState(false);
+
   useEffect(() => {
+    if (showCatalog && catalogChildActive) setCatalogOpen(true);
+    if (showMarketing && marketingChildActive) setMarketingOpen(true);
     if (showMore && moreChildActive) setCeleryOpen(true);
-  }, [pathname, showMore, moreChildActive]);
+  }, [
+    pathname,
+    showCatalog,
+    catalogChildActive,
+    showMarketing,
+    marketingChildActive,
+    showMore,
+    moreChildActive,
+  ]);
   const [copiedStoreId, setCopiedStoreId] = useState<string | null>(null);
   const [activeStoreId, setActiveStoreId] = useState<string | null>(null);
   const [theme, setTheme] = useState<ThemePreference>("system");
@@ -260,12 +259,12 @@ function SidebarContent({
     router.replace(pathname, { locale: next });
   };
 
-  const showBrandingSkeleton = isBrandingLoading && !branding;
-  const adminName = branding?.admin_name?.trim() || tSidebar("setInSettings");
-  const storeType = branding?.store_type ?? "";
-  const ownerName = branding?.owner_name?.trim() || tSidebar("setInSettings");
-  const ownerEmail = branding?.owner_email || "";
-  const resolvedLogoUrl = logoUrl(branding?.logo_url ?? null);
+  const showBrandingSkeleton = isBrandingLoading && !brandingData;
+  const adminName = brandingData?.admin_name?.trim() || tSidebar("setInSettings");
+  const storeType = brandingData?.store_type ?? "";
+  const ownerName = brandingData?.owner_name?.trim() || tSidebar("setInSettings");
+  const ownerEmail = brandingData?.owner_email || "";
+  const resolvedLogoUrl = logoUrl(brandingData?.logo_url ?? null);
   const initial = adminName.charAt(0).toUpperCase() || "?";
 
   const handleLinkClick = () => {

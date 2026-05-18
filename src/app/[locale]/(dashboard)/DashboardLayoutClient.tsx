@@ -7,6 +7,7 @@ import { History } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { BrandingProvider } from "@/context/BrandingContext";
 import { EnabledAppsProvider } from "@/context/EnabledAppsContext";
+import { SidebarDataProvider } from "@/context/SidebarDataContext";
 import { SearchModalProvider } from "@/context/SearchModalContext";
 import { NavigationLoadingProvider } from "@/context/NavigationLoadingContext";
 import { DeferredNavLink } from "@/components/navigation/DeferredNavLink";
@@ -63,7 +64,6 @@ export default function DashboardLayoutClient({
   } = useAuth();
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [mobileSidebarMounted, setMobileSidebarMounted] = useState(false);
   const [networkGateReady, setNetworkGateReady] = useState(false);
   const isSettingsMode = pathname.startsWith("/settings");
   const subscription =
@@ -299,21 +299,14 @@ export default function DashboardLayoutClient({
               className="md:hidden"
             />
 
+            <SidebarDataProvider>
             <Sidebar
               collapsed={collapsed}
               onToggle={() => setCollapsed(!collapsed)}
               navVariant={isSettingsMode ? "settings" : "app"}
             />
 
-            <Sheet
-              open={mobileOpen}
-              onOpenChange={(open) => {
-                setMobileOpen(open);
-                if (open) {
-                  requestAnimationFrame(() => setMobileSidebarMounted(true));
-                }
-              }}
-            >
+            <Sheet modal={false} open={mobileOpen} onOpenChange={setMobileOpen}>
               <SheetContent
                 side="left"
                 className="z-[70] min-h-0 w-64 p-0 flex flex-col"
@@ -322,17 +315,14 @@ export default function DashboardLayoutClient({
                 <SheetTitle className="sr-only">
                   {tSheet("navigationMenu")}
                 </SheetTitle>
-                {mobileSidebarMounted ? (
-                  <SidebarContent
-                    collapsed={false}
-                    onNavigate={() => setMobileOpen(false)}
-                    showSystemNotification={false}
-                  />
-                ) : (
-                  <div className="flex-1" />
-                )}
+                <SidebarContent
+                  collapsed={false}
+                  onNavigate={() => setMobileOpen(false)}
+                  showSystemNotification={false}
+                />
               </SheetContent>
             </Sheet>
+            </SidebarDataProvider>
 
             <div
               className={cn(
@@ -340,12 +330,7 @@ export default function DashboardLayoutClient({
                 collapsed ? "md:ml-16" : "md:ml-72"
               )}
             >
-              <MobileNavBar
-                onMenuClick={() => {
-                  setMobileOpen(true);
-                  requestAnimationFrame(() => setMobileSidebarMounted(true));
-                }}
-              />
+              <MobileNavBar onMenuClick={() => setMobileOpen(true)} />
 
               <div className="sticky top-[var(--subscription-banner-offset,0px)] z-30 hidden h-[var(--header-height)] shrink-0 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 md:block">
                 <div className={cn(contentContainerClass, "flex h-full items-center justify-end")}>

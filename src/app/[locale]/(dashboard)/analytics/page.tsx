@@ -4,7 +4,6 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Undo2 } from "lucide-react";
 
 import api from "@/lib/api";
-import { usePageLoadingBar } from "@/hooks/usePageLoadingBar";
 import { useBranding } from "@/context/BrandingContext";
 import { useFeatures } from "@/hooks/useFeatures";
 import { useRefreshCountdown } from "@/hooks/useRefreshCountdown";
@@ -59,9 +58,6 @@ export default function AnalyticsPage() {
   const [utmLoading, setUtmLoading] = useState(false);
   const [loading, setLoading] = useState(true);
   const { hasFeature, loading: featuresLoading, features } = useFeatures();
-  usePageLoadingBar(
-    (featuresLoading && features == null) || (loading && overview == null)
-  );
   const hasAdvancedAnalytics = hasFeature("advanced_analytics");
 
   const mainGenRef = useRef(0);

@@ -9,7 +9,6 @@ import {
   type DashboardAnalyticsSummary,
 } from "@/lib/basicAnalyticsService";
 import { isNetworkError } from "@/lib/network-error";
-import { takeRoutePrefetch } from "@/lib/navigation/route-prefetch-cache";
 import { dashboardAnalyticsQueryKey } from "@/lib/query-keys";
 import { todayYmdInBD } from "@/utils/time";
 
@@ -31,24 +30,12 @@ export function useDashboardAnalyticsQuery(filters: DashboardAnalyticsFilters) {
 
   const query = useQuery({
     queryKey,
-    queryFn: async () => {
-      const today = todayYmdInBD(new Date());
-      const isDefaultToday =
-        filters.startDate === today &&
-        filters.endDate === today &&
-        filters.bucket === "hour";
-
-      if (isDefaultToday) {
-        const prefetched = takeRoutePrefetch<DashboardAnalyticsResponse>("/");
-        if (prefetched) return prefetched;
-      }
-
-      return getBasicAnalyticsOverview({
+    queryFn: () =>
+      getBasicAnalyticsOverview({
         start_date: filters.startDate,
         end_date: filters.endDate,
         bucket: filters.bucket,
-      });
-    },
+      }),
     refetchInterval: (q) => {
       const today = todayYmdInBD(new Date());
       const isLiveRange = filters.endDate >= today;

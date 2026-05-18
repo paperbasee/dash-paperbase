@@ -17,7 +17,6 @@ import { notify } from "@/notifications";
 import { numberTextClass } from "@/lib/number-font";
 import { cn } from "@/lib/utils";
 import { useConfirm } from "@/context/ConfirmDialogContext";
-import { usePageLoadingBar } from "@/hooks/usePageLoadingBar";
 
 import { buildPublicMediaUrlFromKey, uploadFile } from "@/hooks/usePresignedUpload";
 
@@ -90,7 +89,6 @@ export default function PopupEditorPage() {
 
   const [loading, setLoading] = useState(true);
   const [popup, setPopup] = useState<any | null>(null);
-  usePageLoadingBar(loading && popup == null);
   const [editing, setEditing] = useState<string | "new" | null>(null);
   const [form, setForm] = useState<PopupForm>(emptyForm);
   const [imageSlots, setImageSlots] = useState<PopupImageSlot[]>(emptySlots);

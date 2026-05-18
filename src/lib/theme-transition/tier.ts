@@ -55,23 +55,18 @@ export function getThemeTransitionTier(): TransitionTier {
   const session = getThemeTransitionSessionState();
   if (session.forcedTier) return session.forcedTier;
 
-  // If we're unstable or constrained, stay instant.
-  if (isLowEndDevice()) return "instant";
-
   const supportsViewTransitions = typeof document.startViewTransition === "function";
-  const mobile = isLikelyMobile();
 
-  if (mobile) {
-    // Modern mobile: fade only. If no VT support, fall back to instant (CSS html transition may still soften).
+  if (isLikelyMobile()) {
     return supportsViewTransitions ? "fade" : "instant";
   }
 
-  // Desktop/high-end: allow advanced when supported and not spammed.
+  if (isLowEndDevice()) return "instant";
+
   if (supportsViewTransitions && isHighEndDesktop() && canUseAdvancedCooldown()) {
     return "advanced";
   }
 
-  // Everything else: conservative fade if VT exists, otherwise instant.
   return supportsViewTransitions ? "fade" : "instant";
 }
 

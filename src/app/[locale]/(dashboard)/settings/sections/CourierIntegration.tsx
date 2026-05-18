@@ -10,7 +10,6 @@ import { formatDashboardDate } from "@/lib/datetime-display";
 import type { Courier, PaginatedResponse } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { usePageLoadingBar } from "@/hooks/usePageLoadingBar";
 import { cn } from "@/lib/utils";
 import { useEnterNavigation } from "@/hooks/useEnterNavigation";
 import { useConfirm } from "@/context/ConfirmDialogContext";
@@ -396,7 +395,6 @@ export default function CourierIntegration({
   const confirm = useConfirm();
   const [couriers, setCouriers] = useState<Courier[]>([]);
   const [loading, setLoading] = useState(true);
-  usePageLoadingBar(!panelHidden && loading && couriers.length === 0);
   const [modal, setModal] = useState<CourierModal>(null);
   const [form, setForm] = useState<ConnectForm>({ ...emptyForm });
   const [saving, setSaving] = useState(false);

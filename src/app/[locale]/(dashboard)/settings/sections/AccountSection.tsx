@@ -7,7 +7,6 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useEnterNavigation } from "@/hooks/useEnterNavigation";
-import { usePageLoadingBar } from "@/hooks/usePageLoadingBar";
 import {
   SettingsSectionBody,
   settingsInvertedButtonClassName,
@@ -38,7 +37,6 @@ export default function AccountSection({
   const t = useTranslations("settings");
   const formRef = useRef<HTMLFormElement>(null);
   const { handleKeyDown } = useEnterNavigation(() => formRef.current?.requestSubmit());
-  usePageLoadingBar(!hidden && isLoading);
   return (
     <section
       id="panel-account"

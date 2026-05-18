@@ -3,7 +3,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import { useDeferredNavigate } from "@/hooks/useDeferredNavigate";
-import { getPrefetchFn } from "@/lib/navigation/route-prefetch-registry";
 import { normalizeNavigationHref } from "@/lib/navigation/normalize-navigation-href";
 import { Loader2, Search, X } from "lucide-react";
 import { Dialog } from "radix-ui";
@@ -106,11 +105,8 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
   }, [results]);
 
   const goTo = (href: string) => {
-    const normalized = normalizeNavigationHref(href);
-    const prefetch = getPrefetchFn(normalized);
-    void navigate(normalized, () => prefetch()).then(() => {
-      onOpenChange(false);
-    });
+    navigate(normalizeNavigationHref(href));
+    onOpenChange(false);
   };
 
   return (

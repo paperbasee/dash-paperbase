@@ -8,7 +8,6 @@ import { notify } from "@/notifications";
 import type { Blog } from "@/types";
 import { BlogForm } from "../../_components/BlogForm";
 import { useConfirm } from "@/context/ConfirmDialogContext";
-import { usePageLoadingBar } from "@/hooks/usePageLoadingBar";
 
 export default function EditBlogPage({
   params,
@@ -48,7 +47,6 @@ export default function EditBlogPage({
     };
   }, [public_id]);
 
-  usePageLoadingBar(loading && !blog);
 
   if (loading) {
     return null;

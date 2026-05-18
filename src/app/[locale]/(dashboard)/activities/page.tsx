@@ -4,7 +4,6 @@ import { useMemo, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Select } from "@/components/ui/select";
 import { useActivities } from "@/hooks/useActivities";
-import { usePageLoadingBar } from "@/hooks/usePageLoadingBar";
 import { formatDashboardDateTimeWithSeconds } from "@/lib/datetime-display";
 
 const ACTION_BADGE_STYLES: Record<string, string> = {
@@ -109,7 +108,6 @@ export default function ActivitiesPage() {
   );
 
   const { data, loading, error } = useActivities(filters);
-  usePageLoadingBar(loading && !data);
 
   const results = data?.results ?? [];
   const count = data?.count ?? 0;

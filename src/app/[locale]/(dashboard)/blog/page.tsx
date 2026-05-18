@@ -17,7 +17,6 @@ import { Card } from "@/components/ui/card";
 import { notify } from "@/notifications";
 import type { Blog, BlogTag, PaginatedResponse } from "@/types";
 import { BlogListCard } from "./_components/BlogListCard";
-import { usePageLoadingBar } from "@/hooks/usePageLoadingBar";
 
 export default function BlogListPage() {
   const router = useRouter();
@@ -35,7 +34,6 @@ export default function BlogListPage() {
   const [blogs, setBlogs] = useState<Blog[]>([]);
   const [tags, setTags] = useState<BlogTag[]>([]);
   const [loading, setLoading] = useState(true);
-  usePageLoadingBar(loading && blogs.length === 0);
   const [filtersOpen, setFiltersOpen] = useState(false);
 
   useEffect(() => {

@@ -32,8 +32,6 @@ import { notify } from "@/notifications";
 import { useAdminDeleteCapabilities } from "@/hooks/useAdminDeleteCapabilities";
 import { numberTextClass } from "@/lib/number-font";
 import { cn } from "@/lib/utils";
-import { takeRoutePrefetch } from "@/lib/navigation/route-prefetch-cache";
-import { usePageLoadingBar } from "@/hooks/usePageLoadingBar";
 import { buildPublicMediaUrlFromKey, uploadFile } from "@/hooks/usePresignedUpload";
 
 const MAX_IMAGES = MAX_PRODUCT_IMAGES;
@@ -100,7 +98,6 @@ export default function ProductDetailClient() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
-  usePageLoadingBar(loading && !product);
   const { canDelete: canDeleteProduct, isSuperuser: deleteIsSuperuser } =
     useAdminDeleteCapabilities();
   const confirm = useConfirm();
@@ -202,12 +199,6 @@ export default function ProductDetailClient() {
   }, [isEditMode, product_public_id]);
 
   useEffect(() => {
-    const cacheKey = `/products/${product_public_id}`;
-    const prefetched = takeRoutePrefetch<{
-      product: Product;
-      categories: AdminCategoryTreeNode[];
-    }>(cacheKey);
-
     const applyProduct = (p: Product, d: AdminCategoryTreeNode[]) => {
       setProduct(p);
       setCategoryTree(Array.isArray(d) ? d : []);
@@ -232,15 +223,6 @@ export default function ProductDetailClient() {
           : {}
       );
     };
-
-    if (prefetched) {
-      applyProduct(
-        prefetched.product,
-        Array.isArray(prefetched.categories) ? prefetched.categories : []
-      );
-      setLoading(false);
-      return;
-    }
 
     Promise.all([
       api.get<Product>(`admin/products/${product_public_id}/`),

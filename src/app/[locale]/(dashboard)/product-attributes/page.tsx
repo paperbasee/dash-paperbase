@@ -20,7 +20,6 @@ import { useConfirm } from "@/context/ConfirmDialogContext";
 import { notify, normalizeError } from "@/notifications";
 import { numberTextClass } from "@/lib/number-font";
 import { cn } from "@/lib/utils";
-import { usePageLoadingBar } from "@/hooks/usePageLoadingBar";
 
 type AttrForm = { name: string; order: string };
 type ValueForm = { value: string; order: string };
@@ -37,7 +36,6 @@ export default function ProductAttributesPage() {
   const confirm = useConfirm();
   const [attributes, setAttributes] = useState<ProductAttributeAdmin[]>([]);
   const [loading, setLoading] = useState(true);
-  usePageLoadingBar(loading && attributes.length === 0);
   const [error, setError] = useState(""); // kept for legacy; do not render inline
 
   const [attrEditing, setAttrEditing] = useState<string | "new" | null>(null);

@@ -10,9 +10,12 @@ export type ThemeTogglePerfSample = {
 
 type SessionState = {
   forcedTier?: TransitionTier;
+  downgradedAt?: number;
   lastAdvancedAt?: number;
   recentSamples: ThemeTogglePerfSample[];
 };
+
+const FORCED_TIER_EXPIRY_MS = 60_000;
 
 const SESSION_KEY = "pb_theme_transition_state_v1";
 
@@ -22,11 +25,24 @@ function readSessionState(): SessionState {
     const raw = window.sessionStorage.getItem(SESSION_KEY);
     if (!raw) return { recentSamples: [] };
     const parsed = JSON.parse(raw) as SessionState;
-    return {
+    const state: SessionState = {
       forcedTier: parsed.forcedTier,
+      downgradedAt: typeof parsed.downgradedAt === "number" ? parsed.downgradedAt : undefined,
       lastAdvancedAt: typeof parsed.lastAdvancedAt === "number" ? parsed.lastAdvancedAt : undefined,
       recentSamples: Array.isArray(parsed.recentSamples) ? parsed.recentSamples.slice(-10) : [],
     };
+
+    if (state.forcedTier && Date.now() - (state.downgradedAt ?? 0) > FORCED_TIER_EXPIRY_MS) {
+      const cleared: SessionState = {
+        ...state,
+        forcedTier: undefined,
+        downgradedAt: undefined,
+      };
+      writeSessionState(cleared);
+      return cleared;
+    }
+
+    return state;
   } catch {
     return { recentSamples: [] };
   }
@@ -116,6 +132,7 @@ export function recordThemeTogglePerfAndMaybeDowngrade(sample: ThemeTogglePerfSa
     ...s,
     recentSamples,
     forcedTier: shouldDowngrade ? "instant" : s.forcedTier,
+    downgradedAt: shouldDowngrade ? Date.now() : s.downgradedAt,
   };
 
   writeSessionState(next);

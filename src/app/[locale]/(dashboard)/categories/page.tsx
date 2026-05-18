@@ -19,7 +19,6 @@ import {
 } from "@/lib/category-tree";
 import { useConfirm } from "@/context/ConfirmDialogContext";
 import { notify } from "@/notifications";
-import { usePageLoadingBar } from "@/hooks/usePageLoadingBar";
 import { buildPublicMediaUrlFromKey, uploadFile } from "@/hooks/usePresignedUpload";
 import { Loader2, CheckCircle2, AlertCircle } from "lucide-react";
 
@@ -169,7 +168,6 @@ export default function CategoriesPage() {
   const [tree, setTree] = useState<AdminCategoryTreeNode[]>([]);
   const [expanded, setExpanded] = useState<Set<string>>(() => new Set());
   const [loading, setLoading] = useState(true);
-  usePageLoadingBar(loading && tree.length === 0);
   const [mode, setMode] = useState<FormMode>("closed");
   const [editingPublicId, setEditingPublicId] = useState<string | null>(null);
   const [form, setForm] = useState<CatForm>(emptyForm);

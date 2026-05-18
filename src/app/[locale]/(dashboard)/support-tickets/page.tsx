@@ -19,7 +19,6 @@ import {
   ComboboxList,
 } from "@/components/ui/combobox";
 import api from "@/lib/api";
-import { usePageLoadingBar } from "@/hooks/usePageLoadingBar";
 import type { SupportTicket, PaginatedResponse } from "@/types";
 import { formatDashboardDateTime } from "@/lib/datetime-display";
 import { useConfirm } from "@/context/ConfirmDialogContext";
@@ -122,7 +121,6 @@ export default function SupportTicketsPage() {
   const [tickets, setTickets] = useState<SupportTicket[]>([]);
   const [loading, setLoading] = useState(true);
   const [count, setCount] = useState(0);
-  usePageLoadingBar(loading && tickets.length === 0 && count === 0);
   const [hasNext, setHasNext] = useState(false);
   const [saving, setSaving] = useState<Record<string, Partial<Record<EditableField, boolean>>>>({});
   const [errors, setErrors] = useState<Record<string, string>>({});

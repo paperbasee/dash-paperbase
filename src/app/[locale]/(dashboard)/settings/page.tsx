@@ -104,6 +104,7 @@ export default function SettingsPage() {
     setRevalidateSecret,
   } = controller;
 
+
   const activeSectionMeta = SECTIONS.find((s) => s.id === activeSection);
   const activeLabel = activeSectionMeta
     ? "labelKey" in activeSectionMeta

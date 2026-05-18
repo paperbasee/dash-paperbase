@@ -10,7 +10,6 @@ import api from "@/lib/api";
 import type { SupportTicket } from "@/types";
 import { formatDashboardDateTime } from "@/lib/datetime-display";
 import { notify } from "@/notifications";
-import { usePageLoadingBar } from "@/hooks/usePageLoadingBar";
 
 function labelFromValue(value: string): string {
   if (!value) return "—";
@@ -52,7 +51,6 @@ export default function SupportTicketDetailPage() {
 
   const attachmentCount = useMemo(() => ticket?.attachments?.length ?? 0, [ticket]);
 
-  usePageLoadingBar(loading && !ticket);
 
   return (
     <div className="space-y-6">
