@@ -1,3 +1,4 @@
+import { flushSync } from "react-dom";
 import type { ThemePreference } from "@/lib/theme";
 import {
   applyThemePreferenceToDom,
@@ -118,10 +119,12 @@ export function runThemeTransition({ next, event, setThemePreferenceState }: The
     const root = document.documentElement;
     root.setAttribute("data-theme-fade", "1");
 
+    flushSync(() => setThemePreferenceState(next));
+
     const transition = document.startViewTransition(() => {
       const applied = applyThemePreferenceToDom(next);
-      setThemePreferenceState(next);
       deferPersistence(next, applied);
+      return applied;
     });
 
     transition.ready
@@ -149,10 +152,12 @@ export function runThemeTransition({ next, event, setThemePreferenceState }: The
   root.style.setProperty("--ripple-radius", `${endRadius}px`);
   root.setAttribute("data-theme-ripple", "1");
 
+  flushSync(() => setThemePreferenceState(next));
+
   const transition = document.startViewTransition(() => {
     const applied = applyThemePreferenceToDom(next);
-    setThemePreferenceState(next);
     deferPersistence(next, applied);
+    return applied;
   });
 
   transition.ready
