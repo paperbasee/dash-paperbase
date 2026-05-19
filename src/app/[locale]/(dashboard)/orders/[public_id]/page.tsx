@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { useParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
@@ -11,6 +12,12 @@ import {
 } from "lucide-react";
 import { AddressBookIcon } from "@phosphor-icons/react";
 import api from "@/lib/api";
+import {
+  navCountsQueryKey,
+  orderDetailQueryKey,
+  ordersListQueryKeyRoot,
+} from "@/lib/query-keys";
+import { useOrderDetailQuery } from "@/hooks/useOrderDetailQuery";
 import { useBranding } from "@/context/BrandingContext";
 import {
   ORDER_STATUS_OPTIONS,
@@ -71,7 +78,8 @@ type EditForm = {
 };
 
 export default function OrderDetailPage() {
-  const { id: order_public_id } = useParams<{ locale: string; id: string }>();
+  const params = useParams<{ public_id: string }>();
+  const publicId = params.public_id;
   const router = useRouter();
   const locale = useLocale();
   const numClass = numberTextClass(locale);
@@ -79,9 +87,24 @@ export default function OrderDetailPage() {
   const tNav = useTranslations("nav");
   const tCommon = useTranslations("common");
   const confirm = useConfirm();
+  const queryClient = useQueryClient();
   const { currencySymbol } = useBranding();
-  const [order, setOrder] = useState<Order | null>(null);
-  const [loading, setLoading] = useState(true);
+
+  const {
+    data: order,
+    isLoading,
+    isError,
+    error: orderError,
+  } = useOrderDetailQuery(publicId ?? "");
+
+  const invalidateOrdersCaches = useCallback(() => {
+    void queryClient.invalidateQueries({ queryKey: ordersListQueryKeyRoot });
+    void queryClient.invalidateQueries({ queryKey: navCountsQueryKey });
+    if (publicId) {
+      void queryClient.invalidateQueries({ queryKey: orderDetailQueryKey(publicId) });
+    }
+  }, [queryClient, publicId]);
+
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState<EditForm>({
     shipping_name: "",
@@ -118,17 +141,12 @@ export default function OrderDetailPage() {
   });
 
   useEffect(() => {
-    api
-      .get<Order>(`admin/orders/${order_public_id}/`)
-      .then((res) => setOrder(res.data))
-      .catch((err) => {
-        notify.error(err, {
-          title: tPages("toastTitleOrderDataIncomplete"),
-          fallbackMessage: tPages("toastDescOrderDataIncomplete"),
-        });
-      })
-      .finally(() => setLoading(false));
-  }, [order_public_id]);
+    if (!isError || !orderError) return;
+    notify.error(orderError, {
+      title: tPages("toastTitleOrderDataIncomplete"),
+      fallbackMessage: tPages("toastDescOrderDataIncomplete"),
+    });
+  }, [isError, orderError, tPages]);
 
   useEffect(() => {
     Promise.all([
@@ -432,10 +450,11 @@ export default function OrderDetailPage() {
           ...removedExistingIds.map((publicId) => ({ public_id: publicId, remove: true })),
         ],
       };
-      const { data } = await api.patch<Order>(`admin/orders/${order_public_id}/`, payload);
-      setOrder(data);
+      const { data } = await api.patch<Order>(`admin/orders/${publicId}/`, payload);
+      queryClient.setQueryData(orderDetailQueryKey(publicId), data);
       setPricingPreview(null);
       setEditing(false);
+      invalidateOrdersCaches();
     } catch (err: unknown) {
       notify.error(err, {
         title: tPages("toastTitleChangesNotSavedOrder"),
@@ -468,10 +487,11 @@ export default function OrderDetailPage() {
     setStatusUpdateLoading(true);
     try {
       const { data } = await api.patch<{ order: Order }>(
-        `admin/orders/${order_public_id}/status/`,
+        `admin/orders/${publicId}/status/`,
         { status: next },
       );
-      setOrder(data.order);
+      queryClient.setQueryData(orderDetailQueryKey(publicId), data.order);
+      invalidateOrdersCaches();
     } catch (err: unknown) {
       notify.error(err, {
         title: tPages("toastTitleStatusNotUpdated"),
@@ -487,10 +507,11 @@ export default function OrderDetailPage() {
     setPaymentVerifying(valid ? "verify" : "reject");
     try {
       const { data } = await api.post<{ order: Order }>(
-        `admin/orders/${order_public_id}/verify-payment/`,
+        `admin/orders/${publicId}/verify-payment/`,
         { valid },
       );
-      setOrder(data.order);
+      queryClient.setQueryData(orderDetailQueryKey(publicId), data.order);
+      invalidateOrdersCaches();
       notify.success(tPages("toastDescPaymentReviewRecorded"), {
         title: tPages("toastTitlePaymentReviewRecorded"),
       });
@@ -512,8 +533,9 @@ export default function OrderDetailPage() {
     setFlagUpdateLoading(true);
     try {
       const payload = { flag: normalized || null };
-      const { data } = await api.patch<Order>(`admin/orders/${order_public_id}/`, payload);
-      setOrder(data);
+      const { data } = await api.patch<Order>(`admin/orders/${publicId}/`, payload);
+      queryClient.setQueryData(orderDetailQueryKey(publicId), data);
+      invalidateOrdersCaches();
     } catch (err: unknown) {
       notify.error(err, {
         title: tPages("toastTitleOrderFlagNotSaved"),
@@ -524,7 +546,7 @@ export default function OrderDetailPage() {
     }
   }
 
-  if (loading && !order) {
+  if (isLoading && !order) {
     return null;
   }
 

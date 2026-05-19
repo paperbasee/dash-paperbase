@@ -1,22 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Check, Loader2 } from "lucide-react";
 
-import api from "@/lib/api";
 import { cn } from "@/lib/utils";
+import { useThemePresetsQuery, type ThemeCardVariantRow } from "@/hooks/useThemePresetsQuery";
 
-export type CardVariantRow = {
-  key: string;
-  name: string;
-  description: string;
-};
-
-type PresetsPayload = {
-  presets?: unknown[];
-  card_variants?: CardVariantRow[];
-};
+export type CardVariantRow = ThemeCardVariantRow;
 
 const sk = "animate-pulse rounded bg-muted";
 
@@ -82,33 +72,9 @@ export function CardVariantPicker({
   disabled?: boolean;
 }) {
   const t = useTranslations("settings.customization");
-  const [variants, setVariants] = useState<CardVariantRow[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [loadError, setLoadError] = useState<string | null>(null);
-
-  useEffect(() => {
-    let cancelled = false;
-    void (async () => {
-      try {
-        const { data } = await api.get<PresetsPayload>("theming/presets/");
-        if (!cancelled) {
-          setVariants(data.card_variants ?? []);
-          setLoadError(null);
-        }
-      } catch (e) {
-        if (!cancelled) {
-          setLoadError(e instanceof Error ? e.message : "failed");
-        }
-      } finally {
-        if (!cancelled) {
-          setLoading(false);
-        }
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+  const { data, isLoading: loading, isError } = useThemePresetsQuery();
+  const variants = data?.card_variants ?? [];
+  const loadError = isError ? "failed" : null;
 
   if (loading) {
     return (

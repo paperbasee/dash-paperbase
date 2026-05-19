@@ -6,7 +6,7 @@ import { useLocale, useTranslations } from "next-intl";
 import DateRangePresetPicker from "./DateRangePresetPicker";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
-import type { AnalyticsBucket } from "@/hooks/useDashboardAnalytics";
+import type { AnalyticsBucket } from "@/lib/basicAnalyticsService";
 import { dateToYmd, startOfDay, ymdToDate } from "@/lib/date-range-ui";
 import { digitsInNumberFont } from "@/lib/number-font";
 import { cn } from "@/lib/utils";

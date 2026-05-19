@@ -1,13 +1,12 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo } from "react";
 import { useParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { ClickableTableRow } from "@/components/ui/clickable-table-row";
 import { Undo2 } from "lucide-react";
-import api from "@/lib/api";
-import type { SupportTicket } from "@/types";
+import { useSupportTicketDetailQuery } from "@/hooks/useSupportTicketDetailQuery";
 import { formatDashboardDateTime } from "@/lib/datetime-display";
 import { notify } from "@/notifications";
 
@@ -26,31 +25,24 @@ export default function SupportTicketDetailPage() {
   const params = useParams<{ public_id: string }>();
   const publicId = params.public_id;
 
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-  const [ticket, setTicket] = useState<SupportTicket | null>(null);
+  const {
+    data: ticket,
+    isLoading: loading,
+    isError,
+    error: ticketError,
+  } = useSupportTicketDetailQuery(publicId ?? "");
 
-  const fetchTicket = useCallback(() => {
-    if (!publicId) return;
-    api
-      .get<SupportTicket>(`admin/support-tickets/${publicId}/`)
-      .then((res) => setTicket(res.data))
-      .catch((err) => {
-        setError(tPages("supportTicketDetailLoadError"));
-        notify.error(err, {
-          title: tPages("toastTitleTicketThreadUnavailable"),
-          fallbackMessage: tPages("toastDescTicketThreadUnavailable"),
-        });
-      })
-      .finally(() => setLoading(false));
-  }, [publicId, tPages]);
+  const error = isError ? tPages("supportTicketDetailLoadError") : "";
 
   useEffect(() => {
-    fetchTicket();
-  }, [fetchTicket]);
+    if (!isError || !ticketError) return;
+    notify.error(ticketError, {
+      title: tPages("toastTitleTicketThreadUnavailable"),
+      fallbackMessage: tPages("toastDescTicketThreadUnavailable"),
+    });
+  }, [isError, ticketError, tPages]);
 
   const attachmentCount = useMemo(() => ticket?.attachments?.length ?? 0, [ticket]);
-
 
   return (
     <div className="space-y-6">
@@ -174,7 +166,7 @@ export default function SupportTicketDetailPage() {
                           window.open(
                             attachment.file,
                             "_blank",
-                            "noopener,noreferrer"
+                            "noopener,noreferrer",
                           )
                         }
                         aria-label={attachment.public_id}

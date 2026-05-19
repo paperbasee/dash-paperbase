@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { Loader2, Trash } from "lucide-react";
 import { DeferredNavLink } from "@/components/navigation/DeferredNavLink";
 import { useTranslations } from "next-intl";
@@ -10,6 +11,7 @@ import { formatDashboardDateOptional } from "@/lib/datetime-display";
 import { cn } from "@/lib/utils";
 import { notify } from "@/notifications";
 import { useConfirm } from "@/context/ConfirmDialogContext";
+import { blogsListQueryKeyRoot, navCountsQueryKey } from "@/lib/query-keys";
 
 function estimateReadingMinutesFromHtml(html: string | undefined): number {
   if (!html?.trim()) return 1;
@@ -31,11 +33,17 @@ function blogDisplayDateIso(blog: Blog): string | null {
 type BlogListCardProps = {
   blog: Blog;
   locale: string;
-  onDelete: (publicId: string) => void;
 };
 
-export function BlogListCard({ blog, locale, onDelete }: BlogListCardProps) {
+export function BlogListCard({ blog, locale }: BlogListCardProps) {
   const confirm = useConfirm();
+  const queryClient = useQueryClient();
+
+  const invalidateBlogCaches = useCallback(() => {
+    void queryClient.invalidateQueries({ queryKey: blogsListQueryKeyRoot });
+    void queryClient.invalidateQueries({ queryKey: navCountsQueryKey });
+  }, [queryClient]);
+
   const tPages = useTranslations("pages");
   const [deleting, setDeleting] = useState(false);
   const readMins = estimateReadingMinutesFromHtml(blog.content);
@@ -59,7 +67,7 @@ export function BlogListCard({ blog, locale, onDelete }: BlogListCardProps) {
     try {
       setDeleting(true);
       await api.delete(`admin/blogs/${blog.public_id}/`);
-      onDelete(blog.public_id);
+      invalidateBlogCaches();
       notify.success(tPages("toastDescPostDeleted"), {
         title: tPages("toastTitlePostDeleted"),
       });

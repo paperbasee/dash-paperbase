@@ -31,7 +31,7 @@ export default function DashboardPage() {
   const locale = useLocale();
   const t = useTranslations("dashboard");
   const { data: branding } = useBrandingQuery();
-  const { interval, lastRefreshedAt } = useDashboardRefresh();
+  const { lastRefreshedAt } = useDashboardRefresh();
   const today = useMemo(() => new Date(), []);
   const [now, setNow] = useState(() => Date.now());
 
@@ -107,7 +107,6 @@ export default function DashboardPage() {
         greeting={greeting}
         accountName={accountName}
         lastUpdatedLabel={lastUpdatedLabel}
-        autoRefreshInterval={interval}
         range={range}
         onRangeChange={setRange}
       />
@@ -160,24 +159,20 @@ export default function DashboardPage() {
         />
       </section>
 
-      <div className="hidden sm:block">
-        <DashboardActivityTimeline data={series} bucket={range.bucket} />
-      </div>
+      <DashboardActivityTimeline data={series} bucket={range.bucket} />
 
-      <section className="hidden gap-4 sm:grid lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
+      <section className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
         <DashboardComingSoonCard
           className="h-full"
-          minHeightClass="min-h-[16rem] lg:min-h-[20rem]"
+          minHeightClass="min-h-[12rem] sm:min-h-[16rem] lg:min-h-[20rem]"
         />
-        <div className="flex flex-col gap-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-1 lg:flex lg:flex-col">
           <DashboardComingSoonCard />
           <DashboardComingSoonCard />
         </div>
       </section>
 
-      <div className="hidden sm:block">
-        <DashboardComingSoonCard minHeightClass="min-h-[14rem]" />
-      </div>
+      <DashboardComingSoonCard minHeightClass="min-h-[12rem] sm:min-h-[14rem]" />
 
       <DashboardStatusFooter apiHealthy={apiHealthy} latencyMs={null} />
     </div>

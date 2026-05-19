@@ -22,6 +22,7 @@ export type AppNavIcon = LucideIcon | PhosphorIcon;
 export interface NavCounts {
   orders: number;
   products: number;
+  customers: number;
   notifications: number;
   supportTickets: number;
   banners: number;
@@ -78,7 +79,7 @@ export const APP_CONFIG: Record<string, AppConfig> = {
     description: "Customer accounts and profiles",
     essential: false,
     href: "/customers",
-    countKey: null,
+    countKey: "customers",
     parentId: null,
   },
   categories: {

@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { FunnelIcon, Undo2 } from "lucide-react";
@@ -10,16 +11,21 @@ import { FilterBar } from "@/components/filters/FilterBar";
 import { FilterDropdown } from "@/components/filters/FilterDropdown";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { useFilters } from "@/hooks/useFilters";
+import { useInventoryListQuery } from "@/hooks/useInventoryListQuery";
 import api from "@/lib/api";
-import type { Inventory, PaginatedResponse } from "@/types";
+import {
+  inventoryListQueryKey,
+  inventoryStatusQueryKey,
+  type InventoryListParams,
+} from "@/lib/query-keys";
 import { notify } from "@/notifications";
 import { numberTextClass } from "@/lib/number-font";
 import { cn } from "@/lib/utils";
-import { INVENTORY_STATUS_REFRESH_EVENT } from "@/hooks/useInventoryStatus";
 import { BelowFoldScrollHint } from "@/components/BelowFoldScrollHint";
 import { Button } from "@/components/ui/button";
 
 export default function InventoryPage() {
+  const queryClient = useQueryClient();
   const router = useRouter();
   const locale = useLocale();
   const numClass = numberTextClass(locale);
@@ -31,14 +37,6 @@ export default function InventoryPage() {
     "tracked",
     "type",
   ]);
-  const [inventory, setInventory] = useState<Inventory[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [count, setCount] = useState(0);
-  const [hasNext, setHasNext] = useState(false);
-  /** Store-wide count of tracked rows at or below low threshold (not limited to current page). */
-  const [lowStockTotal, setLowStockTotal] = useState<number | null>(null);
-  /** Store-wide count of rows with quantity 0 (not limited to current page). */
-  const [outOfStockTotal, setOutOfStockTotal] = useState<number | null>(null);
   const [adjusting, setAdjusting] = useState<string | null>(null);
   const [adjustValue, setAdjustValue] = useState<Record<string, string>>({});
   const [searchInput, setSearchInput] = useState(filters.search || "");
@@ -56,42 +54,31 @@ export default function InventoryPage() {
     setFilter("search", next);
   }, [debouncedSearch, filters.search, setFilter]);
 
-  const fetchData = useCallback(() => {
-    setLoading(true);
-    const params: Record<string, string | number> = { page };
+  const listParams = useMemo((): InventoryListParams => {
+    const params: InventoryListParams = { page };
     if (filters.search) params.search = filters.search;
     if (filters.stock) params.stock = filters.stock;
     if (filters.tracked) params.tracked = filters.tracked;
     if (filters.type) params.type = filters.type;
+    return params;
+  }, [page, filters.search, filters.stock, filters.tracked, filters.type]);
 
-    const listReq = api.get<PaginatedResponse<Inventory>>("admin/inventory/", { params });
-    const lowStockReq = api.get<PaginatedResponse<Inventory>>("admin/inventory/", {
-      params: { stock: "low_stock", page: 1 },
-    });
-    const outOfStockReq = api.get<PaginatedResponse<Inventory>>("admin/inventory/", {
-      params: { stock: "out_of_stock", page: 1 },
-    });
+  const { data, isLoading, isError, error } = useInventoryListQuery(listParams);
 
-    Promise.all([listReq, lowStockReq, outOfStockReq])
-      .then(([listRes, lowRes, outRes]) => {
-        setInventory(listRes.data.results);
-        setCount(listRes.data.count ?? 0);
-        setHasNext(!!listRes.data.next);
-        setLowStockTotal(lowRes.data.count ?? 0);
-        setOutOfStockTotal(outRes.data.count ?? 0);
-      })
-      .catch((err) => {
-        notify.error(err, {
-          title: tPages("toastTitleInventoryUpdateFailed"),
-          fallbackMessage: tPages("toastDescInventoryUpdateFailed"),
-        });
-      })
-      .finally(() => setLoading(false));
-  }, [filters.search, filters.stock, filters.tracked, filters.type, page]);
+  const inventory = data?.list.results ?? [];
+  const count = data?.list.count ?? 0;
+  const hasNext = !!data?.list.next;
+  const lowStockTotal = data ? data.lowStockTotal : null;
+  const outOfStockTotal = data ? data.outOfStockTotal : null;
+  const loading = isLoading;
 
   useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+    if (!isError || !error) return;
+    notify.error(error, {
+      title: tPages("toastTitleInventoryUpdateFailed"),
+      fallbackMessage: tPages("toastDescInventoryUpdateFailed"),
+    });
+  }, [isError, error, tPages]);
 
   const showLowStockOnly = useCallback(() => {
     setFilter("stock", "low_stock");
@@ -163,10 +150,8 @@ export default function InventoryPage() {
         reference: "",
       });
       setAdjustValue((prev) => ({ ...prev, [publicId]: "" }));
-      fetchData();
-      if (typeof window !== "undefined") {
-        window.dispatchEvent(new Event(INVENTORY_STATUS_REFRESH_EVENT));
-      }
+      void queryClient.invalidateQueries({ queryKey: inventoryListQueryKey() });
+      void queryClient.invalidateQueries({ queryKey: inventoryStatusQueryKey });
     } catch (err) {
       notify.error(err, {
         title: tPages("toastTitleInventoryUpdateFailed"),

@@ -4,58 +4,48 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { isApiHttpError } from "@/lib/api-client";
 
 import api from "@/lib/api";
+import { useThemeQuery, type ThemePayload } from "@/hooks/useThemeQuery";
+import { queryClient } from "@/components/QueryProvider";
+import { brandingQueryKey, themeQueryKey } from "@/lib/query-keys";
 
-export type ThemePayload = {
-  palette: string;
-  card_variant: string;
-  resolved_palette: Record<string, string>;
-  created_at: string;
-  updated_at: string;
-};
+export type { ThemePayload };
 
 const DEBOUNCE_MS = 400;
 
 export function useThemeEditor() {
+  const { data, isLoading, isError, error } = useThemeQuery();
   const [theme, setTheme] = useState<ThemePayload | null>(null);
-  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [errorState, setErrorState] = useState<string | null>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    let cancelled = false;
-    void (async () => {
-      try {
-        const { data } = await api.get<ThemePayload>("theming/");
-        if (!cancelled) {
-          setTheme({
-            ...data,
-            card_variant: typeof data.card_variant === "string" ? data.card_variant : "classic",
-          });
-          setError(null);
-        }
-      } catch (e) {
-        if (!cancelled) {
-          setError(isApiHttpError(e) ? (e.response?.data as { detail?: string })?.detail ?? e.message : "load_failed");
-        }
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+    if (data) {
+      setTheme(data);
+      setErrorState(null);
+    }
+  }, [data]);
+
+  useEffect(() => {
+    if (!isError) return;
+    setErrorState(
+      isApiHttpError(error)
+        ? (error.response?.data as { detail?: string })?.detail ?? error.message
+        : "load_failed",
+    );
+  }, [isError, error]);
 
   const flushPatch = useCallback(async (paletteKey: string, rollbackPalette: string, rollbackResolved: Record<string, string>) => {
     setSaving(true);
     try {
-      const { data } = await api.patch<ThemePayload>("theming/", { palette: paletteKey });
+      const { data: patchData } = await api.patch<ThemePayload>("theming/", { palette: paletteKey });
       setTheme({
-        ...data,
-        card_variant: typeof data.card_variant === "string" ? data.card_variant : "classic",
+        ...patchData,
+        card_variant: typeof patchData.card_variant === "string" ? patchData.card_variant : "classic",
       });
-      setError(null);
+      setErrorState(null);
+      void queryClient.invalidateQueries({ queryKey: themeQueryKey });
+      void queryClient.invalidateQueries({ queryKey: brandingQueryKey });
     } catch {
       setTheme((prev) =>
         prev
@@ -66,7 +56,7 @@ export function useThemeEditor() {
             }
           : prev
       );
-      setError("saveFailed");
+      setErrorState("saveFailed");
     } finally {
       setSaving(false);
     }
@@ -85,7 +75,7 @@ export function useThemeEditor() {
             }
           : prev
       );
-      setError(null);
+      setErrorState(null);
       if (debounceRef.current) clearTimeout(debounceRef.current);
       debounceRef.current = setTimeout(() => {
         void flushPatch(paletteKey, rollbackPalette, rollbackResolved);
@@ -101,15 +91,17 @@ export function useThemeEditor() {
       setTheme((prev) => (prev ? { ...prev, card_variant: variantKey } : prev));
       setSaving(true);
       try {
-        const { data } = await api.patch<ThemePayload>("theming/", { card_variant: variantKey });
+        const { data: patchData } = await api.patch<ThemePayload>("theming/", { card_variant: variantKey });
         setTheme({
-          ...data,
-          card_variant: typeof data.card_variant === "string" ? data.card_variant : "classic",
+          ...patchData,
+          card_variant: typeof patchData.card_variant === "string" ? patchData.card_variant : "classic",
         });
-        setError(null);
+        setErrorState(null);
+        void queryClient.invalidateQueries({ queryKey: themeQueryKey });
+        void queryClient.invalidateQueries({ queryKey: brandingQueryKey });
       } catch {
         setTheme((prev) => (prev ? { ...prev, card_variant: rollback } : prev));
-        setError("saveFailed");
+        setErrorState("saveFailed");
       } finally {
         setSaving(false);
       }
@@ -117,5 +109,5 @@ export function useThemeEditor() {
     [theme]
   );
 
-  return { theme, loading, saving, error, selectPalette, selectCardVariant };
+  return { theme, loading: isLoading, saving, error: errorState, selectPalette, selectCardVariant };
 }

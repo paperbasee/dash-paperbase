@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import dynamic from "next/dynamic";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
@@ -22,7 +23,7 @@ import {
   ComboboxList,
   useComboboxAnchor,
 } from "@/components/ui/combobox";
-import type { Banner, PaginatedResponse } from "@/types";
+import type { Banner } from "@/types";
 import { formatDashboardDateTime } from "@/lib/datetime-display";
 import { displayInputToApiLocal, isoDatetimeToDisplayInput } from "@/lib/datetime-form";
 import { useConfirm } from "@/context/ConfirmDialogContext";
@@ -33,6 +34,8 @@ import { numberTextClass } from "@/lib/number-font";
 import { cn } from "@/lib/utils";
 import { useEnterNavigation } from "@/hooks/useEnterNavigation";
 import { buildPublicMediaUrlFromKey, uploadFile } from "@/hooks/usePresignedUpload";
+import { bannersQueryKey, navCountsQueryKey } from "@/lib/query-keys";
+import { useBannersQuery, type BannersQueryData } from "@/hooks/useBannersQuery";
 
 const Calendar = dynamic(
   () => import("@/components/ui/calendar").then((mod) => mod.Calendar),
@@ -209,9 +212,25 @@ export default function BannersPage() {
   const tPages = useTranslations("pages");
   const tCommon = useTranslations("common");
   const confirm = useConfirm();
-  const [banners, setBanners] = useState<Banner[]>([]);
-  const [bannersTotalCount, setBannersTotalCount] = useState<number | null>(null);
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
+
+  const invalidateBannerCaches = useCallback(() => {
+    void queryClient.invalidateQueries({ queryKey: bannersQueryKey });
+    void queryClient.invalidateQueries({ queryKey: navCountsQueryKey });
+  }, [queryClient]);
+
+  const { data, isLoading, isError, error } = useBannersQuery();
+  const banners = data?.banners ?? [];
+  const bannersTotalCount = data?.totalCount ?? null;
+  const loading = isLoading;
+
+  useEffect(() => {
+    if (!isError || !error) return;
+    notify.error(error, {
+      title: tPages("toastTitleBannersFailedToLoad"),
+      fallbackMessage: tPages("toastDescBannersFailedToLoad"),
+    });
+  }, [isError, error, tPages]);
   const [editing, setEditing] = useState<string | "new" | null>(null);
   const [form, setForm] = useState<BannerForm>(emptyForm);
   const [startDate, setStartDate] = useState<Date | undefined>(undefined);
@@ -314,33 +333,6 @@ export default function BannersPage() {
     });
     setSlotStatus((prev) => prev.map((s, i) => (i === index ? "uploaded" : s)));
   }
-
-  function fetchData() {
-    setLoading(true);
-    api
-      .get<PaginatedResponse<Banner> | Banner[]>("admin/banners/")
-      .then((res) => {
-        const data = res.data;
-        if (Array.isArray(data)) {
-          setBanners(data);
-          setBannersTotalCount(null);
-        } else {
-          setBanners(data.results);
-          setBannersTotalCount(typeof data.count === "number" ? data.count : null);
-        }
-      })
-      .catch((err) => {
-        notify.error(err, {
-          title: tPages("toastTitleBannersFailedToLoad"),
-          fallbackMessage: tPages("toastDescBannersFailedToLoad"),
-        });
-      })
-      .finally(() => setLoading(false));
-  }
-
-  useEffect(() => {
-    fetchData();
-  }, []);
 
   useEffect(() => {
     const timer = window.setInterval(() => setNow(new Date()), 1000);
@@ -531,7 +523,7 @@ export default function BannersPage() {
       setEditing(null);
       notify.clearValidation("banners-form");
       notify.success(tPages("toastDescBannerSaved"), { title: tPages("toastTitleBannerSaved") });
-      fetchData();
+      invalidateBannerCaches();
     } catch (err) {
       if (isApiHttpError(err)) {
         notify.error(err, {
@@ -558,8 +550,8 @@ export default function BannersPage() {
     if (!ok) return;
     try {
       await api.delete(`admin/banners/${publicId}/`);
+      invalidateBannerCaches();
       notify.success(tPages("toastDescBannerDeleted"), { title: tPages("toastTitleBannerDeleted") });
-      fetchData();
     } catch (err) {
       notify.error(err, {
         title: tPages("toastTitleBannerOperationFailed"),
@@ -574,9 +566,16 @@ export default function BannersPage() {
         `admin/banners/${banner.public_id}/`,
         { is_active: !banner.is_active }
       );
-      setBanners((prev) =>
-        prev.map((b) => (b.public_id === data.public_id ? data : b))
-      );
+      queryClient.setQueryData<BannersQueryData>(bannersQueryKey, (prev) => {
+        if (!prev) return prev;
+        return {
+          ...prev,
+          banners: prev.banners.map((b) =>
+            b.public_id === data.public_id ? data : b,
+          ),
+        };
+      });
+      invalidateBannerCaches();
     } catch (err) {
       notify.error(err, {
         title: tPages("toastTitleBannerOperationFailed"),

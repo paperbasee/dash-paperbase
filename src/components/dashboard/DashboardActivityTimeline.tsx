@@ -4,7 +4,7 @@ import DashboardBarChart from "@/components/DashboardBarChart";
 import type {
   AnalyticsBucket,
   DashboardAnalyticsPoint,
-} from "@/hooks/useDashboardAnalytics";
+} from "@/lib/basicAnalyticsService";
 
 interface DashboardActivityTimelineProps {
   data: DashboardAnalyticsPoint[];

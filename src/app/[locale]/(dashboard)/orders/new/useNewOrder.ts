@@ -1,21 +1,27 @@
 "use client";
 
-import { useEffect, useState, useRef, useMemo, type FormEvent } from "react";
+import { useCallback, useEffect, useState, useRef, useMemo, type FormEvent } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { useDeferredNavigate } from "@/hooks/useDeferredNavigate";
+import { useShippingMethodsQuery } from "@/hooks/useShippingMethodsQuery";
+import { useShippingZonesQuery } from "@/hooks/useShippingZonesQuery";
 import api from "@/lib/api";
 import { notify } from "@/notifications";
 import type {
   Product,
   PaginatedResponse,
   ProductVariant,
-  ShippingMethod,
-  ShippingZone,
   OrderPricingPreview,
 } from "@/types";
 import { joinVillageThanaDistrict } from "@/lib/orders/shipping-address-parts";
 import { buildOrderCreateSchema, parseValidation } from "@/lib/validation";
+import {
+  dashboardAnalyticsQueryKeyRoot,
+  navCountsQueryKey,
+  ordersListQueryKeyRoot,
+} from "@/lib/query-keys";
 
 export interface OrderItemRow {
   key: number;
@@ -40,8 +46,15 @@ export interface OrderForm {
 }
 
 export function useNewOrder() {
+  const queryClient = useQueryClient();
   const router = useRouter();
   const navigate = useDeferredNavigate();
+
+  const invalidateAfterOrderCreate = useCallback(() => {
+    void queryClient.invalidateQueries({ queryKey: ordersListQueryKeyRoot });
+    void queryClient.invalidateQueries({ queryKey: navCountsQueryKey });
+    void queryClient.invalidateQueries({ queryKey: dashboardAnalyticsQueryKeyRoot });
+  }, [queryClient]);
   const t = useTranslations("pages");
   const tCommon = useTranslations("common");
   const orderCreateSchema = useMemo(
@@ -86,28 +99,24 @@ export function useNewOrder() {
   const [variantsByProductId, setVariantsByProductId] = useState<Record<string, ProductVariant[]>>({});
   const [variantsLoadingByProductId, setVariantsLoadingByProductId] = useState<Record<string, boolean>>({});
 
-  const [shippingZones, setShippingZones] = useState<ShippingZone[]>([]);
-  const [shippingMethods, setShippingMethods] = useState<ShippingMethod[]>([]);
+  const zonesQuery = useShippingZonesQuery();
+  const methodsQuery = useShippingMethodsQuery();
+  const shippingZones = zonesQuery.data ?? [];
+  const shippingMethods = methodsQuery.data ?? [];
   const [pricingPreview, setPricingPreview] = useState<OrderPricingPreview | null>(null);
 
+  const shippingSetupError = zonesQuery.isError
+    ? zonesQuery.error
+    : methodsQuery.isError
+      ? methodsQuery.error
+      : null;
   useEffect(() => {
-    Promise.all([
-      api.get<PaginatedResponse<ShippingZone> | ShippingZone[]>("admin/shipping-zones/"),
-      api.get<PaginatedResponse<ShippingMethod> | ShippingMethod[]>("admin/shipping-methods/"),
-    ])
-      .then(([z, m]) => {
-        setShippingZones(Array.isArray(z.data) ? z.data : (z.data.results ?? []));
-        setShippingMethods(Array.isArray(m.data) ? m.data : (m.data.results ?? []));
-      })
-      .catch((err) => {
-        setShippingZones([]);
-        setShippingMethods([]);
-        notify.error(err, {
-          title: t("toastTitleShippingSetupUnavailable"),
-          fallbackMessage: t("toastDescShippingSetupUnavailable"),
-        });
-      });
-  }, []);
+    if (!shippingSetupError) return;
+    notify.error(shippingSetupError, {
+      title: t("toastTitleShippingSetupUnavailable"),
+      fallbackMessage: t("toastDescShippingSetupUnavailable"),
+    });
+  }, [shippingSetupError, t]);
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -319,6 +328,7 @@ export function useNewOrder() {
         })),
       };
       await api.post("admin/orders/", payload);
+      invalidateAfterOrderCreate();
       notify.success(t("toastDescOrderCreated"), {
         title: t("toastTitleOrderCreated"),
         action: {

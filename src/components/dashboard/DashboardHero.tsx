@@ -5,30 +5,19 @@ import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import DateRangeFilter, { type DateRangeValue } from "@/components/DateRangeFilter";
 import DashboardRefreshControl from "@/components/DashboardRefreshControl";
-import type { RefreshInterval } from "@/context/DashboardRefreshContext";
 
 interface DashboardHeroProps {
   greeting: string;
   accountName: string;
   lastUpdatedLabel: string | null;
-  autoRefreshInterval: RefreshInterval;
   range: DateRangeValue;
   onRangeChange: (value: DateRangeValue) => void;
 }
-
-const INTERVAL_LABELS: Record<RefreshInterval, string> = {
-  off: "off",
-  "1m": "1m",
-  "5m": "5m",
-  "15m": "15m",
-  "30m": "30m",
-};
 
 export default function DashboardHero({
   greeting,
   accountName,
   lastUpdatedLabel,
-  autoRefreshInterval,
   range,
   onRangeChange,
 }: DashboardHeroProps) {
@@ -40,9 +29,6 @@ export default function DashboardHero({
     lastUpdatedLabel
       ? t("heroMetaLastUpdated", { when: lastUpdatedLabel })
       : t("heroMetaLastUpdatedUnknown"),
-    t("heroMetaAutoRefresh", {
-      interval: INTERVAL_LABELS[autoRefreshInterval],
-    }),
   ];
 
   return (

@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { useLocale, useTranslations } from "next-intl";
 import {
   ClipboardTextIcon,
@@ -9,10 +10,9 @@ import {
 } from "@phosphor-icons/react";
 import { Check } from "lucide-react";
 import api from "@/lib/api";
-import type {
-  MarketingIntegration as MarketingIntegrationType,
-  PaginatedResponse,
-} from "@/types";
+import type { MarketingIntegration as MarketingIntegrationType } from "@/types";
+import { useMarketingIntegrationsQuery } from "@/hooks/useMarketingIntegrationsQuery";
+import { marketingIntegrationsQueryKey } from "@/lib/query-keys";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useEnterNavigation } from "@/hooks/useEnterNavigation";
@@ -60,6 +60,21 @@ export default function MarketingProviderCard({
   const t = useTranslations("settings");
   const tPages = useTranslations("pages");
   const confirm = useConfirm();
+  const queryClient = useQueryClient();
+  const {
+    data: allFetched = [],
+    isLoading: loading,
+    isError: integrationsIsError,
+    error: integrationsError,
+  } = useMarketingIntegrationsQuery();
+
+  useEffect(() => {
+    if (!integrationsIsError) return;
+    notify.error(integrationsError, {
+      title: tPages("toastTitleMarketingLinkFailed"),
+      fallbackMessage: tPages("toastDescMarketingLinkFailed"),
+    });
+  }, [integrationsIsError, integrationsError, tPages]);
 
   const c = useCallback(
     (key: string) =>
@@ -69,8 +84,6 @@ export default function MarketingProviderCard({
     [provider, t]
   );
 
-  const [allFetched, setAllFetched] = useState<MarketingIntegrationType[] | null>(null);
-  const [loading, setLoading] = useState(true);
   const [modal, setModal] = useState<MarketingModal>(null);
   const [form, setForm] = useState<ConnectForm>(empty(provider));
   const [saving, setSaving] = useState(false);
@@ -81,36 +94,12 @@ export default function MarketingProviderCard({
   const connectFormRef = useRef<HTMLFormElement>(null);
   const { handleKeyDown } = useEnterNavigation(() => connectFormRef.current?.requestSubmit());
 
-  const providerIntegrations = (allFetched ?? []).filter((i) => i.provider === provider);
+  const providerIntegrations = allFetched.filter((i) => i.provider === provider);
   const canAddPixel = providerIntegrations.length < 3;
-
-  const fetchIntegrations = useCallback(() => {
-    setLoading(true);
-    api
-      .get<PaginatedResponse<MarketingIntegrationType> | MarketingIntegrationType[]>(
-        "admin/marketing-integrations/"
-      )
-      .then((res) => {
-        const list = Array.isArray(res.data) ? res.data : res.data.results;
-        setAllFetched(list ?? []);
-      })
-      .catch((err) => {
-        notify.error(err, {
-          title: tPages("toastTitleMarketingLinkFailed"),
-          fallbackMessage: tPages("toastDescMarketingLinkFailed"),
-        });
-        setAllFetched(null);
-      })
-      .finally(() => setLoading(false));
-  }, []);
-
-  useEffect(() => {
-    fetchIntegrations();
-  }, [fetchIntegrations]);
 
   useEffect(() => {
     if (modal === null || modal === "connect" || modal.type !== "configure") return;
-    const found = allFetched?.find(
+    const found = allFetched.find(
       (i) => i.public_id === modal.publicId && i.provider === provider
     );
     if (!found) setModal(null);
@@ -130,7 +119,7 @@ export default function MarketingProviderCard({
 
   const configureIntegration: MarketingIntegrationType | undefined =
     modal !== null && modal !== "connect" && modal.type === "configure"
-      ? allFetched?.find(
+      ? allFetched.find(
           (i) => i.public_id === modal.publicId && i.provider === provider
         )
       : undefined;
@@ -150,7 +139,7 @@ export default function MarketingProviderCard({
       const body: ConnectForm = { ...form, provider };
       await api.post("admin/marketing-integrations/", body);
       closeConnectModal();
-      fetchIntegrations();
+      void queryClient.invalidateQueries({ queryKey: marketingIntegrationsQueryKey });
     } catch (err: unknown) {
       const data = (err as { response?: { data?: Record<string, unknown> } })?.response?.data;
       const msg =
@@ -174,7 +163,7 @@ export default function MarketingProviderCard({
       onConfirm: async () => {
         try {
           await api.delete(`admin/marketing-integrations/${publicId}/`);
-          fetchIntegrations();
+          void queryClient.invalidateQueries({ queryKey: marketingIntegrationsQueryKey });
           notify.success(tPages("toastDescIntegrationDisconnected"), {
             title: tPages("toastTitleIntegrationDisconnected"),
           });
@@ -196,7 +185,7 @@ export default function MarketingProviderCard({
       await api.patch(`admin/marketing-integrations/${row.public_id}/`, {
         is_active: !row.is_active,
       });
-      fetchIntegrations();
+      void queryClient.invalidateQueries({ queryKey: marketingIntegrationsQueryKey });
     } catch (err) {
       notify.error(err, {
         title: tPages("toastTitleMarketingLinkFailed"),
@@ -218,7 +207,7 @@ export default function MarketingProviderCard({
       await api.patch(`admin/marketing-integrations/${row.public_id}/events/`, {
         [key]: value,
       });
-      fetchIntegrations();
+      void queryClient.invalidateQueries({ queryKey: marketingIntegrationsQueryKey });
     } catch (err) {
       notify.error(err, {
         title: tPages("toastTitleMarketingLinkFailed"),

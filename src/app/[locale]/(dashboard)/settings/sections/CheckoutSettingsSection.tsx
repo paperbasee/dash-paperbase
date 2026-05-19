@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { isApiHttpError } from "@/lib/api-client";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -11,8 +12,11 @@ import {
   settingsSectionSurfaceClassName,
 } from "../SettingsSectionBody";
 import { cn } from "@/lib/utils";
-
-type CustomerFormVariant = "minimal" | "extended";
+import {
+  useCheckoutSettingsQuery,
+  type CustomerFormVariant,
+} from "@/hooks/useCheckoutSettingsQuery";
+import { checkoutSettingsQueryKey } from "@/lib/query-keys";
 
 type SettingsMessage = { type: "success" | "error"; text: string } | null;
 
@@ -31,7 +35,8 @@ export default function CheckoutSettingsSection({
 }: {
   hidden: boolean;
 }) {
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
+  const { data, isLoading: loading, isError, error } = useCheckoutSettingsQuery();
   const [saving, setSaving] = useState(false);
   const [loadedVariant, setLoadedVariant] = useState<CustomerFormVariant | null>(
     null
@@ -40,47 +45,36 @@ export default function CheckoutSettingsSection({
     useState<CustomerFormVariant>("extended");
   const [message, setMessage] = useState<SettingsMessage>(null);
 
-  const fetchSettings = useCallback(async () => {
-    setLoading(true);
+  useEffect(() => {
+    if (!data?.customer_form_variant) return;
+    setLoadedVariant(data.customer_form_variant);
+    setSelectedVariant(data.customer_form_variant);
     setMessage(null);
-    try {
-      const { data } = await api.get<{ customer_form_variant: CustomerFormVariant }>(
-        "store/checkout-settings/"
-      );
-      const v = data.customer_form_variant;
-      if (v !== "minimal" && v !== "extended") {
-        throw new Error("Invalid response");
-      }
-      setLoadedVariant(v);
-      setSelectedVariant(v);
-    } catch (err) {
-      setLoadedVariant(null);
-      setMessage({ type: "error", text: errorMessage(err) });
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  }, [data?.customer_form_variant]);
 
   useEffect(() => {
-    void fetchSettings();
-  }, [fetchSettings]);
+    if (!isError) return;
+    setLoadedVariant(null);
+    setMessage({ type: "error", text: errorMessage(error) });
+  }, [isError, error]);
 
   const handleSave = async () => {
     if (loadedVariant === null || selectedVariant === loadedVariant) return;
     setSaving(true);
     setMessage(null);
     try {
-      const { data } = await api.patch<{ customer_form_variant: CustomerFormVariant }>(
+      const { data: patchData } = await api.patch<{ customer_form_variant: CustomerFormVariant }>(
         "store/checkout-settings/",
         { customer_form_variant: selectedVariant }
       );
-      const v = data.customer_form_variant;
+      const v = patchData.customer_form_variant;
       if (v !== "minimal" && v !== "extended") {
         throw new Error("Invalid response");
       }
       setLoadedVariant(v);
       setSelectedVariant(v);
       setMessage({ type: "success", text: "Saved." });
+      void queryClient.invalidateQueries({ queryKey: checkoutSettingsQueryKey });
     } catch (err) {
       setMessage({ type: "error", text: errorMessage(err) });
     } finally {

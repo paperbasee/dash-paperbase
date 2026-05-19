@@ -539,18 +539,23 @@ input.font-numbers-date-value::placeholder {
 
   /*
    * Recharts: clicking the chart focuses the SVG; the browser default focus
-   * outline reads as a harsh white box on dark themes. Use no outline here —
-   * keyboard users use controls outside the plot (e.g. metric filters) where provided.
+   * outline reads as a harsh box on dark themes. Suppress outline/shadow on plot
+   * chrome — metric filter buttons remain keyboard-focusable.
    */
+  .recharts-responsive-container,
   .recharts-responsive-container:focus,
   .recharts-responsive-container:focus-visible,
+  .recharts-wrapper,
   .recharts-wrapper:focus,
   .recharts-wrapper:focus-visible,
+  .recharts-surface,
   .recharts-surface:focus,
   .recharts-surface:focus-visible,
+  svg.recharts-surface,
   svg.recharts-surface:focus,
   svg.recharts-surface:focus-visible {
-    outline: none;
+    outline: none !important;
+    box-shadow: none !important;
   }
 
   /* System notification banner — tokens: --system-banner-* in :root / .dark */

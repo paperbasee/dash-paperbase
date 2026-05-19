@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { DeferredNavLink } from "@/components/navigation/DeferredNavLink";
@@ -33,6 +34,11 @@ import { useAdminDeleteCapabilities } from "@/hooks/useAdminDeleteCapabilities";
 import { numberTextClass } from "@/lib/number-font";
 import { cn } from "@/lib/utils";
 import { buildPublicMediaUrlFromKey, uploadFile } from "@/hooks/usePresignedUpload";
+import {
+  inventoryStatusQueryKey,
+  navCountsQueryKey,
+  productsListQueryKeyRoot,
+} from "@/lib/query-keys";
 
 const MAX_IMAGES = MAX_PRODUCT_IMAGES;
 type UploadStatus = "idle" | "uploading" | "uploaded" | "error";
@@ -86,7 +92,8 @@ export default function ProductDetailClient() {
   const pathname = usePathname();
   const isEditMode = pathname.replace(/\/$/, "").endsWith("/edit");
 
-  const { id: product_public_id } = useParams<{ locale: string; id: string }>();
+  const params = useParams<{ public_id: string }>();
+  const publicId = params.public_id;
   const router = useRouter();
   const navigate = useDeferredNavigate();
   const locale = useLocale();
@@ -101,7 +108,14 @@ export default function ProductDetailClient() {
   const { canDelete: canDeleteProduct, isSuperuser: deleteIsSuperuser } =
     useAdminDeleteCapabilities();
   const confirm = useConfirm();
+  const queryClient = useQueryClient();
   const [deleting, setDeleting] = useState(false);
+
+  const invalidateProductCaches = useCallback(() => {
+    void queryClient.invalidateQueries({ queryKey: productsListQueryKeyRoot });
+    void queryClient.invalidateQueries({ queryKey: navCountsQueryKey });
+    void queryClient.invalidateQueries({ queryKey: inventoryStatusQueryKey });
+  }, [queryClient]);
 
   const [form, setForm] = useState({
     name: "",
@@ -196,7 +210,7 @@ export default function ProductDetailClient() {
     setUploadErrors(Array(MAX_IMAGES).fill(null));
     setError("");
     setExtraFieldsErrors({});
-  }, [isEditMode, product_public_id]);
+  }, [isEditMode, publicId]);
 
   useEffect(() => {
     const applyProduct = (p: Product, d: AdminCategoryTreeNode[]) => {
@@ -225,7 +239,7 @@ export default function ProductDetailClient() {
     };
 
     Promise.all([
-      api.get<Product>(`admin/products/${product_public_id}/`),
+      api.get<Product>(`admin/products/${publicId}/`),
       api.get<AdminCategoryTreeNode[]>("admin/categories/?tree=1"),
     ])
       .then(([prodRes, treeRes]) => {
@@ -241,7 +255,7 @@ export default function ProductDetailClient() {
         });
       })
       .finally(() => setLoading(false));
-  }, [product_public_id, tPages]);
+  }, [publicId, tPages]);
 
   const categorySelectOptions = useMemo(
     () => flattenCategoryOptions(categoryTree),
@@ -268,7 +282,7 @@ export default function ProductDetailClient() {
     try {
       const { key } = await uploadFile(file, {
         entity: "product",
-        entityPublicId: product_public_id,
+        entityPublicId: publicId,
         isGallery: index > 0,
         onProgress: (percent) =>
           setUploadProgress((prev) => prev.map((p, i) => (i === index ? percent : p))),
@@ -305,7 +319,7 @@ export default function ProductDetailClient() {
           let counter = 2;
           while (true) {
             const res = await api.get<{ available: boolean }>(
-              `admin/products/check-slug/?slug=${encodeURIComponent(candidate)}&exclude_public_id=${encodeURIComponent(product_public_id)}`
+              `admin/products/check-slug/?slug=${encodeURIComponent(candidate)}&exclude_public_id=${encodeURIComponent(publicId)}`
             );
             if (res.data.available) {
               setResolvedSlug(candidate);
@@ -324,7 +338,7 @@ export default function ProductDetailClient() {
       })();
     }, 400);
     return () => clearTimeout(t);
-  }, [isEditMode, baseSlug, product_public_id]);
+  }, [isEditMode, baseSlug, publicId]);
 
   const clearSlot = useCallback((i: number) => {
     if (i === 0) {
@@ -441,7 +455,7 @@ export default function ProductDetailClient() {
     const galleryIdsBeforeSave = galleryPublicIdsPerSlot(product);
 
     try {
-      const { data } = await api.patch(`admin/products/${product_public_id}/`, formData);
+      const { data } = await api.patch(`admin/products/${publicId}/`, formData);
 
       for (const pid of removedGalleryPublicIds) {
         await api.delete(`admin/product-images/${pid}/`);
@@ -457,7 +471,7 @@ export default function ProductDetailClient() {
         const key = imageKeys[i];
         if (!key) continue;
         const galleryData = new FormData();
-        galleryData.append("product_public_id", product_public_id);
+        galleryData.append("product_public_id", publicId);
         galleryData.append("image_key", key);
         galleryData.append("order", String(i));
         await api.post("admin/product-images/", galleryData);
@@ -471,7 +485,8 @@ export default function ProductDetailClient() {
       setUploadStatus(Array(MAX_IMAGES).fill("idle"));
       setUploadProgress(Array(MAX_IMAGES).fill(0));
       setUploadErrors(Array(MAX_IMAGES).fill(null));
-      void navigate(`/products/${product_public_id}`);
+      invalidateProductCaches();
+      void navigate(`/products/${publicId}`);
     } catch (err: unknown) {
       const message =
         err && typeof err === "object" && "response" in err
@@ -507,7 +522,8 @@ export default function ProductDetailClient() {
     if (!ok) return;
     setDeleting(true);
     try {
-      await api.delete(`admin/products/${product_public_id}/`);
+      await api.delete(`admin/products/${publicId}/`);
+      invalidateProductCaches();
       void navigate("/products");
     } catch (err) {
       notify.error(err, {
@@ -567,7 +583,7 @@ export default function ProductDetailClient() {
           )}
           {!isEditMode && (
             <Button type="button" className="gap-2" asChild>
-              <DeferredNavLink href={`/products/${product_public_id}/edit`}>
+              <DeferredNavLink href={`/products/${publicId}/edit`}>
                 {tPages("productEditProductButton")}
               </DeferredNavLink>
             </Button>
@@ -686,7 +702,7 @@ export default function ProductDetailClient() {
                       total: product.total_stock ?? product.available_quantity ?? 0,
                     })}{" "}
                     <ClickableText
-                      href={`/variants?product_public_id=${encodeURIComponent(product_public_id)}`}
+                      href={`/variants?product_public_id=${encodeURIComponent(publicId)}`}
                       className="underline-offset-2"
                     >
                       {tPages("productEditManageVariants")}
@@ -1082,7 +1098,7 @@ export default function ProductDetailClient() {
                       total: product.total_stock ?? product.available_quantity ?? 0,
                     })}{" "}
                     <ClickableText
-                      href={`/variants?product_public_id=${encodeURIComponent(product_public_id)}`}
+                      href={`/variants?product_public_id=${encodeURIComponent(publicId)}`}
                       className="underline-offset-2"
                     >
                       {tPages("productEditManageVariants")}

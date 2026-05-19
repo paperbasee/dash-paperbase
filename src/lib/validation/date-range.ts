@@ -1,5 +1,5 @@
 import { z } from "zod";
-import type { AnalyticsBucket } from "@/hooks/useDashboardAnalytics";
+import type { AnalyticsBucket } from "@/lib/basicAnalyticsService";
 import {
   addCalendarDaysYmd,
   isValidYmd,

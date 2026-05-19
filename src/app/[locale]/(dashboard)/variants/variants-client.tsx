@@ -8,6 +8,7 @@ import {
   useState,
   type FormEvent,
 } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { useLocale, useTranslations } from "next-intl";
 import { usePathname, useRouter } from "@/i18n/navigation";
 import { useSearchParams } from "next/navigation";
@@ -20,52 +21,25 @@ import { ClickableTableRow } from "@/components/ui/clickable-table-row";
 import { ClickableText } from "@/components/ui/clickable-text";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
-import type {
-  Product,
-  ProductAttributeAdmin,
-  ProductVariant,
-  PaginatedResponse,
-} from "@/types";
+import type { ProductAttributeAdmin, ProductVariant } from "@/types";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { useFilters } from "@/hooks/useFilters";
+import {
+  useVariantAttributesQuery,
+  useVariantProductsQuery,
+  useVariantsListQuery,
+} from "@/hooks/useVariantsQuery";
 import { useConfirm } from "@/context/ConfirmDialogContext";
-import { notify, normalizeError } from "@/notifications";
+import { notify } from "@/notifications";
 import { numberTextClass } from "@/lib/number-font";
 import { cn } from "@/lib/utils";
-import { cursorFromLink } from "@/lib/cursor-from-link";
 import { useEnterNavigation } from "@/hooks/useEnterNavigation";
-
-async function fetchAllProducts(): Promise<Product[]> {
-  const out: Product[] = [];
-  let cursor: string | null = null;
-  while (true) {
-    const params: Record<string, string> = { page_size: "100" };
-    if (cursor) params.cursor = cursor;
-    const { data } = await api.get<PaginatedResponse<Product>>("admin/products/", {
-      params,
-    });
-    out.push(...data.results);
-    const next = data.next ? cursorFromLink(data.next) : null;
-    if (!next) break;
-    cursor = next;
-  }
-  return out;
-}
-
-async function fetchAllAttributes(): Promise<ProductAttributeAdmin[]> {
-  const out: ProductAttributeAdmin[] = [];
-  let page = 1;
-  while (true) {
-    const { data } = await api.get<PaginatedResponse<ProductAttributeAdmin>>(
-      "admin/product-attributes/",
-      { params: { page, page_size: 100 } }
-    );
-    out.push(...data.results);
-    if (!data.next) break;
-    page += 1;
-  }
-  return out;
-}
+import {
+  inventoryStatusQueryKey,
+  productsListQueryKeyRoot,
+  variantsListQueryKey,
+  variantsQueryKeyRoot,
+} from "@/lib/query-keys";
 
 type VariantForm = {
   price_override: string;
@@ -114,6 +88,14 @@ export default function VariantsPageClient() {
   const tPages = useTranslations("pages");
   const tCommon = useTranslations("common");
   const confirm = useConfirm();
+  const queryClient = useQueryClient();
+
+  const invalidateVariantCaches = useCallback(() => {
+    void queryClient.invalidateQueries({ queryKey: variantsQueryKeyRoot });
+    void queryClient.invalidateQueries({ queryKey: productsListQueryKeyRoot });
+    void queryClient.invalidateQueries({ queryKey: inventoryStatusQueryKey });
+  }, [queryClient]);
+
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const router = useRouter();
@@ -129,11 +111,15 @@ export default function VariantsPageClient() {
   const [searchInput, setSearchInput] = useState(filters.search || "");
   const debouncedSearch = useDebouncedValue(searchInput);
 
-  const [products, setProducts] = useState<Product[]>([]);
-  const [attributes, setAttributes] = useState<ProductAttributeAdmin[]>([]);
-  const [variants, setVariants] = useState<ProductVariant[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [variantsLoading, setVariantsLoading] = useState(false);
+  const productsQuery = useVariantProductsQuery();
+  const attributesQuery = useVariantAttributesQuery();
+  const variantsQuery = useVariantsListQuery(productId);
+
+  const products = productsQuery.data ?? [];
+  const attributes = attributesQuery.data ?? [];
+  const variants = variantsQuery.data ?? [];
+  const loading = productsQuery.isLoading || attributesQuery.isLoading;
+  const variantsLoading = variantsQuery.isLoading;
   const [error, setError] = useState("");
 
   const [editing, setEditing] = useState<string | "new" | null>(null);
@@ -149,6 +135,23 @@ export default function VariantsPageClient() {
     unlockDocumentScroll();
   }, []);
 
+  useEffect(() => {
+    const metaError = productsQuery.error ?? attributesQuery.error;
+    if (!metaError) return;
+    notify.error(metaError, {
+      title: tPages("toastTitleVariantsFailedToLoad"),
+      fallbackMessage: tPages("toastDescVariantsFailedToLoad"),
+    });
+  }, [productsQuery.error, attributesQuery.error, tPages]);
+
+  useEffect(() => {
+    if (!variantsQuery.isError || !variantsQuery.error) return;
+    notify.error(variantsQuery.error, {
+      title: tPages("toastTitleVariantsFailedToLoad"),
+      fallbackMessage: tPages("toastDescVariantsFailedToLoad"),
+    });
+  }, [variantsQuery.isError, variantsQuery.error, tPages]);
+
   const selectedProduct = useMemo(
     () => products.find((p) => p.public_id === productId) ?? null,
     [products, productId]
@@ -158,27 +161,6 @@ export default function VariantsPageClient() {
     editing && editing !== "new"
       ? variants.find((v) => v.public_id === editing)?.sku
       : undefined;
-
-  const loadMeta = useCallback(async () => {
-    setLoading(true);
-    setError("");
-    try {
-      const [prods, attrs] = await Promise.all([fetchAllProducts(), fetchAllAttributes()]);
-      setProducts(prods);
-      setAttributes(attrs);
-    } catch (err) {
-      notify.error(err, {
-        title: tPages("toastTitleVariantsFailedToLoad"),
-        fallbackMessage: tPages("toastDescVariantsFailedToLoad"),
-      });
-    } finally {
-      setLoading(false);
-    }
-  }, [tPages]);
-
-  useEffect(() => {
-    loadMeta();
-  }, [loadMeta]);
 
   useEffect(() => {
     const next = debouncedSearch.trim();
@@ -236,47 +218,6 @@ export default function VariantsPageClient() {
     setSearchInput("");
   }
 
-  const loadVariants = useCallback(async () => {
-    if (!productId) {
-      setVariants([]);
-      return;
-    }
-    setVariantsLoading(true);
-    try {
-      const acc: ProductVariant[] = [];
-      let page = 1;
-      while (true) {
-        const { data } = await api.get<PaginatedResponse<ProductVariant>>(
-          "admin/product-variants/",
-          {
-            params: {
-              product_public_id: productId,
-              page,
-              page_size: 100,
-              include_inactive: true,
-            },
-          }
-        );
-        acc.push(...data.results);
-        if (!data.next) break;
-        page += 1;
-      }
-      setVariants(acc);
-    } catch {
-      setVariants([]);
-      notify.error(new Error("variants_load_failed"), {
-        title: tPages("toastTitleVariantsFailedToLoad"),
-        fallbackMessage: tPages("toastDescVariantsFailedToLoad"),
-      });
-    } finally {
-      setVariantsLoading(false);
-    }
-  }, [productId, tPages]);
-
-  useEffect(() => {
-    loadVariants();
-  }, [loadVariants]);
-
   function openNew() {
     setEditing("new");
     setForm(emptyForm(attributes));
@@ -333,8 +274,7 @@ export default function VariantsPageClient() {
         await api.patch(`admin/product-variants/${editing}/`, payload);
       }
       closePanel();
-      await loadVariants();
-      await loadMeta();
+      invalidateVariantCaches();
     } catch (err: unknown) {
       notify.error(err, {
         title: tPages("toastTitleVariantNotSaved"),
@@ -354,8 +294,7 @@ export default function VariantsPageClient() {
     if (!ok) return;
     try {
       await api.delete(`admin/product-variants/${v.public_id}/`);
-      await loadVariants();
-      await loadMeta();
+      invalidateVariantCaches();
       notify.success(tPages("toastDescVariantDeleted"), { title: tPages("toastTitleVariantDeleted") });
     } catch (err) {
       notify.error(err, {
@@ -371,18 +310,22 @@ export default function VariantsPageClient() {
     setError("");
     try {
       await api.patch(`admin/product-variants/${v.public_id}/`, { is_active });
-      setVariants((prev) =>
-        prev.map((row) =>
-          row.public_id === v.public_id ? { ...row, is_active } : row
-        )
-      );
-      await loadMeta();
+      if (productId) {
+        queryClient.setQueryData<ProductVariant[]>(
+          variantsListQueryKey(productId),
+          (prev) =>
+            (prev ?? []).map((row) =>
+              row.public_id === v.public_id ? { ...row, is_active } : row,
+            ),
+        );
+      }
+      invalidateVariantCaches();
     } catch {
       notify.error(new Error("variant_status_update_failed"), {
         title: tPages("toastTitleVariantStatusNotSaved"),
         fallbackMessage: tPages("toastDescVariantStatusNotSaved"),
       });
-      await loadVariants();
+      invalidateVariantCaches();
     } finally {
       setTogglingVariantId(null);
     }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { useLocale, useTranslations } from "next-intl";
 import { DeferredNavLink } from "@/components/navigation/DeferredNavLink";
 import { toLocaleDigits } from "@/lib/locale-digits";
@@ -9,10 +10,17 @@ import { Loader2, Undo2, Trash } from "lucide-react";
 import api from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { formatDashboardDateTime } from "@/lib/datetime-display";
-import type { PaginatedResponse, TrashItem } from "@/types";
+import type { TrashItem } from "@/types";
 import { useConfirm } from "@/context/ConfirmDialogContext";
 import { notify, normalizeError } from "@/notifications";
 import { useAdminDeleteCapabilities } from "@/hooks/useAdminDeleteCapabilities";
+import { useTrashQuery } from "@/hooks/useTrashQuery";
+import {
+  navCountsQueryKey,
+  ordersListQueryKeyRoot,
+  productsListQueryKeyRoot,
+  trashQueryKey,
+} from "@/lib/query-keys";
 
 function rowKey(row: TrashItem): string {
   return row.public_id;
@@ -25,57 +33,56 @@ export default function TrashPage() {
   const tNav = useTranslations("nav");
   const { canDelete, loading: capsLoading } = useAdminDeleteCapabilities();
   const confirm = useConfirm();
+  const queryClient = useQueryClient();
+
   const [page, setPage] = useState(1);
-  const [rows, setRows] = useState<TrashItem[]>([]);
-  const [count, setCount] = useState(0);
-  const [hasNext, setHasNext] = useState(false);
-  const [loading, setLoading] = useState(true);
+
+  const invalidateTrashCaches = useCallback(() => {
+    void queryClient.invalidateQueries({ queryKey: trashQueryKey(page) });
+    void queryClient.invalidateQueries({ queryKey: productsListQueryKeyRoot });
+    void queryClient.invalidateQueries({ queryKey: ordersListQueryKeyRoot });
+    void queryClient.invalidateQueries({ queryKey: navCountsQueryKey });
+  }, [queryClient, page]);
+  const trashEnabled = !capsLoading && canDelete;
+  const {
+    data: trashData,
+    isLoading: trashLoading,
+    isError: trashIsError,
+    error: trashError,
+  } = useTrashQuery(page, trashEnabled);
+
+  const rows = canDelete ? (trashData?.results ?? []) : [];
+  const count = canDelete ? (trashData?.count ?? 0) : 0;
+  const hasNext = canDelete ? (trashData?.hasNext ?? false) : false;
+  const loading = capsLoading || (trashEnabled && trashLoading);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!trashEnabled) {
+      setError(null);
+      return;
+    }
+    if (!trashIsError || !trashError) {
+      setError(null);
+      return;
+    }
+    const err = trashError;
+    const norm = normalizeError(err, tPages("trashLoadError"));
+    if (
+      err &&
+      typeof err === "object" &&
+      "response" in err &&
+      (err as { response?: { status?: number } }).response?.status === 403
+    ) {
+      setError(tPages("trashForbidden"));
+    } else {
+      setError(norm.message);
+    }
+  }, [trashEnabled, trashIsError, trashError, tPages]);
   const [busyPublicId, setBusyPublicId] = useState<string | null>(null);
   const [selectedPublicIds, setSelectedPublicIds] = useState<Set<string>>(new Set());
   const [bulkDeleting, setBulkDeleting] = useState(false);
   const [bulkRestoring, setBulkRestoring] = useState(false);
-
-  const fetchTrash = useCallback(() => {
-    if (!canDelete) {
-      setLoading(false);
-      setRows([]);
-      setCount(0);
-      setHasNext(false);
-      return;
-    }
-    setLoading(true);
-    setError(null);
-    api
-      .get<PaginatedResponse<TrashItem>>("admin/trash/", { params: { page } })
-      .then((res) => {
-        setRows(res.data.results ?? []);
-        setCount(res.data.count ?? 0);
-        setHasNext(!!res.data.next);
-      })
-      .catch((err: unknown) => {
-        const norm = normalizeError(err, tPages("trashLoadError"));
-        if (
-          err &&
-          typeof err === "object" &&
-          "response" in err &&
-          (err as { response?: { status?: number } }).response?.status === 403
-        ) {
-          setError(tPages("trashForbidden"));
-        } else {
-          setError(norm.message);
-        }
-        setRows([]);
-        setCount(0);
-        setHasNext(false);
-      })
-      .finally(() => setLoading(false));
-  }, [canDelete, page, tPages]);
-
-  useEffect(() => {
-    if (capsLoading) return;
-    fetchTrash();
-  }, [capsLoading, fetchTrash]);
 
   const toggleSelect = (publicId: string) => {
     setSelectedPublicIds((prev) => {
@@ -130,7 +137,7 @@ export default function TrashPage() {
       notify.success(tPages("toastDescAllItemsRestored"), {
         title: tPages("toastTitleAllItemsRestored"),
       });
-      fetchTrash();
+      invalidateTrashCaches();
     } catch (err) {
       notify.error(err, {
         title: tPages("toastTitleRestoreFailed"),
@@ -164,7 +171,7 @@ export default function TrashPage() {
       notify.success(tPages("toastDescTrashEmptied"), {
         title: tPages("toastTitleTrashEmptied"),
       });
-      fetchTrash();
+      invalidateTrashCaches();
     } catch (err) {
       notify.error(err, {
         title: tPages("toastTitleTrashNotEmptied"),
@@ -195,7 +202,7 @@ export default function TrashPage() {
       notify.success(tPages("toastDescItemRestored"), {
         title: tPages("toastTitleItemRestored"),
       });
-      fetchTrash();
+      invalidateTrashCaches();
     } catch (err) {
       notify.error(err, {
         title: tPages("toastTitleRestoreFailed"),
@@ -224,7 +231,7 @@ export default function TrashPage() {
       notify.success(tPages("toastDescPermanentlyDeleted"), {
         title: tPages("toastTitlePermanentlyDeleted"),
       });
-      fetchTrash();
+      invalidateTrashCaches();
     } catch (err) {
       notify.error(err, {
         title: tPages("toastTitleDeletionFailed"),

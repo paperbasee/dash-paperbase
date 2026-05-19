@@ -119,7 +119,7 @@ export default function DashboardLayoutClient({
     isAuthenticated &&
     meProfileStatus === "ready" &&
     Boolean(meProfile?.active_store_public_id?.trim());
-  const { isConnected: isSocketConnected } = useStoreSocket({
+  useStoreSocket({
     enabled: socketEnabled,
     onConnect: () => markRefreshedRef.current?.(),
     onAfterInvalidate: () => markRefreshedRef.current?.(),
@@ -223,11 +223,7 @@ export default function DashboardLayoutClient({
   return (
     <BrandingProvider>
       <EnabledAppsProvider>
-      <DashboardRefreshProvider
-        storePublicId={meProfile?.active_store_public_id ?? ""}
-        socketConnected={isSocketConnected}
-        markRefreshedRef={markRefreshedRef}
-      >
+      <DashboardRefreshProvider markRefreshedRef={markRefreshedRef}>
       <NavigationLoadingProvider>
       <SearchModalProvider>
         <div className="md:flex md:h-screen md:flex-col md:overflow-hidden">

@@ -61,7 +61,12 @@ import { numberTextClass } from "@/lib/number-font";
 import { cn } from "@/lib/utils";
 import { BelowFoldScrollHint } from "@/components/BelowFoldScrollHint";
 import { useProductsQuery } from "@/hooks/useProductsQuery";
-import { productsListQueryKey } from "@/lib/query-keys";
+import {
+  inventoryStatusQueryKey,
+  navCountsQueryKey,
+  productsListQueryKey,
+  productsListQueryKeyRoot,
+} from "@/lib/query-keys";
 import { useQueryClient } from "@tanstack/react-query";
 
 type CategoryOption = { value: string; label: string; labelDisplay: ReactNode };
@@ -170,7 +175,13 @@ export default function ProductsPage() {
   const prevLink = productsPage?.previous ?? null;
 
   const invalidateProductsList = useCallback(() => {
-    void queryClient.invalidateQueries({ queryKey: ["products", "list"] });
+    void queryClient.invalidateQueries({ queryKey: productsListQueryKeyRoot });
+  }, [queryClient]);
+
+  const invalidateProductCaches = useCallback(() => {
+    void queryClient.invalidateQueries({ queryKey: productsListQueryKeyRoot });
+    void queryClient.invalidateQueries({ queryKey: navCountsQueryKey });
+    void queryClient.invalidateQueries({ queryKey: inventoryStatusQueryKey });
   }, [queryClient]);
 
   const patchProductsList = useCallback(
@@ -405,7 +416,7 @@ export default function ProductsPage() {
       notify.success(tPages("toastDescProductsRemoved"), {
         title: tPages("toastTitleProductsRemoved"),
       });
-      invalidateProductsList();
+      invalidateProductCaches();
     } catch (err) {
       notify.error(err, {
         title: tPages("toastTitleBulkDeleteIncomplete"),
@@ -425,6 +436,7 @@ export default function ProductsPage() {
           p.public_id === product.public_id ? { ...p, ...payload } : p
         )
       );
+      invalidateProductCaches();
     } catch (err) {
       notify.error(err, {
         title: tPages("toastTitleProductStatusNotSaved"),

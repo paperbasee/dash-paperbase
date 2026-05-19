@@ -1,6 +1,6 @@
 {
   "name": "dash-paperbase",
-  "version": "2.0.1",
+  "version": "2.3.12",
   "private": true,
   "browserslist": [
     "last 2 Chrome versions",

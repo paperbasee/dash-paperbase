@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { Trash, Undo2, X, Loader2, AlertCircle, CheckCircle2 } from "lucide-react";
 import { isApiHttpError } from "@/lib/api-client";
 import api from "@/lib/api";
@@ -12,13 +13,20 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { notify } from "@/notifications";
-import type { Blog, BlogTag, PaginatedResponse } from "@/types";
+import type { Blog, BlogTag } from "@/types";
 import { BlogImageUpload } from "./BlogImageUpload";
 import { useConfirm } from "@/context/ConfirmDialogContext";
 import { useNotificationValidation } from "@/notifications/NotificationProvider";
 import { cn } from "@/lib/utils";
 import { useEnterNavigation } from "@/hooks/useEnterNavigation";
 import { buildPublicMediaUrlFromKey, uploadFile } from "@/hooks/usePresignedUpload";
+import {
+  blogDetailQueryKey,
+  blogsListQueryKeyRoot,
+  blogTagsQueryKey,
+  navCountsQueryKey,
+} from "@/lib/query-keys";
+import { useBlogTagsQuery } from "@/hooks/useBlogTagsQuery";
 
 interface BlogFormState {
   title: string;
@@ -82,6 +90,20 @@ export function BlogForm({
   const router = useRouter();
   const navigate = useDeferredNavigate();
   const confirm = useConfirm();
+  const queryClient = useQueryClient();
+
+  const invalidateBlogCaches = useCallback(
+    (blogPublicId?: string) => {
+      void queryClient.invalidateQueries({ queryKey: blogsListQueryKeyRoot });
+      void queryClient.invalidateQueries({ queryKey: blogTagsQueryKey });
+      void queryClient.invalidateQueries({ queryKey: navCountsQueryKey });
+      if (blogPublicId) {
+        void queryClient.invalidateQueries({ queryKey: blogDetailQueryKey(blogPublicId) });
+      }
+    },
+    [queryClient],
+  );
+
   const tPages = useTranslations("pages");
   const { fieldErrors, clearValidation } = useNotificationValidation("blog-form");
   const tempBlogUploadIdRef = useRef<string>(
@@ -99,7 +121,7 @@ export function BlogForm({
   const [uploadProgress, setUploadProgress] = useState(0);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [removeRemoteImage, setRemoveRemoteImage] = useState(false);
-  const [tags, setTags] = useState<BlogTag[]>([]);
+  const { data: tags = [], isError: tagsIsError, error: tagsError } = useBlogTagsQuery();
   const [newTagName, setNewTagName] = useState("");
   const [saving, setSaving] = useState(false);
   const { handleKeyDown } = useEnterNavigation(() => {
@@ -142,22 +164,12 @@ export function BlogForm({
   }
 
   useEffect(() => {
-    void fetchTags();
-  }, []);
-
-  async function fetchTags() {
-    try {
-      const { data } = await api.get<PaginatedResponse<BlogTag> | BlogTag[]>(
-        "admin/blog-tags/",
-      );
-      setTags(Array.isArray(data) ? data : data.results);
-    } catch (err) {
-      notify.error(err, {
-        title: tPages("toastTitleTagsUnavailable"),
-        fallbackMessage: tPages("toastDescTagsUnavailable"),
-      });
-    }
-  }
+    if (!tagsIsError || !tagsError) return;
+    notify.error(tagsError, {
+      title: tPages("toastTitleTagsUnavailable"),
+      fallbackMessage: tPages("toastDescTagsUnavailable"),
+    });
+  }, [tagsIsError, tagsError, tPages]);
 
   const selectedTags = useMemo(
     () => tags.filter((t) => form.tag_public_ids.includes(t.public_id)),
@@ -177,7 +189,7 @@ export function BlogForm({
     if (!name) return;
     try {
       const { data } = await api.post<BlogTag>("admin/blog-tags/", { name });
-      setTags((prev) => [...prev, data]);
+      queryClient.setQueryData<BlogTag[]>(blogTagsQueryKey, (prev) => [...(prev ?? []), data]);
       setForm((f) => ({ ...f, tag_public_ids: [...f.tag_public_ids, data.public_id] }));
       setNewTagName("");
       notify.success(tPages("toastDescTagAdded"), { title: tPages("toastTitleTagAdded") });
@@ -198,7 +210,9 @@ export function BlogForm({
     if (!ok) return;
     try {
       await api.delete(`admin/blog-tags/${tag.public_id}/`);
-      setTags((prev) => prev.filter((t) => t.public_id !== tag.public_id));
+      queryClient.setQueryData<BlogTag[]>(blogTagsQueryKey, (prev) =>
+        (prev ?? []).filter((t) => t.public_id !== tag.public_id),
+      );
       setForm((f) => ({
         ...f,
         tag_public_ids: f.tag_public_ids.filter((id) => id !== tag.public_id),
@@ -332,6 +346,7 @@ export function BlogForm({
     const saved = await ensureSaved();
     setSaving(false);
     if (!saved) return;
+    invalidateBlogCaches(saved.public_id);
     clearValidation();
     notify.success(tPages("toastDescPostSaved"), { title: tPages("toastTitlePostSaved") });
     if (mode === "new") {

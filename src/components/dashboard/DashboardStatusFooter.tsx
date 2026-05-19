@@ -1,6 +1,7 @@
 "use client";
 
 import { useLocale, useTranslations } from "next-intl";
+import { appVersion } from "@/lib/app-version";
 import { toLocaleDigits } from "@/lib/locale-digits";
 
 interface DashboardStatusFooterProps {
@@ -21,8 +22,8 @@ export default function DashboardStatusFooter({
       : "—";
 
   return (
-    <footer className="flex flex-col gap-2 pt-2 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
-      <span>{t("footerVersion", { version: "1.3.0" })}</span>
+    <footer className="flex flex-row flex-wrap items-center justify-center gap-x-3 gap-y-1 pt-2 text-center text-xs text-muted-foreground sm:justify-between sm:text-left">
+      <span>{t("footerVersion", { version: appVersion })}</span>
       <span>
         {t("footerLatency", { ms: latencyLabel })} ·{" "}
         {apiHealthy ? t("footerApiNominal") : t("footerApiDegraded")}

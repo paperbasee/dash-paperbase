@@ -1,13 +1,19 @@
 "use client";
 
-import { use, useEffect, useState } from "react";
+import { use, useCallback, useEffect, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { useDeferredNavigate } from "@/hooks/useDeferredNavigate";
 import { useTranslations } from "next-intl";
 import api from "@/lib/api";
 import { notify } from "@/notifications";
-import type { Blog } from "@/types";
 import { BlogForm } from "../../_components/BlogForm";
 import { useConfirm } from "@/context/ConfirmDialogContext";
+import { useBlogDetailQuery } from "@/hooks/useBlogDetailQuery";
+import {
+  blogDetailQueryKey,
+  blogsListQueryKeyRoot,
+  navCountsQueryKey,
+} from "@/lib/query-keys";
 
 export default function EditBlogPage({
   params,
@@ -16,48 +22,37 @@ export default function EditBlogPage({
 }) {
   const navigate = useDeferredNavigate();
   const confirm = useConfirm();
+  const queryClient = useQueryClient();
+
+  const invalidateBlogCaches = useCallback(() => {
+    void queryClient.invalidateQueries({ queryKey: blogsListQueryKeyRoot });
+    void queryClient.invalidateQueries({ queryKey: navCountsQueryKey });
+  }, [queryClient]);
+
   const tPages = useTranslations("pages");
   const { public_id } = use(params);
-  const [blog, setBlog] = useState<Blog | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { data: blog, isLoading, isError, error } = useBlogDetailQuery(public_id);
   const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
-    let cancelled = false;
-    async function run() {
-      try {
-        const { data } = await api.get<Blog>(`admin/blogs/${public_id}/`);
-        if (!cancelled) setBlog(data);
-      } catch (err) {
-        if (!cancelled) {
-          setError(tPages("toastDescPostCouldntLoad"));
-          notify.error(err, {
-            title: tPages("toastTitlePostCouldntLoad"),
-            fallbackMessage: tPages("toastDescPostCouldntLoad"),
-          });
-        }
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    }
-    void run();
-    return () => {
-      cancelled = true;
-    };
-  }, [public_id]);
+    if (!isError || !error) return;
+    notify.error(error, {
+      title: tPages("toastTitlePostCouldntLoad"),
+      fallbackMessage: tPages("toastDescPostCouldntLoad"),
+    });
+  }, [isError, error, tPages]);
 
-
-  if (loading) {
+  if (isLoading) {
     return null;
   }
-  if (error || !blog) {
+  if (isError || !blog) {
     return (
       <div className="rounded-card border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive">
-        {error ?? "Blog post not found."}
+        {tPages("toastDescPostCouldntLoad")}
       </div>
     );
   }
+
   const currentBlog = blog;
 
   async function handleDelete() {
@@ -70,6 +65,8 @@ export default function EditBlogPage({
     try {
       setDeleting(true);
       await api.delete(`admin/blogs/${currentBlog.public_id}/`);
+      invalidateBlogCaches();
+      void queryClient.invalidateQueries({ queryKey: blogDetailQueryKey(public_id) });
       notify.success(tPages("toastDescPostDeleted"), {
         title: tPages("toastTitlePostDeleted"),
       });

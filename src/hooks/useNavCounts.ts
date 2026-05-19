@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback } from "react";
+import { useCallback, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useLocale } from "next-intl";
 import api from "@/lib/api";
@@ -19,6 +19,7 @@ function mapStatsToNavCounts(stats: DashboardStats): NavCounts {
   return {
     orders: stats.orders.total,
     products: stats.products.active,
+    customers: stats.customers_count ?? 0,
     notifications: stats.notifications,
     supportTickets: stats.support_tickets,
     banners: stats.banners_count ?? 0,
@@ -33,6 +34,7 @@ export async function fetchNavCounts(): Promise<NavCounts> {
 
 export function useNavCounts() {
   const locale = useLocale();
+  const lastKnownCounts = useRef<NavCounts | null>(null);
 
   const formatCount = useCallback(
     (n: number) => formatCountLocalized(n, locale, formatCountBase),
@@ -47,15 +49,12 @@ export function useNavCounts() {
     refetchOnReconnect: true,
   });
 
-  if (query.isLoading || !query.data) {
-    return {
-      counts: null,
-      formatCount,
-    };
+  if (query.data) {
+    lastKnownCounts.current = query.data;
   }
 
   return {
-    counts: query.data,
+    counts: query.data ?? lastKnownCounts.current,
     formatCount,
   };
 }

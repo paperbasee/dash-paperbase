@@ -1225,7 +1225,6 @@
     "heroMetaOverview": "স্টোর ওভারভিউ",
     "heroMetaLastUpdated": "সর্বশেষ আপডেট: {when}",
     "heroMetaLastUpdatedUnknown": "সর্বশেষ আপডেট: —",
-    "heroMetaAutoRefresh": "অটো-রিফ্রেশ: {interval}",
     "configure": "কনফিগার",
     "export": "এক্সপোর্ট",
     "activityTimeline": "অ্যাক্টিভিটি টাইমলাইন",

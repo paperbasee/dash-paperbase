@@ -1,13 +1,17 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { useParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { useDeferredNavigate } from "@/hooks/useDeferredNavigate";
 import { Undo2 } from "lucide-react";
-import api from "@/lib/api";
-import type { CustomerDetailsResponse } from "@/types";
+import {
+  customerDetailQueryKey,
+  customersListQueryKeyRoot,
+} from "@/lib/query-keys";
+import { useCustomerDetailQuery } from "@/hooks/useCustomerDetailQuery";
 import { formatDashboardDateTime } from "@/lib/datetime-display";
 import { Button } from "@/components/ui/button";
 import { numberTextClass } from "@/lib/number-font";
@@ -28,23 +32,41 @@ export default function CustomerDetailPage() {
   const navigate = useDeferredNavigate();
   const params = useParams<{ public_id: string }>();
   const publicId = params.public_id;
+  const queryClient = useQueryClient();
 
-  const [loading, setLoading] = useState(true);
-  const [data, setData] = useState<CustomerDetailsResponse | null>(null);
+  const {
+    data,
+    isLoading,
+    isError,
+    error: customerError,
+  } = useCustomerDetailQuery(publicId ?? "");
+
+  const invalidateCustomersCaches = useCallback(() => {
+    void queryClient.invalidateQueries({ queryKey: customersListQueryKeyRoot });
+    if (publicId) {
+      void queryClient.invalidateQueries({ queryKey: customerDetailQueryKey(publicId) });
+    }
+  }, [queryClient, publicId]);
 
   useEffect(() => {
-    if (!publicId) return;
-    api
-      .get<CustomerDetailsResponse>(`admin/customers/${publicId}/details/`)
-      .then((res) => setData(res.data))
-      .catch((err) => {
-        notify.error(err, {
-          title: tPages("toastTitleCustomerProfileUnavailable"),
-          fallbackMessage: tPages("toastDescCustomerProfileUnavailable"),
-        });
-      })
-      .finally(() => setLoading(false));
-  }, [publicId, tPages]);
+    if (!isError || !customerError) return;
+    notify.error(customerError, {
+      title: tPages("toastTitleCustomerProfileUnavailable"),
+      fallbackMessage: tPages("toastDescCustomerProfileUnavailable"),
+    });
+  }, [isError, customerError, tPages]);
+
+  if (isLoading && !data) {
+    return null;
+  }
+
+  if (!data) {
+    return (
+      <p className="text-muted-foreground">
+        {tPages("toastDescCustomerProfileUnavailable")}
+      </p>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -64,77 +86,71 @@ export default function CustomerDetailPage() {
         </h1>
       </div>
 
-      {!loading && data ? (
-        <>
-          <section className="rounded-card border border-card-border bg-card p-6">
-            <div className="mb-4 flex items-center justify-between gap-3 flex-wrap">
-              <h2 className="text-lg font-medium">{tPages("customerDetailsBasicInfo")}</h2>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() =>
-                  void navigate(`/orders?customer=${encodeURIComponent(publicId)}`)
-                }
-              >
-                {tPages("customerDetailsViewOrders")}
-              </Button>
-            </div>
-            <div className="grid gap-3 sm:grid-cols-2">
-              <p><span className="text-muted-foreground">{tPages("customerDetailsName")}:</span> {data.customer.name || "—"}</p>
-              <p><span className="text-muted-foreground">{tPages("customerDetailsEmail")}:</span> {data.customer.email ?? "—"}</p>
-              <p><span className="text-muted-foreground">{tPages("customerDetailsPhone")}:</span> {data.customer.phone || "—"}</p>
-              <p><span className="text-muted-foreground">{tPages("customerDetailsAddress")}:</span> {data.customer.address ?? "—"}</p>
-            </div>
-          </section>
+      <section className="rounded-card border border-card-border bg-card p-6">
+        <div className="mb-4 flex items-center justify-between gap-3 flex-wrap">
+          <h2 className="text-lg font-medium">{tPages("customerDetailsBasicInfo")}</h2>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() =>
+              void navigate(`/orders?customer=${encodeURIComponent(publicId)}`)
+            }
+          >
+            {tPages("customerDetailsViewOrders")}
+          </Button>
+        </div>
+        <div className="grid gap-3 sm:grid-cols-2">
+          <p><span className="text-muted-foreground">{tPages("customerDetailsName")}:</span> {data.customer.name || "—"}</p>
+          <p><span className="text-muted-foreground">{tPages("customerDetailsEmail")}:</span> {data.customer.email ?? "—"}</p>
+          <p><span className="text-muted-foreground">{tPages("customerDetailsPhone")}:</span> {data.customer.phone || "—"}</p>
+          <p><span className="text-muted-foreground">{tPages("customerDetailsAddress")}:</span> {data.customer.address ?? "—"}</p>
+        </div>
+      </section>
 
-          <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            <div className="rounded-card border border-card-border bg-card p-4">
-              <p className="text-sm text-muted-foreground">{tPages("customerDetailsTotalOrders")}</p>
-              <p className={`mt-1 text-2xl font-semibold ${numClass}`}>
-                {data.analytics.total_orders}
-              </p>
-            </div>
-            <div
-              className="rounded-card border border-card-border bg-card p-4"
-            >
-              <p className="text-sm text-muted-foreground">{tPages("customerDetailsTotalSpent")}</p>
-              <p className={`mt-1 text-2xl font-semibold ${numClass}`}>
-                {asCurrency(data.analytics.total_spent)}
-              </p>
-            </div>
-            <div className="rounded-card border border-card-border bg-card p-4">
-              <p className="text-sm text-muted-foreground">{tPages("customerDetailsFirstOrderDate")}</p>
-              <p className="mt-1 text-base font-medium">
-                {data.analytics.first_order_at
-                  ? formatDashboardDateTime(data.analytics.first_order_at, locale)
-                  : "—"}
-              </p>
-            </div>
-            <div className="rounded-card border border-card-border bg-card p-4">
-              <p className="text-sm text-muted-foreground">{tPages("customerDetailsLastOrderDate")}</p>
-              <p className="mt-1 text-base font-medium">
-                {data.analytics.last_order_at
-                  ? formatDashboardDateTime(data.analytics.last_order_at, locale)
-                  : "—"}
-              </p>
-            </div>
-            <div className="rounded-card border border-card-border bg-card p-4">
-              <p className="text-sm text-muted-foreground">{tPages("customerDetailsRepeatCustomer")}</p>
-              <p className="mt-1 text-2xl font-semibold">
-                {data.analytics.is_repeat_customer ? tCommon("yes") : tCommon("no")}
-              </p>
-            </div>
-            <div className="rounded-card border border-card-border bg-card p-4">
-              <p className="text-sm text-muted-foreground">{tPages("customerDetailsAvgOrderIntervalDays")}</p>
-              <p className={`mt-1 text-2xl font-semibold ${numClass}`}>
-                {data.analytics.avg_order_interval_days == null
-                  ? "—"
-                  : asCurrency(data.analytics.avg_order_interval_days)}
-              </p>
-            </div>
-          </section>
-        </>
-      ) : null}
+      <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="rounded-card border border-card-border bg-card p-4">
+          <p className="text-sm text-muted-foreground">{tPages("customerDetailsTotalOrders")}</p>
+          <p className={`mt-1 text-2xl font-semibold ${numClass}`}>
+            {data.analytics.total_orders}
+          </p>
+        </div>
+        <div className="rounded-card border border-card-border bg-card p-4">
+          <p className="text-sm text-muted-foreground">{tPages("customerDetailsTotalSpent")}</p>
+          <p className={`mt-1 text-2xl font-semibold ${numClass}`}>
+            {asCurrency(data.analytics.total_spent)}
+          </p>
+        </div>
+        <div className="rounded-card border border-card-border bg-card p-4">
+          <p className="text-sm text-muted-foreground">{tPages("customerDetailsFirstOrderDate")}</p>
+          <p className="mt-1 text-base font-medium">
+            {data.analytics.first_order_at
+              ? formatDashboardDateTime(data.analytics.first_order_at, locale)
+              : "—"}
+          </p>
+        </div>
+        <div className="rounded-card border border-card-border bg-card p-4">
+          <p className="text-sm text-muted-foreground">{tPages("customerDetailsLastOrderDate")}</p>
+          <p className="mt-1 text-base font-medium">
+            {data.analytics.last_order_at
+              ? formatDashboardDateTime(data.analytics.last_order_at, locale)
+              : "—"}
+          </p>
+        </div>
+        <div className="rounded-card border border-card-border bg-card p-4">
+          <p className="text-sm text-muted-foreground">{tPages("customerDetailsRepeatCustomer")}</p>
+          <p className="mt-1 text-2xl font-semibold">
+            {data.analytics.is_repeat_customer ? tCommon("yes") : tCommon("no")}
+          </p>
+        </div>
+        <div className="rounded-card border border-card-border bg-card p-4">
+          <p className="text-sm text-muted-foreground">{tPages("customerDetailsAvgOrderIntervalDays")}</p>
+          <p className={`mt-1 text-2xl font-semibold ${numClass}`}>
+            {data.analytics.avg_order_interval_days == null
+              ? "—"
+              : asCurrency(data.analytics.avg_order_interval_days)}
+          </p>
+        </div>
+      </section>
     </div>
   );
 }

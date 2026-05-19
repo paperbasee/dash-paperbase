@@ -1,13 +1,16 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState, type Dispatch, type SetStateAction } from "react";
+import { useEffect, useRef, useState, type Dispatch, type SetStateAction } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { useLocale, useTranslations } from "next-intl";
 import { ClipboardTextIcon } from "@phosphor-icons/react";
 import { Check, Truck, ChevronRight } from "lucide-react";
 import api from "@/lib/api";
 import { formatAdminApiErrorFromAxios } from "@/lib/admin-api-error";
 import { formatDashboardDate } from "@/lib/datetime-display";
-import type { Courier, PaginatedResponse } from "@/types";
+import type { Courier } from "@/types";
+import { useCouriersQuery } from "@/hooks/useCouriersQuery";
+import { couriersQueryKey } from "@/lib/query-keys";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
@@ -393,8 +396,21 @@ export default function CourierIntegration({
   const t = useTranslations("settings");
   const tPages = useTranslations("pages");
   const confirm = useConfirm();
-  const [couriers, setCouriers] = useState<Courier[]>([]);
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
+  const {
+    data: couriers = [],
+    isLoading: loading,
+    isError: couriersIsError,
+    error: couriersError,
+  } = useCouriersQuery();
+
+  useEffect(() => {
+    if (!couriersIsError) return;
+    notify.error(couriersError, {
+      title: tPages("toastTitleCourierTestFailed"),
+      fallbackMessage: tPages("toastDescCourierTestFailed"),
+    });
+  }, [couriersIsError, couriersError, tPages]);
   const [modal, setModal] = useState<CourierModal>(null);
   const [form, setForm] = useState<ConnectForm>({ ...emptyForm });
   const [saving, setSaving] = useState(false);
@@ -497,7 +513,7 @@ export default function CourierIntegration({
       notify.success(tPages("toastDescWebhookSaved"), {
         title: tPages("toastTitleWebhookSaved"),
       });
-      fetchCouriers();
+      void queryClient.invalidateQueries({ queryKey: couriersQueryKey });
     } catch (err) {
       notify.error(err, {
         title: tPages("toastTitleCourierTestFailed"),
@@ -507,27 +523,6 @@ export default function CourierIntegration({
       setSavingWebhookTokenId(null);
     }
   }
-
-  const fetchCouriers = useCallback(() => {
-    setLoading(true);
-    api
-      .get<PaginatedResponse<Courier> | Courier[]>("admin/couriers/")
-      .then((res) => {
-        const list = Array.isArray(res.data) ? res.data : res.data.results;
-        setCouriers(list ?? []);
-      })
-      .catch((err) => {
-        notify.error(err, {
-          title: tPages("toastTitleCourierTestFailed"),
-          fallbackMessage: tPages("toastDescCourierTestFailed"),
-        });
-      })
-      .finally(() => setLoading(false));
-  }, []);
-
-  useEffect(() => {
-    fetchCouriers();
-  }, [fetchCouriers]);
 
   function closeConnectModal() {
     setModal(null);
@@ -549,7 +544,7 @@ export default function CourierIntegration({
     try {
       await api.post("admin/couriers/", payload);
       closeConnectModal();
-      fetchCouriers();
+      void queryClient.invalidateQueries({ queryKey: couriersQueryKey });
     } catch (err: unknown) {
       setError(formatAdminApiErrorFromAxios(err, t("courier.saveFailed")));
     } finally {
@@ -566,7 +561,7 @@ export default function CourierIntegration({
       onConfirm: async () => {
         try {
           await api.delete(`admin/couriers/${publicId}/`);
-          fetchCouriers();
+          void queryClient.invalidateQueries({ queryKey: couriersQueryKey });
         } catch (err) {
           notify.error(err, {
             title: tPages("toastTitleCourierTestFailed"),
@@ -584,7 +579,7 @@ export default function CourierIntegration({
       await api.patch(`admin/couriers/${courier.public_id}/`, {
         is_active: !courier.is_active,
       });
-      fetchCouriers();
+      void queryClient.invalidateQueries({ queryKey: couriersQueryKey });
     } catch (err) {
       notify.error(err, {
         title: tPages("toastTitleCourierTestFailed"),

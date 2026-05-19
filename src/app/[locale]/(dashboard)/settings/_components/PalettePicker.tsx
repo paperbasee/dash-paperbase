@@ -1,21 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Check, Loader2 } from "lucide-react";
 
-import api from "@/lib/api";
 import { cn } from "@/lib/utils";
+import { useThemePresetsQuery, type ThemePresetRow } from "@/hooks/useThemePresetsQuery";
 
-export type PresetRow = {
-  key: string;
-  name: string;
-  tokens: Record<string, string>;
-};
-
-type PresetsPayload = {
-  presets: PresetRow[];
-};
+export type PresetRow = ThemePresetRow;
 
 const DESCRIPTION_KEYS: Record<string, "paletteIvory" | "paletteNoir" | "paletteArctic" | "paletteSage"> = {
   ivory: "paletteIvory",
@@ -37,31 +28,9 @@ export function PalettePicker({
   disabled?: boolean;
 }) {
   const t = useTranslations("settings.customization");
-  const [presets, setPresets] = useState<PresetRow[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [loadError, setLoadError] = useState<string | null>(null);
-
-  useEffect(() => {
-    let cancelled = false;
-    void (async () => {
-      try {
-        const { data } = await api.get<PresetsPayload>("theming/presets/");
-        if (!cancelled) {
-          setPresets(data.presets ?? []);
-          setLoadError(null);
-        }
-      } catch (e) {
-        if (!cancelled) {
-          setLoadError(e instanceof Error ? e.message : "failed");
-        }
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+  const { data, isLoading: loading, isError } = useThemePresetsQuery();
+  const presets = data?.presets ?? [];
+  const loadError = isError ? "failed" : null;
 
   if (loading) {
     return (

@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useState, type FormEvent } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { ImageIcon, Undo2 } from "lucide-react";
@@ -19,6 +20,8 @@ import { cn } from "@/lib/utils";
 import { useConfirm } from "@/context/ConfirmDialogContext";
 
 import { buildPublicMediaUrlFromKey, uploadFile } from "@/hooks/usePresignedUpload";
+import { navCountsQueryKey, popupsQueryKey } from "@/lib/query-keys";
+import { usePopupsQuery } from "@/hooks/usePopupsQuery";
 
 const MAX_POPUP_IMAGES = 3;
 
@@ -85,10 +88,26 @@ export default function PopupEditorPage() {
   const tCommon = useTranslations("common");
 
   const confirm = useConfirm();
+  const queryClient = useQueryClient();
+
+  const invalidatePopupCaches = useCallback(() => {
+    void queryClient.invalidateQueries({ queryKey: popupsQueryKey });
+    void queryClient.invalidateQueries({ queryKey: navCountsQueryKey });
+  }, [queryClient]);
+
   const numClass = numberTextClass(locale);
 
-  const [loading, setLoading] = useState(true);
-  const [popup, setPopup] = useState<any | null>(null);
+  const { data, isLoading, isError, error } = usePopupsQuery();
+  const popup = (data ?? null) as any | null;
+  const loading = isLoading;
+
+  useEffect(() => {
+    if (!isError || !error) return;
+    notify.error(error, {
+      title: tPages("toastTitlePopupOperationFailed"),
+      fallbackMessage: tPages("toastDescPopupOperationFailed"),
+    });
+  }, [isError, error, tPages]);
   const [editing, setEditing] = useState<string | "new" | null>(null);
   const [form, setForm] = useState<PopupForm>(emptyForm);
   const [imageSlots, setImageSlots] = useState<PopupImageSlot[]>(emptySlots);
@@ -129,27 +148,14 @@ export default function PopupEditorPage() {
     setSlotError(Array(MAX_POPUP_IMAGES).fill(null));
   }
 
-  function fetchData() {
-    setLoading(true);
-    api
-      .get<any>("admin/popups/")
-      .then((res) => setPopup(res.data ?? null))
-      .catch((err) => {
-        notify.error(err, {
-          title: tPages("toastTitlePopupOperationFailed"),
-          fallbackMessage: tPages("toastDescPopupOperationFailed"),
-        });
-      })
-      .finally(() => setLoading(false));
-  }
-
   async function toggleActive(p: any) {
     if (!p?.public_id) return;
     try {
       const { data } = await api.patch<any>(`admin/popups/${p.public_id}/`, {
         is_active: !p.is_active,
       });
-      setPopup(data ?? null);
+      queryClient.setQueryData(popupsQueryKey, data ?? null);
+      invalidatePopupCaches();
     } catch (err) {
       notify.error(err, {
         title: tPages("toastTitlePopupOperationFailed"),
@@ -157,11 +163,6 @@ export default function PopupEditorPage() {
       });
     }
   }
-
-  useEffect(() => {
-    fetchData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   function openNew() {
     setEditing("new");
@@ -305,7 +306,7 @@ export default function PopupEditorPage() {
 
       notify.success(tPages("toastDescPopupSaved"), { title: tPages("toastTitlePopupSaved") });
       setEditing(null);
-      fetchData();
+      invalidatePopupCaches();
     } catch (err) {
       if (isApiHttpError(err)) {
         notify.error(err, {
@@ -334,8 +335,8 @@ export default function PopupEditorPage() {
     try {
       await api.delete(`admin/popups/${publicId}/`);
       setEditing(null);
+      invalidatePopupCaches();
       notify.success(tPages("toastDescPopupRemoved"), { title: tPages("toastTitlePopupRemoved") });
-      fetchData();
     } catch (err) {
       notify.error(err, {
         title: tPages("toastTitlePopupOperationFailed"),

@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import dynamic from "next/dynamic";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
@@ -13,7 +14,7 @@ import { Input } from "@/components/ui/input";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
 import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import type { Notification, PaginatedResponse } from "@/types";
+import type { Notification } from "@/types";
 import { formatDashboardDateTime } from "@/lib/datetime-display";
 import { displayInputToApiLocal, isoDatetimeToDisplayInput } from "@/lib/datetime-form";
 import { useConfirm } from "@/context/ConfirmDialogContext";
@@ -21,6 +22,8 @@ import { notify } from "@/notifications";
 import { numberTextClass } from "@/lib/number-font";
 import { cn } from "@/lib/utils";
 import { useEnterNavigation } from "@/hooks/useEnterNavigation";
+import { navCountsQueryKey, notificationsQueryKey } from "@/lib/query-keys";
+import { useNotificationsQuery } from "@/hooks/useNotificationsQuery";
 
 const Calendar = dynamic(
   () => import("@/components/ui/calendar").then((mod) => mod.Calendar),
@@ -123,8 +126,24 @@ export default function CtaPage() {
   const tPages = useTranslations("pages");
   const tCommon = useTranslations("common");
   const confirm = useConfirm();
-  const [ctas, setCtas] = useState<Notification[]>([]);
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
+
+  const invalidateNotificationCaches = useCallback(() => {
+    void queryClient.invalidateQueries({ queryKey: notificationsQueryKey });
+    void queryClient.invalidateQueries({ queryKey: navCountsQueryKey });
+  }, [queryClient]);
+
+  const { data, isLoading, isError, error } = useNotificationsQuery();
+  const ctas = data ?? [];
+  const loading = isLoading;
+
+  useEffect(() => {
+    if (!isError || !error) return;
+    notify.error(error, {
+      title: tPages("toastTitleCtaNotSaved"),
+      fallbackMessage: tPages("toastDescCtaNotSaved"),
+    });
+  }, [isError, error, tPages]);
   const [editing, setEditing] = useState<string | "new" | null>(null);
   const [form, setForm] = useState<CtaForm>(emptyForm);
   const [startDate, setStartDate] = useState<Date | undefined>(undefined);
@@ -155,27 +174,6 @@ export default function CtaPage() {
     setEndDate(new Date(target.getFullYear(), target.getMonth(), target.getDate()));
     setEndTime(toTime24hWithSeconds(target));
   }
-
-  function fetchData() {
-    setLoading(true);
-    api
-      .get<PaginatedResponse<Notification> | Notification[]>("admin/notifications/")
-      .then((res) => {
-        const data = res.data;
-        setCtas(Array.isArray(data) ? data : data.results);
-      })
-      .catch((err) => {
-        notify.error(err, {
-          title: tPages("toastTitleCtaNotSaved"),
-          fallbackMessage: tPages("toastDescCtaNotSaved"),
-        });
-      })
-      .finally(() => setLoading(false));
-  }
-
-  useEffect(() => {
-    fetchData();
-  }, []);
 
   useEffect(() => {
     const timer = window.setInterval(() => setNow(new Date()), 1000);
@@ -308,7 +306,7 @@ export default function CtaPage() {
       setEditing(null);
       notify.clearValidation("cta-form");
       notify.success(tPages("toastDescCtaSaved"), { title: tPages("toastTitleCtaSaved") });
-      fetchData();
+      invalidateNotificationCaches();
     } catch (err) {
       notify.error(err, {
         title: tPages("toastTitleCtaNotSaved"),
@@ -325,9 +323,10 @@ export default function CtaPage() {
         `admin/notifications/${n.public_id}/`,
         { is_active: !n.is_active }
       );
-      setCtas((prev) =>
-        prev.map((x) => (x.public_id === data.public_id ? data : x))
+      queryClient.setQueryData<Notification[]>(notificationsQueryKey, (prev) =>
+        (prev ?? []).map((x) => (x.public_id === data.public_id ? data : x)),
       );
+      invalidateNotificationCaches();
     } catch (err) {
       notify.error(err, {
         title: tPages("toastTitleCtaNotSaved"),
@@ -345,7 +344,10 @@ export default function CtaPage() {
     if (!ok) return;
     try {
       await api.delete(`admin/notifications/${publicId}/`);
-      setCtas((prev) => prev.filter((n) => n.public_id !== publicId));
+      queryClient.setQueryData<Notification[]>(notificationsQueryKey, (prev) =>
+        (prev ?? []).filter((n) => n.public_id !== publicId),
+      );
+      invalidateNotificationCaches();
       notify.success(tPages("toastDescCtaRemoved"), { title: tPages("toastTitleCtaRemoved") });
     } catch (err) {
       notify.error(err, {

@@ -48,7 +48,11 @@ import { useConfirm } from "@/context/ConfirmDialogContext";
 import { notify, normalizeError } from "@/notifications";
 import { BelowFoldScrollHint } from "@/components/BelowFoldScrollHint";
 import { useOrdersQuery } from "@/hooks/useOrdersQuery";
-import { ordersListQueryKey } from "@/lib/query-keys";
+import {
+  navCountsQueryKey,
+  ordersListQueryKey,
+  ordersListQueryKeyRoot,
+} from "@/lib/query-keys";
 import { useQueryClient } from "@tanstack/react-query";
 
 import { OrderPreviewTriggerButton } from "@/components/orders/order-preview";
@@ -271,8 +275,9 @@ export default function OrdersPage() {
   const nextLink = ordersPage?.next ?? null;
   const prevLink = ordersPage?.previous ?? null;
 
-  const invalidateOrdersList = useCallback(() => {
-    void queryClient.invalidateQueries({ queryKey: ["orders", "list"] });
+  const invalidateOrdersCaches = useCallback(() => {
+    void queryClient.invalidateQueries({ queryKey: ordersListQueryKeyRoot });
+    void queryClient.invalidateQueries({ queryKey: navCountsQueryKey });
   }, [queryClient]);
 
   const patchOrdersList = useCallback(
@@ -779,7 +784,7 @@ export default function OrdersPage() {
         });
       }
       setSelectedIds(new Set());
-      invalidateOrdersList();
+      invalidateOrdersCaches();
     } catch (err) {
       notify.error(err, {
         title: tPages("toastTitleBulkDispatchFailed"),
@@ -817,6 +822,7 @@ export default function OrdersPage() {
       patchOrdersList((prev) =>
         prev.map((o) => (o.public_id === order.public_id ? data.order : o))
       );
+      invalidateOrdersCaches();
     } catch (e) {
       notify.error(e, {
         title: tPages("toastTitleOrderStatusNotUpdated"),
@@ -841,6 +847,7 @@ export default function OrdersPage() {
       patchOrdersList((prev) =>
         prev.map((o) => (o.public_id === order.public_id ? data : o))
       );
+      invalidateOrdersCaches();
     } catch (e) {
       notify.error(e, {
         title: tPages("toastTitleFlagNotSaved"),
@@ -870,6 +877,7 @@ export default function OrdersPage() {
       if (data.courier_dispatch_pending) {
         setPendingCourierDispatchIds((prev) => new Set(prev).add(order.public_id));
       }
+      invalidateOrdersCaches();
     } catch (err: unknown) {
       const normalized = normalizeError(err, tPages("ordersSendToCourierErrorFallback"));
       notify.error(normalized.message, {

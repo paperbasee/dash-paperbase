@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { useLocale, useTranslations } from "next-intl";
 import { ClipboardTextIcon } from "@phosphor-icons/react";
 import { Check, KeyRound, RefreshCcw, Trash } from "lucide-react";
@@ -20,14 +21,8 @@ import { notify } from "@/notifications";
 import { useAuth } from "@/context/AuthContext";
 import { isNetworkingStoreUnderReview } from "@/lib/subscription-ui-state";
 import { useEnterNavigation } from "@/hooks/useEnterNavigation";
-
-type APIKeyRow = {
-  public_id: string;
-  name: string;
-  key_prefix: string;
-  created_at: string;
-  revoked_at: string | null;
-};
+import { useApiKeysQuery, type APIKeyRow } from "@/hooks/useApiKeysQuery";
+import { apiKeysQueryKey } from "@/lib/query-keys";
 
 type APIKeyCreateResponse = {
   public_id: string;
@@ -36,29 +31,6 @@ type APIKeyCreateResponse = {
   created_at: string;
   api_key: string;
 };
-
-/** Hide legacy auto-created keys from store onboarding (no longer created server-side). */
-const LEGACY_AUTO_KEY_NAME = "Bootstrap Public";
-
-function extractRows(data: unknown): APIKeyRow[] {
-  const active = (row: APIKeyRow) =>
-    !row.revoked_at && row.name !== LEGACY_AUTO_KEY_NAME;
-  const rows = Array.isArray(data)
-    ? (data as APIKeyRow[])
-    : data && typeof data === "object" && "results" in data
-      ? (((data as { results?: APIKeyRow[] }).results ?? []) as APIKeyRow[])
-      : [];
-
-  // Backend can return multiple active keys; dashboard UX expects a single "current" key.
-  // Keep the newest active key only.
-  const filtered = rows.filter(active).sort((a, b) => {
-    const ta = Date.parse(a.created_at);
-    const tb = Date.parse(b.created_at);
-    if (!Number.isNaN(ta) && !Number.isNaN(tb)) return tb - ta;
-    return String(b.created_at).localeCompare(String(a.created_at));
-  });
-  return filtered.length ? [filtered[0]] : [];
-}
 
 export default function NetworkingSection({ hidden }: { hidden: boolean }) {
   const locale = useLocale();
@@ -112,8 +84,24 @@ export default function NetworkingSection({ hidden }: { hidden: boolean }) {
 
   const networkingActionsLocked =
     subscriptionLocked || planExpired || storeUnderReview;
-  const [keys, setKeys] = useState<APIKeyRow[]>([]);
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
+  const {
+    data: keys = [],
+    isLoading: loading,
+    isError: keysIsError,
+    error: keysError,
+  } = useApiKeysQuery({
+    enabled: !hidden && !networkingActionsLocked,
+  });
+  const displayKeys = networkingActionsLocked ? [] : keys;
+
+  useEffect(() => {
+    if (!keysIsError) return;
+    notify.error(keysError ?? new Error("networking_keys_load_failed"), {
+      title: tPages("toastTitleThemeNotLoaded"),
+      fallbackMessage: t("networking.loadError"),
+    });
+  }, [keysIsError, keysError, t, tPages]);
   const [newKeyName, setNewKeyName] = useState("");
   const [revealedKey, setRevealedKey] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -127,32 +115,6 @@ export default function NetworkingSection({ hidden }: { hidden: boolean }) {
       void createKey();
     }
   });
-
-  const load = useCallback(async () => {
-    if (networkingActionsLocked) {
-      setKeys([]);
-      setLoading(false);
-      return;
-    }
-    try {
-      setLoading(true);
-      const { data } = await api.get("settings/network/api-keys/");
-      setKeys(extractRows(data));
-    } catch {
-      setKeys([]);
-      notify.error(new Error("networking_keys_load_failed"), {
-        title: tPages("toastTitleThemeNotLoaded"),
-        fallbackMessage: t("networking.loadError"),
-      });
-    } finally {
-      setLoading(false);
-    }
-  }, [networkingActionsLocked, t]);
-
-  useEffect(() => {
-    if (hidden) return;
-    void load();
-  }, [hidden, load]);
 
   useEffect(() => {
     if (!apiUrlCopied) return;
@@ -194,7 +156,7 @@ export default function NetworkingSection({ hidden }: { hidden: boolean }) {
       notify.success(t("networking.msgCreated"), {
         title: tPages("toastTitleKeyOperationFailed"),
       });
-      await load();
+      void queryClient.invalidateQueries({ queryKey: apiKeysQueryKey });
     } catch {
       notify.error(new Error("networking_key_create_failed"), {
         title: tPages("toastTitleKeyOperationFailed"),
@@ -224,7 +186,7 @@ export default function NetworkingSection({ hidden }: { hidden: boolean }) {
       notify.success(t("networking.msgRegenerated"), {
         title: tPages("toastTitleKeyOperationFailed"),
       });
-      await load();
+      void queryClient.invalidateQueries({ queryKey: apiKeysQueryKey });
     } catch {
       notify.error(new Error("networking_key_regenerate_failed"), {
         title: tPages("toastTitleKeyOperationFailed"),
@@ -246,8 +208,7 @@ export default function NetworkingSection({ hidden }: { hidden: boolean }) {
     setBusy(true);
     try {
       await api.delete(`settings/network/api-keys/${publicId}/`);
-      // Remove immediately so deleted keys disappear from the screen.
-      setKeys((prev) => prev.filter((row) => row.public_id !== publicId));
+      void queryClient.invalidateQueries({ queryKey: apiKeysQueryKey });
       notify.success(t("networking.msgRevoked"), {
         title: tPages("toastTitleIntegrationDisconnected"),
       });
@@ -434,7 +395,7 @@ export default function NetworkingSection({ hidden }: { hidden: boolean }) {
 
         {!loading ? (
           <div className="space-y-3">
-            {keys.map((k) => (
+            {displayKeys.map((k) => (
               <div
                 key={k.public_id}
                 className="flex flex-col gap-3 rounded-card border border-border bg-muted/30 px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
@@ -473,7 +434,7 @@ export default function NetworkingSection({ hidden }: { hidden: boolean }) {
                 </div>
               </div>
             ))}
-            {keys.length === 0 && (
+            {displayKeys.length === 0 && (
               <p className="text-sm text-muted-foreground">{t("networking.noKeys")}</p>
             )}
           </div>

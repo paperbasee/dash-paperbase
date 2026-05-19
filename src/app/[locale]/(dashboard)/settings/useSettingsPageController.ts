@@ -5,10 +5,13 @@ import { useEnabledApps } from "@/hooks/useEnabledApps";
 import { useFeatures } from "@/hooks/useFeatures";
 import { useAutoExpire } from "@/hooks/useAutoExpire";
 import { useBrandingQuery } from "@/hooks/useBrandingQuery";
+import { useEmailNotificationPrefsQuery } from "@/hooks/useEmailNotificationPrefsQuery";
 import api from "@/lib/api";
 import { useAccountSettings } from "./useAccountSettings";
 import { useStoreSettings } from "./useStoreSettings";
 import type { DynamicFieldsMessage } from "@/components/DynamicFieldsPanel";
+import { queryClient } from "@/components/QueryProvider";
+import { emailNotificationPrefsQueryKey } from "@/lib/query-keys";
 
 export type EmailNotificationPrefs = {
   emailMeOnOrderReceived: boolean;
@@ -33,6 +36,10 @@ export default function useSettingsPageController() {
   const account = useAccountSettings();
   const store = useStoreSettings();
 
+  const { data: storeSettings } = useEmailNotificationPrefsQuery({
+    enabled: !isBrandingLoading && !isBrandingValidating && !!branding,
+  });
+
   useEffect(() => {
     if (!branding) return;
     account.setOwnerName(branding.owner_name ?? "");
@@ -50,31 +57,14 @@ export default function useSettingsPageController() {
   const [emailPrefsSaving, setEmailPrefsSaving] = useState(false);
 
   useEffect(() => {
-    if (isBrandingLoading || isBrandingValidating || !branding) return;
-    let cancelled = false;
-    (async () => {
-      try {
-        const { data } = await api.get<{
-          email_notify_owner_on_order_received: boolean;
-          email_customer_on_order_confirmed: boolean;
-          storefront_url?: string | null;
-          revalidate_secret?: string | null;
-        }>("store/settings/current/");
-        if (cancelled) return;
-        setNotificationPrefs((prev) => ({
-          ...prev,
-          emailMeOnOrderReceived: data.email_notify_owner_on_order_received,
-          emailCustomerOnOrderConfirmed: data.email_customer_on_order_confirmed,
-        }));
-        store.syncStoreIntegrationFromSettings(data);
-      } catch {
-        // keep email defaults from state
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [isBrandingLoading, isBrandingValidating, branding]);
+    if (!storeSettings) return;
+    setNotificationPrefs({
+      emailMeOnOrderReceived: storeSettings.email_notify_owner_on_order_received,
+      emailCustomerOnOrderConfirmed: storeSettings.email_customer_on_order_confirmed,
+    });
+    store.syncStoreIntegrationFromSettings(storeSettings);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [storeSettings]);
 
   const updateEmailNotificationPref = useCallback(
     async (key: keyof EmailNotificationPrefs, value: boolean) => {
@@ -87,6 +77,7 @@ export default function useSettingsPageController() {
       try {
         await api.patch("store/settings/current/", { [patchKey]: value });
         setNotificationPrefs((prev) => ({ ...prev, [key]: value }));
+        void queryClient.invalidateQueries({ queryKey: emailNotificationPrefsQueryKey });
       } catch {
         // keep previous values
       } finally {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { DeferredNavLink } from "@/components/navigation/DeferredNavLink";
@@ -11,11 +11,12 @@ import { FilterDropdown } from "@/components/filters/FilterDropdown";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { useFilters } from "@/hooks/useFilters";
 import { digitsInNumberFont } from "@/lib/number-font";
-import api from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { notify } from "@/notifications";
-import type { Blog, BlogTag, PaginatedResponse } from "@/types";
+import type { BlogsListParams } from "@/lib/query-keys";
+import { useBlogsQuery } from "@/hooks/useBlogsQuery";
+import { useBlogTagsQuery } from "@/hooks/useBlogTagsQuery";
 import { BlogListCard } from "./_components/BlogListCard";
 
 export default function BlogListPage() {
@@ -31,10 +32,35 @@ export default function BlogListPage() {
   ]);
   const [searchInput, setSearchInput] = useState(filters.search || "");
   const debouncedSearch = useDebouncedValue(searchInput);
-  const [blogs, setBlogs] = useState<Blog[]>([]);
-  const [tags, setTags] = useState<BlogTag[]>([]);
-  const [loading, setLoading] = useState(true);
   const [filtersOpen, setFiltersOpen] = useState(false);
+
+  const listParams = useMemo((): BlogsListParams => {
+    const params: BlogsListParams = {};
+    if (filters.search?.trim()) params.q = filters.search.trim();
+    if (filters.tag?.trim()) params.tag = filters.tag.trim();
+    if (filters.published_date?.trim()) {
+      params.published_date = filters.published_date.trim();
+    }
+    return params;
+  }, [filters.published_date, filters.search, filters.tag]);
+
+  const { data: blogs = [], isLoading: blogsLoading, isError: blogsIsError, error: blogsError } =
+    useBlogsQuery(listParams);
+  const { data: tags = [], isError: tagsIsError, error: tagsError } = useBlogTagsQuery();
+  const loading = blogsLoading;
+
+  useEffect(() => {
+    if (!blogsIsError || !blogsError) return;
+    notify.error(blogsError);
+  }, [blogsIsError, blogsError]);
+
+  useEffect(() => {
+    if (!tagsIsError || !tagsError) return;
+    notify.error(tagsError, {
+      title: tPages("toastTitleTagsUnavailable"),
+      fallbackMessage: tPages("toastDescTagsUnavailable"),
+    });
+  }, [tagsIsError, tagsError, tPages]);
 
   useEffect(() => {
     setSearchInput(filters.search || "");
@@ -45,59 +71,6 @@ export default function BlogListPage() {
     if (next === (filters.search || "")) return;
     setFilter("search", next);
   }, [debouncedSearch, filters.search, setFilter]);
-
-  useEffect(() => {
-    let cancelled = false;
-    async function loadTags() {
-      try {
-        const { data } = await api.get<PaginatedResponse<BlogTag> | BlogTag[]>(
-          "admin/blog-tags/",
-        );
-        if (!cancelled) {
-          setTags(Array.isArray(data) ? data : data.results);
-        }
-      } catch (err) {
-        if (!cancelled) {
-          notify.error(err, {
-            title: tPages("toastTitleTagsUnavailable"),
-            fallbackMessage: tPages("toastDescTagsUnavailable"),
-          });
-        }
-      }
-    }
-    void loadTags();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  const fetchBlogs = useCallback(async () => {
-    setLoading(true);
-    try {
-      const params = new URLSearchParams();
-      if (filters.search?.trim()) params.set("q", filters.search.trim());
-      if (filters.tag?.trim()) params.set("tag", filters.tag.trim());
-      if (filters.published_date?.trim()) {
-        params.set("published_date", filters.published_date.trim());
-      }
-      const { data } = await api.get<PaginatedResponse<Blog> | Blog[]>(
-        `admin/blogs/${params.toString() ? `?${params}` : ""}`,
-      );
-      setBlogs(Array.isArray(data) ? data : data.results);
-    } catch (err) {
-      notify.error(err);
-    } finally {
-      setLoading(false);
-    }
-  }, [filters.published_date, filters.search, filters.tag]);
-
-  useEffect(() => {
-    void fetchBlogs();
-  }, [fetchBlogs]);
-
-  const handleDeleteBlog = useCallback((publicId: string) => {
-    setBlogs((prev) => prev.filter((blog) => blog.public_id !== publicId));
-  }, []);
 
   const tagOptions = tags.map((t) => ({
     value: t.public_id,
@@ -242,12 +215,7 @@ export default function BlogListPage() {
         <div className="rounded-card border border-card-border bg-card p-3">
           <div className="grid min-w-0 grid-cols-1 justify-items-stretch gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {blogs.map((blog) => (
-              <BlogListCard
-                key={blog.public_id}
-                blog={blog}
-                locale={locale}
-                onDelete={handleDeleteBlog}
-              />
+              <BlogListCard key={blog.public_id} blog={blog} locale={locale} />
             ))}
           </div>
         </div>

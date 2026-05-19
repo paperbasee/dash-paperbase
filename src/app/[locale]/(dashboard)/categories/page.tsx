@@ -1,6 +1,7 @@
 "use client";
 
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { ChevronDown, ChevronRight, Undo2 } from "lucide-react";
@@ -21,6 +22,8 @@ import { useConfirm } from "@/context/ConfirmDialogContext";
 import { notify } from "@/notifications";
 import { buildPublicMediaUrlFromKey, uploadFile } from "@/hooks/usePresignedUpload";
 import { Loader2, CheckCircle2, AlertCircle } from "lucide-react";
+import { categoriesQueryKey, navCountsQueryKey } from "@/lib/query-keys";
+import { useCategoriesQuery } from "@/hooks/useCategoriesQuery";
 
 type FormMode = "closed" | "new_root" | "new_child" | "edit";
 
@@ -159,15 +162,32 @@ export default function CategoriesPage() {
   const tPages = useTranslations("pages");
   const tCommon = useTranslations("common");
   const confirm = useConfirm();
+  const queryClient = useQueryClient();
+
+  const invalidateCategoryCaches = useCallback(() => {
+    void queryClient.invalidateQueries({ queryKey: categoriesQueryKey });
+    void queryClient.invalidateQueries({ queryKey: navCountsQueryKey });
+  }, [queryClient]);
+
+  const { data, isLoading, isError, error } = useCategoriesQuery();
+  const tree = data ?? [];
+  const loading = isLoading;
+
+  useEffect(() => {
+    if (!isError || !error) return;
+    notify.error(error, {
+      title: tPages("toastTitleCategoriesUnavailable"),
+      fallbackMessage: tPages("toastDescCategoriesUnavailable"),
+    });
+  }, [isError, error, tPages]);
+
   const treeLabels = {
     addChild: tPages("categoriesAddChild"),
     delete: tCommon("delete"),
     active: tCommon("active"),
     inactive: tCommon("inactive"),
   };
-  const [tree, setTree] = useState<AdminCategoryTreeNode[]>([]);
   const [expanded, setExpanded] = useState<Set<string>>(() => new Set());
-  const [loading, setLoading] = useState(true);
   const [mode, setMode] = useState<FormMode>("closed");
   const [editingPublicId, setEditingPublicId] = useState<string | null>(null);
   const [form, setForm] = useState<CatForm>(emptyForm);
@@ -187,27 +207,6 @@ export default function CategoriesPage() {
       : `cat_${Date.now()}`
   );
   const { handleKeyDown } = useEnterNavigation(() => formRef.current?.requestSubmit());
-
-  const fetchTree = useCallback(() => {
-    setLoading(true);
-    api
-      .get<AdminCategoryTreeNode[]>("admin/categories/?tree=1")
-      .then((res) => {
-        const d = res.data;
-        setTree(Array.isArray(d) ? d : []);
-      })
-      .catch((err) => {
-        notify.error(err, {
-          title: tPages("toastTitleCategoriesUnavailable"),
-          fallbackMessage: tPages("toastDescCategoriesUnavailable"),
-        });
-      })
-      .finally(() => setLoading(false));
-  }, [tPages]);
-
-  useEffect(() => {
-    fetchTree();
-  }, [fetchTree]);
 
   function toggleExpand(publicId: string) {
     setExpanded((prev) => {
@@ -349,7 +348,7 @@ export default function CategoriesPage() {
       }
       setMode("closed");
       setEditingSlugPreview(null);
-      fetchTree();
+      invalidateCategoryCaches();
     } catch (err) {
       notify.error(err, {
         title: tPages("toastTitleCategoryChangeFailed"),
@@ -371,7 +370,7 @@ export default function CategoriesPage() {
     }
     try {
       await api.delete(`admin/categories/${publicId}/`);
-      fetchTree();
+      invalidateCategoryCaches();
     } catch (err) {
       notify.error(err, {
         title: tPages("toastTitleCategoryChangeFailed"),

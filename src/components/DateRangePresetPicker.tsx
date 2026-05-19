@@ -19,7 +19,7 @@ import { useLocale, useTranslations } from "next-intl";
 import DatePickerPopover from "@/components/DatePickerPopover";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import type { AnalyticsBucket } from "@/hooks/useDashboardAnalytics";
+import type { AnalyticsBucket } from "@/lib/basicAnalyticsService";
 import { toLocaleDigits } from "@/lib/locale-digits";
 import { dateToYmd, startOfDay, ymdToDate } from "@/lib/date-range-ui";
 import { digitsInNumberFont } from "@/lib/number-font";

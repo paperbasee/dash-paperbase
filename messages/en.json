@@ -1225,7 +1225,6 @@
     "heroMetaOverview": "Store overview",
     "heroMetaLastUpdated": "last updated: {when}",
     "heroMetaLastUpdatedUnknown": "last updated: —",
-    "heroMetaAutoRefresh": "auto-refresh: {interval}",
     "configure": "Configure",
     "export": "Export",
     "activityTimeline": "Activity timeline",

@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { FunnelIcon, Undo2 } from "lucide-react";
@@ -11,6 +12,7 @@ import { FilterBar } from "@/components/filters/FilterBar";
 import { FilterDropdown } from "@/components/filters/FilterDropdown";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { useFilters } from "@/hooks/useFilters";
+import { useSupportTicketsQuery } from "@/hooks/useSupportTicketsQuery";
 import {
   Combobox,
   ComboboxContent,
@@ -24,6 +26,12 @@ import { formatDashboardDateTime } from "@/lib/datetime-display";
 import { useConfirm } from "@/context/ConfirmDialogContext";
 import { notify } from "@/notifications";
 import { Button } from "@/components/ui/button";
+import {
+  navCountsQueryKey,
+  supportTicketDetailQueryKey,
+  supportTicketsListQueryKey,
+  type SupportTicketsListParams,
+} from "@/lib/query-keys";
 
 type EditableField = "status" | "priority" | "category";
 
@@ -111,6 +119,8 @@ export default function SupportTicketsPage() {
   const tPages = useTranslations("pages");
   const router = useRouter();
   const confirm = useConfirm();
+  const queryClient = useQueryClient();
+
   const { page, filters, setFilter, setPage, clearFilters } = useFilters([
     "status",
     "priority",
@@ -118,10 +128,6 @@ export default function SupportTicketsPage() {
   ]);
   const [searchInput, setSearchInput] = useState(filters.search || "");
   const debouncedSearch = useDebouncedValue(searchInput);
-  const [tickets, setTickets] = useState<SupportTicket[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [count, setCount] = useState(0);
-  const [hasNext, setHasNext] = useState(false);
   const [saving, setSaving] = useState<Record<string, Partial<Record<EditableField, boolean>>>>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [filtersOpen, setFiltersOpen] = useState(false);
@@ -165,29 +171,54 @@ export default function SupportTicketsPage() {
     setFilter("search", next);
   }, [debouncedSearch, filters.search, setFilter]);
 
-  useEffect(() => {
-    setLoading(true);
-    const params: Record<string, string | number> = { page };
+  const listParams = useMemo((): SupportTicketsListParams => {
+    const params: SupportTicketsListParams = { page };
     if (filters.status) params.status = filters.status;
     if (filters.priority) params.priority = filters.priority;
     if (filters.search) params.search = filters.search;
-    api
-      .get<PaginatedResponse<SupportTicket>>("admin/support-tickets/", {
-        params,
-      })
-      .then((res) => {
-        setTickets(res.data.results);
-        setCount(res.data.count ?? 0);
-        setHasNext(!!res.data.next);
-      })
-      .catch((err) => {
-        notify.error(err, {
-          title: tPages("toastTitleTicketsFailedToLoad"),
-          fallbackMessage: tPages("toastDescTicketsFailedToLoad"),
+    return params;
+  }, [page, filters.status, filters.priority, filters.search]);
+
+  const { data, isLoading, isError, error } = useSupportTicketsQuery(listParams);
+
+  const tickets = data?.results ?? [];
+  const count = data?.count ?? 0;
+  const hasNext = !!data?.next;
+  const loading = isLoading;
+
+  const invalidateSupportTicketsCaches = useCallback(
+    (ticketPublicId?: string) => {
+      void queryClient.invalidateQueries({ queryKey: supportTicketsListQueryKey() });
+      void queryClient.invalidateQueries({ queryKey: navCountsQueryKey });
+      if (ticketPublicId) {
+        void queryClient.invalidateQueries({
+          queryKey: supportTicketDetailQueryKey(ticketPublicId),
         });
-      })
-      .finally(() => setLoading(false));
-  }, [filters.priority, filters.search, filters.status, page]);
+      }
+    },
+    [queryClient],
+  );
+
+  const patchTicketsList = useCallback(
+    (updater: (results: SupportTicket[]) => SupportTicket[]) => {
+      queryClient.setQueryData(
+        supportTicketsListQueryKey(listParams),
+        (old: PaginatedResponse<SupportTicket> | undefined) => {
+          if (!old) return old;
+          return { ...old, results: updater(old.results) };
+        },
+      );
+    },
+    [queryClient, listParams],
+  );
+
+  useEffect(() => {
+    if (!isError || !error) return;
+    notify.error(error, {
+      title: tPages("toastTitleTicketsFailedToLoad"),
+      fallbackMessage: tPages("toastDescTicketsFailedToLoad"),
+    });
+  }, [isError, error, tPages]);
 
   async function handleDelete(publicId: string) {
     const ok = await confirm({
@@ -198,8 +229,15 @@ export default function SupportTicketsPage() {
     if (!ok) return;
     try {
       await api.delete(`admin/support-tickets/${publicId}/`);
-      setTickets((prev) => prev.filter((t) => t.public_id !== publicId));
-      setCount((c) => c - 1);
+      patchTicketsList((prev) => prev.filter((t) => t.public_id !== publicId));
+      queryClient.setQueryData(
+        supportTicketsListQueryKey(listParams),
+        (old: PaginatedResponse<SupportTicket> | undefined) => {
+          if (!old) return old;
+          return { ...old, count: Math.max(0, (old.count ?? 0) - 1) };
+        },
+      );
+      invalidateSupportTicketsCaches(publicId);
       notify.success(tPages("toastDescTicketDeleted"), {
         title: tPages("toastTitleTicketDeleted"),
       });
@@ -220,10 +258,10 @@ export default function SupportTicketsPage() {
     if (!previous || previous[field] === nextValue) return;
 
     setErrors((prev) => ({ ...prev, [publicId]: "" }));
-    setTickets((prev) =>
+    patchTicketsList((prev) =>
       prev.map((ticket) =>
-        ticket.public_id === publicId ? { ...ticket, [field]: nextValue } : ticket
-      )
+        ticket.public_id === publicId ? { ...ticket, [field]: nextValue } : ticket,
+      ),
     );
     setSaving((prev) => ({
       ...prev,
@@ -235,11 +273,12 @@ export default function SupportTicketsPage() {
 
     try {
       await api.patch(`admin/support-tickets/${publicId}/`, { [field]: nextValue });
+      invalidateSupportTicketsCaches(publicId);
     } catch (err) {
-      setTickets((prev) =>
+      patchTicketsList((prev) =>
         prev.map((ticket) =>
-          ticket.public_id === publicId ? { ...ticket, [field]: previous[field] } : ticket
-        )
+          ticket.public_id === publicId ? { ...ticket, [field]: previous[field] } : ticket,
+        ),
       );
       setErrors((prev) => ({
         ...prev,
