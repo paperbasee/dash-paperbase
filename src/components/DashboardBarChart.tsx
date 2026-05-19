@@ -179,7 +179,6 @@ export default function DashboardBarChart({
             height={chartHeight}
             minWidth={0}
             minHeight={chartHeight}
-            tabIndex={-1}
             className="outline-none focus:outline-none focus-visible:outline-none"
           >
             {/* Recharts SVG: keep square geometry; not using theme radius tokens */}
