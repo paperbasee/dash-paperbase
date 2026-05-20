@@ -9,7 +9,7 @@ import DashboardComingSoonCard from "@/components/dashboard/DashboardComingSoonC
 import DashboardStatusFooter from "@/components/dashboard/DashboardStatusFooter";
 import type { DateRangeValue } from "@/components/DateRangeFilter";
 import { useDashboardAnalyticsQuery } from "@/hooks/useDashboardAnalyticsQuery";
-import { useDashboardStatsQuery } from "@/hooks/useDashboardStatsQuery";
+import { useNavCounts } from "@/hooks/useNavCounts";
 import { useBrandingQuery } from "@/hooks/useBrandingQuery";
 import { useDashboardRefresh } from "@/context/DashboardRefreshContext";
 import { computeTrend } from "@/lib/dashboard/compute-trend";
@@ -75,7 +75,7 @@ export default function DashboardPage() {
     bucket: previousRange.bucket,
   });
 
-  const { isError: statsError } = useDashboardStatsQuery();
+  const { isError: navCountsError } = useNavCounts();
 
   const summary = data?.summary;
   const previousSummary = previousData?.summary;
@@ -94,7 +94,7 @@ export default function DashboardPage() {
   };
 
   const lastUpdatedLabel = formatLastUpdated(lastRefreshedAt, now);
-  const apiHealthy = !analyticsNetworkError && !statsError && !error;
+  const apiHealthy = !analyticsNetworkError && !navCountsError && !error;
 
   useEffect(() => {
     const id = window.setInterval(() => setNow(Date.now()), 30_000);

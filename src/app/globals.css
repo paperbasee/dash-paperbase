@@ -3,20 +3,8 @@
 /* Tailwind `dark:` follows html.dark (class strategy). */
 @custom-variant dark (&:where(.dark, .dark *));
 
-/* Bengali — add Ador Noirit files under public/fonts/bengali/ador-noirit/ansi-v2/ */
-@font-face {
-  font-family: 'Ador Noirit';
-  src:
-    url('/fonts/bengali/ador-noirit/ansi-v2/AdorNoirit.woff2') format('woff2'),
-    url('/fonts/bengali/ador-noirit/ansi-v2/AdorNoirit.ttf') format('truetype');
-  font-weight: 100 900;
-  font-style: normal;
-  font-display: swap;
-}
-
 @layer base {
   :root {
-    /* Primary UI + numeric faces from @fontsource/poppins in app/layout.tsx */
     --font-poppins: "Poppins";
 
     /* Subscription warning strip height (set from JS when expiring-soon); default 0 */
@@ -238,7 +226,6 @@
 }
 
 @theme inline {
-  /* Primary text: Poppins (@fontsource in app/layout.tsx) */
   --font-family-sans:
     "Poppins", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --font-family-mono: ui-monospace, monospace;
@@ -320,8 +307,9 @@
 
 html[lang="bn"] {
   --font-family-sans:
-    "Ador Noirit", "Poppins", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-    sans-serif;
+    var(--font-noto-sans-bengali),
+    "Noto Sans Bengali",
+    ui-sans-serif, system-ui, sans-serif;
 }
 
 body {

@@ -35,7 +35,7 @@ import { CSS } from "@dnd-kit/utilities";
 import { FunnelIcon, GripVertical, Loader2, Undo2 } from "lucide-react";
 import api from "@/lib/api";
 import { useBranding } from "@/context/BrandingContext";
-import type { AdminCategoryTreeNode, Product, PaginatedResponse } from "@/types";
+import type { Product, PaginatedResponse } from "@/types";
 import { flattenCategoryOptionsRich } from "@/lib/category-tree";
 import {
   Combobox,
@@ -61,6 +61,7 @@ import { numberTextClass } from "@/lib/number-font";
 import { cn } from "@/lib/utils";
 import { BelowFoldScrollHint } from "@/components/BelowFoldScrollHint";
 import { useProductsQuery } from "@/hooks/useProductsQuery";
+import { useCategoriesQuery } from "@/hooks/useCategoriesQuery";
 import {
   inventoryStatusQueryKey,
   navCountsQueryKey,
@@ -121,7 +122,7 @@ export default function ProductsPage() {
   const debouncedSearch = useDebouncedValue(searchInput);
   const debouncedPriceMin = useDebouncedValue(priceMinInput);
   const debouncedPriceMax = useDebouncedValue(priceMaxInput);
-  const [categoryTree, setCategoryTree] = useState<AdminCategoryTreeNode[]>([]);
+  const { data: categoryTree = [] } = useCategoriesQuery();
   const [filtersOpen, setFiltersOpen] = useState(false);
   const { counts: navCounts } = useNavCounts();
   const [listCursor, setListCursor] = useState<string | null>(null);
@@ -231,26 +232,6 @@ export default function ProductsPage() {
     if (next === (filters.price_max || "")) return;
     setFilter("price_max", next);
   }, [debouncedPriceMax, filters.price_max, setFilter]);
-
-  useEffect(() => {
-    let active = true;
-    api
-      .get<AdminCategoryTreeNode[]>("admin/categories/?tree=1")
-      .then((res) => {
-        if (!active) return;
-        const d = res.data;
-        setCategoryTree(Array.isArray(d) ? d : []);
-      })
-      .catch((err) => {
-        notify.error(err, {
-          title: tPages("toastTitleCategoriesUnavailable"),
-          fallbackMessage: tPages("toastDescCategoriesUnavailable"),
-        });
-      });
-    return () => {
-      active = false;
-    };
-  }, [tPages]);
 
   const categoryOptions = useMemo<CategoryOption[]>(
     () => flattenCategoryOptionsRich(categoryTree),

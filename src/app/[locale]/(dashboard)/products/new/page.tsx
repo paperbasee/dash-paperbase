@@ -16,8 +16,8 @@ import { ExtraFieldsFormSection } from "@/components/ExtraFieldsFormSection";
 import { useExtraFieldsSchema } from "@/hooks/useExtraFieldsSchema";
 import { useEnterNavigation } from "@/hooks/useEnterNavigation";
 import type { ExtraFieldValues } from "@/types/extra-fields";
-import type { AdminCategoryTreeNode } from "@/types";
 import { flattenCategoryOptions } from "@/lib/category-tree";
+import { useCategoriesQuery } from "@/hooks/useCategoriesQuery";
 import { MAX_PRODUCT_IMAGES } from "@/lib/product-media";
 import {
   parseValidation,
@@ -46,7 +46,7 @@ export default function NewProductPage() {
   const numClass = numberTextClass(locale);
   const tPages = useTranslations("pages");
   const tCommon = useTranslations("common");
-  const [categoryTree, setCategoryTree] = useState<AdminCategoryTreeNode[]>([]);
+  const { data: categoryTree = [] } = useCategoriesQuery();
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
@@ -102,21 +102,6 @@ export default function NewProductPage() {
   /** Slot 0 is always the main image; gallery slots 1–3 can only be used after main is set. */
   const hasMainImage = Boolean(imageFiles[0]);
   const canAddToGallery = hasMainImage && canAddMore;
-
-  useEffect(() => {
-    api
-      .get<AdminCategoryTreeNode[]>("admin/categories/?tree=1")
-      .then((res) => {
-        const d = res.data;
-        setCategoryTree(Array.isArray(d) ? d : []);
-      })
-      .catch((err) => {
-        notify.error(err, {
-          title: tPages("toastTitleProductTemplateUnavailable"),
-          fallbackMessage: tPages("toastDescProductTemplateUnavailable"),
-        });
-      });
-  }, [tPages]);
 
   const categorySelectOptions = useMemo(
     () => flattenCategoryOptions(categoryTree),

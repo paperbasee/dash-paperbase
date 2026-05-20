@@ -1,11 +1,14 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { useLocale, useTranslations } from "next-intl";
 import { ClipboardTextIcon } from "@phosphor-icons/react";
 import { Check } from "lucide-react";
 import api from "@/lib/api";
-import type { MarketingIntegration as MarketingIntegrationType, PaginatedResponse } from "@/types";
+import type { MarketingIntegration as MarketingIntegrationType } from "@/types";
+import { useMarketingIntegrationsQuery } from "@/hooks/useMarketingIntegrationsQuery";
+import { marketingIntegrationsQueryKey } from "@/lib/query-keys";
 import { numberTextClass } from "@/lib/number-font";
 import { useConfirm } from "@/context/ConfirmDialogContext";
 import { notify } from "@/notifications";
@@ -32,39 +35,34 @@ export default function OtherMarketingIntegrations({
   const t = useTranslations("settings");
   const tPages = useTranslations("pages");
   const confirm = useConfirm();
-  const [list, setList] = useState<MarketingIntegrationType[]>([]);
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
+  const {
+    data: allFetched = [],
+    isLoading: loading,
+    isError: integrationsIsError,
+    error: integrationsError,
+  } = useMarketingIntegrationsQuery({ enabled: !panelHidden });
+
+  const list = useMemo(
+    () =>
+      allFetched.filter(
+        (i) => i.provider !== "facebook" && i.provider !== "tiktok",
+      ),
+    [allFetched],
+  );
+
   const [togglingId, setTogglingId] = useState<string | null>(null);
   const [eventSavingId, setEventSavingId] = useState<string | null>(null);
   const [configurePublicId, setConfigurePublicId] = useState<string | null>(null);
   const [pixelCopied, setPixelCopied] = useState(false);
 
-  const fetchIntegrations = useCallback(() => {
-    setLoading(true);
-    api
-      .get<PaginatedResponse<MarketingIntegrationType> | MarketingIntegrationType[]>(
-        "admin/marketing-integrations/"
-      )
-      .then((res) => {
-        const all = Array.isArray(res.data) ? res.data : res.data.results;
-        const rest = (all ?? []).filter(
-          (i) => i.provider !== "facebook" && i.provider !== "tiktok"
-        );
-        setList(rest);
-      })
-      .catch((err) => {
-        notify.error(err, {
-          title: tPages("toastTitleMarketingLinkFailed"),
-          fallbackMessage: tPages("toastDescMarketingLinkFailed"),
-        });
-        setList([]);
-      })
-      .finally(() => setLoading(false));
-  }, []);
-
   useEffect(() => {
-    fetchIntegrations();
-  }, [fetchIntegrations]);
+    if (!integrationsIsError) return;
+    notify.error(integrationsError, {
+      title: tPages("toastTitleMarketingLinkFailed"),
+      fallbackMessage: tPages("toastDescMarketingLinkFailed"),
+    });
+  }, [integrationsIsError, integrationsError, tPages]);
 
   useEffect(() => {
     if (configurePublicId) {
@@ -92,7 +90,9 @@ export default function OtherMarketingIntegrations({
       onConfirm: async () => {
         try {
           await api.delete(`admin/marketing-integrations/${publicId}/`);
-          fetchIntegrations();
+          void queryClient.invalidateQueries({
+            queryKey: marketingIntegrationsQueryKey,
+          });
           notify.success(tPages("toastDescIntegrationDisconnected"), {
             title: tPages("toastTitleIntegrationDisconnected"),
           });
@@ -113,7 +113,7 @@ export default function OtherMarketingIntegrations({
       await api.patch(`admin/marketing-integrations/${integration.public_id}/`, {
         is_active: !integration.is_active,
       });
-      fetchIntegrations();
+      void queryClient.invalidateQueries({ queryKey: marketingIntegrationsQueryKey });
     } catch (err) {
       notify.error(err, {
         title: tPages("toastTitleMarketingLinkFailed"),
@@ -134,7 +134,7 @@ export default function OtherMarketingIntegrations({
       await api.patch(`admin/marketing-integrations/${integration.public_id}/events/`, {
         [key]: value,
       });
-      fetchIntegrations();
+      void queryClient.invalidateQueries({ queryKey: marketingIntegrationsQueryKey });
     } catch (err) {
       notify.error(err, {
         title: tPages("toastTitleMarketingLinkFailed"),

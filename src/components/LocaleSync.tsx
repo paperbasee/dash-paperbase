@@ -11,6 +11,7 @@ export function LocaleSync() {
   useEffect(() => {
     if (typeof window === "undefined") return;
     localStorage.setItem(CORE_LOCALE_STORAGE_KEY, locale);
+    document.documentElement.lang = locale;
   }, [locale]);
 
   return null;

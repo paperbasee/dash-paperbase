@@ -1,25 +1,23 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
-import api from "@/lib/api";
-import { emailNotificationPrefsQueryKey } from "@/lib/query-keys";
+import {
+  fetchStoreSettingsCurrent,
+  useStoreSettingsCurrentQuery,
+  type StoreSettingsCurrent,
+} from "@/hooks/useStoreSettingsCurrentQuery";
 
-export type EmailNotificationPrefsSettings = {
-  email_notify_owner_on_order_received: boolean;
-  email_customer_on_order_confirmed: boolean;
-  storefront_url?: string | null;
-  revalidate_secret?: string | null;
-};
+export type EmailNotificationPrefsSettings = Pick<
+  StoreSettingsCurrent,
+  | "email_notify_owner_on_order_received"
+  | "email_customer_on_order_confirmed"
+  | "storefront_url"
+  | "revalidate_secret"
+>;
 
 export async function fetchEmailNotificationPrefs(): Promise<EmailNotificationPrefsSettings> {
-  const { data } = await api.get<EmailNotificationPrefsSettings>("store/settings/current/");
-  return data;
+  return fetchStoreSettingsCurrent();
 }
 
 export function useEmailNotificationPrefsQuery(options?: { enabled?: boolean }) {
-  return useQuery({
-    queryKey: emailNotificationPrefsQueryKey,
-    queryFn: fetchEmailNotificationPrefs,
-    enabled: options?.enabled ?? true,
-  });
+  return useStoreSettingsCurrentQuery(options);
 }

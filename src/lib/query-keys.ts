@@ -4,11 +4,14 @@ export const brandingQueryKey = ["branding", "admin"] as const;
 
 export const navCountsQueryKey = ["nav-counts"] as const;
 
-export const dashboardStatsQueryKey = ["dashboard-stats"] as const;
-
 export const featuresQueryKey = ["features"] as const;
 
-export const inventoryStatusQueryKey = ["inventory-status"] as const;
+export const systemNotificationActiveQueryKey = ["system-notifications", "active"] as const;
+
+export const inventoryCountsQueryKey = ["inventory", "counts"] as const;
+
+/** @deprecated Use inventoryCountsQueryKey */
+export const inventoryStatusQueryKey = inventoryCountsQueryKey;
 
 export const dashboardAnalyticsQueryKeyRoot = ["analytics", "overview"] as const;
 
@@ -58,6 +61,8 @@ export const shippingZonesQueryKey = ["shipping", "zones"] as const;
 
 export const shippingMethodsQueryKey = ["shipping", "methods"] as const;
 
+export const shippingRatesQueryKey = ["shipping", "rates"] as const;
+
 export const ordersListQueryKeyRoot = ["orders", "list"] as const;
 
 export type OrdersListParams = Record<string, string>;
@@ -76,6 +81,10 @@ export type ProductsListParams = Record<string, string>;
 
 export function productsListQueryKey(params: ProductsListParams) {
   return [...productsListQueryKeyRoot, params] as const;
+}
+
+export function productDetailQueryKey(publicId: string) {
+  return ["products", "detail", publicId] as const;
 }
 
 export const customersListQueryKeyRoot = ["customers", "list"] as const;
@@ -147,7 +156,9 @@ export const apiKeysQueryKey = ["api-keys"] as const;
 
 export const marketingIntegrationsQueryKey = ["marketing-integrations"] as const;
 
-export const emailNotificationPrefsQueryKey = ["store-settings", "current"] as const;
+export const storeSettingsCurrentQueryKey = ["store-settings", "current"] as const;
+
+export const emailNotificationPrefsQueryKey = storeSettingsCurrentQueryKey;
 
 export const themeQueryKey = ["theming"] as const;
 

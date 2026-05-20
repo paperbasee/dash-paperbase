@@ -21,6 +21,8 @@ import { useEnterNavigation } from "@/hooks/useEnterNavigation";
 import type { ExtraFieldValues } from "@/types/extra-fields";
 import type { Product, AdminCategoryTreeNode } from "@/types";
 import { flattenCategoryOptions } from "@/lib/category-tree";
+import { useCategoriesQuery } from "@/hooks/useCategoriesQuery";
+import { useProductDetailQuery } from "@/hooks/useProductDetailQuery";
 import { MAX_PRODUCT_IMAGES } from "@/lib/product-media";
 import {
   parseValidation,
@@ -101,10 +103,15 @@ export default function ProductDetailClient() {
   const tPages = useTranslations("pages");
   const tCommon = useTranslations("common");
   const [product, setProduct] = useState<Product | null>(null);
-  const [categoryTree, setCategoryTree] = useState<AdminCategoryTreeNode[]>([]);
+  const { data: categoryTree = [] } = useCategoriesQuery();
+  const {
+    data: productData,
+    isLoading,
+    isError,
+    error: productQueryError,
+  } = useProductDetailQuery(publicId ?? "");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
-  const [loading, setLoading] = useState(true);
   const { canDelete: canDeleteProduct, isSuperuser: deleteIsSuperuser } =
     useAdminDeleteCapabilities();
   const confirm = useConfirm();
@@ -201,6 +208,10 @@ export default function ProductDetailClient() {
   const baseSlug = slugFromName(form.name);
 
   useEffect(() => {
+    setProduct(null);
+  }, [publicId]);
+
+  useEffect(() => {
     setRemoveImage(false);
     setRemovedGalleryPublicIds([]);
     setImageFiles(Array(MAX_IMAGES).fill(null));
@@ -213,49 +224,37 @@ export default function ProductDetailClient() {
   }, [isEditMode, publicId]);
 
   useEffect(() => {
-    const applyProduct = (p: Product, d: AdminCategoryTreeNode[]) => {
-      setProduct(p);
-      setCategoryTree(Array.isArray(d) ? d : []);
-      const catRef = p.category ?? p.category_public_id ?? "";
-      setForm({
-        name: p.name,
-        brand: p.brand ?? "",
-        price: p.price,
-        original_price: p.original_price ?? "",
-        category: String(catRef),
-        description: p.description ?? "",
-        stock: String(p.available_quantity ?? p.total_stock ?? ""),
-        is_active: p.is_active,
-        prepayment_type: (p.prepayment_type ?? "none") as
-          | "none"
-          | "delivery_only"
-          | "full",
-      });
-      setExtraFields(
-        typeof p.extra_data === "object" && p.extra_data !== null
-          ? (p.extra_data as ExtraFieldValues)
-          : {}
-      );
-    };
+    if (!productData) return;
+    setProduct(productData);
+    const catRef = productData.category ?? productData.category_public_id ?? "";
+    setForm({
+      name: productData.name,
+      brand: productData.brand ?? "",
+      price: productData.price,
+      original_price: productData.original_price ?? "",
+      category: String(catRef),
+      description: productData.description ?? "",
+      stock: String(productData.available_quantity ?? productData.total_stock ?? ""),
+      is_active: productData.is_active,
+      prepayment_type: (productData.prepayment_type ?? "none") as
+        | "none"
+        | "delivery_only"
+        | "full",
+    });
+    setExtraFields(
+      typeof productData.extra_data === "object" && productData.extra_data !== null
+        ? (productData.extra_data as ExtraFieldValues)
+        : {}
+    );
+  }, [productData]);
 
-    Promise.all([
-      api.get<Product>(`admin/products/${publicId}/`),
-      api.get<AdminCategoryTreeNode[]>("admin/categories/?tree=1"),
-    ])
-      .then(([prodRes, treeRes]) => {
-        applyProduct(
-          prodRes.data,
-          Array.isArray(treeRes.data) ? treeRes.data : []
-        );
-      })
-      .catch((err) => {
-        notify.error(err, {
-          title: tPages("toastTitleProductDidntLoad"),
-          fallbackMessage: tPages("toastDescProductDidntLoad"),
-        });
-      })
-      .finally(() => setLoading(false));
-  }, [publicId, tPages]);
+  useEffect(() => {
+    if (!isError || !productQueryError) return;
+    notify.error(productQueryError, {
+      title: tPages("toastTitleProductDidntLoad"),
+      fallbackMessage: tPages("toastDescProductDidntLoad"),
+    });
+  }, [isError, productQueryError, tPages]);
 
   const categorySelectOptions = useMemo(
     () => flattenCategoryOptions(categoryTree),
@@ -538,7 +537,7 @@ export default function ProductDetailClient() {
   const fieldControlClass = "w-full rounded-card bg-muted/50";
   const { handleKeyDown } = useEnterNavigation(() => formRef.current?.requestSubmit());
 
-  if (loading && !product) {
+  if (isLoading && !product) {
     return null;
   }
 

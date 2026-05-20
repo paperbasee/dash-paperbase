@@ -2,7 +2,8 @@ import type { ReactNode } from "react";
 import type { Metadata } from "next";
 import { cookies, headers } from "next/headers";
 import Script from "next/script";
-import { Poppins } from "next/font/google";
+import { Noto_Sans_Bengali, Poppins } from "next/font/google";
+import { getLocale } from "next-intl/server";
 import "./globals.css";
 import { isTurnstileDisabled } from "@/lib/turnstile-env";
 import { CORE_THEME_COOKIE_KEY } from "@/lib/theme";
@@ -10,6 +11,13 @@ import { CORE_THEME_COOKIE_KEY } from "@/lib/theme";
 const poppins = Poppins({
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
+  display: "swap",
+});
+
+const notoSansBengali = Noto_Sans_Bengali({
+  subsets: ["bengali"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-noto-sans-bengali",
   display: "swap",
 });
 
@@ -64,6 +72,7 @@ const THEME_BOOT_SCRIPT = `
 `.trim();
 
 export default async function RootLayout({ children }: { children: ReactNode }) {
+  const locale = await getLocale();
   const cookieStore = await cookies();
   const headersList = await headers();
   const pref = cookieStore.get("core-theme")?.value;
@@ -88,9 +97,11 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
 
   return (
     <html
-      lang="en"
+      lang={locale}
       suppressHydrationWarning
-      className={isDark ? "dark" : undefined}
+      className={[isDark ? "dark" : undefined, poppins.className, notoSansBengali.variable]
+        .filter(Boolean)
+        .join(" ")}
       data-theme={dataTheme}
     >
       <head>
@@ -101,7 +112,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
           dangerouslySetInnerHTML={{ __html: THEME_BOOT_SCRIPT }}
         />
       </head>
-      <body className={`${poppins.className} antialiased font-sans`}>
+      <body className="antialiased font-sans">
         {children}
         {!isTurnstileDisabled() ? (
           <Script

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { Plus, Undo2 } from "lucide-react";
@@ -16,9 +17,16 @@ import type {
   ShippingMethod,
   ShippingRate,
   ShippingZone,
-  PaginatedResponse,
 } from "@/types";
 import { useEnterNavigation } from "@/hooks/useEnterNavigation";
+import { useShippingZonesQuery } from "@/hooks/useShippingZonesQuery";
+import { useShippingMethodsQuery } from "@/hooks/useShippingMethodsQuery";
+import { useShippingRatesQuery } from "@/hooks/useShippingRatesQuery";
+import {
+  shippingMethodsQueryKey,
+  shippingRatesQueryKey,
+  shippingZonesQueryKey,
+} from "@/lib/query-keys";
 
 const multiSelectClass =
   "w-full min-h-[6rem] rounded-ui border border-border bg-background px-3 py-2 text-sm text-foreground shadow-xs outline-none transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50";
@@ -69,10 +77,6 @@ const emptyRate: RateForm = {
   is_active: true,
 };
 
-function unwrap<T>(data: PaginatedResponse<T> | T[]): T[] {
-  return Array.isArray(data) ? data : data.results;
-}
-
 export default function ShippingPage() {
   const router = useRouter();
   const tPages = useTranslations("pages");
@@ -99,12 +103,39 @@ export default function ShippingPage() {
       }) as Record<ShippingRate["rate_type"], string>,
     [tPages],
   );
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
+  const zonesQuery = useShippingZonesQuery();
+  const methodsQuery = useShippingMethodsQuery();
+  const ratesQuery = useShippingRatesQuery();
+  const zones = zonesQuery.data ?? [];
+  const methods = methodsQuery.data ?? [];
+  const rates = ratesQuery.data ?? [];
+  const loading = zonesQuery.isLoading || methodsQuery.isLoading || ratesQuery.isLoading;
   const [error, setError] = useState<string>(""); // kept for legacy; do not render inline
 
-  const [zones, setZones] = useState<ShippingZone[]>([]);
-  const [methods, setMethods] = useState<ShippingMethod[]>([]);
-  const [rates, setRates] = useState<ShippingRate[]>([]);
+  const invalidateShippingQueries = () => {
+    void queryClient.invalidateQueries({ queryKey: shippingZonesQueryKey });
+    void queryClient.invalidateQueries({ queryKey: shippingMethodsQueryKey });
+    void queryClient.invalidateQueries({ queryKey: shippingRatesQueryKey });
+  };
+
+  useEffect(() => {
+    const failed = zonesQuery.isError || methodsQuery.isError || ratesQuery.isError;
+    if (!failed) return;
+    const err = zonesQuery.error ?? methodsQuery.error ?? ratesQuery.error;
+    notify.error(err, {
+      title: tPages("toastTitleShippingSettingsNotSaved"),
+      fallbackMessage: tPages("toastDescShippingSettingsNotSaved"),
+    });
+  }, [
+    zonesQuery.isError,
+    zonesQuery.error,
+    methodsQuery.isError,
+    methodsQuery.error,
+    ratesQuery.isError,
+    ratesQuery.error,
+    tPages,
+  ]);
 
   const [editingZone, setEditingZone] = useState<string | "new" | null>(null);
   const [editingMethod, setEditingMethod] = useState<string | "new" | null>(null);
@@ -134,38 +165,6 @@ export default function ShippingPage() {
     zones.forEach((x) => m.set(x.public_id, x));
     return m;
   }, [zones]);
-
-  async function fetchAll() {
-    setLoading(true);
-    setError("");
-    try {
-      const [z, m, r] = await Promise.all([
-        api.get<PaginatedResponse<ShippingZone> | ShippingZone[]>(
-          "admin/shipping-zones/"
-        ),
-        api.get<PaginatedResponse<ShippingMethod> | ShippingMethod[]>(
-          "admin/shipping-methods/"
-        ),
-        api.get<PaginatedResponse<ShippingRate> | ShippingRate[]>(
-          "admin/shipping-rates/"
-        ),
-      ]);
-      setZones(unwrap(z.data));
-      setMethods(unwrap(m.data));
-      setRates(unwrap(r.data));
-    } catch (e) {
-      notify.error(e, {
-        title: tPages("toastTitleShippingSettingsNotSaved"),
-        fallbackMessage: tPages("toastDescShippingSettingsNotSaved"),
-      });
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  useEffect(() => {
-    fetchAll();
-  }, []);
 
   function openNewZone() {
     setEditingZone("new");
@@ -226,7 +225,7 @@ export default function ShippingPage() {
         await api.patch(`admin/shipping-zones/${editingZone}/`, payload);
       }
       setEditingZone(null);
-      fetchAll();
+      invalidateShippingQueries();
     } catch (e) {
       notify.error(e, {
         title: tPages("toastTitleShippingSettingsNotSaved"),
@@ -255,7 +254,7 @@ export default function ShippingPage() {
         await api.patch(`admin/shipping-methods/${editingMethod}/`, payload);
       }
       setEditingMethod(null);
-      fetchAll();
+      invalidateShippingQueries();
     } catch (e) {
       notify.error(e, {
         title: tPages("toastTitleShippingSettingsNotSaved"),
@@ -287,7 +286,7 @@ export default function ShippingPage() {
         await api.patch(`admin/shipping-rates/${editingRate}/`, payload);
       }
       setEditingRate(null);
-      fetchAll();
+      invalidateShippingQueries();
     } catch (e) {
       notify.error(e, {
         title: tPages("toastTitleShippingSettingsNotSaved"),
@@ -317,7 +316,7 @@ export default function ShippingPage() {
           title: tPages("toastTitleShippingMethodRemoved"),
         });
       }
-      fetchAll();
+      invalidateShippingQueries();
     } catch (e) {
       notify.error(e, {
         title: tPages("toastTitleShippingSettingsNotSaved"),

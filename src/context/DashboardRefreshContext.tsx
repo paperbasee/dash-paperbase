@@ -52,7 +52,7 @@ export function DashboardRefreshProvider({
         queryClient.invalidateQueries({ queryKey: ["orders", "list"] }),
         queryClient.invalidateQueries({ queryKey: ["nav-counts"] }),
         queryClient.invalidateQueries({ queryKey: ["analytics", "overview"] }),
-        queryClient.invalidateQueries({ queryKey: ["inventory-status"] }),
+        queryClient.invalidateQueries({ queryKey: ["inventory", "counts"] }),
         queryClient.invalidateQueries({ queryKey: ["products", "list"] }),
       ]);
       setLastRefreshedAt(new Date());

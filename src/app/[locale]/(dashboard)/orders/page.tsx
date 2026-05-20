@@ -43,11 +43,12 @@ import {
   formatOrderDeliveryStatusLabel,
 } from "@/lib/orders/delivery-statuses";
 import { ORDER_FLAG_OPTIONS, formatOrderFlagLabel } from "@/lib/orders/order-flags";
-import type { AdminCategoryTreeNode, Order, PaginatedResponse } from "@/types";
+import type { Order, PaginatedResponse } from "@/types";
 import { useConfirm } from "@/context/ConfirmDialogContext";
 import { notify, normalizeError } from "@/notifications";
 import { BelowFoldScrollHint } from "@/components/BelowFoldScrollHint";
 import { useOrdersQuery } from "@/hooks/useOrdersQuery";
+import { useCategoriesQuery } from "@/hooks/useCategoriesQuery";
 import {
   navCountsQueryKey,
   ordersListQueryKey,
@@ -456,9 +457,11 @@ export default function OrdersPage() {
   const [exportSubmitting, setExportSubmitting] = useState(false);
   const [activeExportJobId, setActiveExportJobId] = useState<string | null>(null);
   const [exportPoll, setExportPoll] = useState<OrderExportPollResponse | null>(null);
-  const [categoryOptions, setCategoryOptions] = useState<
-    { value: string; label: string; labelDisplay: ReactNode }[]
-  >([]);
+  const { data: categoryTree = [] } = useCategoriesQuery();
+  const categoryOptions = useMemo(
+    () => flattenCategoryOptionsRich(categoryTree),
+    [categoryTree],
+  );
 
   function fraudStatus(data: FraudCheckApiOk | null | undefined): string | undefined {
     return data?.status ? String(data.status) : undefined;
@@ -477,21 +480,6 @@ export default function OrdersPage() {
     if (next === (filters.search || "")) return;
     setFilter("search", next);
   }, [debouncedSearch, filters.search, setFilter]);
-
-  useEffect(() => {
-    api
-      .get<AdminCategoryTreeNode[]>("admin/categories/?tree=1")
-      .then((res) => {
-        const tree = Array.isArray(res.data) ? res.data : [];
-        setCategoryOptions(flattenCategoryOptionsRich(tree));
-      })
-      .catch((err) => {
-        notify.error(err, {
-          title: tPages("toastTitleCategoryFiltersUnavailable"),
-          fallbackMessage: tPages("toastDescCategoryFiltersUnavailable"),
-        });
-      });
-  }, [tPages]);
 
   useLayoutEffect(() => {
     setListCursor(null);

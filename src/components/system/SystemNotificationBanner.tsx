@@ -8,7 +8,7 @@ import { normalizeNavigationHref } from "@/lib/navigation/normalize-navigation-h
 
 import { Button } from "@/components/ui/button";
 import { ShineBorder } from "@/components/ui/shine-border";
-import { useSystemNotification } from "@/hooks/useSystemNotification";
+import { useSystemNotificationQuery } from "@/hooks/useSystemNotificationQuery";
 import { dismissSystemNotification } from "@/lib/api/systemNotification";
 import { cn } from "@/lib/utils";
 
@@ -54,7 +54,7 @@ export default function SystemNotificationBanner({
   const goInternal = (path: string) => {
     navigate(normalizeNavigationHref(path));
   };
-  const { notification, isLoading, isError } = useSystemNotification();
+  const { notification, isLoading, isError } = useSystemNotificationQuery();
   const [hiddenPublicId, setHiddenPublicId] = useState<string | null>(null);
   const [isDismissing, setIsDismissing] = useState(false);
 

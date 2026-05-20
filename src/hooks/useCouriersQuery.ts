@@ -10,9 +10,10 @@ export async function fetchCouriers(): Promise<Courier[]> {
   return Array.isArray(data) ? data : (data.results ?? []);
 }
 
-export function useCouriersQuery() {
+export function useCouriersQuery(options?: { enabled?: boolean }) {
   return useQuery({
     queryKey: couriersQueryKey,
     queryFn: fetchCouriers,
+    enabled: options?.enabled ?? true,
   });
 }

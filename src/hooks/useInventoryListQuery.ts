@@ -1,9 +1,10 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "@/lib/api";
 import type { Inventory, PaginatedResponse } from "@/types";
-import { inventoryListQueryKey, type InventoryListParams } from "@/lib/query-keys";
+import { inventoryCountsQueryKey, inventoryListQueryKey, type InventoryListParams } from "@/lib/query-keys";
+import { fetchInventoryCounts } from "@/hooks/useInventoryCountsQuery";
 
 export type InventoryListData = {
   list: PaginatedResponse<Inventory>;
@@ -13,27 +14,28 @@ export type InventoryListData = {
 
 export async function fetchInventoryList(
   params: InventoryListParams,
+  queryClient: ReturnType<typeof useQueryClient>,
 ): Promise<InventoryListData> {
-  const [listRes, lowRes, outRes] = await Promise.all([
+  const [listRes, counts] = await Promise.all([
     api.get<PaginatedResponse<Inventory>>("admin/inventory/", { params }),
-    api.get<PaginatedResponse<Inventory>>("admin/inventory/", {
-      params: { stock: "low_stock", page: 1 },
-    }),
-    api.get<PaginatedResponse<Inventory>>("admin/inventory/", {
-      params: { stock: "out_of_stock", page: 1 },
+    queryClient.fetchQuery({
+      queryKey: inventoryCountsQueryKey,
+      queryFn: fetchInventoryCounts,
     }),
   ]);
 
   return {
     list: listRes.data,
-    lowStockTotal: lowRes.data.count ?? 0,
-    outOfStockTotal: outRes.data.count ?? 0,
+    lowStockTotal: counts.lowStockTotal,
+    outOfStockTotal: counts.outOfStockTotal,
   };
 }
 
 export function useInventoryListQuery(params: InventoryListParams) {
+  const queryClient = useQueryClient();
+
   return useQuery({
     queryKey: inventoryListQueryKey(params),
-    queryFn: () => fetchInventoryList(params),
+    queryFn: () => fetchInventoryList(params, queryClient),
   });
 }

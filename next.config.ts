@@ -20,6 +20,10 @@ const wsOrigin = process.env.NEXT_PUBLIC_API_URL
   ? "ws://localhost:8000"
   : "";
 
+const cspReportUri = apiOrigin
+  ? `report-uri ${apiOrigin}/api/v1/csp-report/?app=dash`
+  : "";
+
 const securityHeaders = [
   {
     key: "X-DNS-Prefetch-Control",
@@ -59,8 +63,9 @@ const securityHeaders = [
       `img-src 'self' data: blob: https: ${apiOrigin}`,
       "font-src 'self' data:",
       // Allow the backend API origin explicitly (http in dev, https in prod).
-      `connect-src 'self' https: ${apiOrigin} ${wsOrigin} https://challenges.cloudflare.com`,
+      `connect-src 'self' ${apiOrigin} ${wsOrigin} https://challenges.cloudflare.com https://*.r2.cloudflarestorage.com`,
       "frame-ancestors 'none'",
+      ...(cspReportUri ? [cspReportUri] : []),
     ].join("; "),
   },
 ];

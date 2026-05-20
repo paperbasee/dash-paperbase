@@ -402,7 +402,7 @@ export default function CourierIntegration({
     isLoading: loading,
     isError: couriersIsError,
     error: couriersError,
-  } = useCouriersQuery();
+  } = useCouriersQuery({ enabled: !panelHidden });
 
   useEffect(() => {
     if (!couriersIsError) return;

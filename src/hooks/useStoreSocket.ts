@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { getAccessToken } from "@/lib/auth";
 import { StoreSocketClient } from "@/lib/websocket/socket-client";
+import { createInvalidationCoalescer } from "@/lib/websocket/coalesce-query-invalidations";
 import { getQueryKeysToInvalidate } from "@/lib/websocket/socket-events";
 
 export interface UseStoreSocketOptions {
@@ -67,19 +68,21 @@ export function useStoreSocket(
       onDisconnectRef.current?.();
     });
 
+    const invalidationCoalescer = createInvalidationCoalescer(queryClient, {
+      onFlush: () => onAfterInvalidateRef.current?.(),
+    });
+
     const removeHandler = client.onMessage((socketEvent) => {
       const queryKeys = getQueryKeysToInvalidate(socketEvent.event);
       if (queryKeys.length > 0) {
-        queryKeys.forEach((queryKey) => {
-          void queryClient.invalidateQueries({ queryKey });
-        });
-        onAfterInvalidateRef.current?.();
+        invalidationCoalescer.enqueue(queryKeys);
       }
     });
 
     connect();
 
     return () => {
+      invalidationCoalescer.dispose();
       removeHandler();
       client.disconnect();
       clientRef.current = null;

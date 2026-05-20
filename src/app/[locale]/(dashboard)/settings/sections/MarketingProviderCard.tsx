@@ -66,7 +66,7 @@ export default function MarketingProviderCard({
     isLoading: loading,
     isError: integrationsIsError,
     error: integrationsError,
-  } = useMarketingIntegrationsQuery();
+  } = useMarketingIntegrationsQuery({ enabled: !panelHidden });
 
   useEffect(() => {
     if (!integrationsIsError) return;

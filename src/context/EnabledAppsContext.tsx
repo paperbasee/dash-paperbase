@@ -15,6 +15,7 @@ import {
   CATALOG_INCLUDED_APP_IDS,
 } from "@/config/apps";
 import api from "@/lib/api";
+import { useStoreSettingsCurrentQuery } from "@/hooks/useStoreSettingsCurrentQuery";
 
 const STORAGE_KEY = "core_enabled_apps";
 
@@ -82,31 +83,18 @@ export function EnabledAppsProvider({ children }: { children: ReactNode }) {
   const [enabledOptional, setEnabledOptional] = useState<Set<string>>(() =>
     loadEnabledOptionalApps()
   );
-  const [isLoading, setIsLoading] = useState(true);
+  const settingsQuery = useStoreSettingsCurrentQuery();
 
   useEffect(() => {
-    let cancelled = false;
-    async function fetchFromBackend() {
-      try {
-        const { data } = await api.get<{ modules_enabled?: Record<string, boolean> }>(
-          "store/settings/current/"
-        );
-        if (!cancelled && data?.modules_enabled) {
-          setEnabledOptional(modulesEnabledToSet(data.modules_enabled));
-        }
-      } catch {
-        if (!cancelled) {
-          setEnabledOptional(loadEnabledOptionalApps());
-        }
-      } finally {
-        if (!cancelled) setIsLoading(false);
-      }
+    if (!settingsQuery.isFetched) return;
+    if (settingsQuery.isError) {
+      setEnabledOptional(loadEnabledOptionalApps());
+      return;
     }
-    void fetchFromBackend();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+    if (settingsQuery.data?.modules_enabled) {
+      setEnabledOptional(modulesEnabledToSet(settingsQuery.data.modules_enabled));
+    }
+  }, [settingsQuery.isFetched, settingsQuery.isError, settingsQuery.data]);
 
   const isEnabled = useCallback(
     (appId: string): boolean => {
@@ -153,9 +141,9 @@ export function EnabledAppsProvider({ children }: { children: ReactNode }) {
       isEnabled,
       toggleApp,
       enabledOptional,
-      isLoading,
+      isLoading: settingsQuery.isLoading,
     }),
-    [enabledAppIds, isEnabled, toggleApp, enabledOptional, isLoading]
+    [enabledAppIds, isEnabled, toggleApp, enabledOptional, settingsQuery.isLoading]
   );
 
   return <EnabledAppsContext.Provider value={value}>{children}</EnabledAppsContext.Provider>;

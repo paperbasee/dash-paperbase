@@ -56,5 +56,6 @@ export function useNavCounts() {
   return {
     counts: query.data ?? lastKnownCounts.current,
     formatCount,
+    isError: query.isError,
   };
 }

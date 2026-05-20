@@ -33,6 +33,7 @@ export interface MeForRouting {
   /** User public_id from auth/me/; used for cache key when JWT omits user_public_id. */
   public_id?: string;
   is_moderator?: boolean;
+  is_superuser?: boolean;
   active_store_public_id: string | null;
   /**
    * Latest subscription row by server `updated_at` (REJECTED / PENDING_REVIEW only).

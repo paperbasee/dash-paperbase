@@ -18,6 +18,8 @@ import {
   ordersListQueryKeyRoot,
 } from "@/lib/query-keys";
 import { useOrderDetailQuery } from "@/hooks/useOrderDetailQuery";
+import { useShippingZonesQuery } from "@/hooks/useShippingZonesQuery";
+import { useShippingMethodsQuery } from "@/hooks/useShippingMethodsQuery";
 import { useBranding } from "@/context/BrandingContext";
 import {
   ORDER_STATUS_OPTIONS,
@@ -31,8 +33,6 @@ import type {
   PaginatedResponse,
   ProductVariant,
   Product,
-  ShippingMethod,
-  ShippingZone,
 } from "@/types";
 import { Button } from "@/components/ui/button";
 import { ClickableText } from "@/components/ui/clickable-text";
@@ -128,8 +128,8 @@ export default function OrderDetailPage() {
   const [productResults, setProductResults] = useState<Product[]>([]);
   const [searchingProducts, setSearchingProducts] = useState(false);
   const [showProductResults, setShowProductResults] = useState(false);
-  const [shippingZones, setShippingZones] = useState<ShippingZone[]>([]);
-  const [shippingMethods, setShippingMethods] = useState<ShippingMethod[]>([]);
+  const { data: shippingZones = [] } = useShippingZonesQuery();
+  const { data: shippingMethods = [] } = useShippingMethodsQuery();
   const [statusUpdateLoading, setStatusUpdateLoading] = useState(false);
   const [flagUpdateLoading, setFlagUpdateLoading] = useState(false);
   const [paymentVerifying, setPaymentVerifying] = useState<"verify" | "reject" | null>(null);
@@ -147,23 +147,6 @@ export default function OrderDetailPage() {
       fallbackMessage: tPages("toastDescOrderDataIncomplete"),
     });
   }, [isError, orderError, tPages]);
-
-  useEffect(() => {
-    Promise.all([
-      api.get<PaginatedResponse<ShippingZone> | ShippingZone[]>("admin/shipping-zones/"),
-      api.get<PaginatedResponse<ShippingMethod> | ShippingMethod[]>("admin/shipping-methods/"),
-    ])
-      .then(([z, m]) => {
-        const zones = Array.isArray(z.data) ? z.data : z.data.results;
-        const methods = Array.isArray(m.data) ? m.data : m.data.results;
-        setShippingZones(zones ?? []);
-        setShippingMethods(methods ?? []);
-      })
-      .catch(() => {
-        setShippingZones([]);
-        setShippingMethods([]);
-      });
-  }, []);
 
   // Match Product card height to Payment + Customer combined on desktop
   useEffect(() => {

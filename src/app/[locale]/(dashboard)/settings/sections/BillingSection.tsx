@@ -1,10 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Input } from "@/components/ui/input";
-import api from "@/lib/api";
-import type { MeForRouting } from "@/lib/subscription-access";
+import { useAuth } from "@/context/AuthContext";
 import {
   billingSettingsStatusKey,
   type BillingSettingsStatusKey,
@@ -14,42 +12,25 @@ import { SettingsSectionBody, settingsSectionSurfaceClassName } from "../Setting
 
 export default function BillingSection({ hidden }: { hidden: boolean }) {
   const t = useTranslations("settings");
-  const [meSnapshot, setMeSnapshot] = useState<Pick<
-    MeForRouting,
-    "subscription" | "latest_payment_status"
-  > | null>(null);
-  const [loading, setLoading] = useState(false);
+  const { meProfile, meProfileStatus, meProfileFetching } = useAuth();
 
-  useEffect(() => {
-    if (hidden) return;
-    let cancelled = false;
-    setLoading(true);
-    api
-      .get<MeForRouting>("auth/me/")
-      .then(({ data }) => {
-        if (cancelled) return;
-        setMeSnapshot({
-          subscription: data.subscription,
-          latest_payment_status: data.latest_payment_status ?? null,
-        });
-      })
-      .catch(() => {
-        if (!cancelled) setMeSnapshot(null);
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [hidden]);
+  const loading =
+    !hidden &&
+    (meProfileStatus === "loading" ||
+      meProfileStatus === "idle" ||
+      meProfileFetching);
 
-  const subscription = meSnapshot?.subscription ?? null;
+  const subscription = !hidden && meProfileStatus === "ready" ? meProfile?.subscription ?? null : null;
+  const latestPaymentStatus =
+    !hidden && meProfileStatus === "ready"
+      ? (meProfile?.latest_payment_status ?? null)
+      : null;
+
   const uiState =
-    subscription && meSnapshot
+    subscription
       ? resolveSubscriptionUIState(
           subscription.subscription_status,
-          meSnapshot.latest_payment_status ?? null
+          latestPaymentStatus,
         )
       : null;
   const statusKey: BillingSettingsStatusKey | null =

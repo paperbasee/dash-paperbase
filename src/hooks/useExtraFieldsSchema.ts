@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useEffect } from "react";
 import api from "@/lib/api";
+import { useStoreSettingsCurrentQuery } from "@/hooks/useStoreSettingsCurrentQuery";
 import type { ExtraFieldDefinition, ExtraFieldEntityType } from "@/types/extra-fields";
 import { validateExtraFieldDefinitions } from "@/lib/validation";
 
@@ -28,26 +29,17 @@ function normalizeSchema(raw: unknown): ExtraFieldDefinition[] {
 
 export function useExtraFieldsSchema(entityType?: ExtraFieldEntityType) {
   const [schema, setSchemaState] = useState<ExtraFieldDefinition[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  const fetchSchema = useCallback(async () => {
-    setLoading(true);
-    try {
-      const { data } = await api.get<{ extra_field_schema?: unknown }>(
-        "store/settings/current/"
-      );
-      const raw = data.extra_field_schema ?? [];
-      setSchemaState(normalizeSchema(raw));
-    } catch {
-      setSchemaState([]);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const settingsQuery = useStoreSettingsCurrentQuery();
 
   useEffect(() => {
-    fetchSchema();
-  }, [fetchSchema]);
+    if (!settingsQuery.isFetched) return;
+    if (settingsQuery.isError) {
+      setSchemaState([]);
+      return;
+    }
+    const raw = settingsQuery.data?.extra_field_schema ?? [];
+    setSchemaState(normalizeSchema(raw));
+  }, [settingsQuery.isFetched, settingsQuery.isError, settingsQuery.data]);
 
   const filteredSchema = entityType
     ? schema.filter((f) => f.entityType === entityType)
@@ -145,13 +137,13 @@ export function useExtraFieldsSchema(entityType?: ExtraFieldEntityType) {
   return {
     schema: filteredSchema,
     fullSchema: schema,
-    loading,
+    loading: settingsQuery.isLoading,
     setSchema,
     addField,
     updateField,
     removeField,
     reorderFields,
     save,
-    refetch: fetchSchema,
+    refetch: () => void settingsQuery.refetch(),
   };
 }

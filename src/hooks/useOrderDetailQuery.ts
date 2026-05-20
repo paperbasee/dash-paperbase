@@ -10,10 +10,13 @@ export async function fetchOrderDetail(publicId: string): Promise<Order> {
   return data;
 }
 
-export function useOrderDetailQuery(publicId: string) {
+export function useOrderDetailQuery(
+  publicId: string,
+  options?: { enabled?: boolean },
+) {
   return useQuery({
     queryKey: orderDetailQueryKey(publicId),
     queryFn: () => fetchOrderDetail(publicId),
-    enabled: !!publicId,
+    enabled: (options?.enabled ?? true) && !!publicId,
   });
 }

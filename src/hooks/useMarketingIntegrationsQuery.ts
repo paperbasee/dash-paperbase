@@ -12,9 +12,10 @@ export async function fetchMarketingIntegrations(): Promise<MarketingIntegration
   return Array.isArray(data) ? data : (data.results ?? []);
 }
 
-export function useMarketingIntegrationsQuery() {
+export function useMarketingIntegrationsQuery(options?: { enabled?: boolean }) {
   return useQuery({
     queryKey: marketingIntegrationsQueryKey,
     queryFn: fetchMarketingIntegrations,
+    enabled: options?.enabled ?? true,
   });
 }
