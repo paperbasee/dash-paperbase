@@ -57,7 +57,7 @@ const securityHeaders = [
     value: [
       "default-src 'self'",
       // Cloudflare Turnstile (widget script + challenge iframe)
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://challenges.cloudflare.com",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://challenges.cloudflare.com https://static.cloudflareinsights.com",
       "frame-src 'self' https://challenges.cloudflare.com",
       "style-src 'self' 'unsafe-inline'",
       `img-src 'self' data: blob: https: ${apiOrigin}`,
