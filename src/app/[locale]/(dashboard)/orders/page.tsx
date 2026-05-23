@@ -15,6 +15,7 @@ import { useRouter } from "@/i18n/navigation";
 import { DeferredNavLink } from "@/components/navigation/DeferredNavLink";
 import { toLocaleDigits } from "@/lib/locale-digits";
 import { cursorFromLink } from "@/lib/cursor-from-link";
+import { cn } from "@/lib/utils";
 import { digitsInNumberFont, numberTextClass } from "@/lib/number-font";
 import { Download, Loader2, FunnelIcon, Truck, Undo2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -47,7 +48,7 @@ import type { Order, PaginatedResponse } from "@/types";
 import { useConfirm } from "@/context/ConfirmDialogContext";
 import { notify, normalizeError } from "@/notifications";
 import { BelowFoldScrollHint } from "@/components/BelowFoldScrollHint";
-import { useOrdersQuery } from "@/hooks/useOrdersQuery";
+import { useOrdersPage } from "@/hooks/useOrdersPage";
 import { useCategoriesQuery } from "@/hooks/useCategoriesQuery";
 import {
   navCountsQueryKey,
@@ -268,7 +269,8 @@ export default function OrdersPage() {
     filters.status,
   ]);
 
-  const { data: ordersPage, isLoading, isError, error } = useOrdersQuery(listParams);
+  const { data: ordersPage, isLoading, isError, error, markOrderSeen } =
+    useOrdersPage(listParams);
 
   const orders = ordersPage?.results ?? [];
   const ordersCount =
@@ -1204,12 +1206,20 @@ export default function OrdersPage() {
               <tbody className="divide-y divide-border/60">
                 {orders.map((order) => {
                   const fraud = fraudByOrderId[order.public_id] || { kind: "idle" };
+                  const isNew = order.is_new === true;
 
                   return (
                     <Fragment key={order.public_id}>
                       <ClickableTableRow
-                        href={`/orders/${order.public_id}`}
+                        onNavigate={() => {
+                          markOrderSeen(order.public_id);
+                          router.push(`/orders/${order.public_id}`);
+                        }}
                         aria-label={String(order.order_number)}
+                        className={cn(
+                          isNew &&
+                            "rounded-none border-l-[3px] border-l-[#378ADD] bg-[#EEF5FF] transition-colors duration-400 dark:border-l-[#85B7EB] dark:bg-[#0C447C]/20"
+                        )}
                       >
                         <td className="w-10 px-4 py-3">
                           <input
@@ -1227,15 +1237,21 @@ export default function OrdersPage() {
                           <div className="flex items-center gap-3">
                             <OrderPreviewTriggerButton
                               orderNumber={String(order.order_number)}
-                              onClick={() =>
+                              onClick={() => {
+                                markOrderSeen(order.public_id);
                                 setPreviewOrder({
                                   public_id: order.public_id,
                                   order_number: String(order.order_number),
-                                })
-                              }
+                                });
+                              }}
                             />
                             <span
-                              className={`text-sm font-medium leading-none text-foreground ${numClass}`}
+                              className={cn(
+                                "text-sm leading-none",
+                                isNew
+                                  ? "font-medium text-[#185FA5] dark:text-[#85B7EB]"
+                                  : cn("font-medium text-foreground", numClass)
+                              )}
                             >
                               {order.order_number}
                             </span>

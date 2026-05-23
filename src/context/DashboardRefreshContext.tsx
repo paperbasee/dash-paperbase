@@ -49,7 +49,6 @@ export function DashboardRefreshProvider({
     setIsRefreshing(true);
     try {
       await Promise.all([
-        queryClient.invalidateQueries({ queryKey: ["orders", "list"] }),
         queryClient.invalidateQueries({ queryKey: ["nav-counts"] }),
         queryClient.invalidateQueries({ queryKey: ["analytics", "overview"] }),
         queryClient.invalidateQueries({ queryKey: ["inventory", "counts"] }),

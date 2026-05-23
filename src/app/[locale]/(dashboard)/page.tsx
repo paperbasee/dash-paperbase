@@ -161,18 +161,12 @@ export default function DashboardPage() {
 
       <DashboardActivityTimeline data={series} bucket={range.bucket} />
 
-      <section className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
-        <DashboardComingSoonCard
-          className="h-full"
-          minHeightClass="min-h-[12rem] sm:min-h-[16rem] lg:min-h-[20rem]"
-        />
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-1 lg:flex lg:flex-col">
-          <DashboardComingSoonCard />
-          <DashboardComingSoonCard />
-        </div>
+      <section className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
+        <DashboardComingSoonCard className="aspect-square w-full py-6 sm:py-8" minHeightClass="min-h-0" />
+        <DashboardComingSoonCard className="aspect-square w-full py-6 sm:py-8" minHeightClass="min-h-0" />
+        <DashboardComingSoonCard className="aspect-square w-full py-6 sm:py-8" minHeightClass="min-h-0" />
+        <DashboardComingSoonCard className="aspect-square w-full py-6 sm:py-8" minHeightClass="min-h-0" />
       </section>
-
-      <DashboardComingSoonCard minHeightClass="min-h-[12rem] sm:min-h-[14rem]" />
 
       <DashboardStatusFooter apiHealthy={apiHealthy} latencyMs={null} />
     </div>

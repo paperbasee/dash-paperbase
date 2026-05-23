@@ -134,6 +134,8 @@ export interface Order {
   items_count?: number;
   has_unavailable_products?: boolean;
   unavailable_products_count?: number;
+  /** True when created after the user's last orders-page visit (admin list only). */
+  is_new?: boolean;
   created_at: string;
   updated_at: string;
 }
