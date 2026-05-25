@@ -77,6 +77,15 @@ const nextConfig: NextConfig = {
       process.env.VERCEL_GIT_COMMIT_SHA ??
       "dev",
   },
+  experimental: {
+    optimizePackageImports: [
+      "lucide-react",
+      "@phosphor-icons/react",
+      "recharts",
+      "next-intl",
+      "radix-ui",
+    ],
+  },
   // Courier logos from BD Courier API (fraud-check response `logo` URLs).
   images: {
     remotePatterns: [

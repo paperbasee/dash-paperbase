@@ -2,6 +2,7 @@
   "name": "dash-paperbase",
   "version": "2.3.12",
   "private": true,
+  "fund": false,
   "browserslist": [
     "last 2 Chrome versions",
     "last 2 Firefox versions",
@@ -12,7 +13,6 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint",
     "test:validation": "vitest run tests/validation"
   },
   "dependencies": {
@@ -52,8 +52,6 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "eslint": "^9",
-    "eslint-config-next": "^16.2.5",
     "tailwindcss": "^4",
     "typescript": "^5",
     "vitest": "^4.1.0"
