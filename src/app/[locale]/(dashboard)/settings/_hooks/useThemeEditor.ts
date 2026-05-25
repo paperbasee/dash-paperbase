@@ -109,5 +109,12 @@ export function useThemeEditor() {
     [theme]
   );
 
-  return { theme, loading: isLoading, saving, error: errorState, selectPalette, selectCardVariant };
+  return {
+    theme,
+    loading: isLoading,
+    saving,
+    error: errorState,
+    selectPalette,
+    selectCardVariant,
+  };
 }
