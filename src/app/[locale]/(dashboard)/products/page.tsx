@@ -500,7 +500,7 @@ export default function ProductsPage() {
         <div className="flex items-center gap-2">
           {canDeleteProducts && someSelected && (
             <button
-              onClick={handleDeleteSelected}
+              onClick={() => void handleDeleteSelected()}
               disabled={deleting}
               className="inline-flex items-center gap-2 rounded-card bg-destructive px-4 py-2 text-sm font-semibold text-destructive-foreground transition hover:bg-destructive/90 disabled:opacity-50"
             >
