@@ -32,7 +32,7 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { FunnelIcon, GripVertical, Loader2, Undo2 } from "lucide-react";
+import { FunnelIcon, GripVertical, ImageIcon, LayoutGrid, List, Loader2, Undo2 } from "lucide-react";
 import api from "@/lib/api";
 import { useBranding } from "@/context/BrandingContext";
 import type { Product, PaginatedResponse } from "@/types";
@@ -51,6 +51,7 @@ import { Input } from "@/components/ui/input";
 import { FilterBar } from "@/components/filters/FilterBar";
 import { FilterDropdown } from "@/components/filters/FilterDropdown";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
+import { useDeferredNavigate } from "@/hooks/useDeferredNavigate";
 import { useHorizontalWheelScroll } from "@/hooks/useHorizontalWheelScroll";
 import { useFilters } from "@/hooks/useFilters";
 import { useConfirm } from "@/context/ConfirmDialogContext";
@@ -71,6 +72,20 @@ import {
 import { useQueryClient } from "@tanstack/react-query";
 
 type CategoryOption = { value: string; label: string; labelDisplay: ReactNode };
+
+const PRODUCTS_VIEW_MODE_KEY = "core_products_view_mode";
+type ViewMode = "list" | "grid";
+
+function getStoredViewMode(): ViewMode {
+  if (typeof window === "undefined") return "list";
+  const stored = window.localStorage.getItem(PRODUCTS_VIEW_MODE_KEY);
+  return stored === "grid" ? "grid" : "list";
+}
+
+function saveViewMode(mode: ViewMode) {
+  if (typeof window === "undefined") return;
+  window.localStorage.setItem(PRODUCTS_VIEW_MODE_KEY, mode);
+}
 
 async function fetchAllProductPublicIdsInCategory(
   categoryPublicId: string
@@ -99,6 +114,7 @@ async function fetchAllProductPublicIdsInCategory(
 
 export default function ProductsPage() {
   const router = useRouter();
+  const navigate = useDeferredNavigate();
   const locale = useLocale();
   const numClass = numberTextClass(locale);
   const tNav = useTranslations("nav");
@@ -124,6 +140,7 @@ export default function ProductsPage() {
   const debouncedPriceMax = useDebouncedValue(priceMaxInput);
   const { data: categoryTree = [] } = useCategoriesQuery();
   const [filtersOpen, setFiltersOpen] = useState(false);
+  const [viewMode, setViewMode] = useState<ViewMode>(() => getStoredViewMode());
   const { counts: navCounts } = useNavCounts();
   const [listCursor, setListCursor] = useState<string | null>(null);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -369,9 +386,10 @@ export default function ProductsPage() {
     }
   };
 
-  async function handleDeleteSelected() {
-    if (selectedIds.size === 0) return;
-    const deletedCount = selectedIds.size;
+  async function handleDeleteSelected(idsOverride?: string[]) {
+    const ids = idsOverride ?? Array.from(selectedIds);
+    if (ids.length === 0) return;
+    const deletedCount = ids.length;
     const ok = await confirm({
       title: tPages("confirmDialogTitleDeleteProducts", {
         count: deletedCount,
@@ -387,7 +405,6 @@ export default function ProductsPage() {
     });
     if (!ok) return;
     setDeleting(true);
-    const ids = Array.from(selectedIds);
     try {
       // Sequential: parallel deletes each touch trash/DB locks and can 500 (deadlock).
       for (const id of ids) {
@@ -406,6 +423,12 @@ export default function ProductsPage() {
     } finally {
       setDeleting(false);
     }
+  }
+
+  async function handleDeleteSingle(id: string) {
+    const idsToDelete =
+      selectedIds.size > 0 && selectedIds.has(id) ? Array.from(selectedIds) : [id];
+    await handleDeleteSelected(idsToDelete);
   }
 
   async function updateProduct(product: Product, payload: { is_active?: boolean }) {
@@ -436,6 +459,15 @@ export default function ProductsPage() {
 
   const allSelected = products.length > 0 && selectedIds.size === products.length;
   const someSelected = selectedIds.size > 0;
+
+  useEffect(() => {
+    if (!someSelected) return;
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setSelectedIds(new Set());
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [someSelected]);
 
   const pageProductsCount = products.length;
   const totalProductsCount = filtersActive
@@ -513,17 +545,55 @@ export default function ProductsPage() {
             );
           })}
         </div>
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          className="h-9 px-3"
-          aria-label="Toggle filters"
-          aria-expanded={filtersOpen}
-          onClick={() => setFiltersOpen((v) => !v)}
-        >
-          <FunnelIcon className="size-4" aria-hidden />
-        </Button>
+        <div className="flex items-center gap-2 shrink-0">
+          <div className="flex min-h-0 items-center gap-1 rounded-ui border border-border bg-muted/70 p-1 text-sm shadow-xs">
+            <button
+              type="button"
+              onClick={() => {
+                setViewMode("list");
+                saveViewMode("list");
+              }}
+              className={cn(
+                "rounded-ui px-3 py-1.5 font-medium transition",
+                viewMode === "list"
+                  ? "bg-foreground text-background"
+                  : "text-muted-foreground hover:bg-background/70 hover:text-foreground"
+              )}
+              aria-label="List view"
+              aria-pressed={viewMode === "list"}
+            >
+              <List className="h-4 w-4" />
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setViewMode("grid");
+                saveViewMode("grid");
+              }}
+              className={cn(
+                "rounded-ui px-3 py-1.5 font-medium transition",
+                viewMode === "grid"
+                  ? "bg-foreground text-background"
+                  : "text-muted-foreground hover:bg-background/70 hover:text-foreground"
+              )}
+              aria-label="Grid view"
+              aria-pressed={viewMode === "grid"}
+            >
+              <LayoutGrid className="h-4 w-4" />
+            </button>
+          </div>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="h-9 px-3"
+            aria-label="Toggle filters"
+            aria-expanded={filtersOpen}
+            onClick={() => setFiltersOpen((v) => !v)}
+          >
+            <FunnelIcon className="size-4" aria-hidden />
+          </Button>
+        </div>
       </div>
 
       {!isLoading ? (
@@ -620,88 +690,293 @@ export default function ProductsPage() {
         <>
           <div
             ref={setScrollContainer}
-            className="overflow-x-auto rounded-card border border-card-border bg-card"
+            className={cn(
+              "overflow-x-auto",
+              viewMode === "list"
+                ? "rounded-card border border-card-border bg-card"
+                : "bg-background"
+            )}
           >
-            <DndContext
-              sensors={sensors}
-              collisionDetection={closestCenter}
-              onDragEnd={handleDragEnd}
-            >
-              <table className="w-full text-left text-sm">
-                <thead>
-                  <tr className="border-b border-border bg-muted/40">
-                    {canReorder && (
-                      <th className="w-10 px-2 py-3" aria-hidden />
-                    )}
-                    <th className="w-10 px-4 py-3">
-                      {canDeleteProducts && (
-                        <input
-                          type="checkbox"
-                          checked={allSelected}
-                          onChange={toggleSelectAll}
-                          className="form-checkbox"
-                          aria-label={tPages("productsListSelectAllAria")}
-                        />
+            {viewMode === "list" ? (
+              <DndContext
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragEnd={handleDragEnd}
+              >
+                <table className="w-full text-left text-sm">
+                  <thead>
+                    <tr className="border-b border-border bg-muted/40">
+                      {canReorder && (
+                        <th className="w-10 px-2 py-3" aria-hidden />
                       )}
-                    </th>
-                    <th className="th">{tPages("productsListColProduct")}</th>
-                    <th className="th">{tPages("productsListColBrand")}</th>
-                    <th className="th">{tPages("productsListColCategory")}</th>
-                    <th className="th">{tPages("productsListColPrice")}</th>
-                    <th className="th">{tPages("productsListColStock")}</th>
-                    <th className="th">{tPages("productsListColPrepayment")}</th>
-                    <th className="th">{tPages("productsListColStatus")}</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border/60">
-                  {canReorder ? (
-                    <SortableContext
-                      items={sortableIds}
-                      strategy={verticalListSortingStrategy}
-                    >
-                      {products.map((product) => (
-                        <SortableProductRow
-                          key={product.public_id}
-                          product={product}
-                          canDeleteProducts={canDeleteProducts}
-                          selectedIds={selectedIds}
-                          onToggleSelect={toggleSelect}
-                          currencySymbol={currencySymbol}
-                          numClass={numClass}
-                          locale={locale}
-                          tPages={tPages}
-                          tCommon={tCommon}
-                          updatingId={updatingId}
-                          onStatusChange={handleStatusChange}
-                        />
-                      ))}
-                    </SortableContext>
-                  ) : (
-                    products.map((product) => (
-                      <ClickableTableRow
-                        key={product.public_id}
-                        href={`/products/${product.public_id}`}
-                        aria-label={product.name}
+                      <th className="w-10 px-4 py-3">
+                        {canDeleteProducts && (
+                          <input
+                            type="checkbox"
+                            checked={allSelected}
+                            onChange={toggleSelectAll}
+                            className="form-checkbox"
+                            aria-label={tPages("productsListSelectAllAria")}
+                          />
+                        )}
+                      </th>
+                      <th className="th">{tPages("productsListColProduct")}</th>
+                      <th className="th">{tPages("productsListColBrand")}</th>
+                      <th className="th">{tPages("productsListColCategory")}</th>
+                      <th className="th">{tPages("productsListColPrice")}</th>
+                      <th className="th">{tPages("productsListColStock")}</th>
+                      <th className="th">{tPages("productsListColPrepayment")}</th>
+                      <th className="th">{tPages("productsListColStatus")}</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-border/60">
+                    {canReorder ? (
+                      <SortableContext
+                        items={sortableIds}
+                        strategy={verticalListSortingStrategy}
                       >
-                        <ProductRowCells
-                          product={product}
-                          canDeleteProducts={canDeleteProducts}
-                          selectedIds={selectedIds}
-                          onToggleSelect={toggleSelect}
-                          currencySymbol={currencySymbol}
-                          numClass={numClass}
-                          locale={locale}
-                          tPages={tPages}
-                          tCommon={tCommon}
-                          updatingId={updatingId}
-                          onStatusChange={handleStatusChange}
-                        />
-                      </ClickableTableRow>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </DndContext>
+                        {products.map((product) => (
+                          <SortableProductRow
+                            key={product.public_id}
+                            product={product}
+                            canDeleteProducts={canDeleteProducts}
+                            selectedIds={selectedIds}
+                            onToggleSelect={toggleSelect}
+                            currencySymbol={currencySymbol}
+                            numClass={numClass}
+                            locale={locale}
+                            tPages={tPages}
+                            tCommon={tCommon}
+                            updatingId={updatingId}
+                            onStatusChange={handleStatusChange}
+                          />
+                        ))}
+                      </SortableContext>
+                    ) : (
+                      products.map((product) => (
+                        <ClickableTableRow
+                          key={product.public_id}
+                          href={`/products/${product.public_id}`}
+                          aria-label={product.name}
+                        >
+                          <ProductRowCells
+                            product={product}
+                            canDeleteProducts={canDeleteProducts}
+                            selectedIds={selectedIds}
+                            onToggleSelect={toggleSelect}
+                            currencySymbol={currencySymbol}
+                            numClass={numClass}
+                            locale={locale}
+                            tPages={tPages}
+                            tCommon={tCommon}
+                            updatingId={updatingId}
+                            onStatusChange={handleStatusChange}
+                          />
+                        </ClickableTableRow>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </DndContext>
+            ) : (
+              <>
+                {someSelected && (
+                  <div className="mb-2 flex items-center gap-3">
+                    <span className="text-sm text-muted-foreground">
+                      {selectedIds.size} selected
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedIds(new Set())}
+                      className="text-xs text-primary underline-offset-2 hover:underline"
+                    >
+                      Deselect all
+                    </button>
+                    {!allSelected && (
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setSelectedIds(new Set(products.map((p) => p.public_id)))
+                        }
+                        className="text-xs text-primary underline-offset-2 hover:underline"
+                      >
+                        {tPages("productsListSelectAllAria")}
+                      </button>
+                    )}
+                  </div>
+                )}
+                <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
+                {products.map((product) => {
+                  const firstImage = product.images?.[0]?.image ?? product.image_url ?? null;
+                  const isSelected = selectedIds.has(product.public_id);
+                  return (
+                    <div
+                      key={product.public_id}
+                      onClick={() => {
+                        if (someSelected) {
+                          toggleSelect(product.public_id);
+                        } else {
+                          navigate(`/products/${product.public_id}`);
+                        }
+                      }}
+                      className={cn(
+                        "group relative cursor-pointer overflow-hidden rounded-card border bg-card transition-all",
+                        isSelected
+                          ? "border-primary ring-2 ring-primary/30"
+                          : "border-border"
+                      )}
+                    >
+                      {canDeleteProducts && (
+                        <div
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toggleSelect(product.public_id);
+                          }}
+                          className={cn(
+                            "absolute left-2 top-2 z-10 flex h-5 w-5 items-center justify-center rounded transition-opacity",
+                            isSelected || someSelected
+                              ? "opacity-100"
+                              : "opacity-0 group-hover:opacity-100 md:opacity-0 max-md:opacity-100"
+                          )}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={isSelected}
+                            onChange={() => toggleSelect(product.public_id)}
+                            onClick={(e) => e.stopPropagation()}
+                            className="form-checkbox h-4 w-4 cursor-pointer"
+                            aria-label={tPages("productsListSelectRowAria", {
+                              name: product.name,
+                            })}
+                          />
+                        </div>
+                      )}
+
+                      <div className="aspect-square w-full overflow-hidden bg-muted">
+                        {firstImage ? (
+                          <img
+                            src={firstImage}
+                            alt={product.name}
+                            className="h-full w-full object-cover"
+                          />
+                        ) : (
+                          <div className="flex h-full w-full items-center justify-center text-muted-foreground">
+                            <ImageIcon className="h-8 w-8 opacity-30" />
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="space-y-2 p-3">
+                        <p className="truncate text-sm font-semibold text-foreground">{product.name}</p>
+
+                        {product.brand && (
+                          <p className="truncate text-xs text-muted-foreground">{product.brand}</p>
+                        )}
+
+                        {product.category_name && (
+                          <p className="truncate text-xs text-muted-foreground">{product.category_name}</p>
+                        )}
+
+                        <div className="flex items-baseline gap-2">
+                          <p className={cn("text-sm font-medium tabular-nums text-foreground", numClass)}>
+                            {currencySymbol}
+                            {Number(product.price).toLocaleString()}
+                          </p>
+                          {product.original_price && (
+                            <p className="text-xs tabular-nums text-muted-foreground line-through">
+                              {currencySymbol}
+                              {Number(product.original_price).toLocaleString()}
+                            </p>
+                          )}
+                        </div>
+
+                        <div className="flex flex-col gap-0.5">
+                          {product.variant_count && product.variant_count > 0 ? (
+                            <>
+                              <span
+                                className={cn(
+                                  "text-xs font-medium tabular-nums",
+                                  numClass,
+                                  (product.total_stock ?? 0) === 0 ? "text-destructive" : "text-foreground"
+                                )}
+                              >
+                                {product.total_stock ?? product.available_quantity ?? 0} in stock
+                              </span>
+                              <ClickableText
+                                href={`/variants?product_public_id=${encodeURIComponent(product.public_id)}`}
+                                className="text-xs underline-offset-2"
+                                title={tPages("productsListVariantStockTitle")}
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                {tPages("productsListVariantsManage", {
+                                  count: toLocaleDigits(String(product.variant_count), locale),
+                                })}
+                              </ClickableText>
+                            </>
+                          ) : product.stock_tracking ? (
+                            <span
+                              className={cn(
+                                "text-xs font-medium tabular-nums",
+                                numClass,
+                                (product.total_stock ?? product.available_quantity ?? 0) === 0
+                                  ? "text-destructive"
+                                  : "text-foreground"
+                              )}
+                            >
+                              {product.total_stock ?? product.available_quantity ?? 0} in stock
+                            </span>
+                          ) : (
+                            <span className="text-xs text-muted-foreground">No stock tracking</span>
+                          )}
+                        </div>
+
+                        <p className="text-xs text-muted-foreground">
+                          {(product.prepayment_type ?? "none") === "delivery_only"
+                            ? tPages("productPrepaymentTypeDeliveryOnly")
+                            : (product.prepayment_type ?? "none") === "full"
+                              ? tPages("productPrepaymentTypeFull")
+                              : tPages("productPrepaymentTypeNone")}
+                        </p>
+
+                        <div onClick={(e) => e.stopPropagation()}>
+                          <Combobox
+                            modal={false}
+                            value={product.is_active ? "active" : "inactive"}
+                            onValueChange={(value) => {
+                              if (!value) return;
+                              handleStatusChange(product, value === "active");
+                            }}
+                            disabled={updatingId === product.public_id}
+                          >
+                            <ComboboxInput
+                              placeholder={tPages("productsListStatusPlaceholder")}
+                              showClear={false}
+                              className="w-full"
+                              inputClassName={`cursor-pointer caret-transparent text-xs font-semibold capitalize ${
+                                product.is_active
+                                  ? "bg-emerald-500/10 text-emerald-400"
+                                  : "bg-muted text-muted-foreground"
+                              }`}
+                            />
+                            <ComboboxContent>
+                              <ComboboxList>
+                                <ComboboxItem value="active">
+                                  <span className="text-xs font-medium capitalize">{tCommon("active")}</span>
+                                </ComboboxItem>
+                                <ComboboxItem value="inactive">
+                                  <span className="text-xs font-medium capitalize">{tCommon("inactive")}</span>
+                                </ComboboxItem>
+                              </ComboboxList>
+                            </ComboboxContent>
+                          </Combobox>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+                </div>
+              </>
+            )}
           </div>
 
           <div className="flex items-center justify-between gap-2">
