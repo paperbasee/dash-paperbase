@@ -440,6 +440,14 @@ export default function OrdersPage() {
         "dark:[&_[data-slot=select]]:text-violet-200",
       ].join(" ");
     }
+    if (f === "zone_changed") {
+      return [
+        "[&_[data-slot=select]]:bg-teal-50",
+        "[&_[data-slot=select]]:text-teal-950",
+        "dark:[&_[data-slot=select]]:bg-teal-500/20",
+        "dark:[&_[data-slot=select]]:text-teal-200",
+      ].join(" ");
+    }
     return "";
   }
 
@@ -452,6 +460,7 @@ export default function OrdersPage() {
     if (f === "call_later") return { ...base, color: "#60a5fa" }; // blue-400
     if (f === "busy") return { ...base, color: "#c4b5fd" }; // violet-300
     if (f === "no_response") return { ...base, color: "#cbd5e1" }; // slate-300
+    if (f === "zone_changed") return { ...base, color: "#5eead4" }; // teal-300
     return base;
   }
 
