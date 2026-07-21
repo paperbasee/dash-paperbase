@@ -250,7 +250,11 @@ export default function DashboardBarChart({
                   )
                 }
                 labelFormatter={(label) =>
-                  formatCategoryTick(label === undefined || label === null ? "" : label)
+                  formatCategoryTick(
+                    typeof label === "string" || typeof label === "number"
+                      ? label
+                      : String(label ?? "")
+                  )
                 }
               />
               {metrics.map((m) => {
