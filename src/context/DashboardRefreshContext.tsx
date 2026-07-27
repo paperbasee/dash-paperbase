@@ -10,6 +10,8 @@ import {
   type ReactNode,
 } from "react";
 import { useQueryClient } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
+import { notify } from "@/notifications";
 
 export interface DashboardRefreshContextValue {
   lastRefreshedAt: Date | null;
@@ -31,6 +33,7 @@ export function DashboardRefreshProvider({
   children,
 }: DashboardRefreshProviderProps) {
   const queryClient = useQueryClient();
+  const t = useTranslations("pages");
   const [lastRefreshedAt, setLastRefreshedAt] = useState<Date | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
@@ -55,10 +58,15 @@ export function DashboardRefreshProvider({
         queryClient.invalidateQueries({ queryKey: ["products", "list"] }),
       ]);
       setLastRefreshedAt(new Date());
+    } catch (err) {
+      notify.error(err, {
+        title: t("toastTitleDashboardRefreshFailed"),
+        fallbackMessage: t("toastDescDashboardRefreshFailed"),
+      });
     } finally {
       setIsRefreshing(false);
     }
-  }, [queryClient]);
+  }, [queryClient, t]);
 
   const value: DashboardRefreshContextValue = {
     lastRefreshedAt,

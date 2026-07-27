@@ -864,6 +864,8 @@
 
     "toastTitleOrdersFailedToLoad": "Orders failed to load",
     "toastDescOrdersFailedToLoad": "The order list could not be fetched. Check your connection and refresh.",
+    "toastTitleDashboardRefreshFailed": "Dashboard refresh failed",
+    "toastDescDashboardRefreshFailed": "Some dashboard data couldn't be refreshed. Check your connection and try again.",
     "toastTitleCsvExportQueued": "CSV export queued",
     "toastDescCsvExportQueued": "Your export is building in the background. The download will be ready shortly.",
     "toastTitleExportCouldntStart": "Export couldn't start",

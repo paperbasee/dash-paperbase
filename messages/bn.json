@@ -864,6 +864,8 @@
 
     "toastTitleOrdersFailedToLoad": "অর্ডার লোড হয়নি",
     "toastDescOrdersFailedToLoad": "অর্ডার তালিকা আনা যায়নি। ইন্টারনেট সংযোগ পরীক্ষা করে রিফ্রেশ করুন।",
+    "toastTitleDashboardRefreshFailed": "ড্যাশবোর্ড রিফ্রেশ ব্যর্থ হয়েছে",
+    "toastDescDashboardRefreshFailed": "কিছু ড্যাশবোর্ড ডেটা রিফ্রেশ করা যায়নি। আপনার সংযোগ পরীক্ষা করে আবার চেষ্টা করুন।",
     "toastTitleCsvExportQueued": "CSV এক্সপোর্ট কিউ হয়েছে",
     "toastDescCsvExportQueued": "আপনার এক্সপোর্ট ব্যাকগ্রাউন্ডে তৈরি হচ্ছে। শিগগিরই ডাউনলোড প্রস্তুত হবে।",
     "toastTitleExportCouldntStart": "এক্সপোর্ট শুরু হয়নি",
