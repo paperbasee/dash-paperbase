@@ -1195,7 +1195,7 @@ export default function OrdersPage() {
                       type="checkbox"
                       checked={allSelected}
                       onChange={toggleSelectAll}
-                      className="form-checkbox"
+                      className={cn("form-checkbox", "h-4 w-4 md:h-3.5 md:w-3.5")}
                       aria-label={tPages("ordersListSelectAllAria")}
                     />
                   </th>
@@ -1227,7 +1227,7 @@ export default function OrdersPage() {
                         aria-label={String(order.order_number)}
                         className={cn(
                           isNew &&
-                            "rounded-none border-l-[3px] border-l-[#378ADD] bg-[#EEF5FF] transition-colors duration-400 dark:border-l-[#85B7EB] dark:bg-[#0C447C]/20"
+                            "rounded-none bg-[#EEF5FF] transition-colors duration-400 dark:bg-[#0C447C]/20"
                         )}
                       >
                         <td className="w-10 px-4 py-3">
@@ -1236,7 +1236,7 @@ export default function OrdersPage() {
                             checked={globalSelectActive || selectedIds.has(order.public_id)}
                             disabled={globalSelectActive}
                             onChange={() => toggleSelect(order.public_id)}
-                            className="form-checkbox"
+                            className={cn("form-checkbox", "h-4 w-4 md:h-3.5 md:w-3.5")}
                             aria-label={tPages("ordersListSelectOrderAria", {
                               orderNumber: order.order_number,
                             })}

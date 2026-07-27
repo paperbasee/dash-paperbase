@@ -715,7 +715,7 @@ export default function ProductsPage() {
                             type="checkbox"
                             checked={allSelected}
                             onChange={toggleSelectAll}
-                            className="form-checkbox"
+                            className={cn("form-checkbox", "h-4 w-4 md:h-3.5 md:w-3.5")}
                             aria-label={tPages("productsListSelectAllAria")}
                           />
                         )}
@@ -1113,7 +1113,7 @@ function ProductRowCells({
             type="checkbox"
             checked={selectedIds.has(product.public_id)}
             onChange={() => onToggleSelect(product.public_id)}
-            className="form-checkbox"
+            className={cn("form-checkbox", "h-4 w-4 md:h-3.5 md:w-3.5")}
             aria-label={tPagesSafe("productsListSelectRowAria", {
               name: product.name,
             })}
