@@ -6,21 +6,17 @@ import { useLocale, useTranslations } from "next-intl";
 import DateRangePresetPicker from "./DateRangePresetPicker";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
-import type { AnalyticsBucket } from "@/lib/basicAnalyticsService";
+import { COMMON_PRESET_DEFS, resolvePreset } from "@/lib/date-range-presets";
 import { dateToYmd, startOfDay, ymdToDate } from "@/lib/date-range-ui";
 import { digitsInNumberFont } from "@/lib/number-font";
 import { cn } from "@/lib/utils";
 import {
   dateRangeInputSchema,
+  MAX_LOOKBACK_DAYS,
   normalizeDateRange,
   type DateRangeValue,
   type PresetKey,
 } from "@/lib/validation";
-import {
-  addCalendarDaysYmd,
-  startOfMonthYmdInBD,
-  todayYmdInBD,
-} from "@/utils/time";
 
 const Calendar = dynamic(
   () => import("./ui/calendar").then((mod) => mod.Calendar),
@@ -52,7 +48,7 @@ export default function DateRangeFilter({
   const todayDate = useMemo(() => startOfDay(today), [today]);
   const minDate = useMemo(() => {
     const d = new Date(todayDate);
-    d.setDate(d.getDate() - 90);
+    d.setDate(d.getDate() - MAX_LOOKBACK_DAYS);
     return d;
   }, [todayDate]);
   const selectedStart = ymdToDate(value.startDate);
@@ -63,36 +59,13 @@ export default function DateRangeFilter({
   const endPickerRef = useRef<HTMLDivElement | null>(null);
 
   const setPreset = (preset: PresetKey) => {
-    const endStr = todayYmdInBD(today);
-    let startStr = endStr;
-    let bucket: AnalyticsBucket = "day";
-
-    if (preset === "last7") {
-      startStr = addCalendarDaysYmd(endStr, -6);
-      bucket = "day";
-    } else if (preset === "last30") {
-      startStr = addCalendarDaysYmd(endStr, -29);
-      bucket = "day";
-    } else if (preset === "thisMonth") {
-      startStr = startOfMonthYmdInBD(today);
-      bucket = "day";
-    } else if (preset === "today") {
-      startStr = endStr;
-      bucket = "hour";
-    } else {
+    const resolved = resolvePreset(preset, today);
+    if (!resolved) {
       // custom – keep existing dates/bucket
       onChange({ ...value, preset });
       return;
     }
-
-    const base: DateRangeValue = {
-      startDate: startStr,
-      endDate: endStr,
-      bucket,
-      preset,
-    };
-
-    onChange(normalizeDateRange(base, today));
+    onChange(normalizeDateRange(resolved, today));
   };
 
   const handleDateInput = (field: "startDate" | "endDate", val: string) => {
@@ -137,13 +110,6 @@ export default function DateRangeFilter({
 
   const isCompact = layout === "compact";
 
-  const PRESET_OPTIONS: { key: PresetKey; labelKey: "filtersToday" | "filtersLast7Days" | "filtersLast30Days" | "filtersThisMonth" }[] = [
-    { key: "today", labelKey: "filtersToday" },
-    { key: "last7", labelKey: "filtersLast7Days" },
-    { key: "last30", labelKey: "filtersLast30Days" },
-    { key: "thisMonth", labelKey: "filtersThisMonth" },
-  ];
-
   return (
     <div
       className={cn(
@@ -164,7 +130,7 @@ export default function DateRangeFilter({
         ) : (
           <>
           <div className="grid grid-cols-2 gap-2 md:grid-cols-4 lg:flex lg:flex-wrap">
-            {PRESET_OPTIONS.map((opt) => (
+            {COMMON_PRESET_DEFS.map((opt) => (
               <Button
                 key={opt.key}
                 size="sm"

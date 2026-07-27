@@ -7,7 +7,27 @@ import {
 } from "@/utils/time";
 import { defaultValidationMessages, type ValidationMessages } from "./messages";
 
-export type PresetKey = "today" | "last7" | "last30" | "thisMonth" | "custom";
+export const PRESET_KEYS = [
+  "last7",
+  "last30",
+  "custom",
+  "last5m",
+  "last10m",
+  "last15m",
+  "last30m",
+  "last1h",
+  "last3h",
+  "last6h",
+  "last12h",
+  "last24h",
+  "last2d",
+  "last90d",
+] as const;
+
+export type PresetKey = (typeof PRESET_KEYS)[number];
+
+/** Furthest back an absolute/day-granularity range may reach. */
+export const MAX_LOOKBACK_DAYS = 90;
 
 export interface DateRangeValue {
   startDate: string;
@@ -20,14 +40,20 @@ export function buildDateRangeInputSchema(messages: ValidationMessages = default
   return z.object({
     startDate: z.string().trim().min(1, messages.startDateRequired),
     endDate: z.string().trim().min(1, messages.endDateRequired),
-    bucket: z.enum(["hour", "day", "week", "month"]),
-    preset: z.enum(["today", "last7", "last30", "thisMonth", "custom"]),
+    bucket: z.enum(["minute", "hour", "day", "week", "month"]),
+    preset: z.enum(PRESET_KEYS),
   });
 }
 
 export const dateRangeInputSchema = buildDateRangeInputSchema();
 
 export function normalizeDateRange(raw: DateRangeValue, anchorDate: Date): DateRangeValue {
+  // Sub-day presets carry full ISO instants rather than YYYY-MM-DD strings;
+  // they're always freshly computed from "now" so there's nothing to clamp.
+  if (!isValidYmd(raw.startDate) || !isValidYmd(raw.endDate)) {
+    return raw;
+  }
+
   const todayStr = todayYmdInBD(anchorDate);
 
   let endStr = isValidYmd(raw.endDate)
@@ -39,7 +65,7 @@ export function normalizeDateRange(raw: DateRangeValue, anchorDate: Date): DateR
     endStr = todayStr;
   }
 
-  const minStartStr = addCalendarDaysYmd(endStr, -90);
+  const minStartStr = addCalendarDaysYmd(endStr, -MAX_LOOKBACK_DAYS);
   let startStr = isValidYmd(raw.startDate) ? raw.startDate.trim() : endStr;
   if (startStr < minStartStr) {
     startStr = minStartStr;
@@ -51,7 +77,7 @@ export function normalizeDateRange(raw: DateRangeValue, anchorDate: Date): DateR
   let bucket: AnalyticsBucket = raw.bucket;
   if (startStr === endStr) {
     bucket = "hour";
-  } else if (bucket === "hour") {
+  } else if (bucket === "hour" || bucket === "minute") {
     bucket = "day";
   }
 
@@ -77,6 +103,11 @@ export function shiftDateRange(
   direction: -1 | 1,
   anchorDate: Date
 ): DateRangeValue {
+  // Sub-day (ISO instant) ranges aren't shiftable — see canShiftDateRangeForward.
+  if (!isValidYmd(value.startDate) || !isValidYmd(value.endDate)) {
+    return value;
+  }
+
   const todayStr = todayYmdInBD(anchorDate);
   const span = inclusiveDayCount(value.startDate, value.endDate);
   const delta = direction * span;
@@ -88,7 +119,7 @@ export function shiftDateRange(
     startStr = addCalendarDaysYmd(endStr, -(span - 1));
   }
 
-  const minStartStr = addCalendarDaysYmd(todayStr, -90);
+  const minStartStr = addCalendarDaysYmd(todayStr, -MAX_LOOKBACK_DAYS);
   if (startStr < minStartStr) {
     startStr = minStartStr;
     endStr = addCalendarDaysYmd(startStr, span - 1);
@@ -112,5 +143,6 @@ export function canShiftDateRangeForward(
   value: DateRangeValue,
   anchorDate: Date
 ): boolean {
+  if (!isValidYmd(value.endDate)) return false;
   return value.endDate < todayYmdInBD(anchorDate);
 }

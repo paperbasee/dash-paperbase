@@ -12,10 +12,15 @@ import { useDashboardAnalyticsQuery } from "@/hooks/useDashboardAnalyticsQuery";
 import { useNavCounts } from "@/hooks/useNavCounts";
 import { useBrandingQuery } from "@/hooks/useBrandingQuery";
 import { useDashboardRefresh } from "@/context/DashboardRefreshContext";
+import { resolvePreset } from "@/lib/date-range-presets";
 import { computeTrend } from "@/lib/dashboard/compute-trend";
+import {
+  loadDashboardRange,
+  saveDashboardRange,
+} from "@/lib/dashboard/dashboard-range-storage";
 import { getPreviousDateRange } from "@/lib/dashboard/previous-date-range";
 import { toLocaleDigits } from "@/lib/locale-digits";
-import { todayYmdInBD } from "@/utils/time";
+import { normalizeDateRange } from "@/lib/validation";
 
 function formatLastUpdated(lastRefreshedAt: Date | null, now: number): string | null {
   if (!lastRefreshedAt) return null;
@@ -35,15 +40,27 @@ export default function DashboardPage() {
   const today = useMemo(() => new Date(), []);
   const [now, setNow] = useState(() => Date.now());
 
-  const [range, setRange] = useState<DateRangeValue>(() => {
-    const iso = todayYmdInBD(today);
-    return {
-      startDate: iso,
-      endDate: iso,
-      bucket: "hour",
-      preset: "today",
-    };
-  });
+  const [range, setRange] = useState<DateRangeValue>(() => resolvePreset("last24h", today)!);
+
+  // Restore the last-picked range after mount (client-only; avoids an SSR/
+  // hydration mismatch from reading localStorage during the initial render).
+  useEffect(() => {
+    const stored = loadDashboardRange();
+    if (!stored) return;
+    if (stored.preset === "custom") {
+      setRange(normalizeDateRange(stored, today));
+      return;
+    }
+    const resolved = resolvePreset(stored.preset, today);
+    if (resolved) setRange(normalizeDateRange(resolved, today));
+    // Restore once on mount; `today` is a stable ref from useMemo(() => new Date(), []).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const handleRangeChange = (next: DateRangeValue) => {
+    setRange(next);
+    saveDashboardRange(next);
+  };
 
   const previousRange = useMemo(() => getPreviousDateRange(range), [range]);
 
@@ -108,7 +125,7 @@ export default function DashboardPage() {
         accountName={accountName}
         lastUpdatedLabel={lastUpdatedLabel}
         range={range}
-        onRangeChange={setRange}
+        onRangeChange={handleRangeChange}
       />
 
       {(error || analyticsNetworkError) && (

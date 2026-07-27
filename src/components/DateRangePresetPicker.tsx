@@ -9,34 +9,24 @@ import {
   type CSSProperties,
   type ReactNode,
 } from "react";
-import {
-  Calendar as CalendarIcon,
-  ChevronsLeft,
-  ChevronsRight,
-  Search,
-} from "lucide-react";
+import { Calendar as CalendarIcon, Search } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import DatePickerPopover from "@/components/DatePickerPopover";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import type { AnalyticsBucket } from "@/lib/basicAnalyticsService";
+import { PRESET_DEFS, resolvePreset } from "@/lib/date-range-presets";
 import { toLocaleDigits } from "@/lib/locale-digits";
 import { dateToYmd, startOfDay, ymdToDate } from "@/lib/date-range-ui";
 import { digitsInNumberFont } from "@/lib/number-font";
 import { cn } from "@/lib/utils";
 import {
-  canShiftDateRangeForward,
   dateRangeInputSchema,
+  MAX_LOOKBACK_DAYS,
   normalizeDateRange,
-  shiftDateRange,
   type DateRangeValue,
   type PresetKey,
 } from "@/lib/validation";
-import {
-  addCalendarDaysYmd,
-  startOfMonthYmdInBD,
-  todayYmdInBD,
-} from "@/utils/time";
+import { isValidYmd, todayYmdInBD } from "@/utils/time";
 
 const PANEL_MAX_WIDTH_PX = 576;
 
@@ -49,16 +39,6 @@ function getContentBounds(el: HTMLElement) {
   }
   return { left: 16, right: window.innerWidth - 16, width: window.innerWidth - 32 };
 }
-
-const PRESET_OPTIONS: {
-  key: PresetKey;
-  labelKey: "filtersToday" | "filtersLast7Days" | "filtersLast30Days" | "filtersThisMonth";
-}[] = [
-  { key: "today", labelKey: "filtersToday" },
-  { key: "last7", labelKey: "filtersLast7Days" },
-  { key: "last30", labelKey: "filtersLast30Days" },
-  { key: "thisMonth", labelKey: "filtersThisMonth" },
-];
 
 interface DateRangePresetPickerProps {
   value: DateRangeValue;
@@ -74,7 +54,7 @@ function presetLabel(
   t: ReturnType<typeof useTranslations<"pages">>,
   locale: string
 ): ReactNode {
-  const match = PRESET_OPTIONS.find((o) => o.key === value.preset);
+  const match = PRESET_DEFS.find((o) => o.key === value.preset);
   if (match) {
     return digitsInNumberFont(t(match.labelKey), locale);
   }
@@ -105,30 +85,34 @@ export default function DateRangePresetPicker({
   const todayDate = useMemo(() => startOfDay(anchorDate), [anchorDate]);
   const minDate = useMemo(() => {
     const d = new Date(todayDate);
-    d.setDate(d.getDate() - 90);
+    d.setDate(d.getDate() - MAX_LOOKBACK_DAYS);
     return d;
   }, [todayDate]);
   const selectedStart = ymdToDate(draft.startDate);
   const selectedEnd = ymdToDate(draft.endDate);
 
   const label = useMemo(() => presetLabel(value, t, locale), [value, t, locale]);
-  const canShiftForward = canShiftDateRangeForward(value, anchorDate);
 
   const filteredPresets = useMemo(() => {
     const q = quickSearch.trim().toLowerCase();
-    if (!q) return PRESET_OPTIONS;
-    return PRESET_OPTIONS.filter((opt) =>
+    if (!q) return PRESET_DEFS;
+    return PRESET_DEFS.filter((opt) =>
       t(opt.labelKey).toLowerCase().includes(q)
     );
   }, [quickSearch, t]);
 
   useEffect(() => {
     if (open) {
-      setDraft({ startDate: value.startDate, endDate: value.endDate });
+      const hasYmdRange = isValidYmd(value.startDate) && isValidYmd(value.endDate);
+      setDraft(
+        hasYmdRange
+          ? { startDate: value.startDate, endDate: value.endDate }
+          : { startDate: todayYmdInBD(anchorDate), endDate: todayYmdInBD(anchorDate) }
+      );
       setQuickSearch("");
       setActiveCalendarField(null);
     }
-  }, [open, value.startDate, value.endDate]);
+  }, [open, value.startDate, value.endDate, anchorDate]);
 
   useEffect(() => {
     onPanelOpenChange?.(open);
@@ -192,30 +176,13 @@ export default function DateRangePresetPicker({
   };
 
   const setPreset = (preset: PresetKey) => {
-    const endStr = todayYmdInBD(anchorDate);
-    let startStr = endStr;
-    let bucket: AnalyticsBucket = "day";
-
-    if (preset === "last7") {
-      startStr = addCalendarDaysYmd(endStr, -6);
-    } else if (preset === "last30") {
-      startStr = addCalendarDaysYmd(endStr, -29);
-    } else if (preset === "thisMonth") {
-      startStr = startOfMonthYmdInBD(anchorDate);
-    } else if (preset === "today") {
-      startStr = endStr;
-      bucket = "hour";
-    } else {
+    const resolved = resolvePreset(preset, anchorDate);
+    if (!resolved) {
       onChange({ ...value, preset });
+      setOpen(false);
       return;
     }
-
-    onChange(
-      normalizeDateRange(
-        { startDate: startStr, endDate: endStr, bucket, preset },
-        anchorDate
-      )
-    );
+    onChange(normalizeDateRange(resolved, anchorDate));
     setOpen(false);
   };
 
@@ -293,15 +260,6 @@ export default function DateRangePresetPicker({
       >
         <button
           type="button"
-          className={cn(barBtnClass, "px-2")}
-          aria-label={t("filtersDateRangePrevious")}
-          onClick={() => onChange(shiftDateRange(value, -1, anchorDate))}
-        >
-          <ChevronsLeft className="size-4" aria-hidden />
-        </button>
-        <div className="w-px self-stretch bg-border" aria-hidden />
-        <button
-          type="button"
           className={cn(
             barBtnClass,
             "min-w-0 flex-1 px-3 font-medium text-foreground",
@@ -312,16 +270,6 @@ export default function DateRangePresetPicker({
           onClick={() => setOpen((v) => !v)}
         >
           <span className="truncate">{label}</span>
-        </button>
-        <div className="w-px self-stretch bg-border" aria-hidden />
-        <button
-          type="button"
-          className={cn(barBtnClass, "px-2")}
-          aria-label={t("filtersDateRangeNext")}
-          disabled={!canShiftForward}
-          onClick={() => onChange(shiftDateRange(value, 1, anchorDate))}
-        >
-          <ChevronsRight className="size-4" aria-hidden />
         </button>
       </div>
 
@@ -350,7 +298,10 @@ export default function DateRangePresetPicker({
                 {dateField("startDate", "filtersDateFieldFrom")}
                 {dateField("endDate", "filtersDateFieldTo")}
               </div>
-              <Button type="button" size="sm" className="mt-4 w-full sm:w-auto" onClick={applyDraft}>
+              <p className="mt-3 text-xs text-muted-foreground">
+                {t("filtersAbsoluteRangeNote")}
+              </p>
+              <Button type="button" size="sm" className="mt-2 w-full" onClick={applyDraft}>
                 {t("filtersApplyTimeRange")}
               </Button>
             </section>
