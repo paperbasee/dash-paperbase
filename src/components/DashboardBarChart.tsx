@@ -86,9 +86,23 @@ export default function DashboardBarChart({
   const formatCountTick = (v: string | number) =>
     toLocaleDigits(String(v), locale);
 
-  /** X-axis uses `label` (dates or ISO hour starts). */
+  /** X-axis uses `label` (dates or ISO hour/minute starts). */
   const formatCategoryTick = (v: string | number) => {
     const s = String(v);
+    if (bucket === "minute") {
+      try {
+        const d = new Date(s);
+        if (Number.isNaN(d.getTime())) return formatCountTick(v);
+        const formatted = d.toLocaleTimeString(locale, {
+          hour: "numeric",
+          minute: "2-digit",
+          second: "2-digit",
+        });
+        return toLocaleDigits(formatted, locale);
+      } catch {
+        return formatCountTick(v);
+      }
+    }
     if (bucket === "hour") {
       try {
         const d = new Date(s);

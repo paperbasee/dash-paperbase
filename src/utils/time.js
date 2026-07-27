@@ -93,6 +93,35 @@ export function startOfMonthYmdInBD(anchor = new Date()) {
   return `${y}-${m}-01`;
 }
 
+const WEEKDAY_INDEX = { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 };
+
+/**
+ * Start of the week (Sunday, Asia/Dhaka) containing `anchor`, as `YYYY-MM-DD`.
+ * @param {Date} [anchor]
+ */
+export function startOfWeekYmdInBD(anchor = new Date()) {
+  const todayStr = todayYmdInBD(anchor);
+  const weekday = new Intl.DateTimeFormat("en-US", {
+    timeZone: BD,
+    weekday: "short",
+  }).format(anchor);
+  const offset = WEEKDAY_INDEX[weekday] ?? 0;
+  return addCalendarDaysYmd(todayStr, -offset);
+}
+
+/**
+ * First day of the year (Asia/Dhaka) containing `anchor`, as `YYYY-MM-DD`.
+ * @param {Date} [anchor]
+ */
+export function startOfYearYmdInBD(anchor = new Date()) {
+  const parts = new Intl.DateTimeFormat("en-GB", {
+    timeZone: BD,
+    year: "numeric",
+  }).formatToParts(anchor);
+  const y = parts.find((x) => x.type === "year")?.value;
+  return `${y}-01-01`;
+}
+
 /**
  * Parse `DD-MM-YYYY HH:mm` as Asia/Dhaka wall time and return UTC ISO string.
  * Uses explicit `+06:00` (Bangladesh has no DST).

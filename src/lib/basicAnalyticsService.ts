@@ -1,6 +1,6 @@
 import api from "@/lib/api";
 
-export type AnalyticsBucket = "hour" | "day" | "week" | "month";
+export type AnalyticsBucket = "minute" | "hour" | "day" | "week" | "month";
 
 export interface DashboardAnalyticsSummary {
   totalOrders: number;
