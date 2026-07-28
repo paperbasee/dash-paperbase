@@ -51,6 +51,14 @@ export const PRESET_DEFS: PresetDef[] = [
   { key: "last12h", labelKey: "filtersLast12Hours", resolve: (now) => lastHours(now, 12, "last12h") },
   { key: "last24h", labelKey: "filtersLast24Hours", resolve: (now) => lastHours(now, 24, "last24h") },
   {
+    key: "today",
+    labelKey: "filtersToday",
+    resolve: (now) => {
+      const d = todayYmdInBD(now);
+      return dayRange(d, d, "hour", "today");
+    },
+  },
+  {
     key: "last2d",
     labelKey: "filtersLast2Days",
     resolve: (now) => {

@@ -35,6 +35,7 @@ describe("resolvePreset — relative sub-day (ISO instant) ranges", () => {
 
 describe("resolvePreset — calendar day-precision ranges", () => {
   it.each([
+    ["today", "2026-07-21", "2026-07-21", "hour"],
     ["last2d", "2026-07-20", "2026-07-21", "day"],
     ["last7", "2026-07-15", "2026-07-21", "day"],
     ["last30", "2026-06-22", "2026-07-21", "day"],

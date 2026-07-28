@@ -20,6 +20,7 @@ export const PRESET_KEYS = [
   "last6h",
   "last12h",
   "last24h",
+  "today",
   "last2d",
   "last90d",
 ] as const;
