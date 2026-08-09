@@ -15,6 +15,10 @@ export type StoreSettingsCurrent = {
   public_api_enabled?: boolean;
   storefront_url?: string | null;
   revalidate_secret?: string | null;
+  autopilot_enabled?: boolean;
+  autopilot_min_success_ratio?: number;
+  autopilot_min_total_parcels?: number;
+  autopilot_max_order_value?: string | number;
 };
 
 export async function fetchStoreSettingsCurrent(): Promise<StoreSettingsCurrent> {

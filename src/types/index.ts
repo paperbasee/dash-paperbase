@@ -120,6 +120,7 @@ export interface Order {
   courier_consignment_id?: string;
   sent_to_courier?: boolean;
   courier_dispatch_pending?: boolean;
+  dispatched_by_autopilot?: boolean;
   customer_confirmation_sent_at?: string | null;
   delivery_status:
     | "not_dispatched"

@@ -17,6 +17,7 @@ import {
   type CustomerFormVariant,
 } from "@/hooks/useCheckoutSettingsQuery";
 import { checkoutSettingsQueryKey } from "@/lib/query-keys";
+import AutopilotSettingsPanel from "./AutopilotSettingsPanel";
 
 type SettingsMessage = { type: "success" | "error"; text: string } | null;
 
@@ -187,6 +188,8 @@ export default function CheckoutSettingsSection({
               {saving && <Loader2 className="size-4 animate-spin" />}
               Save changes
             </Button>
+
+            <AutopilotSettingsPanel />
           </div>
         </SettingsSectionBody>
       ) : null}

@@ -17,7 +17,7 @@ import { toLocaleDigits } from "@/lib/locale-digits";
 import { cursorFromLink } from "@/lib/cursor-from-link";
 import { cn } from "@/lib/utils";
 import { digitsInNumberFont, numberTextClass } from "@/lib/number-font";
-import { Download, Loader2, FunnelIcon, Truck, Undo2 } from "lucide-react";
+import { Download, Loader2, FunnelIcon, RefreshCcw, Truck, Undo2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ClickableTableRow } from "@/components/ui/clickable-table-row";
 import { Input } from "@/components/ui/input";
@@ -59,6 +59,7 @@ import { useQueryClient } from "@tanstack/react-query";
 
 import { OrderPreviewTriggerButton } from "@/components/orders/order-preview";
 import { FraudCheckButton } from "./_components/FraudCheckButton";
+import { AutopilotStatusPill } from "./_components/AutopilotStatusPill";
 import type { FraudCheckApiOk, FraudCheckState } from "./_components/types";
 import { useFeatures } from "@/hooks/useFeatures";
 import { useAuth } from "@/context/AuthContext";
@@ -243,6 +244,7 @@ export default function OrdersPage() {
   const [pendingCourierDispatchIds, setPendingCourierDispatchIds] = useState<Set<string>>(
     new Set()
   );
+  const [retryingCourierId, setRetryingCourierId] = useState<string | null>(null);
   const setScrollContainer = useHorizontalWheelScroll<HTMLDivElement>();
 
   const listParams = useMemo(() => {
@@ -887,6 +889,43 @@ export default function OrdersPage() {
     }
   }
 
+  async function handleRetryCourierDispatch(order: Order) {
+    if (order.sent_to_courier || !order.courier_dispatch_pending) return;
+    setRetryingCourierId(order.public_id);
+    try {
+      const { data } = await api.post<Order>(
+        `admin/orders/${order.public_id}/retry-courier-dispatch/`
+      );
+      patchOrdersList((prev) =>
+        prev.map((o) => (o.public_id === order.public_id ? data : o))
+      );
+      // The server flips pending back to true after clearing it, so keep the
+      // "Sending..." UI state until the next server refresh confirms outcome.
+      setPendingCourierDispatchIds((prev) => new Set(prev).add(order.public_id));
+      invalidateOrdersCaches();
+    } catch (err: unknown) {
+      const normalized = normalizeError(err, tPages("ordersSendToCourierErrorFallback"));
+      notify.error(normalized.message, {
+        title: tPages("toastTitleCourierHandoffFailed"),
+      });
+    } finally {
+      setRetryingCourierId(null);
+    }
+  }
+
+  // A pending dispatch counts as stuck only after 3 minutes — matches the
+  // server-side STUCK_THRESHOLD. Just-clicked orders (tracked in
+  // pendingCourierDispatchIds this session) never show the retry button.
+  const STUCK_THRESHOLD_MS = 3 * 60 * 1000;
+  function isStuckPending(order: Order): boolean {
+    if (order.sent_to_courier || !order.courier_dispatch_pending) return false;
+    if (pendingCourierDispatchIds.has(order.public_id)) return false;
+    if (!order.updated_at) return false;
+    const updated = Date.parse(order.updated_at);
+    if (Number.isNaN(updated)) return false;
+    return Date.now() - updated >= STUCK_THRESHOLD_MS;
+  }
+
   const allSelected =
     globalSelectActive ||
     (orders.length > 0 && selectedIds.size === orders.length);
@@ -948,6 +987,7 @@ export default function OrdersPage() {
           </h1>
         </div>
         <div className="flex items-center gap-2 flex-wrap justify-end">
+          <AutopilotStatusPill />
           {canExportOrders &&
           orders.length > 0 &&
           selectedIds.size > 0 &&
@@ -1226,8 +1266,10 @@ export default function OrdersPage() {
                         }}
                         aria-label={String(order.order_number)}
                         className={cn(
-                          isNew &&
-                            "rounded-none bg-[#EEF5FF] transition-colors duration-400 dark:bg-[#0C447C]/20"
+                          isNew && order.dispatched_by_autopilot
+                            ? "rounded-none bg-[#EDE9FE] transition-colors duration-400 dark:bg-[#4C1D95]/20"
+                            : isNew &&
+                                "rounded-none bg-[#EEF5FF] transition-colors duration-400 dark:bg-[#0C447C]/20"
                         )}
                       >
                         <td className="w-10 px-4 py-3">
@@ -1257,13 +1299,24 @@ export default function OrdersPage() {
                             <span
                               className={cn(
                                 "text-sm leading-none",
-                                isNew
-                                  ? "font-medium text-[#185FA5] dark:text-[#85B7EB]"
-                                  : cn("font-medium text-foreground", numClass)
+                                isNew && order.dispatched_by_autopilot
+                                  ? "font-medium text-violet-700 dark:text-violet-300"
+                                  : isNew
+                                    ? "font-medium text-[#185FA5] dark:text-[#85B7EB]"
+                                    : cn("font-medium text-foreground", numClass)
                               )}
                             >
                               {order.order_number}
                             </span>
+                            {order.dispatched_by_autopilot && (
+                              <span
+                                className="inline-flex items-center gap-1 text-[10px] font-medium leading-none text-muted-foreground"
+                                title="This order was confirmed and dispatched by autopilot"
+                              >
+                                <span className="size-1.5 rounded-full bg-emerald-500" aria-hidden />
+                                Autopilot
+                              </span>
+                            )}
                           </div>
                         </td>
                         <td className="px-4 py-3 text-foreground whitespace-nowrap">
@@ -1397,9 +1450,32 @@ export default function OrdersPage() {
                             </Button>
                           ) : pendingCourierDispatchIds.has(order.public_id) ||
                             order.courier_dispatch_pending ? (
-                            <span className="text-muted-foreground text-xs">
-                              {tPages("ordersSending")}
-                            </span>
+                            isStuckPending(order) ? (
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                className="h-8 gap-1 px-2.5 text-xs"
+                                disabled={retryingCourierId === order.public_id}
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  handleRetryCourierDispatch(order);
+                                }}
+                                title="This dispatch has been pending for more than 3 minutes. Click to retry."
+                              >
+                                {retryingCourierId === order.public_id ? (
+                                  <Loader2 className="size-3.5 shrink-0 animate-spin" />
+                                ) : (
+                                  <RefreshCcw className="size-3.5 shrink-0" />
+                                )}
+                                Retry
+                              </Button>
+                            ) : (
+                              <span className="text-muted-foreground text-xs">
+                                {tPages("ordersSending")}
+                              </span>
+                            )
                           ) : order.status === "confirmed" && !order.sent_to_courier ? (
                             <Button
                               type="button"
