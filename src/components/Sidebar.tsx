@@ -39,6 +39,7 @@ import { useAuth } from "@/context/AuthContext";
 import UserAvatar from "@/components/UserAvatar";
 import { useSearchModal } from "@/context/SearchModalContext";
 import { useEnabledApps } from "@/hooks/useEnabledApps";
+import { usePermissions } from "@/context/PermissionsContext";
 import { useSidebarData } from "@/context/SidebarDataContext";
 import {
   APP_CONFIG,
@@ -146,15 +147,22 @@ function SidebarContent({
   const { hasFeature } = features;
   const { setOpen: setSearchOpen } = useSearchModal();
   const { isEnabled } = useEnabledApps();
+  const { canViewApp } = usePermissions();
+
+  // An app shows only if the store enabled it AND the user's role can view it.
+  const canShowApp = useCallback(
+    (appId: string) => isEnabled(appId) && canViewApp(appId),
+    [isEnabled, canViewApp]
+  );
 
   const mainNavSequence = useMemo(
     () =>
       (MAIN_NAV_SEQUENCE as readonly string[]).filter((token) => {
         if (token === "__catalog__" || token === "__marketing__") return true;
         if (!APP_CONFIG[token]?.href) return false;
-        return isEnabled(token);
+        return canShowApp(token);
       }),
-    [isEnabled]
+    [canShowApp]
   );
   const inventoryNavStatus = inventoryStatus.status;
   const userPublicId =
@@ -174,7 +182,7 @@ function SidebarContent({
   };
 
   const catalogLinks = CATALOG_SUB_APP_IDS.filter(
-    (id) => isEnabled(id) && APP_CONFIG[id]?.href
+    (id) => canShowApp(id) && APP_CONFIG[id]?.href
   );
   const showCatalog = catalogLinks.length > 0;
   const catalogChildActive = catalogLinks.some((id) => {
@@ -183,7 +191,7 @@ function SidebarContent({
   });
 
   const marketingLinks = MARKETING_SUB_APP_IDS.filter(
-    (id) => isEnabled(id) && APP_CONFIG[id]?.href
+    (id) => canShowApp(id) && APP_CONFIG[id]?.href
   );
   const showMarketing = marketingLinks.length > 0;
   const marketingChildActive = marketingLinks.some((id) => {
@@ -191,8 +199,8 @@ function SidebarContent({
     return href ? isActive(href) : false;
   });
 
-  const showMore = MORE_APP_IDS.some((id) => isEnabled(id) && APP_CONFIG[id]?.href);
-  const moreLinks = MORE_APP_IDS.filter((id) => isEnabled(id) && APP_CONFIG[id]?.href);
+  const showMore = MORE_APP_IDS.some((id) => canShowApp(id) && APP_CONFIG[id]?.href);
+  const moreLinks = MORE_APP_IDS.filter((id) => canShowApp(id) && APP_CONFIG[id]?.href);
   const moreChildActive = moreLinks.some((id) => {
     const href = APP_CONFIG[id]?.href;
     return href ? isActive(href) : false;
@@ -264,6 +272,19 @@ function SidebarContent({
   const storeType = brandingData?.store_type ?? "";
   const ownerName = brandingData?.owner_name?.trim() || tSidebar("setInSettings");
   const ownerEmail = brandingData?.owner_email || "";
+
+  // Footer identity reflects the LOGGED-IN user (owner or staff), not the
+  // store's owner branding — so a moderator sees their own email + role.
+  const meReady = meProfileStatus === "ready";
+  const userEmail = meReady ? (meProfile?.email?.trim() || "") : "";
+  const userFullName = meReady ? (meProfile?.full_name?.trim() || "") : "";
+  // Backend get_store.role → "Owner" for owners, the RBAC role name for staff.
+  const roleLabel = meReady ? (meProfile?.store?.role?.trim() || "") : "";
+  const footerName = userFullName || roleLabel || ownerName;
+  const footerEmail = userEmail || ownerEmail;
+  // Show the role as a chip only when it isn't already the primary line.
+  const showRoleChip = Boolean(roleLabel) && roleLabel !== footerName;
+  const showUserSkeleton = !meReady;
   const resolvedLogoUrl = logoUrl(brandingData?.logo_url ?? null);
   const initial = adminName.charAt(0).toUpperCase() || "?";
 
@@ -523,23 +544,30 @@ function SidebarContent({
               aria-label={tSidebar("userMenu")}
             >
               <span className="flex shrink-0 items-center justify-center">
-                <UserAvatar publicId={userPublicId} name={ownerName} plan={userPlan} urgentSubscriptionRing={urgentSubscriptionRing} />
+                <UserAvatar publicId={userPublicId} name={footerName} plan={userPlan} urgentSubscriptionRing={urgentSubscriptionRing} />
               </span>
               {!collapsed && (
                 <>
                   <div className="min-w-0 flex-1">
-                    {showBrandingSkeleton ? (
+                    {showUserSkeleton ? (
                       <div className="space-y-1.5">
                         <Skeleton className="h-4 w-28 rounded-ui" />
                         <Skeleton className="h-3 w-36 rounded-ui" />
                       </div>
                     ) : (
                       <>
-                        <p className="truncate text-sm font-medium text-foreground">
-                          {ownerName}
-                        </p>
+                        <div className="flex items-center gap-1.5">
+                          <p className="truncate text-sm font-medium text-foreground">
+                            {footerName}
+                          </p>
+                          {showRoleChip && (
+                            <span className="shrink-0 rounded-full bg-muted px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+                              {roleLabel}
+                            </span>
+                          )}
+                        </div>
                         <p className="truncate text-xs text-muted-foreground">
-                          {ownerEmail || tSidebar("setInSettings")}
+                          {footerEmail || tSidebar("setInSettings")}
                         </p>
                       </>
                     )}

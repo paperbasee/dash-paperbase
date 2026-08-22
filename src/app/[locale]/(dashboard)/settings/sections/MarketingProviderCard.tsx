@@ -18,6 +18,7 @@ import { Input } from "@/components/ui/input";
 import { useEnterNavigation } from "@/hooks/useEnterNavigation";
 import { numberTextClass } from "@/lib/number-font";
 import { useConfirm } from "@/context/ConfirmDialogContext";
+import { usePermissions } from "@/context/PermissionsContext";
 import { notify } from "@/notifications";
 import { SettingsActionDialog } from "@/components/settings/SettingsActionDialog";
 import { settingsInvertedButtonClassName } from "../SettingsSectionBody";
@@ -96,6 +97,9 @@ export default function MarketingProviderCard({
 
   const providerIntegrations = allFetched.filter((i) => i.provider === provider);
   const canAddPixel = providerIntegrations.length < 3;
+  // Connecting/editing marketing integrations needs integrations.manage; view-only
+  // roles (integrations.view) can see them but not mutate.
+  const canManage = usePermissions().has("integrations.manage");
 
   useEffect(() => {
     if (modal === null || modal === "connect" || modal.type !== "configure") return;
@@ -243,7 +247,7 @@ export default function MarketingProviderCard({
     );
 
   return (
-    <div className="min-w-0 w-full">
+    <fieldset disabled={!canManage} className="m-0 min-w-0 w-full border-0 p-0">
       <SettingsActionDialog
         open={modal === "connect"}
         onOpenChange={(next) => {
@@ -522,6 +526,6 @@ export default function MarketingProviderCard({
           </>
         ) : null}
       </div>
-    </div>
+    </fieldset>
   );
 }

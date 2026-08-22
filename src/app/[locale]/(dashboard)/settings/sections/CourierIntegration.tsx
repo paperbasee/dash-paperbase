@@ -10,6 +10,7 @@ import { formatAdminApiErrorFromAxios } from "@/lib/admin-api-error";
 import { formatDashboardDate } from "@/lib/datetime-display";
 import type { Courier } from "@/types";
 import { useCouriersQuery } from "@/hooks/useCouriersQuery";
+import { usePermissions } from "@/context/PermissionsContext";
 import { couriersQueryKey } from "@/lib/query-keys";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -429,6 +430,8 @@ export default function CourierIntegration({
   const [savingWebhookTokenId, setSavingWebhookTokenId] = useState<string | null>(null);
   const connectFormRef = useRef<HTMLFormElement>(null);
   const { handleKeyDown } = useEnterNavigation(() => connectFormRef.current?.requestSubmit());
+  // Courier connect/edit/disconnect needs couriers.manage; view-only is read-only.
+  const canManage = usePermissions().has("couriers.manage");
 
   async function copyToClipboard(text: string) {
     const value = (text || "").trim();
@@ -593,7 +596,7 @@ export default function CourierIntegration({
   const tStr = t as (key: string) => string;
 
   return (
-    <div className="min-w-0 w-full">
+    <fieldset disabled={!canManage} className="m-0 min-w-0 w-full border-0 p-0">
       <SettingsActionDialog
         open={modal === "connect"}
         onOpenChange={(next) => {
@@ -756,6 +759,6 @@ export default function CourierIntegration({
           </>
         )}
       </div>
-    </div>
+    </fieldset>
   );
 }

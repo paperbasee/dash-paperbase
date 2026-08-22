@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/input-group";
 import { useEnterNavigation } from "@/hooks/useEnterNavigation";
 import { useConfirm } from "@/context/ConfirmDialogContext";
+import { usePermissions } from "@/context/PermissionsContext";
 import {
   SettingsSectionBody,
   settingsInvertedButtonClassName,
@@ -98,6 +99,9 @@ export default function StoreInfoSection({
   const t = useTranslations("settings");
   const locale = useLocale();
   const confirm = useConfirm();
+  // Store profile persists via settings.manage; view-only roles see it read-only.
+  const { has } = usePermissions();
+  const canManage = has("settings.manage");
   const [secretRevealed, setSecretRevealed] = useState(false);
   const [secretFieldFocused, setSecretFieldFocused] = useState(false);
   const [secretCopied, setSecretCopied] = useState(false);
@@ -168,7 +172,11 @@ export default function StoreInfoSection({
           <p className="text-sm text-muted-foreground">{t("store.subtitle")}</p>
         </div>
 
-        <form ref={formRef} onSubmit={onSubmit} className="w-full space-y-6">
+        <form ref={formRef} onSubmit={onSubmit} className="w-full">
+          <fieldset
+            disabled={!canManage}
+            className="m-0 w-full min-w-0 space-y-6 border-0 p-0"
+          >
         <div className="space-y-2">
           <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
             {t("store.logo")}
@@ -506,6 +514,7 @@ export default function StoreInfoSection({
           {storeSaving && <Loader2 className="size-4 animate-spin" />}
           {t("store.saveButton")}
         </Button>
+          </fieldset>
         </form>
       </SettingsSectionBody>
     </section>

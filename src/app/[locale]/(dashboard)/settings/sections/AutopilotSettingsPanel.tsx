@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { isApiHttpError } from "@/lib/api-client";
 import { useFeatures } from "@/hooks/useFeatures";
+import { usePermissions } from "@/context/PermissionsContext";
 import { useStoreSettingsCurrentQuery } from "@/hooks/useStoreSettingsCurrentQuery";
 import { storeSettingsCurrentQueryKey } from "@/lib/query-keys";
 import { settingsInvertedButtonClassName } from "../SettingsSectionBody";
@@ -46,6 +47,7 @@ export default function AutopilotSettingsPanel() {
   const queryClient = useQueryClient();
   const { data, isLoading } = useStoreSettingsCurrentQuery();
   const { hasFeature, loading: featuresLoading } = useFeatures();
+  const { isOwner } = usePermissions();
   const featureUnlocked = hasFeature("fraud_check");
 
   const [enabled, setEnabled] = useState(false);
@@ -94,6 +96,10 @@ export default function AutopilotSettingsPanel() {
       setSaving(false);
     }
   };
+
+  // Autopilot writes are owner-only on the backend, so hide the whole panel from
+  // non-owners entirely (rather than showing a disabled control they can't use).
+  if (!isOwner) return null;
 
   return (
     <div id="autopilot" className="w-full space-y-6 border-t border-border pt-8 scroll-mt-24">

@@ -2,6 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { APP_CONFIG, ESSENTIAL_APP_IDS, OPTIONAL_APP_IDS } from "@/config/apps";
+import { usePermissions } from "@/context/PermissionsContext";
 import { SettingsSectionBody, settingsSectionSurfaceClassName } from "../SettingsSectionBody";
 
 export default function AppsSection({
@@ -15,6 +16,9 @@ export default function AppsSection({
   };
 }) {
   const t = useTranslations("settings");
+  // Enabling/disabling apps writes store settings — view-only roles can't toggle.
+  const { has } = usePermissions();
+  const canManage = has("settings.manage");
   return (
     <section
       id="panel-apps"
@@ -72,11 +76,14 @@ export default function AppsSection({
                     <p className="font-medium text-foreground">{t(`apps.items.${id}.label` as never)}</p>
                     <p className="text-xs text-muted-foreground">{t(`apps.items.${id}.description` as never)}</p>
                   </div>
-                  <label className="flex cursor-pointer items-center gap-2 justify-self-end">
+                  <label
+                    className={`flex items-center gap-2 justify-self-end ${canManage ? "cursor-pointer" : "cursor-not-allowed opacity-70"}`}
+                  >
                     <input
                       type="checkbox"
                       checked={enabledApps.isEnabled(id)}
                       onChange={() => enabledApps.toggleApp(id)}
+                      disabled={!canManage}
                       className="form-checkbox"
                     />
                     <span className="whitespace-nowrap text-sm text-muted-foreground">

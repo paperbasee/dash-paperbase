@@ -7,6 +7,7 @@ import { History } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { BrandingProvider } from "@/context/BrandingContext";
 import { EnabledAppsProvider } from "@/context/EnabledAppsContext";
+import { PermissionsProvider } from "@/context/PermissionsContext";
 import { SidebarDataProvider } from "@/context/SidebarDataContext";
 import { SearchModalProvider } from "@/context/SearchModalContext";
 import { NavigationLoadingProvider } from "@/context/NavigationLoadingContext";
@@ -88,6 +89,9 @@ export default function DashboardLayoutClient({
 
   const showTopBannerStrip =
     meProfileStatus === "ready" &&
+    // Billing/plan status is the store owner's concern — never show plan
+    // prompts (e.g. "choose a plan") to a staff member who can't manage billing.
+    !isModerator &&
     subscriptionUiState !== null &&
     subscriptionUiState !== "none";
   const isPendingReviewWithPaymentBanner =
@@ -222,6 +226,7 @@ export default function DashboardLayoutClient({
 
   return (
     <BrandingProvider>
+      <PermissionsProvider>
       <EnabledAppsProvider>
       <DashboardRefreshProvider markRefreshedRef={markRefreshedRef}>
       <NavigationLoadingProvider>
@@ -372,6 +377,7 @@ export default function DashboardLayoutClient({
       </NavigationLoadingProvider>
       </DashboardRefreshProvider>
       </EnabledAppsProvider>
+      </PermissionsProvider>
     </BrandingProvider>
   );
 }

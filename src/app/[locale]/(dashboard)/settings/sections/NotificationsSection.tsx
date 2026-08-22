@@ -3,6 +3,7 @@
 import { useTranslations } from "next-intl";
 import { Lock } from "lucide-react";
 import { SettingsSectionBody, settingsSectionSurfaceClassName } from "../SettingsSectionBody";
+import { usePermissions } from "@/context/PermissionsContext";
 import type { EmailNotificationPrefs } from "../useSettingsPageController";
 
 export default function NotificationsSection({
@@ -21,6 +22,12 @@ export default function NotificationsSection({
   emailPrefsSaving: boolean;
 }) {
   const t = useTranslations("settings");
+  const { has } = usePermissions();
+  // Order-email settings are RBAC-gated on settings.manage. Hide the whole
+  // section from roles that can't change them (owner + admin + any settings.manage
+  // role see it). The nav row is gated in settingsSections; this also covers a
+  // direct ?tab=notifications URL.
+  if (!has("settings.manage")) return null;
   const emailLocked =
     orderEmailFeatureLoading || !orderEmailNotificationsEnabled || emailPrefsSaving;
   return (

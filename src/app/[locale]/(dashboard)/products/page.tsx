@@ -148,7 +148,7 @@ export default function ProductsPage() {
   const [updatingId, setUpdatingId] = useState<string | null>(null);
   const reorderBusyRef = useRef(false);
   const setScrollContainer = useHorizontalWheelScroll<HTMLDivElement>();
-  const { canDelete: canDeleteProducts, isSuperuser: deleteIsSuperuser } =
+  const { canDeleteProducts, isSuperuser: deleteIsSuperuser } =
     useAdminDeleteCapabilities();
 
   const listParams = useMemo(() => {

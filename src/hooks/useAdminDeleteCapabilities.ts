@@ -1,27 +1,19 @@
 "use client";
 
-import { useMemo } from "react";
-import { useAuth } from "@/context/AuthContext";
-import { canUserDeleteProducts } from "@/lib/product-delete-permission";
+import { usePermissions } from "@/context/PermissionsContext";
 
 /**
- * Mirrors admin API rules for destructive actions (products, orders, trash):
- * store OWNER/ADMIN or platform superuser.
+ * Destructive-action capabilities, driven by RBAC permissions (not the legacy
+ * role enum). Owners and superusers hold everything via usePermissions().has.
  */
 export function useAdminDeleteCapabilities() {
-  const { meProfile, meProfileStatus, meProfileFetching } = useAuth();
+  const { has, isSuperuser, loading } = usePermissions();
 
-  const loading =
-    meProfileStatus === "loading" ||
-    meProfileStatus === "idle" ||
-    meProfileFetching;
-
-  const canDelete = useMemo(
-    () => (meProfile ? canUserDeleteProducts(meProfile) : false),
-    [meProfile],
-  );
-
-  const isSuperuser = Boolean(meProfile?.is_superuser);
-
-  return { canDelete, isSuperuser, loading };
+  return {
+    canDeleteProducts: has("products.delete"),
+    canViewTrash: has("trash.view"),
+    canManageTrash: has("trash.manage"),
+    isSuperuser,
+    loading,
+  };
 }

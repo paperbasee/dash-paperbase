@@ -1,7 +1,14 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { SECTIONS, type SettingsSection } from "./settingsSections";
+import {
+  SECTIONS,
+  SECTION_OWNER_ONLY,
+  SECTION_PERMISSION,
+  sectionMatchesPermission,
+  type SettingsSection,
+} from "./settingsSections";
+import { usePermissions } from "@/context/PermissionsContext";
 import { cn } from "@/lib/utils";
 
 export function SettingsSectionNav({
@@ -16,13 +23,18 @@ export function SettingsSectionNav({
   className?: string;
 }) {
   const t = useTranslations("settings");
+  const { has, isOwner, isSuperuser } = usePermissions();
+  const visibleSections = SECTIONS.filter((row) => {
+    if (SECTION_OWNER_ONLY[row.id] && !(isOwner || isSuperuser)) return false;
+    return sectionMatchesPermission(SECTION_PERMISSION[row.id], has);
+  });
   return (
     <nav
       className={cn("flex flex-col gap-0.5", className)}
       role="tablist"
       aria-label={t("navAria")}
     >
-      {SECTIONS.map((row) => {
+      {visibleSections.map((row) => {
         const { id, icon: Icon } = row;
         const label =
           "labelKey" in row ? t(row.labelKey) : row.displayLabel;

@@ -8,6 +8,7 @@ import { Check } from "lucide-react";
 import api from "@/lib/api";
 import type { MarketingIntegration as MarketingIntegrationType } from "@/types";
 import { useMarketingIntegrationsQuery } from "@/hooks/useMarketingIntegrationsQuery";
+import { usePermissions } from "@/context/PermissionsContext";
 import { marketingIntegrationsQueryKey } from "@/lib/query-keys";
 import { numberTextClass } from "@/lib/number-font";
 import { useConfirm } from "@/context/ConfirmDialogContext";
@@ -34,6 +35,8 @@ export default function OtherMarketingIntegrations({
   const numClass = numberTextClass(locale);
   const t = useTranslations("settings");
   const tPages = useTranslations("pages");
+  // Marketing integrations mutate under integrations.manage; view-only is read-only.
+  const canManage = usePermissions().has("integrations.manage");
   const confirm = useConfirm();
   const queryClient = useQueryClient();
   const {
@@ -173,7 +176,10 @@ export default function OtherMarketingIntegrations({
   if (list.length === 0) return null;
 
   return (
-    <div className="min-w-0 w-full space-y-3">
+    <fieldset
+      disabled={!canManage}
+      className="m-0 min-w-0 w-full space-y-3 border-0 p-0"
+    >
       {list.map((integration) => (
         <MarketingIntegrationListRow
           key={integration.public_id}
@@ -247,6 +253,6 @@ export default function OtherMarketingIntegrations({
           </div>
         ) : null}
       </SettingsActionDialog>
-    </div>
+    </fieldset>
   );
 }

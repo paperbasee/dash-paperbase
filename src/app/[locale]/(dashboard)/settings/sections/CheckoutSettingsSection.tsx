@@ -12,6 +12,7 @@ import {
   settingsSectionSurfaceClassName,
 } from "../SettingsSectionBody";
 import { cn } from "@/lib/utils";
+import { usePermissions } from "@/context/PermissionsContext";
 import {
   useCheckoutSettingsQuery,
   type CustomerFormVariant,
@@ -85,6 +86,9 @@ export default function CheckoutSettingsSection({
 
   const unchanged =
     loadedVariant !== null && selectedVariant === loadedVariant;
+  // Checkout settings persist via settings.manage; view-only roles can't change them.
+  const { has } = usePermissions();
+  const canManage = has("settings.manage");
 
 
   return (
@@ -111,7 +115,8 @@ export default function CheckoutSettingsSection({
               <div
                 className={cn(
                   "space-y-3",
-                  loadedVariant === null && "pointer-events-none opacity-60"
+                  (loadedVariant === null || !canManage) &&
+                    "pointer-events-none opacity-60"
                 )}
                 role="radiogroup"
                 aria-label="Customer information form variant"
@@ -182,7 +187,7 @@ export default function CheckoutSettingsSection({
               type="button"
               variant="outline"
               className={`${settingsInvertedButtonClassName} gap-2`}
-              disabled={saving || unchanged || loadedVariant === null}
+              disabled={saving || unchanged || loadedVariant === null || !canManage}
               onClick={() => void handleSave()}
             >
               {saving && <Loader2 className="size-4 animate-spin" />}
