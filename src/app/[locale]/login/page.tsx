@@ -1,488 +1,181 @@
 "use client";
 
-import { useEffect, useRef, useState, type FormEvent } from "react";
-import { useTranslations } from "next-intl";
+import { useEffect, useState, type FormEvent } from "react";
+import { useSearchParams } from "next/navigation";
 import { Link, useRouter } from "@/i18n/navigation";
-import { Eye, EyeOff } from "lucide-react";
+import { KeyRound, Mail } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { AuthPageShell } from "@/components/auth/AuthPageShell";
 import { MailSentIllustration } from "@/components/auth/MailSentIllustration";
-import { TurnstileWidget } from "@/components/auth/TurnstileWidget";
 import { useMinDelayLoading } from "@/hooks/useMinDelayLoading";
-import { useEnterNavigation } from "@/hooks/useEnterNavigation";
-import { useRateLimitCooldown, extractRateLimitInfo } from "@/hooks/useRateLimitCooldown";
-import { loginSchema, parseValidation } from "@/lib/validation";
 import { resolvePostAuthRoute } from "@/lib/subscription-access";
-import { isTurnstileDisabled } from "@/lib/turnstile-env";
+import { getSafeNextPath, withNext } from "@/lib/safe-next";
 import { isNetworkError } from "@/lib/network-error";
+import { browserSupportsWebAuthn, isPasskeyCancellation } from "@/lib/passkeys";
 
 export default function LoginPage() {
-  const formRef = useRef<HTMLFormElement>(null);
   const router = useRouter();
-  const t = useTranslations("auth.login");
-  const tAuth = useTranslations("auth");
-  const tLayout = useTranslations("dashboardLayout");
-  const {
-    login,
-    pendingTwoFactor,
-    verifyTwoFactorChallenge,
-    requestTwoFactorChallengeRecoveryCode,
-    verifyTwoFactorChallengeRecovery,
-  } = useAuth();
+  const searchParams = useSearchParams();
+  const nextPath = getSafeNextPath(searchParams.get("next"));
+  const { signInWithPasskey, requestMagicLink } = useAuth();
+
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
-  const [successMessage, setSuccessMessage] = useState("");
-  const [rememberMe, setRememberMe] = useState(false);
-  const [otpCode, setOtpCode] = useState("");
-  const [recoveryEmail, setRecoveryEmail] = useState("");
-  const [recoveryCode, setRecoveryCode] = useState("");
-  const [recoveryMode, setRecoveryMode] = useState<"none" | "email" | "code">("none");
-  const [recoveryVerified, setRecoveryVerified] = useState(false);
-  const [recoveryRequestLoading, setRecoveryRequestLoading] = useState(false);
-  const [recoveryVerifyLoading, setRecoveryVerifyLoading] = useState(false);
-  const recoveryCooldown = useRateLimitCooldown();
+  const [supportsPasskeys, setSupportsPasskeys] = useState(true);
+  const [linkSent, setLinkSent] = useState(false);
+  const [linkLoading, setLinkLoading] = useState(false);
   const { loading, runWithLoading } = useMinDelayLoading();
-  const forgotPasswordLabel = t("forgotPassword");
-  const noAccountLabel = t("noAccount");
-  const { handleKeyDown } = useEnterNavigation(() => formRef.current?.requestSubmit());
-  const showRecoverySentIllustration = pendingTwoFactor && recoveryMode === "code" && !!successMessage;
 
   useEffect(() => {
-    if (!pendingTwoFactor) {
-      setRecoveryMode("none");
-      setRecoveryEmail("");
-      setRecoveryCode("");
-      setRecoveryVerified(false);
-    }
-  }, [pendingTwoFactor]);
+    setSupportsPasskeys(browserSupportsWebAuthn());
+  }, []);
 
-  async function handleSubmit(e: FormEvent) {
-    e.preventDefault();
-    setError("");
-    setSuccessMessage("");
-    const validation = parseValidation(loginSchema, { email, password });
-    if (!validation.success) {
+  async function redirectAfterAuth() {
+    if (nextPath) {
+      router.push(nextPath);
+      return;
+    }
+    const next = await resolvePostAuthRoute();
+    if (next.ok) {
+      router.push(next.path);
+    } else {
       setError(
-        validation.errors.email ??
-          validation.errors.password ??
-          t("validCredentialsHint")
+        next.kind === "network_error"
+          ? "We couldn't reach the server. Please try again."
+          : "We couldn't verify your subscription. Please try again."
       );
-      return;
     }
+  }
 
-    const formEl = e.currentTarget;
-    if (!(formEl instanceof HTMLFormElement)) return;
-    const turnstileToken =
-      (new FormData(formEl).get("cf-turnstile-response") as string | null)?.trim() ?? "";
-    if (!isTurnstileDisabled() && !turnstileToken) {
-      setError(tAuth("turnstileRequired"));
-      return;
-    }
-
+  // Passkey sign-in is discoverable — the browser shows the user's accounts, so
+  // no email is required. A typed email (if any) is passed only as a hint.
+  async function handlePasskeyLogin() {
+    setError("");
     try {
       await runWithLoading(async () => {
-        const result = await login(validation.data.email, validation.data.password, turnstileToken);
-        if (!("2fa_required" in result)) {
-          const next = await resolvePostAuthRoute();
-          if (next.ok) {
-            router.push(next.path);
-          } else {
-            setError(
-              next.kind === "network_error"
-                ? t("serverUnreachable")
-                : tLayout("subscriptionVerifyBody")
-            );
-          }
-        }
+        await signInWithPasskey(email.trim() || undefined);
+        await redirectAfterAuth();
       });
     } catch (err: unknown) {
+      if (isPasskeyCancellation(err)) return; // user dismissed the prompt
       if (isNetworkError(err)) {
-        setError(t("serverUnreachable"));
+        setError("We couldn't reach the server. Please try again.");
         return;
       }
-      const res =
-        err && typeof err === "object" && "response" in err
-          ? (err as { response?: { status?: number; data?: { code?: string; detail?: unknown } } })
-              .response
-          : undefined;
-      if (res?.status === 403 && res.data?.code === "email_not_verified") {
-        router.push(
-          `/auth/verify-email?email=${encodeURIComponent(validation.data.email)}`
-        );
-        return;
-      }
-      const detail = res?.data?.detail;
-      if (res?.status === 400 && typeof detail === "string") {
-        setError(detail);
-        return;
-      }
-      setError(t("invalidCredentials"));
+      setError(
+        "We couldn't sign you in with a passkey. Try the email link below, or sign in from a device that has your passkey."
+      );
     }
   }
 
-  async function handleOtpSubmit(e: FormEvent) {
+  async function handleMagicLink(e: FormEvent) {
     e.preventDefault();
-    if (!pendingTwoFactor) return;
     setError("");
-    setSuccessMessage("");
-    try {
-      await runWithLoading(async () => {
-        await verifyTwoFactorChallenge(
-          pendingTwoFactor.challenge_public_id,
-          otpCode
-        );
-        const next = await resolvePostAuthRoute();
-        if (next.ok) {
-          router.push(next.path);
-        } else {
-          setError(
-            next.kind === "network_error"
-              ? t("serverUnreachable")
-              : tLayout("subscriptionVerifyBody")
-          );
-        }
-      });
-    } catch (err: unknown) {
-      if (isNetworkError(err)) {
-        setError(t("serverUnreachable"));
-        return;
-      }
-      const data =
-        err && typeof err === "object" && "response" in err
-          ? (err as { response?: { status?: number; data?: { code?: string } } }).response
-          : undefined;
-      if (data?.status === 403 && data.data?.code === "email_not_verified") {
-        router.push(`/auth/verify-email?email=${encodeURIComponent(email.trim().toLowerCase())}`);
-        return;
-      }
-      setError(t("invalidOtp"));
-    }
-  }
-
-  async function handleRecoveryRequest() {
-    if (!pendingTwoFactor) return;
-    setError("");
-    setSuccessMessage("");
-    if (!recoveryEmail.trim()) {
-      setError(t("recoveryEmailRequired"));
+    if (!email.trim()) {
+      setError("Enter your email to receive a sign-in link.");
       return;
     }
-    setRecoveryRequestLoading(true);
+    setLinkLoading(true);
     try {
-      const response = await requestTwoFactorChallengeRecoveryCode(
-        pendingTwoFactor.challenge_public_id,
-        recoveryEmail
-      );
-      if (!response.sent) {
-        setError(t("recoveryEmailNotFound"));
-        return;
-      }
-      setRecoveryMode("code");
-      setSuccessMessage(response.detail || t("recoverySent"));
+      await requestMagicLink(email, "login");
+      setLinkSent(true);
     } catch (err: unknown) {
-      const info = extractRateLimitInfo(err);
-      if (info) {
-        recoveryCooldown.startCooldown(info.retryAfter);
-        return;
-      }
-      if (isNetworkError(err)) {
-        setError(t("serverUnreachable"));
-        return;
-      }
-      setError(t("recoverySendFailed"));
+      setError(
+        isNetworkError(err)
+          ? "We couldn't reach the server. Please try again."
+          : "Something went wrong. Please try again."
+      );
     } finally {
-      setRecoveryRequestLoading(false);
+      setLinkLoading(false);
     }
   }
 
-  function handleRecoveryEmailSubmit(e: FormEvent) {
-    e.preventDefault();
-    void handleRecoveryRequest();
-  }
-
-  async function handleRecoveryVerify(e: FormEvent) {
-    e.preventDefault();
-    if (!pendingTwoFactor) return;
-    setError("");
-    setSuccessMessage("");
-    setRecoveryVerifyLoading(true);
-    try {
-      await verifyTwoFactorChallengeRecovery(
-        pendingTwoFactor.challenge_public_id,
-        recoveryCode
-      );
-      setRecoveryVerified(true);
-      setSuccessMessage("2FA has been disabled successfully.");
-    } catch (err: unknown) {
-      if (isNetworkError(err)) {
-        setError(t("serverUnreachable"));
-      } else {
-        setError(t("recoveryInvalid"));
-      }
-    } finally {
-      setRecoveryVerifyLoading(false);
-    }
+  if (linkSent) {
+    return (
+      <AuthPageShell containerClassName="space-y-8">
+        <div className="mx-auto w-11/12 max-w-sm space-y-3 text-center sm:w-full">
+          <MailSentIllustration className="-mt-1" />
+          <h1 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
+            Check your email
+          </h1>
+          <p className="mx-auto max-w-[34ch] text-sm leading-relaxed text-muted-foreground">
+            If an account can use it, we&apos;ve sent a one-time sign-in link to{" "}
+            <span className="font-medium text-foreground">{email}</span>.
+          </p>
+        </div>
+      </AuthPageShell>
+    );
   }
 
   return (
     <AuthPageShell
-      headline={showRecoverySentIllustration ? undefined : pendingTwoFactor ? t("twoFactorHeadline") : t("headline")}
-      description={
-        showRecoverySentIllustration
-          ? undefined
-          : pendingTwoFactor
-            ? t("twoFactorDescription")
-            : t("description")
-      }
+      headline="Welcome back"
+      description="Sign in to your Paperbase dashboard."
       containerClassName="space-y-8 sm:space-y-10"
     >
+      <div className="mx-auto w-11/12 max-w-sm space-y-6 sm:w-full" aria-busy={loading}>
+        {error && (
+          <div className="rounded-ui border border-destructive/20 bg-destructive/10 px-3 py-2 text-center text-sm text-destructive">
+            {error}
+          </div>
+        )}
 
-      {recoveryVerified ? (
-        <div className="mx-auto w-11/12 max-w-sm space-y-4 rounded-ui border border-emerald-500/30 bg-emerald-500/10 px-4 py-5 text-center sm:w-full">
-          <p className="text-sm font-medium text-emerald-500">
-            {successMessage || "2FA has been disabled successfully."}
-          </p>
+        {/* Primary: passkey — no email needed */}
+        {supportsPasskeys ? (
           <Button
             type="button"
-            className="w-full"
-            onClick={() => router.push("/")}
+            loading={loading}
+            onClick={() => void handlePasskeyLogin()}
+            className="w-full gap-2"
           >
-            Go to home
+            <KeyRound size={16} />
+            Sign in with a passkey
           </Button>
+        ) : (
+          <p className="rounded-ui border border-border bg-muted/40 px-3 py-2 text-center text-sm text-muted-foreground">
+            This device doesn&apos;t support passkeys. Use the email sign-in link below.
+          </p>
+        )}
+
+        <div className="flex items-center gap-3 text-xs text-muted-foreground">
+          <span className="h-px flex-1 bg-border" />
+          or
+          <span className="h-px flex-1 bg-border" />
         </div>
-      ) : (
-      <form
-            ref={formRef}
-            onSubmit={
-              pendingTwoFactor
-                ? recoveryMode === "email"
-                  ? handleRecoveryEmailSubmit
-                  : recoveryMode === "code"
-                    ? handleRecoveryVerify
-                    : handleOtpSubmit
-                : handleSubmit
-            }
-            className="mx-auto w-11/12 max-w-sm space-y-6 sm:w-full"
-            aria-busy={loading}
-      >
-          {error && (
-            <div className="rounded-ui border border-destructive/20 bg-destructive/10 px-3 py-2 text-center text-sm text-destructive">
-              {error}
-            </div>
-          )}
-          {successMessage && (
-            <div className="rounded-ui border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-center text-sm text-emerald-500">
-              {successMessage}
-            </div>
-          )}
-          {showRecoverySentIllustration ? (
-            <div className="space-y-2 text-center">
-              <MailSentIllustration className="-mt-1" />
-              <h1 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
-                {t("twoFactorHeadline")}
-              </h1>
-              <p className="mx-auto max-w-[32ch] text-sm leading-relaxed text-muted-foreground">
-                {t("twoFactorDescription")}
-              </p>
-            </div>
-          ) : null}
 
-          {!pendingTwoFactor ? (
-            <>
-              <div className="form-field">
-                <label htmlFor="email" className="field-label">
-                  {t("email")}
-                </label>
-                <Input
-                  id="email"
-                  type="email"
-                  required
-                  size="lg"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder={t("emailPlaceholder")}
-                  autoComplete="email"
-                  inputMode="email"
-                  onKeyDown={handleKeyDown}
-                />
-              </div>
-
-              <div className="form-field">
-                <label htmlFor="password" className="field-label">
-                  {t("password")}
-                </label>
-                <div className="relative">
-                  <Input
-                    id="password"
-                    type={showPassword ? "text" : "password"}
-                    required
-                    size="lg"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder={t("passwordPlaceholder")}
-                    className="pr-10"
-                    autoComplete="current-password"
-                    onKeyDown={handleKeyDown}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword((v) => !v)}
-                    className="absolute inset-y-0 right-0 flex items-center px-3 text-muted-foreground hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                    aria-label={
-                      showPassword ? t("hidePassword") : t("showPassword")
-                    }
-                  >
-                    {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                  </button>
-                </div>
-              </div>
-
-              <div className="flex items-center justify-between gap-4 text-sm">
-                <label className="inline-flex items-center gap-2 text-muted-foreground">
-                  <input
-                    type="checkbox"
-                    checked={rememberMe}
-                    onChange={(e) => setRememberMe(e.target.checked)}
-                    onKeyDown={handleKeyDown}
-                    className="form-checkbox"
-                    disabled={!!pendingTwoFactor}
-                  />
-                  <span>{t("rememberMe")}</span>
-                </label>
-
-                <Link
-                  href="/auth/password-reset"
-                  className="font-medium text-foreground underline-offset-4 hover:underline"
-                >
-                  {forgotPasswordLabel.replace("?", "")}
-                  {forgotPasswordLabel.includes("?") ? (
-                    <span className="font-sans">?</span>
-                  ) : null}
-                </Link>
-              </div>
-
-              <TurnstileWidget />
-            </>
-          ) : (
-            <div className="form-field">
-              {recoveryMode === "email" ? (
-                <>
-                  <label htmlFor="recovery-email" className="field-label">
-                    {t("recoveryEmail")}
-                  </label>
-                  <Input
-                    id="recovery-email"
-                    type="email"
-                    required
-                    size="lg"
-                    value={recoveryEmail}
-                    onChange={(e) => setRecoveryEmail(e.target.value)}
-                    placeholder={t("recoveryEmailPlaceholder")}
-                    autoComplete="email"
-                    inputMode="email"
-                    onKeyDown={handleKeyDown}
-                  />
-                  <Button
-                    type="button"
-                    loading={recoveryRequestLoading}
-                    onClick={() => void handleRecoveryRequest()}
-                    disabled={recoveryVerifyLoading || recoveryCooldown.isLimited}
-                    className="mt-2 w-full"
-                  >
-                    {recoveryCooldown.isLimited
-                      ? t("retryIn", { seconds: recoveryCooldown.remaining })
-                      : t("sendRecoveryCode")}
-                  </Button>
-                </>
-              ) : recoveryMode === "code" ? (
-                <>
-                  <label htmlFor="recovery-code" className="field-label">
-                    {t("recoveryCode")}
-                  </label>
-                  <Input
-                    id="recovery-code"
-                    type="text"
-                    required
-                    size="lg"
-                    value={recoveryCode}
-                    onChange={(e) => setRecoveryCode(e.target.value)}
-                    placeholder={t("recoveryPlaceholder")}
-                    autoComplete="one-time-code"
-                    onKeyDown={handleKeyDown}
-                  />
-                </>
-              ) : (
-                <>
-                  <label htmlFor="otp" className="field-label">
-                    {t("verificationCode")}
-                  </label>
-                  <Input
-                    id="otp"
-                    type="text"
-                    required
-                    size="lg"
-                    value={otpCode}
-                    onChange={(e) => setOtpCode(e.target.value)}
-                    placeholder={t("otpPlaceholder")}
-                    inputMode="numeric"
-                    autoComplete="one-time-code"
-                    onKeyDown={handleKeyDown}
-                  />
-                </>
-              )}
-              <button
-                type="button"
-                onClick={() => {
-                  if (recoveryMode !== "none") {
-                    setRecoveryMode("none");
-                    setRecoveryVerified(false);
-                    setError("");
-                    setSuccessMessage("");
-                    return;
-                  }
-                  setRecoveryMode("email");
-                  setRecoveryVerified(false);
-                  setError("");
-                  setSuccessMessage("");
-                }}
-                disabled={recoveryVerifyLoading}
-                className="mt-2 text-left text-sm font-medium text-foreground underline-offset-4 hover:underline disabled:cursor-not-allowed disabled:opacity-70"
-              >
-                {recoveryMode !== "none"
-                  ? t("backToOtp")
-                  : t("cantAccess2fa")}
-              </button>
-            </div>
-          )}
-
-            {!(pendingTwoFactor && recoveryMode === "email") ? (
-              <Button
-                type="submit"
-                loading={loading}
-                className="mt-2 w-full"
-              >
-                {pendingTwoFactor
-                  ? recoveryMode === "code"
-                    ? t("verifyRecovery")
-                    : t("verifyCode")
-                  : t("loginButton")}
-              </Button>
-            ) : null}
-      </form>
-      )}
+        {/* Fallback: email magic-link — email is entered here */}
+        <form onSubmit={handleMagicLink} className="space-y-4">
+          <div className="form-field">
+            <label htmlFor="email" className="field-label">
+              Email
+            </label>
+            <Input
+              id="email"
+              type="email"
+              size="lg"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="you@example.com"
+              autoComplete="username webauthn"
+              inputMode="email"
+            />
+          </div>
+          <Button type="submit" variant="outline" loading={linkLoading} className="w-full gap-2">
+            <Mail size={16} />
+            Email me a sign-in link
+          </Button>
+        </form>
+      </div>
 
       <p className="text-center text-sm text-muted-foreground">
-        {noAccountLabel.replace("?", "")}
-        {noAccountLabel.includes("?") ? <span className="font-sans">?</span> : null}{" "}
+        New to Paperbase?{" "}
         <Link
-          href="/signup"
+          href={withNext("/signup", nextPath)}
           className="font-medium text-foreground underline-offset-4 hover:underline"
         >
-          {t("signUp")}
+          Create an account
         </Link>
       </p>
     </AuthPageShell>

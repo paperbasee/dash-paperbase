@@ -3,7 +3,13 @@
 import { DeferredNavLink } from "@/components/navigation/DeferredNavLink";
 import { ArrowLeft } from "lucide-react";
 import type { SettingsSection } from "@/app/[locale]/(dashboard)/settings/settingsSections";
-import { SECTIONS } from "@/app/[locale]/(dashboard)/settings/settingsSections";
+import {
+  SECTIONS,
+  SECTION_OWNER_ONLY,
+  SECTION_PERMISSION,
+  sectionMatchesPermission,
+} from "@/app/[locale]/(dashboard)/settings/settingsSections";
+import { usePermissions } from "@/context/PermissionsContext";
 import { cn } from "@/lib/utils";
 
 export default function SettingsSidebarNav({
@@ -25,6 +31,11 @@ export default function SettingsSidebarNav({
   tBackToHomeLabel: string;
   tSettings: (key: string) => string;
 }) {
+  const { has, isOwner, isSuperuser } = usePermissions();
+  const visibleSections = SECTIONS.filter((row) => {
+    if (SECTION_OWNER_ONLY[row.id] && !(isOwner || isSuperuser)) return false;
+    return sectionMatchesPermission(SECTION_PERMISSION[row.id], has);
+  });
   return (
     <>
       {!collapsed && (
@@ -55,7 +66,7 @@ export default function SettingsSidebarNav({
         </span>
       </DeferredNavLink>
 
-      {SECTIONS.map((row) => {
+      {visibleSections.map((row) => {
         const id = row.id;
         const Icon = row.icon;
         const label = "labelKey" in row ? tSettings(row.labelKey) : row.displayLabel;

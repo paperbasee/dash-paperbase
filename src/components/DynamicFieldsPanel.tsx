@@ -20,6 +20,7 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 import { GripVertical, ChevronDown, Plus, Trash2 } from "lucide-react";
 import { useExtraFieldsSchema } from "@/hooks/useExtraFieldsSchema";
+import { usePermissions } from "@/context/PermissionsContext";
 import type { ExtraFieldDefinition, ExtraFieldType } from "@/types/extra-fields";
 import { cn } from "@/lib/utils";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
@@ -367,6 +368,10 @@ export function DynamicFieldsPanel({
     reorderFields,
     save,
   } = useExtraFieldsSchema("product");
+  // Editing the product extra-field schema requires products.edit; view-only
+  // roles (e.g. products.view without .edit) can browse but not add/save.
+  const { has } = usePermissions();
+  const canEdit = has("products.edit");
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -548,8 +553,10 @@ export function DynamicFieldsPanel({
             className={cn(
               "inline-flex h-9 items-center gap-1.5 rounded-[var(--border-radius-md)] border-[0.5px] border-[var(--color-border-secondary)] bg-[var(--color-background-secondary)] px-2.5 text-[13px] font-normal text-[var(--color-text-primary)]",
               transitionStyle,
-              "hover:border-[var(--color-border-primary)]"
+              "hover:border-[var(--color-border-primary)]",
+              "disabled:cursor-not-allowed disabled:opacity-50"
             )}
+            disabled={!canEdit}
             onClick={handleAddField}
           >
             <Plus className="size-3.5 shrink-0" strokeWidth={1.75} aria-hidden />
@@ -557,7 +564,7 @@ export function DynamicFieldsPanel({
           </button>
           <button
             type="button"
-            disabled={saveLoading}
+            disabled={saveLoading || !canEdit}
             className={cn(
               "inline-flex h-9 items-center gap-1.5 rounded-[var(--border-radius-md)] border-[0.5px] border-[var(--color-border-primary)] bg-[var(--color-text-primary)] px-2.5 text-[13px] font-medium text-[var(--color-background-primary)]",
               transitionStyle,

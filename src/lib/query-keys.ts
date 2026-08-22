@@ -6,6 +6,11 @@ export const navCountsQueryKey = ["nav-counts"] as const;
 
 export const featuresQueryKey = ["features"] as const;
 
+export const myPermissionsQueryKey = ["me", "permissions"] as const;
+export const teamRolesQueryKey = ["team", "roles"] as const;
+export const teamMembersQueryKey = ["team", "members"] as const;
+export const teamInvitesQueryKey = ["team", "invites"] as const;
+
 export const systemNotificationActiveQueryKey = ["system-notifications", "active"] as const;
 
 export const inventoryCountsQueryKey = ["inventory", "counts"] as const;

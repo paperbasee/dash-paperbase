@@ -7,6 +7,9 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useEnterNavigation } from "@/hooks/useEnterNavigation";
+import { useAuth } from "@/context/AuthContext";
+import { usePermissions } from "@/context/PermissionsContext";
+import { maskEmail } from "@/lib/mask-email";
 import {
   SettingsSectionBody,
   settingsInvertedButtonClassName,
@@ -37,6 +40,19 @@ export default function AccountSection({
   const t = useTranslations("settings");
   const formRef = useRef<HTMLFormElement>(null);
   const { handleKeyDown } = useEnterNavigation(() => formRef.current?.requestSubmit());
+  const { meProfile } = useAuth();
+  const { isOwner, isSuperuser } = usePermissions();
+  // "My Account" is visible to everyone (each user manages their own passkeys and
+  // sees their own email/role below). Only the store-OWNER identity form is
+  // owner-only, so staff never see or edit the owner's name/email.
+  const canEditOwnerIdentity = isOwner || isSuperuser;
+  // The signed-in user's own identity (distinct from the store owner details
+  // edited below) — so a moderator sees their own email and role, not the owner's.
+  const myEmail = meProfile?.email?.trim() || "";
+  const myRole = meProfile?.store?.role?.trim() || "";
+  // Role-scoped, dynamic label: "Owner email" for the owner, "Moderator email"
+  // for staff, etc. (role names are merchant-defined and not localized).
+  const accountEmailLabel = myRole ? `${myRole} email` : t("account.heading");
   return (
     <section
       id="panel-account"
@@ -47,6 +63,21 @@ export default function AccountSection({
     >
       {!isLoading ? (
         <SettingsSectionBody>
+          {myEmail && (
+            <div className="rounded-card border border-border bg-muted/30 p-4">
+              <p className="text-sm font-medium text-foreground">
+                {accountEmailLabel}
+              </p>
+              <div className="mt-1.5 flex flex-wrap items-center gap-2">
+                <span className="truncate text-sm text-muted-foreground">
+                  {maskEmail(myEmail)}
+                </span>
+                {myRole && <Badge variant="secondary">{myRole}</Badge>}
+              </div>
+            </div>
+          )}
+
+          {canEditOwnerIdentity && (
           <form ref={formRef} onSubmit={onSubmit} className="w-full space-y-6">
           <div className="space-y-1">
             <h2 className="text-lg font-medium text-foreground">{t("account.heading")}</h2>
@@ -84,8 +115,10 @@ export default function AccountSection({
               </div>
               <Input
                 id="owner_email"
-                type="email"
-                value={ownerEmail}
+                type="text"
+                // Read-only display is masked; the real address stays in the
+                // controller's state, so form submit is unaffected.
+                value={maskEmail(ownerEmail)}
                 readOnly
                 tabIndex={-1}
                 className="w-full cursor-not-allowed bg-muted text-muted-foreground"
@@ -115,6 +148,7 @@ export default function AccountSection({
             {t("account.saveButton")}
           </Button>
           </form>
+          )}
         </SettingsSectionBody>
       ) : null}
     </section>

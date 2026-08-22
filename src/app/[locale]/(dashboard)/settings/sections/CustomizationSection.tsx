@@ -8,6 +8,7 @@ import { CustomizationShell } from "../_components/CustomizationShell";
 import { CardVariantPicker } from "../_components/CardVariantPicker";
 import { PalettePicker } from "../_components/PalettePicker";
 import { useThemeEditor } from "../_hooks/useThemeEditor";
+import { usePermissions } from "@/context/PermissionsContext";
 import { settingsSectionSurfaceClassName } from "../SettingsSectionBody";
 
 type SettingsMessage = { type: "success" | "error"; text: string } | null;
@@ -28,6 +29,11 @@ export default function CustomizationSection({
   const t = useTranslations("settings");
   const tc = useTranslations("settings.customization");
   const { theme, loading, saving, error, selectPalette, selectCardVariant } = useThemeEditor();
+  const { has } = usePermissions();
+  // Staff without theming.manage may view the current theme but not change it.
+  const canManageTheming = has("theming.manage");
+  // The language selector persists via store branding, which needs settings.manage.
+  const canManageSettings = has("settings.manage");
 
   return (
     <section
@@ -48,7 +54,7 @@ export default function CustomizationSection({
           <Select
             id="customization_store_language"
             value={language}
-            disabled={languageSaving}
+            disabled={languageSaving || !canManageSettings}
             onChange={(e) => {
               const next = e.target.value as "en" | "bn";
               void onLanguageChange(next);
@@ -82,12 +88,12 @@ export default function CustomizationSection({
             <PalettePicker
               selectedPalette={theme?.palette ?? null}
               onSelect={selectPalette}
-              disabled={saving}
+              disabled={saving || !canManageTheming}
             />
             <CardVariantPicker
               selectedVariant={theme?.card_variant ?? null}
               onSelect={selectCardVariant}
-              disabled={saving}
+              disabled={saving || !canManageTheming}
             />
             {saving ? (
               <p className="text-xs text-muted-foreground">{t("saving")}</p>

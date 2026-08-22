@@ -10,6 +10,7 @@ import DashboardStatusFooter from "@/components/dashboard/DashboardStatusFooter"
 import type { DateRangeValue } from "@/components/DateRangeFilter";
 import { useDashboardAnalyticsQuery } from "@/hooks/useDashboardAnalyticsQuery";
 import { useNavCounts } from "@/hooks/useNavCounts";
+import { useApiLatency } from "@/hooks/useApiLatency";
 import { useBrandingQuery } from "@/hooks/useBrandingQuery";
 import { useDashboardRefresh } from "@/context/DashboardRefreshContext";
 import { resolvePreset } from "@/lib/date-range-presets";
@@ -93,6 +94,7 @@ export default function DashboardPage() {
   });
 
   const { isError: navCountsError } = useNavCounts();
+  const latencyMs = useApiLatency();
 
   const summary = data?.summary;
   const previousSummary = previousData?.summary;
@@ -185,7 +187,7 @@ export default function DashboardPage() {
         <DashboardComingSoonCard className="aspect-square w-full py-6 sm:py-8" minHeightClass="min-h-0" />
       </section>
 
-      <DashboardStatusFooter apiHealthy={apiHealthy} latencyMs={null} />
+      <DashboardStatusFooter apiHealthy={apiHealthy} latencyMs={latencyMs} />
     </div>
   );
 }

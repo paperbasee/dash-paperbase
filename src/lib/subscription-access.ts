@@ -32,6 +32,9 @@ export interface MeSubscription {
 export interface MeForRouting {
   /** User public_id from auth/me/; used for cache key when JWT omits user_public_id. */
   public_id?: string;
+  /** Logged-in user's own identity (distinct from the store owner's branding). */
+  email?: string;
+  full_name?: string;
   is_moderator?: boolean;
   is_superuser?: boolean;
   active_store_public_id: string | null;

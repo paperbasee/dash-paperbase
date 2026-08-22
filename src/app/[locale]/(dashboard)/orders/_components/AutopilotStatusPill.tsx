@@ -6,13 +6,18 @@ import { DeferredNavLink } from "@/components/navigation/DeferredNavLink";
 import { cn } from "@/lib/utils";
 import { useFeatures } from "@/hooks/useFeatures";
 import { useStoreSettingsCurrentQuery } from "@/hooks/useStoreSettingsCurrentQuery";
+import { usePermissions } from "@/context/PermissionsContext";
 
 const SETTINGS_HREF = "/settings?tab=checkout#autopilot";
 
 export function AutopilotStatusPill() {
   const { hasFeature, loading: featuresLoading } = useFeatures();
   const { data, isLoading } = useStoreSettingsCurrentQuery();
+  const { isOwner } = usePermissions();
 
+  // Autopilot is owner-only (its settings panel is hidden from non-owners), and
+  // both states of this pill link there — so don't surface it to anyone else.
+  if (!isOwner) return null;
   if (featuresLoading || isLoading) return null;
   if (!hasFeature("fraud_check")) return null;
 

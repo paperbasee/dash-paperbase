@@ -31,7 +31,8 @@ export default function TrashPage() {
   const numClass = numberTextClass(locale);
   const tPages = useTranslations("pages");
   const tNav = useTranslations("nav");
-  const { canDelete, loading: capsLoading } = useAdminDeleteCapabilities();
+  const { canViewTrash, canManageTrash, loading: capsLoading } =
+    useAdminDeleteCapabilities();
   const confirm = useConfirm();
   const queryClient = useQueryClient();
 
@@ -43,7 +44,7 @@ export default function TrashPage() {
     void queryClient.invalidateQueries({ queryKey: ordersListQueryKeyRoot });
     void queryClient.invalidateQueries({ queryKey: navCountsQueryKey });
   }, [queryClient, page]);
-  const trashEnabled = !capsLoading && canDelete;
+  const trashEnabled = !capsLoading && canViewTrash;
   const {
     data: trashData,
     isLoading: trashLoading,
@@ -51,9 +52,9 @@ export default function TrashPage() {
     error: trashError,
   } = useTrashQuery(page, trashEnabled);
 
-  const rows = canDelete ? (trashData?.results ?? []) : [];
-  const count = canDelete ? (trashData?.count ?? 0) : 0;
-  const hasNext = canDelete ? (trashData?.hasNext ?? false) : false;
+  const rows = canViewTrash ? (trashData?.results ?? []) : [];
+  const count = canViewTrash ? (trashData?.count ?? 0) : 0;
+  const hasNext = canViewTrash ? (trashData?.hasNext ?? false) : false;
   const loading = capsLoading || (trashEnabled && trashLoading);
   const [error, setError] = useState<string | null>(null);
 
@@ -259,7 +260,7 @@ export default function TrashPage() {
             <h1 className="text-2xl font-medium text-foreground">{tNav("trash")}</h1>
           </div>
         </div>
-        {canDelete && someSelected && (
+        {canManageTrash && someSelected && (
           <div className="flex flex-wrap items-center gap-2">
             <button
               type="button"
@@ -291,7 +292,7 @@ export default function TrashPage() {
         {tPages("trashSubtitle")}
       </p>
 
-      {!capsLoading && !canDelete ? (
+      {!capsLoading && !canViewTrash ? (
         <p className="text-sm text-muted-foreground">{tPages("trashForbidden")}</p>
       ) : !loading && error ? (
         <p className="text-sm text-destructive">{error}</p>
@@ -361,34 +362,36 @@ export default function TrashPage() {
                         {formatDashboardDateTime(row.expires_at, locale)}
                       </td>
                       <td className="whitespace-nowrap px-3 py-3 text-right align-middle">
-                        <div className="flex flex-nowrap items-center justify-end gap-2">
-                          <Button
-                            type="button"
-                            variant="secondary"
-                            size="sm"
-                            className="shrink-0 whitespace-nowrap"
-                            disabled={busy || bulkBusy}
-                            onClick={() => handleRestore(row)}
-                          >
-                            <Undo2 className="mr-1 size-3.5 shrink-0" />
-                            {tPages("trashRestore")}
-                          </Button>
-                          <Button
-                            type="button"
-                            variant="destructive"
-                            size="sm"
-                            className="shrink-0 whitespace-nowrap"
-                            disabled={busy || bulkBusy}
-                            onClick={() => handlePermanentDelete(row)}
-                          >
-                            {busy ? (
-                              <Loader2 className="mr-1 size-3.5 shrink-0 animate-spin" />
-                            ) : (
-                              <Trash className="mr-1 size-3.5 shrink-0" />
-                            )}
-                            {tPages("trashPermanentDelete")}
-                          </Button>
-                        </div>
+                        {canManageTrash ? (
+                          <div className="flex flex-nowrap items-center justify-end gap-2">
+                            <Button
+                              type="button"
+                              variant="secondary"
+                              size="sm"
+                              className="shrink-0 whitespace-nowrap"
+                              disabled={busy || bulkBusy}
+                              onClick={() => handleRestore(row)}
+                            >
+                              <Undo2 className="mr-1 size-3.5 shrink-0" />
+                              {tPages("trashRestore")}
+                            </Button>
+                            <Button
+                              type="button"
+                              variant="destructive"
+                              size="sm"
+                              className="shrink-0 whitespace-nowrap"
+                              disabled={busy || bulkBusy}
+                              onClick={() => handlePermanentDelete(row)}
+                            >
+                              {busy ? (
+                                <Loader2 className="mr-1 size-3.5 shrink-0 animate-spin" />
+                              ) : (
+                                <Trash className="mr-1 size-3.5 shrink-0" />
+                              )}
+                              {tPages("trashPermanentDelete")}
+                            </Button>
+                          </div>
+                        ) : null}
                       </td>
                     </tr>
                   );

@@ -9,6 +9,7 @@ import {
   buildApiUrl,
   isApiHttpError,
 } from "@/lib/api-client";
+import { recordApiLatency } from "@/lib/api-latency";
 
 type RefreshResponse = {
   access?: unknown;
@@ -24,7 +25,7 @@ const REFRESH_TIMEOUT_MS = 15_000;
 const PROACTIVE_REFRESH_LEEWAY_MS = 10_000;
 const RECENT_ROTATION_WINDOW_MS = 30_000;
 const LAST_ROTATED_AT_KEY = "paperbase_token_rotated_at";
-const ME_PROFILE_STORAGE_KEY = "paperbase_me_profile_v6";
+const ME_PROFILE_STORAGE_KEY = "paperbase_me_profile_v7";
 const REFRESH_LOCK_NAME = "paperbase-token-refresh";
 
 const RETRY_AFTER_401 = Symbol("paperbaseApiRetry401");
@@ -365,6 +366,7 @@ async function executeRequest<T>(
   }
 
   let res: Response;
+  const requestStartedAt = performance.now();
   try {
     res = await fetch(url, {
       method,
@@ -372,6 +374,7 @@ async function executeRequest<T>(
       body: reqBody,
       signal: mergedSignal,
     });
+    recordApiLatency(performance.now() - requestStartedAt);
   } catch (cause) {
     throw new ApiTransportError(
       cause instanceof Error ? cause.message : "Network request failed",

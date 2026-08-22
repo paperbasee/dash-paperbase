@@ -62,12 +62,8 @@ import { FraudCheckButton } from "./_components/FraudCheckButton";
 import { AutopilotStatusPill } from "./_components/AutopilotStatusPill";
 import type { FraudCheckApiOk, FraudCheckState } from "./_components/types";
 import { useFeatures } from "@/hooks/useFeatures";
-import { useAuth } from "@/context/AuthContext";
 import { useNavCounts } from "@/hooks/useNavCounts";
-import {
-  canUserDeleteProducts,
-  type MeForProductDeletePermission,
-} from "@/lib/product-delete-permission";
+import { usePermissions } from "@/context/PermissionsContext";
 
 const FraudCheckDialog = dynamic(
   () => import("./_components/FraudCheckDialog").then((mod) => mod.FraudCheckDialog),
@@ -327,12 +323,9 @@ export default function OrdersPage() {
   } | null>(null);
   const { hasFeature } = useFeatures();
   const canFraudCheck = hasFeature("fraud_check");
-  const { meProfile } = useAuth();
   const { counts: navCounts } = useNavCounts();
-  const canExportOrders = Boolean(
-    meProfile &&
-      canUserDeleteProducts(meProfile as MeForProductDeletePermission)
-  );
+  const { has: hasPermission, isOwner } = usePermissions();
+  const canExportOrders = hasPermission("orders.export");
 
   const deliveryPillOptions: { value: string; label: string }[] = [
     { value: "", label: "All" },
@@ -1266,7 +1259,7 @@ export default function OrdersPage() {
                         }}
                         aria-label={String(order.order_number)}
                         className={cn(
-                          isNew && order.dispatched_by_autopilot
+                          isNew && isOwner && order.dispatched_by_autopilot
                             ? "rounded-none bg-[#EDE9FE] transition-colors duration-400 dark:bg-[#4C1D95]/20"
                             : isNew &&
                                 "rounded-none bg-[#EEF5FF] transition-colors duration-400 dark:bg-[#0C447C]/20"
@@ -1299,7 +1292,7 @@ export default function OrdersPage() {
                             <span
                               className={cn(
                                 "text-sm leading-none",
-                                isNew && order.dispatched_by_autopilot
+                                isNew && isOwner && order.dispatched_by_autopilot
                                   ? "font-medium text-violet-700 dark:text-violet-300"
                                   : isNew
                                     ? "font-medium text-[#185FA5] dark:text-[#85B7EB]"
@@ -1308,7 +1301,7 @@ export default function OrdersPage() {
                             >
                               {order.order_number}
                             </span>
-                            {order.dispatched_by_autopilot && (
+                            {isOwner && order.dispatched_by_autopilot && (
                               <span
                                 className="inline-flex items-center gap-1 text-[10px] font-medium leading-none text-muted-foreground"
                                 title="This order was confirmed and dispatched by autopilot"

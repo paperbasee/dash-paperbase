@@ -21,6 +21,9 @@ const PUBLIC_PATHS = [
   "/auth",
   "/order",
   "/billing",
+  // Team invite accept: recipients may not be signed in (or have no account)
+  // yet. The page previews anonymously and prompts sign-in only to accept.
+  "/team/invite",
 ];
 
 function stripLocalePath(pathname: string): string {

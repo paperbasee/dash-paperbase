@@ -14,6 +14,7 @@ import {
 } from "@/lib/auth-email";
 import { useRateLimitCooldown, extractRateLimitInfo } from "@/hooks/useRateLimitCooldown";
 import { useMinDelayLoading } from "@/hooks/useMinDelayLoading";
+import { getSafeNextPath, withNext } from "@/lib/safe-next";
 import { remainingResendCooldownSeconds } from "@/lib/email-verification-resend-policy";
 import {
   PENDING_VERIFICATION_EMAIL_KEY,
@@ -60,6 +61,10 @@ export default function VerifyEmailContent() {
   const emailParam = searchParams.get("email") ?? "";
   const signupTimeRaw = searchParams.get("signup_time") ?? "";
   const decodedEmail = decodeEmailParam(emailParam);
+  // Carry a return path (e.g. a team invite) onto the "Log in" links so the
+  // last hop lands the verified account back where it started.
+  const nextPath = getSafeNextPath(searchParams.get("next"));
+  const loginHref = withNext("/login", nextPath);
 
   const [linkStatus, setLinkStatus] = useState<
     "idle" | "loading" | "success" | "error"
@@ -208,7 +213,7 @@ export default function VerifyEmailContent() {
 
           <div className="mx-auto w-11/12 max-w-sm space-y-6 sm:w-full">
             <Button asChild className="mt-2 w-full">
-              <Link href="/login">{t("logIn")}</Link>
+              <Link href={loginHref}>{t("logIn")}</Link>
             </Button>
           </div>
         </div>
@@ -226,7 +231,7 @@ export default function VerifyEmailContent() {
 
         <div className="mx-auto w-11/12 max-w-sm space-y-6 sm:w-full">
           <Button asChild variant="outline" className="mt-2 w-full">
-            <Link href="/login">{t("backToLogin")}</Link>
+            <Link href={loginHref}>{t("backToLogin")}</Link>
           </Button>
         </div>
       </div>
@@ -292,7 +297,7 @@ export default function VerifyEmailContent() {
 
       <p className="text-center text-sm text-muted-foreground">
         <Link
-          href="/login"
+          href={loginHref}
           className="font-medium text-foreground underline-offset-4 hover:underline"
         >
           {t("backToLogin")}

@@ -112,7 +112,7 @@ export default function ProductDetailClient() {
   } = useProductDetailQuery(publicId ?? "");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
-  const { canDelete: canDeleteProduct, isSuperuser: deleteIsSuperuser } =
+  const { canDeleteProducts: canDeleteProduct, isSuperuser: deleteIsSuperuser } =
     useAdminDeleteCapabilities();
   const confirm = useConfirm();
   const queryClient = useQueryClient();

@@ -12,6 +12,7 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import AccountSection from "./sections/AccountSection";
+import PasskeysManager from "./sections/PasskeysManager";
 import StoreInfoSection from "./sections/StoreInfoSection";
 import DynamicFieldsSection from "./sections/DynamicFieldsSection";
 import AppsSection from "./sections/AppsSection";
@@ -19,11 +20,19 @@ import IntegrationsSection from "./sections/IntegrationsSection";
 import NetworkingSection from "./sections/NetworkingSection";
 import NotificationsSection from "./sections/NotificationsSection";
 import SecuritySection from "./sections/SecuritySection";
+import TeamSection from "./sections/team/TeamSection";
 import BillingSection from "./sections/BillingSection";
 import CustomizationSection from "./sections/CustomizationSection";
 import CheckoutSettingsSection from "./sections/CheckoutSettingsSection";
 import { SettingsSectionNav } from "./SettingsNav";
-import { SECTIONS, type SettingsSection } from "./settingsSections";
+import {
+  SECTIONS,
+  SECTION_OWNER_ONLY,
+  SECTION_PERMISSION,
+  sectionMatchesPermission,
+  type SettingsSection,
+} from "./settingsSections";
+import { usePermissions } from "@/context/PermissionsContext";
 import { settingsInvertedButtonClassName } from "./SettingsSectionBody";
 import useSettingsPageController from "./useSettingsPageController";
 import { useDeferredNavigate } from "@/hooks/useDeferredNavigate";
@@ -37,6 +46,16 @@ export default function SettingsPage() {
 
   const validSectionIds = useMemo(() => new Set(SECTIONS.map((s) => s.id)), []);
 
+  const { has, isOwner, isSuperuser } = usePermissions();
+  const visibleSectionIds = useMemo(
+    () =>
+      SECTIONS.filter((row) => {
+        if (SECTION_OWNER_ONLY[row.id] && !(isOwner || isSuperuser)) return false;
+        return sectionMatchesPermission(SECTION_PERMISSION[row.id], has);
+      }).map((s) => s.id),
+    [has, isOwner, isSuperuser],
+  );
+
   useEffect(() => {
     const raw = (searchParams.get("tab") || "").trim();
     if (!raw) return;
@@ -44,6 +63,15 @@ export default function SettingsPage() {
     const next = raw as SettingsSection;
     setActiveSection((prev) => (prev === next ? prev : next));
   }, [searchParams, validSectionIds]);
+
+  useEffect(() => {
+    // If the active section isn't one this role can see (e.g. a staff member on
+    // the default "store"), fall back to their first available section so they
+    // never land on a panel that's missing from their nav.
+    if (visibleSectionIds.length > 0 && !visibleSectionIds.includes(activeSection)) {
+      setActiveSection(visibleSectionIds[0]);
+    }
+  }, [visibleSectionIds, activeSection]);
 
   function setSection(next: SettingsSection) {
     const current = (searchParams.get("tab") || "").trim();
@@ -172,6 +200,12 @@ export default function SettingsPage() {
             onSubmit={handleAccountSubmit}
           />
 
+          {activeSection === "account" && (
+            <div className="mt-6">
+              <PasskeysManager />
+            </div>
+          )}
+
           <StoreInfoSection
             hidden={activeSection !== "store"}
             previewUrl={previewUrl}
@@ -233,6 +267,8 @@ export default function SettingsPage() {
             orderEmailFeatureLoading={orderEmailFeatureLoading}
             emailPrefsSaving={emailPrefsSaving}
           />
+
+          <TeamSection hidden={activeSection !== "team"} />
 
           <SecuritySection hidden={activeSection !== "security"} />
 

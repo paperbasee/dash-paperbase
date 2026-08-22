@@ -19,6 +19,7 @@ import {
 import { useConfirm } from "@/context/ConfirmDialogContext";
 import { notify } from "@/notifications";
 import { useAuth } from "@/context/AuthContext";
+import { usePermissions } from "@/context/PermissionsContext";
 import { isNetworkingStoreUnderReview } from "@/lib/subscription-ui-state";
 import { useEnterNavigation } from "@/hooks/useEnterNavigation";
 import { useApiKeysQuery, type APIKeyRow } from "@/hooks/useApiKeysQuery";
@@ -82,8 +83,11 @@ export default function NetworkingSection({ hidden }: { hidden: boolean }) {
     }
   }, [hidden, showOnboardingInactiveHintEligible]);
 
+  // Creating/rotating/revoking API keys needs api_keys.manage; view-only roles
+  // (api_keys.view) can see keys but not mutate them.
+  const canManageApiKeys = usePermissions().has("api_keys.manage");
   const networkingActionsLocked =
-    subscriptionLocked || planExpired || storeUnderReview;
+    subscriptionLocked || planExpired || storeUnderReview || !canManageApiKeys;
   const queryClient = useQueryClient();
   const {
     data: keys = [],
