@@ -1466,7 +1466,7 @@
       "ownerNamePlaceholder": "e.g. John Doe",
       "ownerEmail": "Owner email",
       "emailVerified": "Verified",
-      "emailReadonlyHint": "Your email address cannot be changed from the dashboard. Contact support if you need to update it.",
+      "emailReadonlyHint": "Owner email address cannot be changed from the dashboard. Contact support if you need to update it.",
       "saveButton": "Save account settings",
       "saved": "Account settings saved.",
       "saveFailed": "Failed to save account settings.",
