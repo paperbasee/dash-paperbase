@@ -10,16 +10,17 @@ import {
   type ReactNode,
 } from "react";
 import {
-  login as authLogin,
-  register as authRegister,
+  signup as authSignup,
+  passkeyLogin as authPasskeyLogin,
+  enrollPasskey as authEnrollPasskey,
+  requestMagicLink as authRequestMagicLink,
+  verifyMagicLink as authVerifyMagicLink,
   logout as authLogout,
-  verifyTwoFactorChallenge as authVerifyTwoFactorChallenge,
-  requestTwoFactorChallengeRecoveryCode as authRequestTwoFactorChallengeRecoveryCode,
-  verifyTwoFactorChallengeRecovery as authVerifyTwoFactorChallengeRecovery,
-  type LoginResult,
-  type LoginResponse,
-  type PendingTwoFactorResponse,
-  type RegisterResponse,
+  type AuthTokens,
+  type SignupResponse,
+  type MagicLinkPurpose,
+  type MagicLinkVerifyResult,
+  type PasskeyInfo,
 } from "@/lib/auth";
 import { clearPendingVerificationEmail } from "@/lib/verification-state";
 import type { MeForRouting } from "@/lib/subscription-access";
@@ -35,7 +36,6 @@ export type MeProfileStatus = "idle" | "loading" | "ready" | "error";
 
 interface AuthState {
   isAuthenticated: boolean;
-  pendingTwoFactor: PendingTwoFactorResponse | null;
   isLoading: boolean;
   isLoggingOut: boolean;
   /** True after first client mount (avoids SSR/client hydration mismatch for auth-derived UI). */
@@ -47,25 +47,24 @@ interface AuthState {
   /** Raw error from the last failed ensureMeProfile call; null when status is not "error". */
   meProfileError: unknown;
   refreshMeProfile: () => Promise<void>;
-  login: (email: string, password: string, cf_turnstile_response?: string) => Promise<LoginResult>;
-  register: (
+  /** Passwordless sign-in with a passkey (discoverable when no email given). */
+  signInWithPasskey: (email?: string) => Promise<AuthTokens>;
+  signup: (
     email: string,
-    password: string,
-    password_confirm: string,
+    firstName: string,
+    lastName: string,
     cf_turnstile_response?: string
-  ) => Promise<RegisterResponse | PendingTwoFactorResponse>;
-  verifyTwoFactorChallenge: (
-    challengeId: string,
-    code: string
-  ) => Promise<LoginResponse>;
-  requestTwoFactorChallengeRecoveryCode: (
-    challengeId: string,
-    email: string
-  ) => Promise<{ detail: string; sent: boolean }>;
-  verifyTwoFactorChallengeRecovery: (
-    challengeId: string,
-    code: string
-  ) => Promise<LoginResponse>;
+  ) => Promise<SignupResponse>;
+  /** Create a passkey; bootstrap flows pass a ticket and get logged in. */
+  enrollPasskey: (opts: {
+    enrollmentTicket?: string;
+    name?: string;
+  }) => Promise<{ tokens?: AuthTokens; credential: PasskeyInfo }>;
+  requestMagicLink: (
+    email: string,
+    purpose: MagicLinkPurpose
+  ) => Promise<{ message: string }>;
+  verifyMagicLink: (token: string) => Promise<MagicLinkVerifyResult>;
   logout: () => void;
 }
 
@@ -87,7 +86,6 @@ function isTokenExpired(token: string): boolean {
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [pendingTwoFactor, setPendingTwoFactor] = useState<PendingTwoFactorResponse | null>(null);
   const [isLoading] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [authHydrated, setAuthHydrated] = useState(false);
@@ -224,7 +222,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const now = Date.now();
         if (now - lastRemoteLogoutAt.current < 400) return;
         lastRemoteLogoutAt.current = now;
-        setPendingTwoFactor(null);
         setIsAuthenticated(false);
         setMeProfileFromStore(null, "idle");
         setMeProfileFetching(false);
@@ -286,64 +283,51 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [isAuthenticated, setMeProfileFromStore]);
 
-  const login = useCallback(async (email: string, password: string, cf_turnstile_response?: string) => {
-    const result = await authLogin(email, password, cf_turnstile_response);
-    if ("2fa_required" in result) {
-      setPendingTwoFactor(result);
-      setIsAuthenticated(false);
-      return result;
-    }
-    setPendingTwoFactor(null);
+  const signInWithPasskey = useCallback(async (email?: string) => {
+    const tokens = await authPasskeyLogin(email);
     setIsAuthenticated(true);
     clearPendingVerificationEmail();
-    return result;
+    return tokens;
   }, []);
 
-  const register = useCallback(
-    async (email: string, password: string, password_confirm: string, cf_turnstile_response?: string) => {
-      const result = await authRegister(email, password, password_confirm, cf_turnstile_response);
-      if ("2fa_required" in result) {
-        setPendingTwoFactor(result);
-        setIsAuthenticated(false);
-        return result;
+  const signup = useCallback(
+    async (email: string, firstName: string, lastName: string, cf?: string) => {
+      return authSignup(email, firstName, lastName, cf);
+    },
+    []
+  );
+
+  const enrollPasskey = useCallback(
+    async (opts: { enrollmentTicket?: string; name?: string }) => {
+      const result = await authEnrollPasskey(opts);
+      if (result.tokens) {
+        setIsAuthenticated(true);
+        clearPendingVerificationEmail();
       }
-      setPendingTwoFactor(null);
-      setIsAuthenticated(false);
       return result;
     },
     []
   );
 
-  const verifyTwoFactorChallenge = useCallback(async (
-    challengeId: string,
-    code: string
-  ) => {
-    const result = await authVerifyTwoFactorChallenge(challengeId, code);
-    setPendingTwoFactor(null);
-    setIsAuthenticated(true);
-    clearPendingVerificationEmail();
-    return result;
-  }, []);
+  const requestMagicLink = useCallback(
+    async (email: string, purpose: MagicLinkPurpose) => {
+      return authRequestMagicLink(email, purpose);
+    },
+    []
+  );
 
-  const requestTwoFactorChallengeRecoveryCode = useCallback(async (challengeId: string, email: string) => {
-    return authRequestTwoFactorChallengeRecoveryCode(challengeId, email);
-  }, []);
-
-  const verifyTwoFactorChallengeRecovery = useCallback(async (
-    challengeId: string,
-    code: string
-  ) => {
-    const result = await authVerifyTwoFactorChallengeRecovery(challengeId, code);
-    setPendingTwoFactor(null);
-    setIsAuthenticated(true);
-    clearPendingVerificationEmail();
+  const verifyMagicLink = useCallback(async (token: string) => {
+    const result = await authVerifyMagicLink(token);
+    if (result.action === "signed_in") {
+      setIsAuthenticated(true);
+      clearPendingVerificationEmail();
+    }
     return result;
   }, []);
 
   const logout = useCallback(() => {
     setIsLoggingOut(true);
     authLogout();
-    setPendingTwoFactor(null);
     setIsAuthenticated(false);
   }, []);
 
@@ -351,7 +335,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     <AuthContext.Provider
       value={{
         isAuthenticated,
-        pendingTwoFactor,
         isLoading,
         isLoggingOut,
         authHydrated,
@@ -360,11 +343,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         meProfileStatus,
         meProfileError,
         refreshMeProfile,
-        login,
-        register,
-        verifyTwoFactorChallenge,
-        requestTwoFactorChallengeRecoveryCode,
-        verifyTwoFactorChallengeRecovery,
+        signInWithPasskey,
+        signup,
+        enrollPasskey,
+        requestMagicLink,
+        verifyMagicLink,
         logout,
       }}
     >
