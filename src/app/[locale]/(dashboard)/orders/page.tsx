@@ -76,6 +76,14 @@ const OrderPreviewDialog = dynamic(
   { ssr: false, loading: () => null }
 );
 
+/** Must match ``AdminOrderViewSet._list_ordering`` on the API. */
+const ORDER_SORT_OPTIONS = [
+  { value: "newest", label: "Newest first" },
+  { value: "oldest", label: "Oldest first" },
+  { value: "total_desc", label: "Highest total" },
+  { value: "total_asc", label: "Lowest total" },
+];
+
 type OrderExportPollResponse = {
   status: string;
   progress: number;
@@ -89,6 +97,19 @@ function courierCell(order: Order): string {
   if (!order.sent_to_courier) return "—";
   const c = (order.courier_consignment_id || "").trim();
   return c || "—";
+}
+
+/** Compact "4h ago" / "3d ago" label for courier tracking freshness. */
+function relativeTimeShort(iso: string | null | undefined): string | null {
+  if (!iso) return null;
+  const then = new Date(iso).getTime();
+  if (!Number.isFinite(then)) return null;
+  const mins = Math.floor((Date.now() - then) / 60000);
+  if (mins < 1) return "just now";
+  if (mins < 60) return `${mins}m ago`;
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return `${hours}h ago`;
+  return `${Math.floor(hours / 24)}d ago`;
 }
 
 function deliveryStatusBadge(order: Order) {
@@ -123,13 +144,32 @@ function deliveryStatusBadge(order: Order) {
     },
   };
   const hit = cfg[s] || cfg.unknown;
+  const updated = relativeTimeShort(order.delivery_status_updated_at);
+  const tracking = (order.last_tracking_message || "").trim();
+  // Courier tracking detail lives in the tooltip; the cell keeps a one-line summary
+  // so the row height stays stable across a page of orders.
+  const tooltip = [
+    `Delivery status: ${hit.label}`,
+    updated ? `Updated ${updated}` : null,
+    tracking || null,
+  ]
+    .filter(Boolean)
+    .join("\n");
+
   return (
-    <span
-      className={`inline-flex items-center rounded-ui px-2 py-0.5 text-xs font-medium whitespace-nowrap ${hit.className}`}
-      aria-label={`Delivery status: ${hit.label}`}
-    >
-      {hit.label}
-    </span>
+    <div className="space-y-1" title={tooltip}>
+      <span
+        className={`inline-flex items-center rounded-ui px-2 py-0.5 text-xs font-medium whitespace-nowrap ${hit.className}`}
+        aria-label={`Delivery status: ${hit.label}`}
+      >
+        {hit.label}
+      </span>
+      {updated || tracking ? (
+        <p className="max-w-[200px] truncate text-[11px] leading-tight text-muted-foreground">
+          {tracking || `Updated ${updated}`}
+        </p>
+      ) : null}
+    </div>
   );
 }
 
@@ -218,15 +258,18 @@ export default function OrdersPage() {
   const { currencySymbol } = useBranding();
   const queryClient = useQueryClient();
   const confirm = useConfirm();
-  const { filters, setFilter, clearFilters } = useFilters([
+  const { filters, setFilter, setFilters, clearFilters } = useFilters([
     "customer",
     "status",
     "flag",
     "date_range",
+    "date_from",
+    "date_to",
     "payment_status",
     "delivery_status",
     "category",
     "search",
+    "ordering",
   ]);
   const [searchInput, setSearchInput] = useState(filters.search || "");
   const debouncedSearch = useDebouncedValue(searchInput);
@@ -250,21 +293,27 @@ export default function OrdersPage() {
     if (filters.status) params.status = filters.status;
     if (filters.flag) params.flag = filters.flag;
     if (filters.date_range) params.date_range = filters.date_range;
+    if (filters.date_from) params.date_from = filters.date_from;
+    if (filters.date_to) params.date_to = filters.date_to;
     if (filters.payment_status) params.payment_status = filters.payment_status;
     if (filters.delivery_status) params.delivery_status = filters.delivery_status;
     if (filters.category) params.category = filters.category;
     if (filters.search) params.search = filters.search;
+    if (filters.ordering) params.ordering = filters.ordering;
     return params;
   }, [
     listCursor,
     filters.customer,
     filters.date_range,
+    filters.date_from,
+    filters.date_to,
     filters.flag,
     filters.category,
     filters.payment_status,
     filters.delivery_status,
     filters.search,
     filters.status,
+    filters.ordering,
   ]);
 
   const { data: ordersPage, isLoading, isError, error, markOrderSeen } =
@@ -326,6 +375,11 @@ export default function OrdersPage() {
   const { counts: navCounts } = useNavCounts();
   const { has: hasPermission, isOwner } = usePermissions();
   const canExportOrders = hasPermission("orders.export");
+  // Fraud checks spend metered third-party quota, so the API gates them on
+  // orders.edit. Hide the control rather than reusing `locked`, which renders a
+  // "Premium Feature" label — misleading when the store's plan is fine and it is
+  // the role that lacks the permission.
+  const canRunFraudCheck = hasPermission("orders.edit");
 
   const deliveryPillOptions: { value: string; label: string }[] = [
     { value: "", label: "All" },
@@ -492,12 +546,15 @@ export default function OrdersPage() {
   }, [
     filters.customer,
     filters.date_range,
+    filters.date_from,
+    filters.date_to,
     filters.flag,
     filters.category,
     filters.payment_status,
     filters.delivery_status,
     filters.search,
     filters.status,
+    filters.ordering,
   ]);
 
   useEffect(() => {
@@ -505,12 +562,15 @@ export default function OrdersPage() {
   }, [
     filters.customer,
     filters.date_range,
+    filters.date_from,
+    filters.date_to,
     filters.flag,
     filters.category,
     filters.payment_status,
     filters.delivery_status,
     filters.search,
     filters.status,
+    filters.ordering,
   ]);
 
   const filtersActive = Boolean(
@@ -678,6 +738,8 @@ export default function OrdersPage() {
               status: filters.status || "",
               flag: filters.flag || "",
               date_range: filters.date_range || "",
+              date_from: filters.date_from || "",
+              date_to: filters.date_to || "",
               payment_status: filters.payment_status || "",
               delivery_status: filters.delivery_status || "",
               category: filters.category || "",
@@ -1053,17 +1115,26 @@ export default function OrdersPage() {
             );
           })}
         </div>
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          className="h-9 px-3"
-          aria-label="Toggle filters"
-          aria-expanded={filtersOpen}
-          onClick={() => setFiltersOpen((v) => !v)}
-        >
-          <FunnelIcon className="size-4" aria-hidden />
-        </Button>
+        <div className="flex items-center gap-2">
+          <FilterDropdown
+            value={filters.ordering || ""}
+            onChange={(value) => setFilter("ordering", value)}
+            placeholder="Sort"
+            options={ORDER_SORT_OPTIONS}
+            className="min-w-[150px]"
+          />
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="h-9 px-3"
+            aria-label="Toggle filters"
+            aria-expanded={filtersOpen}
+            onClick={() => setFiltersOpen((v) => !v)}
+          >
+            <FunnelIcon className="size-4" aria-hidden />
+          </Button>
+        </div>
       </div>
 
       {!isLoading ? (
@@ -1099,7 +1170,12 @@ export default function OrdersPage() {
           />
           <FilterDropdown
             value={filters.date_range}
-            onChange={(value) => setFilter("date_range", value)}
+            // Presets and an explicit window are mutually exclusive (the API ignores
+            // the preset when date_from/date_to are present) — clear one when the
+            // other is chosen so the controls never disagree with the results.
+            onChange={(value) =>
+              setFilters({ date_range: value, date_from: null, date_to: null })
+            }
             placeholder={tPages("filtersDateRange")}
             options={[
               { value: "today", label: tPages("filtersToday") },
@@ -1115,6 +1191,29 @@ export default function OrdersPage() {
               },
             ]}
           />
+          <div className="flex items-center gap-1.5">
+            <Input
+              type="date"
+              aria-label="Orders from date"
+              value={filters.date_from || ""}
+              max={filters.date_to || undefined}
+              onChange={(e) =>
+                setFilters({ date_from: e.target.value, date_range: null })
+              }
+              className="h-9 w-[150px]"
+            />
+            <span className="text-sm text-muted-foreground">–</span>
+            <Input
+              type="date"
+              aria-label="Orders to date"
+              value={filters.date_to || ""}
+              min={filters.date_from || undefined}
+              onChange={(e) =>
+                setFilters({ date_to: e.target.value, date_range: null })
+              }
+              className="h-9 w-[150px]"
+            />
+          </div>
           <FilterDropdown
             value={filters.payment_status}
             onChange={(value) => setFilter("payment_status", value)}
@@ -1311,20 +1410,49 @@ export default function OrdersPage() {
                               </span>
                             )}
                           </div>
+                          {typeof order.items_count === "number" ? (
+                            <p
+                              className={`mt-0.5 text-[11px] leading-tight text-muted-foreground ${numClass}`}
+                            >
+                              {tPages("ordersListItemCount", {
+                                count: order.items_count,
+                              })}
+                            </p>
+                          ) : null}
                         </td>
                         <td className="px-4 py-3 text-foreground whitespace-nowrap">
-                          {order.shipping_name || "—"}
+                          <span className="block">{order.shipping_name || "—"}</span>
+                          {order.district ? (
+                            <span className="block text-[11px] leading-tight text-muted-foreground">
+                              {order.district}
+                            </span>
+                          ) : null}
                         </td>
                         <td className="px-4 py-3 text-foreground whitespace-nowrap">
-                          {order.phone || "—"}
+                          {order.phone ? (
+                            <a
+                              href={`tel:${order.phone}`}
+                              // The row navigates on click; keep the dial action local.
+                              onClick={(e) => e.stopPropagation()}
+                              className={`hover:underline ${numClass}`}
+                            >
+                              {order.phone}
+                            </a>
+                          ) : (
+                            "—"
+                          )}
                         </td>
                         <td className="px-4 py-3 whitespace-nowrap">
-                          <FraudCheckButton
-                            loading={fraud.kind === "loading"}
-                            disabled={!order.phone}
-                            locked={!canFraudCheck}
-                            onClick={() => handleFraudCheck(order)}
-                          />
+                          {canRunFraudCheck ? (
+                            <FraudCheckButton
+                              loading={fraud.kind === "loading"}
+                              disabled={!order.phone}
+                              locked={!canFraudCheck}
+                              onClick={() => handleFraudCheck(order)}
+                            />
+                          ) : (
+                            <span className="text-xs text-muted-foreground">—</span>
+                          )}
                         </td>
                         <td className="px-4 py-3 whitespace-nowrap">
                           <div className="space-y-1">
@@ -1414,11 +1542,32 @@ export default function OrdersPage() {
                         >
                           {currencySymbol}
                           {Number(order.total).toLocaleString()}
+                          {Number(order.discount_total) > 0 ? (
+                            <span className="mt-0.5 block text-[11px] leading-tight text-emerald-700 dark:text-emerald-400">
+                              −{currencySymbol}
+                              {Number(order.discount_total).toLocaleString()}
+                            </span>
+                          ) : null}
                         </td>
                         <td className="px-4 py-3 whitespace-nowrap text-foreground">
-                          {formatOrderPaymentStatusLabel(order.payment_status, (key) =>
-                            tPages(key)
-                          )}
+                          <span className="block">
+                            {formatOrderPaymentStatusLabel(order.payment_status, (key) =>
+                              tPages(key)
+                            )}
+                          </span>
+                          {/* Prepayment reference, so staff can verify without opening the order. */}
+                          {order.transaction_id ? (
+                            <span
+                              className={`block text-[11px] leading-tight text-muted-foreground ${numClass}`}
+                              title={
+                                order.payer_number
+                                  ? `Payer: ${order.payer_number}`
+                                  : undefined
+                              }
+                            >
+                              {order.transaction_id}
+                            </span>
+                          ) : null}
                         </td>
                         <td
                           className={`px-4 py-3 text-muted-foreground whitespace-nowrap max-w-[220px] ${numClass}`}
