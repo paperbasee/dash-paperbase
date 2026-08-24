@@ -326,6 +326,11 @@ export default function OrdersPage() {
   const { counts: navCounts } = useNavCounts();
   const { has: hasPermission, isOwner } = usePermissions();
   const canExportOrders = hasPermission("orders.export");
+  // Fraud checks spend metered third-party quota, so the API gates them on
+  // orders.edit. Hide the control rather than reusing `locked`, which renders a
+  // "Premium Feature" label — misleading when the store's plan is fine and it is
+  // the role that lacks the permission.
+  const canRunFraudCheck = hasPermission("orders.edit");
 
   const deliveryPillOptions: { value: string; label: string }[] = [
     { value: "", label: "All" },
@@ -1319,12 +1324,16 @@ export default function OrdersPage() {
                           {order.phone || "—"}
                         </td>
                         <td className="px-4 py-3 whitespace-nowrap">
-                          <FraudCheckButton
-                            loading={fraud.kind === "loading"}
-                            disabled={!order.phone}
-                            locked={!canFraudCheck}
-                            onClick={() => handleFraudCheck(order)}
-                          />
+                          {canRunFraudCheck ? (
+                            <FraudCheckButton
+                              loading={fraud.kind === "loading"}
+                              disabled={!order.phone}
+                              locked={!canFraudCheck}
+                              onClick={() => handleFraudCheck(order)}
+                            />
+                          ) : (
+                            <span className="text-xs text-muted-foreground">—</span>
+                          )}
                         </td>
                         <td className="px-4 py-3 whitespace-nowrap">
                           <div className="space-y-1">
