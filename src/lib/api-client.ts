@@ -1,5 +1,21 @@
 const baseUrl = (): string => process.env.NEXT_PUBLIC_API_URL ?? "";
 
+/**
+ * THIS instance's public API origin (scheme+host, no path), derived from
+ * NEXT_PUBLIC_API_URL by stripping the trailing /api/v1. Use for user-facing URLs that
+ * must point at the tenant's own API (public API base shown to merchants, courier webhook
+ * callbacks) — never hardcode a paperbase host, which would misroute on other instances.
+ */
+export function apiOrigin(): string {
+  const raw = (process.env.NEXT_PUBLIC_API_URL ?? "").trim().replace(/\/+$/, "");
+  if (!raw) return "";
+  try {
+    return new URL(raw).origin;
+  } catch {
+    return raw.replace(/\/api\/v1$/, "");
+  }
+}
+
 export function joinBasePath(path: string): string {
   if (path.startsWith("http://") || path.startsWith("https://")) {
     return path;

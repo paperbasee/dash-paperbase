@@ -26,6 +26,7 @@ import {
   formatOrderStatusLabel,
 } from "@/lib/orders/order-statuses";
 import { ORDER_FLAG_OPTIONS, formatOrderFlagLabel } from "@/lib/orders/order-flags";
+import { formatOrderNumber } from "@/lib/orders/format-order-number";
 import { formatOrderPaymentStatusLabel } from "@/lib/orders/payment-statuses";
 import type {
   Order,
@@ -624,7 +625,7 @@ export default function OrderDetailPage() {
                 numClass
               )}
             >
-              #S-{order.order_number}
+              #S-{formatOrderNumber(order.order_number)}
             </h1>
           </div>
           <nav className="flex flex-wrap items-center gap-1 text-sm text-muted-foreground">
@@ -637,7 +638,7 @@ export default function OrderDetailPage() {
             </ClickableText>
             <span aria-hidden>/</span>
             <span className={numClass}>
-              S-{order.order_number} – {orderDateFormatted}
+              S-{formatOrderNumber(order.order_number)} – {orderDateFormatted}
             </span>
           </nav>
         </div>
@@ -1124,7 +1125,7 @@ export default function OrderDetailPage() {
                     {tPages("orderDetailOrderNumber")}
                   </label>
                   <Input
-                    value={order.order_number}
+                    value={formatOrderNumber(order.order_number)}
                     readOnly
                     className={cn("bg-muted/50", numClass)}
                     onKeyDown={handleKeyDown}
