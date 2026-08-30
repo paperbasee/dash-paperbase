@@ -10,6 +10,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useBranding } from "@/context/BrandingContext";
+import { formatOrderNumber } from "@/lib/orders/format-order-number";
 import { numberTextClass } from "@/lib/number-font";
 import { cn } from "@/lib/utils";
 import { OrderPreviewContent } from "./OrderPreviewContent";
@@ -35,7 +36,8 @@ export function OrderPreviewDialog({
   const { currencySymbol } = useBranding();
   const { order, loading, error } = useOrderPreview(orderPublicId, open);
 
-  const titleNumber = order?.order_number ?? orderNumber ?? "—";
+  const rawTitleNumber = order?.order_number ?? orderNumber;
+  const titleNumber = rawTitleNumber ? formatOrderNumber(rawTitleNumber) : "—";
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

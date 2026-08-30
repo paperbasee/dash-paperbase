@@ -8,6 +8,7 @@ import { ClickableTableRow } from "@/components/ui/clickable-table-row";
 import { Undo2 } from "lucide-react";
 import { useSupportTicketDetailQuery } from "@/hooks/useSupportTicketDetailQuery";
 import { formatDashboardDateTime } from "@/lib/datetime-display";
+import { formatOrderNumber } from "@/lib/orders/format-order-number";
 import { notify } from "@/notifications";
 
 function labelFromValue(value: string): string {
@@ -93,7 +94,7 @@ export default function SupportTicketDetailPage() {
                 <span className="text-muted-foreground">
                   {tPages("supportTicketDetailOrderNumber")}:
                 </span>{" "}
-                {ticket.order_number || "—"}
+                {formatOrderNumber(ticket.order_number) || "—"}
               </p>
             </div>
           </section>

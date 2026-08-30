@@ -19,6 +19,7 @@ export type StoreSettingsCurrent = {
   autopilot_min_success_ratio?: number;
   autopilot_min_total_parcels?: number;
   autopilot_max_order_value?: string | number;
+  invoice_terms?: string;
 };
 
 export async function fetchStoreSettingsCurrent(): Promise<StoreSettingsCurrent> {

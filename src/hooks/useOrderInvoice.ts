@@ -4,14 +4,21 @@ import api from "@/lib/api";
 import { isApiHttpError } from "@/lib/api-client";
 import { notify } from "@/notifications";
 
+/** Backend-reported generation stage (from the invoice task via Redis). */
+export type InvoiceStage = "queued" | "rendering" | "uploading";
+
 type InvoiceState =
   | { status: "idle" }
-  | { status: "generating" }
+  | { status: "generating"; stage: InvoiceStage }
   | { status: "ready"; url: string }
   | { status: "error"; message: string };
 
-const POLL_INTERVAL_MS = 3000;
-const MAX_POLLS = 40;
+const POLL_INTERVAL_MS = 1500;
+const MAX_POLLS = 80;
+
+function coerceStage(raw?: string): InvoiceStage {
+  return raw === "rendering" || raw === "uploading" ? raw : "queued";
+}
 
 export function useOrderInvoice(orderPublicId: string) {
   const [state, setState] = useState<InvoiceState>({ status: "idle" });
@@ -57,13 +64,15 @@ export function useOrderInvoice(orderPublicId: string) {
           return;
         }
         try {
-          const res = await api.get<{ ready: boolean; url: string }>(
+          const res = await api.get<{ ready: boolean; url: string; stage?: string }>(
             `admin/orders/${orderPublicId}/invoice/status/`,
           );
           if (res.data.ready && res.data.url) {
             stopPolling();
             setState({ status: "ready", url: res.data.url });
             openInvoiceInNewTabAndReset(res.data.url);
+          } else {
+            setState({ status: "generating", stage: coerceStage(res.data.stage) });
           }
         } catch {
           // Keep polling on transient errors
@@ -73,17 +82,19 @@ export function useOrderInvoice(orderPublicId: string) {
   }, [orderPublicId, stopPolling, openInvoiceInNewTabAndReset]);
 
   const getInvoice = useCallback(async () => {
-    setState({ status: "generating" });
+    setState({ status: "generating", stage: "queued" });
     try {
       const res = await api.get<{
         ready: boolean;
         url: string;
         status?: string;
+        stage?: string;
       }>(`admin/orders/${orderPublicId}/invoice/`);
       if (res.data.ready && res.data.url) {
         setState({ status: "ready", url: res.data.url });
         openInvoiceInNewTabAndReset(res.data.url);
       } else {
+        setState({ status: "generating", stage: coerceStage(res.data.stage) });
         startPolling();
       }
     } catch (err: unknown) {

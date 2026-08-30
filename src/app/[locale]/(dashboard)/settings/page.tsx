@@ -14,6 +14,7 @@ import {
 import AccountSection from "./sections/AccountSection";
 import PasskeysManager from "./sections/PasskeysManager";
 import StoreInfoSection from "./sections/StoreInfoSection";
+import InvoiceSettingsPanel from "./sections/InvoiceSettingsPanel";
 import DynamicFieldsSection from "./sections/DynamicFieldsSection";
 import AppsSection from "./sections/AppsSection";
 import IntegrationsSection from "./sections/IntegrationsSection";
@@ -234,6 +235,12 @@ export default function SettingsPage() {
             revalidateSecret={revalidateSecret}
             onRevalidateSecretChange={setRevalidateSecret}
           />
+
+          {activeSection === "store" && (
+            <div className="mt-6">
+              <InvoiceSettingsPanel />
+            </div>
+          )}
 
           <CustomizationSection
             hidden={activeSection !== "customization"}
