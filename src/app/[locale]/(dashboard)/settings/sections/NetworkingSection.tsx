@@ -8,6 +8,7 @@ import { Check, KeyRound, RefreshCcw, Trash } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import api from "@/lib/api";
+import { apiOrigin } from "@/lib/api-client";
 import { formatDashboardDateTimeWithSeconds } from "@/lib/datetime-display";
 import { subscriptionIsPaidPeriod } from "@/lib/subscription-access";
 import { cn } from "@/lib/utils";
@@ -113,7 +114,7 @@ export default function NetworkingSection({ hidden }: { hidden: boolean }) {
   const [revealedKeyCopied, setRevealedKeyCopied] = useState(false);
   const [promptCopied, setPromptCopied] = useState(false);
   const [promptLoading, setPromptLoading] = useState(false);
-  const API_BASE_URL = "https://api.paperbase.me";
+  const API_BASE_URL = apiOrigin();
   const { handleKeyDown } = useEnterNavigation(() => {
     if (!busy && !networkingActionsLocked) {
       void createKey();

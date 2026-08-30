@@ -40,7 +40,7 @@ export default function SubscriptionAccessBlock({ variant }: { variant: Variant 
       <div className="mx-auto w-11/12 max-w-sm space-y-3 sm:w-full">
         {isInactive ? (
           <Button asChild className="w-full">
-            <a href="mailto:noreply@mail.paperbase.me">{tCommon("contactSupport")}</a>
+            <a href={`mailto:${process.env.NEXT_PUBLIC_SUPPORT_EMAIL || "noreply@mail.paperbase.me"}`}>{tCommon("contactSupport")}</a>
           </Button>
         ) : (
           <Button type="button" className="w-full" onClick={() => window.location.reload()}>

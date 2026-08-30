@@ -6,6 +6,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { ClipboardTextIcon } from "@phosphor-icons/react";
 import { Check, Truck, ChevronRight } from "lucide-react";
 import api from "@/lib/api";
+import { apiOrigin } from "@/lib/api-client";
 import { formatAdminApiErrorFromAxios } from "@/lib/admin-api-error";
 import { formatDashboardDate } from "@/lib/datetime-display";
 import type { Courier } from "@/types";
@@ -21,7 +22,8 @@ import { notify } from "@/notifications";
 import { SettingsActionDialog } from "@/components/settings/SettingsActionDialog";
 import { settingsInvertedButtonClassName } from "../SettingsSectionBody";
 
-const STEADFAST_WEBHOOK_CALLBACK_URL = "https://api.paperbase.me/api/v1/webhooks/steadfast/";
+// Callback the merchant pastes into Steadfast — must point at THIS instance's API, not paperbase.
+const STEADFAST_WEBHOOK_CALLBACK_URL = `${apiOrigin()}/api/v1/webhooks/steadfast/`;
 
 type ConnectForm = {
   api_key: string;
