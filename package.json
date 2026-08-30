@@ -61,5 +61,9 @@
     "next": {
       "postcss": "^8.5.10"
     }
+  },
+  "allowScripts": {
+    "@parcel/watcher": true,
+    "@swc/core": true
   }
 }
