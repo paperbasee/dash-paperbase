@@ -1867,7 +1867,6 @@
       "showRecords": "Show DNS records",
       "hideRecords": "Hide DNS records",
       "dnsHeading": "Records to add",
-      "copyRecordAria": "Copy record value",
       "confirmSetPrimary": "Make {hostname} the main address for your store? Your other addresses will redirect here.",
       "confirmRemove": "Remove {hostname}? Your store will no longer be reachable at this address.",
       "msgConnected": "Domain added. Add the DNS records below, then check again.",
