@@ -185,11 +185,45 @@ function StepChip({ done, label }: { done: boolean; label: string }) {
   );
 }
 
-function TypeChip({ type }: { type: string }) {
+/**
+ * Record type as plain text, the way every DNS console shows it.
+ *
+ * It was a bordered chip, which drew the eye to the least surprising column: a
+ * merchant copying records reads Name and Value, and already knows a TXT is a TXT.
+ */
+function TypeLabel({ type }: { type: string }) {
   return (
-    <span className="inline-flex h-5 items-center rounded-ui border border-border bg-muted px-1.5 font-mono text-[11px] font-semibold uppercase tracking-wide text-foreground">
+    <span className="font-mono text-[13px] font-semibold uppercase tracking-wide text-foreground">
       {type}
     </span>
+  );
+}
+
+/**
+ * The record name, with its label separated from the zone.
+ *
+ * Cloudflare renders "api.paperbase.me" as a dark `api` against a muted
+ * `.paperbase.me`, and that is not only decoration: Cloudflare's own Name field
+ * wants `api`, not the full name. Showing the split makes nameHint concrete instead
+ * of asking the merchant to work out where to cut. The full name is still the copy
+ * value -- guessing the short form wrong takes a live shop down.
+ */
+function RecordName({ name, hostname }: { name: string; hostname: string }) {
+  const suffix = `.${hostname}`;
+  const isRoot = name === hostname;
+  const label = !isRoot && name.endsWith(suffix) ? name.slice(0, -suffix.length) : null;
+  if (isRoot || label === null) {
+    return (
+      <code dir="ltr" className="min-w-0 break-all font-mono text-[13px] leading-5 text-foreground">
+        {name}
+      </code>
+    );
+  }
+  return (
+    <code dir="ltr" className="min-w-0 break-all font-mono text-[13px] leading-5 text-muted-foreground">
+      <span className="font-medium text-foreground">{label}</span>
+      {suffix}
+    </code>
   );
 }
 
@@ -407,25 +441,20 @@ export default function DomainsSection({ hidden }: { hidden: boolean }) {
     }
   }
 
-  function renderRecordCells(row: DnsRow, recommended: boolean) {
+  function renderRecordCells(row: DnsRow, recommended: boolean, hostname: string) {
     const showNote = row.note && !GUIDED_TYPES.has((row.type || "").toUpperCase());
     return (
       <>
         <td className="px-4 py-3 align-top">
-          <div className="flex flex-col items-start gap-1">
-            <TypeChip type={row.type} />
-            {recommended ? <RecommendedPill label={t("domains.recommendedBadge")} /> : null}
+          <div className="flex items-start justify-between gap-1">
+            <RecordName name={row.name} hostname={hostname} />
+            <CopyButton value={row.name} label={t("domains.copyNameAria", { type: row.type })} />
           </div>
         </td>
         <td className="px-4 py-3 align-top">
-          <div className="flex items-start justify-between gap-1">
-            <code
-              dir="ltr"
-              className="min-w-0 break-all font-mono text-[13px] leading-5 text-muted-foreground"
-            >
-              {row.name}
-            </code>
-            <CopyButton value={row.name} label={t("domains.copyNameAria", { type: row.type })} />
+          <div className="flex flex-col items-start gap-1">
+            <TypeLabel type={row.type} />
+            {recommended ? <RecommendedPill label={t("domains.recommendedBadge")} /> : null}
           </div>
         </td>
         <td className="px-4 py-3 align-top">
@@ -446,7 +475,7 @@ export default function DomainsSection({ hidden }: { hidden: boolean }) {
     );
   }
 
-  function renderMobileRow(row: DnsRow, recommended: boolean) {
+  function renderMobileRow(row: DnsRow, recommended: boolean, hostname: string) {
     const showNote = row.note && !GUIDED_TYPES.has((row.type || "").toUpperCase());
     return (
       <li
@@ -457,7 +486,7 @@ export default function DomainsSection({ hidden }: { hidden: boolean }) {
         )}
       >
         <div className="flex flex-wrap items-center gap-2">
-          <TypeChip type={row.type} />
+          <TypeLabel type={row.type} />
           {recommended ? <RecommendedPill label={t("domains.recommendedBadge")} /> : null}
         </div>
         {/* space-y-3, not 2: at 2 the two 44px hit areas would overlap. */}
@@ -467,12 +496,7 @@ export default function DomainsSection({ hidden }: { hidden: boolean }) {
               {t("domains.colName")}
             </dt>
             <dd className="mt-0.5 flex items-center justify-between gap-1">
-              <code
-                dir="ltr"
-                className="min-w-0 break-all font-mono text-[13px] leading-5 text-muted-foreground"
-              >
-                {row.name}
-              </code>
+              <RecordName name={row.name} hostname={hostname} />
               <CopyButton value={row.name} label={t("domains.copyNameAria", { type: row.type })} />
             </dd>
           </div>
@@ -652,12 +676,9 @@ export default function DomainsSection({ hidden }: { hidden: boolean }) {
                 </div>
 
                 {/* The fear answer, read before they act. */}
-                <div className="space-y-1 border-b border-border bg-muted/20 px-4 py-3">
+                <div className="border-b border-border bg-muted/20 px-4 py-3">
                   <p className="text-xs leading-relaxed text-muted-foreground">
                     {t("domains.setupReassurance")}
-                  </p>
-                  <p className="text-xs leading-relaxed text-muted-foreground">
-                    {t("domains.setupRevertible")}
                   </p>
                 </div>
 
@@ -696,11 +717,14 @@ export default function DomainsSection({ hidden }: { hidden: boolean }) {
                             </caption>
                             <thead>
                               <tr className="border-b border-border bg-muted/40">
-                                <th scope="col" className="th w-[7.5rem]">
-                                  {t("domains.colType")}
-                                </th>
-                                <th scope="col" className="th w-[32%]">
+                                <th scope="col" className="th w-[38%]">
                                   {t("domains.colName")}
+                                  <span className="mt-0.5 block whitespace-normal text-[11px] font-normal normal-case tracking-normal text-muted-foreground">
+                                    {t("domains.nameHint")}
+                                  </span>
+                                </th>
+                                <th scope="col" className="th w-[6.5rem]">
+                                  {t("domains.colType")}
                                 </th>
                                 <th scope="col" className="th">
                                   {t("domains.colValue")}
@@ -741,7 +765,7 @@ export default function DomainsSection({ hidden }: { hidden: boolean }) {
                               {step1Visible
                                 ? plan.step1.map((row) => (
                                     <tr key={row.key} id={`dns-step1-d-${domain.public_id}`}>
-                                      {renderRecordCells(row, false)}
+                                      {renderRecordCells(row, false, domain.hostname)}
                                     </tr>
                                   ))
                                 : null}
@@ -773,7 +797,7 @@ export default function DomainsSection({ hidden }: { hidden: boolean }) {
                                       : undefined
                                   }
                                 >
-                                  {renderRecordCells(row, row.tier === "recommended" && plan.hasChoice)}
+                                  {renderRecordCells(row, row.tier === "recommended" && plan.hasChoice, domain.hostname)}
                                 </tr>
                               ))}
                               {plan.hasChoice ? (
@@ -794,9 +818,6 @@ export default function DomainsSection({ hidden }: { hidden: boolean }) {
                                       />
                                       {t("domains.fallbackToggle")}
                                     </button>
-                                    <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
-                                      {t("domains.fallbackToggleHint")}
-                                    </p>
                                   </td>
                                 </tr>
                               ) : null}
@@ -820,7 +841,7 @@ export default function DomainsSection({ hidden }: { hidden: boolean }) {
                                   </td>
                                 </tr>
                                 {plan.step2Fallback.map((row) => (
-                                  <tr key={row.key}>{renderRecordCells(row, false)}</tr>
+                                  <tr key={row.key}>{renderRecordCells(row, false, domain.hostname)}</tr>
                                 ))}
                               </tbody>
                             ) : null}
@@ -861,7 +882,7 @@ export default function DomainsSection({ hidden }: { hidden: boolean }) {
                           </div>
                           {step1Visible ? (
                             <ul id={`dns-step1-m-${domain.public_id}`} className="divide-y divide-border/60">
-                              {plan.step1.map((row) => renderMobileRow(row, false))}
+                              {plan.step1.map((row) => renderMobileRow(row, false, domain.hostname))}
                             </ul>
                           ) : null}
 
@@ -881,7 +902,7 @@ export default function DomainsSection({ hidden }: { hidden: boolean }) {
                           </div>
                           <ul className="divide-y divide-border/60">
                             {plan.step2Visible.map((row) =>
-                              renderMobileRow(row, row.tier === "recommended" && plan.hasChoice),
+                              renderMobileRow(row, row.tier === "recommended" && plan.hasChoice, domain.hostname),
                             )}
                           </ul>
 
@@ -902,9 +923,6 @@ export default function DomainsSection({ hidden }: { hidden: boolean }) {
                                 />
                                 {t("domains.fallbackToggle")}
                               </button>
-                              <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
-                                {t("domains.fallbackToggleHint")}
-                              </p>
                             </div>
                           ) : null}
                           {plan.hasChoice && fallbackIsOpen ? (
@@ -920,7 +938,7 @@ export default function DomainsSection({ hidden }: { hidden: boolean }) {
                                 ) : null}
                               </div>
                               <ul className="divide-y divide-border/60">
-                                {plan.step2Fallback.map((row) => renderMobileRow(row, false))}
+                                {plan.step2Fallback.map((row) => renderMobileRow(row, false, domain.hostname))}
                               </ul>
                             </div>
                           ) : null}
@@ -929,7 +947,7 @@ export default function DomainsSection({ hidden }: { hidden: boolean }) {
                         {/* The UI never computes a shortened name: guessing wrong
                             here takes a live shop down, so the full name from the
                             API stays the copy value. */}
-                        <p className="border-t border-border px-4 py-2.5 text-xs leading-relaxed text-muted-foreground">
+                        <p className="border-t border-border px-4 py-2.5 text-xs leading-relaxed text-muted-foreground sm:hidden">
                           {t("domains.nameHint")}
                         </p>
                       </div>
@@ -942,6 +960,9 @@ export default function DomainsSection({ hidden }: { hidden: boolean }) {
                     <p className="text-xs leading-relaxed text-amber-700 dark:text-amber-300">
                       {domain.check_error}
                     </p>
+                    <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+                      {t("domains.stillStuck")}
+                    </p>
                     {domain.last_checked_at ? (
                       <p className="mt-0.5 text-[11px] text-muted-foreground">
                         {t("domains.lastCheckedAt", {
@@ -953,12 +974,9 @@ export default function DomainsSection({ hidden }: { hidden: boolean }) {
                 ) : null}
 
                 <div className="flex flex-col gap-3 border-t border-border bg-muted/20 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
-                  <div className="min-w-0 space-y-1">
+                  <div className="min-w-0">
                     <p className="text-xs leading-relaxed text-muted-foreground">
                       {t("domains.propagationHint")}
-                    </p>
-                    <p className="text-xs leading-relaxed text-muted-foreground">
-                      {t("domains.stillStuck")}
                     </p>
                   </div>
                   <Button
