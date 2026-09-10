@@ -71,7 +71,11 @@ export function proxy(request: NextRequest) {
 
   if (!isPublicPath(stripped) && !isAuthed) {
     const loginUrl = new URL(`/${locale}/login`, request.url);
-    loginUrl.searchParams.set("next", pathname);
+    // `stripped`, not `pathname`: the auth pages push this through next-intl's
+    // locale-aware router, which prepends the locale itself. Storing "/en/settings"
+    // here produced "/en/en/settings" on sign-in. getSafeNextPath() also strips a
+    // locale defensively, for links already in bookmarks and old emails.
+    loginUrl.searchParams.set("next", stripped);
     return NextResponse.redirect(loginUrl);
   }
 

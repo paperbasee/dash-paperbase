@@ -7,7 +7,33 @@
  * (`/\evil.com`, which some browsers normalize to `//`), and control
  * characters. The value keeps its query string and hash so links like
  * `/team/invite?token=…` round-trip intact.
+ *
+ * The returned path is also LOCALE-FREE. Every consumer pushes it through
+ * next-intl's locale-aware router, which prepends the active locale itself, so a
+ * `next` that still carries one produces `/en/en/settings`. proxy.ts wrote the
+ * un-stripped pathname for a long time, so stripping here rather than only at the
+ * source also fixes links already sitting in bookmarks, open tabs and old emails.
  */
+
+/** Locales from src/i18n/routing.ts. Kept literal: importing routing here would
+ *  pull next-intl into a module that middleware-adjacent code also uses. */
+const LOCALE_SEGMENTS = ["en", "bn"] as const;
+
+/**
+ * Drop a leading `/en` or `/bn`, and only when it is a whole path segment.
+ * `/energy` and `/bnpl` must survive untouched.
+ */
+function stripLocalePrefix(value: string): string {
+  for (const locale of LOCALE_SEGMENTS) {
+    if (value === `/${locale}`) return "/";
+    if (value.startsWith(`/${locale}/`)) return value.slice(locale.length + 1);
+    // A locale immediately followed by ? or # is still a whole segment.
+    if (value.startsWith(`/${locale}?`) || value.startsWith(`/${locale}#`)) {
+      return `/${value.slice(locale.length + 1)}`;
+    }
+  }
+  return value;
+}
 
 export function getSafeNextPath(raw: string | null | undefined): string | null {
   if (!raw) return null;
@@ -25,7 +51,8 @@ export function getSafeNextPath(raw: string | null | undefined): string | null {
   for (let i = 0; i < value.length; i++) {
     if (value.charCodeAt(i) < 0x20) return null;
   }
-  return value;
+  // Strip AFTER the safety checks, so the checks always see the raw value.
+  return stripLocalePrefix(value);
 }
 
 /**
