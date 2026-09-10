@@ -382,6 +382,13 @@ export default function DomainsSection({ hidden }: { hidden: boolean }) {
       title: t("domains.remove"),
       message: t("domains.confirmRemove", { hostname: domain.hostname }),
       variant: "danger",
+      // Removal is a hard delete now: the row is gone, and re-adding issues a new
+      // ownership token, so the merchant must replace their TXT record too. Typing
+      // the hostname makes them read WHICH domain they are about to lose -- the
+      // realistic mistake here is removing the wrong one from a list, not being
+      // unaware that removing deletes.
+      requireTypedValue: domain.hostname,
+      typedValueLabel: t("domains.removeTypedLabel", { hostname: domain.hostname }),
     });
     if (!ok) return;
     try {

@@ -1868,7 +1868,7 @@
       "hideRecords": "Hide DNS records",
       "dnsHeading": "Records to add",
       "confirmSetPrimary": "Make {hostname} the main address for your store? Your other addresses will redirect here.",
-      "confirmRemove": "Remove {hostname}? Your store will no longer be reachable at this address.",
+      "confirmRemove": "Remove {hostname} permanently? Your store will no longer be reachable at this address. To add it back later you will have to verify it again with a new TXT record.",
       "msgConnected": "Domain added. Add the DNS records below, then check again.",
       "msgConnectFailed": "We couldn't add that domain.",
       "msgVerified": "Your domain is verified and live.",
@@ -1911,7 +1911,8 @@
       "copyValueAria": "Copy the {type} record value",
       "copied": "Copied",
       "openStoreAria": "Open {hostname} in a new tab",
-      "addAnother": "Add another domain"
+      "addAnother": "Add another domain",
+      "removeTypedLabel": "Type {hostname} to confirm"
     },
     "sectionDomains": "Domains"
   },

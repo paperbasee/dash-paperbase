@@ -21,6 +21,14 @@ export type ConfirmDialogOptions = {
   confirmText?: string;
   cancelText?: string;
   variant?: ConfirmDialogVariant;
+  /**
+   * Require the user to type this exact value before Confirm becomes clickable.
+   * Reserve it for actions with no undo -- a delete that really deletes. Overuse
+   * turns it into another thing to click past.
+   */
+  requireTypedValue?: string;
+  /** Localized label for that input; the caller owns the wording. */
+  typedValueLabel?: string;
   onConfirm?: () => void | Promise<void>;
 };
 
@@ -193,6 +201,8 @@ export function ConfirmDialogProvider({ children }: { children: ReactNode }) {
           )}
           confirmText={entry.options.confirmText}
           cancelText={entry.options.cancelText}
+          requireTypedValue={entry.options.requireTypedValue}
+          typedValueLabel={entry.options.typedValueLabel}
           variant={entry.options.variant ?? "default"}
           isConfirmLoading={confirmLoading}
           onCancel={handleCancel}
