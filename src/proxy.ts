@@ -87,5 +87,8 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!api|_next|_next/static|_next/image|_vercel|.*\\..*).*)"],
+  // `monitoring` is Sentry's browser tunnel (next.config.ts tunnelRoute). Without
+  // this exclusion the SDK's POST is redirected to /en/monitoring and every
+  // client-side error silently vanishes -- exactly what happened on 2026-09-11.
+  matcher: ["/((?!api|monitoring|_next|_next/static|_next/image|_vercel|.*\\..*).*)"],
 };
