@@ -1,5 +1,6 @@
 import type { NextConfig } from "next";
 import createNextIntlPlugin from "next-intl/plugin";
+import { withSentryConfig } from "@sentry/nextjs/config";
 
 const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 
@@ -19,6 +20,21 @@ const wsOrigin = process.env.NEXT_PUBLIC_API_URL
   : isDev
   ? "ws://localhost:8000"
   : "";
+
+/**
+ * Sentry's ingest origin, taken from the DSN so the CSP cannot drift from it.
+ * Empty when no DSN is configured, which keeps the header byte-identical to
+ * before on any instance that does not use Sentry.
+ */
+const sentryIngest = (() => {
+  const dsn = process.env.NEXT_PUBLIC_SENTRY_DSN?.trim();
+  if (!dsn) return "";
+  try {
+    return new URL(dsn).origin;
+  } catch {
+    return "";
+  }
+})();
 
 const cspReportUri = apiOrigin
   ? `report-uri ${apiOrigin}/api/v1/csp-report/?app=dash`
@@ -63,7 +79,7 @@ const securityHeaders = [
       `img-src 'self' data: blob: https: ${apiOrigin}`,
       "font-src 'self' data:",
       // Allow the backend API origin explicitly (http in dev, https in prod).
-      `connect-src 'self' ${apiOrigin} ${wsOrigin} https://challenges.cloudflare.com https://*.r2.cloudflarestorage.com`,
+      `connect-src 'self' ${apiOrigin} ${wsOrigin} https://challenges.cloudflare.com https://*.r2.cloudflarestorage.com ${sentryIngest}`,
       "frame-ancestors 'none'",
       ...(cspReportUri ? [cspReportUri] : []),
     ].join("; "),
@@ -106,4 +122,17 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default withNextIntl(nextConfig);
+export default withSentryConfig(withNextIntl(nextConfig), {
+  org: "paperbaseme",
+  project: "dashboard-paperbase",
+  // Quiet unless something is wrong.
+  silent: !process.env.CI,
+  // Source maps upload only when a build is given a token. Without one the
+  // build still succeeds -- it just reports minified frames -- so adding the
+  // token later is a CI change, not a code change.
+  sourcemaps: { disable: !process.env.SENTRY_AUTH_TOKEN },
+  authToken: process.env.SENTRY_AUTH_TOKEN,
+  // Routes browser reports through this app's own origin, so an ad blocker
+  // cutting requests to sentry.io does not silently erase merchant errors.
+  tunnelRoute: "/monitoring",
+});
