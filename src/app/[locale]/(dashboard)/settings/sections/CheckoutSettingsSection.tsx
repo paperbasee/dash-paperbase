@@ -14,13 +14,28 @@ import {
 import { cn } from "@/lib/utils";
 import { usePermissions } from "@/context/PermissionsContext";
 import {
+  parseCheckoutSettings,
+  REPEAT_ORDER_COOLDOWN_MAX_MINUTES,
   useCheckoutSettingsQuery,
+  type CheckoutSettings,
   type CustomerFormVariant,
 } from "@/hooks/useCheckoutSettingsQuery";
 import { checkoutSettingsQueryKey } from "@/lib/query-keys";
 import AutopilotSettingsPanel from "./AutopilotSettingsPanel";
 
 type SettingsMessage = { type: "success" | "error"; text: string } | null;
+
+/** "90" is hard to picture; "1 hour 30 minutes" is not. */
+function describeMinutes(total: number): string {
+  const days = Math.floor(total / 1440);
+  const hours = Math.floor((total % 1440) / 60);
+  const minutes = total % 60;
+  const parts: string[] = [];
+  if (days) parts.push(`${days} day${days === 1 ? "" : "s"}`);
+  if (hours) parts.push(`${hours} hour${hours === 1 ? "" : "s"}`);
+  if (minutes || parts.length === 0) parts.push(`${minutes} minute${minutes === 1 ? "" : "s"}`);
+  return parts.join(" ");
+}
 
 function errorMessage(err: unknown): string {
   if (isApiHttpError(err)) {
@@ -46,13 +61,19 @@ export default function CheckoutSettingsSection({
   const [selectedVariant, setSelectedVariant] =
     useState<CustomerFormVariant>("extended");
   const [message, setMessage] = useState<SettingsMessage>(null);
+  // The cooldown is edited as text so a merchant can clear the box mid-edit
+  // without the field snapping to 0; it is parsed once, on save.
+  const [loadedCooldown, setLoadedCooldown] = useState<number | null>(null);
+  const [cooldownInput, setCooldownInput] = useState("");
 
   useEffect(() => {
-    if (!data?.customer_form_variant) return;
+    if (!data) return;
     setLoadedVariant(data.customer_form_variant);
     setSelectedVariant(data.customer_form_variant);
+    setLoadedCooldown(data.repeat_order_cooldown_minutes);
+    setCooldownInput(String(data.repeat_order_cooldown_minutes));
     setMessage(null);
-  }, [data?.customer_form_variant]);
+  }, [data]);
 
   useEffect(() => {
     if (!isError) return;
@@ -60,21 +81,40 @@ export default function CheckoutSettingsSection({
     setMessage({ type: "error", text: errorMessage(error) });
   }, [isError, error]);
 
+  /** null when the box does not hold a whole number of minutes inside the allowed range. */
+  const parsedCooldown = (() => {
+    const trimmed = cooldownInput.trim();
+    if (!/^\d+$/.test(trimmed)) return null;
+    const n = Number(trimmed);
+    return n <= REPEAT_ORDER_COOLDOWN_MAX_MINUTES ? n : null;
+  })();
+  const variantDirty = loadedVariant !== null && selectedVariant !== loadedVariant;
+  const cooldownDirty = loadedCooldown !== null && cooldownInput.trim() !== String(loadedCooldown);
+
   const handleSave = async () => {
-    if (loadedVariant === null || selectedVariant === loadedVariant) return;
+    if (loadedVariant === null || loadedCooldown === null) return;
+    if (!variantDirty && !cooldownDirty) return;
+    if (cooldownDirty && parsedCooldown === null) {
+      setMessage({
+        type: "error",
+        text: `Enter a whole number of minutes between 0 and ${REPEAT_ORDER_COOLDOWN_MAX_MINUTES}.`,
+      });
+      return;
+    }
+    // Send only what changed: the API rejects unknown keys and applies the rest.
+    const patch: Partial<CheckoutSettings> = {};
+    if (variantDirty) patch.customer_form_variant = selectedVariant;
+    if (cooldownDirty && parsedCooldown !== null) patch.repeat_order_cooldown_minutes = parsedCooldown;
+
     setSaving(true);
     setMessage(null);
     try {
-      const { data: patchData } = await api.patch<{ customer_form_variant: CustomerFormVariant }>(
-        "store/checkout-settings/",
-        { customer_form_variant: selectedVariant }
-      );
-      const v = patchData.customer_form_variant;
-      if (v !== "minimal" && v !== "extended") {
-        throw new Error("Invalid response");
-      }
-      setLoadedVariant(v);
-      setSelectedVariant(v);
+      const { data: patchData } = await api.patch<CheckoutSettings>("store/checkout-settings/", patch);
+      const saved = parseCheckoutSettings(patchData);
+      setLoadedVariant(saved.customer_form_variant);
+      setSelectedVariant(saved.customer_form_variant);
+      setLoadedCooldown(saved.repeat_order_cooldown_minutes);
+      setCooldownInput(String(saved.repeat_order_cooldown_minutes));
       setMessage({ type: "success", text: "Saved." });
       void queryClient.invalidateQueries({ queryKey: checkoutSettingsQueryKey });
     } catch (err) {
@@ -84,8 +124,7 @@ export default function CheckoutSettingsSection({
     }
   };
 
-  const unchanged =
-    loadedVariant !== null && selectedVariant === loadedVariant;
+  const unchanged = !variantDirty && !cooldownDirty;
   // Checkout settings persist via settings.manage; view-only roles can't change them.
   const { has } = usePermissions();
   const canManage = has("settings.manage");
@@ -168,6 +207,51 @@ export default function CheckoutSettingsSection({
                     </div>
                   </div>
                 </label>
+              </div>
+            </div>
+
+            <div className="space-y-3 border-t border-border pt-6">
+              <div className="space-y-1">
+                <h3 className="text-base font-medium text-foreground">
+                  Repeat orders from the same phone number
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  After an order, make that phone number wait before it can order again.
+                  Stops fake repeat orders on cash on delivery. Cancelled orders don&apos;t count.
+                </p>
+              </div>
+              <div
+                className={cn(
+                  "space-y-2",
+                  (loadedCooldown === null || !canManage) && "pointer-events-none opacity-60"
+                )}
+              >
+                <label
+                  htmlFor="repeat_order_cooldown_minutes"
+                  className="text-sm font-medium text-foreground"
+                >
+                  Wait time in minutes
+                </label>
+                <div className="flex items-center gap-3">
+                  <input
+                    id="repeat_order_cooldown_minutes"
+                    type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    autoComplete="off"
+                    value={cooldownInput}
+                    onChange={(e) => setCooldownInput(e.target.value)}
+                    disabled={loadedCooldown === null || !canManage}
+                    aria-describedby="repeat_order_cooldown_hint"
+                    className="h-9 w-32 rounded-xs border border-input-border bg-input-surface px-3 text-sm text-foreground focus-visible:border-ring focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/20"
+                  />
+                  <span className="text-sm text-muted-foreground">
+                    {parsedCooldown === 0 ? "Off" : parsedCooldown === null ? "" : `= ${describeMinutes(parsedCooldown)}`}
+                  </span>
+                </div>
+                <p id="repeat_order_cooldown_hint" className="text-xs text-muted-foreground">
+                  0 turns this off. Longest allowed is 7 days (10080 minutes).
+                </p>
               </div>
             </div>
 
