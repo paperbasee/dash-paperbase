@@ -33,6 +33,7 @@ type CatForm = {
   parent: string;
   order: string;
   is_active: boolean;
+  free_delivery: boolean;
 };
 
 const emptyForm: CatForm = {
@@ -41,6 +42,7 @@ const emptyForm: CatForm = {
   parent: "",
   order: "0",
   is_active: true,
+  free_delivery: false,
 };
 
 function CategoryTreeRows({
@@ -293,6 +295,7 @@ export default function CategoriesPage() {
       parent: node.parent ?? "",
       order: String(node.order),
       is_active: node.is_active,
+      free_delivery: node.free_delivery ?? false,
     });
     setImageFile(null);
     setImageKey(null);
@@ -334,6 +337,7 @@ export default function CategoriesPage() {
     fd.append("description", form.description);
     fd.append("order", form.order);
     fd.append("is_active", String(form.is_active));
+    fd.append("free_delivery", String(form.free_delivery));
     if (form.parent) {
       fd.append("parent", form.parent);
     } else if (mode === "edit") {
@@ -518,6 +522,18 @@ export default function CategoriesPage() {
                 onKeyDown={handleKeyDown}
               />{" "}
               {tPages("categoriesActiveLabel")}
+            </label>
+            <label className="flex items-center gap-2 text-sm text-foreground">
+              <input
+                type="checkbox"
+                checked={form.free_delivery}
+                onChange={(e) =>
+                  setForm({ ...form, free_delivery: e.target.checked })
+                }
+                className="form-checkbox"
+                onKeyDown={handleKeyDown}
+              />{" "}
+              {tPages("categoriesFreeDeliveryLabel")}
             </label>
           </div>
           <div className="flex gap-2">

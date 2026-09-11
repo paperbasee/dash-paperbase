@@ -133,6 +133,7 @@ export default function ProductDetailClient() {
     description: "",
     stock: "0",
     is_active: true,
+    free_delivery: false,
     prepayment_type: "none" as "none" | "delivery_only" | "full",
   });
   const [extraFields, setExtraFields] = useState<ExtraFieldValues>({});
@@ -236,6 +237,7 @@ export default function ProductDetailClient() {
       description: productData.description ?? "",
       stock: String(productData.available_quantity ?? productData.total_stock ?? ""),
       is_active: productData.is_active,
+      free_delivery: productData.free_delivery ?? false,
       prepayment_type: (productData.prepayment_type ?? "none") as
         | "none"
         | "delivery_only"
@@ -443,6 +445,7 @@ export default function ProductDetailClient() {
     formData.append("category", form.category);
     formData.append("description", form.description);
     formData.append("is_active", String(form.is_active));
+    formData.append("free_delivery", String(form.free_delivery));
     formData.append("prepayment_type", form.prepayment_type);
     const mainKey = imageKeys[0];
     if (mainKey) formData.append("image_key", mainKey);
@@ -684,6 +687,25 @@ export default function ProductDetailClient() {
                   />
                   <span className="text-sm font-medium text-foreground">
                     {tPages("productActiveVisible")}
+                  </span>
+                </label>
+                <label className="flex cursor-pointer items-start gap-2">
+                  <input
+                    type="checkbox"
+                    checked={form.free_delivery}
+                    onChange={(e) =>
+                      setForm({ ...form, free_delivery: e.target.checked })
+                    }
+                    className="form-checkbox mt-0.5"
+                    onKeyDown={handleKeyDown}
+                  />
+                  <span className="min-w-0">
+                    <span className="block text-sm font-medium text-foreground">
+                      {tPages("productFreeDelivery")}
+                    </span>
+                    <span className="block text-xs text-muted-foreground">
+                      {tPages("productFreeDeliveryHint")}
+                    </span>
                   </span>
                 </label>
               </CardContent>
@@ -1080,6 +1102,12 @@ export default function ProductDetailClient() {
                   <p className="text-xs text-muted-foreground">{tPages("productActiveVisible")}</p>
                   <p className="text-foreground">
                     {product.is_active ? tCommon("yes") : tCommon("no")}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">{tPages("productFreeDelivery")}</p>
+                  <p className="text-foreground">
+                    {product.free_delivery ? tCommon("yes") : tCommon("no")}
                   </p>
                 </div>
               </CardContent>
