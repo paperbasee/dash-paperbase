@@ -59,6 +59,7 @@ export default function NewProductPage() {
     description: "",
     stock: "0",
     is_active: true,
+    free_delivery: false,
     prepayment_type: "none" as "none" | "delivery_only" | "full",
   });
   const [extraFields, setExtraFields] = useState<ExtraFieldValues>({});
@@ -222,6 +223,7 @@ export default function NewProductPage() {
     formData.append("category", form.category);
     formData.append("description", form.description);
     formData.append("is_active", String(form.is_active));
+    formData.append("free_delivery", String(form.free_delivery));
     formData.append("prepayment_type", form.prepayment_type);
     const mainImageKey = imageKeys[0];
     if (mainImageKey) formData.append("image_key", mainImageKey);
@@ -426,6 +428,24 @@ export default function NewProductPage() {
                     onKeyDown={handleKeyDown}
                   />
                 </Field>
+                <label className="flex cursor-pointer items-start gap-2">
+                  <input
+                    type="checkbox"
+                    checked={form.free_delivery}
+                    onChange={(e) =>
+                      setForm({ ...form, free_delivery: e.target.checked })
+                    }
+                    className="form-checkbox mt-0.5"
+                  />
+                  <span className="min-w-0">
+                    <span className="block text-sm font-medium text-foreground">
+                      {tPages("productFreeDelivery")}
+                    </span>
+                    <span className="block text-xs text-muted-foreground">
+                      {tPages("productFreeDeliveryHint")}
+                    </span>
+                  </span>
+                </label>
                 <Field label={tPages("productPrepaymentTypeLabel")}>
                   <Select
                     value={form.prepayment_type}

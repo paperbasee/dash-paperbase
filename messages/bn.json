@@ -563,6 +563,8 @@
     "productSelectCategory": "ক্যাটাগরি বেছে নিন…",
     "productAddCategory": "ক্যাটাগরি যোগ করুন",
     "productActiveVisible": "সক্রিয় (স্টোরে দৃশ্যমান)",
+    "productFreeDelivery": "ফ্রি ডেলিভারি",
+    "productFreeDeliveryHint": "কার্টের প্রতিটি পণ্য ফ্রি ডেলিভারির যোগ্য হলেই ডেলিভারি ফ্রি হবে।",
     "productStockInventoryDerived": "স্টক (ইনভেন্টরি-ভিত্তিক)",
     "productStockManagedInventory": "স্টক শুধু ইনভেন্টরি থেকে পরিচালিত হয়।",
     "productPrepaymentTypeLabel": "প্রি-পেমেন্ট",
@@ -591,6 +593,7 @@
     "categoriesParentRoot": "রুট স্তর (প্যারেন্ট নেই)",
     "categoriesPlaceholderOrder": "ক্রম",
     "categoriesActiveLabel": "সক্রিয়",
+    "categoriesFreeDeliveryLabel": "এই ক্যাটাগরির সব পণ্যে ফ্রি ডেলিভারি",
     "categoriesTreeHeading": "ক্যাটাগরি ট্রি ({count}টি ক্যাটাগরি)",
     "categoriesColName": "নাম",
     "categoriesColSlug": "স্লাগ",
@@ -877,7 +880,6 @@
     "trashRestoreSelected": "নির্বাচিত পুনরুদ্ধার ({count})",
     "trashBulkConfirmRestore": "{count, plural, one {এই আইটেমটি স্টোরে ফিরিয়ে আনবেন?} other {#টি আইটেম স্টোরে ফিরিয়ে আনবেন?}}",
     "trashBulkRestoreSuccess": "{count}টি আইটেম পুনরুদ্ধার হয়েছে।",
-
     "toastTitleOrdersFailedToLoad": "অর্ডার লোড হয়নি",
     "toastDescOrdersFailedToLoad": "অর্ডার তালিকা আনা যায়নি। ইন্টারনেট সংযোগ পরীক্ষা করে রিফ্রেশ করুন।",
     "toastTitleDashboardRefreshFailed": "ড্যাশবোর্ড রিফ্রেশ ব্যর্থ হয়েছে",
@@ -906,7 +908,6 @@
     "toastDescCourierHandoffFailed": "এই অর্ডারটি কুরিয়ারে পাঠানো হয়েছে হিসেবে চিহ্নিত করা যায়নি। স্ট্যাটাস যাচাই করে আবার চেষ্টা করুন।",
     "toastTitleCategoryFiltersUnavailable": "ক্যাটাগরি ফিল্টার পাওয়া যাচ্ছে না",
     "toastDescCategoryFiltersUnavailable": "ক্যাটাগরি ফিল্টার চিপ লোড হয়নি। আপাতত ক্যাটাগরি দিয়ে ফিল্টার করা যাবে না।",
-
     "toastTitleOrderDataIncomplete": "অর্ডারের তথ্য অসম্পূর্ণ",
     "toastDescOrderDataIncomplete": "এই অর্ডারের সাথে সম্পর্কিত কিছু ডেটা লোড হয়নি।",
     "toastTitleAddAtLeastOneProduct": "অন্তত একটি পণ্য যোগ করুন",
@@ -921,7 +922,6 @@
     "toastDescPaymentReviewFailed": "অনুমোদন/প্রত্যাখ্যান অ্যাকশনটি সার্ভারে রেকর্ড করা যায়নি।",
     "toastTitleOrderFlagNotSaved": "ফ্ল্যাগ সংরক্ষিত হয়নি",
     "toastDescOrderFlagNotSaved": "অর্ডার ফ্ল্যাগ আপডেট করা যায়নি।",
-
     "toastTitleOrderCreated": "অর্ডার তৈরি হয়েছে",
     "toastDescOrderCreated": "ম্যানুয়াল অর্ডারটি সংরক্ষিত হয়েছে এবং অর্ডার তালিকায় যোগ হয়েছে।",
     "toastTitleOrderNotCreated": "অর্ডার তৈরি হয়নি",
@@ -934,12 +934,10 @@
     "toastDescVariantsUnavailable": "নির্বাচিত পণ্যের ভেরিয়েন্ট লোড করা যায়নি।",
     "toastTitleTotalsPreviewPaused": "টোটাল প্রিভিউ স্থগিত",
     "toastDescTotalsPreviewPaused": "সব প্রয়োজনীয় ফিল্ড বৈধ না হওয়া পর্যন্ত লাইভ টোটাল অনুমান করা যাবে না।",
-
     "toastTitleInvoiceRequestFailed": "ইনভয়েস অনুরোধ ব্যর্থ",
     "toastDescInvoiceRequestFailed": "PDF তৈরি শুরু করা যায়নি। সার্ভার একটি ত্রুটি রেসপন্স দিয়েছে।",
     "toastTitleInvoiceTimedOut": "ইনভয়েস তৈরি টাইমআউট",
     "toastDescInvoiceTimedOut": "প্রত্যাশিত সময়ের মধ্যে PDF প্রস্তুত হয়নি। আবার চেষ্টা করুন।",
-
     "toastTitleProductsFailedToLoad": "পণ্য লোড হয়নি",
     "toastDescProductsFailedToLoad": "পণ্যের ক্যাটালগ আনা যায়নি। রিফ্রেশ করে আবার চেষ্টা করুন।",
     "toastTitleReorderBlocked": "রিঅর্ডার করা যাবে না",
@@ -952,49 +950,40 @@
     "toastDescBulkDeleteIncomplete": "কমপক্ষে একটি পণ্য সরানো যায়নি। তালিকাটি রিফ্রেশ করা হয়েছে।",
     "toastTitleProductStatusNotSaved": "পণ্যের স্ট্যাটাস সংরক্ষিত হয়নি",
     "toastDescProductStatusNotSaved": "এই পণ্যের active/inactive টগল সংরক্ষণ করা যায়নি।",
-
     "toastTitleProductTemplateUnavailable": "পণ্যের টেমপ্লেট পাওয়া যাচ্ছে না",
     "toastDescProductTemplateUnavailable": "নতুন পণ্যের ডিফল্ট মান সার্ভার থেকে লোড করা যায়নি।",
     "toastTitleProductNotCreated": "পণ্য তৈরি হয়নি",
     "toastDescProductNotCreated": "পণ্য সংরক্ষণ করা যায়নি। ফর্মে দেখানো ভ্যালিডেশন বা API ত্রুটি ঠিক করে আবার চেষ্টা করুন।",
-
     "toastTitleProductDidntLoad": "পণ্য লোড হয়নি",
     "toastDescProductDidntLoad": "এডিটর সার্ভার থেকে এই পণ্যের সর্বশেষ ডেটা আনতে পারেনি।",
     "toastTitleChangesNotSavedProduct": "পরিবর্তন সংরক্ষিত হয়নি",
     "toastDescChangesNotSavedProduct": "সার্ভার পণ্যের আপডেট গ্রহণ করেনি। ফর্মে দেখানো ত্রুটি ঠিক করে আবার চেষ্টা করুন।",
     "toastTitleProductNotDeleted": "পণ্য মুছে ফেলা হয়নি",
     "toastDescProductNotDeleted": "সার্ভার পণ্যটি মুছতে পারেনি। এটি সক্রিয় অর্ডারের সাথে যুক্ত থাকতে পারে।",
-
     "toastTitleCategoriesUnavailable": "ক্যাটাগরি পাওয়া যাচ্ছে না",
     "toastDescCategoriesUnavailable": "সার্ভার থেকে ক্যাটাগরি হায়ারার্কি আনা যায়নি।",
     "toastTitleUploadsStillInProgress": "আপলোড এখনো চলছে",
     "toastDescUploadsStillInProgressCategory": "ক্যাটাগরি সেভ করার আগে সব মিডিয়া আপলোড সম্পন্ন হওয়া পর্যন্ত অপেক্ষা করুন।",
     "toastTitleCategoryChangeFailed": "ক্যাটাগরি পরিবর্তন ব্যর্থ",
     "toastDescCategoryChangeFailed": "তৈরি/আপডেট/ডিলিট অপারেশনটি সার্ভারে সম্পন্ন হয়নি।",
-
     "toastTitleShippingSettingsNotSaved": "শিপিং সেটিংস সংরক্ষিত হয়নি",
     "toastDescShippingSettingsNotSaved": "জোন বা মেথড সার্ভারে লেখা যায়নি।",
     "toastTitleShippingMethodRemoved": "শিপিং মেথড সরানো হয়েছে",
     "toastDescShippingMethodRemoved": "মেথডটি ডিলিট হয়েছে এবং এখন চেকআউটে আর উপলব্ধ নয়।",
-
     "toastTitleInventoryUpdateFailed": "ইনভেন্টরি আপডেট ব্যর্থ",
     "toastDescInventoryUpdateFailed": "স্টক লেভেল বা মুভমেন্ট রেকর্ড সার্ভারের সাথে সিঙ্ক করা যায়নি।",
-
     "toastTitleCustomersFailedToLoad": "গ্রাহক লোড হয়নি",
     "toastDescCustomersFailedToLoad": "গ্রাহক ডিরেক্টরি অনুরোধ ব্যর্থ হয়েছে। কিছুক্ষণ পর আবার চেষ্টা করুন।",
     "toastTitleCustomerProfileUnavailable": "গ্রাহক প্রোফাইল পাওয়া যাচ্ছে না",
     "toastDescCustomerProfileUnavailable": "এই গ্রাহকের রেকর্ড সার্ভার থেকে লোড করা যায়নি।",
-
     "toastTitleAnalyticsFailedToLoad": "অ্যানালিটিক্স লোড হয়নি",
     "toastDescAnalyticsFailedToLoad": "নির্বাচিত তারিখ পরিসরের চার্ট ও KPI রিফ্রেশ করা যায়নি।",
     "toastTitleUtmBreakdownUnavailable": "UTM ব্রেকডাউন পাওয়া যাচ্ছে না",
     "toastDescUtmBreakdownUnavailable": "নির্বাচিত সময়ে ক্যাম্পেইন অ্যাট্রিবিউশন ডেটা লোড হয়নি।",
-
     "toastTitleBlogPostsUnavailable": "ব্লগ পোস্ট পাওয়া যাচ্ছে না",
     "toastDescBlogPostsUnavailable": "বর্তমান ফিল্টার অনুযায়ী পোস্ট তালিকা লোড করা যায়নি।",
     "toastTitleTagsUnavailable": "ট্যাগ পাওয়া যাচ্ছে না",
     "toastDescTagsUnavailable": "ট্যাগ ফিল্টার চিপ লোড হয়নি এবং খালি দেখাতে পারে।",
-
     "toastTitleTagAdded": "ট্যাগ যোগ হয়েছে",
     "toastDescTagAdded": "নতুন ট্যাগটি তৈরি হয়েছে এবং এই পোস্টে যোগ হয়েছে।",
     "toastTitleTagNotRemoved": "ট্যাগ সরানো হয়নি",
@@ -1005,7 +994,6 @@
     "toastDescPostSaved": "আপনার ব্লগ পোস্টের পরিবর্তন সফলভাবে সংরক্ষিত হয়েছে।",
     "toastTitlePostNotSaved": "পোস্ট সংরক্ষিত হয়নি",
     "toastDescPostNotSaved": "সার্ভার আপনার ব্লগ পোস্টের পরিবর্তন সংরক্ষণ করতে পারেনি।",
-
     "toastTitlePostNotDeleted": "পোস্ট মুছে ফেলা হয়নি",
     "toastDescPostNotDeletedRefused": "সার্ভার এই ব্লগ পোস্টটি ডিলিট করতে অস্বীকৃতি জানিয়েছে।",
     "toastTitlePostCouldntLoad": "পোস্ট লোড হয়নি",
@@ -1013,7 +1001,6 @@
     "toastTitlePostDeleted": "পোস্ট মুছে ফেলা হয়েছে",
     "toastDescPostDeleted": "ব্লগ থেকে পোস্টটি স্থায়ীভাবে সরানো হয়েছে।",
     "toastDescPostNotDeleted": "সার্ভার এই ব্লগ পোস্টটি ডিলিট করতে পারেনি।",
-
     "toastTitleItemRestored": "আইটেম পুনরুদ্ধার হয়েছে",
     "toastDescItemRestored": "আইটেমটি সফলভাবে তার মূল মডিউলে ফিরিয়ে দেওয়া হয়েছে।",
     "toastTitleRestoreFailed": "পুনরুদ্ধার ব্যর্থ",
@@ -1028,7 +1015,6 @@
     "toastDescTrashNotEmptied": "এক বা একাধিক আইটেম স্থায়ীভাবে মুছে ফেলা যায়নি।",
     "toastTitleAllItemsRestored": "সব আইটেম পুনরুদ্ধার হয়েছে",
     "toastDescAllItemsRestored": "সব পুনরুদ্ধারযোগ্য আইটেম তাদের মূল মডিউলে ফিরিয়ে দেওয়া হয়েছে।",
-
     "toastTitleInvalidScheduleDates": "শিডিউল তারিখ ভুল",
     "toastDescInvalidScheduleDates": "CTA শুরুর তারিখ শেষ তারিখের আগে হতে হবে।",
     "toastTitleDuplicateCta": "ডুপ্লিকেট CTA",
@@ -1039,7 +1025,6 @@
     "toastDescCtaRemoved": "CTA ডিলিট হয়েছে এবং আর স্টোরফ্রন্টে দেখাবে না।",
     "toastTitleCtaNotSaved": "CTA সংরক্ষিত হয়নি",
     "toastDescCtaNotSaved": "সার্ভার CTA অপারেশনটি সম্পন্ন করতে পারেনি।",
-
     "toastDescUploadsStillInProgressBanner": "সেভ করার আগে সব ব্যানার মিডিয়া আপলোড শেষ হওয়া পর্যন্ত অপেক্ষা করুন।",
     "toastTitleBannerSaved": "ব্যানার সংরক্ষিত",
     "toastDescBannerSaved": "ব্যানার সংরক্ষণ হয়েছে এবং স্টোরফ্রন্টে দেখানোর জন্য শিডিউল হয়েছে।",
@@ -1049,7 +1034,6 @@
     "toastDescBannerOperationFailed": "সার্ভার ব্যানারটি সেভ বা ডিলিট করতে পারেনি।",
     "toastTitleBannersFailedToLoad": "ব্যানার লোড হয়নি",
     "toastDescBannersFailedToLoad": "সার্ভার থেকে ব্যানার তালিকা আনা যায়নি।",
-
     "toastDescUploadsStillInProgressPopup": "সেভ করার আগে পপ-আপ মিডিয়া আপলোড শেষ হওয়া পর্যন্ত অপেক্ষা করুন।",
     "toastTitleDuplicatePopup": "ডুপ্লিকেট পপ-আপ",
     "toastDescDuplicatePopup": "একটি সক্রিয় পপ-আপ ক্যাম্পেইন ইতিমধ্যেই আছে। নতুন তৈরি করার আগে সেটি নিষ্ক্রিয় করুন।",
@@ -1059,7 +1043,6 @@
     "toastDescPopupRemoved": "পপ-আপ ক্যাম্পেইন ডিলিট হয়েছে এবং আর দর্শকদের কাছে দেখাবে না।",
     "toastTitlePopupOperationFailed": "পপ-আপ অপারেশন ব্যর্থ",
     "toastDescPopupOperationFailed": "সার্ভার পপ-আপটি সেভ বা ডিলিট করতে পারেনি।",
-
     "toastTitleAttributesFailedToLoad": "অ্যাট্রিবিউট লোড হয়নি",
     "toastDescAttributesFailedToLoad": "পণ্যের অ্যাট্রিবিউট ডেফিনিশন আনা যায়নি।",
     "toastTitleAttributeNotSaved": "অ্যাট্রিবিউট সংরক্ষিত হয়নি",
@@ -1072,7 +1055,6 @@
     "toastDescValueDeleted": "অ্যাট্রিবিউট মানটি সফলভাবে সরানো হয়েছে।",
     "toastTitleValueNotDeleted": "মান মুছে ফেলা হয়নি",
     "toastDescValueNotDeleted": "এই মানটি মুছে ফেলা যায়নি। বিদ্যমান ভেরিয়েন্ট এতে নির্ভর করতে পারে।",
-
     "toastTitleVariantsFailedToLoad": "ভেরিয়েন্ট লোড হয়নি",
     "toastDescVariantsFailedToLoad": "ভেরিয়েন্ট ওয়ার্কস্পেস পণ্যের ভেরিয়েন্ট ডেটা আনতে পারেনি।",
     "toastTitleVariantNotSaved": "ভেরিয়েন্ট সংরক্ষিত হয়নি",
@@ -1083,7 +1065,6 @@
     "toastDescVariantNotDeleted": "সার্ভার ভেরিয়েন্টটি মুছতে পারেনি।",
     "toastTitleVariantStatusNotSaved": "ভেরিয়েন্ট স্ট্যাটাস সংরক্ষিত হয়নি",
     "toastDescVariantStatusNotSaved": "এই ভেরিয়েন্টের active/inactive স্ট্যাটাস আপডেট করা যায়নি।",
-
     "toastTitleTicketsFailedToLoad": "টিকিট লোড হয়নি",
     "toastDescTicketsFailedToLoad": "সাপোর্ট টিকিট তালিকা আনা যায়নি।",
     "toastTitleTicketNotDeleted": "টিকিট মুছে ফেলা হয়নি",
@@ -1094,39 +1075,32 @@
     "toastDescTicketDeleted": "সাপোর্ট ইনবক্স থেকে টিকিটটি সরানো হয়েছে।",
     "toastTitleTicketUpdateFailed": "আপডেট ব্যর্থ",
     "toastDescTicketUpdateFailed": "টিকিটের পরিবর্তন সংরক্ষণ করা যায়নি। রিফ্রেশ করে আবার চেষ্টা করুন।",
-
     "toastTitleStoreSetupNotSaved": "স্টোর সেটআপ সংরক্ষিত হয়নি",
     "toastDescStoreSetupNotSaved": "অনবোর্ডিং কনফিগারেশন সংরক্ষণ করা যায়নি। ত্রুটি ঠিক করে আবার চেষ্টা করুন।",
-
     "toastTitleStoreProfileSaved": "স্টোর প্রোফাইল সংরক্ষিত",
     "toastDescStoreProfileSaved": "আপনার স্টোরের নাম, ব্র্যান্ডিং এবং URL সেটিংস সফলভাবে আপডেট হয়েছে।",
     "toastTitleStoreProfileNotSaved": "স্টোর প্রোফাইল সংরক্ষিত হয়নি",
     "toastDescStoreProfileNotSaved": "সার্ভার আপনার স্টোর প্রোফাইলের পরিবর্তন সংরক্ষণ করতে পারেনি।",
     "toastTitleLanguageNotSaved": "ভাষা সংরক্ষিত হয়নি",
     "toastDescLanguageNotSaved": "ড্যাশবোর্ড ভাষার পছন্দ সার্ভারে লেখা যায়নি।",
-
     "toastTitleApiKeyCopied": "API কী কপি হয়েছে",
     "toastDescApiKeyCopied": "স্টোরফ্রন্ট API কী আপনার ক্লিপবোর্ডে কপি হয়েছে।",
     "toastTitleClipboardBlocked": "ক্লিপবোর্ড ব্লক হয়েছে",
     "toastDescClipboardBlocked": "আপনার ব্রাউজার ক্লিপবোর্ড অ্যাক্সেস ব্লক করেছে। ম্যানুয়ালি কী কপি করুন।",
     "toastTitleKeyOperationFailed": "কী অপারেশন ব্যর্থ",
     "toastDescKeyOperationFailed": "API কী তৈরি বা রোটেট করা সার্ভারে সম্পন্ন হয়নি।",
-
     "toastTitleThemeNotLoaded": "থিম লোড হয়নি",
     "toastDescThemeNotLoaded": "এডিট করার জন্য রিমোট থিম কনফিগারেশন আনা যায়নি।",
     "toastTitleThemeNotSaved": "থিম সংরক্ষিত হয়নি",
     "toastDescThemeNotSaved": "আপনার থিম পরিবর্তন সার্ভারে লেখা যায়নি।",
-
     "toastTitleWebhookSaved": "ওয়েবহুক সংরক্ষিত",
     "toastDescWebhookSaved": "কুরিয়ার ওয়েবহুক URL এবং সাইনিং সিক্রেট আপডেট হয়েছে।",
     "toastTitleCourierTestFailed": "কুরিয়ার টেস্ট ব্যর্থ",
     "toastDescCourierTestFailed": "আপনার কুরিয়ার ইন্টিগ্রেশনে টেস্ট অনুরোধে ত্রুটি এসেছে।",
-
     "toastTitleMarketingLinkFailed": "মার্কেটিং লিংক ব্যর্থ",
     "toastDescMarketingLinkFailed": "এই মার্কেটিং প্রোভাইডারের OAuth বা টোকেন এক্সচেঞ্জ সম্পন্ন হয়নি।",
     "toastTitleIntegrationDisconnected": "ইন্টিগ্রেশন বিচ্ছিন্ন",
     "toastDescIntegrationDisconnected": "এই মার্কেটিং প্রোভাইডারটি বিচ্ছিন্ন হয়েছে এবং ইভেন্ট সিঙ্ক বন্ধ হয়েছে।",
-
     "toastTitleTwoFactorAuthEnabled": "দুই-ধাপ যাচাইকরণ চালু",
     "toastDescTwoFactorAuthEnabled": "আপনার অ্যাকাউন্ট এখন অতিরিক্ত লগইন ধাপে সুরক্ষিত।",
     "toastTitleTwoFactorAuthDisabled": "দুই-ধাপ যাচাইকরণ বন্ধ",
@@ -1135,13 +1109,10 @@
     "toastDescPasswordUpdated": "আপনার অ্যাকাউন্টের পাসওয়ার্ড সফলভাবে পরিবর্তিত হয়েছে।",
     "toastTitleVerificationFailed": "যাচাই ব্যর্থ",
     "toastDescVerificationFailed": "কোডটি ভুল বা মেয়াদোত্তীর্ণ। নতুন কোড অনুরোধ করুন।",
-
     "toastTitleSessionVerificationFailed": "সেশন যাচাই ব্যর্থ",
     "toastDescSessionVerificationFailed": "আপনার প্রোফাইল রিফ্রেশ করা যায়নি। আবার সাইন ইন করতে হতে পারে।",
-
     "toastTitleSearchFailed": "সার্চ ব্যর্থ",
     "toastDescSearchFailed": "গ্লোবাল সার্চ সার্ভারে পৌঁছাতে পারেনি। কিছুক্ষণ পর আবার চেষ্টা করুন।",
-
     "toastTitleDuplicateFieldName": "ডুপ্লিকেট ফিল্ড নাম",
     "toastDescDuplicateFieldName": "প্রতিটি কাস্টম ফিল্ডের নাম অনন্য হতে হবে। ডুপ্লিকেটগুলোর একটি নাম পরিবর্তন করুন।",
     "toastTitleLoginFailed": "লগইন ব্যর্থ",

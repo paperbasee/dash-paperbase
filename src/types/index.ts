@@ -168,6 +168,8 @@ export interface Product {
   stock_source?: string;
   variant_count?: number;
   is_active: boolean;
+  /** Ships free on its own flag. Optional: older API builds do not send it. */
+  free_delivery?: boolean;
   extra_data?: Record<string, string | number | boolean>;
   images?: ProductImage[];
   /** Admin list: manual sort index within category. */
@@ -234,6 +236,8 @@ export interface AdminCategoryTreeNode {
   parent_name: string;
   order: number;
   is_active: boolean;
+  /** Every product in this category ships free. Optional: older API builds do not send it. */
+  free_delivery?: boolean;
   product_count: number;
   child_count: number;
   children: AdminCategoryTreeNode[];

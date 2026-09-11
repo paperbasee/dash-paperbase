@@ -563,6 +563,8 @@
     "productSelectCategory": "Select category…",
     "productAddCategory": "Add category",
     "productActiveVisible": "Active (visible in store)",
+    "productFreeDelivery": "Free delivery",
+    "productFreeDeliveryHint": "Delivery is free only when every item in the cart qualifies.",
     "productStockInventoryDerived": "Stock (inventory-derived)",
     "productStockManagedInventory": "Stock is managed from Inventory only.",
     "productPrepaymentTypeLabel": "Prepayment",
@@ -591,6 +593,7 @@
     "categoriesParentRoot": "Root level (no parent)",
     "categoriesPlaceholderOrder": "Order",
     "categoriesActiveLabel": "Active",
+    "categoriesFreeDeliveryLabel": "Free delivery for every product in this category",
     "categoriesTreeHeading": "Category tree ({count} categories)",
     "categoriesColName": "Name",
     "categoriesColSlug": "Slug",
@@ -877,7 +880,6 @@
     "trashRestoreSelected": "Restore selected ({count})",
     "trashBulkConfirmRestore": "{count, plural, one {Restore this item to your store?} other {Restore # items to your store?}}",
     "trashBulkRestoreSuccess": "{count} item(s) restored.",
-
     "toastTitleOrdersFailedToLoad": "Orders failed to load",
     "toastDescOrdersFailedToLoad": "The order list could not be fetched. Check your connection and refresh.",
     "toastTitleDashboardRefreshFailed": "Dashboard refresh failed",
@@ -906,7 +908,6 @@
     "toastDescCourierHandoffFailed": "This order could not be marked as sent to the courier. Check the order status and retry.",
     "toastTitleCategoryFiltersUnavailable": "Category filters unavailable",
     "toastDescCategoryFiltersUnavailable": "Category filter chips could not load. Filtering by category is temporarily unavailable.",
-
     "toastTitleOrderDataIncomplete": "Order data incomplete",
     "toastDescOrderDataIncomplete": "Some related data failed to load alongside this order.",
     "toastTitleAddAtLeastOneProduct": "Add at least one product",
@@ -921,7 +922,6 @@
     "toastDescPaymentReviewFailed": "The approve or reject action could not be recorded on the server.",
     "toastTitleOrderFlagNotSaved": "Flag not saved",
     "toastDescOrderFlagNotSaved": "The order flag could not be updated.",
-
     "toastTitleOrderCreated": "Order created",
     "toastDescOrderCreated": "The manual order was saved and added to the orders list.",
     "toastTitleOrderNotCreated": "Order not created",
@@ -934,12 +934,10 @@
     "toastDescVariantsUnavailable": "Variants for the selected product could not be loaded.",
     "toastTitleTotalsPreviewPaused": "Totals preview paused",
     "toastDescTotalsPreviewPaused": "Live price totals could not be estimated until all required fields are valid.",
-
     "toastTitleInvoiceRequestFailed": "Invoice request failed",
     "toastDescInvoiceRequestFailed": "PDF generation could not be started. The server returned an error response.",
     "toastTitleInvoiceTimedOut": "Invoice generation timed out",
     "toastDescInvoiceTimedOut": "The PDF was never ready within the expected window. Try generating it again.",
-
     "toastTitleProductsFailedToLoad": "Products failed to load",
     "toastDescProductsFailedToLoad": "The product catalog could not be fetched. Refresh to try again.",
     "toastTitleReorderBlocked": "Reorder blocked",
@@ -952,49 +950,40 @@
     "toastDescBulkDeleteIncomplete": "At least one product could not be removed. The list has been refreshed.",
     "toastTitleProductStatusNotSaved": "Product status not saved",
     "toastDescProductStatusNotSaved": "The active/inactive toggle could not be saved for this product.",
-
     "toastTitleProductTemplateUnavailable": "Product template unavailable",
     "toastDescProductTemplateUnavailable": "Default values for a new product could not be loaded from the server.",
     "toastTitleProductNotCreated": "Product not created",
     "toastDescProductNotCreated": "The product could not be saved. Resolve validation issues or API errors shown on the form.",
-
     "toastTitleProductDidntLoad": "Product didn't load",
     "toastDescProductDidntLoad": "The editor could not fetch this product's latest data from the server.",
     "toastTitleChangesNotSavedProduct": "Changes not saved",
     "toastDescChangesNotSavedProduct": "The product update was rejected by the server. Review and fix errors shown on the form.",
     "toastTitleProductNotDeleted": "Product not deleted",
     "toastDescProductNotDeleted": "The server could not delete this product. It may be linked to active orders.",
-
     "toastTitleCategoriesUnavailable": "Categories unavailable",
     "toastDescCategoriesUnavailable": "The category hierarchy could not be fetched from the server.",
     "toastTitleUploadsStillInProgress": "Uploads still in progress",
     "toastDescUploadsStillInProgressCategory": "Wait for all media uploads to complete before saving this category.",
     "toastTitleCategoryChangeFailed": "Category change failed",
     "toastDescCategoryChangeFailed": "The create, update, or delete operation did not complete on the server.",
-
     "toastTitleShippingSettingsNotSaved": "Shipping settings not saved",
     "toastDescShippingSettingsNotSaved": "Zones or methods could not be written to the server.",
     "toastTitleShippingMethodRemoved": "Shipping method removed",
     "toastDescShippingMethodRemoved": "The method was deleted and is no longer available for checkout.",
-
     "toastTitleInventoryUpdateFailed": "Inventory update failed",
     "toastDescInventoryUpdateFailed": "Stock levels or movement records could not be synchronized with the server.",
-
     "toastTitleCustomersFailedToLoad": "Customers failed to load",
     "toastDescCustomersFailedToLoad": "The customer directory request failed. Retry shortly.",
     "toastTitleCustomerProfileUnavailable": "Customer profile unavailable",
     "toastDescCustomerProfileUnavailable": "This customer's record could not be loaded from the server.",
-
     "toastTitleAnalyticsFailedToLoad": "Analytics failed to load",
     "toastDescAnalyticsFailedToLoad": "Charts and KPIs could not be refreshed for the selected date range.",
     "toastTitleUtmBreakdownUnavailable": "UTM breakdown unavailable",
     "toastDescUtmBreakdownUnavailable": "Campaign attribution data failed to load for the selected period.",
-
     "toastTitleBlogPostsUnavailable": "Blog posts unavailable",
     "toastDescBlogPostsUnavailable": "The post list could not be loaded with the current filters applied.",
     "toastTitleTagsUnavailable": "Tags unavailable",
     "toastDescTagsUnavailable": "Tag filter chips failed to load and may appear empty.",
-
     "toastTitleTagAdded": "Tag added",
     "toastDescTagAdded": "The new tag was created and added to this post.",
     "toastTitleTagNotRemoved": "Tag not removed",
@@ -1005,7 +994,6 @@
     "toastDescPostSaved": "Your blog post changes were saved successfully.",
     "toastTitlePostNotSaved": "Post not saved",
     "toastDescPostNotSaved": "The server could not save your blog post changes.",
-
     "toastTitlePostNotDeleted": "Post not deleted",
     "toastDescPostNotDeletedRefused": "The server refused to delete this blog post.",
     "toastTitlePostCouldntLoad": "Post couldn't load",
@@ -1013,7 +1001,6 @@
     "toastTitlePostDeleted": "Post deleted",
     "toastDescPostDeleted": "The blog post was permanently removed from the blog.",
     "toastDescPostNotDeleted": "The server could not delete this blog post.",
-
     "toastTitleItemRestored": "Item restored",
     "toastDescItemRestored": "The item was moved back to its original module successfully.",
     "toastTitleRestoreFailed": "Restore failed",
@@ -1028,7 +1015,6 @@
     "toastDescTrashNotEmptied": "One or more items could not be permanently deleted.",
     "toastTitleAllItemsRestored": "All items restored",
     "toastDescAllItemsRestored": "Every restorable item was moved back to its original module.",
-
     "toastTitleInvalidScheduleDates": "Invalid schedule dates",
     "toastDescInvalidScheduleDates": "The CTA start date must be before the end date.",
     "toastTitleDuplicateCta": "Duplicate CTA",
@@ -1039,7 +1025,6 @@
     "toastDescCtaRemoved": "The call-to-action was deleted and will no longer appear on the storefront.",
     "toastTitleCtaNotSaved": "CTA not saved",
     "toastDescCtaNotSaved": "The server could not complete the CTA operation.",
-
     "toastDescUploadsStillInProgressBanner": "Wait for all banner media to finish uploading before saving.",
     "toastTitleBannerSaved": "Banner saved",
     "toastDescBannerSaved": "The banner was saved and is scheduled for storefront display.",
@@ -1049,7 +1034,6 @@
     "toastDescBannerOperationFailed": "The server could not save or delete this banner.",
     "toastTitleBannersFailedToLoad": "Banners failed to load",
     "toastDescBannersFailedToLoad": "The banner list could not be fetched from the server.",
-
     "toastDescUploadsStillInProgressPopup": "Wait for popup media to finish uploading before saving.",
     "toastTitleDuplicatePopup": "Duplicate popup",
     "toastDescDuplicatePopup": "An active popup campaign already exists. Deactivate it before creating a new one.",
@@ -1059,7 +1043,6 @@
     "toastDescPopupRemoved": "The popup campaign was deleted and will no longer appear to visitors.",
     "toastTitlePopupOperationFailed": "Popup operation failed",
     "toastDescPopupOperationFailed": "The server could not save or delete this popup.",
-
     "toastTitleAttributesFailedToLoad": "Attributes failed to load",
     "toastDescAttributesFailedToLoad": "Product attribute definitions could not be fetched.",
     "toastTitleAttributeNotSaved": "Attribute not saved",
@@ -1072,7 +1055,6 @@
     "toastDescValueDeleted": "The attribute value was removed successfully.",
     "toastTitleValueNotDeleted": "Value not deleted",
     "toastDescValueNotDeleted": "This attribute value could not be deleted. Existing variants may depend on it.",
-
     "toastTitleVariantsFailedToLoad": "Variants failed to load",
     "toastDescVariantsFailedToLoad": "The variants workspace could not fetch product variant data.",
     "toastTitleVariantNotSaved": "Variant not saved",
@@ -1083,7 +1065,6 @@
     "toastDescVariantNotDeleted": "The server could not delete this variant.",
     "toastTitleVariantStatusNotSaved": "Variant status not saved",
     "toastDescVariantStatusNotSaved": "The active/inactive state for this variant could not be updated.",
-
     "toastTitleTicketsFailedToLoad": "Tickets failed to load",
     "toastDescTicketsFailedToLoad": "The support ticket list could not be fetched from the server.",
     "toastTitleTicketNotDeleted": "Ticket not deleted",
@@ -1094,39 +1075,32 @@
     "toastDescTicketDeleted": "The support ticket was removed from the support inbox.",
     "toastTitleTicketUpdateFailed": "Update failed",
     "toastDescTicketUpdateFailed": "The ticket change could not be saved. Refresh and try again.",
-
     "toastTitleStoreSetupNotSaved": "Store setup not saved",
     "toastDescStoreSetupNotSaved": "The onboarding configuration could not be saved. Resolve the error and try again.",
-
     "toastTitleStoreProfileSaved": "Store profile saved",
     "toastDescStoreProfileSaved": "Your store name, branding, and URL settings were updated successfully.",
     "toastTitleStoreProfileNotSaved": "Store profile not saved",
     "toastDescStoreProfileNotSaved": "The server could not save your store profile changes.",
     "toastTitleLanguageNotSaved": "Language not saved",
     "toastDescLanguageNotSaved": "Dashboard language preference could not be written to the server.",
-
     "toastTitleApiKeyCopied": "API key copied",
     "toastDescApiKeyCopied": "The storefront API key was copied to your clipboard.",
     "toastTitleClipboardBlocked": "Clipboard blocked",
     "toastDescClipboardBlocked": "Your browser blocked clipboard access. Copy the key manually.",
     "toastTitleKeyOperationFailed": "Key operation failed",
     "toastDescKeyOperationFailed": "The API key could not be created or rotated on the server.",
-
     "toastTitleThemeNotLoaded": "Theme not loaded",
     "toastDescThemeNotLoaded": "The remote theme configuration could not be fetched for editing.",
     "toastTitleThemeNotSaved": "Theme not saved",
     "toastDescThemeNotSaved": "Your theme changes could not be written to the server.",
-
     "toastTitleWebhookSaved": "Webhook saved",
     "toastDescWebhookSaved": "The courier webhook URL and signing secret were updated.",
     "toastTitleCourierTestFailed": "Courier test failed",
     "toastDescCourierTestFailed": "The test request to your courier integration returned an error.",
-
     "toastTitleMarketingLinkFailed": "Marketing link failed",
     "toastDescMarketingLinkFailed": "The OAuth or token exchange for this marketing provider did not complete.",
     "toastTitleIntegrationDisconnected": "Integration disconnected",
     "toastDescIntegrationDisconnected": "This marketing provider was disconnected and event sync has stopped.",
-
     "toastTitleTwoFactorAuthEnabled": "Two-factor auth enabled",
     "toastDescTwoFactorAuthEnabled": "Your account is now protected with a second login step.",
     "toastTitleTwoFactorAuthDisabled": "Two-factor auth disabled",
@@ -1135,13 +1109,10 @@
     "toastDescPasswordUpdated": "Your account password was changed successfully.",
     "toastTitleVerificationFailed": "Verification failed",
     "toastDescVerificationFailed": "The code entered was invalid or has expired. Request a new one.",
-
     "toastTitleSessionVerificationFailed": "Session verification failed",
     "toastDescSessionVerificationFailed": "Your profile could not be refreshed. You may need to sign in again.",
-
     "toastTitleSearchFailed": "Search failed",
     "toastDescSearchFailed": "Global search could not reach the server. Try again in a moment.",
-
     "toastTitleDuplicateFieldName": "Duplicate field name",
     "toastDescDuplicateFieldName": "Each custom field must have a unique name. Rename one of the duplicates.",
     "toastTitleLoginFailed": "Login failed",
