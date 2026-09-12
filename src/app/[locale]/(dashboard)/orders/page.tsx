@@ -6,6 +6,7 @@ import {
   useEffect,
   useLayoutEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from "react";
@@ -241,6 +242,12 @@ export default function OrdersPage() {
   const [pendingCourierDispatchIds, setPendingCourierDispatchIds] = useState<Set<string>>(
     new Set()
   );
+  // Ids with a poll loop already running, so a set that grows does not restart
+  // the loops that were already in flight.
+  const courierPollsInFlightRef = useRef<Set<string>>(new Set());
+  // Ids whose poll ended without the server clearing the flag. Not re-seeded.
+  const abandonedCourierPollsRef = useRef<Set<string>>(new Set());
+  const ordersUnmountedRef = useRef(false);
   const [retryingCourierId, setRetryingCourierId] = useState<string | null>(null);
   const setScrollContainer = useHorizontalWheelScroll<HTMLDivElement>();
 
@@ -303,14 +310,31 @@ export default function OrdersPage() {
     });
   }, [isError, error, tPages]);
 
+  // Seeds the poll set from rows the server says are mid-dispatch.
+  //
+  // Returning `prev` unchanged when nothing was added is load-bearing, not a
+  // micro-optimisation. This used to build a new Set every time, and polling
+  // writes its results back into the orders query cache -- which gives
+  // `ordersPage` a new identity, which re-ran this effect, which produced a new
+  // Set, which restarted every poll loop with its attempt counter back at zero.
+  // The 20-attempt ceiling could never be reached, so the list polled one
+  // request per pending order every 1.5s for as long as the tab stayed open.
   useEffect(() => {
-    if (!ordersPage?.results?.length) return;
+    const results = ordersPage?.results;
+    if (!results?.length) return;
     setPendingCourierDispatchIds((prev) => {
+      let added = false;
       const next = new Set(prev);
-      for (const o of ordersPage.results) {
-        if (o.courier_dispatch_pending) next.add(o.public_id);
+      for (const o of results) {
+        if (!o.courier_dispatch_pending) continue;
+        // Orders we already gave up on are not re-seeded; the row shows the
+        // retry button instead, which is the merchant's way back in.
+        if (abandonedCourierPollsRef.current.has(o.public_id)) continue;
+        if (next.has(o.public_id)) continue;
+        next.add(o.public_id);
+        added = true;
       }
-      return next;
+      return added ? next : prev;
     });
   }, [ordersPage]);
 
@@ -589,57 +613,69 @@ export default function OrdersPage() {
     };
   }, [activeExportJobId, tPages]);
 
+  // Cancellation is scoped to unmount, not to this effect's dependencies. A
+  // cleanup that cancelled on every change killed in-flight polls each time the
+  // set was rebuilt, which is what let the attempt counter reset forever.
+  useEffect(() => {
+    ordersUnmountedRef.current = false;
+    return () => {
+      ordersUnmountedRef.current = true;
+    };
+  }, []);
+
   useEffect(() => {
     if (pendingCourierDispatchIds.size === 0) return;
 
-    let cancelled = false;
+    const dropFromPending = (publicId: string) =>
+      setPendingCourierDispatchIds((prev) => {
+        if (!prev.has(publicId)) return prev;
+        const next = new Set(prev);
+        next.delete(publicId);
+        return next;
+      });
 
     async function pollOrder(publicId: string) {
       let attempts = 0;
-      while (!cancelled && attempts < 20) {
-        await new Promise((resolve) => setTimeout(resolve, 1500));
-        if (cancelled) break;
-        attempts++;
-        try {
-          const { data } = await api.get<Order>(`admin/orders/${publicId}/`);
-          if (cancelled) break;
-          patchOrdersList((prev) =>
-            prev.map((o) => (o.public_id === publicId ? data : o))
-          );
-          if (!data.courier_dispatch_pending) {
-            setPendingCourierDispatchIds((prev) => {
-              const next = new Set(prev);
-              next.delete(publicId);
-              return next;
-            });
-            break;
+      let settled = false;
+      try {
+        while (!ordersUnmountedRef.current && attempts < 20) {
+          await new Promise((resolve) => setTimeout(resolve, 1500));
+          if (ordersUnmountedRef.current) return;
+          attempts++;
+          try {
+            const { data } = await api.get<Order>(`admin/orders/${publicId}/`);
+            if (ordersUnmountedRef.current) return;
+            patchOrdersList((prev) =>
+              prev.map((o) => (o.public_id === publicId ? data : o))
+            );
+            if (!data.courier_dispatch_pending) {
+              settled = true;
+              dropFromPending(publicId);
+              return;
+            }
+          } catch {
+            if (ordersUnmountedRef.current) return;
+            dropFromPending(publicId);
+            return;
           }
-        } catch {
-          if (cancelled) break;
-          setPendingCourierDispatchIds((prev) => {
-            const next = new Set(prev);
-            next.delete(publicId);
-            return next;
-          });
-          break;
         }
-      }
-      if (attempts >= 20) {
-        setPendingCourierDispatchIds((prev) => {
-          const next = new Set(prev);
-          next.delete(publicId);
-          return next;
-        });
+        if (!settled) {
+          // Ran out of attempts with the order still pending. Give up rather
+          // than poll forever, and remember it so the next list refresh does
+          // not queue the same order straight back up.
+          abandonedCourierPollsRef.current.add(publicId);
+          dropFromPending(publicId);
+        }
+      } finally {
+        courierPollsInFlightRef.current.delete(publicId);
       }
     }
 
     for (const publicId of pendingCourierDispatchIds) {
-      pollOrder(publicId);
+      if (courierPollsInFlightRef.current.has(publicId)) continue;
+      courierPollsInFlightRef.current.add(publicId);
+      void pollOrder(publicId);
     }
-
-    return () => {
-      cancelled = true;
-    };
   }, [pendingCourierDispatchIds, patchOrdersList]);
 
   const toggleSelect = (id: string) => {
@@ -875,6 +911,7 @@ export default function OrdersPage() {
         prev.map((o) => (o.public_id === order.public_id ? data : o))
       );
       if (data.courier_dispatch_pending) {
+        abandonedCourierPollsRef.current.delete(order.public_id);
         setPendingCourierDispatchIds((prev) => new Set(prev).add(order.public_id));
       }
       invalidateOrdersCaches();
@@ -900,6 +937,7 @@ export default function OrdersPage() {
       );
       // The server flips pending back to true after clearing it, so keep the
       // "Sending..." UI state until the next server refresh confirms outcome.
+      abandonedCourierPollsRef.current.delete(order.public_id);
       setPendingCourierDispatchIds((prev) => new Set(prev).add(order.public_id));
       invalidateOrdersCaches();
     } catch (err: unknown) {
