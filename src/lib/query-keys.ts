@@ -121,12 +121,30 @@ export const categoriesQueryKey = ["categories"] as const;
 
 export const variantsQueryKeyRoot = ["variants"] as const;
 
-export const variantsProductsQueryKey = [...variantsQueryKeyRoot, "products"] as const;
+/** Product picker on the Variants page: one page of products per typed search. */
+export function variantsProductSearchQueryKey(search: string) {
+  return [...variantsQueryKeyRoot, "product-search", search] as const;
+}
+
+/** The product selected on the Variants page (price, variant count). */
+export function variantsProductQueryKey(productId: string) {
+  return [...variantsQueryKeyRoot, "product", productId] as const;
+}
 
 export const variantsAttributesQueryKey = [...variantsQueryKeyRoot, "attributes"] as const;
 
-export function variantsListQueryKey(productId: string, search = "") {
-  return [...variantsQueryKeyRoot, "list", productId, search] as const;
+/** Every variant of one product (Variants page, product selected). */
+export const variantsListQueryKeyRoot = [...variantsQueryKeyRoot, "list"] as const;
+
+export function variantsListQueryKey(productId: string) {
+  return [...variantsListQueryKeyRoot, productId] as const;
+}
+
+/** Store-wide variant search, loaded one page at a time. */
+export const variantsSearchQueryKeyRoot = [...variantsQueryKeyRoot, "search"] as const;
+
+export function variantsSearchQueryKey(search: string, status: string) {
+  return [...variantsSearchQueryKeyRoot, search, status] as const;
 }
 
 export const notificationsQueryKey = ["notifications"] as const;
@@ -149,8 +167,10 @@ export function blogDetailQueryKey(publicId: string) {
 
 export const blogTagsQueryKey = ["blog-tags"] as const;
 
+export const trashQueryKeyRoot = ["trash", "list"] as const;
+
 export function trashQueryKey(page: number) {
-  return ["trash", "list", page] as const;
+  return [...trashQueryKeyRoot, page] as const;
 }
 
 export const couriersQueryKey = ["couriers"] as const;

@@ -32,6 +32,7 @@ import {
 } from "@/lib/validation";
 import { useConfirm } from "@/context/ConfirmDialogContext";
 import { notify } from "@/notifications";
+import { scheduleSlugSuggestion } from "@/lib/products/slug-suggestion";
 import { useAdminDeleteCapabilities } from "@/hooks/useAdminDeleteCapabilities";
 import { numberTextClass } from "@/lib/number-font";
 import { cn } from "@/lib/utils";
@@ -310,35 +311,18 @@ export default function ProductDetailClient() {
     if (!baseSlug) {
       setResolvedSlug("");
       setSlugUsesFallback(false);
+      setSlugChecking(false);
       return;
     }
-    const t = setTimeout(() => {
-      setSlugChecking(true);
-      void (async () => {
-        try {
-          let candidate = baseSlug;
-          let counter = 2;
-          while (true) {
-            const res = await api.get<{ available: boolean }>(
-              `admin/products/check-slug/?slug=${encodeURIComponent(candidate)}&exclude_public_id=${encodeURIComponent(publicId)}`
-            );
-            if (res.data.available) {
-              setResolvedSlug(candidate);
-              setSlugUsesFallback(candidate !== baseSlug);
-              break;
-            }
-            candidate = `${baseSlug}-${counter}`;
-            counter += 1;
-          }
-        } catch {
-          setResolvedSlug(baseSlug);
-          setSlugUsesFallback(false);
-        } finally {
-          setSlugChecking(false);
-        }
-      })();
-    }, 400);
-    return () => clearTimeout(t);
+    return scheduleSlugSuggestion({
+      baseSlug,
+      excludePublicId: publicId,
+      onChecking: setSlugChecking,
+      onResult: ({ slug, usesFallback }) => {
+        setResolvedSlug(slug);
+        setSlugUsesFallback(usesFallback);
+      },
+    });
   }, [isEditMode, baseSlug, publicId]);
 
   const clearSlot = useCallback((i: number) => {

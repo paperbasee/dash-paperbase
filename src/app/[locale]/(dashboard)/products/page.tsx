@@ -36,6 +36,16 @@ import { FunnelIcon, GripVertical, ImageIcon, LayoutGrid, List, Loader2, Undo2 }
 import api from "@/lib/api";
 import { useBranding } from "@/context/BrandingContext";
 import type { Product, PaginatedResponse } from "@/types";
+import { reorderCategoryPublicId, saveProductReorder } from "@/lib/products/reorder";
+import {
+  BulkProductActionError,
+  bulkDeleteProducts,
+  failedProductNames,
+  remainingSelection,
+  selectionAfterRequestFailure,
+  runBulkWithInvalidation,
+  type BulkProductActionResult,
+} from "@/lib/products/bulk-actions";
 import { flattenCategoryOptionsRich } from "@/lib/category-tree";
 import {
   Combobox,
@@ -85,31 +95,6 @@ function getStoredViewMode(): ViewMode {
 function saveViewMode(mode: ViewMode) {
   if (typeof window === "undefined") return;
   window.localStorage.setItem(PRODUCTS_VIEW_MODE_KEY, mode);
-}
-
-async function fetchAllProductPublicIdsInCategory(
-  categoryPublicId: string
-): Promise<string[]> {
-  const rows: Product[] = [];
-  let cursor: string | null = null;
-  for (;;) {
-    const params: Record<string, string> = { category: categoryPublicId };
-    if (cursor) params.cursor = cursor;
-    const res = await api.get<PaginatedResponse<Product>>("admin/products/", {
-      params,
-    });
-    rows.push(...res.data.results);
-    const next = res.data.next ? cursorFromLink(res.data.next) : null;
-    if (!next) break;
-    cursor = next;
-  }
-  rows.sort(
-    (a, b) =>
-      (a.display_order ?? 0) - (b.display_order ?? 0) ||
-      (a.name || "").localeCompare(b.name || "") ||
-      (a.public_id || "").localeCompare(b.public_id || "")
-  );
-  return rows.map((x) => x.public_id);
 }
 
 export default function ProductsPage() {
@@ -302,59 +287,27 @@ export default function ProductsPage() {
     if (filters.price_min || filters.price_max) return false;
     const ord = filters.ordering;
     if (ord && ord !== "display_order") return false;
-    if (products.length < 2) return false;
-    const cats = new Set(
-      products.map((p) => p.category_public_id).filter(Boolean)
-    );
-    return cats.size === 1;
+    return reorderCategoryPublicId(products) !== null;
   }, [filters, products]);
 
   const handleDragEnd = useCallback(
     async (event: DragEndEvent) => {
       if (!canReorder) return;
-      if (reorderBusyRef.current || !filters.category) return;
+      if (reorderBusyRef.current) return;
       const { active, over } = event;
       if (!over || active.id === over.id) return;
       const oldIndex = products.findIndex((p) => p.public_id === active.id);
       const newIndex = products.findIndex((p) => p.public_id === over.id);
       if (oldIndex < 0 || newIndex < 0) return;
+      // The page's own category: under a parent-category filter it is the subcategory shown.
+      const catId = reorderCategoryPublicId(products);
+      if (!catId) return;
 
       reorderBusyRef.current = true;
-      const reorderedPage = arrayMove(products, oldIndex, newIndex);
-      patchProductsList(() => reorderedPage);
+      patchProductsList(() => arrayMove(products, oldIndex, newIndex));
 
-      const catId = filters.category;
       try {
-        const fullIds = await fetchAllProductPublicIdsInCategory(catId);
-        const sliceIds = reorderedPage.map((p) => p.public_id);
-        const positions = sliceIds
-          .map((id) => fullIds.indexOf(id))
-          .filter((i) => i >= 0);
-        if (positions.length === 0) {
-          reorderBusyRef.current = false;
-          return;
-        }
-        positions.sort((a, b) => a - b);
-        const contiguous = positions.every(
-          (p, i) => i === 0 || p === positions[i - 1] + 1
-        );
-        if (!contiguous) {
-          notify.error(new Error("reorder_range"), {
-            title: tPages("toastTitleReorderBlocked"),
-            fallbackMessage: tPages("toastDescReorderBlocked"),
-          });
-          invalidateProductsList();
-          return;
-        }
-        const start = positions[0];
-        const merged = [...fullIds];
-        for (let i = 0; i < sliceIds.length; i++) {
-          merged[start + i] = sliceIds[i];
-        }
-        await api.post("admin/products/reorder/", {
-          category_public_id: catId,
-          product_public_ids: merged,
-        });
+        await saveProductReorder({ categoryPublicId: catId, page: products, oldIndex, newIndex });
         invalidateProductsList();
       } catch (err) {
         notify.error(err, {
@@ -366,7 +319,7 @@ export default function ProductsPage() {
         reorderBusyRef.current = false;
       }
     },
-    [canReorder, filters.category, products, invalidateProductsList, patchProductsList, tPages]
+    [canReorder, products, invalidateProductsList, patchProductsList, tPages]
   );
 
   const toggleSelect = (id: string) => {
@@ -386,7 +339,7 @@ export default function ProductsPage() {
     }
   };
 
-  async function handleDeleteSelected(idsOverride?: string[]) {
+  async function handleDeleteSelected(idsOverride?: string[], singleRow = false) {
     const ids = idsOverride ?? Array.from(selectedIds);
     if (ids.length === 0) return;
     const deletedCount = ids.length;
@@ -405,30 +358,67 @@ export default function ProductsPage() {
     });
     if (!ok) return;
     setDeleting(true);
+    // Names from every cached products page, read before the refresh: a selection can span pages.
+    const nameById = new Map<string, string>();
+    for (const [, cached] of queryClient.getQueriesData<PaginatedResponse<Product>>({
+      queryKey: productsListQueryKeyRoot,
+    })) {
+      for (const p of cached?.results ?? []) nameById.set(p.public_id, p.name);
+    }
+    let result: BulkProductActionResult;
     try {
-      // Sequential: parallel deletes each touch trash/DB locks and can 500 (deadlock).
-      for (const id of ids) {
-        await api.delete(`admin/products/${id}/`);
-      }
-      setSelectedIds(new Set());
-      notify.success(tPages("toastDescProductsRemoved"), {
-        title: tPages("toastTitleProductsRemoved"),
-      });
-      invalidateProductCaches();
+      result = await runBulkWithInvalidation(async () => {
+        if (singleRow && ids.length === 1) {
+          // A row's own delete button keeps using the per-row endpoint.
+          await api.delete(`admin/products/${ids[0]}/`);
+          return { succeeded: ids, failed: [] };
+        }
+        return bulkDeleteProducts(api, ids);
+      }, invalidateProductCaches);
     } catch (err) {
-      notify.error(err, {
+      const done = err instanceof BulkProductActionError ? err.result.succeeded : [];
+      setSelectedIds((prev) =>
+        selectionAfterRequestFailure(prev, ids, done, { perRow: singleRow })
+      );
+      notify.error(err instanceof BulkProductActionError ? err.cause : err, {
         title: tPages("toastTitleBulkDeleteIncomplete"),
         fallbackMessage: tPages("toastDescBulkDeleteIncomplete"),
       });
+      return;
     } finally {
       setDeleting(false);
     }
+    setSelectedIds((prev) => remainingSelection(prev, ids, result.succeeded));
+    if (result.failed.length === 0) {
+      notify.success(tPages("toastDescProductsRemoved"), {
+        title: tPages("toastTitleProductsRemoved"),
+      });
+      return;
+    }
+    const { names, more } = failedProductNames(result.failed, nameById);
+    notify.warning(
+      tPages("toastDescSomeProductsNotRemoved", {
+        ok: toLocaleDigits(String(result.succeeded.length), locale),
+        failed: toLocaleDigits(String(result.failed.length), locale),
+        names:
+          more > 0
+            ? tPages("bulkFailedNamesMore", {
+                names,
+                count: toLocaleDigits(String(more), locale),
+              })
+            : names,
+      }),
+      { title: tPages("toastTitleSomeProductsNotRemoved") }
+    );
   }
 
   async function handleDeleteSingle(id: string) {
-    const idsToDelete =
-      selectedIds.size > 0 && selectedIds.has(id) ? Array.from(selectedIds) : [id];
-    await handleDeleteSelected(idsToDelete);
+    // A row that is part of a larger selection deletes the whole selection.
+    if (selectedIds.size > 1 && selectedIds.has(id)) {
+      await handleDeleteSelected(Array.from(selectedIds));
+      return;
+    }
+    await handleDeleteSelected([id], true);
   }
 
   async function updateProduct(product: Product, payload: { is_active?: boolean }) {

@@ -14,12 +14,22 @@ import type { TrashItem } from "@/types";
 import { useConfirm } from "@/context/ConfirmDialogContext";
 import { notify, normalizeError } from "@/notifications";
 import { useAdminDeleteCapabilities } from "@/hooks/useAdminDeleteCapabilities";
-import { useTrashQuery } from "@/hooks/useTrashQuery";
+import { useTrashQuery, type TrashQueryData } from "@/hooks/useTrashQuery";
+import {
+  BulkProductActionError,
+  bulkDeleteTrash,
+  bulkRestoreTrash,
+  failedProductNames,
+  remainingSelection,
+  runBulkWithInvalidation,
+  type BulkProductActionResult,
+  type BulkProductFailure,
+} from "@/lib/products/bulk-actions";
 import {
   navCountsQueryKey,
   ordersListQueryKeyRoot,
   productsListQueryKeyRoot,
-  trashQueryKey,
+  trashQueryKeyRoot,
 } from "@/lib/query-keys";
 
 function rowKey(row: TrashItem): string {
@@ -39,11 +49,12 @@ export default function TrashPage() {
   const [page, setPage] = useState(1);
 
   const invalidateTrashCaches = useCallback(() => {
-    void queryClient.invalidateQueries({ queryKey: trashQueryKey(page) });
+    // Every trash page: a bulk selection can span pages, and removing rows shifts later pages.
+    void queryClient.invalidateQueries({ queryKey: trashQueryKeyRoot });
     void queryClient.invalidateQueries({ queryKey: productsListQueryKeyRoot });
     void queryClient.invalidateQueries({ queryKey: ordersListQueryKeyRoot });
     void queryClient.invalidateQueries({ queryKey: navCountsQueryKey });
-  }, [queryClient, page]);
+  }, [queryClient]);
   const trashEnabled = !capsLoading && canViewTrash;
   const {
     data: trashData,
@@ -115,6 +126,43 @@ export default function TrashPage() {
 
   const bulkBusy = bulkDeleting || bulkRestoring;
 
+  /** Failed product names, read from every cached trash page (the selection can span pages). */
+  function failedNamesText(failed: BulkProductFailure[]): string {
+    const nameById = new Map<string, string>();
+    for (const [, cached] of queryClient.getQueriesData<TrashQueryData>({
+      queryKey: trashQueryKeyRoot,
+    })) {
+      for (const row of cached?.results ?? []) nameById.set(row.public_id, row.name);
+    }
+    const { names, more } = failedProductNames(failed, nameById);
+    return more > 0
+      ? tPages("bulkFailedNamesMore", { names, count: toLocaleDigits(String(more), locale) })
+      : names;
+  }
+
+  /**
+   * Run a bulk trash action for the current selection: one request per 100 products, caches
+   * refreshed afterwards whatever happened, and only the products that did not go left selected.
+   */
+  async function runTrashBulkAction(
+    action: typeof bulkRestoreTrash,
+    onDone: (result: BulkProductActionResult) => void,
+    errorToast: { title: string; fallbackMessage: string },
+  ) {
+    const ids = Array.from(selectedPublicIds);
+    let result: BulkProductActionResult;
+    try {
+      result = await runBulkWithInvalidation(() => action(api, ids), invalidateTrashCaches);
+    } catch (err) {
+      const done = err instanceof BulkProductActionError ? err.result.succeeded : [];
+      setSelectedPublicIds((prev) => remainingSelection(prev, ids, done));
+      notify.error(err instanceof BulkProductActionError ? err.cause : err, errorToast);
+      return;
+    }
+    setSelectedPublicIds((prev) => remainingSelection(prev, ids, result.succeeded));
+    onDone(result);
+  }
+
   async function handleRestoreSelected() {
     if (selectedPublicIds.size === 0) return;
     const n = selectedPublicIds.size;
@@ -129,21 +177,30 @@ export default function TrashPage() {
     });
     if (!ok) return;
     setBulkRestoring(true);
-    const ids = Array.from(selectedPublicIds);
     try {
-      for (const publicId of ids) {
-        await api.post(`admin/trash/${publicId}/restore/`);
-      }
-      setSelectedPublicIds(new Set());
-      notify.success(tPages("toastDescAllItemsRestored"), {
-        title: tPages("toastTitleAllItemsRestored"),
-      });
-      invalidateTrashCaches();
-    } catch (err) {
-      notify.error(err, {
-        title: tPages("toastTitleRestoreFailed"),
-        fallbackMessage: tPages("toastDescRestoreFailed"),
-      });
+      await runTrashBulkAction(
+        bulkRestoreTrash,
+        (result) => {
+          if (result.failed.length === 0) {
+            notify.success(tPages("toastDescAllItemsRestored"), {
+              title: tPages("toastTitleAllItemsRestored"),
+            });
+            return;
+          }
+          notify.warning(
+            tPages("toastDescSomeItemsNotRestored", {
+              ok: toLocaleDigits(String(result.succeeded.length), locale),
+              failed: toLocaleDigits(String(result.failed.length), locale),
+              names: failedNamesText(result.failed),
+            }),
+            { title: tPages("toastTitleSomeItemsNotRestored") }
+          );
+        },
+        {
+          title: tPages("toastTitleRestoreFailed"),
+          fallbackMessage: tPages("toastDescRestoreFailed"),
+        }
+      );
     } finally {
       setBulkRestoring(false);
     }
@@ -163,21 +220,30 @@ export default function TrashPage() {
     });
     if (!ok) return;
     setBulkDeleting(true);
-    const ids = Array.from(selectedPublicIds);
     try {
-      for (const publicId of ids) {
-        await api.delete(`admin/trash/${publicId}/`);
-      }
-      setSelectedPublicIds(new Set());
-      notify.success(tPages("toastDescTrashEmptied"), {
-        title: tPages("toastTitleTrashEmptied"),
-      });
-      invalidateTrashCaches();
-    } catch (err) {
-      notify.error(err, {
-        title: tPages("toastTitleTrashNotEmptied"),
-        fallbackMessage: tPages("toastDescTrashNotEmptied"),
-      });
+      await runTrashBulkAction(
+        bulkDeleteTrash,
+        (result) => {
+          if (result.failed.length === 0) {
+            notify.success(tPages("toastDescTrashEmptied"), {
+              title: tPages("toastTitleTrashEmptied"),
+            });
+            return;
+          }
+          notify.warning(
+            tPages("toastDescSomeItemsNotDeleted", {
+              ok: toLocaleDigits(String(result.succeeded.length), locale),
+              failed: toLocaleDigits(String(result.failed.length), locale),
+              names: failedNamesText(result.failed),
+            }),
+            { title: tPages("toastTitleSomeItemsNotDeleted") }
+          );
+        },
+        {
+          title: tPages("toastTitleTrashNotEmptied"),
+          fallbackMessage: tPages("toastDescTrashNotEmptied"),
+        }
+      );
     } finally {
       setBulkDeleting(false);
     }

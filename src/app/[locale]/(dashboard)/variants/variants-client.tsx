@@ -25,9 +25,10 @@ import type { ProductAttributeAdmin, ProductVariant } from "@/types";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { useFilters } from "@/hooks/useFilters";
 import {
+  useProductVariantsQuery,
   useVariantAttributesQuery,
-  useVariantProductsQuery,
-  useVariantsListQuery,
+  useVariantProductQuery,
+  useVariantSearchQuery,
 } from "@/hooks/useVariantsQuery";
 import { useConfirm } from "@/context/ConfirmDialogContext";
 import { notify } from "@/notifications";
@@ -35,11 +36,11 @@ import { numberTextClass } from "@/lib/number-font";
 import { cn } from "@/lib/utils";
 import { useEnterNavigation } from "@/hooks/useEnterNavigation";
 import {
-  inventoryStatusQueryKey,
-  productsListQueryKeyRoot,
-  variantsListQueryKey,
-  variantsQueryKeyRoot,
-} from "@/lib/query-keys";
+  patchVariantInCaches,
+  variantMutationInvalidationKeys,
+} from "@/lib/variants/variants-queries";
+import { toLocaleDigits } from "@/lib/locale-digits";
+import { VariantProductPicker } from "./variant-product-picker";
 
 type VariantForm = {
   price_override: string;
@@ -92,11 +93,15 @@ export default function VariantsPageClient() {
   const confirm = useConfirm();
   const queryClient = useQueryClient();
 
-  const invalidateVariantCaches = useCallback(() => {
-    void queryClient.invalidateQueries({ queryKey: variantsQueryKeyRoot });
-    void queryClient.invalidateQueries({ queryKey: productsListQueryKeyRoot });
-    void queryClient.invalidateQueries({ queryKey: inventoryStatusQueryKey });
-  }, [queryClient]);
+  /** After a variant change: reload what it affects, never the product picker or attributes. */
+  const invalidateVariantCaches = useCallback(
+    (variantProductId: string) => {
+      for (const queryKey of variantMutationInvalidationKeys(variantProductId)) {
+        void queryClient.invalidateQueries({ queryKey });
+      }
+    },
+    [queryClient]
+  );
 
   const searchParams = useSearchParams();
   const pathname = usePathname();
@@ -117,19 +122,31 @@ export default function VariantsPageClient() {
   const storeWide = !productId && activeSearch.length > 0;
   const showList = !!productId || activeSearch.length > 0;
 
-  const productsQuery = useVariantProductsQuery();
+  const productQuery = useVariantProductQuery(productId);
   const attributesQuery = useVariantAttributesQuery();
-  const variantsQuery = useVariantsListQuery({
-    productId,
-    // When a product is chosen we load its variants once and filter client-side;
-    // otherwise the search is sent to the backend so it spans the whole store.
-    search: productId ? "" : debouncedSearch,
-  });
+  // When a product is chosen we load all its variants and filter client-side; otherwise the
+  // search (and status filter) is sent to the backend, one page at a time, across the store.
+  const productVariantsQuery = useProductVariantsQuery(productId);
+  const searchQuery = useVariantSearchQuery(
+    activeSearch,
+    filters.variant_status || "",
+    storeWide
+  );
+  const variantsQuery = productId ? productVariantsQuery : searchQuery;
 
-  const products = productsQuery.data ?? [];
   const attributes = attributesQuery.data ?? [];
-  const variants = variantsQuery.data ?? [];
-  const loading = productsQuery.isLoading || attributesQuery.isLoading;
+  const searchPages = searchQuery.data?.pages;
+  const variants = useMemo(
+    () =>
+      productId
+        ? (productVariantsQuery.data ?? [])
+        : storeWide
+          ? (searchPages ?? []).flatMap((page) => page.results)
+          : [],
+    [productId, productVariantsQuery.data, storeWide, searchPages]
+  );
+  const searchTotal = searchPages?.[0]?.count ?? null;
+  const loading = attributesQuery.isLoading;
   const variantsLoading = variantsQuery.isLoading;
   const [error, setError] = useState("");
 
@@ -153,13 +170,13 @@ export default function VariantsPageClient() {
   }, []);
 
   useEffect(() => {
-    const metaError = productsQuery.error ?? attributesQuery.error;
+    const metaError = attributesQuery.error;
     if (!metaError) return;
     notify.error(metaError, {
       title: tPages("toastTitleVariantsFailedToLoad"),
       fallbackMessage: tPages("toastDescVariantsFailedToLoad"),
     });
-  }, [productsQuery.error, attributesQuery.error, tPages]);
+  }, [attributesQuery.error, tPages]);
 
   useEffect(() => {
     if (!variantsQuery.isError || !variantsQuery.error) return;
@@ -169,10 +186,8 @@ export default function VariantsPageClient() {
     });
   }, [variantsQuery.isError, variantsQuery.error, tPages]);
 
-  const selectedProduct = useMemo(
-    () => products.find((p) => p.public_id === productId) ?? null,
-    [products, productId]
-  );
+  const selectedProduct =
+    productId && productQuery.data?.public_id === productId ? productQuery.data : null;
 
   const editingVariantSku =
     editing && editing !== "new"
@@ -190,16 +205,9 @@ export default function VariantsPageClient() {
     setSearchInput(filters.search || "");
   }, [filters.search]);
 
-  const productOptions = useMemo(
-    () =>
-      products.map((p) => ({
-        value: p.public_id,
-        label: p.name,
-      })),
-    [products]
-  );
-
   const filteredVariants = useMemo(() => {
+    // Store-wide search results are already matched and status-filtered by the server.
+    if (!productId) return variants;
     const q = activeSearch.toLowerCase();
     let rows = variants;
     if (q) {
@@ -212,13 +220,7 @@ export default function VariantsPageClient() {
     if (st === "active") rows = rows.filter((v) => v.is_active);
     else if (st === "inactive") rows = rows.filter((v) => !v.is_active);
     return rows;
-  }, [variants, activeSearch, filters.variant_status]);
-
-  // Store-wide search rows span products; map public_id -> name to label each row.
-  const productNameById = useMemo(
-    () => new Map(products.map((p) => [p.public_id, p.name])),
-    [products]
-  );
+  }, [productId, variants, activeSearch, filters.variant_status]);
 
   // Which attribute *types* the selected product's variants actually use.
   const attributeIdByValueId = useMemo(() => {
@@ -369,7 +371,7 @@ export default function VariantsPageClient() {
         await api.patch(`admin/product-variants/${editing}/`, payload);
       }
       closePanel();
-      invalidateVariantCaches();
+      invalidateVariantCaches(targetProductId);
     } catch (err: unknown) {
       notify.error(err, {
         title: tPages("toastTitleVariantNotSaved"),
@@ -389,7 +391,7 @@ export default function VariantsPageClient() {
     if (!ok) return;
     try {
       await api.delete(`admin/product-variants/${v.public_id}/`);
-      invalidateVariantCaches();
+      invalidateVariantCaches(v.product_public_id);
       notify.success(tPages("toastDescVariantDeleted"), { title: tPages("toastTitleVariantDeleted") });
     } catch (err) {
       notify.error(err, {
@@ -405,20 +407,14 @@ export default function VariantsPageClient() {
     setError("");
     try {
       await api.patch(`admin/product-variants/${v.public_id}/`, { is_active });
-      queryClient.setQueryData<ProductVariant[]>(
-        variantsListQueryKey(productId, productId ? "" : activeSearch),
-        (prev) =>
-          (prev ?? []).map((row) =>
-            row.public_id === v.public_id ? { ...row, is_active } : row,
-          ),
-      );
-      invalidateVariantCaches();
+      patchVariantInCaches(queryClient, v.public_id, { is_active });
+      invalidateVariantCaches(v.product_public_id);
     } catch {
       notify.error(new Error("variant_status_update_failed"), {
         title: tPages("toastTitleVariantStatusNotSaved"),
         fallbackMessage: tPages("toastDescVariantStatusNotSaved"),
       });
-      invalidateVariantCaches();
+      invalidateVariantCaches(v.product_public_id);
     } finally {
       setTogglingVariantId(null);
     }
@@ -432,7 +428,7 @@ export default function VariantsPageClient() {
 
   const variantStatusValue = filters.variant_status || "";
 
-  if (loading && products.length === 0) {
+  if (loading && attributes.length === 0) {
     return null;
   }
 
@@ -476,24 +472,19 @@ export default function VariantsPageClient() {
       {/* Inline error text moved to toasts (keep form states only). */}
 
       <FilterBar className="flex-nowrap overflow-x-auto overflow-y-clip [-webkit-overflow-scrolling:touch] sm:flex-wrap sm:overflow-x-visible sm:overflow-y-visible">
-        <Select
-          aria-label={tPages("variantsFiltersProduct")}
-          className={cn(
-            "shrink-0 min-w-[200px] max-w-[min(100vw-2rem,320px)] text-xs font-medium"
-          )}
-          value={productId}
-          onChange={(e) => {
+        <VariantProductPicker
+          productId={productId}
+          productName={selectedProduct?.name ?? null}
+          onChange={(value) => {
             closePanel();
-            applyProductPublicIdToUrl(e.target.value);
+            applyProductPublicIdToUrl(value);
           }}
-        >
-          <option value="">{tPages("variantsFiltersProduct")}</option>
-          {productOptions.map((o) => (
-            <option key={o.value} value={o.value}>
-              {o.label}
-            </option>
-          ))}
-        </Select>
+          ariaLabel={tPages("variantsFiltersProduct")}
+          placeholder={tPages("variantsFiltersProduct")}
+          emptyText={tPages("variantsProductPickerNoResults")}
+          loadingText={tCommon("loading")}
+          className="shrink-0 min-w-[200px] max-w-[min(100vw-2rem,320px)]"
+        />
         <Select
           aria-label={tPages("variantsFiltersVariantStatus")}
           className="w-[160px] shrink-0 text-xs font-medium"
@@ -736,9 +727,9 @@ export default function VariantsPageClient() {
                         {!productId ? (
                           <span
                             className="mt-0.5 block max-w-[16rem] truncate text-xs font-normal text-muted-foreground"
-                            title={productNameById.get(v.product_public_id) ?? v.product_public_id}
+                            title={v.product_name || v.product_public_id}
                           >
-                            {productNameById.get(v.product_public_id) ?? v.product_public_id}
+                            {v.product_name || v.product_public_id}
                           </span>
                         ) : null}
                       </td>
@@ -801,6 +792,33 @@ export default function VariantsPageClient() {
               </table>
             </div>
           )}
+
+          {storeWide && !variantsLoading && variants.length > 0 ? (
+            <div className="flex flex-wrap items-center justify-between gap-2 text-sm text-muted-foreground">
+              {searchTotal != null ? (
+                <span>
+                  {tPages("variantsSearchShowing", {
+                    shown: toLocaleDigits(String(variants.length), locale),
+                    total: toLocaleDigits(String(searchTotal), locale),
+                  })}
+                </span>
+              ) : (
+                <span />
+              )}
+              {searchQuery.hasNextPage ? (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  loading={searchQuery.isFetchingNextPage}
+                  disabled={searchQuery.isFetchingNextPage}
+                  onClick={() => void searchQuery.fetchNextPage()}
+                >
+                  {tPages("variantsLoadMore")}
+                </Button>
+              ) : null}
+            </div>
+          ) : null}
         </div>
       ) : (
         <p className="text-sm text-muted-foreground">{tPages("variantsChooseProduct")}</p>
