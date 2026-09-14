@@ -1,7 +1,8 @@
 import { describe, expect, it, vi } from "vitest";
-import { QueriesObserver, QueryClient } from "@tanstack/react-query";
+import { onlineManager, QueriesObserver, QueryClient } from "@tanstack/react-query";
 import {
   ensureOrderEditorVariants,
+  invalidateOrderEditorVariants,
   orderEditorVariantsQueryKey,
   orderEditorVariantsQueryOptions,
   type OrderEditorVariantsHttp,
@@ -148,5 +149,99 @@ describe("order editor variants loading", () => {
     expect(reopened.calls).toBe(0);
     reopened.unsubscribe();
     small.unsubscribe();
+  });
+
+  /** Loaded, fresh entries for N products (the editor was opened and closed within 2 minutes). */
+  async function freshEntries(n: number) {
+    const client = newClient();
+    const fake = createDeferredHttp();
+    const ids = Array.from({ length: n }, (_, i) => `p${i}`);
+    ids.forEach((id) => ensureOrderEditorVariants(client, id, fake.http));
+    fake.resolveAll();
+    await flush();
+    return { client, fake, ids };
+  }
+
+  /** Requests an editor mount makes for these products, observing them like useQueries does. */
+  async function mountRequests(client: QueryClient, fake: ReturnType<typeof createDeferredHttp>, ids: string[]) {
+    type ObserverQueries = ConstructorParameters<typeof QueriesObserver>[1];
+    const before = fake.get.mock.calls.length;
+    const observer = new QueriesObserver(
+      client,
+      ids.map((id) => orderEditorVariantsQueryOptions(id, fake.http)) as unknown as ObserverQueries,
+    );
+    const unsubscribe = observer.subscribe(() => {});
+    await flush();
+    fake.resolveAll();
+    await flush();
+    unsubscribe();
+    return fake.get.mock.calls.length - before;
+  }
+
+  /** What the order pages call after creating, editing, or changing the status of an order. */
+  function invalidateAfterOrderChange(client: QueryClient) {
+    return invalidateOrderEditorVariants(client);
+  }
+
+  it("an order change makes the next editor mount reload stock, once per product at any N", async () => {
+    for (const n of [3, 12]) {
+      const { client, fake, ids } = await freshEntries(n);
+      // Fresh and untouched: reopening costs nothing.
+      expect(await mountRequests(client, fake, ids)).toBe(0);
+      // The merchant saves/creates/cancels an order: stock may have moved, so reload it.
+      await invalidateAfterOrderChange(client);
+      expect((await mountRequests(client, fake, ids)) / n).toBe(1);
+      // And it is fresh again afterwards.
+      expect(await mountRequests(client, fake, ids)).toBe(0);
+    }
+  });
+
+  it("an order change refetches an open editor's products once each, whatever the order size", async () => {
+    const perProduct: number[] = [];
+    for (const n of [3, 12]) {
+      const { client, fake, ids } = await freshEntries(n);
+      type ObserverQueries = ConstructorParameters<typeof QueriesObserver>[1];
+      const observer = new QueriesObserver(
+        client,
+        ids.map((id) => orderEditorVariantsQueryOptions(id, fake.http)) as unknown as ObserverQueries,
+      );
+      const unsubscribe = observer.subscribe(() => {});
+      await flush();
+      const before = fake.get.mock.calls.length;
+      await Promise.all([invalidateAfterOrderChange(client), (async () => {
+        await flush();
+        fake.resolveAll();
+      })()]);
+      await flush();
+      perProduct.push((fake.get.mock.calls.length - before) / n);
+      unsubscribe();
+    }
+    expect(perProduct[0]).toBe(1);
+    expect(perProduct[1]).toBe(perProduct[0]);
+  });
+
+  it("does not touch other variants caches (the Variants page list) on an order change", async () => {
+    const client = newClient();
+    const otherKey = [...variantsQueryKeyRoot, "list", "p1", ""];
+    client.setQueryData(otherKey, []);
+    await invalidateAfterOrderChange(client);
+    expect(client.getQueryState(otherKey)?.isInvalidated).toBe(false);
+  });
+
+  it("offline, still attempts the request and fails (empty list) instead of waiting in 'Loading'", async () => {
+    onlineManager.setOnline(false);
+    try {
+      const client = newClient();
+      const fake = createDeferredHttp();
+      ensureOrderEditorVariants(client, "p1", fake.http);
+      expect(fake.get).toHaveBeenCalledTimes(1);
+      fake.rejectOne("p1");
+      await flush();
+      const state = client.getQueryState(orderEditorVariantsQueryKey("p1"));
+      expect(state?.status).toBe("error");
+      expect(state?.fetchStatus).toBe("idle");
+    } finally {
+      onlineManager.setOnline(true);
+    }
   });
 });

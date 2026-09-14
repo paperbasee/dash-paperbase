@@ -29,7 +29,10 @@ import {
 import { ORDER_FLAG_OPTIONS, formatOrderFlagLabel } from "@/lib/orders/order-flags";
 import { formatOrderNumber } from "@/lib/orders/format-order-number";
 import { formatOrderPaymentStatusLabel } from "@/lib/orders/payment-statuses";
-import { ensureOrderEditorVariants } from "@/lib/orders/order-editor-variants";
+import {
+  ensureOrderEditorVariants,
+  invalidateOrderEditorVariants,
+} from "@/lib/orders/order-editor-variants";
 import { createProductSearchScheduler } from "@/lib/orders/product-search-scheduler";
 import type {
   Order,
@@ -106,6 +109,8 @@ export default function OrderDetailPage() {
     if (publicId) {
       void queryClient.invalidateQueries({ queryKey: orderDetailQueryKey(publicId) });
     }
+    // Edits and status changes (cancel) move stock: editors must not keep the old quantities.
+    void invalidateOrderEditorVariants(queryClient);
   }, [queryClient, publicId]);
 
   const [editing, setEditing] = useState(false);
@@ -328,6 +333,10 @@ export default function OrderDetailPage() {
     ),
   );
   useEffect(() => () => productSearch.cancel(), [productSearch]);
+  // Closing the editor (Cancel or Save) drops a pending search so it cannot reopen the results.
+  useEffect(() => {
+    if (!editing) productSearch.cancel();
+  }, [editing, productSearch]);
 
   function handleProductSearch(value: string) {
     setProductQuery(value);
@@ -340,6 +349,9 @@ export default function OrderDetailPage() {
 
   function addProductToEditableOrder(product: Product) {
     if (!product.public_id) return;
+    // A search still pending for a newer query must not reopen the results after the pick.
+    productSearch.cancel();
+    setSearchingProducts(false);
     // Adding the line adds its product to editProductIds, which loads its variants.
     setEditableItems((prev) => [
       ...prev,

@@ -11,8 +11,19 @@ export type OrderEditorVariantsHttp = Pick<typeof api, "get">;
  * Kept under the variants root so a variant saved on the Variants page invalidates it. It must not
  * share `variantsListQueryKey`: that fetcher sends include_inactive=true, the editors must not.
  */
+export const orderEditorVariantsQueryKeyRoot = [...variantsQueryKeyRoot, "order-editor"] as const;
+
 export function orderEditorVariantsQueryKey(productId: string) {
-  return [...variantsQueryKeyRoot, "order-editor", productId] as const;
+  return [...orderEditorVariantsQueryKeyRoot, productId] as const;
+}
+
+/**
+ * Each variant carries available_quantity, which orders move (create, edit, cancel). Call after
+ * any order change so an open editor reloads stock now and a closed one reloads on next open,
+ * instead of showing stock (and capping quantities) from before the change.
+ */
+export function invalidateOrderEditorVariants(queryClient: QueryClient): Promise<void> {
+  return queryClient.invalidateQueries({ queryKey: orderEditorVariantsQueryKeyRoot });
 }
 
 export async function fetchOrderEditorVariants(
@@ -41,6 +52,9 @@ export function orderEditorVariantsQueryOptions(
     staleTime: 2 * 60 * 1000,
     // The editors have always made a single attempt and shown an empty variant list on failure.
     retry: false,
+    // Offline, attempt the request and fail (empty list, as before) rather than pausing the query
+    // in "Loading" until the connection returns.
+    networkMode: "always",
   });
 }
 

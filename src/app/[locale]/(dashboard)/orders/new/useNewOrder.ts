@@ -16,7 +16,10 @@ import type {
   OrderPricingPreview,
 } from "@/types";
 import { joinVillageThanaDistrict } from "@/lib/orders/shipping-address-parts";
-import { ensureOrderEditorVariants } from "@/lib/orders/order-editor-variants";
+import {
+  ensureOrderEditorVariants,
+  invalidateOrderEditorVariants,
+} from "@/lib/orders/order-editor-variants";
 import { buildOrderCreateSchema, parseValidation } from "@/lib/validation";
 import {
   dashboardAnalyticsQueryKeyRoot,
@@ -55,6 +58,8 @@ export function useNewOrder() {
     void queryClient.invalidateQueries({ queryKey: ordersListQueryKeyRoot });
     void queryClient.invalidateQueries({ queryKey: navCountsQueryKey });
     void queryClient.invalidateQueries({ queryKey: dashboardAnalyticsQueryKeyRoot });
+    // The order took stock: the next editor must not show the old available quantities.
+    void invalidateOrderEditorVariants(queryClient);
   }, [queryClient]);
   const t = useTranslations("pages");
   const tCommon = useTranslations("common");
