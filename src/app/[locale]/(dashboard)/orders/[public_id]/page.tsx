@@ -18,6 +18,7 @@ import {
   ordersListQueryKeyRoot,
 } from "@/lib/query-keys";
 import { useOrderDetailQuery } from "@/hooks/useOrderDetailQuery";
+import { useOrderEditorVariants } from "@/hooks/useOrderEditorVariants";
 import { useShippingZonesQuery } from "@/hooks/useShippingZonesQuery";
 import { useShippingMethodsQuery } from "@/hooks/useShippingMethodsQuery";
 import { useBranding } from "@/context/BrandingContext";
@@ -28,11 +29,12 @@ import {
 import { ORDER_FLAG_OPTIONS, formatOrderFlagLabel } from "@/lib/orders/order-flags";
 import { formatOrderNumber } from "@/lib/orders/format-order-number";
 import { formatOrderPaymentStatusLabel } from "@/lib/orders/payment-statuses";
+import { ensureOrderEditorVariants } from "@/lib/orders/order-editor-variants";
+import { createProductSearchScheduler } from "@/lib/orders/product-search-scheduler";
 import type {
   Order,
   OrderPricingPreview,
   PaginatedResponse,
-  ProductVariant,
   Product,
 } from "@/types";
 import { Button } from "@/components/ui/button";
@@ -123,8 +125,6 @@ export default function OrderDetailPage() {
   >({});
   const [pricingPreview, setPricingPreview] = useState<OrderPricingPreview | null>(null);
   const [editableItems, setEditableItems] = useState<EditableOrderItem[]>([]);
-  const [variantsByProductId, setVariantsByProductId] = useState<Record<string, ProductVariant[]>>({});
-  const [variantsLoadingByProductId, setVariantsLoadingByProductId] = useState<Record<string, boolean>>({});
   const [productQuery, setProductQuery] = useState("");
   const [productResults, setProductResults] = useState<Product[]>([]);
   const [searchingProducts, setSearchingProducts] = useState(false);
@@ -221,8 +221,10 @@ export default function OrderDetailPage() {
         isNew: false,
       }))
     );
+    productSearch.cancel();
     setProductQuery("");
     setProductResults([]);
+    setSearchingProducts(false);
     setShowProductResults(false);
     setEditing(true);
   }
@@ -286,24 +288,6 @@ export default function OrderDetailPage() {
     form.shipping_method_public_id,
   ]);
 
-  const ensureVariantsLoaded = useCallback(async (productId: string) => {
-    if (!productId) return;
-    if (variantsByProductId[productId]) return;
-    setVariantsLoadingByProductId((p) => ({ ...p, [productId]: true }));
-    try {
-      const { data } = await api.get<PaginatedResponse<ProductVariant> | ProductVariant[]>(
-        "admin/product-variants/",
-        { params: { product_public_id: productId } },
-      );
-      const list = Array.isArray(data) ? data : data.results;
-      setVariantsByProductId((p) => ({ ...p, [productId]: list ?? [] }));
-    } catch {
-      setVariantsByProductId((p) => ({ ...p, [productId]: [] }));
-    } finally {
-      setVariantsLoadingByProductId((p) => ({ ...p, [productId]: false }));
-    }
-  }, [variantsByProductId]);
-
   const editProductIds = useMemo(() => {
     if (!editing) return [];
     const ids = editableItems
@@ -312,34 +296,42 @@ export default function OrderDetailPage() {
     return [...new Set(ids)];
   }, [editing, editableItems]);
 
-  useEffect(() => {
-    if (!editing || editProductIds.length === 0) return;
-    for (const pid of editProductIds) {
-      void ensureVariantsLoaded(pid);
-    }
-  }, [editing, editProductIds, ensureVariantsLoaded]);
+  // One shared cache entry per product: an Edit click costs at most one request per product.
+  // Failures show an empty variant list, as before (no toast on this page).
+  const { variantsByProductId, variantsLoadingByProductId } =
+    useOrderEditorVariants(editProductIds);
+
+  // Debounced, newest-query-wins product search (a request per pause, not per keystroke).
+  const [productSearch] = useState(() =>
+    createProductSearchScheduler(
+      async (query, signal) => {
+        const { data } = await api.get<PaginatedResponse<Product>>("admin/products/", {
+          params: { search: query, status: "active" },
+          signal,
+        });
+        return data.results ?? [];
+      },
+      {
+        onSearching: () => setSearchingProducts(true),
+        onResults: (results) => {
+          setProductResults(results);
+          setShowProductResults(true);
+        },
+        onError: () => setProductResults([]),
+        onSettled: () => setSearchingProducts(false),
+        onCleared: () => {
+          setProductResults([]);
+          setShowProductResults(false);
+          setSearchingProducts(false);
+        },
+      },
+    ),
+  );
+  useEffect(() => () => productSearch.cancel(), [productSearch]);
 
   function handleProductSearch(value: string) {
     setProductQuery(value);
-    const query = value.trim();
-    if (query.length < 2) {
-      setProductResults([]);
-      setShowProductResults(false);
-      return;
-    }
-    setSearchingProducts(true);
-    api
-      .get<PaginatedResponse<Product>>("admin/products/", {
-        params: { search: query, status: "active" },
-      })
-      .then(({ data }) => {
-        setProductResults(data.results ?? []);
-        setShowProductResults(true);
-      })
-      .catch(() => {
-        setProductResults([]);
-      })
-      .finally(() => setSearchingProducts(false));
+    productSearch.search(value);
   }
 
   const dismissProductResults = useCallback(() => {
@@ -348,7 +340,7 @@ export default function OrderDetailPage() {
 
   function addProductToEditableOrder(product: Product) {
     if (!product.public_id) return;
-    ensureVariantsLoaded(product.public_id);
+    // Adding the line adds its product to editProductIds, which loads its variants.
     setEditableItems((prev) => [
       ...prev,
       {
@@ -760,9 +752,11 @@ export default function OrderDetailPage() {
                           },
                         }));
                       }}
-                      onVariantFocus={() =>
-                        item.product_public_id && ensureVariantsLoaded(item.product_public_id)
-                      }
+                      onVariantFocus={() => {
+                        if (item.product_public_id) {
+                          ensureOrderEditorVariants(queryClient, item.product_public_id);
+                        }
+                      }}
                       onRemove={() => removeEditableItem(orderLineRemoveKey(item))}
                     />
                   );

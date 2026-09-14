@@ -7,15 +7,16 @@ import { useRouter } from "@/i18n/navigation";
 import { useDeferredNavigate } from "@/hooks/useDeferredNavigate";
 import { useShippingMethodsQuery } from "@/hooks/useShippingMethodsQuery";
 import { useShippingZonesQuery } from "@/hooks/useShippingZonesQuery";
+import { useOrderEditorVariants } from "@/hooks/useOrderEditorVariants";
 import api from "@/lib/api";
 import { notify } from "@/notifications";
 import type {
   Product,
   PaginatedResponse,
-  ProductVariant,
   OrderPricingPreview,
 } from "@/types";
 import { joinVillageThanaDistrict } from "@/lib/orders/shipping-address-parts";
+import { ensureOrderEditorVariants } from "@/lib/orders/order-editor-variants";
 import { buildOrderCreateSchema, parseValidation } from "@/lib/validation";
 import {
   dashboardAnalyticsQueryKeyRoot,
@@ -96,8 +97,26 @@ export function useNewOrder() {
   const searchRef = useRef<HTMLDivElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
-  const [variantsByProductId, setVariantsByProductId] = useState<Record<string, ProductVariant[]>>({});
-  const [variantsLoadingByProductId, setVariantsLoadingByProductId] = useState<Record<string, boolean>>({});
+  // Same shared per-product cache as the order edit page: at most one request per product.
+  const itemProductIds = useMemo(
+    () => [...new Set(items.map((item) => item.product_public_id).filter(Boolean))],
+    [items],
+  );
+  const { variantsByProductId, variantsLoadingByProductId, variantErrors } =
+    useOrderEditorVariants(itemProductIds);
+
+  // Report each failed variants load once (a retry that fails again is a new failure).
+  const reportedVariantErrorsRef = useRef<Map<string, number>>(new Map());
+  useEffect(() => {
+    for (const { productId, error, errorUpdatedAt } of variantErrors) {
+      if (reportedVariantErrorsRef.current.get(productId) === errorUpdatedAt) continue;
+      reportedVariantErrorsRef.current.set(productId, errorUpdatedAt);
+      notify.error(error, {
+        title: t("toastTitleVariantsUnavailable"),
+        fallbackMessage: t("toastDescVariantsUnavailable"),
+      });
+    }
+  }, [variantErrors, t]);
 
   const zonesQuery = useShippingZonesQuery();
   const methodsQuery = useShippingMethodsQuery();
@@ -158,32 +177,14 @@ export function useNewOrder() {
     }, 300);
   }
 
-  async function ensureVariantsLoaded(productId: string) {
-    if (!productId) return;
-    if (variantsByProductId[productId]) return;
-    setVariantsLoadingByProductId((p) => ({ ...p, [productId]: true }));
-    try {
-      const { data } = await api.get<PaginatedResponse<ProductVariant> | ProductVariant[]>(
-        "admin/product-variants/",
-        { params: { product_public_id: productId } }
-      );
-      const list = Array.isArray(data) ? data : data.results;
-      setVariantsByProductId((p) => ({ ...p, [productId]: list ?? [] }));
-    } catch (err) {
-      setVariantsByProductId((p) => ({ ...p, [productId]: [] }));
-      notify.error(err, {
-        title: t("toastTitleVariantsUnavailable"),
-        fallbackMessage: t("toastDescVariantsUnavailable"),
-      });
-    } finally {
-      setVariantsLoadingByProductId((p) => ({ ...p, [productId]: false }));
-    }
+  function ensureVariantsLoaded(productId: string) {
+    ensureOrderEditorVariants(queryClient, productId);
   }
 
   function addProduct(product: Product) {
     if (!product?.public_id) return;
     setFieldErrors({});
-    ensureVariantsLoaded(product.public_id);
+    // Adding the row adds its product to itemProductIds, which loads its variants.
     setItems((prev) => [
       ...prev,
       {
