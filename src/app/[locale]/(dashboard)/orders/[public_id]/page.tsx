@@ -301,7 +301,8 @@ export default function OrderDetailPage() {
     return [...new Set(ids)];
   }, [editing, editableItems]);
 
-  // One shared cache entry per product: an Edit click costs at most one request per product.
+  // One shared cache entry per product, loaded together: an Edit click on cold products costs one
+  // request (more only past 100 products or 100 variant rows).
   // Failures show an empty variant list, as before (no toast on this page).
   const { variantsByProductId, variantsLoadingByProductId } =
     useOrderEditorVariants(editProductIds);
@@ -335,7 +336,10 @@ export default function OrderDetailPage() {
   useEffect(() => () => productSearch.cancel(), [productSearch]);
   // Closing the editor (Cancel or Save) drops a pending search so it cannot reopen the results.
   useEffect(() => {
-    if (!editing) productSearch.cancel();
+    if (!editing) {
+      productSearch.cancel();
+      setSearchingProducts(false);
+    }
   }, [editing, productSearch]);
 
   function handleProductSearch(value: string) {

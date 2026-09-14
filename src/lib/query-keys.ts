@@ -147,6 +147,17 @@ export function variantsSearchQueryKey(search: string, status: string) {
   return [...variantsSearchQueryKeyRoot, search, status] as const;
 }
 
+/**
+ * Active variants (with stock) of one product, as the order editors (order edit and new order)
+ * show them. Under the variants root so a Variants page save invalidates it; never shared with
+ * variantsListQueryKey, whose fetcher includes inactive variants.
+ */
+export const orderEditorVariantsQueryKeyRoot = [...variantsQueryKeyRoot, "order-editor"] as const;
+
+export function orderEditorVariantsQueryKey(productId: string) {
+  return [...orderEditorVariantsQueryKeyRoot, productId] as const;
+}
+
 export const notificationsQueryKey = ["notifications"] as const;
 
 export const popupsQueryKey = ["popups"] as const;

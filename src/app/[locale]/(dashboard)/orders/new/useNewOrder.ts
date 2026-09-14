@@ -17,9 +17,11 @@ import type {
 } from "@/types";
 import { joinVillageThanaDistrict } from "@/lib/orders/shipping-address-parts";
 import {
+  createOrderEditorVariantsFailureReporter,
   ensureOrderEditorVariants,
   invalidateOrderEditorVariants,
 } from "@/lib/orders/order-editor-variants";
+import { createProductSearchScheduler } from "@/lib/orders/product-search-scheduler";
 import { buildOrderCreateSchema, parseValidation } from "@/lib/validation";
 import {
   dashboardAnalyticsQueryKeyRoot,
@@ -100,9 +102,8 @@ export function useNewOrder() {
   const [searching, setSearching] = useState(false);
   const [showResults, setShowResults] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
-  const debounceRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
-  // Same shared per-product cache as the order edit page: at most one request per product.
+  // Same shared per-product cache as the order edit page: products loaded together share a request.
   const itemProductIds = useMemo(
     () => [...new Set(items.map((item) => item.product_public_id).filter(Boolean))],
     [items],
@@ -110,18 +111,16 @@ export function useNewOrder() {
   const { variantsByProductId, variantsLoadingByProductId, variantErrors } =
     useOrderEditorVariants(itemProductIds);
 
-  // Report each failed variants load once (a retry that fails again is a new failure).
-  const reportedVariantErrorsRef = useRef<Map<string, number>>(new Map());
+  // Report each failed variants request once (a retry that fails again is a new failure).
+  const [unreportedVariantErrors] = useState(createOrderEditorVariantsFailureReporter);
   useEffect(() => {
-    for (const { productId, error, errorUpdatedAt } of variantErrors) {
-      if (reportedVariantErrorsRef.current.get(productId) === errorUpdatedAt) continue;
-      reportedVariantErrorsRef.current.set(productId, errorUpdatedAt);
+    for (const { error } of unreportedVariantErrors(variantErrors)) {
       notify.error(error, {
         title: t("toastTitleVariantsUnavailable"),
         fallbackMessage: t("toastDescVariantsUnavailable"),
       });
     }
-  }, [variantErrors, t]);
+  }, [variantErrors, unreportedVariantErrors, t]);
 
   const zonesQuery = useShippingZonesQuery();
   const methodsQuery = useShippingMethodsQuery();
@@ -152,34 +151,49 @@ export function useNewOrder() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  // Debounced, newest-query-wins product search: an older response never replaces newer results.
+  const tRef = useRef(t);
+  useEffect(() => {
+    tRef.current = t;
+  }, [t]);
+  const [productSearch] = useState(() =>
+    createProductSearchScheduler(
+      async (search, signal) => {
+        // The spinner shows while a request runs, not while the user is still typing.
+        setSearching(true);
+        const { data } = await api.get<PaginatedResponse<Product>>("admin/products/", {
+          params: { search, status: "active" },
+          signal,
+        });
+        return data.results;
+      },
+      {
+        onSearching: () => {},
+        onResults: (found) => {
+          setResults(found);
+          setShowResults(true);
+        },
+        onError: (err) => {
+          setResults([]);
+          notify.error(err, {
+            title: tRef.current("toastTitleProductSearchFailed"),
+            fallbackMessage: tRef.current("toastDescProductSearchFailed"),
+          });
+        },
+        onSettled: () => setSearching(false),
+        onCleared: () => {
+          setResults([]);
+          setShowResults(false);
+          setSearching(false);
+        },
+      },
+    ),
+  );
+  useEffect(() => () => productSearch.cancel(), [productSearch]);
+
   function handleSearch(value: string) {
     setQuery(value);
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-
-    if (value.trim().length < 2) {
-      setResults([]);
-      setShowResults(false);
-      return;
-    }
-
-    debounceRef.current = setTimeout(async () => {
-      setSearching(true);
-      try {
-        const { data } = await api.get<PaginatedResponse<Product>>("admin/products/", {
-          params: { search: value.trim(), status: "active" },
-        });
-        setResults(data.results);
-        setShowResults(true);
-      } catch (err) {
-        setResults([]);
-        notify.error(err, {
-          title: t("toastTitleProductSearchFailed"),
-          fallbackMessage: t("toastDescProductSearchFailed"),
-        });
-      } finally {
-        setSearching(false);
-      }
-    }, 300);
+    productSearch.search(value);
   }
 
   function ensureVariantsLoaded(productId: string) {
@@ -202,6 +216,9 @@ export function useNewOrder() {
         unit_price: String(product.price ?? "0"),
       },
     ]);
+    // A search still pending for an older query must not reopen the results after the pick.
+    productSearch.cancel();
+    setSearching(false);
     setQuery("");
     setResults([]);
     setShowResults(false);

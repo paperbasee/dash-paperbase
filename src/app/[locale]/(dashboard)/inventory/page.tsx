@@ -15,6 +15,7 @@ import { useInventoryListQuery } from "@/hooks/useInventoryListQuery";
 import { usePermissions } from "@/context/PermissionsContext";
 import { useConfirm } from "@/context/ConfirmDialogContext";
 import api from "@/lib/api";
+import { invalidateOrderEditorVariants } from "@/lib/orders/order-editor-variants";
 import {
   inventoryListQueryKey,
   inventoryStatusQueryKey,
@@ -158,6 +159,8 @@ export default function InventoryPage() {
       setAdjustValue((prev) => ({ ...prev, [publicId]: "" }));
       void queryClient.invalidateQueries({ queryKey: inventoryListQueryKey() });
       void queryClient.invalidateQueries({ queryKey: inventoryStatusQueryKey });
+      // Order editors show available stock per variant: reload it.
+      void invalidateOrderEditorVariants(queryClient);
     } catch (err) {
       notify.error(err, {
         title: tPages("toastTitleInventoryUpdateFailed"),
@@ -184,6 +187,8 @@ export default function InventoryPage() {
       const created = data?.rows_created ?? 0;
       void queryClient.invalidateQueries({ queryKey: inventoryListQueryKey() });
       void queryClient.invalidateQueries({ queryKey: inventoryStatusQueryKey });
+      // Order editors show available stock per variant: reload it.
+      void invalidateOrderEditorVariants(queryClient);
       notify.success(
         removed === 0 && created === 0
           ? tPages("inventorySyncUpToDate")

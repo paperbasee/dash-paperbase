@@ -1,19 +1,18 @@
 "use client";
 
 import { useQueries } from "@tanstack/react-query";
-import { orderEditorVariantsQueryOptions } from "@/lib/orders/order-editor-variants";
+import {
+  orderEditorVariantsQueryOptions,
+  type OrderEditorVariantsFailure,
+} from "@/lib/orders/order-editor-variants";
 import type { ProductVariant } from "@/types";
 
-export type OrderEditorVariantsError = {
-  productId: string;
-  error: unknown;
-  /** Changes on every failed attempt, so a consumer can report each failure once. */
-  errorUpdatedAt: number;
-};
+export type OrderEditorVariantsError = OrderEditorVariantsFailure;
 
 /**
  * Active variants for every product in an order editor, one shared cache entry per product.
- * Pass distinct product ids; pass an empty list when the editor is closed.
+ * Products that need loading at the same time share one request. Pass distinct product ids;
+ * pass an empty list when the editor is closed.
  */
 export function useOrderEditorVariants(productIds: readonly string[]) {
   const results = useQueries({

@@ -57,6 +57,7 @@ import {
   ordersListQueryKey,
   ordersListQueryKeyRoot,
 } from "@/lib/query-keys";
+import { invalidateOrderEditorVariants } from "@/lib/orders/order-editor-variants";
 import { useQueryClient } from "@tanstack/react-query";
 
 import { OrderPreviewTriggerButton } from "@/components/orders/order-preview";
@@ -287,6 +288,8 @@ export default function OrdersPage() {
   const invalidateOrdersCaches = useCallback(() => {
     void queryClient.invalidateQueries({ queryKey: ordersListQueryKeyRoot });
     void queryClient.invalidateQueries({ queryKey: navCountsQueryKey });
+    // Status changes (confirm, cancel) move stock: order editors must not keep the old quantities.
+    void invalidateOrderEditorVariants(queryClient);
   }, [queryClient]);
 
   const patchOrdersList = useCallback(
