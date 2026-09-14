@@ -15,6 +15,7 @@ import {
 } from "@/lib/storeSocialLinks";
 import { queryClient } from "@/components/QueryProvider";
 import { brandingQueryKey } from "@/lib/query-keys";
+import { storefrontIntegrationAvailable } from "./storefrontIntegration";
 
 function resolveLogoUrl(url: string | null): string | null {
   if (!url) return null;
@@ -47,6 +48,8 @@ export function useStoreSettings({ onSaveSuccess }: UseStoreSettingsOptions = {}
   const [languageMessage, setLanguageMessage] = useState<SettingsMessage>(null);
   const [storefrontUrl, setStorefrontUrl] = useState("");
   const [revalidateSecret, setRevalidateSecret] = useState("");
+  // Off until store settings load and actually include the integration keys.
+  const [storefrontIntegrationEnabled, setStorefrontIntegrationEnabled] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   function syncFromBranding(branding: {
@@ -73,6 +76,9 @@ export function useStoreSettings({ onSaveSuccess }: UseStoreSettingsOptions = {}
     storefront_url?: string | null;
     revalidate_secret?: string | null;
   }) {
+    const available = storefrontIntegrationAvailable(row);
+    setStorefrontIntegrationEnabled(available);
+    if (!available) return;
     setStorefrontUrl((row.storefront_url ?? "").trim());
     setRevalidateSecret(row.revalidate_secret ?? "");
   }
@@ -131,35 +137,39 @@ export function useStoreSettings({ onSaveSuccess }: UseStoreSettingsOptions = {}
       formData.append("social_links", JSON.stringify(socialLinks));
 
       await api.patch("admin/branding/", formData);
-      const normalizedUrl = storefrontUrl.trim()
-        ? storefrontUrl.trim().startsWith("http://") || storefrontUrl.trim().startsWith("https://")
-          ? storefrontUrl.trim()
-          : `https://${storefrontUrl.trim()}`
-        : "";
-      try {
-        await api.patch("store/settings/current/", {
-          storefront_url: normalizedUrl,
-          revalidate_secret: revalidateSecret,
-        });
-      } catch (err: unknown) {
-        storeSettingsPatchErrorHandled = true;
-        const patchData = isApiHttpError(err)
-          ? (err.response?.data as Record<string, unknown> | undefined)
-          : undefined;
-        if (patchData?.storefront_url) {
-          const raw = patchData.storefront_url;
-          const extracted =
-            Array.isArray(raw) && raw.length > 0 && typeof raw[0] === "string"
-              ? raw[0]
-              : null;
-          setMessage({
-            type: "error",
-            text: extracted ?? t("store.saveFailed"),
+      // Only PATCH integration fields the API gave us; otherwise we'd send
+      // unloaded "" state (blanking them) or keys host routing ignores.
+      if (storefrontIntegrationEnabled) {
+        const normalizedUrl = storefrontUrl.trim()
+          ? storefrontUrl.trim().startsWith("http://") || storefrontUrl.trim().startsWith("https://")
+            ? storefrontUrl.trim()
+            : `https://${storefrontUrl.trim()}`
+          : "";
+        try {
+          await api.patch("store/settings/current/", {
+            storefront_url: normalizedUrl,
+            revalidate_secret: revalidateSecret,
           });
-        } else {
-          setMessage({ type: "error", text: t("store.saveFailed") });
+        } catch (err: unknown) {
+          storeSettingsPatchErrorHandled = true;
+          const patchData = isApiHttpError(err)
+            ? (err.response?.data as Record<string, unknown> | undefined)
+            : undefined;
+          if (patchData?.storefront_url) {
+            const raw = patchData.storefront_url;
+            const extracted =
+              Array.isArray(raw) && raw.length > 0 && typeof raw[0] === "string"
+                ? raw[0]
+                : null;
+            setMessage({
+              type: "error",
+              text: extracted ?? t("store.saveFailed"),
+            });
+          } else {
+            setMessage({ type: "error", text: t("store.saveFailed") });
+          }
+          throw err;
         }
-        throw err;
       }
       await queryClient.invalidateQueries({ queryKey: brandingQueryKey });
       onSaveSuccess?.();
@@ -234,6 +244,7 @@ export function useStoreSettings({ onSaveSuccess }: UseStoreSettingsOptions = {}
     setStorefrontUrl,
     revalidateSecret,
     setRevalidateSecret,
+    storefrontIntegrationEnabled,
     syncStoreIntegrationFromSettings,
   };
 }

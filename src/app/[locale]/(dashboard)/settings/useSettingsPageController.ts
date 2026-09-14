@@ -137,6 +137,7 @@ export default function useSettingsPageController() {
     setStorefrontUrl: store.setStorefrontUrl,
     revalidateSecret: store.revalidateSecret,
     setRevalidateSecret: store.setRevalidateSecret,
+    storefrontIntegrationEnabled: store.storefrontIntegrationEnabled,
 
     dynamicFieldsMessage,
     setDynamicFieldsMessage,
