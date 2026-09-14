@@ -7,7 +7,8 @@ function sanitizeMessage(input: unknown): string | null {
   if (typeof input !== "string") return null;
   const value = input.trim();
   if (!value) return null;
-  if (value.startsWith("{") || value.startsWith("[")) return null;
+  // JSON or a Python list repr, and HTML error pages (a proxy or Django 500 page).
+  if (value.startsWith("{") || value.startsWith("[") || value.startsWith("<")) return null;
   const lower = value.toLowerCase();
   if (lower.includes("traceback") || lower.includes("select *") || lower.includes("sql")) {
     return null;
@@ -69,6 +70,24 @@ function flattenFieldErrors(value: unknown, prefix = "", out: FieldErrors = {}):
   return out;
 }
 
+/** The fetch clients set `HTTP 400` etc. as the message when the body has no detail. */
+const BARE_HTTP_STATUS = /^HTTP \d{3}$/;
+
+/** A client-set error message, unless it is only a bare HTTP status. */
+function sanitizeClientMessage(input: unknown): string | null {
+  const value = sanitizeMessage(input);
+  return value && !BARE_HTTP_STATUS.test(value) ? value : null;
+}
+
+/** The first readable field error, e.g. {"items": ["Selected product is unavailable."]}. */
+function firstFieldErrorMessage(fieldErrors: FieldErrors): string | null {
+  for (const value of Object.values(fieldErrors)) {
+    const msg = sanitizeMessage(value);
+    if (msg) return msg;
+  }
+  return null;
+}
+
 export function normalizeError(error: unknown, fallbackMessage?: string): NormalizedError {
   if (typeof error === "string") {
     return {
@@ -79,12 +98,13 @@ export function normalizeError(error: unknown, fallbackMessage?: string): Normal
 
   if (isApiHttpError(error)) {
     const responseData = error.response?.data;
+    const fieldErrors = flattenFieldErrors(responseData);
     const message =
       extractApiMessage(responseData) ??
-      sanitizeMessage(error.message) ??
+      firstFieldErrorMessage(fieldErrors) ??
+      sanitizeClientMessage(error.message) ??
       fallbackMessage ??
       SAFE_FALLBACK;
-    const fieldErrors = flattenFieldErrors(responseData);
     const code = sanitizeMessage((responseData as { code?: unknown } | undefined)?.code) ?? undefined;
     return {
       message,
@@ -96,9 +116,14 @@ export function normalizeError(error: unknown, fallbackMessage?: string): Normal
 
   if (error && typeof error === "object") {
     const obj = error as Record<string, unknown>;
-    const message =
-      extractApiMessage(obj) ?? sanitizeMessage(obj.message) ?? fallbackMessage ?? SAFE_FALLBACK;
     const fieldErrors = flattenFieldErrors(obj);
+    const message =
+      extractApiMessage(obj) ??
+      // An Error subclass's own `name` ("ApiTransportError") is not a field error.
+      (error instanceof Error ? null : firstFieldErrorMessage(fieldErrors)) ??
+      sanitizeClientMessage(obj.message) ??
+      fallbackMessage ??
+      SAFE_FALLBACK;
     return {
       message,
       fieldErrors: Object.keys(fieldErrors).length > 0 ? fieldErrors : undefined,
