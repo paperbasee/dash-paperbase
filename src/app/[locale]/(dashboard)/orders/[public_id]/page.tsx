@@ -57,7 +57,7 @@ import {
   orderLineRemoveKey,
 } from "@/lib/orders/editable-order-item";
 import {
-  joinVillageThanaDistrict,
+  orderEditAddressPatch,
   splitShippingAddressForForm,
 } from "@/lib/orders/shipping-address-parts";
 import { formatDashboardDateTime } from "@/lib/datetime-display";
@@ -117,6 +117,8 @@ export default function OrderDetailPage() {
     shipping_zone_public_id: "",
     shipping_method_public_id: "",
   });
+  /** The form as it was when editing started; an unchanged address is not re-sent. */
+  const initialFormRef = useRef<EditForm | null>(null);
   const [saving, setSaving] = useState(false);
   const [itemEdits, setItemEdits] = useState<
     Record<string, { variant_public_id: string | null; quantity: number; unit_price: string }>
@@ -172,17 +174,19 @@ export default function OrderDetailPage() {
   function startEditing() {
     if (!order) return;
     setPricingPreview(null);
-    const addr = splitShippingAddressForForm(order.shipping_address);
-    setForm({
+    const addr = splitShippingAddressForForm(order.shipping_address, order.district);
+    const initialForm: EditForm = {
       shipping_name: order.shipping_name,
       phone: order.phone,
       email: order.email,
       village: addr.village,
       thana: addr.thana,
-      district: (addr.trailingDistrict || order.district || "").trim(),
+      district: (order.district ?? "").trim(),
       shipping_zone_public_id: order.shipping_zone_public_id ?? "",
       shipping_method_public_id: order.shipping_method_public_id ?? "",
-    });
+    };
+    initialFormRef.current = initialForm;
+    setForm(initialForm);
     const nextEdits: Record<string, { variant_public_id: string | null; quantity: number; unit_price: string }> =
       {};
     for (const item of order.items ?? []) {
@@ -386,12 +390,20 @@ export default function OrderDetailPage() {
       });
       return;
     }
-    if (!form.village.trim() || !form.thana.trim() || !form.district.trim()) {
-      notify.validation("orderEdit", {
-        village: tPages("orderEditAddressFieldsRequired"),
-        thana: tPages("orderEditAddressFieldsRequired"),
-        district: tPages("orderEditAddressFieldsRequired"),
+    if (!form.shipping_zone_public_id.trim()) {
+      notify.warning(tPages("orderValidationZoneRequired"), {
+        title: tPages("toastTitleChangesNotSavedOrder"),
       });
+      return;
+    }
+    const addr = orderEditAddressPatch(form, initialFormRef.current);
+    if (addr.error) {
+      notify.warning(
+        tPages(
+          addr.error === "thana" ? "orderValidationThanaRequired" : "orderValidationDistrictRequired",
+        ),
+        { title: tPages("toastTitleChangesNotSavedOrder") },
+      );
       return;
     }
     setSaving(true);
@@ -403,12 +415,8 @@ export default function OrderDetailPage() {
         shipping_name: form.shipping_name,
         phone: form.phone,
         email: form.email,
-        shipping_address: joinVillageThanaDistrict(
-          form.village,
-          form.thana,
-          form.district,
-        ),
-        district: form.district,
+        // Only a changed address is sent, so an items-only save keeps what the storefront stored.
+        ...(addr.patch ?? {}),
         shipping_zone_public_id: form.shipping_zone_public_id,
         shipping_method_public_id: form.shipping_method_public_id || null,
         items: [
@@ -438,6 +446,9 @@ export default function OrderDetailPage() {
       queryClient.setQueryData(orderDetailQueryKey(publicId), data);
       setPricingPreview(null);
       setEditing(false);
+      notify.success(tPages("toastDescOrderUpdated"), {
+        title: tPages("toastTitleOrderUpdated"),
+      });
       invalidateOrdersCaches();
     } catch (err: unknown) {
       notify.error(err, {
@@ -1119,7 +1130,7 @@ export default function OrderDetailPage() {
           </CardHeader>
           <CardContent className="px-4 pt-6 sm:px-6">
             {editing ? (
-              <form id="order-edit-form" onSubmit={handleSave} className="space-y-4">
+              <form id="order-edit-form" noValidate onSubmit={handleSave} className="space-y-4">
                 <div>
                   <label className="mb-1 block text-xs font-medium text-muted-foreground">
                     {tPages("orderDetailOrderNumber")}
@@ -1170,7 +1181,6 @@ export default function OrderDetailPage() {
                     <Select
                       value={form.shipping_zone_public_id}
                       onChange={(e) => setForm({ ...form, shipping_zone_public_id: e.target.value })}
-                      required
                     >
                       <option value="">{tPages("orderNewSelectZone")}</option>
                       {shippingZones.map((z) => (
@@ -1224,7 +1234,6 @@ export default function OrderDetailPage() {
                   <div className="sm:col-span-2">
                     <label className="mb-1 block text-xs font-medium text-muted-foreground">
                       {tPages("orderFormRoadVillage")}
-                      <span className="ml-0.5 text-destructive">*</span>
                     </label>
                     <Input
                       value={form.village}
@@ -1292,28 +1301,24 @@ export default function OrderDetailPage() {
                       {tPages("orderDetailShippingAddress")}
                     </p>
                     {(() => {
-                      const addr = splitShippingAddressForForm(order.shipping_address);
-                      // Minimal-mode orders store only thana in shipping_address (no village segment).
-                      // When village is populated but thana is empty, treat the value as thana instead.
-                      const displayVillage = addr.thana ? addr.village : "";
-                      const displayThana = addr.thana ? addr.thana : addr.village;
-                      const districtLine =
-                        order.district?.trim() ||
-                        addr.trailingDistrict ||
-                        "—";
+                      const addr = splitShippingAddressForForm(
+                        order.shipping_address,
+                        order.district,
+                      );
+                      const districtLine = order.district?.trim() || "—";
                       return (
                         <>
                           <p className="text-sm text-foreground">
                             <span className="text-muted-foreground">
                               {tPages("orderFormRoadVillage")}:{" "}
                             </span>
-                            {displayVillage || "—"}
+                            {addr.village || "—"}
                           </p>
                           <p className="text-sm text-foreground">
                             <span className="text-muted-foreground">
                               {tPages("orderDetailCityThana")}:{" "}
                             </span>
-                            {displayThana || "—"}
+                            {addr.thana || "—"}
                           </p>
                           <p className="text-sm text-foreground">
                             <span className="text-muted-foreground">

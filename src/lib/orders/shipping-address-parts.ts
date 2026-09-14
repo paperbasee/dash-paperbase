@@ -1,6 +1,11 @@
 /**
  * BD-style address: road/village + thana + district.
- * `shipping_address` stores all three comma-separated for courier-friendly full line.
+ *
+ * Order.shipping_address is stored in one of three shapes, and the district always has its own
+ * field (Order.district):
+ * - storefront minimal checkout: "thana"
+ * - storefront extended checkout: "address line, thana" (the address line may contain commas)
+ * - dashboard (create and edit): "village, thana, district"
  */
 
 /** Compose stored shipping_address for API (village, thana, district). */
@@ -18,26 +23,55 @@ export function joinVillageThana(village: string, thana: string): string {
 }
 
 /**
- * Parse shipping_address back into form fields.
- * 3+ comma-separated segments: first = village, last = district, middle = thana.
- * 2 segments: village, thana (district comes from order.district).
+ * Parse shipping_address back into form fields, using the order's own district.
+ * A trailing part equal to the district (dashboard shape) is dropped; the district is never
+ * guessed from position. The last remaining part is the thana, everything before it the village.
  */
-export function splitShippingAddressForForm(shipping_address: string): {
-  village: string;
-  thana: string;
-  trailingDistrict: string | null;
-} {
+export function splitShippingAddressForForm(
+  shipping_address: string,
+  district?: string | null,
+): { village: string; thana: string } {
   const parts = (shipping_address || "")
     .split(",")
     .map((s) => s.trim())
     .filter(Boolean);
-  if (parts.length === 0) return { village: "", thana: "", trailingDistrict: null };
-  if (parts.length === 1) return { village: parts[0], thana: "", trailingDistrict: null };
-  if (parts.length === 2) {
-    return { village: parts[0], thana: parts[1], trailingDistrict: null };
+  const d = (district ?? "").trim().toLowerCase();
+  if (d && parts.length >= 2 && parts[parts.length - 1].toLowerCase() === d) {
+    parts.pop();
   }
-  const village = parts[0];
-  const trailingDistrict = parts[parts.length - 1];
-  const thana = parts.slice(1, -1).join(", ");
-  return { village, thana, trailingDistrict };
+  if (parts.length === 0) return { village: "", thana: "" };
+  return { village: parts.slice(0, -1).join(", "), thana: parts[parts.length - 1] };
+}
+
+export type OrderEditAddressFields = { village: string; thana: string; district: string };
+
+/**
+ * What the order editor sends for the address. An untouched address is not sent at all, so an
+ * items-only save never rewrites what the storefront stored (and never blocks on a field the
+ * storefront did not collect). A changed address needs a thana and a district.
+ */
+export function orderEditAddressPatch(
+  form: OrderEditAddressFields,
+  initial: OrderEditAddressFields | null,
+): {
+  error: "thana" | "district" | null;
+  patch: { shipping_address: string; district: string } | null;
+} {
+  const village = form.village.trim();
+  const thana = form.thana.trim();
+  const district = form.district.trim();
+  if (
+    initial &&
+    village === initial.village.trim() &&
+    thana === initial.thana.trim() &&
+    district === initial.district.trim()
+  ) {
+    return { error: null, patch: null };
+  }
+  if (!thana) return { error: "thana", patch: null };
+  if (!district) return { error: "district", patch: null };
+  return {
+    error: null,
+    patch: { shipping_address: joinVillageThanaDistrict(village, thana, district), district },
+  };
 }

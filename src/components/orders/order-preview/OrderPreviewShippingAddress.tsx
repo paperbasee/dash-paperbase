@@ -14,10 +14,8 @@ export function OrderPreviewShippingAddress({
   district,
 }: OrderPreviewShippingAddressProps) {
   const tPages = useTranslations("pages");
-  const addr = splitShippingAddressForForm(shippingAddress);
-  const displayVillage = addr.thana ? addr.village : "";
-  const displayThana = addr.thana ? addr.thana : addr.village;
-  const districtLine = district?.trim() || addr.trailingDistrict || "—";
+  const addr = splitShippingAddressForForm(shippingAddress, district);
+  const districtLine = district?.trim() || "—";
 
   return (
     <div className="flex items-start gap-2.5 border-t border-border/60 pt-2.5">
@@ -30,11 +28,11 @@ export function OrderPreviewShippingAddress({
         </p>
         <p className="text-xs text-foreground">
           <span className="text-muted-foreground">{tPages("orderFormRoadVillage")}: </span>
-          {displayVillage || "—"}
+          {addr.village || "—"}
         </p>
         <p className="text-xs text-foreground">
           <span className="text-muted-foreground">{tPages("orderDetailCityThana")}: </span>
-          {displayThana || "—"}
+          {addr.thana || "—"}
         </p>
         <p className="text-xs text-foreground">
           <span className="text-muted-foreground">{tPages("orderFormDistrict")}: </span>
