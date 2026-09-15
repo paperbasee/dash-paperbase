@@ -1156,6 +1156,21 @@
     "logOut": "Log out",
     "twoFaSwitchPrompt": "Enter your 2FA code to switch stores:"
   },
+  "whatsNew": {
+    "menuLabel": "What's new",
+    "menuUnreadAria": "What's new, unread updates",
+    "userMenuUnreadAria": "User menu, unread updates in What's new",
+    "panelTitle": "What's new",
+    "panelDescription": "Recent updates to your dashboard and store, newest first.",
+    "tagNew": "New",
+    "tagImproved": "Improved",
+    "tagFixed": "Fixed",
+    "unreadMarker": "New",
+    "openLink": "Take me there",
+    "empty": "No updates yet.",
+    "versionLabel": "Dashboard {version}",
+    "close": "Close What's new"
+  },
   "mobileNav": {
     "openMenu": "Open menu",
     "searchAria": "Search",
