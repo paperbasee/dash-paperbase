@@ -104,8 +104,8 @@ export default function WhatsNewPanel({
                           {tWhatsNew(TAG_LABEL_KEY[entry.tag])}
                         </span>
                         {isNew ? (
-                          <span className="inline-flex items-center gap-1 text-[11px] font-medium text-primary">
-                            <span className="size-1.5 rounded-full bg-primary" aria-hidden />
+                          <span className="inline-flex items-center gap-1 text-[11px] font-medium text-emerald-700 dark:text-emerald-300">
+                            <span className="size-1.5 rounded-full bg-emerald-500" aria-hidden />
                             {tWhatsNew("unreadMarker")}
                           </span>
                         ) : null}

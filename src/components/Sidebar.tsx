@@ -568,7 +568,7 @@ function SidebarContent({
                 <UserAvatar publicId={userPublicId} name={footerName} plan={userPlan} urgentSubscriptionRing={urgentSubscriptionRing} />
                 {whatsNewUnread ? (
                   <span
-                    className="absolute -right-0.5 -top-0.5 size-2.5 rounded-full bg-primary ring-2 ring-background"
+                    className="absolute -right-0.5 -top-0.5 size-2.5 rounded-full bg-emerald-500 ring-2 ring-background"
                     aria-hidden
                   />
                 ) : null}
@@ -760,7 +760,7 @@ function SidebarContent({
                 <Sparkles className="size-[1.125rem]" aria-hidden />
                 <span className="min-w-0 flex-1 truncate">{tWhatsNew("menuLabel")}</span>
                 {whatsNewUnread ? (
-                  <span className="size-2 shrink-0 rounded-full bg-primary" aria-hidden />
+                  <span className="size-2 shrink-0 rounded-full bg-emerald-500" aria-hidden />
                 ) : null}
               </DropdownMenuItem>
             </div>
