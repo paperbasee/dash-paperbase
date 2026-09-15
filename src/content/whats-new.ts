@@ -37,6 +37,21 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-09-16-ivory-colours-and-language-in-store-info",
+    date: "2026-09-16",
+    version: "4.8.0",
+    tag: "improved",
+    title: {
+      en: "Colour choices removed, language moved to Store Info",
+      bn: "রঙ বাছাইয়ের অপশন সরানো হলো, ভাষা এখন স্টোর তথ্যে",
+    },
+    body: {
+      en: "Every store now uses the Ivory colours, so the colour choice is gone from Settings → Customization. Store language moved to Settings → Store Info and is saved with the Save button there. Your storefront pages also load a little lighter.",
+      bn: "সব স্টোর এখন Ivory রঙ ব্যবহার করে, তাই সেটিংস → কাস্টমাইজেশন থেকে রঙ বাছাইয়ের অপশন সরানো হয়েছে। স্টোরের ভাষা এখন সেটিংস → স্টোর তথ্য-এ, আর সেখানে সংরক্ষণ বাটনে চাপলে সেভ হয়। আপনার স্টোরফ্রন্টের পেজগুলোও এখন একটু হালকাভাবে লোড হয়।",
+    },
+    href: "/settings?tab=store",
+  },
+  {
     id: "2026-09-16-promotions-and-shipping-in-settings",
     date: "2026-09-16",
     version: "4.7.0",
