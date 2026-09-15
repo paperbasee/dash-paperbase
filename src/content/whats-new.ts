@@ -38,6 +38,20 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-09-15-safer-courier-sending-and-statuses",
+    date: "2026-09-15",
+    version: "3.3.3",
+    tag: "fixed",
+    title: {
+      en: "Safer courier sending and correct delivery statuses",
+      bn: "নিরাপদ কুরিয়ার পাঠানো আর সঠিক ডেলিভারি স্ট্যাটাস",
+    },
+    body: {
+      en: "If Steadfast does not answer or has an error while sending, the order goes back to not sent, and sending it again first checks Steadfast so you don't end up with a duplicate parcel. Delivery statuses now update correctly instead of showing Unknown, and orders stuck on Unknown fix themselves over the next few updates, so parcel status numbers in Analytics may change. Your dashboard and store also keep working during brief server hiccups, so shoppers are not turned away and their orders are kept, though dashboard pages may load a little slower.",
+      bn: "Steadfast-এ পাঠানোর সময় সাড়া না পেলে বা কোনো সমস্যা হলে অর্ডারটি আবার \"পাঠানো হয়নি\" অবস্থায় ফিরে যায়, আর আবার পাঠালে আগে Steadfast-এ যাচাই করা হয়, যাতে একই পার্সেল দুবার তৈরি না হয়। ডেলিভারি স্ট্যাটাস এখন Unknown না দেখিয়ে সঠিকভাবে আপডেট হয়, আর Unknown-এ আটকে থাকা অর্ডারগুলো পরের কয়েকটি আপডেটে নিজে থেকেই ঠিক হয়ে যাবে, তাই Analytics-এ পার্সেল স্ট্যাটাসের সংখ্যা বদলে যেতে পারে। সার্ভারে সাময়িক সমস্যা হলেও আপনার ড্যাশবোর্ড ও স্টোর এখন চালু থাকে, ক্রেতারা ফিরে যান না এবং তাদের অর্ডারও থেকে যায়, তবে ড্যাশবোর্ডের পেজ একটু ধীরে লোড হতে পারে।",
+    },
+  },
+  {
     id: "2026-09-15-ad-purchases-count-real-orders",
     date: "2026-09-15",
     version: "3.3.2",
