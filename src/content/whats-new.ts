@@ -37,6 +37,21 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-09-16-promotions-in-settings",
+    date: "2026-09-16",
+    version: "4.7.0",
+    tag: "improved",
+    title: {
+      en: "Banners, Pop-up and CTA moved to Settings",
+      bn: "ব্যানার, পপ-আপ আর সিটিএ এখন সেটিংসে",
+    },
+    body: {
+      en: "The Marketing group is gone from the sidebar. Find Banners, Pop-up and CTA under Settings → Promotions; old links still take you there.",
+      bn: "সাইডবারে এখন আর মার্কেটিং গ্রুপ নেই। ব্যানার, পপ-আপ আর সিটিএ পাবেন সেটিংস → প্রোমোশন-এ; পুরোনো লিংকগুলোও আপনাকে সেখানেই নিয়ে যাবে।",
+    },
+    href: "/settings?tab=promotions",
+  },
+  {
     id: "2026-09-15-safer-courier-sending-and-statuses",
     date: "2026-09-15",
     version: "4.6.3",
