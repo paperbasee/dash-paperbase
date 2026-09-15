@@ -60,6 +60,10 @@ import {
   orderEditAddressPatch,
   splitShippingAddressForForm,
 } from "@/lib/orders/shipping-address-parts";
+import {
+  pricingPreviewDisplay,
+  shouldRequestPricingPreview,
+} from "@/lib/orders/order-pricing-preview";
 import { formatDashboardDateTime } from "@/lib/datetime-display";
 import { numberTextClass } from "@/lib/number-font";
 import { notify, normalizeError } from "@/notifications";
@@ -124,6 +128,7 @@ export default function OrderDetailPage() {
     Record<string, { variant_public_id: string | null; quantity: number; unit_price: string }>
   >({});
   const [pricingPreview, setPricingPreview] = useState<OrderPricingPreview | null>(null);
+  const [pricingPreviewFailed, setPricingPreviewFailed] = useState(false);
   const [editableItems, setEditableItems] = useState<EditableOrderItem[]>([]);
   const [variantsByProductId, setVariantsByProductId] = useState<Record<string, ProductVariant[]>>({});
   const [variantsLoadingByProductId, setVariantsLoadingByProductId] = useState<Record<string, boolean>>({});
@@ -234,12 +239,28 @@ export default function OrderDetailPage() {
   const orderItems = useMemo(() => order?.items ?? [], [order]);
   const displayItems = useMemo(() => (editing ? editableItems : orderItems), [editing, editableItems, orderItems]);
 
+  /** Lines the preview can price: a line whose product was deleted is not sent. */
+  const previewLineCount = useMemo(
+    () => editableItems.filter((it) => it.product_public_id).length,
+    [editableItems],
+  );
+  const pricingDisplay = pricingPreviewDisplay({
+    lineCount: previewLineCount,
+    zonePublicId: form.shipping_zone_public_id,
+    hasPreview: pricingPreview != null,
+    failed: pricingPreviewFailed,
+  });
+
   useEffect(() => {
-    if (!editing) {
-      setPricingPreview(null);
-      return;
-    }
-    if (editableItems.length === 0) {
+    setPricingPreviewFailed(false);
+    if (
+      !editing ||
+      !shouldRequestPricingPreview({
+        lineCount: previewLineCount,
+        zonePublicId: form.shipping_zone_public_id,
+      })
+    ) {
+      // The API cannot price an order without a zone: do not ask, and drop older totals.
       setPricingPreview(null);
       return;
     }
@@ -275,7 +296,9 @@ export default function OrderDetailPage() {
         )
         .then(({ data }) => setPricingPreview(data))
         .catch(() => {
-          if (!ac.signal.aborted) setPricingPreview(null);
+          if (ac.signal.aborted) return;
+          setPricingPreview(null);
+          setPricingPreviewFailed(true);
         });
     }, 300);
     return () => {
@@ -285,6 +308,7 @@ export default function OrderDetailPage() {
   }, [
     editing,
     editableItems,
+    previewLineCount,
     itemEdits,
     form.shipping_zone_public_id,
     form.shipping_method_public_id,
@@ -974,7 +998,7 @@ export default function OrderDetailPage() {
                   <p className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
                     {tPages("orderDetailNewTotalPreview")}
                   </p>
-                  {pricingPreview ? (
+                  {pricingDisplay === "totals" && pricingPreview ? (
                     <dl className="space-y-3 text-sm">
                       <div className="flex justify-between">
                         <dt className="text-muted-foreground">{tPages("orderDetailSubtotalBeforeDiscount")}</dt>
@@ -1014,9 +1038,13 @@ export default function OrderDetailPage() {
                         </dd>
                       </div>
                     </dl>
-                  ) : (
+                  ) : pricingDisplay === "chooseZone" ? (
+                    <p className="text-sm text-muted-foreground">{tPages("orderNewSelectZoneForPreview")}</p>
+                  ) : pricingDisplay === "unavailable" ? (
+                    <p className="text-sm text-muted-foreground">{tPages("toastDescTotalsPreviewPaused")}</p>
+                  ) : pricingDisplay === "calculating" ? (
                     <p className="text-sm text-muted-foreground">{tPages("orderDetailCalculating")}</p>
-                  )}
+                  ) : null}
                 </div>
               </div>
             )}
