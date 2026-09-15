@@ -38,6 +38,20 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-09-15-ad-purchases-count-real-orders",
+    date: "2026-09-15",
+    version: "3.3.2",
+    tag: "improved",
+    title: {
+      en: "Ad purchases now count real orders",
+      bn: "বিজ্ঞাপনে এখন আসল অর্ডারই পারচেজ",
+    },
+    body: {
+      en: "Facebook and TikTok Ads now count a cash on delivery order as a purchase when you confirm it within 7 days, and a prepaid order when the customer pays. Orders you never confirm, like fake ones, no longer count, so your purchase numbers may drop to the real ones. Ads may take a few days to adjust.",
+      bn: "Facebook ও TikTok বিজ্ঞাপনে ক্যাশ অন ডেলিভারি অর্ডার এখন পারচেজ হিসেবে গণ্য হবে ৭ দিনের মধ্যে আপনি কনফার্ম করলে, আর প্রিপেইড অর্ডার গ্রাহক পেমেন্ট করলে। যেসব অর্ডার আপনি কনফার্ম করেন না, যেমন ভুয়া অর্ডার, সেগুলো আর গোনা হবে না, তাই পারচেজের সংখ্যা কমে আসল সংখ্যায় আসতে পারে। বিজ্ঞাপন মানিয়ে নিতে কয়েক দিন সময় লাগতে পারে।",
+    },
+  },
+  {
     id: "2026-09-15-sidebar-starts-collapsed",
     date: "2026-09-15",
     version: "3.3.1",
