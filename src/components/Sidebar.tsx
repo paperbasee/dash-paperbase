@@ -19,6 +19,7 @@ import {
   Sun,
   Moon,
   Laptop,
+  Sparkles,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -38,6 +39,7 @@ import {
 import { useAuth } from "@/context/AuthContext";
 import UserAvatar from "@/components/UserAvatar";
 import { useSearchModal } from "@/context/SearchModalContext";
+import { useWhatsNew } from "@/context/WhatsNewContext";
 import { useEnabledApps } from "@/hooks/useEnabledApps";
 import { usePermissions } from "@/context/PermissionsContext";
 import { useSidebarData } from "@/context/SidebarDataContext";
@@ -51,7 +53,7 @@ import {
 } from "@/config/apps";
 import { numberTextClass } from "@/lib/number-font";
 import { cn } from "@/lib/utils";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocale } from "next-intl";
 import {
   CORE_LOCALE_STORAGE_KEY,
@@ -135,6 +137,7 @@ function SidebarContent({
   const tCommon = useTranslations("common");
   const tLang = useTranslations("language");
   const tSettings = useTranslations("settings");
+  const tWhatsNew = useTranslations("whatsNew");
   const locale = useLocale();
   const numClass = numberTextClass(locale);
   const pathname = usePathname();
@@ -146,6 +149,7 @@ function SidebarContent({
   const { counts, formatCount } = navCounts;
   const { hasFeature } = features;
   const { setOpen: setSearchOpen } = useSearchModal();
+  const { hasUnread: whatsNewUnread, openPanel: openWhatsNew } = useWhatsNew();
   const { isEnabled } = useEnabledApps();
   const { canViewApp } = usePermissions();
 
@@ -225,6 +229,10 @@ function SidebarContent({
   const [theme, setTheme] = useState<ThemePreference>("system");
   /** Controlled so we can expand the sidebar first, then open the menu when collapsed. */
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  /** Profile menu trigger; focus returns here when the What's new panel closes. */
+  const userMenuTriggerRef = useRef<HTMLButtonElement>(null);
+  /** Set when "What's new" is picked; the panel opens once the menu has finished closing. */
+  const whatsNewPendingRef = useRef(false);
   /** Mobile sheet: center menu and size below nav panel width (desktop-style inset). */
   const [mobileUserMenuLayout, setMobileUserMenuLayout] = useState(false);
   // Next.js route prefetching can trigger Chrome warnings in dev about preloaded CSS
@@ -345,6 +353,16 @@ function SidebarContent({
     } catch {
       // Ignore clipboard permission/runtime errors.
     }
+  };
+
+  const handleUserMenuCloseAutoFocus = (event: Event) => {
+    if (!whatsNewPendingRef.current) return;
+    whatsNewPendingRef.current = false;
+    // The panel takes focus itself; returning it to the trigger first would flash a ring.
+    event.preventDefault();
+    openWhatsNew(userMenuTriggerRef.current);
+    // In the mobile sheet, get the nav drawer out of the way of the full-width panel.
+    onNavigate?.();
   };
 
   const handleUserMenuOpenChange = (open: boolean) => {
@@ -533,6 +551,7 @@ function SidebarContent({
         <DropdownMenu open={userMenuOpen} onOpenChange={handleUserMenuOpenChange}>
           <DropdownMenuTrigger asChild>
             <button
+              ref={userMenuTriggerRef}
               type="button"
               className={cn(
                 "flex w-full items-center gap-3 rounded-xs border-0 bg-transparent text-left transition-colors",
@@ -541,10 +560,18 @@ function SidebarContent({
                 collapsed ? "justify-center px-0 py-2" : "p-3",
                 collapsed && "min-h-11"
               )}
-              aria-label={tSidebar("userMenu")}
+              aria-label={
+                whatsNewUnread ? tWhatsNew("userMenuUnreadAria") : tSidebar("userMenu")
+              }
             >
-              <span className="flex shrink-0 items-center justify-center">
+              <span className="relative flex shrink-0 items-center justify-center">
                 <UserAvatar publicId={userPublicId} name={footerName} plan={userPlan} urgentSubscriptionRing={urgentSubscriptionRing} />
+                {whatsNewUnread ? (
+                  <span
+                    className="absolute -right-0.5 -top-0.5 size-2.5 rounded-full bg-primary ring-2 ring-background"
+                    aria-hidden
+                  />
+                ) : null}
               </span>
               {!collapsed && (
                 <>
@@ -580,6 +607,7 @@ function SidebarContent({
           <DropdownMenuContent
             align="center"
             side="top"
+            onCloseAutoFocus={handleUserMenuCloseAutoFocus}
             className={cn(
               "z-[80] overflow-hidden rounded-xs border border-border/80 p-0 shadow-lg",
               mobileUserMenuLayout
@@ -721,6 +749,19 @@ function SidebarContent({
                   <Cog className="size-[1.125rem]" />
                   {tCommon("settings")}
                 </DeferredNavLink>
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onSelect={() => {
+                  whatsNewPendingRef.current = true;
+                }}
+                className="cursor-pointer text-[15px] font-medium"
+                aria-label={whatsNewUnread ? tWhatsNew("menuUnreadAria") : undefined}
+              >
+                <Sparkles className="size-[1.125rem]" aria-hidden />
+                <span className="min-w-0 flex-1 truncate">{tWhatsNew("menuLabel")}</span>
+                {whatsNewUnread ? (
+                  <span className="size-2 shrink-0 rounded-full bg-primary" aria-hidden />
+                ) : null}
               </DropdownMenuItem>
             </div>
 

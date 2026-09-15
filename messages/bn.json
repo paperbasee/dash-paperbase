@@ -1164,6 +1164,21 @@
     "logOut": "লগ আউট",
     "twoFaSwitchPrompt": "স্টোর বদলাতে আপনার ২এফএ কোড লিখুন:"
   },
+  "whatsNew": {
+    "menuLabel": "নতুন কী আছে",
+    "menuUnreadAria": "নতুন কী আছে, নতুন আপডেট দেখা বাকি",
+    "userMenuUnreadAria": "ব্যবহারকারী মেনু, নতুন আপডেট দেখা বাকি",
+    "panelTitle": "নতুন কী আছে",
+    "panelDescription": "আপনার ড্যাশবোর্ড ও স্টোরের সাম্প্রতিক আপডেট, নতুনগুলো আগে।",
+    "tagNew": "নতুন",
+    "tagImproved": "উন্নত",
+    "tagFixed": "সংশোধিত",
+    "unreadMarker": "নতুন",
+    "openLink": "সেখানে যান",
+    "empty": "এখনও কোনো আপডেট নেই।",
+    "versionLabel": "ড্যাশবোর্ড {version}",
+    "close": "নতুন কী আছে বন্ধ করুন"
+  },
   "mobileNav": {
     "openMenu": "মেনু খুলুন",
     "searchAria": "খোঁজ",

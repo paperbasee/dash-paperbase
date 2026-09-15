@@ -10,6 +10,7 @@ import { EnabledAppsProvider } from "@/context/EnabledAppsContext";
 import { PermissionsProvider } from "@/context/PermissionsContext";
 import { SidebarDataProvider } from "@/context/SidebarDataContext";
 import { SearchModalProvider } from "@/context/SearchModalContext";
+import { WhatsNewProvider } from "@/context/WhatsNewContext";
 import { NavigationLoadingProvider } from "@/context/NavigationLoadingContext";
 import { DeferredNavLink } from "@/components/navigation/DeferredNavLink";
 import Sidebar, { SidebarContent } from "@/components/Sidebar";
@@ -231,6 +232,7 @@ export default function DashboardLayoutClient({
       <DashboardRefreshProvider markRefreshedRef={markRefreshedRef}>
       <NavigationLoadingProvider>
       <SearchModalProvider>
+      <WhatsNewProvider>
         <div className="md:flex md:h-screen md:flex-col md:overflow-hidden">
           {showTopBannerStrip && subscriptionUiState ? (
             <div className="z-[60] flex flex-col md:shrink-0">
@@ -393,6 +395,7 @@ export default function DashboardLayoutClient({
             </SidebarDataProvider>
           </div>
         </div>
+      </WhatsNewProvider>
       </SearchModalProvider>
       </NavigationLoadingProvider>
       </DashboardRefreshProvider>
