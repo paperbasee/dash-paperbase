@@ -6,6 +6,7 @@ import {
   ShoppingCartIcon, 
   BellRingingIcon, 
   AppStoreLogoIcon,
+  TruckIcon,
 } from "@phosphor-icons/react";
 
 import {
@@ -29,6 +30,7 @@ export type SettingsSection =
   | "customization"
   | "promotions"
   | "checkout"
+  | "shipping"
   | "eav"
   | "apps"
   | "integrations"
@@ -42,6 +44,7 @@ export type SettingsSectionLabelKey =
   | "sectionStore"
   | "sectionCustomization"
   | "sectionPromotions"
+  | "sectionShipping"
   | "sectionEav"
   | "sectionApps"
   | "sectionIntegrations"
@@ -96,12 +99,14 @@ export const SECTION_OWNER_ONLY: Partial<Record<SettingsSection, boolean>> = {
 };
 
 /**
- * Sections that hold optional apps (ids from config/apps.ts). Such a section shows
- * only when at least one of its apps is enabled for the store AND viewable by the
- * user's role — the same rule the sidebar applies to an app's link.
+ * Sections that hold apps (ids from config/apps.ts). Such a section shows only when
+ * at least one of its apps is enabled for the store AND viewable by the user's role
+ * — the same rule the sidebar applies to an app's link. Essential apps such as
+ * shipping are always enabled, so for them only the role's view permission counts.
  */
 export const SECTION_APPS: Partial<Record<SettingsSection, readonly string[]>> = {
   promotions: PROMOTION_TABS,
+  shipping: ["shipping"],
 };
 
 /** What a user can reach, as the settings nav and page need it. */
@@ -143,6 +148,7 @@ export const ALL_SECTIONS: SettingsSectionNavItem[] = [
     displayLabel: "Checkout",
     icon: ShoppingCartIcon,
   },
+  { id: "shipping", labelKey: "sectionShipping", icon: TruckIcon },
   { id: "eav", labelKey: "sectionEav", icon: Layers },
   { id: "apps", labelKey: "sectionApps", icon: AppStoreLogoIcon },
   { id: "integrations", labelKey: "sectionIntegrations", icon: PlugsIcon },

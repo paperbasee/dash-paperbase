@@ -33,7 +33,7 @@ export interface AppConfig {
   icon: AppNavIcon;
   description: string;
   essential: boolean;
-  /** Sidebar route; null for apps shown as tabs in Settings → Promotions instead. */
+  /** Sidebar route; null for apps shown in Settings instead (Promotions tabs, Shipping). */
   href: string | null;
   countKey: keyof NavCounts | null;
   parentId: string | null;
@@ -187,7 +187,7 @@ export const APP_CONFIG: Record<string, AppConfig> = {
     icon: TruckIcon,
     description: "Shipping zones, methods, and rates",
     essential: true,
-    href: "/shipping",
+    href: null,
     countKey: null,
     parentId: null,
   },
@@ -226,7 +226,6 @@ export const MAIN_NAV_APP_IDS = [
   "analytics",
   "customers",
   "inventory",
-  "shipping",
   "blog",
 ] as const;
 

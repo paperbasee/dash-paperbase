@@ -20,7 +20,6 @@
     "inventory": "Inventory",
     "attributes": "Attributes",
     "variants": "Variants",
-    "shipping": "Shipping",
     "activities": "Activities",
     "blog": "Blog",
     "blogNew": "New post",
@@ -84,7 +83,6 @@
     "popup": "Pop-up",
     "blog": "Blog",
     "blogNew": "New post",
-    "shipping": "Shipping",
     "catalog": "Catalog",
     "more": "More",
     "navigation": "Navigation"
@@ -668,8 +666,6 @@
     "bannersConfirmDelete": "Delete this banner?",
     "bannersSavedSuccess": "Banner saved successfully.",
     "bannersDeletedSuccess": "Banner deleted successfully.",
-    "shippingGoBackAria": "Go back",
-    "shippingTitle": "Shipping",
     "shippingLoadFailed": "Failed to load shipping rules.",
     "shippingSaveZoneFailed": "Failed to save zone.",
     "shippingSaveMethodFailed": "Failed to save method.",
@@ -1447,6 +1443,7 @@
     "sectionStore": "Store Info",
     "sectionCustomization": "Customization",
     "sectionPromotions": "Promotions",
+    "sectionShipping": "Shipping",
     "sectionEav": "Dynamic Fields",
     "sectionApps": "Apps",
     "sectionIntegrations": "Integrations",
@@ -1568,6 +1565,10 @@
       "heading": "Promotions",
       "subtitle": "Show banners, a pop-up and a call-to-action message on your storefront.",
       "tabsAria": "Promotion types"
+    },
+    "shipping": {
+      "heading": "Shipping",
+      "subtitle": "Set your delivery zones, shipping methods and the rate for each."
     },
     "dynamicFields": {
       "heading": "Dynamic fields",

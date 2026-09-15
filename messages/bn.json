@@ -20,7 +20,6 @@
     "inventory": "ইনভেন্টরি",
     "attributes": "অ্যাট্রিবিউট",
     "variants": "ভেরিয়েন্ট",
-    "shipping": "শিপিং",
     "activities": "কার্যকলাপ",
     "blog": "ব্লগ",
     "blogNew": "নতুন পোস্ট",
@@ -84,7 +83,6 @@
     "popup": "পপ-আপ",
     "blog": "ব্লগ",
     "blogNew": "নতুন পোস্ট",
-    "shipping": "শিপিং",
     "catalog": "ক্যাটালগ",
     "more": "আরও",
     "navigation": "নেভিগেশন"
@@ -668,8 +666,6 @@
     "bannersConfirmDelete": "এই ব্যানার মুছবেন?",
     "bannersSavedSuccess": "ব্যানার সফলভাবে সংরক্ষিত হয়েছে।",
     "bannersDeletedSuccess": "ব্যানার সফলভাবে মুছে ফেলা হয়েছে।",
-    "shippingGoBackAria": "পিছনে যান",
-    "shippingTitle": "শিপিং",
     "shippingLoadFailed": "শিপিং নিয়ম লোড করা যায়নি।",
     "shippingSaveZoneFailed": "জোন সংরক্ষণ করা যায়নি।",
     "shippingSaveMethodFailed": "পদ্ধতি সংরক্ষণ করা যায়নি।",
@@ -1447,6 +1443,7 @@
     "sectionStore": "স্টোর তথ্য",
     "sectionCustomization": "কাস্টমাইজেশন",
     "sectionPromotions": "প্রোমোশন",
+    "sectionShipping": "শিপিং",
     "sectionEav": "ডায়নামিক ফিল্ড",
     "sectionApps": "অ্যাপ",
     "sectionIntegrations": "ইন্টিগ্রেশন",
@@ -1568,6 +1565,10 @@
       "heading": "প্রোমোশন",
       "subtitle": "আপনার স্টোরফ্রন্টে ব্যানার, পপ-আপ আর কল-টু-অ্যাকশন বার্তা দেখান।",
       "tabsAria": "প্রোমোশনের ধরন"
+    },
+    "shipping": {
+      "heading": "শিপিং",
+      "subtitle": "ডেলিভারির জোন, শিপিং পদ্ধতি আর প্রতিটির রেট এখানে ঠিক করুন।"
     },
     "dynamicFields": {
       "heading": "ডায়নামিক ফিল্ড",

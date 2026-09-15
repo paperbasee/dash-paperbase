@@ -26,6 +26,7 @@ import BillingSection from "./sections/BillingSection";
 import CustomizationSection from "./sections/CustomizationSection";
 import PromotionsSection from "./sections/promotions/PromotionsSection";
 import CheckoutSettingsSection from "./sections/CheckoutSettingsSection";
+import ShippingSection from "./sections/shipping/ShippingSection";
 import { SettingsSectionNav } from "./SettingsNav";
 import { SECTIONS, resolveSettingsSection, type SettingsSection } from "./settingsSections";
 import { useVisibleSettingsSections } from "./useVisibleSettingsSections";
@@ -225,6 +226,8 @@ export default function SettingsPage() {
           <PromotionsSection hidden={activeSection !== "promotions"} />
 
           <CheckoutSettingsSection hidden={activeSection !== "checkout"} />
+
+          <ShippingSection hidden={activeSection !== "shipping"} />
 
           <DynamicFieldsSection
             hidden={activeSection !== "eav"}
