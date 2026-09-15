@@ -66,7 +66,8 @@ export default function DashboardLayoutClient({
     meProfileError,
     isLoggingOut,
   } = useAuth();
-  const [collapsed, setCollapsed] = useState(false);
+  // Desktop sidebar starts collapsed (icons only); the mobile nav sheet is always expanded.
+  const [collapsed, setCollapsed] = useState(true);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [networkGateReady, setNetworkGateReady] = useState(false);
   const isSettingsMode = pathname.startsWith("/settings");
