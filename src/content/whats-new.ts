@@ -37,6 +37,21 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-09-16-shipping-in-settings",
+    date: "2026-09-16",
+    version: "4.7.0",
+    tag: "improved",
+    title: {
+      en: "Shipping moved to Settings",
+      bn: "শিপিং এখন সেটিংসে",
+    },
+    body: {
+      en: "Shipping is no longer in the sidebar. Set your delivery zones, methods and rates under Settings → Shipping; old links still take you there.",
+      bn: "শিপিং এখন আর সাইডবারে নেই। ডেলিভারির জোন, পদ্ধতি আর রেট ঠিক করুন সেটিংস → শিপিং-এ; পুরোনো লিংকগুলোও আপনাকে সেখানেই নিয়ে যাবে।",
+    },
+    href: "/settings?tab=shipping",
+  },
+  {
     id: "2026-09-16-promotions-in-settings",
     date: "2026-09-16",
     version: "4.7.0",
@@ -50,6 +65,20 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
       bn: "সাইডবারে এখন আর মার্কেটিং গ্রুপ নেই। ব্যানার, পপ-আপ আর সিটিএ পাবেন সেটিংস → প্রোমোশন-এ; পুরোনো লিংকগুলোও আপনাকে সেখানেই নিয়ে যাবে।",
     },
     href: "/settings?tab=promotions",
+  },
+  {
+    id: "2026-09-16-uploads-better-protected",
+    date: "2026-09-16",
+    version: "4.7.0",
+    tag: "fixed",
+    title: {
+      en: "Uploaded images are better protected",
+      bn: "আপলোড করা ছবি এখন আরও সুরক্ষিত",
+    },
+    body: {
+      en: "Images and files you upload can now only be used and removed by your own store.",
+      bn: "আপনার আপলোড করা ছবি ও ফাইল এখন শুধু আপনার নিজের স্টোরই ব্যবহার করতে ও মুছতে পারবে।",
+    },
   },
   {
     id: "2026-09-15-safer-courier-sending-and-statuses",
