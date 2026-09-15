@@ -20,9 +20,7 @@ function mapStatsToNavCounts(stats: DashboardStats): NavCounts {
     orders: stats.orders.total,
     products: stats.products.active,
     customers: stats.customers_count ?? 0,
-    notifications: stats.notifications,
     supportTickets: stats.support_tickets,
-    banners: stats.banners_count ?? 0,
     blog: stats.blogs_count ?? 0,
   };
 }

@@ -40,13 +40,11 @@ import { useAuth } from "@/context/AuthContext";
 import UserAvatar from "@/components/UserAvatar";
 import { useSearchModal } from "@/context/SearchModalContext";
 import { useWhatsNew } from "@/context/WhatsNewContext";
-import { useEnabledApps } from "@/hooks/useEnabledApps";
-import { usePermissions } from "@/context/PermissionsContext";
+import { useCanShowApp } from "@/hooks/useCanShowApp";
 import { useSidebarData } from "@/context/SidebarDataContext";
 import {
   APP_CONFIG,
   CATALOG_SUB_APP_IDS,
-  MARKETING_SUB_APP_IDS,
   MAIN_NAV_APP_IDS,
   MORE_APP_IDS,
   type NavCounts,
@@ -73,7 +71,6 @@ import {
 } from "@/lib/theme";
 import { runThemeTransition } from "@/lib/theme-transition/transition";
 import SystemNotificationBanner from "@/components/system/SystemNotificationBanner";
-import { SECTIONS, type SettingsSection } from "@/app/[locale]/(dashboard)/settings/settingsSections";
 import AppSidebarNav from "@/components/sidebar/AppSidebarNav";
 import SettingsSidebarNav from "@/components/sidebar/SettingsSidebarNav";
 
@@ -84,9 +81,7 @@ import SettingsSidebarNav from "@/components/sidebar/SettingsSidebarNav";
 const MAIN_NAV_SEQUENCE = [
   MAIN_NAV_APP_IDS[0],
   "__catalog__",
-  ...MAIN_NAV_APP_IDS.slice(1, 4),
-  "__marketing__",
-  ...MAIN_NAV_APP_IDS.slice(4),
+  ...MAIN_NAV_APP_IDS.slice(1),
 ] as const;
 
 function logoUrl(url: string | null): string | null {
@@ -103,15 +98,6 @@ const HOME_NAV = {
 };
 
 type SidebarNavVariant = "app" | "settings";
-
-const DEFAULT_SETTINGS_SECTION: SettingsSection = "store";
-
-function resolveActiveSettingsSection(raw: string | null): SettingsSection {
-  const candidate = (raw ?? "").trim();
-  const ids = new Set(SECTIONS.map((s) => s.id));
-  if (ids.has(candidate as SettingsSection)) return candidate as SettingsSection;
-  return DEFAULT_SETTINGS_SECTION;
-}
 
 function SidebarContent({
   collapsed,
@@ -150,19 +136,12 @@ function SidebarContent({
   const { hasFeature } = features;
   const { setOpen: setSearchOpen } = useSearchModal();
   const { hasUnread: whatsNewUnread, openPanel: openWhatsNew } = useWhatsNew();
-  const { isEnabled } = useEnabledApps();
-  const { canViewApp } = usePermissions();
-
-  // An app shows only if the store enabled it AND the user's role can view it.
-  const canShowApp = useCallback(
-    (appId: string) => isEnabled(appId) && canViewApp(appId),
-    [isEnabled, canViewApp]
-  );
+  const canShowApp = useCanShowApp();
 
   const mainNavSequence = useMemo(
     () =>
       (MAIN_NAV_SEQUENCE as readonly string[]).filter((token) => {
-        if (token === "__catalog__" || token === "__marketing__") return true;
+        if (token === "__catalog__") return true;
         if (!APP_CONFIG[token]?.href) return false;
         return canShowApp(token);
       }),
@@ -178,7 +157,6 @@ function SidebarContent({
     (meProfile?.subscription?.subscription_status === "GRACE" ||
       meProfile?.subscription?.subscription_status === "EXPIRED");
   const [catalogOpen, setCatalogOpen] = useState(false);
-  const [marketingOpen, setMarketingOpen] = useState(false);
 
   const isActive = (href: string) => {
     if (href === "/") return pathname === "/";
@@ -194,15 +172,6 @@ function SidebarContent({
     return href ? isActive(href) : false;
   });
 
-  const marketingLinks = MARKETING_SUB_APP_IDS.filter(
-    (id) => canShowApp(id) && APP_CONFIG[id]?.href
-  );
-  const showMarketing = marketingLinks.length > 0;
-  const marketingChildActive = marketingLinks.some((id) => {
-    const href = APP_CONFIG[id]?.href;
-    return href ? isActive(href) : false;
-  });
-
   const showMore = MORE_APP_IDS.some((id) => canShowApp(id) && APP_CONFIG[id]?.href);
   const moreLinks = MORE_APP_IDS.filter((id) => canShowApp(id) && APP_CONFIG[id]?.href);
   const moreChildActive = moreLinks.some((id) => {
@@ -213,14 +182,11 @@ function SidebarContent({
 
   useEffect(() => {
     if (showCatalog && catalogChildActive) setCatalogOpen(true);
-    if (showMarketing && marketingChildActive) setMarketingOpen(true);
     if (showMore && moreChildActive) setCeleryOpen(true);
   }, [
     pathname,
     showCatalog,
     catalogChildActive,
-    showMarketing,
-    marketingChildActive,
     showMore,
     moreChildActive,
   ]);
@@ -301,11 +267,6 @@ function SidebarContent({
   };
 
   const isSettingsRoute = pathname.startsWith("/settings");
-
-  const settingsActiveSection =
-    navVariant === "settings"
-      ? resolveActiveSettingsSection(searchParams.get("tab"))
-      : DEFAULT_SETTINGS_SECTION;
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -489,7 +450,7 @@ function SidebarContent({
           <SettingsSidebarNav
             collapsed={collapsed}
             pathname={pathname}
-            settingsActiveSection={settingsActiveSection}
+            settingsTab={searchParams.get("tab")}
             shouldPrefetchLinks={shouldPrefetchLinks}
             onNavigate={handleLinkClick}
             tCommonSettingsLabel={tCommon("settings")}
@@ -504,7 +465,6 @@ function SidebarContent({
             onNavigate={handleLinkClick}
             tNavLabel={tNav("navigation")}
             tCatalogLabel={tNav("catalog")}
-            tMarketingLabel={tNav("marketing")}
             tMoreLabel={tNav("more")}
             tAppLabel={tNav}
             hasFeature={hasFeature}
@@ -518,11 +478,6 @@ function SidebarContent({
             catalogChildActive={catalogChildActive}
             catalogOpen={catalogOpen}
             setCatalogOpen={setCatalogOpen}
-            marketingLinks={marketingLinks}
-            showMarketing={showMarketing}
-            marketingChildActive={marketingChildActive}
-            marketingOpen={marketingOpen}
-            setMarketingOpen={setMarketingOpen}
             showMore={showMore}
             moreLinks={moreLinks}
             moreChildActive={moreChildActive}

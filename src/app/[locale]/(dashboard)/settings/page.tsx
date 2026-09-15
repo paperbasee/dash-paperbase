@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
 import { ChevronDown } from "lucide-react";
@@ -24,16 +24,11 @@ import SecuritySection from "./sections/SecuritySection";
 import TeamSection from "./sections/team/TeamSection";
 import BillingSection from "./sections/BillingSection";
 import CustomizationSection from "./sections/CustomizationSection";
+import PromotionsSection from "./sections/promotions/PromotionsSection";
 import CheckoutSettingsSection from "./sections/CheckoutSettingsSection";
 import { SettingsSectionNav } from "./SettingsNav";
-import {
-  SECTIONS,
-  SECTION_OWNER_ONLY,
-  SECTION_PERMISSION,
-  sectionMatchesPermission,
-  type SettingsSection,
-} from "./settingsSections";
-import { usePermissions } from "@/context/PermissionsContext";
+import { SECTIONS, resolveSettingsSection, type SettingsSection } from "./settingsSections";
+import { useVisibleSettingsSections } from "./useVisibleSettingsSections";
 import { settingsInvertedButtonClassName } from "./SettingsSectionBody";
 import useSettingsPageController from "./useSettingsPageController";
 import { useDeferredNavigate } from "@/hooks/useDeferredNavigate";
@@ -42,37 +37,12 @@ export default function SettingsPage() {
   const searchParams = useSearchParams();
   const navigate = useDeferredNavigate();
   const tSettings = useTranslations("settings");
-  const [activeSection, setActiveSection] = useState<SettingsSection>("store");
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
-  const validSectionIds = useMemo(() => new Set(SECTIONS.map((s) => s.id)), []);
-
-  const { has, isOwner, isSuperuser } = usePermissions();
-  const visibleSectionIds = useMemo(
-    () =>
-      SECTIONS.filter((row) => {
-        if (SECTION_OWNER_ONLY[row.id] && !(isOwner || isSuperuser)) return false;
-        return sectionMatchesPermission(SECTION_PERMISSION[row.id], has);
-      }).map((s) => s.id),
-    [has, isOwner, isSuperuser],
-  );
-
-  useEffect(() => {
-    const raw = (searchParams.get("tab") || "").trim();
-    if (!raw) return;
-    if (!validSectionIds.has(raw as SettingsSection)) return;
-    const next = raw as SettingsSection;
-    setActiveSection((prev) => (prev === next ? prev : next));
-  }, [searchParams, validSectionIds]);
-
-  useEffect(() => {
-    // If the active section isn't one this role can see (e.g. a staff member on
-    // the default "store"), fall back to their first available section so they
-    // never land on a panel that's missing from their nav.
-    if (visibleSectionIds.length > 0 && !visibleSectionIds.includes(activeSection)) {
-      setActiveSection(visibleSectionIds[0]);
-    }
-  }, [visibleSectionIds, activeSection]);
+  // Worked out on every render rather than stored, so it follows the URL and also
+  // recovers when a section appears late (enabled apps and permissions load async).
+  const visibleSections = useVisibleSettingsSections();
+  const activeSection = resolveSettingsSection(searchParams.get("tab"), visibleSections);
 
   function setSection(next: SettingsSection) {
     const current = (searchParams.get("tab") || "").trim();
@@ -251,6 +221,8 @@ export default function SettingsPage() {
             languageSaving={languageSaving}
             languageMessage={languageMessage}
           />
+
+          <PromotionsSection hidden={activeSection !== "promotions"} />
 
           <CheckoutSettingsSection hidden={activeSection !== "checkout"} />
 

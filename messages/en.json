@@ -22,9 +22,6 @@
     "variants": "Variants",
     "shipping": "Shipping",
     "activities": "Activities",
-    "cta": "CTA",
-    "banners": "Banners",
-    "popup": "Pop-up",
     "blog": "Blog",
     "blogNew": "New post",
     "blogEdit": "Edit post",
@@ -89,7 +86,6 @@
     "blogNew": "New post",
     "shipping": "Shipping",
     "catalog": "Catalog",
-    "marketing": "Marketing",
     "more": "More",
     "navigation": "Navigation"
   },
@@ -645,8 +641,6 @@
     "inventoryPageLabel": "Page {page} ({count} total)",
     "inventoryListCountPageOnly": "{pageCount, plural, one {{pageCount} row on this page} other {{pageCount} rows on this page}}",
     "inventoryListCountWithTotal": "{pageCount, plural, one {{pageCount} row on this page} other {{pageCount} rows on this page}} of total {totalCount, plural, one {{totalCount} row} other {{totalCount} rows}}",
-    "bannersGoBackAria": "Go back",
-    "bannersTitle": "Banners",
     "bannersListCountPageOnly": "{pageCount, plural, one {{pageCount} banner on this page} other {{pageCount} banners on this page}}",
     "bannersListCountWithTotal": "{pageCount, plural, one {{pageCount} banner on this page} other {{pageCount} banners on this page}} of total {totalCount, plural, one {{totalCount} banner} other {{totalCount} banners}}",
     "bannersAdd": "Add Banner",
@@ -710,8 +704,6 @@
     "shippingZonesAll": "all",
     "shippingRateMeta": "{status} · {rateType} · price: {price}",
     "shippingRateRange": "· range: {min} – {max}",
-    "ctaGoBackAria": "Go back",
-    "ctaTitle": "Call to Action",
     "ctaAdd": "Add CTA",
     "ctaNew": "New CTA",
     "ctaEdit": "Edit CTA",
@@ -1454,6 +1446,7 @@
     "navAria": "Settings sections",
     "sectionStore": "Store Info",
     "sectionCustomization": "Customization",
+    "sectionPromotions": "Promotions",
     "sectionEav": "Dynamic Fields",
     "sectionApps": "Apps",
     "sectionIntegrations": "Integrations",
@@ -1570,6 +1563,11 @@
       "productCardsHeading": "Product cards",
       "loadingCardVariants": "Loading card styles…",
       "cardVariantsError": "Could not load card styles."
+    },
+    "promotions": {
+      "heading": "Promotions",
+      "subtitle": "Show banners, a pop-up and a call-to-action message on your storefront.",
+      "tabsAria": "Promotion types"
     },
     "dynamicFields": {
       "heading": "Dynamic fields",

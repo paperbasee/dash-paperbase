@@ -23,9 +23,7 @@ export interface NavCounts {
   orders: number;
   products: number;
   customers: number;
-  notifications: number;
   supportTickets: number;
-  banners: number;
   blog: number;
 }
 
@@ -35,6 +33,7 @@ export interface AppConfig {
   icon: AppNavIcon;
   description: string;
   essential: boolean;
+  /** Sidebar route; null for apps shown as tabs in Settings → Promotions instead. */
   href: string | null;
   countKey: keyof NavCounts | null;
   parentId: string | null;
@@ -108,8 +107,8 @@ export const APP_CONFIG: Record<string, AppConfig> = {
     icon: Bell,
     description: "Call-to-action banners and notifications",
     essential: false,
-    href: "/cta",
-    countKey: "notifications",
+    href: null,
+    countKey: null,
     parentId: null,
   },
   variants: {
@@ -158,8 +157,8 @@ export const APP_CONFIG: Record<string, AppConfig> = {
     icon: ImageIcon,
     description: "Manage banners for homepage, sidebar, footer",
     essential: false,
-    href: "/banners",
-    countKey: "banners",
+    href: null,
+    countKey: null,
     parentId: null,
   },
   popup: {
@@ -168,7 +167,7 @@ export const APP_CONFIG: Record<string, AppConfig> = {
     icon: MessageSquare,
     description: "Marketing pop-up modal announcement",
     essential: false,
-    href: "/popup",
+    href: null,
     countKey: null,
     parentId: null,
   },
@@ -220,9 +219,6 @@ export const CATALOG_SUB_APP_IDS = [
   "variants",
   "product_attributes",
 ] as const;
-
-/** Collapsible “Marketing” group in the sidebar (CTA + Banners). */
-export const MARKETING_SUB_APP_IDS = ["cta", "banners", "popup"] as const;
 
 /** Top-level nav items (excluding catalog children). */
 export const MAIN_NAV_APP_IDS = [

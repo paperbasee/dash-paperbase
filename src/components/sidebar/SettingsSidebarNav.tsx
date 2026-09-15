@@ -2,20 +2,14 @@
 
 import { DeferredNavLink } from "@/components/navigation/DeferredNavLink";
 import { ArrowLeft } from "lucide-react";
-import type { SettingsSection } from "@/app/[locale]/(dashboard)/settings/settingsSections";
-import {
-  SECTIONS,
-  SECTION_OWNER_ONLY,
-  SECTION_PERMISSION,
-  sectionMatchesPermission,
-} from "@/app/[locale]/(dashboard)/settings/settingsSections";
-import { usePermissions } from "@/context/PermissionsContext";
+import { resolveSettingsSection } from "@/app/[locale]/(dashboard)/settings/settingsSections";
+import { useVisibleSettingsSections } from "@/app/[locale]/(dashboard)/settings/useVisibleSettingsSections";
 import { cn } from "@/lib/utils";
 
 export default function SettingsSidebarNav({
   collapsed,
   pathname,
-  settingsActiveSection,
+  settingsTab,
   shouldPrefetchLinks,
   onNavigate,
   tCommonSettingsLabel,
@@ -24,18 +18,16 @@ export default function SettingsSidebarNav({
 }: {
   collapsed: boolean;
   pathname: string;
-  settingsActiveSection: SettingsSection;
+  /** Raw `tab` search param; resolved the same way the settings page picks its section. */
+  settingsTab: string | null;
   shouldPrefetchLinks: boolean;
   onNavigate: () => void;
   tCommonSettingsLabel: string;
   tBackToHomeLabel: string;
   tSettings: (key: string) => string;
 }) {
-  const { has, isOwner, isSuperuser } = usePermissions();
-  const visibleSections = SECTIONS.filter((row) => {
-    if (SECTION_OWNER_ONLY[row.id] && !(isOwner || isSuperuser)) return false;
-    return sectionMatchesPermission(SECTION_PERMISSION[row.id], has);
-  });
+  const visibleSections = useVisibleSettingsSections();
+  const settingsActiveSection = resolveSettingsSection(settingsTab, visibleSections);
   return (
     <>
       {!collapsed && (

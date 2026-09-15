@@ -7,13 +7,17 @@ import { describe, expect, it } from "vitest";
 import {
   ALL_SECTIONS,
   SECTIONS,
+  SECTION_APPS,
   SECTION_OWNER_ONLY,
   SECTION_PERMISSION,
+  isSectionVisible,
+  resolveSettingsSection,
   sectionMatchesPermission,
   type SettingsSection,
   type SettingsSectionNavItem,
 } from "@/app/[locale]/(dashboard)/settings/settingsSections";
-import { ALL_PERMISSION_KEYS } from "@/config/permissions";
+import { APP_CONFIG } from "@/config/apps";
+import { ALL_PERMISSION_KEYS, APP_VIEW_PERMISSION } from "@/config/permissions";
 
 /**
  * settingsSections is the single source of truth for which settings tabs a
@@ -55,10 +59,11 @@ function grants(...keys: string[]) {
 }
 
 /**
- * Mirrors the visibility filter that page.tsx, SettingsNav.tsx and
- * SettingsSidebarNav.tsx all apply verbatim (owner gate first, then
- * permission gate). Kept here so role-shaped expectations below exercise the
- * real maps rather than a hand-written allow list.
+ * Runs the visibility check that page.tsx, SettingsNav.tsx and
+ * SettingsSidebarNav.tsx share (useVisibleSettingsSections), so role-shaped
+ * expectations below exercise the real maps rather than a hand-written allow
+ * list. Unless a test says otherwise every optional app is enabled and app
+ * access follows APP_VIEW_PERMISSION, as PermissionsContext.canViewApp does.
  */
 function visibleIdsFor(
   has: (key: string) => boolean,
@@ -66,14 +71,14 @@ function visibleIdsFor(
     isOwner?: boolean;
     isSuperuser?: boolean;
     sections?: SettingsSectionNavItem[];
+    canShowApp?: (appId: string) => boolean;
   } = {},
 ): SettingsSection[] {
   const { isOwner = false, isSuperuser = false } = opts;
+  const canShowApp =
+    opts.canShowApp ?? ((appId: string) => isOwner || isSuperuser || has(APP_VIEW_PERMISSION[appId]));
   return (opts.sections ?? SECTIONS)
-    .filter((row) => {
-      if (SECTION_OWNER_ONLY[row.id] && !(isOwner || isSuperuser)) return false;
-      return sectionMatchesPermission(SECTION_PERMISSION[row.id], has);
-    })
+    .filter((row) => isSectionVisible(row.id, { has, isOwner, isSuperuser, canShowApp }))
     .map((row) => row.id);
 }
 
@@ -240,6 +245,20 @@ describe("permission map ↔ SECTIONS consistency", () => {
     }
   });
 
+  it("has no orphaned SECTION_APPS keys and names only real, permission-gated apps", () => {
+    const orphans = Object.keys(SECTION_APPS).filter(
+      (id) => !CATALOG_IDS.includes(id as SettingsSection),
+    );
+    expect(orphans).toEqual([]);
+    for (const [id, apps] of Object.entries(SECTION_APPS)) {
+      expect(apps!.length, `section "${id}" lists no apps`).toBeGreaterThan(0);
+      for (const appId of apps!) {
+        expect(APP_CONFIG[appId], `section "${id}" -> unknown app "${appId}"`).toBeDefined();
+        expect(APP_VIEW_PERMISSION[appId], `section "${id}" -> app "${appId}" has no view key`).toBeDefined();
+      }
+    }
+  });
+
   it("marks owner-only sections with a literal true (a false value is a silent no-op)", () => {
     for (const [id, value] of Object.entries(SECTION_OWNER_ONLY)) {
       // The consumers guard with `if (SECTION_OWNER_ONLY[row.id] && ...)`, so a
@@ -282,6 +301,29 @@ describe("role-shaped visibility (the maps as consumers apply them)", () => {
 
   it("shows every section to the owner", () => {
     expect(visibleIdsFor(() => true, { isOwner: true }).sort()).toEqual([...SECTION_IDS].sort());
+  });
+});
+
+describe("active section (what the page shows and the sidebar highlights)", () => {
+  const rows = (...ids: SettingsSection[]) => SECTIONS.filter((row) => ids.includes(row.id));
+
+  it("uses the URL's tab when the user can see it", () => {
+    expect(resolveSettingsSection("team", SECTIONS)).toBe("team");
+    expect(resolveSettingsSection(" billing ", SECTIONS)).toBe("billing");
+  });
+
+  it("opens the first visible section when the tab is missing, unknown or hidden", () => {
+    expect(resolveSettingsSection(null, SECTIONS)).toBe("store");
+    expect(resolveSettingsSection("networking", SECTIONS)).toBe("store");
+    expect(resolveSettingsSection("store", rows("integrations", "account"))).toBe("integrations");
+  });
+
+  it("follows the URL's tab again once that section becomes visible", () => {
+    // Enabled apps can arrive after the page mounts; no earlier fallback may stick.
+    expect(resolveSettingsSection("promotions", rows("store", "account"))).toBe("store");
+    expect(resolveSettingsSection("promotions", rows("store", "promotions", "account"))).toBe(
+      "promotions",
+    );
   });
 });
 
