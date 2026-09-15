@@ -3,37 +3,19 @@
 import { useTranslations } from "next-intl";
 import { Loader2 } from "lucide-react";
 
-import { Select } from "@/components/ui/select";
 import { CustomizationShell } from "../_components/CustomizationShell";
 import { CardVariantPicker } from "../_components/CardVariantPicker";
-import { PalettePicker } from "../_components/PalettePicker";
 import { useThemeEditor } from "../_hooks/useThemeEditor";
 import { usePermissions } from "@/context/PermissionsContext";
 import { settingsSectionSurfaceClassName } from "../SettingsSectionBody";
 
-type SettingsMessage = { type: "success" | "error"; text: string } | null;
-
-export default function CustomizationSection({
-  hidden,
-  language,
-  onLanguageChange,
-  languageSaving,
-  languageMessage,
-}: {
-  hidden: boolean;
-  language: "en" | "bn";
-  onLanguageChange: (value: "en" | "bn") => void | Promise<void>;
-  languageSaving: boolean;
-  languageMessage: SettingsMessage;
-}) {
+export default function CustomizationSection({ hidden }: { hidden: boolean }) {
   const t = useTranslations("settings");
   const tc = useTranslations("settings.customization");
-  const { theme, loading, saving, error, selectPalette, selectCardVariant } = useThemeEditor();
+  const { theme, loading, saving, error, selectCardVariant } = useThemeEditor();
   const { has } = usePermissions();
   // Staff without theming.manage may view the current theme but not change it.
   const canManageTheming = has("theming.manage");
-  // The language selector persists via store branding, which needs settings.manage.
-  const canManageSettings = has("settings.manage");
 
   return (
     <section
@@ -44,52 +26,18 @@ export default function CustomizationSection({
       className={settingsSectionSurfaceClassName}
     >
       <CustomizationShell title={tc("heading")} description={tc("subtitle")}>
-        <div className="max-w-md space-y-2">
-          <label
-            htmlFor="customization_store_language"
-            className="text-sm font-medium leading-normal text-foreground"
-          >
-            {t("store.language")}
-          </label>
-          <Select
-            id="customization_store_language"
-            value={language}
-            disabled={languageSaving || !canManageSettings}
-            onChange={(e) => {
-              const next = e.target.value as "en" | "bn";
-              void onLanguageChange(next);
-            }}
-          >
-            <option value="en">{t("store.languageOptions.en")}</option>
-            <option value="bn">{t("store.languageOptions.bn")}</option>
-          </Select>
-          {languageMessage?.type === "error" ? (
-            <p className="text-sm text-destructive" role="alert">
-              {languageMessage.text}
-            </p>
-          ) : null}
-          {languageSaving ? (
-            <p className="text-xs text-muted-foreground">{t("saving")}</p>
-          ) : null}
-        </div>
-
         {loading ? (
-          <div className="mt-6 flex items-center gap-2 text-sm text-muted-foreground">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <Loader2 className="size-4 animate-spin" aria-hidden />
             {tc("loadingTheme")}
           </div>
         ) : (
-          <div className="mt-6 space-y-4">
+          <div className="space-y-4">
             {error === "saveFailed" ? (
               <p className="text-sm text-destructive" role="alert">
                 {tc("saveFailed")}
               </p>
             ) : null}
-            <PalettePicker
-              selectedPalette={theme?.palette ?? null}
-              onSelect={selectPalette}
-              disabled={saving || !canManageTheming}
-            />
             <CardVariantPicker
               selectedVariant={theme?.card_variant ?? null}
               onSelect={selectCardVariant}

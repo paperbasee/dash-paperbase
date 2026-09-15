@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useCallback, type FormEvent } from "react";
+import { useState, useRef, type FormEvent } from "react";
 import { useTranslations } from "next-intl";
 import { isApiHttpError } from "@/lib/api-client";
 import api from "@/lib/api";
@@ -43,9 +43,7 @@ export function useStoreSettings({ onSaveSuccess }: UseStoreSettingsOptions = {}
   const [clearLogo, setClearLogo] = useState(false);
   const [currentLogoUrl, setCurrentLogoUrl] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
-  const [languageSaving, setLanguageSaving] = useState(false);
   const [message, setMessage] = useState<SettingsMessage>(null);
-  const [languageMessage, setLanguageMessage] = useState<SettingsMessage>(null);
   const [storefrontUrl, setStorefrontUrl] = useState("");
   const [revalidateSecret, setRevalidateSecret] = useState("");
   // Off until store settings load and actually include the integration keys.
@@ -188,28 +186,6 @@ export function useStoreSettings({ onSaveSuccess }: UseStoreSettingsOptions = {}
     }
   }
 
-  const persistLanguage = useCallback(
-    async (next: "en" | "bn") => {
-      setLanguageSaving(true);
-      setLanguageMessage(null);
-      setLanguage(next);
-      try {
-        const formData = new FormData();
-        formData.append("language", next);
-        await api.patch("admin/branding/", formData);
-        await queryClient.invalidateQueries({ queryKey: brandingQueryKey });
-        onSaveSuccess?.();
-        notify.success(t("customization.languageSaved"));
-      } catch {
-        await queryClient.invalidateQueries({ queryKey: brandingQueryKey });
-        setLanguageMessage({ type: "error", text: t("customization.languageSaveFailed") });
-      } finally {
-        setLanguageSaving(false);
-      }
-    },
-    [onSaveSuccess, t],
-  );
-
   return {
     storeName,
     setStoreName,
@@ -233,12 +209,9 @@ export function useStoreSettings({ onSaveSuccess }: UseStoreSettingsOptions = {}
     previewUrl,
     fileInputRef,
     saving,
-    languageSaving,
-    languageMessage,
     message,
     syncFromBranding,
     handleSubmit,
-    persistLanguage,
 
     storefrontUrl,
     setStorefrontUrl,

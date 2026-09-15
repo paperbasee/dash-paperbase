@@ -74,6 +74,7 @@ export default function SettingsPage() {
     address,
     setAddress,
     language,
+    setLanguage,
     socialLinks,
     setSocialLink,
     previewUrl,
@@ -95,9 +96,6 @@ export default function SettingsPage() {
     emailPrefsSaving,
     handleAccountSubmit,
     handleStoreSubmit,
-    languageSaving,
-    languageMessage,
-    persistLanguage,
     storefrontUrl,
     setStorefrontUrl,
     revalidateSecret,
@@ -192,11 +190,13 @@ export default function SettingsPage() {
             contactEmail={contactEmail}
             phone={phone}
             address={address}
+            language={language}
             onStoreNameChange={setStoreName}
             onStoreTypeChange={setStoreType}
             onContactEmailChange={setContactEmail}
             onPhoneChange={setPhone}
             onAddressChange={setAddress}
+            onLanguageChange={setLanguage}
             socialLinks={socialLinks}
             onSocialLinkChange={setSocialLink}
             storeSaving={storeSaving}
@@ -215,13 +215,7 @@ export default function SettingsPage() {
             </div>
           )}
 
-          <CustomizationSection
-            hidden={activeSection !== "customization"}
-            language={language}
-            onLanguageChange={persistLanguage}
-            languageSaving={languageSaving}
-            languageMessage={languageMessage}
-          />
+          <CustomizationSection hidden={activeSection !== "customization"} />
 
           <PromotionsSection hidden={activeSection !== "promotions"} />
 

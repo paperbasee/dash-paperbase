@@ -5,9 +5,7 @@ import api from "@/lib/api";
 import { themeQueryKey } from "@/lib/query-keys";
 
 export type ThemePayload = {
-  palette: string;
   card_variant: string;
-  resolved_palette: Record<string, string>;
   created_at: string;
   updated_at: string;
 };
