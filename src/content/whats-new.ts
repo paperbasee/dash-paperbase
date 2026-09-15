@@ -38,6 +38,20 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-09-15-sidebar-starts-collapsed",
+    date: "2026-09-15",
+    version: "3.3.1",
+    tag: "improved",
+    title: {
+      en: "More room for your pages",
+      bn: "পেজে এখন আরও বেশি জায়গা",
+    },
+    body: {
+      en: "On computers the sidebar now starts collapsed, showing only icons. Click the button at the top of the sidebar to expand it anytime.",
+      bn: "কম্পিউটারে সাইডবার এখন সংকুচিত অবস্থায় শুরু হয়, শুধু আইকন দেখায়। যেকোনো সময় সাইডবারের একেবারে উপরের বোতামে ক্লিক করে এটি প্রসারিত করুন।",
+    },
+  },
+  {
     id: "2026-09-15-whats-new-panel",
     date: "2026-09-15",
     version: "3.3.0",
