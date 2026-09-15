@@ -22,6 +22,10 @@ import {
   invalidateOrderEditorVariants,
 } from "@/lib/orders/order-editor-variants";
 import { createProductSearchScheduler } from "@/lib/orders/product-search-scheduler";
+import {
+  pricingPreviewDisplay,
+  shouldRequestPricingPreview,
+} from "@/lib/orders/order-pricing-preview";
 import { buildOrderCreateSchema, parseValidation } from "@/lib/validation";
 import {
   dashboardAnalyticsQueryKeyRoot,
@@ -127,6 +131,7 @@ export function useNewOrder() {
   const shippingZones = zonesQuery.data ?? [];
   const shippingMethods = methodsQuery.data ?? [];
   const [pricingPreview, setPricingPreview] = useState<OrderPricingPreview | null>(null);
+  const [pricingPreviewFailed, setPricingPreviewFailed] = useState(false);
 
   const shippingSetupError = zonesQuery.isError
     ? zonesQuery.error
@@ -246,9 +251,22 @@ export function useNewOrder() {
   }
 
   const displayTotal = pricingPreview ? Number(pricingPreview.total || 0) : 0;
+  const pricingDisplay = pricingPreviewDisplay({
+    lineCount: items.length,
+    zonePublicId: form.shipping_zone_public_id,
+    hasPreview: pricingPreview != null,
+    failed: pricingPreviewFailed,
+  });
 
   useEffect(() => {
-    if (items.length === 0) {
+    setPricingPreviewFailed(false);
+    if (
+      !shouldRequestPricingPreview({
+        lineCount: items.length,
+        zonePublicId: form.shipping_zone_public_id,
+      })
+    ) {
+      // The API cannot price an order without a zone: do not ask, and drop older totals.
       setPricingPreview(null);
       return;
     }
@@ -273,6 +291,7 @@ export function useNewOrder() {
         .catch((err) => {
           if (ac.signal.aborted) return;
           setPricingPreview(null);
+          setPricingPreviewFailed(true);
           notify.info(t("toastDescTotalsPreviewPaused"), {
             title: t("toastTitleTotalsPreviewPaused"),
             dedupeKey: "orderNewTotalsPreviewPaused",
@@ -421,6 +440,7 @@ export function useNewOrder() {
     shippingMethods,
     displayTotal,
     pricingPreview,
+    pricingDisplay,
     handleSearch,
     addProduct,
     updateItem,

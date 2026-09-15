@@ -37,6 +37,7 @@ export default function NewOrderPage() {
     shippingMethods,
     displayTotal,
     pricingPreview,
+    pricingDisplay,
     handleSearch,
     addProduct,
     updateItem,
@@ -467,11 +468,12 @@ export default function NewOrderPage() {
               <div className="flex items-center justify-between border-t border-border pt-4">
                 <span className="text-sm text-muted-foreground">{tPages("orderNewEstimatedTotal")}</span>
                 <span className={`text-lg font-semibold text-foreground ${numClass}`}>
-                  {currencySymbol}
-                  {displayTotal.toLocaleString()}
+                  {pricingDisplay === "totals" || pricingDisplay === "empty"
+                    ? `${currencySymbol}${displayTotal.toLocaleString()}`
+                    : "—"}
                 </span>
               </div>
-              {pricingPreview && (
+              {pricingDisplay === "totals" && pricingPreview && (
                 <div className="space-y-1 text-xs text-muted-foreground">
                   <p>
                     {tPages("orderNewSubtotalBeforeDiscount")}:{" "}
@@ -510,8 +512,11 @@ export default function NewOrderPage() {
                   </p>
                 </div>
               )}
-              {!pricingPreview && items.length > 0 && (
+              {pricingDisplay === "chooseZone" && (
                 <p className="text-xs text-muted-foreground">{tPages("orderNewSelectZoneForPreview")}</p>
+              )}
+              {pricingDisplay === "unavailable" && (
+                <p className="text-xs text-muted-foreground">{tPages("toastDescTotalsPreviewPaused")}</p>
               )}
             </CardContent>
           </Card>
