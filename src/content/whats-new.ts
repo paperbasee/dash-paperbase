@@ -47,8 +47,8 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
       bn: "বিজ্ঞাপনে এখন আসল অর্ডারই পারচেজ",
     },
     body: {
-      en: "Facebook and TikTok Ads now count a cash on delivery order as a purchase when you confirm it within 7 days, and a prepaid order when the customer pays. Orders you never confirm, like fake ones, no longer count, so your purchase numbers may drop to the real ones. Ads may take a few days to adjust.",
-      bn: "Facebook ও TikTok বিজ্ঞাপনে ক্যাশ অন ডেলিভারি অর্ডার এখন পারচেজ হিসেবে গণ্য হবে ৭ দিনের মধ্যে আপনি কনফার্ম করলে, আর প্রিপেইড অর্ডার গ্রাহক পেমেন্ট করলে। যেসব অর্ডার আপনি কনফার্ম করেন না, যেমন ভুয়া অর্ডার, সেগুলো আর গোনা হবে না, তাই পারচেজের সংখ্যা কমে আসল সংখ্যায় আসতে পারে। বিজ্ঞাপন মানিয়ে নিতে কয়েক দিন সময় লাগতে পারে।",
+      en: "Facebook Ads now counts a cash on delivery order as a purchase when you confirm it within 7 days, and a prepaid order when the customer pays, so your purchase numbers may drop to the real ones. TikTok keeps counting every order as \"Place an Order\" and adds a new Purchase count for confirmed and paid orders; switch your TikTok campaign goal to Purchase to use it. Ads may take a few days to adjust.",
+      bn: "Facebook বিজ্ঞাপনে ক্যাশ অন ডেলিভারি অর্ডার এখন পারচেজ হিসেবে গণ্য হবে ৭ দিনের মধ্যে আপনি কনফার্ম করলে, আর প্রিপেইড অর্ডার গ্রাহক পেমেন্ট করলে, তাই পারচেজের সংখ্যা কমে আসল সংখ্যায় আসতে পারে। TikTok আগের মতোই প্রতিটি অর্ডারকে \"Place an Order\" হিসেবে গুনবে, আর কনফার্ম ও পেমেন্ট হওয়া অর্ডারের জন্য নতুন একটি Purchase গণনা যোগ করবে; এটি ব্যবহার করতে আপনার TikTok ক্যাম্পেইনের লক্ষ্য Purchase-এ বদলে নিন। বিজ্ঞাপন মানিয়ে নিতে কয়েক দিন সময় লাগতে পারে।",
     },
   },
   {
