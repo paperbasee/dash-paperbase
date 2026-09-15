@@ -37,32 +37,17 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
-    id: "2026-09-16-shipping-in-settings",
+    id: "2026-09-16-promotions-and-shipping-in-settings",
     date: "2026-09-16",
     version: "4.7.0",
     tag: "improved",
     title: {
-      en: "Shipping moved to Settings",
-      bn: "শিপিং এখন সেটিংসে",
+      en: "Banners, Pop-up, CTA and Shipping moved to Settings",
+      bn: "ব্যানার, পপ-আপ, সিটিএ আর শিপিং এখন সেটিংসে",
     },
     body: {
-      en: "Shipping is no longer in the sidebar. Set your delivery zones, methods and rates under Settings → Shipping; old links still take you there.",
-      bn: "শিপিং এখন আর সাইডবারে নেই। ডেলিভারির জোন, পদ্ধতি আর রেট ঠিক করুন সেটিংস → শিপিং-এ; পুরোনো লিংকগুলোও আপনাকে সেখানেই নিয়ে যাবে।",
-    },
-    href: "/settings?tab=shipping",
-  },
-  {
-    id: "2026-09-16-promotions-in-settings",
-    date: "2026-09-16",
-    version: "4.7.0",
-    tag: "improved",
-    title: {
-      en: "Banners, Pop-up and CTA moved to Settings",
-      bn: "ব্যানার, পপ-আপ আর সিটিএ এখন সেটিংসে",
-    },
-    body: {
-      en: "The Marketing group is gone from the sidebar. Find Banners, Pop-up and CTA under Settings → Promotions; old links still take you there.",
-      bn: "সাইডবারে এখন আর মার্কেটিং গ্রুপ নেই। ব্যানার, পপ-আপ আর সিটিএ পাবেন সেটিংস → প্রোমোশন-এ; পুরোনো লিংকগুলোও আপনাকে সেখানেই নিয়ে যাবে।",
+      en: "Banners, Pop-up, CTA and Shipping are no longer in the sidebar. Find Banners, Pop-up and CTA under Settings → Promotions, and your delivery zones, methods and rates under Settings → Shipping. Old links still take you there.",
+      bn: "ব্যানার, পপ-আপ, সিটিএ আর শিপিং এখন আর সাইডবারে নেই। ব্যানার, পপ-আপ আর সিটিএ পাবেন সেটিংস → প্রোমোশন-এ, আর ডেলিভারির জোন, পদ্ধতি ও রেট পাবেন সেটিংস → শিপিং-এ। পুরোনো লিংকগুলোও আপনাকে সেখানেই নিয়ে যাবে।",
     },
     href: "/settings?tab=promotions",
   },
