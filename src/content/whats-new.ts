@@ -37,6 +37,20 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-09-17-purchases-count-at-order-time",
+    date: "2026-09-17",
+    version: "4.8.4",
+    tag: "improved",
+    title: {
+      en: "Purchases now count when the order is placed",
+      bn: "অর্ডার করার সাথে সাথেই পারচেজ গণনা হবে",
+    },
+    body: {
+      en: "Facebook and TikTok now count a cash on delivery order as a purchase as soon as the customer places it, instead of waiting for you to confirm. Your purchase numbers will look higher, because orders that are cancelled later stay counted. Prepaid orders still count when the customer pays.",
+      bn: "ক্যাশ অন ডেলিভারি অর্ডার এখন গ্রাহক অর্ডার করার সাথে সাথেই Facebook ও TikTok-এ পারচেজ হিসেবে গণনা হয়, আপনার কনফার্ম করার অপেক্ষা করে না। এতে পারচেজের সংখ্যা বেশি দেখাবে, কারণ পরে বাতিল হওয়া অর্ডারও গোনা থাকবে। প্রিপেইড অর্ডার আগের মতোই গ্রাহক পেমেন্ট করলে গণনা হবে।",
+    },
+  },
+  {
     id: "2026-09-16-brief-glitch-no-longer-hides-a-product",
     date: "2026-09-16",
     version: "4.8.3",
