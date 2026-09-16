@@ -37,6 +37,21 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-09-16-blog-posts-open-again",
+    date: "2026-09-16",
+    version: "4.8.2",
+    tag: "fixed",
+    title: {
+      en: "Blog posts open again",
+      bn: "ব্লগ পোস্ট আবার খুলছে",
+    },
+    body: {
+      en: "Opening a blog post on your storefront showed an error page instead of the article. Posts now open normally, and their text is cleaned on our servers so unsafe content never reaches shoppers.",
+      bn: "আপনার স্টোরফ্রন্টে ব্লগ পোস্ট খুললে আর্টিকেলের বদলে এরর পেজ আসত। এখন পোস্টগুলো ঠিকভাবে খোলে, আর পোস্টের লেখা আমাদের সার্ভারেই পরিষ্কার করা হয়, তাই ক্ষতিকর কিছু ক্রেতাদের কাছে পৌঁছায় না।",
+    },
+    href: "/blog",
+  },
+  {
     id: "2026-09-16-faster-storefront",
     date: "2026-09-16",
     version: "4.8.1",
