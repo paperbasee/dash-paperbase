@@ -37,6 +37,20 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-09-16-faster-storefront",
+    date: "2026-09-16",
+    version: "4.8.1",
+    tag: "improved",
+    title: {
+      en: "Faster storefront and a lighter home page",
+      bn: "দোকান এখন দ্রুত, হোম পেজ হালকা",
+    },
+    body: {
+      en: "Your shop pages load faster and no longer jump about while loading. The home page now shows your first 6 categories with 8 products each, and shoppers reach the rest from the menu. Price and stock changes also appear sooner.",
+      bn: "আপনার দোকানের পেজগুলো এখন দ্রুত লোড হয় আর লোড হওয়ার সময় আগের মতো লাফায় না। হোম পেজে এখন প্রথম ৬টি ক্যাটাগরি দেখাবে, প্রতিটিতে ৮টি পণ্য, বাকিগুলো ক্রেতারা মেনু থেকে দেখতে পাবেন। দাম বা স্টক বদলালে সেটাও এখন আগের চেয়ে তাড়াতাড়ি দেখা যায়।",
+    },
+  },
+  {
     id: "2026-09-16-ivory-colours-and-language-in-store-info",
     date: "2026-09-16",
     version: "4.8.0",
