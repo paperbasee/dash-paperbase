@@ -37,6 +37,20 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-09-16-brief-glitch-no-longer-hides-a-product",
+    date: "2026-09-16",
+    version: "4.8.3",
+    tag: "fixed",
+    title: {
+      en: "A brief glitch no longer hides a product",
+      bn: "সাময়িক সমস্যায় পণ্য আর হারিয়ে যাবে না",
+    },
+    body: {
+      en: "If our servers hiccup while a product page is being prepared, your shop no longer shows \"product not found\" for the next few minutes. Products that really are gone still show a proper not-found page.",
+      bn: "পণ্যের পেজ তৈরির সময় আমাদের সার্ভারে সাময়িক সমস্যা হলে আপনার দোকান এখন আর কয়েক মিনিট ধরে \"পণ্য পাওয়া যায়নি\" দেখাবে না। সত্যিই মুছে ফেলা পণ্যের জন্য আগের মতোই সঠিক বার্তা দেখাবে।",
+    },
+  },
+  {
     id: "2026-09-16-blog-posts-open-again",
     date: "2026-09-16",
     version: "4.8.2",
