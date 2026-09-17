@@ -91,7 +91,11 @@ export function CardVariantPicker({
 
   return (
     <div className="space-y-2">
-      <p className="text-sm font-medium text-foreground">{t("productCardsHeading")}</p>
+      <div className="space-y-0.5">
+        <p className="text-sm font-medium text-foreground">{t("productCardsHeading")}</p>
+        {/* Unlike a theme, the card style has no draft: a click changes the live shop. */}
+        <p className="text-xs text-muted-foreground">{t("cardStyleGoesLive")}</p>
+      </div>
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {variants.map((row) => {
           const selected = selectedVariant === row.key;

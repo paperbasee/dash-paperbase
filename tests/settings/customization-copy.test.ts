@@ -1,7 +1,7 @@
 /**
- * Copy integrity for Settings > Customization. The palette picker and its strings
- * were removed, so a key the card style picker still reads, or one missing in
- * Bangla, renders the raw key.
+ * Copy integrity for Settings > Customization: the theme page and the card style
+ * picker. A key a component reads that is missing in either language renders the
+ * raw key, and most merchants read the Bangla one.
  */
 
 import fs from "node:fs";
@@ -29,11 +29,23 @@ describe("customization copy", () => {
     expect(Object.keys(enNs).filter((k) => enNs[k] === bnNs[k])).toEqual([]);
   });
 
+  it("keeps every placeholder in Bangla", () => {
+    const placeholders = (value: string) => [...value.matchAll(/\{(\w+)\}/g)].map((m) => m[1]).sort();
+    expect(Object.keys(enNs).filter((k) => placeholders(enNs[k]).join() !== placeholders(bnNs[k]).join())).toEqual([]);
+  });
+
   it("every customization key the components ask for exists in both languages", () => {
     const used = new Set<string>();
     for (const m of read("sections/CustomizationSection.tsx").matchAll(/\btc\(\s*"(\w+)"/g)) used.add(m[1]);
-    for (const m of read("_components/CardVariantPicker.tsx").matchAll(/\bt\(\s*"(\w+)"/g)) used.add(m[1]);
-    expect(used.size).toBeGreaterThan(4);
+    for (const file of [
+      "_components/CardVariantPicker.tsx",
+      "_components/CurrentThemeCard.tsx",
+      "_components/ThemeLibrary.tsx",
+      "_components/ThemeLockNotice.tsx",
+    ]) {
+      for (const m of read(file).matchAll(/\bt\(\s*"(\w+)"/g)) used.add(m[1]);
+    }
+    expect(used.size).toBeGreaterThan(40);
     expect([...used].filter((k) => !(k in enNs))).toEqual([]);
     expect([...used].filter((k) => !(k in bnNs))).toEqual([]);
   });
