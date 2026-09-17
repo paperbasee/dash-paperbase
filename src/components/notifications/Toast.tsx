@@ -217,7 +217,9 @@ export function Toast({ variant, message, title, action, iconName, onClose }: To
               "dark:hover:bg-zinc-800 dark:active:bg-zinc-700",
             )}
           >
-            {action ? "Secondary" : "Dismiss"}
+            {/* Was the untranslated "Secondary"/"Dismiss": a placeholder word a Bangla merchant
+                could read on any toast that offers an action. It closes the toast, so it says so. */}
+            {tCommon("close")}
           </button>
 
           {/* Primary */}
