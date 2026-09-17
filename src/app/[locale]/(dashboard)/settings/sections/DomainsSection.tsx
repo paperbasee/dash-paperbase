@@ -33,10 +33,12 @@ import {
   useSetPrimaryDomain,
   useVerifyDomain,
 } from "@/lib/domains/hooks";
-import type {
-  StoreDomain,
-  StoreDomainDnsRecord,
-  StoreDomainStatus,
+import {
+  liveStorefrontDomain,
+  storefrontUrlFor,
+  type StoreDomain,
+  type StoreDomainDnsRecord,
+  type StoreDomainStatus,
 } from "@/lib/domains/api";
 
 /** Colour per lifecycle state, mirroring the order-status badge conventions. */
@@ -54,16 +56,6 @@ function statusBadgeClassName(status: StoreDomainStatus): string {
     default:
       return "border-border bg-muted text-muted-foreground";
   }
-}
-
-/** Mirrors the server's canonical URL rule: https everywhere but local suffixes. */
-function storefrontUrlFor(hostname: string): string {
-  const isLocal =
-    hostname === "localhost" ||
-    hostname.endsWith(".localhost") ||
-    hostname.endsWith(".local") ||
-    hostname.endsWith(".test");
-  return `${isLocal ? "http" : "https"}://${hostname}`;
 }
 
 /**
@@ -263,12 +255,7 @@ export default function DomainsSection({ hidden }: { hidden: boolean }) {
 
   // Removed domains are gone from the database; nothing to filter for them here.
   const domains = allDomains.filter((d) => d.status !== "disabled");
-  // The address to show the merchant: their canonical one, falling back to any
-  // live address so a store is never told it has none while it is serving.
-  const liveDomain =
-    domains.find((d) => d.is_primary && d.status === "active") ??
-    domains.find((d) => d.status === "active") ??
-    null;
+  const liveDomain = liveStorefrontDomain(domains);
 
   const connect = useConnectDomain();
   const verify = useVerifyDomain();

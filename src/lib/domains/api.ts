@@ -104,3 +104,26 @@ export function domainIsSettling(domain: StoreDomain): boolean {
     (domain.ssl_status === "pending" || domain.ssl_status === "none")
   );
 }
+
+/** Mirrors the server's canonical URL rule: https everywhere but local suffixes. */
+export function storefrontUrlFor(hostname: string): string {
+  const isLocal =
+    hostname === "localhost" ||
+    hostname.endsWith(".localhost") ||
+    hostname.endsWith(".local") ||
+    hostname.endsWith(".test");
+  return `${isLocal ? "http" : "https"}://${hostname}`;
+}
+
+/**
+ * The address a shopper reaches this shop on: its canonical one, falling back to any live
+ * address, so a shop that is serving is never treated as having none. Null while the list has
+ * not arrived, or when this member may not read it.
+ */
+export function liveStorefrontDomain(domains: StoreDomain[] | undefined): StoreDomain | null {
+  return (
+    domains?.find((d) => d.is_primary && d.status === "active") ??
+    domains?.find((d) => d.status === "active") ??
+    null
+  );
+}
