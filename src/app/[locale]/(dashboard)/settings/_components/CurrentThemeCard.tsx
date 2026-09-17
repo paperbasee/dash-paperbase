@@ -18,6 +18,7 @@ export function CurrentThemeCard({
   current,
   locked,
   canOpenEditor,
+  previewMissing,
 }: {
   themes: ThemeSummary[];
   current: ThemeCurrent;
@@ -25,6 +26,8 @@ export function CurrentThemeCard({
   locked: boolean;
   /** Unlocked, this member may edit, and the preview host is configured. */
   canOpenEditor: boolean;
+  /** This member could edit, but the preview host is not configured, so the editor can't open. */
+  previewMissing: boolean;
 }) {
   const t = useTranslations("settings.customization");
   const locale = useLocale();
@@ -84,6 +87,15 @@ export function CurrentThemeCard({
         <Button asChild className={cn("w-full shrink-0 sm:w-auto", settingsInvertedButtonClassName)}>
           <DeferredNavLink href={THEME_EDITOR_HREF}>{t("customize")}</DeferredNavLink>
         </Button>
+      ) : previewMissing ? (
+        <div className="flex w-full shrink-0 flex-col gap-1.5 sm:w-auto sm:items-end">
+          <Button type="button" disabled aria-describedby="customize-preview-missing" className="w-full sm:w-auto">
+            {t("customize")}
+          </Button>
+          <p id="customize-preview-missing" className="text-xs text-muted-foreground">
+            {t("previewNotSetUp")}
+          </p>
+        </div>
       ) : null}
     </div>
   );

@@ -180,6 +180,7 @@ export default function CustomizationSection({ hidden }: { hidden: boolean }) {
           current={current}
           locked={page.lock !== null}
           canOpenEditor={canOpenEditor}
+          previewMissing={canEdit && PREVIEW_ORIGIN === null}
         />
         <ThemeLibrary
           themes={themes}
