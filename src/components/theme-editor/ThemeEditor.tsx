@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { useConfirm, type ConfirmDialogOptions } from "@/context/ConfirmDialogContext";
 import { usePreviewExamplesQuery } from "@/hooks/useThemesQuery";
 import { getMeProfileKeyFromToken } from "@/lib/me-profile-store";
-import type { ThemeEditorState, ThemeSection } from "@/lib/theme-editor/api";
+import type { ThemeBlock, ThemeEditorState, ThemeSection } from "@/lib/theme-editor/api";
 import {
   editorPages,
   isGroupPage,
@@ -18,7 +18,11 @@ import {
   type PageKey,
 } from "@/lib/theme-editor/document-ops";
 import { editorReducer, initEditorState } from "@/lib/theme-editor/editor-reducer";
+import { blockChoices, fieldValue, type FieldSpec } from "@/lib/theme-editor/field-specs";
+import { linkPages } from "@/lib/theme-editor/link-targets";
 import { pathLocale, previewTarget, templateForPath } from "@/lib/theme-editor/preview-paths";
+import { cannotAdd, cannotAddBlock } from "@/lib/theme-editor/rules";
+import { documentProblem } from "@/lib/theme-editor/validate";
 import type { PreviewMessage, PreviewState } from "@/lib/theme-editor/preview-session";
 import {
   clearUnsentCopy,
@@ -30,11 +34,13 @@ import {
   type UnsentCopy,
 } from "@/lib/theme-editor/unsent-copy";
 import { cn } from "@/lib/utils";
-import { AddSectionSheet } from "./AddSectionSheet";
+import { AddSheet, type AddItem } from "./AddSheet";
 import { EditorTopBar, PagePicker } from "./EditorTopBar";
+import { LinkPicker } from "./LinkPicker";
 import { PreviewPane } from "./PreviewPane";
 import { SaveProblem } from "./SaveStatus";
 import { SectionList } from "./SectionList";
+import { SettingsPanel } from "./SettingsPanel";
 import { useAutosave } from "./useAutosave";
 import { useEditorBackGuard } from "./useEditorBackGuard";
 import { usePreviewSession } from "./usePreviewSession";
@@ -50,6 +56,12 @@ const MISSING_NOTE = {
 
 type Tab = "edit" | "preview";
 
+/** What is open over the left column: adding a section or a part, or picking a link. */
+type SheetKind =
+  | { kind: "addSection" }
+  | { kind: "addBlock" }
+  | { kind: "link"; setting: string; value: string };
+
 /** The signed-in member and the store being edited, from the dashboard's access token. */
 function editorIdentity(): { user: string; store: string } | null {
   if (typeof window === "undefined") return null;
@@ -62,10 +74,13 @@ function editorIdentity(): { user: string; store: string } | null {
 function findUnsentCopy(loaded: ThemeEditorState) {
   const identity = editorIdentity();
   const key = identity ? unsentCopyKey(identity.user, identity.store) : null;
-  const copy = key ? readUnsentCopy(window.localStorage, key) : null;
+  const stored = key ? readUnsentCopy(window.localStorage, key) : null;
+  // Written by an editor working from an older theme file: a value it was allowed to store
+  // then may be one the API refuses now, and bringing it back would stop every save.
+  const copy = stored && documentProblem(loaded.manifest, stored.document) === null ? stored : null;
   const choice = unsentCopyChoice(copy, { document: loaded.document, draftRevision: loaded.draft_revision });
   // The copies this tab may replace: its own (a new id each time the editor opens) and the one found now.
-  const tabs = [Math.random().toString(36).slice(2), copy?.tab] as const;
+  const tabs = [Math.random().toString(36).slice(2), stored?.tab] as const;
   return { identity, key, tabs, copy: choice === "none" ? null : copy, choice };
 }
 
@@ -93,7 +108,9 @@ export function ThemeEditor({ loaded, origin }: { loaded: ThemeEditorState; orig
   );
   const { device, setDevice, width } = usePreviewDevice("desktop", PREVIEW_WIDTHS);
   const [tab, setTab] = useState<Tab>("edit");
-  const [addOpen, setAddOpen] = useState(false);
+  // The section (and, inside it, the part) whose settings are open, and the sheet over it.
+  const [open, setOpen] = useState<{ sectionId: string; blockId?: string } | null>(null);
+  const [sheet, setSheet] = useState<SheetKind | null>(null);
   const [focusRequest, setFocusRequest] = useState<{ id: string | null } | null>(null);
   const [reloading, setReloading] = useState(false);
   const dialogOpen = useRef(false);
@@ -108,6 +125,20 @@ export function ThemeEditor({ loaded, origin }: { loaded: ThemeEditorState; orig
     const sectionSpec = manifest.sections[section.type];
     return sectionSpec ? localLabel(sectionSpec, locale) : section.type;
   };
+
+  // The open panel follows the document: a section removed here, or a page picked there,
+  // closes it rather than leaving the settings of something that is no longer on the page.
+  const openSection = open ? (sections.find((s) => s.id === open.sectionId) ?? null) : null;
+  const openBlock =
+    openSection && open?.blockId ? (openSection.blocks.find((b) => b.id === open.blockId) ?? null) : null;
+  useEffect(() => {
+    if (!open) return;
+    if (!openSection) setOpen(null);
+    else if (open.blockId && !openBlock) setOpen({ sectionId: open.sectionId });
+  }, [open, openSection, openBlock]);
+  useEffect(() => {
+    if (!open) setSheet((current) => (current?.kind === "addSection" ? current : null));
+  }, [open]);
 
   // The page picker follows the frame when the merchant moves around inside it. Not for the
   // ready that answers entering, which lands on home whatever page is picked (the frame is taken
@@ -188,10 +219,19 @@ export function ThemeEditor({ loaded, origin }: { loaded: ThemeEditorState; orig
   const leave = useEditorBackGuard({
     changed: unsent && !reloading,
     onBack: () => {
-      // Back never stacks a second dialog, and closes an open panel before anything else.
+      // Back never stacks a second dialog, and closes one open layer at a time: the sheet
+      // over the panel, then the part inside a section, then the section, then the editor.
       if (dialogOpen.current) return false;
-      if (addOpen) {
-        setAddOpen(false);
+      if (sheet) {
+        setSheet(null);
+        return false;
+      }
+      if (open?.blockId) {
+        setOpen({ sectionId: open.sectionId });
+        return false;
+      }
+      if (open) {
+        setOpen(null);
         return false;
       }
       if (!unsent) return true;
@@ -229,11 +269,43 @@ export function ThemeEditor({ loaded, origin }: { loaded: ThemeEditorState; orig
 
   function handleAdd(type: string) {
     const next = editorReducer(state, { type: "add", sectionType: type });
-    setAddOpen(false);
+    setSheet(null);
     if (next === state) return;
     dispatch({ type: "add", sectionType: type });
     const added = pageSections(next.document, page).at(-1);
     setFocusRequest({ id: added?.id ?? null });
+  }
+
+  /** Every setting change goes through the reducer, which refuses what the API would. */
+  function handleSet(setting: string, value: unknown) {
+    if (!open) return;
+    dispatch({ type: "setSetting", id: open.sectionId, blockId: open.blockId, setting, value });
+  }
+
+  function handlePickLink(link: string) {
+    if (sheet?.kind !== "link") return;
+    handleSet(sheet.setting, link);
+    setSheet(null);
+  }
+
+  function openLinkPicker(spec: FieldSpec) {
+    const settings = openBlock ? openBlock.settings : openSection?.settings;
+    const value = fieldValue(spec, settings);
+    setSheet({ kind: "link", setting: spec.id, value: typeof value === "string" ? value : "" });
+  }
+
+  async function handleRemoveBlock(block: ThemeBlock) {
+    if (!openSection) return;
+    const spec = manifest.sections[openSection.type]?.blocks?.[block.type];
+    const ok = await ask({
+      title: t("confirmRemoveTitle", { name: spec ? localLabel(spec, locale) : block.type }),
+      message: t("confirmRemoveBlockMessage"),
+      confirmText: t("confirmRemove"),
+      cancelText: tCommon("cancel"),
+      variant: "danger",
+    });
+    if (!ok) return;
+    dispatch({ type: "removeBlock", id: openSection.id, blockId: block.id });
   }
 
   function answerCopy(restore: boolean, copy: UnsentCopy | null) {
@@ -265,6 +337,26 @@ export function ThemeEditor({ loaded, origin }: { loaded: ThemeEditorState; orig
   }
 
   const pickPage = (next: PageKey) => dispatch({ type: "pickPage", page: next });
+
+  // What the two Add sheets offer: the theme's list, with the ones the rules refuse listed
+  // but not offered, so a merchant sees what the page could hold and why it cannot now.
+  const sectionItems: AddItem[] = allowed.map((type) => {
+    const refused = cannotAdd(manifest, allowed, sections, type);
+    const spec = manifest.sections[type];
+    return {
+      key: type,
+      label: spec ? localLabel(spec, locale) : type,
+      note: refused === "onlyOnce" ? t("alreadyOnPage") : undefined,
+      disabled: refused !== null,
+    };
+  });
+  const blockItems: AddItem[] = openSection
+    ? blockChoices(manifest.sections[openSection.type], locale).map(({ type, label }) => ({
+        key: type,
+        label,
+        disabled: cannotAddBlock(manifest, openSection, type) !== null,
+      }))
+    : [];
 
   let previewNote: ReactNode = null;
   const framePath = preview.state.path;
@@ -361,19 +453,35 @@ export function ThemeEditor({ loaded, origin }: { loaded: ThemeEditorState; orig
             tab !== "edit" && "hidden",
           )}
         >
-          <SectionList
-            manifest={manifest}
-            pageName={pageName}
-            isGroup={isGroupPage(page)}
-            allowed={allowed}
-            sections={sections}
-            focusRequest={focusRequest}
-            onHide={(id) => dispatch({ type: "hide", id })}
-            onShow={(id) => dispatch({ type: "show", id })}
-            onMove={(id, to) => dispatch({ type: "move", id, to })}
-            onRemove={(section) => void handleRemove(section)}
-            onAdd={() => setAddOpen(true)}
-          />
+          {openSection ? (
+            <SettingsPanel
+              manifest={manifest}
+              section={openSection}
+              block={openBlock}
+              onBack={() => setOpen(openBlock ? { sectionId: openSection.id } : null)}
+              onSet={handleSet}
+              onPickLink={openLinkPicker}
+              onOpenBlock={(block) => setOpen({ sectionId: openSection.id, blockId: block.id })}
+              onAddBlock={() => setSheet({ kind: "addBlock" })}
+              onRemoveBlock={(block) => void handleRemoveBlock(block)}
+              onMoveBlock={(blockId, to) => dispatch({ type: "moveBlock", id: openSection.id, blockId, to })}
+            />
+          ) : (
+            <SectionList
+              manifest={manifest}
+              pageName={pageName}
+              isGroup={isGroupPage(page)}
+              allowed={allowed}
+              sections={sections}
+              focusRequest={focusRequest}
+              onOpen={(section) => setOpen({ sectionId: section.id })}
+              onHide={(id) => dispatch({ type: "hide", id })}
+              onShow={(id) => dispatch({ type: "show", id })}
+              onMove={(id, to) => dispatch({ type: "move", id, to })}
+              onRemove={(section) => void handleRemove(section)}
+              onAdd={() => setSheet({ kind: "addSection" })}
+            />
+          )}
         </div>
         <div
           id="theme-editor-preview"
@@ -385,13 +493,33 @@ export function ThemeEditor({ loaded, origin }: { loaded: ThemeEditorState; orig
         </div>
       </div>
 
-      <AddSectionSheet
-        open={addOpen}
-        manifest={manifest}
-        allowed={allowed}
-        sections={sections}
+      <AddSheet
+        open={sheet?.kind === "addSection"}
+        title={t("addTitle")}
+        hint={t("addHint")}
+        items={sectionItems}
         onPick={handleAdd}
-        onClose={() => setAddOpen(false)}
+        onClose={() => setSheet(null)}
+      />
+
+      <AddSheet
+        open={sheet?.kind === "addBlock"}
+        title={t("addBlockTitle")}
+        hint={t("addBlockHint")}
+        items={blockItems}
+        onPick={(type) => {
+          setSheet(null);
+          if (openSection) dispatch({ type: "addBlock", id: openSection.id, blockType: type });
+        }}
+        onClose={() => setSheet(null)}
+      />
+
+      <LinkPicker
+        open={sheet?.kind === "link"}
+        pages={linkPages(state.document)}
+        value={sheet?.kind === "link" ? sheet.value : ""}
+        onPick={handlePickLink}
+        onClose={() => setSheet(null)}
       />
     </div>
   );

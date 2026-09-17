@@ -44,6 +44,7 @@ type SectionListProps = {
   sections: ThemeSection[];
   /** Move focus after an edit: to a row (a section just added), or to the heading (id null). */
   focusRequest: { id: string | null } | null;
+  onOpen: (section: ThemeSection) => void;
   onHide: (id: string) => void;
   onShow: (id: string) => void;
   onMove: (id: string, to: number) => void;
@@ -61,6 +62,7 @@ export function SectionList({
   allowed,
   sections,
   focusRequest,
+  onOpen,
   onHide,
   onShow,
   onMove,
@@ -147,6 +149,7 @@ export function SectionList({
                   showBlocked={cannotShow(manifest, sections, section) !== null}
                   first={index === 0}
                   last={index === sections.length - 1}
+                  onOpen={() => onOpen(section)}
                   onHide={() => onHide(section.id)}
                   onShow={() => onShow(section.id)}
                   onMoveUp={() => onMove(section.id, index - 1)}
@@ -182,6 +185,7 @@ function SectionRow({
   showBlocked,
   first,
   last,
+  onOpen,
   onHide,
   onShow,
   onMoveUp,
@@ -198,6 +202,7 @@ function SectionRow({
   showBlocked: boolean;
   first: boolean;
   last: boolean;
+  onOpen: () => void;
   onHide: () => void;
   onShow: () => void;
   onMoveUp: () => void;
@@ -233,17 +238,22 @@ function SectionRow({
           <GripVertical className="size-4" aria-hidden />
         </button>
 
-        <div className="min-w-0 flex-1 py-1">
-          <p
+        <button
+          type="button"
+          onClick={onOpen}
+          aria-label={t("openSettings", { name })}
+          className="min-w-0 flex-1 rounded-ui px-2 py-2 text-left hover:bg-accent md:px-1.5"
+        >
+          <span
             className={cn(
-              "text-sm font-medium break-words",
+              "block text-sm font-medium break-words",
               section.hidden ? "text-muted-foreground" : "text-foreground",
             )}
           >
             {name}
-          </p>
+          </span>
           {locked || section.hidden || onlyOne ? (
-            <div className="mt-1 flex flex-wrap gap-1">
+            <span className="mt-1 flex flex-wrap gap-1">
               {locked ? (
                 <Badge variant="outline">
                   <Lock aria-hidden />
@@ -253,10 +263,10 @@ function SectionRow({
                 <Badge variant="outline">{t("onlyOne")}</Badge>
               ) : null}
               {section.hidden ? <Badge variant="secondary">{t("hidden")}</Badge> : null}
-            </div>
+            </span>
           ) : null}
-          {reason ? <p className="mt-1.5 text-xs text-muted-foreground">{reason}</p> : null}
-        </div>
+          {reason ? <span className="mt-1.5 block text-xs text-muted-foreground">{reason}</span> : null}
+        </button>
 
         {locked || showBlocked ? null : section.hidden ? (
           <Button type="button" variant="ghost" size="icon" className={iconButton} aria-label={t("show", { name })} title={t("show", { name })} onClick={onShow}>
