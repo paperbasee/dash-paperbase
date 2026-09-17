@@ -12,6 +12,7 @@ import {
   moveItem,
   newId,
   newSection,
+  pageAtPath,
   pageSections,
   pageSpec,
   withPageSections,
@@ -120,5 +121,27 @@ describe("moveItem", () => {
     expect(moveItem(items, 7, 0)).toBe(items);
     const one = [section("x", "rich_text")];
     expect(moveItem(one, 0, 1)).toBe(one);
+  });
+});
+
+describe("pageAtPath", () => {
+  test("an API error path points at its page and section", () => {
+    const doc = document();
+    expect(pageAtPath(doc, "templates.product.sections[1].blocks[0].settings.text")).toEqual({
+      page: "templates.product",
+      section: doc.templates.product.sections[1],
+    });
+    expect(pageAtPath(doc, "header.sections[0].settings.link")).toEqual({
+      page: "header",
+      section: doc.header.sections[0],
+    });
+  });
+
+  test("a page without a section, a section that is gone, or no page at all", () => {
+    const doc = document();
+    expect(pageAtPath(doc, "templates.home")).toEqual({ page: "templates.home", section: null });
+    expect(pageAtPath(doc, "templates.home.sections[9].type")).toEqual({ page: "templates.home", section: null });
+    expect(pageAtPath(doc, "settings.colors")).toBeNull();
+    expect(pageAtPath(doc, "")).toBeNull();
   });
 });

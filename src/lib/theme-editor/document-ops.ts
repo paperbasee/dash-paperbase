@@ -63,6 +63,22 @@ export function withPageSections(
   };
 }
 
+/**
+ * The page and section an API error path points at, e.g. "templates.home.sections[1].settings.align"
+ * is the second section of the home page. Null when the path is not inside a page (the theme's own
+ * settings, or the document as a whole).
+ */
+export function pageAtPath(
+  document: ThemeDocument,
+  path: string,
+): { page: PageKey; section: ThemeSection | null } | null {
+  const match = /^(header|footer|templates\.[A-Za-z0-9_]+)(?:\.sections\[(\d+)\])?/.exec(path);
+  if (!match) return null;
+  const page = match[1] as PageKey;
+  const index = match[2] === undefined ? -1 : Number(match[2]);
+  return { page, section: pageSections(document, page)[index] ?? null };
+}
+
 /** A label in the viewer's language, falling back to English. */
 export function localLabel(entry: { label: string; label_bn: string }, locale: string): string {
   return locale === "bn" && entry.label_bn?.trim() ? entry.label_bn : entry.label;
