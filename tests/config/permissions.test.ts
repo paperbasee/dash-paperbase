@@ -162,9 +162,10 @@ describe("expandPermissionKeys", () => {
   });
 
   test("expanding any subset of offered keys yields only keys the API knows", () => {
-    // RoleEditorDialog POSTs `[...expandPermissionKeys(selected)]`; the API
-    // 400s the whole role save if a single key is unknown. So the expansion of
-    // any UI-reachable selection must stay inside the offered key set.
+    // RoleEditorDialog POSTs `permissionsToSave(selected, unavailable)`, which
+    // expands the keys this way and then drops the role's unavailable ones; the
+    // API 400s the whole role save if a single key is unknown. So the expansion
+    // of any UI-reachable selection must stay inside the offered key set.
     const catalog = new Set(ALL_PERMISSION_KEYS);
     for (let i = 0; i < ALL_PERMISSION_KEYS.length; i++) {
       const subset = ALL_PERMISSION_KEYS.filter((_, j) => (j + i) % 3 === 0);
@@ -259,26 +260,49 @@ interface ApiCatalog {
   keys: Set<string>;
   groupIds: string[];
   requires: Map<string, string[]>;
+  /** key → built-in role slugs limited to holding it (`roles=`); absent = any role. */
+  roles: Map<string, string[]>;
+  /** How many `_p("…"` calls the source contains, parsed or not. */
+  callCount: number;
+  /** How many of those calls the def regex actually parsed. */
+  parsedCount: number;
 }
 
-/** Pull the permission defs out of catalog.py: `_p("key", "label"[, ("req", …)])`. */
+/**
+ * Pull the permission defs out of catalog.py, on one line or spread over
+ * several: `_p("key", "label"[, ("req", …)][, roles=("slug", …)][, store_wide=True])`.
+ */
 function parseApiCatalog(src: string): ApiCatalog {
   const keys = new Set<string>();
   const requires = new Map<string, string[]>();
-  const defRe = /_p\(\s*"([^"]+)"\s*,\s*"[^"]*"\s*(?:,\s*\(([^)]*)\))?\s*,?\s*\)/g;
+  const roles = new Map<string, string[]>();
+  const quoted = (s: string | undefined) => [...(s ?? "").matchAll(/"([^"]+)"/g)].map((r) => r[1]);
+  const defRe = new RegExp(
+    [
+      /_p\(\s*"([^"]+)"\s*,\s*"[^"]*"/.source, // key, label
+      /(?:\s*,\s*\(([^)]*)\))?/.source, // positional requires tuple
+      /(?:\s*,\s*roles\s*=\s*\(([^)]*)\))?/.source, // roles=(…)
+      /(?:\s*,\s*store_wide\s*=\s*(?:True|False))?/.source, // store_wide=…
+      /\s*,?\s*\)/.source, // optional trailing comma, close
+    ].join(""),
+    "g"
+  );
+  let parsedCount = 0;
   for (let m = defRe.exec(src); m !== null; m = defRe.exec(src)) {
+    parsedCount++;
     const key = m[1];
     keys.add(key);
-    const reqs = [...(m[2] ?? "").matchAll(/"([^"]+)"/g)].map((r) => r[1]);
-    requires.set(key, reqs);
+    requires.set(key, quoted(m[2]));
+    if (m[3] !== undefined) roles.set(key, quoted(m[3]));
   }
+  const callCount = src.match(/_p\(\s*"/g)?.length ?? 0;
 
   const groupsBlock = /GROUPS:\s*dict\[str,\s*str\]\s*=\s*\{([\s\S]*?)\n\}/.exec(src);
   const groupIds = groupsBlock
     ? [...groupsBlock[1].matchAll(/"([^"]+)"\s*:\s*"[^"]*"/g)].map((m) => m[1])
     : [];
 
-  return { keys, groupIds, requires };
+  return { keys, groupIds, requires, roles, callCount, parsedCount };
 }
 
 const apiSource = readApiCatalog();
@@ -295,6 +319,26 @@ describe.skipIf(api === null || api.keys.size === 0)(
       expect(api!.keys.size).toBeGreaterThan(40);
       expect(api!.keys.has("orders.refund")).toBe(true);
       expect(api!.groupIds).toContain("orders");
+    });
+
+    test("every _p(...) entry in catalog.py is parsed, however it is formatted", () => {
+      // A key the regex skips (a new keyword argument, a multi-line call)
+      // would drop out of every check below without failing any of them.
+      expect(api!.callCount).toBeGreaterThan(40);
+      expect(api!.parsedCount).toBe(api!.callCount);
+      expect(api!.keys.size).toBe(api!.callCount);
+    });
+
+    test("role-limited keys match the role editor's note and never gate a group", () => {
+      // RoleEditorDialog labels every key a role can't hold "only Admin and
+      // Manager". A key limited to other roles needs that note changed. A
+      // limited .view gate would take its whole group away, which the editor
+      // does not explain.
+      expect(api!.roles.size).toBeGreaterThan(0);
+      for (const [key, slugs] of api!.roles) {
+        expect([...slugs].sort(), `roles= on ${key}`).toEqual(["admin", "manager"]);
+        expect(key.endsWith(".view"), `${key} is a view gate`).toBe(false);
+      }
     });
 
     test("every permission key offered in the UI exists in the API catalog", () => {
