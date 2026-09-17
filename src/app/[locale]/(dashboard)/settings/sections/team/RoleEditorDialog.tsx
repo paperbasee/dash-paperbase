@@ -16,43 +16,20 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { notify } from "@/notifications";
-import {
-  PERMISSION_GROUPS,
-  expandPermissionKeys,
-  type PermissionGroup,
-} from "@/config/permissions";
+import { PERMISSION_GROUPS, type PermissionGroup } from "@/config/permissions";
 import { settingsInvertedButtonClassName } from "../../SettingsSectionBody";
 import { useCreateRole, useUpdateRole } from "@/lib/team/hooks";
 import type { TeamRole } from "@/lib/team/api";
+import {
+  applyLevel,
+  levelForGroup,
+  permissionsToSave,
+  type AccessLevel,
+} from "@/lib/team/role-levels";
 
-type AccessLevel = "none" | "view" | "full" | "custom";
-
-/** Access level a group's currently-selected keys represent (drives the presets). */
-function levelForGroup(group: PermissionGroup, selected: Set<string>): AccessLevel {
-  const viewKey = group.permissions[0].key;
-  const nonView = group.permissions.slice(1).map((p) => p.key);
-  const hasView = selected.has(viewKey);
-  const chosenNonView = nonView.filter((k) => selected.has(k));
-  if (!hasView && chosenNonView.length === 0) return "none";
-  if (hasView && chosenNonView.length === 0) return "view";
-  if (hasView && chosenNonView.length === nonView.length) return "full";
-  return "custom";
-}
-
-function applyLevel(
-  group: PermissionGroup,
-  level: Exclude<AccessLevel, "custom">,
-  selected: Set<string>
-): Set<string> {
-  const next = new Set(selected);
-  for (const p of group.permissions) next.delete(p.key);
-  if (level === "view") {
-    next.add(group.permissions[0].key);
-  } else if (level === "full") {
-    for (const p of group.permissions) next.add(p.key);
-  }
-  return next;
-}
+// Only theming.manage is limited today, and the API allows it to Admin and
+// Manager (tests/config/permissions.test.ts keeps this note honest).
+const UNAVAILABLE_NOTE = "only Admin and Manager";
 
 const LEVELS: { id: Exclude<AccessLevel, "custom">; label: string }[] = [
   { id: "none", label: "No access" },
@@ -65,6 +42,7 @@ function GroupRow({
   selected,
   disabled,
   grantable,
+  unavailable,
   onChange,
 }: {
   group: PermissionGroup;
@@ -72,11 +50,16 @@ function GroupRow({
   disabled: boolean;
   /** Keys the editor is allowed to grant (their own effective permissions). */
   grantable: Set<string> | null;
+  /** Keys this role can never hold; shown switched off and never saved. */
+  unavailable: ReadonlySet<string>;
   onChange: (next: Set<string>) => void;
 }) {
   const [expanded, setExpanded] = useState(false);
-  const level = levelForGroup(group, selected);
+  const level = levelForGroup(group, selected, unavailable);
   const hasAdvanced = group.permissions.length > 1;
+  const unavailableLabels = group.permissions
+    .filter((p) => unavailable.has(p.key))
+    .map((p) => p.label);
 
   // A group is ungrantable if the editor lacks even its view key.
   const groupGrantable =
@@ -114,7 +97,7 @@ function GroupRow({
                 key={lvl.id}
                 type="button"
                 disabled={disabled || !groupGrantable}
-                onClick={() => onChange(applyLevel(group, lvl.id, selected))}
+                onClick={() => onChange(applyLevel(group, lvl.id, selected, unavailable))}
                 className={cn(
                   "rounded px-2.5 py-1 text-xs font-medium transition-colors disabled:cursor-not-allowed",
                   active
@@ -130,6 +113,12 @@ function GroupRow({
         </div>
       </div>
 
+      {unavailableLabels.length > 0 && (
+        <p className="-mt-1 px-3 pb-2.5 pl-9 text-xs text-muted-foreground">
+          {unavailableLabels.join(", ")}: {UNAVAILABLE_NOTE}
+        </p>
+      )}
+
       {expanded && hasAdvanced && (
         <div className="space-y-1.5 border-t border-border px-3 py-2.5">
           {level === "custom" && (
@@ -138,7 +127,8 @@ function GroupRow({
           {group.permissions.map((perm, idx) => {
             const isView = idx === 0;
             const checked = selected.has(perm.key);
-            const keyGrantable = grantable === null || grantable.has(perm.key);
+            const keyGrantable =
+              !unavailable.has(perm.key) && (grantable === null || grantable.has(perm.key));
             return (
               <label
                 key={perm.key}
@@ -220,10 +210,16 @@ export function RoleEditorDialog({
   }
 
   const grantable = isOwner ? null : grantableKeys;
+  // `?? []`: a roles list persisted before the API sent this field has none.
+  const unavailablePermissions = role?.unavailable_permissions;
+  const unavailable = useMemo(
+    () => new Set(unavailablePermissions ?? []),
+    [unavailablePermissions]
+  );
   const saving = createRole.isPending || updateRole.isPending;
   const permissionCount = useMemo(
-    () => expandPermissionKeys(selected).size,
-    [selected]
+    () => permissionsToSave(selected, unavailable).length,
+    [selected, unavailable]
   );
 
   async function handleSave() {
@@ -231,7 +227,7 @@ export function RoleEditorDialog({
       notify.error("Give the role a name.");
       return;
     }
-    const permissions = [...expandPermissionKeys(selected)];
+    const permissions = permissionsToSave(selected, unavailable);
     try {
       if (editing && role) {
         await updateRole.mutateAsync({
@@ -311,6 +307,7 @@ export function RoleEditorDialog({
                   selected={selected}
                   disabled={readOnly || saving}
                   grantable={grantable}
+                  unavailable={unavailable}
                   onChange={setSelected}
                 />
               ))}

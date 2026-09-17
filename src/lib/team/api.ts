@@ -8,6 +8,8 @@ export interface TeamRole {
   color: string;
   is_system: boolean;
   permissions: string[];
+  /** Keys this role can never hold (e.g. theming.manage outside Admin and Manager). */
+  unavailable_permissions: string[];
   member_count: number;
   pending_invite_count: number;
   created_at: string;
