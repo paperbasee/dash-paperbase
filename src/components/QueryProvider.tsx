@@ -3,7 +3,7 @@
 import { useState, type ReactNode } from "react";
 import { QueryClient } from "@tanstack/react-query";
 import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
-import { idbPersister } from "@/lib/queryPersister";
+import { idbPersister, shouldPersistQuery } from "@/lib/queryPersister";
 
 const FIFTEEN_DAYS_MS = 15 * 24 * 60 * 60 * 1000;
 
@@ -29,6 +29,7 @@ export default function QueryProvider({ children }: { children: ReactNode }) {
         persister: idbPersister,
         maxAge: FIFTEEN_DAYS_MS,
         buster: process.env.NEXT_PUBLIC_BUILD_ID,
+        dehydrateOptions: { shouldDehydrateQuery: shouldPersistQuery },
       }}
     >
       {children}

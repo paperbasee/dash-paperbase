@@ -200,3 +200,13 @@ export const emailNotificationPrefsQueryKey = storeSettingsCurrentQueryKey;
 export const themeQueryKey = ["theming"] as const;
 
 export const themePresetsQueryKey = ["theming", "presets"] as const;
+
+/**
+ * Theme library (Settings > Customization) and the theme editor. Outside ["theming"],
+ * so the card style picker's invalidations never refetch them, and never persisted
+ * to IndexedDB (their queries set meta.persist: false): a draft and its revision
+ * must come from the server, not from a copy up to 15 days old.
+ */
+export const themesQueryKey = ["themes"] as const;
+
+export const themeEditorQueryKey = ["themeEditor"] as const;
