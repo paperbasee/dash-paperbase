@@ -60,13 +60,27 @@ export type ThemeLibrary = {
   themes: ThemeSummary[];
 };
 
-/** One setting a theme offers. The settings forms (step 5) read the rest of its fields. */
+/**
+ * One setting a theme offers, as the theme file writes it. `type` is one of the kinds
+ * engine/apps/theming/manifest.py allows (text, textarea, boolean, number, select, url);
+ * the fields below it belong to some of those kinds only, and the manifest check makes
+ * sure each kind carries the ones it needs.
+ */
 export type ThemeSettingSpec = {
   id: string;
   type: string;
   label: string;
   label_bn: string;
   default: unknown;
+  /** One line under the field. Written in both languages or in neither. */
+  help?: string;
+  help_bn?: string;
+  /** select: the values the API accepts, and a name for each in both languages. */
+  options?: string[];
+  option_labels?: Record<string, { en: string; bn: string }>;
+  /** number: the range the API accepts, ends included. */
+  min?: number;
+  max?: number;
 };
 
 export type ThemeBlockSpec = {

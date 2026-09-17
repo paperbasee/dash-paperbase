@@ -11,9 +11,11 @@ import { fileURLToPath } from "node:url";
 
 import { describe, expect, test } from "vitest";
 
-import type { ThemeManifest } from "@/lib/theme-editor/api";
+import type { ThemeManifest, ThemeSettingSpec } from "@/lib/theme-editor/api";
 import { editorPages, newSection, pageSpec } from "@/lib/theme-editor/document-ops";
+import { FIELD_KINDS, fieldSpecs } from "@/lib/theme-editor/field-specs";
 import { cannotAdd, cannotHide } from "@/lib/theme-editor/rules";
+import { checkField } from "@/lib/theme-editor/validate";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../..");
 const THEMES = path.resolve(ROOT, "../api-paperbase/engine/apps/theming/themes");
@@ -52,6 +54,37 @@ describe.skipIf(files.length === 0)("theme files in api-paperbase", () => {
         if (spec.required) expect(allowedSomewhere.has(type), type).toBe(true);
         const made = newSection(manifest, type, []);
         expect(made.blocks.map((b) => b.type), type).toEqual(spec.required_blocks ?? []);
+      }
+    });
+
+    test(`${file}: every setting is a field the panel can draw, at a value it would store`, () => {
+      const everySetting: { where: string; spec: ThemeSettingSpec }[] = [
+        ...manifest.settings.map((spec) => ({ where: "settings", spec })),
+      ];
+      for (const [type, section] of Object.entries(manifest.sections)) {
+        for (const spec of section.settings) everySetting.push({ where: `sections.${type}`, spec });
+        for (const [blockType, block] of Object.entries(section.blocks ?? {})) {
+          for (const spec of block.settings) {
+            everySetting.push({ where: `sections.${type}.blocks.${blockType}`, spec });
+          }
+        }
+      }
+      // A theme that one day ships a kind this dashboard cannot draw would silently lose the
+      // field, so the drift shows up here rather than as an empty panel a merchant reports.
+      const undrawable = everySetting.filter(({ spec }) => !(FIELD_KINDS as readonly string[]).includes(spec.type));
+      expect(undrawable.map((s) => `${s.where}.${s.spec.id}: ${s.spec.type}`)).toEqual([]);
+
+      for (const { where, spec } of everySetting) {
+        const [field] = fieldSpecs([spec], "bn");
+        expect(field, `${where}.${spec.id}`).toBeDefined();
+        // The theme's own default is the value an untouched field holds and the one the API
+        // fills in, so the editor has to be willing to store it.
+        expect(checkField(field, spec.default), `${where}.${spec.id}`).toBeNull();
+        if (field.kind === "select") {
+          expect(field.options.length, `${where}.${spec.id}`).toBeGreaterThan(0);
+          // Every choice is named, so no merchant reads a raw value like "center".
+          expect(field.options.filter((o) => o.label === o.value), `${where}.${spec.id}`).toEqual([]);
+        }
       }
     });
 

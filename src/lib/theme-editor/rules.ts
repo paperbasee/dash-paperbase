@@ -1,4 +1,4 @@
-import type { ThemeManifest, ThemeSection } from "./api";
+import type { ThemeBlock, ThemeManifest, ThemeSection } from "./api";
 
 /*
  * What the editor refuses, mirroring api-paperbase engine/apps/theming/documents.py, so a
@@ -9,6 +9,10 @@ import type { ThemeManifest, ThemeSection } from "./api";
 export const MAX_SECTIONS_PER_LIST = 40;
 export const MAX_BLOCKS_PER_SECTION = 30;
 export const MAX_ID_LENGTH = 40;
+/** One line of copy, a paragraph, and a link: what a setting of each kind may hold. */
+export const MAX_TEXT_LENGTH = 200;
+export const MAX_LONG_TEXT_LENGTH = 2000;
+export const MAX_URL_LENGTH = 500;
 
 export type RuleReason =
   /** The shop needs it: the last shown copy of a required section. */
@@ -73,7 +77,7 @@ export function cannotShow(
   return sections.some((s) => isShownCopy(s, section.type, section)) ? "onlyOnce" : null;
 }
 
-/** Why a block of `blockType` cannot be added to `section` (the block editor comes with the settings forms). */
+/** Why a block of `blockType` cannot be added to `section`. */
 export function cannotAddBlock(
   manifest: ThemeManifest,
   section: ThemeSection,
@@ -81,4 +85,20 @@ export function cannotAddBlock(
 ): RuleReason | null {
   if (!manifest.sections[section.type]?.blocks?.[blockType]) return "notAllowed";
   return section.blocks.length >= MAX_BLOCKS_PER_SECTION ? "blocksFull" : null;
+}
+
+/**
+ * Why a block cannot be taken out of its section: every copy of a section keeps the blocks
+ * its theme marks required (the product's title, price, variant picker and buy buttons), so
+ * a merchant cannot switch off buying. Blocks are never hidden, only removed, so the last
+ * copy of a required one is the one that is held.
+ */
+export function cannotRemoveBlock(
+  manifest: ThemeManifest,
+  section: ThemeSection,
+  block: ThemeBlock,
+): RuleReason | null {
+  const required = manifest.sections[section.type]?.required_blocks ?? [];
+  if (!required.includes(block.type)) return null;
+  return section.blocks.some((b) => b !== block && b.type === block.type) ? null : "required";
 }
