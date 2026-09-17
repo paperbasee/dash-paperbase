@@ -6,7 +6,7 @@
 
 import { describe, expect, test } from "vitest";
 
-import { previewOrigin } from "@/lib/theme-editor/preview-origin";
+import { dashboardFrameSrc, previewOrigin } from "@/lib/theme-editor/preview-origin";
 
 describe("previewOrigin", () => {
   test("unset or blank is null", () => {
@@ -33,5 +33,33 @@ describe("previewOrigin", () => {
     expect(previewOrigin("preview.paperbase.me")).toBeNull();
     expect(previewOrigin("javascript:alert(1)")).toBeNull();
     expect(previewOrigin("ftp://preview.paperbase.me")).toBeNull();
+  });
+
+  test("a wildcard or a trailing dot is not one exact host", () => {
+    expect(previewOrigin("https://*.paperbase.me")).toBeNull();
+    expect(previewOrigin("https://*")).toBeNull();
+    expect(previewOrigin("https://preview.paperbase.me.")).toBeNull();
+    expect(previewOrigin("https://[::1]:4000")).toBeNull();
+  });
+});
+
+describe("dashboardFrameSrc", () => {
+  test("adds the preview origin only when one is configured", () => {
+    expect(dashboardFrameSrc(null)).toBe("frame-src 'self' https://challenges.cloudflare.com");
+    expect(dashboardFrameSrc(previewOrigin("https://preview.paperbase.me/"))).toBe(
+      "frame-src 'self' https://challenges.cloudflare.com https://preview.paperbase.me",
+    );
+  });
+
+  test("an unusable setting never widens the policy", () => {
+    for (const raw of [
+      "*",
+      "https://*.paperbase.me",
+      "https://preview.paperbase.me.",
+      "http://preview.paperbase.me",
+      "https://preview.paperbase.me; script-src *",
+    ]) {
+      expect(dashboardFrameSrc(previewOrigin(raw))).toBe("frame-src 'self' https://challenges.cloudflare.com");
+    }
   });
 });

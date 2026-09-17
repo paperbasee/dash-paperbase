@@ -18,7 +18,19 @@ export function previewOrigin(raw: string | undefined | null): string | null {
   } catch {
     return null;
   }
+  // A plain host name only: URL accepts "*.paperbase.me" and a trailing dot, which the storefront
+  // refuses and which would widen the dashboard's frame-src to every subdomain.
+  if (!/^[a-z0-9-]+(\.[a-z0-9-]+)*$/i.test(url.hostname)) return null;
   const localhost = url.hostname === "localhost" || url.hostname.endsWith(".localhost");
   if (url.protocol === "https:" || (url.protocol === "http:" && localhost)) return url.origin;
   return null;
+}
+
+/**
+ * The dashboard's CSP `frame-src`. The editor frames the preview host and form-POSTs the
+ * pass into that frame (a frame navigation, so frame-src covers it too; the policy has no
+ * form-action). The preview origin is added only when it is configured.
+ */
+export function dashboardFrameSrc(origin: string | null): string {
+  return ["frame-src 'self' https://challenges.cloudflare.com", origin].filter(Boolean).join(" ");
 }

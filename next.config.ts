@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
 import createNextIntlPlugin from "next-intl/plugin";
 import { withSentryConfig } from "@sentry/nextjs/config";
+import { dashboardFrameSrc, previewOrigin } from "./src/lib/theme-editor/preview-origin";
 
 const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 
@@ -74,7 +75,8 @@ const securityHeaders = [
       "default-src 'self'",
       // Cloudflare Turnstile (widget script + challenge iframe)
       "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://challenges.cloudflare.com https://static.cloudflareinsights.com",
-      "frame-src 'self' https://challenges.cloudflare.com",
+      // Theme editor: the storefront preview host, only when NEXT_PUBLIC_STOREFRONT_PREVIEW_ORIGIN is set.
+      dashboardFrameSrc(previewOrigin(process.env.NEXT_PUBLIC_STOREFRONT_PREVIEW_ORIGIN)),
       "style-src 'self' 'unsafe-inline'",
       `img-src 'self' data: blob: https: ${apiOrigin}`,
       "font-src 'self' data:",
