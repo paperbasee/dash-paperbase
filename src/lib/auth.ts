@@ -1,5 +1,6 @@
 import { apiClient } from "@/lib/api-client";
 import { clearMeProfileCache } from "@/lib/me-profile-store";
+import { clearAllUnsentCopies } from "@/lib/theme-editor/unsent-copy";
 import {
   setAuthSessionCookie,
   clearAuthSessionCookie,
@@ -232,6 +233,8 @@ export function logout() {
   }
   window.location.replace("/login");
   clearMeProfileCache();
+  // Theme edits kept on this device belong to the member signing out.
+  clearAllUnsentCopies(localStorage);
   localStorage.removeItem("access_token");
   localStorage.removeItem("refresh_token");
   localStorage.removeItem(LAST_ROTATED_AT_KEY);

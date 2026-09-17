@@ -165,6 +165,16 @@ describe("remove", () => {
     }
   });
 
+  test("restore puts edits kept on this device on top of the loaded document", () => {
+    const state = start("templates.product");
+    const kept = run(start(), { type: "hide", id: "banner-slider" }).document;
+    const restored = editorReducer(state, { type: "restore", document: kept });
+    expect(restored.document).toBe(kept);
+    expect(restored.saved).toBe(state.saved);
+    expect(restored.changed).toBe(true);
+    expect(restored.page).toBe("templates.product");
+  });
+
   test("never touches the loaded document", () => {
     const loaded: ThemeDocument = document();
     const before = JSON.stringify(loaded);

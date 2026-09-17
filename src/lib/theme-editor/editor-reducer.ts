@@ -31,6 +31,8 @@ export type EditorState = {
 
 export type EditorAction =
   | { type: "load"; document: ThemeDocument; manifest: ThemeManifest }
+  /** Edits kept on this device, brought back on top of the loaded document. */
+  | { type: "restore"; document: ThemeDocument }
   | { type: "pickPage"; page: PageKey }
   | { type: "add"; sectionType: string }
   | { type: "hide"; id: string }
@@ -70,6 +72,7 @@ function withDocument(state: EditorState, document: ThemeDocument): EditorState 
 
 export function editorReducer(state: EditorState, action: EditorAction): EditorState {
   if (action.type === "load") return initEditorState(action, state.page);
+  if (action.type === "restore") return withDocument(state, action.document);
   if (action.type === "pickPage") {
     if (action.page === state.page || !editorPages(state.manifest).includes(action.page)) return state;
     return { ...state, page: action.page };
