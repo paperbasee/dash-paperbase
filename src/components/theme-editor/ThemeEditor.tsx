@@ -3,12 +3,41 @@
 import { useEffect, useReducer, useRef, useState, type ReactNode } from "react";
 import { useLocale, useTranslations } from "next-intl";
 
+import { useQueryClient } from "@tanstack/react-query";
+
 import { usePreviewDevice } from "@/components/preview-system/usePreviewDevice";
 import { Button } from "@/components/ui/button";
 import { useConfirm, type ConfirmDialogOptions } from "@/context/ConfirmDialogContext";
 import { usePreviewExamplesQuery } from "@/hooks/useThemesQuery";
+import api from "@/lib/api";
+import { liveStorefrontDomain, storefrontUrlFor } from "@/lib/domains/api";
+import { useDomainsQuery } from "@/lib/domains/hooks";
 import { getMeProfileKeyFromToken } from "@/lib/me-profile-store";
-import type { ThemeBlock, ThemeEditorState, ThemeSection } from "@/lib/theme-editor/api";
+import { themeEditorVersionsQueryKey, themesQueryKey } from "@/lib/query-keys";
+import {
+  discardThemeDraft,
+  fetchThemeEditor,
+  publishThemeDraft,
+  restoreThemeVersion,
+  themeErrorMessageKey,
+  type ThemeBlock,
+  type ThemeEditorState,
+  type ThemeSection,
+  type ThemeVersion,
+} from "@/lib/theme-editor/api";
+import {
+  actionProblem,
+  discardDraft,
+  keepMyVersion,
+  leaveChoice,
+  loadLatest,
+  restoreVersion,
+  saveToShop,
+  type EditorActionResult,
+  type EditorPorts,
+} from "@/lib/theme-editor/editor-actions";
+import { versionNumber } from "@/lib/theme-editor/versions";
+import { notify } from "@/notifications";
 import {
   editorPages,
   isGroupPage,
@@ -35,12 +64,15 @@ import {
 } from "@/lib/theme-editor/unsent-copy";
 import { cn } from "@/lib/utils";
 import { AddSheet, type AddItem } from "./AddSheet";
+import { CloseSheet } from "./CloseSheet";
+import { ConflictDialog } from "./ConflictDialog";
 import { EditorTopBar, PagePicker } from "./EditorTopBar";
 import { LinkPicker } from "./LinkPicker";
 import { PreviewPane } from "./PreviewPane";
 import { SaveProblem } from "./SaveStatus";
 import { SectionList } from "./SectionList";
 import { SettingsPanel } from "./SettingsPanel";
+import { VersionHistorySheet } from "./VersionHistorySheet";
 import { useAutosave } from "./useAutosave";
 import { useEditorBackGuard } from "./useEditorBackGuard";
 import { usePreviewSession } from "./usePreviewSession";
@@ -56,11 +88,19 @@ const MISSING_NOTE = {
 
 type Tab = "edit" | "preview";
 
-/** What is open over the left column: adding a section or a part, or picking a link. */
+/**
+ * What is open over the left column: adding a section or a part, picking a link, the saves this
+ * shop can go back to, or the three choices for leaving with a draft.
+ */
 type SheetKind =
   | { kind: "addSection" }
   | { kind: "addBlock" }
-  | { kind: "link"; setting: string; value: string };
+  | { kind: "link"; setting: string; value: string }
+  | { kind: "history" }
+  | { kind: "leave" };
+
+/** The sheets that belong to an open section, so closing it closes them. */
+const SECTION_SHEETS = ["addBlock", "link"];
 
 /** The signed-in member and the store being edited, from the dashboard's access token. */
 function editorIdentity(): { user: string; store: string } | null {
@@ -92,9 +132,11 @@ function findUnsentCopy(loaded: ThemeEditorState) {
  */
 export function ThemeEditor({ loaded, origin }: { loaded: ThemeEditorState; origin: string }) {
   const t = useTranslations("themeEditor");
+  const tc = useTranslations("settings.customization");
   const tCommon = useTranslations("common");
   const locale = useLocale();
   const confirm = useConfirm();
+  const qc = useQueryClient();
   const [found] = useState(() => findUnsentCopy(loaded));
   const [state, dispatch] = useReducer(editorReducer, loaded, (value) => {
     const initial = initEditorState(value);
@@ -112,7 +154,10 @@ export function ThemeEditor({ loaded, origin }: { loaded: ThemeEditorState; orig
   const [open, setOpen] = useState<{ sectionId: string; blockId?: string } | null>(null);
   const [sheet, setSheet] = useState<SheetKind | null>(null);
   const [focusRequest, setFocusRequest] = useState<{ id: string | null } | null>(null);
-  const [reloading, setReloading] = useState(false);
+  // A whole-theme action is running (Save, Discard, Restore, answering a clash): one at a time.
+  const [busy, setBusy] = useState(false);
+  // The clash waiting for an answer, and where the draft stands now so it can be saved over.
+  const [conflict, setConflict] = useState<{ draftRevision: number | null } | null>(null);
   const dialogOpen = useRef(false);
   const closing = useRef(false);
 
@@ -137,7 +182,7 @@ export function ThemeEditor({ loaded, origin }: { loaded: ThemeEditorState; orig
     else if (open.blockId && !openBlock) setOpen({ sectionId: open.sectionId });
   }, [open, openSection, openBlock]);
   useEffect(() => {
-    if (!open) setSheet((current) => (current?.kind === "addSection" ? current : null));
+    if (!open) setSheet((current) => (current && SECTION_SHEETS.includes(current.kind) ? null : current));
   }, [open]);
 
   // The page picker follows the frame when the merchant moves around inside it. Not for the
@@ -160,6 +205,11 @@ export function ThemeEditor({ loaded, origin }: { loaded: ThemeEditorState; orig
   });
   const save = useAutosave({ loaded, document: state.document, onSaved: preview.saved });
   const examples = usePreviewExamplesQuery();
+  // Where "View shop" goes after a save: the address shoppers reach this shop on. A member who
+  // may not read the shop's domains gets the message without the link.
+  const domains = useDomainsQuery();
+  const liveDomain = liveStorefrontDomain(domains.data);
+  const shopUrl = liveDomain ? storefrontUrlFor(liveDomain.hostname) : null;
 
   // Where the preview should go to show the picked page, from where it is now.
   const { current: currentPreview, show } = preview;
@@ -194,9 +244,10 @@ export function ThemeEditor({ loaded, origin }: { loaded: ThemeEditorState; orig
     }
   }, [found.key, found.tabs, copyNotice, unsent, draftRevision, state.document]);
 
+  // A clash autosave ran into by itself, rather than one this editor asked for.
   useEffect(() => {
-    if (reloading) window.location.reload();
-  }, [reloading]);
+    if (save.status.kind === "conflict") setConflict({ draftRevision: save.status.draftRevision });
+  }, [save.status]);
 
   async function ask(options: ConfirmDialogOptions) {
     dialogOpen.current = true;
@@ -217,7 +268,7 @@ export function ThemeEditor({ loaded, origin }: { loaded: ThemeEditorState; orig
     });
 
   const leave = useEditorBackGuard({
-    changed: unsent && !reloading,
+    changed: unsent,
     onBack: () => {
       // Back never stacks a second dialog, and closes one open layer at a time: the sheet
       // over the panel, then the part inside a section, then the section, then the editor.
@@ -234,20 +285,31 @@ export function ThemeEditor({ loaded, origin }: { loaded: ThemeEditorState; orig
         setOpen(null);
         return false;
       }
-      if (!unsent) return true;
+      if (!unsent && !save.hasDraft) return true;
       void handleClose();
       return false;
     },
   });
 
-  /** Send what is waiting first; ask only when it could not be saved. */
+  /**
+   * Send what is waiting first, then ask what the draft should do: put it on the shop, keep it
+   * for later, or throw it away. Edits that could not be sent at all get the older warning —
+   * they are on this device, not on the server, so there is no draft to decide about.
+   */
   async function handleClose() {
-    if (closing.current) return;
+    // Not while a whole-theme action is running: the question to ask depends on what it leaves.
+    if (closing.current || busy) return;
     closing.current = true;
     try {
       await save.flush();
-      if (save.latest().unsent && !(await confirmLeave())) return;
-      leave();
+      const choice = leaveChoice(save.latest());
+      if (choice === "askUnsaved") {
+        if (await confirmLeave()) leave();
+      } else if (choice === "askDraft") {
+        setSheet({ kind: "leave" });
+      } else {
+        leave();
+      }
     } finally {
       closing.current = false;
     }
@@ -308,33 +370,114 @@ export function ThemeEditor({ loaded, origin }: { loaded: ThemeEditorState; orig
     dispatch({ type: "removeBlock", id: openSection.id, blockId: block.id });
   }
 
-  function answerCopy(restore: boolean, copy: UnsentCopy | null) {
-    if (restore && copy) dispatch({ type: "restore", document: copy.document });
-    else if (found.key && mayReplaceUnsentCopy(readUnsentCopy(window.localStorage, found.key), found.tabs)) {
+  /** Drop the unsent edits this device was keeping, and the notice that offered them back. */
+  function forgetCopy() {
+    if (found.key && mayReplaceUnsentCopy(readUnsentCopy(window.localStorage, found.key), found.tabs)) {
       clearUnsentCopy(window.localStorage, found.key);
     }
     setCopyNotice(null);
   }
 
-  /**
-   * Reload after a conflict. The page and everything unsent in it go, so this tab's edits are
-   * put in the device copy first, whichever tab wrote it last, and the reloaded editor offers
-   * them. When the copy can't be kept, the browser's own leave warning still asks.
-   */
-  function reloadAfterConflict() {
-    const latest = save.latest();
-    const kept =
-      !latest.unsent ||
-      (found.key !== null &&
-        writeUnsentCopy(window.localStorage, found.key, {
-          document: state.document,
-          baseDraftRevision: latest.draftRevision,
-          savedAt: Date.now(),
-          tab: found.tabs[0],
-        }));
-    if (kept) setReloading(true);
-    else window.location.reload();
+  function answerCopy(restore: boolean, copy: UnsentCopy | null) {
+    if (restore && copy) {
+      dispatch({ type: "restore", document: copy.document });
+      setCopyNotice(null);
+    } else {
+      forgetCopy();
+    }
   }
+
+  const ports = (): EditorPorts => ({
+    autosave: save.control,
+    publish: (expected) => publishThemeDraft(api, expected),
+    discard: (expected) => discardThemeDraft(api, expected),
+    restore: (revision, expected) => restoreThemeVersion(api, revision, expected),
+    reload: () => fetchThemeEditor(api),
+    load: (next) => dispatch({ type: "load", document: next.document, manifest: next.manifest }),
+    refreshPreview: (version) => preview.saved(version),
+    forgetDeviceCopy: forgetCopy,
+    themesChanged: () => {
+      // Customization reads the library again for its Live and Draft badges, and the history
+      // sheet reads its list again, because a save adds a version to it.
+      void qc.resetQueries({ queryKey: themesQueryKey });
+      qc.removeQueries({ queryKey: themeEditorVersionsQueryKey });
+    },
+  });
+
+  /**
+   * Runs one whole-theme action. A clash is a question, so it keeps (or reopens) the dialog
+   * instead of a toast; anything else says what happened, and takes the dialog away when its
+   * two answers cannot help any more.
+   */
+  async function run(action: () => Promise<EditorActionResult>, onDone: () => void) {
+    if (busy) return;
+    setBusy(true);
+    try {
+      const result = await action();
+      if (result.ok) {
+        onDone();
+        return;
+      }
+      const { clash, tell } = actionProblem(result, save.latest().status);
+      setConflict(clash);
+      if (!tell) return;
+      if (tell.kind === "error") notify.warning(tc(themeErrorMessageKey(tell.error)), { title: tc("heading") });
+      else if (tell.kind === "blockedInvalid") notify.warning(t("saveBlockedInvalid"), { title: t("saveBlockedTitle") });
+      else notify.warning(t("saveBlocked"), { title: t("saveBlockedTitle") });
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  /** Said the same way wherever the merchant pressed Save or Discard: the top bar, or on leaving. */
+  const savedNotice = () =>
+    notify.success(t("savedToShop"), {
+      title: tc("heading"),
+      // Longer than a success toast's own four seconds: saving on the way out leaves the editor,
+      // and the link would be gone before the page behind it had finished arriving.
+      durationMs: 10_000,
+      action: shopUrl
+        ? { label: t("viewShop"), onClick: () => window.open(shopUrl, "_blank", "noopener,noreferrer") }
+        : undefined,
+    });
+  const discardedNotice = () => notify.success(t("draftDiscarded"), { title: tc("heading") });
+
+  const handleSave = () => void run(() => saveToShop(ports()), savedNotice);
+
+  async function handleDiscard() {
+    const ok = await ask({
+      title: t("confirmDiscardTitle"),
+      message: t("confirmDiscardMessage"),
+      confirmText: t("confirmDiscard"),
+      cancelText: t("keepEditing"),
+      variant: "danger",
+    });
+    if (!ok) return;
+    await run(() => discardDraft(ports()), discardedNotice);
+  }
+
+  async function handleRestore(version: ThemeVersion) {
+    const number = versionNumber(version.revision, locale);
+    const ok = await ask({
+      title: t("confirmRestoreTitle", { number }),
+      message: t("confirmRestoreMessage"),
+      confirmText: t("confirmRestore"),
+      cancelText: tCommon("cancel"),
+      variant: "warning",
+    });
+    if (!ok) return;
+    setSheet(null);
+    await run(
+      () => restoreVersion(ports(), version.revision),
+      () => notify.info(t("restoredToDraft", { number }), { title: tc("heading") }),
+    );
+  }
+
+  /** Load latest gives up this editor's unsent edits; keeping mine replaces the other draft. */
+  const answered = () => setConflict(null);
+  const handleLoadLatest = () => void run(() => loadLatest(ports()), answered);
+  const handleKeepMine = (draftRevision: number) =>
+    void run(() => keepMyVersion(ports(), draftRevision), answered);
 
   const pickPage = (next: PageKey) => dispatch({ type: "pickPage", page: next });
 
@@ -392,10 +535,16 @@ export function ThemeEditor({ loaded, origin }: { loaded: ThemeEditorState; orig
         onPickPage={pickPage}
         device={device}
         onDevice={setDevice}
+        hasDraft={save.hasDraft}
+        canSave={save.hasDraft || save.unsent}
+        busy={busy}
+        onSave={handleSave}
+        onHistory={() => setSheet({ kind: "history" })}
+        onDiscard={() => void handleDiscard()}
         onClose={() => void handleClose()}
       />
 
-      <SaveProblem status={save.status} manifest={manifest} onReload={reloadAfterConflict} />
+      <SaveProblem status={save.status} manifest={manifest} />
 
       {copyNotice ? (
         <div
@@ -520,6 +669,54 @@ export function ThemeEditor({ loaded, origin }: { loaded: ThemeEditorState; orig
         value={sheet?.kind === "link" ? sheet.value : ""}
         onPick={handlePickLink}
         onClose={() => setSheet(null)}
+      />
+
+      <VersionHistorySheet
+        open={sheet?.kind === "history"}
+        busy={busy}
+        onRestore={(version) => void handleRestore(version)}
+        onClose={() => setSheet(null)}
+      />
+
+      <CloseSheet
+        open={sheet?.kind === "leave"}
+        busy={busy}
+        onSave={() =>
+          void run(
+            () => saveToShop(ports()),
+            () => {
+              savedNotice();
+              setSheet(null);
+              leave();
+            },
+          )
+        }
+        onKeep={() => {
+          setSheet(null);
+          leave();
+        }}
+        onDiscard={() =>
+          void run(
+            () => discardDraft(ports()),
+            () => {
+              discardedNotice();
+              setSheet(null);
+              leave();
+            },
+          )
+        }
+        onClose={() => setSheet(null)}
+      />
+
+      <ConflictDialog
+        open={conflict !== null}
+        busy={busy}
+        canKeepMine={conflict?.draftRevision != null}
+        hasUnsent={save.unsent}
+        onLoadLatest={handleLoadLatest}
+        onKeepMine={() => {
+          if (conflict?.draftRevision != null) handleKeepMine(conflict.draftRevision);
+        }}
       />
     </div>
   );

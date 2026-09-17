@@ -59,5 +59,12 @@ export function useAutosave({
     };
   }, [autosave]);
 
-  return { ...snapshot, flush: autosave.flush, latest: autosave.snapshot };
+  return {
+    ...snapshot,
+    flush: autosave.flush,
+    /** The snapshot as of now, past any change React has not rendered yet. */
+    latest: autosave.snapshot,
+    /** Everything the whole-theme actions need (lib/theme-editor/editor-actions). */
+    control: autosave,
+  };
 }

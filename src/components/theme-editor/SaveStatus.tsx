@@ -2,7 +2,6 @@
 
 import { useLocale, useTranslations } from "next-intl";
 
-import { Button } from "@/components/ui/button";
 import { themeErrorMessageKey, type ThemeManifest } from "@/lib/theme-editor/api";
 import type { AutosaveStatus } from "@/lib/theme-editor/autosave";
 import { localLabel, pageAtPath, pageSpec } from "@/lib/theme-editor/document-ops";
@@ -36,25 +35,17 @@ export function SaveStatus({ status, onRetry }: { status: AutosaveStatus; onRetr
   );
 }
 
-/** Why autosave has stopped, in full, under the top bar: a document the API refused, a conflict, or lost access. */
-export function SaveProblem({
-  status,
-  manifest,
-  onReload,
-}: {
-  status: AutosaveStatus;
-  manifest: ThemeManifest;
-  onReload: () => void;
-}) {
+/**
+ * Why autosave has stopped, in full, under the top bar: a document the API refused, or lost
+ * access. A clash with another editor is not here — it asks for a choice, in ConflictDialog.
+ */
+export function SaveProblem({ status, manifest }: { status: AutosaveStatus; manifest: ThemeManifest }) {
   const t = useTranslations("themeEditor");
   const tc = useTranslations("settings.customization");
-  const tCommon = useTranslations("common");
   const locale = useLocale();
 
   let message: string;
-  if (status.kind === "conflict") {
-    message = t("saveConflict");
-  } else if (status.kind === "refused") {
+  if (status.kind === "refused") {
     message = tc(themeErrorMessageKey(status.error));
   } else if (status.kind === "invalid") {
     const at = pageAtPath(status.document, status.path);
@@ -76,11 +67,6 @@ export function SaveProblem({
       className="flex shrink-0 flex-wrap items-center gap-x-3 gap-y-2 border-b border-destructive/30 bg-destructive/10 px-4 py-2 text-sm text-destructive"
     >
       <p className="min-w-0 flex-1">{message}</p>
-      {status.kind === "conflict" ? (
-        <Button type="button" size="sm" variant="outline" onClick={onReload}>
-          {tCommon("reload")}
-        </Button>
-      ) : null}
     </div>
   );
 }
