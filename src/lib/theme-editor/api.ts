@@ -50,7 +50,79 @@ export type ThemeLibrary = {
   themes: ThemeSummary[];
 };
 
-/** What editor/select/ and editor/discard/ answer; the editor (step 3) reads the rest. */
+/** One setting a theme offers. The settings forms (step 5) read the rest of its fields. */
+export type ThemeSettingSpec = {
+  id: string;
+  type: string;
+  label: string;
+  label_bn: string;
+  default: unknown;
+};
+
+export type ThemeBlockSpec = {
+  label: string;
+  label_bn: string;
+  settings: ThemeSettingSpec[];
+};
+
+export type ThemeSectionSpec = {
+  label: string;
+  label_bn: string;
+  settings: ThemeSettingSpec[];
+  /** One shown copy per list at most; a hidden copy does not count. */
+  at_most_one?: boolean;
+  /** Every list that allows it keeps one shown copy, so it is never hidden or removed. */
+  required?: boolean;
+  /** Blocks every copy of the section keeps. */
+  required_blocks?: string[];
+  blocks?: Record<string, ThemeBlockSpec>;
+};
+
+/** The header or footer group, or a page template: its name and the sections it allows. */
+export type ThemeListSpec = {
+  label: string;
+  label_bn: string;
+  sections: string[];
+};
+
+/** A theme file (api-paperbase engine/apps/theming/themes/<key>.json). */
+export type ThemeManifest = {
+  key: string;
+  name: string;
+  name_bn: string;
+  category: string | null;
+  settings: ThemeSettingSpec[];
+  sections: Record<string, ThemeSectionSpec>;
+  groups: { header: ThemeListSpec; footer: ThemeListSpec };
+  templates: Record<string, ThemeListSpec>;
+};
+
+export type ThemeBlock = {
+  id: string;
+  type: string;
+  settings: Record<string, unknown>;
+};
+
+export type ThemeSection = {
+  id: string;
+  type: string;
+  hidden: boolean;
+  settings: Record<string, unknown>;
+  blocks: ThemeBlock[];
+};
+
+export type ThemeSectionList = { sections: ThemeSection[] };
+
+/** A shop's theme document (engine/apps/theming/documents.py): list order is page order. */
+export type ThemeDocument = {
+  theme: string;
+  settings: Record<string, unknown>;
+  header: ThemeSectionList;
+  footer: ThemeSectionList;
+  templates: Record<string, ThemeSectionList>;
+};
+
+/** What editor/, editor/select/ and editor/discard/ answer. */
 export type ThemeEditorState = {
   theme_key: string;
   has_draft: boolean;
@@ -60,14 +132,21 @@ export type ThemeEditorState = {
   published_by_name: string;
   manifest_version: string;
   preview_version: string;
-  document: unknown;
-  manifest: unknown;
+  /** The draft, else the saved document, else the theme's defaults. */
+  document: ThemeDocument;
+  manifest: ThemeManifest;
 };
 
 const BASE = "theming/";
 
 export async function fetchThemeLibrary(http: ThemeHttp): Promise<ThemeLibrary> {
   const { data } = await http.get<ThemeLibrary>(`${BASE}themes/`);
+  return data;
+}
+
+/** Everything the editor opens with. Needs theming.manage and an unlocked shop (403 otherwise). */
+export async function fetchThemeEditor(http: ThemeHttp): Promise<ThemeEditorState> {
+  const { data } = await http.get<ThemeEditorState>(`${BASE}editor/`);
   return data;
 }
 

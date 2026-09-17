@@ -10,6 +10,7 @@ import en from "../../../messages/en.json";
 import bn from "../../../messages/bn.json";
 import {
   discardThemeDraft,
+  fetchThemeEditor,
   fetchThemeLibrary,
   selectTheme,
   themeErrorMessageKey,
@@ -40,6 +41,12 @@ describe("fetchers", () => {
     const { http, calls } = fakeHttp({ themes: [] });
     await expect(fetchThemeLibrary(http)).resolves.toEqual({ themes: [] });
     expect(calls).toEqual([{ method: "GET", path: "theming/themes/" }]);
+  });
+
+  test("the editor opens with GET theming/editor/", async () => {
+    const { http, calls } = fakeHttp({ draft_revision: 3 });
+    await expect(fetchThemeEditor(http)).resolves.toEqual({ draft_revision: 3 });
+    expect(calls).toEqual([{ method: "GET", path: "theming/editor/" }]);
   });
 
   test("select sends the theme and the draft revision the page holds", async () => {
