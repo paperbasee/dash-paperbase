@@ -3,6 +3,9 @@ import type { ThemeAccess } from "./api";
 /** The full-screen theme editor (editor step 3). */
 export const THEME_EDITOR_HREF = "/settings/customize";
 
+/** Settings > Customization, where the editor opens from and returns to. */
+export const CUSTOMIZATION_HREF = "/settings?tab=customization";
+
 /** Why the shop cannot use themes now; each has its own notice. */
 export type ThemeLock = "not_entitled" | "payment_pending" | "expired";
 

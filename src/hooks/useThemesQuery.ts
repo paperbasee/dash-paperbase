@@ -4,7 +4,12 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import api from "@/lib/api";
 import { themeEditorQueryKey, themesQueryKey } from "@/lib/query-keys";
-import { discardThemeDraft, fetchThemeLibrary, selectTheme } from "@/lib/theme-editor/api";
+import {
+  discardThemeDraft,
+  fetchThemeEditor,
+  fetchThemeLibrary,
+  selectTheme,
+} from "@/lib/theme-editor/api";
 
 /**
  * The theme library for Settings > Customization.
@@ -23,6 +28,26 @@ export function useThemesQuery({ enabled }: { enabled: boolean }) {
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
     retry: 1,
+    meta: { persist: false },
+  });
+}
+
+/**
+ * What the theme editor opens with. It fills the editor once: never kept in IndexedDB,
+ * dropped as soon as the editor closes (gcTime 0) so the next visit loads the latest
+ * draft, and never refetched in the background. A refusal is final (a 403 means the
+ * member may not edit or the shop is locked), so it is not retried.
+ */
+export function useThemeEditorQuery({ enabled }: { enabled: boolean }) {
+  return useQuery({
+    queryKey: themeEditorQueryKey,
+    queryFn: () => fetchThemeEditor(api),
+    enabled,
+    staleTime: 0,
+    gcTime: 0,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    retry: false,
     meta: { persist: false },
   });
 }
