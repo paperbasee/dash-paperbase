@@ -79,7 +79,7 @@ export function previewTarget(page: PageKey, examples: PreviewExamples, locale: 
   }
 }
 
-type CategoryNode = {
+export type CategoryNode = {
   public_id: string;
   slug: string;
   is_active: boolean;
@@ -95,7 +95,7 @@ const rows = <T>(data: unknown): T[] =>
   Array.isArray(data) ? data : ((data as { results?: T[] } | null)?.results ?? []);
 
 /** Each active category's address under the storefront's /categories/, by public id. Inactive ones hide their children. */
-function categoryPaths(nodes: CategoryNode[], parent = "", out = new Map<string, { path: string; node: CategoryNode }>()) {
+export function categoryPaths(nodes: CategoryNode[], parent = "", out = new Map<string, { path: string; node: CategoryNode }>()) {
   for (const node of nodes) {
     if (!node.is_active || !node.slug) continue;
     const path = parent ? `${parent}/${node.slug}` : node.slug;
