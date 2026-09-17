@@ -37,6 +37,21 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-09-17-managers-can-edit-storefront-look",
+    date: "2026-09-17",
+    version: "4.8.5",
+    tag: "improved",
+    title: {
+      en: "Managers can now change your storefront's look",
+      bn: "ম্যানেজাররা এখন স্টোরফ্রন্টের ডিজাইন বদলাতে পারবেন",
+    },
+    body: {
+      en: "Team members with the Manager role can now edit Settings → Customization, like the owner and Admins. Staff and Viewers can't, even if the permission is ticked for their role, and a team member limited to some categories can't either.",
+      bn: "ম্যানেজার রোলের টিম মেম্বাররা এখন মালিক ও অ্যাডমিনের মতো সেটিংস → কাস্টমাইজেশন বদলাতে পারবেন। স্টাফ ও ভিউয়াররা পারবেন না, তাদের রোলে পারমিশন টিক দেওয়া থাকলেও না, আর কিছু ক্যাটাগরিতে সীমিত টিম মেম্বাররাও পারবেন না।",
+    },
+    href: "/settings?tab=customization",
+  },
+  {
     id: "2026-09-17-purchases-count-at-order-time",
     date: "2026-09-17",
     version: "4.8.4",
