@@ -3,13 +3,14 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import api from "@/lib/api";
-import { themeEditorQueryKey, themesQueryKey } from "@/lib/query-keys";
+import { themeEditorExamplesQueryKey, themeEditorQueryKey, themesQueryKey } from "@/lib/query-keys";
 import {
   discardThemeDraft,
   fetchThemeEditor,
   fetchThemeLibrary,
   selectTheme,
 } from "@/lib/theme-editor/api";
+import { fetchPreviewExamples } from "@/lib/theme-editor/preview-paths";
 
 /**
  * The theme library for Settings > Customization.
@@ -48,6 +49,22 @@ export function useThemeEditorQuery({ enabled }: { enabled: boolean }) {
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
     retry: false,
+    meta: { persist: false },
+  });
+}
+
+/**
+ * A real category, product and blog post for the editor's page picker to show, read once when
+ * the editor opens. Like the editor's own query: not persisted, dropped when the editor closes.
+ */
+export function usePreviewExamplesQuery() {
+  return useQuery({
+    queryKey: themeEditorExamplesQueryKey,
+    // Fails only when a read got no answer: retried, and again when the tab or the connection
+    // comes back. Once loaded it is never refetched (staleTime).
+    queryFn: () => fetchPreviewExamples(api),
+    staleTime: Infinity,
+    gcTime: 0,
     meta: { persist: false },
   });
 }

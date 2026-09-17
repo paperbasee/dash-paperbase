@@ -210,3 +210,6 @@ export const themePresetsQueryKey = ["theming", "presets"] as const;
 export const themesQueryKey = ["themes"] as const;
 
 export const themeEditorQueryKey = ["themeEditor"] as const;
+
+/** One category, product and blog post the editor's preview can show; dropped with the editor. */
+export const themeEditorExamplesQueryKey = ["themeEditor", "examples"] as const;
