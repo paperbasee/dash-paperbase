@@ -14,7 +14,7 @@ import {
   type EditorAction,
   type EditorState,
 } from "@/lib/theme-editor/editor-reducer";
-import { MAX_SECTIONS_PER_LIST } from "@/lib/theme-editor/rules";
+import { MAX_BLOCKS_PER_SECTION, MAX_SECTIONS_PER_LIST } from "@/lib/theme-editor/rules";
 import { document, manifest, section } from "./fixtures";
 
 const start = (page?: Parameters<typeof initEditorState>[1]) =>
@@ -23,6 +23,10 @@ const start = (page?: Parameters<typeof initEditorState>[1]) =>
 const run = (state: EditorState, ...actions: EditorAction[]) => actions.reduce(editorReducer, state);
 
 const ids = (state: EditorState) => pageSections(state.document, state.page).map((s) => s.id);
+
+/** The parts of the product page's buy area, the one section in the fixture that takes them. */
+const blocks = (state: EditorState) =>
+  pageSections(state.document, "templates.product").find((s) => s.id === "product-details")!.blocks;
 
 describe("load and pages", () => {
   test("opens on the home page, unchanged", () => {
@@ -173,6 +177,98 @@ describe("remove", () => {
     expect(restored.saved).toBe(state.saved);
     expect(restored.changed).toBe(true);
     expect(restored.page).toBe("templates.product");
+  });
+
+  test("writes a setting the theme offers", () => {
+    const state = run(start("header"), {
+      type: "setSetting",
+      id: "announcement-bar",
+      setting: "text",
+      value: "Free delivery this week",
+    });
+    expect(pageSections(state.document, "header")[0].settings.text).toBe("Free delivery this week");
+    expect(state.changed).toBe(true);
+  });
+
+  test("refuses a value the API would refuse, so nothing is ever sent for it", () => {
+    const state = start("header");
+    for (const value of ["a".repeat(201), "line\nbreak", 5, null]) {
+      expect(
+        editorReducer(state, { type: "setSetting", id: "announcement-bar", setting: "text", value }),
+      ).toBe(state);
+    }
+    expect(
+      editorReducer(state, { type: "setSetting", id: "announcement-bar", setting: "link", value: "//evil.com" }),
+    ).toBe(state);
+  });
+
+  test("refuses a setting the theme does not offer, and an unknown section", () => {
+    const state = start("header");
+    expect(editorReducer(state, { type: "setSetting", id: "announcement-bar", setting: "colour", value: "red" })).toBe(state);
+    expect(editorReducer(state, { type: "setSetting", id: "nope", setting: "text", value: "x" })).toBe(state);
+  });
+
+  test("writes a block's own setting, and refuses one the block does not have", () => {
+    const start2 = run(start("templates.product"), {
+      type: "addBlock",
+      id: "product-details",
+      blockType: "custom_text",
+    });
+    const added = blocks(start2).at(-1)!;
+    const state = run(start2, {
+      type: "setSetting",
+      id: "product-details",
+      blockId: added.id,
+      setting: "text",
+      value: "Ships in 2 days",
+    });
+    expect(blocks(state).at(-1)!.settings.text).toBe("Ships in 2 days");
+    expect(
+      editorReducer(state, { type: "setSetting", id: "product-details", blockId: added.id, setting: "text", value: "a".repeat(2001) }),
+    ).toBe(state);
+    expect(
+      editorReducer(state, { type: "setSetting", id: "product-details", blockId: "gone", setting: "text", value: "x" }),
+    ).toBe(state);
+  });
+
+  test("adds a block at the bottom with its settings at their defaults", () => {
+    const state = run(start("templates.product"), {
+      type: "addBlock",
+      id: "product-details",
+      blockType: "custom_text",
+    });
+    expect(blocks(state).map((b) => b.type)).toEqual(["title", "buy_buttons", "custom_text"]);
+    expect(blocks(state).at(-1)!.settings).toEqual({ text: "" });
+    expect(blocks(state).at(-1)!.id).toBe("custom-text");
+  });
+
+  test("refuses a block the section does not have, and a full section", () => {
+    const state = start("templates.product");
+    expect(editorReducer(state, { type: "addBlock", id: "product-details", blockType: "nope" })).toBe(state);
+
+    let full = state;
+    for (let n = blocks(state).length; n < MAX_BLOCKS_PER_SECTION; n += 1) {
+      full = editorReducer(full, { type: "addBlock", id: "product-details", blockType: "custom_text" });
+    }
+    expect(blocks(full)).toHaveLength(MAX_BLOCKS_PER_SECTION);
+    expect(editorReducer(full, { type: "addBlock", id: "product-details", blockType: "custom_text" })).toBe(full);
+  });
+
+  test("removes an optional block and never the last required one", () => {
+    const added = run(start("templates.product"), { type: "addBlock", id: "product-details", blockType: "custom_text" });
+    const state = run(added, { type: "removeBlock", id: "product-details", blockId: "custom-text" });
+    expect(blocks(state).map((b) => b.type)).toEqual(["title", "buy_buttons"]);
+    for (const blockId of ["title", "buy-buttons"]) {
+      expect(editorReducer(state, { type: "removeBlock", id: "product-details", blockId })).toBe(state);
+    }
+    expect(editorReducer(state, { type: "removeBlock", id: "product-details", blockId: "gone" })).toBe(state);
+  });
+
+  test("moves a block, and stops at the ends of the list", () => {
+    const state = run(start("templates.product"), { type: "moveBlock", id: "product-details", blockId: "buy-buttons", to: 0 });
+    expect(blocks(state).map((b) => b.type)).toEqual(["buy_buttons", "title"]);
+    expect(editorReducer(state, { type: "moveBlock", id: "product-details", blockId: "buy-buttons", to: 0 })).toBe(state);
+    expect(editorReducer(state, { type: "moveBlock", id: "product-details", blockId: "gone", to: 1 })).toBe(state);
   });
 
   test("never touches the loaded document", () => {

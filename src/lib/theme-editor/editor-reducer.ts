@@ -1,14 +1,25 @@
-import type { ThemeDocument, ThemeManifest } from "./api";
+import type { ThemeBlock, ThemeDocument, ThemeManifest, ThemeSection } from "./api";
 import {
   editorPages,
   moveItem,
+  newBlock,
   newSection,
   pageSections,
   pageSpec,
   withPageSections,
+  withSetting,
   type PageKey,
 } from "./document-ops";
-import { cannotAdd, cannotHide, cannotRemove, cannotShow } from "./rules";
+import { blockFields, sectionFields, type FieldSpec } from "./field-specs";
+import {
+  cannotAdd,
+  cannotAddBlock,
+  cannotHide,
+  cannotRemove,
+  cannotRemoveBlock,
+  cannotShow,
+} from "./rules";
+import { checkField } from "./validate";
 
 /*
  * The editor's state. It is filled from GET theming/editor/ once, and again only on an
@@ -38,7 +49,12 @@ export type EditorAction =
   | { type: "hide"; id: string }
   | { type: "show"; id: string }
   | { type: "move"; id: string; to: number }
-  | { type: "remove"; id: string };
+  | { type: "remove"; id: string }
+  /** One setting of a section, or of one of its blocks when `blockId` is given. */
+  | { type: "setSetting"; id: string; blockId?: string; setting: string; value: unknown }
+  | { type: "addBlock"; id: string; blockType: string }
+  | { type: "removeBlock"; id: string; blockId: string }
+  | { type: "moveBlock"; id: string; blockId: string; to: number };
 
 const FIRST_PAGE: PageKey = "templates.home";
 
@@ -93,6 +109,8 @@ export function editorReducer(state: EditorState, action: EditorAction): EditorS
   const index = sections.findIndex((s) => s.id === action.id);
   if (index < 0) return state;
   const section = sections[index];
+  const withSection = (next: ThemeSection) =>
+    next === section ? state : edit(sections.map((s, i) => (i === index ? next : s)));
 
   switch (action.type) {
     case "hide":
@@ -110,5 +128,53 @@ export function editorReducer(state: EditorState, action: EditorAction): EditorS
     case "remove":
       if (cannotRemove(manifest, sections, section)) return state;
       return edit(sections.filter((_, i) => i !== index));
+
+    case "setSetting": {
+      if (action.blockId === undefined) {
+        const spec = fieldFor(sectionFields(manifest, section.type, LABELS_UNUSED), action.setting);
+        if (!spec || checkField(spec, action.value)) return state;
+        return withSection(withSetting(section, action.setting, action.value));
+      }
+      const block = section.blocks.find((b) => b.id === action.blockId);
+      if (!block) return state;
+      const spec = fieldFor(
+        blockFields(manifest, section.type, block.type, LABELS_UNUSED),
+        action.setting,
+      );
+      if (!spec || checkField(spec, action.value)) return state;
+      return withSection(withBlocks(section, (b) => (b === block ? withSetting(b, action.setting, action.value) : b)));
+    }
+    case "addBlock": {
+      if (cannotAddBlock(manifest, section, action.blockType)) return state;
+      const block = newBlock(manifest, section.type, action.blockType, section.blocks.map((b) => b.id));
+      if (!block) return state;
+      return withSection({ ...section, blocks: [...section.blocks, block] });
+    }
+    case "removeBlock": {
+      const block = section.blocks.find((b) => b.id === action.blockId);
+      if (!block || cannotRemoveBlock(manifest, section, block)) return state;
+      return withSection({ ...section, blocks: section.blocks.filter((b) => b !== block) });
+    }
+    case "moveBlock": {
+      const from = section.blocks.findIndex((b) => b.id === action.blockId);
+      if (from < 0) return state;
+      const blocks = moveItem(section.blocks, from, action.to);
+      return withSection(blocks === section.blocks ? section : { ...section, blocks });
+    }
   }
+}
+
+/**
+ * The language a field's name is written in does not change what the API stores, and the
+ * reducer only checks values, so it reads the fields in whichever language costs nothing.
+ */
+const LABELS_UNUSED = "en";
+
+function fieldFor(specs: FieldSpec[], setting: string): FieldSpec | undefined {
+  return specs.find((spec) => spec.id === setting);
+}
+
+function withBlocks(section: ThemeSection, map: (block: ThemeBlock) => ThemeBlock): ThemeSection {
+  const blocks = section.blocks.map(map);
+  return blocks.every((block, i) => block === section.blocks[i]) ? section : { ...section, blocks };
 }

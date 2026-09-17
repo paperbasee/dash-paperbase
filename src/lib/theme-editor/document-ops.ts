@@ -109,6 +109,21 @@ function defaultSettings(specs: { id: string; default: unknown }[]): Record<stri
 }
 
 /**
+ * A new block of `blockType` with every setting at its default, or null when the section has
+ * no such block. `takenIds` are the ids already in that section.
+ */
+export function newBlock(
+  manifest: ThemeManifest,
+  sectionType: string,
+  blockType: string,
+  takenIds: Iterable<string>,
+): ThemeBlock | null {
+  const spec = manifest.sections[sectionType]?.blocks?.[blockType];
+  if (!spec) return null;
+  return { id: newId(blockType, takenIds), type: blockType, settings: defaultSettings(spec.settings) };
+}
+
+/**
  * A new, shown section of `type` with every setting at its default and the blocks the
  * theme requires, so the API accepts it as it is. `takenIds` are the ids in its list.
  */
@@ -120,13 +135,8 @@ export function newSection(
   const spec = manifest.sections[type];
   const blocks: ThemeBlock[] = [];
   for (const blockType of spec.required_blocks ?? []) {
-    const blockSpec = spec.blocks?.[blockType];
-    if (!blockSpec) continue;
-    blocks.push({
-      id: newId(blockType, blocks.map((b) => b.id)),
-      type: blockType,
-      settings: defaultSettings(blockSpec.settings),
-    });
+    const block = newBlock(manifest, type, blockType, blocks.map((b) => b.id));
+    if (block) blocks.push(block);
   }
   return {
     id: newId(type, takenIds),
@@ -135,6 +145,16 @@ export function newSection(
     settings: defaultSettings(spec.settings),
     blocks,
   };
+}
+
+/** A section or block with one setting written; the same object when the value is already there. */
+export function withSetting<T extends { settings: Record<string, unknown> }>(
+  entry: T,
+  setting: string,
+  value: unknown,
+): T {
+  if (entry.settings[setting] === value) return entry;
+  return { ...entry, settings: { ...entry.settings, [setting]: value } };
 }
 
 /** `items` with the entry at `from` moved to `to`; the same array when nothing moves. */
