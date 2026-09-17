@@ -6,10 +6,20 @@
  * fake in tests, so this file never touches the browser.
  */
 
+/** The dashboard client's own option: a call with no answer by then fails like a lost connection. */
+export type ThemeRequestConfig = { timeout?: number };
+
 export type ThemeHttp = {
-  get<T>(path: string): Promise<{ data: T }>;
-  post<T>(path: string, body?: unknown): Promise<{ data: T }>;
+  get<T>(path: string, config?: ThemeRequestConfig): Promise<{ data: T }>;
+  post<T>(path: string, body?: unknown, config?: ThemeRequestConfig): Promise<{ data: T }>;
 };
+
+/**
+ * How long the editor's background calls (autosave, preview passes, the example pages) wait for
+ * an answer. The client has no timeout of its own, and a stalled connection would otherwise
+ * leave autosave on "Saving…" and the preview opening for good.
+ */
+export const EDITOR_REQUEST_TIMEOUT_MS = 15_000;
 
 export type ThemeAccessState = "ok" | "not_entitled" | "storefront_unavailable";
 
@@ -171,6 +181,57 @@ export async function discardThemeDraft(
     expected_draft_revision: expectedDraftRevision,
   });
   return data;
+}
+
+export type ThemeDraftHttp = {
+  put<T>(path: string, body?: unknown, config?: ThemeRequestConfig): Promise<{ data: T }>;
+};
+
+export type ThemeDraftSaved = {
+  /** Sent with the next save. */
+  draft_revision: number;
+  /** What the preview reports once it has drawn this draft. */
+  preview_version: string;
+};
+
+/** Save the private draft. The live shop changes only on publish. */
+export async function saveThemeDraft(
+  http: ThemeDraftHttp,
+  document: ThemeDocument,
+  expectedDraftRevision: number,
+): Promise<ThemeDraftSaved> {
+  const { data } = await http.put<ThemeDraftSaved>(
+    `${BASE}editor/draft/`,
+    { document, expected_draft_revision: expectedDraftRevision },
+    { timeout: EDITOR_REQUEST_TIMEOUT_MS },
+  );
+  return data;
+}
+
+export type PreviewPass = {
+  /** Secret for two hours: only ever posted into the preview frame, never kept or logged. */
+  preview_pass: string;
+  expires_at: string;
+  store_public_id: string;
+};
+
+export async function mintPreviewPass(http: ThemeHttp): Promise<PreviewPass> {
+  const { data } = await http.post<PreviewPass>(`${BASE}preview/pass/`, undefined, {
+    timeout: EDITOR_REQUEST_TIMEOUT_MS,
+  });
+  return data;
+}
+
+/** The status and the `code`/`path` fields of a failed call, read from the dashboard's ApiHttpError. */
+export function apiErrorParts(error: unknown): { status?: number; code?: string; path?: string } {
+  const status = (error as { status?: unknown } | null)?.status;
+  const data = (error as { data?: unknown } | null)?.data;
+  const body = data && typeof data === "object" ? (data as { code?: unknown; path?: unknown }) : {};
+  return {
+    status: typeof status === "number" ? status : undefined,
+    code: typeof body.code === "string" ? body.code : undefined,
+    path: typeof body.path === "string" ? body.path : undefined,
+  };
 }
 
 /** Keys under settings.customization for what a failed theme action tells the merchant. */

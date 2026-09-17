@@ -9,23 +9,28 @@ import { describe, expect, test } from "vitest";
 import en from "../../../messages/en.json";
 import bn from "../../../messages/bn.json";
 import {
+  apiErrorParts,
   discardThemeDraft,
+  EDITOR_REQUEST_TIMEOUT_MS,
   fetchThemeEditor,
   fetchThemeLibrary,
+  mintPreviewPass,
+  saveThemeDraft,
   selectTheme,
   themeErrorMessageKey,
+  type ThemeDocument,
   type ThemeHttp,
 } from "@/lib/theme-editor/api";
 
 function fakeHttp(answer: unknown) {
-  const calls: { method: string; path: string; body?: unknown }[] = [];
+  const calls: { method: string; path: string; body?: unknown; config?: unknown }[] = [];
   const http: ThemeHttp = {
     async get<T>(path: string) {
       calls.push({ method: "GET", path });
       return { data: answer as T };
     },
-    async post<T>(path: string, body?: unknown) {
-      calls.push({ method: "POST", path, body });
+    async post<T>(path: string, body?: unknown, config?: unknown) {
+      calls.push({ method: "POST", path, body, ...(config ? { config } : {}) });
       return { data: answer as T };
     },
   };
@@ -67,6 +72,48 @@ describe("fetchers", () => {
     expect(calls).toEqual([
       { method: "POST", path: "theming/editor/discard/", body: { expected_draft_revision: 0 } },
     ]);
+  });
+});
+
+describe("draft and preview pass", () => {
+  test("the draft is PUT with the document and the revision it was made on, and a timeout", async () => {
+    const calls: unknown[] = [];
+    const http = {
+      async put<T>(path: string, body?: unknown, config?: unknown) {
+        calls.push({ method: "PUT", path, body, config });
+        return { data: { draft_revision: 8, preview_version: "abc123def456" } as T };
+      },
+    };
+    const doc = { theme: "basic" } as ThemeDocument;
+    await expect(saveThemeDraft(http, doc, 7)).resolves.toEqual({
+      draft_revision: 8,
+      preview_version: "abc123def456",
+    });
+    expect(calls).toEqual([
+      {
+        method: "PUT",
+        path: "theming/editor/draft/",
+        body: { document: doc, expected_draft_revision: 7 },
+        config: { timeout: EDITOR_REQUEST_TIMEOUT_MS },
+      },
+    ]);
+  });
+
+  test("a pass is minted with an empty POST, and a timeout", async () => {
+    const { http, calls } = fakeHttp({ preview_pass: "secret", expires_at: "x", store_public_id: "str_1" });
+    await mintPreviewPass(http);
+    expect(calls).toEqual([
+      { method: "POST", path: "theming/preview/pass/", body: undefined, config: { timeout: EDITOR_REQUEST_TIMEOUT_MS } },
+    ]);
+  });
+
+  test("apiErrorParts reads the status, code and path, and nothing that isn't there", () => {
+    expect(
+      apiErrorParts(httpError(400, { code: "invalid_document", path: "templates.home.sections[1]" })),
+    ).toEqual({ status: 400, code: "invalid_document", path: "templates.home.sections[1]" });
+    expect(apiErrorParts(httpError(502, "<html>"))).toEqual({ status: 502, code: undefined, path: undefined });
+    expect(apiErrorParts(new TypeError("Failed to fetch"))).toEqual({});
+    expect(apiErrorParts(null)).toEqual({});
   });
 });
 
