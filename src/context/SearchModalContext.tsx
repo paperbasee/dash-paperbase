@@ -26,10 +26,18 @@ export function useSearchModal() {
   return ctx;
 }
 
-export function SearchModalProvider({ children }: { children: ReactNode }) {
+export function SearchModalProvider({
+  children,
+  shortcut = true,
+}: {
+  children: ReactNode;
+  /** Ctrl/Cmd+K opens search. Off where leaving the page would lose unsaved work. */
+  shortcut?: boolean;
+}) {
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
+    if (!shortcut) return;
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "k" && (e.ctrlKey || e.metaKey)) {
         if (window.innerWidth >= 768) {
@@ -40,7 +48,7 @@ export function SearchModalProvider({ children }: { children: ReactNode }) {
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, []);
+  }, [shortcut]);
 
   return (
     <SearchModalContext.Provider value={{ open, setOpen }}>

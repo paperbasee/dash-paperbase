@@ -33,6 +33,7 @@ import SubscriptionExpirationBanner from "@/components/auth/SubscriptionExpirati
 import { TopLoadingBar } from "@/components/TopLoadingBar";
 import { DashboardRefreshProvider } from "@/context/DashboardRefreshContext";
 import { useStoreSocket } from "@/hooks/useStoreSocket";
+import { THEME_EDITOR_HREF } from "@/lib/theme-editor/access";
 
 const DASHBOARD_SERVER_UNREACHABLE_KEY = "paperbase_dashboard_server_unreachable";
 
@@ -71,6 +72,8 @@ export default function DashboardLayoutClient({
   const [mobileOpen, setMobileOpen] = useState(false);
   const [networkGateReady, setNetworkGateReady] = useState(false);
   const isSettingsMode = pathname.startsWith("/settings");
+  /** The full-screen theme editor: every provider, none of the chrome. */
+  const isThemeEditor = pathname.startsWith(THEME_EDITOR_HREF);
   const subscription =
     meProfileStatus === "ready" ? (meProfile?.subscription ?? null) : null;
   const isModerator = meProfile?.is_moderator === true;
@@ -232,8 +235,11 @@ export default function DashboardLayoutClient({
       <EnabledAppsProvider>
       <DashboardRefreshProvider markRefreshedRef={markRefreshedRef}>
       <NavigationLoadingProvider>
-      <SearchModalProvider>
+      <SearchModalProvider shortcut={!isThemeEditor}>
       <WhatsNewProvider>
+        {isThemeEditor ? (
+          <div className="fixed inset-0 flex h-dvh flex-col bg-background">{children}</div>
+        ) : (
         <div className="md:flex md:h-screen md:flex-col md:overflow-hidden">
           {showTopBannerStrip && subscriptionUiState ? (
             <div className="z-[60] flex flex-col md:shrink-0">
@@ -396,6 +402,7 @@ export default function DashboardLayoutClient({
             </SidebarDataProvider>
           </div>
         </div>
+        )}
       </WhatsNewProvider>
       </SearchModalProvider>
       </NavigationLoadingProvider>
