@@ -7,9 +7,11 @@ import type { DeviceType } from "@/components/preview-system/usePreviewDevice";
 import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/select";
 import type { ThemeManifest } from "@/lib/theme-editor/api";
+import type { AutosaveStatus } from "@/lib/theme-editor/autosave";
 import { editorPages, isGroupPage, localLabel, pageSpec, type PageKey } from "@/lib/theme-editor/document-ops";
 import { themeName } from "@/lib/theme-editor/theme-groups";
 import { cn } from "@/lib/utils";
+import { SaveStatus } from "./SaveStatus";
 
 /** A native select: the theme's pages, then the header and footer that sit on every page. */
 export function PagePicker({
@@ -58,7 +60,8 @@ const DEVICES = [
 
 export function EditorTopBar({
   manifest,
-  changed,
+  saveStatus,
+  onRetrySave,
   page,
   onPickPage,
   device,
@@ -66,7 +69,8 @@ export function EditorTopBar({
   onClose,
 }: {
   manifest: ThemeManifest;
-  changed: boolean;
+  saveStatus: AutosaveStatus;
+  onRetrySave: () => void;
   page: PageKey;
   onPickPage: (page: PageKey) => void;
   device: DeviceType;
@@ -87,11 +91,7 @@ export function EditorTopBar({
           <p className="truncate text-sm font-semibold text-foreground">
             {themeName(manifest, locale)}
           </p>
-          {changed ? (
-            <p role="status" className="truncate text-xs text-amber-700 dark:text-amber-300">
-              {t("unsavedChanges")}
-            </p>
-          ) : null}
+          <SaveStatus status={saveStatus} onRetry={onRetrySave} />
         </div>
 
         <div className="hidden min-w-0 flex-1 justify-center md:flex">

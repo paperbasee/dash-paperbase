@@ -24,6 +24,7 @@ const SOURCES = [
   "src/components/theme-editor/SectionList.tsx",
   "src/components/theme-editor/AddSectionSheet.tsx",
   "src/components/theme-editor/PreviewPane.tsx",
+  "src/components/theme-editor/SaveStatus.tsx",
 ];
 
 describe("theme editor copy", () => {
@@ -43,6 +44,8 @@ describe("theme editor copy", () => {
       const text = fs.readFileSync(path.join(ROOT, rel), "utf8");
       for (const m of text.matchAll(/\bt\(\s*"(\w+)"/g)) used.add(m[1]);
       for (const m of text.matchAll(/labelKey: "(\w+)"/g)) used.add(m[1]);
+      // The notes for a page the shop has nothing to show on.
+      for (const m of text.matchAll(/(?:category|product|post): "(preview\w+)"/g)) used.add(m[1]);
     }
     expect(used.size).toBeGreaterThan(35);
     expect([...used].filter((k) => !(k in enNs))).toEqual([]);

@@ -40,7 +40,7 @@ export default function ThemeEditorPage() {
     router.replace(CUSTOMIZATION_HREF);
   }, [refusal, router, tc]);
 
-  if (editor.data) return <ThemeEditor loaded={editor.data} />;
+  if (editor.data && PREVIEW_ORIGIN) return <ThemeEditor loaded={editor.data} origin={PREVIEW_ORIGIN} />;
 
   return (
     <div className="flex flex-1 flex-col items-center justify-center gap-4 p-6 text-center">
