@@ -73,7 +73,12 @@ function edited(hidden = true, extra = 0): ThemeDocument {
 
 describe("timing", () => {
   test("opens idle, or saved when a draft exists, with nothing unsent", () => {
-    expect(setup().autosave.snapshot()).toEqual({ status: { kind: "idle" }, draftRevision: 4, unsent: false });
+    expect(setup().autosave.snapshot()).toEqual({
+      status: { kind: "idle" },
+      draftRevision: 4,
+      unsent: false,
+      hasDraft: false,
+    });
     expect(setup({ hasDraft: true }).autosave.snapshot().status).toEqual({ kind: "saved" });
   });
 
@@ -139,7 +144,7 @@ describe("one save at a time", () => {
     clock.runAll();
     calls[0].resolve({ draft_revision: 5, preview_version: "aaa" });
     await settle();
-    expect(last()).toEqual({ status: { kind: "saved" }, draftRevision: 5, unsent: false });
+    expect(last()).toEqual({ status: { kind: "saved" }, draftRevision: 5, unsent: false, hasDraft: true });
 
     autosave.edit(edited(true, 2));
     clock.runAll();
@@ -167,7 +172,7 @@ describe("one save at a time", () => {
 
     calls[1].resolve({ draft_revision: 6, preview_version: "bbb" });
     await done;
-    expect(last()).toEqual({ status: { kind: "saved" }, draftRevision: 6, unsent: false });
+    expect(last()).toEqual({ status: { kind: "saved" }, draftRevision: 6, unsent: false, hasDraft: true });
   });
 
   test("an edit still settling when a save lands keeps its quiet period", async () => {
@@ -191,7 +196,7 @@ describe("refusals", () => {
     clock.runAll();
     calls[0].reject(new TypeError("Failed to fetch"));
     await settle();
-    expect(last()).toEqual({ status: { kind: "failed" }, draftRevision: 4, unsent: true });
+    expect(last()).toEqual({ status: { kind: "failed" }, draftRevision: 4, unsent: true, hasDraft: false });
 
     void autosave.flush(); // Retry
     expect(calls).toHaveLength(2);
@@ -217,14 +222,14 @@ describe("refusals", () => {
     autosave.edit(edited(true, 2)); // waiting while the conflict comes back
     calls[0].reject(httpError(409, { code: "draft_conflict", draft_revision: 9 }));
     await settle();
-    expect(last()).toMatchObject({ status: { kind: "conflict" }, unsent: true });
+    expect(last()).toMatchObject({ status: { kind: "conflict", draftRevision: 9 }, unsent: true });
     expect(clock.pending()).toEqual([]);
 
     autosave.edit(edited(true, 3));
     await autosave.flush();
     clock.runAll();
     expect(calls).toHaveLength(1);
-    expect(last().status).toEqual({ kind: "conflict" });
+    expect(last().status).toEqual({ kind: "conflict", draftRevision: 9 });
   });
 
   test("403 stops autosave with the answer, for the message", async () => {
@@ -274,5 +279,97 @@ describe("refusals", () => {
     clock.runAll();
     expect(calls).toHaveLength(1);
     expect(last()).toMatchObject({ status: { kind: "invalid", path: refusal.path, document: bad }, unsent: true });
+  });
+});
+
+describe("the whole-theme actions", () => {
+  test("hold drops the waiting edit, waits for the save already out, and sends nothing while it runs", async () => {
+    const { autosave, clock, calls, last } = setup();
+    autosave.edit(edited(true, 1));
+    clock.runAll(); // one save is out
+    autosave.edit(edited(true, 2)); // another edit starts waiting
+    expect(clock.pending()).toEqual([AUTOSAVE_DELAY_MS]);
+
+    const order: string[] = [];
+    const held = autosave.hold(async () => {
+      order.push("work");
+    });
+    expect(clock.pending()).toEqual([]);
+    expect(order).toEqual([]); // the save out has not landed yet
+
+    calls[0].resolve({ draft_revision: 5, preview_version: "aaa" });
+    await held;
+    expect(order).toEqual(["work"]);
+    // The landed save's follow-up never went, and the dropped edit is waiting again instead.
+    expect(calls).toHaveLength(1);
+    expect(clock.pending()).toEqual([AUTOSAVE_DELAY_MS]);
+    expect(last().unsent).toBe(true);
+    clock.runAll();
+    expect(calls[1].expected).toBe(5);
+  });
+
+  test("reset starts again from the server's own answer, with nothing unsent", async () => {
+    const { autosave, clock, calls, last } = setup();
+    autosave.edit(edited(true, 1));
+    clock.runAll();
+    calls[0].reject(httpError(400, { code: "invalid_document", path: "templates.home" }));
+    await settle();
+
+    const server = edited(false, 9);
+    autosave.reset({ document: server, draftRevision: 11, hasDraft: false });
+    expect(last()).toEqual({ status: { kind: "idle" }, draftRevision: 11, unsent: false, hasDraft: false });
+    // The refusal is gone with the document it was about: the same shape saves again.
+    autosave.edit(edited(true, 1));
+    clock.runAll();
+    expect(calls).toHaveLength(2);
+    expect(calls[1].expected).toBe(11);
+  });
+
+  test("reset onto a draft says so, and resets no edit made since", () => {
+    const { autosave, last } = setup();
+    autosave.reset({ document: edited(true, 3), draftRevision: 7, hasDraft: true });
+    expect(last()).toEqual({ status: { kind: "saved" }, draftRevision: 7, unsent: false, hasDraft: true });
+  });
+
+  test("resume saves over the other editor's draft at the revision the clash named", async () => {
+    const { autosave, clock, calls, last } = setup();
+    autosave.edit(edited(true, 1));
+    clock.runAll();
+    calls[0].reject(httpError(409, { code: "draft_conflict", draft_revision: 30 }));
+    await settle();
+    expect(last().status).toEqual({ kind: "conflict", draftRevision: 30 });
+
+    void autosave.resume(30);
+    expect(calls[1].expected).toBe(30);
+    calls[1].resolve({ draft_revision: 31, preview_version: "bbb" });
+    await settle();
+    expect(last()).toEqual({ status: { kind: "saved" }, draftRevision: 31, unsent: false, hasDraft: true });
+
+    // Autosave works again afterwards.
+    autosave.edit(edited(true, 2));
+    clock.runAll();
+    expect(calls[2].expected).toBe(31);
+  });
+
+  test("resume sends even a document the server already had", async () => {
+    const { autosave, calls } = setup({ hasDraft: true });
+    void autosave.resume(30);
+    expect(calls).toHaveLength(1);
+    expect(calls[0].expected).toBe(30);
+  });
+
+  test("published leaves the screen alone: an edit made during it is still unsent", async () => {
+    const { autosave, clock, calls, last } = setup({ hasDraft: true });
+    autosave.edit(edited(true, 1));
+    clock.runAll();
+    calls[0].resolve({ draft_revision: 5, preview_version: "aaa" });
+    await settle();
+
+    autosave.published(6);
+    expect(last()).toEqual({ status: { kind: "idle" }, draftRevision: 6, unsent: false, hasDraft: false });
+
+    autosave.edit(edited(true, 2));
+    clock.runAll();
+    expect(calls[1].expected).toBe(6);
   });
 });

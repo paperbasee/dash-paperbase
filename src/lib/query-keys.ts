@@ -213,3 +213,6 @@ export const themeEditorQueryKey = ["themeEditor"] as const;
 
 /** One category, product and blog post the editor's preview can show; dropped with the editor. */
 export const themeEditorExamplesQueryKey = ["themeEditor", "examples"] as const;
+
+/** The saved versions the editor's History sheet lists; read again each time it opens. */
+export const themeEditorVersionsQueryKey = ["themeEditor", "versions"] as const;

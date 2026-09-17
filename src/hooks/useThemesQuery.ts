@@ -3,11 +3,17 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import api from "@/lib/api";
-import { themeEditorExamplesQueryKey, themeEditorQueryKey, themesQueryKey } from "@/lib/query-keys";
+import {
+  themeEditorExamplesQueryKey,
+  themeEditorQueryKey,
+  themeEditorVersionsQueryKey,
+  themesQueryKey,
+} from "@/lib/query-keys";
 import {
   discardThemeDraft,
   fetchThemeEditor,
   fetchThemeLibrary,
+  fetchThemeVersions,
   selectTheme,
 } from "@/lib/theme-editor/api";
 import { fetchPreviewExamples } from "@/lib/theme-editor/preview-paths";
@@ -65,6 +71,25 @@ export function usePreviewExamplesQuery() {
     queryFn: () => fetchPreviewExamples(api),
     staleTime: Infinity,
     gcTime: 0,
+    meta: { persist: false },
+  });
+}
+
+/**
+ * The saved versions the editor's History sheet lists. Read when the sheet opens and dropped when
+ * it closes, because a save in this tab or another adds to it: a kept list would offer a version
+ * that is no longer the newest, or miss the one just made.
+ */
+export function useThemeVersionsQuery({ enabled }: { enabled: boolean }) {
+  return useQuery({
+    queryKey: themeEditorVersionsQueryKey,
+    queryFn: () => fetchThemeVersions(api),
+    enabled,
+    staleTime: 0,
+    gcTime: 0,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    retry: 1,
     meta: { persist: false },
   });
 }

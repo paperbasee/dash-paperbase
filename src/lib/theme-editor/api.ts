@@ -14,6 +14,25 @@ export type ThemeHttp = {
   post<T>(path: string, body?: unknown, config?: ThemeRequestConfig): Promise<{ data: T }>;
 };
 
+/** One saved version a merchant can bring back (GET editor/versions/), newest first. */
+export type ThemeVersion = {
+  revision: number;
+  theme_key: string;
+  published_at: string;
+  published_by_name: string;
+  /** This is the version shoppers see now. */
+  is_live: boolean;
+};
+
+/** What editor/publish/ answers. */
+export type ThemePublished = {
+  revision: number;
+  published_at: string;
+  /** The draft is gone, and this is where its revision counter stands. */
+  draft_revision: number;
+  preview_version: string;
+};
+
 /**
  * How long the editor's background calls (autosave, preview passes, the example pages) wait for
  * an answer. The client has no timeout of its own, and a stalled connection would otherwise
@@ -197,6 +216,38 @@ export async function discardThemeDraft(
   return data;
 }
 
+/**
+ * Put the draft on the shop. The API is the one that clears the storefront's caches and tells
+ * it to rebuild, so nothing here purges anything. Throttled to 60 an hour per member per shop.
+ */
+export async function publishThemeDraft(
+  http: ThemeHttp,
+  expectedDraftRevision: number,
+): Promise<ThemePublished> {
+  const { data } = await http.post<ThemePublished>(`${BASE}editor/publish/`, {
+    expected_draft_revision: expectedDraftRevision,
+  });
+  return data;
+}
+
+/** The versions this shop can bring back: at most the last 20 saves, newest first. */
+export async function fetchThemeVersions(http: ThemeHttp): Promise<ThemeVersion[]> {
+  const { data } = await http.get<ThemeVersion[]>(`${BASE}editor/versions/`);
+  return data;
+}
+
+/** Load a saved version into the draft. It goes live only when the merchant saves. */
+export async function restoreThemeVersion(
+  http: ThemeHttp,
+  revision: number,
+  expectedDraftRevision: number,
+): Promise<ThemeEditorState> {
+  const { data } = await http.post<ThemeEditorState>(`${BASE}editor/versions/${revision}/restore/`, {
+    expected_draft_revision: expectedDraftRevision,
+  });
+  return data;
+}
+
 export type ThemeDraftHttp = {
   put<T>(path: string, body?: unknown, config?: ThemeRequestConfig): Promise<{ data: T }>;
 };
@@ -236,15 +287,28 @@ export async function mintPreviewPass(http: ThemeHttp): Promise<PreviewPass> {
   return data;
 }
 
-/** The status and the `code`/`path` fields of a failed call, read from the dashboard's ApiHttpError. */
-export function apiErrorParts(error: unknown): { status?: number; code?: string; path?: string } {
+/**
+ * The status and the `code`, `path` and `draft_revision` fields of a failed call, read from the
+ * dashboard's ApiHttpError.
+ */
+export function apiErrorParts(error: unknown): {
+  status?: number;
+  code?: string;
+  path?: string;
+  /** Where the draft stands now; a 409 carries it, so this editor can save over it. */
+  draftRevision?: number;
+} {
   const status = (error as { status?: unknown } | null)?.status;
   const data = (error as { data?: unknown } | null)?.data;
-  const body = data && typeof data === "object" ? (data as { code?: unknown; path?: unknown }) : {};
+  const body =
+    data && typeof data === "object"
+      ? (data as { code?: unknown; path?: unknown; draft_revision?: unknown })
+      : {};
   return {
     status: typeof status === "number" ? status : undefined,
     code: typeof body.code === "string" ? body.code : undefined,
     path: typeof body.path === "string" ? body.path : undefined,
+    draftRevision: typeof body.draft_revision === "number" ? body.draft_revision : undefined,
   };
 }
 
@@ -253,6 +317,10 @@ export type ThemeErrorMessageKey =
   | "errorDraftConflict"
   | "errorNoPermission"
   | "errorUnknownTheme"
+  | "errorNothingToSave"
+  | "errorInvalidDocument"
+  | "errorVersionGone"
+  | "errorTooManySaves"
   | "errorGeneric"
   | "lockNotEntitledTitle"
   | "lockPaymentPending"
@@ -271,6 +339,15 @@ export function themeErrorMessageKey(error: unknown): ThemeErrorMessageKey {
     }
     return "errorNoPermission";
   }
-  if (status === 400 && body.code === "unknown_theme") return "errorUnknownTheme";
+  if (status === 400) {
+    if (body.code === "unknown_theme") return "errorUnknownTheme";
+    if (body.code === "nothing_to_publish") return "errorNothingToSave";
+    // Publish and restore validate the draft again, because a theme file can have changed
+    // under it. Nothing comes right by waiting, so this says what the way out is instead.
+    if (body.code === "invalid_document") return "errorInvalidDocument";
+  }
+  if (status === 404 && body.code === "version_not_found") return "errorVersionGone";
+  // The API allows 60 saves an hour per member per shop, and each one rebuilds the whole shop.
+  if (status === 429) return "errorTooManySaves";
   return "errorGeneric";
 }

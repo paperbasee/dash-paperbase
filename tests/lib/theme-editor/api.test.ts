@@ -14,7 +14,10 @@ import {
   EDITOR_REQUEST_TIMEOUT_MS,
   fetchThemeEditor,
   fetchThemeLibrary,
+  fetchThemeVersions,
   mintPreviewPass,
+  publishThemeDraft,
+  restoreThemeVersion,
   saveThemeDraft,
   selectTheme,
   themeErrorMessageKey,
@@ -107,13 +110,54 @@ describe("draft and preview pass", () => {
     ]);
   });
 
-  test("apiErrorParts reads the status, code and path, and nothing that isn't there", () => {
+  test("publishing sends the revision the editor holds, and nothing else", async () => {
+    const { http, calls } = fakeHttp({ revision: 4, draft_revision: 7, preview_version: "v" });
+    await expect(publishThemeDraft(http, 6)).resolves.toMatchObject({ revision: 4 });
+    expect(calls).toEqual([
+      { method: "POST", path: "theming/editor/publish/", body: { expected_draft_revision: 6 } },
+    ]);
+  });
+
+  test("the versions are GET theming/editor/versions/", async () => {
+    const { http, calls } = fakeHttp([]);
+    await expect(fetchThemeVersions(http)).resolves.toEqual([]);
+    expect(calls).toEqual([{ method: "GET", path: "theming/editor/versions/" }]);
+  });
+
+  test("a restore names the version in the path and the revision in the body", async () => {
+    const { http, calls } = fakeHttp({ draft_revision: 8 });
+    await expect(restoreThemeVersion(http, 12, 7)).resolves.toMatchObject({ draft_revision: 8 });
+    expect(calls).toEqual([
+      { method: "POST", path: "theming/editor/versions/12/restore/", body: { expected_draft_revision: 7 } },
+    ]);
+  });
+
+  test("apiErrorParts reads the status, code, path and draft revision, and nothing that isn't there", () => {
     expect(
       apiErrorParts(httpError(400, { code: "invalid_document", path: "templates.home.sections[1]" })),
-    ).toEqual({ status: 400, code: "invalid_document", path: "templates.home.sections[1]" });
-    expect(apiErrorParts(httpError(502, "<html>"))).toEqual({ status: 502, code: undefined, path: undefined });
-    expect(apiErrorParts(new TypeError("Failed to fetch"))).toEqual({});
-    expect(apiErrorParts(null)).toEqual({});
+    ).toEqual({
+      status: 400,
+      code: "invalid_document",
+      path: "templates.home.sections[1]",
+      draftRevision: undefined,
+    });
+    // A clash carries where the draft stands now, so the editor can offer to save over it.
+    expect(apiErrorParts(httpError(409, { code: "draft_conflict", draft_revision: 30 }))).toMatchObject({
+      status: 409,
+      code: "draft_conflict",
+      draftRevision: 30,
+    });
+    expect(apiErrorParts(httpError(409, { code: "draft_conflict", draft_revision: "30" })).draftRevision).toBe(
+      undefined,
+    );
+    expect(apiErrorParts(httpError(502, "<html>"))).toEqual({
+      status: 502,
+      code: undefined,
+      path: undefined,
+      draftRevision: undefined,
+    });
+    expect(apiErrorParts(new TypeError("Failed to fetch")).status).toBe(undefined);
+    expect(apiErrorParts(null).status).toBe(undefined);
   });
 });
 
@@ -126,7 +170,10 @@ describe("themeErrorMessageKey", () => {
     [403, { code: "storefront_unavailable", reason: null }, "lockExpired"],
     [403, { detail: "You do not have permission to perform this action." }, "errorNoPermission"],
     [400, { code: "unknown_theme" }, "errorUnknownTheme"],
-    [400, { code: "invalid_document", path: "sections" }, "errorGeneric"],
+    [400, { code: "nothing_to_publish" }, "errorNothingToSave"],
+    [400, { code: "invalid_document", path: "templates.home.sections[1]" }, "errorInvalidDocument"],
+    [404, { code: "version_not_found" }, "errorVersionGone"],
+    [429, { detail: "Request was throttled." }, "errorTooManySaves"],
     [409, { detail: "other conflict" }, "errorGeneric"],
     [500, "<html>", "errorGeneric"],
   ])("%i %j -> %s", (status, data, key) => {
@@ -144,6 +191,10 @@ describe("themeErrorMessageKey", () => {
       "errorDraftConflict",
       "errorNoPermission",
       "errorUnknownTheme",
+      "errorNothingToSave",
+      "errorInvalidDocument",
+      "errorVersionGone",
+      "errorTooManySaves",
       "errorGeneric",
       "lockNotEntitledTitle",
       "lockPaymentPending",
