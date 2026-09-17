@@ -29,6 +29,10 @@ const SOURCES = [
   "src/components/theme-editor/BlockList.tsx",
   "src/components/theme-editor/LinkPicker.tsx",
   "src/components/theme-editor/EditorSheet.tsx",
+  "src/components/theme-editor/EditorMenu.tsx",
+  "src/components/theme-editor/VersionHistorySheet.tsx",
+  "src/components/theme-editor/CloseSheet.tsx",
+  "src/components/theme-editor/ConflictDialog.tsx",
 ];
 
 /**
