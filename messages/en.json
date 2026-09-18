@@ -62,7 +62,18 @@
     "scrollMoreBelow": "Scroll to more content below",
     "toastActionViewOrders": "View orders",
     "toastActionRetry": "Retry",
-    "toastActionSignOut": "Sign out"
+    "toastActionSignOut": "Sign out",
+    "toastLabelSuccess": "Success",
+    "toastLabelError": "Error",
+    "toastLabelWarning": "Warning",
+    "toastLabelInfo": "Info",
+    "toastLabelNotice": "Notice",
+    "toastRegionLabel": "Notifications",
+    "toastUnknownError": "Something went wrong. Please try again.",
+    "toastRateLimitTitle": "Slow down",
+    "toastRateLimitBody": "Too many attempts. Please wait {seconds, number} seconds, then try again.",
+    "confirmPromptTitle": "Please confirm",
+    "confirmPromptMessage": "Please confirm that you want to continue."
   },
   "nav": {
     "home": "Home",

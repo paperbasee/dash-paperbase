@@ -62,7 +62,18 @@
     "scrollMoreBelow": "নিচে আরও কনটেন্ট দেখতে স্ক্রল করুন",
     "toastActionViewOrders": "অর্ডার দেখুন",
     "toastActionRetry": "আবার চেষ্টা করুন",
-    "toastActionSignOut": "সাইন আউট"
+    "toastActionSignOut": "সাইন আউট",
+    "toastLabelSuccess": "সফল",
+    "toastLabelError": "সমস্যা",
+    "toastLabelWarning": "সতর্কতা",
+    "toastLabelInfo": "তথ্য",
+    "toastLabelNotice": "বার্তা",
+    "toastRegionLabel": "নোটিফিকেশন",
+    "toastUnknownError": "কিছু একটা সমস্যা হয়েছে। আবার চেষ্টা করুন।",
+    "toastRateLimitTitle": "একটু ধীরে",
+    "toastRateLimitBody": "অনেকবার চেষ্টা হয়েছে। {seconds, number} সেকেন্ড অপেক্ষা করে আবার চেষ্টা করুন।",
+    "confirmPromptTitle": "নিশ্চিত করুন",
+    "confirmPromptMessage": "আপনি চালিয়ে যেতে চান কি না নিশ্চিত করুন।"
   },
   "nav": {
     "home": "হোম",

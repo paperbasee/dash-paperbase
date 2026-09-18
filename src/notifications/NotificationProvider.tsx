@@ -88,12 +88,28 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
       if (!isDescriptor(message)) return message;
       try {
         const translated = t(message.key as never, (message.values ?? {}) as never);
-        return translated || message.fallback || UNKNOWN_ERROR_FALLBACK;
+        // next-intl answers a missing key with the key itself, so without this check a
+        // forgotten key reached the merchant as "common.toastSomething" on screen. The
+        // descriptor's own fallback is a readable sentence, so it wins over that.
+        if (!translated || translated === message.key) {
+          return message.fallback || UNKNOWN_ERROR_FALLBACK;
+        }
+        return translated;
       } catch {
         return message.fallback || message.key || UNKNOWN_ERROR_FALLBACK;
       }
     },
     [t],
+  );
+
+  /**
+   * What an error toast says when the server sent nothing readable. It was the English
+   * sentence in normalizeError; a Bangla shop now gets a Bangla one, with that sentence
+   * kept only as the very last resort if the key ever goes missing.
+   */
+  const unknownErrorText = useCallback(
+    () => resolveMessage({ key: "common.toastUnknownError", fallback: UNKNOWN_ERROR_FALLBACK }),
+    [resolveMessage],
   );
 
   const makeId = () => `${Date.now()}-${Math.random().toString(16).slice(2)}`;
@@ -152,14 +168,9 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
     (kind: "success" | "info" | "warning" | "error", message: MessageDescriptor, options?: NotifyOptions) => {
       const text = resolveMessage(message);
       const id = options?.id ?? makeId();
-      const titleByVariant: Record<typeof kind, string> = {
-        success: "Success",
-        info: "Info",
-        warning: "Warning",
-        error: "Error",
-      };
-
-      const resolvedTitle = options?.title ? resolveMessage(options.title) : titleByVariant[kind];
+      // No default title. It used to be the English word for the kind ("Success", "Warning"),
+      // which the toast already prints in its coloured bar — in the merchant's language.
+      const resolvedTitle = options?.title ? resolveMessage(options.title) : undefined;
       const inferredIconName = inferToastIconName({
         variant: kind,
         title: resolvedTitle,
@@ -221,14 +232,17 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
           return pushToast(
             "warning",
             {
-              key: "notifyRateLimit.body",
+              // These two keys did not exist, so every rate-limit toast printed the English
+              // fallback below — or, worse, the raw key. They live in `common` with the rest
+              // of the toast words now.
+              key: "common.toastRateLimitBody",
               values: { seconds },
               fallback: `Too many attempts. Please wait ${seconds} seconds, then try again.`,
             },
             {
               ...options,
               title: {
-                key: "notifyRateLimit.title",
+                key: "common.toastRateLimitTitle",
                 fallback: "Slow down",
               },
               durationMs: options?.durationMs ?? durationMs,
@@ -238,7 +252,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
         }
         const fallbackText = options?.fallbackMessage
           ? resolveMessage(options.fallbackMessage)
-          : UNKNOWN_ERROR_FALLBACK;
+          : unknownErrorText();
         const normalized = normalizeError(error, fallbackText);
         if (normalized.fieldErrors && Object.keys(normalized.fieldErrors).length > 0 && options?.dedupeKey) {
           setValidationByForm((prev) => ({ ...prev, [options.dedupeKey!]: normalized.fieldErrors! }));
@@ -251,7 +265,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
         showToast({
           id,
           variant: "info",
-          title: options?.title ? resolveMessage(options.title) : "Loading",
+          title: options?.title ? resolveMessage(options.title) : t("common.loading"),
           message: resolveMessage(message),
           action: options?.action
             ? {
@@ -267,11 +281,12 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
           fail: (error?: unknown) => {
             toast.dismiss(id);
             if (error) {
-              const normalized = normalizeError(error);
+              const normalized = normalizeError(error, unknownErrorText());
               showToast({
                 id: `${id}-error`,
                 variant: "error",
-                title: "Error",
+                // No title: the toast's coloured bar names the kind in the merchant's
+                // language, where this said "Error" in English.
                 message: normalized.message,
                 persistent: options?.persistent,
               });
@@ -297,7 +312,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
 
     registerNotifyDispatcher(dispatcher);
     return () => registerNotifyDispatcher(null);
-  }, [clearValidation, pushToast, resolveMessage, showToast]);
+  }, [clearValidation, pushToast, resolveMessage, showToast, t, unknownErrorText]);
 
   const contextValue = useMemo<ContextValue>(
     () => ({
@@ -371,7 +386,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
             >
               {promptRequest?.options.cancelLabel
                 ? resolveMessage(promptRequest.options.cancelLabel)
-                : "Cancel"}
+                : t("common.cancel")}
             </Button>
             <Button
               variant={promptRequest?.options.level === "destructive" ? "destructive" : "default"}
@@ -384,7 +399,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
             >
               {promptRequest?.options.confirmLabel
                 ? resolveMessage(promptRequest.options.confirmLabel)
-                : "Confirm"}
+                : t("common.confirm")}
             </Button>
           </DialogFooter>
         </DialogContent>

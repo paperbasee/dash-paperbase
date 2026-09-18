@@ -9,6 +9,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { useTranslations } from "next-intl";
 
 import {
   ConfirmDialog,
@@ -41,60 +42,26 @@ type ConfirmFn = (options: ConfirmDialogOptions) => Promise<boolean>;
 
 const ConfirmDialogContext = createContext<ConfirmFn | undefined>(undefined);
 
-function asDialogText(value: ReactNode | undefined, fallback: string): string {
-  if (typeof value === "string") return value;
-  if (typeof value === "number") return String(value);
-  return fallback;
-}
-
-function normalizeDialogText(value: string): string {
-  return value.trim().toLowerCase().replace(/[?.!,:;'"`]/g, "");
-}
-
-function toWordSet(value: string): Set<string> {
-  return new Set(normalizeDialogText(value).split(/\s+/).filter(Boolean));
-}
-
-function isDescriptionTooSimilar(title: string, description: string): boolean {
-  const titleWords = toWordSet(title);
-  const descriptionWords = toWordSet(description);
-  if (titleWords.size === 0 || descriptionWords.size === 0) return false;
-
-  let overlap = 0;
-  for (const word of descriptionWords) {
-    if (titleWords.has(word)) overlap += 1;
-  }
-
-  const overlapRatio = overlap / Math.min(titleWords.size, descriptionWords.size);
-  const descriptionLooksLikeShortQuestion =
-    descriptionWords.size <= 5 && description.trim().endsWith("?");
-
-  return overlapRatio >= 0.6 || descriptionLooksLikeShortQuestion;
-}
-
-function descriptiveFallbackByVariant(variant: ConfirmDialogVariant | undefined): string {
-  if (variant === "danger") return "This action may be irreversible. Please confirm to continue.";
-  if (variant === "warning") return "Please review this action carefully before continuing.";
-  return "Please confirm that you want to proceed with this action.";
-}
-
-function resolveDialogDescription(
-  title: string,
-  message: ReactNode,
-  variant: ConfirmDialogVariant | undefined,
-): string {
-  const resolvedMessage = asDialogText(message, "").trim();
-  if (!resolvedMessage) return descriptiveFallbackByVariant(variant);
-  if (normalizeDialogText(resolvedMessage) === normalizeDialogText(title)) {
-    return descriptiveFallbackByVariant(variant);
-  }
-  if (isDescriptionTooSimilar(title, resolvedMessage)) {
-    return descriptiveFallbackByVariant(variant);
-  }
-  return resolvedMessage;
+/**
+ * Whether the caller gave this slot something to show. A string of spaces counts as nothing;
+ * anything else it passed -- text, a number, its own markup -- is its words and is shown as
+ * given.
+ *
+ * This replaces a rule that compared the message with the title and, when they shared enough
+ * words or the message was a short question, threw the caller's sentence away and printed an
+ * English one instead ("This action may be irreversible..."). A Bangla shop could see that on
+ * a dialog whose own text was fine -- and the shorter and plainer the title, the likelier it
+ * was. The caller's text now always wins; only a genuinely empty slot falls back, and it falls
+ * back to translated copy.
+ */
+export function hasOwnText(value: ReactNode): boolean {
+  if (typeof value === "string") return value.trim().length > 0;
+  if (typeof value === "number") return true;
+  return value !== null && value !== undefined && typeof value !== "boolean";
 }
 
 export function ConfirmDialogProvider({ children }: { children: ReactNode }) {
+  const tCommon = useTranslations("common");
   const [entry, setEntry] = useState<QueueEntry | null>(null);
   const [confirmLoading, setConfirmLoading] = useState(false);
   const queueRef = useRef<QueueEntry[]>([]);
@@ -193,12 +160,14 @@ export function ConfirmDialogProvider({ children }: { children: ReactNode }) {
         <ConfirmDialog
           isOpen
           onOpenChange={handleOpenChange}
-          title={asDialogText(entry.options.title, "Confirm Action")}
-          description={resolveDialogDescription(
-            asDialogText(entry.options.title, "Confirm Action"),
-            entry.options.message,
-            entry.options.variant,
-          )}
+          title={
+            hasOwnText(entry.options.title) ? entry.options.title : tCommon("confirmPromptTitle")
+          }
+          description={
+            hasOwnText(entry.options.message)
+              ? entry.options.message
+              : tCommon("confirmPromptMessage")
+          }
           confirmText={entry.options.confirmText}
           cancelText={entry.options.cancelText}
           requireTypedValue={entry.options.requireTypedValue}

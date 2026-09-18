@@ -33,6 +33,17 @@ type ToastProps = {
 export function Toast({ variant, message, title, action, iconName, onClose }: ToastProps) {
   const tCommon = useTranslations("common");
 
+  // The little word in the coloured bar. It used to be written in English in this file, so a
+  // Bangla shop read "SUCCESS" above its own language on every single toast. All five are
+  // looked up with a literal key, which keeps them findable by the copy test.
+  const headerLabelByVariant: Record<ToastVariant, string> = {
+    success: tCommon("toastLabelSuccess"),
+    error: tCommon("toastLabelError"),
+    warning: tCommon("toastLabelWarning"),
+    info: tCommon("toastLabelInfo"),
+    default: tCommon("toastLabelNotice"),
+  };
+
   const variantByIconName: Record<ToastIconName, ToastVariant> = {
     success: "success",
     information: "info",
@@ -60,7 +71,6 @@ export function Toast({ variant, message, title, action, iconName, onClose }: To
       headerBg: string;
       headerBorder: string;
       headerLabelText: string;
-      headerLabel: string;
       iconBg: string;
       iconBorder: string;
       iconColor: string;
@@ -73,7 +83,6 @@ export function Toast({ variant, message, title, action, iconName, onClose }: To
       headerBg: "bg-green-50 dark:bg-green-950/50",
       headerBorder: "border-green-100 dark:border-green-900",
       headerLabelText: "text-green-700 dark:text-green-400",
-      headerLabel: "Success",
       iconBg: "bg-green-50 dark:bg-green-950/60",
       iconBorder: "border-green-200 dark:border-green-800",
       iconColor: "text-green-600 dark:text-green-400",
@@ -86,7 +95,6 @@ export function Toast({ variant, message, title, action, iconName, onClose }: To
       headerBg: "bg-red-50 dark:bg-red-950/50",
       headerBorder: "border-red-100 dark:border-red-900",
       headerLabelText: "text-red-700 dark:text-red-400",
-      headerLabel: "Error dialog",
       iconBg: "bg-red-50 dark:bg-red-950/60",
       iconBorder: "border-red-200 dark:border-red-800",
       iconColor: "text-red-600 dark:text-red-400",
@@ -99,7 +107,6 @@ export function Toast({ variant, message, title, action, iconName, onClose }: To
       headerBg: "bg-amber-50 dark:bg-amber-950/50",
       headerBorder: "border-amber-100 dark:border-amber-900",
       headerLabelText: "text-amber-700 dark:text-amber-400",
-      headerLabel: "Warning",
       iconBg: "bg-amber-50 dark:bg-amber-950/60",
       iconBorder: "border-amber-200 dark:border-amber-800",
       iconColor: "text-amber-600 dark:text-amber-400",
@@ -112,7 +119,6 @@ export function Toast({ variant, message, title, action, iconName, onClose }: To
       headerBg: "bg-blue-50 dark:bg-blue-950/50",
       headerBorder: "border-blue-100 dark:border-blue-900",
       headerLabelText: "text-blue-700 dark:text-blue-400",
-      headerLabel: "Info",
       iconBg: "bg-blue-50 dark:bg-blue-950/60",
       iconBorder: "border-blue-200 dark:border-blue-800",
       iconColor: "text-blue-600 dark:text-blue-400",
@@ -125,7 +131,6 @@ export function Toast({ variant, message, title, action, iconName, onClose }: To
       headerBg: "bg-gray-100 dark:bg-gray-800/60",
       headerBorder: "border-gray-200 dark:border-gray-700",
       headerLabelText: "text-gray-600 dark:text-gray-300",
-      headerLabel: "Notice",
       iconBg: "bg-gray-100 dark:bg-gray-800",
       iconBorder: "border-gray-200 dark:border-gray-700",
       iconColor: "text-gray-500 dark:text-gray-400",
@@ -172,7 +177,7 @@ export function Toast({ variant, message, title, action, iconName, onClose }: To
             config.headerLabelText,
           )}
         >
-          {config.headerLabel}
+          {headerLabelByVariant[resolvedVariant]}
         </span>
       </div>
 
@@ -194,10 +199,22 @@ export function Toast({ variant, message, title, action, iconName, onClose }: To
         </div>
 
         <div className="min-w-0 flex-1">
-          <p className={cn("text-[15px] font-semibold leading-snug", config.titleText)}>
-            {title ?? "Notification"}
-          </p>
-          <p className="mt-1 whitespace-pre-line text-[13px] leading-relaxed text-gray-500 dark:text-gray-400">
+          {/* No English "Notification" stand-in any more. When a toast has no title of its
+              own, what it has to say takes the title's place, so the toast reads and weighs
+              the same as before — the coloured bar above already names the kind. */}
+          {title ? (
+            <p className={cn("text-[15px] font-semibold leading-snug", config.titleText)}>
+              {title}
+            </p>
+          ) : null}
+          <p
+            className={cn(
+              "whitespace-pre-line",
+              title
+                ? "mt-1 text-[13px] leading-relaxed text-gray-500 dark:text-gray-400"
+                : cn("text-[15px] font-semibold leading-snug", config.titleText),
+            )}
+          >
             {message}
           </p>
         </div>
@@ -222,7 +239,9 @@ export function Toast({ variant, message, title, action, iconName, onClose }: To
             {tCommon("close")}
           </button>
 
-          {/* Primary */}
+          {/* Primary — only when there is something to do. It used to say "Confirm" on every
+              toast that had no action, a button that confirmed nothing and only closed, next
+              to a Close button that already did that. */}
           {action ? (
             <button
               type="button"
@@ -237,18 +256,7 @@ export function Toast({ variant, message, title, action, iconName, onClose }: To
             >
               {action.label}
             </button>
-          ) : (
-            <button
-              type="button"
-              onClick={onClose}
-              className={cn(
-                "h-9 rounded-xs px-4 text-[13px] font-medium transition-colors",
-                config.primaryButton,
-              )}
-            >
-              {tCommon("confirm")}
-            </button>
-          )}
+          ) : null}
         </div>
       </div>
     </div>

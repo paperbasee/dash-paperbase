@@ -1,8 +1,11 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Toaster } from "sonner";
 
 export function NotificationViewport() {
+  const tCommon = useTranslations("common");
+
   return (
     <Toaster
       position="bottom-right"
@@ -11,7 +14,8 @@ export function NotificationViewport() {
       duration={5000}
       visibleToasts={4}
       gap={12}
-      containerAriaLabel="Notifications"
+      // Read out by a screen reader, so it belongs in the merchant's language too.
+      containerAriaLabel={tCommon("toastRegionLabel")}
       style={{
         zIndex: 70,
         bottom: "2rem",

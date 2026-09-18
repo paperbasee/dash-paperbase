@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
@@ -11,8 +12,9 @@ export type ConfirmDialogVariant = "danger" | "warning" | "default";
 export type ConfirmDialogProps = {
   isOpen: boolean;
   onOpenChange: (isOpen: boolean) => void;
-  title: string;
-  description: string;
+  title: React.ReactNode;
+  /** The caller's own words. A node is rendered as given, never swapped for other text. */
+  description: React.ReactNode;
   confirmText?: string;
   cancelText?: string;
   variant?: ConfirmDialogVariant;
@@ -36,8 +38,8 @@ export function ConfirmDialog({
   onOpenChange,
   title,
   description,
-  confirmText = "Confirm",
-  cancelText = "Cancel",
+  confirmText,
+  cancelText,
   variant = "default",
   isConfirmLoading = false,
   requireTypedValue,
@@ -45,6 +47,9 @@ export function ConfirmDialog({
   onCancel,
   onConfirm,
 }: ConfirmDialogProps) {
+  // The two buttons used to default to the English words "Confirm" and "Cancel" for any
+  // caller that did not pass its own.
+  const tCommon = useTranslations("common");
   const busy = isConfirmLoading;
   const [typed, setTyped] = React.useState("");
   // Clear between openings, so one confirmation cannot arm the next.
@@ -135,7 +140,7 @@ export function ConfirmDialog({
               "h-10 min-w-28 px-5 text-base font-medium sm:h-11 sm:min-w-32 sm:px-6 sm:text-lg",
             )}
           >
-            {cancelText}
+            {cancelText ?? tCommon("cancel")}
           </Button>
           <Button
             type="button"
@@ -147,7 +152,7 @@ export function ConfirmDialog({
               confirmButtonTone,
             )}
           >
-            {confirmText}
+            {confirmText ?? tCommon("confirm")}
           </Button>
         </div>
       </DialogContent>
