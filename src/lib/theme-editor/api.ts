@@ -40,7 +40,8 @@ export type ThemePublished = {
  */
 export const EDITOR_REQUEST_TIMEOUT_MS = 15_000;
 
-export type ThemeAccessState = "ok" | "not_entitled" | "storefront_unavailable";
+/** Whether the editor can open at all. The plan is not part of this — see ThemeSummary.available. */
+export type ThemeAccessState = "ok" | "storefront_unavailable";
 
 export type ThemeAccess = {
   state: ThemeAccessState;
@@ -74,6 +75,8 @@ export type ThemeSummary = {
   name_bn: string;
   /** An industry word such as "fashion"; null for Basic. */
   category: string | null;
+  /** May this shop put this theme live? Basic always; the rest need Premium running. */
+  available: boolean;
 };
 
 export type ThemeLibrary = {
@@ -331,6 +334,7 @@ export type ThemeErrorMessageKey =
   | "errorTooManySaves"
   | "errorGeneric"
   | "lockNotEntitledBody"
+  | "errorThemeNotAvailable"
   | "lockPaymentPending"
   | "lockExpired";
 
@@ -351,6 +355,9 @@ export function themeErrorMessageKey(error: unknown): ThemeErrorMessageKey {
   }
   if (status === 400) {
     if (body.code === "unknown_theme") return "errorUnknownTheme";
+    // Asked for a theme this plan does not include: the library refetch will already
+    // be showing it as Premium-only, so this only has to say why the click did nothing.
+    if (body.code === "theme_not_available") return "errorThemeNotAvailable";
     if (body.code === "nothing_to_publish") return "errorNothingToSave";
     // Publish and restore validate the draft again, because a theme file can have changed
     // under it. Nothing comes right by waiting, so this says what the way out is instead.

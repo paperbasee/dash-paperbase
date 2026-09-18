@@ -101,10 +101,15 @@ export function ThemeLibrary({
 
     // Every theme keeps its own design, so opening one costs nothing and asks
     // nothing. A theme the shop has worked on says so, rather than inviting a
-    // merchant to "try" what they already built.
+    // merchant to "try" what they already built. A theme the plan does not
+    // include is shown, not hidden — that is how a merchant learns it exists.
     const started = current.started_themes.includes(theme.key);
     let action: ReactNode = null;
-    if (canOpenEditor && !isLive) {
+    if (!theme.available) {
+      action = (
+        <p className="text-xs text-muted-foreground">{t("themeNeedsPremium")}</p>
+      );
+    } else if (canOpenEditor && !isLive) {
       action = (
         <Button
           type="button"

@@ -30,7 +30,6 @@ describe("themePageState", () => {
   });
 
   test.each([
-    [{ state: "not_entitled" }, "not_entitled"],
     [{ state: "storefront_unavailable", reason: "payment_pending" }, "payment_pending"],
     [{ state: "storefront_unavailable", reason: "expired" }, "expired"],
     [{ state: "storefront_unavailable", reason: null }, "expired"],

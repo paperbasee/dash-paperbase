@@ -27,11 +27,7 @@ export function ThemeLockNotice({
   let title: string;
   let body: string | null = null;
   let cta: string | null = null;
-  if (lock === "not_entitled") {
-    title = t("lockNotEntitledTitle");
-    body = isOwner ? t("lockNotEntitledBody") : t("askOwnerUpgrade");
-    cta = isOwner ? t("upgradeCta") : null;
-  } else if (lock === "payment_pending") {
+  if (lock === "payment_pending") {
     title = t("lockPaymentPending");
   } else {
     // "Renew to edit. Your theme is kept." already says it is kept.
@@ -47,7 +43,7 @@ export function ThemeLockNotice({
         <div className="flex flex-wrap items-center gap-2">
           <span className="inline-flex items-center gap-1 rounded-tooltip border border-border bg-muted/50 px-2 py-0.5 text-xs text-muted-foreground">
             <Lock className="size-3 shrink-0" aria-hidden />
-            {t("premiumBadge")}
+            {t("lockedBadge")}
           </span>
           <p className="text-sm font-medium text-foreground">{title}</p>
         </div>

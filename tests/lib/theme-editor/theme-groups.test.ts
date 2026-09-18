@@ -22,6 +22,7 @@ const theme = (key: string, category: string | null, name_bn = `${key}-bn`): The
   name: key.charAt(0).toUpperCase() + key.slice(1),
   name_bn,
   category,
+  available: true,
 });
 
 const BASIC = theme("basic", null, "বেসিক");
