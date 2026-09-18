@@ -37,9 +37,39 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-09-18-banners-move-into-the-editor",
+    date: "2026-09-18",
+    version: "4.12.0",
+    tag: "improved",
+    title: {
+      en: "Banners move into the design editor",
+      bn: "ব্যানার এখন ডিজাইন এডিটরে",
+    },
+    body: {
+      en: "Your banner pictures are now part of your design, so you add and change them in Settings → Customization while watching your store beside you. The Banners page has left Promotions, which keeps your pop-up and your notice bar. Pictures you have used before are offered again, so you never upload the same photo twice.",
+      bn: "ব্যানারের ছবি এখন আপনার ডিজাইনের অংশ, তাই সেটিংস → কাস্টমাইজেশনে পাশে স্টোর দেখতে দেখতেই ছবি যোগ বা বদল করবেন। প্রোমোশন থেকে ব্যানার পেজটি সরানো হয়েছে, সেখানে পপ-আপ আর নোটিশ বার থাকছে। আগে ব্যবহার করা ছবিগুলো আবার দেখানো হয়, তাই একই ছবি দুবার আপলোড করতে হবে না।",
+    },
+    href: "/settings?tab=customization",
+  },
+  {
+    id: "2026-09-18-every-plan-can-customize",
+    date: "2026-09-18",
+    version: "4.12.0",
+    tag: "improved",
+    title: {
+      en: "Every plan can now customize its store",
+      bn: "এখন সব প্ল্যানেই স্টোর সাজানো যাবে",
+    },
+    body: {
+      en: "The design editor used to be Premium only. Now every store can open it and change the Basic design; Premium is what lets you pick a different theme. Each theme also keeps its own design, so looking at another one never costs you the work you have already done.",
+      bn: "ডিজাইন এডিটর আগে শুধু প্রিমিয়ামে ছিল। এখন যেকোনো স্টোর এটি খুলে বেসিক ডিজাইন বদলাতে পারবে; অন্য থিম বেছে নিতে প্রিমিয়াম লাগবে। প্রতিটি থিমের ডিজাইন আলাদাভাবে জমা থাকে, তাই অন্য থিম দেখে এলে আগের কাজ হারাবে না।",
+    },
+    href: "/settings?tab=customization",
+  },
+  {
     id: "2026-09-18-team-screen-in-bangla",
     date: "2026-09-18",
-    version: "4.11.0",
+    version: "4.12.0",
     tag: "improved",
     title: {
       en: "Team and roles, in your language",
@@ -54,7 +84,7 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
     id: "2026-09-18-theme-editor-and-live-preview",
     date: "2026-09-18",
-    version: "4.11.0",
+    version: "4.12.0",
     tag: "new",
     title: {
       en: "Choose a theme and design your store",
