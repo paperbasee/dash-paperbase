@@ -37,6 +37,21 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-09-18-fraud-check-new-provider",
+    date: "2026-09-18",
+    version: "4.7.1",
+    tag: "improved",
+    title: {
+      en: "Fraud Check runs on a new data source",
+      bn: "ফ্রড চেক এখন নতুন ডেটা সোর্সে চলছে",
+    },
+    body: {
+      en: "The courier delivery history behind Fraud Check now comes from a new provider. The success ratio and the courier breakdown work exactly as before, and there is nothing for you to change.",
+      bn: "ফ্রড চেকের পেছনের কুরিয়ার ডেলিভারি হিস্ট্রি এখন নতুন একটি সোর্স থেকে আসছে। সাকসেস রেশিও আর কুরিয়ারভিত্তিক হিসাব আগের মতোই কাজ করবে, আপনাকে কিছুই বদলাতে হবে না।",
+    },
+    href: "/orders",
+  },
+  {
     id: "2026-09-16-promotions-and-shipping-in-settings",
     date: "2026-09-16",
     version: "4.7.0",
