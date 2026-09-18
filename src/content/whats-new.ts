@@ -200,6 +200,21 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     href: "/settings?tab=customization",
   },
   {
+    id: "2026-09-18-fraud-check-new-provider",
+    date: "2026-09-18",
+    version: "4.7.1",
+    tag: "improved",
+    title: {
+      en: "Fraud Check runs on a new data source",
+      bn: "ফ্রড চেক এখন নতুন ডেটা সোর্সে চলছে",
+    },
+    body: {
+      en: "The courier delivery history behind Fraud Check now comes from a new provider. The success ratio and the courier breakdown work exactly as before, and there is nothing for you to change.",
+      bn: "ফ্রড চেকের পেছনের কুরিয়ার ডেলিভারি হিস্ট্রি এখন নতুন একটি সোর্স থেকে আসছে। সাকসেস রেশিও আর কুরিয়ারভিত্তিক হিসাব আগের মতোই কাজ করবে, আপনাকে কিছুই বদলাতে হবে না।",
+    },
+    href: "/orders",
+  },
+  {
     id: "2026-09-17-managers-can-edit-storefront-look",
     date: "2026-09-17",
     version: "4.8.5",
@@ -461,20 +476,4 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     },
     href: "/trash",
   },
-  {
-    id: "2026-09-14-drag-reorder-saves-instantly",
-    date: "2026-09-14",
-    version: "4.5.0",
-    tag: "improved",
-    title: {
-      en: "Drag-to-reorder saves instantly",
-      bn: "টেনে সাজানো সঙ্গে সঙ্গে সংরক্ষিত হয়",
-    },
-    body: {
-      en: "Reordering products in a category saves the moment you drop, no matter how many products the category has.",
-      bn: "ক্যাটাগরির পণ্য টেনে সাজালে ছেড়ে দেওয়ামাত্রই সংরক্ষিত হয়, ক্যাটাগরিতে যত পণ্যই থাকুক।",
-    },
-    href: "/products",
-  },
-
 ];
