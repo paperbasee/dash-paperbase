@@ -37,6 +37,20 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-09-18-lighter-buy-buttons",
+    date: "2026-09-18",
+    version: "4.12.4",
+    tag: "improved",
+    title: {
+      en: "Softer text on the buy buttons",
+      bn: "কেনার বাটনের লেখা একটু হালকা",
+    },
+    body: {
+      en: "Order now and Add to cart are set a little lighter on your product pages. Nothing moved and nothing changed about how they work; they simply sit more quietly next to your product name and price.",
+      bn: "পণ্যের পেজে এখনই অর্ডার করুন আর কার্টে যোগ করুন লেখা দুটি একটু হালকা করা হয়েছে। কিছু সরেনি, কাজেও কোনো বদল নেই; শুধু পণ্যের নাম আর দামের পাশে আগের চেয়ে শান্ত দেখায়।",
+    },
+  },
+  {
     id: "2026-09-18-card-style-on-every-theme",
     date: "2026-09-18",
     version: "4.12.3",
@@ -459,20 +473,6 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     body: {
       en: "A short hiccup on our servers no longer takes your store offline or loses an order a shopper has already placed.",
       bn: "আমাদের সার্ভারে সাময়িক সমস্যা হলেও আপনার স্টোর আর বন্ধ হয়ে যায় না, আর ক্রেতার দেওয়া অর্ডারও হারিয়ে যায় না।",
-    },
-  },
-  {
-    id: "2026-09-12-quick-order-simple-products",
-    date: "2026-09-12",
-    version: "4.4.0",
-    tag: "fixed",
-    title: {
-      en: "Quick order works for products without options",
-      bn: "অপশন ছাড়া পণ্যেও কুইক অর্ডার কাজ করে",
-    },
-    body: {
-      en: "In your store's quick order popup, Order Now and Add to cart now work for products with no size or color to choose. The popup also shows free delivery when a product has it.",
-      bn: "আপনার স্টোরের কুইক অর্ডার পপআপে সাইজ বা রং বাছাই নেই এমন পণ্যেও এখন \"এখনই অর্ডার করুন\" ও \"কার্টে যোগ করুন\" কাজ করে। পণ্যে ফ্রি ডেলিভারি থাকলে পপআপেও তা দেখায়।",
     },
   },
 ];
