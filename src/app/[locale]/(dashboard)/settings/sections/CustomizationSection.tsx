@@ -122,7 +122,7 @@ export default function CustomizationSection({ hidden }: { hidden: boolean }) {
     const ok = await confirm({
       title: tc("confirmDiscardTitle"),
       message: tc("confirmDiscardMessage", {
-        draft: themeNameByKey(data.themes, data.current.draft_theme, locale),
+        draft: themeNameByKey(data.themes, data.current.draft_theme, locale, tc("themeUnnamed")),
         theme: name,
       }),
       confirmText: tc("confirmDiscard"),

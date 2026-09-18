@@ -322,7 +322,7 @@ export type ThemeErrorMessageKey =
   | "errorVersionGone"
   | "errorTooManySaves"
   | "errorGeneric"
-  | "lockNotEntitledTitle"
+  | "lockNotEntitledBody"
   | "lockPaymentPending"
   | "lockExpired";
 
@@ -333,7 +333,9 @@ export function themeErrorMessageKey(error: unknown): ThemeErrorMessageKey {
   const body = data && typeof data === "object" ? (data as { code?: unknown; reason?: unknown }) : {};
   if (status === 409 && body.code === "draft_conflict") return "errorDraftConflict";
   if (status === 403) {
-    if (body.code === "not_entitled") return "lockNotEntitledTitle";
+    // The body, not the heading: "Themes are part of Premium" alone reads as a title and
+    // says nothing about what to do next.
+    if (body.code === "not_entitled") return "lockNotEntitledBody";
     if (body.code === "storefront_unavailable") {
       return body.reason === "payment_pending" ? "lockPaymentPending" : "lockExpired";
     }

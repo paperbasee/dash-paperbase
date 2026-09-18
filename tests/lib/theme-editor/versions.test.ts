@@ -1,7 +1,7 @@
 /**
  * How a history row reads: "Version 12 · 14 Sep, 3:40 PM", and the same line in Bangla with
- * Bangla digits and a Bangla month. The time is the shop's own (Asia/Dhaka), so an evening save
- * never reads as the next morning.
+ * Bangla digits, a Bangla month and the Bangla part of the day instead of AM/PM. The time is
+ * the shop's own (Asia/Dhaka), so an evening save never reads as the next morning.
  */
 
 import { describe, expect, test } from "vitest";
@@ -22,13 +22,13 @@ describe("when it was saved", () => {
 
   test("reads day, month and time, in each language", () => {
     expect(versionMoment(afternoon, "en")).toBe("14 Sep, 3:40 PM");
-    expect(versionMoment(afternoon, "bn")).toBe("১৪ সেপ্ট, ৩:৪০ PM");
+    expect(versionMoment(afternoon, "bn")).toBe("১৪ সেপ্ট, দুপুর ৩:৪০");
   });
 
   test("is the shop's own day: late evening UTC is already tomorrow in Dhaka", () => {
     // 2026-09-14 20:30 UTC is 2:30 AM on the 15th in Dhaka.
     expect(versionMoment("2026-09-14T20:30:00Z", "en")).toBe("15 Sep, 2:30 AM");
-    expect(versionMoment("2026-09-14T20:30:00Z", "bn")).toBe("১৫ সেপ্ট, ২:৩০ AM");
+    expect(versionMoment("2026-09-14T20:30:00Z", "bn")).toBe("১৫ সেপ্ট, রাত ২:৩০");
   });
 
   test("a date that cannot be read is a dash, never a wrong day", () => {

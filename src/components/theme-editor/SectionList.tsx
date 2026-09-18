@@ -242,7 +242,9 @@ function SectionRow({
           type="button"
           onClick={onOpen}
           aria-label={t("openSettings", { name })}
-          className="min-w-0 flex-1 rounded-ui px-2 py-2 text-left hover:bg-accent md:px-1.5"
+          // min-h-11: a one-line name is the most tapped control here, and padding alone left
+          // it at 36px on a phone, under the 44px the row's own buttons already have.
+          className="flex min-h-11 min-w-0 flex-1 flex-col justify-center rounded-ui px-2 py-2 text-left hover:bg-accent md:min-h-0 md:px-1.5"
         >
           <span
             className={cn(

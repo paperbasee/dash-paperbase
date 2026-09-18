@@ -164,7 +164,7 @@ describe("draft and preview pass", () => {
 describe("themeErrorMessageKey", () => {
   test.each([
     [409, { code: "draft_conflict", draft_revision: 9 }, "errorDraftConflict"],
-    [403, { code: "not_entitled" }, "lockNotEntitledTitle"],
+    [403, { code: "not_entitled" }, "lockNotEntitledBody"],
     [403, { code: "storefront_unavailable", reason: "payment_pending" }, "lockPaymentPending"],
     [403, { code: "storefront_unavailable", reason: "expired" }, "lockExpired"],
     [403, { code: "storefront_unavailable", reason: null }, "lockExpired"],
@@ -196,7 +196,7 @@ describe("themeErrorMessageKey", () => {
       "errorVersionGone",
       "errorTooManySaves",
       "errorGeneric",
-      "lockNotEntitledTitle",
+      "lockNotEntitledBody",
       "lockPaymentPending",
       "lockExpired",
     ];

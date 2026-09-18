@@ -49,14 +49,20 @@ export function themeName(theme: Pick<ThemeSummary, "name" | "name_bn">, locale:
   return locale === "bn" && theme.name_bn.trim() ? theme.name_bn : theme.name;
 }
 
-/** The name for a theme key, or the key itself when the list no longer has it. */
+/**
+ * The name for a theme key. A key the list no longer carries (a retired theme a store still
+ * holds) has no name to show, so the caller's own translated words stand in — never the key,
+ * which is English and would land inside a Bangla sentence.
+ */
 export function themeNameByKey(
   themes: readonly ThemeSummary[],
   key: string | null,
   locale: string,
+  unnamed: string,
 ): string {
   const theme = themes.find((t) => t.key === key);
-  return theme ? themeName(theme, locale) : (key ?? "");
+  if (theme) return themeName(theme, locale);
+  return key ? unnamed : "";
 }
 
 /** Message keys (settings.customization) for the categories the owner named. */

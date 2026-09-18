@@ -10,6 +10,16 @@ export type CardVariantRow = ThemeCardVariantRow;
 
 const sk = "animate-pulse rounded bg-muted";
 
+/**
+ * The API serves a card style's name and description in English only (there is no `name_bn`
+ * on `CARD_VARIANTS`), so the two styles that ship are named here instead. A style the API
+ * adds later falls back to the English it sends, rather than to a missing key.
+ */
+const CARD_VARIANT_COPY: Record<string, { name: string; description: string }> = {
+  classic: { name: "cardVariantClassic", description: "cardVariantClassicDescription" },
+  shelf: { name: "cardVariantShelf", description: "cardVariantShelfDescription" },
+};
+
 /** Layout skeleton for storefront `ProductCard` (square media + corner chip + centered lines). */
 function ClassicPreview() {
   return (
@@ -99,6 +109,7 @@ export function CardVariantPicker({
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {variants.map((row) => {
           const selected = selectedVariant === row.key;
+          const copy = CARD_VARIANT_COPY[row.key];
           return (
             <button
               key={row.key}
@@ -112,14 +123,16 @@ export function CardVariantPicker({
               )}
             >
               <div className="flex items-start justify-between gap-2">
-                <span className="font-medium text-foreground">{row.name}</span>
+                <span className="font-medium text-foreground">{copy ? t(copy.name) : row.name}</span>
                 {selected ? (
                   <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-emerald-500 text-white shadow-sm ring-2 ring-background dark:bg-emerald-600">
                     <Check className="size-3.5 stroke-[2.5]" aria-hidden />
                   </span>
                 ) : null}
               </div>
-              <p className="mt-1 text-xs text-muted-foreground">{row.description}</p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                {copy ? t(copy.description) : row.description}
+              </p>
               {row.key === "shelf" ? <ShelfPreview /> : <ClassicPreview />}
             </button>
           );

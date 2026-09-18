@@ -87,10 +87,10 @@ describe("names by locale", () => {
     expect(themeName({ name: "Minimal", name_bn: "  " }, "bn")).toBe("Minimal");
   });
 
-  test("by key, or the key itself when the theme is gone", () => {
-    expect(themeNameByKey([BASIC], "basic", "bn")).toBe("বেসিক");
-    expect(themeNameByKey([BASIC], "retired", "en")).toBe("retired");
-    expect(themeNameByKey([BASIC], null, "en")).toBe("");
+  test("by key; a theme that is gone reads the caller's words, never the English key", () => {
+    expect(themeNameByKey([BASIC], "basic", "bn", "অন্য একটি থিম")).toBe("বেসিক");
+    expect(themeNameByKey([BASIC], "retired", "bn", "অন্য একটি থিম")).toBe("অন্য একটি থিম");
+    expect(themeNameByKey([BASIC], null, "en", "Another theme")).toBe("");
   });
 });
 

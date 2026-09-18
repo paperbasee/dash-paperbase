@@ -33,7 +33,8 @@ export function CurrentThemeCard({
   const locale = useLocale();
   const categoryText = useCategoryLabel();
 
-  const liveName = themeNameByKey(themes, current.live_theme, locale);
+  const unnamed = t("themeUnnamed");
+  const liveName = themeNameByKey(themes, current.live_theme, locale, unnamed);
   const live = themes.find((theme) => theme.key === current.live_theme);
   const draftOfOther =
     current.has_draft && current.draft_theme !== null && current.draft_theme !== current.live_theme;
@@ -44,7 +45,7 @@ export function CurrentThemeCard({
     if (locked) {
       // published_at describes the saved theme, which waits while shoppers see Basic.
       savedLine = t("savedThemeNotLive", {
-        theme: themeNameByKey(themes, current.theme_key, locale),
+        theme: themeNameByKey(themes, current.theme_key, locale, unnamed),
         date,
       });
     } else {
@@ -76,7 +77,7 @@ export function CurrentThemeCard({
             <p className="pt-0.5">
               <ThemePill tone="draft">
                 {draftOfOther
-                  ? t("draftOfTheme", { theme: themeNameByKey(themes, current.draft_theme, locale) })
+                  ? t("draftOfTheme", { theme: themeNameByKey(themes, current.draft_theme, locale, unnamed) })
                   : t("draftBadge")}
               </ThemePill>
             </p>

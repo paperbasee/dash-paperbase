@@ -49,7 +49,20 @@ const KEY_SOURCES = [
 describe("theme editor copy", () => {
   it("has the same keys in English and Bangla, all translated", () => {
     expect(Object.keys(bnNs).sort()).toEqual(Object.keys(enNs).sort());
-    expect(Object.keys(enNs).filter((k) => enNs[k] === bnNs[k])).toEqual([]);
+    // A string made only of placeholders and punctuation — the field counter's "20 / 200" —
+    // has nothing to translate, and a Bangla reader gets Bangla digits from the formatter.
+    const hasWords = (value: string) => /\p{L}/u.test(value.replace(/\{[^}]*\}/g, ""));
+    expect(Object.keys(enNs).filter((k) => enNs[k] === bnNs[k] && hasWords(enNs[k]))).toEqual([]);
+  });
+
+  it("types every counted placeholder, so Bangla gets Bangla digits", () => {
+    // A bare {max} renders "40" even at locale bn; only "{max, number}" gives "৪০".
+    const COUNTED = ["max", "used", "position", "total", "count", "seconds"];
+    const bare = (ns: Record<string, string>, lang: string) =>
+      Object.entries(ns)
+        .filter(([, v]) => COUNTED.some((n) => new RegExp(`\\{\\s*${n}\\s*\\}`).test(v)))
+        .map(([k]) => `${lang}.${k}`);
+    expect([...bare(enNs, "en"), ...bare(bnNs, "bn")]).toEqual([]);
   });
 
   it("keeps every placeholder in Bangla", () => {
