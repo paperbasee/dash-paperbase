@@ -37,6 +37,65 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-09-18-heritage-is-its-own-design",
+    date: "2026-09-18",
+    version: "4.12.5",
+    tag: "improved",
+    title: {
+      en: "Heritage is now a design of its own",
+      bn: "হেরিটেজ এখন সম্পূর্ণ আলাদা একটি ডিজাইন",
+    },
+    body: {
+      en: "Heritage no longer borrows anything from Basic. Its product page, cards, search, menu, cart panel and journal are all drawn its own way. Choosing a theme now changes the whole shop, not only its colours and type.",
+      bn: "হেরিটেজ এখন আর বেসিক থেকে কিছু ধার করে না। এর পণ্যের পেজ, কার্ড, সার্চ, মেনু, কার্ট প্যানেল আর জার্নাল—সবই নিজের মতো করে আঁকা। থিম বদলালে এখন শুধু রং আর ফন্ট নয়, পুরো দোকানের চেহারাই বদলায়।",
+    },
+    href: "/settings/customize",
+  },
+  {
+    id: "2026-09-18-popup-waits-its-turn",
+    date: "2026-09-18",
+    version: "4.12.5",
+    tag: "fixed",
+    title: {
+      en: "Your pop-up waits its turn",
+      bn: "আপনার পপ-আপ এখন অপেক্ষা করে",
+    },
+    body: {
+      en: "Your promotional pop-up used to appear on top of whatever a shopper was already looking at, including the panel confirming what they had just added to their cart. It now waits until the screen is free, and it is not counted as shown until the shopper actually sees it.",
+      bn: "আগে আপনার প্রচারের পপ-আপ ক্রেতার সামনে খোলা যেকোনো কিছুর ওপরেই চলে আসত—এমনকি কার্টে পণ্য যোগ হওয়ার বার্তার ওপরেও। এখন স্ক্রিন খালি হওয়া পর্যন্ত অপেক্ষা করে, আর ক্রেতা সত্যিই না দেখা পর্যন্ত সেটি দেখানো হয়েছে বলে ধরা হয় না।",
+    },
+  },
+  {
+    id: "2026-09-18-card-add-to-cart-counted",
+    date: "2026-09-18",
+    version: "4.12.5",
+    tag: "fixed",
+    title: {
+      en: "Add to cart from a card is now counted",
+      bn: "কার্ড থেকে কার্টে যোগ এখন হিসাবে আসে",
+    },
+    body: {
+      en: "When a shopper added a product straight from a card instead of opening the product page, your reports did not count it. Those add to cart numbers were lower than they should have been, and are now correct. Expect the figure to rise.",
+      bn: "ক্রেতা পণ্যের পেজে না গিয়ে সরাসরি কার্ড থেকে কার্টে যোগ করলে সেটি আপনার রিপোর্টে গণনা হতো না। কার্টে যোগের সংখ্যা তাই আসলের চেয়ে কম দেখাত, এখন তা ঠিক করা হয়েছে। সংখ্যাটি বাড়তে দেখলে অবাক হবেন না।",
+    },
+    href: "/analytics",
+  },
+  {
+    id: "2026-09-18-every-page-keeps-something",
+    date: "2026-09-18",
+    version: "4.12.5",
+    tag: "improved",
+    title: {
+      en: "A page can no longer be left empty",
+      bn: "কোনো পেজ আর একদম ফাঁকা করা যাবে না",
+    },
+    body: {
+      en: "In the theme editor, every page now keeps one part you cannot hide: the products on your home and category pages, the posts on your journal, the writing on a post. Everything else, banners included, is still yours to move or remove.",
+      bn: "থিম এডিটরে এখন প্রতিটি পেজে একটি অংশ থাকবেই, যা লুকানো যাবে না—হোম আর ক্যাটাগরিতে পণ্য, জার্নালে পোস্ট, পোস্টে লেখা। ব্যানারসহ বাকি সবকিছু আগের মতোই সরানো বা বাদ দেওয়া যাবে।",
+    },
+    href: "/settings/customize",
+  },
+  {
     id: "2026-09-18-lighter-buy-buttons",
     date: "2026-09-18",
     version: "4.12.4",
@@ -417,62 +476,5 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     },
     href: "/products",
   },
-  {
-    id: "2026-09-14-variants-product-search",
-    date: "2026-09-14",
-    version: "4.5.0",
-    tag: "improved",
-    title: {
-      en: "Find products faster on the Variants page",
-      bn: "ভেরিয়েন্ট পেজে পণ্য খুঁজুন আরও দ্রুত",
-    },
-    body: {
-      en: "Pick a product on the Variants page by typing its name in the new search box. Search results now have a Load more button, and a product with more than 100 variants shows all of them.",
-      bn: "ভেরিয়েন্ট পেজে নতুন সার্চ বক্সে নাম লিখে পণ্য বেছে নিন। সার্চ ফলাফলে এখন \"আরও দেখুন\" বাটন আছে, আর ১০০টির বেশি ভেরিয়েন্টের পণ্যেও সবগুলো দেখাবে।",
-    },
-    href: "/variants",
-  },
-  {
-    id: "2026-09-14-faster-checkout",
-    date: "2026-09-14",
-    version: "4.5.0",
-    tag: "improved",
-    title: {
-      en: "Faster checkout for your shoppers",
-      bn: "ক্রেতাদের জন্য আরও দ্রুত চেকআউট",
-    },
-    body: {
-      en: "Your store's checkout page loads faster, even when you have many delivery zones or a shopper has a full cart.",
-      bn: "আপনার স্টোরের চেকআউট পেজ এখন দ্রুত লোড হয়, অনেক ডেলিভারি জোন থাকলে বা ক্রেতার কার্টে অনেক পণ্য থাকলেও।",
-    },
-  },
-  {
-    id: "2026-09-14-simpler-store-info",
-    date: "2026-09-14",
-    version: "4.4.3",
-    tag: "improved",
-    title: {
-      en: "Simpler Store info settings",
-      bn: "স্টোরের তথ্য সেটিংস আরও সহজ",
-    },
-    body: {
-      en: "Store info in Settings no longer shows storefront connection fields that your store doesn't need.",
-      bn: "সেটিংসের স্টোরের তথ্যে এখন আর স্টোরফ্রন্ট সংযোগের এমন ঘর দেখায় না, যা আপনার স্টোরের দরকার নেই।",
-    },
-    href: "/settings",
-  },
-  {
-    id: "2026-09-12-store-stays-open",
-    date: "2026-09-12",
-    version: "4.4.1",
-    tag: "fixed",
-    title: {
-      en: "Your store stays open during brief glitches",
-      bn: "সাময়িক সমস্যাতেও স্টোর খোলা থাকে",
-    },
-    body: {
-      en: "A short hiccup on our servers no longer takes your store offline or loses an order a shopper has already placed.",
-      bn: "আমাদের সার্ভারে সাময়িক সমস্যা হলেও আপনার স্টোর আর বন্ধ হয়ে যায় না, আর ক্রেতার দেওয়া অর্ডারও হারিয়ে যায় না।",
-    },
-  },
+
 ];
