@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 import { ChevronDown, ChevronRight } from "lucide-react";
 
 import {
@@ -28,13 +29,12 @@ import {
 } from "@/lib/team/role-levels";
 
 // Only theming.manage is limited today, and the API allows it to Admin and
-// Manager (tests/config/permissions.test.ts keeps this note honest).
-const UNAVAILABLE_NOTE = "only Admin and Manager";
-
-const LEVELS: { id: Exclude<AccessLevel, "custom">; label: string }[] = [
-  { id: "none", label: "No access" },
-  { id: "view", label: "View" },
-  { id: "full", label: "Full" },
+// Manager, which is what `unavailableNote` says in both languages
+// (tests/config/permissions.test.ts keeps that note honest).
+const LEVELS: { id: Exclude<AccessLevel, "custom">; labelKey: string }[] = [
+  { id: "none", labelKey: "levelNone" },
+  { id: "view", labelKey: "levelView" },
+  { id: "full", labelKey: "levelFull" },
 ];
 
 function GroupRow({
@@ -54,12 +54,13 @@ function GroupRow({
   unavailable: ReadonlySet<string>;
   onChange: (next: Set<string>) => void;
 }) {
+  const t = useTranslations("settings.team");
   const [expanded, setExpanded] = useState(false);
   const level = levelForGroup(group, selected, unavailable);
   const hasAdvanced = group.permissions.length > 1;
   const unavailableLabels = group.permissions
     .filter((p) => unavailable.has(p.key))
-    .map((p) => p.label);
+    .map((p) => t(p.labelKey));
 
   // A group is ungrantable if the editor lacks even its view key.
   const groupGrantable =
@@ -74,7 +75,7 @@ function GroupRow({
               type="button"
               onClick={() => setExpanded((v) => !v)}
               className="text-muted-foreground hover:text-foreground"
-              aria-label={expanded ? "Collapse" : "Expand"}
+              aria-label={expanded ? t("collapseGroup") : t("expandGroup")}
             >
               {expanded ? (
                 <ChevronDown className="size-4" />
@@ -85,7 +86,7 @@ function GroupRow({
           ) : (
             <span className="inline-block size-4" />
           )}
-          <span className="truncate text-sm font-medium">{group.label}</span>
+          <span className="truncate text-sm font-medium">{t(group.labelKey)}</span>
         </div>
 
         <div className="flex shrink-0 items-center gap-1 rounded-md bg-muted p-0.5">
@@ -106,7 +107,7 @@ function GroupRow({
                   isCustom && "ring-1 ring-inset ring-border"
                 )}
               >
-                {lvl.label}
+                {t(lvl.labelKey)}
               </button>
             );
           })}
@@ -115,14 +116,14 @@ function GroupRow({
 
       {unavailableLabels.length > 0 && (
         <p className="-mt-1 px-3 pb-2.5 pl-9 text-xs text-muted-foreground">
-          {unavailableLabels.join(", ")}: {UNAVAILABLE_NOTE}
+          {t("unavailableNote", { permissions: unavailableLabels.join(", ") })}
         </p>
       )}
 
       {expanded && hasAdvanced && (
         <div className="space-y-1.5 border-t border-border px-3 py-2.5">
           {level === "custom" && (
-            <p className="pb-1 text-xs text-muted-foreground">Custom selection</p>
+            <p className="pb-1 text-xs text-muted-foreground">{t("customSelection")}</p>
           )}
           {group.permissions.map((perm, idx) => {
             const isView = idx === 0;
@@ -156,7 +157,7 @@ function GroupRow({
                     onChange(next);
                   }}
                 />
-                <span>{perm.label}</span>
+                <span>{t(perm.labelKey)}</span>
               </label>
             );
           })}
@@ -184,6 +185,8 @@ export function RoleEditorDialog({
   /** Whether the viewer can edit roles (team.manage_roles). */
   canManage: boolean;
 }) {
+  const t = useTranslations("settings.team");
+  const tSettings = useTranslations("settings");
   const createRole = useCreateRole();
   const updateRole = useUpdateRole();
   const editing = role !== null;
@@ -224,7 +227,7 @@ export function RoleEditorDialog({
 
   async function handleSave() {
     if (!name.trim()) {
-      notify.error("Give the role a name.");
+      notify.error(t("roleNameRequired"));
       return;
     }
     const permissions = permissionsToSave(selected, unavailable);
@@ -241,7 +244,7 @@ export function RoleEditorDialog({
           permissions,
         });
       }
-      notify.success(editing ? "Role updated." : "Role created.");
+      notify.success({ key: editing ? "settings.team.roleUpdated" : "settings.team.roleCreated" });
       onOpenChange(false);
     } catch (err) {
       notify.error(err);
@@ -254,14 +257,15 @@ export function RoleEditorDialog({
         <div className="flex max-h-[85vh] flex-col">
           <DialogHeader className="border-b border-border px-6 py-4">
             <DialogTitle>
-              {isSystem ? `Edit ${role?.name}` : "Edit role"}
+              {/* A built-in role's name is the API's, the same word the roles list shows. */}
+              {isSystem ? t("editorTitleFixed", { role: role?.name ?? "" }) : t("editorTitle")}
             </DialogTitle>
             <DialogDescription>
               {readOnly
-                ? "You don't have permission to edit roles."
+                ? t("editorReadOnly")
                 : isSystem
-                  ? "Adjust what this built-in role can do — its name is fixed."
-                  : "Choose what this role can access. Non-view actions include view automatically."}
+                  ? t("editorSystemHint")
+                  : t("editorCustomHint")}
             </DialogDescription>
           </DialogHeader>
 
@@ -269,24 +273,24 @@ export function RoleEditorDialog({
             <div className="grid gap-3 sm:grid-cols-2">
               <div className="space-y-1">
                 <label className="text-xs font-medium text-muted-foreground">
-                  Role name
+                  {t("roleNameLabel")}
                 </label>
                 <Input
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   disabled={readOnly || isSystem || saving}
-                  placeholder="e.g. Moderator"
+                  placeholder={t("roleNamePlaceholder")}
                 />
               </div>
               <div className="space-y-1">
                 <label className="text-xs font-medium text-muted-foreground">
-                  Description
+                  {t("roleDescriptionLabel")}
                 </label>
                 <Input
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   disabled={readOnly || saving}
-                  placeholder="Optional"
+                  placeholder={t("roleDescriptionPlaceholder")}
                 />
               </div>
             </div>
@@ -294,10 +298,10 @@ export function RoleEditorDialog({
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-medium text-muted-foreground">
-                  Permissions
+                  {t("permissionsHeading")}
                 </span>
                 <span className="text-xs text-muted-foreground">
-                  {permissionCount} selected
+                  {t("permissionsSelected", { count: permissionCount })}
                 </span>
               </div>
               {PERMISSION_GROUPS.map((group) => (
@@ -320,7 +324,7 @@ export function RoleEditorDialog({
               onClick={() => onOpenChange(false)}
               disabled={saving}
             >
-              {readOnly ? "Close" : "Cancel"}
+              {readOnly ? tSettings("close") : tSettings("cancel")}
             </Button>
             {!readOnly && (
               <Button
@@ -328,7 +332,7 @@ export function RoleEditorDialog({
                 disabled={saving}
                 className={settingsInvertedButtonClassName}
               >
-                {saving ? "Saving…" : "Save changes"}
+                {saving ? tSettings("saving") : t("saveChanges")}
               </Button>
             )}
           </DialogFooter>

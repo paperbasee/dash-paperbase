@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 import { Check, Folder, Globe, Layers, Minus, SlidersHorizontal } from "lucide-react";
 
 import {
@@ -54,6 +55,8 @@ export function MemberCategoryScopeDialog({
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
+  const t = useTranslations("settings.team");
+  const tSettings = useTranslations("settings");
   const { data: tree = [], isLoading } = useCategoriesQuery();
   const save = useSetMemberCategories();
   const { rows, descendants } = useMemo(() => analyze(tree), [tree]);
@@ -102,11 +105,12 @@ export function MemberCategoryScopeDialog({
         membershipPublicId: member.public_id,
         categoryPublicIds: [...selected],
       });
-      notify.success(
-        selected.size === 0
-          ? "Full access — this member sees every category."
-          : "Category access updated."
-      );
+      notify.success({
+        key:
+          selected.size === 0
+            ? "settings.team.categoryScopeCleared"
+            : "settings.team.categoryScopeUpdated",
+      });
       onOpenChange(false);
     } catch (err) {
       notify.error(err);
@@ -121,16 +125,15 @@ export function MemberCategoryScopeDialog({
             <span className="grid size-7 shrink-0 place-items-center rounded-full bg-primary/10 text-primary">
               <Layers className="size-4" />
             </span>
-            Category access
+            {t("categoryTitle")}
           </DialogTitle>
           <DialogDescription className="text-xs leading-relaxed">
-            Limit{" "}
-            <span className="font-medium text-foreground">
-              {member.user.full_name || member.user.email}
-            </span>{" "}
-            to specific departments — they&apos;ll only see products and orders in the
-            categories you tick. Ticking a category also ticks everything beneath it;
-            untick any subcategory to carve it out. Tick nothing for full access.
+            {t.rich("categoryBody", {
+              name: member.user.full_name || member.user.email,
+              b: (chunks) => (
+                <span className="font-medium text-foreground">{chunks}</span>
+              ),
+            })}
           </DialogDescription>
         </DialogHeader>
 
@@ -147,12 +150,12 @@ export function MemberCategoryScopeDialog({
             {limited ? (
               <>
                 <SlidersHorizontal className="size-3.5" />
-                Limited to {selected.size} categor{selected.size === 1 ? "y" : "ies"}
+                {t("categoryLimitedBadge", { count: selected.size })}
               </>
             ) : (
               <>
                 <Globe className="size-3.5" />
-                Full access
+                {t("categoryFullAccessBadge")}
               </>
             )}
           </span>
@@ -162,7 +165,7 @@ export function MemberCategoryScopeDialog({
               onClick={() => setSelected(new Set())}
               className="text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
             >
-              Clear all
+              {t("categoryClearAll")}
             </button>
           )}
         </div>
@@ -170,11 +173,11 @@ export function MemberCategoryScopeDialog({
         <div className="max-h-72 overflow-y-auto px-2 py-2">
           {isLoading ? (
             <p className="px-3 py-6 text-center text-sm text-muted-foreground">
-              Loading categories…
+              {t("categoryLoading")}
             </p>
           ) : rows.length === 0 ? (
             <p className="px-3 py-6 text-center text-sm text-muted-foreground">
-              No categories yet.
+              {t("categoryEmpty")}
             </p>
           ) : (
             rows.map((row) => {
@@ -227,10 +230,10 @@ export function MemberCategoryScopeDialog({
 
         <DialogFooter className="border-t border-border px-5 py-3">
           <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Cancel
+            {tSettings("cancel")}
           </Button>
           <Button onClick={() => void handleSave()} disabled={save.isPending}>
-            {save.isPending ? "Saving…" : "Save access"}
+            {save.isPending ? tSettings("saving") : t("categorySave")}
           </Button>
         </DialogFooter>
       </DialogContent>

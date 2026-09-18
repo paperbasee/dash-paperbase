@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 import { Layers, Shield, Trash2, UserPlus } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -42,7 +43,17 @@ import { MemberCategoryScopeDialog } from "./MemberCategoryScopeDialog";
 
 type Tab = "members" | "roles";
 
+/** Tab id → its name under `settings.team`. */
+const TAB_LABEL_KEYS: Record<Tab, string> = {
+  members: "tabMembers",
+  roles: "tabRoles",
+};
+
+/** A member or invite with no role yet. Punctuation, so it is not translated. */
+const NO_ROLE = "—";
+
 export default function TeamSection({ hidden }: { hidden: boolean }) {
+  const t = useTranslations("settings.team");
   const { has, isOwner, permissions } = usePermissions();
   const canManageMembers = has("team.invite");
   const canManageRoles = has("team.manage_roles");
@@ -64,26 +75,24 @@ export default function TeamSection({ hidden }: { hidden: boolean }) {
     <div className={settingsSectionSurfaceClassName}>
       <SettingsSectionBody>
         <div>
-          <h2 className="text-lg font-semibold">Team &amp; roles</h2>
-          <p className="text-sm text-muted-foreground">
-            Invite people and control what they can access with roles.
-          </p>
+          <h2 className="text-lg font-semibold">{t("heading")}</h2>
+          <p className="text-sm text-muted-foreground">{t("subtitle")}</p>
         </div>
 
         <div className="flex gap-1 rounded-md bg-muted p-0.5 w-fit">
-          {(["members", "roles"] as Tab[]).map((t) => (
+          {(["members", "roles"] as Tab[]).map((tabId) => (
             <button
-              key={t}
+              key={tabId}
               type="button"
-              onClick={() => setTab(t)}
+              onClick={() => setTab(tabId)}
               className={cn(
-                "rounded px-3 py-1.5 text-sm font-medium capitalize transition-colors",
-                tab === t
+                "rounded px-3 py-1.5 text-sm font-medium transition-colors",
+                tab === tabId
                   ? "bg-foreground text-background"
                   : "text-muted-foreground hover:text-foreground"
               )}
             >
-              {t}
+              {t(TAB_LABEL_KEYS[tabId])}
             </button>
           ))}
         </div>
@@ -123,6 +132,8 @@ function MembersTab({
   roles: TeamRole[];
   canManage: boolean;
 }) {
+  const t = useTranslations("settings.team");
+  const tCommon = useTranslations("common");
   const invite = useInviteMember();
   const [email, setEmail] = useState("");
   const [roleId, setRoleId] = useState("");
@@ -130,12 +141,12 @@ function MembersTab({
   async function handleInvite(e: React.FormEvent) {
     e.preventDefault();
     if (!email.trim() || !roleId) {
-      notify.error("Enter an email and pick a role.");
+      notify.error(t("inviteMissingFields"));
       return;
     }
     try {
       await invite.mutateAsync({ email: email.trim(), rolePublicId: roleId });
-      notify.success("Invitation sent.");
+      notify.success({ key: "settings.team.inviteSent" });
       setEmail("");
       setRoleId("");
     } catch (err) {
@@ -157,24 +168,26 @@ function MembersTab({
         >
           <div className="flex-1 space-y-1">
             <label className="text-xs font-medium text-muted-foreground">
-              Invite by email
+              {t("inviteByEmail")}
             </label>
             <Input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="person@example.com"
+              placeholder={t("inviteEmailPlaceholder")}
               disabled={invite.isPending}
             />
           </div>
           <div className="space-y-1 sm:w-48">
-            <label className="text-xs font-medium text-muted-foreground">Role</label>
+            <label className="text-xs font-medium text-muted-foreground">
+              {t("roleLabel")}
+            </label>
             <Select
               value={roleId}
               onChange={(e) => setRoleId(e.target.value)}
               disabled={invite.isPending}
             >
-              <option value="">Select role…</option>
+              <option value="">{t("selectRole")}</option>
               {roles.map((r) => (
                 <option key={r.public_id} value={r.public_id}>
                   {r.name}
@@ -188,7 +201,7 @@ function MembersTab({
             className={settingsInvertedButtonClassName}
           >
             <UserPlus className="size-4" />
-            {invite.isPending ? "Sending…" : "Invite"}
+            {invite.isPending ? t("inviteSending") : t("inviteButton")}
           </Button>
         </form>
       )}
@@ -196,7 +209,7 @@ function MembersTab({
       {pendingInvites.length > 0 && (
         <div className="space-y-2">
           <h3 className="text-sm font-medium text-muted-foreground">
-            Pending invites
+            {t("pendingInvitesHeading")}
           </h3>
           <div className="divide-y divide-border rounded-md border border-border">
             {pendingInvites.map((inv) => (
@@ -204,7 +217,7 @@ function MembersTab({
                 key={inv.public_id}
                 publicId={inv.public_id}
                 email={inv.email}
-                roleName={inv.role?.name ?? "—"}
+                roleName={inv.role?.name ?? NO_ROLE}
                 canManage={canManage}
               />
             ))}
@@ -213,9 +226,11 @@ function MembersTab({
       )}
 
       <div className="space-y-2">
-        <h3 className="text-sm font-medium text-muted-foreground">Members</h3>
+        <h3 className="text-sm font-medium text-muted-foreground">
+          {t("membersHeading")}
+        </h3>
         {membersQuery.isLoading ? (
-          <p className="text-sm text-muted-foreground">Loading…</p>
+          <p className="text-sm text-muted-foreground">{tCommon("loading")}</p>
         ) : (
           <div className="divide-y divide-border rounded-md border border-border">
             {members.map((m) => (
@@ -244,6 +259,7 @@ function PendingInviteRow({
   roleName: string;
   canManage: boolean;
 }) {
+  const t = useTranslations("settings.team");
   const revoke = useRevokeInvite();
   return (
     <div className="flex items-center justify-between gap-3 px-3 py-2.5">
@@ -251,11 +267,13 @@ function PendingInviteRow({
         <UserAvatar publicId={publicId} name={email} className="opacity-70" />
         <div className="min-w-0">
           <p className="truncate text-sm">{email}</p>
-          <p className="text-xs text-muted-foreground">Invited as {roleName}</p>
+          <p className="text-xs text-muted-foreground">
+            {t("invitedAs", { role: roleName })}
+          </p>
         </div>
       </div>
       <div className="flex items-center gap-2">
-        <Badge variant="secondary">Pending</Badge>
+        <Badge variant="secondary">{t("pendingBadge")}</Badge>
         {canManage && (
           <Button
             variant="ghost"
@@ -264,13 +282,13 @@ function PendingInviteRow({
             onClick={async () => {
               try {
                 await revoke.mutateAsync(publicId);
-                notify.success("Invite revoked.");
+                notify.success({ key: "settings.team.inviteRevoked" });
               } catch (err) {
                 notify.error(err);
               }
             }}
           >
-            Revoke
+            {t("revoke")}
           </Button>
         )}
       </div>
@@ -287,6 +305,7 @@ function MemberRow({
   roles: TeamRole[];
   canManage: boolean;
 }) {
+  const t = useTranslations("settings.team");
   const changeRole = useChangeMemberRole();
   const setActive = useSetMemberActive();
   const remove = useRemoveMember();
@@ -312,13 +331,13 @@ function MemberRow({
       </div>
       <div className="flex shrink-0 items-center gap-2">
         {member.is_owner ? (
-          <Badge>Owner</Badge>
+          <Badge>{t("ownerBadge")}</Badge>
         ) : !member.is_active ? (
-          <Badge variant="secondary">Suspended</Badge>
+          <Badge variant="secondary">{t("suspendedBadge")}</Badge>
         ) : null}
 
         {member.is_owner ? (
-          <span className="text-xs text-muted-foreground">Full access</span>
+          <span className="text-xs text-muted-foreground">{t("ownerFullAccess")}</span>
         ) : manageable ? (
           <Select
             value={member.role?.public_id ?? ""}
@@ -329,7 +348,7 @@ function MemberRow({
                   membershipPublicId: member.public_id,
                   rolePublicId: e.target.value,
                 });
-                notify.success("Role updated.");
+                notify.success({ key: "settings.team.memberRoleUpdated" });
               } catch (err) {
                 notify.error(err);
               }
@@ -347,7 +366,7 @@ function MemberRow({
             ))}
           </Select>
         ) : (
-          <Badge variant="outline">{member.role?.name ?? "—"}</Badge>
+          <Badge variant="outline">{member.role?.name ?? NO_ROLE}</Badge>
         )}
 
         {manageable && member.scopeable && (
@@ -356,12 +375,12 @@ function MemberRow({
             size="sm"
             className="gap-1.5"
             onClick={() => setCatOpen(true)}
-            title="Limit this member to specific categories (departments)"
+            title={t("scopeButtonTitle")}
           >
             <Layers className="size-4" />
             {scopeCount === 0
-              ? "All categories"
-              : `${scopeCount} categor${scopeCount === 1 ? "y" : "ies"}`}
+              ? t("scopeAllCategories")
+              : t("scopeSomeCategories", { count: scopeCount })}
           </Button>
         )}
 
@@ -377,18 +396,23 @@ function MemberRow({
                     membershipPublicId: member.public_id,
                     isActive: !member.is_active,
                   });
-                  notify.success(member.is_active ? "Suspended." : "Reactivated.");
+                  notify.success({
+                    key: member.is_active
+                      ? "settings.team.memberSuspended"
+                      : "settings.team.memberReactivated",
+                  });
                 } catch (err) {
                   notify.error(err);
                 }
               }}
             >
-              {member.is_active ? "Suspend" : "Reactivate"}
+              {member.is_active ? t("suspend") : t("reactivate")}
             </Button>
             <Button
               variant="ghost"
               size="icon"
               className="text-destructive hover:text-destructive"
+              aria-label={t("removeMemberTitle")}
               onClick={() => setConfirmRemove(true)}
             >
               <Trash2 className="size-4" />
@@ -400,16 +424,16 @@ function MemberRow({
       <ConfirmDialog
         isOpen={confirmRemove}
         onOpenChange={setConfirmRemove}
-        title="Remove member"
-        description={`Remove ${member.user.email} from the team? They lose all access immediately.`}
-        confirmText="Remove"
+        title={t("removeMemberTitle")}
+        description={t("removeMemberBody", { email: member.user.email })}
+        confirmText={t("removeMemberConfirm")}
         variant="danger"
         isConfirmLoading={remove.isPending}
         onCancel={() => setConfirmRemove(false)}
         onConfirm={async () => {
           try {
             await remove.mutateAsync(member.public_id);
-            notify.success("Member removed.");
+            notify.success({ key: "settings.team.memberRemoved" });
             setConfirmRemove(false);
           } catch (err) {
             notify.error(err);
@@ -441,6 +465,9 @@ function RolesTab({
   grantableKeys: Set<string> | null;
   isOwner: boolean;
 }) {
+  const t = useTranslations("settings.team");
+  const tCommon = useTranslations("common");
+  const tSettings = useTranslations("settings");
   const [editorOpen, setEditorOpen] = useState(false);
   const [editingRole, setEditingRole] = useState<TeamRole | null>(null);
   const deleteRole = useDeleteRole();
@@ -464,13 +491,10 @@ function RolesTab({
 
   return (
     <div className="space-y-4">
-      <p className="text-sm text-muted-foreground">
-        Your store has four built-in roles. You can tune what each one can access,
-        but you can&apos;t add or remove roles.
-      </p>
+      <p className="text-sm text-muted-foreground">{t("rolesIntro")}</p>
 
       {rolesQuery.isLoading ? (
-        <p className="text-sm text-muted-foreground">Loading…</p>
+        <p className="text-sm text-muted-foreground">{tCommon("loading")}</p>
       ) : (
         <div className="space-y-2">
           {roles.map((role) => (
@@ -482,24 +506,28 @@ function RolesTab({
                 <Shield className="size-4 shrink-0 text-muted-foreground" />
                 <div className="min-w-0">
                   <div className="flex items-center gap-2">
+                    {/* A role's name and description are the merchant's own words. */}
                     <p className="truncate text-sm font-medium">{role.name}</p>
-                    {role.is_system && <Badge variant="secondary">System</Badge>}
+                    {role.is_system && <Badge variant="secondary">{t("systemBadge")}</Badge>}
                   </div>
                   <p className="truncate text-xs text-muted-foreground">
-                    {role.description || `${role.permissions.length} permissions`}
-                    {role.member_count > 0 && ` · ${role.member_count} member(s)`}
+                    {role.description ||
+                      t("rolePermissionCount", { count: role.permissions.length })}
+                    {role.member_count > 0 &&
+                      ` · ${t("roleMemberCount", { count: role.member_count })}`}
                   </p>
                 </div>
               </div>
               <div className="flex shrink-0 items-center gap-1">
                 <Button variant="ghost" size="sm" onClick={() => openEdit(role)}>
-                  {!canManage ? "View" : "Edit"}
+                  {!canManage ? t("openRoleView") : t("openRoleEdit")}
                 </Button>
                 {canManage && !role.is_system && (
                   <Button
                     variant="ghost"
                     size="icon"
                     className="text-destructive hover:text-destructive"
+                    aria-label={t("deleteRoleTitle")}
                     onClick={() => {
                       setDeleteTarget(role);
                       setReassignTo("");
@@ -529,25 +557,29 @@ function RolesTab({
       >
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>Delete role</DialogTitle>
+            <DialogTitle>{t("deleteRoleTitle")}</DialogTitle>
             <DialogDescription>
               {deleteNeedsReassign
-                ? `“${deleteTarget?.name}” is used by ${deleteTarget?.member_count} member(s) and ${deleteTarget?.pending_invite_count} pending invite(s). Reassign them to another role, then delete.`
-                : `Delete the role “${deleteTarget?.name}”? This can't be undone.`}
+                ? t("deleteRoleReassignBody", {
+                    name: deleteTarget?.name ?? "",
+                    members: deleteTarget?.member_count ?? 0,
+                    invites: deleteTarget?.pending_invite_count ?? 0,
+                  })
+                : t("deleteRoleBody", { name: deleteTarget?.name ?? "" })}
             </DialogDescription>
           </DialogHeader>
 
           {deleteNeedsReassign && (
             <div className="space-y-1">
               <label className="text-xs font-medium text-muted-foreground">
-                Reassign members &amp; invites to
+                {t("reassignLabel")}
               </label>
               <Select
                 value={reassignTo}
                 onChange={(e) => setReassignTo(e.target.value)}
                 className="w-full"
               >
-                <option value="">Select role…</option>
+                <option value="">{t("selectRole")}</option>
                 {reassignOptions.map((r) => (
                   <option key={r.public_id} value={r.public_id}>
                     {r.name}
@@ -559,7 +591,7 @@ function RolesTab({
 
           <DialogFooter>
             <Button variant="outline" onClick={() => setDeleteTarget(null)}>
-              Cancel
+              {tSettings("cancel")}
             </Button>
             <Button
               variant="destructive"
@@ -570,14 +602,14 @@ function RolesTab({
                     publicId: deleteTarget!.public_id,
                     reassignTo: deleteNeedsReassign ? reassignTo : undefined,
                   });
-                  notify.success("Role deleted.");
+                  notify.success({ key: "settings.team.roleDeleted" });
                   setDeleteTarget(null);
                 } catch (err) {
                   notify.error(err);
                 }
               }}
             >
-              {deleteRole.isPending ? "Deleting…" : "Delete role"}
+              {deleteRole.isPending ? t("deleteRoleDeleting") : t("deleteRoleConfirm")}
             </Button>
           </DialogFooter>
         </DialogContent>

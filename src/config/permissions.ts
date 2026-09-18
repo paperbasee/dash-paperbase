@@ -8,17 +8,23 @@
  *
  * Permission groups match the catalog GROUPS; the dash app ids in
  * `config/apps.ts` map onto a group's `.view` key via APP_VIEW_PERMISSION.
+ *
+ * Every name a merchant reads is a message key under `settings.team`, not a
+ * word: the role editor renders it with `t(labelKey)`, so this file stays a
+ * pure mirror of the API catalogue in one language-free place.
  */
 
 /** Grouped catalog for the role editor: one row per group, presets + advanced. */
 export interface PermissionDef {
   key: string;
-  label: string;
+  /** Names this permission under `settings.team`. */
+  labelKey: string;
 }
 
 export interface PermissionGroup {
   id: string;
-  label: string;
+  /** Names this group under `settings.team`. */
+  labelKey: string;
   /** Ordered permissions; the first (…\.view) is the group's "view" gate. */
   permissions: PermissionDef[];
 }
@@ -26,172 +32,172 @@ export interface PermissionGroup {
 export const PERMISSION_GROUPS: PermissionGroup[] = [
   {
     id: "orders",
-    label: "Orders",
+    labelKey: "groupOrders",
     permissions: [
-      { key: "orders.view", label: "View orders" },
-      { key: "orders.edit", label: "Update orders" },
-      { key: "orders.refund", label: "Refund orders" },
-      { key: "orders.cancel", label: "Cancel orders" },
-      { key: "orders.export", label: "Export orders" },
+      { key: "orders.view", labelKey: "permOrdersView" },
+      { key: "orders.edit", labelKey: "permOrdersEdit" },
+      { key: "orders.refund", labelKey: "permOrdersRefund" },
+      { key: "orders.cancel", labelKey: "permOrdersCancel" },
+      { key: "orders.export", labelKey: "permOrdersExport" },
     ],
   },
   {
     id: "products",
-    label: "Products",
+    labelKey: "groupProducts",
     permissions: [
-      { key: "products.view", label: "View products" },
-      { key: "products.create", label: "Create products" },
-      { key: "products.edit", label: "Edit products" },
-      { key: "products.delete", label: "Delete products" },
+      { key: "products.view", labelKey: "permProductsView" },
+      { key: "products.create", labelKey: "permProductsCreate" },
+      { key: "products.edit", labelKey: "permProductsEdit" },
+      { key: "products.delete", labelKey: "permProductsDelete" },
     ],
   },
   {
     id: "categories",
-    label: "Categories",
+    labelKey: "groupCategories",
     permissions: [
-      { key: "categories.view", label: "View categories" },
-      { key: "categories.manage", label: "Manage categories" },
+      { key: "categories.view", labelKey: "permCategoriesView" },
+      { key: "categories.manage", labelKey: "permCategoriesManage" },
     ],
   },
   {
     id: "inventory",
-    label: "Inventory",
+    labelKey: "groupInventory",
     permissions: [
-      { key: "inventory.view", label: "View inventory" },
-      { key: "inventory.adjust", label: "Adjust stock & purchases" },
+      { key: "inventory.view", labelKey: "permInventoryView" },
+      { key: "inventory.adjust", labelKey: "permInventoryAdjust" },
     ],
   },
   {
     id: "customers",
-    label: "Customers",
+    labelKey: "groupCustomers",
     permissions: [
-      { key: "customers.view", label: "View customers" },
-      { key: "customers.edit", label: "Edit customers" },
-      { key: "customers.export", label: "Export customers" },
-      { key: "customers.delete", label: "Delete customers" },
+      { key: "customers.view", labelKey: "permCustomersView" },
+      { key: "customers.edit", labelKey: "permCustomersEdit" },
+      { key: "customers.export", labelKey: "permCustomersExport" },
+      { key: "customers.delete", labelKey: "permCustomersDelete" },
     ],
   },
   {
     id: "analytics",
-    label: "Analytics",
-    permissions: [{ key: "analytics.view", label: "View analytics" }],
+    labelKey: "groupAnalytics",
+    permissions: [{ key: "analytics.view", labelKey: "permAnalyticsView" }],
   },
   {
     id: "support",
-    label: "Support tickets",
+    labelKey: "groupSupport",
     permissions: [
-      { key: "support.view", label: "View support tickets" },
-      { key: "support.manage", label: "Reply to & manage tickets" },
+      { key: "support.view", labelKey: "permSupportView" },
+      { key: "support.manage", labelKey: "permSupportManage" },
     ],
   },
   {
     id: "notifications",
-    label: "Notifications",
+    labelKey: "groupNotifications",
     permissions: [
-      { key: "notifications.view", label: "View notifications" },
-      { key: "notifications.manage", label: "Manage notifications" },
+      { key: "notifications.view", labelKey: "permNotificationsView" },
+      { key: "notifications.manage", labelKey: "permNotificationsManage" },
     ],
   },
   {
     id: "banners",
-    label: "Banners",
+    labelKey: "groupBanners",
     permissions: [
-      { key: "banners.view", label: "View banners" },
-      { key: "banners.manage", label: "Manage banners" },
+      { key: "banners.view", labelKey: "permBannersView" },
+      { key: "banners.manage", labelKey: "permBannersManage" },
     ],
   },
   {
     id: "popups",
-    label: "Popups",
+    labelKey: "groupPopups",
     permissions: [
-      { key: "popups.view", label: "View popups" },
-      { key: "popups.manage", label: "Manage popups" },
+      { key: "popups.view", labelKey: "permPopupsView" },
+      { key: "popups.manage", labelKey: "permPopupsManage" },
     ],
   },
   {
     id: "blogs",
-    label: "Blog",
+    labelKey: "groupBlogs",
     permissions: [
-      { key: "blogs.view", label: "View blog posts" },
-      { key: "blogs.manage", label: "Manage blog posts" },
+      { key: "blogs.view", labelKey: "permBlogsView" },
+      { key: "blogs.manage", labelKey: "permBlogsManage" },
     ],
   },
   {
     id: "shipping",
-    label: "Shipping",
+    labelKey: "groupShipping",
     permissions: [
-      { key: "shipping.view", label: "View shipping configuration" },
-      { key: "shipping.manage", label: "Manage shipping configuration" },
+      { key: "shipping.view", labelKey: "permShippingView" },
+      { key: "shipping.manage", labelKey: "permShippingManage" },
     ],
   },
   {
     id: "couriers",
-    label: "Couriers",
+    labelKey: "groupCouriers",
     permissions: [
-      { key: "couriers.view", label: "View courier integrations" },
-      { key: "couriers.manage", label: "Manage courier integrations" },
+      { key: "couriers.view", labelKey: "permCouriersView" },
+      { key: "couriers.manage", labelKey: "permCouriersManage" },
     ],
   },
   {
     id: "trash",
-    label: "Trash",
+    labelKey: "groupTrash",
     permissions: [
-      { key: "trash.view", label: "View trash" },
-      { key: "trash.manage", label: "Restore or purge items" },
+      { key: "trash.view", labelKey: "permTrashView" },
+      { key: "trash.manage", labelKey: "permTrashManage" },
     ],
   },
   {
     id: "theming",
-    label: "Storefront customization",
+    labelKey: "groupTheming",
     permissions: [
-      { key: "theming.view", label: "View customization" },
-      { key: "theming.manage", label: "Manage customization" },
+      { key: "theming.view", labelKey: "permThemingView" },
+      { key: "theming.manage", labelKey: "permThemingManage" },
     ],
   },
   {
     id: "domains",
-    label: "Domains",
+    labelKey: "groupDomains",
     permissions: [
-      { key: "domains.view", label: "View storefront domains" },
-      { key: "domains.manage", label: "Connect & manage domains" },
+      { key: "domains.view", labelKey: "permDomainsView" },
+      { key: "domains.manage", labelKey: "permDomainsManage" },
     ],
   },
   {
     id: "settings",
-    label: "Store settings",
+    labelKey: "groupSettings",
     permissions: [
-      { key: "settings.view", label: "View store settings" },
-      { key: "settings.manage", label: "Manage store settings" },
+      { key: "settings.view", labelKey: "permSettingsView" },
+      { key: "settings.manage", labelKey: "permSettingsManage" },
     ],
   },
   {
     id: "integrations",
-    label: "Marketing integrations",
+    labelKey: "groupIntegrations",
     permissions: [
-      { key: "integrations.view", label: "View integrations" },
-      { key: "integrations.manage", label: "Manage integrations" },
+      { key: "integrations.view", labelKey: "permIntegrationsView" },
+      { key: "integrations.manage", labelKey: "permIntegrationsManage" },
     ],
   },
   {
     id: "activity",
-    label: "Activity log",
-    permissions: [{ key: "activity.view", label: "View the store activity log" }],
+    labelKey: "groupActivity",
+    permissions: [{ key: "activity.view", labelKey: "permActivityView" }],
   },
   {
     id: "team",
-    label: "Team & roles",
+    labelKey: "groupTeam",
     permissions: [
-      { key: "team.view", label: "View team members" },
-      { key: "team.invite", label: "Invite & remove members" },
-      { key: "team.manage_roles", label: "Create & edit roles" },
+      { key: "team.view", labelKey: "permTeamView" },
+      { key: "team.invite", labelKey: "permTeamInvite" },
+      { key: "team.manage_roles", labelKey: "permTeamManageRoles" },
     ],
   },
   {
     id: "billing",
-    label: "Billing",
+    labelKey: "groupBilling",
     permissions: [
-      { key: "billing.view", label: "View billing" },
-      { key: "billing.manage", label: "Manage billing" },
+      { key: "billing.view", labelKey: "permBillingView" },
+      { key: "billing.manage", labelKey: "permBillingManage" },
     ],
   },
 ];

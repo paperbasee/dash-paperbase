@@ -34,6 +34,9 @@ const HERE = path.dirname(fileURLToPath(import.meta.url));
 /** `<group>.<action>` — the exact shape the API builds keys with (`key.split(".", 1)`). */
 const KEY_SHAPE = /^[a-z][a-z0-9_]*\.[a-z][a-z0-9_]*$/;
 
+/** A message name under `settings.team`: camelCase, no dots, no spaces. */
+const KEY_NAME_SHAPE = /^[a-z][A-Za-z0-9]*$/;
+
 const groupOf = (key: string) => key.slice(0, key.indexOf("."));
 
 // ---------------------------------------------------------------------------
@@ -65,15 +68,42 @@ describe("PERMISSION_GROUPS structure", () => {
     expect(mismatched).toEqual([]);
   });
 
-  test("no group or permission ships an empty label", () => {
+  test("no group or permission ships an empty labelKey", () => {
     const blank: string[] = [];
     for (const g of PERMISSION_GROUPS) {
-      if (g.label.trim() === "") blank.push(`group:${g.id}`);
+      if (g.labelKey.trim() === "") blank.push(`group:${g.id}`);
       for (const p of g.permissions) {
-        if (p.label.trim() === "") blank.push(`perm:${p.key}`);
+        if (p.labelKey.trim() === "") blank.push(`perm:${p.key}`);
       }
     }
     expect(blank).toEqual([]);
+  });
+
+  test("every labelKey is a bare name under settings.team, never a sentence", () => {
+    // These are message keys, not words: the editor renders each with
+    // t(labelKey) inside the `settings.team` namespace. An English label left
+    // here by mistake, or a key written with its full path, both reach the
+    // merchant as raw text — next-intl answers a key it cannot find with the
+    // key itself. tests/settings/team-copy.test.ts checks each one resolves.
+    const malformed: string[] = [];
+    for (const g of PERMISSION_GROUPS) {
+      if (!KEY_NAME_SHAPE.test(g.labelKey)) malformed.push(`group:${g.id}`);
+      for (const p of g.permissions) {
+        if (!KEY_NAME_SHAPE.test(p.labelKey)) malformed.push(`perm:${p.key}`);
+      }
+    }
+    expect(malformed).toEqual([]);
+  });
+
+  test("no two entries share a labelKey", () => {
+    // A duplicate would silently print one permission's name on another row.
+    const keys = PERMISSION_GROUPS.flatMap((g) => [
+      g.labelKey,
+      ...g.permissions.map((p) => p.labelKey),
+    ]);
+    const seen = new Set<string>();
+    const duplicated = keys.filter((k) => (seen.has(k) ? true : (seen.add(k), false)));
+    expect(duplicated).toEqual([]);
   });
 
   test("no group is empty", () => {
@@ -330,8 +360,9 @@ describe.skipIf(api === null || api.keys.size === 0)(
     });
 
     test("role-limited keys match the role editor's note and never gate a group", () => {
-      // RoleEditorDialog labels every key a role can't hold "only Admin and
-      // Manager". A key limited to other roles needs that note changed. A
+      // RoleEditorDialog labels every key a role can't hold with its
+      // `unavailableNote` message, which says "only Admin and Manager" in both
+      // languages. A key limited to other roles needs that note changed. A
       // limited .view gate would take its whole group away, which the editor
       // does not explain.
       expect(api!.roles.size).toBeGreaterThan(0);
