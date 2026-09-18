@@ -37,6 +37,21 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-09-18-card-style-on-every-theme",
+    date: "2026-09-18",
+    version: "4.12.3",
+    tag: "fixed",
+    title: {
+      en: "Card style works on every theme",
+      bn: "কার্ড স্টাইল এখন সব থিমেই কাজ করে",
+    },
+    body: {
+      en: "The product card style setting only appeared while your store was on Basic. It now appears on any theme that uses it, so you can switch between the quiet card and the price-first card on Heritage too.",
+      bn: "পণ্যের কার্ড স্টাইল আগে শুধু বেসিক থিমে দেখা যেত। এখন যেসব থিম এটি ব্যবহার করে সব জায়গাতেই দেখা যাবে, তাই হেরিটেজেও শান্ত কার্ড আর দাম-আগে কার্ডের মধ্যে বদল করতে পারবেন।",
+    },
+    href: "/settings?tab=customization",
+  },
+  {
     id: "2026-09-18-heritage-theme",
     date: "2026-09-18",
     version: "4.12.2",
@@ -459,20 +474,5 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
       en: "In your store's quick order popup, Order Now and Add to cart now work for products with no size or color to choose. The popup also shows free delivery when a product has it.",
       bn: "আপনার স্টোরের কুইক অর্ডার পপআপে সাইজ বা রং বাছাই নেই এমন পণ্যেও এখন \"এখনই অর্ডার করুন\" ও \"কার্টে যোগ করুন\" কাজ করে। পণ্যে ফ্রি ডেলিভারি থাকলে পপআপেও তা দেখায়।",
     },
-  },
-  {
-    id: "2026-09-11-free-delivery",
-    date: "2026-09-11",
-    version: "4.4.0",
-    tag: "new",
-    title: {
-      en: "Offer free delivery on products or categories",
-      bn: "পণ্য বা ক্যাটাগরিতে ফ্রি ডেলিভারি দিন",
-    },
-    body: {
-      en: "Turn on free delivery for a product or a whole category. Shoppers see a Free delivery label in your store, and an order ships free only when every item in it qualifies.",
-      bn: "কোনো পণ্য বা পুরো ক্যাটাগরির জন্য ফ্রি ডেলিভারি চালু করুন। ক্রেতারা আপনার স্টোরে ফ্রি ডেলিভারি লেবেল দেখবেন, আর অর্ডারের সব পণ্য যোগ্য হলেই ডেলিভারি ফ্রি হবে।",
-    },
-    href: "/products",
   },
 ];
