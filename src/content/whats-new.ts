@@ -37,6 +37,21 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-09-18-heritage-theme",
+    date: "2026-09-18",
+    version: "4.12.1",
+    tag: "new",
+    title: {
+      en: "Heritage: a new look for fashion stores",
+      bn: "হেরিটেজ: ফ্যাশন স্টোরের নতুন চেহারা",
+    },
+    body: {
+      en: "Heritage is the first of our designed themes, made for clothing: your shop name centred at the top, a warm sand and terracotta palette, and large serif type in both Bangla and English. It comes with its own colours and lettering, so choosing it changes the whole store, not just the layout. Your Basic design stays exactly where you left it.",
+      bn: "হেরিটেজ আমাদের প্রথম ডিজাইন করা থিম, তৈরি হয়েছে পোশাকের দোকানের জন্য: উপরে মাঝখানে দোকানের নাম, উষ্ণ বালু আর টেরাকোটা রঙ, আর বাংলা-ইংরেজি দুটোতেই বড় সেরিফ অক্ষর। এর নিজস্ব রং আর অক্ষর আছে, তাই এটি বেছে নিলে পুরো দোকানের চেহারাই বদলায় — শুধু সাজানো নয়। আপনার বেসিক ডিজাইন যেমন ছিল তেমনই থাকবে।",
+    },
+    href: "/settings?tab=customization",
+  },
+  {
     id: "2026-09-18-banners-move-into-the-editor",
     date: "2026-09-18",
     version: "4.12.0",
@@ -459,20 +474,5 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
       bn: "কোনো পণ্য বা পুরো ক্যাটাগরির জন্য ফ্রি ডেলিভারি চালু করুন। ক্রেতারা আপনার স্টোরে ফ্রি ডেলিভারি লেবেল দেখবেন, আর অর্ডারের সব পণ্য যোগ্য হলেই ডেলিভারি ফ্রি হবে।",
     },
     href: "/products",
-  },
-  {
-    id: "2026-09-11-repeat-order-cooldown",
-    date: "2026-09-11",
-    version: "4.3.0",
-    tag: "new",
-    title: {
-      en: "Stop repeat orders from one phone number",
-      bn: "একই নম্বর থেকে বারবার অর্ডার ঠেকান",
-    },
-    body: {
-      en: "In Settings, under Checkout, set a waiting time in minutes. Your store then refuses a second order from the same phone number within that time and tells the shopper, in their language, how long to wait.",
-      bn: "সেটিংসের চেকআউট অংশে মিনিট হিসেবে একটি অপেক্ষার সময় দিন। ওই সময়ের মধ্যে একই ফোন নম্বর থেকে আরেকটি অর্ডার এলে স্টোর তা নেবে না, আর ক্রেতাকে তার ভাষায় জানিয়ে দেবে কতক্ষণ অপেক্ষা করতে হবে।",
-    },
-    href: "/settings?tab=checkout",
   },
 ];
