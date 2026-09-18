@@ -23,6 +23,7 @@ const theme = (key: string, category: string | null, name_bn = `${key}-bn`): The
   name_bn,
   category,
   available: true,
+  card_styles: true,
 });
 
 const BASIC = theme("basic", null, "বেসিক");

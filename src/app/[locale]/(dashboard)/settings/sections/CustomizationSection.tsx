@@ -11,7 +11,7 @@ import { useSelectTheme, useThemesQuery } from "@/hooks/useThemesQuery";
 import { THEME_EDITOR_HREF, themePageState } from "@/lib/theme-editor/access";
 import { themeErrorMessageKey, type ThemeSummary } from "@/lib/theme-editor/api";
 import { previewOrigin } from "@/lib/theme-editor/preview-origin";
-import { BASIC_THEME_KEY, themeName } from "@/lib/theme-editor/theme-groups";
+import { themeName } from "@/lib/theme-editor/theme-groups";
 import { notify } from "@/notifications";
 import { CustomizationShell } from "../_components/CustomizationShell";
 import { CardVariantPicker } from "../_components/CardVariantPicker";
@@ -23,8 +23,15 @@ import { settingsSectionSurfaceClassName } from "../SettingsSectionBody";
 
 const PREVIEW_ORIGIN = previewOrigin(process.env.NEXT_PUBLIC_STOREFRONT_PREVIEW_ORIGIN);
 
-/** Basic's product card style, the one setting that predates themes. */
-function BasicCardStyle({ canEdit }: { canEdit: boolean }) {
+/**
+ * The shop's product-card style.
+ *
+ * Shown when the LIVE theme actually draws it (`current.card_styles`, from that
+ * theme's manifest) rather than when the live theme happens to be Basic, which
+ * is what it used to check. Heritage honours the setting too, and the name check
+ * hid the control from every shop on it.
+ */
+function CardStyle({ canEdit }: { canEdit: boolean }) {
   const t = useTranslations("settings");
   const tc = useTranslations("settings.customization");
   const { theme, loading, saving, error, selectCardVariant } = useThemeEditor();
@@ -155,9 +162,7 @@ export default function CustomizationSection({ hidden }: { hidden: boolean }) {
           busyKey={busyKey}
           onTry={(theme) => void handleTry(theme)}
         />
-        {current.live_theme === BASIC_THEME_KEY ? (
-          <BasicCardStyle canEdit={data.access.can_edit} />
-        ) : null}
+        {current.card_styles ? <CardStyle canEdit={data.access.can_edit} /> : null}
       </div>
     );
   }

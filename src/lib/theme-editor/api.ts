@@ -67,6 +67,15 @@ export type ThemeCurrent = {
    * back what they had; every other theme starts from its defaults.
    */
   started_themes: string[];
+  /**
+   * Whether the LIVE theme draws the shop's product-card style.
+   *
+   * The control used to be shown by checking the live theme's NAME against Basic,
+   * which hid it the day a second theme honoured the setting too. The theme's own
+   * manifest answers it now, so a theme that ignores card styles hides the
+   * control and a theme that uses one shows it, with nothing to keep in step here.
+   */
+  card_styles: boolean;
 };
 
 export type ThemeSummary = {
@@ -77,6 +86,8 @@ export type ThemeSummary = {
   category: string | null;
   /** May this shop put this theme live? Basic always; the rest need Premium running. */
   available: boolean;
+  /** Whether this theme draws the shop's product-card style. */
+  card_styles: boolean;
 };
 
 export type ThemeLibrary = {
