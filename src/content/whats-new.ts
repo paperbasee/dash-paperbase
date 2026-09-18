@@ -39,15 +39,15 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
     id: "2026-09-18-heritage-theme",
     date: "2026-09-18",
-    version: "4.12.1",
+    version: "4.12.2",
     tag: "new",
     title: {
       en: "Heritage: a new look for fashion stores",
       bn: "হেরিটেজ: ফ্যাশন স্টোরের নতুন চেহারা",
     },
     body: {
-      en: "Heritage is the first of our designed themes, made for clothing: your shop name centred at the top, a warm sand and terracotta palette, and large serif type in both Bangla and English. It comes with its own colours and lettering, so choosing it changes the whole store, not just the layout. Your Basic design stays exactly where you left it.",
-      bn: "হেরিটেজ আমাদের প্রথম ডিজাইন করা থিম, তৈরি হয়েছে পোশাকের দোকানের জন্য: উপরে মাঝখানে দোকানের নাম, উষ্ণ বালু আর টেরাকোটা রঙ, আর বাংলা-ইংরেজি দুটোতেই বড় সেরিফ অক্ষর। এর নিজস্ব রং আর অক্ষর আছে, তাই এটি বেছে নিলে পুরো দোকানের চেহারাই বদলায় — শুধু সাজানো নয়। আপনার বেসিক ডিজাইন যেমন ছিল তেমনই থাকবে।",
+      en: "Heritage is the first of our designed themes, made for clothing: your shop name centred at the top, a warm sand and terracotta palette, and large serif type in both Bangla and English. It comes with its own colours and lettering, so choosing it changes the whole store, not just the layout. Product names are never cut short, whichever language you sell in, and your Basic design stays exactly where you left it.",
+      bn: "হেরিটেজ আমাদের প্রথম ডিজাইন করা থিম, তৈরি হয়েছে পোশাকের দোকানের জন্য: উপরে মাঝখানে দোকানের নাম, উষ্ণ বালু আর টেরাকোটা রঙ, আর বাংলা-ইংরেজি দুটোতেই বড় সেরিফ অক্ষর। এর নিজস্ব রং আর অক্ষর আছে, তাই এটি বেছে নিলে পুরো দোকানের চেহারাই বদলায় — শুধু সাজানো নয়। যে ভাষাতেই বিক্রি করুন, পণ্যের নাম কেটে ছোট করা হয় না, আর আপনার বেসিক ডিজাইন যেমন ছিল তেমনই থাকবে।",
     },
     href: "/settings?tab=customization",
   },
