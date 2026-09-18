@@ -8,7 +8,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { usePreviewDevice } from "@/components/preview-system/usePreviewDevice";
 import { Button } from "@/components/ui/button";
 import { useConfirm, type ConfirmDialogOptions } from "@/context/ConfirmDialogContext";
-import { usePreviewExamplesQuery } from "@/hooks/useThemesQuery";
+import { usePreviewExamplesQuery, useThemeImagesQuery } from "@/hooks/useThemesQuery";
 import api from "@/lib/api";
 import { liveStorefrontDomain, storefrontUrlFor } from "@/lib/domains/api";
 import { useDomainsQuery } from "@/lib/domains/hooks";
@@ -22,6 +22,7 @@ import {
   themeErrorMessageKey,
   type ThemeBlock,
   type ThemeEditorState,
+  type ThemeImage,
   type ThemeSection,
   type ThemeVersion,
 } from "@/lib/theme-editor/api";
@@ -68,6 +69,7 @@ import { CloseSheet } from "./CloseSheet";
 import { ConflictDialog } from "./ConflictDialog";
 import { EditorTopBar, PagePicker } from "./EditorTopBar";
 import { LinkPicker } from "./LinkPicker";
+import { PicturePicker } from "./PicturePicker";
 import { PreviewPane } from "./PreviewPane";
 import { SaveProblem } from "./SaveStatus";
 import { SectionList } from "./SectionList";
@@ -96,6 +98,7 @@ type SheetKind =
   | { kind: "addSection" }
   | { kind: "addBlock" }
   | { kind: "link"; setting: string; value: string }
+  | { kind: "picture"; setting: string; value: string }
   | { kind: "history" }
   | { kind: "leave" };
 
@@ -153,6 +156,10 @@ export function ThemeEditor({ loaded, origin }: { loaded: ThemeEditorState; orig
   // The section (and, inside it, the part) whose settings are open, and the sheet over it.
   const [open, setOpen] = useState<{ sectionId: string; blockId?: string } | null>(null);
   const [sheet, setSheet] = useState<SheetKind | null>(null);
+  // Pictures this shop has already placed, and the URLs of ones placed since the
+  // list was read: an upload answers with a key alone, and a field needs a URL.
+  const images = useThemeImagesQuery({ enabled: true });
+  const [pictureUrls, setPictureUrls] = useState<Record<string, string>>({});
   const [focusRequest, setFocusRequest] = useState<{ id: string | null } | null>(null);
   // A whole-theme action is running (Save, Discard, Restore, answering a clash): one at a time.
   const [busy, setBusy] = useState(false);
@@ -351,9 +358,27 @@ export function ThemeEditor({ loaded, origin }: { loaded: ThemeEditorState; orig
   }
 
   function openLinkPicker(spec: FieldSpec) {
+    setSheet({ kind: "link", setting: spec.id, value: openSettingText(spec) });
+  }
+
+  function openPicturePicker(spec: FieldSpec) {
+    setSheet({ kind: "picture", setting: spec.id, value: openSettingText(spec) });
+  }
+
+  /** What the open section or block holds in one setting, as text. */
+  function openSettingText(spec: FieldSpec): string {
     const settings = openBlock ? openBlock.settings : openSection?.settings;
     const value = fieldValue(spec, settings);
-    setSheet({ kind: "link", setting: spec.id, value: typeof value === "string" ? value : "" });
+    return typeof value === "string" ? value : "";
+  }
+
+  function handlePickPicture(picture: ThemeImage) {
+    if (sheet?.kind !== "picture") return;
+    handleSet(sheet.setting, picture.key);
+    // Drawn from the picker's own answer until the list is read again: the upload
+    // hands back a key and no URL, so without this the field would show a gap.
+    if (picture.url) setPictureUrls((known) => ({ ...known, [picture.key]: picture.url }));
+    setSheet(null);
   }
 
   async function handleRemoveBlock(block: ThemeBlock) {
@@ -610,6 +635,10 @@ export function ThemeEditor({ loaded, origin }: { loaded: ThemeEditorState; orig
               onBack={() => setOpen(openBlock ? { sectionId: openSection.id } : null)}
               onSet={handleSet}
               onPickLink={openLinkPicker}
+              onPickPicture={openPicturePicker}
+              pictureUrl={(key) =>
+                pictureUrls[key] ?? images.data?.find((row) => row.key === key)?.url ?? ""
+              }
               onOpenBlock={(block) => setOpen({ sectionId: openSection.id, blockId: block.id })}
               onAddBlock={() => setSheet({ kind: "addBlock" })}
               onRemoveBlock={(block) => void handleRemoveBlock(block)}
@@ -668,6 +697,14 @@ export function ThemeEditor({ loaded, origin }: { loaded: ThemeEditorState; orig
         pages={linkPages(state.document)}
         value={sheet?.kind === "link" ? sheet.value : ""}
         onPick={handlePickLink}
+        onClose={() => setSheet(null)}
+      />
+
+      <PicturePicker
+        open={sheet?.kind === "picture"}
+        used={images.data ?? []}
+        current={sheet?.kind === "picture" ? sheet.value : ""}
+        onPick={handlePickPicture}
         onClose={() => setSheet(null)}
       />
 

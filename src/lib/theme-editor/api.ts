@@ -242,6 +242,16 @@ export async function publishThemeDraft(
 }
 
 /** The versions this shop can bring back: at most the last 20 saves, newest first. */
+/** One picture this shop has placed: the key a document stores, and where to draw it from. */
+export type ThemeImage = { key: string; url: string };
+
+export async function fetchThemeImages(http: ThemeHttp): Promise<ThemeImage[]> {
+  const { data } = await http.get<ThemeImage[]>(`${BASE}editor/images/`, {
+    timeout: EDITOR_REQUEST_TIMEOUT_MS,
+  });
+  return data;
+}
+
 export async function fetchThemeVersions(http: ThemeHttp): Promise<ThemeVersion[]> {
   const { data } = await http.get<ThemeVersion[]>(`${BASE}editor/versions/`);
   return data;

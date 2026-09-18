@@ -17,10 +17,9 @@ import { promotionsHref } from "@/app/[locale]/(dashboard)/settings/sections/pro
  */
 
 /** Where a section's content is managed, and the message key that names that place. */
-export type ContentPlace = { href: string; key: "contentBanners" | "contentCta" | "contentStore" };
+export type ContentPlace = { href: string; key: "contentCta" | "contentStore" };
 
 const PLACES: Record<string, ContentPlace> = {
-  banner_slider: { href: promotionsHref("banners"), key: "contentBanners" },
   header: { href: promotionsHref("cta"), key: "contentCta" },
   footer: { href: "/settings?tab=store", key: "contentStore" },
 };

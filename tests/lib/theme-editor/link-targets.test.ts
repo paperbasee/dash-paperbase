@@ -124,10 +124,9 @@ describe("linkTab", () => {
 
 describe("sectionContentPlace", () => {
   it("points the sections that draw merchant content at where it is managed", () => {
-    expect(sectionContentPlace("banner_slider")).toEqual({
-      href: "/settings?tab=promotions&promotion=banners",
-      key: "contentBanners",
-    });
+    // Not the banners: since 2026-09-18 their pictures are the section's own, so it
+    // points nowhere and the merchant never leaves the editor to place one.
+    expect(sectionContentPlace("banner_slider")).toBeNull();
     expect(sectionContentPlace("header")?.key).toBe("contentCta");
     expect(sectionContentPlace("footer")?.key).toBe("contentStore");
   });

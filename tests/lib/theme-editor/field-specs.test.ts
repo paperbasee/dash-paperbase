@@ -28,7 +28,9 @@ const SPECS: ThemeSettingSpec[] = [
     options: ["left", "center"],
     option_labels: { left: { en: "Left", bn: "বাঁ দিকে" }, center: { en: "Center", bn: "মাঝখানে" } },
   },
-  { id: "picture", type: "image", ...labels("Picture"), default: null },
+  { id: "picture", type: "image", ...labels("Picture"), default: "" },
+  // A kind no theme ships and this dashboard cannot draw.
+  { id: "clip", type: "video", ...labels("Clip"), default: "" },
 ];
 
 describe("fieldSpecs", () => {
@@ -40,11 +42,12 @@ describe("fieldSpecs", () => {
       ["wide", "boolean", null, null, null],
       ["rows", "number", null, 1, 6],
       ["align", "select", null, null, null],
+      ["picture", "image", null, null, null],
     ]);
   });
 
   it("leaves out a kind this dashboard cannot draw", () => {
-    expect(fieldSpecs(SPECS, "en").map((f) => f.id)).not.toContain("picture");
+    expect(fieldSpecs(SPECS, "en").map((f) => f.id)).not.toContain("clip");
   });
 
   it("names the field, its help and its choices in the reader's language", () => {

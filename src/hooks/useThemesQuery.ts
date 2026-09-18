@@ -6,6 +6,7 @@ import api from "@/lib/api";
 import {
   themeEditorExamplesQueryKey,
   themeEditorQueryKey,
+  themeEditorImagesQueryKey,
   themeEditorVersionsQueryKey,
   themesQueryKey,
 } from "@/lib/query-keys";
@@ -13,6 +14,7 @@ import {
   discardThemeDraft,
   fetchThemeEditor,
   fetchThemeLibrary,
+  fetchThemeImages,
   fetchThemeVersions,
   selectTheme,
 } from "@/lib/theme-editor/api";
@@ -84,6 +86,24 @@ export function useThemeVersionsQuery({ enabled }: { enabled: boolean }) {
   return useQuery({
     queryKey: themeEditorVersionsQueryKey,
     queryFn: () => fetchThemeVersions(api),
+    enabled,
+    staleTime: 0,
+    gcTime: 0,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    retry: 1,
+    meta: { persist: false },
+  });
+}
+
+/**
+ * The pictures the picker offers. Read while the editor is open and refetched after every
+ * save, because a picture placed in this session becomes one the merchant can place again.
+ */
+export function useThemeImagesQuery({ enabled }: { enabled: boolean }) {
+  return useQuery({
+    queryKey: themeEditorImagesQueryKey,
+    queryFn: () => fetchThemeImages(api),
     enabled,
     staleTime: 0,
     gcTime: 0,

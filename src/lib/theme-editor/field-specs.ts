@@ -14,7 +14,7 @@ import { MAX_LONG_TEXT_LENGTH, MAX_TEXT_LENGTH, MAX_URL_LENGTH } from "./rules";
  */
 
 /** The setting kinds the API validates (engine/apps/theming/manifest.py SETTING_TYPES). */
-export const FIELD_KINDS = ["text", "textarea", "boolean", "number", "select", "url"] as const;
+export const FIELD_KINDS = ["text", "textarea", "boolean", "number", "select", "url", "image"] as const;
 
 export type FieldKind = (typeof FIELD_KINDS)[number];
 

@@ -6,7 +6,6 @@ import { useRouter } from "@/i18n/navigation";
 import { useCanShowApp } from "@/hooks/useCanShowApp";
 import { cn } from "@/lib/utils";
 import { SettingsSectionBody, settingsSectionSurfaceClassName } from "../../SettingsSectionBody";
-import BannersPanel from "./BannersPanel";
 import PopupPanel from "./PopupPanel";
 import CtaPanel from "./CtaPanel";
 import {
@@ -77,7 +76,6 @@ export default function PromotionsSection({ hidden }: { hidden: boolean }) {
         </div>
 
         <div id="promotion-panel" role="tabpanel" aria-labelledby={`promotion-tab-${activeTab}`}>
-          {activeTab === "banners" && <BannersPanel />}
           {activeTab === "popup" && <PopupPanel />}
           {activeTab === "cta" && <CtaPanel />}
         </div>

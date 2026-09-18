@@ -151,16 +151,6 @@ export const APP_CONFIG: Record<string, AppConfig> = {
     countKey: null,
     parentId: "more",
   },
-  banners: {
-    id: "banners",
-    label: "Banners",
-    icon: ImageIcon,
-    description: "Manage banners for homepage, sidebar, footer",
-    essential: false,
-    href: null,
-    countKey: null,
-    parentId: null,
-  },
   popup: {
     id: "popup",
     label: "Pop-up",
@@ -207,7 +197,6 @@ export const OPTIONAL_APP_IDS = [
   "support_tickets",
   "cta",
   "customers",
-  "banners",
   "popup",
   "blog",
 ] as const;

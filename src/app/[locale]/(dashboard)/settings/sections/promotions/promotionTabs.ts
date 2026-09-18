@@ -2,9 +2,9 @@
  * Tabs of Settings → Promotions, in display order. Each id is also the app id in
  * config/apps.ts, so a tab follows that app's enabled flag and view permission.
  *
- * Kept free of imports: the legacy /banners, /popup and /cta server redirects use it.
+ * Kept free of imports: the legacy /popup and /cta server redirects use it.
  */
-export const PROMOTION_TABS = ["banners", "popup", "cta"] as const;
+export const PROMOTION_TABS = ["popup", "cta"] as const;
 
 export type PromotionTab = (typeof PROMOTION_TABS)[number];
 

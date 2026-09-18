@@ -47,8 +47,8 @@ describe("Promotions section visibility", () => {
     expect(isSectionVisible("promotions", staff(["settings.view"]))).toBe(false);
   });
 
-  it("lets a banners-only staff member reach Banners without any settings permission", () => {
-    const access = staff(["banners.view"]);
+  it("lets a pop-up-only staff member reach the pop-up without any settings permission", () => {
+    const access = staff(["popups.view"]);
     const visible = SECTIONS.filter((row) => isSectionVisible(row.id, access));
     expect(visible.map((row) => row.id)).toEqual(["promotions", "account"]);
     // Plain /settings and the default "store" tab both land them on Promotions.
@@ -66,9 +66,9 @@ describe("active promotion tab from the URL", () => {
   });
 
   it("falls back to the first visible tab when the param is missing or unknown", () => {
-    expect(resolvePromotionTab(null, all)).toBe("banners");
-    expect(resolvePromotionTab("", all)).toBe("banners");
-    expect(resolvePromotionTab("coupons", all)).toBe("banners");
+    expect(resolvePromotionTab(null, all)).toBe("popup");
+    expect(resolvePromotionTab("", all)).toBe("popup");
+    expect(resolvePromotionTab("coupons", all)).toBe("popup");
   });
 
   it("falls back to the first visible tab when the URL names a tab the user cannot open", () => {

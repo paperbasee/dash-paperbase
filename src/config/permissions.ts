@@ -99,6 +99,9 @@ export const PERMISSION_GROUPS: PermissionGroup[] = [
     ],
   },
   {
+    // No dashboard screen since 2026-09-18: a theme holds its own pictures. The
+    // permission stays because the API's banners endpoints do, and this file is a
+    // mirror of its catalogue; it goes when those endpoints go.
     id: "banners",
     labelKey: "groupBanners",
     permissions: [
@@ -236,7 +239,6 @@ export const APP_VIEW_PERMISSION: Record<string, string> = {
   product_attributes: "products.view",
   inventory: "inventory.view",
   trash: "trash.view",
-  banners: "banners.view",
   popup: "popups.view",
   blog: "blogs.view",
   shipping: "shipping.view",

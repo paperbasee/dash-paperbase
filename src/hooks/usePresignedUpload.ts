@@ -10,7 +10,15 @@ const ALLOWED_CONTENT_TYPES = new Set([
 ]);
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
 
-export type UploadEntity = "product" | "blog" | "banner" | "category" | "support" | "popup";
+export type UploadEntity =
+  | "product"
+  | "blog"
+  | "banner"
+  | "category"
+  | "support"
+  | "popup"
+  /** Pictures a merchant places in the theme editor. */
+  | "theme";
 
 type PresignResponse = {
   url: string;

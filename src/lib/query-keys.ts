@@ -216,3 +216,6 @@ export const themeEditorExamplesQueryKey = ["themeEditor", "examples"] as const;
 
 /** The saved versions the editor's History sheet lists; read again each time it opens. */
 export const themeEditorVersionsQueryKey = ["themeEditor", "versions"] as const;
+
+/** The pictures this shop has already placed, for the editor's picture picker. */
+export const themeEditorImagesQueryKey = ["themeEditor", "images"] as const;

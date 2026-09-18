@@ -2,7 +2,7 @@
 
 import { useEffect, useId, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { Link2, Pencil, X } from "lucide-react";
+import { Image as ImageIcon, Link2, Pencil, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { FormField } from "@/components/ui/form-field";
@@ -32,9 +32,19 @@ export type SettingFieldProps = {
   onChange: (value: unknown) => void;
   /** A link field asks for the picker rather than being typed into. */
   onPickLink: () => void;
+  /** A picture field does the same, and needs a URL to draw the one it holds. */
+  onPickPicture: () => void;
+  pictureUrl?: (key: string) => string;
 };
 
-export function SettingField({ spec, value, onChange, onPickLink }: SettingFieldProps) {
+export function SettingField({
+  spec,
+  value,
+  onChange,
+  onPickLink,
+  onPickPicture,
+  pictureUrl,
+}: SettingFieldProps) {
   const t = useTranslations("themeEditor");
   const id = useId();
 
@@ -67,6 +77,42 @@ export function SettingField({ spec, value, onChange, onPickLink }: SettingField
             </option>
           ))}
         </Select>
+      </FormField>
+    );
+  }
+
+  if (spec.kind === "image") {
+    const key = typeof value === "string" ? value : "";
+    const url = key ? (pictureUrl?.(key) ?? "") : "";
+    return (
+      <FormField label={spec.label} hint={spec.help ?? undefined}>
+        <div className="flex items-center gap-2">
+          <div className="flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-ui border border-input-border bg-input-surface">
+            {url ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={url} alt="" className="size-full object-cover" />
+            ) : (
+              <ImageIcon className="size-5 text-muted-foreground" aria-hidden />
+            )}
+          </div>
+          <Button type="button" variant="outline" className="h-11 shrink-0 md:h-9" onClick={onPickPicture}>
+            <Pencil aria-hidden />
+            {key ? t("pictureChange") : t("pictureChoose")}
+          </Button>
+          {key ? (
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="size-11 shrink-0 md:size-9"
+              aria-label={t("pictureClear")}
+              title={t("pictureClear")}
+              onClick={() => onChange("")}
+            >
+              <X aria-hidden />
+            </Button>
+          ) : null}
+        </div>
       </FormField>
     );
   }

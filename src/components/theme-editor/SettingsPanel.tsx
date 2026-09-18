@@ -29,6 +29,8 @@ export function SettingsPanel({
   onBack,
   onSet,
   onPickLink,
+  onPickPicture,
+  pictureUrl,
   onOpenBlock,
   onAddBlock,
   onRemoveBlock,
@@ -41,6 +43,9 @@ export function SettingsPanel({
   onBack: () => void;
   onSet: (setting: string, value: unknown) => void;
   onPickLink: (spec: FieldSpec) => void;
+  onPickPicture: (spec: FieldSpec) => void;
+  /** A key this shop uploaded to the URL it draws from; "" when it is not known yet. */
+  pictureUrl: (key: string) => string;
   onOpenBlock: (block: ThemeBlock) => void;
   onAddBlock: () => void;
   onRemoveBlock: (block: ThemeBlock) => void;
@@ -109,6 +114,8 @@ export function SettingsPanel({
               value={fieldValue(spec, settings)}
               onChange={(value) => onSet(spec.id, value)}
               onPickLink={() => onPickLink(spec)}
+              onPickPicture={() => onPickPicture(spec)}
+              pictureUrl={pictureUrl}
             />
           ))}
         </div>
