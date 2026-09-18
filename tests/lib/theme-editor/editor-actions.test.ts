@@ -59,6 +59,7 @@ function edited(extra: number): ThemeDocument {
 function editorState(over: Partial<ThemeEditorState> = {}): ThemeEditorState {
   return {
     theme_key: "basic",
+    is_live: true,
     has_draft: false,
     draft_revision: 9,
     revision: 3,

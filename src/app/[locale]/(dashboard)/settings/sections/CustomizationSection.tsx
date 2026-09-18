@@ -5,14 +5,13 @@ import { useLocale, useTranslations } from "next-intl";
 import { Loader2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { useConfirm } from "@/context/ConfirmDialogContext";
 import { usePermissions } from "@/context/PermissionsContext";
 import { useDeferredNavigate } from "@/hooks/useDeferredNavigate";
-import { useDiscardThemeDraft, useSelectTheme, useThemesQuery } from "@/hooks/useThemesQuery";
+import { useSelectTheme, useThemesQuery } from "@/hooks/useThemesQuery";
 import { THEME_EDITOR_HREF, themePageState } from "@/lib/theme-editor/access";
 import { themeErrorMessageKey, type ThemeSummary } from "@/lib/theme-editor/api";
 import { previewOrigin } from "@/lib/theme-editor/preview-origin";
-import { BASIC_THEME_KEY, themeName, themeNameByKey } from "@/lib/theme-editor/theme-groups";
+import { BASIC_THEME_KEY, themeName } from "@/lib/theme-editor/theme-groups";
 import { notify } from "@/notifications";
 import { CustomizationShell } from "../_components/CustomizationShell";
 import { CardVariantPicker } from "../_components/CardVariantPicker";
@@ -59,13 +58,11 @@ export default function CustomizationSection({ hidden }: { hidden: boolean }) {
   const tc = useTranslations("settings.customization");
   const tCommon = useTranslations("common");
   const locale = useLocale();
-  const confirm = useConfirm();
   const navigate = useDeferredNavigate();
   const { isOwner } = usePermissions();
   // Loads only while the tab is open, like the Team section.
   const library = useThemesQuery({ enabled: !hidden });
   const select = useSelectTheme();
-  const discard = useDiscardThemeDraft();
   const [busyKey, setBusyKey] = useState<string | null>(null);
 
   if (hidden) return null;
@@ -90,16 +87,8 @@ export default function CustomizationSection({ hidden }: { hidden: boolean }) {
     // A draft nobody can open would only replace the one the merchant has.
     if (!data || !canOpenEditor || busyKey) return;
     const name = themeName(theme, locale);
-    if (data.current.has_draft) {
-      const ok = await confirm({
-        title: tc("confirmSwitchTitle"),
-        message: tc("confirmSwitchMessage", { theme: name }),
-        confirmText: tc("confirmSwitch"),
-        cancelText: tCommon("cancel"),
-        variant: "warning",
-      });
-      if (!ok) return;
-    }
+    // Nothing is asked and nothing is lost: every theme keeps its own design, so
+    // opening one puts the work it already had back in front of the merchant.
     setBusyKey(theme.key);
     try {
       await select.mutateAsync({
@@ -112,34 +101,11 @@ export default function CustomizationSection({ hidden }: { hidden: boolean }) {
     } finally {
       setBusyKey(null);
     }
-    notify.success(tc("draftStarted", { theme: name }), { title: tc("heading") });
-    void navigate(THEME_EDITOR_HREF);
-  }
-
-  async function handleDiscardDraft(liveTheme: ThemeSummary) {
-    if (!data || !canEdit || busyKey) return;
-    const name = themeName(liveTheme, locale);
-    const ok = await confirm({
-      title: tc("confirmDiscardTitle"),
-      message: tc("confirmDiscardMessage", {
-        draft: themeNameByKey(data.themes, data.current.draft_theme, locale, tc("themeUnnamed")),
-        theme: name,
-      }),
-      confirmText: tc("confirmDiscard"),
-      cancelText: tCommon("cancel"),
-      variant: "danger",
+    const started = data.current.started_themes.includes(theme.key);
+    notify.success(tc(started ? "draftReopened" : "draftStarted", { theme: name }), {
+      title: tc("heading"),
     });
-    if (!ok) return;
-    setBusyKey(liveTheme.key);
-    try {
-      await discard.mutateAsync(data.current.draft_revision);
-    } catch (error) {
-      reportFailure(error);
-      return;
-    } finally {
-      setBusyKey(null);
-    }
-    notify.success(tc("draftDiscarded"), { title: tc("heading") });
+    void navigate(THEME_EDITOR_HREF);
   }
 
   let body: ReactNode;
@@ -185,11 +151,9 @@ export default function CustomizationSection({ hidden }: { hidden: boolean }) {
         <ThemeLibrary
           themes={themes}
           current={current}
-          canEdit={canEdit}
           canOpenEditor={canOpenEditor}
           busyKey={busyKey}
           onTry={(theme) => void handleTry(theme)}
-          onDiscardDraft={(theme) => void handleDiscardDraft(theme)}
         />
         {current.live_theme === BASIC_THEME_KEY ? (
           <BasicCardStyle canEdit={data.access.can_edit} />

@@ -61,6 +61,11 @@ export type ThemeCurrent = {
   draft_revision: number;
   published_at: string | null;
   published_by_name: string;
+  /**
+   * Themes this shop has already worked on. Opening one of these gives the merchant
+   * back what they had; every other theme starts from its defaults.
+   */
+  started_themes: string[];
 };
 
 export type ThemeSummary = {
@@ -168,7 +173,10 @@ export type ThemeDocument = {
 /** What editor/, editor/select/ and editor/discard/ answer. */
 export type ThemeEditorState = {
   theme_key: string;
+  /** Whether the theme being edited is the one shoppers see. */
+  is_live: boolean;
   has_draft: boolean;
+  /** Every counter below describes THIS theme, not the shop. */
   draft_revision: number;
   revision: number;
   published_at: string | null;

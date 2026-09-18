@@ -75,23 +75,19 @@ type ThemeLibraryProps = {
   themes: ThemeSummary[];
   current: ThemeCurrent;
   /** Unlocked and this member may edit; otherwise the list is read-only. */
-  canEdit: boolean;
-  /** canEdit and the preview host is configured: Try starts a draft only the editor can use. */
+  /** canEdit and the preview host is configured: opening a theme needs the editor. */
   canOpenEditor: boolean;
   /** The theme whose action is running; every action waits while one runs. */
   busyKey: string | null;
   onTry: (theme: ThemeSummary) => void;
-  onDiscardDraft: (theme: ThemeSummary) => void;
 };
 
 export function ThemeLibrary({
   themes,
   current,
-  canEdit,
   canOpenEditor,
   busyKey,
   onTry,
-  onDiscardDraft,
 }: ThemeLibraryProps) {
   const t = useTranslations("settings.customization");
   const locale = useLocale();
@@ -103,23 +99,12 @@ export function ThemeLibrary({
     const isLive = theme.key === current.live_theme;
     const isDraft = current.has_draft && current.draft_theme === theme.key;
 
+    // Every theme keeps its own design, so opening one costs nothing and asks
+    // nothing. A theme the shop has worked on says so, rather than inviting a
+    // merchant to "try" what they already built.
+    const started = current.started_themes.includes(theme.key);
     let action: ReactNode = null;
-    if (canEdit && isLive && current.has_draft && !isDraft) {
-      // The draft is another theme's: going back to the live one means dropping it.
-      action = (
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          className="h-auto min-h-9 w-full whitespace-normal py-1.5"
-          loading={busyKey === theme.key}
-          disabled={busyKey !== null}
-          onClick={() => onDiscardDraft(theme)}
-        >
-          {t("discardAndUse", { theme: name })}
-        </Button>
-      );
-    } else if (canOpenEditor && !isLive && !isDraft) {
+    if (canOpenEditor && !isLive) {
       action = (
         <Button
           type="button"
@@ -129,9 +114,9 @@ export function ThemeLibrary({
           loading={busyKey === theme.key}
           disabled={busyKey !== null}
           onClick={() => onTry(theme)}
-          aria-label={t("tryThemeLabel", { theme: name })}
+          aria-label={t(started ? "continueThemeLabel" : "tryThemeLabel", { theme: name })}
         >
-          {t("tryTheme")}
+          {t(started ? "continueTheme" : "tryTheme")}
         </Button>
       );
     }

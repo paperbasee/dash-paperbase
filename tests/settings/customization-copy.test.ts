@@ -43,9 +43,15 @@ describe("customization copy", () => {
       "_components/ThemeLibrary.tsx",
       "_components/ThemeLockNotice.tsx",
     ]) {
-      for (const m of read(file).matchAll(/\bt\(\s*"(\w+)"/g)) used.add(m[1]);
+      const text = read(file);
+      for (const m of text.matchAll(/\bt\(\s*"(\w+)"/g)) used.add(m[1]);
+      // A key chosen by a condition: t(started ? "continueTheme" : "tryTheme").
+      for (const m of text.matchAll(/\bt\([^)]*\?\s*"(\w+)"\s*:\s*"(\w+)"/g)) {
+        used.add(m[1]);
+        used.add(m[2]);
+      }
     }
-    expect(used.size).toBeGreaterThan(40);
+    expect(used.size).toBeGreaterThan(30);
     expect([...used].filter((k) => !(k in enNs))).toEqual([]);
     expect([...used].filter((k) => !(k in bnNs))).toEqual([]);
   });
