@@ -12,6 +12,26 @@
  * - `href` is an optional internal dashboard path WITHOUT the locale (e.g. "/orders").
  * - Write for merchants: what they can now do or what got better, in plain words. Never
  *   mention code. Title under ~8 words, body 1-3 short sentences, natural Bangla in `bn`.
+ *
+ * ## Entries written before their release — RESTAMP THEM ON THE DAY
+ *
+ * An entry is usually written with the work, and the work usually ships within days.
+ * The theme system did not: it has been held since 2026-09-16, so the entries above it
+ * carry the date and version they were WRITTEN at, not the day they reach anyone. Per
+ * the rule above, those dates are wrong — no merchant has read a word of them.
+ *
+ * **On the day the held work ships, before anything else: restamp every unreleased
+ * entry with the real date and the version it actually goes out in, then reorder.**
+ *
+ * How to find them: compare each `version` against the dashboard version that is live
+ * in production. Anything above it has not shipped.
+ *
+ * Until then `tests/whats-new/content.test.ts` "is sorted newest first" FAILS, and it
+ * is right to. The list genuinely is out of order: a held entry dated 2026-09-17 at
+ * 4.8.5 sits below a released one dated 2026-09-18 at 4.7.1, and no arrangement fixes
+ * that while one of the two dates is fiction. It is a real inconsistency in the data,
+ * not a flaw in the check, and restamping is what clears it. Do not loosen the test to
+ * make it green — that would hide the next one.
  */
 
 export const WHATS_NEW_TAGS = ["new", "improved", "fixed"] as const;

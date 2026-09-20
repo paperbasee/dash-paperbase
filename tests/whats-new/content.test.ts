@@ -73,6 +73,16 @@ describe("what's new content", () => {
     }
   });
 
+  /**
+   * Newest first by both date and version.
+   *
+   * This fails while work is held: an entry written before it ships carries the
+   * date it was WRITTEN at, and a held 4.8.5 dated 2026-09-17 then sits below a
+   * released 4.7.1 dated 2026-09-18. That is a real inconsistency in the data --
+   * one of those dates is fiction -- and the fix is to restamp the held entries
+   * on release day, which `src/content/whats-new.ts` explains at the top.
+   * Loosening this check instead would hide the next one.
+   */
   it("is sorted newest first", () => {
     for (let i = 1; i < WHATS_NEW_ENTRIES.length; i += 1) {
       const prev = WHATS_NEW_ENTRIES[i - 1];
