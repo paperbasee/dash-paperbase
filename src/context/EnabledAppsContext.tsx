@@ -11,6 +11,7 @@ import {
 } from "react";
 import {
   OPTIONAL_APP_IDS,
+  ALWAYS_ON_EXTRA_APP_IDS,
   OPT_IN_APP_IDS,
   ESSENTIAL_APP_IDS,
   CATALOG_INCLUDED_APP_IDS,
@@ -34,7 +35,8 @@ function isAlwaysOnApp(appId: string): boolean {
   return (
     appId === "trash" ||
     (ESSENTIAL_APP_IDS as readonly string[]).includes(appId) ||
-    (CATALOG_INCLUDED_APP_IDS as readonly string[]).includes(appId)
+    (CATALOG_INCLUDED_APP_IDS as readonly string[]).includes(appId) ||
+    (ALWAYS_ON_EXTRA_APP_IDS as readonly string[]).includes(appId)
   );
 }
 

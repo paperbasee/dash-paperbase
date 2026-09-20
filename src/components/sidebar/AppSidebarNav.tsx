@@ -243,7 +243,7 @@ export default function AppSidebarNav({
         );
 
         const children = navChildren?.[token] ?? [];
-        if (!children.length || collapsed) return link;
+        if (!children.length) return link;
 
         // A group, behaving exactly like `Catalog`: the row opens the tree and
         // the shopper -- merchant -- picks from it. The parent's own page is
@@ -266,21 +266,41 @@ export default function AppSidebarNav({
             onOpenChange={() => onToggleChildren(token)}
           >
             <CollapsibleTrigger
+              onClick={() => {
+                // Collapsed, this opens the sidebar and the tree with it --
+                // exactly what Catalog does. Navigating instead would take a
+                // merchant somewhere they did not ask to go, from a rail where
+                // they cannot even read the labels.
+                if (collapsed) {
+                  if (!open) onToggleChildren(token);
+                  onExpandIfCollapsed?.();
+                }
+              }}
+              title={collapsed ? tAppLabel(NAV_GROUP_LABEL_KEYS[token] ?? app.id) : undefined}
               className={cn(
                 "group flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-xs text-sm font-normal w-full transition-colors",
                 childActive && !open
                   ? "bg-accent text-foreground dark:bg-white/[0.12] dark:text-white/95"
-                  : "text-muted-foreground hover:bg-accent hover:text-foreground dark:text-white/70 dark:hover:bg-white/[0.07] dark:hover:text-white/90"
+                  : "text-muted-foreground hover:bg-accent hover:text-foreground dark:text-white/70 dark:hover:bg-white/[0.07] dark:hover:text-white/90",
+                collapsed && "justify-center px-2"
               )}
             >
-              <span className="flex min-w-0 flex-1 items-center gap-2">
+              <span
+                className={cn(
+                  "flex items-center gap-2",
+                  collapsed ? "justify-center" : "min-w-0 flex-1"
+                )}
+              >
                 <Icon className="size-5 shrink-0" />
                 {/* The group's own name, not the parent page's -- otherwise
                     the same word appears twice, one indented under the other. */}
-                <span className="truncate">
-                  {tAppLabel(NAV_GROUP_LABEL_KEYS[token] ?? app.id)}
-                </span>
+                {!collapsed && (
+                  <span className="truncate">
+                    {tAppLabel(NAV_GROUP_LABEL_KEYS[token] ?? app.id)}
+                  </span>
+                )}
               </span>
+              {!collapsed && (
               <span className="flex shrink-0 items-center gap-1.5">
                 {app.countKey && counts != null && counts[app.countKey] > 0 && (
                   <Badge
@@ -299,8 +319,10 @@ export default function AppSidebarNav({
                   )}
                 />
               </span>
+              )}
             </CollapsibleTrigger>
             <CollapsibleContent>
+              {!collapsed && (
               <div className="ml-4 mt-2 space-y-1 border-l border-border pl-3">
                 {children.map((childId) => {
                   const child = APP_CONFIG[childId as keyof typeof APP_CONFIG];
@@ -323,6 +345,7 @@ export default function AppSidebarNav({
                   );
                 })}
               </div>
+              )}
             </CollapsibleContent>
           </Collapsible>
         );

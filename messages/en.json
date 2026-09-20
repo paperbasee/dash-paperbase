@@ -1738,8 +1738,8 @@
           "description": "Product catalog; categories, variants, and attributes are always available with it"
         },
         "orders": {
-          "label": "Orders",
-          "description": "Order management, status flow, and fulfillment"
+          "label": "Sales",
+          "description": "Orders, abandoned checkouts, status flow and fulfilment"
         },
         "customers": {
           "label": "Customers",
@@ -1780,10 +1780,6 @@
         "wishlist": {
           "label": "Wishlist",
           "description": "Let shoppers save things to come back to, and see which products are saved most. Needs customer accounts."
-        },
-        "abandoned_checkouts": {
-          "label": "Abandoned checkouts",
-          "description": "Keep the phone number and basket of anyone who starts checkout and does not finish, so you can call them. Kept 30 days."
         }
       }
     },

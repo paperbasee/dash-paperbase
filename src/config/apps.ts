@@ -266,11 +266,18 @@ export const MORE_APP_IDS = ["support_tickets", "trash"] as const;
  * treats a missing flag as off, and the dashboard has to agree: a sidebar entry
  * for something the shop does not serve is a link to a 404.
  */
-export const OPT_IN_APP_IDS = [
-  "accounts",
-  "wishlist",
-  "abandoned_checkouts",
-] as const;
+export const OPT_IN_APP_IDS = ["accounts", "wishlist"] as const;
+
+/**
+ * Always on, and not listed in Settings → Apps.
+ *
+ * `abandoned_checkouts` is here by the owner's decision on 2026-09-21: every
+ * shop keeps the phone number and basket of somebody who starts checkout and
+ * does not finish. There is no switch, so the thirty-day deletion is the only
+ * thing limiting how long that is held -- see
+ * `engine.apps.checkout_attempts.services.KEEP_FOR_DAYS`.
+ */
+export const ALWAYS_ON_EXTRA_APP_IDS = ["abandoned_checkouts"] as const;
 
 /**
  * Sidebar groups: a row that opens a tree, exactly as `Catalog` does.
