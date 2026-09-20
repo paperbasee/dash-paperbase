@@ -425,9 +425,12 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
       ],
     },
     {
+      // On by default, and the home page's own sign-up is off: the footer is
+      // where a shopper expects this, so a shop gets one out of the box and a
+      // merchant adds the second deliberately rather than discovering two.
       key: "newsletter",
       label: "footerNewsletter",
-      initial: "off",
+      initial: "email",
       emptyValues: ["off"],
       emptyLabel: "footerNewsletterEmpty",
       options: [
