@@ -249,7 +249,33 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
   product: [
     { key: "notice", label: "notice", inherited: true, inheritedFrom: { page: "header", key: "notice" } },
     { key: "header", label: "header", inherited: true, inheritedFrom: { page: "header", key: "layout" } },
-    { key: "buy", label: "buy", locked: true, lockedBecause: "buyWhy" },
+    {
+      key: "breadcrumb",
+      label: "breadcrumb",
+      initial: "on",
+      emptyValues: ["off"],
+      emptyLabel: "breadcrumbEmpty",
+      options: [
+        { value: "on", label: "on", note: "breadcrumbNote", shape: "line" },
+        { value: "off", label: "off", shape: "blank" },
+      ],
+    },
+    {
+      /**
+       * One slot, because the pictures and the buying column share a row: drawn
+       * as two they would say the page stacks them, which it does not. The
+       * pictures are a merchant's choice; the column is not, and the chooser
+       * says so rather than a lock on a slot that is half editable.
+       */
+      key: "buy",
+      label: "buy",
+      initial: "frame",
+      options: [
+        { value: "frame", label: "galleryFrame", note: "galleryFrameNote", shape: "row" },
+        { value: "column", label: "galleryColumn", note: "galleryColumnNote", shape: "block" },
+        { value: "single", label: "gallerySingle", note: "gallerySingleNote", shape: "block" },
+      ],
+    },
     {
       key: "trust",
       label: "trust",
@@ -280,6 +306,41 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
       ],
     },
     {
+      key: "shipping",
+      label: "shipping",
+      initial: "folded",
+      emptyValues: ["off"],
+      emptyLabel: "shippingEmpty",
+      options: [
+        { value: "folded", label: "shippingFolded", note: "shippingFoldedNote", shape: "line" },
+        { value: "plain", label: "shippingPlain", note: "shippingPlainNote", shape: "block" },
+        { value: "off", label: "off", shape: "blank" },
+      ],
+    },
+    {
+      key: "reviews",
+      label: "productReviews",
+      initial: "off",
+      emptyValues: ["off"],
+      emptyLabel: "productReviewsEmpty",
+      options: [
+        { value: "cards", label: "productReviewsCards", note: "productReviewsCardsNote", shape: "row", premium: true },
+        { value: "summary", label: "productReviewsSummary", note: "productReviewsSummaryNote", shape: "line", premium: true },
+        { value: "off", label: "off", shape: "blank" },
+      ],
+    },
+    {
+      key: "faq",
+      label: "productFaq",
+      initial: "off",
+      emptyValues: ["off"],
+      emptyLabel: "productFaqEmpty",
+      options: [
+        { value: "on", label: "productFaqOn", note: "productFaqOnNote", shape: "line" },
+        { value: "off", label: "off", shape: "blank" },
+      ],
+    },
+    {
       key: "related",
       label: "related",
       initial: "on",
@@ -288,6 +349,26 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
       options: [
         { value: "on", label: "on", note: "relatedNote", shape: "row" },
         { value: "off", label: "off", shape: "blank" },
+      ],
+    },
+    {
+      key: "recent",
+      label: "recent",
+      initial: "off",
+      emptyValues: ["off"],
+      emptyLabel: "recentEmpty",
+      options: [
+        { value: "on", label: "recentOn", note: "recentOnNote", shape: "row" },
+        { value: "off", label: "off", shape: "blank" },
+      ],
+    },
+    {
+      key: "stickybuy",
+      label: "stickyBuy",
+      initial: "on",
+      options: [
+        { value: "on", label: "on", note: "stickyBuyNote", shape: "line" },
+        { value: "off", label: "off", note: "stickyBuyOffNote", shape: "blank" },
       ],
     },
     { key: "footer", label: "footer", inherited: true, inheritedFrom: { page: "footer", key: "layout" } },

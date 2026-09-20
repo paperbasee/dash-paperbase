@@ -595,19 +595,43 @@ export function ShopChrome({
         </div>
       );
 
-    case "product:buy":
+    case "product:buy": {
+      const pictures =
+        variant === "column" ? (
+          <div className="space-y-2">
+            <div className="aspect-[4/5] rounded-xs bg-current/8" />
+            <div className="aspect-[4/5] rounded-xs bg-current/8" />
+          </div>
+        ) : variant === "single" ? (
+          <div className="aspect-square rounded-xs bg-current/8" />
+        ) : (
+          <div>
+            <div className="aspect-square rounded-xs bg-current/8" />
+            <div className="mt-2 flex gap-2">
+              {Array.from({ length: 4 }, (_, i) => (
+                <span key={i} className="size-11 rounded-xs bg-current/8" />
+              ))}
+            </div>
+          </div>
+        );
       return (
-        <div className="grid gap-4 px-4 py-4 sm:grid-cols-2">
-          <div className="aspect-[4/5] rounded-xs bg-current/8" />
+        <div className="grid gap-5 px-4 py-4 sm:grid-cols-2">
+          {pictures}
           <div>
             <h4 className="m-0 mb-1.5 text-lg font-semibold">Crossbody Bag</h4>
             <p className="mb-3 text-[19px] font-semibold tabular-nums">৳45</p>
+            <p className="mb-2 text-[11px] uppercase tracking-[0.06em] text-current/45">{t("colour")}</p>
+            <div className="mb-3 flex gap-2">
+              <span className="size-7 rounded-xs bg-current/25" />
+              <span className="size-7 rounded-xs bg-current/10" />
+            </div>
             <span className="mb-2 block h-9 rounded-xs bg-[#1a1a1a]" />
             <span className="mb-3 block h-9 rounded-xs border border-current/15" />
             <p className="text-[11px] text-current/45">Accessories · Bags</p>
           </div>
         </div>
       );
+    }
 
     case "product:trust":
     case "checkout:trust":
@@ -646,6 +670,97 @@ export function ShopChrome({
               <p className="border-b border-current/10 py-1.5">Made in · Bangladesh</p>
             </div>
           )}
+        </div>
+      );
+
+    case "product:breadcrumb":
+      return (
+        <p className="px-4 py-2.5 text-[11px] text-current/45">Accessories · Bags · Crossbody Bag</p>
+      );
+
+    case "product:shipping":
+      return variant === "plain" ? (
+        <div className="px-4 py-4">
+          <SectionHead title={t("shippingHeading")} />
+          <div className="space-y-2 text-[11.5px] leading-relaxed text-current/60">
+            <p>{t("shippingInside")}</p>
+            <p>{t("shippingOutside")}</p>
+            <p>{t("shippingReturns")}</p>
+          </div>
+        </div>
+      ) : (
+        <div className="px-4 py-4">
+          <div className="flex items-center justify-between border-y border-current/12 py-3.5 text-[11px] uppercase tracking-[0.06em] text-current/55">
+            <span>{t("shippingHeading")}</span>
+            <span aria-hidden>+</span>
+          </div>
+        </div>
+      );
+
+    case "product:reviews":
+      return variant === "summary" ? (
+        <div className="flex flex-wrap items-center gap-3 border-y border-current/12 px-4 py-4">
+          <span className="text-[19px] font-semibold tabular-nums">4.7</span>
+          <span className="text-[12px] text-current/45">★★★★★</span>
+          <span className="text-[11.5px] text-current/55">{t("productReviewsCount")}</span>
+        </div>
+      ) : (
+        <div className="px-4 py-4">
+          <SectionHead title={t("productReviewsHeading")} />
+          <div className="grid gap-3 sm:grid-cols-3">
+            {["Nusrat J.", "Rafiq H.", "Tanvir A."].map((name) => (
+              <div key={name} className="rounded-xs border border-current/12 p-3">
+                <p className="text-[11px] text-current/45">★★★★★</p>
+                <div className="mt-2 space-y-1.5">
+                  <Line />
+                  <Line w="70%" />
+                </div>
+                <p className="mt-2.5 text-[11px] text-current/60">{name}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+
+    case "product:faq":
+      return (
+        <div className="px-4 py-4">
+          <SectionHead title={t("productFaqHeading")} />
+          <div className="divide-y divide-current/10 border-y border-current/10">
+            {[t("productFaqOne"), t("productFaqTwo")].map((q) => (
+              <p key={q} className="flex items-center justify-between gap-3 py-3 text-[12px] text-current/70">
+                {q}
+                <span aria-hidden className="text-current/40">
+                  +
+                </span>
+              </p>
+            ))}
+          </div>
+        </div>
+      );
+
+    case "product:recent":
+      return (
+        <div className="px-4 py-4">
+          <SectionHead title={t("recentHeading")} />
+          <Cards items={ARRIVALS} />
+        </div>
+      );
+
+    case "product:stickybuy":
+      return (
+        <div className="px-4 py-4">
+          <p className="mb-2.5 text-[11.5px] text-current/55">{t("stickyBuyExample")}</p>
+          <div className="flex items-center gap-3 rounded-xs border border-current/15 bg-current/5 px-3 py-2.5">
+            <span className="size-9 shrink-0 rounded-xs bg-current/10" />
+            <span className="min-w-0 flex-1">
+              <span className="block truncate text-[12px] font-medium">Crossbody Bag</span>
+              <span className="block text-[12px] font-semibold tabular-nums">৳45</span>
+            </span>
+            <span className="grid h-9 shrink-0 place-items-center rounded-xs bg-[#1a1a1a] px-4 text-[11px] text-white">
+              {t("addToCart")}
+            </span>
+          </div>
         </div>
       );
 
