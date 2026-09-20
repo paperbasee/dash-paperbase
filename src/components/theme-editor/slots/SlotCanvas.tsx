@@ -202,14 +202,25 @@ function SlotRegion({
         className,
       )}
     >
-      {/* The tab that names the place, and says what kind it is. */}
+      {/*
+        The tab that names the place, and says what kind it is.
+
+        Each fill takes ITS OWN paired ink, never a literal. `text-white` here
+        read as white-on-white the moment the dashboard was in dark mode, where
+        `--primary` is 96% lightness -- the tab was there, the name was not. A
+        fill and its text have to come from the same pair or one theme gets a
+        label it cannot read. `muted-foreground` is a text colour being used as
+        a fill, so its pair is the page's own ground.
+      */}
       <span
         className={cn(
           "pointer-events-none absolute -left-px -top-px z-10 inline-flex items-center gap-1 rounded-br-sm px-1.5 py-1",
-          "text-[10px] font-medium tracking-[0.02em] text-white opacity-0 transition-opacity",
+          "text-[10px] font-medium tracking-[0.02em] opacity-0 transition-opacity",
           "group-hover:opacity-100",
           isOpen && "opacity-100",
-          slot.inherited || slot.locked ? "bg-muted-foreground" : "bg-primary",
+          slot.inherited || slot.locked
+            ? "bg-muted-foreground text-background"
+            : "bg-primary text-primary-foreground",
         )}
       >
         {slot.locked ? <Lock className="size-2.5" aria-hidden /> : null}
