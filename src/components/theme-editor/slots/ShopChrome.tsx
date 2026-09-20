@@ -756,41 +756,6 @@ export function ShopChrome({
       );
     }
 
-    case "category:grid": {
-      const cols = variant === "two" ? 2 : variant === "three" ? 3 : 4;
-      const items = [...FEATURED, ...BESTSELLERS].slice(0, cols * 2);
-      return (
-        <div className="px-4 py-4">
-          <div className="grid gap-3" style={{ gridTemplateColumns: `repeat(${cols}, minmax(0,1fr))` }}>
-            {items.map((item) => (
-              <div key={item.name} className="min-w-0">
-                <div className="rounded-xs bg-current/8" style={{ aspectRatio: "1" }} />
-                <p className="mt-2 truncate text-[11px] text-current/60">{item.name}</p>
-                <p className="text-[12px] font-semibold tabular-nums">{item.price}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      );
-    }
-
-    case "category:more":
-      return variant === "pages" ? (
-        <div className="flex items-center justify-center gap-1.5 px-4 py-4 text-[11px]">
-          <span className="grid size-7 place-items-center rounded-xs bg-[#1a1a1a] text-white">1</span>
-          {[2, 3].map((n) => (
-            <span key={n} className="grid size-7 place-items-center rounded-xs border border-current/15 text-current/60">
-              {n}
-            </span>
-          ))}
-          <span className="px-1 text-current/40">›</span>
-        </div>
-      ) : (
-        <div className="grid place-items-center px-4 py-4">
-          <span className="rounded-xs border border-current/25 px-5 py-2 text-[11px] font-medium">{t("catMoreButtonExample")}</span>
-        </div>
-      );
-
     case "category:text":
       return (
         <div className="px-4 py-5 text-center">
@@ -817,6 +782,118 @@ export function ShopChrome({
             </div>
           ) : (
             <p className="py-4 text-[12px] text-current/55">{t("catEmptyTextExample")}</p>
+          )}
+        </div>
+      );
+
+    case "search:heading":
+      return (
+        <div className="px-4 py-5">
+          <h4 className="m-0 text-[19px] font-medium tracking-tight">
+            {t("searchResultsFor")} <span className="italic">“bag”</span>
+            {variant === "plain" ? null : (
+              <span className="ml-2 text-[13px] font-normal text-current/45">({t("catCountExample", { count: 7 })})</span>
+            )}
+          </h4>
+        </div>
+      );
+
+    case "search:categories":
+      return (
+        <div className="px-4 py-4">
+          <p className="mb-2.5 text-[11px] font-semibold">{t("searchCategoriesHeading")}</p>
+          <div className="flex flex-wrap gap-2">
+            {["Bags", "Accessories", "Travel"].map((name) => (
+              <span key={name} className="rounded-full border border-current/15 px-3 py-1 text-[11px] text-current/60">
+                {name}
+              </span>
+            ))}
+          </div>
+        </div>
+      );
+
+    case "search:suggestions":
+      return (
+        <div className="px-4 py-4">
+          <p className="mb-2 text-[11px] font-semibold">{t("searchSuggestionsHeading")}</p>
+          <p className="text-[11px] text-current/55">
+            {["Crossbody Bag", "Canvas Tote", "Laptop Bag"].join(" · ")}
+          </p>
+        </div>
+      );
+
+    case "search:grid":
+    case "category:grid": {
+      const cols = variant === "two" ? 2 : variant === "three" ? 3 : 4;
+      const items = [...FEATURED, ...BESTSELLERS].slice(0, cols * 2);
+      return (
+        <div className="px-4 py-4">
+          <div className="grid gap-3" style={{ gridTemplateColumns: `repeat(${cols}, minmax(0,1fr))` }}>
+            {items.map((item) => (
+              <div key={item.name} className="min-w-0">
+                <div className="rounded-xs bg-current/8" style={{ aspectRatio: "1" }} />
+                <p className="mt-2 truncate text-[11px] text-current/60">{item.name}</p>
+                <p className="text-[12px] font-semibold tabular-nums">{item.price}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    }
+
+    case "search:more":
+    case "category:more":
+      return variant === "pages" ? (
+        <div className="flex items-center justify-center gap-1.5 px-4 py-4 text-[11px]">
+          <span className="grid size-7 place-items-center rounded-xs bg-[#1a1a1a] text-white">1</span>
+          {[2, 3].map((n) => (
+            <span key={n} className="grid size-7 place-items-center rounded-xs border border-current/15 text-current/60">
+              {n}
+            </span>
+          ))}
+          <span className="px-1 text-current/40">›</span>
+        </div>
+      ) : (
+        <div className="grid place-items-center px-4 py-4">
+          <span className="rounded-xs border border-current/25 px-5 py-2 text-[11px] font-medium">{t("catMoreButtonExample")}</span>
+        </div>
+      );
+
+    case "search:empty":
+      return (
+        <div className="border-t border-dashed border-current/15 px-4 py-6">
+          <p className="mb-2 text-[10px] uppercase tracking-[0.06em] text-current/40">{t("searchEmptyWhen")}</p>
+          {variant === "invite" ? (
+            <div className="grid place-items-center gap-3 py-3 text-center">
+              <span>
+                <span className="block text-[14px] font-medium">{t("searchEmptyHeadingExample")}</span>
+                <span className="mt-1 block text-[11px] text-current/50">{t("searchEmptyBodyExample")}</span>
+              </span>
+              <span className="flex flex-wrap justify-center gap-2">
+                {["Bags", "Shirts", "Shoes"].map((name) => (
+                  <span key={name} className="rounded-full border border-current/20 px-3 py-1 text-[11px]">
+                    {name}
+                  </span>
+                ))}
+              </span>
+            </div>
+          ) : (
+            <p className="py-3 text-[12px] text-current/55">{t("searchEmptyTextExample")}</p>
+          )}
+        </div>
+      );
+
+    case "search:prompt":
+      return (
+        <div className="border-t border-dashed border-current/15 px-4 py-5">
+          <p className="mb-2.5 text-[10px] uppercase tracking-[0.06em] text-current/40">{t("searchPromptWhen")}</p>
+          {variant === "trending" ? (
+            <>
+              <SectionHead title={t("searchTrendingHeading")} />
+              <Cards items={BESTSELLERS} />
+            </>
+          ) : (
+            <p className="py-2 text-[12px] text-current/55">{t("searchPromptExample")}</p>
           )}
         </div>
       );

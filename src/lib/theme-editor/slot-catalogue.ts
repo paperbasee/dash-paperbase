@@ -18,7 +18,15 @@
  */
 
 /** Which page a merchant is looking at. Matches the editor's existing page keys. */
-export type SlotPageKey = "home" | "category" | "product" | "cart" | "checkout" | "header" | "footer";
+export type SlotPageKey =
+  | "home"
+  | "category"
+  | "product"
+  | "search"
+  | "cart"
+  | "checkout"
+  | "header"
+  | "footer";
 
 /** The wireframe drawn on an option's tile, so a merchant sees the shape before choosing. */
 export type OptionShape = "blank" | "line" | "block" | "row";
@@ -99,7 +107,14 @@ export type Slot = {
 };
 
 /** In the order a shopper meets them. */
-export const SLOT_PAGES: readonly SlotPageKey[] = ["home", "category", "product", "cart", "checkout"] as const;
+export const SLOT_PAGES: readonly SlotPageKey[] = [
+  "home",
+  "category",
+  "product",
+  "search",
+  "cart",
+  "checkout",
+] as const;
 export const SLOT_GROUPS: readonly SlotPageKey[] = ["header", "footer"] as const;
 
 export const SLOTS: Record<SlotPageKey, Slot[]> = {
@@ -519,6 +534,111 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
       options: [
         { value: "text", label: "cartEmptyText", note: "catEmptyTextNote", shape: "line" },
         { value: "invite", label: "cartEmptyInvite", note: "catEmptyInviteNote", shape: "block" },
+      ],
+    },
+    { key: "footer", label: "footer", inherited: true, inheritedFrom: { page: "footer", key: "layout" } },
+  ],
+
+  /**
+   * Search: the page for a shopper who already knows what they want.
+   *
+   * The most intent anyone shows in a shop, and the page with the least built
+   * behind it. Two things are true of it today and both are said at the point
+   * of choosing rather than left to be discovered:
+   *
+   * - **It returns at most ten products, ever.** `StorefrontSearchView` slices
+   *   the query `[:10]` server side. A shop with two hundred shirts answers
+   *   "shirt" with ten of them and no way to the rest.
+   * - **Its pagination cannot appear.** The section computes its page count
+   *   from `count / PRODUCT_SEARCH_PAGE_SIZE`, `count` is the length of what
+   *   came back (≤ 10) and the page size is 24, so the answer is always one
+   *   and the prev/next block is unreachable. `getStorefrontSearchResults`
+   *   takes a page number as `_page` and never uses it.
+   *
+   * So "Getting to the rest" starts at nothing and says why. The older
+   * `products/search/` endpoint does paginate properly, which is where a fix
+   * would start.
+   *
+   * What IS built and unused: the same endpoint returns twelve popular
+   * products for a query-less search when asked for `trending`. The page shows
+   * a line of text instead.
+   */
+  search: [
+    { key: "notice", label: "notice", inherited: true, inheritedFrom: { page: "header", key: "notice" } },
+    { key: "header", label: "header", inherited: true, inheritedFrom: { page: "header", key: "layout" } },
+    {
+      key: "heading",
+      label: "searchHeading",
+      initial: "withCount",
+      options: [
+        { value: "withCount", label: "searchHeadingCount", note: "searchHeadingCountNote", shape: "line" },
+        { value: "plain", label: "searchHeadingPlain", note: "searchHeadingPlainNote", shape: "line" },
+      ],
+    },
+    {
+      key: "grid",
+      label: "catGrid",
+      hint: "catGridHint",
+      initial: "four",
+      options: [
+        { value: "four", label: "catGridFour", note: "searchGridFourNote", shape: "row" },
+        { value: "three", label: "catGridThree", note: "catGridThreeNote", shape: "row" },
+        { value: "two", label: "catGridTwo", note: "catGridTwoNote", shape: "block" },
+      ],
+    },
+    {
+      key: "categories",
+      label: "searchCategories",
+      initial: "on",
+      emptyValues: ["off"],
+      emptyLabel: "searchCategoriesEmpty",
+      options: [
+        { value: "on", label: "on", note: "searchCategoriesNote", shape: "row" },
+        { value: "off", label: "off", shape: "blank" },
+      ],
+    },
+    {
+      key: "suggestions",
+      label: "searchSuggestions",
+      initial: "on",
+      emptyValues: ["off"],
+      emptyLabel: "searchSuggestionsEmpty",
+      options: [
+        { value: "on", label: "on", note: "searchSuggestionsNote", shape: "line" },
+        { value: "off", label: "off", shape: "blank" },
+      ],
+    },
+    {
+      key: "more",
+      label: "catMore",
+      hint: "searchMoreHint",
+      initial: "none",
+      emptyValues: ["none"],
+      emptyLabel: "catMoreEmpty",
+      options: [
+        { value: "none", label: "catMoreNone", note: "searchMoreNoneNote", shape: "blank" },
+        { value: "button", label: "catMoreButton", note: "catMoreButtonNote", shape: "line" },
+        { value: "pages", label: "catMorePages", note: "catMorePagesNote", shape: "line" },
+      ],
+    },
+    {
+      key: "empty",
+      label: "searchEmpty",
+      hint: "searchEmptyHint",
+      initial: "text",
+      options: [
+        { value: "text", label: "cartEmptyText", note: "searchEmptyTextNote", shape: "line" },
+        { value: "invite", label: "cartEmptyInvite", note: "searchEmptyInviteNote", shape: "block" },
+      ],
+    },
+    {
+      key: "prompt",
+      label: "searchPrompt",
+      hint: "searchPromptHint",
+      initial: "hint",
+      options: [
+        { value: "hint", label: "searchPromptHintOption", note: "searchPromptHintNote", shape: "line" },
+        { value: "trending", label: "searchPromptTrending", note: "searchPromptTrendingNote", shape: "row" },
       ],
     },
     { key: "footer", label: "footer", inherited: true, inheritedFrom: { page: "footer", key: "layout" } },
