@@ -13,7 +13,7 @@ import { cn } from "@/lib/utils";
 import { InventoryStatusDot } from "@/components/inventory/InventoryStatusDot";
 import type { ComponentType } from "react";
 import type { NavCounts } from "@/config/apps";
-import { APP_CONFIG } from "@/config/apps";
+import { APP_CONFIG, NAV_GROUP_LABEL_KEYS } from "@/config/apps";
 import type { InventoryStatusLevel } from "@/lib/inventory-status";
 
 export default function AppSidebarNav({
@@ -245,37 +245,42 @@ export default function AppSidebarNav({
         const children = navChildren?.[token] ?? [];
         if (!children.length || collapsed) return link;
 
-        // One row, exactly like any other nav item, with the chevron inside it
-        // at the right edge -- the same place `Catalog` puts its own.
+        // A group, behaving exactly like `Catalog`: the row opens the tree and
+        // the shopper -- merchant -- picks from it. The parent's own page is
+        // the first child, the way Products sits under Catalog, so nothing
+        // becomes unreachable by the row no longer navigating.
         //
-        // What differs from Catalog is only what the two halves do: there the
-        // whole row expands, here the row navigates and the chevron expands.
-        // Orders and Customers are opened many times a day, and making them
-        // cost an extra click would be a worse dashboard for a tidier one.
-        //
-        // Built as a div holding a link rather than a button nested inside an
-        // anchor: that is invalid markup, and a screen reader is right to be
-        // confused by it. The row carries the background, so the link inside
-        // carries none and the two read as one control.
+        // The owner asked for this over a row that navigated with a chevron
+        // beside it: one behaviour for every group in the sidebar beats two
+        // that look alike and do different things.
         const open = openChildren.has(token);
+        const childActive = children.some((id) => {
+          const href = APP_CONFIG[id as keyof typeof APP_CONFIG]?.href;
+          return href ? isActive(href) : false;
+        });
+
         return (
-          <div key={token}>
-            <div
+          <Collapsible
+            key={token}
+            open={open}
+            onOpenChange={() => onToggleChildren(token)}
+          >
+            <CollapsibleTrigger
               className={cn(
                 "group flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-xs text-sm font-normal w-full transition-colors",
-                active
+                childActive && !open
                   ? "bg-accent text-foreground dark:bg-white/[0.12] dark:text-white/95"
                   : "text-muted-foreground hover:bg-accent hover:text-foreground dark:text-white/70 dark:hover:bg-white/[0.07] dark:hover:text-white/90"
               )}
             >
-              <DeferredNavLink
-                href={app.href}
-                onNavigate={onNavigate}
-                className="flex min-w-0 flex-1 items-center gap-2 text-inherit"
-              >
+              <span className="flex min-w-0 flex-1 items-center gap-2">
                 <Icon className="size-5 shrink-0" />
-                <span className="truncate">{tAppLabel(app.id)}</span>
-              </DeferredNavLink>
+                {/* The group's own name, not the parent page's -- otherwise
+                    the same word appears twice, one indented under the other. */}
+                <span className="truncate">
+                  {tAppLabel(NAV_GROUP_LABEL_KEYS[token] ?? app.id)}
+                </span>
+              </span>
               <span className="flex shrink-0 items-center gap-1.5">
                 {app.countKey && counts != null && counts[app.countKey] > 0 && (
                   <Badge
@@ -287,36 +292,28 @@ export default function AppSidebarNav({
                     {formatCount(counts[app.countKey])}
                   </Badge>
                 )}
-                <button
-                  type="button"
-                  aria-expanded={open}
-                  aria-label={tAppLabel(app.id)}
-                  onClick={() => onToggleChildren(token)}
-                  className="flex shrink-0 cursor-pointer items-center border-0 bg-transparent p-0 text-inherit"
-                >
-                  <ChevronRight
-                    className={cn(
-                      "size-4 shrink-0 transition-transform text-muted-foreground dark:text-white/50",
-                      open && "rotate-90"
-                    )}
-                  />
-                </button>
+                <ChevronRight
+                  className={cn(
+                    "size-4 shrink-0 transition-transform text-muted-foreground dark:text-white/50",
+                    open && "rotate-90"
+                  )}
+                />
               </span>
-            </div>
-            {open && (
+            </CollapsibleTrigger>
+            <CollapsibleContent>
               <div className="ml-4 mt-2 space-y-1 border-l border-border pl-3">
                 {children.map((childId) => {
                   const child = APP_CONFIG[childId as keyof typeof APP_CONFIG];
                   if (!child?.href) return null;
-                  const childActive = isActive(child.href);
+                  const active = isActive(child.href);
                   return (
                     <DeferredNavLink
                       key={childId}
                       href={child.href}
                       onNavigate={onNavigate}
                       className={cn(
-                        "group flex items-center gap-2 px-2.5 py-1.5 rounded-xs text-sm font-normal w-full transition-colors",
-                        childActive
+                        "group flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-xs text-sm font-normal w-full transition-colors",
+                        active
                           ? "bg-accent text-foreground dark:bg-white/[0.12] dark:text-white/95"
                           : "text-muted-foreground hover:bg-accent hover:text-foreground dark:text-white/70 dark:hover:bg-white/[0.07] dark:hover:text-white/90"
                       )}
@@ -326,8 +323,8 @@ export default function AppSidebarNav({
                   );
                 })}
               </div>
-            )}
-          </div>
+            </CollapsibleContent>
+          </Collapsible>
         );
       })}
 

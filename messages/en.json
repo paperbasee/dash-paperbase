@@ -100,7 +100,9 @@
     "navigation": "Navigation",
     "abandoned_checkouts": "Abandoned checkouts",
     "accounts": "Accounts",
-    "wishlist": "Most wished-for"
+    "wishlist": "Most wished-for",
+    "groupSales": "Sales",
+    "groupShoppers": "Shoppers"
   },
   "analyticsPage": {
     "metrics": {

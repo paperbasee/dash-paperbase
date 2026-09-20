@@ -100,7 +100,9 @@
     "navigation": "নেভিগেশন",
     "abandoned_checkouts": "অসমাপ্ত চেকআউট",
     "accounts": "অ্যাকাউন্ট",
-    "wishlist": "সবচেয়ে পছন্দের"
+    "wishlist": "সবচেয়ে পছন্দের",
+    "groupSales": "বিক্রয়",
+    "groupShoppers": "ক্রেতা"
   },
   "analyticsPage": {
     "metrics": {

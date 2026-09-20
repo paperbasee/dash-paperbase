@@ -273,13 +273,36 @@ export const OPT_IN_APP_IDS = [
 ] as const;
 
 /**
- * Sidebar children: a parent that still navigates, with a chevron beside it.
+ * Sidebar groups: a row that opens a tree, exactly as `Catalog` does.
  *
- * Not the `Catalog` shape, where the parent only expands. Orders and Customers
- * are opened many times a day and making them cost an extra click to reach
- * would be a worse dashboard for the sake of a tidier one.
+ * **The parent's own page is the first child.** The row itself no longer
+ * navigates -- it expands -- so without that entry the orders list and the
+ * customer list would have no way in at all. Products sits under Catalog for
+ * the same reason.
+ *
+ * One behaviour for every group in the sidebar. Two that look alike and do
+ * different things is worse than either.
  */
 export const NAV_CHILD_APP_IDS: Record<string, readonly string[]> = {
-  orders: ["abandoned_checkouts"],
-  customers: ["accounts"],
+  orders: ["orders", "abandoned_checkouts"],
+  customers: ["customers", "accounts"],
+};
+
+/**
+ * What a group is called, when it cannot be called what its parent is called.
+ *
+ * `Catalog` has this problem solved for it: the group and the page beneath it
+ * were always different words. Orders and Customers were not, so the tree read
+ * "Orders / Orders, Abandoned checkouts" -- the same word twice, one indented
+ * under the other, which looks like a mistake.
+ *
+ * The group takes the wider word and the page keeps its own: a sale that landed
+ * and one that did not are both `Sales`; the phone-keyed record and the login
+ * are both people who `Shop` here. In Bangla the two words are already
+ * distinct -- গ্রাহক for the record, ক্রেতা for the person -- so the same
+ * split works there.
+ */
+export const NAV_GROUP_LABEL_KEYS: Record<string, string> = {
+  orders: "groupSales",
+  customers: "groupShoppers",
 };

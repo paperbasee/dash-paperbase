@@ -200,7 +200,11 @@ function SidebarContent({
     const out: Record<string, readonly string[]> = {};
     for (const [parent, ids] of Object.entries(NAV_CHILD_APP_IDS)) {
       const shown = ids.filter((id) => canShowApp(id) && APP_CONFIG[id]?.href);
-      if (shown.length) out[parent] = shown;
+      // More than the parent's own page, or there is no tree worth opening --
+      // a group containing only "Orders" is a row that costs a click and
+      // shows nothing. It stays an ordinary link until the shop switches the
+      // second thing on.
+      if (shown.some((id) => id !== parent)) out[parent] = shown;
     }
     return out;
   }, [canShowApp]);
@@ -208,12 +212,27 @@ function SidebarContent({
   useEffect(() => {
     if (showCatalog && catalogChildActive) setCatalogOpen(true);
     if (showMore && moreChildActive) setCeleryOpen(true);
+    // A group whose page you are already on opens itself, the same way Catalog
+    // does. Landing on /orders/abandoned from a link or a reload and finding
+    // the tree shut gives no clue where you are.
+    setOpenChildren((prev) => {
+      const next = new Set(prev);
+      for (const [parent, ids] of Object.entries(navChildren)) {
+        const onOne = ids.some((id) => {
+          const href = APP_CONFIG[id]?.href;
+          return href ? isActive(href) : false;
+        });
+        if (onOne) next.add(parent);
+      }
+      return next.size === prev.size ? prev : next;
+    });
   }, [
     pathname,
     showCatalog,
     catalogChildActive,
     showMore,
     moreChildActive,
+    navChildren,
   ]);
   const [copiedStoreId, setCopiedStoreId] = useState<string | null>(null);
   const [activeStoreId, setActiveStoreId] = useState<string | null>(null);
