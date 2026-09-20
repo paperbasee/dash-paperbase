@@ -1860,19 +1860,18 @@ export function ShopChrome({
      */
     case "checkout:coupon":
       return (
-        <div className="mx-4 mb-4 rounded-xs border border-current/12 p-4">
+        <div className="mx-4 mb-4 rounded-md border border-current/12 p-4">
           {variant === "link" ? (
             <p className="text-[11px] underline underline-offset-2 text-current/55">{t("couponLinkExample")}</p>
           ) : (
-            <>
-              <p className="mb-2 text-[10px] uppercase tracking-[0.08em] text-current/45">{t("couponHeading")}</p>
-              <div className="flex gap-2">
-                <span className="h-8 flex-1 rounded-xs border border-current/15 bg-current/[0.04]" aria-hidden />
-                <span className="grid h-8 shrink-0 place-items-center rounded-xs border border-current/25 px-3 text-[11px] font-medium">
-                  {t("couponApply")}
-                </span>
-              </div>
-            </>
+            <div className="flex gap-2">
+              <span className="flex h-9 flex-1 items-center rounded-full border border-current/15 bg-current/[0.04] px-3 text-[11px] text-current/40">
+                {t("couponPlaceholder")}
+              </span>
+              <span className="grid h-9 shrink-0 place-items-center rounded-full bg-foreground px-5 text-[11px] font-semibold text-background">
+                {t("couponApply")}
+              </span>
+            </div>
           )}
         </div>
       );
@@ -1919,51 +1918,77 @@ export function ShopChrome({
      */
     case "checkout:summary": {
       const fixed = variant === "fixed";
+      const coupon = settings?.coupon ?? "off";
       const lines = [
-        { name: "Crossbody Bag", note: "Tan · One size", qty: 1, price: "৳45" },
-        { name: "Leather Belt", note: "Black · 34", qty: 2, price: "৳58" },
+        { name: "Gradient Graphic T-shirt", size: "Large", colour: "White", qty: 1, price: "৳1,450" },
+        { name: "Checkered Shirt", size: "Medium", colour: "Red", qty: 1, price: "৳1,800" },
+        { name: "Skinny Fit Jeans", size: "Large", colour: "Blue", qty: 1, price: "৳2,400" },
       ];
       return (
         // A panel, because the shop's own summary is one -- and because the
         // column is shorter than the form beside it, so without an edge the
         // space under it reads as a hole rather than as the page.
-        <div className="m-4 rounded-xs border border-current/12 p-4">
-          <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.06em]">{t("orderSummary")}</p>
-          <div className="grid gap-3">
-            {lines.map((line) => (
-              <div key={line.name} className="flex items-start gap-2.5">
-                <span className="size-11 shrink-0 rounded-xs bg-current/8" aria-hidden />
+        //
+        // Drawn in the cart's language on purpose: a shopper meets these two
+        // pages one after the other, and the same order looking like two
+        // different orders is how somebody stops to check they are buying what
+        // they think they are.
+        <div className="m-4 rounded-md border border-current/12 p-4">
+          <p className="mb-3 text-[15px] font-semibold">{t("orderSummary")}</p>
+
+          <div className="rounded-md border border-current/12">
+            {lines.map((line, i) => (
+              <div
+                key={line.name}
+                className={`flex items-start gap-3 p-3 ${i ? "border-t border-current/10" : ""}`}
+              >
+                <span className="size-14 shrink-0 rounded-sm bg-current/8" aria-hidden />
                 <span className="min-w-0 flex-1">
-                  <span className="block truncate text-[12px] font-medium">{line.name}</span>
-                  <span className="block truncate text-[10px] text-current/45">{line.note}</span>
-                  {fixed ? (
-                    <span className="mt-1 block text-[10px] tabular-nums text-current/50">× {line.qty}</span>
-                  ) : (
-                    <span className="mt-1.5 inline-flex items-center rounded-xs border border-current/15 text-[11px] leading-none">
-                      <span className="px-2 py-1 text-current/45">−</span>
-                      <span className="px-1.5 py-1 tabular-nums">{line.qty}</span>
-                      <span className="px-2 py-1 text-current/45">+</span>
-                    </span>
-                  )}
+                  <span className="block truncate text-[12.5px] font-semibold">{line.name}</span>
+                  <span className="mt-0.5 block text-[10px] text-current/45">
+                    {t("cartLineSize")}: <span className="text-current/65">{line.size}</span>
+                  </span>
+                  <span className="block text-[10px] text-current/45">
+                    {t("cartLineColour")}: <span className="text-current/65">{line.colour}</span>
+                  </span>
+                  <span className="mt-1.5 flex items-center justify-between gap-3">
+                    <span className="text-[14px] font-semibold tabular-nums">{line.price}</span>
+                    {fixed ? (
+                      <span className="text-[11px] tabular-nums text-current/50">× {line.qty}</span>
+                    ) : (
+                      <span className="inline-flex shrink-0 items-center rounded-full border border-current/15 text-[11px] leading-none">
+                        <span className="px-2.5 py-1.5 text-current/45">−</span>
+                        <span className="px-1.5 py-1.5 tabular-nums">{line.qty}</span>
+                        <span className="px-2.5 py-1.5 text-current/45">+</span>
+                      </span>
+                    )}
+                  </span>
                 </span>
-                <span className="shrink-0 text-[12px] font-semibold tabular-nums">{line.price}</span>
               </div>
             ))}
           </div>
 
-          <div className="mt-3.5 grid gap-1.5 border-t border-current/10 pt-3 text-[11px] text-current/55">
+          <div className="mt-4 grid gap-2 text-[12px] text-current/60">
             <div className="flex justify-between tabular-nums">
               <span>{t("subtotal")}</span>
-              <span>৳103</span>
+              <span>৳5,650</span>
             </div>
+            {/* Only when there is a field to type a code into. A shop with no
+                coupons has nothing to take off, on either page. */}
+            {coupon === "off" ? null : (
+              <div className="flex justify-between tabular-nums text-[#d64545]">
+                <span>{t("cartDiscountExample")}</span>
+                <span>−৳1,130</span>
+              </div>
+            )}
             <div className="flex justify-between tabular-nums">
               <span>{t("delivery")}</span>
-              <span>৳60</span>
+              <span>৳150</span>
             </div>
-            <div className="flex justify-between border-t border-current/10 pt-1.5 text-[14px] font-semibold tabular-nums text-current">
-              <span>{t("total")}</span>
-              <span>৳163</span>
-            </div>
+          </div>
+          <div className="mt-3 flex items-baseline justify-between gap-3 border-t border-current/10 pt-3">
+            <span className="text-[13px] font-medium">{t("total")}</span>
+            <span className="text-[19px] font-semibold tabular-nums">৳4,670</span>
           </div>
         </div>
       );
