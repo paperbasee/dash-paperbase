@@ -23,6 +23,8 @@ export type SlotPageKey =
   | "category"
   | "product"
   | "search"
+  | "blog"
+  | "article"
   | "cart"
   | "checkout"
   | "header"
@@ -112,6 +114,8 @@ export const SLOT_PAGES: readonly SlotPageKey[] = [
   "category",
   "product",
   "search",
+  "blog",
+  "article",
   "cart",
   "checkout",
 ] as const;
@@ -639,6 +643,199 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
       options: [
         { value: "hint", label: "searchPromptHintOption", note: "searchPromptHintNote", shape: "line" },
         { value: "trending", label: "searchPromptTrending", note: "searchPromptTrendingNote", shape: "row" },
+      ],
+    },
+    { key: "footer", label: "footer", inherited: true, inheritedFrom: { page: "footer", key: "layout" } },
+  ],
+
+  /**
+   * The blog, and a post: two templates the API already separates
+   * (`blog` and `blog_article`), so two entries rather than one.
+   *
+   * A shop's blog is not a magazine. It is there so a search engine has
+   * something to send people to and so a shopper who wants convincing can be
+   * convinced, which is why what a post carries -- who wrote it, when, how many
+   * have read it, what to read next -- matters more here than how the shelf is
+   * arranged.
+   *
+   * Everything offered is already in the payload: `tags` filter through
+   * `?tag=<slug>` on the public list, `views` ships on every card, and
+   * `author_name` is on the DETAIL serializer only. That last one is why a
+   * byline is a choice on a post and not on a card: the list does not know it.
+   */
+  blog: [
+    { key: "notice", label: "notice", inherited: true, inheritedFrom: { page: "header", key: "notice" } },
+    { key: "header", label: "header", inherited: true, inheritedFrom: { page: "header", key: "layout" } },
+    {
+      key: "heading",
+      label: "blogHeading",
+      initial: "on",
+      emptyValues: ["off"],
+      emptyLabel: "blogHeadingEmpty",
+      options: [
+        { value: "on", label: "on", note: "blogHeadingNote", shape: "line" },
+        { value: "off", label: "off", note: "blogHeadingOffNote", shape: "blank" },
+      ],
+    },
+    {
+      key: "search",
+      label: "blogSearch",
+      initial: "on",
+      emptyValues: ["off"],
+      emptyLabel: "blogSearchEmpty",
+      options: [
+        { value: "on", label: "on", note: "blogSearchNote", shape: "line" },
+        { value: "off", label: "off", shape: "blank" },
+      ],
+    },
+    {
+      key: "tags",
+      label: "blogTags",
+      hint: "blogTagsHint",
+      initial: "off",
+      emptyValues: ["off"],
+      emptyLabel: "blogTagsEmpty",
+      options: [
+        { value: "off", label: "off", shape: "blank" },
+        { value: "row", label: "blogTagsRow", note: "blogTagsRowNote", shape: "line" },
+      ],
+    },
+    {
+      key: "featured",
+      label: "blogFeatured",
+      hint: "blogFeaturedHint",
+      initial: "shelf",
+      emptyValues: ["off"],
+      emptyLabel: "blogFeaturedEmpty",
+      options: [
+        { value: "shelf", label: "blogFeaturedShelf", note: "blogFeaturedShelfNote", shape: "row" },
+        { value: "hero", label: "blogFeaturedHero", note: "blogFeaturedHeroNote", shape: "block" },
+        { value: "off", label: "off", shape: "blank" },
+      ],
+    },
+    {
+      key: "latest",
+      label: "blogLatest",
+      initial: "grid",
+      options: [
+        { value: "grid", label: "blogLatestGrid", note: "blogLatestGridNote", shape: "row" },
+        { value: "rows", label: "blogLatestRows", note: "blogLatestRowsNote", shape: "line" },
+      ],
+    },
+    {
+      key: "cards",
+      label: "blogCards",
+      initial: "full",
+      options: [
+        { value: "full", label: "blogCardsFull", note: "blogCardsFullNote", shape: "block" },
+        { value: "picture", label: "blogCardsPicture", note: "blogCardsPictureNote", shape: "block" },
+        { value: "words", label: "blogCardsWords", note: "blogCardsWordsNote", shape: "line" },
+      ],
+    },
+    {
+      key: "meta",
+      label: "blogMeta",
+      hint: "blogMetaHint",
+      initial: "date",
+      emptyValues: ["none"],
+      emptyLabel: "blogMetaEmpty",
+      options: [
+        { value: "date", label: "blogMetaDate", note: "blogMetaDateNote", shape: "line" },
+        { value: "reads", label: "blogMetaReads", note: "blogMetaReadsNote", shape: "line" },
+        { value: "none", label: "nothing", shape: "blank" },
+      ],
+    },
+    {
+      key: "text",
+      label: "catText",
+      initial: "off",
+      emptyValues: ["off"],
+      emptyLabel: "catTextEmpty",
+      options: [
+        { value: "off", label: "off", shape: "blank" },
+        { value: "block", label: "catTextBlock", note: "blogTextBlockNote", shape: "block" },
+      ],
+    },
+    { key: "footer", label: "footer", inherited: true, inheritedFrom: { page: "footer", key: "layout" } },
+  ],
+
+  article: [
+    { key: "notice", label: "notice", inherited: true, inheritedFrom: { page: "header", key: "notice" } },
+    { key: "header", label: "header", inherited: true, inheritedFrom: { page: "header", key: "layout" } },
+    {
+      key: "back",
+      label: "articleBack",
+      initial: "on",
+      emptyValues: ["off"],
+      emptyLabel: "articleBackEmpty",
+      options: [
+        { value: "on", label: "on", note: "articleBackNote", shape: "line" },
+        { value: "off", label: "off", note: "articleBackOffNote", shape: "blank" },
+      ],
+    },
+    {
+      key: "head",
+      label: "articleHead",
+      initial: "plain",
+      options: [
+        { value: "plain", label: "articleHeadPlain", note: "articleHeadPlainNote", shape: "line" },
+        { value: "picture", label: "articleHeadPicture", note: "articleHeadPictureNote", shape: "block" },
+      ],
+    },
+    {
+      key: "byline",
+      label: "articleByline",
+      hint: "articleBylineHint",
+      initial: "date",
+      emptyValues: ["none"],
+      emptyLabel: "articleBylineEmpty",
+      options: [
+        { value: "date", label: "articleBylineDate", note: "articleBylineDateNote", shape: "line" },
+        { value: "author", label: "articleBylineAuthor", note: "articleBylineAuthorNote", shape: "line" },
+        { value: "none", label: "nothing", shape: "blank" },
+      ],
+    },
+    {
+      key: "body",
+      label: "articleBody",
+      hint: "articleBodyHint",
+      initial: "narrow",
+      options: [
+        { value: "narrow", label: "articleBodyNarrow", note: "articleBodyNarrowNote", shape: "block" },
+        { value: "wide", label: "articleBodyWide", note: "articleBodyWideNote", shape: "block" },
+      ],
+    },
+    {
+      key: "tags",
+      label: "blogTags",
+      initial: "on",
+      emptyValues: ["off"],
+      emptyLabel: "blogTagsEmpty",
+      options: [
+        { value: "on", label: "on", note: "articleTagsNote", shape: "line" },
+        { value: "off", label: "off", shape: "blank" },
+      ],
+    },
+    {
+      key: "prevNext",
+      label: "articlePrevNext",
+      initial: "on",
+      emptyValues: ["off"],
+      emptyLabel: "articlePrevNextEmpty",
+      options: [
+        { value: "on", label: "on", note: "articlePrevNextNote", shape: "row" },
+        { value: "off", label: "off", shape: "blank" },
+      ],
+    },
+    {
+      key: "related",
+      label: "articleRelated",
+      initial: "on",
+      emptyValues: ["off"],
+      emptyLabel: "articleRelatedEmpty",
+      options: [
+        { value: "on", label: "on", note: "articleRelatedNote", shape: "row" },
+        { value: "off", label: "off", shape: "blank" },
       ],
     },
     { key: "footer", label: "footer", inherited: true, inheritedFrom: { page: "footer", key: "layout" } },

@@ -56,6 +56,8 @@ export function SlotEditor() {
     category: initialChoices("category"),
     product: initialChoices("product"),
     search: initialChoices("search"),
+    blog: initialChoices("blog"),
+    article: initialChoices("article"),
     cart: initialChoices("cart"),
     checkout: initialChoices("checkout"),
     header: initialChoices("header"),

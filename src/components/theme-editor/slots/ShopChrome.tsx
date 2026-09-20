@@ -61,6 +61,46 @@ const BESTSELLERS = [
   { name: "Card Wallet", price: "৳41" },
 ];
 
+const POSTS = [
+  { title: "How we choose leather", excerpt: "Six tanneries, one that answers the phone." },
+  { title: "Caring for canvas in the rain", excerpt: "Dhaka in July is a test no lab can run." },
+  { title: "Behind the seams", excerpt: "A day with the people who cut and stitch." },
+  { title: "Why our hardware never changed", excerpt: "Six years, and nothing has worn out yet." },
+];
+
+/**
+ * Post cards, drawn the way the blog's own two settings say.
+ *
+ * The shelves do not own this: `cards` decides what a card carries and `meta`
+ * decides the line under it, and both are chosen on their own bands. Passing
+ * them through is what lets a merchant change the card shape and watch every
+ * shelf on the page change with it.
+ */
+function PostCards({
+  posts,
+  cards,
+  meta,
+}: {
+  posts: { title: string; excerpt: string }[];
+  cards: string;
+  meta: string | null;
+}) {
+  return (
+    <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+      {posts.map((post) => (
+        <div key={post.title} className="min-w-0">
+          {cards === "words" ? null : <div className="aspect-[4/3] rounded-xs bg-current/8" aria-hidden />}
+          <p className={`${cards === "words" ? "" : "mt-2"} text-[12px] font-medium leading-snug`}>{post.title}</p>
+          {cards === "picture" ? null : (
+            <p className="mt-1 text-[10.5px] leading-relaxed text-current/50">{post.excerpt}</p>
+          )}
+          {meta ? <p className="mt-1 text-[10px] text-current/40">{meta}</p> : null}
+        </div>
+      ))}
+    </div>
+  );
+}
+
 const ARRIVALS = [
   { name: "Merino Scarf", price: "৳58" },
   { name: "Wool Cap", price: "৳34" },
@@ -895,6 +935,216 @@ export function ShopChrome({
           ) : (
             <p className="py-2 text-[12px] text-current/55">{t("searchPromptExample")}</p>
           )}
+        </div>
+      );
+
+    /* -------------------------------------------------------------- blog -- */
+
+    case "blog:heading":
+      return (
+        <div className="px-4 py-5">
+          <h4 className="m-0 text-[20px] font-medium tracking-tight">{t("blogTitleExample")}</h4>
+          <p className="mt-1.5 max-w-[46ch] text-[11.5px] leading-relaxed text-current/55">{t("blogIntroExample")}</p>
+        </div>
+      );
+
+    case "blog:search":
+      return (
+        <div className="flex gap-2 px-4 py-3">
+          <span className="h-8 flex-1 rounded-xs border border-current/15 bg-current/[0.04]" aria-hidden />
+          <span className="grid h-8 shrink-0 place-items-center rounded-xs border border-current/25 px-3 text-[11px] font-medium">
+            {t("blogSearchButton")}
+          </span>
+        </div>
+      );
+
+    case "blog:tags":
+      return (
+        <div className="flex flex-wrap gap-2 px-4 py-3">
+          {[t("blogTagAll"), "Care", "Materials", "Behind the seams", "Stockists"].map((name, i) => (
+            <span
+              key={name}
+              className={
+                i === 0
+                  ? "rounded-full bg-[#1a1a1a] px-3 py-1 text-[11px] text-white"
+                  : "rounded-full border border-current/15 px-3 py-1 text-[11px] text-current/60"
+              }
+            >
+              {name}
+            </span>
+          ))}
+        </div>
+      );
+
+    /**
+     * The featured shelf, or one post given the whole width.
+     *
+     * `is_featured` already marks them; the only question is whether four small
+     * ones or one large one does more for a blog whose best post is the reason
+     * anybody is on the page.
+     */
+    case "blog:featured": {
+      const meta = settings?.meta ?? "date";
+      const cardMeta =
+        meta === "reads" ? t("blogReadsExample", { count: 1240 }) : meta === "none" ? null : "12 Sep 2026";
+      if (variant === "hero") {
+        return (
+          <div className="px-4 py-4">
+            <SectionHead title={t("blogFeaturedHeadingExample")} />
+            <div className="grid gap-3 sm:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)]">
+              <div className="aspect-[16/10] rounded-xs bg-current/8" aria-hidden />
+              <div className="flex flex-col justify-center gap-2">
+                <p className="text-[16px] font-medium leading-snug">{POSTS[0].title}</p>
+                <p className="text-[11.5px] leading-relaxed text-current/55">{POSTS[0].excerpt}</p>
+                {cardMeta ? <p className="text-[10px] text-current/40">{cardMeta}</p> : null}
+              </div>
+            </div>
+          </div>
+        );
+      }
+      return (
+        <div className="px-4 py-4">
+          <SectionHead title={t("blogFeaturedHeadingExample")} />
+          <PostCards posts={POSTS} meta={cardMeta} cards={settings?.cards ?? "full"} />
+        </div>
+      );
+    }
+
+    case "blog:latest": {
+      const meta = settings?.meta ?? "date";
+      const cardMeta =
+        meta === "reads" ? t("blogReadsExample", { count: 1240 }) : meta === "none" ? null : "12 Sep 2026";
+      if (variant === "rows") {
+        return (
+          <div className="px-4 py-4">
+            <SectionHead title={t("blogLatestHeadingExample")} />
+            <div className="grid gap-3">
+              {POSTS.slice(0, 3).map((post) => (
+                <div key={post.title} className="flex items-center gap-3 border-b border-current/10 pb-3">
+                  <span className="h-14 w-20 shrink-0 rounded-xs bg-current/8" aria-hidden />
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate text-[13px] font-medium">{post.title}</span>
+                    <span className="mt-0.5 block truncate text-[11px] text-current/50">{post.excerpt}</span>
+                  </span>
+                  {cardMeta ? <span className="shrink-0 text-[10px] text-current/40">{cardMeta}</span> : null}
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+      }
+      return (
+        <div className="px-4 py-4">
+          <SectionHead title={t("blogLatestHeadingExample")} />
+          <PostCards posts={POSTS} meta={cardMeta} cards={settings?.cards ?? "full"} />
+        </div>
+      );
+    }
+
+    // The card shape and the line under it are read by the two shelves above,
+    // so their own bands show the choice in the place it will really be made.
+    case "blog:cards":
+    case "blog:meta":
+      return (
+        <div className="px-4 py-4">
+          <p className="mb-2.5 text-[10px] uppercase tracking-[0.08em] text-current/45">
+            {slotKey === "cards" ? t("blogCardsWhat") : t("blogMetaWhat")}
+          </p>
+          <PostCards
+            posts={POSTS.slice(0, 2)}
+            cards={slotKey === "cards" ? (variant ?? "full") : (settings?.cards ?? "full")}
+            meta={
+              slotKey === "meta"
+                ? variant === "reads"
+                  ? t("blogReadsExample", { count: 1240 })
+                  : variant === "none"
+                    ? null
+                    : "12 Sep 2026"
+                : "12 Sep 2026"
+            }
+          />
+        </div>
+      );
+
+    case "blog:text":
+      return (
+        <div className="px-4 py-5 text-center">
+          <h4 className="m-0 mb-2 text-[14px] font-semibold">{t("blogTextHeadingExample")}</h4>
+          <p className="mx-auto max-w-[52ch] text-[11.5px] leading-relaxed text-current/55">{t("blogTextBodyExample")}</p>
+        </div>
+      );
+
+    /* ----------------------------------------------------------- article -- */
+
+    case "article:back":
+      return <p className="px-4 py-3 text-[11px] text-current/55">← {t("articleBackExample")}</p>;
+
+    case "article:head":
+      if (variant === "picture") {
+        return (
+          <div>
+            <div className="aspect-[21/8] bg-current/8" aria-hidden />
+            <h4 className="m-0 px-4 pt-4 text-[21px] font-medium leading-tight tracking-tight">{POSTS[0].title}</h4>
+          </div>
+        );
+      }
+      return (
+        <h4 className="m-0 px-4 pt-5 text-[21px] font-medium leading-tight tracking-tight">{POSTS[0].title}</h4>
+      );
+
+    case "article:byline":
+      return (
+        <p className="px-4 py-2.5 text-[11px] text-current/45">
+          {variant === "author" ? t("articleBylineExample") : "12 September 2026"}
+        </p>
+      );
+
+    case "article:body": {
+      const wide = variant === "wide";
+      return (
+        <div className={wide ? "px-4 py-4" : "mx-auto max-w-[34rem] px-4 py-4"}>
+          <p className="mb-3 text-[12px] leading-[1.75] text-current/70">{t("articleBodyExample")}</p>
+          <div className="grid gap-2">
+            <Line />
+            <Line />
+            <Line w="92%" />
+            <Line w="78%" />
+          </div>
+        </div>
+      );
+    }
+
+    case "article:tags":
+      return (
+        <div className="flex flex-wrap gap-2 px-4 py-3">
+          {["Care", "Materials"].map((name) => (
+            <span key={name} className="rounded-full border border-current/15 px-3 py-1 text-[11px] text-current/60">
+              {name}
+            </span>
+          ))}
+        </div>
+      );
+
+    case "article:prevNext":
+      return (
+        <div className="grid gap-3 border-t border-current/10 px-4 py-4 sm:grid-cols-2">
+          {[
+            { dir: t("articlePrev"), title: POSTS[1].title, align: "" },
+            { dir: t("articleNext"), title: POSTS[2].title, align: "sm:text-right" },
+          ].map((item) => (
+            <div key={item.dir} className={item.align}>
+              <p className="text-[10px] uppercase tracking-[0.08em] text-current/40">{item.dir}</p>
+              <p className="mt-1 truncate text-[12px] font-medium">{item.title}</p>
+            </div>
+          ))}
+        </div>
+      );
+
+    case "article:related":
+      return (
+        <div className="px-4 py-4">
+          <SectionHead title={t("articleRelatedHeadingExample")} />
+          <PostCards posts={POSTS} meta="12 Sep 2026" cards="full" />
         </div>
       );
 
