@@ -1006,14 +1006,66 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
         { value: "bar", label: "checkoutStepsBar", note: "cartStepsBarNote", shape: "line" },
       ],
     },
+    /**
+     * The two columns of the cart, the same shape the checkout has: what they
+     * are buying on the left, what it comes to on the right.
+     *
+     * The old cart was a stack -- items, then a total tucked under them -- and
+     * the total is the one thing a shopper opens this page to see. Beside the
+     * items it is on screen from the moment the page loads, at any length of
+     * cart. Below them it is wherever the scrollbar happens to leave it.
+     */
     {
       key: "lines",
       label: "cartLines",
+      row: "body",
+      stack: "left",
+      span: 1.45,
       hint: "cartLinesHint",
-      initial: "table",
+      initial: "cards",
       options: [
+        { value: "cards", label: "cartLinesCards", note: "cartLinesCardsNote", shape: "block" },
         { value: "table", label: "cartTable", note: "cartTableNote", shape: "row" },
-        { value: "list", label: "cartList", note: "cartListNote", shape: "block" },
+      ],
+    },
+    {
+      key: "total",
+      label: "cartTotal",
+      row: "body",
+      stack: "right",
+      span: 1,
+      hint: "cartTotalHint",
+      initial: "full",
+      options: [
+        { value: "full", label: "cartTotalFull", note: "cartTotalFullNote", shape: "block" },
+        { value: "simple", label: "cartTotalSimple", note: "cartTotalSimpleNote", shape: "line" },
+      ],
+    },
+    /**
+     * The promo field, under the summary it would come off -- and, like the
+     * checkout's, a box with nothing behind it. Paperbase has no coupons: no
+     * code to make, no limit, no expiry. Off to begin with, and the chooser
+     * says why rather than letting a merchant switch on a field that cannot
+     * take anything.
+     *
+     * The summary above reads this: a discount line has no business in the
+     * totals of a shop that cannot give one, so it appears only when the field
+     * a shopper would type into does.
+     */
+    {
+      key: "coupon",
+      label: "checkoutCoupon",
+      row: "body",
+      stack: "right",
+      hint: "checkoutCouponHint",
+      initial: "off",
+      /* No empty state: the summary above is where this actually appears, so
+         this band is the control for it and has to stay visible to be clicked
+         -- hatching it over would hide the only way to switch it on. */
+      options: [
+        { value: "off", label: "off", note: "couponOffNote", shape: "blank" },
+        { value: "link", label: "couponLink", note: "couponLinkNote", shape: "line" },
+        { value: "open", label: "couponOpen", note: "couponOpenNote", shape: "row" },
       ],
     },
     {
@@ -1025,17 +1077,6 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
       options: [
         { value: "on", label: "on", note: "cartTrustNote", shape: "line" },
         { value: "off", label: "off", shape: "blank" },
-      ],
-    },
-    {
-      key: "total",
-      label: "cartTotal",
-      hint: "cartTotalHint",
-      initial: "right",
-      options: [
-        { value: "right", label: "cartTotalRight", note: "cartTotalRightNote", shape: "line" },
-        { value: "card", label: "cartTotalCard", note: "cartTotalCardNote", shape: "block" },
-        { value: "bar", label: "cartTotalBar", note: "cartTotalBarNote", shape: "row" },
       ],
     },
     {
@@ -1053,8 +1094,6 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
       key: "upsell",
       label: "cartUpsell",
       hint: "cartUpsellHint",
-      /* On: a shopper with a full cart has already decided to buy here, and
-         four best sellers need no personalisation to be worth showing. */
       initial: "row",
       emptyValues: ["off"],
       emptyLabel: "cartUpsellEmpty",
@@ -1086,11 +1125,6 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
         { value: "off", label: "off", shape: "blank" },
       ],
     },
-    /**
-     * Not a place on the page but a state of it -- and the one most shops leave
-     * as a sentence. Whoever sees it has arrived wanting to buy and found
-     * nothing, which is the cheapest sale in the shop to rescue.
-     */
     {
       key: "empty",
       label: "cartEmpty",

@@ -1373,110 +1373,154 @@ export function ShopChrome({
       );
 
     /**
-     * The lines, as a table or as cards.
+     * What they are buying, on the left.
      *
-     * The shop draws a table on a desktop and cards on a phone, which is two
-     * answers to one question. Picking one and keeping it everywhere is a real
-     * option: a card that looks the same on both is a card a merchant can
-     * actually picture before they look.
+     * Cards by default rather than a table: a table is a receipt, and a cart is
+     * the last place a shopper looks at the thing itself before paying for it.
+     * The picture, the size and the colour are what stop somebody ordering the
+     * wrong one, and a row of columns shrinks all three to fit the narrowest of
+     * them. The table is still offered, because a long cart reads faster as one.
      */
     case "cart:lines": {
       const lines = [
-        { name: "Crossbody Bag", note: "Tan · One size", qty: 1, price: "৳45" },
-        { name: "Leather Belt", note: "Black · 34", qty: 2, price: "৳58" },
+        { name: "Gradient Graphic T-shirt", size: "Large", colour: "White", qty: 1, price: "৳1,450" },
+        { name: "Checkered Shirt", size: "Medium", colour: "Red", qty: 1, price: "৳1,800" },
+        { name: "Skinny Fit Jeans", size: "Large", colour: "Blue", qty: 1, price: "৳2,400" },
       ];
       const stepper = (qty: number) => (
-        <span className="inline-flex items-center rounded-xs border border-current/15 text-[11px] leading-none">
-          <span className="px-2 py-1 text-current/45">−</span>
-          <span className="px-1.5 py-1 tabular-nums">{qty}</span>
-          <span className="px-2 py-1 text-current/45">+</span>
+        <span className="inline-flex shrink-0 items-center rounded-full border border-current/15 text-[11px] leading-none">
+          <span className="px-2.5 py-1.5 text-current/45">−</span>
+          <span className="px-1.5 py-1.5 tabular-nums">{qty}</span>
+          <span className="px-2.5 py-1.5 text-current/45">+</span>
         </span>
       );
-      if (variant === "list") {
+      // Only the remove mark is coloured, and only because it is the one action
+      // on this page a shopper cannot undo.
+      const remove = (
+        <span className="shrink-0 text-[13px] leading-none text-[#d64545]" aria-hidden>
+          &#128465;
+        </span>
+      );
+
+      if (variant === "table") {
         return (
-          <div className="grid gap-3 px-4 py-4">
+          <div className="px-4 py-4">
+            <div className="grid grid-cols-[minmax(0,1fr)_7rem_5rem] gap-4 border-b border-current/10 pb-2 text-[10px] font-semibold uppercase tracking-[0.06em] text-current/45">
+              <span>{t("colProduct")}</span>
+              <span className="text-center">{t("colQuantity")}</span>
+              <span className="text-right">{t("colTotal")}</span>
+            </div>
             {lines.map((line) => (
-              <div key={line.name} className="flex items-center gap-3 rounded-xs border border-current/12 p-3">
-                <span className="size-14 shrink-0 rounded-xs bg-current/8" aria-hidden />
-                <span className="min-w-0 flex-1">
-                  <span className="block truncate text-[13px] font-medium">{line.name}</span>
-                  <span className="block truncate text-[10px] text-current/45">{line.note}</span>
-                  <span className="mt-1.5 block">{stepper(line.qty)}</span>
+              <div
+                key={line.name}
+                className="grid grid-cols-[minmax(0,1fr)_7rem_5rem] items-center gap-4 border-b border-current/10 py-3"
+              >
+                <span className="flex min-w-0 items-center gap-3">
+                  <span className="size-12 shrink-0 rounded-sm bg-current/8" aria-hidden />
+                  <span className="min-w-0">
+                    <span className="block truncate text-[13px] font-medium">{line.name}</span>
+                    <span className="block truncate text-[10px] text-current/45">
+                      {line.size} · {line.colour}
+                    </span>
+                  </span>
                 </span>
-                <span className="shrink-0 text-[13px] font-semibold tabular-nums">{line.price}</span>
+                <span className="text-center">{stepper(line.qty)}</span>
+                <span className="text-right text-[13px] font-semibold tabular-nums">{line.price}</span>
               </div>
             ))}
           </div>
         );
       }
+
       return (
-        <div className="px-4 py-4">
-          <div className="grid grid-cols-[minmax(0,1fr)_7rem_5rem] gap-4 border-b border-current/10 pb-2 text-[10px] font-semibold uppercase tracking-[0.06em] text-current/45">
-            <span>{t("colProduct")}</span>
-            <span className="text-center">{t("colQuantity")}</span>
-            <span className="text-right">{t("colTotal")}</span>
-          </div>
-          {lines.map((line) => (
-            <div
-              key={line.name}
-              className="grid grid-cols-[minmax(0,1fr)_7rem_5rem] items-center gap-4 border-b border-current/10 py-3"
-            >
-              <span className="flex min-w-0 items-center gap-3">
-                <span className="size-12 shrink-0 rounded-xs bg-current/8" aria-hidden />
-                <span className="min-w-0">
-                  <span className="block truncate text-[13px] font-medium">{line.name}</span>
-                  <span className="block truncate text-[10px] text-current/45">{line.note}</span>
+        <div className="p-4">
+          <div className="rounded-md border border-current/12">
+            {lines.map((line, i) => (
+              <div
+                key={line.name}
+                className={`flex items-start gap-3.5 p-3.5 ${i ? "border-t border-current/10" : ""}`}
+              >
+                <span className="size-16 shrink-0 rounded-sm bg-current/8" aria-hidden />
+                <span className="min-w-0 flex-1">
+                  <span className="flex items-start justify-between gap-3">
+                    <span className="min-w-0 truncate text-[13px] font-semibold">{line.name}</span>
+                    {remove}
+                  </span>
+                  <span className="mt-0.5 block text-[10px] text-current/45">
+                    {t("cartLineSize")}: <span className="text-current/65">{line.size}</span>
+                  </span>
+                  <span className="block text-[10px] text-current/45">
+                    {t("cartLineColour")}: <span className="text-current/65">{line.colour}</span>
+                  </span>
+                  <span className="mt-2 flex items-center justify-between gap-3">
+                    <span className="text-[15px] font-semibold tabular-nums">{line.price}</span>
+                    {stepper(line.qty)}
+                  </span>
                 </span>
-              </span>
-              <span className="text-center">{stepper(line.qty)}</span>
-              <span className="text-right text-[13px] font-semibold tabular-nums">{line.price}</span>
-            </div>
-          ))}
+              </div>
+            ))}
+          </div>
         </div>
       );
     }
 
-    /** The total, and the button that leaves the page. */
+    /**
+     * What it comes to, on the right.
+     *
+     * One panel: the sums, then the way out of the page. The promo row is the
+     * coupon slot's, drawn here because a field floating under the panel is not
+     * where anybody looks for it -- and the discount line above it appears on
+     * the same condition, since a shop with no coupons has nothing to discount.
+     */
     case "cart:total": {
-      const note = <p className="text-[10px] text-current/45">{t("cartTotalNoteExample")}</p>;
-      const button = (
-        <span className="grid h-9 place-items-center rounded-xs bg-foreground px-6 text-[12px] font-semibold text-background">
-          {t("checkOut")}
-        </span>
+      const coupon = settings?.coupon ?? "off";
+      const full = variant !== "simple";
+      const row = (label: string, value: string, tone = "") => (
+        <div className={`flex justify-between text-[12px] tabular-nums ${tone || "text-current/60"}`}>
+          <span>{label}</span>
+          <span>{value}</span>
+        </div>
       );
-      if (variant === "bar") {
-        return (
-          <div className="flex flex-wrap items-center justify-between gap-3 border-t border-current/10 bg-current/5 px-4 py-3.5">
-            <span>
-              <span className="text-[10px] uppercase tracking-[0.06em] text-current/45">{t("cartEstimated")}</span>
-              <span className="block text-[17px] font-semibold tabular-nums">৳163</span>
-            </span>
-            {button}
-          </div>
-        );
-      }
-      if (variant === "card") {
-        return (
-          <div className="px-4 py-4">
-            <div className="ml-auto max-w-[17rem] rounded-xs border border-current/12 p-4">
-              <div className="flex items-baseline justify-between gap-3">
-                <span className="text-[11px] text-current/55">{t("cartEstimated")}</span>
-                <span className="text-[17px] font-semibold tabular-nums">৳163</span>
-              </div>
-              <div className="mt-1 mb-3">{note}</div>
-              <span className="block">{button}</span>
-            </div>
-          </div>
-        );
-      }
       return (
-        <div className="flex flex-col items-end gap-2 border-t border-current/10 px-4 py-5">
-          <span className="flex items-baseline gap-4">
-            <span className="text-[11px] text-current/55">{t("cartEstimated")}</span>
-            <span className="text-[15px] font-semibold tabular-nums">৳163</span>
-          </span>
-          {note}
-          {button}
+        <div className="p-4">
+          <div className="rounded-md border border-current/12 p-4">
+            <p className="mb-3 text-[15px] font-semibold">{t("orderSummary")}</p>
+            {full ? (
+              <div className="grid gap-2">
+                {row(t("subtotal"), "৳5,650")}
+                {coupon === "off" ? null : row(t("cartDiscountExample"), "−৳1,130", "text-[#d64545]")}
+                {row(t("delivery"), "৳150")}
+              </div>
+            ) : null}
+            <div
+              className={`flex items-baseline justify-between gap-3 ${
+                full ? "mt-3 border-t border-current/10 pt-3" : ""
+              }`}
+            >
+              <span className="text-[13px] font-medium">{t("total")}</span>
+              <span className="text-[19px] font-semibold tabular-nums">৳4,670</span>
+            </div>
+
+            {coupon === "off" ? null : coupon === "link" ? (
+              <p className="mt-3 text-[11px] underline underline-offset-2 text-current/55">
+                {t("couponLinkExample")}
+              </p>
+            ) : (
+              <div className="mt-3 flex gap-2">
+                <span className="flex h-9 flex-1 items-center rounded-full border border-current/15 bg-current/[0.04] px-3 text-[11px] text-current/40">
+                  {t("couponPlaceholder")}
+                </span>
+                <span className="grid h-9 shrink-0 place-items-center rounded-full bg-foreground px-5 text-[11px] font-semibold text-background">
+                  {t("couponApply")}
+                </span>
+              </div>
+            )}
+
+            <span className="mt-3 grid h-11 place-items-center rounded-full bg-foreground text-[12px] font-semibold text-background">
+              {t("cartGoToCheckout")} &#8594;
+            </span>
+            <p className="mt-2 text-center text-[10px] text-current/45">{t("cartTotalNoteExample")}</p>
+          </div>
         </div>
       );
     }
@@ -1485,13 +1529,13 @@ export function ShopChrome({
       return (
         <div className="px-4 py-4">
           <p className="mb-2.5 text-[11.5px] text-current/55">{t("cartStickyExample")}</p>
-          <div className="flex items-center gap-3 rounded-xs border border-current/15 bg-current/5 px-3 py-2.5">
+          <div className="flex items-center gap-3 rounded-md border border-current/15 bg-current/5 px-3 py-2.5">
             <span className="min-w-0 flex-1">
-              <span className="block text-[10px] uppercase tracking-[0.06em] text-current/45">{t("cartEstimated")}</span>
-              <span className="block text-[13px] font-semibold tabular-nums">৳163</span>
+              <span className="block text-[10px] uppercase tracking-[0.06em] text-current/45">{t("total")}</span>
+              <span className="block text-[14px] font-semibold tabular-nums">৳4,670</span>
             </span>
-            <span className="grid h-9 shrink-0 place-items-center rounded-xs bg-foreground px-4 text-[11px] text-background">
-              {t("checkOut")}
+            <span className="grid h-9 shrink-0 place-items-center rounded-full bg-foreground px-4 text-[11px] font-semibold text-background">
+              {t("cartGoToCheckout")}
             </span>
           </div>
         </div>
@@ -1782,6 +1826,29 @@ export function ShopChrome({
         </div>
       );
     }
+
+    /**
+     * On the cart this is the CONTROL, not the thing.
+     *
+     * The promo row belongs inside the summary panel and is drawn there, so
+     * putting a second copy in a band of its own would show a merchant two of
+     * something their shoppers see once. This strip says where the choice lands
+     * and what it will look like when it does -- the same job the blog's card
+     * and meta bands do for the shelves above them.
+     */
+    case "cart:coupon":
+      return (
+        <div className="flex items-baseline gap-2 px-4 pb-4 text-[11px]">
+          <span className="shrink-0 uppercase tracking-[0.08em] text-current/40">{t("couponWhere")}</span>
+          <span className="min-w-0 flex-1 truncate text-current/65">
+            {variant === "off"
+              ? t("couponOffExample")
+              : variant === "link"
+                ? t("couponLinkExample")
+                : t("couponPlaceholder")}
+          </span>
+        </div>
+      );
 
     /**
      * The coupon box, under the order it would come off.
