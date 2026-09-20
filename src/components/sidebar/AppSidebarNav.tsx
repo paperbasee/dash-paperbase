@@ -10,6 +10,7 @@ import {
   ListTodo,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { isNavHrefActive } from "@/lib/navigation/nav-active";
 import { InventoryStatusDot } from "@/components/inventory/InventoryStatusDot";
 import type { ComponentType } from "react";
 import type { NavCounts } from "@/config/apps";
@@ -80,10 +81,7 @@ export default function AppSidebarNav({
   mainNavSequence: readonly (string)[]; // tokens like __catalog__
   onExpandIfCollapsed?: () => void;
 }) {
-  const isActive = (href: string) => {
-    if (href === "/") return pathname === "/";
-    return pathname.startsWith(href);
-  };
+  const isActive = (href: string) => isNavHrefActive(pathname, href);
 
   /**
    * One rule for every group in this sidebar.

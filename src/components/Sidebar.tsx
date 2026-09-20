@@ -52,6 +52,7 @@ import {
 } from "@/config/apps";
 import { numberTextClass } from "@/lib/number-font";
 import { cn } from "@/lib/utils";
+import { isNavHrefActive } from "@/lib/navigation/nav-active";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocale } from "next-intl";
 import {
@@ -159,10 +160,7 @@ function SidebarContent({
       meProfile?.subscription?.subscription_status === "EXPIRED");
   const [catalogOpen, setCatalogOpen] = useState(false);
 
-  const isActive = (href: string) => {
-    if (href === "/") return pathname === "/";
-    return pathname.startsWith(href);
-  };
+  const isActive = (href: string) => isNavHrefActive(pathname, href);
 
   const catalogLinks = CATALOG_SUB_APP_IDS.filter(
     (id) => canShowApp(id) && APP_CONFIG[id]?.href
