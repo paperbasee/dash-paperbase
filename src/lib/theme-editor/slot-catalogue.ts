@@ -376,7 +376,23 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
 
   checkout: [
     { key: "notice", label: "notice", inherited: true, inheritedFrom: { page: "header", key: "notice" } },
-    { key: "header", label: "header", inherited: true, inheritedFrom: { page: "header", key: "layout" } },
+    {
+      /**
+       * Checkout gets its OWN header and footer rather than inheriting them.
+       *
+       * Every shop that sells seriously strips this page: a nav, a search box
+       * and a category row are all ways out of a page a shopper is halfway
+       * through paying on. Offering that is not a look, it is the difference
+       * between a checkout and a page that happens to have a form on it.
+       */
+      key: "chrome",
+      label: "checkoutChrome",
+      initial: "reduced",
+      options: [
+        { value: "reduced", label: "chromeReduced", note: "chromeReducedNote", shape: "line" },
+        { value: "full", label: "chromeFull", note: "chromeFullNote", shape: "block" },
+      ],
+    },
     {
       key: "trust",
       label: "trustLine",
@@ -388,20 +404,51 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
         { value: "off", label: "off", shape: "blank" },
       ],
     },
+    {
+      key: "layout",
+      label: "checkoutLayout",
+      initial: "two",
+      options: [
+        { value: "two", label: "checkoutTwo", note: "checkoutTwoNote", shape: "row" },
+        { value: "one", label: "checkoutOne", note: "checkoutOneNote", shape: "block" },
+      ],
+    },
     { key: "form", label: "form", locked: true, lockedBecause: "formWhy" },
     { key: "summary", label: "summary", locked: true, lockedBecause: "summaryWhy" },
     {
+      key: "payments",
+      label: "checkoutPayments",
+      initial: "on",
+      emptyValues: ["off"],
+      emptyLabel: "checkoutPaymentsEmpty",
+      options: [
+        { value: "on", label: "paymentsOn", note: "checkoutPaymentsNote", shape: "row" },
+        { value: "off", label: "off", shape: "blank" },
+      ],
+    },
+    {
       key: "after",
       label: "after",
-      initial: "none",
+      initial: "line",
       emptyValues: ["none"],
       emptyLabel: "afterEmpty",
       options: [
-        { value: "none", label: "nothing", shape: "blank" },
         { value: "line", label: "afterLine", note: "afterLineNote", shape: "line" },
+        { value: "none", label: "nothing", shape: "blank" },
       ],
     },
-    { key: "footer", label: "footer", inherited: true, inheritedFrom: { page: "footer", key: "layout" } },
+    {
+      key: "footerStyle",
+      label: "checkoutFooter",
+      initial: "policies",
+      emptyValues: ["none"],
+      emptyLabel: "checkoutFooterEmpty",
+      options: [
+        { value: "policies", label: "checkoutFooterPolicies", note: "checkoutFooterPoliciesNote", shape: "line" },
+        { value: "same", label: "checkoutFooterSame", note: "checkoutFooterSameNote", shape: "row" },
+        { value: "none", label: "nothing", shape: "blank" },
+      ],
+    },
   ],
 
   header: [

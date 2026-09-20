@@ -772,6 +772,70 @@ export function ShopChrome({
         </div>
       );
 
+    case "checkout:chrome":
+      return variant === "full" ? (
+        <ShopChrome page="header" slotKey="header" variant="bar" />
+      ) : (
+        <div className="flex items-center justify-between gap-3 bg-[#1a1a1a] px-4 py-3.5 text-white">
+          <span className="text-sm font-semibold tracking-[0.14em]">GADZILLA</span>
+          <span className="text-[11px] text-white/55">{t("secureCheckout")}</span>
+        </div>
+      );
+
+    case "checkout:layout":
+      return variant === "one" ? (
+        <div className="grid gap-3 px-4 py-4">
+          <div className="rounded-xs border border-current/12 p-3">
+            <p className="mb-2 text-[11px] uppercase tracking-[0.06em] text-current/45">{t("summary")}</p>
+            <div className="flex justify-between text-[12px] tabular-nums text-current/60">
+              <span>{t("total")}</span>
+              <span className="font-semibold text-current">৳105</span>
+            </div>
+          </div>
+          <span className="block h-9 rounded-xs bg-current/8" />
+          <span className="block h-9 rounded-xs bg-current/8" />
+          <span className="block h-9 rounded-xs bg-current/8" />
+        </div>
+      ) : (
+        <div className="grid gap-4 px-4 py-4 sm:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
+          <div className="grid gap-2.5">
+            <span className="block h-9 rounded-xs bg-current/8" />
+            <span className="block h-9 rounded-xs bg-current/8" />
+            <span className="block h-9 w-3/5 rounded-xs bg-current/8" />
+          </div>
+          <div className="rounded-xs border border-current/12 p-3">
+            <p className="mb-2 text-[11px] uppercase tracking-[0.06em] text-current/45">{t("summary")}</p>
+            <div className="flex justify-between text-[12px] tabular-nums text-current/60">
+              <span>{t("total")}</span>
+              <span className="font-semibold text-current">৳105</span>
+            </div>
+          </div>
+        </div>
+      );
+
+    case "checkout:payments":
+      return (
+        <div className="px-4 py-4">
+          <p className="mb-2 text-[10px] uppercase tracking-[0.08em] text-current/45">{t("paymentsHeading")}</p>
+          <div className="flex flex-wrap gap-2">
+            {["bKash", "Nagad", "Rocket", "Visa", "Mastercard", t("cashOnDelivery")].map((name) => (
+              <span key={name} className="rounded-xs border border-current/15 px-2.5 py-1 text-[10px] text-current/60">
+                {name}
+              </span>
+            ))}
+          </div>
+        </div>
+      );
+
+    case "checkout:footerStyle":
+      return variant === "same" ? (
+        <ShopChrome page="footer" slotKey="footer" variant="columns" />
+      ) : (
+        <p className="border-t border-current/10 px-4 py-4 text-center text-[11px] text-current/50">
+          {t("checkoutFooterExample")}
+        </p>
+      );
+
     case "checkout:form":
       return (
         <div className="grid gap-2.5 px-4 py-4">
