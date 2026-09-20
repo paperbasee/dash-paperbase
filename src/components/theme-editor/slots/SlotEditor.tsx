@@ -14,6 +14,7 @@ import {
   type SlotPageKey,
 } from "@/lib/theme-editor/slot-catalogue";
 import { SlotCanvas } from "./SlotCanvas";
+import { StylePanel } from "./StylePanel";
 
 /**
  * The theme editor, rebuilt around slots.
@@ -44,6 +45,8 @@ export function SlotEditor() {
   const [page, setPage] = useState<SlotPageKey>("home");
   const [device, setDevice] = useState<"desktop" | "mobile">("desktop");
   const [open, setOpen] = useState<string | null>("promo");
+  const [palette, setPalette] = useState("ivory");
+  const [face, setFace] = useState("poppins");
   const [choices, setChoices] = useState<Record<SlotPageKey, Record<string, string>>>(() => ({
     home: initialChoices("home"),
     product: initialChoices("product"),
@@ -131,15 +134,28 @@ export function SlotEditor() {
         {t("designOnly")}
       </p>
 
-      <div className="min-h-0 flex-1 overflow-y-auto">
-        <SlotCanvas
-          page={page}
-          device={device}
-          open={open}
-          onOpen={setOpen}
-          choices={choices[page]}
-          onChoose={choose}
-        />
+      {/*
+        Two fifths for colour and type, three for the page.
+
+        With one theme and fixed places, the palette and the face are what make
+        two shops look different -- so they are not a tab somewhere, they are
+        half the screen. On a narrow window they stack above the page rather
+        than squeezing: a 40% column of swatches is unusable at that width.
+      */}
+      <div className="grid min-h-0 flex-1 grid-rows-[auto_1fr] lg:grid-cols-[2fr_3fr] lg:grid-rows-1">
+        <div className="min-h-0 border-b border-border lg:border-b-0 lg:border-r">
+          <StylePanel palette={palette} onPalette={setPalette} face={face} onFace={setFace} />
+        </div>
+        <div className="min-h-0 overflow-y-auto">
+          <SlotCanvas
+            page={page}
+            device={device}
+            open={open}
+            onOpen={setOpen}
+            choices={choices[page]}
+            onChoose={choose}
+          />
+        </div>
       </div>
     </div>
   );

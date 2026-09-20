@@ -58,6 +58,7 @@ const SOURCES = [
   "src/components/theme-editor/slots/SlotEditor.tsx",
   "src/components/theme-editor/slots/SlotCanvas.tsx",
   "src/components/theme-editor/slots/ShopChrome.tsx",
+  "src/components/theme-editor/slots/StylePanel.tsx",
 ];
 
 /**
@@ -68,6 +69,8 @@ const SOURCES = [
 const KEY_SOURCES = [
   // The slot catalogue is all keys: every slot, option and reason a merchant reads.
   "src/lib/theme-editor/slot-catalogue.ts",
+  // Palettes and faces name their keys the same way.
+  "src/components/theme-editor/slots/style-catalogue.ts",
   "src/lib/theme-editor/link-targets.ts",
   "src/lib/theme-editor/content-links.ts",
   "src/lib/theme-editor/validate.ts",

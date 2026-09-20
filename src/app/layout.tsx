@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import type { Metadata } from "next";
 import { cookies, headers } from "next/headers";
 import Script from "next/script";
-import { Noto_Sans_Bengali, Poppins } from "next/font/google";
+import { Archivo, Cinzel, Noto_Sans_Bengali, Playfair_Display, Poppins } from "next/font/google";
 import { getLocale } from "next-intl/server";
 import "./globals.css";
 import { isTurnstileDisabled } from "@/lib/turnstile-env";
@@ -13,6 +13,47 @@ const poppins = Poppins({
   weight: ["400", "500", "600", "700"],
   display: "swap",
 });
+
+/**
+ * The faces a merchant may set their SHOP in, offered in the theme editor.
+ *
+ * Declared here because `next/font` is a build-time transform that only runs on
+ * a server component module -- called from the editor's own client component it
+ * stops the build on "Font loader calls must be assigned to a const", which it
+ * is, and which is not the problem.
+ *
+ * `preload: false` is what keeps that from costing every page: the CSS is
+ * defined everywhere, the files are fetched only where a rule actually uses one,
+ * and the only rules that do are in the editor's specimen list.
+ */
+const archivo = Archivo({
+  subsets: ["latin"],
+  weight: ["400", "600"],
+  variable: "--font-archivo",
+  display: "swap",
+  preload: false,
+});
+
+const playfairDisplay = Playfair_Display({
+  subsets: ["latin"],
+  weight: ["400", "600"],
+  variable: "--font-playfair",
+  display: "swap",
+  preload: false,
+});
+
+const cinzel = Cinzel({
+  subsets: ["latin"],
+  weight: ["400", "600"],
+  variable: "--font-cinzel",
+  display: "swap",
+  preload: false,
+});
+
+// One const each, at module scope: a loader call nested in an array or an object
+// is refused with "Font loaders must be called and assigned to a const in the
+// module scope", which reads like the opposite of what is wrong.
+const shopFaces = [archivo, playfairDisplay, cinzel];
 
 const notoSansBengali = Noto_Sans_Bengali({
   subsets: ["bengali"],
@@ -99,7 +140,8 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
     <html
       lang={locale}
       suppressHydrationWarning
-      className={[isDark ? "dark" : undefined, poppins.className, notoSansBengali.variable]
+      className={[isDark ? "dark" : undefined, poppins.className, notoSansBengali.variable,
+        ...shopFaces.map((face) => face.variable)]
         .filter(Boolean)
         .join(" ")}
       data-theme={dataTheme}
