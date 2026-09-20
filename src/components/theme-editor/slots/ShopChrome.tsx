@@ -3,7 +3,9 @@
 import { useTranslations } from "next-intl";
 import {
   Banknote,
+  Hash,
   Headphones,
+  Heart,
   Lock,
   Mail,
   Map,
@@ -1088,41 +1090,60 @@ export function ShopChrome({
       const buy = (settings?.action ?? "cart") === "cart";
       if (variant === "rows") {
         return (
-          <div className="grid gap-3 px-4 py-4">
-            {BESTSELLERS.slice(0, 3).map((item) => (
-              <div key={item.name} className="flex items-center gap-3 border-b border-current/10 pb-3">
-                <span className="size-14 shrink-0 rounded-xs bg-current/8" aria-hidden />
-                <span className="min-w-0 flex-1">
-                  <span className="block truncate text-[13px] font-medium">{item.name}</span>
-                  <span className="block text-[12px] font-semibold tabular-nums">{item.price}</span>
-                </span>
-                {buy ? (
-                  <span className="grid h-8 shrink-0 place-items-center rounded-xs bg-foreground px-3 text-[11px] text-background">
-                    {t("addToCart")}
+          <div className="p-4">
+            <div className="rounded-md border border-current/12">
+              {BESTSELLERS.slice(0, 3).map((item, i) => (
+                <div
+                  key={item.name}
+                  className={`flex items-center gap-3.5 p-3.5 ${i ? "border-t border-current/10" : ""}`}
+                >
+                  <span className="size-16 shrink-0 rounded-sm bg-current/8" aria-hidden />
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate text-[13px] font-semibold">{item.name}</span>
+                    <span className="mt-0.5 flex items-baseline gap-1.5">
+                      <span className="text-[14px] font-semibold tabular-nums">{item.price}</span>
+                      {item.was ? (
+                        <span className="text-[10px] tabular-nums text-current/35 line-through">{item.was}</span>
+                      ) : null}
+                    </span>
                   </span>
-                ) : null}
-                <span className="shrink-0 text-[13px] text-current/35" aria-hidden>
-                  ×
-                </span>
-              </div>
-            ))}
+                  {buy ? (
+                    <span className="grid h-9 shrink-0 place-items-center rounded-full bg-foreground px-4 text-[11px] font-semibold text-background">
+                      {t("addToCart")}
+                    </span>
+                  ) : null}
+                  {/* The heart is how it got here, so the heart is how it leaves. */}
+                  <Heart className="size-4 shrink-0 fill-current text-[#d64545]" aria-hidden />
+                </div>
+              ))}
+            </div>
           </div>
         );
       }
       return (
         <div className="px-4 py-4">
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <div className="grid grid-cols-2 gap-3.5 sm:grid-cols-4">
             {BESTSELLERS.map((item) => (
               <div key={item.name} className="min-w-0">
-                <span className="relative block aspect-square rounded-xs bg-current/8" aria-hidden>
-                  <span className="absolute right-1.5 top-1.5 grid size-5 place-items-center rounded-full bg-[color:var(--color-background)] text-[11px] text-current/45">
-                    ×
+                <span className="relative block aspect-square overflow-hidden rounded-md bg-current/8">
+                  <span className="absolute right-2 top-2 grid size-7 place-items-center rounded-full bg-[color:var(--color-background)] shadow-sm">
+                    <Heart className="size-3.5 fill-current text-[#d64545]" aria-hidden />
                   </span>
+                  {item.off ? (
+                    <span className="absolute left-2 top-2 rounded-full bg-[#d64545] px-1.5 py-0.5 text-[9px] font-semibold text-white">
+                      −{item.off}%
+                    </span>
+                  ) : null}
                 </span>
-                <p className="mt-2 truncate text-[11px] text-current/60">{item.name}</p>
-                <p className="text-[12px] font-semibold tabular-nums">{item.price}</p>
+                <p className="mt-2 truncate text-[11.5px] font-medium">{item.name}</p>
+                <p className="mt-0.5 flex items-baseline gap-1.5">
+                  <span className="text-[12.5px] font-semibold tabular-nums">{item.price}</span>
+                  {item.was ? (
+                    <span className="text-[10px] tabular-nums text-current/35 line-through">{item.was}</span>
+                  ) : null}
+                </p>
                 {buy ? (
-                  <span className="mt-1.5 grid h-8 place-items-center rounded-xs bg-foreground text-[11px] text-background">
+                  <span className="mt-2 grid h-9 place-items-center rounded-full bg-foreground text-[11px] font-semibold text-background">
                     {t("addToCart")}
                   </span>
                 ) : null}
@@ -1133,25 +1154,18 @@ export function ShopChrome({
       );
     }
 
-    // The choice is read by the list above, so this band shows what it changes.
+    /**
+     * A control, like the coupon's. The list above already draws the answer --
+     * it reads this slot's value -- so a band redrawing one of its own cards
+     * put the same thing in front of a merchant twice.
+     */
     case "wishlist:action":
       return (
-        <div className="px-4 py-4">
-          <p className="mb-2.5 text-[10px] uppercase tracking-[0.08em] text-current/45">{t("wishActionWhat")}</p>
-          <div className="flex items-center gap-3 rounded-xs border border-current/12 p-3">
-            <span className="size-12 shrink-0 rounded-xs bg-current/8" aria-hidden />
-            <span className="min-w-0 flex-1">
-              <span className="block truncate text-[13px] font-medium">Crossbody Bag</span>
-              <span className="block text-[12px] font-semibold tabular-nums">৳45</span>
-            </span>
-            {variant === "cart" ? (
-              <span className="grid h-8 shrink-0 place-items-center rounded-xs bg-foreground px-3 text-[11px] text-background">
-                {t("addToCart")}
-              </span>
-            ) : (
-              <span className="shrink-0 text-[11px] text-current/45">{t("wishActionLookExample")}</span>
-            )}
-          </div>
+        <div className="flex items-baseline gap-2 px-4 pb-4 text-[11px]">
+          <span className="shrink-0 uppercase tracking-[0.08em] text-current/40">{t("wishActionWhat")}</span>
+          <span className="min-w-0 flex-1 truncate text-current/65">
+            {variant === "look" ? t("wishActionLookExample") : t("addToCart")}
+          </span>
         </div>
       );
 
@@ -1182,17 +1196,25 @@ export function ShopChrome({
       return (
         <div className="border-b border-dashed border-current/15 px-4 py-5">
           <p className="mb-3 text-[10px] uppercase tracking-[0.06em] text-current/40">{t("accountDoorWhen")}</p>
-          <div className="mx-auto max-w-[22rem] rounded-xs border border-current/12 p-4">
-            <p className="mb-1 text-[14px] font-medium">
+          <div className="mx-auto max-w-[23rem] rounded-md border border-current/12 p-5">
+            <p className="mb-1 text-[15px] font-semibold">
               {lookup ? t("accountLookupHeading") : t("accountSignInHeading")}
             </p>
-            <p className="mb-3 text-[11px] leading-relaxed text-current/50">
+            <p className="mb-4 text-[11px] leading-relaxed text-current/50">
               {lookup ? t("accountLookupBody") : t("accountSignInBody")}
             </p>
-            <div className="grid gap-2">
-              <span className="block h-8 rounded-xs border border-current/15 bg-current/[0.04]" aria-hidden />
-              {lookup ? <span className="block h-8 rounded-xs border border-current/15 bg-current/[0.04]" aria-hidden /> : null}
-              <span className="grid h-9 place-items-center rounded-xs bg-foreground text-[11px] font-semibold text-background">
+            <div className="grid gap-2.5">
+              <span className="flex items-center gap-2 rounded-md border border-current/15 bg-current/[0.03] px-3 py-2.5">
+                <Phone className="size-3.5 shrink-0 text-current/35" aria-hidden />
+                <span className="text-[11.5px] text-current/40">{t("fieldPhone")}</span>
+              </span>
+              {lookup ? (
+                <span className="flex items-center gap-2 rounded-md border border-current/15 bg-current/[0.03] px-3 py-2.5">
+                  <Hash className="size-3.5 shrink-0 text-current/35" aria-hidden />
+                  <span className="text-[11.5px] text-current/40">{t("accountOrderNumber")}</span>
+                </span>
+              ) : null}
+              <span className="grid h-10 place-items-center rounded-full bg-foreground text-[11.5px] font-semibold text-background">
                 {lookup ? t("accountLookupButton") : t("accountSignInButton")}
               </span>
             </div>
@@ -1236,26 +1258,32 @@ export function ShopChrome({
     }
 
     case "account:orders": {
+      // Green for arrived, amber for moving. Status is the whole reason
+      // somebody opens this page, so it is the one thing carrying colour.
       const orders = [
-        { id: "#1042", date: "12 Sep 2026", state: t("orderDelivered"), total: "৳163" },
-        { id: "#1038", date: "2 Sep 2026", state: t("orderOnTheWay"), total: "৳92" },
+        { id: "#1042", date: "12 Sep 2026", state: t("orderDelivered"), total: "৳4,670", tone: "#2f8f4e" },
+        { id: "#1038", date: "2 Sep 2026", state: t("orderOnTheWay"), total: "৳1,890", tone: "#b4571f" },
       ];
       if (variant === "cards") {
         return (
           <div className="grid gap-3 px-4 py-4 sm:grid-cols-2">
             {orders.map((order) => (
-              <div key={order.id} className="rounded-xs border border-current/12 p-3">
+              <div key={order.id} className="rounded-md border border-current/12 p-3.5">
                 <div className="flex items-baseline justify-between gap-3">
                   <span className="text-[13px] font-semibold tabular-nums">{order.id}</span>
-                  <span className="text-[13px] font-semibold tabular-nums">{order.total}</span>
+                  <span className="text-[14px] font-semibold tabular-nums">{order.total}</span>
                 </div>
                 <p className="mt-0.5 text-[10px] text-current/45">{order.date}</p>
-                <span className="mt-2 inline-block rounded-full border border-current/15 px-2.5 py-0.5 text-[10px] text-current/60">
+                <span
+                  className="mt-2.5 inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-medium"
+                  style={{ backgroundColor: `${order.tone}1f`, color: order.tone }}
+                >
+                  <span className="size-1.5 rounded-full" style={{ backgroundColor: order.tone }} aria-hidden />
                   {order.state}
                 </span>
-                <div className="mt-2.5 flex gap-2">
-                  {[0, 1].map((i) => (
-                    <span key={i} className="size-9 rounded-xs bg-current/8" aria-hidden />
+                <div className="mt-3 flex gap-2">
+                  {[0, 1, 2].map((i) => (
+                    <span key={i} className="size-10 rounded-sm bg-current/8" aria-hidden />
                   ))}
                 </div>
               </div>
@@ -1266,13 +1294,16 @@ export function ShopChrome({
       return (
         <div className="px-4 py-4">
           {orders.map((order) => (
-            <div key={order.id} className="flex items-center gap-3 border-b border-current/10 py-3">
-              <span className="w-14 shrink-0 text-[12px] font-semibold tabular-nums">{order.id}</span>
+            <div key={order.id} className="flex items-center gap-3 border-b border-current/10 py-3.5">
+              <span className="w-14 shrink-0 text-[12.5px] font-semibold tabular-nums">{order.id}</span>
               <span className="min-w-0 flex-1 truncate text-[11px] text-current/45">{order.date}</span>
-              <span className="shrink-0 rounded-full border border-current/15 px-2.5 py-0.5 text-[10px] text-current/60">
+              <span
+                className="shrink-0 rounded-full px-2.5 py-1 text-[10px] font-medium"
+                style={{ backgroundColor: `${order.tone}1f`, color: order.tone }}
+              >
                 {order.state}
               </span>
-              <span className="w-14 shrink-0 text-right text-[12px] font-semibold tabular-nums">{order.total}</span>
+              <span className="w-16 shrink-0 text-right text-[13px] font-semibold tabular-nums">{order.total}</span>
             </div>
           ))}
         </div>
