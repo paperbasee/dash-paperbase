@@ -452,12 +452,39 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
       key: "summary",
       label: "checkoutOrder",
       row: "body",
+      stack: "left",
       span: 1,
       hint: "checkoutOrderHint",
       initial: "quantity",
       options: [
         { value: "quantity", label: "orderQuantity", note: "orderQuantityNote", shape: "row" },
         { value: "fixed", label: "orderFixed", note: "orderFixedNote", shape: "line" },
+      ],
+    },
+    /**
+     * A coupon box -- and the one place in this editor with NO feature behind it.
+     *
+     * Paperbase has no coupons: no code, no limit, no expiry, nowhere to make
+     * one. `discount_total` on an order is the sum of per-line product
+     * discounts, which is a sale price and not a code a shopper types. So this
+     * is off to begin with, and the chooser says why rather than letting a
+     * merchant switch on a box that cannot take anything.
+     *
+     * Whoever wires this: the design is the small half of the job.
+     */
+    {
+      key: "coupon",
+      label: "checkoutCoupon",
+      row: "body",
+      stack: "left",
+      hint: "checkoutCouponHint",
+      initial: "off",
+      emptyValues: ["off"],
+      emptyLabel: "couponEmpty",
+      options: [
+        { value: "off", label: "off", note: "couponOffNote", shape: "blank" },
+        { value: "link", label: "couponLink", note: "couponLinkNote", shape: "line" },
+        { value: "open", label: "couponOpen", note: "couponOpenNote", shape: "row" },
       ],
     },
     {

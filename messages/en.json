@@ -2666,7 +2666,18 @@
       "beforePayWarning": "Warning box",
       "beforePayWarningNote": "Boxed and coloured. For something they must not miss.",
       "beforePayNoteExample": "Orders placed after 5pm are sent the next working day.",
-      "beforePayWarningExample": "Sale items cannot be returned or exchanged. Please check your size before ordering."
+      "beforePayWarningExample": "Sale items cannot be returned or exchanged. Please check your size before ordering.",
+      "checkoutCoupon": "Coupon box",
+      "checkoutCouponHint": "Paperbase has no coupons yet — there is no code to make, no limit, no expiry date. What you pick here is the design; the discount behind it still has to be built before a shopper could use one. That is why it starts switched off.",
+      "couponEmpty": "No coupon box",
+      "couponOffNote": "Nothing to type a code into",
+      "couponLink": "A line they can tap",
+      "couponLinkNote": "\"Have a coupon?\" — opens the field only for people who have one.",
+      "couponOpen": "Field and Apply",
+      "couponOpenNote": "Always open. An empty box sends shoppers off to hunt for a code, and not all of them come back.",
+      "couponHeading": "Coupon",
+      "couponApply": "Apply",
+      "couponLinkExample": "Have a coupon?"
     }
   },
   "billingSuccess": {

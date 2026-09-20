@@ -883,6 +883,33 @@ export function ShopChrome({
     }
 
     /**
+     * The coupon box, under the order it would come off.
+     *
+     * `link` is not a smaller version of `open`: an empty coupon field is a
+     * known way to lose a sale, because a shopper who has no code goes looking
+     * for one and does not always come back. A line they can ignore costs the
+     * shop nothing.
+     */
+    case "checkout:coupon":
+      return (
+        <div className="mx-4 mb-4 rounded-xs border border-current/12 p-4">
+          {variant === "link" ? (
+            <p className="text-[11px] underline underline-offset-2 text-current/55">{t("couponLinkExample")}</p>
+          ) : (
+            <>
+              <p className="mb-2 text-[10px] uppercase tracking-[0.08em] text-current/45">{t("couponHeading")}</p>
+              <div className="flex gap-2">
+                <span className="h-8 flex-1 rounded-xs border border-current/15 bg-current/[0.04]" aria-hidden />
+                <span className="grid h-8 shrink-0 place-items-center rounded-xs border border-current/25 px-3 text-[11px] font-medium">
+                  {t("couponApply")}
+                </span>
+              </div>
+            </>
+          )}
+        </div>
+      );
+
+    /**
      * The merchant's own words, and the button they come before.
      *
      * The button is drawn here rather than with the form because this place is
