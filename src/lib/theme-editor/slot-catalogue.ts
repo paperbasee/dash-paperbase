@@ -264,18 +264,6 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
       ],
     },
     {
-      key: "story",
-      label: "story",
-      initial: "none",
-      emptyValues: ["none"],
-      emptyLabel: "storyEmpty",
-      options: [
-        { value: "none", label: "nothing", shape: "blank" },
-        { value: "text", label: "storyText", note: "storyTextNote", shape: "line" },
-        { value: "both", label: "storyBoth", note: "storyBothNote", shape: "row" },
-      ],
-    },
-    {
       key: "posts",
       label: "posts",
       initial: "off",

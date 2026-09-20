@@ -573,21 +573,6 @@ export function ShopChrome({
         </div>
       );
 
-    case "home:story":
-      return (
-        <div className={variant === "both" ? "flex items-center gap-5 px-4 py-6" : "px-4 py-6"}>
-          {variant === "both" ? <span className="h-24 w-1/3 shrink-0 rounded-xs bg-current/8" /> : null}
-          <div className="min-w-0 flex-1">
-            <h4 className="m-0 mb-2.5 text-[15px] font-semibold">{t("storyHeading")}</h4>
-            <div className="space-y-2">
-              <Line />
-              <Line />
-              <Line w="60%" />
-            </div>
-          </div>
-        </div>
-      );
-
     case "home:posts":
       return (
         <div className="px-4 py-4">
