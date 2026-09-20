@@ -34,7 +34,7 @@ export default function AppSidebarNav({
   catalogLinks,
   navChildren,
   openChildren,
-  onToggleChildren,
+  onSetChildrenOpen,
   showCatalog,
   catalogChildActive,
   catalogOpen,
@@ -66,7 +66,7 @@ export default function AppSidebarNav({
   /** Parent app id -> its sidebar children. The parent still navigates. */
   navChildren: Record<string, readonly string[]>;
   openChildren: Set<string>;
-  onToggleChildren: (appId: string) => void;
+  onSetChildrenOpen: (appId: string, open: boolean) => void;
   showCatalog: boolean;
   catalogChildActive: boolean;
   catalogOpen: boolean;
@@ -83,6 +83,30 @@ export default function AppSidebarNav({
   const isActive = (href: string) => {
     if (href === "/") return pathname === "/";
     return pathname.startsWith(href);
+  };
+
+  /**
+   * One rule for every group in this sidebar.
+   *
+   * Expanded, a click on the row toggles its tree, as a disclosure should.
+   * Collapsed, the tree is not on screen to be closed, so a click on the rail
+   * means "show me this" and never "hide it": the tree is SET open and the
+   * sidebar opens with it.
+   *
+   * It lives here, on the Collapsible, rather than in the trigger's `onClick`.
+   * Both fire for one click -- the trigger's handler first, then Radix's own
+   * toggle -- so a group that handled the rail in `onClick` acted twice on one
+   * press. Toggling in each cancelled out and Sales and Customers never opened
+   * from the rail at all; setting `true` in each left Catalog and More closing
+   * themselves whenever they were already open.
+   */
+  const openFromRow = (set: (open: boolean) => void) => (next: boolean) => {
+    if (collapsed) {
+      set(true);
+      onExpandIfCollapsed?.();
+      return;
+    }
+    set(next);
   };
 
   return (
@@ -115,14 +139,8 @@ export default function AppSidebarNav({
         if (token === "__catalog__") {
           if (!showCatalog) return null;
           return (
-            <Collapsible key="catalog" open={catalogOpen} onOpenChange={setCatalogOpen}>
+            <Collapsible key="catalog" open={catalogOpen} onOpenChange={openFromRow(setCatalogOpen)}>
               <CollapsibleTrigger
-                onClick={() => {
-                  if (collapsed) {
-                    setCatalogOpen(true);
-                    onExpandIfCollapsed?.();
-                  }
-                }}
                 className={cn(
                   "group flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-xs text-sm font-normal w-full transition-colors",
                   catalogChildActive && !catalogOpen
@@ -263,19 +281,9 @@ export default function AppSidebarNav({
           <Collapsible
             key={token}
             open={open}
-            onOpenChange={() => onToggleChildren(token)}
+            onOpenChange={openFromRow((next) => onSetChildrenOpen(token, next))}
           >
             <CollapsibleTrigger
-              onClick={() => {
-                // Collapsed, this opens the sidebar and the tree with it --
-                // exactly what Catalog does. Navigating instead would take a
-                // merchant somewhere they did not ask to go, from a rail where
-                // they cannot even read the labels.
-                if (collapsed) {
-                  if (!open) onToggleChildren(token);
-                  onExpandIfCollapsed?.();
-                }
-              }}
               title={collapsed ? tAppLabel(NAV_GROUP_LABEL_KEYS[token] ?? app.id) : undefined}
               className={cn(
                 "group flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-xs text-sm font-normal w-full transition-colors",
@@ -352,14 +360,8 @@ export default function AppSidebarNav({
       })}
 
       {showMore && (
-        <Collapsible open={celeryOpen} onOpenChange={setCeleryOpen}>
+        <Collapsible open={celeryOpen} onOpenChange={openFromRow(setCeleryOpen)}>
           <CollapsibleTrigger
-            onClick={() => {
-              if (collapsed) {
-                setCeleryOpen(true);
-                onExpandIfCollapsed?.();
-              }
-            }}
             className={cn(
               "group flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-xs text-sm font-normal w-full transition-colors",
               moreChildActive && !celeryOpen

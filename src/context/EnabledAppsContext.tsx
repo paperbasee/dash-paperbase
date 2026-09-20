@@ -148,7 +148,14 @@ export function EnabledAppsProvider({ children }: { children: ReactNode }) {
 
   const enabledAppIds = useMemo(
     () =>
-      new Set<string>([...ESSENTIAL_APP_IDS, ...CATALOG_INCLUDED_APP_IDS, ...enabledOptional]),
+      // Every id `isEnabled` says yes to. The always-on extras belong here too:
+      // a set that disagreed with the function beside it is a trap.
+      new Set<string>([
+        ...ESSENTIAL_APP_IDS,
+        ...CATALOG_INCLUDED_APP_IDS,
+        ...ALWAYS_ON_EXTRA_APP_IDS,
+        ...enabledOptional,
+      ]),
     [enabledOptional]
   );
 

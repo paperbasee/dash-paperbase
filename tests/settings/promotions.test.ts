@@ -11,7 +11,7 @@ import {
   isSectionVisible,
   resolveSettingsSection,
 } from "@/app/[locale]/(dashboard)/settings/settingsSections";
-import { OPTIONAL_APP_IDS } from "@/config/apps";
+import { ALWAYS_ON_EXTRA_APP_IDS, APPS_SCREEN_SWITCHABLE_IDS } from "@/config/apps";
 import { APP_VIEW_PERMISSION } from "@/config/permissions";
 
 /**
@@ -27,9 +27,14 @@ function staff(granted: string[]) {
 }
 
 describe("promotion tabs", () => {
-  it("are optional apps, so each follows the store's enabled flag", () => {
+  // They had a switch on Settings -> Apps until 2026-09-21. It only ever hid
+  // the editor -- the storefront reads neither flag -- so switching one off
+  // took away the only screen where the pop-up could be turned off, and a
+  // merchant who used it could not find their pop-up again.
+  it("are always on, so the editor cannot hide itself", () => {
     for (const tab of PROMOTION_TABS) {
-      expect(OPTIONAL_APP_IDS as readonly string[]).toContain(tab);
+      expect(ALWAYS_ON_EXTRA_APP_IDS as readonly string[]).toContain(tab);
+      expect(APPS_SCREEN_SWITCHABLE_IDS).not.toContain(tab);
     }
   });
 });

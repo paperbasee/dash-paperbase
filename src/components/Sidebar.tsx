@@ -184,11 +184,12 @@ function SidebarContent({
   // Which parents have their children showing. A set rather than one flag per
   // parent, so adding a third costs nothing.
   const [openChildren, setOpenChildren] = useState<Set<string>>(new Set());
-  const toggleChildren = useCallback((appId: string) => {
+  const setChildrenOpen = useCallback((appId: string, open: boolean) => {
     setOpenChildren((prev) => {
+      if (prev.has(appId) === open) return prev;
       const next = new Set(prev);
-      if (next.has(appId)) next.delete(appId);
-      else next.add(appId);
+      if (open) next.add(appId);
+      else next.delete(appId);
       return next;
     });
   }, []);
@@ -520,7 +521,7 @@ function SidebarContent({
             catalogLinks={catalogLinks}
             navChildren={navChildren}
             openChildren={openChildren}
-            onToggleChildren={toggleChildren}
+            onSetChildrenOpen={setChildrenOpen}
             showCatalog={showCatalog}
             catalogChildActive={catalogChildActive}
             catalogOpen={catalogOpen}

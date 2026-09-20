@@ -3,9 +3,8 @@
 import { useTranslations } from "next-intl";
 import {
   APP_CONFIG,
-  ESSENTIAL_APP_IDS,
-  OPTIONAL_APP_IDS,
-  OPT_IN_APP_IDS,
+  APPS_SCREEN_ALWAYS_ON_IDS,
+  APPS_SCREEN_SWITCHABLE_IDS,
 } from "@/config/apps";
 import { usePermissions } from "@/context/PermissionsContext";
 import { SettingsSectionBody, settingsSectionSurfaceClassName } from "../SettingsSectionBody";
@@ -43,7 +42,7 @@ export default function AppsSection({
         <div>
           <h3 className="mb-3 text-sm font-medium uppercase tracking-wider text-muted-foreground">{t("apps.essential")}</h3>
           <div className="grid min-w-0 grid-cols-1 gap-3 @min-[40rem]:grid-cols-2 @min-[64rem]:grid-cols-3">
-            {ESSENTIAL_APP_IDS.map((id) => {
+            {APPS_SCREEN_ALWAYS_ON_IDS.map((id) => {
               const app = APP_CONFIG[id];
               const Icon = app.icon;
               return (
@@ -68,7 +67,7 @@ export default function AppsSection({
         <div>
           <h3 className="mb-3 text-sm font-medium uppercase tracking-wider text-muted-foreground">{t("apps.optional")}</h3>
           <div className="grid min-w-0 grid-cols-1 gap-3 @min-[40rem]:grid-cols-2 @min-[64rem]:grid-cols-3">
-            {[...OPTIONAL_APP_IDS, ...OPT_IN_APP_IDS].map((id) => {
+            {APPS_SCREEN_SWITCHABLE_IDS.map((id) => {
               const app = APP_CONFIG[id];
               const Icon = app.icon;
               return (

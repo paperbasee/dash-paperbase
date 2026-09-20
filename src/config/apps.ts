@@ -228,9 +228,7 @@ export const CATALOG_INCLUDED_APP_IDS = [
 export const OPTIONAL_APP_IDS = [
   "analytics",
   "support_tickets",
-  "cta",
   "customers",
-  "popup",
   "blog",
 ] as const;
 
@@ -276,8 +274,15 @@ export const OPT_IN_APP_IDS = ["accounts", "wishlist"] as const;
  * does not finish. There is no switch, so the thirty-day deletion is the only
  * thing limiting how long that is held -- see
  * `engine.apps.checkout_attempts.services.KEEP_FOR_DAYS`.
+ *
+ * `popup` and `cta` joined it on the same day, moved off `OPTIONAL_APP_IDS`.
+ * Their switch only ever hid their own editor: neither flag is read by the
+ * storefront, which draws a pop-up or a notice when the merchant has written
+ * one and marked it active. So the switch turned off the only screen where the
+ * thing could be turned off -- and a merchant who used it once could not find
+ * their pop-up again. Writing it inactive is how you turn it off.
  */
-export const ALWAYS_ON_EXTRA_APP_IDS = ["abandoned_checkouts"] as const;
+export const ALWAYS_ON_EXTRA_APP_IDS = ["abandoned_checkouts", "popup", "cta"] as const;
 
 /**
  * Sidebar groups: a row that opens a tree, exactly as `Catalog` does.
@@ -313,3 +318,27 @@ export const NAV_GROUP_LABEL_KEYS: Record<string, string> = {
   orders: "groupSales",
   customers: "groupShoppers",
 };
+
+/** Does this app have a place of its own, or is it a screen inside Settings? */
+const hasOwnPage = (id: string): boolean => Boolean(APP_CONFIG[id]?.href);
+
+/**
+ * What Settings → Apps lists, in its two groups.
+ *
+ * An app earns its place on that screen by having a place of its own in the
+ * sidebar. `shipping`, `popup` and `cta` have no `href` because they ARE
+ * settings screens -- Settings → Shipping, and the two Promotions tabs -- so
+ * listing them there asked a merchant to switch on the page they were already
+ * standing in, under a heading that says these are the apps in their shop.
+ *
+ * Derived from `href` rather than written out again, so an app cannot be added
+ * to the sidebar and quietly miss this screen, or lose its page and linger on
+ * it.
+ */
+export const APPS_SCREEN_ALWAYS_ON_IDS: readonly string[] =
+  ESSENTIAL_APP_IDS.filter(hasOwnPage);
+
+export const APPS_SCREEN_SWITCHABLE_IDS: readonly string[] = [
+  ...OPTIONAL_APP_IDS,
+  ...OPT_IN_APP_IDS,
+].filter(hasOwnPage);
