@@ -137,7 +137,7 @@ export function ShopChrome({
   // entry in the picker edits them.
   if (slotKey === "notice") {
     return (
-      <p className="bg-[#1a1a1a] px-4 py-2 text-center text-[11px] uppercase tracking-[0.06em] text-white/75">
+      <p className="border-b border-border bg-muted px-4 py-2 text-center text-[11px] uppercase tracking-[0.06em] text-current/75">
         {t("noticeExample")}
       </p>
     );
@@ -153,9 +153,9 @@ export function ShopChrome({
     // account and wishlist marks appear only when they are switched on.
     const icons = (
       <span className="flex shrink-0 items-center gap-2.5">
-        {search === "icon" ? <span className="size-4 rounded-full border border-white/35" /> : null}
+        {search === "icon" ? <span className="size-4 rounded-full border border-current/35" /> : null}
         {Array.from({ length: marks }, (_, i) => (
-          <span key={i} className="size-4 rounded-xs bg-white/25" />
+          <span key={i} className="size-4 rounded-xs bg-current/25" />
         ))}
       </span>
     );
@@ -171,13 +171,13 @@ export function ShopChrome({
       </div>
     );
     const bar = (children: React.ReactNode) => (
-      <div className="flex items-center gap-3 bg-[#1a1a1a] px-4 py-3 text-white">{children}</div>
+      <div className="flex items-center gap-3 border-b border-border bg-muted px-4 py-3 text-foreground">{children}</div>
     );
 
     if (layout === "masthead") {
       return (
         <div>
-          <div className="bg-[#1a1a1a] px-4 py-5 text-center text-white">{logo}</div>
+          <div className="border-b border-border bg-muted px-4 py-5 text-center text-foreground">{logo}</div>
           <div className="border-b border-current/10">{nav(true)}</div>
         </div>
       );
@@ -187,7 +187,7 @@ export function ShopChrome({
         <div className="border-b border-current/10">
           {bar(
             <>
-              <span className="flex flex-1 gap-3 overflow-hidden text-[10px] uppercase tracking-[0.08em] text-white/65">
+              <span className="flex flex-1 gap-3 overflow-hidden text-[10px] uppercase tracking-[0.08em] text-current/65">
                 <span>Men</span>
                 <span>Women</span>
                 <span>Kids</span>
@@ -205,7 +205,7 @@ export function ShopChrome({
           {bar(
             <>
               {logo}
-              <span className="flex flex-1 gap-3.5 overflow-hidden text-[10px] uppercase tracking-[0.08em] text-white/65">
+              <span className="flex flex-1 gap-3.5 overflow-hidden text-[10px] uppercase tracking-[0.08em] text-current/65">
                 {["Audio", "Men", "Wearables", "Women"].map((name) => (
                   <span key={name}>{name}</span>
                 ))}
@@ -222,9 +222,9 @@ export function ShopChrome({
           {bar(
             <>
               <span className="flex size-4 shrink-0 flex-col justify-center gap-[3px]" aria-hidden>
-                <span className="block h-px bg-white/60" />
-                <span className="block h-px bg-white/60" />
-                <span className="block h-px bg-white/60" />
+                <span className="block h-px bg-current/60" />
+                <span className="block h-px bg-current/60" />
+                <span className="block h-px bg-current/60" />
               </span>
               {logo}
               <span className="flex-1" />
@@ -241,7 +241,7 @@ export function ShopChrome({
           <>
             {logo}
             {search === "box" ? (
-              <span className="h-7 flex-1 rounded-xs bg-white/12" />
+              <span className="h-7 flex-1 rounded-xs bg-current/12" />
             ) : (
               <span className="flex-1" />
             )}
@@ -257,7 +257,7 @@ export function ShopChrome({
     const set = settings ?? {};
     const layout = variant ?? set.layout ?? "columns";
     const heading = (text: string) => (
-      <p className="mb-2.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-white">{text}</p>
+      <p className="mb-2.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-foreground">{text}</p>
     );
     const links = (items: string[]) =>
       items.map((link) => (
@@ -299,15 +299,15 @@ export function ShopChrome({
     const newsletter =
       (set.newsletter ?? "off") === "off" ? null : (
         <div
-          className={`mt-6 flex flex-wrap items-center gap-4 rounded-sm bg-white/[0.06] px-4 py-4${
+          className={`mt-6 flex flex-wrap items-center gap-4 rounded-sm bg-current/[0.06] px-4 py-4${
             layout === "centred" || layout === "minimal" ? " justify-center text-center" : ""
           }`}
         >
-          <p className="min-w-0 flex-1 text-[12px] font-semibold text-white">
+          <p className="min-w-0 flex-1 text-[12px] font-semibold text-foreground">
             {set.newsletter === "whatsapp" ? t("signupWhatsappHeading") : t("signupEmailHeading")}
           </p>
           <div className="flex w-full max-w-xs gap-2 sm:w-auto">
-            <span className="h-9 flex-1 rounded-xs bg-white/12 sm:w-44" />
+            <span className="h-9 flex-1 rounded-xs bg-current/12 sm:w-44" />
             <span className="grid h-9 shrink-0 place-items-center rounded-xs bg-white px-4 text-[11px] font-medium text-[#1a1a1a]">
               {set.newsletter === "whatsapp" ? t("signupWhatsappButton") : t("signupEmailButton")}
             </span>
@@ -321,7 +321,7 @@ export function ShopChrome({
       ) : (
         <div className="mt-5 flex gap-2.5">
           {Array.from({ length: 4 }, (_, i) => (
-            <span key={i} className="size-8 rounded-full bg-white/12" />
+            <span key={i} className="size-8 rounded-full bg-current/12" />
           ))}
         </div>
       );
@@ -329,10 +329,10 @@ export function ShopChrome({
     const payments =
       (set.payments ?? "on") === "off" ? null : (
         <div className="mt-5">
-          <p className="mb-2 text-[10px] uppercase tracking-[0.08em] text-white/45">{t("paymentsHeading")}</p>
+          <p className="mb-2 text-[10px] uppercase tracking-[0.08em] text-current/45">{t("paymentsHeading")}</p>
           <div className="flex flex-wrap gap-2">
             {["bKash", "Nagad", "Rocket", "Visa", "Mastercard", t("cashOnDelivery")].map((name) => (
-              <span key={name} className="rounded-xs border border-white/15 px-2.5 py-1 text-[10px] text-white/70">
+              <span key={name} className="rounded-xs border border-current/15 px-2.5 py-1 text-[10px] text-current/70">
                 {name}
               </span>
             ))}
@@ -342,18 +342,18 @@ export function ShopChrome({
 
     const bottom =
       (set.bottom ?? "copyright") === "policies" ? (
-        <div className="mt-5 flex flex-wrap items-center justify-between gap-2 border-t border-white/12 pt-4 text-[10px] text-white/45">
+        <div className="mt-5 flex flex-wrap items-center justify-between gap-2 border-t border-current/12 pt-4 text-[10px] text-current/45">
           <span>© 2026 Gadzilla · powered by Paperbase</span>
           <span>Privacy · Returns · Terms</span>
         </div>
       ) : (
-        <p className="mt-5 border-t border-white/12 pt-4 text-[10px] text-white/45">
+        <p className="mt-5 border-t border-current/12 pt-4 text-[10px] text-current/45">
           © 2026 Gadzilla — All rights reserved · powered by Paperbase
         </p>
       );
 
     const shell = (children: React.ReactNode, centred = false) => (
-      <div className={`bg-[#1a1a1a] px-5 py-6 text-white/65${centred ? " text-center" : ""}`}>
+      <div className={`border-t border-border bg-muted px-5 py-6 text-current/65${centred ? " text-center" : ""}`}>
         {children}
         {newsletter}
         {social}
@@ -365,7 +365,7 @@ export function ShopChrome({
     if (layout === "minimal") {
       return shell(
         <>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-white">Gadzilla</p>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-foreground">Gadzilla</p>
           <p className="mt-2.5 text-[11px]">About · Contact · Returns · Privacy</p>
         </>,
         true,
@@ -374,7 +374,7 @@ export function ShopChrome({
     if (layout === "centred") {
       return shell(
         <>
-          <p className="text-[12px] font-semibold uppercase tracking-[0.12em] text-white">Gadzilla</p>
+          <p className="text-[12px] font-semibold uppercase tracking-[0.12em] text-foreground">Gadzilla</p>
           {contact === "off" ? null : (
             <p className="mt-2.5 text-[11px]">
               {contact === "email" ? "hello@gadzilla.com" : "12 Gulshan Avenue, Dhaka 1212 · +880 1700 000000"}
@@ -596,7 +596,7 @@ export function ShopChrome({
           </p>
           <div className="mx-auto mt-3 flex max-w-sm gap-2">
             <span className="h-9 flex-1 rounded-xs bg-current/10" />
-            <span className="grid h-9 place-items-center rounded-xs bg-[#1a1a1a] px-4 text-[11px] text-white">
+            <span className="grid h-9 place-items-center rounded-xs bg-foreground px-4 text-[11px] text-background">
               {variant === "whatsapp" ? t("signupWhatsappButton") : t("signupEmailButton")}
             </span>
           </div>
@@ -650,7 +650,7 @@ export function ShopChrome({
               <span className="size-7 rounded-xs bg-current/25" />
               <span className="size-7 rounded-xs bg-current/10" />
             </div>
-            <span className="mb-2 block h-9 rounded-xs bg-[#1a1a1a]" />
+            <span className="mb-2 block h-9 rounded-xs bg-foreground" />
             <span className="mb-3 block h-9 rounded-xs border border-current/15" />
             <p className="text-[11px] text-current/45">Accessories · Bags</p>
           </div>
@@ -710,7 +710,7 @@ export function ShopChrome({
               // resolves to the label's colour and the chip disappears.
               className={
                 i === 0
-                  ? "rounded-xs bg-[#1a1a1a] px-2.5 py-1 text-[11px] text-white"
+                  ? "rounded-xs bg-foreground px-2.5 py-1 text-[11px] text-background"
                   : "rounded-xs border border-current/15 px-2.5 py-1 text-[11px] text-current/60"
               }
             >
@@ -801,7 +801,7 @@ export function ShopChrome({
                 <span className="block text-[14px] font-medium">{t("catEmptyHeadingExample")}</span>
                 <span className="mt-1 block text-[11px] text-current/50">{t("catEmptyBodyExample")}</span>
               </span>
-              <span className="grid h-9 place-items-center rounded-xs bg-[#1a1a1a] px-5 text-[11px] font-semibold text-white">
+              <span className="grid h-9 place-items-center rounded-xs bg-foreground px-5 text-[11px] font-semibold text-background">
                 {t("catEmptyButtonExample")}
               </span>
             </div>
@@ -870,7 +870,7 @@ export function ShopChrome({
     case "category:more":
       return variant === "pages" ? (
         <div className="flex items-center justify-center gap-1.5 px-4 py-4 text-[11px]">
-          <span className="grid size-7 place-items-center rounded-xs bg-[#1a1a1a] text-white">1</span>
+          <span className="grid size-7 place-items-center rounded-xs bg-foreground text-background">1</span>
           {[2, 3].map((n) => (
             <span key={n} className="grid size-7 place-items-center rounded-xs border border-current/15 text-current/60">
               {n}
@@ -950,7 +950,7 @@ export function ShopChrome({
                   <span className="block text-[12px] font-semibold tabular-nums">{item.price}</span>
                 </span>
                 {buy ? (
-                  <span className="grid h-8 shrink-0 place-items-center rounded-xs bg-[#1a1a1a] px-3 text-[11px] text-white">
+                  <span className="grid h-8 shrink-0 place-items-center rounded-xs bg-foreground px-3 text-[11px] text-background">
                     {t("addToCart")}
                   </span>
                 ) : null}
@@ -975,7 +975,7 @@ export function ShopChrome({
                 <p className="mt-2 truncate text-[11px] text-current/60">{item.name}</p>
                 <p className="text-[12px] font-semibold tabular-nums">{item.price}</p>
                 {buy ? (
-                  <span className="mt-1.5 grid h-8 place-items-center rounded-xs bg-[#1a1a1a] text-[11px] text-white">
+                  <span className="mt-1.5 grid h-8 place-items-center rounded-xs bg-foreground text-[11px] text-background">
                     {t("addToCart")}
                   </span>
                 ) : null}
@@ -998,7 +998,7 @@ export function ShopChrome({
               <span className="block text-[12px] font-semibold tabular-nums">৳45</span>
             </span>
             {variant === "cart" ? (
-              <span className="grid h-8 shrink-0 place-items-center rounded-xs bg-[#1a1a1a] px-3 text-[11px] text-white">
+              <span className="grid h-8 shrink-0 place-items-center rounded-xs bg-foreground px-3 text-[11px] text-background">
                 {t("addToCart")}
               </span>
             ) : (
@@ -1018,7 +1018,7 @@ export function ShopChrome({
                 <span className="block text-[14px] font-medium">{t("wishEmptyHeadingExample")}</span>
                 <span className="mt-1 block text-[11px] text-current/50">{t("wishEmptyBodyExample")}</span>
               </span>
-              <span className="grid h-9 place-items-center rounded-xs bg-[#1a1a1a] px-5 text-[11px] font-semibold text-white">
+              <span className="grid h-9 place-items-center rounded-xs bg-foreground px-5 text-[11px] font-semibold text-background">
                 {t("cartEmptyButtonExample")}
               </span>
             </div>
@@ -1045,7 +1045,7 @@ export function ShopChrome({
             <div className="grid gap-2">
               <span className="block h-8 rounded-xs border border-current/15 bg-current/[0.04]" aria-hidden />
               {lookup ? <span className="block h-8 rounded-xs border border-current/15 bg-current/[0.04]" aria-hidden /> : null}
-              <span className="grid h-9 place-items-center rounded-xs bg-[#1a1a1a] text-[11px] font-semibold text-white">
+              <span className="grid h-9 place-items-center rounded-xs bg-foreground text-[11px] font-semibold text-background">
                 {lookup ? t("accountLookupButton") : t("accountSignInButton")}
               </span>
             </div>
@@ -1077,7 +1077,7 @@ export function ShopChrome({
               key={name}
               className={
                 i === 0
-                  ? "rounded-xs bg-[#1a1a1a] px-3 py-1 text-[11px] text-white"
+                  ? "rounded-xs bg-foreground px-3 py-1 text-[11px] text-background"
                   : "rounded-xs border border-current/15 px-3 py-1 text-[11px] text-current/60"
               }
             >
@@ -1142,7 +1142,7 @@ export function ShopChrome({
                 <span className="block text-[14px] font-medium">{t("accountEmptyHeadingExample")}</span>
                 <span className="mt-1 block text-[11px] text-current/50">{t("accountEmptyBodyExample")}</span>
               </span>
-              <span className="grid h-9 place-items-center rounded-xs bg-[#1a1a1a] px-5 text-[11px] font-semibold text-white">
+              <span className="grid h-9 place-items-center rounded-xs bg-foreground px-5 text-[11px] font-semibold text-background">
                 {t("cartEmptyButtonExample")}
               </span>
             </div>
@@ -1180,7 +1180,7 @@ export function ShopChrome({
               key={name}
               className={
                 i === 0
-                  ? "rounded-full bg-[#1a1a1a] px-3 py-1 text-[11px] text-white"
+                  ? "rounded-full bg-foreground px-3 py-1 text-[11px] text-background"
                   : "rounded-full border border-current/15 px-3 py-1 text-[11px] text-current/60"
               }
             >
@@ -1440,7 +1440,7 @@ export function ShopChrome({
     case "cart:total": {
       const note = <p className="text-[10px] text-current/45">{t("cartTotalNoteExample")}</p>;
       const button = (
-        <span className="grid h-9 place-items-center rounded-xs bg-[#1a1a1a] px-6 text-[12px] font-semibold text-white">
+        <span className="grid h-9 place-items-center rounded-xs bg-foreground px-6 text-[12px] font-semibold text-background">
           {t("checkOut")}
         </span>
       );
@@ -1490,7 +1490,7 @@ export function ShopChrome({
               <span className="block text-[10px] uppercase tracking-[0.06em] text-current/45">{t("cartEstimated")}</span>
               <span className="block text-[13px] font-semibold tabular-nums">৳163</span>
             </span>
-            <span className="grid h-9 shrink-0 place-items-center rounded-xs bg-[#1a1a1a] px-4 text-[11px] text-white">
+            <span className="grid h-9 shrink-0 place-items-center rounded-xs bg-foreground px-4 text-[11px] text-background">
               {t("checkOut")}
             </span>
           </div>
@@ -1542,7 +1542,7 @@ export function ShopChrome({
                 <span className="block text-[14px] font-medium">{t("cartEmptyHeadingExample")}</span>
                 <span className="mt-1 block text-[11px] text-current/50">{t("cartEmptyBodyExample")}</span>
               </span>
-              <span className="grid h-9 place-items-center rounded-xs bg-[#1a1a1a] px-5 text-[11px] font-semibold text-white">
+              <span className="grid h-9 place-items-center rounded-xs bg-foreground px-5 text-[11px] font-semibold text-background">
                 {t("cartEmptyButtonExample")}
               </span>
             </div>
@@ -1668,7 +1668,7 @@ export function ShopChrome({
               <span className="block truncate text-[12px] font-medium">Crossbody Bag</span>
               <span className="block text-[12px] font-semibold tabular-nums">৳45</span>
             </span>
-            <span className="grid h-9 shrink-0 place-items-center rounded-xs bg-[#1a1a1a] px-4 text-[11px] text-white">
+            <span className="grid h-9 shrink-0 place-items-center rounded-xs bg-foreground px-4 text-[11px] text-background">
               {t("addToCart")}
             </span>
           </div>
@@ -1687,9 +1687,9 @@ export function ShopChrome({
       return variant === "full" ? (
         <ShopChrome page="header" slotKey="header" variant="bar" />
       ) : (
-        <div className="flex items-center justify-between gap-3 bg-[#1a1a1a] px-4 py-3.5 text-white">
+        <div className="flex items-center justify-between gap-3 border-b border-border bg-muted px-4 py-3.5 text-foreground">
           <span className="text-sm font-semibold tracking-[0.14em]">GADZILLA</span>
-          <span className="text-[11px] text-white/55">{t("secureCheckout")}</span>
+          <span className="text-[11px] text-current/55">{t("secureCheckout")}</span>
         </div>
       );
 
@@ -1835,7 +1835,7 @@ export function ShopChrome({
           {/* The same near-black the rest of the mock shop fills a button with.
               Not `bg-current`: the label sets `color`, so currentColor would
               paint the button in the label's colour and it would disappear. */}
-          <span className="block rounded-xs bg-[#1a1a1a] py-2.5 text-center text-[12px] font-semibold text-white">
+          <span className="block rounded-xs bg-foreground py-2.5 text-center text-[12px] font-semibold text-background">
             {t("placeOrder")}
           </span>
         </div>
@@ -1944,8 +1944,8 @@ export function ShopChrome({
 
     case "footer:contact":
       return (
-        <div className="bg-[#1a1a1a] px-5 py-5 text-white/65">
-          <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.08em] text-white">Gadzilla</p>
+        <div className="border-t border-border bg-muted px-5 py-5 text-current/65">
+          <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.08em] text-foreground">Gadzilla</p>
           {variant === "email" ? (
             <p className="text-[11px]">hello@gadzilla.com</p>
           ) : (
@@ -1959,13 +1959,13 @@ export function ShopChrome({
 
     case "footer:social":
       return (
-        <div className="bg-[#1a1a1a] px-5 py-5 text-white/65">
+        <div className="border-t border-border bg-muted px-5 py-5 text-current/65">
           {variant === "names" ? (
             <p className="text-[11px]">Facebook · Instagram · YouTube · TikTok</p>
           ) : (
             <div className="flex gap-2.5">
               {Array.from({ length: 4 }, (_, i) => (
-                <span key={i} className="size-8 rounded-full bg-white/12" />
+                <span key={i} className="size-8 rounded-full bg-current/12" />
               ))}
             </div>
           )}
@@ -1974,13 +1974,13 @@ export function ShopChrome({
 
     case "footer:payments":
       return (
-        <div className="bg-[#1a1a1a] px-5 py-5">
-          <p className="mb-2.5 text-[10px] uppercase tracking-[0.08em] text-white/45">{t("paymentsHeading")}</p>
+        <div className="border-t border-border bg-muted px-5 py-5">
+          <p className="mb-2.5 text-[10px] uppercase tracking-[0.08em] text-current/45">{t("paymentsHeading")}</p>
           <div className="flex flex-wrap gap-2">
             {["bKash", "Nagad", "Rocket", "Visa", "Mastercard", t("cashOnDelivery")].map((name) => (
               <span
                 key={name}
-                className="rounded-xs border border-white/15 px-2.5 py-1 text-[10px] text-white/70"
+                className="rounded-xs border border-current/15 px-2.5 py-1 text-[10px] text-current/70"
               >
                 {name}
               </span>
@@ -1991,12 +1991,12 @@ export function ShopChrome({
 
     case "footer:newsletter":
       return (
-        <div className="bg-[#1a1a1a] px-5 py-5 text-white/65">
-          <p className="text-[12px] font-semibold text-white">
+        <div className="border-t border-border bg-muted px-5 py-5 text-current/65">
+          <p className="text-[12px] font-semibold text-foreground">
             {variant === "whatsapp" ? t("signupWhatsappHeading") : t("signupEmailHeading")}
           </p>
           <div className="mt-3 flex max-w-sm gap-2">
-            <span className="h-9 flex-1 rounded-xs bg-white/12" />
+            <span className="h-9 flex-1 rounded-xs bg-current/12" />
             <span className="grid h-9 place-items-center rounded-xs bg-white px-4 text-[11px] text-[#1a1a1a]">
               {variant === "whatsapp" ? t("signupWhatsappButton") : t("signupEmailButton")}
             </span>
@@ -2006,7 +2006,7 @@ export function ShopChrome({
 
     case "footer:bottom":
       return (
-        <div className="bg-[#1a1a1a] px-5 py-4 text-[10px] text-white/45">
+        <div className="border-t border-border bg-muted px-5 py-4 text-[10px] text-current/45">
           {variant === "policies" ? (
             <div className="flex flex-wrap items-center justify-between gap-2">
               <span>© 2026 Gadzilla · powered by Paperbase</span>

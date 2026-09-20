@@ -57,6 +57,21 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-09-20-search-shows-every-match",
+    date: "2026-09-20",
+    // A storefront and API change: the dashboard version that is live, per the rule above.
+    version: "4.12.5",
+    tag: "fixed",
+    title: {
+      en: "Search can reach every matching product",
+      bn: "সার্চে এখন সব পণ্যেই পৌঁছানো যায়",
+    },
+    body: {
+      en: "Search never showed more than ten products, and there was no way to reach the rest — so a shop with two hundred shirts answered a search for shirts with ten of them. It now shows a full page at a time with working previous and next buttons, and the number beside your search is the real number of matches.",
+      bn: "সার্চে কখনোই দশটির বেশি পণ্য দেখাত না, আর বাকিগুলোয় যাওয়ার কোনো উপায়ও ছিল না—ফলে দুইশ শার্টের দোকানে “শার্ট” খুঁজলে মাত্র দশটি আসত। এখন একবারে পুরো এক পাতা দেখায়, আগের-পরের বোতামও কাজ করে। আর সার্চের পাশে যে সংখ্যাটি থাকে, সেটিই আসল মিলে যাওয়া পণ্যের সংখ্যা।",
+    },
+  },
+  {
     id: "2026-09-20-cart-page-in-your-language",
     date: "2026-09-20",
     // A storefront change: the dashboard version that is live, per the rule above.
