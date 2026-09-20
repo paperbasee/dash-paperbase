@@ -7,43 +7,66 @@ import type { SlotPageKey } from "@/lib/theme-editor/slot-catalogue";
 /**
  * What a slot actually shows, drawn as the shop rather than as a grey box.
  *
- * The canvas IS the editor now -- there is no list beside it -- so a merchant
- * has to recognise the thing they are about to click. A row of wireframe bars
- * would not be recognisable; a masthead with the shop's name in it is. These are
- * deliberately shallow: enough to read at a glance, and no attempt at the real
- * storefront, which is what the live preview will show once this is wired.
+ * The canvas IS the editor -- there is no list beside it -- so a merchant has to
+ * recognise the thing they are about to click. A row of wireframe bars would not
+ * be recognisable; a masthead with the shop's name in it is.
+ *
+ * **Drawn to be read, not to be small.** These were once a third of this size
+ * and the complaint was fair: a preview you have to lean in to identify is not
+ * doing its job. Real product names, real prices, real headings, at sizes that
+ * survive a 60% column.
  *
  * Everything here is scenery. It carries no state and no behaviour: the slot
  * wrapper in `SlotCanvas` owns the clicking.
  */
 
-function Bars({ count = 3, tall = false }: { count?: number; tall?: boolean }) {
+function Line({ w = "100%", h = 6 }: { w?: string; h?: number }) {
+  return <span className="block rounded-full bg-current/12" style={{ width: w, height: h }} />;
+}
+
+function SectionHead({ title, link }: { title: string; link?: string }) {
   return (
-    <div className="flex gap-1.5">
-      {Array.from({ length: count }, (_, i) => (
-        <span
-          key={i}
-          className={tall ? "block flex-1 rounded-xs bg-current/10" : "block h-1.5 flex-1 rounded-full bg-current/10"}
-          style={tall ? { height: 46 } : undefined}
-        />
-      ))}
+    <div className="mb-3 flex items-baseline justify-between gap-3">
+      <h4 className="m-0 text-[15px] font-semibold">{title}</h4>
+      {link ? <span className="text-[10px] uppercase tracking-[0.08em] text-current/45">{link}</span> : null}
     </div>
   );
 }
 
-function Cards({ items }: { items: { name: string; price: string }[] }) {
+function Cards({ items, ratio = "1" }: { items: { name: string; price: string }[]; ratio?: string }) {
   return (
-    <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+    <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
       {items.map((item) => (
         <div key={item.name} className="min-w-0">
-          <div className="aspect-square rounded-xs bg-current/8" />
-          <p className="mt-1.5 truncate text-[10px] text-current/55">{item.name}</p>
-          <p className="text-[11px] font-semibold tabular-nums">{item.price}</p>
+          <div className="rounded-xs bg-current/8" style={{ aspectRatio: ratio }} />
+          <p className="mt-2 truncate text-[11px] text-current/60">{item.name}</p>
+          <p className="text-[12px] font-semibold tabular-nums">{item.price}</p>
         </div>
       ))}
     </div>
   );
 }
+
+const FEATURED = [
+  { name: "Denim Work Shirt", price: "৳65" },
+  { name: "Oxford Shirt", price: "৳82" },
+  { name: "Linen Overshirt", price: "৳94" },
+  { name: "Corduroy Shirt", price: "৳71" },
+];
+
+const BESTSELLERS = [
+  { name: "Crossbody Bag", price: "৳45" },
+  { name: "Canvas Tote", price: "৳52" },
+  { name: "Leather Belt", price: "৳29" },
+  { name: "Card Wallet", price: "৳41" },
+];
+
+const ARRIVALS = [
+  { name: "Merino Scarf", price: "৳58" },
+  { name: "Wool Cap", price: "৳34" },
+  { name: "Suede Loafer", price: "৳120" },
+  { name: "Cotton Socks", price: "৳18" },
+];
 
 /** The mock shop, one slot at a time. `variant` is whatever the merchant chose. */
 export function ShopChrome({
@@ -60,13 +83,13 @@ export function ShopChrome({
   if (slotKey === "header") {
     return (
       <div>
-        <div className="flex items-center gap-2.5 bg-[#1a1a1a] px-3.5 py-2.5 text-white">
-          <span className="text-[13px] font-semibold tracking-[0.14em]">GADZILLA</span>
-          {variant !== "masthead" ? <span className="h-5 flex-1 rounded-xs bg-white/12" /> : <span className="flex-1" />}
-          <span className="size-3.5 rounded-xs bg-white/25" />
-          <span className="size-3.5 rounded-xs bg-white/25" />
+        <div className="flex items-center gap-3 bg-[#1a1a1a] px-4 py-3 text-white">
+          <span className="text-sm font-semibold tracking-[0.14em]">GADZILLA</span>
+          {variant !== "masthead" ? <span className="h-7 flex-1 rounded-xs bg-white/12" /> : <span className="flex-1" />}
+          <span className="size-4 rounded-xs bg-white/25" />
+          <span className="size-4 rounded-xs bg-white/25" />
         </div>
-        <div className="flex gap-3.5 overflow-hidden border-b border-current/10 px-3.5 py-1.5 text-[9px] uppercase tracking-[0.08em] text-current/45">
+        <div className="flex gap-4 overflow-hidden border-b border-current/10 px-4 py-2.5 text-[10px] uppercase tracking-[0.08em] text-current/50">
           <span>Audio</span>
           <span>Men</span>
           <span>Wearables</span>
@@ -79,14 +102,31 @@ export function ShopChrome({
 
   if (slotKey === "footer") {
     return (
-      <div className="grid grid-cols-2 gap-2.5 bg-[#1a1a1a] px-3.5 py-3.5 text-[9px] text-white/60 sm:grid-cols-4">
-        {["Gadzilla", "Information", "Service", "Company"].map((heading) => (
-          <div key={heading}>
-            <p className="mb-1.5 text-[9px] uppercase tracking-[0.06em] text-white">{heading}</p>
-            <span className="mb-1 block h-1 w-4/5 rounded-full bg-white/18" />
-            <span className="block h-1 w-3/5 rounded-full bg-white/18" />
+      <div className="bg-[#1a1a1a] px-5 py-6 text-white/65">
+        <div className="grid grid-cols-2 gap-x-5 gap-y-5 sm:grid-cols-4">
+          <div>
+            <p className="mb-2.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-white">Gadzilla</p>
+            <p className="text-[11px] leading-relaxed">12 Gulshan Avenue, Dhaka 1212</p>
+            <p className="mt-1.5 text-[11px]">+880 1700 000000</p>
           </div>
-        ))}
+          {[
+            { head: "Information", links: ["About us", "Blog", "Privacy policy"] },
+            { head: "Customer service", links: ["Contact us", "Returns", "Track order"] },
+            { head: "Company", links: ["Careers", "Wholesale", "Stores"] },
+          ].map((column) => (
+            <div key={column.head}>
+              <p className="mb-2.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-white">{column.head}</p>
+              {column.links.map((link) => (
+                <p key={link} className="mb-1.5 text-[11px] leading-relaxed">
+                  {link}
+                </p>
+              ))}
+            </div>
+          ))}
+        </div>
+        <p className="mt-5 border-t border-white/12 pt-4 text-[10px] text-white/45">
+          © 2026 Gadzilla — All rights reserved · powered by Paperbase
+        </p>
       </div>
     );
   }
@@ -94,21 +134,21 @@ export function ShopChrome({
   switch (`${page}:${slotKey}`) {
     case "home:notice":
       return (
-        <p className="px-3.5 py-1.5 text-center text-[10px] uppercase tracking-[0.06em] text-current/55">
+        <p className="px-4 py-2 text-center text-[11px] uppercase tracking-[0.06em] text-current/55">
           {t("noticeExample")}
         </p>
       );
 
     case "home:hero":
       return (
-        <div className="grid h-[130px] place-items-center bg-current/6 px-3 text-center">
+        <div className="grid h-[150px] place-items-center bg-current/6 px-4 text-center">
           <div>
-            <p className="text-[13px] text-current/55">
+            <p className="text-sm text-current/60">
               {variant === "video" ? t("heroVideo") : variant === "still" ? t("heroStill") : t("heroSliderExample")}
             </p>
             {variant === "slider" || variant === undefined ? (
-              <div className="mt-2 flex justify-center gap-1">
-                <span className="size-1.5 rounded-full bg-current/35" />
+              <div className="mt-2.5 flex justify-center gap-1.5">
+                <span className="size-1.5 rounded-full bg-current/40" />
                 <span className="size-1.5 rounded-full bg-current/20" />
               </div>
             ) : null}
@@ -116,67 +156,220 @@ export function ShopChrome({
         </div>
       );
 
+    case "home:categories":
+      return variant === "strip" ? (
+        <div className="flex gap-2 overflow-hidden px-4 py-4">
+          {["Audio", "Men", "Women", "Wearables", "Kids", "Home"].map((name) => (
+            <span key={name} className="shrink-0 rounded-full border border-current/15 px-3 py-1.5 text-[11px]">
+              {name}
+            </span>
+          ))}
+        </div>
+      ) : (
+        <div className="px-4 py-4">
+          <SectionHead title={t("categoriesHeading")} />
+          <div className="grid grid-cols-4 gap-3">
+            {["Audio", "Men", "Women", "Kids"].map((name) => (
+              <div key={name} className="min-w-0">
+                <div className="aspect-[4/3] rounded-xs bg-current/8" />
+                <p className="mt-1.5 truncate text-center text-[11px] text-current/60">{name}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+
+    case "home:trust":
+      return variant === "line" ? (
+        <p className="border-y border-current/10 px-4 py-3 text-center text-[11px] uppercase tracking-[0.06em] text-current/55">
+          {t("trustExample")}
+        </p>
+      ) : (
+        <div className="grid grid-cols-2 gap-3 border-y border-current/10 px-4 py-4 sm:grid-cols-4">
+          {[t("trustDelivery"), t("trustReturns"), t("trustPayment"), t("trustSupport")].map((label) => (
+            <div key={label} className="flex items-center gap-2">
+              <span className="size-7 shrink-0 rounded-full bg-current/8" />
+              <span className="min-w-0 truncate text-[11px] text-current/60">{label}</span>
+            </div>
+          ))}
+        </div>
+      );
+
+    case "home:featured":
+      return (
+        <div className="px-4 py-4">
+          <SectionHead title={t("featuredHeading")} link={t("browseAll")} />
+          <Cards items={variant === "grid" ? [...FEATURED, ...BESTSELLERS] : FEATURED} />
+        </div>
+      );
+
     case "home:bands":
       return (
-        <div className="p-3.5">
-          <div className="mb-2.5 flex items-baseline justify-between gap-2.5">
-            <h4 className="m-0 text-sm font-semibold">Button-Downs</h4>
-            <span className="text-[9px] uppercase tracking-[0.08em] text-current/45">Browse everything</span>
+        <div className="px-4 py-4">
+          <SectionHead title="Button-Downs" link={t("browseAll")} />
+          <Cards items={FEATURED} />
+          <div className="mt-5">
+            <SectionHead title="Outerwear" link={t("browseAll")} />
+            <Cards items={ARRIVALS} />
           </div>
-          <Cards
-            items={[
-              { name: "Denim Work Shirt", price: "৳65" },
-              { name: "Oxford Shirt", price: "৳82" },
-              { name: "Linen Overshirt", price: "৳94" },
-              { name: "Corduroy Shirt", price: "৳71" },
-            ]}
-          />
         </div>
       );
 
     case "home:promo":
       return (
-        <div className="px-3.5 py-3">
+        <div className="px-4 py-4">
           {variant === "card" ? (
-            <div className="flex items-center gap-3 rounded-xs bg-current/6 p-3">
-              <span className="size-12 shrink-0 rounded-xs bg-current/10" />
-              <div className="min-w-0 flex-1">
-                <p className="text-[12px] font-semibold">{t("promoCard")}</p>
-                <Bars count={2} />
+            <div className="flex items-center gap-4 rounded-xs bg-current/6 p-4">
+              <span className="size-16 shrink-0 rounded-xs bg-current/10" />
+              <div className="min-w-0 flex-1 space-y-2">
+                <p className="text-[13px] font-semibold">{t("promoCardHeading")}</p>
+                <Line w="80%" />
+                <span className="mt-1 inline-block rounded-xs bg-current/20 px-3 py-1.5 text-[10px]">
+                  {t("browseAll")}
+                </span>
               </div>
             </div>
           ) : (
-            <p className="text-center text-[11px] uppercase tracking-[0.08em] text-current/55">
+            <p className="text-center text-[12px] uppercase tracking-[0.08em] text-current/60">
               {variant === "countdown" ? t("promoCountdownExample") : t("promoTextExample")}
             </p>
           )}
         </div>
       );
 
+    case "home:bestsellers":
+      return (
+        <div className="px-4 py-4">
+          <SectionHead title={t("bestsellersHeading")} link={t("browseAll")} />
+          <Cards items={BESTSELLERS} />
+        </div>
+      );
+
+    case "home:arrivals":
+      return (
+        <div className="px-4 py-4">
+          <SectionHead title={t("arrivalsHeading")} link={t("browseAll")} />
+          <Cards items={ARRIVALS} />
+        </div>
+      );
+
+    case "home:brands":
+      return (
+        <div className="px-4 py-5">
+          <SectionHead title={t("brandsHeading")} />
+          <div className="grid grid-cols-3 gap-4 sm:grid-cols-6">
+            {Array.from({ length: 6 }, (_, i) => (
+              <span key={i} className="h-8 rounded-xs bg-current/8" />
+            ))}
+          </div>
+        </div>
+      );
+
+    case "home:reviews":
+      return variant === "quote" ? (
+        <div className="px-6 py-6 text-center">
+          <p className="text-[14px] leading-relaxed text-current/70">“{t("reviewsQuoteExample")}”</p>
+          <p className="mt-2.5 text-[11px] uppercase tracking-[0.08em] text-current/45">Nusrat J. · Dhaka</p>
+        </div>
+      ) : (
+        <div className="px-4 py-4">
+          <SectionHead title={t("reviewsHeading")} />
+          <div className="grid gap-3 sm:grid-cols-3">
+            {["Nusrat J.", "Rafiq H.", "Tanvir A."].map((name) => (
+              <div key={name} className="rounded-xs border border-current/12 p-3">
+                <p className="text-[11px] text-current/45">★★★★★</p>
+                <div className="mt-2 space-y-1.5">
+                  <Line />
+                  <Line w="70%" />
+                </div>
+                <p className="mt-2.5 text-[11px] text-current/60">{name}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+
+    case "home:video":
+      return (
+        <div className="grid h-[150px] place-items-center bg-current/8 px-4">
+          <span className="grid size-12 place-items-center rounded-full bg-current/15 text-[15px]" aria-hidden>
+            ▶
+          </span>
+        </div>
+      );
+
     case "home:story":
       return (
-        <div className={variant === "both" ? "flex items-center gap-3 p-3.5" : "p-3.5"}>
-          {variant === "both" ? <span className="h-16 w-1/3 shrink-0 rounded-xs bg-current/8" /> : null}
-          <div className="min-w-0 flex-1 space-y-1.5">
-            <Bars count={1} />
-            <Bars count={1} />
-            <div className="w-1/2">
-              <Bars count={1} />
+        <div className={variant === "both" ? "flex items-center gap-5 px-4 py-6" : "px-4 py-6"}>
+          {variant === "both" ? <span className="h-24 w-1/3 shrink-0 rounded-xs bg-current/8" /> : null}
+          <div className="min-w-0 flex-1">
+            <h4 className="m-0 mb-2.5 text-[15px] font-semibold">{t("storyHeading")}</h4>
+            <div className="space-y-2">
+              <Line />
+              <Line />
+              <Line w="60%" />
             </div>
+          </div>
+        </div>
+      );
+
+    case "home:posts":
+      return (
+        <div className="px-4 py-4">
+          <SectionHead title={t("postsHeading")} link={t("browseAll")} />
+          <div className="grid gap-3 sm:grid-cols-3">
+            {[t("postOne"), t("postTwo"), t("postThree")].map((title) => (
+              <div key={title} className="min-w-0">
+                <div className="aspect-[16/10] rounded-xs bg-current/8" />
+                <p className="mt-2 text-[12px] font-medium leading-snug">{title}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+
+    case "home:signup":
+      return (
+        <div className="bg-current/6 px-6 py-6 text-center">
+          <p className="text-[14px] font-semibold">
+            {variant === "whatsapp" ? t("signupWhatsappHeading") : t("signupEmailHeading")}
+          </p>
+          <div className="mx-auto mt-3 flex max-w-sm gap-2">
+            <span className="h-9 flex-1 rounded-xs bg-current/10" />
+            <span className="grid h-9 place-items-center rounded-xs bg-[#1a1a1a] px-4 text-[11px] text-white">
+              {variant === "whatsapp" ? t("signupWhatsappButton") : t("signupEmailButton")}
+            </span>
+          </div>
+        </div>
+      );
+
+    case "home:faq":
+      return (
+        <div className="px-4 py-4">
+          <SectionHead title={t("faqHeading")} />
+          <div className="divide-y divide-current/10 border-y border-current/10">
+            {[t("faqOne"), t("faqTwo"), t("faqThree")].map((q) => (
+              <p key={q} className="flex items-center justify-between gap-3 py-3 text-[12px] text-current/70">
+                {q}
+                <span aria-hidden className="text-current/40">
+                  +
+                </span>
+              </p>
+            ))}
           </div>
         </div>
       );
 
     case "product:buy":
       return (
-        <div className="grid gap-3.5 p-3.5 sm:grid-cols-2">
+        <div className="grid gap-4 px-4 py-4 sm:grid-cols-2">
           <div className="aspect-[4/5] rounded-xs bg-current/8" />
           <div>
-            <h4 className="m-0 mb-1 text-base font-semibold">Crossbody Bag</h4>
-            <p className="mb-2.5 text-[17px] font-semibold tabular-nums">৳45</p>
-            <span className="mb-1.5 block h-7 rounded-xs bg-[#1a1a1a]" />
-            <span className="mb-2.5 block h-7 rounded-xs border border-current/15" />
-            <p className="text-[10px] text-current/45">Accessories · Bags</p>
+            <h4 className="m-0 mb-1.5 text-lg font-semibold">Crossbody Bag</h4>
+            <p className="mb-3 text-[19px] font-semibold tabular-nums">৳45</p>
+            <span className="mb-2 block h-9 rounded-xs bg-[#1a1a1a]" />
+            <span className="mb-3 block h-9 rounded-xs border border-current/15" />
+            <p className="text-[11px] text-current/45">Accessories · Bags</p>
           </div>
         </div>
       );
@@ -184,21 +377,19 @@ export function ShopChrome({
     case "product:trust":
     case "checkout:trust":
       return (
-        <p className="border-t border-current/10 px-3.5 py-2.5 text-center text-[10px] uppercase tracking-[0.06em] text-current/50">
+        <p className="border-t border-current/10 px-4 py-3 text-center text-[11px] uppercase tracking-[0.06em] text-current/55">
           {page === "checkout" ? t("trustLineExample") : t("trustExample")}
         </p>
       );
 
     case "product:description":
       return (
-        <div className="p-3.5">
-          <div className={variant === "box" ? "rounded-xs border border-current/12 p-3" : ""}>
-            <p className="mb-2 text-[11px] uppercase tracking-[0.06em] text-current/45">{t("descriptionHeading")}</p>
-            <div className="space-y-1.5">
-              <Bars count={1} />
-              <div className="w-3/5">
-                <Bars count={1} />
-              </div>
+        <div className="px-4 py-4">
+          <div className={variant === "box" ? "rounded-xs border border-current/12 p-4" : ""}>
+            <p className="mb-2.5 text-[11px] uppercase tracking-[0.06em] text-current/45">{t("descriptionHeading")}</p>
+            <div className="space-y-2">
+              <Line />
+              <Line w="65%" />
             </div>
           </div>
         </div>
@@ -206,18 +397,18 @@ export function ShopChrome({
 
     case "product:specs":
       return (
-        <div className="p-3.5">
+        <div className="px-4 py-4">
           {variant === "folded" ? (
-            <div className="flex items-center justify-between border-y border-current/12 py-2.5 text-[11px] uppercase tracking-[0.06em] text-current/50">
+            <div className="flex items-center justify-between border-y border-current/12 py-3.5 text-[11px] uppercase tracking-[0.06em] text-current/55">
               <span>{t("specsHeading")}</span>
               <span aria-hidden>+</span>
             </div>
           ) : (
-            <div className="grid grid-cols-1 gap-x-4 gap-y-1 text-[10px] text-current/55 sm:grid-cols-2">
-              <p className="border-b border-current/10 py-1">Material · Cotton canvas</p>
-              <p className="border-b border-current/10 py-1">Strap · Adjustable</p>
-              <p className="border-b border-current/10 py-1">Closure · Zip</p>
-              <p className="border-b border-current/10 py-1">Made in · Bangladesh</p>
+            <div className="grid grid-cols-1 gap-x-5 gap-y-1 text-[11px] text-current/60 sm:grid-cols-2">
+              <p className="border-b border-current/10 py-1.5">Material · Cotton canvas</p>
+              <p className="border-b border-current/10 py-1.5">Strap · Adjustable</p>
+              <p className="border-b border-current/10 py-1.5">Closure · Zip</p>
+              <p className="border-b border-current/10 py-1.5">Made in · Bangladesh</p>
             </div>
           )}
         </div>
@@ -225,32 +416,25 @@ export function ShopChrome({
 
     case "product:related":
       return (
-        <div className="p-3.5">
-          <h4 className="m-0 mb-2.5 text-sm font-semibold">{t("relatedHeading")}</h4>
-          <Cards
-            items={[
-              { name: "Tote Bag", price: "৳52" },
-              { name: "Sling Bag", price: "৳38" },
-              { name: "Leather Belt", price: "৳29" },
-              { name: "Card Wallet", price: "৳41" },
-            ]}
-          />
+        <div className="px-4 py-4">
+          <SectionHead title={t("relatedHeading")} />
+          <Cards items={BESTSELLERS} />
         </div>
       );
 
     case "checkout:form":
       return (
-        <div className="grid gap-2 p-3.5">
-          <span className="block h-6 rounded-xs bg-current/8" />
-          <span className="block h-6 rounded-xs bg-current/8" />
-          <span className="block h-6 w-3/5 rounded-xs bg-current/8" />
-          <span className="block h-6 rounded-xs bg-current/8" />
+        <div className="grid gap-2.5 px-4 py-4">
+          <span className="block h-9 rounded-xs bg-current/8" />
+          <span className="block h-9 rounded-xs bg-current/8" />
+          <span className="block h-9 w-3/5 rounded-xs bg-current/8" />
+          <span className="block h-9 rounded-xs bg-current/8" />
         </div>
       );
 
     case "checkout:summary":
       return (
-        <div className="grid gap-1.5 border-t border-current/10 p-3.5 text-[11px] text-current/55">
+        <div className="grid gap-2 border-t border-current/10 px-4 py-4 text-[12px] text-current/60">
           <div className="flex justify-between tabular-nums">
             <span>Crossbody Bag × 1</span>
             <span>৳45</span>
@@ -259,7 +443,7 @@ export function ShopChrome({
             <span>{t("delivery")}</span>
             <span>৳60</span>
           </div>
-          <div className="flex justify-between border-t border-current/10 pt-1.5 text-[13px] font-semibold tabular-nums text-current">
+          <div className="flex justify-between border-t border-current/10 pt-2 text-[14px] font-semibold tabular-nums text-current">
             <span>{t("total")}</span>
             <span>৳105</span>
           </div>
@@ -267,23 +451,21 @@ export function ShopChrome({
       );
 
     case "checkout:after":
-      return (
-        <p className="px-3.5 py-2.5 text-center text-[10px] text-current/50">{t("afterExample")}</p>
-      );
+      return <p className="px-4 py-3 text-center text-[11px] text-current/55">{t("afterExample")}</p>;
 
     case "header:layout":
       return <ShopChrome page={page} slotKey="header" variant={variant} />;
 
     case "header:sticky":
       return (
-        <p className="px-3.5 py-2.5 text-center text-[11px] text-current/50">
+        <p className="px-4 py-3 text-center text-[12px] text-current/55">
           {variant === "off" ? t("stickyOffExample") : t("stickyExample")}
         </p>
       );
 
     case "header:marks":
       return (
-        <p className="px-3.5 py-2.5 text-center text-[11px] text-current/50">
+        <p className="px-4 py-3 text-center text-[12px] text-current/55">
           {variant === "on" ? t("marksBothExample") : t("marksCartOnly")}
         </p>
       );
@@ -292,6 +474,11 @@ export function ShopChrome({
       return <ShopChrome page={page} slotKey="footer" variant={variant} />;
 
     default:
-      return <Bars />;
+      return (
+        <div className="space-y-2 px-4 py-4">
+          <Line />
+          <Line w="60%" />
+        </div>
+      );
   }
 }
