@@ -40,6 +40,7 @@ const known = (ns: Record<string, string>, key: string) => key in ns || `slots.$
 
 const SOURCES = [
   "src/app/[locale]/(dashboard)/settings/customize/page.tsx",
+  "src/app/[locale]/(dashboard)/settings/customize/sections/page.tsx",
   "src/components/theme-editor/ThemeEditor.tsx",
   "src/components/theme-editor/EditorTopBar.tsx",
   "src/components/theme-editor/SectionList.tsx",

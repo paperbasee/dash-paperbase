@@ -4,34 +4,41 @@ import { useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { Loader2 } from "lucide-react";
 
-import { ThemeEditor } from "@/components/theme-editor/ThemeEditor";
-import { DeferredNavLink } from "@/components/navigation/DeferredNavLink";
-import { Button } from "@/components/ui/button";
+import { SlotEditor } from "@/components/theme-editor/slots/SlotEditor";
 import { useThemeEditorQuery } from "@/hooks/useThemesQuery";
 import { useRouter } from "@/i18n/navigation";
 import { CUSTOMIZATION_HREF } from "@/lib/theme-editor/access";
 import { themeErrorMessageKey } from "@/lib/theme-editor/api";
-import { previewOrigin } from "@/lib/theme-editor/preview-origin";
 import { notify } from "@/notifications";
 
-const PREVIEW_ORIGIN = previewOrigin(process.env.NEXT_PUBLIC_STOREFRONT_PREVIEW_ORIGIN);
-
 /**
- * Settings > Customization > Customize. The API decides who may edit: a member without
- * theming.manage, or a locked shop, gets a 403 and is sent back to Customization with
- * the reason (the page there shows the lock too). Without a preview host the editor
- * has nothing to show, so it does not open at all.
+ * Settings > Customization > Customize.
+ *
+ * **The slot editor, which is the design and not yet the wiring.** The owner
+ * decided on 2026-09-20 that a merchant arranges nothing: every page has the
+ * same places in the same order, and the only choice is what fills each one.
+ * This screen is that idea, built to be used and argued with; it saves nothing
+ * yet and says so across the top. The editor that does save is at `./sections`
+ * until this one is wired, and then it goes.
+ *
+ * **The permission check stays.** Who may open the editor is the API's answer,
+ * not this page's, and it does not change because the screen behind it did: a
+ * member without `theming.manage`, or a locked shop, gets a 403 and is sent
+ * back to Customization with the reason.
+ *
+ * What it no longer waits for is the preview host. The old editor could not open
+ * without one because it had nothing to show; this one draws its own shop, so a
+ * missing preview origin is no longer a reason to refuse a merchant the screen.
  */
 export default function ThemeEditorPage() {
-  const t = useTranslations("themeEditor");
   const tc = useTranslations("settings.customization");
   const tCommon = useTranslations("common");
+  const t = useTranslations("themeEditor");
   const router = useRouter();
-  const editor = useThemeEditorQuery({ enabled: PREVIEW_ORIGIN !== null });
+  const editor = useThemeEditorQuery({ enabled: true });
 
   const status = (editor.error as { status?: unknown } | null)?.status;
-  const refusal =
-    PREVIEW_ORIGIN === null ? t("unavailable") : status === 403 ? tc(themeErrorMessageKey(editor.error)) : null;
+  const refusal = status === 403 ? tc(themeErrorMessageKey(editor.error)) : null;
 
   useEffect(() => {
     if (!refusal) return;
@@ -40,24 +47,21 @@ export default function ThemeEditorPage() {
     router.replace(CUSTOMIZATION_HREF);
   }, [refusal, router, tc]);
 
-  if (editor.data && PREVIEW_ORIGIN) return <ThemeEditor loaded={editor.data} origin={PREVIEW_ORIGIN} />;
+  if (editor.data) return <SlotEditor />;
 
   return (
     <div className="flex flex-1 flex-col items-center justify-center gap-4 p-6 text-center">
       {editor.isError && !refusal ? (
-        <>
-          <p role="alert" className="max-w-sm text-sm text-destructive">
-            {t("loadFailed")}
-          </p>
-          <div className="flex flex-wrap justify-center gap-2">
-            <Button type="button" onClick={() => void editor.refetch()}>
-              {tCommon("retry")}
-            </Button>
-            <Button asChild variant="outline">
-              <DeferredNavLink href={CUSTOMIZATION_HREF}>{t("backToCustomization")}</DeferredNavLink>
-            </Button>
-          </div>
-        </>
+        <p role="alert" className="max-w-sm text-sm text-destructive">
+          {t("loadFailed")}
+          <button
+            type="button"
+            onClick={() => void editor.refetch()}
+            className="ml-2 font-medium underline underline-offset-2"
+          >
+            {tCommon("retry")}
+          </button>
+        </p>
       ) : (
         <p role="status" className="flex items-center gap-2 text-sm text-muted-foreground">
           <Loader2 className="size-4 animate-spin" aria-hidden />
