@@ -67,18 +67,8 @@ export const SLOT_GROUPS: readonly SlotPageKey[] = ["header", "footer"] as const
 
 export const SLOTS: Record<SlotPageKey, Slot[]> = {
   home: [
+    { key: "notice", label: "notice", inherited: true },
     { key: "header", label: "header", inherited: true },
-    {
-      key: "notice",
-      label: "notice",
-      initial: "off",
-      emptyValues: ["off"],
-      emptyLabel: "noticeEmpty",
-      options: [
-        { value: "off", label: "off", shape: "blank" },
-        { value: "message", label: "noticeMessage", note: "noticeMessageNote", shape: "line" },
-      ],
-    },
     {
       key: "hero",
       label: "hero",
@@ -245,6 +235,7 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
   ],
 
   product: [
+    { key: "notice", label: "notice", inherited: true },
     { key: "header", label: "header", inherited: true },
     { key: "buy", label: "buy", locked: true, lockedBecause: "buyWhy" },
     {
@@ -291,6 +282,7 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
   ],
 
   checkout: [
+    { key: "notice", label: "notice", inherited: true },
     { key: "header", label: "header", inherited: true },
     {
       key: "trust",
@@ -321,12 +313,36 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
 
   header: [
     {
+      key: "notice",
+      label: "notice",
+      initial: "message",
+      emptyValues: ["off"],
+      emptyLabel: "noticeEmpty",
+      options: [
+        { value: "message", label: "noticeMessage", note: "noticeMessageNote", shape: "line" },
+        { value: "off", label: "off", shape: "blank" },
+      ],
+    },
+    {
       key: "layout",
       label: "headerLayout",
       initial: "bar",
       options: [
         { value: "bar", label: "headerBar", note: "headerBarNote", shape: "line" },
+        { value: "inline", label: "headerInline", note: "headerInlineNote", shape: "line" },
         { value: "masthead", label: "headerMasthead", note: "headerMastheadNote", shape: "block" },
+        { value: "split", label: "headerSplit", note: "headerSplitNote", shape: "row" },
+        { value: "drawer", label: "headerDrawer", note: "headerDrawerNote", shape: "blank" },
+      ],
+    },
+    {
+      key: "search",
+      label: "headerSearch",
+      initial: "box",
+      options: [
+        { value: "box", label: "searchBox", note: "searchBoxNote", shape: "line" },
+        { value: "icon", label: "searchIcon", note: "searchIconNote", shape: "blank" },
+        { value: "off", label: "off", shape: "blank" },
       ],
     },
     {

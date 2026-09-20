@@ -80,22 +80,112 @@ export function ShopChrome({
 }) {
   const t = useTranslations("themeEditor.slots");
 
+  // The announcement and the masthead are drawn by key rather than by page:
+  // both live in the header group, so every page shows them and only the Header
+  // entry in the picker edits them.
+  if (slotKey === "notice") {
+    return (
+      <p className="bg-[#1a1a1a] px-4 py-2 text-center text-[11px] uppercase tracking-[0.06em] text-white/75">
+        {t("noticeExample")}
+      </p>
+    );
+  }
+
   if (slotKey === "header") {
+    const layout = variant ?? "bar";
+    const logo = <span className="text-sm font-semibold tracking-[0.14em]">GADZILLA</span>;
+    const icons = (
+      <span className="flex shrink-0 items-center gap-2.5">
+        <span className="size-4 rounded-xs bg-white/25" />
+        <span className="size-4 rounded-xs bg-white/25" />
+      </span>
+    );
+    const nav = (centred: boolean) => (
+      <div
+        className={`flex gap-4 overflow-hidden px-4 py-2.5 text-[10px] uppercase tracking-[0.08em] text-current/50 ${
+          centred ? "justify-center" : ""
+        }`}
+      >
+        {["Audio", "Men", "Wearables", "Women", "Kids"].map((name) => (
+          <span key={name}>{name}</span>
+        ))}
+      </div>
+    );
+    const bar = (children: React.ReactNode) => (
+      <div className="flex items-center gap-3 bg-[#1a1a1a] px-4 py-3 text-white">{children}</div>
+    );
+
+    if (layout === "masthead") {
+      return (
+        <div>
+          <div className="bg-[#1a1a1a] px-4 py-5 text-center text-white">{logo}</div>
+          <div className="border-b border-current/10">{nav(true)}</div>
+        </div>
+      );
+    }
+    if (layout === "split") {
+      return (
+        <div className="border-b border-current/10">
+          {bar(
+            <>
+              <span className="flex flex-1 gap-3 overflow-hidden text-[10px] uppercase tracking-[0.08em] text-white/65">
+                <span>Men</span>
+                <span>Women</span>
+                <span>Kids</span>
+              </span>
+              {logo}
+              <span className="flex flex-1 justify-end">{icons}</span>
+            </>,
+          )}
+        </div>
+      );
+    }
+    if (layout === "inline") {
+      return (
+        <div className="border-b border-current/10">
+          {bar(
+            <>
+              {logo}
+              <span className="flex flex-1 gap-3.5 overflow-hidden text-[10px] uppercase tracking-[0.08em] text-white/65">
+                {["Audio", "Men", "Wearables", "Women"].map((name) => (
+                  <span key={name}>{name}</span>
+                ))}
+              </span>
+              {icons}
+            </>,
+          )}
+        </div>
+      );
+    }
+    if (layout === "drawer") {
+      return (
+        <div className="border-b border-current/10">
+          {bar(
+            <>
+              <span className="flex size-4 shrink-0 flex-col justify-center gap-[3px]" aria-hidden>
+                <span className="block h-px bg-white/60" />
+                <span className="block h-px bg-white/60" />
+                <span className="block h-px bg-white/60" />
+              </span>
+              {logo}
+              <span className="flex-1" />
+              {icons}
+            </>,
+          )}
+        </div>
+      );
+    }
+    // bar: the shop's name, a search box across the middle, the nav underneath.
     return (
       <div>
-        <div className="flex items-center gap-3 bg-[#1a1a1a] px-4 py-3 text-white">
-          <span className="text-sm font-semibold tracking-[0.14em]">GADZILLA</span>
-          {variant !== "masthead" ? <span className="h-7 flex-1 rounded-xs bg-white/12" /> : <span className="flex-1" />}
-          <span className="size-4 rounded-xs bg-white/25" />
-          <span className="size-4 rounded-xs bg-white/25" />
-        </div>
-        <div className="flex gap-4 overflow-hidden border-b border-current/10 px-4 py-2.5 text-[10px] uppercase tracking-[0.08em] text-current/50">
-          <span>Audio</span>
-          <span>Men</span>
-          <span>Wearables</span>
-          <span>Women</span>
-          <span>Kids</span>
-        </div>
+        {bar(
+          <>
+            {logo}
+            <span className="h-7 flex-1 rounded-xs bg-white/12" />
+            {icons}
+          </>,
+        )}
+        <div className="border-b border-current/10">{nav(false)}</div>
       </div>
     );
   }
@@ -132,13 +222,6 @@ export function ShopChrome({
   }
 
   switch (`${page}:${slotKey}`) {
-    case "home:notice":
-      return (
-        <p className="px-4 py-2 text-center text-[11px] uppercase tracking-[0.06em] text-current/55">
-          {t("noticeExample")}
-        </p>
-      );
-
     case "home:hero":
       return (
         <div className="grid h-[150px] place-items-center bg-current/6 px-4 text-center">
@@ -455,6 +538,23 @@ export function ShopChrome({
 
     case "header:layout":
       return <ShopChrome page={page} slotKey="header" variant={variant} />;
+
+    case "header:search":
+      return variant === "off" ? (
+        <p className="px-4 py-3 text-center text-[12px] text-current/55">{t("searchOffExample")}</p>
+      ) : variant === "icon" ? (
+        <div className="flex items-center justify-center gap-2 px-4 py-3 text-[12px] text-current/55">
+          <span className="size-4 rounded-full border border-current/30" aria-hidden />
+          {t("searchIconExample")}
+        </div>
+      ) : (
+        <div className="px-4 py-3">
+          <span className="flex h-9 items-center gap-2 rounded-xs border border-current/15 px-3 text-[12px] text-current/45">
+            <span className="size-3.5 rounded-full border border-current/30" aria-hidden />
+            {t("searchBoxExample")}
+          </span>
+        </div>
+      );
 
     case "header:sticky":
       return (

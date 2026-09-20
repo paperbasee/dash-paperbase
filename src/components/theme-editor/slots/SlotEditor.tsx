@@ -190,6 +190,7 @@ export function SlotEditor() {
             onOpen={setOpen}
             choices={choices[page]}
             onChoose={choose}
+            groupChoices={{ ...choices.header, ...choices.footer }}
           />
         </div>
       </div>

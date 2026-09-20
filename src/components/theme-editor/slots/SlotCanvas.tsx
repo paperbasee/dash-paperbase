@@ -154,6 +154,7 @@ export function SlotCanvas({
   onOpen,
   choices,
   onChoose,
+  groupChoices,
 }: {
   page: SlotPageKey;
   device: "desktop" | "mobile";
@@ -161,6 +162,13 @@ export function SlotCanvas({
   onOpen: (slotKey: string | null) => void;
   choices: Record<string, string>;
   onChoose: (slotKey: string, value: string) => void;
+  /**
+   * What the header and footer are set to. A page draws them but does not own
+   * them, so changing the masthead on the Header entry shows up on every page
+   * rather than only where it was changed -- which is the point of calling them
+   * "every page" in the first place.
+   */
+  groupChoices: Record<string, string>;
 }) {
   const t = useTranslations("themeEditor.slots");
 
@@ -174,7 +182,7 @@ export function SlotCanvas({
       >
         {SLOTS[page].map((slot) => {
           const isOpen = open === slot.key;
-          const value = choices[slot.key];
+          const value = slot.inherited ? groupChoices[slot.key] : choices[slot.key];
           const pickable = !slot.inherited;
           const blank = isEmpty(slot, value);
 
