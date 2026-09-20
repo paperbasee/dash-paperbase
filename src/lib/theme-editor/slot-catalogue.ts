@@ -41,9 +41,21 @@ export type Slot = {
   label: string;
   /**
    * Drawn on every page and edited once, so this page shows it but does not
-   * offer it. The tab says which.
+   * offer it. The tab says which, and clicking it goes there.
    */
   inherited?: boolean;
+  /**
+   * Where an inherited slot's value actually lives: which entry in the page
+   * picker owns it, and under which key.
+   *
+   * It has to be said rather than guessed. A page drew its header from a
+   * setting called `header`, but the Header entry stores its arrangement under
+   * `layout` -- so the lookup missed every time and the masthead never changed
+   * anywhere but on the Header entry itself. Worse, `header` and `footer` BOTH
+   * call their arrangement `layout`, so merging the two into one object let the
+   * footer's value answer for the header's.
+   */
+  inheritedFrom?: { page: SlotPageKey; key: string };
   /**
    * Its shape is the platform's, not a merchant's: the buying column and the
    * checkout form are where people pay. Clicking still answers -- with the
@@ -67,8 +79,8 @@ export const SLOT_GROUPS: readonly SlotPageKey[] = ["header", "footer"] as const
 
 export const SLOTS: Record<SlotPageKey, Slot[]> = {
   home: [
-    { key: "notice", label: "notice", inherited: true },
-    { key: "header", label: "header", inherited: true },
+    { key: "notice", label: "notice", inherited: true, inheritedFrom: { page: "header", key: "notice" } },
+    { key: "header", label: "header", inherited: true, inheritedFrom: { page: "header", key: "layout" } },
     {
       key: "hero",
       label: "hero",
@@ -231,12 +243,12 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
         { value: "off", label: "off", shape: "blank" },
       ],
     },
-    { key: "footer", label: "footer", inherited: true },
+    { key: "footer", label: "footer", inherited: true, inheritedFrom: { page: "footer", key: "layout" } },
   ],
 
   product: [
-    { key: "notice", label: "notice", inherited: true },
-    { key: "header", label: "header", inherited: true },
+    { key: "notice", label: "notice", inherited: true, inheritedFrom: { page: "header", key: "notice" } },
+    { key: "header", label: "header", inherited: true, inheritedFrom: { page: "header", key: "layout" } },
     { key: "buy", label: "buy", locked: true, lockedBecause: "buyWhy" },
     {
       key: "trust",
@@ -278,12 +290,12 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
         { value: "off", label: "off", shape: "blank" },
       ],
     },
-    { key: "footer", label: "footer", inherited: true },
+    { key: "footer", label: "footer", inherited: true, inheritedFrom: { page: "footer", key: "layout" } },
   ],
 
   checkout: [
-    { key: "notice", label: "notice", inherited: true },
-    { key: "header", label: "header", inherited: true },
+    { key: "notice", label: "notice", inherited: true, inheritedFrom: { page: "header", key: "notice" } },
+    { key: "header", label: "header", inherited: true, inheritedFrom: { page: "header", key: "layout" } },
     {
       key: "trust",
       label: "trustLine",
@@ -308,7 +320,7 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
         { value: "line", label: "afterLine", note: "afterLineNote", shape: "line" },
       ],
     },
-    { key: "footer", label: "footer", inherited: true },
+    { key: "footer", label: "footer", inherited: true, inheritedFrom: { page: "footer", key: "layout" } },
   ],
 
   header: [

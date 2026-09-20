@@ -190,7 +190,11 @@ export function SlotEditor() {
             onOpen={setOpen}
             choices={choices[page]}
             onChoose={choose}
-            groupChoices={{ ...choices.header, ...choices.footer }}
+            allChoices={choices}
+            onGoToPage={(next, slotKey) => {
+              setPage(next);
+              setOpen(slotKey);
+            }}
           />
         </div>
       </div>

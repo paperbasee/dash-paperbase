@@ -154,7 +154,8 @@ export function SlotCanvas({
   onOpen,
   choices,
   onChoose,
-  groupChoices,
+  allChoices,
+  onGoToPage,
 }: {
   page: SlotPageKey;
   device: "desktop" | "mobile";
@@ -163,12 +164,14 @@ export function SlotCanvas({
   choices: Record<string, string>;
   onChoose: (slotKey: string, value: string) => void;
   /**
-   * What the header and footer are set to. A page draws them but does not own
-   * them, so changing the masthead on the Header entry shows up on every page
-   * rather than only where it was changed -- which is the point of calling them
-   * "every page" in the first place.
+   * Every page's settings, so an inherited slot can read the one that actually
+   * drives it -- `slot.inheritedFrom` says which page and which key. Merging
+   * them into one object does not work: the header and the footer both call
+   * their arrangement `layout`.
    */
-  groupChoices: Record<string, string>;
+  allChoices: Record<SlotPageKey, Record<string, string>>;
+  /** Clicking an inherited slot goes to the entry that owns it. */
+  onGoToPage: (page: SlotPageKey, slotKey: string) => void;
 }) {
   const t = useTranslations("themeEditor.slots");
 
@@ -182,8 +185,9 @@ export function SlotCanvas({
       >
         {SLOTS[page].map((slot) => {
           const isOpen = open === slot.key;
-          const value = slot.inherited ? groupChoices[slot.key] : choices[slot.key];
-          const pickable = !slot.inherited;
+          const source = slot.inheritedFrom;
+          const value = source ? allChoices[source.page]?.[source.key] : choices[slot.key];
+          const pickable = true;
           const blank = isEmpty(slot, value);
 
           return (
@@ -194,11 +198,13 @@ export function SlotCanvas({
                     role: "button",
                     tabIndex: 0,
                     "aria-expanded": isOpen,
-                    onClick: () => onOpen(isOpen ? null : slot.key),
+                    onClick: () =>
+                      source ? onGoToPage(source.page, source.key) : onOpen(isOpen ? null : slot.key),
                     onKeyDown: (event: React.KeyboardEvent) => {
                       if (event.key !== "Enter" && event.key !== " ") return;
                       event.preventDefault();
-                      onOpen(isOpen ? null : slot.key);
+                      if (source) onGoToPage(source.page, source.key);
+                      else onOpen(isOpen ? null : slot.key);
                     },
                   }
                 : {})}
@@ -224,7 +230,7 @@ export function SlotCanvas({
               >
                 {slot.locked ? <Lock className="size-2.5" aria-hidden /> : null}
                 {t(slot.label)}
-                {slot.inherited ? ` · ${t("everyPage")}` : null}
+                {slot.inherited ? ` · ${t("editOnEveryPage")}` : null}
               </span>
 
               {blank ? (
