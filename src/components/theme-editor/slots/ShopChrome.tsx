@@ -1,7 +1,20 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { Banknote, Lock, Mail, Map, MapPin, Phone, Smartphone, User } from "lucide-react";
+import {
+  Banknote,
+  Headphones,
+  Lock,
+  Mail,
+  Map,
+  MapPin,
+  Phone,
+  RotateCcw,
+  ShieldCheck,
+  Smartphone,
+  Truck,
+  User,
+} from "lucide-react";
 
 import type { SlotPageKey } from "@/lib/theme-editor/slot-catalogue";
 
@@ -34,32 +47,54 @@ function SectionHead({ title, link }: { title: string; link?: string }) {
   );
 }
 
-function Cards({ items, ratio = "1" }: { items: { name: string; price: string }[]; ratio?: string }) {
+/**
+ * The product card, which eight slots on five pages draw with.
+ *
+ * It carries what a card has to carry to be worth a merchant's shelf space: a
+ * picture, the name, the price, and -- where there is one -- the price it used
+ * to be with the saving marked on the picture. Improving this one function is
+ * what lifts featured, best sellers, new arrivals, related, recently viewed and
+ * the cart's upsell all at once.
+ */
+type Card = { name: string; price: string; was?: string; off?: number };
+
+function Cards({ items, ratio = "1" }: { items: Card[]; ratio?: string }) {
   return (
     <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
       {items.map((item) => (
         <div key={item.name} className="min-w-0">
-          <div className="rounded-xs bg-current/8" style={{ aspectRatio: ratio }} />
-          <p className="mt-2 truncate text-[11px] text-current/60">{item.name}</p>
-          <p className="text-[12px] font-semibold tabular-nums">{item.price}</p>
+          <div className="relative overflow-hidden rounded-md bg-current/8" style={{ aspectRatio: ratio }}>
+            {item.off ? (
+              <span className="absolute left-1.5 top-1.5 rounded-full bg-[#d64545] px-1.5 py-0.5 text-[9px] font-semibold text-white">
+                −{item.off}%
+              </span>
+            ) : null}
+          </div>
+          <p className="mt-2 truncate text-[11.5px] font-medium">{item.name}</p>
+          <p className="mt-0.5 flex items-baseline gap-1.5">
+            <span className="text-[12.5px] font-semibold tabular-nums">{item.price}</span>
+            {item.was ? (
+              <span className="text-[10px] tabular-nums text-current/35 line-through">{item.was}</span>
+            ) : null}
+          </p>
         </div>
       ))}
     </div>
   );
 }
 
-const FEATURED = [
-  { name: "Denim Work Shirt", price: "৳65" },
-  { name: "Oxford Shirt", price: "৳82" },
-  { name: "Linen Overshirt", price: "৳94" },
-  { name: "Corduroy Shirt", price: "৳71" },
+const FEATURED: Card[] = [
+  { name: "Gradient Graphic T-shirt", price: "৳1,450", was: "৳2,400", off: 40 },
+  { name: "Oxford Button-Down", price: "৳2,150" },
+  { name: "Linen Overshirt", price: "৳2,890", was: "৳3,400", off: 15 },
+  { name: "Corduroy Shirt", price: "৳1,990" },
 ];
 
-const BESTSELLERS = [
-  { name: "Crossbody Bag", price: "৳45" },
-  { name: "Canvas Tote", price: "৳52" },
-  { name: "Leather Belt", price: "৳29" },
-  { name: "Card Wallet", price: "৳41" },
+const BESTSELLERS: Card[] = [
+  { name: "Crossbody Bag", price: "৳1,250" },
+  { name: "Canvas Tote", price: "৳980", was: "৳1,400", off: 30 },
+  { name: "Leather Belt", price: "৳890" },
+  { name: "Card Wallet", price: "৳650" },
 ];
 
 const POSTS = [
@@ -102,11 +137,11 @@ function PostCards({
   );
 }
 
-const ARRIVALS = [
-  { name: "Merino Scarf", price: "৳58" },
-  { name: "Wool Cap", price: "৳34" },
-  { name: "Suede Loafer", price: "৳120" },
-  { name: "Cotton Socks", price: "৳18" },
+const ARRIVALS: Card[] = [
+  { name: "Merino Scarf", price: "৳1,180" },
+  { name: "Wool Cap", price: "৳740" },
+  { name: "Suede Loafer", price: "৳3,600", was: "৳4,200", off: 15 },
+  { name: "Cotton Socks", price: "৳320" },
 ];
 
 /** The mock shop, one slot at a time. `variant` is whatever the merchant chose. */
@@ -415,22 +450,43 @@ export function ShopChrome({
   }
 
   switch (`${page}:${slotKey}`) {
-    case "home:hero":
+    /**
+     * The hero, drawn as a hero.
+     *
+     * It was a grey rectangle with a caption naming itself, which is the one
+     * band on the page a merchant cannot picture their own shop from. It now
+     * holds what a hero holds -- a line that sells something, a line under it,
+     * and the button -- so the choice between a slider, a still and a video is
+     * made against three versions of the same real thing.
+     */
+    case "home:hero": {
+      const slider = variant === "slider" || variant === undefined;
       return (
-        <div className="grid h-[150px] place-items-center bg-current/6 px-4 text-center">
-          <div>
-            <p className="text-sm text-current/60">
-              {variant === "video" ? t("heroVideo") : variant === "still" ? t("heroStill") : t("heroSliderExample")}
-            </p>
-            {variant === "slider" || variant === undefined ? (
-              <div className="mt-2.5 flex justify-center gap-1.5">
-                <span className="size-1.5 rounded-full bg-current/40" />
-                <span className="size-1.5 rounded-full bg-current/20" />
-              </div>
-            ) : null}
-          </div>
+        <div className="relative flex min-h-[210px] flex-col justify-center gap-2.5 bg-current/8 px-7 pb-9 pt-7">
+          {variant === "video" ? (
+            <span
+              className="absolute right-6 top-1/2 grid size-11 -translate-y-1/2 place-items-center rounded-full border border-current/25 text-[13px]"
+              aria-hidden
+            >
+              ▶
+            </span>
+          ) : null}
+          <p className="text-[10px] uppercase tracking-[0.14em] text-current/45">{t("heroEyebrowExample")}</p>
+          <p className="max-w-[22ch] text-[22px] font-semibold leading-[1.15]">{t("heroHeadingExample")}</p>
+          <p className="max-w-[34ch] text-[11.5px] leading-relaxed text-current/55">{t("heroBodyExample")}</p>
+          <span className="mt-1 grid h-9 w-fit place-items-center rounded-full bg-foreground px-6 text-[11.5px] font-semibold text-background">
+            {t("heroButtonExample")}
+          </span>
+          {slider ? (
+            <div className="absolute bottom-4 left-7 flex gap-1.5">
+              <span className="h-1.5 w-5 rounded-full bg-current/50" />
+              <span className="size-1.5 rounded-full bg-current/20" />
+              <span className="size-1.5 rounded-full bg-current/20" />
+            </div>
+          ) : null}
         </div>
       );
+    }
 
     case "home:categories":
       return variant === "strip" ? (
@@ -462,12 +518,22 @@ export function ShopChrome({
         </p>
       ) : (
         <div className="grid grid-cols-2 gap-3 border-y border-current/10 px-4 py-4 sm:grid-cols-4">
-          {[t("trustDelivery"), t("trustReturns"), t("trustPayment"), t("trustSupport")].map((label) => (
-            <div key={label} className="flex items-center gap-2">
-              <span className="size-7 shrink-0 rounded-full bg-current/8" />
-              <span className="min-w-0 truncate text-[11px] text-current/60">{label}</span>
-            </div>
-          ))}
+          {[
+            [Truck, t("trustDelivery")],
+            [RotateCcw, t("trustReturns")],
+            [ShieldCheck, t("trustPayment")],
+            [Headphones, t("trustSupport")],
+          ].map(([Icon, label]) => {
+            const Mark = Icon as typeof Truck;
+            return (
+              <div key={label as string} className="flex items-center gap-2.5">
+                <span className="grid size-8 shrink-0 place-items-center rounded-full bg-current/8">
+                  <Mark className="size-3.5 text-current/55" aria-hidden />
+                </span>
+                <span className="min-w-0 truncate text-[11px] text-current/65">{label as string}</span>
+              </div>
+            );
+          })}
         </div>
       );
 
@@ -495,12 +561,12 @@ export function ShopChrome({
       return (
         <div className="px-4 py-4">
           {variant === "card" ? (
-            <div className="flex items-center gap-4 rounded-xs bg-current/6 p-4">
-              <span className="size-16 shrink-0 rounded-xs bg-current/10" />
-              <div className="min-w-0 flex-1 space-y-2">
-                <p className="text-[13px] font-semibold">{t("promoCardHeading")}</p>
-                <Line w="80%" />
-                <span className="mt-1 inline-block rounded-xs bg-current/20 px-3 py-1.5 text-[10px]">
+            <div className="flex items-center gap-4 rounded-md bg-current/6 p-4">
+              <span className="size-16 shrink-0 rounded-md bg-current/10" />
+              <div className="min-w-0 flex-1">
+                <p className="text-[13.5px] font-semibold">{t("promoCardHeading")}</p>
+                <p className="mt-1 text-[11.5px] leading-relaxed text-current/55">{t("promoCardBodyExample")}</p>
+                <span className="mt-2.5 inline-block rounded-full bg-foreground px-4 py-1.5 text-[10.5px] font-semibold text-background">
                   {t("browseAll")}
                 </span>
               </div>

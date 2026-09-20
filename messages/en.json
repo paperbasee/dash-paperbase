@@ -3016,7 +3016,12 @@
       "fieldAddressHint": "House no., road, area",
       "payCod": "Cash",
       "payCodNote": "Cash on delivery is on. The mobile wallets appear here when you switch prepayment on in Settings.",
-      "placeOrderSafe": "Your details are sent securely and never shared."
+      "placeOrderSafe": "Your details are sent securely and never shared.",
+      "heroEyebrowExample": "New this week",
+      "heroHeadingExample": "Made for Dhaka weather",
+      "heroBodyExample": "Cotton that breathes, cut to sit right, delivered the next day inside the city.",
+      "heroButtonExample": "Shop the collection",
+      "promoCardBodyExample": "Everything in outerwear, twenty percent off until Friday."
     }
   },
   "billingSuccess": {
