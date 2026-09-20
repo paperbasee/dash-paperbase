@@ -3001,7 +3001,22 @@
       "cartLineColour": "Colour",
       "couponPlaceholder": "Add promo code",
       "couponWhere": "In the summary above",
-      "couponOffExample": "No promo field in the summary."
+      "couponOffExample": "No promo field in the summary.",
+      "productSave": "Save for later",
+      "productInStock": "In stock",
+      "productDeliveryNote": "Delivered in 24 hours inside Dhaka",
+      "productDescriptionExample": "A heavyweight cotton tee with a printed gradient across the chest, cut a little longer in the body so it sits properly untucked. Pre-shrunk, so the size you order is the size you keep.",
+      "specMaterial": "Material",
+      "specFit": "Fit",
+      "specCare": "Care",
+      "specMadeIn": "Made in",
+      "reviewOne": "Exactly the colour in the photo, which is more than I can say for most. Washed twice, no fading.",
+      "reviewTwo": "Ordered Friday night, had it Saturday afternoon. Packaging was proper too.",
+      "reviewThree": "Second one I have bought. The first is a year old and still holding its shape.",
+      "fieldAddressHint": "House no., road, area",
+      "payCod": "Cash",
+      "payCodNote": "Cash on delivery is on. The mobile wallets appear here when you switch prepayment on in Settings.",
+      "placeOrderSafe": "Your details are sent securely and never shared."
     }
   },
   "billingSuccess": {

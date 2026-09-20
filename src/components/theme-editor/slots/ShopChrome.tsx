@@ -1,6 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { Banknote, Lock, Mail, Map, MapPin, Phone, Smartphone, User } from "lucide-react";
 
 import type { SlotPageKey } from "@/lib/theme-editor/slot-catalogue";
 
@@ -550,14 +551,18 @@ export function ShopChrome({
         <div className="px-4 py-4">
           <SectionHead title={t("reviewsHeading")} />
           <div className="grid gap-3 sm:grid-cols-3">
-            {["Nusrat J.", "Rafiq H.", "Tanvir A."].map((name) => (
-              <div key={name} className="rounded-xs border border-current/12 p-3">
-                <p className="text-[11px] text-current/45">★★★★★</p>
-                <div className="mt-2 space-y-1.5">
-                  <Line />
-                  <Line w="70%" />
-                </div>
-                <p className="mt-2.5 text-[11px] text-current/60">{name}</p>
+            {[
+              ["Nusrat J.", t("reviewOne")],
+              ["Rafiq H.", t("reviewTwo")],
+              ["Tanvir A.", t("reviewThree")],
+            ].map(([name, words]) => (
+              <div key={name} className="rounded-md border border-current/12 p-3.5">
+                <p className="text-[11px] text-current/70">★★★★★</p>
+                <p className="mt-2 text-[11.5px] leading-relaxed text-current/65">{words}</p>
+                <p className="mt-3 flex items-center gap-2 text-[11px] font-medium">
+                  <span className="size-6 shrink-0 rounded-full bg-current/12" aria-hidden />
+                  {name}
+                </p>
               </div>
             ))}
           </div>
@@ -620,39 +625,99 @@ export function ShopChrome({
         </div>
       );
 
+    /**
+     * The buying column, and the pictures beside it.
+     *
+     * The same shirt the cart and the checkout carry, drawn in the same
+     * language: one shop, one order, followed through three pages. The buttons
+     * say what they do -- they were two blank grey bars before, which is the
+     * one thing a merchant cannot judge a buying column by.
+     */
     case "product:buy": {
       const pictures =
         variant === "column" ? (
           <div className="space-y-2">
-            <div className="aspect-[4/5] rounded-xs bg-current/8" />
-            <div className="aspect-[4/5] rounded-xs bg-current/8" />
+            <div className="aspect-[4/5] rounded-md bg-current/8" />
+            <div className="aspect-[4/5] rounded-md bg-current/8" />
           </div>
         ) : variant === "single" ? (
-          <div className="aspect-square rounded-xs bg-current/8" />
+          <div className="aspect-square rounded-md bg-current/8" />
         ) : (
           <div>
-            <div className="aspect-square rounded-xs bg-current/8" />
+            <div className="aspect-square rounded-md bg-current/8" />
             <div className="mt-2 flex gap-2">
               {Array.from({ length: 4 }, (_, i) => (
-                <span key={i} className="size-11 rounded-xs bg-current/8" />
+                <span
+                  key={i}
+                  className={`size-12 rounded-sm bg-current/8 ${i === 0 ? "ring-1 ring-current/30" : ""}`}
+                />
               ))}
             </div>
           </div>
         );
+      const chip = (label: string, chosen: boolean) => (
+        <span
+          key={label}
+          className={`grid h-8 min-w-8 place-items-center rounded-sm px-2.5 text-[11px] ${
+            chosen ? "bg-foreground font-semibold text-background" : "border border-current/15 text-current/65"
+          }`}
+        >
+          {label}
+        </span>
+      );
       return (
-        <div className="grid gap-5 px-4 py-4 sm:grid-cols-2">
+        <div className="grid gap-6 px-4 py-4 sm:grid-cols-2">
           {pictures}
-          <div>
-            <h4 className="m-0 mb-1.5 text-lg font-semibold">Crossbody Bag</h4>
-            <p className="mb-3 text-[19px] font-semibold tabular-nums">৳45</p>
-            <p className="mb-2 text-[11px] uppercase tracking-[0.06em] text-current/45">{t("colour")}</p>
-            <div className="mb-3 flex gap-2">
-              <span className="size-7 rounded-xs bg-current/25" />
-              <span className="size-7 rounded-xs bg-current/10" />
+          <div className="min-w-0">
+            <h4 className="m-0 text-[19px] font-semibold leading-snug">Gradient Graphic T-shirt</h4>
+            <p className="mt-1.5 flex items-center gap-2 text-[11px] text-current/55">
+              <span className="text-current/70">★★★★★</span>
+              <span className="tabular-nums">4.7</span>
+              <span className="text-current/35">·</span>
+              <span>{t("productReviewsCount")}</span>
+            </p>
+
+            <p className="mt-3 flex flex-wrap items-baseline gap-2.5">
+              <span className="text-[24px] font-semibold tabular-nums">৳1,450</span>
+              <span className="text-[14px] tabular-nums text-current/40 line-through">৳2,400</span>
+              <span className="rounded-full bg-[#d64545]/12 px-2 py-0.5 text-[10px] font-semibold text-[#d64545]">
+                −40%
+              </span>
+            </p>
+
+            <p className="mt-4 mb-2 text-[11px] text-current/45">
+              {t("colour")}: <span className="text-current/75">White</span>
+            </p>
+            <div className="flex gap-2">
+              <span className="size-7 rounded-full bg-current/70 ring-2 ring-current/20 ring-offset-2" />
+              <span className="size-7 rounded-full bg-current/25" />
+              <span className="size-7 rounded-full bg-current/12" />
             </div>
-            <span className="mb-2 block h-9 rounded-xs bg-foreground" />
-            <span className="mb-3 block h-9 rounded-xs border border-current/15" />
-            <p className="text-[11px] text-current/45">Accessories · Bags</p>
+
+            <p className="mt-4 mb-2 text-[11px] text-current/45">
+              {t("cartLineSize")}: <span className="text-current/75">Large</span>
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {["S", "M", "L", "XL"].map((size) => chip(size, size === "L"))}
+            </div>
+
+            <div className="mt-5 flex items-center gap-2.5">
+              <span className="inline-flex shrink-0 items-center rounded-full border border-current/15 text-[12px] leading-none">
+                <span className="px-3 py-2.5 text-current/45">−</span>
+                <span className="px-2 py-2.5 tabular-nums">1</span>
+                <span className="px-3 py-2.5 text-current/45">+</span>
+              </span>
+              <span className="grid h-11 flex-1 place-items-center rounded-full bg-foreground text-[12px] font-semibold text-background">
+                {t("addToCart")}
+              </span>
+            </div>
+            <span className="mt-2.5 grid h-10 place-items-center rounded-full border border-current/20 text-[11.5px] font-medium">
+              ♡&nbsp;&nbsp;{t("productSave")}
+            </span>
+
+            <p className="mt-3.5 text-[11px] text-current/50">
+              <span className="text-[#2f8f4e]">●</span> {t("productInStock")} · {t("productDeliveryNote")}
+            </p>
           </div>
         </div>
       );
@@ -1599,12 +1664,11 @@ export function ShopChrome({
     case "product:description":
       return (
         <div className="px-4 py-4">
-          <div className={variant === "box" ? "rounded-xs border border-current/12 p-4" : ""}>
-            <p className="mb-2.5 text-[11px] uppercase tracking-[0.06em] text-current/45">{t("descriptionHeading")}</p>
-            <div className="space-y-2">
-              <Line />
-              <Line w="65%" />
-            </div>
+          <div className={variant === "box" ? "rounded-md border border-current/12 p-4" : ""}>
+            <p className="mb-2 text-[14px] font-semibold">{t("descriptionHeading")}</p>
+            {/* Real sentences. A merchant judging whether their own words have
+                room here cannot do it against two grey bars. */}
+            <p className="max-w-[62ch] text-[12px] leading-[1.7] text-current/65">{t("productDescriptionExample")}</p>
           </div>
         </div>
       );
@@ -1613,16 +1677,23 @@ export function ShopChrome({
       return (
         <div className="px-4 py-4">
           {variant === "folded" ? (
-            <div className="flex items-center justify-between border-y border-current/12 py-3.5 text-[11px] uppercase tracking-[0.06em] text-current/55">
+            <div className="flex items-center justify-between rounded-md border border-current/12 px-3.5 py-3 text-[12px] font-medium text-current/70">
               <span>{t("specsHeading")}</span>
               <span aria-hidden>+</span>
             </div>
           ) : (
-            <div className="grid grid-cols-1 gap-x-5 gap-y-1 text-[11px] text-current/60 sm:grid-cols-2">
-              <p className="border-b border-current/10 py-1.5">Material · Cotton canvas</p>
-              <p className="border-b border-current/10 py-1.5">Strap · Adjustable</p>
-              <p className="border-b border-current/10 py-1.5">Closure · Zip</p>
-              <p className="border-b border-current/10 py-1.5">Made in · Bangladesh</p>
+            <div className="grid grid-cols-1 gap-x-8 sm:grid-cols-2">
+              {[
+                [t("specMaterial"), "100% cotton"],
+                [t("specFit"), "Regular"],
+                [t("specCare"), "Machine wash cold"],
+                [t("specMadeIn"), "Bangladesh"],
+              ].map(([label, value]) => (
+                <p key={label} className="flex justify-between gap-4 border-b border-current/10 py-2 text-[11.5px]">
+                  <span className="text-current/45">{label}</span>
+                  <span className="text-right text-current/75">{value}</span>
+                </p>
+              ))}
             </div>
           )}
         </div>
@@ -1630,7 +1701,9 @@ export function ShopChrome({
 
     case "product:breadcrumb":
       return (
-        <p className="px-4 py-2.5 text-[11px] text-current/45">Accessories · Bags · Crossbody Bag</p>
+        <p className="px-4 py-3 text-[11px] text-current/45">
+          {t("breadcrumbHomeExample")} · Men · <span className="text-current/70">Gradient Graphic T-shirt</span>
+        </p>
       );
 
     case "product:shipping":
@@ -1645,7 +1718,7 @@ export function ShopChrome({
         </div>
       ) : (
         <div className="px-4 py-4">
-          <div className="flex items-center justify-between border-y border-current/12 py-3.5 text-[11px] uppercase tracking-[0.06em] text-current/55">
+          <div className="flex items-center justify-between rounded-md border border-current/12 px-3.5 py-3 text-[12px] font-medium text-current/70">
             <span>{t("shippingHeading")}</span>
             <span aria-hidden>+</span>
           </div>
@@ -1663,14 +1736,18 @@ export function ShopChrome({
         <div className="px-4 py-4">
           <SectionHead title={t("productReviewsHeading")} />
           <div className="grid gap-3 sm:grid-cols-3">
-            {["Nusrat J.", "Rafiq H.", "Tanvir A."].map((name) => (
-              <div key={name} className="rounded-xs border border-current/12 p-3">
-                <p className="text-[11px] text-current/45">★★★★★</p>
-                <div className="mt-2 space-y-1.5">
-                  <Line />
-                  <Line w="70%" />
-                </div>
-                <p className="mt-2.5 text-[11px] text-current/60">{name}</p>
+            {[
+              ["Nusrat J.", t("reviewOne")],
+              ["Rafiq H.", t("reviewTwo")],
+              ["Tanvir A.", t("reviewThree")],
+            ].map(([name, words]) => (
+              <div key={name} className="rounded-md border border-current/12 p-3.5">
+                <p className="text-[11px] text-current/70">★★★★★</p>
+                <p className="mt-2 text-[11.5px] leading-relaxed text-current/65">{words}</p>
+                <p className="mt-3 flex items-center gap-2 text-[11px] font-medium">
+                  <span className="size-6 shrink-0 rounded-full bg-current/12" aria-hidden />
+                  {name}
+                </p>
               </div>
             ))}
           </div>
@@ -1706,13 +1783,13 @@ export function ShopChrome({
       return (
         <div className="px-4 py-4">
           <p className="mb-2.5 text-[11.5px] text-current/55">{t("stickyBuyExample")}</p>
-          <div className="flex items-center gap-3 rounded-xs border border-current/15 bg-current/5 px-3 py-2.5">
-            <span className="size-9 shrink-0 rounded-xs bg-current/10" />
+          <div className="flex items-center gap-3 rounded-md border border-current/15 bg-current/5 px-3 py-2.5">
+            <span className="size-10 shrink-0 rounded-sm bg-current/10" />
             <span className="min-w-0 flex-1">
-              <span className="block truncate text-[12px] font-medium">Crossbody Bag</span>
-              <span className="block text-[12px] font-semibold tabular-nums">৳45</span>
+              <span className="block truncate text-[12px] font-medium">Gradient Graphic T-shirt</span>
+              <span className="block text-[13px] font-semibold tabular-nums">৳1,450</span>
             </span>
-            <span className="grid h-9 shrink-0 place-items-center rounded-xs bg-foreground px-4 text-[11px] text-background">
+            <span className="grid h-9 shrink-0 place-items-center rounded-full bg-foreground px-5 text-[11px] font-semibold text-background">
               {t("addToCart")}
             </span>
           </div>
@@ -1768,113 +1845,118 @@ export function ShopChrome({
     /**
      * The right column: everything a shopper fills in before they can buy.
      *
-     * The two variants are the real ones -- `customer_form_variant` on the
-     * shop's checkout settings -- so the preview lists the actual fields rather
-     * than a count. Extended asks for the address; minimal asks for a name, a
-     * number and an area, and somebody rings back for the rest. Delivery and
-     * payment are under them because that is where the page puts them, and both
-     * come from the shop's own settings rather than from here.
+     * Grouped and numbered, because a checkout is not one long form -- it is
+     * three questions (who you are, where it goes, how you pay) and a shopper
+     * who can see which one they are on can see how many are left. Every field
+     * carries the mark of what it wants, so the shape is readable before a word
+     * is typed.
+     *
+     * **No card fields.** The reference this was drawn from has a card number,
+     * an expiry and a CVV; Paperbase has none of those -- `card_number` and
+     * `cvv` appear nowhere in the API. It takes cash on delivery, or a mobile
+     * transfer with a reference number. Drawing card boxes would have been a
+     * payment method a merchant could switch on and no shopper could use.
+     *
+     * The two variants are the real `customer_form_variant`, so the preview
+     * lists the actual fields rather than a count.
      */
     case "checkout:form": {
       const minimal = variant === "minimal";
-      const field = (label: string, w = "100%") => (
-        <label key={label} className="grid min-w-0 gap-1" style={{ width: w }}>
-          <span className="text-[10px] text-current/50">{label}</span>
-          <span className="block h-8 rounded-xs border border-current/15 bg-current/[0.04]" />
-        </label>
-      );
-      return (
-        <div className="grid gap-4 px-4 py-4">
-          <div>
-            <p className="mb-2.5 text-[11px] font-semibold uppercase tracking-[0.06em]">{t("customerInfo")}</p>
-            <div className="grid gap-2.5">
-              {minimal ? (
-                field(t("fieldFullName"))
-              ) : (
-                <div className="grid grid-cols-2 gap-2.5">
-                  {field(t("fieldFirstName"))}
-                  {field(t("fieldLastName"))}
-                </div>
-              )}
-              {minimal ? null : field(t("fieldEmail"))}
-              {field(t("fieldPhone"))}
-              {minimal ? null : field(t("fieldDistrict"))}
-              {field(t("fieldArea"))}
-              {minimal ? null : field(t("fieldAddress"))}
-            </div>
-          </div>
 
-          <div>
-            <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.06em]">{t("deliveryHeading")}</p>
-            <div className="flex items-center justify-between rounded-xs border border-current/15 px-2.5 py-2 text-[11px]">
-              <span className="flex items-center gap-2 text-current/60">
-                <span className="size-2.5 rounded-full border-[3px] border-current/45" aria-hidden />
-                {t("deliveryInside")}
-              </span>
-              <span className="tabular-nums text-current/60">৳60</span>
-            </div>
-          </div>
-
-          <div>
-            <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.06em]">{t("paymentHeading")}</p>
-            <div className="flex items-center gap-2 rounded-xs border border-current/15 px-2.5 py-2 text-[11px] text-current/60">
-              <span className="size-2.5 rounded-full border-[3px] border-current/45" aria-hidden />
-              {t("cashOnDelivery")}
-            </div>
-          </div>
-
+      const group = (n: number, title: string, children: React.ReactNode) => (
+        <div>
+          <p className="mb-2.5 flex items-center gap-2 text-[12.5px] font-semibold">
+            <span className="grid size-5 shrink-0 place-items-center rounded-full bg-foreground text-[10px] font-bold text-background">
+              {n}
+            </span>
+            {title}
+          </p>
+          <div className="grid gap-2.5">{children}</div>
         </div>
       );
-    }
 
-    /**
-     * On the cart this is the CONTROL, not the thing.
-     *
-     * The promo row belongs inside the summary panel and is drawn there, so
-     * putting a second copy in a band of its own would show a merchant two of
-     * something their shoppers see once. This strip says where the choice lands
-     * and what it will look like when it does -- the same job the blog's card
-     * and meta bands do for the shelves above them.
-     */
-    case "cart:coupon":
-      return (
-        <div className="flex items-baseline gap-2 px-4 pb-4 text-[11px]">
-          <span className="shrink-0 uppercase tracking-[0.08em] text-current/40">{t("couponWhere")}</span>
-          <span className="min-w-0 flex-1 truncate text-current/65">
-            {variant === "off"
-              ? t("couponOffExample")
-              : variant === "link"
-                ? t("couponLinkExample")
-                : t("couponPlaceholder")}
+      const field = (Icon: typeof User, label: string, hint?: string) => (
+        <span
+          key={label}
+          className="flex min-w-0 items-center gap-2 rounded-md border border-current/15 bg-current/[0.03] px-3 py-2.5"
+        >
+          <Icon className="size-3.5 shrink-0 text-current/35" aria-hidden />
+          <span className="min-w-0 flex-1 truncate text-[11.5px] text-current/40">
+            {label}
+            {hint ? <span className="block truncate text-[10px] text-current/25">{hint}</span> : null}
           </span>
+        </span>
+      );
+      const pair = (a: React.ReactNode, b: React.ReactNode) => (
+        <div className="grid grid-cols-2 gap-2.5">
+          {a}
+          {b}
         </div>
       );
 
-    /**
-     * The coupon box, under the order it would come off.
-     *
-     * `link` is not a smaller version of `open`: an empty coupon field is a
-     * known way to lose a sale, because a shopper who has no code goes looking
-     * for one and does not always come back. A line they can ignore costs the
-     * shop nothing.
-     */
-    case "checkout:coupon":
       return (
-        <div className="mx-4 mb-4 rounded-md border border-current/12 p-4">
-          {variant === "link" ? (
-            <p className="text-[11px] underline underline-offset-2 text-current/55">{t("couponLinkExample")}</p>
-          ) : (
-            <div className="flex gap-2">
-              <span className="flex h-9 flex-1 items-center rounded-full border border-current/15 bg-current/[0.04] px-3 text-[11px] text-current/40">
-                {t("couponPlaceholder")}
+        <div className="grid gap-5 px-4 py-4">
+          {group(
+            1,
+            t("customerInfo"),
+            <>
+              {minimal
+                ? field(User, t("fieldFullName"))
+                : pair(field(User, t("fieldFirstName")), field(User, t("fieldLastName")))}
+              {minimal ? null : field(Mail, t("fieldEmail"))}
+              {field(Phone, t("fieldPhone"), "+880 1700 000000")}
+            </>,
+          )}
+
+          {group(
+            2,
+            t("deliveryHeading"),
+            <>
+              {minimal ? null : field(MapPin, t("fieldAddress"), t("fieldAddressHint"))}
+              {minimal
+                ? field(Map, t("fieldArea"))
+                : pair(field(Map, t("fieldDistrict")), field(Map, t("fieldArea")))}
+              <span className="flex items-center justify-between rounded-md border border-current/15 px-3 py-2.5 text-[11px]">
+                <span className="flex items-center gap-2 text-current/65">
+                  <span className="size-2.5 rounded-full border-[3px] border-current/45" aria-hidden />
+                  {t("deliveryInside")}
+                </span>
+                <span className="tabular-nums text-current/65">৳150</span>
               </span>
-              <span className="grid h-9 shrink-0 place-items-center rounded-full bg-foreground px-5 text-[11px] font-semibold text-background">
-                {t("couponApply")}
-              </span>
-            </div>
+            </>,
+          )}
+
+          {group(
+            3,
+            t("paymentHeading"),
+            <>
+              <div className="grid grid-cols-4 gap-2">
+                {[
+                  [Banknote, t("payCod")],
+                  [Smartphone, "bKash"],
+                  [Smartphone, "Nagad"],
+                  [Smartphone, "Rocket"],
+                ].map(([Icon, name], i) => {
+                  const Mark = Icon as typeof User;
+                  return (
+                    <span
+                      key={name as string}
+                      className={`grid place-items-center gap-1 rounded-md border px-1 py-2.5 text-[9.5px] leading-tight ${
+                        i === 0 ? "border-current/50 bg-current/[0.05] font-semibold" : "border-current/15 text-current/55"
+                      }`}
+                    >
+                      <Mark className="size-4" aria-hidden />
+                      <span className="truncate">{name as string}</span>
+                    </span>
+                  );
+                })}
+              </div>
+              <p className="text-[10.5px] leading-relaxed text-current/45">{t("payCodNote")}</p>
+            </>,
           )}
         </div>
       );
+    }
 
     /**
      * The merchant's own words, and the button they come before.
@@ -1901,9 +1983,11 @@ export function ShopChrome({
           {/* The same near-black the rest of the mock shop fills a button with.
               Not `bg-current`: the label sets `color`, so currentColor would
               paint the button in the label's colour and it would disappear. */}
-          <span className="block rounded-xs bg-foreground py-2.5 text-center text-[12px] font-semibold text-background">
+          <span className="flex h-11 items-center justify-center gap-2 rounded-full bg-foreground text-[12px] font-semibold text-background">
+            <Lock className="size-3.5" aria-hidden />
             {t("placeOrder")}
           </span>
+          <p className="mt-2 text-center text-[10px] text-current/45">{t("placeOrderSafe")}</p>
         </div>
       );
     }
