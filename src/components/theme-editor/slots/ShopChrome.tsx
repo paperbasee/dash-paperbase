@@ -247,15 +247,28 @@ export function ShopChrome({
       { head: "Company", items: ["Careers", "Wholesale", "Stores"] },
     ];
 
+    /**
+     * The sign-up sits AFTER the links, not above them.
+     *
+     * At the top it competed with the shop's own name for the first line of the
+     * footer and read as something stuck on. A shopper who has scrolled this far
+     * has finished looking; the ask belongs after they have found what they came
+     * for, and before the marks that reassure them. It gets its own panel rather
+     * than a bare rule so it reads as a thing and not a stray form.
+     */
     const newsletter =
       (set.newsletter ?? "off") === "off" ? null : (
-        <div className="mb-6 border-b border-white/12 pb-6">
-          <p className="text-[12px] font-semibold text-white">
+        <div
+          className={`mt-6 flex flex-wrap items-center gap-4 rounded-sm bg-white/[0.06] px-4 py-4${
+            layout === "centred" || layout === "minimal" ? " justify-center text-center" : ""
+          }`}
+        >
+          <p className="min-w-0 flex-1 text-[12px] font-semibold text-white">
             {set.newsletter === "whatsapp" ? t("signupWhatsappHeading") : t("signupEmailHeading")}
           </p>
-          <div className="mt-3 flex max-w-sm gap-2">
-            <span className="h-9 flex-1 rounded-xs bg-white/12" />
-            <span className="grid h-9 place-items-center rounded-xs bg-white px-4 text-[11px] text-[#1a1a1a]">
+          <div className="flex w-full max-w-xs gap-2 sm:w-auto">
+            <span className="h-9 flex-1 rounded-xs bg-white/12 sm:w-44" />
+            <span className="grid h-9 shrink-0 place-items-center rounded-xs bg-white px-4 text-[11px] font-medium text-[#1a1a1a]">
               {set.newsletter === "whatsapp" ? t("signupWhatsappButton") : t("signupEmailButton")}
             </span>
           </div>
@@ -301,8 +314,8 @@ export function ShopChrome({
 
     const shell = (children: React.ReactNode, centred = false) => (
       <div className={`bg-[#1a1a1a] px-5 py-6 text-white/65${centred ? " text-center" : ""}`}>
-        {newsletter}
         {children}
+        {newsletter}
         {social}
         {payments}
         {bottom}
