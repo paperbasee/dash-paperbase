@@ -129,6 +129,10 @@ function Chooser({
         </button>
       </div>
 
+      {slot.hint ? (
+        <p className="m-0 mb-3.5 max-w-prose text-[12.5px] leading-relaxed text-muted-foreground">{t(slot.hint)}</p>
+      ) : null}
+
       {slot.locked ? (
         <p className="m-0 max-w-prose text-[13px] leading-relaxed text-muted-foreground">{t(slot.lockedBecause ?? "lockedWhy")}</p>
       ) : (
@@ -145,6 +149,104 @@ function Chooser({
       )}
     </div>
   );
+}
+
+/**
+ * One place on the page: the tab that names it, and what it is showing.
+ *
+ * The chooser is NOT drawn here. A place in a row has to open its choices under
+ * the whole row rather than under its own half, or the tiles get a 150px column
+ * to live in and the merchant chooses blind.
+ */
+function SlotRegion({
+  slot,
+  page,
+  value,
+  isOpen,
+  onActivate,
+  settings,
+  className,
+  children,
+}: {
+  slot: Slot;
+  page: SlotPageKey;
+  value: string | undefined;
+  isOpen: boolean;
+  onActivate: () => void;
+  settings: Record<string, string>;
+  className?: string;
+  /** The chooser, when this place is on its own and can hold it. */
+  children?: React.ReactNode;
+}) {
+  const t = useTranslations("themeEditor.slots");
+  const blank = isEmpty(slot, value);
+
+  return (
+    <div
+      role="button"
+      tabIndex={0}
+      aria-expanded={isOpen}
+      onClick={onActivate}
+      onKeyDown={(event: React.KeyboardEvent) => {
+        if (event.key !== "Enter" && event.key !== " ") return;
+        event.preventDefault();
+        onActivate();
+      }}
+      className={cn(
+        "group relative min-w-0 cursor-pointer border-2 border-transparent outline-none",
+        !slot.locked && "hover:border-primary hover:bg-primary/5",
+        slot.locked && "hover:border-border-hover hover:bg-muted/50",
+        isOpen && !slot.locked && "border-primary bg-primary/5",
+        isOpen && slot.locked && "border-border-hover bg-muted/50",
+        "focus-visible:border-primary",
+        className,
+      )}
+    >
+      {/* The tab that names the place, and says what kind it is. */}
+      <span
+        className={cn(
+          "pointer-events-none absolute -left-px -top-px z-10 inline-flex items-center gap-1 rounded-br-sm px-1.5 py-1",
+          "text-[10px] font-medium tracking-[0.02em] text-white opacity-0 transition-opacity",
+          "group-hover:opacity-100",
+          isOpen && "opacity-100",
+          slot.inherited || slot.locked ? "bg-muted-foreground" : "bg-primary",
+        )}
+      >
+        {slot.locked ? <Lock className="size-2.5" aria-hidden /> : null}
+        {t(slot.label)}
+        {slot.inherited ? ` · ${t("editOnEveryPage")}` : null}
+      </span>
+
+      {blank ? (
+        <div
+          className="grid h-full place-items-center py-9 text-center"
+          style={{
+            backgroundImage:
+              "repeating-linear-gradient(135deg, transparent, transparent 8px, var(--color-border-subtle) 8px, var(--color-border-subtle) 9px)",
+          }}
+        >
+          <span className="rounded-full bg-background px-3 py-1.5 text-xs text-muted-foreground">
+            {t(slot.emptyLabel ?? "nothingHere")}
+          </span>
+        </div>
+      ) : (
+        <ShopChrome page={page} slotKey={slot.key} variant={value} settings={settings} />
+      )}
+
+      {children}
+    </div>
+  );
+}
+
+/** Consecutive slots that name the same `row` are one band; everything else is its own. */
+function bandsOf(slots: Slot[]): Slot[][] {
+  const bands: Slot[][] = [];
+  for (const slot of slots) {
+    const last = bands[bands.length - 1];
+    if (slot.row && last?.[0]?.row === slot.row) last.push(slot);
+    else bands.push([slot]);
+  }
+  return bands;
 }
 
 export function SlotCanvas({
@@ -173,8 +275,6 @@ export function SlotCanvas({
   /** Clicking an inherited slot goes to the entry that owns it. */
   onGoToPage: (page: SlotPageKey, slotKey: string) => void;
 }) {
-  const t = useTranslations("themeEditor.slots");
-
   return (
     <div className="flex justify-center bg-muted/40 p-2 sm:p-3">
       <div
@@ -183,85 +283,73 @@ export function SlotCanvas({
           device === "mobile" ? "max-w-[320px]" : "max-w-none",
         )}
       >
-        {SLOTS[page].map((slot) => {
-          const isOpen = open === slot.key;
-          const source = slot.inheritedFrom;
-          const value = source ? allChoices[source.page]?.[source.key] : choices[slot.key];
-          const pickable = true;
-          const blank = isEmpty(slot, value);
+        {bandsOf(SLOTS[page]).map((band) => {
+          /** An inherited place is edited where it lives; everything else opens here. */
+          const activate = (slot: Slot) => () => {
+            const source = slot.inheritedFrom;
+            if (source) onGoToPage(source.page, source.key);
+            else onOpen(open === slot.key ? null : slot.key);
+          };
+          const valueOf = (slot: Slot) =>
+            slot.inheritedFrom
+              ? allChoices[slot.inheritedFrom.page]?.[slot.inheritedFrom.key]
+              : choices[slot.key];
+          const settingsOf = (slot: Slot) =>
+            slot.inheritedFrom ? (allChoices[slot.inheritedFrom.page] ?? {}) : choices;
 
-          return (
-            <div
-              key={slot.key}
-              {...(pickable
-                ? {
-                    role: "button",
-                    tabIndex: 0,
-                    "aria-expanded": isOpen,
-                    onClick: () =>
-                      source ? onGoToPage(source.page, source.key) : onOpen(isOpen ? null : slot.key),
-                    onKeyDown: (event: React.KeyboardEvent) => {
-                      if (event.key !== "Enter" && event.key !== " ") return;
-                      event.preventDefault();
-                      if (source) onGoToPage(source.page, source.key);
-                      else onOpen(isOpen ? null : slot.key);
-                    },
-                  }
-                : {})}
-              className={cn(
-                "group relative border-2 border-transparent outline-none",
-                pickable && "cursor-pointer",
-                pickable && !slot.locked && "hover:border-primary hover:bg-primary/5",
-                slot.locked && "hover:border-border-hover hover:bg-muted/50",
-                isOpen && !slot.locked && "border-primary bg-primary/5",
-                isOpen && slot.locked && "border-border-hover bg-muted/50",
-                "focus-visible:border-primary",
-              )}
-            >
-              {/* The tab that names the place, and says what kind it is. */}
-              <span
-                className={cn(
-                  "pointer-events-none absolute -left-px -top-px z-10 inline-flex items-center gap-1 rounded-br-sm px-1.5 py-1",
-                  "text-[10px] font-medium tracking-[0.02em] text-white opacity-0 transition-opacity",
-                  "group-hover:opacity-100",
-                  isOpen && "opacity-100",
-                  slot.inherited || slot.locked ? "bg-muted-foreground" : "bg-primary",
-                )}
+          const opened = band.find((slot) => open === slot.key);
+          const chooser = opened ? (
+            <Chooser
+              slot={opened}
+              value={valueOf(opened)}
+              onPick={(next) => onChoose(opened.key, next)}
+              onDone={() => onOpen(null)}
+            />
+          ) : null;
+
+          // A lone place keeps its choices inside its own outline.
+          if (band.length === 1) {
+            const slot = band[0];
+            return (
+              <SlotRegion
+                key={slot.key}
+                slot={slot}
+                page={page}
+                value={valueOf(slot)}
+                isOpen={open === slot.key}
+                onActivate={activate(slot)}
+                settings={settingsOf(slot)}
               >
-                {slot.locked ? <Lock className="size-2.5" aria-hidden /> : null}
-                {t(slot.label)}
-                {slot.inherited ? ` · ${t("editOnEveryPage")}` : null}
-              </span>
+                {chooser}
+              </SlotRegion>
+            );
+          }
 
-              {blank ? (
-                <div
-                  className="grid place-items-center py-9 text-center"
-                  style={{
-                    backgroundImage:
-                      "repeating-linear-gradient(135deg, transparent, transparent 8px, var(--color-border-subtle) 8px, var(--color-border-subtle) 9px)",
-                  }}
-                >
-                  <span className="rounded-full bg-background px-3 py-1.5 text-xs text-muted-foreground">
-                    {t(slot.emptyLabel ?? "nothingHere")}
-                  </span>
-                </div>
-              ) : (
-                <ShopChrome
-                  page={page}
-                  slotKey={slot.key}
-                  variant={value}
-                  settings={source ? allChoices[source.page] : choices}
-                />
-              )}
-
-              {isOpen ? (
-                <Chooser
-                  slot={slot}
-                  value={value}
-                  onPick={(next) => onChoose(slot.key, next)}
-                  onDone={() => onOpen(null)}
-                />
-              ) : null}
+          // Side by side, as the page itself has them -- and stacked on a phone,
+          // which is also what the page itself does.
+          return (
+            <div key={band[0].row}>
+              <div
+                className={cn("grid", device === "mobile" ? "" : "sm:[grid-template-columns:var(--slot-cols)]")}
+                style={
+                  {
+                    "--slot-cols": band.map((slot) => `minmax(0,${slot.span ?? 1}fr)`).join(" "),
+                  } as React.CSSProperties
+                }
+              >
+                {band.map((slot) => (
+                  <SlotRegion
+                    key={slot.key}
+                    slot={slot}
+                    page={page}
+                    value={valueOf(slot)}
+                    isOpen={open === slot.key}
+                    onActivate={activate(slot)}
+                    settings={settingsOf(slot)}
+                  />
+                ))}
+              </div>
+              {chooser}
             </div>
           );
         })}

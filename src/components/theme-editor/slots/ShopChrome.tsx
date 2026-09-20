@@ -782,34 +782,18 @@ export function ShopChrome({
         </div>
       );
 
-    case "checkout:layout":
-      return variant === "one" ? (
-        <div className="grid gap-3 px-4 py-4">
-          <div className="rounded-xs border border-current/12 p-3">
-            <p className="mb-2 text-[11px] uppercase tracking-[0.06em] text-current/45">{t("summary")}</p>
-            <div className="flex justify-between text-[12px] tabular-nums text-current/60">
-              <span>{t("total")}</span>
-              <span className="font-semibold text-current">৳105</span>
-            </div>
-          </div>
-          <span className="block h-9 rounded-xs bg-current/8" />
-          <span className="block h-9 rounded-xs bg-current/8" />
-          <span className="block h-9 rounded-xs bg-current/8" />
-        </div>
-      ) : (
-        <div className="grid gap-4 px-4 py-4 sm:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
-          <div className="grid gap-2.5">
-            <span className="block h-9 rounded-xs bg-current/8" />
-            <span className="block h-9 rounded-xs bg-current/8" />
-            <span className="block h-9 w-3/5 rounded-xs bg-current/8" />
-          </div>
-          <div className="rounded-xs border border-current/12 p-3">
-            <p className="mb-2 text-[11px] uppercase tracking-[0.06em] text-current/45">{t("summary")}</p>
-            <div className="flex justify-between text-[12px] tabular-nums text-current/60">
-              <span>{t("total")}</span>
-              <span className="font-semibold text-current">৳105</span>
-            </div>
-          </div>
+    case "checkout:steps":
+      return (
+        <div className="flex items-center justify-center gap-2 border-b border-current/10 px-4 py-3 text-[11px]">
+          {[t("stepCart"), t("stepDetails"), t("stepDone")].map((name, i) => (
+            <span key={name} className="flex items-center gap-2">
+              {i ? <span className="block h-px w-6 bg-current/20" aria-hidden /> : null}
+              <span className={i === 1 ? "font-semibold text-current" : "text-current/45"}>
+                <span className="mr-1.5 tabular-nums">{i + 1}</span>
+                {name}
+              </span>
+            </span>
+          ))}
         </div>
       );
 
@@ -836,33 +820,133 @@ export function ShopChrome({
         </p>
       );
 
-    case "checkout:form":
-      return (
-        <div className="grid gap-2.5 px-4 py-4">
-          <span className="block h-9 rounded-xs bg-current/8" />
-          <span className="block h-9 rounded-xs bg-current/8" />
-          <span className="block h-9 w-3/5 rounded-xs bg-current/8" />
-          <span className="block h-9 rounded-xs bg-current/8" />
-        </div>
+    /**
+     * The right column: everything a shopper fills in before they can buy.
+     *
+     * The two variants are the real ones -- `customer_form_variant` on the
+     * shop's checkout settings -- so the preview lists the actual fields rather
+     * than a count. Extended asks for the address; minimal asks for a name, a
+     * number and an area, and somebody rings back for the rest. Delivery and
+     * payment are under them because that is where the page puts them, and both
+     * come from the shop's own settings rather than from here.
+     */
+    case "checkout:form": {
+      const minimal = variant === "minimal";
+      const field = (label: string, w = "100%") => (
+        <label key={label} className="grid min-w-0 gap-1" style={{ width: w }}>
+          <span className="text-[10px] text-current/50">{label}</span>
+          <span className="block h-8 rounded-xs border border-current/15 bg-current/[0.04]" />
+        </label>
       );
+      return (
+        <div className="grid gap-4 px-4 py-4">
+          <div>
+            <p className="mb-2.5 text-[11px] font-semibold uppercase tracking-[0.06em]">{t("customerInfo")}</p>
+            <div className="grid gap-2.5">
+              {minimal ? (
+                field(t("fieldFullName"))
+              ) : (
+                <div className="grid grid-cols-2 gap-2.5">
+                  {field(t("fieldFirstName"))}
+                  {field(t("fieldLastName"))}
+                </div>
+              )}
+              {minimal ? null : field(t("fieldEmail"))}
+              {field(t("fieldPhone"))}
+              {minimal ? null : field(t("fieldDistrict"))}
+              {field(t("fieldArea"))}
+              {minimal ? null : field(t("fieldAddress"))}
+            </div>
+          </div>
 
-    case "checkout:summary":
+          <div>
+            <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.06em]">{t("deliveryHeading")}</p>
+            <div className="flex items-center justify-between rounded-xs border border-current/15 px-2.5 py-2 text-[11px]">
+              <span className="flex items-center gap-2 text-current/60">
+                <span className="size-2.5 rounded-full border-[3px] border-current/45" aria-hidden />
+                {t("deliveryInside")}
+              </span>
+              <span className="tabular-nums text-current/60">৳60</span>
+            </div>
+          </div>
+
+          <div>
+            <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.06em]">{t("paymentHeading")}</p>
+            <div className="flex items-center gap-2 rounded-xs border border-current/15 px-2.5 py-2 text-[11px] text-current/60">
+              <span className="size-2.5 rounded-full border-[3px] border-current/45" aria-hidden />
+              {t("cashOnDelivery")}
+            </div>
+          </div>
+
+          {/* The same near-black the rest of the mock shop fills a button with.
+              Not `bg-current`: the label sets `color`, so currentColor would
+              paint the button in the label's colour and it would disappear. */}
+          <span className="block rounded-xs bg-[#1a1a1a] py-2.5 text-center text-[12px] font-semibold text-white">
+            {t("placeOrder")}
+          </span>
+        </div>
+      );
+    }
+
+    /**
+     * The left column: the order, and whether it is still the shopper's to change.
+     *
+     * Leaving the steppers on is the shop's own behaviour today. Turning them
+     * off is a real decision some shops make -- a cart that cannot be edited at
+     * the till is one fewer way to talk yourself out of buying -- so it is
+     * offered rather than assumed.
+     */
+    case "checkout:summary": {
+      const fixed = variant === "fixed";
+      const lines = [
+        { name: "Crossbody Bag", note: "Tan · One size", qty: 1, price: "৳45" },
+        { name: "Leather Belt", note: "Black · 34", qty: 2, price: "৳58" },
+      ];
       return (
-        <div className="grid gap-2 border-t border-current/10 px-4 py-4 text-[12px] text-current/60">
-          <div className="flex justify-between tabular-nums">
-            <span>Crossbody Bag × 1</span>
-            <span>৳45</span>
+        // A panel, because the shop's own summary is one -- and because the
+        // column is shorter than the form beside it, so without an edge the
+        // space under it reads as a hole rather than as the page.
+        <div className="m-4 rounded-xs border border-current/12 p-4">
+          <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.06em]">{t("orderSummary")}</p>
+          <div className="grid gap-3">
+            {lines.map((line) => (
+              <div key={line.name} className="flex items-start gap-2.5">
+                <span className="size-11 shrink-0 rounded-xs bg-current/8" aria-hidden />
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate text-[12px] font-medium">{line.name}</span>
+                  <span className="block truncate text-[10px] text-current/45">{line.note}</span>
+                  {fixed ? (
+                    <span className="mt-1 block text-[10px] tabular-nums text-current/50">× {line.qty}</span>
+                  ) : (
+                    <span className="mt-1.5 inline-flex items-center rounded-xs border border-current/15 text-[11px] leading-none">
+                      <span className="px-2 py-1 text-current/45">−</span>
+                      <span className="px-1.5 py-1 tabular-nums">{line.qty}</span>
+                      <span className="px-2 py-1 text-current/45">+</span>
+                    </span>
+                  )}
+                </span>
+                <span className="shrink-0 text-[12px] font-semibold tabular-nums">{line.price}</span>
+              </div>
+            ))}
           </div>
-          <div className="flex justify-between tabular-nums">
-            <span>{t("delivery")}</span>
-            <span>৳60</span>
-          </div>
-          <div className="flex justify-between border-t border-current/10 pt-2 text-[14px] font-semibold tabular-nums text-current">
-            <span>{t("total")}</span>
-            <span>৳105</span>
+
+          <div className="mt-3.5 grid gap-1.5 border-t border-current/10 pt-3 text-[11px] text-current/55">
+            <div className="flex justify-between tabular-nums">
+              <span>{t("subtotal")}</span>
+              <span>৳103</span>
+            </div>
+            <div className="flex justify-between tabular-nums">
+              <span>{t("delivery")}</span>
+              <span>৳60</span>
+            </div>
+            <div className="flex justify-between border-t border-current/10 pt-1.5 text-[14px] font-semibold tabular-nums text-current">
+              <span>{t("total")}</span>
+              <span>৳163</span>
+            </div>
           </div>
         </div>
       );
+    }
 
     case "checkout:after":
       return <p className="px-4 py-3 text-center text-[11px] text-current/55">{t("afterExample")}</p>;

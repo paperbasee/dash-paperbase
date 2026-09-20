@@ -64,6 +64,22 @@ export type Slot = {
   locked?: boolean;
   /** `themeEditor.slots.*` key for that reason. */
   lockedBecause?: string;
+  /**
+   * Places that sit BESIDE each other in the real page share a row name.
+   *
+   * Every other page in this editor is a stack of full-width bands, and drawing
+   * it that way is honest. The checkout is not a stack: the order sits on the
+   * left and the form on the right, and a merchant who is shown two bands will
+   * not recognise their own checkout when they meet it. So consecutive slots
+   * with the same `row` are drawn side by side, each still its own place with
+   * its own tab and its own choices, and they stack on a phone exactly as the
+   * shop's own page does.
+   */
+  row?: string;
+  /** Its share of that row, as a grid fraction. Defaults to 1. */
+  span?: number;
+  /** `themeEditor.slots.*` key: something true about the place, said before the choices. */
+  hint?: string;
   /** What a merchant may put here. Empty when locked or inherited. */
   options?: SlotOption[];
   /** The value that is in the slot to begin with. */
@@ -405,16 +421,51 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
       ],
     },
     {
-      key: "layout",
-      label: "checkoutLayout",
-      initial: "two",
+      key: "steps",
+      label: "checkoutSteps",
+      initial: "none",
+      emptyValues: ["none"],
+      emptyLabel: "checkoutStepsEmpty",
       options: [
-        { value: "two", label: "checkoutTwo", note: "checkoutTwoNote", shape: "row" },
-        { value: "one", label: "checkoutOne", note: "checkoutOneNote", shape: "block" },
+        { value: "none", label: "nothing", note: "checkoutStepsNoneNote", shape: "blank" },
+        { value: "bar", label: "checkoutStepsBar", note: "checkoutStepsBarNote", shape: "line" },
       ],
     },
-    { key: "form", label: "form", locked: true, lockedBecause: "formWhy" },
-    { key: "summary", label: "summary", locked: true, lockedBecause: "summaryWhy" },
+    /**
+     * The two columns of the page people actually pay on.
+     *
+     * The order is on the left and the form is on the right, which is the
+     * shop's own arrangement and not a choice -- so it is not offered as one.
+     * What IS a choice is what each column does, and those are the two
+     * highest-stakes settings in the editor: whether a shopper may still change
+     * the order here, and how much they are asked for before they can buy.
+     */
+    {
+      key: "summary",
+      label: "checkoutOrder",
+      row: "body",
+      span: 1,
+      hint: "checkoutOrderHint",
+      initial: "quantity",
+      options: [
+        { value: "quantity", label: "orderQuantity", note: "orderQuantityNote", shape: "row" },
+        { value: "fixed", label: "orderFixed", note: "orderFixedNote", shape: "line" },
+      ],
+    },
+    {
+      key: "form",
+      label: "checkoutForm",
+      row: "body",
+      span: 1.15,
+      /* The same value as Settings > Checkout. Said here, because two screens
+         editing one setting is a thing a merchant should be told, not find. */
+      hint: "checkoutFormHint",
+      initial: "extended",
+      options: [
+        { value: "extended", label: "formExtended", note: "formExtendedNote", shape: "block" },
+        { value: "minimal", label: "formMinimal", note: "formMinimalNote", shape: "line" },
+      ],
+    },
     {
       key: "payments",
       label: "checkoutPayments",
