@@ -1161,7 +1161,19 @@
     "toastTitleMostWishedForFailedToLoad": "সংরক্ষিত পণ্য লোড করা যায়নি",
     "toastDescMostWishedForFailedToLoad": "ক্রেতাদের সংরক্ষিত পণ্য লোড করার সময় সমস্যা হয়েছে। আবার চেষ্টা করুন।",
     "customerAccountDetailsSaved": "পরে দেখার জন্য সংরক্ষিত",
-    "customerAccountDetailsNothingSaved": "এই ক্রেতা এখনও কিছু সংরক্ষণ করেননি।"
+    "customerAccountDetailsNothingSaved": "এই ক্রেতা এখনও কিছু সংরক্ষণ করেননি।",
+    "ordersTabsAria": "অর্ডার ও অসমাপ্ত চেকআউট",
+    "ordersTabOrders": "অর্ডার",
+    "ordersTabAbandoned": "অসমাপ্ত চেকআউট",
+    "abandonedColPhone": "ফোন",
+    "abandonedColItems": "পণ্য",
+    "abandonedColValue": "ঝুড়ির মূল্য",
+    "abandonedColWhen": "সর্বশেষ দেখা",
+    "abandonedIntro": "যাঁরা আপনার চেকআউট ফর্ম পূরণ করেও শেষ করেননি। তাঁরা কী চেয়েছিলেন দেখতে সারিতে চাপ দিন, বা কল করতে নম্বরে চাপ দিন।",
+    "abandonedKeptFor": "৩০ দিন রাখা হয়, তারপর মুছে ফেলা হয়। কেউ ফিরে এসে অর্ডার করলে সারিটি নিজে থেকেই চলে যাবে।",
+    "abandonedEmpty": "কোনো অসমাপ্ত চেকআউট নেই। কেউ চেকআউটে ফোন নম্বর দিয়ে অর্ডার সম্পূর্ণ না করলে এখানে দেখা যাবে।",
+    "toastTitleAbandonedFailedToLoad": "অসমাপ্ত চেকআউট লোড করা যায়নি",
+    "toastDescAbandonedFailedToLoad": "অসমাপ্ত চেকআউট লোড করার সময় সমস্যা হয়েছে। আবার চেষ্টা করুন।"
   },
   "sidebar": {
     "expandSidebar": "সাইডবার প্রসারিত করুন",

@@ -471,6 +471,36 @@ export interface Customer {
  */
 /** One row of the Products page's "Most wished-for" tab. `saved_by` counts
  *  people, not rows: one shopper saving two sizes is one person who wants it. */
+/** One line of what somebody had in their basket when they stopped. */
+export interface AbandonedCheckoutItem {
+  name: string;
+  variant: string;
+  quantity: number;
+  unit_price: string;
+}
+
+/**
+ * Somebody who started checking out and did not finish.
+ *
+ * The phone is the point: an abandoned cart is a statistic, an abandoned
+ * checkout is a phone call.
+ */
+export interface AbandonedCheckout {
+  id: number;
+  cart_public_id: string;
+  account_public_id: string | null;
+  name: string;
+  phone: string;
+  email: string;
+  shipping_address: string;
+  district: string;
+  items: AbandonedCheckoutItem[];
+  item_count: number;
+  value: string | number;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface MostWishedForProduct {
   public_id: string;
   name: string;

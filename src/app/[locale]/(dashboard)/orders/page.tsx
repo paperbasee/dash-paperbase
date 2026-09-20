@@ -12,7 +12,13 @@ import {
 } from "react";
 import dynamic from "next/dynamic";
 import { useLocale, useTranslations } from "next-intl";
+import { useSearchParams } from "next/navigation";
 import { useRouter } from "@/i18n/navigation";
+import {
+  OrdersTabStrip,
+  activeOrderTab,
+} from "./sections/OrdersTabStrip";
+import { AbandonedCheckoutsTab } from "./sections/AbandonedCheckoutsTab";
 import { DeferredNavLink } from "@/components/navigation/DeferredNavLink";
 import { toLocaleDigits } from "@/lib/locale-digits";
 import { cursorFromLink } from "@/lib/cursor-from-link";
@@ -212,6 +218,8 @@ function bulkDispatchFailureBody(
 }
 
 export default function OrdersPage() {
+  const orderTabParam = useSearchParams().get("tab");
+  const activeTab = activeOrderTab(orderTabParam);
   const router = useRouter();
   const locale = useLocale();
   const numClass = numberTextClass(locale);
@@ -1008,6 +1016,38 @@ export default function OrdersPage() {
     }
   }
 
+  // The ones that got away instead of the ones that landed. An early return,
+  // after every hook above has run -- this page is sixteen hundred lines, and
+  // wrapping all of it in a ternary would be an unreadable diff for a change
+  // that adds a tab. The export and autopilot controls are left out on purpose:
+  // there is nothing to export and nothing to dispatch on a list of people who
+  // did not order.
+  if (activeTab === "abandoned") {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center gap-3 flex-wrap">
+          <div className="rounded-card bg-muted/80 px-1 py-1 hidden md:block">
+            <button
+              type="button"
+              onClick={() => router.back()}
+              aria-label={tPages("goBack")}
+              className="flex items-center justify-center rounded-ui p-1 text-muted-foreground hover:bg-muted"
+            >
+              <Undo2 className="h-4 w-4" />
+            </button>
+          </div>
+          <h1 className="text-2xl font-medium leading-relaxed text-foreground">
+            {tNav("orders")}
+          </h1>
+          <OrdersTabStrip />
+        </div>
+        <div id="orders-panel" role="tabpanel" aria-labelledby="orders-tab-abandoned">
+          <AbandonedCheckoutsTab />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between gap-4 flex-wrap">
@@ -1025,6 +1065,7 @@ export default function OrdersPage() {
           <h1 className="text-2xl font-medium leading-relaxed text-foreground">
             {tNav("orders")}
           </h1>
+          <OrdersTabStrip />
         </div>
         <div className="flex items-center gap-2 flex-wrap justify-end">
           <AutopilotStatusPill />

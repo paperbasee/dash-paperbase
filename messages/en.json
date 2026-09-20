@@ -1161,7 +1161,19 @@
     "toastTitleMostWishedForFailedToLoad": "Could not load saved items",
     "toastDescMostWishedForFailedToLoad": "Something went wrong while loading what shoppers have saved. Please try again.",
     "customerAccountDetailsSaved": "Saved for later",
-    "customerAccountDetailsNothingSaved": "This shopper has not saved anything yet."
+    "customerAccountDetailsNothingSaved": "This shopper has not saved anything yet.",
+    "ordersTabsAria": "Orders and abandoned checkouts",
+    "ordersTabOrders": "Orders",
+    "ordersTabAbandoned": "Abandoned checkouts",
+    "abandonedColPhone": "Phone",
+    "abandonedColItems": "Items",
+    "abandonedColValue": "Basket value",
+    "abandonedColWhen": "Last seen",
+    "abandonedIntro": "People who filled in your checkout form and did not finish. Tap a row to see what they wanted, or tap the number to call them.",
+    "abandonedKeptFor": "Kept for 30 days, then deleted. A row disappears on its own if the person comes back and orders.",
+    "abandonedEmpty": "No abandoned checkouts. They appear here when someone enters their phone number at checkout and does not complete the order.",
+    "toastTitleAbandonedFailedToLoad": "Could not load abandoned checkouts",
+    "toastDescAbandonedFailedToLoad": "Something went wrong while loading abandoned checkouts. Please try again."
   },
   "sidebar": {
     "expandSidebar": "Expand sidebar",

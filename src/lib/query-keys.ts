@@ -110,6 +110,12 @@ export function customerAccountsListQueryKey(params: CustomersListParams) {
   return [...customerAccountsListQueryKeyRoot, params] as const;
 }
 
+export const abandonedCheckoutsQueryKeyRoot = ["abandoned-checkouts", "list"] as const;
+
+export function abandonedCheckoutsQueryKey(params: CustomersListParams) {
+  return [...abandonedCheckoutsQueryKeyRoot, params] as const;
+}
+
 export const mostWishedForQueryKey = ["products", "most-wished-for"] as const;
 
 export function customerAccountDetailQueryKey(publicId: string) {
