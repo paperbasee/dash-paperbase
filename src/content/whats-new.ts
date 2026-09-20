@@ -57,6 +57,21 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-09-20-cart-page-in-your-language",
+    date: "2026-09-20",
+    // A storefront change: the dashboard version that is live, per the rule above.
+    version: "4.12.5",
+    tag: "fixed",
+    title: {
+      en: "Your cart page speaks your shop's language",
+      bn: "কার্ট পেজ এখন আপনার দোকানের ভাষায়",
+    },
+    body: {
+      en: "On the cart page the column headings, the estimated total and the button to check out were written in English whichever language your shop runs in, and they now follow your shop. The line under the total was wrong as well: it promised that taxes and discounts would be worked out at checkout, and Paperbase handles neither. It now says what is true — the delivery charge is added at checkout.",
+      bn: "কার্ট পেজে কলামের শিরোনাম, আনুমানিক মোট আর অর্ডারের বোতাম—আপনার দোকান যে ভাষাতেই চলুক, এগুলো ইংরেজিতেই দেখাত; এখন সেগুলো দোকানের ভাষা মেনে চলে। মোটের নিচের লাইনটিও ভুল ছিল: সেখানে লেখা ছিল ট্যাক্স ও ছাড় চেকআউটে হিসাব হবে, অথচ পেপারবেসে এর কোনোটিই নেই। এখন যা সত্যি তাই লেখা থাকে—ডেলিভারি চার্জ চেকআউটে যোগ হবে।",
+    },
+  },
+  {
     id: "2026-09-18-popup-waits-its-turn",
     date: "2026-09-18",
     version: "4.12.5",
