@@ -2,11 +2,13 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { Monitor, Smartphone } from "lucide-react";
+import { Monitor, Smartphone, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { DeferredNavLink } from "@/components/navigation/DeferredNavLink";
 import { Select } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
+import { CUSTOMIZATION_HREF } from "@/lib/theme-editor/access";
 import {
   initialChoices,
   SLOT_GROUPS,
@@ -68,7 +70,21 @@ export function SlotEditor() {
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
-      <div className="flex flex-wrap items-center gap-2 border-b border-border px-3 py-2.5">
+      <div className="flex flex-wrap items-center gap-2 border-b border-border px-2 py-2.5 md:px-3">
+        {/*
+          The way out. This screen fills the window with no dashboard around it,
+          so without this a merchant's only exit is the browser's back button --
+          and the X at the far left is where the editor has always kept it.
+
+          A link and not a button: it is a navigation, so it opens in a new tab
+          on a middle click and reads as an address to a screen reader.
+        */}
+        <Button asChild type="button" variant="ghost" size="icon" className="size-9 shrink-0">
+          <DeferredNavLink href={CUSTOMIZATION_HREF} aria-label={tEditor("close")} title={tEditor("close")}>
+            <X aria-hidden />
+          </DeferredNavLink>
+        </Button>
+
         <Select
           aria-label={tEditor("pageLabel")}
           value={page}
