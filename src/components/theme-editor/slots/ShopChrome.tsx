@@ -191,32 +191,83 @@ export function ShopChrome({
   }
 
   if (slotKey === "footer") {
+    const layout = variant ?? "columns";
+    const heading = (text: string) => (
+      <p className="mb-2.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-white">{text}</p>
+    );
+    const links = (items: string[]) =>
+      items.map((link) => (
+        <p key={link} className="mb-1.5 text-[11px] leading-relaxed">
+          {link}
+        </p>
+      ));
+    const shop = (
+      <div>
+        {heading("Gadzilla")}
+        <p className="text-[11px] leading-relaxed">12 Gulshan Avenue, Dhaka 1212</p>
+        <p className="mt-1.5 text-[11px]">+880 1700 000000</p>
+      </div>
+    );
+    const columns = [
+      { head: "Information", items: ["About us", "Blog", "Privacy policy"] },
+      { head: "Customer service", items: ["Contact us", "Returns", "Track order"] },
+      { head: "Company", items: ["Careers", "Wholesale", "Stores"] },
+    ];
+    const bottom = (
+      <p className="mt-5 border-t border-white/12 pt-4 text-[10px] text-white/45">
+        © 2026 Gadzilla — All rights reserved · powered by Paperbase
+      </p>
+    );
+
+    if (layout === "minimal") {
+      return (
+        <div className="bg-[#1a1a1a] px-5 py-5 text-center text-white/65">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-white">Gadzilla</p>
+          <p className="mt-2.5 text-[11px]">About · Contact · Returns · Privacy</p>
+          <p className="mt-3 text-[10px] text-white/45">© 2026 Gadzilla · powered by Paperbase</p>
+        </div>
+      );
+    }
+    if (layout === "centred") {
+      return (
+        <div className="bg-[#1a1a1a] px-5 py-6 text-center text-white/65">
+          <p className="text-[12px] font-semibold uppercase tracking-[0.12em] text-white">Gadzilla</p>
+          <p className="mt-2.5 text-[11px]">12 Gulshan Avenue, Dhaka 1212 · +880 1700 000000</p>
+          <p className="mt-3 text-[11px]">About us · Blog · Contact us · Returns · Privacy policy</p>
+          {bottom}
+        </div>
+      );
+    }
+    if (layout === "split") {
+      return (
+        <div className="bg-[#1a1a1a] px-5 py-6 text-white/65">
+          <div className="grid gap-6 sm:grid-cols-[minmax(0,1fr)_auto]">
+            {shop}
+            <div className="grid grid-cols-2 gap-x-8 gap-y-5">
+              {columns.slice(0, 2).map((column) => (
+                <div key={column.head}>
+                  {heading(column.head)}
+                  {links(column.items)}
+                </div>
+              ))}
+            </div>
+          </div>
+          {bottom}
+        </div>
+      );
+    }
     return (
       <div className="bg-[#1a1a1a] px-5 py-6 text-white/65">
         <div className="grid grid-cols-2 gap-x-5 gap-y-5 sm:grid-cols-4">
-          <div>
-            <p className="mb-2.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-white">Gadzilla</p>
-            <p className="text-[11px] leading-relaxed">12 Gulshan Avenue, Dhaka 1212</p>
-            <p className="mt-1.5 text-[11px]">+880 1700 000000</p>
-          </div>
-          {[
-            { head: "Information", links: ["About us", "Blog", "Privacy policy"] },
-            { head: "Customer service", links: ["Contact us", "Returns", "Track order"] },
-            { head: "Company", links: ["Careers", "Wholesale", "Stores"] },
-          ].map((column) => (
+          {shop}
+          {columns.map((column) => (
             <div key={column.head}>
-              <p className="mb-2.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-white">{column.head}</p>
-              {column.links.map((link) => (
-                <p key={link} className="mb-1.5 text-[11px] leading-relaxed">
-                  {link}
-                </p>
-              ))}
+              {heading(column.head)}
+              {links(column.items)}
             </div>
           ))}
         </div>
-        <p className="mt-5 border-t border-white/12 pt-4 text-[10px] text-white/45">
-          © 2026 Gadzilla — All rights reserved · powered by Paperbase
-        </p>
+        {bottom}
       </div>
     );
   }
@@ -572,6 +623,82 @@ export function ShopChrome({
 
     case "footer:layout":
       return <ShopChrome page={page} slotKey="footer" variant={variant} />;
+
+    case "footer:contact":
+      return (
+        <div className="bg-[#1a1a1a] px-5 py-5 text-white/65">
+          <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.08em] text-white">Gadzilla</p>
+          {variant === "email" ? (
+            <p className="text-[11px]">hello@gadzilla.com</p>
+          ) : (
+            <>
+              <p className="text-[11px] leading-relaxed">12 Gulshan Avenue, Dhaka 1212</p>
+              <p className="mt-1.5 text-[11px]">+880 1700 000000 · hello@gadzilla.com</p>
+            </>
+          )}
+        </div>
+      );
+
+    case "footer:social":
+      return (
+        <div className="bg-[#1a1a1a] px-5 py-5 text-white/65">
+          {variant === "names" ? (
+            <p className="text-[11px]">Facebook · Instagram · YouTube · TikTok</p>
+          ) : (
+            <div className="flex gap-2.5">
+              {Array.from({ length: 4 }, (_, i) => (
+                <span key={i} className="size-8 rounded-full bg-white/12" />
+              ))}
+            </div>
+          )}
+        </div>
+      );
+
+    case "footer:payments":
+      return (
+        <div className="bg-[#1a1a1a] px-5 py-5">
+          <p className="mb-2.5 text-[10px] uppercase tracking-[0.08em] text-white/45">{t("paymentsHeading")}</p>
+          <div className="flex flex-wrap gap-2">
+            {["bKash", "Nagad", "Rocket", "Visa", "Mastercard", t("cashOnDelivery")].map((name) => (
+              <span
+                key={name}
+                className="rounded-xs border border-white/15 px-2.5 py-1 text-[10px] text-white/70"
+              >
+                {name}
+              </span>
+            ))}
+          </div>
+        </div>
+      );
+
+    case "footer:newsletter":
+      return (
+        <div className="bg-[#1a1a1a] px-5 py-5 text-white/65">
+          <p className="text-[12px] font-semibold text-white">
+            {variant === "whatsapp" ? t("signupWhatsappHeading") : t("signupEmailHeading")}
+          </p>
+          <div className="mt-3 flex max-w-sm gap-2">
+            <span className="h-9 flex-1 rounded-xs bg-white/12" />
+            <span className="grid h-9 place-items-center rounded-xs bg-white px-4 text-[11px] text-[#1a1a1a]">
+              {variant === "whatsapp" ? t("signupWhatsappButton") : t("signupEmailButton")}
+            </span>
+          </div>
+        </div>
+      );
+
+    case "footer:bottom":
+      return (
+        <div className="bg-[#1a1a1a] px-5 py-4 text-[10px] text-white/45">
+          {variant === "policies" ? (
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <span>© 2026 Gadzilla · powered by Paperbase</span>
+              <span>Privacy · Returns · Terms</span>
+            </div>
+          ) : (
+            <span>© 2026 Gadzilla — All rights reserved · powered by Paperbase</span>
+          )}
+        </div>
+      );
 
     default:
       return (
