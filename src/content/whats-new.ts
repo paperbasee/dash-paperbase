@@ -37,21 +37,6 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
-    id: "2026-09-18-heritage-is-its-own-design",
-    date: "2026-09-18",
-    version: "4.12.5",
-    tag: "improved",
-    title: {
-      en: "Heritage is now a design of its own",
-      bn: "হেরিটেজ এখন সম্পূর্ণ আলাদা একটি ডিজাইন",
-    },
-    body: {
-      en: "Heritage no longer borrows anything from Basic. Its product page, cards, search, menu, cart panel and journal are all drawn its own way. Choosing a theme now changes the whole shop, not only its colours and type.",
-      bn: "হেরিটেজ এখন আর বেসিক থেকে কিছু ধার করে না। এর পণ্যের পেজ, কার্ড, সার্চ, মেনু, কার্ট প্যানেল আর জার্নাল—সবই নিজের মতো করে আঁকা। থিম বদলালে এখন শুধু রং আর ফন্ট নয়, পুরো দোকানের চেহারাই বদলায়।",
-    },
-    href: "/settings/customize",
-  },
-  {
     id: "2026-09-18-popup-waits-its-turn",
     date: "2026-09-18",
     version: "4.12.5",
@@ -108,36 +93,6 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
       en: "Order now and Add to cart are set a little lighter on your product pages. Nothing moved and nothing changed about how they work; they simply sit more quietly next to your product name and price.",
       bn: "পণ্যের পেজে এখনই অর্ডার করুন আর কার্টে যোগ করুন লেখা দুটি একটু হালকা করা হয়েছে। কিছু সরেনি, কাজেও কোনো বদল নেই; শুধু পণ্যের নাম আর দামের পাশে আগের চেয়ে শান্ত দেখায়।",
     },
-  },
-  {
-    id: "2026-09-18-card-style-on-every-theme",
-    date: "2026-09-18",
-    version: "4.12.3",
-    tag: "fixed",
-    title: {
-      en: "Card style works on every theme",
-      bn: "কার্ড স্টাইল এখন সব থিমেই কাজ করে",
-    },
-    body: {
-      en: "The product card style setting only appeared while your store was on Basic. It now appears on any theme that uses it, so you can switch between the quiet card and the price-first card on Heritage too.",
-      bn: "পণ্যের কার্ড স্টাইল আগে শুধু বেসিক থিমে দেখা যেত। এখন যেসব থিম এটি ব্যবহার করে সব জায়গাতেই দেখা যাবে, তাই হেরিটেজেও শান্ত কার্ড আর দাম-আগে কার্ডের মধ্যে বদল করতে পারবেন।",
-    },
-    href: "/settings?tab=customization",
-  },
-  {
-    id: "2026-09-18-heritage-theme",
-    date: "2026-09-18",
-    version: "4.12.2",
-    tag: "new",
-    title: {
-      en: "Heritage: a new look for fashion stores",
-      bn: "হেরিটেজ: ফ্যাশন স্টোরের নতুন চেহারা",
-    },
-    body: {
-      en: "Heritage is the first of our designed themes, made for clothing: your shop name centred at the top, a warm sand and terracotta palette, and large serif type in both Bangla and English. It comes with its own colours and lettering, so choosing it changes the whole store, not just the layout. Product names are never cut short, whichever language you sell in, and your Basic design stays exactly where you left it.",
-      bn: "হেরিটেজ আমাদের প্রথম ডিজাইন করা থিম, তৈরি হয়েছে পোশাকের দোকানের জন্য: উপরে মাঝখানে দোকানের নাম, উষ্ণ বালু আর টেরাকোটা রঙ, আর বাংলা-ইংরেজি দুটোতেই বড় সেরিফ অক্ষর। এর নিজস্ব রং আর অক্ষর আছে, তাই এটি বেছে নিলে পুরো দোকানের চেহারাই বদলায় — শুধু সাজানো নয়। যে ভাষাতেই বিক্রি করুন, পণ্যের নাম কেটে ছোট করা হয় না, আর আপনার বেসিক ডিজাইন যেমন ছিল তেমনই থাকবে।",
-    },
-    href: "/settings?tab=customization",
   },
   {
     id: "2026-09-18-banners-move-into-the-editor",

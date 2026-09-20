@@ -122,7 +122,7 @@ export function SlotEditor() {
         </div>
 
         <Button type="button" size="sm" disabled title={t("notWiredYet")}>
-          {tEditor("save")}
+          {tEditor("saveToShop")}
         </Button>
       </div>
 

@@ -104,7 +104,18 @@ describe("theme editor copy", () => {
     const used = new Set<string>();
     for (const rel of SOURCES) {
       const text = fs.readFileSync(path.join(ROOT, rel), "utf8");
-      for (const m of text.matchAll(/\bt\(\s*"(\w+)"/g)) used.add(m[1]);
+      // Every translator bound to THIS namespace, whatever it is called. A
+      // component may hold two -- `t` for `themeEditor.slots` and `tEditor` for
+      // `themeEditor` -- and a key read through the second one slipped past a
+      // check that only knew about `t`, which is how `themeEditor.save` reached
+      // the browser. Translators for other namespaces (`tc`, `tCommon`) are
+      // deliberately not collected: their keys do not live here.
+      const ours = [...text.matchAll(/const\s+(\w+)\s*=\s*useTranslations\(\s*"themeEditor(?:\.\w+)?"/g)].map(
+        (m) => m[1],
+      );
+      for (const name of ours) {
+        for (const m of text.matchAll(new RegExp(`\\b${name}\\(\\s*"(\\w+)"`, "g"))) used.add(m[1]);
+      }
       for (const m of text.matchAll(/labelKey: "(\w+)"/g)) used.add(m[1]);
       // The notes for a page the shop has nothing to show on.
       for (const m of text.matchAll(/(?:category|product|post): "(preview\w+)"/g)) used.add(m[1]);
