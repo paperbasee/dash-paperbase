@@ -165,11 +165,11 @@ export function SlotCanvas({
   const t = useTranslations("themeEditor.slots");
 
   return (
-    <div className="flex justify-center bg-muted/60 p-4">
+    <div className="flex justify-center bg-muted/40 p-1.5 sm:p-2">
       <div
         className={cn(
           "w-full overflow-hidden rounded-sm border border-border-subtle bg-background text-foreground transition-[max-width]",
-          device === "mobile" ? "max-w-[320px]" : "max-w-[720px]",
+          device === "mobile" ? "max-w-[320px]" : "max-w-none",
         )}
       >
         {SLOTS[page].map((slot) => {

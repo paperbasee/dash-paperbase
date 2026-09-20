@@ -47,6 +47,8 @@ export function SlotEditor() {
   const [open, setOpen] = useState<string | null>("promo");
   const [palette, setPalette] = useState("ivory");
   const [face, setFace] = useState("poppins");
+  const [corner, setCorner] = useState("soft");
+  const [cardStyle, setCardStyle] = useState("classic");
   const [choices, setChoices] = useState<Record<SlotPageKey, Record<string, string>>>(() => ({
     home: initialChoices("home"),
     product: initialChoices("product"),
@@ -144,7 +146,16 @@ export function SlotEditor() {
       */}
       <div className="grid min-h-0 flex-1 grid-rows-[auto_1fr] lg:grid-cols-[2fr_3fr] lg:grid-rows-1">
         <div className="min-h-0 border-b border-border lg:border-b-0 lg:border-r">
-          <StylePanel palette={palette} onPalette={setPalette} face={face} onFace={setFace} />
+          <StylePanel
+            palette={palette}
+            onPalette={setPalette}
+            face={face}
+            onFace={setFace}
+            corner={corner}
+            onCorner={setCorner}
+            cardStyle={cardStyle}
+            onCardStyle={setCardStyle}
+          />
         </div>
         <div className="min-h-0 overflow-y-auto">
           <SlotCanvas

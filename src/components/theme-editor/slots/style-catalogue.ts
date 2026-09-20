@@ -138,3 +138,46 @@ export const FACES: Face[] = [
     specimen: "ডেনিম ওয়ার্ক শার্ট",
   },
 ];
+
+/**
+ * Corners.
+ *
+ * One value dresses everything a shop draws a box around -- cards, buttons,
+ * inputs, panels, the picture frames -- so it is one choice rather than a
+ * setting per component. `radius` is the largest step; the smaller ones scale
+ * from it, which is how `styles/base.css` already resolves `rounded-sm` and
+ * `rounded-md` against `rounded-lg`.
+ */
+export type Corner = {
+  key: string;
+  /** `themeEditor.slots.*` key. */
+  label: string;
+  /** What the preview draws, and what the shop would resolve `rounded-lg` to. */
+  radius: number;
+};
+
+export const CORNERS: Corner[] = [
+  { key: "square", label: "cornerSquare", radius: 0 },
+  { key: "soft", label: "cornerSoft", radius: 6 },
+  { key: "round", label: "cornerRound", radius: 14 },
+];
+
+/**
+ * How hard a product card sells.
+ *
+ * The two the API already ships (`theming/presets.py` CARD_VARIANTS). It is a
+ * decision about selling rather than about looks -- which is why it survives as
+ * a merchant setting and is not folded into the palette.
+ */
+export type CardStyle = {
+  key: string;
+  /** `themeEditor.slots.*` key. */
+  label: string;
+  /** `themeEditor.slots.*` key: what it does differently, in a few words. */
+  note: string;
+};
+
+export const CARD_STYLES: CardStyle[] = [
+  { key: "classic", label: "cardClassic", note: "cardClassicNote" },
+  { key: "shelf", label: "cardShelf", note: "cardShelfNote" },
+];

@@ -4,7 +4,16 @@ import { useTranslations } from "next-intl";
 import { Check } from "lucide-react";
 
 import { cn } from "@/lib/utils";
-import { FACES, PALETTES, type Face, type Palette } from "./style-catalogue";
+import {
+  CARD_STYLES,
+  CORNERS,
+  FACES,
+  PALETTES,
+  type CardStyle,
+  type Corner,
+  type Face,
+  type Palette,
+} from "./style-catalogue";
 
 /**
  * Which face each specimen is set in.
@@ -110,19 +119,112 @@ function FaceRow({
   );
 }
 
+/** A corner, shown at the size a card would wear it. */
+function CornerCard({ corner, chosen, onPick }: { corner: Corner; chosen: boolean; onPick: () => void }) {
+  const t = useTranslations("themeEditor.slots");
+  return (
+    <button
+      type="button"
+      aria-pressed={chosen}
+      onClick={onPick}
+      className={cn(
+        "flex flex-col items-center gap-2 rounded-sm border p-2.5 transition-colors",
+        "hover:border-primary focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-primary",
+        chosen ? "border-primary ring-1 ring-inset ring-primary" : "border-border-subtle",
+      )}
+    >
+      <span
+        aria-hidden
+        className="h-9 w-full border-2 border-muted-foreground/30 bg-muted"
+        style={{ borderRadius: corner.radius }}
+      />
+      <span className="text-xs font-medium">{t(corner.label)}</span>
+    </button>
+  );
+}
+
+/**
+ * A product card, drawn small.
+ *
+ * The difference between the two is what a shopper meets first -- a quiet name
+ * and an add mark in the corner, or the price and a button that orders -- so the
+ * preview draws that rather than naming it.
+ */
+function CardStyleCard({
+  style,
+  corner,
+  chosen,
+  onPick,
+}: {
+  style: CardStyle;
+  corner: number;
+  chosen: boolean;
+  onPick: () => void;
+}) {
+  const t = useTranslations("themeEditor.slots");
+  const shelf = style.key === "shelf";
+  return (
+    <button
+      type="button"
+      aria-pressed={chosen}
+      onClick={onPick}
+      className={cn(
+        "flex flex-col gap-2 rounded-sm border p-2.5 text-left transition-colors",
+        "hover:border-primary focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-primary",
+        chosen ? "border-primary ring-1 ring-inset ring-primary" : "border-border-subtle",
+      )}
+    >
+      <span aria-hidden className="flex flex-col gap-1">
+        <span className="relative block h-12 bg-muted" style={{ borderRadius: corner }}>
+          {shelf ? null : (
+            <span
+              className="absolute bottom-1 right-1 grid size-4 place-items-center bg-background text-[10px] leading-none text-muted-foreground"
+              style={{ borderRadius: Math.min(corner, 6) }}
+            >
+              +
+            </span>
+          )}
+        </span>
+        {shelf ? (
+          <>
+            <span className="block h-1.5 w-1/2 rounded-full bg-muted-foreground/40" />
+            <span className="block h-4 w-full bg-muted-foreground/25" style={{ borderRadius: Math.min(corner, 6) }} />
+          </>
+        ) : (
+          <>
+            <span className="block h-1.5 w-3/4 rounded-full bg-muted-foreground/25" />
+            <span className="block h-1.5 w-1/3 rounded-full bg-muted-foreground/15" />
+          </>
+        )}
+      </span>
+      <span className="text-xs font-medium">{t(style.label)}</span>
+      <span className="text-[11px] text-muted-foreground">{t(style.note)}</span>
+    </button>
+  );
+}
+
 export function StylePanel({
   palette,
   onPalette,
   face,
   onFace,
+  corner,
+  onCorner,
+  cardStyle,
+  onCardStyle,
 }: {
   palette: string;
   onPalette: (key: string) => void;
   face: string;
   onFace: (key: string) => void;
+  corner: string;
+  onCorner: (key: string) => void;
+  cardStyle: string;
+  onCardStyle: (key: string) => void;
 }) {
   const t = useTranslations("themeEditor.slots");
   const current = FACES.find((f) => f.key === face) ?? FACES[0];
+  const radius = (CORNERS.find((c) => c.key === corner) ?? CORNERS[0]).radius;
 
   const group = (language: Face["language"]) => FACES.filter((f) => f.language === language);
 
@@ -172,6 +274,37 @@ export function StylePanel({
         <p className="mt-3 rounded-sm bg-muted/60 px-3 py-2 text-[11px] text-muted-foreground">
           {t("pairedWith", { face: current.pairedWith })}
         </p>
+      </section>
+
+      <section>
+        <h3 className="mb-1 text-[13px] font-semibold">{t("corners")}</h3>
+        <p className="mb-3 text-xs text-muted-foreground">{t("cornersNote")}</p>
+        <div className="grid grid-cols-3 gap-2">
+          {CORNERS.map((item) => (
+            <CornerCard
+              key={item.key}
+              corner={item}
+              chosen={corner === item.key}
+              onPick={() => onCorner(item.key)}
+            />
+          ))}
+        </div>
+      </section>
+
+      <section>
+        <h3 className="mb-1 text-[13px] font-semibold">{t("cardStyle")}</h3>
+        <p className="mb-3 text-xs text-muted-foreground">{t("cardStyleNote")}</p>
+        <div className="grid grid-cols-2 gap-2">
+          {CARD_STYLES.map((item) => (
+            <CardStyleCard
+              key={item.key}
+              style={item}
+              corner={radius}
+              chosen={cardStyle === item.key}
+              onPick={() => onCardStyle(item.key)}
+            />
+          ))}
+        </div>
       </section>
     </div>
   );
