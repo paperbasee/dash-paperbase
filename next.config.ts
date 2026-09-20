@@ -88,12 +88,29 @@ const securityHeaders = [
   },
 ];
 
+// What busts the persisted react-query cache (see QueryProvider).
+//
+// In production this is the commit, so a deploy throws away anything cached
+// against the old code -- which is what stops a merchant's browser restoring a
+// response in a shape the API no longer sends.
+//
+// In development it used to be the literal string "dev", which never changes.
+// That meant a cached response outlived every code change: alter a response
+// shape and the browser goes on restoring the old one from IndexedDB, for
+// fifteen days, with no way to tell that from a real bug. It cost an afternoon
+// on the most-wished-for list, which came back as a paginated object long after
+// the endpoint had stopped sending one.
+//
+// So in development it changes whenever the dev server starts. Reloading then
+// refetches, which is the right trade there: dev wants the truth, not speed.
+const BUILD_ID =
+  process.env.NEXT_PUBLIC_BUILD_ID ??
+  process.env.VERCEL_GIT_COMMIT_SHA ??
+  (process.env.NODE_ENV === "production" ? "production" : `dev-${Date.now()}`);
+
 const nextConfig: NextConfig = {
   env: {
-    NEXT_PUBLIC_BUILD_ID:
-      process.env.NEXT_PUBLIC_BUILD_ID ??
-      process.env.VERCEL_GIT_COMMIT_SHA ??
-      "dev",
+    NEXT_PUBLIC_BUILD_ID: BUILD_ID,
   },
   experimental: {
     optimizePackageImports: [
