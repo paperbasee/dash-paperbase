@@ -22,6 +22,7 @@ import { toLocaleDigits } from "@/lib/locale-digits";
 import { digitsInNumberFont, numberTextClass } from "@/lib/number-font";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { useFilters } from "@/hooks/useFilters";
+import { useEnabledApps } from "@/context/EnabledAppsContext";
 import { ClickableTableRow } from "@/components/ui/clickable-table-row";
 import { CustomersTabStrip } from "./CustomersTabStrip";
 import { useCustomerAccountsQuery } from "@/hooks/useCustomerAccountsQuery";
@@ -43,6 +44,8 @@ export function AccountsTab() {
   const numClass = numberTextClass(locale);
   const tPages = useTranslations("pages");
   const tCommon = useTranslations("common");
+  const { isEnabled } = useEnabledApps();
+  const accountsOn = isEnabled("accounts");
   const { page, filters, setFilter, setPage, clearFilters } = useFilters([
     "joined_date",
     "is_repeat_customer",
@@ -175,7 +178,12 @@ export function AccountsTab() {
 
       {!isLoading && accounts.length === 0 && !isError ? (
         <div className="rounded-card border border-card-border bg-card py-12 text-center text-sm text-muted-foreground">
-          {tPages("customerAccountsEmpty")}
+          {/* Two different empty lists. "Nobody has signed in yet" is true but
+              misleading for a shop where nobody CAN: a merchant would wait for
+              something that cannot happen. */}
+          {accountsOn
+            ? tPages("customerAccountsEmpty")
+            : tPages("customerAccountsSwitchedOff")}
         </div>
       ) : !isLoading ? (
         <>

@@ -1147,7 +1147,8 @@
     "customerAccountDetailsVerifiedOn": "Verified {date}",
     "customerAccountDetailsUnverified": "Not verified",
     "toastTitleCustomerAccountUnavailable": "Could not load this account",
-    "toastDescCustomerAccountUnavailable": "This account could not be loaded. It may have been removed."
+    "toastDescCustomerAccountUnavailable": "This account could not be loaded. It may have been removed.",
+    "customerAccountsSwitchedOff": "Accounts are switched off for this shop, so no one can sign in yet. Turn them on to let shoppers create an account."
   },
   "sidebar": {
     "expandSidebar": "Expand sidebar",

@@ -57,6 +57,35 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-09-21-shoppers-can-have-an-account",
+    date: "2026-09-21",
+    tag: "new",
+    version: "4.34.0",
+    href: "/customers",
+    title: {
+      en: "Shoppers can have an account",
+      bn: "ক্রেতারা অ্যাকাউন্ট খুলতে পারবেন",
+    },
+    body: {
+      en: "A shopper can sign in to your shop with their email — no password, just a link we send them. Your Customers page now has an Accounts tab showing everyone who has. It stays off until you switch it on.",
+      bn: "ক্রেতারা তাদের ইমেইল দিয়ে আপনার দোকানে সাইন ইন করতে পারবেন — কোনো পাসওয়ার্ড লাগবে না, আমরা একটি লিংক পাঠিয়ে দেব। গ্রাহক পাতায় এখন একটি অ্যাকাউন্ট ট্যাব আছে, যেখানে যারা সাইন ইন করেছেন তাদের দেখা যায়। আপনি চালু না করা পর্যন্ত এটি বন্ধ থাকবে।",
+    },
+  },
+  {
+    id: "2026-09-21-shoppers-can-track-their-order",
+    date: "2026-09-21",
+    tag: "new",
+    version: "4.34.0",
+    title: {
+      en: "Shoppers can track their own order",
+      bn: "ক্রেতারা নিজেরাই অর্ডার ট্র্যাক করতে পারবেন",
+    },
+    body: {
+      en: "With their order number and the phone they ordered with, a shopper can see where their parcel is. No account needed — which matters most if your checkout form does not ask for an email. It stays off until you switch it on.",
+      bn: "অর্ডার নম্বর আর যে ফোন নম্বর দিয়ে অর্ডার করেছেন, সেটি দিলেই ক্রেতা দেখতে পাবেন তার পার্সেল কোথায় আছে। কোনো অ্যাকাউন্ট লাগবে না — বিশেষ করে যদি আপনার চেকআউট ফর্মে ইমেইল না চাওয়া হয়। আপনি চালু না করা পর্যন্ত এটি বন্ধ থাকবে।",
+    },
+  },
+  {
     id: "2026-09-20-search-shows-every-match",
     date: "2026-09-20",
     // A storefront and API change: the dashboard version that is live, per the rule above.
@@ -450,21 +479,6 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
       bn: "অর্ডার তালিকা, অর্ডারের বিস্তারিত, পণ্য, ক্যাটাগরি ও ইনভেন্টরি পেজ এখন দ্রুত লোড হয়, স্টোর বড় হলেও ধীর হয় না। একসাথে অনেক অর্ডার কুরিয়ারে পাঠানোও এখন দ্রুত হয়।",
     },
     href: "/orders",
-  },
-  {
-    id: "2026-09-14-order-editor-fresh-stock",
-    date: "2026-09-14",
-    version: "4.5.0",
-    tag: "improved",
-    title: {
-      en: "Order editor opens faster with fresh stock",
-      bn: "অর্ডার এডিটর দ্রুত খোলে, স্টক থাকে হালনাগাদ",
-    },
-    body: {
-      en: "Editing an order or creating a new one loads product options in one go. Stock in the editor updates after orders or inventory change, so the numbers stay current.",
-      bn: "অর্ডার সম্পাদনা বা নতুন অর্ডার তৈরির সময় পণ্যের অপশন এখন একবারেই লোড হয়। অর্ডার বা ইনভেন্টরি বদলালে এডিটরের স্টকও হালনাগাদ হয়, তাই সংখ্যাগুলো হালনাগাদ থাকে।",
-    },
-    href: "/orders/new",
   },
   {
     id: "2026-09-14-bulk-delete-and-restore",
