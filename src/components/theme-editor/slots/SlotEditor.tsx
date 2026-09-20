@@ -160,8 +160,17 @@ export function SlotEditor() {
         half the screen. On a narrow window they stack above the page rather
         than squeezing: a 40% column of swatches is unusable at that width.
       */}
-      <div className="grid min-h-0 flex-1 grid-rows-[auto_1fr] lg:grid-cols-[2fr_3fr] lg:grid-rows-1">
-        <div className="min-h-0 border-b border-border lg:border-b-0 lg:border-r">
+      {/*
+        Two panes that scroll on their own, and one column that scrolls as a
+        whole when there is no room for two.
+
+        `overflow-hidden` on the container is what makes the panes scrollable at
+        all: a grid item stretches to the row, but a child with `overflow-y-auto`
+        and no height of its own just grows past it and the scrollbar never
+        appears. The container has to refuse to grow first.
+      */}
+      <div className="flex min-h-0 flex-1 flex-col overflow-y-auto lg:grid lg:grid-cols-[2fr_3fr] lg:overflow-hidden">
+        <div className="shrink-0 border-b border-border lg:min-h-0 lg:overflow-y-auto lg:border-b-0 lg:border-r">
           <StylePanel
             palette={palette}
             onPalette={setPalette}
@@ -173,7 +182,7 @@ export function SlotEditor() {
             onCardStyle={setCardStyle}
           />
         </div>
-        <div className="min-h-0 overflow-y-auto">
+        <div className="lg:min-h-0 lg:overflow-y-auto">
           <SlotCanvas
             page={page}
             device={device}

@@ -229,7 +229,7 @@ export function StylePanel({
   const group = (language: Face["language"]) => FACES.filter((f) => f.language === language);
 
   return (
-    <div className="flex min-h-0 flex-col gap-10 overflow-y-auto px-5 py-6">
+    <div className="flex flex-col gap-10 px-5 py-6">
       <section>
         <h3 className="mb-2 text-[11px] font-semibold uppercase tracking-[0.09em] text-muted-foreground">
           {t("colours")}
