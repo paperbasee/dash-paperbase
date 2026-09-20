@@ -10,6 +10,7 @@ import {
   MapPin,
   Phone,
   RotateCcw,
+  Search,
   ShieldCheck,
   Smartphone,
   Truck,
@@ -98,10 +99,10 @@ const BESTSELLERS: Card[] = [
 ];
 
 const POSTS = [
-  { title: "How we choose leather", excerpt: "Six tanneries, one that answers the phone." },
-  { title: "Caring for canvas in the rain", excerpt: "Dhaka in July is a test no lab can run." },
-  { title: "Behind the seams", excerpt: "A day with the people who cut and stitch." },
-  { title: "Why our hardware never changed", excerpt: "Six years, and nothing has worn out yet." },
+  { title: "How we choose leather", excerpt: "Six tanneries, one that answers the phone.", tag: "Materials" },
+  { title: "Caring for canvas in the rain", excerpt: "Dhaka in July is a test no lab can run.", tag: "Care" },
+  { title: "Behind the seams", excerpt: "A day with the people who cut and stitch.", tag: "Workshop" },
+  { title: "Why our hardware never changed", excerpt: "Six years, and nothing has worn out yet.", tag: "Materials" },
 ];
 
 /**
@@ -117,20 +118,35 @@ function PostCards({
   cards,
   meta,
 }: {
-  posts: { title: string; excerpt: string }[];
+  posts: { title: string; excerpt: string; tag: string }[];
   cards: string;
   meta: string | null;
 }) {
   return (
-    <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+    <div className="grid grid-cols-2 gap-3.5 sm:grid-cols-4">
       {posts.map((post) => (
         <div key={post.title} className="min-w-0">
-          {cards === "words" ? null : <div className="aspect-[4/3] rounded-xs bg-current/8" aria-hidden />}
-          <p className={`${cards === "words" ? "" : "mt-2"} text-[12px] font-medium leading-snug`}>{post.title}</p>
+          {cards === "words" ? null : (
+            <div className="relative overflow-hidden rounded-md bg-current/8 aspect-[4/3]" aria-hidden>
+              <span className="absolute left-2 top-2 rounded-full bg-[color:var(--color-background)]/85 px-2 py-0.5 text-[9px] font-medium text-current/70">
+                {post.tag}
+              </span>
+            </div>
+          )}
+          {/* A words-only card has nothing to lean on, so it gets a rule and the
+              tag it would otherwise have worn on the picture. */}
+          {cards === "words" ? (
+            <p className="mb-1.5 border-t-2 border-current/20 pt-2 text-[9px] uppercase tracking-[0.1em] text-current/45">
+              {post.tag}
+            </p>
+          ) : null}
+          <p className={`${cards === "words" ? "" : "mt-2.5"} text-[12.5px] font-semibold leading-snug`}>
+            {post.title}
+          </p>
           {cards === "picture" ? null : (
             <p className="mt-1 text-[10.5px] leading-relaxed text-current/50">{post.excerpt}</p>
           )}
-          {meta ? <p className="mt-1 text-[10px] text-current/40">{meta}</p> : null}
+          {meta ? <p className="mt-1.5 text-[10px] text-current/40">{meta}</p> : null}
         </div>
       ))}
     </div>
@@ -1296,8 +1312,11 @@ export function ShopChrome({
     case "blog:search":
       return (
         <div className="flex gap-2 px-4 py-3">
-          <span className="h-8 flex-1 rounded-xs border border-current/15 bg-current/[0.04]" aria-hidden />
-          <span className="grid h-8 shrink-0 place-items-center rounded-xs border border-current/25 px-3 text-[11px] font-medium">
+          <span className="flex h-9 flex-1 items-center gap-2 rounded-full border border-current/15 bg-current/[0.04] px-3.5 text-[11px] text-current/40">
+            <Search className="size-3.5 shrink-0 text-current/30" aria-hidden />
+            {t("blogSearchPlaceholder")}
+          </span>
+          <span className="grid h-9 shrink-0 place-items-center rounded-full bg-foreground px-5 text-[11px] font-semibold text-background">
             {t("blogSearchButton")}
           </span>
         </div>
@@ -1336,12 +1355,16 @@ export function ShopChrome({
         return (
           <div className="px-4 py-4">
             <SectionHead title={t("blogFeaturedHeadingExample")} />
-            <div className="grid gap-3 sm:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)]">
-              <div className="aspect-[16/10] rounded-xs bg-current/8" aria-hidden />
+            <div className="grid gap-4 sm:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)]">
+              <div className="aspect-[16/10] rounded-md bg-current/8" aria-hidden />
               <div className="flex flex-col justify-center gap-2">
-                <p className="text-[16px] font-medium leading-snug">{POSTS[0].title}</p>
+                <p className="w-fit rounded-full bg-current/8 px-2.5 py-0.5 text-[9.5px] font-medium uppercase tracking-[0.08em] text-current/55">
+                  {POSTS[0].tag}
+                </p>
+                <p className="text-[17px] font-semibold leading-snug">{POSTS[0].title}</p>
                 <p className="text-[11.5px] leading-relaxed text-current/55">{POSTS[0].excerpt}</p>
                 {cardMeta ? <p className="text-[10px] text-current/40">{cardMeta}</p> : null}
+                <p className="mt-0.5 text-[11px] font-medium underline underline-offset-4">{t("blogReadOn")}</p>
               </div>
             </div>
           </div>
@@ -1365,10 +1388,11 @@ export function ShopChrome({
             <SectionHead title={t("blogLatestHeadingExample")} />
             <div className="grid gap-3">
               {POSTS.slice(0, 3).map((post) => (
-                <div key={post.title} className="flex items-center gap-3 border-b border-current/10 pb-3">
-                  <span className="h-14 w-20 shrink-0 rounded-xs bg-current/8" aria-hidden />
+                <div key={post.title} className="flex items-center gap-3.5 border-b border-current/10 pb-3.5">
+                  <span className="h-16 w-24 shrink-0 rounded-md bg-current/8" aria-hidden />
                   <span className="min-w-0 flex-1">
-                    <span className="block truncate text-[13px] font-medium">{post.title}</span>
+                    <span className="block text-[9.5px] uppercase tracking-[0.08em] text-current/40">{post.tag}</span>
+                    <span className="mt-0.5 block truncate text-[13px] font-semibold">{post.title}</span>
                     <span className="mt-0.5 block truncate text-[11px] text-current/50">{post.excerpt}</span>
                   </span>
                   {cardMeta ? <span className="shrink-0 text-[10px] text-current/40">{cardMeta}</span> : null}
@@ -1429,12 +1453,20 @@ export function ShopChrome({
         return (
           <div>
             <div className="aspect-[21/8] bg-current/8" aria-hidden />
-            <h4 className="m-0 px-4 pt-4 text-[21px] font-medium leading-tight tracking-tight">{POSTS[0].title}</h4>
+            <div className="px-4 pt-4">
+              <p className="mb-1.5 text-[9.5px] uppercase tracking-[0.1em] text-current/45">{POSTS[0].tag}</p>
+              <h4 className="m-0 max-w-[26ch] text-[22px] font-semibold leading-[1.2] tracking-tight">
+                {POSTS[0].title}
+              </h4>
+            </div>
           </div>
         );
       }
       return (
-        <h4 className="m-0 px-4 pt-5 text-[21px] font-medium leading-tight tracking-tight">{POSTS[0].title}</h4>
+        <div className="px-4 pt-5">
+          <p className="mb-1.5 text-[9.5px] uppercase tracking-[0.1em] text-current/45">{POSTS[0].tag}</p>
+          <h4 className="m-0 max-w-[26ch] text-[22px] font-semibold leading-[1.2] tracking-tight">{POSTS[0].title}</h4>
+        </div>
       );
 
     case "article:byline":
@@ -1447,14 +1479,16 @@ export function ShopChrome({
     case "article:body": {
       const wide = variant === "wide";
       return (
-        <div className={wide ? "px-4 py-4" : "mx-auto max-w-[34rem] px-4 py-4"}>
-          <p className="mb-3 text-[12px] leading-[1.75] text-current/70">{t("articleBodyExample")}</p>
-          <div className="grid gap-2">
-            <Line />
-            <Line />
-            <Line w="92%" />
-            <Line w="78%" />
-          </div>
+        <div className={wide ? "px-4 py-5" : "mx-auto max-w-[34rem] px-4 py-5"}>
+          {/* Real paragraphs. The choice on this slot is how WIDE a line of text
+              runs, and that cannot be judged against grey bars of a fixed
+              length -- they are the same shape at either setting. */}
+          <p className="text-[12.5px] leading-[1.8] text-current/75">{t("articleBodyExample")}</p>
+          <p className="mt-3.5 text-[12.5px] leading-[1.8] text-current/70">{t("articleBodyTwo")}</p>
+          <p className="mt-4 border-l-2 border-current/25 pl-4 text-[13px] italic leading-[1.7] text-current/70">
+            {t("articleQuoteExample")}
+          </p>
+          <p className="mt-4 text-[12.5px] leading-[1.8] text-current/70">{t("articleBodyThree")}</p>
         </div>
       );
     }
@@ -1472,14 +1506,14 @@ export function ShopChrome({
 
     case "article:prevNext":
       return (
-        <div className="grid gap-3 border-t border-current/10 px-4 py-4 sm:grid-cols-2">
+        <div className="grid gap-3 px-4 py-4 sm:grid-cols-2">
           {[
-            { dir: t("articlePrev"), title: POSTS[1].title, align: "" },
-            { dir: t("articleNext"), title: POSTS[2].title, align: "sm:text-right" },
+            { dir: `← ${t("articlePrev")}`, title: POSTS[1].title, align: "" },
+            { dir: `${t("articleNext")} →`, title: POSTS[2].title, align: "sm:text-right" },
           ].map((item) => (
-            <div key={item.dir} className={item.align}>
+            <div key={item.dir} className={`rounded-md border border-current/12 p-3.5 ${item.align}`}>
               <p className="text-[10px] uppercase tracking-[0.08em] text-current/40">{item.dir}</p>
-              <p className="mt-1 truncate text-[12px] font-medium">{item.title}</p>
+              <p className="mt-1.5 truncate text-[12.5px] font-semibold">{item.title}</p>
             </div>
           ))}
         </div>
