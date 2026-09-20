@@ -73,10 +73,22 @@ export function ShopChrome({
   page,
   slotKey,
   variant,
+  settings,
 }: {
   page: SlotPageKey;
   slotKey: string;
   variant: string | undefined;
+  /**
+   * Every setting of the group this slot belongs to, when it is drawing the
+   * whole of one -- the header or the footer.
+   *
+   * Without it the composed footer drew its arrangement and ignored the other
+   * five settings, so a merchant switched the sign-up on, went to look at a
+   * page, and found nothing there. A preview that answers only some of the
+   * questions put to it is worse than one that answers none, because it is
+   * believed.
+   */
+  settings?: Record<string, string>;
 }) {
   const t = useTranslations("themeEditor.slots");
 
@@ -92,12 +104,19 @@ export function ShopChrome({
   }
 
   if (slotKey === "header") {
-    const layout = variant ?? "bar";
+    const set = settings ?? {};
+    const layout = variant ?? set.layout ?? "bar";
+    const search = set.search ?? "box";
+    const marks = (set.marks ?? "off") === "on" ? 4 : 2;
     const logo = <span className="text-sm font-semibold tracking-[0.14em]">GADZILLA</span>;
+    // Search is a mark in the row unless it has a box of its own, and the
+    // account and wishlist marks appear only when they are switched on.
     const icons = (
       <span className="flex shrink-0 items-center gap-2.5">
-        <span className="size-4 rounded-xs bg-white/25" />
-        <span className="size-4 rounded-xs bg-white/25" />
+        {search === "icon" ? <span className="size-4 rounded-full border border-white/35" /> : null}
+        {Array.from({ length: marks }, (_, i) => (
+          <span key={i} className="size-4 rounded-xs bg-white/25" />
+        ))}
       </span>
     );
     const nav = (centred: boolean) => (
@@ -181,7 +200,11 @@ export function ShopChrome({
         {bar(
           <>
             {logo}
-            <span className="h-7 flex-1 rounded-xs bg-white/12" />
+            {search === "box" ? (
+              <span className="h-7 flex-1 rounded-xs bg-white/12" />
+            ) : (
+              <span className="flex-1" />
+            )}
             {icons}
           </>,
         )}
@@ -191,7 +214,8 @@ export function ShopChrome({
   }
 
   if (slotKey === "footer") {
-    const layout = variant ?? "columns";
+    const set = settings ?? {};
+    const layout = variant ?? set.layout ?? "columns";
     const heading = (text: string) => (
       <p className="mb-2.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-white">{text}</p>
     );
@@ -201,74 +225,138 @@ export function ShopChrome({
           {link}
         </p>
       ));
+
+    const contact = set.contact ?? "full";
     const shop = (
       <div>
         {heading("Gadzilla")}
-        <p className="text-[11px] leading-relaxed">12 Gulshan Avenue, Dhaka 1212</p>
-        <p className="mt-1.5 text-[11px]">+880 1700 000000</p>
+        {contact === "off" ? null : contact === "email" ? (
+          <p className="text-[11px]">hello@gadzilla.com</p>
+        ) : (
+          <>
+            <p className="text-[11px] leading-relaxed">12 Gulshan Avenue, Dhaka 1212</p>
+            <p className="mt-1.5 text-[11px]">+880 1700 000000</p>
+          </>
+        )}
       </div>
     );
+
     const columns = [
       { head: "Information", items: ["About us", "Blog", "Privacy policy"] },
       { head: "Customer service", items: ["Contact us", "Returns", "Track order"] },
       { head: "Company", items: ["Careers", "Wholesale", "Stores"] },
     ];
-    const bottom = (
-      <p className="mt-5 border-t border-white/12 pt-4 text-[10px] text-white/45">
-        © 2026 Gadzilla — All rights reserved · powered by Paperbase
-      </p>
+
+    const newsletter =
+      (set.newsletter ?? "off") === "off" ? null : (
+        <div className="mb-6 border-b border-white/12 pb-6">
+          <p className="text-[12px] font-semibold text-white">
+            {set.newsletter === "whatsapp" ? t("signupWhatsappHeading") : t("signupEmailHeading")}
+          </p>
+          <div className="mt-3 flex max-w-sm gap-2">
+            <span className="h-9 flex-1 rounded-xs bg-white/12" />
+            <span className="grid h-9 place-items-center rounded-xs bg-white px-4 text-[11px] text-[#1a1a1a]">
+              {set.newsletter === "whatsapp" ? t("signupWhatsappButton") : t("signupEmailButton")}
+            </span>
+          </div>
+        </div>
+      );
+
+    const social =
+      (set.social ?? "marks") === "off" ? null : (set.social ?? "marks") === "names" ? (
+        <p className="mt-5 text-[11px]">Facebook · Instagram · YouTube · TikTok</p>
+      ) : (
+        <div className="mt-5 flex gap-2.5">
+          {Array.from({ length: 4 }, (_, i) => (
+            <span key={i} className="size-8 rounded-full bg-white/12" />
+          ))}
+        </div>
+      );
+
+    const payments =
+      (set.payments ?? "on") === "off" ? null : (
+        <div className="mt-5">
+          <p className="mb-2 text-[10px] uppercase tracking-[0.08em] text-white/45">{t("paymentsHeading")}</p>
+          <div className="flex flex-wrap gap-2">
+            {["bKash", "Nagad", "Rocket", "Visa", "Mastercard", t("cashOnDelivery")].map((name) => (
+              <span key={name} className="rounded-xs border border-white/15 px-2.5 py-1 text-[10px] text-white/70">
+                {name}
+              </span>
+            ))}
+          </div>
+        </div>
+      );
+
+    const bottom =
+      (set.bottom ?? "copyright") === "policies" ? (
+        <div className="mt-5 flex flex-wrap items-center justify-between gap-2 border-t border-white/12 pt-4 text-[10px] text-white/45">
+          <span>© 2026 Gadzilla · powered by Paperbase</span>
+          <span>Privacy · Returns · Terms</span>
+        </div>
+      ) : (
+        <p className="mt-5 border-t border-white/12 pt-4 text-[10px] text-white/45">
+          © 2026 Gadzilla — All rights reserved · powered by Paperbase
+        </p>
+      );
+
+    const shell = (children: React.ReactNode, centred = false) => (
+      <div className={`bg-[#1a1a1a] px-5 py-6 text-white/65${centred ? " text-center" : ""}`}>
+        {newsletter}
+        {children}
+        {social}
+        {payments}
+        {bottom}
+      </div>
     );
 
     if (layout === "minimal") {
-      return (
-        <div className="bg-[#1a1a1a] px-5 py-5 text-center text-white/65">
+      return shell(
+        <>
           <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-white">Gadzilla</p>
           <p className="mt-2.5 text-[11px]">About · Contact · Returns · Privacy</p>
-          <p className="mt-3 text-[10px] text-white/45">© 2026 Gadzilla · powered by Paperbase</p>
-        </div>
+        </>,
+        true,
       );
     }
     if (layout === "centred") {
-      return (
-        <div className="bg-[#1a1a1a] px-5 py-6 text-center text-white/65">
+      return shell(
+        <>
           <p className="text-[12px] font-semibold uppercase tracking-[0.12em] text-white">Gadzilla</p>
-          <p className="mt-2.5 text-[11px]">12 Gulshan Avenue, Dhaka 1212 · +880 1700 000000</p>
+          {contact === "off" ? null : (
+            <p className="mt-2.5 text-[11px]">
+              {contact === "email" ? "hello@gadzilla.com" : "12 Gulshan Avenue, Dhaka 1212 · +880 1700 000000"}
+            </p>
+          )}
           <p className="mt-3 text-[11px]">About us · Blog · Contact us · Returns · Privacy policy</p>
-          {bottom}
-        </div>
+        </>,
+        true,
       );
     }
     if (layout === "split") {
-      return (
-        <div className="bg-[#1a1a1a] px-5 py-6 text-white/65">
-          <div className="grid gap-6 sm:grid-cols-[minmax(0,1fr)_auto]">
-            {shop}
-            <div className="grid grid-cols-2 gap-x-8 gap-y-5">
-              {columns.slice(0, 2).map((column) => (
-                <div key={column.head}>
-                  {heading(column.head)}
-                  {links(column.items)}
-                </div>
-              ))}
-            </div>
+      return shell(
+        <div className="grid gap-6 sm:grid-cols-[minmax(0,1fr)_auto]">
+          {shop}
+          <div className="grid grid-cols-2 gap-x-8 gap-y-5">
+            {columns.slice(0, 2).map((column) => (
+              <div key={column.head}>
+                {heading(column.head)}
+                {links(column.items)}
+              </div>
+            ))}
           </div>
-          {bottom}
-        </div>
+        </div>,
       );
     }
-    return (
-      <div className="bg-[#1a1a1a] px-5 py-6 text-white/65">
-        <div className="grid grid-cols-2 gap-x-5 gap-y-5 sm:grid-cols-4">
-          {shop}
-          {columns.map((column) => (
-            <div key={column.head}>
-              {heading(column.head)}
-              {links(column.items)}
-            </div>
-          ))}
-        </div>
-        {bottom}
-      </div>
+    return shell(
+      <div className="grid grid-cols-2 gap-x-5 gap-y-5 sm:grid-cols-4">
+        {shop}
+        {columns.map((column) => (
+          <div key={column.head}>
+            {heading(column.head)}
+            {links(column.items)}
+          </div>
+        ))}
+      </div>,
     );
   }
 
@@ -588,7 +676,7 @@ export function ShopChrome({
       return <p className="px-4 py-3 text-center text-[11px] text-current/55">{t("afterExample")}</p>;
 
     case "header:layout":
-      return <ShopChrome page={page} slotKey="header" variant={variant} />;
+      return <ShopChrome page={page} slotKey="header" variant={variant} settings={settings} />;
 
     case "header:search":
       return variant === "off" ? (
@@ -622,7 +710,7 @@ export function ShopChrome({
       );
 
     case "footer:layout":
-      return <ShopChrome page={page} slotKey="footer" variant={variant} />;
+      return <ShopChrome page={page} slotKey="footer" variant={variant} settings={settings} />;
 
     case "footer:contact":
       return (

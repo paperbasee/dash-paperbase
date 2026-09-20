@@ -246,7 +246,12 @@ export function SlotCanvas({
                   </span>
                 </div>
               ) : (
-                <ShopChrome page={page} slotKey={slot.key} variant={value} />
+                <ShopChrome
+                  page={page}
+                  slotKey={slot.key}
+                  variant={value}
+                  settings={source ? allChoices[source.page] : choices}
+                />
               )}
 
               {isOpen ? (
