@@ -14,8 +14,29 @@ import bn from "../../messages/bn.json";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 
-const enNs = (en as Record<string, any>).themeEditor as Record<string, string>;
-const bnNs = (bn as Record<string, any>).themeEditor as Record<string, string>;
+/**
+ * The namespace, flattened.
+ *
+ * `themeEditor` holds one nested namespace, `slots` -- the slot editor reads it as
+ * `useTranslations("themeEditor.slots")` -- so the strings live one level down.
+ * Flattening keeps every check below working on strings rather than teaching each
+ * one to walk, and a key is then checked by either spelling: `done` for the flat
+ * namespace, `slots.done` for the nested one.
+ */
+const flatten = (source: Record<string, any>, prefix = ""): Record<string, string> => {
+  const out: Record<string, string> = {};
+  for (const [key, value] of Object.entries(source)) {
+    if (value && typeof value === "object") Object.assign(out, flatten(value, `${prefix}${key}.`));
+    else out[`${prefix}${key}`] = String(value);
+  }
+  return out;
+};
+
+const enNs = flatten((en as Record<string, any>).themeEditor);
+const bnNs = flatten((bn as Record<string, any>).themeEditor);
+
+/** A key a component asked for, found under the namespace it reads or under `slots`. */
+const known = (ns: Record<string, string>, key: string) => key in ns || `slots.${key}` in ns;
 
 const SOURCES = [
   "src/app/[locale]/(dashboard)/settings/customize/page.tsx",
@@ -33,6 +54,9 @@ const SOURCES = [
   "src/components/theme-editor/VersionHistorySheet.tsx",
   "src/components/theme-editor/CloseSheet.tsx",
   "src/components/theme-editor/ConflictDialog.tsx",
+  "src/components/theme-editor/slots/SlotEditor.tsx",
+  "src/components/theme-editor/slots/SlotCanvas.tsx",
+  "src/components/theme-editor/slots/ShopChrome.tsx",
 ];
 
 /**
@@ -41,6 +65,8 @@ const SOURCES = [
  * so they are read from there.
  */
 const KEY_SOURCES = [
+  // The slot catalogue is all keys: every slot, option and reason a merchant reads.
+  "src/lib/theme-editor/slot-catalogue.ts",
   "src/lib/theme-editor/link-targets.ts",
   "src/lib/theme-editor/content-links.ts",
   "src/lib/theme-editor/validate.ts",
@@ -89,10 +115,12 @@ describe("theme editor copy", () => {
       for (const m of text.matchAll(/\bkey: "((?:link|content|field)\w+)"/g)) used.add(m[1]);
       // The message keys a refused value carries (validate.ts FieldProblem).
       for (const m of text.matchAll(/^ {2}\| "(field\w+)"$/gm)) used.add(m[1]);
+      // Every slot, option and locked reason names its key as a value.
+      for (const m of text.matchAll(/\b(?:label|note|lockedBecause|emptyLabel):\s*"(\w+)"/g)) used.add(m[1]);
     }
     expect(used.size).toBeGreaterThan(70);
-    expect([...used].filter((k) => !(k in enNs))).toEqual([]);
-    expect([...used].filter((k) => !(k in bnNs))).toEqual([]);
+    expect([...used].filter((k) => !known(enNs, k))).toEqual([]);
+    expect([...used].filter((k) => !known(bnNs, k))).toEqual([]);
   });
 
   it("names the browser tab in both languages", () => {
