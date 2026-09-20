@@ -1127,7 +1127,19 @@
     "toastTitlePasswordResetFailed": "Reset link not sent",
     "toastDescPasswordResetFailed": "We couldn't send the password reset email right now. Try again in a moment.",
     "toastTitlePasswordNotReset": "Password not reset",
-    "toastDescPasswordNotReset": "The reset link is invalid or expired. Request a new password reset link."
+    "toastDescPasswordNotReset": "The reset link is invalid or expired. Request a new password reset link.",
+    "customersTabsAria": "Customers and accounts",
+    "customersTabCustomers": "Customers",
+    "customersTabAccounts": "Accounts",
+    "customerAccountsEmpty": "No one has signed in to your storefront yet. An account is created the first time a shopper signs in.",
+    "customerAccountsListCountWithTotal": "{pageCount, plural, one {{pageCount} account on this page} other {{pageCount} accounts on this page}} of total {totalCount, plural, one {{totalCount} account} other {{totalCount} accounts}}",
+    "customerAccountsListColSignedInOrders": "Orders signed in",
+    "customerAccountsListColLastSeen": "Last seen",
+    "customerAccountsOnlySignedInOrders": "Counts orders placed while signed in. The same person may also appear under Customers, from orders placed without signing in.",
+    "filtersSearchCustomerAccounts": "Search name, email",
+    "filtersToggleAria": "Toggle filters",
+    "toastTitleCustomerAccountsFailedToLoad": "Could not load accounts",
+    "toastDescCustomerAccountsFailedToLoad": "Something went wrong while loading accounts. Please try again."
   },
   "sidebar": {
     "expandSidebar": "Expand sidebar",

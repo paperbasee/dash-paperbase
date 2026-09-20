@@ -1127,7 +1127,19 @@
     "toastTitlePasswordResetFailed": "রিসেট লিংক পাঠানো হয়নি",
     "toastDescPasswordResetFailed": "এখন পাসওয়ার্ড রিসেট ইমেইল পাঠানো যায়নি। কিছুক্ষণ পর আবার চেষ্টা করুন।",
     "toastTitlePasswordNotReset": "পাসওয়ার্ড রিসেট হয়নি",
-    "toastDescPasswordNotReset": "রিসেট লিংকটি ভুল বা মেয়াদোত্তীর্ণ। নতুন রিসেট লিংক অনুরোধ করুন।"
+    "toastDescPasswordNotReset": "রিসেট লিংকটি ভুল বা মেয়াদোত্তীর্ণ। নতুন রিসেট লিংক অনুরোধ করুন।",
+    "customersTabsAria": "গ্রাহক ও অ্যাকাউন্ট",
+    "customersTabCustomers": "গ্রাহক",
+    "customersTabAccounts": "অ্যাকাউন্ট",
+    "customerAccountsEmpty": "আপনার স্টোরফ্রন্টে এখনও কেউ সাইন ইন করেননি। কোনো ক্রেতা প্রথমবার সাইন ইন করলে অ্যাকাউন্ট তৈরি হয়।",
+    "customerAccountsListCountWithTotal": "{pageCount, plural, one {{pageCount}টি অ্যাকাউন্ট এই পৃষ্ঠায়} other {{pageCount}টি অ্যাকাউন্ট এই পৃষ্ঠায়}} (মোট {totalCount, plural, one {{totalCount}টি অ্যাকাউন্ট} other {{totalCount}টি অ্যাকাউন্ট}})",
+    "customerAccountsListColSignedInOrders": "সাইন ইন অবস্থার অর্ডার",
+    "customerAccountsListColLastSeen": "সর্বশেষ সক্রিয়",
+    "customerAccountsOnlySignedInOrders": "সাইন ইন অবস্থায় করা অর্ডার গণনা করা হয়। একই ব্যক্তি গ্রাহক ট্যাবেও থাকতে পারেন, সাইন ইন না করে করা অর্ডারের কারণে।",
+    "filtersSearchCustomerAccounts": "নাম, ইমেইল খুঁজুন",
+    "filtersToggleAria": "ফিল্টার দেখান বা লুকান",
+    "toastTitleCustomerAccountsFailedToLoad": "অ্যাকাউন্ট লোড করা যায়নি",
+    "toastDescCustomerAccountsFailedToLoad": "অ্যাকাউন্ট লোড করার সময় সমস্যা হয়েছে। আবার চেষ্টা করুন।"
   },
   "sidebar": {
     "expandSidebar": "সাইডবার প্রসারিত করুন",

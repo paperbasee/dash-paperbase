@@ -462,6 +462,27 @@ export interface Customer {
   updated_at?: string;
 }
 
+/**
+ * A shopper who signed in to the storefront. Distinct from `Customer`, which is
+ * the phone-keyed record built from orders: the two are separate tabs of the
+ * customers screen and are never merged. A person can appear in both.
+ *
+ * Read-only — the API exposes no way to create, edit or delete one.
+ */
+export interface CustomerAccount {
+  public_id: string;
+  name: string;
+  /** The verified address they sign in with; null until one is verified. */
+  email: string | null;
+  created_at: string;
+  last_seen_at: string | null;
+  /** Confirmed orders placed while signed in — same definition the Customers tab uses. */
+  total_orders: number;
+  total_spent: string | number;
+  first_order_at?: string | null;
+  last_order_at?: string | null;
+}
+
 export interface CustomerDetailsResponse {
   customer: {
     public_id: string;
