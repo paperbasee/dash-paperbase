@@ -11,7 +11,13 @@ import {
   type ReactNode,
 } from "react";
 import { useLocale, useTranslations } from "next-intl";
+import { useSearchParams } from "next/navigation";
 import { useRouter } from "@/i18n/navigation";
+import {
+  ProductsTabStrip,
+  activeProductTab,
+} from "./sections/ProductsTabStrip";
+import { MostWishedForTab } from "./sections/MostWishedForTab";
 import { DeferredNavLink } from "@/components/navigation/DeferredNavLink";
 import { toLocaleDigits } from "@/lib/locale-digits";
 import { cursorFromLink } from "@/lib/cursor-from-link";
@@ -98,6 +104,8 @@ function saveViewMode(mode: ViewMode) {
 }
 
 export default function ProductsPage() {
+  const productTabParam = useSearchParams().get("tab");
+  const activeTab = activeProductTab(productTabParam);
   const router = useRouter();
   const navigate = useDeferredNavigate();
   const locale = useLocale();
@@ -469,6 +477,37 @@ export default function ProductsPage() {
     [products]
   );
 
+  // The ranking instead of the list. An early return, after every hook above
+  // has run -- this page is twelve hundred lines with drag-and-drop reordering
+  // in it, and wrapping all of that in a ternary would be an unreadable diff
+  // for a change that adds a tab. The action buttons are left out on purpose:
+  // nothing on the ranking is selectable, so there is nothing to act on.
+  if (activeTab === "wished") {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center gap-3 flex-wrap">
+          <div className="rounded-card bg-muted/80 px-1 py-1 hidden md:block">
+            <button
+              type="button"
+              onClick={() => router.back()}
+              aria-label={tPages("goBack")}
+              className="flex items-center justify-center rounded-ui p-1 text-muted-foreground hover:bg-muted"
+            >
+              <Undo2 className="h-4 w-4" />
+            </button>
+          </div>
+          <h1 className="text-2xl font-medium leading-relaxed text-foreground">
+            {tNav("products")}
+          </h1>
+          <ProductsTabStrip />
+        </div>
+        <div id="products-panel" role="tabpanel" aria-labelledby="products-tab-wished">
+          <MostWishedForTab />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between gap-4 flex-wrap">
@@ -486,6 +525,7 @@ export default function ProductsPage() {
           <h1 className="text-2xl font-medium leading-relaxed text-foreground">
             {tNav("products")}
           </h1>
+          <ProductsTabStrip />
         </div>
         <div className="flex items-center gap-2">
           {canDeleteProducts && someSelected && (

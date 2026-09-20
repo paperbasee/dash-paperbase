@@ -1148,7 +1148,20 @@
     "customerAccountDetailsUnverified": "Not verified",
     "toastTitleCustomerAccountUnavailable": "Could not load this account",
     "toastDescCustomerAccountUnavailable": "This account could not be loaded. It may have been removed.",
-    "customerAccountsSwitchedOff": "Accounts are switched off for this shop, so no one can sign in yet. Turn them on to let shoppers create an account."
+    "customerAccountsSwitchedOff": "Accounts are switched off for this shop, so no one can sign in yet. Turn them on to let shoppers create an account.",
+    "productsTabsAria": "Products and what shoppers want",
+    "productsTabProducts": "Products",
+    "productsTabMostWishedFor": "Most wished-for",
+    "mostWishedForColRank": "#",
+    "mostWishedForColSavedBy": "Saved by",
+    "mostWishedForHidden": "(hidden)",
+    "mostWishedForIntro": "What shoppers have saved to come back to. The top of this list is what to restock or promote.",
+    "mostWishedForCountsPeople": "Counts people, not saves. Someone saving two sizes of the same product counts once.",
+    "mostWishedForEmpty": "No one has saved anything yet. Saved items appear here once shoppers start using the heart on your storefront.",
+    "toastTitleMostWishedForFailedToLoad": "Could not load saved items",
+    "toastDescMostWishedForFailedToLoad": "Something went wrong while loading what shoppers have saved. Please try again.",
+    "customerAccountDetailsSaved": "Saved for later",
+    "customerAccountDetailsNothingSaved": "This shopper has not saved anything yet."
   },
   "sidebar": {
     "expandSidebar": "Expand sidebar",

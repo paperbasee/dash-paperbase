@@ -1148,7 +1148,20 @@
     "customerAccountDetailsUnverified": "যাচাই করা হয়নি",
     "toastTitleCustomerAccountUnavailable": "এই অ্যাকাউন্ট লোড করা যায়নি",
     "toastDescCustomerAccountUnavailable": "এই অ্যাকাউন্ট লোড করা যায়নি। এটি হয়তো সরিয়ে ফেলা হয়েছে।",
-    "customerAccountsSwitchedOff": "এই দোকানের জন্য অ্যাকাউন্ট বন্ধ আছে, তাই এখনও কেউ সাইন ইন করতে পারবেন না। ক্রেতাদের অ্যাকাউন্ট খুলতে দিতে এটি চালু করুন।"
+    "customerAccountsSwitchedOff": "এই দোকানের জন্য অ্যাকাউন্ট বন্ধ আছে, তাই এখনও কেউ সাইন ইন করতে পারবেন না। ক্রেতাদের অ্যাকাউন্ট খুলতে দিতে এটি চালু করুন।",
+    "productsTabsAria": "পণ্য ও ক্রেতারা যা চান",
+    "productsTabProducts": "পণ্য",
+    "productsTabMostWishedFor": "সবচেয়ে পছন্দের",
+    "mostWishedForColRank": "#",
+    "mostWishedForColSavedBy": "যতজন রেখেছেন",
+    "mostWishedForHidden": "(লুকানো)",
+    "mostWishedForIntro": "ক্রেতারা পরে দেখার জন্য যা সংরক্ষণ করেছেন। এই তালিকার উপরের দিকেই স্টক বাড়ানো বা প্রচার করার সুযোগ।",
+    "mostWishedForCountsPeople": "কতজন মানুষ রেখেছেন তা গণনা করা হয়, কতবার নয়। একই পণ্যের দুটি সাইজ রাখলেও একজনই গণনা হবে।",
+    "mostWishedForEmpty": "এখনও কেউ কিছু সংরক্ষণ করেননি। আপনার স্টোরফ্রন্টে ক্রেতারা হার্ট আইকন ব্যবহার করা শুরু করলে এখানে দেখা যাবে।",
+    "toastTitleMostWishedForFailedToLoad": "সংরক্ষিত পণ্য লোড করা যায়নি",
+    "toastDescMostWishedForFailedToLoad": "ক্রেতাদের সংরক্ষিত পণ্য লোড করার সময় সমস্যা হয়েছে। আবার চেষ্টা করুন।",
+    "customerAccountDetailsSaved": "পরে দেখার জন্য সংরক্ষিত",
+    "customerAccountDetailsNothingSaved": "এই ক্রেতা এখনও কিছু সংরক্ষণ করেননি।"
   },
   "sidebar": {
     "expandSidebar": "সাইডবার প্রসারিত করুন",

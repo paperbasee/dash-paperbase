@@ -469,6 +469,19 @@ export interface Customer {
  *
  * Read-only — the API exposes no way to create, edit or delete one.
  */
+/** One row of the Products page's "Most wished-for" tab. `saved_by` counts
+ *  people, not rows: one shopper saving two sizes is one person who wants it. */
+export interface MostWishedForProduct {
+  public_id: string;
+  name: string;
+  slug: string;
+  price: string | number;
+  image_url: string | null;
+  category_name: string | null;
+  is_active: boolean;
+  saved_by: number;
+}
+
 export interface CustomerAccount {
   public_id: string;
   name: string;
@@ -493,6 +506,14 @@ export interface CustomerIdentity {
   verified_at: string | null;
 }
 
+/** One thing a shopper saved, on their own account page. */
+export interface CustomerSavedItem {
+  product_public_id: string;
+  product_name: string;
+  variant_public_id: string | null;
+  saved_at: string;
+}
+
 export interface CustomerAccountDetailsResponse {
   account: {
     public_id: string;
@@ -509,6 +530,7 @@ export interface CustomerAccountDetailsResponse {
     average_order_value: string | number;
   };
   identities: CustomerIdentity[];
+  saved_items: CustomerSavedItem[];
 }
 
 export interface CustomerDetailsResponse {

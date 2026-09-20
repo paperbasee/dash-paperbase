@@ -17,6 +17,7 @@ import { useRouter } from "@/i18n/navigation";
 import { useDeferredNavigate } from "@/hooks/useDeferredNavigate";
 import { Undo2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { ClickableText } from "@/components/ui/clickable-text";
 import { useCustomerAccountDetailQuery } from "@/hooks/useCustomerAccountDetailQuery";
 import { formatDashboardDateTime } from "@/lib/datetime-display";
 import { numberTextClass } from "@/lib/number-font";
@@ -188,6 +189,36 @@ export default function CustomerAccountDetailPage() {
                         ),
                       })
                     : tPages("customerAccountDetailsUnverified")}
+                </span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+
+      <section className="rounded-card border border-card-border bg-card p-6">
+        <h2 className="mb-4 text-lg font-medium">
+          {tPages("customerAccountDetailsSaved")}
+        </h2>
+        {data.saved_items.length === 0 ? (
+          <p className="text-sm text-muted-foreground">
+            {tPages("customerAccountDetailsNothingSaved")}
+          </p>
+        ) : (
+          <ul className="m-0 list-none space-y-3 p-0 text-sm">
+            {data.saved_items.map((item) => (
+              <li
+                key={`${item.product_public_id}:${item.variant_public_id ?? ""}`}
+                className="flex flex-wrap items-baseline justify-between gap-3"
+              >
+                <ClickableText
+                  href={`/products/${item.product_public_id}`}
+                  className="font-medium text-foreground"
+                >
+                  {item.product_name}
+                </ClickableText>
+                <span className="text-muted-foreground">
+                  {formatDashboardDateTime(item.saved_at, locale)}
                 </span>
               </li>
             ))}
