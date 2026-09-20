@@ -72,9 +72,11 @@ export function CustomersTab() {
   const filtersActive = useMemo(
     () =>
       Boolean(
-        (filters.joined_date || "").trim() || (filters.search || "").trim()
+        (filters.joined_date || "").trim() ||
+          (filters.search || "").trim() ||
+          (filters.is_repeat_customer || "").trim()
       ),
-    [filters.joined_date, filters.search]
+    [filters.joined_date, filters.search, filters.is_repeat_customer]
   );
 
   useEffect(() => {
@@ -87,42 +89,12 @@ export function CustomersTab() {
     setFilter("search", next);
   }, [debouncedSearch, filters.search, setFilter]);
 
-  const customerTypePillOptions = useMemo(
-    () => [
-      { value: "", label: tCommon("all") },
-      { value: "true", label: tPages("filtersRepeatedCustomerYes") },
-      { value: "false", label: tPages("filtersRepeatedCustomerNo") },
-    ],
-    [tCommon, tPages]
-  );
-
   const pageCustomersCount = customers.length;
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between gap-3">
-        <div className="flex items-center gap-2 flex-wrap min-w-0">
-          <CustomersTabStrip />
-          {customerTypePillOptions.map((opt) => {
-            const active = (filters.is_repeat_customer || "") === opt.value;
-            return (
-              <button
-                key={opt.value || "__all__"}
-                type="button"
-                onClick={() => setFilter("is_repeat_customer", opt.value)}
-                aria-pressed={active}
-                className={[
-                  "h-9 rounded-ui border px-3 text-sm font-medium transition whitespace-nowrap",
-                  active
-                    ? "border-primary/40 bg-primary text-primary-foreground"
-                    : "border-border bg-card text-foreground hover:bg-muted",
-                ].join(" ")}
-              >
-                {opt.label}
-              </button>
-            );
-          })}
-        </div>
+        <CustomersTabStrip />
         <Button
           type="button"
           variant="outline"
@@ -147,6 +119,15 @@ export function CustomersTab() {
 
       {filtersOpen ? (
         <FilterBar>
+          <FilterDropdown
+            value={filters.is_repeat_customer}
+            onChange={(value) => setFilter("is_repeat_customer", value)}
+            placeholder={tPages("filtersRepeatedCustomer")}
+            options={[
+              { value: "true", label: tPages("filtersRepeatedCustomerYes") },
+              { value: "false", label: tPages("filtersRepeatedCustomerNo") },
+            ]}
+          />
           <FilterDropdown
             value={filters.joined_date}
             onChange={(value) => setFilter("joined_date", value)}
