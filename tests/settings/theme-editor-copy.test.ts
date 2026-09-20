@@ -11,6 +11,7 @@ import { describe, expect, it } from "vitest";
 
 import en from "../../messages/en.json";
 import bn from "../../messages/bn.json";
+import { PAGE_NOTES, SLOT_PAGES } from "@/lib/theme-editor/slot-catalogue";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 
@@ -130,12 +131,48 @@ describe("theme editor copy", () => {
       for (const m of text.matchAll(/\bkey: "((?:link|content|field)\w+)"/g)) used.add(m[1]);
       // The message keys a refused value carries (validate.ts FieldProblem).
       for (const m of text.matchAll(/^ {2}\| "(field\w+)"$/gm)) used.add(m[1]);
-      // Every slot, option and locked reason names its key as a value.
-      for (const m of text.matchAll(/\b(?:label|note|lockedBecause|emptyLabel):\s*"(\w+)"/g)) used.add(m[1]);
+      // Every slot, option, hint and locked reason names its key as a value.
+      for (const m of text.matchAll(/\b(?:label|note|hint|lockedBecause|emptyLabel):\s*"(\w+)"/g)) used.add(m[1]);
     }
     expect(used.size).toBeGreaterThan(70);
     expect([...used].filter((k) => !known(enNs, k))).toEqual([]);
     expect([...used].filter((k) => !known(bnNs, k))).toEqual([]);
+  });
+
+  /**
+   * next-intl parses every message as ICU, and ICU reads `<name>` as the start
+   * of a rich-text tag. An unmatched one does not fall back to the raw text --
+   * it throws INVALID_MESSAGE: UNCLOSED_TAG at render, and the screen that asked
+   * for it dies. A hint that quoted a query string as `?tag=<name>` took the
+   * whole editor down that way.
+   *
+   * This namespace uses no rich text at all, so ANY angle-bracket pair is the
+   * bug rather than a use, and the fix is always to say it in words.
+   */
+  /**
+   * The page-level warnings, which the regex sweep above cannot see: the editor
+   * reads them as `t(PAGE_NOTES[page])`, so neither the key nor the call is a
+   * literal anywhere. Reading the real object is both shorter and surer.
+   *
+   * A page named here must also be a page: the note is drawn from the picker's
+   * current value, so one keyed to a page nobody can select says nothing.
+   */
+  it("says which pages are not built yet, in both languages", () => {
+    const notes = Object.entries(PAGE_NOTES);
+    expect(notes.length).toBeGreaterThan(0);
+    for (const [page, key] of notes) {
+      expect(SLOT_PAGES, `${page} is not in the page picker`).toContain(page);
+      expect(known(enNs, key), `en is missing ${key}`).toBe(true);
+      expect(known(bnNs, key), `bn is missing ${key}`).toBe(true);
+    }
+  });
+
+  it("quotes nothing in angle brackets, which ICU reads as a tag", () => {
+    const tagged = (ns: Record<string, string>, lang: string) =>
+      Object.entries(ns)
+        .filter(([, value]) => /<[^>]*>/.test(value))
+        .map(([key]) => `${lang}.${key}`);
+    expect([...tagged(enNs, "en"), ...tagged(bnNs, "bn")]).toEqual([]);
   });
 
   it("names the browser tab in both languages", () => {

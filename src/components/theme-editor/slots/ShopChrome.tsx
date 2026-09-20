@@ -938,6 +938,235 @@ export function ShopChrome({
         </div>
       );
 
+    /* ---------------------------------------------------------- wishlist -- */
+
+    case "wishlist:heading":
+      return (
+        <div className="px-4 py-5">
+          <h4 className="m-0 text-[20px] font-medium tracking-tight">
+            {t("wishTitleExample")}
+            {variant === "plain" ? null : (
+              <span className="ml-2 text-[13px] font-normal text-current/45">({t("catCountExample", { count: 4 })})</span>
+            )}
+          </h4>
+        </div>
+      );
+
+    case "wishlist:items": {
+      const buy = (settings?.action ?? "cart") === "cart";
+      if (variant === "rows") {
+        return (
+          <div className="grid gap-3 px-4 py-4">
+            {BESTSELLERS.slice(0, 3).map((item) => (
+              <div key={item.name} className="flex items-center gap-3 border-b border-current/10 pb-3">
+                <span className="size-14 shrink-0 rounded-xs bg-current/8" aria-hidden />
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate text-[13px] font-medium">{item.name}</span>
+                  <span className="block text-[12px] font-semibold tabular-nums">{item.price}</span>
+                </span>
+                {buy ? (
+                  <span className="grid h-8 shrink-0 place-items-center rounded-xs bg-[#1a1a1a] px-3 text-[11px] text-white">
+                    {t("addToCart")}
+                  </span>
+                ) : null}
+                <span className="shrink-0 text-[13px] text-current/35" aria-hidden>
+                  ×
+                </span>
+              </div>
+            ))}
+          </div>
+        );
+      }
+      return (
+        <div className="px-4 py-4">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            {BESTSELLERS.map((item) => (
+              <div key={item.name} className="min-w-0">
+                <span className="relative block aspect-square rounded-xs bg-current/8" aria-hidden>
+                  <span className="absolute right-1.5 top-1.5 grid size-5 place-items-center rounded-full bg-[color:var(--color-background)] text-[11px] text-current/45">
+                    ×
+                  </span>
+                </span>
+                <p className="mt-2 truncate text-[11px] text-current/60">{item.name}</p>
+                <p className="text-[12px] font-semibold tabular-nums">{item.price}</p>
+                {buy ? (
+                  <span className="mt-1.5 grid h-8 place-items-center rounded-xs bg-[#1a1a1a] text-[11px] text-white">
+                    {t("addToCart")}
+                  </span>
+                ) : null}
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    }
+
+    // The choice is read by the list above, so this band shows what it changes.
+    case "wishlist:action":
+      return (
+        <div className="px-4 py-4">
+          <p className="mb-2.5 text-[10px] uppercase tracking-[0.08em] text-current/45">{t("wishActionWhat")}</p>
+          <div className="flex items-center gap-3 rounded-xs border border-current/12 p-3">
+            <span className="size-12 shrink-0 rounded-xs bg-current/8" aria-hidden />
+            <span className="min-w-0 flex-1">
+              <span className="block truncate text-[13px] font-medium">Crossbody Bag</span>
+              <span className="block text-[12px] font-semibold tabular-nums">৳45</span>
+            </span>
+            {variant === "cart" ? (
+              <span className="grid h-8 shrink-0 place-items-center rounded-xs bg-[#1a1a1a] px-3 text-[11px] text-white">
+                {t("addToCart")}
+              </span>
+            ) : (
+              <span className="shrink-0 text-[11px] text-current/45">{t("wishActionLookExample")}</span>
+            )}
+          </div>
+        </div>
+      );
+
+    case "wishlist:empty":
+      return (
+        <div className="border-t border-dashed border-current/15 px-4 py-6">
+          <p className="mb-2 text-[10px] uppercase tracking-[0.06em] text-current/40">{t("wishEmptyWhen")}</p>
+          {variant === "invite" ? (
+            <div className="grid place-items-center gap-3 py-3 text-center">
+              <span>
+                <span className="block text-[14px] font-medium">{t("wishEmptyHeadingExample")}</span>
+                <span className="mt-1 block text-[11px] text-current/50">{t("wishEmptyBodyExample")}</span>
+              </span>
+              <span className="grid h-9 place-items-center rounded-xs bg-[#1a1a1a] px-5 text-[11px] font-semibold text-white">
+                {t("cartEmptyButtonExample")}
+              </span>
+            </div>
+          ) : (
+            <p className="py-3 text-[12px] text-current/55">{t("wishEmptyTextExample")}</p>
+          )}
+        </div>
+      );
+
+    /* ----------------------------------------------------------- account -- */
+
+    case "account:door": {
+      const lookup = variant === "lookup";
+      return (
+        <div className="border-b border-dashed border-current/15 px-4 py-5">
+          <p className="mb-3 text-[10px] uppercase tracking-[0.06em] text-current/40">{t("accountDoorWhen")}</p>
+          <div className="mx-auto max-w-[22rem] rounded-xs border border-current/12 p-4">
+            <p className="mb-1 text-[14px] font-medium">
+              {lookup ? t("accountLookupHeading") : t("accountSignInHeading")}
+            </p>
+            <p className="mb-3 text-[11px] leading-relaxed text-current/50">
+              {lookup ? t("accountLookupBody") : t("accountSignInBody")}
+            </p>
+            <div className="grid gap-2">
+              <span className="block h-8 rounded-xs border border-current/15 bg-current/[0.04]" aria-hidden />
+              {lookup ? <span className="block h-8 rounded-xs border border-current/15 bg-current/[0.04]" aria-hidden /> : null}
+              <span className="grid h-9 place-items-center rounded-xs bg-[#1a1a1a] text-[11px] font-semibold text-white">
+                {lookup ? t("accountLookupButton") : t("accountSignInButton")}
+              </span>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    case "account:greeting":
+      return (
+        <div className="px-4 py-5">
+          <h4 className="m-0 text-[19px] font-medium tracking-tight">
+            {variant === "name" ? t("accountGreetingExample") : t("accountTitleExample")}
+          </h4>
+        </div>
+      );
+
+    case "account:panels": {
+      const panels =
+        variant === "everything"
+          ? [t("accountTabOrders"), t("accountTabDetails"), t("accountTabAddresses"), t("wishTitleExample")]
+          : variant === "details"
+            ? [t("accountTabOrders"), t("accountTabDetails")]
+            : [t("accountTabOrders")];
+      return (
+        <div className="flex flex-wrap gap-2 border-b border-current/10 px-4 py-3">
+          {panels.map((name, i) => (
+            <span
+              key={name}
+              className={
+                i === 0
+                  ? "rounded-xs bg-[#1a1a1a] px-3 py-1 text-[11px] text-white"
+                  : "rounded-xs border border-current/15 px-3 py-1 text-[11px] text-current/60"
+              }
+            >
+              {name}
+            </span>
+          ))}
+        </div>
+      );
+    }
+
+    case "account:orders": {
+      const orders = [
+        { id: "#1042", date: "12 Sep 2026", state: t("orderDelivered"), total: "৳163" },
+        { id: "#1038", date: "2 Sep 2026", state: t("orderOnTheWay"), total: "৳92" },
+      ];
+      if (variant === "cards") {
+        return (
+          <div className="grid gap-3 px-4 py-4 sm:grid-cols-2">
+            {orders.map((order) => (
+              <div key={order.id} className="rounded-xs border border-current/12 p-3">
+                <div className="flex items-baseline justify-between gap-3">
+                  <span className="text-[13px] font-semibold tabular-nums">{order.id}</span>
+                  <span className="text-[13px] font-semibold tabular-nums">{order.total}</span>
+                </div>
+                <p className="mt-0.5 text-[10px] text-current/45">{order.date}</p>
+                <span className="mt-2 inline-block rounded-full border border-current/15 px-2.5 py-0.5 text-[10px] text-current/60">
+                  {order.state}
+                </span>
+                <div className="mt-2.5 flex gap-2">
+                  {[0, 1].map((i) => (
+                    <span key={i} className="size-9 rounded-xs bg-current/8" aria-hidden />
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        );
+      }
+      return (
+        <div className="px-4 py-4">
+          {orders.map((order) => (
+            <div key={order.id} className="flex items-center gap-3 border-b border-current/10 py-3">
+              <span className="w-14 shrink-0 text-[12px] font-semibold tabular-nums">{order.id}</span>
+              <span className="min-w-0 flex-1 truncate text-[11px] text-current/45">{order.date}</span>
+              <span className="shrink-0 rounded-full border border-current/15 px-2.5 py-0.5 text-[10px] text-current/60">
+                {order.state}
+              </span>
+              <span className="w-14 shrink-0 text-right text-[12px] font-semibold tabular-nums">{order.total}</span>
+            </div>
+          ))}
+        </div>
+      );
+    }
+
+    case "account:empty":
+      return (
+        <div className="border-t border-dashed border-current/15 px-4 py-6">
+          <p className="mb-2 text-[10px] uppercase tracking-[0.06em] text-current/40">{t("accountEmptyWhen")}</p>
+          {variant === "invite" ? (
+            <div className="grid place-items-center gap-3 py-3 text-center">
+              <span>
+                <span className="block text-[14px] font-medium">{t("accountEmptyHeadingExample")}</span>
+                <span className="mt-1 block text-[11px] text-current/50">{t("accountEmptyBodyExample")}</span>
+              </span>
+              <span className="grid h-9 place-items-center rounded-xs bg-[#1a1a1a] px-5 text-[11px] font-semibold text-white">
+                {t("cartEmptyButtonExample")}
+              </span>
+            </div>
+          ) : (
+            <p className="py-3 text-[12px] text-current/55">{t("accountEmptyTextExample")}</p>
+          )}
+        </div>
+      );
+
     /* -------------------------------------------------------------- blog -- */
 
     case "blog:heading":

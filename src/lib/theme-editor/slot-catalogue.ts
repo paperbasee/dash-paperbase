@@ -25,6 +25,8 @@ export type SlotPageKey =
   | "search"
   | "blog"
   | "article"
+  | "wishlist"
+  | "account"
   | "cart"
   | "checkout"
   | "header"
@@ -116,9 +118,29 @@ export const SLOT_PAGES: readonly SlotPageKey[] = [
   "search",
   "blog",
   "article",
+  "wishlist",
+  "account",
   "cart",
   "checkout",
 ] as const;
+
+/**
+ * Pages whose FEATURE does not exist yet, and the line that says so.
+ *
+ * The editor is design-only everywhere and says that across the top. These two
+ * are a second thing: `/account` and `/wishlist` are `renderPlaceholderPage`
+ * calls that print "This page is not ready yet", there is no wishlist anywhere
+ * in the API, and a shopper cannot sign in at all -- `Customer` is a record the
+ * merchant's CRM keeps, with no password and no session.
+ *
+ * Designing them ahead of building them is reasonable; letting a merchant
+ * believe they are arranging a page their shoppers can reach is not. So the
+ * page says which it is, in the same place the design-only line is said.
+ */
+export const PAGE_NOTES: Partial<Record<SlotPageKey, string>> = {
+  wishlist: "wishlistNotBuilt",
+  account: "accountNotBuilt",
+};
 export const SLOT_GROUPS: readonly SlotPageKey[] = ["header", "footer"] as const;
 
 export const SLOTS: Record<SlotPageKey, Slot[]> = {
@@ -836,6 +858,130 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
       options: [
         { value: "on", label: "on", note: "articleRelatedNote", shape: "row" },
         { value: "off", label: "off", shape: "blank" },
+      ],
+    },
+    { key: "footer", label: "footer", inherited: true, inheritedFrom: { page: "footer", key: "layout" } },
+  ],
+
+  /**
+   * The wishlist: designed, not built.
+   *
+   * There is no wishlist in Paperbase -- no model, no endpoint, nothing that
+   * remembers a saved product. The page is a placeholder and the heart in the
+   * header has nowhere to put anything. What is offered here is deliberately
+   * few and structural: inventing ten settings for a feature nobody has written
+   * would be pretending to know more about it than anyone does.
+   */
+  wishlist: [
+    { key: "notice", label: "notice", inherited: true, inheritedFrom: { page: "header", key: "notice" } },
+    { key: "header", label: "header", inherited: true, inheritedFrom: { page: "header", key: "layout" } },
+    {
+      key: "heading",
+      label: "wishHeading",
+      initial: "withCount",
+      options: [
+        { value: "withCount", label: "wishHeadingCount", note: "wishHeadingCountNote", shape: "line" },
+        { value: "plain", label: "searchHeadingPlain", note: "wishHeadingPlainNote", shape: "line" },
+      ],
+    },
+    {
+      key: "items",
+      label: "wishItems",
+      initial: "grid",
+      options: [
+        { value: "grid", label: "wishItemsGrid", note: "wishItemsGridNote", shape: "row" },
+        { value: "rows", label: "wishItemsRows", note: "wishItemsRowsNote", shape: "line" },
+      ],
+    },
+    {
+      key: "action",
+      label: "wishAction",
+      hint: "wishActionHint",
+      initial: "cart",
+      options: [
+        { value: "cart", label: "wishActionCart", note: "wishActionCartNote", shape: "line" },
+        { value: "look", label: "wishActionLook", note: "wishActionLookNote", shape: "blank" },
+      ],
+    },
+    {
+      key: "empty",
+      label: "wishEmpty",
+      hint: "wishEmptyHint",
+      initial: "invite",
+      options: [
+        { value: "text", label: "cartEmptyText", note: "wishEmptyTextNote", shape: "line" },
+        { value: "invite", label: "cartEmptyInvite", note: "wishEmptyInviteNote", shape: "block" },
+      ],
+    },
+    { key: "footer", label: "footer", inherited: true, inheritedFrom: { page: "footer", key: "layout" } },
+  ],
+
+  /**
+   * The account: designed, not built, and the bigger of the two gaps.
+   *
+   * A shopper cannot sign in to a Paperbase shop. There is no session, no
+   * password, no code sent to a phone. `Customer` is the merchant's own record
+   * of somebody who ordered -- name, phone, total spent -- built from orders
+   * and never signed into.
+   *
+   * Which is why the first place here is the interesting one. "Look up an
+   * order" needs no accounts at all: a phone number and an order number are
+   * things a customer already has, and it answers the question almost everyone
+   * opens this page to ask. Signing in answers more, and costs an entire
+   * feature. Both are offered rather than the second being assumed.
+   */
+  account: [
+    { key: "notice", label: "notice", inherited: true, inheritedFrom: { page: "header", key: "notice" } },
+    { key: "header", label: "header", inherited: true, inheritedFrom: { page: "header", key: "layout" } },
+    {
+      key: "door",
+      label: "accountDoor",
+      hint: "accountDoorHint",
+      initial: "lookup",
+      options: [
+        { value: "lookup", label: "accountDoorLookup", note: "accountDoorLookupNote", shape: "block" },
+        { value: "signIn", label: "accountDoorSignIn", note: "accountDoorSignInNote", shape: "block" },
+      ],
+    },
+    {
+      key: "greeting",
+      label: "accountGreeting",
+      initial: "name",
+      emptyValues: ["none"],
+      emptyLabel: "accountGreetingEmpty",
+      options: [
+        { value: "name", label: "accountGreetingName", note: "accountGreetingNameNote", shape: "line" },
+        { value: "plain", label: "accountGreetingPlain", note: "accountGreetingPlainNote", shape: "line" },
+        { value: "none", label: "nothing", shape: "blank" },
+      ],
+    },
+    {
+      key: "panels",
+      label: "accountPanels",
+      hint: "accountPanelsHint",
+      initial: "orders",
+      options: [
+        { value: "orders", label: "accountPanelsOrders", note: "accountPanelsOrdersNote", shape: "line" },
+        { value: "details", label: "accountPanelsDetails", note: "accountPanelsDetailsNote", shape: "row" },
+        { value: "everything", label: "accountPanelsEverything", note: "accountPanelsEverythingNote", shape: "block" },
+      ],
+    },
+    {
+      key: "orders",
+      label: "accountOrders",
+      initial: "rows",
+      options: [
+        { value: "rows", label: "accountOrdersRows", note: "accountOrdersRowsNote", shape: "line" },
+        { value: "cards", label: "accountOrdersCards", note: "accountOrdersCardsNote", shape: "block" },
+      ],
+    },
+    {
+      key: "empty",
+      label: "accountEmpty",
+      initial: "invite",
+      options: [
+        { value: "text", label: "cartEmptyText", note: "accountEmptyTextNote", shape: "line" },
+        { value: "invite", label: "cartEmptyInvite", note: "accountEmptyInviteNote", shape: "block" },
       ],
     },
     { key: "footer", label: "footer", inherited: true, inheritedFrom: { page: "footer", key: "layout" } },

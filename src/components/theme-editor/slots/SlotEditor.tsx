@@ -11,6 +11,7 @@ import { cn } from "@/lib/utils";
 import { CUSTOMIZATION_HREF } from "@/lib/theme-editor/access";
 import {
   initialChoices,
+  PAGE_NOTES,
   SLOT_GROUPS,
   SLOT_PAGES,
   type SlotPageKey,
@@ -56,6 +57,8 @@ export function SlotEditor() {
     category: initialChoices("category"),
     product: initialChoices("product"),
     search: initialChoices("search"),
+    wishlist: initialChoices("wishlist"),
+    account: initialChoices("account"),
     blog: initialChoices("blog"),
     article: initialChoices("article"),
     cart: initialChoices("cart"),
@@ -156,6 +159,21 @@ export function SlotEditor() {
       <p className="border-b border-border bg-[hsl(var(--accent-yellow)/0.1)] px-4 py-2.5 text-xs leading-relaxed text-muted-foreground">
         {t("designOnly")}
       </p>
+
+      {/*
+        A second, different warning, and only on the pages that need it.
+
+        The line above says this SCREEN saves nothing. This one says the PAGE
+        itself does not exist yet -- the wishlist and the account are
+        placeholders in the shop with no feature behind them. They are not the
+        same admission, and a merchant who reads only the first would come away
+        believing the wrong thing.
+      */}
+      {PAGE_NOTES[page] ? (
+        <p className="border-b border-border bg-muted px-4 py-2.5 text-xs leading-relaxed text-muted-foreground">
+          {t(PAGE_NOTES[page])}
+        </p>
+      ) : null}
 
       {/*
         Two fifths for colour and type, three for the page.
