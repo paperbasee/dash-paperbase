@@ -110,6 +110,10 @@ export function customerAccountsListQueryKey(params: CustomersListParams) {
   return [...customerAccountsListQueryKeyRoot, params] as const;
 }
 
+export function customerAccountDetailQueryKey(publicId: string) {
+  return ["customer-accounts", "detail", publicId] as const;
+}
+
 export type InventoryListParams = Record<string, string | number>;
 
 export const inventoryListQueryKey = (params?: InventoryListParams) =>

@@ -1139,7 +1139,15 @@
     "filtersSearchCustomerAccounts": "নাম, ইমেইল খুঁজুন",
     "filtersToggleAria": "ফিল্টার দেখান বা লুকান",
     "toastTitleCustomerAccountsFailedToLoad": "অ্যাকাউন্ট লোড করা যায়নি",
-    "toastDescCustomerAccountsFailedToLoad": "অ্যাকাউন্ট লোড করার সময় সমস্যা হয়েছে। আবার চেষ্টা করুন।"
+    "toastDescCustomerAccountsFailedToLoad": "অ্যাকাউন্ট লোড করার সময় সমস্যা হয়েছে। আবার চেষ্টা করুন।",
+    "customerAccountDetailsTitle": "অ্যাকাউন্টের বিবরণ",
+    "customerAccountDetailsAverageOrder": "গড় অর্ডার",
+    "customerAccountDetailsSignInMethods": "যেভাবে সাইন ইন করেন",
+    "customerAccountDetailsNoSignInMethods": "এখনও যাচাই করা কোনো সাইন ইন পদ্ধতি নেই।",
+    "customerAccountDetailsVerifiedOn": "যাচাই হয়েছে {date}",
+    "customerAccountDetailsUnverified": "যাচাই করা হয়নি",
+    "toastTitleCustomerAccountUnavailable": "এই অ্যাকাউন্ট লোড করা যায়নি",
+    "toastDescCustomerAccountUnavailable": "এই অ্যাকাউন্ট লোড করা যায়নি। এটি হয়তো সরিয়ে ফেলা হয়েছে।"
   },
   "sidebar": {
     "expandSidebar": "সাইডবার প্রসারিত করুন",

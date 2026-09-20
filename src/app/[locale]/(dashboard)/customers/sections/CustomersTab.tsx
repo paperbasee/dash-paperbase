@@ -16,6 +16,7 @@ import { FilterBar } from "@/components/filters/FilterBar";
 import { FilterDropdown } from "@/components/filters/FilterDropdown";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { useFilters } from "@/hooks/useFilters";
+import { CustomersTabStrip } from "./CustomersTabStrip";
 import type { Customer } from "@/types";
 import { formatDashboardDate } from "@/lib/datetime-display";
 import { notify } from "@/notifications";
@@ -101,6 +102,7 @@ export function CustomersTab() {
     <div className="space-y-6">
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-2 flex-wrap min-w-0">
+          <CustomersTabStrip />
           {customerTypePillOptions.map((opt) => {
             const active = (filters.is_repeat_customer || "") === opt.value;
             return (

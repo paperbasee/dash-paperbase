@@ -483,6 +483,32 @@ export interface CustomerAccount {
   last_order_at?: string | null;
 }
 
+/** How a shopper signs in. Only `email` exists today; the list shape is what makes
+ *  a phone or social login a later addition rather than a redesign. */
+export interface CustomerIdentity {
+  provider: string;
+  identifier: string;
+  verified_at: string | null;
+}
+
+export interface CustomerAccountDetailsResponse {
+  account: {
+    public_id: string;
+    name: string;
+    email: string | null;
+    created_at: string;
+    last_seen_at: string | null;
+  };
+  analytics: {
+    total_orders: number;
+    total_spent: string | number;
+    first_order_at: string | null;
+    last_order_at: string | null;
+    average_order_value: string | number;
+  };
+  identities: CustomerIdentity[];
+}
+
 export interface CustomerDetailsResponse {
   customer: {
     public_id: string;

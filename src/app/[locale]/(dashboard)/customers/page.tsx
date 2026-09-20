@@ -12,40 +12,24 @@
 // who buy here", and a person moving from one list to the other the day they
 // sign in would look, from a sidebar, like a customer who vanished.
 
-import { useCallback, useMemo } from "react";
+import { useMemo } from "react";
 import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { usePathname, useRouter } from "@/i18n/navigation";
+import { useRouter } from "@/i18n/navigation";
 import { Undo2 } from "lucide-react";
-import { cn } from "@/lib/utils";
 import { CustomersTab } from "./sections/CustomersTab";
 import { AccountsTab } from "./sections/AccountsTab";
-
-const TABS = ["customers", "accounts"] as const;
-type Tab = (typeof TABS)[number];
+import { activeCustomerTab } from "./sections/CustomersTabStrip";
 
 export default function CustomersPage() {
   const router = useRouter();
-  const pathname = usePathname();
   const searchParams = useSearchParams();
   const tNav = useTranslations("nav");
   const tPages = useTranslations("pages");
 
-  const activeTab: Tab = useMemo(() => {
-    const requested = searchParams.get("tab");
-    return TABS.includes(requested as Tab) ? (requested as Tab) : "customers";
-  }, [searchParams]);
-
-  const selectTab = useCallback(
-    (tab: Tab) => {
-      if (tab === activeTab) return;
-      // Everything else in the query string belongs to the tab being left --
-      // its page, its filters, its search. Carrying them across would apply one
-      // list's filters to the other and show a result nobody asked for.
-      const query = tab === "customers" ? "" : `?tab=${tab}`;
-      router.replace(`${pathname}${query}`, { scroll: false });
-    },
-    [activeTab, pathname, router]
+  const activeTab = useMemo(
+    () => activeCustomerTab(searchParams.get("tab")),
+    [searchParams]
   );
 
   return (
@@ -66,34 +50,6 @@ export default function CustomersPage() {
             {tNav("customers")}
           </h1>
         </div>
-      </div>
-
-      <div
-        role="tablist"
-        aria-label={tPages("customersTabsAria")}
-        className="flex gap-1 rounded-md bg-muted p-0.5 w-fit"
-      >
-        {TABS.map((tab) => (
-          <button
-            key={tab}
-            type="button"
-            role="tab"
-            id={`customers-tab-${tab}`}
-            aria-selected={activeTab === tab}
-            aria-controls="customers-panel"
-            onClick={() => selectTab(tab)}
-            className={cn(
-              "rounded px-3 py-1.5 text-sm font-medium transition-colors",
-              activeTab === tab
-                ? "bg-foreground text-background"
-                : "text-muted-foreground hover:text-foreground"
-            )}
-          >
-            {tab === "customers"
-              ? tPages("customersTabCustomers")
-              : tPages("customersTabAccounts")}
-          </button>
-        ))}
       </div>
 
       <div

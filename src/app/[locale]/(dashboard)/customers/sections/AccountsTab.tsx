@@ -22,6 +22,8 @@ import { toLocaleDigits } from "@/lib/locale-digits";
 import { digitsInNumberFont, numberTextClass } from "@/lib/number-font";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { useFilters } from "@/hooks/useFilters";
+import { ClickableTableRow } from "@/components/ui/clickable-table-row";
+import { CustomersTabStrip } from "./CustomersTabStrip";
 import { useCustomerAccountsQuery } from "@/hooks/useCustomerAccountsQuery";
 import { formatDashboardDate } from "@/lib/datetime-display";
 import { notify } from "@/notifications";
@@ -88,7 +90,8 @@ export function AccountsTab() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-end gap-3">
+      <div className="flex items-center justify-between gap-3">
+        <CustomersTabStrip />
         <Button
           type="button"
           variant="outline"
@@ -174,7 +177,11 @@ export function AccountsTab() {
               </thead>
               <tbody className="divide-y divide-border/60">
                 {accounts.map((account) => (
-                  <tr key={account.public_id}>
+                  <ClickableTableRow
+                    key={account.public_id}
+                    href={`/customers/accounts/${account.public_id}`}
+                    aria-label={account.email || account.name || account.public_id}
+                  >
                     <td className="px-4 py-3 text-muted-foreground">
                       <span className="whitespace-nowrap">
                         {account.name || "—"}
@@ -203,7 +210,7 @@ export function AccountsTab() {
                           : "—"}
                       </span>
                     </td>
-                  </tr>
+                  </ClickableTableRow>
                 ))}
               </tbody>
             </table>

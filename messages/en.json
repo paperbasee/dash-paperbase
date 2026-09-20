@@ -1139,7 +1139,15 @@
     "filtersSearchCustomerAccounts": "Search name, email",
     "filtersToggleAria": "Toggle filters",
     "toastTitleCustomerAccountsFailedToLoad": "Could not load accounts",
-    "toastDescCustomerAccountsFailedToLoad": "Something went wrong while loading accounts. Please try again."
+    "toastDescCustomerAccountsFailedToLoad": "Something went wrong while loading accounts. Please try again.",
+    "customerAccountDetailsTitle": "Account details",
+    "customerAccountDetailsAverageOrder": "Average order",
+    "customerAccountDetailsSignInMethods": "How they sign in",
+    "customerAccountDetailsNoSignInMethods": "No verified sign-in method yet.",
+    "customerAccountDetailsVerifiedOn": "Verified {date}",
+    "customerAccountDetailsUnverified": "Not verified",
+    "toastTitleCustomerAccountUnavailable": "Could not load this account",
+    "toastDescCustomerAccountUnavailable": "This account could not be loaded. It may have been removed."
   },
   "sidebar": {
     "expandSidebar": "Expand sidebar",
