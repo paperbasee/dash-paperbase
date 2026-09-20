@@ -68,6 +68,12 @@ function setToModulesEnabled(enabled: Set<string>): Record<string, boolean> {
   for (const id of OPTIONAL_APP_IDS) {
     out[id] = enabled.has(id);
   }
+  for (const id of OPT_IN_APP_IDS) {
+    out[id] = enabled.has(id);
+  }
+  // Only the ids above are sent. The API merges what it is given into what is
+  // already stored, so a flag this dashboard has never heard of survives a
+  // toggle here -- see StoreSettingsSerializer.validate_modules_enabled.
   return out;
 }
 
