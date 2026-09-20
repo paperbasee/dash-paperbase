@@ -1,20 +1,18 @@
 "use client";
 
-// The phone-keyed customer list the shop has always had, built from orders.
+// Shoppers who signed in — its own address, in the sidebar under Customers.
 //
-// Shoppers who signed in are a separate record and a separate page, in the
-// sidebar under this one. They are never merged, so the same person can appear
-// in both — expected, not a duplicate to clean up. Letting a merchant link the
-// two by hand is agreed for later.
+// The detail page for one of them already lives a level below, at
+// `accounts/[public_id]`, so this is the list above it rather than a tab
+// somewhere else.
 
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { Undo2 } from "lucide-react";
-import { CustomersTab } from "./sections/CustomersTab";
+import { AccountsTab } from "../sections/AccountsTab";
 
-export default function CustomersPage() {
+export default function CustomerAccountsPage() {
   const router = useRouter();
-  const tNav = useTranslations("nav");
   const tPages = useTranslations("pages");
 
   return (
@@ -31,10 +29,10 @@ export default function CustomersPage() {
           </button>
         </div>
         <h1 className="text-2xl font-medium leading-relaxed text-foreground">
-          {tNav("customers")}
+          {tPages("customersTabAccounts")}
         </h1>
       </div>
-      <CustomersTab />
+      <AccountsTab />
     </div>
   );
 }

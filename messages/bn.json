@@ -97,7 +97,10 @@
     "blogNew": "নতুন পোস্ট",
     "catalog": "ক্যাটালগ",
     "more": "আরও",
-    "navigation": "নেভিগেশন"
+    "navigation": "নেভিগেশন",
+    "abandoned_checkouts": "অসমাপ্ত চেকআউট",
+    "accounts": "অ্যাকাউন্ট",
+    "wishlist": "সবচেয়ে পছন্দের"
   },
   "analyticsPage": {
     "metrics": {

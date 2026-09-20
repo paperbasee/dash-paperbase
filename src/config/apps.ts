@@ -14,6 +14,9 @@ import {
   Image as ImageIcon,
   Ticket,
   Trash,
+  Heart as HeartIcon,
+  Phone as PhoneIcon,
+  UserRound,
 } from "lucide-react";
 
 /** Lucide or Phosphor icon for main nav / apps list. */
@@ -80,6 +83,36 @@ export const APP_CONFIG: Record<string, AppConfig> = {
     href: "/customers",
     countKey: "customers",
     parentId: null,
+  },
+  abandoned_checkouts: {
+    id: "abandoned_checkouts",
+    label: "Abandoned checkouts",
+    icon: PhoneIcon,
+    description: "People who filled in checkout and did not finish",
+    essential: false,
+    href: "/orders/abandoned",
+    countKey: null,
+    parentId: "orders",
+  },
+  accounts: {
+    id: "accounts",
+    label: "Accounts",
+    icon: UserRound,
+    description: "Shoppers who signed in to your storefront",
+    essential: false,
+    href: "/customers/accounts",
+    countKey: null,
+    parentId: "customers",
+  },
+  wishlist: {
+    id: "wishlist",
+    label: "Most wished-for",
+    icon: HeartIcon,
+    description: "What shoppers saved to come back to",
+    essential: false,
+    href: "/products/wished",
+    countKey: null,
+    parentId: "products",
   },
   categories: {
     id: "categories",
@@ -207,6 +240,10 @@ export const CATALOG_SUB_APP_IDS = [
   "categories",
   "variants",
   "product_attributes",
+  // What shoppers saved. A sibling of Products rather than a child of it: the
+  // group is already the catalogue, and a second level inside it would be one
+  // more thing to open for a list that is read in ten seconds.
+  "wishlist",
 ] as const;
 
 /** Top-level nav items (excluding catalog children). */
@@ -219,3 +256,30 @@ export const MAIN_NAV_APP_IDS = [
 ] as const;
 
 export const MORE_APP_IDS = ["support_tickets", "trash"] as const;
+
+/**
+ * Apps that are OFF until a merchant switches them on.
+ *
+ * Different from `OPTIONAL_APP_IDS`, where a missing flag means *on* -- those
+ * predate per-shop flags and defaulting them off would have taken features away
+ * from every existing shop. These three arrived with their flag, the storefront
+ * treats a missing flag as off, and the dashboard has to agree: a sidebar entry
+ * for something the shop does not serve is a link to a 404.
+ */
+export const OPT_IN_APP_IDS = [
+  "accounts",
+  "wishlist",
+  "abandoned_checkouts",
+] as const;
+
+/**
+ * Sidebar children: a parent that still navigates, with a chevron beside it.
+ *
+ * Not the `Catalog` shape, where the parent only expands. Orders and Customers
+ * are opened many times a day and making them cost an extra click to reach
+ * would be a worse dashboard for the sake of a tidier one.
+ */
+export const NAV_CHILD_APP_IDS: Record<string, readonly string[]> = {
+  orders: ["abandoned_checkouts"],
+  customers: ["accounts"],
+};

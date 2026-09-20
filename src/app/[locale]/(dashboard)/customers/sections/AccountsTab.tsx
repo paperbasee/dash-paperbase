@@ -24,7 +24,6 @@ import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { useFilters } from "@/hooks/useFilters";
 import { useEnabledApps } from "@/context/EnabledAppsContext";
 import { ClickableTableRow } from "@/components/ui/clickable-table-row";
-import { CustomersTabStrip } from "./CustomersTabStrip";
 import { useCustomerAccountsQuery } from "@/hooks/useCustomerAccountsQuery";
 import { formatDashboardDate } from "@/lib/datetime-display";
 import { notify } from "@/notifications";
@@ -102,7 +101,6 @@ export function AccountsTab() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between gap-3">
-        <CustomersTabStrip />
         <Button
           type="button"
           variant="outline"

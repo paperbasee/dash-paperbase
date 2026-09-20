@@ -1,20 +1,14 @@
 "use client";
 
-// The phone-keyed customer list the shop has always had, built from orders.
-//
-// Shoppers who signed in are a separate record and a separate page, in the
-// sidebar under this one. They are never merged, so the same person can appear
-// in both — expected, not a duplicate to clean up. Letting a merchant link the
-// two by hand is agreed for later.
+// What shoppers saved — its own address, in the Catalog group beside Products.
 
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { Undo2 } from "lucide-react";
-import { CustomersTab } from "./sections/CustomersTab";
+import { MostWishedForTab } from "../sections/MostWishedForTab";
 
-export default function CustomersPage() {
+export default function MostWishedForPage() {
   const router = useRouter();
-  const tNav = useTranslations("nav");
   const tPages = useTranslations("pages");
 
   return (
@@ -31,10 +25,10 @@ export default function CustomersPage() {
           </button>
         </div>
         <h1 className="text-2xl font-medium leading-relaxed text-foreground">
-          {tNav("customers")}
+          {tPages("productsTabMostWishedFor")}
         </h1>
       </div>
-      <CustomersTab />
+      <MostWishedForTab />
     </div>
   );
 }

@@ -32,6 +32,9 @@ export default function AppSidebarNav({
   homeHref,
   homeIcon: HomeIcon,
   catalogLinks,
+  navChildren,
+  openChildren,
+  onToggleChildren,
   showCatalog,
   catalogChildActive,
   catalogOpen,
@@ -60,6 +63,10 @@ export default function AppSidebarNav({
   homeHref: string;
   homeIcon: ComponentType<{ className?: string }>;
   catalogLinks: readonly string[];
+  /** Parent app id -> its sidebar children. The parent still navigates. */
+  navChildren: Record<string, readonly string[]>;
+  openChildren: Set<string>;
+  onToggleChildren: (appId: string) => void;
   showCatalog: boolean;
   catalogChildActive: boolean;
   catalogOpen: boolean;
@@ -185,7 +192,7 @@ export default function AppSidebarNav({
         const Icon = app.icon;
         const active = isActive(app.href);
 
-        return (
+        const link = (
           <DeferredNavLink
             key={token}
             href={app.href}
@@ -233,6 +240,94 @@ export default function AppSidebarNav({
               </span>
             )}
           </DeferredNavLink>
+        );
+
+        const children = navChildren?.[token] ?? [];
+        if (!children.length || collapsed) return link;
+
+        // One row, exactly like any other nav item, with the chevron inside it
+        // at the right edge -- the same place `Catalog` puts its own.
+        //
+        // What differs from Catalog is only what the two halves do: there the
+        // whole row expands, here the row navigates and the chevron expands.
+        // Orders and Customers are opened many times a day, and making them
+        // cost an extra click would be a worse dashboard for a tidier one.
+        //
+        // Built as a div holding a link rather than a button nested inside an
+        // anchor: that is invalid markup, and a screen reader is right to be
+        // confused by it. The row carries the background, so the link inside
+        // carries none and the two read as one control.
+        const open = openChildren.has(token);
+        return (
+          <div key={token}>
+            <div
+              className={cn(
+                "group flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-xs text-sm font-normal w-full transition-colors",
+                active
+                  ? "bg-accent text-foreground dark:bg-white/[0.12] dark:text-white/95"
+                  : "text-muted-foreground hover:bg-accent hover:text-foreground dark:text-white/70 dark:hover:bg-white/[0.07] dark:hover:text-white/90"
+              )}
+            >
+              <DeferredNavLink
+                href={app.href}
+                onNavigate={onNavigate}
+                className="flex min-w-0 flex-1 items-center gap-2 text-inherit"
+              >
+                <Icon className="size-5 shrink-0" />
+                <span className="truncate">{tAppLabel(app.id)}</span>
+              </DeferredNavLink>
+              <span className="flex shrink-0 items-center gap-1.5">
+                {app.countKey && counts != null && counts[app.countKey] > 0 && (
+                  <Badge
+                    className={cn(
+                      "h-5 min-w-5 rounded-full border-0 bg-muted px-1.5 text-xs font-medium text-muted-foreground dark:bg-white/10 dark:text-white/55",
+                      numClass
+                    )}
+                  >
+                    {formatCount(counts[app.countKey])}
+                  </Badge>
+                )}
+                <button
+                  type="button"
+                  aria-expanded={open}
+                  aria-label={tAppLabel(app.id)}
+                  onClick={() => onToggleChildren(token)}
+                  className="flex shrink-0 cursor-pointer items-center border-0 bg-transparent p-0 text-inherit"
+                >
+                  <ChevronRight
+                    className={cn(
+                      "size-4 shrink-0 transition-transform text-muted-foreground dark:text-white/50",
+                      open && "rotate-90"
+                    )}
+                  />
+                </button>
+              </span>
+            </div>
+            {open && (
+              <div className="ml-4 mt-2 space-y-1 border-l border-border pl-3">
+                {children.map((childId) => {
+                  const child = APP_CONFIG[childId as keyof typeof APP_CONFIG];
+                  if (!child?.href) return null;
+                  const childActive = isActive(child.href);
+                  return (
+                    <DeferredNavLink
+                      key={childId}
+                      href={child.href}
+                      onNavigate={onNavigate}
+                      className={cn(
+                        "group flex items-center gap-2 px-2.5 py-1.5 rounded-xs text-sm font-normal w-full transition-colors",
+                        childActive
+                          ? "bg-accent text-foreground dark:bg-white/[0.12] dark:text-white/95"
+                          : "text-muted-foreground hover:bg-accent hover:text-foreground dark:text-white/70 dark:hover:bg-white/[0.07] dark:hover:text-white/90"
+                      )}
+                    >
+                      <span className="min-w-0 flex-1 truncate">{tAppLabel(child.id)}</span>
+                    </DeferredNavLink>
+                  );
+                })}
+              </div>
+            )}
+          </div>
         );
       })}
 

@@ -11,6 +11,7 @@ import {
 } from "react";
 import {
   OPTIONAL_APP_IDS,
+  OPT_IN_APP_IDS,
   ESSENTIAL_APP_IDS,
   CATALOG_INCLUDED_APP_IDS,
 } from "@/config/apps";
@@ -74,7 +75,15 @@ function modulesEnabledToSet(modules: Record<string, boolean> | null | undefined
   if (!modules || typeof modules !== "object") return new Set(OPTIONAL_APP_IDS);
   const out = new Set<string>();
   for (const id of OPTIONAL_APP_IDS) {
+    // Missing means on. These predate per-shop flags, and defaulting them off
+    // would take features away from every shop that has one today.
     if (modules[id] !== false) out.add(id);
+  }
+  for (const id of OPT_IN_APP_IDS) {
+    // Missing means off. These arrived with their flag and the storefront reads
+    // it the same way -- a sidebar entry for something the shop does not serve
+    // is a link to a 404.
+    if (modules[id] === true) out.add(id);
   }
   return out;
 }

@@ -97,7 +97,10 @@
     "blogNew": "New post",
     "catalog": "Catalog",
     "more": "More",
-    "navigation": "Navigation"
+    "navigation": "Navigation",
+    "abandoned_checkouts": "Abandoned checkouts",
+    "accounts": "Accounts",
+    "wishlist": "Most wished-for"
   },
   "analyticsPage": {
     "metrics": {

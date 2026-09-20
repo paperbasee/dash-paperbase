@@ -45,6 +45,7 @@ import { useSidebarData } from "@/context/SidebarDataContext";
 import {
   APP_CONFIG,
   CATALOG_SUB_APP_IDS,
+  NAV_CHILD_APP_IDS,
   MAIN_NAV_APP_IDS,
   MORE_APP_IDS,
   type NavCounts,
@@ -179,6 +180,30 @@ function SidebarContent({
     return href ? isActive(href) : false;
   });
   const [celeryOpen, setCeleryOpen] = useState(false);
+
+  // Which parents have their children showing. A set rather than one flag per
+  // parent, so adding a third costs nothing.
+  const [openChildren, setOpenChildren] = useState<Set<string>>(new Set());
+  const toggleChildren = useCallback((appId: string) => {
+    setOpenChildren((prev) => {
+      const next = new Set(prev);
+      if (next.has(appId)) next.delete(appId);
+      else next.add(appId);
+      return next;
+    });
+  }, []);
+
+  // Only the children this shop actually has: these three are off until a
+  // merchant switches them on, and a sidebar entry for something the storefront
+  // does not serve is a link to a 404.
+  const navChildren = useMemo(() => {
+    const out: Record<string, readonly string[]> = {};
+    for (const [parent, ids] of Object.entries(NAV_CHILD_APP_IDS)) {
+      const shown = ids.filter((id) => canShowApp(id) && APP_CONFIG[id]?.href);
+      if (shown.length) out[parent] = shown;
+    }
+    return out;
+  }, [canShowApp]);
 
   useEffect(() => {
     if (showCatalog && catalogChildActive) setCatalogOpen(true);
@@ -474,6 +499,9 @@ function SidebarContent({
             homeHref={HOME_NAV.href}
             homeIcon={HOME_NAV.icon}
             catalogLinks={catalogLinks}
+            navChildren={navChildren}
+            openChildren={openChildren}
+            onToggleChildren={toggleChildren}
             showCatalog={showCatalog}
             catalogChildActive={catalogChildActive}
             catalogOpen={catalogOpen}
