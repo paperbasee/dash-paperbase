@@ -18,7 +18,7 @@
  */
 
 /** Which page a merchant is looking at. Matches the editor's existing page keys. */
-export type SlotPageKey = "home" | "product" | "cart" | "checkout" | "header" | "footer";
+export type SlotPageKey = "home" | "category" | "product" | "cart" | "checkout" | "header" | "footer";
 
 /** The wireframe drawn on an option's tile, so a merchant sees the shape before choosing. */
 export type OptionShape = "blank" | "line" | "block" | "row";
@@ -99,7 +99,7 @@ export type Slot = {
 };
 
 /** In the order a shopper meets them. */
-export const SLOT_PAGES: readonly SlotPageKey[] = ["home", "product", "cart", "checkout"] as const;
+export const SLOT_PAGES: readonly SlotPageKey[] = ["home", "category", "product", "cart", "checkout"] as const;
 export const SLOT_GROUPS: readonly SlotPageKey[] = ["header", "footer"] as const;
 
 export const SLOTS: Record<SlotPageKey, Slot[]> = {
@@ -394,6 +394,131 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
       options: [
         { value: "on", label: "on", note: "stickyBuyNote", shape: "line" },
         { value: "off", label: "off", note: "stickyBuyOffNote", shape: "blank" },
+      ],
+    },
+    { key: "footer", label: "footer", inherited: true, inheritedFrom: { page: "footer", key: "layout" } },
+  ],
+
+  /**
+   * A category: the page a shopper browses rather than reads.
+   *
+   * It is the shop's widest page -- most people arrive on a category from a
+   * search engine or the menu rather than on the home page -- and today it is
+   * a heading and a grid with nothing between them.
+   *
+   * **Sorting and filtering are real and already built.** The API takes
+   * `ordering` (newest, price_asc, price_desc, popularity), `price_min`,
+   * `price_max`, `brand` and `attributes`, honours every one of them in
+   * `build_product_list_queryset`, and serves the values to populate the
+   * controls from `CatalogFiltersView` -- whose own docstring says it is "for
+   * product list UI". The storefront has never asked for any of it. So these
+   * are not wishes: they are a UI for a thing that already works, which is why
+   * they are offered here rather than left out the way the coupon nearly was.
+   */
+  category: [
+    { key: "notice", label: "notice", inherited: true, inheritedFrom: { page: "header", key: "notice" } },
+    { key: "header", label: "header", inherited: true, inheritedFrom: { page: "header", key: "layout" } },
+    {
+      key: "breadcrumb",
+      label: "breadcrumb",
+      initial: "on",
+      emptyValues: ["off"],
+      emptyLabel: "breadcrumbEmpty",
+      options: [
+        { value: "on", label: "on", note: "catBreadcrumbNote", shape: "line" },
+        { value: "off", label: "off", shape: "blank" },
+      ],
+    },
+    {
+      key: "heading",
+      label: "catHeading",
+      initial: "plain",
+      options: [
+        { value: "plain", label: "catHeadingPlain", note: "catHeadingPlainNote", shape: "line" },
+        { value: "eyebrow", label: "catHeadingEyebrow", note: "catHeadingEyebrowNote", shape: "line" },
+        { value: "banner", label: "catHeadingBanner", note: "catHeadingBannerNote", shape: "block" },
+      ],
+    },
+    {
+      key: "count",
+      label: "catCount",
+      initial: "off",
+      emptyValues: ["off"],
+      emptyLabel: "catCountEmpty",
+      options: [
+        { value: "on", label: "on", note: "catCountNote", shape: "line" },
+        { value: "off", label: "off", shape: "blank" },
+      ],
+    },
+    {
+      key: "sort",
+      label: "catSort",
+      hint: "catSortHint",
+      initial: "off",
+      emptyValues: ["off"],
+      emptyLabel: "catSortEmpty",
+      options: [
+        { value: "off", label: "off", note: "catSortOffNote", shape: "blank" },
+        { value: "menu", label: "catSortMenu", note: "catSortMenuNote", shape: "line" },
+        { value: "tabs", label: "catSortTabs", note: "catSortTabsNote", shape: "row" },
+      ],
+    },
+    {
+      key: "filters",
+      label: "catFilters",
+      hint: "catFiltersHint",
+      initial: "off",
+      emptyValues: ["off"],
+      emptyLabel: "catFiltersEmpty",
+      options: [
+        { value: "off", label: "off", shape: "blank" },
+        { value: "chips", label: "catFiltersChips", note: "catFiltersChipsNote", shape: "line" },
+        { value: "rail", label: "catFiltersRail", note: "catFiltersRailNote", shape: "row" },
+      ],
+    },
+    {
+      key: "grid",
+      label: "catGrid",
+      hint: "catGridHint",
+      initial: "four",
+      options: [
+        { value: "four", label: "catGridFour", note: "catGridFourNote", shape: "row" },
+        { value: "three", label: "catGridThree", note: "catGridThreeNote", shape: "row" },
+        { value: "two", label: "catGridTwo", note: "catGridTwoNote", shape: "block" },
+      ],
+    },
+    {
+      key: "more",
+      label: "catMore",
+      hint: "catMoreHint",
+      initial: "none",
+      emptyValues: ["none"],
+      emptyLabel: "catMoreEmpty",
+      options: [
+        { value: "none", label: "catMoreNone", note: "catMoreNoneNote", shape: "blank" },
+        { value: "button", label: "catMoreButton", note: "catMoreButtonNote", shape: "line" },
+        { value: "pages", label: "catMorePages", note: "catMorePagesNote", shape: "line" },
+      ],
+    },
+    {
+      key: "text",
+      label: "catText",
+      initial: "off",
+      emptyValues: ["off"],
+      emptyLabel: "catTextEmpty",
+      options: [
+        { value: "off", label: "off", shape: "blank" },
+        { value: "block", label: "catTextBlock", note: "catTextBlockNote", shape: "block" },
+      ],
+    },
+    {
+      key: "empty",
+      label: "catEmptyLabel",
+      hint: "catEmptyHint",
+      initial: "text",
+      options: [
+        { value: "text", label: "cartEmptyText", note: "catEmptyTextNote", shape: "line" },
+        { value: "invite", label: "cartEmptyInvite", note: "catEmptyInviteNote", shape: "block" },
       ],
     },
     { key: "footer", label: "footer", inherited: true, inheritedFrom: { page: "footer", key: "layout" } },

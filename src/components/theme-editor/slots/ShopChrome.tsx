@@ -642,6 +642,185 @@ export function ShopChrome({
         </p>
       );
 
+    case "category:breadcrumb":
+      return (
+        <p className="px-4 py-3 text-[11px] text-current/45">
+          {t("breadcrumbHomeExample")} · Accessories · <span className="text-current/70">Bags</span>
+        </p>
+      );
+
+    case "category:heading":
+      if (variant === "banner") {
+        return (
+          <div className="relative grid h-[130px] place-items-center bg-current/10 px-4 text-center">
+            <span>
+              <span className="block text-[22px] font-medium tracking-tight">Bags</span>
+              <span className="mt-1 block text-[11px] text-current/55">{t("catDescriptionExample")}</span>
+            </span>
+          </div>
+        );
+      }
+      return (
+        <div className="px-4 py-5">
+          {variant === "eyebrow" ? (
+            <p className="mb-1.5 text-[10px] uppercase tracking-[0.1em] text-current/45">{t("catEyebrowExample")}</p>
+          ) : null}
+          <h4 className="m-0 text-[22px] font-medium tracking-tight">Bags</h4>
+          <p className="mt-1.5 max-w-[46ch] text-[11.5px] leading-relaxed text-current/55">
+            {t("catDescriptionExample")}
+          </p>
+        </div>
+      );
+
+    case "category:count":
+      return <p className="px-4 pb-1 text-[11px] text-current/45">{t("catCountExample", { count: 24 })}</p>;
+
+    case "category:sort":
+      return variant === "tabs" ? (
+        <div className="flex flex-wrap gap-2 px-4 py-3">
+          {[t("sortNewest"), t("sortPriceLow"), t("sortPriceHigh"), t("sortPopular")].map((name, i) => (
+            <span
+              key={name}
+              // Never `bg-current` on something that also sets `color`: the fill
+              // resolves to the label's colour and the chip disappears.
+              className={
+                i === 0
+                  ? "rounded-xs bg-[#1a1a1a] px-2.5 py-1 text-[11px] text-white"
+                  : "rounded-xs border border-current/15 px-2.5 py-1 text-[11px] text-current/60"
+              }
+            >
+              {name}
+            </span>
+          ))}
+        </div>
+      ) : (
+        <div className="flex items-center justify-end gap-2 px-4 py-3">
+          <span className="text-[11px] text-current/45">{t("sortBy")}</span>
+          <span className="inline-flex items-center gap-2 rounded-xs border border-current/15 px-2.5 py-1.5 text-[11px]">
+            {t("sortNewest")}
+            <span className="text-current/40" aria-hidden>
+              ▾
+            </span>
+          </span>
+        </div>
+      );
+
+    /**
+     * Filters, as a row or as a rail.
+     *
+     * A rail costs the grid a quarter of its width on a computer and becomes a
+     * drawer on a phone, which is why it is a separate answer rather than the
+     * same one bigger: a shop with three brands wants chips, a shop with sizes
+     * and colours and a price range wants the rail.
+     */
+    case "category:filters": {
+      const groups = [t("filterPrice"), t("filterBrand"), t("filterSize"), t("filterColour")];
+      if (variant === "rail") {
+        return (
+          <div className="grid gap-4 px-4 py-4 sm:grid-cols-[minmax(0,10rem)_minmax(0,1fr)]">
+            <div className="grid content-start gap-3">
+              {groups.map((name) => (
+                <span key={name}>
+                  <span className="mb-1.5 block text-[10px] font-semibold uppercase tracking-[0.06em] text-current/50">
+                    {name}
+                  </span>
+                  <span className="grid gap-1">
+                    <Line w="80%" h={5} />
+                    <Line w="60%" h={5} />
+                  </span>
+                </span>
+              ))}
+            </div>
+            <div className="grid grid-cols-3 gap-2">
+              {Array.from({ length: 6 }, (_, i) => (
+                <span key={i} className="block aspect-square rounded-xs bg-current/8" />
+              ))}
+            </div>
+          </div>
+        );
+      }
+      return (
+        <div className="flex flex-wrap items-center gap-2 px-4 py-3">
+          {groups.map((name) => (
+            <span
+              key={name}
+              className="inline-flex items-center gap-1.5 rounded-full border border-current/15 px-3 py-1 text-[11px] text-current/60"
+            >
+              {name}
+              <span className="text-current/35" aria-hidden>
+                ▾
+              </span>
+            </span>
+          ))}
+        </div>
+      );
+    }
+
+    case "category:grid": {
+      const cols = variant === "two" ? 2 : variant === "three" ? 3 : 4;
+      const items = [...FEATURED, ...BESTSELLERS].slice(0, cols * 2);
+      return (
+        <div className="px-4 py-4">
+          <div className="grid gap-3" style={{ gridTemplateColumns: `repeat(${cols}, minmax(0,1fr))` }}>
+            {items.map((item) => (
+              <div key={item.name} className="min-w-0">
+                <div className="rounded-xs bg-current/8" style={{ aspectRatio: "1" }} />
+                <p className="mt-2 truncate text-[11px] text-current/60">{item.name}</p>
+                <p className="text-[12px] font-semibold tabular-nums">{item.price}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    }
+
+    case "category:more":
+      return variant === "pages" ? (
+        <div className="flex items-center justify-center gap-1.5 px-4 py-4 text-[11px]">
+          <span className="grid size-7 place-items-center rounded-xs bg-[#1a1a1a] text-white">1</span>
+          {[2, 3].map((n) => (
+            <span key={n} className="grid size-7 place-items-center rounded-xs border border-current/15 text-current/60">
+              {n}
+            </span>
+          ))}
+          <span className="px-1 text-current/40">›</span>
+        </div>
+      ) : (
+        <div className="grid place-items-center px-4 py-4">
+          <span className="rounded-xs border border-current/25 px-5 py-2 text-[11px] font-medium">{t("catMoreButtonExample")}</span>
+        </div>
+      );
+
+    case "category:text":
+      return (
+        <div className="px-4 py-5 text-center">
+          <h4 className="m-0 mb-2 text-[14px] font-semibold">{t("catTextHeadingExample")}</h4>
+          <p className="mx-auto max-w-[52ch] text-[11.5px] leading-relaxed text-current/55">
+            {t("catTextBodyExample")}
+          </p>
+        </div>
+      );
+
+    case "category:empty":
+      return (
+        <div className="border-t border-dashed border-current/15 px-4 py-6">
+          <p className="mb-2 text-[10px] uppercase tracking-[0.06em] text-current/40">{t("catEmptyWhen")}</p>
+          {variant === "invite" ? (
+            <div className="grid place-items-center gap-3 py-4 text-center">
+              <span>
+                <span className="block text-[14px] font-medium">{t("catEmptyHeadingExample")}</span>
+                <span className="mt-1 block text-[11px] text-current/50">{t("catEmptyBodyExample")}</span>
+              </span>
+              <span className="grid h-9 place-items-center rounded-xs bg-[#1a1a1a] px-5 text-[11px] font-semibold text-white">
+                {t("catEmptyButtonExample")}
+              </span>
+            </div>
+          ) : (
+            <p className="py-4 text-[12px] text-current/55">{t("catEmptyTextExample")}</p>
+          )}
+        </div>
+      );
+
     case "cart:heading":
       return (
         <div className="flex items-baseline justify-between gap-4 border-b border-current/10 px-4 py-4">
