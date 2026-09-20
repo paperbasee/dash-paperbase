@@ -634,11 +634,202 @@ export function ShopChrome({
     }
 
     case "product:trust":
+    case "cart:trust":
     case "checkout:trust":
       return (
         <p className="border-t border-current/10 px-4 py-3 text-center text-[11px] uppercase tracking-[0.06em] text-current/55">
-          {page === "checkout" ? t("trustLineExample") : t("trustExample")}
+          {page === "product" ? t("trustExample") : t("trustLineExample")}
         </p>
+      );
+
+    case "cart:heading":
+      return (
+        <div className="flex items-baseline justify-between gap-4 border-b border-current/10 px-4 py-4">
+          <h4 className="m-0 text-[20px] font-medium tracking-tight">{t("cartTitle")}</h4>
+          {variant === "plain" ? null : (
+            <span className="text-[11px] underline underline-offset-4 text-current/55">{t("continueShopping")}</span>
+          )}
+        </div>
+      );
+
+    /**
+     * The lines, as a table or as cards.
+     *
+     * The shop draws a table on a desktop and cards on a phone, which is two
+     * answers to one question. Picking one and keeping it everywhere is a real
+     * option: a card that looks the same on both is a card a merchant can
+     * actually picture before they look.
+     */
+    case "cart:lines": {
+      const lines = [
+        { name: "Crossbody Bag", note: "Tan · One size", qty: 1, price: "৳45" },
+        { name: "Leather Belt", note: "Black · 34", qty: 2, price: "৳58" },
+      ];
+      const stepper = (qty: number) => (
+        <span className="inline-flex items-center rounded-xs border border-current/15 text-[11px] leading-none">
+          <span className="px-2 py-1 text-current/45">−</span>
+          <span className="px-1.5 py-1 tabular-nums">{qty}</span>
+          <span className="px-2 py-1 text-current/45">+</span>
+        </span>
+      );
+      if (variant === "list") {
+        return (
+          <div className="grid gap-3 px-4 py-4">
+            {lines.map((line) => (
+              <div key={line.name} className="flex items-center gap-3 rounded-xs border border-current/12 p-3">
+                <span className="size-14 shrink-0 rounded-xs bg-current/8" aria-hidden />
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate text-[13px] font-medium">{line.name}</span>
+                  <span className="block truncate text-[10px] text-current/45">{line.note}</span>
+                  <span className="mt-1.5 block">{stepper(line.qty)}</span>
+                </span>
+                <span className="shrink-0 text-[13px] font-semibold tabular-nums">{line.price}</span>
+              </div>
+            ))}
+          </div>
+        );
+      }
+      return (
+        <div className="px-4 py-4">
+          <div className="grid grid-cols-[minmax(0,1fr)_7rem_5rem] gap-4 border-b border-current/10 pb-2 text-[10px] font-semibold uppercase tracking-[0.06em] text-current/45">
+            <span>{t("colProduct")}</span>
+            <span className="text-center">{t("colQuantity")}</span>
+            <span className="text-right">{t("colTotal")}</span>
+          </div>
+          {lines.map((line) => (
+            <div
+              key={line.name}
+              className="grid grid-cols-[minmax(0,1fr)_7rem_5rem] items-center gap-4 border-b border-current/10 py-3"
+            >
+              <span className="flex min-w-0 items-center gap-3">
+                <span className="size-12 shrink-0 rounded-xs bg-current/8" aria-hidden />
+                <span className="min-w-0">
+                  <span className="block truncate text-[13px] font-medium">{line.name}</span>
+                  <span className="block truncate text-[10px] text-current/45">{line.note}</span>
+                </span>
+              </span>
+              <span className="text-center">{stepper(line.qty)}</span>
+              <span className="text-right text-[13px] font-semibold tabular-nums">{line.price}</span>
+            </div>
+          ))}
+        </div>
+      );
+    }
+
+    /** The total, and the button that leaves the page. */
+    case "cart:total": {
+      const note = <p className="text-[10px] text-current/45">{t("cartTotalNoteExample")}</p>;
+      const button = (
+        <span className="grid h-9 place-items-center rounded-xs bg-[#1a1a1a] px-6 text-[12px] font-semibold text-white">
+          {t("checkOut")}
+        </span>
+      );
+      if (variant === "bar") {
+        return (
+          <div className="flex flex-wrap items-center justify-between gap-3 border-t border-current/10 bg-current/5 px-4 py-3.5">
+            <span>
+              <span className="text-[10px] uppercase tracking-[0.06em] text-current/45">{t("cartEstimated")}</span>
+              <span className="block text-[17px] font-semibold tabular-nums">৳163</span>
+            </span>
+            {button}
+          </div>
+        );
+      }
+      if (variant === "card") {
+        return (
+          <div className="px-4 py-4">
+            <div className="ml-auto max-w-[17rem] rounded-xs border border-current/12 p-4">
+              <div className="flex items-baseline justify-between gap-3">
+                <span className="text-[11px] text-current/55">{t("cartEstimated")}</span>
+                <span className="text-[17px] font-semibold tabular-nums">৳163</span>
+              </div>
+              <div className="mt-1 mb-3">{note}</div>
+              <span className="block">{button}</span>
+            </div>
+          </div>
+        );
+      }
+      return (
+        <div className="flex flex-col items-end gap-2 border-t border-current/10 px-4 py-5">
+          <span className="flex items-baseline gap-4">
+            <span className="text-[11px] text-current/55">{t("cartEstimated")}</span>
+            <span className="text-[15px] font-semibold tabular-nums">৳163</span>
+          </span>
+          {note}
+          {button}
+        </div>
+      );
+    }
+
+    case "cart:sticky":
+      return (
+        <div className="px-4 py-4">
+          <p className="mb-2.5 text-[11.5px] text-current/55">{t("cartStickyExample")}</p>
+          <div className="flex items-center gap-3 rounded-xs border border-current/15 bg-current/5 px-3 py-2.5">
+            <span className="min-w-0 flex-1">
+              <span className="block text-[10px] uppercase tracking-[0.06em] text-current/45">{t("cartEstimated")}</span>
+              <span className="block text-[13px] font-semibold tabular-nums">৳163</span>
+            </span>
+            <span className="grid h-9 shrink-0 place-items-center rounded-xs bg-[#1a1a1a] px-4 text-[11px] text-white">
+              {t("checkOut")}
+            </span>
+          </div>
+        </div>
+      );
+
+    case "cart:upsell":
+      return (
+        <div className="px-4 py-4">
+          <SectionHead title={variant === "picks" ? t("cartUpsellPicksHeading") : t("cartUpsellHeading")} />
+          <Cards items={BESTSELLERS} />
+        </div>
+      );
+
+    case "cart:recent":
+      return (
+        <div className="px-4 py-4">
+          <SectionHead title={t("recentHeading")} />
+          <Cards items={ARRIVALS} />
+        </div>
+      );
+
+    case "cart:payments":
+    case "checkout:payments":
+      return (
+        <div className="px-4 py-4">
+          <p className="mb-2 text-[10px] uppercase tracking-[0.08em] text-current/45">{t("paymentsHeading")}</p>
+          <div className="flex flex-wrap gap-2">
+            {["bKash", "Nagad", "Rocket", "Visa", "Mastercard", t("cashOnDelivery")].map((name) => (
+              <span key={name} className="rounded-xs border border-current/15 px-2.5 py-1 text-[10px] text-current/60">
+                {name}
+              </span>
+            ))}
+          </div>
+        </div>
+      );
+
+    /** What the page says when there is nothing in it. */
+    case "cart:empty":
+      return (
+        <div className="border-t border-dashed border-current/15 px-4 py-6">
+          <p className="mb-2 text-[10px] uppercase tracking-[0.06em] text-current/40">{t("cartEmptyWhen")}</p>
+          {variant === "invite" ? (
+            <div className="grid place-items-center gap-3 py-4 text-center">
+              <span className="grid size-10 place-items-center rounded-full bg-current/8 text-[15px]" aria-hidden>
+                ⌂
+              </span>
+              <span>
+                <span className="block text-[14px] font-medium">{t("cartEmptyHeadingExample")}</span>
+                <span className="mt-1 block text-[11px] text-current/50">{t("cartEmptyBodyExample")}</span>
+              </span>
+              <span className="grid h-9 place-items-center rounded-xs bg-[#1a1a1a] px-5 text-[11px] font-semibold text-white">
+                {t("cartEmptyButtonExample")}
+              </span>
+            </div>
+          ) : (
+            <p className="py-4 text-[12px] text-current/55">{t("cartEmptyTextExample")}</p>
+          )}
+        </div>
       );
 
     case "product:description":
@@ -782,13 +973,16 @@ export function ShopChrome({
         </div>
       );
 
-    case "checkout:steps":
+    // The same bar on both pages, standing on a different step of it.
+    case "cart:steps":
+    case "checkout:steps": {
+      const here = page === "cart" ? 0 : 1;
       return (
         <div className="flex items-center justify-center gap-2 border-b border-current/10 px-4 py-3 text-[11px]">
           {[t("stepCart"), t("stepDetails"), t("stepDone")].map((name, i) => (
             <span key={name} className="flex items-center gap-2">
               {i ? <span className="block h-px w-6 bg-current/20" aria-hidden /> : null}
-              <span className={i === 1 ? "font-semibold text-current" : "text-current/45"}>
+              <span className={i === here ? "font-semibold text-current" : "text-current/45"}>
                 <span className="mr-1.5 tabular-nums">{i + 1}</span>
                 {name}
               </span>
@@ -796,20 +990,7 @@ export function ShopChrome({
           ))}
         </div>
       );
-
-    case "checkout:payments":
-      return (
-        <div className="px-4 py-4">
-          <p className="mb-2 text-[10px] uppercase tracking-[0.08em] text-current/45">{t("paymentsHeading")}</p>
-          <div className="flex flex-wrap gap-2">
-            {["bKash", "Nagad", "Rocket", "Visa", "Mastercard", t("cashOnDelivery")].map((name) => (
-              <span key={name} className="rounded-xs border border-current/15 px-2.5 py-1 text-[10px] text-current/60">
-                {name}
-              </span>
-            ))}
-          </div>
-        </div>
-      );
+    }
 
     case "checkout:footerStyle":
       return variant === "same" ? (

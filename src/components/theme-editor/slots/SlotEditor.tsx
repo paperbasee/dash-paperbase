@@ -54,6 +54,7 @@ export function SlotEditor() {
   const [choices, setChoices] = useState<Record<SlotPageKey, Record<string, string>>>(() => ({
     home: initialChoices("home"),
     product: initialChoices("product"),
+    cart: initialChoices("cart"),
     checkout: initialChoices("checkout"),
     header: initialChoices("header"),
     footer: initialChoices("footer"),

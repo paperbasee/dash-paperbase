@@ -18,7 +18,7 @@
  */
 
 /** Which page a merchant is looking at. Matches the editor's existing page keys. */
-export type SlotPageKey = "home" | "product" | "checkout" | "header" | "footer";
+export type SlotPageKey = "home" | "product" | "cart" | "checkout" | "header" | "footer";
 
 /** The wireframe drawn on an option's tile, so a merchant sees the shape before choosing. */
 export type OptionShape = "blank" | "line" | "block" | "row";
@@ -98,7 +98,8 @@ export type Slot = {
   emptyLabel?: string;
 };
 
-export const SLOT_PAGES: readonly SlotPageKey[] = ["home", "product", "checkout"] as const;
+/** In the order a shopper meets them. */
+export const SLOT_PAGES: readonly SlotPageKey[] = ["home", "product", "cart", "checkout"] as const;
 export const SLOT_GROUPS: readonly SlotPageKey[] = ["header", "footer"] as const;
 
 export const SLOTS: Record<SlotPageKey, Slot[]> = {
@@ -393,6 +394,135 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
       options: [
         { value: "on", label: "on", note: "stickyBuyNote", shape: "line" },
         { value: "off", label: "off", note: "stickyBuyOffNote", shape: "blank" },
+      ],
+    },
+    { key: "footer", label: "footer", inherited: true, inheritedFrom: { page: "footer", key: "layout" } },
+  ],
+
+  /**
+   * The cart: the page between wanting something and paying for it.
+   *
+   * It is the page a shop leaves alone and should not. Everything a shopper
+   * does here is a decision to carry on or to stop, so the places worth owning
+   * are the ones that answer a reason to stop -- what delivery costs, what else
+   * they nearly bought, and what an empty cart says instead of nothing.
+   */
+  cart: [
+    { key: "notice", label: "notice", inherited: true, inheritedFrom: { page: "header", key: "notice" } },
+    { key: "header", label: "header", inherited: true, inheritedFrom: { page: "header", key: "layout" } },
+    {
+      key: "heading",
+      label: "cartHeading",
+      initial: "withLink",
+      options: [
+        { value: "withLink", label: "cartHeadingWithLink", note: "cartHeadingWithLinkNote", shape: "line" },
+        { value: "plain", label: "cartHeadingPlain", note: "cartHeadingPlainNote", shape: "line" },
+      ],
+    },
+    {
+      key: "steps",
+      label: "checkoutSteps",
+      initial: "none",
+      emptyValues: ["none"],
+      emptyLabel: "checkoutStepsEmpty",
+      options: [
+        { value: "none", label: "nothing", note: "checkoutStepsNoneNote", shape: "blank" },
+        { value: "bar", label: "checkoutStepsBar", note: "cartStepsBarNote", shape: "line" },
+      ],
+    },
+    {
+      key: "lines",
+      label: "cartLines",
+      hint: "cartLinesHint",
+      initial: "table",
+      options: [
+        { value: "table", label: "cartTable", note: "cartTableNote", shape: "row" },
+        { value: "list", label: "cartList", note: "cartListNote", shape: "block" },
+      ],
+    },
+    {
+      key: "trust",
+      label: "trustLine",
+      initial: "on",
+      emptyValues: ["off"],
+      emptyLabel: "trustEmpty",
+      options: [
+        { value: "on", label: "on", note: "cartTrustNote", shape: "line" },
+        { value: "off", label: "off", shape: "blank" },
+      ],
+    },
+    {
+      key: "total",
+      label: "cartTotal",
+      hint: "cartTotalHint",
+      initial: "right",
+      options: [
+        { value: "right", label: "cartTotalRight", note: "cartTotalRightNote", shape: "line" },
+        { value: "card", label: "cartTotalCard", note: "cartTotalCardNote", shape: "block" },
+        { value: "bar", label: "cartTotalBar", note: "cartTotalBarNote", shape: "row" },
+      ],
+    },
+    {
+      key: "sticky",
+      label: "cartSticky",
+      initial: "on",
+      emptyValues: ["off"],
+      emptyLabel: "cartStickyEmpty",
+      options: [
+        { value: "on", label: "on", note: "cartStickyNote", shape: "line" },
+        { value: "off", label: "off", note: "cartStickyOffNote", shape: "blank" },
+      ],
+    },
+    {
+      key: "upsell",
+      label: "cartUpsell",
+      hint: "cartUpsellHint",
+      /* On: a shopper with a full cart has already decided to buy here, and
+         four best sellers need no personalisation to be worth showing. */
+      initial: "row",
+      emptyValues: ["off"],
+      emptyLabel: "cartUpsellEmpty",
+      options: [
+        { value: "off", label: "off", shape: "blank" },
+        { value: "row", label: "cartUpsellRow", note: "cartUpsellRowNote", shape: "row" },
+        { value: "picks", label: "cartUpsellPicks", note: "cartUpsellPicksNote", shape: "row", premium: true },
+      ],
+    },
+    {
+      key: "recent",
+      label: "recent",
+      initial: "off",
+      emptyValues: ["off"],
+      emptyLabel: "recentEmpty",
+      options: [
+        { value: "on", label: "on", note: "cartRecentNote", shape: "row" },
+        { value: "off", label: "off", shape: "blank" },
+      ],
+    },
+    {
+      key: "payments",
+      label: "checkoutPayments",
+      initial: "off",
+      emptyValues: ["off"],
+      emptyLabel: "checkoutPaymentsEmpty",
+      options: [
+        { value: "on", label: "paymentsOn", note: "cartPaymentsNote", shape: "row" },
+        { value: "off", label: "off", shape: "blank" },
+      ],
+    },
+    /**
+     * Not a place on the page but a state of it -- and the one most shops leave
+     * as a sentence. Whoever sees it has arrived wanting to buy and found
+     * nothing, which is the cheapest sale in the shop to rescue.
+     */
+    {
+      key: "empty",
+      label: "cartEmpty",
+      hint: "cartEmptyHint",
+      initial: "text",
+      options: [
+        { value: "text", label: "cartEmptyText", note: "cartEmptyTextNote", shape: "line" },
+        { value: "invite", label: "cartEmptyInvite", note: "cartEmptyInviteNote", shape: "block" },
       ],
     },
     { key: "footer", label: "footer", inherited: true, inheritedFrom: { page: "footer", key: "layout" } },
