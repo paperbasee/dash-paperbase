@@ -481,6 +481,8 @@ export interface CustomerAccount {
   total_spent: string | number;
   first_order_at?: string | null;
   last_order_at?: string | null;
+  /** Derived from the confirmed signed-in order count, not a stored column. */
+  is_repeat_customer: boolean;
 }
 
 /** How a shopper signs in. Only `email` exists today; the list shape is what makes

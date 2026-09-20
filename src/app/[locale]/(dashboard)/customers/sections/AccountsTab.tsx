@@ -45,6 +45,7 @@ export function AccountsTab() {
   const tCommon = useTranslations("common");
   const { page, filters, setFilter, setPage, clearFilters } = useFilters([
     "joined_date",
+    "is_repeat_customer",
     "search",
   ]);
   const [searchInput, setSearchInput] = useState(filters.search || "");
@@ -54,9 +55,12 @@ export function AccountsTab() {
   const listParams = useMemo((): CustomersListParams => {
     const params: CustomersListParams = { page };
     if (filters.joined_date) params.joined_date = filters.joined_date;
+    if (filters.is_repeat_customer) {
+      params.is_repeat_customer = filters.is_repeat_customer;
+    }
     if (filters.search) params.search = filters.search;
     return params;
-  }, [page, filters.joined_date, filters.search]);
+  }, [page, filters.joined_date, filters.is_repeat_customer, filters.search]);
 
   const { data, isLoading, isError, error } = useCustomerAccountsQuery(listParams);
 
@@ -74,8 +78,12 @@ export function AccountsTab() {
 
   const filtersActive = useMemo(
     () =>
-      Boolean((filters.joined_date || "").trim() || (filters.search || "").trim()),
-    [filters.joined_date, filters.search]
+      Boolean(
+        (filters.joined_date || "").trim() ||
+          (filters.search || "").trim() ||
+          (filters.is_repeat_customer || "").trim()
+      ),
+    [filters.joined_date, filters.search, filters.is_repeat_customer]
   );
 
   useEffect(() => {
@@ -116,6 +124,18 @@ export function AccountsTab() {
 
       {filtersOpen ? (
         <FilterBar>
+          {/* The same question the Customers tab asks. For an account it is
+              derived from confirmed orders placed while signed in, against the
+              same threshold, so the two tabs agree on who has come back. */}
+          <FilterDropdown
+            value={filters.is_repeat_customer}
+            onChange={(value) => setFilter("is_repeat_customer", value)}
+            placeholder={tPages("filtersRepeatedCustomer")}
+            options={[
+              { value: "true", label: tPages("filtersRepeatedCustomerYes") },
+              { value: "false", label: tPages("filtersRepeatedCustomerNo") },
+            ]}
+          />
           <FilterDropdown
             value={filters.joined_date}
             onChange={(value) => setFilter("joined_date", value)}
