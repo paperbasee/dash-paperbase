@@ -76,7 +76,15 @@ export type Slot = {
    * shop's own page does.
    */
   row?: string;
-  /** Its share of that row, as a grid fraction. Defaults to 1. */
+  /**
+   * Places that share one side of a row, one above the other.
+   *
+   * A column of a real page is not one thing: the checkout's right-hand side is
+   * the form, and then a message, and then the button. Slots in the same `row`
+   * that name the same `stack` are that column, in the order written.
+   */
+  stack?: string;
+  /** Its share of that row, as a grid fraction. Taken from the first slot of a stack. */
   span?: number;
   /** `themeEditor.slots.*` key: something true about the place, said before the choices. */
   hint?: string;
@@ -456,6 +464,7 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
       key: "form",
       label: "checkoutForm",
       row: "body",
+      stack: "right",
       span: 1.15,
       /* The same value as Settings > Checkout. Said here, because two screens
          editing one setting is a thing a merchant should be told, not find. */
@@ -464,6 +473,27 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
       options: [
         { value: "extended", label: "formExtended", note: "formExtendedNote", shape: "block" },
         { value: "minimal", label: "formMinimal", note: "formMinimalNote", shape: "line" },
+      ],
+    },
+    /**
+     * The last thing a shopper reads before they pay.
+     *
+     * It draws the button with it, because the place is defined by where it
+     * sits and a banner floating on its own is not recognisable. That also
+     * means it has no empty state: switched off, this slot is still the button,
+     * so there is nothing to hatch over and nothing a merchant can lose.
+     */
+    {
+      key: "beforePay",
+      label: "checkoutBeforePay",
+      row: "body",
+      stack: "right",
+      hint: "checkoutBeforePayHint",
+      initial: "off",
+      options: [
+        { value: "off", label: "off", note: "beforePayOffNote", shape: "blank" },
+        { value: "note", label: "beforePayNote", note: "beforePayNoteNote", shape: "line" },
+        { value: "warning", label: "beforePayWarning", note: "beforePayWarningNote", shape: "line" },
       ],
     },
     {

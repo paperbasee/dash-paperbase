@@ -878,6 +878,32 @@ export function ShopChrome({
             </div>
           </div>
 
+        </div>
+      );
+    }
+
+    /**
+     * The merchant's own words, and the button they come before.
+     *
+     * The button is drawn here rather than with the form because this place is
+     * defined by where it sits: a banner on its own is not something a merchant
+     * would recognise, and a banner directly above Place order is.
+     */
+    case "checkout:beforePay": {
+      const banner =
+        variant === "warning" ? (
+          // The amber is in the edge and the fill, not the words: the canvas
+          // takes the dashboard's own ground, and a fixed dark ink disappears
+          // on the dark one.
+          <p className="mb-3 rounded-xs border border-[#b4571f]/45 bg-[#b4571f]/12 px-3 py-2.5 text-[11px] leading-relaxed">
+            {t("beforePayWarningExample")}
+          </p>
+        ) : variant === "note" ? (
+          <p className="mb-3 text-center text-[11px] leading-relaxed text-current/55">{t("beforePayNoteExample")}</p>
+        ) : null;
+      return (
+        <div className="px-4 pb-4">
+          {banner}
           {/* The same near-black the rest of the mock shop fills a button with.
               Not `bg-current`: the label sets `color`, so currentColor would
               paint the button in the label's colour and it would disappear. */}

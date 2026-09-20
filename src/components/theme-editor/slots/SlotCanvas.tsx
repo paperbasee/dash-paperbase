@@ -238,13 +238,23 @@ function SlotRegion({
   );
 }
 
-/** Consecutive slots that name the same `row` are one band; everything else is its own. */
-function bandsOf(slots: Slot[]): Slot[][] {
-  const bands: Slot[][] = [];
+/**
+ * Consecutive slots that name the same `row` are one band; everything else is
+ * its own. Inside a band, slots that name the same `stack` are one column of
+ * it, so a band is columns of places rather than places.
+ */
+function bandsOf(slots: Slot[]): Slot[][][] {
+  const bands: Slot[][][] = [];
   for (const slot of slots) {
-    const last = bands[bands.length - 1];
-    if (slot.row && last?.[0]?.row === slot.row) last.push(slot);
-    else bands.push([slot]);
+    const band = bands[bands.length - 1];
+    const sameRow = slot.row && band?.[0]?.[0]?.row === slot.row;
+    if (!sameRow) {
+      bands.push([[slot]]);
+      continue;
+    }
+    const column = band[band.length - 1];
+    if (slot.stack && column[0].stack === slot.stack) column.push(slot);
+    else band.push([slot]);
   }
   return bands;
 }
@@ -297,7 +307,7 @@ export function SlotCanvas({
           const settingsOf = (slot: Slot) =>
             slot.inheritedFrom ? (allChoices[slot.inheritedFrom.page] ?? {}) : choices;
 
-          const opened = band.find((slot) => open === slot.key);
+          const opened = band.flat().find((slot) => open === slot.key);
           const chooser = opened ? (
             <Chooser
               slot={opened}
@@ -308,8 +318,8 @@ export function SlotCanvas({
           ) : null;
 
           // A lone place keeps its choices inside its own outline.
-          if (band.length === 1) {
-            const slot = band[0];
+          if (band.length === 1 && band[0].length === 1) {
+            const slot = band[0][0];
             return (
               <SlotRegion
                 key={slot.key}
@@ -328,25 +338,29 @@ export function SlotCanvas({
           // Side by side, as the page itself has them -- and stacked on a phone,
           // which is also what the page itself does.
           return (
-            <div key={band[0].row}>
+            <div key={band[0][0].row}>
               <div
                 className={cn("grid", device === "mobile" ? "" : "sm:[grid-template-columns:var(--slot-cols)]")}
                 style={
                   {
-                    "--slot-cols": band.map((slot) => `minmax(0,${slot.span ?? 1}fr)`).join(" "),
+                    "--slot-cols": band.map((col) => `minmax(0,${col[0].span ?? 1}fr)`).join(" "),
                   } as React.CSSProperties
                 }
               >
-                {band.map((slot) => (
-                  <SlotRegion
-                    key={slot.key}
-                    slot={slot}
-                    page={page}
-                    value={valueOf(slot)}
-                    isOpen={open === slot.key}
-                    onActivate={activate(slot)}
-                    settings={settingsOf(slot)}
-                  />
+                {band.map((column) => (
+                  <div key={column[0].key} className="flex min-w-0 flex-col">
+                    {column.map((slot) => (
+                      <SlotRegion
+                        key={slot.key}
+                        slot={slot}
+                        page={page}
+                        value={valueOf(slot)}
+                        isOpen={open === slot.key}
+                        onActivate={activate(slot)}
+                        settings={settingsOf(slot)}
+                      />
+                    ))}
+                  </div>
                 ))}
               </div>
               {chooser}

@@ -2657,7 +2657,16 @@
       "paymentHeading": "পেমেন্ট",
       "placeOrder": "অর্ডার করুন",
       "orderSummary": "অর্ডার সারাংশ",
-      "subtotal": "সাবটোটাল"
+      "subtotal": "সাবটোটাল",
+      "checkoutBeforePay": "বোতামের উপরে বার্তা",
+      "checkoutBeforePayHint": "আপনার নিজের কথা, ক্রেতা টাকা দেওয়ার ঠিক আগের মুহূর্তে যা পড়েন। ডেলিভারির সময়, কোনটা ফেরত নেওয়া যাবে না — যা না বললে অর্ডারের পরে বুঝিয়ে বলতে হয়, সবই এখানে।",
+      "beforePayOffNote": "সরাসরি বোতাম",
+      "beforePayNote": "সাধারণ লাইন",
+      "beforePayNoteNote": "হালকা ধূসর লেখা, বাক্স নেই। সহায়ক কোনো তথ্যের জন্য।",
+      "beforePayWarning": "সতর্কতার বাক্স",
+      "beforePayWarningNote": "বাক্সে, রঙসহ। যা ক্রেতার চোখ এড়ানো চলবে না।",
+      "beforePayNoteExample": "বিকেল ৫টার পরে দেওয়া অর্ডার পরের কর্মদিবসে পাঠানো হয়।",
+      "beforePayWarningExample": "সেলের পণ্য ফেরত বা বদল করা যাবে না। অর্ডারের আগে মাপ দেখে নিন।"
     }
   },
   "checkoutPage": {

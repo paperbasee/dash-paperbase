@@ -2657,7 +2657,16 @@
       "paymentHeading": "Payment",
       "placeOrder": "Place order",
       "orderSummary": "Order summary",
-      "subtotal": "Subtotal"
+      "subtotal": "Subtotal",
+      "checkoutBeforePay": "Message above the button",
+      "checkoutBeforePayHint": "Your own words, read in the second before a shopper pays. Delivery times, what cannot be returned — anything you would otherwise have to explain after the order.",
+      "beforePayOffNote": "Straight to the button",
+      "beforePayNote": "Plain line",
+      "beforePayNoteNote": "Quiet grey text, no box. For something helpful.",
+      "beforePayWarning": "Warning box",
+      "beforePayWarningNote": "Boxed and coloured. For something they must not miss.",
+      "beforePayNoteExample": "Orders placed after 5pm are sent the next working day.",
+      "beforePayWarningExample": "Sale items cannot be returned or exchanged. Please check your size before ordering."
     }
   },
   "billingSuccess": {
