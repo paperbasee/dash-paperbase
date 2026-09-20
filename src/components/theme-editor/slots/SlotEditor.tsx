@@ -70,7 +70,7 @@ export function SlotEditor() {
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
-      <div className="flex flex-wrap items-center gap-2 border-b border-border px-2 py-2.5 md:px-3">
+      <div className="flex flex-wrap items-center gap-3 border-b border-border px-3 py-3 md:px-4">
         {/*
           The way out. This screen fills the window with no dashboard around it,
           so without this a merchant's only exit is the browser's back button --
@@ -148,7 +148,7 @@ export function SlotEditor() {
       </div>
 
       {/* Said plainly, because a screen that looks finished and saves nothing is worse than one that says so. */}
-      <p className="border-b border-border bg-[hsl(var(--accent-yellow)/0.1)] px-3 py-2 text-xs text-muted-foreground">
+      <p className="border-b border-border bg-[hsl(var(--accent-yellow)/0.1)] px-4 py-2.5 text-xs leading-relaxed text-muted-foreground">
         {t("designOnly")}
       </p>
 

@@ -37,21 +37,21 @@ import { ShopChrome } from "./ShopChrome";
 /** The little wireframe on an option's tile: the shape it makes, not a picture of it. */
 function OptionShapeMark({ shape }: { shape: OptionShape }) {
   if (shape === "blank") {
-    return <span className="block h-10 rounded-xs bg-muted" aria-hidden />;
+    return <span className="block h-12 rounded-xs bg-muted" aria-hidden />;
   }
   if (shape === "block") {
-    return <span className="block h-10 rounded-xs bg-muted-foreground/20" aria-hidden />;
+    return <span className="block h-12 rounded-xs bg-muted-foreground/20" aria-hidden />;
   }
   if (shape === "row") {
     return (
-      <span className="flex h-10 gap-1 rounded-xs bg-muted p-1.5" aria-hidden>
+      <span className="flex h-12 gap-1 rounded-xs bg-muted p-2" aria-hidden>
         <span className="flex-1 rounded-[2px] bg-muted-foreground/20" />
         <span className="flex-1 rounded-[2px] bg-muted-foreground/20" />
       </span>
     );
   }
   return (
-    <span className="flex h-10 flex-col justify-center gap-1 rounded-xs bg-muted px-1.5" aria-hidden>
+    <span className="flex h-12 flex-col justify-center gap-1.5 rounded-xs bg-muted px-2" aria-hidden>
       <span className="h-1 rounded-full bg-muted-foreground/25" />
       <span className="h-1 rounded-full bg-muted-foreground/25" />
       <span className="h-1 w-1/2 rounded-full bg-muted-foreground/25" />
@@ -78,13 +78,13 @@ function OptionTile({
         onPick();
       }}
       className={cn(
-        "flex flex-col gap-2 rounded-sm border p-2.5 text-left transition-colors",
+        "flex flex-col gap-2.5 rounded-sm border p-3 text-left transition-colors",
         "hover:border-primary focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-primary",
         chosen ? "border-primary ring-1 ring-inset ring-primary" : "border-border-subtle",
       )}
     >
       <OptionShapeMark shape={option.shape} />
-      <span className="flex flex-wrap items-center gap-1.5 text-xs font-medium">
+      <span className="flex flex-wrap items-center gap-1.5 text-[13px] font-medium">
         {t(option.label)}
         {option.premium ? (
           <span className="accent-yellow rounded-[4px] bg-[hsl(var(--accent-yellow)/0.14)] px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-[0.05em]">
@@ -92,7 +92,7 @@ function OptionTile({
           </span>
         ) : null}
       </span>
-      {option.note ? <span className="text-[11px] text-muted-foreground">{t(option.note)}</span> : null}
+      {option.note ? <span className="text-[11.5px] leading-relaxed text-muted-foreground">{t(option.note)}</span> : null}
     </button>
   );
 }
@@ -112,11 +112,11 @@ function Chooser({
   const t = useTranslations("themeEditor.slots");
   return (
     <div
-      className="border-t border-border bg-card p-3 text-card-foreground"
+      className="border-t border-border bg-card px-4 py-4 text-card-foreground"
       onClick={(event) => event.stopPropagation()}
     >
-      <div className="mb-2.5 flex flex-wrap items-baseline gap-x-2.5 gap-y-1">
-        <strong className="text-[13px] font-semibold">
+      <div className="mb-3.5 flex flex-wrap items-baseline gap-x-3 gap-y-1">
+        <strong className="text-sm font-semibold">
           {slot.locked ? t("thisOneIsSet") : t("whatGoesHere")}
         </strong>
         <span className="text-xs text-muted-foreground">{t(slot.label)}</span>
@@ -130,9 +130,9 @@ function Chooser({
       </div>
 
       {slot.locked ? (
-        <p className="m-0 max-w-prose text-[13px] text-muted-foreground">{t(slot.lockedBecause ?? "lockedWhy")}</p>
+        <p className="m-0 max-w-prose text-[13px] leading-relaxed text-muted-foreground">{t(slot.lockedBecause ?? "lockedWhy")}</p>
       ) : (
-        <div className="grid gap-2 [grid-template-columns:repeat(auto-fit,minmax(126px,1fr))]">
+        <div className="grid gap-3 [grid-template-columns:repeat(auto-fit,minmax(148px,1fr))]">
           {slot.options?.map((option) => (
             <OptionTile
               key={option.value}
@@ -165,7 +165,7 @@ export function SlotCanvas({
   const t = useTranslations("themeEditor.slots");
 
   return (
-    <div className="flex justify-center bg-muted/40 p-1.5 sm:p-2">
+    <div className="flex justify-center bg-muted/40 p-2 sm:p-3">
       <div
         className={cn(
           "w-full overflow-hidden rounded-sm border border-border-subtle bg-background text-foreground transition-[max-width]",
@@ -221,13 +221,13 @@ export function SlotCanvas({
 
               {blank ? (
                 <div
-                  className="grid place-items-center py-6 text-center"
+                  className="grid place-items-center py-9 text-center"
                   style={{
                     backgroundImage:
                       "repeating-linear-gradient(135deg, transparent, transparent 8px, var(--color-border-subtle) 8px, var(--color-border-subtle) 9px)",
                   }}
                 >
-                  <span className="rounded-full bg-background px-2.5 py-1 text-xs text-muted-foreground">
+                  <span className="rounded-full bg-background px-3 py-1.5 text-xs text-muted-foreground">
                     {t(slot.emptyLabel ?? "nothingHere")}
                   </span>
                 </div>

@@ -53,7 +53,7 @@ function Swatches({ palette }: { palette: Palette }) {
   return (
     <span className="flex overflow-hidden rounded-xs" aria-hidden>
       {order.map((role) => (
-        <span key={role} className="h-9 flex-1" style={{ backgroundColor: palette[role] as string }} />
+        <span key={role} className="h-12 flex-1" style={{ backgroundColor: palette[role] as string }} />
       ))}
     </span>
   );
@@ -75,7 +75,7 @@ function PaletteCard({
       aria-pressed={chosen}
       onClick={onPick}
       className={cn(
-        "flex flex-col gap-2 rounded-sm border p-2 text-left transition-colors",
+        "flex flex-col gap-2.5 rounded-sm border p-3 text-left transition-colors",
         "hover:border-primary focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-primary",
         chosen ? "border-primary ring-1 ring-inset ring-primary" : "border-border-subtle",
       )}
@@ -105,16 +105,16 @@ function FaceRow({
       aria-pressed={chosen}
       onClick={onPick}
       className={cn(
-        "flex w-full flex-col gap-1 rounded-sm border px-3 py-2.5 text-left transition-colors",
+        "flex w-full flex-col gap-1.5 rounded-sm border px-4 py-3.5 text-left transition-colors",
         "hover:border-primary focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-primary",
         chosen ? "border-primary ring-1 ring-inset ring-primary" : "border-border-subtle",
       )}
     >
       <span className="flex items-baseline justify-between gap-2">
-        <span className={cn("truncate text-[15px]", FACE_FAMILY[face.key])}>{face.specimen}</span>
+        <span className={cn("truncate text-[19px] leading-snug", FACE_FAMILY[face.key])}>{face.specimen}</span>
         <span className="shrink-0 text-[11px] text-muted-foreground">{face.name}</span>
       </span>
-      <span className="text-[11px] text-muted-foreground">{t(face.note)}</span>
+      <span className="text-[11.5px] leading-relaxed text-muted-foreground">{t(face.note)}</span>
     </button>
   );
 }
@@ -128,14 +128,14 @@ function CornerCard({ corner, chosen, onPick }: { corner: Corner; chosen: boolea
       aria-pressed={chosen}
       onClick={onPick}
       className={cn(
-        "flex flex-col items-center gap-2 rounded-sm border p-2.5 transition-colors",
+        "flex flex-col items-center gap-2.5 rounded-sm border p-3 transition-colors",
         "hover:border-primary focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-primary",
         chosen ? "border-primary ring-1 ring-inset ring-primary" : "border-border-subtle",
       )}
     >
       <span
         aria-hidden
-        className="h-9 w-full border-2 border-muted-foreground/30 bg-muted"
+        className="h-11 w-full border-2 border-muted-foreground/30 bg-muted"
         style={{ borderRadius: corner.radius }}
       />
       <span className="text-xs font-medium">{t(corner.label)}</span>
@@ -169,7 +169,7 @@ function CardStyleCard({
       aria-pressed={chosen}
       onClick={onPick}
       className={cn(
-        "flex flex-col gap-2 rounded-sm border p-2.5 text-left transition-colors",
+        "flex flex-col gap-2.5 rounded-sm border p-3 text-left transition-colors",
         "hover:border-primary focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-primary",
         chosen ? "border-primary ring-1 ring-inset ring-primary" : "border-border-subtle",
       )}
@@ -198,7 +198,7 @@ function CardStyleCard({
         )}
       </span>
       <span className="text-xs font-medium">{t(style.label)}</span>
-      <span className="text-[11px] text-muted-foreground">{t(style.note)}</span>
+      <span className="text-[11.5px] leading-relaxed text-muted-foreground">{t(style.note)}</span>
     </button>
   );
 }
@@ -229,11 +229,13 @@ export function StylePanel({
   const group = (language: Face["language"]) => FACES.filter((f) => f.language === language);
 
   return (
-    <div className="flex min-h-0 flex-col gap-6 overflow-y-auto p-4">
+    <div className="flex min-h-0 flex-col gap-10 overflow-y-auto px-5 py-6">
       <section>
-        <h3 className="mb-1 text-[13px] font-semibold">{t("colours")}</h3>
-        <p className="mb-3 text-xs text-muted-foreground">{t("coloursNote")}</p>
-        <div className="grid grid-cols-2 gap-2">
+        <h3 className="mb-2 text-[11px] font-semibold uppercase tracking-[0.09em] text-muted-foreground">
+          {t("colours")}
+        </h3>
+        <p className="mb-4 max-w-[42ch] text-[12.5px] leading-relaxed text-muted-foreground">{t("coloursNote")}</p>
+        <div className="grid grid-cols-2 gap-3">
           {PALETTES.map((item) => (
             <PaletteCard
               key={item.key}
@@ -246,17 +248,19 @@ export function StylePanel({
       </section>
 
       <section>
-        <h3 className="mb-1 text-[13px] font-semibold">{t("type")}</h3>
+        <h3 className="mb-2 text-[11px] font-semibold uppercase tracking-[0.09em] text-muted-foreground">
+          {t("type")}
+        </h3>
         {/* The consequence, at the point of choosing rather than in a note elsewhere. */}
-        <p className="mb-3 text-xs text-muted-foreground">{t("typeNote")}</p>
+        <p className="mb-4 max-w-[42ch] text-[12.5px] leading-relaxed text-muted-foreground">{t("typeNote")}</p>
 
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-5">
           {(["en", "bn"] as const).map((language) => (
             <div key={language}>
-              <p className="mb-1.5 text-[11px] font-medium uppercase tracking-[0.05em] text-muted-foreground">
+              <p className="mb-2 text-[11px] font-medium uppercase tracking-[0.05em] text-muted-foreground">
                 {t(language === "en" ? "facesEnglish" : "facesBengali")}
               </p>
-              <div className="flex flex-col gap-1.5">
+              <div className="flex flex-col gap-2">
                 {group(language).map((item) => (
                   <FaceRow
                     key={item.key}
@@ -271,15 +275,17 @@ export function StylePanel({
         </div>
 
         {/* What a merchant does not choose, said plainly rather than discovered. */}
-        <p className="mt-3 rounded-sm bg-muted/60 px-3 py-2 text-[11px] text-muted-foreground">
+        <p className="mt-4 rounded-sm bg-muted/60 px-3.5 py-3 text-[11.5px] leading-relaxed text-muted-foreground">
           {t("pairedWith", { face: current.pairedWith })}
         </p>
       </section>
 
       <section>
-        <h3 className="mb-1 text-[13px] font-semibold">{t("corners")}</h3>
-        <p className="mb-3 text-xs text-muted-foreground">{t("cornersNote")}</p>
-        <div className="grid grid-cols-3 gap-2">
+        <h3 className="mb-2 text-[11px] font-semibold uppercase tracking-[0.09em] text-muted-foreground">
+          {t("corners")}
+        </h3>
+        <p className="mb-4 max-w-[42ch] text-[12.5px] leading-relaxed text-muted-foreground">{t("cornersNote")}</p>
+        <div className="grid grid-cols-3 gap-3">
           {CORNERS.map((item) => (
             <CornerCard
               key={item.key}
@@ -292,9 +298,11 @@ export function StylePanel({
       </section>
 
       <section>
-        <h3 className="mb-1 text-[13px] font-semibold">{t("cardStyle")}</h3>
-        <p className="mb-3 text-xs text-muted-foreground">{t("cardStyleNote")}</p>
-        <div className="grid grid-cols-2 gap-2">
+        <h3 className="mb-2 text-[11px] font-semibold uppercase tracking-[0.09em] text-muted-foreground">
+          {t("cardStyle")}
+        </h3>
+        <p className="mb-4 max-w-[42ch] text-[12.5px] leading-relaxed text-muted-foreground">{t("cardStyleNote")}</p>
+        <div className="grid grid-cols-2 gap-3">
           {CARD_STYLES.map((item) => (
             <CardStyleCard
               key={item.key}
