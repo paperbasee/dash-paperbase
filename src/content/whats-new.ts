@@ -57,6 +57,80 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-09-21-shoppers-can-save-products",
+    date: "2026-09-21",
+    version: "4.35.0",
+    tag: "new",
+    href: "/products/wished",
+    title: {
+      en: "Shoppers can save products for later",
+      bn: "ক্রেতারা পছন্দের পণ্য সেভ করে রাখতে পারবেন",
+    },
+    body: {
+      en: "A shopper can tap the heart on any product and keep a list of what they want in your shop. Catalog → Most wished-for shows you what they are saving, most-saved first, so you know what to restock or put on offer. It stays off until you switch it on.",
+      bn: "ক্রেতারা যেকোনো পণ্যের হার্ট চিহ্নে চাপ দিয়ে আপনার দোকানে পছন্দের পণ্যের তালিকা রাখতে পারবেন। ক্যাটালগ → সবচেয়ে পছন্দের পাতায় দেখতে পাবেন তারা কী সেভ করছেন, সবচেয়ে বেশি সেভ হওয়া পণ্য আগে — কোনটি আবার আনবেন বা অফারে দেবেন তা বুঝতে সুবিধা হবে। আপনি চালু না করা পর্যন্ত এটি বন্ধ থাকবে।",
+    },
+  },
+  {
+    id: "2026-09-21-see-who-nearly-bought",
+    date: "2026-09-21",
+    version: "4.35.0",
+    tag: "new",
+    href: "/orders/abandoned",
+    title: {
+      en: "See who nearly bought",
+      bn: "যাঁরা প্রায় কিনেই ফেলেছিলেন তাঁদের দেখুন",
+    },
+    body: {
+      en: "When a shopper types their phone number into your checkout and then leaves without ordering, you now see them under Sales → Abandoned checkouts, along with what was in their bag. You can call them back. Each one is kept for 30 days and then deleted.",
+      bn: "কোনো ক্রেতা আপনার চেকআউটে ফোন নম্বর লিখে অর্ডার না করেই চলে গেলে এখন তাঁকে বিক্রয় → অসমাপ্ত চেকআউট-এ দেখতে পাবেন, সাথে তাঁর ব্যাগে কী ছিল তাও। আপনি ফোন করে যোগাযোগ করতে পারবেন। প্রতিটি তথ্য ৩০ দিন রাখা হয়, তারপর মুছে যায়।",
+    },
+  },
+  {
+    id: "2026-09-21-sales-and-shoppers-menus",
+    date: "2026-09-21",
+    version: "4.35.0",
+    tag: "improved",
+    href: "/orders",
+    title: {
+      en: "Sales and Shoppers open as menus",
+      bn: "বিক্রয় ও ক্রেতা এখন মেনু হিসেবে খোলে",
+    },
+    body: {
+      en: "Orders and Customers are now called Sales and Shoppers, and each one opens a short menu instead of going straight to a page — the same way Catalog already did. Your order list and your customer list are the first item inside, so nothing is further away than one more click.",
+      bn: "অর্ডার ও গ্রাহক এখন বিক্রয় ও ক্রেতা নামে আছে, আর প্রতিটি সরাসরি পাতায় না গিয়ে একটি ছোট মেনু খোলে — ক্যাটালগ যেভাবে খুলত ঠিক সেভাবেই। ভেতরের প্রথম আইটেমই আপনার অর্ডার তালিকা ও গ্রাহক তালিকা, তাই কিছুই এক ক্লিকের বেশি দূরে নয়।",
+    },
+  },
+  {
+    id: "2026-09-21-popup-and-cta-always-there",
+    date: "2026-09-21",
+    version: "4.35.0",
+    tag: "fixed",
+    href: "/settings?tab=promotions",
+    title: {
+      en: "Pop-up and CTA no longer hide themselves",
+      bn: "পপ-আপ আর সিটিএ আর নিজেরাই লুকাবে না",
+    },
+    body: {
+      en: "Settings → Apps no longer has switches for Pop-up, CTA and Shipping. Turning the Pop-up or CTA switch off only hid its own editor, leaving no screen to turn it back on from. Both are always in Settings → Promotions now — to stop one showing in your shop, set it to inactive there.",
+      bn: "সেটিংস → অ্যাপস-এ পপ-আপ, সিটিএ আর শিপিং-এর সুইচ আর নেই। পপ-আপ বা সিটিএ-র সুইচ বন্ধ করলে কেবল তার নিজের এডিটরই লুকিয়ে যেত, ফলে আবার চালু করার মতো কোনো পাতাই থাকত না। দুটিই এখন সব সময় সেটিংস → প্রোমোশন-এ থাকবে — দোকানে দেখানো বন্ধ করতে সেখান থেকে সেটিকে নিষ্ক্রিয় করুন।",
+    },
+  },
+  {
+    id: "2026-09-21-sidebar-highlights-one-page",
+    date: "2026-09-21",
+    version: "4.35.0",
+    tag: "fixed",
+    title: {
+      en: "The menu highlights one page at a time",
+      bn: "মেনুতে একসাথে একটি পাতাই হাইলাইট হবে",
+    },
+    body: {
+      en: "Opening Abandoned checkouts also lit up Orders, and opening Accounts also lit up Customers, so the menu made it look like you were in two places at once. Only the page you are actually on is highlighted now.",
+      bn: "অসমাপ্ত চেকআউট খুললে সাথে অর্ডারও হাইলাইট হয়ে থাকত, আর অ্যাকাউন্ট খুললে গ্রাহকও — ফলে মনে হতো আপনি একসাথে দুই জায়গায় আছেন। এখন আপনি আসলে যে পাতায় আছেন কেবল সেটিই হাইলাইট হবে।",
+    },
+  },
+  {
     id: "2026-09-21-shoppers-can-have-an-account",
     date: "2026-09-21",
     tag: "new",
@@ -419,80 +493,5 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
       en: "Open What's new from your profile menu to see recent updates. A small dot lets you know when something new arrives.",
       bn: "প্রোফাইল মেনুর \"নতুন কী আছে\" থেকে সাম্প্রতিক আপডেটগুলো দেখুন। নতুন কিছু এলে ছোট একটি বিন্দু আপনাকে জানিয়ে দেবে।",
     },
-  },
-  {
-    id: "2026-09-15-order-totals-wait-for-zone",
-    date: "2026-09-15",
-    version: "4.5.2",
-    tag: "fixed",
-    title: {
-      en: "Order totals wait for a delivery zone",
-      bn: "ডেলিভারি জোন বাছলেই অর্ডারের মোট দেখাবে",
-    },
-    body: {
-      en: "When you create or edit an order, totals appear as soon as you pick a delivery zone. Until then the page asks you to choose one, instead of showing 0 or loading forever.",
-      bn: "অর্ডার তৈরি বা সম্পাদনার সময় ডেলিভারি জোন বেছে নিলেই মোট হিসাব দেখাবে। তার আগে পেজটি জোন বেছে নিতে বলবে, ০ বা অনবরত লোডিং আর দেখাবে না।",
-    },
-    href: "/orders/new",
-  },
-  {
-    id: "2026-09-15-order-edits-save",
-    date: "2026-09-15",
-    version: "4.5.1",
-    tag: "fixed",
-    title: {
-      en: "Order edits save reliably",
-      bn: "অর্ডার সম্পাদনা এখন ঠিকমতো সংরক্ষণ হয়",
-    },
-    body: {
-      en: "Order changes save again, even if the address has only a thana or an item was later changed or removed. All your delivery zones now show, and you see a confirmation after saving.",
-      bn: "ঠিকানায় শুধু থানা থাকলেও, বা কোনো পণ্য পরে ক্যাটালগে বদলানো বা মুছে ফেলা হলেও, অর্ডারের পরিবর্তন এখন ঠিকমতো সংরক্ষণ হয়। তালিকায় এখন আপনার সব ডেলিভারি জোন দেখা যায়, আর অর্ডার সংরক্ষণ হলে নিশ্চিতকরণ বার্তা দেখাবে।",
-    },
-    href: "/orders",
-  },
-  {
-    id: "2026-09-15-order-save-clear-reasons",
-    date: "2026-09-15",
-    version: "4.5.1",
-    tag: "improved",
-    title: {
-      en: "Clear reasons when an order can't save",
-      bn: "অর্ডার সংরক্ষণ না হলে কারণ স্পষ্ট দেখাবে",
-    },
-    body: {
-      en: "If an order change can't be saved, you now see why in plain words, such as a missing delivery zone or not enough stock. Confusing technical error messages are gone.",
-      bn: "অর্ডারের পরিবর্তন সংরক্ষণ না হলে এখন সহজ ভাষায় কারণ দেখাবে, যেমন ডেলিভারি জোন বাছা হয়নি বা যথেষ্ট স্টক নেই। দুর্বোধ্য টেকনিক্যাল ত্রুটির বার্তা আর দেখাবে না।",
-    },
-    href: "/orders",
-  },
-  {
-    id: "2026-09-14-faster-order-product-pages",
-    date: "2026-09-14",
-    version: "4.5.0",
-    tag: "improved",
-    title: {
-      en: "Faster order and product pages",
-      bn: "অর্ডার ও পণ্যের পেজ এখন আরও দ্রুত",
-    },
-    body: {
-      en: "Your orders, order details, products, categories and inventory pages load faster and stay fast as your store grows. Sending many orders to the courier at once is quicker too.",
-      bn: "অর্ডার তালিকা, অর্ডারের বিস্তারিত, পণ্য, ক্যাটাগরি ও ইনভেন্টরি পেজ এখন দ্রুত লোড হয়, স্টোর বড় হলেও ধীর হয় না। একসাথে অনেক অর্ডার কুরিয়ারে পাঠানোও এখন দ্রুত হয়।",
-    },
-    href: "/orders",
-  },
-  {
-    id: "2026-09-14-bulk-delete-and-restore",
-    date: "2026-09-14",
-    version: "4.5.0",
-    tag: "improved",
-    title: {
-      en: "Bulk delete and restore handle big selections",
-      bn: "একসাথে অনেক আইটেম মুছুন বা ফিরিয়ে আনুন",
-    },
-    body: {
-      en: "Deleting products in bulk, and restoring or permanently deleting items in Trash, now handles large selections in one go. If a few items can't be done, you see which ones, and only those stay selected.",
-      bn: "একসাথে অনেক পণ্য মুছে ফেলা, আর ট্র্যাশ থেকে পুনরুদ্ধার বা স্থায়ীভাবে মুছে ফেলা এখন বড় নির্বাচনেও একবারে হয়। কিছু আইটেম বাদ পড়লে কোনগুলো হয়নি তা দেখাবে, আর শুধু সেগুলোই নির্বাচিত থাকবে।",
-    },
-    href: "/trash",
   },
 ];
