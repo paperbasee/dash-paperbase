@@ -1959,6 +1959,33 @@ export function ShopChrome({
     }
 
     /**
+     * The coupon control -- on both pages, and on neither of them is it the box.
+     *
+     * The promo row is drawn INSIDE the summary panel, where the reference
+     * keeps it and where a shopper who typed a code one page ago looks for it
+     * again. A band redrawing it here would put two of something a shopper sees
+     * once in front of a merchant at the same time, so this says where the
+     * choice lands instead -- the job the blog's card and meta bands do.
+     *
+     * It has no empty state on purpose: hatching it over when the answer is
+     * "off" hides the only way to switch it on.
+     */
+    case "cart:coupon":
+    case "checkout:coupon":
+      return (
+        <div className="flex items-baseline gap-2 px-4 pb-4 text-[11px]">
+          <span className="shrink-0 uppercase tracking-[0.08em] text-current/40">{t("couponWhere")}</span>
+          <span className="min-w-0 flex-1 truncate text-current/65">
+            {variant === "off"
+              ? t("couponOffExample")
+              : variant === "link"
+                ? t("couponLinkExample")
+                : t("couponPlaceholder")}
+          </span>
+        </div>
+      );
+
+    /**
      * The merchant's own words, and the button they come before.
      *
      * The button is drawn here rather than with the form because this place is
@@ -2074,6 +2101,20 @@ export function ShopChrome({
             <span className="text-[13px] font-medium">{t("total")}</span>
             <span className="text-[19px] font-semibold tabular-nums">৳4,670</span>
           </div>
+
+          {/* Inside the panel, exactly where the cart puts it. */}
+          {coupon === "off" ? null : coupon === "link" ? (
+            <p className="mt-3 text-[11px] underline underline-offset-2 text-current/55">{t("couponLinkExample")}</p>
+          ) : (
+            <div className="mt-3 flex gap-2">
+              <span className="flex h-9 flex-1 items-center rounded-full border border-current/15 bg-current/[0.04] px-3 text-[11px] text-current/40">
+                {t("couponPlaceholder")}
+              </span>
+              <span className="grid h-9 shrink-0 place-items-center rounded-full bg-foreground px-5 text-[11px] font-semibold text-background">
+                {t("couponApply")}
+              </span>
+            </div>
+          )}
         </div>
       );
     }
@@ -2194,9 +2235,17 @@ export function ShopChrome({
         </div>
       );
 
+    /**
+     * Nothing drew this slot.
+     *
+     * Marked, because the grey bars are plausible enough to be mistaken for a
+     * preview -- two coupon cases were deleted by an over-wide edit and rendered
+     * as this for a whole commit before anyone noticed. `data-fallback` is what
+     * `theme-editor-previews.test.tsx` looks for.
+     */
     default:
       return (
-        <div className="space-y-2 px-4 py-4">
+        <div data-fallback="1" className="space-y-2 px-4 py-4">
           <Line />
           <Line w="60%" />
         </div>

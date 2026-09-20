@@ -1219,8 +1219,10 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
       stack: "left",
       hint: "checkoutCouponHint",
       initial: "off",
-      emptyValues: ["off"],
-      emptyLabel: "couponEmpty",
+      /* No empty state, for the reason the cart's has none: the promo row is
+         drawn INSIDE the summary above, so this band is the control for it and
+         has to stay visible to be clicked. Hatching it over hid the only way to
+         switch it on. */
       options: [
         { value: "off", label: "off", note: "couponOffNote", shape: "blank" },
         { value: "link", label: "couponLink", note: "couponLinkNote", shape: "line" },
