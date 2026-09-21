@@ -1163,7 +1163,7 @@
     "mostWishedForHidden": "(hidden)",
     "mostWishedForIntro": "What shoppers have saved to come back to. The top of this list is what to restock or promote.",
     "mostWishedForCountsPeople": "Counts people, not saves. Someone saving two sizes of the same product counts once.",
-    "mostWishedForEmpty": "No one has saved anything yet. Saved items appear here once shoppers start using the heart on your storefront.",
+    "mostWishedForEmpty": "No one has saved anything yet. Saved items appear here once signed-in shoppers start using the heart on your storefront.",
     "toastTitleMostWishedForFailedToLoad": "Could not load saved items",
     "toastDescMostWishedForFailedToLoad": "Something went wrong while loading what shoppers have saved. Please try again.",
     "customerAccountDetailsSaved": "Saved for later",
@@ -1212,7 +1212,8 @@
     "couponDelete": "Delete",
     "couponDeleteConfirm": "Delete {code}? Orders that already used it keep their discount.",
     "couponEdit": "Edit",
-    "couponSaveChanges": "Save changes"
+    "couponSaveChanges": "Save changes",
+    "mostWishedForScope": "Counts customers who were signed in when they saved. A shopper who saves without signing in keeps that list in their own browser until they do, so it is not counted here."
   },
   "sidebar": {
     "expandSidebar": "Expand sidebar",
