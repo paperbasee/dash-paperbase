@@ -1815,6 +1815,10 @@
         "coupons": {
           "label": "Discount codes",
           "description": "Let shoppers type a code at checkout for money off, with limits on how often it can be used."
+        },
+        "abandoned_checkouts": {
+          "label": "Abandoned checkouts",
+          "description": "See shoppers who filled in checkout and did not finish, with what was in their bag. Kept for 30 days, then deleted."
         }
       }
     },

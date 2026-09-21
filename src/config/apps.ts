@@ -363,9 +363,16 @@ const hasOwnPage = (id: string): boolean => Boolean(APP_CONFIG[id]?.href);
  * Derived from `href` rather than written out again, so an app cannot be added
  * to the sidebar and quietly miss this screen, or lose its page and linger on
  * it.
+ *
+ * **Always-on is shown, not hidden.** An app with no switch still belongs on
+ * this screen, marked as always on: a merchant who cannot find Accounts here
+ * concludes their shop does not have them. Only the three that have no page of
+ * their own stay off it, because they are settings screens rather than apps.
  */
-export const APPS_SCREEN_ALWAYS_ON_IDS: readonly string[] =
-  ESSENTIAL_APP_IDS.filter(hasOwnPage);
+export const APPS_SCREEN_ALWAYS_ON_IDS: readonly string[] = [
+  ...ESSENTIAL_APP_IDS,
+  ...ALWAYS_ON_EXTRA_APP_IDS,
+].filter(hasOwnPage);
 
 export const APPS_SCREEN_SWITCHABLE_IDS: readonly string[] = [
   ...OPTIONAL_APP_IDS,
