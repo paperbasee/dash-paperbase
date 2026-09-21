@@ -102,7 +102,8 @@
     "accounts": "অ্যাকাউন্ট",
     "wishlist": "সবচেয়ে পছন্দের",
     "groupSales": "বিক্রয়",
-    "groupShoppers": "ক্রেতা"
+    "groupShoppers": "ক্রেতা",
+    "coupons": "ডিসকাউন্ট কোড"
   },
   "analyticsPage": {
     "metrics": {
@@ -1178,7 +1179,38 @@
     "abandonedKeptFor": "৩০ দিন রাখা হয়, তারপর মুছে ফেলা হয়। কেউ ফিরে এসে অর্ডার করলে সারিটি নিজে থেকেই চলে যাবে।",
     "abandonedEmpty": "কোনো অসমাপ্ত চেকআউট নেই। কেউ চেকআউটে ফোন নম্বর দিয়ে অর্ডার সম্পূর্ণ না করলে এখানে দেখা যাবে।",
     "toastTitleAbandonedFailedToLoad": "অসমাপ্ত চেকআউট লোড করা যায়নি",
-    "toastDescAbandonedFailedToLoad": "অসমাপ্ত চেকআউট লোড করার সময় সমস্যা হয়েছে। আবার চেষ্টা করুন।"
+    "toastDescAbandonedFailedToLoad": "অসমাপ্ত চেকআউট লোড করার সময় সমস্যা হয়েছে। আবার চেষ্টা করুন।",
+    "couponsTitle": "ডিসকাউন্ট কোড",
+    "couponsIntro": "ক্রেতারা চেকআউটে যে কোড লিখে ছাড় পান। কোনো কোড বন্ধ করলে সেটি আর গ্রহণ করা হবে না; আগের অর্ডারগুলোতে দেওয়া ছাড় বহাল থাকবে।",
+    "couponsEmpty": "এখনো কোনো ডিসকাউন্ট কোড নেই।",
+    "couponsLoading": "ডিসকাউন্ট কোড লোড হচ্ছে…",
+    "couponsFailedToLoad": "ডিসকাউন্ট কোড লোড করা যায়নি",
+    "couponNew": "নতুন কোড",
+    "couponCancel": "বাতিল",
+    "couponCode": "কোড",
+    "couponKind": "ধরন",
+    "couponKindFixed": "টাকা ছাড়",
+    "couponKindPercent": "শতাংশ ছাড়",
+    "couponValue": "পরিমাণ",
+    "couponMinSpend": "সর্বনিম্ন কেনাকাটা",
+    "couponUsageLimit": "মোট কতবার",
+    "couponPerCustomerLimit": "প্রতি ক্রেতা কতবার",
+    "couponUnlimited": "সীমা নেই",
+    "couponExpires": "শেষ তারিখ",
+    "couponNoExpiry": "শেষ তারিখ নেই",
+    "couponCreate": "কোড তৈরি করুন",
+    "couponSaving": "সংরক্ষণ হচ্ছে…",
+    "couponSaved": "ডিসকাউন্ট কোড সংরক্ষিত হয়েছে",
+    "couponSaveFailed": "ডিসকাউন্ট কোড সংরক্ষণ করা যায়নি",
+    "couponTimesUsed": "ব্যবহৃত",
+    "couponTotalDiscount": "মোট ছাড়",
+    "couponStatus": "অবস্থা",
+    "couponActive": "চালু",
+    "couponOff": "বন্ধ",
+    "couponSwitchOff": "বন্ধ করুন",
+    "couponSwitchOn": "চালু করুন",
+    "couponDelete": "মুছুন",
+    "couponDeleteConfirm": "{code} মুছে ফেলবেন? যেসব অর্ডারে এটি ব্যবহার হয়েছে সেগুলোর ছাড় বহাল থাকবে।"
   },
   "sidebar": {
     "expandSidebar": "সাইডবার প্রসারিত করুন",
@@ -1780,6 +1812,10 @@
         "wishlist": {
           "label": "উইশলিস্ট",
           "description": "ক্রেতারা পরে দেখার জন্য পণ্য রাখতে পারবেন, আর কোন পণ্য সবচেয়ে বেশি রাখা হয়েছে তা আপনি দেখতে পাবেন। এর জন্য ক্রেতার অ্যাকাউন্ট চালু থাকতে হবে।"
+        },
+        "coupons": {
+          "label": "ডিসকাউন্ট কোড",
+          "description": "ক্রেতারা চেকআউটে কোড লিখে ছাড় পাবেন; কতবার ব্যবহার করা যাবে তার সীমা আপনি ঠিক করবেন।"
         }
       }
     },
@@ -2196,7 +2232,10 @@
       "permTeamInvite": "মেম্বার যোগ করা ও সরানো",
       "permTeamManageRoles": "রোল তৈরি ও সম্পাদনা করা",
       "permBillingView": "বিলিং দেখা",
-      "permBillingManage": "বিলিং পরিচালনা করা"
+      "permBillingManage": "বিলিং পরিচালনা করা",
+      "groupCoupons": "ডিসকাউন্ট কোড",
+      "permCouponsView": "ডিসকাউন্ট কোড দেখা",
+      "permCouponsManage": "ডিসকাউন্ট কোড তৈরি ও পরিচালনা"
     }
   },
   "themeEditor": {

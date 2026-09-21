@@ -118,6 +118,14 @@ export const PERMISSION_GROUPS: PermissionGroup[] = [
     ],
   },
   {
+    id: "coupons",
+    labelKey: "groupCoupons",
+    permissions: [
+      { key: "coupons.view", labelKey: "permCouponsView" },
+      { key: "coupons.manage", labelKey: "permCouponsManage" },
+    ],
+  },
+  {
     id: "blogs",
     labelKey: "groupBlogs",
     permissions: [
@@ -240,6 +248,7 @@ export const APP_VIEW_PERMISSION: Record<string, string> = {
   inventory: "inventory.view",
   trash: "trash.view",
   popup: "popups.view",
+  coupons: "coupons.view",
   blog: "blogs.view",
   shipping: "shipping.view",
 };

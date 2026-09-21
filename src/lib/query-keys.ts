@@ -62,6 +62,8 @@ export function analyticsUtmQueryKey(range: string, dimension: string) {
   return [...advancedAnalyticsQueryKeyRoot, "utm", range, dimension] as const;
 }
 
+export const couponsQueryKey = ["coupons"] as const;
+
 export const shippingZonesQueryKey = ["shipping", "zones"] as const;
 
 export const shippingMethodsQueryKey = ["shipping", "methods"] as const;

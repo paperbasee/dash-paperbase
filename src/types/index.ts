@@ -659,3 +659,47 @@ export type {
   StorefrontProductDetail,
   StorefrontProductListItem,
 } from "./storefront-api";
+
+/**
+ * A discount code, as the dashboard reads it.
+ *
+ * `times_used` and `total_discount` are counted by the server over the
+ * redemptions, never stored on the row — a stored tally drifts the first time
+ * anything fails halfway, and a wrong one either refuses a good code or
+ * honours a spent one. `times_used` excludes cancelled orders, exactly as the
+ * usage limit does, so the number a merchant reads is the number deciding
+ * whether the next shopper gets in.
+ */
+export interface Coupon {
+  public_id: string;
+  code: string;
+  kind: "percent" | "fixed";
+  value: string;
+  min_spend: string | null;
+  max_discount: string | null;
+  usage_limit: number | null;
+  per_customer_limit: number | null;
+  starts_at: string | null;
+  expires_at: string | null;
+  applies_to: "all" | "products" | "categories";
+  product_public_ids: string[];
+  category_public_ids: string[];
+  is_active: boolean;
+  created_at: string;
+  times_used: number;
+  total_discount: string;
+}
+
+export interface CouponWrite {
+  code?: string;
+  kind?: "percent" | "fixed";
+  value?: string;
+  min_spend?: string | null;
+  max_discount?: string | null;
+  usage_limit?: number | null;
+  per_customer_limit?: number | null;
+  starts_at?: string | null;
+  expires_at?: string | null;
+  applies_to?: "all" | "products" | "categories";
+  is_active?: boolean;
+}

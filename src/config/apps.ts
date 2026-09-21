@@ -13,6 +13,7 @@ import {
   PackageSearch,
   Image as ImageIcon,
   Ticket,
+  TicketPercent,
   Trash,
   Heart as HeartIcon,
   Phone as PhoneIcon,
@@ -194,6 +195,16 @@ export const APP_CONFIG: Record<string, AppConfig> = {
     countKey: null,
     parentId: null,
   },
+  coupons: {
+    id: "coupons",
+    label: "Discount codes",
+    icon: TicketPercent,
+    description: "Codes shoppers type at checkout for money off",
+    essential: false,
+    href: "/coupons",
+    countKey: null,
+    parentId: null,
+  },
   blog: {
     id: "blog",
     label: "Blog",
@@ -250,6 +261,9 @@ export const MAIN_NAV_APP_IDS = [
   "analytics",
   "customers",
   "inventory",
+  // Its own row rather than a child of Sales: a merchant writing a campaign is
+  // not reading today's orders, and a code outlives any one of them.
+  "coupons",
   "blog",
 ] as const;
 
@@ -264,7 +278,7 @@ export const MORE_APP_IDS = ["support_tickets", "trash"] as const;
  * treats a missing flag as off, and the dashboard has to agree: a sidebar entry
  * for something the shop does not serve is a link to a 404.
  */
-export const OPT_IN_APP_IDS = ["accounts", "wishlist"] as const;
+export const OPT_IN_APP_IDS = ["accounts", "wishlist", "coupons"] as const;
 
 /**
  * Always on, and not listed in Settings → Apps.

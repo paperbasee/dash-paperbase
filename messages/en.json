@@ -102,7 +102,8 @@
     "accounts": "Accounts",
     "wishlist": "Most wished-for",
     "groupSales": "Sales",
-    "groupShoppers": "Shoppers"
+    "groupShoppers": "Shoppers",
+    "coupons": "Discount codes"
   },
   "analyticsPage": {
     "metrics": {
@@ -1178,7 +1179,38 @@
     "abandonedKeptFor": "Kept for 30 days, then deleted. A row disappears on its own if the person comes back and orders.",
     "abandonedEmpty": "No abandoned checkouts. They appear here when someone enters their phone number at checkout and does not complete the order.",
     "toastTitleAbandonedFailedToLoad": "Could not load abandoned checkouts",
-    "toastDescAbandonedFailedToLoad": "Something went wrong while loading abandoned checkouts. Please try again."
+    "toastDescAbandonedFailedToLoad": "Something went wrong while loading abandoned checkouts. Please try again.",
+    "couponsTitle": "Discount codes",
+    "couponsIntro": "Codes a shopper types at checkout for money off. Switching one off stops it being accepted; past orders keep the discount they were given.",
+    "couponsEmpty": "No discount codes yet.",
+    "couponsLoading": "Loading discount codes…",
+    "couponsFailedToLoad": "Discount codes could not be loaded",
+    "couponNew": "New code",
+    "couponCancel": "Cancel",
+    "couponCode": "Code",
+    "couponKind": "Type",
+    "couponKindFixed": "Taka off",
+    "couponKindPercent": "Percent off",
+    "couponValue": "Amount",
+    "couponMinSpend": "Minimum spend",
+    "couponUsageLimit": "Total uses",
+    "couponPerCustomerLimit": "Uses per customer",
+    "couponUnlimited": "Unlimited",
+    "couponExpires": "Ends",
+    "couponNoExpiry": "No end date",
+    "couponCreate": "Create code",
+    "couponSaving": "Saving…",
+    "couponSaved": "Discount code saved",
+    "couponSaveFailed": "Discount code could not be saved",
+    "couponTimesUsed": "Used",
+    "couponTotalDiscount": "Given away",
+    "couponStatus": "Status",
+    "couponActive": "On",
+    "couponOff": "Off",
+    "couponSwitchOff": "Switch off",
+    "couponSwitchOn": "Switch on",
+    "couponDelete": "Delete",
+    "couponDeleteConfirm": "Delete {code}? Orders that already used it keep their discount."
   },
   "sidebar": {
     "expandSidebar": "Expand sidebar",
@@ -1780,6 +1812,10 @@
         "wishlist": {
           "label": "Wishlist",
           "description": "Let shoppers save things to come back to, and see which products are saved most. Needs customer accounts."
+        },
+        "coupons": {
+          "label": "Discount codes",
+          "description": "Let shoppers type a code at checkout for money off, with limits on how often it can be used."
         }
       }
     },
@@ -2196,7 +2232,10 @@
       "permTeamInvite": "Invite & remove members",
       "permTeamManageRoles": "Create & edit roles",
       "permBillingView": "View billing",
-      "permBillingManage": "Manage billing"
+      "permBillingManage": "Manage billing",
+      "groupCoupons": "Discount codes",
+      "permCouponsView": "View discount codes",
+      "permCouponsManage": "Create & manage discount codes"
     }
   },
   "themeEditor": {

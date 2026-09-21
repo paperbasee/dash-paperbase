@@ -37,6 +37,7 @@ describe("Settings → Apps", () => {
       "blog",
       "accounts",
       "wishlist",
+      "coupons",
     ]);
   });
 });
