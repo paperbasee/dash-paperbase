@@ -45,7 +45,6 @@ import {
   formatOrderDeliveryStatusLabel,
 } from "@/lib/orders/delivery-statuses";
 import { ORDER_FLAG_OPTIONS, formatOrderFlagLabel } from "@/lib/orders/order-flags";
-import { formatOrderNumber } from "@/lib/orders/format-order-number";
 import type { Order, PaginatedResponse } from "@/types";
 import { useConfirm } from "@/context/ConfirmDialogContext";
 import { notify, normalizeError } from "@/notifications";
@@ -1304,7 +1303,7 @@ export default function OrdersPage() {
                           markOrderSeen(order.public_id);
                           router.push(`/orders/${order.public_id}`);
                         }}
-                        aria-label={formatOrderNumber(order.order_number)}
+                        aria-label={order.order_number}
                         className={cn(
                           isNew && isOwner && order.dispatched_by_autopilot
                             ? "rounded-none bg-[#EDE9FE] transition-colors duration-400 dark:bg-[#4C1D95]/20"
@@ -1346,7 +1345,7 @@ export default function OrdersPage() {
                                     : cn("font-medium text-foreground", numClass)
                               )}
                             >
-                              {formatOrderNumber(order.order_number)}
+                              {order.order_number}
                             </span>
                             {isOwner && order.dispatched_by_autopilot && (
                               <span
@@ -1445,7 +1444,7 @@ export default function OrdersPage() {
                             onChange={(e) =>
                               handleRowFlagChange(order, e.target.value)
                             }
-                            aria-label={`Flag for order ${formatOrderNumber(order.order_number)}`}
+                            aria-label={`Flag for order ${order.order_number}`}
                           >
                             <option value="" style={themedOptionBaseStyle()}>
                               {formatOrderFlagLabel(null)}

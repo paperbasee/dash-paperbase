@@ -4,8 +4,10 @@
  * Rules for adding an entry:
  * - Newest first. Put the new entry at the top.
  * - Keep AT MOST 30 entries (WHATS_NEW_MAX_ENTRIES). When adding the 31st, delete the oldest.
- * - `id` is stable and unique forever: `<date>-<short-slug>`. Never rename or reuse one; the
- *   unread dot compares the newest id with the one a merchant last saw.
+ * - `id` is stable and unique forever once SHIPPED: `<date>-<short-slug>`. Never rename or
+ *   reuse a shipped one; the unread dot compares the newest id with the one a merchant
+ *   last saw. An entry still held has been seen by nobody, so its id moves with its date
+ *   when the batch is restamped — the only way the two can go on agreeing.
  * - `date` is the day the change reached merchants (YYYY-MM-DD).
  * - `version` is the dashboard version it shipped in. For a storefront or platform change,
  *   use the dashboard version that was live when it went out.
@@ -13,25 +15,28 @@
  * - Write for merchants: what they can now do or what got better, in plain words. Never
  *   mention code. Title under ~8 words, body 1-3 short sentences, natural Bangla in `bn`.
  *
- * ## Entries written before their release — RESTAMP THEM ON THE DAY
+ * ## Entries written before their release — ONE DATE, RESTAMP IT ON THE DAY
  *
  * An entry is usually written with the work, and the work usually ships within days.
- * The theme system did not: it has been held since 2026-09-16, so the entries above it
- * carry the date and version they were WRITTEN at, not the day they reach anyone. Per
- * the rule above, those dates are wrong — no merchant has read a word of them.
+ * The theme system did not: it has been held since 2026-09-16, and everything built
+ * since has been held behind it.
  *
- * **On the day the held work ships, before anything else: restamp every unreleased
- * entry with the real date and the version it actually goes out in, then reorder.**
+ * **Every unreleased entry carries the same date**, because they all reach merchants
+ * on the same day — the day the held work ships. That date is a placeholder until
+ * then, and it is deliberately ONE date so that shipping day is one edit rather than
+ * twenty: change every `2026-09-22` above the first released entry to the real day.
  *
- * How to find them: compare each `version` against the dashboard version that is live
- * in production. Anything above it has not shipped.
+ * How to tell them apart: production has had nothing newer than **4.7.1**
+ * (`2026-09-18-fraud-check-new-provider`, the last thing actually deployed). Every
+ * entry above it is held.
  *
- * Until then `tests/whats-new/content.test.ts` "is sorted newest first" FAILS, and it
- * is right to. The list genuinely is out of order: a held entry dated 2026-09-17 at
- * 4.8.5 sits below a released one dated 2026-09-18 at 4.7.1, and no arrangement fixes
- * that while one of the two dates is fiction. It is a real inconsistency in the data,
- * not a flaw in the check, and restamping is what clears it. Do not loosen the test to
- * make it green — that would hide the next one.
+ * This used to leave the list genuinely out of order, and
+ * `tests/whats-new/content.test.ts` "is sorted newest first" FAILED for a real reason:
+ * the fraud-check release was cut from an older base, so it shipped on 2026-09-18 at
+ * 4.7.1 while entries written the day before carried 4.8.x. No arrangement fixes a
+ * list where one entry has a later date AND a lower version — see the release-branch
+ * trap in guidelines/releasing-safely.md. Giving the held batch one placeholder date
+ * clears it honestly. Do not loosen the test instead; that would hide the next one.
  */
 
 export const WHATS_NEW_TAGS = ["new", "improved", "fixed"] as const;
@@ -87,8 +92,8 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     },
   },
   {
-    id: "2026-09-21-shoppers-can-save-products",
-    date: "2026-09-21",
+    id: "2026-09-22-shoppers-can-save-products",
+    date: "2026-09-22",
     version: "4.35.0",
     tag: "new",
     href: "/products/wished",
@@ -102,8 +107,8 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     },
   },
   {
-    id: "2026-09-21-see-who-nearly-bought",
-    date: "2026-09-21",
+    id: "2026-09-22-see-who-nearly-bought",
+    date: "2026-09-22",
     version: "4.35.0",
     tag: "new",
     href: "/orders/abandoned",
@@ -117,8 +122,8 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     },
   },
   {
-    id: "2026-09-21-sales-and-shoppers-menus",
-    date: "2026-09-21",
+    id: "2026-09-22-sales-and-shoppers-menus",
+    date: "2026-09-22",
     version: "4.35.0",
     tag: "improved",
     href: "/orders",
@@ -132,8 +137,8 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     },
   },
   {
-    id: "2026-09-21-popup-and-cta-always-there",
-    date: "2026-09-21",
+    id: "2026-09-22-popup-and-cta-always-there",
+    date: "2026-09-22",
     version: "4.35.0",
     tag: "fixed",
     href: "/settings?tab=promotions",
@@ -147,8 +152,8 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     },
   },
   {
-    id: "2026-09-21-sidebar-highlights-one-page",
-    date: "2026-09-21",
+    id: "2026-09-22-sidebar-highlights-one-page",
+    date: "2026-09-22",
     version: "4.35.0",
     tag: "fixed",
     title: {
@@ -161,8 +166,8 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     },
   },
   {
-    id: "2026-09-21-shoppers-can-have-an-account",
-    date: "2026-09-21",
+    id: "2026-09-22-shoppers-can-have-an-account",
+    date: "2026-09-22",
     tag: "new",
     version: "4.34.0",
     href: "/customers",
@@ -176,8 +181,8 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     },
   },
   {
-    id: "2026-09-21-shoppers-can-track-their-order",
-    date: "2026-09-21",
+    id: "2026-09-22-shoppers-can-track-their-order",
+    date: "2026-09-22",
     tag: "new",
     version: "4.34.0",
     title: {
@@ -190,8 +195,8 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     },
   },
   {
-    id: "2026-09-20-search-shows-every-match",
-    date: "2026-09-20",
+    id: "2026-09-22-search-shows-every-match",
+    date: "2026-09-22",
     // A storefront and API change: the dashboard version that is live, per the rule above.
     version: "4.12.5",
     tag: "fixed",
@@ -205,8 +210,8 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     },
   },
   {
-    id: "2026-09-20-cart-page-in-your-language",
-    date: "2026-09-20",
+    id: "2026-09-22-cart-page-in-your-language",
+    date: "2026-09-22",
     // A storefront change: the dashboard version that is live, per the rule above.
     version: "4.12.5",
     tag: "fixed",
@@ -220,8 +225,8 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     },
   },
   {
-    id: "2026-09-18-popup-waits-its-turn",
-    date: "2026-09-18",
+    id: "2026-09-22-popup-waits-its-turn",
+    date: "2026-09-22",
     version: "4.12.5",
     tag: "fixed",
     title: {
@@ -234,8 +239,8 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     },
   },
   {
-    id: "2026-09-18-card-add-to-cart-counted",
-    date: "2026-09-18",
+    id: "2026-09-22-card-add-to-cart-counted",
+    date: "2026-09-22",
     version: "4.12.5",
     tag: "fixed",
     title: {
@@ -249,8 +254,8 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     href: "/analytics",
   },
   {
-    id: "2026-09-18-every-page-keeps-something",
-    date: "2026-09-18",
+    id: "2026-09-22-every-page-keeps-something",
+    date: "2026-09-22",
     version: "4.12.5",
     tag: "improved",
     title: {
@@ -264,8 +269,8 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     href: "/settings/customize",
   },
   {
-    id: "2026-09-18-lighter-buy-buttons",
-    date: "2026-09-18",
+    id: "2026-09-22-lighter-buy-buttons",
+    date: "2026-09-22",
     version: "4.12.4",
     tag: "improved",
     title: {
@@ -278,8 +283,8 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     },
   },
   {
-    id: "2026-09-18-banners-move-into-the-editor",
-    date: "2026-09-18",
+    id: "2026-09-22-banners-move-into-the-editor",
+    date: "2026-09-22",
     version: "4.12.0",
     tag: "improved",
     title: {
@@ -293,8 +298,8 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     href: "/settings?tab=customization",
   },
   {
-    id: "2026-09-18-every-plan-can-customize",
-    date: "2026-09-18",
+    id: "2026-09-22-every-plan-can-customize",
+    date: "2026-09-22",
     version: "4.12.0",
     tag: "improved",
     title: {
@@ -308,8 +313,8 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     href: "/settings?tab=customization",
   },
   {
-    id: "2026-09-18-team-screen-in-bangla",
-    date: "2026-09-18",
+    id: "2026-09-22-team-screen-in-bangla",
+    date: "2026-09-22",
     version: "4.12.0",
     tag: "improved",
     title: {
@@ -323,8 +328,8 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     href: "/settings?tab=team",
   },
   {
-    id: "2026-09-18-theme-editor-and-live-preview",
-    date: "2026-09-18",
+    id: "2026-09-22-theme-editor-and-live-preview",
+    date: "2026-09-22",
     version: "4.12.0",
     tag: "new",
     title: {
@@ -336,6 +341,93 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
       bn: "সেটিংস → কাস্টমাইজেশন থেকে এখন একটি থিম বেছে নিয়ে পুরো স্ক্রিনের এডিটর খুলতে পারবেন, যেখানে প্রতিটি পেজের লেখা, লিংক আর অংশগুলো বদলাবেন আর পাশেই আপনার স্টোর বদলাতে দেখবেন। যা বদলান তা ড্রাফট হয়ে থাকে, ক্রেতারা দেখেন না; স্টোরে সংরক্ষণ বাটনে চাপলেই তা স্টোরে যায়, আর শেষ ২০টি সংরক্ষণ রাখা থাকে যাতে আগের চেহারায় ফিরতে পারেন। থিম প্রিমিয়াম প্ল্যানের অংশ।",
     },
     href: "/settings?tab=customization",
+  },
+  {
+    id: "2026-09-22-managers-can-edit-storefront-look",
+    date: "2026-09-22",
+    version: "4.8.5",
+    tag: "improved",
+    title: {
+      en: "Managers can now change your storefront's look",
+      bn: "ম্যানেজাররা এখন স্টোরফ্রন্টের ডিজাইন বদলাতে পারবেন",
+    },
+    body: {
+      en: "Team members with the Manager role can now edit Settings → Customization, like the owner and Admins. Staff and Viewers can't, even if the permission is ticked for their role, and a team member limited to some categories can't either.",
+      bn: "ম্যানেজার রোলের টিম মেম্বাররা এখন মালিক ও অ্যাডমিনের মতো সেটিংস → কাস্টমাইজেশন বদলাতে পারবেন। স্টাফ ও ভিউয়াররা পারবেন না, তাদের রোলে পারমিশন টিক দেওয়া থাকলেও না, আর কিছু ক্যাটাগরিতে সীমিত টিম মেম্বাররাও পারবেন না।",
+    },
+    href: "/settings?tab=customization",
+  },
+  {
+    id: "2026-09-22-purchases-count-at-order-time",
+    date: "2026-09-22",
+    version: "4.8.4",
+    tag: "improved",
+    title: {
+      en: "Purchases now count when the order is placed",
+      bn: "অর্ডার করার সাথে সাথেই পারচেজ গণনা হবে",
+    },
+    body: {
+      en: "Facebook and TikTok now count a cash on delivery order as a purchase as soon as the customer places it, instead of waiting for you to confirm. Your purchase numbers will look higher, because orders that are cancelled later stay counted. Prepaid orders still count when the customer pays.",
+      bn: "ক্যাশ অন ডেলিভারি অর্ডার এখন গ্রাহক অর্ডার করার সাথে সাথেই Facebook ও TikTok-এ পারচেজ হিসেবে গণনা হয়, আপনার কনফার্ম করার অপেক্ষা করে না। এতে পারচেজের সংখ্যা বেশি দেখাবে, কারণ পরে বাতিল হওয়া অর্ডারও গোনা থাকবে। প্রিপেইড অর্ডার আগের মতোই গ্রাহক পেমেন্ট করলে গণনা হবে।",
+    },
+  },
+  {
+    id: "2026-09-22-brief-glitch-no-longer-hides-a-product",
+    date: "2026-09-22",
+    version: "4.8.3",
+    tag: "fixed",
+    title: {
+      en: "A brief glitch no longer hides a product",
+      bn: "সাময়িক সমস্যায় পণ্য আর হারিয়ে যাবে না",
+    },
+    body: {
+      en: "If our servers hiccup while a product page is being prepared, your shop no longer shows \"product not found\" for the next few minutes. Products that really are gone still show a proper not-found page.",
+      bn: "পণ্যের পেজ তৈরির সময় আমাদের সার্ভারে সাময়িক সমস্যা হলে আপনার দোকান এখন আর কয়েক মিনিট ধরে \"পণ্য পাওয়া যায়নি\" দেখাবে না। সত্যিই মুছে ফেলা পণ্যের জন্য আগের মতোই সঠিক বার্তা দেখাবে।",
+    },
+  },
+  {
+    id: "2026-09-22-blog-posts-open-again",
+    date: "2026-09-22",
+    version: "4.8.2",
+    tag: "fixed",
+    title: {
+      en: "Blog posts open again",
+      bn: "ব্লগ পোস্ট আবার খুলছে",
+    },
+    body: {
+      en: "Opening a blog post on your storefront showed an error page instead of the article. Posts now open normally, and their text is cleaned on our servers so unsafe content never reaches shoppers.",
+      bn: "আপনার স্টোরফ্রন্টে ব্লগ পোস্ট খুললে আর্টিকেলের বদলে এরর পেজ আসত। এখন পোস্টগুলো ঠিকভাবে খোলে, আর পোস্টের লেখা আমাদের সার্ভারেই পরিষ্কার করা হয়, তাই ক্ষতিকর কিছু ক্রেতাদের কাছে পৌঁছায় না।",
+    },
+    href: "/blog",
+  },
+  {
+    id: "2026-09-22-faster-storefront",
+    date: "2026-09-22",
+    version: "4.8.1",
+    tag: "improved",
+    title: {
+      en: "Faster storefront and a lighter home page",
+      bn: "দোকান এখন দ্রুত, হোম পেজ হালকা",
+    },
+    body: {
+      en: "Your shop pages load faster and no longer jump about while loading. The home page now shows your first 6 categories with 8 products each, and shoppers reach the rest from the menu. Price and stock changes also appear sooner.",
+      bn: "আপনার দোকানের পেজগুলো এখন দ্রুত লোড হয় আর লোড হওয়ার সময় আগের মতো লাফায় না। হোম পেজে এখন প্রথম ৬টি ক্যাটাগরি দেখাবে, প্রতিটিতে ৮টি পণ্য, বাকিগুলো ক্রেতারা মেনু থেকে দেখতে পাবেন। দাম বা স্টক বদলালে সেটাও এখন আগের চেয়ে তাড়াতাড়ি দেখা যায়।",
+    },
+  },
+  {
+    id: "2026-09-22-ivory-colours-and-language-in-store-info",
+    date: "2026-09-22",
+    version: "4.8.0",
+    tag: "improved",
+    title: {
+      en: "Colour choices removed, language moved to Store Info",
+      bn: "রঙ বাছাইয়ের অপশন সরানো হলো, ভাষা এখন স্টোর তথ্যে",
+    },
+    body: {
+      en: "Every store now uses the Ivory colours, so the colour choice is gone from Settings → Customization. Store language moved to Settings → Store Info and is saved with the Save button there. Your storefront pages also load a little lighter.",
+      bn: "সব স্টোর এখন Ivory রঙ ব্যবহার করে, তাই সেটিংস → কাস্টমাইজেশন থেকে রঙ বাছাইয়ের অপশন সরানো হয়েছে। স্টোরের ভাষা এখন সেটিংস → স্টোর তথ্য-এ, আর সেখানে সংরক্ষণ বাটনে চাপলে সেভ হয়। আপনার স্টোরফ্রন্টের পেজগুলোও এখন একটু হালকাভাবে লোড হয়।",
+    },
+    href: "/settings?tab=store",
   },
   {
     id: "2026-09-18-fraud-check-new-provider",
@@ -351,93 +443,6 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
       bn: "ফ্রড চেকের পেছনের কুরিয়ার ডেলিভারি হিস্ট্রি এখন নতুন একটি সোর্স থেকে আসছে। সাকসেস রেশিও আর কুরিয়ারভিত্তিক হিসাব আগের মতোই কাজ করবে, আপনাকে কিছুই বদলাতে হবে না।",
     },
     href: "/orders",
-  },
-  {
-    id: "2026-09-17-managers-can-edit-storefront-look",
-    date: "2026-09-17",
-    version: "4.8.5",
-    tag: "improved",
-    title: {
-      en: "Managers can now change your storefront's look",
-      bn: "ম্যানেজাররা এখন স্টোরফ্রন্টের ডিজাইন বদলাতে পারবেন",
-    },
-    body: {
-      en: "Team members with the Manager role can now edit Settings → Customization, like the owner and Admins. Staff and Viewers can't, even if the permission is ticked for their role, and a team member limited to some categories can't either.",
-      bn: "ম্যানেজার রোলের টিম মেম্বাররা এখন মালিক ও অ্যাডমিনের মতো সেটিংস → কাস্টমাইজেশন বদলাতে পারবেন। স্টাফ ও ভিউয়াররা পারবেন না, তাদের রোলে পারমিশন টিক দেওয়া থাকলেও না, আর কিছু ক্যাটাগরিতে সীমিত টিম মেম্বাররাও পারবেন না।",
-    },
-    href: "/settings?tab=customization",
-  },
-  {
-    id: "2026-09-17-purchases-count-at-order-time",
-    date: "2026-09-17",
-    version: "4.8.4",
-    tag: "improved",
-    title: {
-      en: "Purchases now count when the order is placed",
-      bn: "অর্ডার করার সাথে সাথেই পারচেজ গণনা হবে",
-    },
-    body: {
-      en: "Facebook and TikTok now count a cash on delivery order as a purchase as soon as the customer places it, instead of waiting for you to confirm. Your purchase numbers will look higher, because orders that are cancelled later stay counted. Prepaid orders still count when the customer pays.",
-      bn: "ক্যাশ অন ডেলিভারি অর্ডার এখন গ্রাহক অর্ডার করার সাথে সাথেই Facebook ও TikTok-এ পারচেজ হিসেবে গণনা হয়, আপনার কনফার্ম করার অপেক্ষা করে না। এতে পারচেজের সংখ্যা বেশি দেখাবে, কারণ পরে বাতিল হওয়া অর্ডারও গোনা থাকবে। প্রিপেইড অর্ডার আগের মতোই গ্রাহক পেমেন্ট করলে গণনা হবে।",
-    },
-  },
-  {
-    id: "2026-09-16-brief-glitch-no-longer-hides-a-product",
-    date: "2026-09-16",
-    version: "4.8.3",
-    tag: "fixed",
-    title: {
-      en: "A brief glitch no longer hides a product",
-      bn: "সাময়িক সমস্যায় পণ্য আর হারিয়ে যাবে না",
-    },
-    body: {
-      en: "If our servers hiccup while a product page is being prepared, your shop no longer shows \"product not found\" for the next few minutes. Products that really are gone still show a proper not-found page.",
-      bn: "পণ্যের পেজ তৈরির সময় আমাদের সার্ভারে সাময়িক সমস্যা হলে আপনার দোকান এখন আর কয়েক মিনিট ধরে \"পণ্য পাওয়া যায়নি\" দেখাবে না। সত্যিই মুছে ফেলা পণ্যের জন্য আগের মতোই সঠিক বার্তা দেখাবে।",
-    },
-  },
-  {
-    id: "2026-09-16-blog-posts-open-again",
-    date: "2026-09-16",
-    version: "4.8.2",
-    tag: "fixed",
-    title: {
-      en: "Blog posts open again",
-      bn: "ব্লগ পোস্ট আবার খুলছে",
-    },
-    body: {
-      en: "Opening a blog post on your storefront showed an error page instead of the article. Posts now open normally, and their text is cleaned on our servers so unsafe content never reaches shoppers.",
-      bn: "আপনার স্টোরফ্রন্টে ব্লগ পোস্ট খুললে আর্টিকেলের বদলে এরর পেজ আসত। এখন পোস্টগুলো ঠিকভাবে খোলে, আর পোস্টের লেখা আমাদের সার্ভারেই পরিষ্কার করা হয়, তাই ক্ষতিকর কিছু ক্রেতাদের কাছে পৌঁছায় না।",
-    },
-    href: "/blog",
-  },
-  {
-    id: "2026-09-16-faster-storefront",
-    date: "2026-09-16",
-    version: "4.8.1",
-    tag: "improved",
-    title: {
-      en: "Faster storefront and a lighter home page",
-      bn: "দোকান এখন দ্রুত, হোম পেজ হালকা",
-    },
-    body: {
-      en: "Your shop pages load faster and no longer jump about while loading. The home page now shows your first 6 categories with 8 products each, and shoppers reach the rest from the menu. Price and stock changes also appear sooner.",
-      bn: "আপনার দোকানের পেজগুলো এখন দ্রুত লোড হয় আর লোড হওয়ার সময় আগের মতো লাফায় না। হোম পেজে এখন প্রথম ৬টি ক্যাটাগরি দেখাবে, প্রতিটিতে ৮টি পণ্য, বাকিগুলো ক্রেতারা মেনু থেকে দেখতে পাবেন। দাম বা স্টক বদলালে সেটাও এখন আগের চেয়ে তাড়াতাড়ি দেখা যায়।",
-    },
-  },
-  {
-    id: "2026-09-16-ivory-colours-and-language-in-store-info",
-    date: "2026-09-16",
-    version: "4.8.0",
-    tag: "improved",
-    title: {
-      en: "Colour choices removed, language moved to Store Info",
-      bn: "রঙ বাছাইয়ের অপশন সরানো হলো, ভাষা এখন স্টোর তথ্যে",
-    },
-    body: {
-      en: "Every store now uses the Ivory colours, so the colour choice is gone from Settings → Customization. Store language moved to Settings → Store Info and is saved with the Save button there. Your storefront pages also load a little lighter.",
-      bn: "সব স্টোর এখন Ivory রঙ ব্যবহার করে, তাই সেটিংস → কাস্টমাইজেশন থেকে রঙ বাছাইয়ের অপশন সরানো হয়েছে। স্টোরের ভাষা এখন সেটিংস → স্টোর তথ্য-এ, আর সেখানে সংরক্ষণ বাটনে চাপলে সেভ হয়। আপনার স্টোরফ্রন্টের পেজগুলোও এখন একটু হালকাভাবে লোড হয়।",
-    },
-    href: "/settings?tab=store",
   },
   {
     id: "2026-09-16-promotions-and-shipping-in-settings",

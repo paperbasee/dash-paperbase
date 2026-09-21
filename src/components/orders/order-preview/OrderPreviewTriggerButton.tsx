@@ -3,7 +3,6 @@
 import { Eye } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
-import { formatOrderNumber } from "@/lib/orders/format-order-number";
 
 type OrderPreviewTriggerButtonProps = {
   orderNumber: string;
@@ -31,7 +30,7 @@ export function OrderPreviewTriggerButton({
         e.stopPropagation();
         onClick();
       }}
-      aria-label={tPages("ordersListPreviewAria", { orderNumber: formatOrderNumber(orderNumber) })}
+      aria-label={tPages("ordersListPreviewAria", { orderNumber })}
     >
       <Eye className="size-4" aria-hidden />
     </button>

@@ -227,32 +227,47 @@ export default function AppSidebarNav({
               {!collapsed && <span className="truncate">{tAppLabel(app.id)}</span>}
             </span>
             {!collapsed && (
-              <span className="flex shrink-0 items-center gap-2">
+              /*
+               * The right-hand column, built to the same measurements as a
+               * group row's: `gap-1.5`, one indicator box, then the width of a
+               * chevron.
+               *
+               * A plain row has no chevron, so without that last spacer its
+               * badge sat about 22px further right than Sales' and Shoppers'
+               * did -- close enough to look accidental, which is worse than
+               * obviously different. The spacer is what puts every number in
+               * one column.
+               */
+              <span className="flex shrink-0 items-center gap-1.5">
                 {token === "analytics" && !hasFeature("advanced_analytics") && (
-                  <Lock className="size-3.5 shrink-0 text-muted-foreground ml-auto" />
+                  <Lock className="size-3.5 shrink-0 text-muted-foreground" />
                 )}
-                {token === "inventory" && (
-                  <>
-                    <InventoryStatusDot status={inventoryNavStatus} />
-                    {inventoryNavStatus !== "none" && (
-                      <span className="sr-only">
-                        {inventoryNavStatus === "red"
-                          ? tAppLabel("inventoryStatusStockOut")
-                          : tAppLabel("inventoryStatusLowStock")}
-                      </span>
-                    )}
-                  </>
-                )}
-                {app.countKey && counts != null && counts[app.countKey] > 0 && (
-                  <Badge
-                    className={cn(
-                      "h-5 min-w-5 rounded-full border-0 bg-muted px-1.5 text-xs font-medium text-muted-foreground dark:bg-white/10 dark:text-white/55",
-                      numClass
-                    )}
-                  >
-                    {formatCount(counts[app.countKey])}
-                  </Badge>
-                )}
+                <span className="flex h-5 min-w-5 items-center justify-center">
+                  {token === "inventory" && (
+                    <>
+                      <InventoryStatusDot status={inventoryNavStatus} />
+                      {inventoryNavStatus !== "none" && (
+                        <span className="sr-only">
+                          {inventoryNavStatus === "red"
+                            ? tAppLabel("inventoryStatusStockOut")
+                            : tAppLabel("inventoryStatusLowStock")}
+                        </span>
+                      )}
+                    </>
+                  )}
+                  {app.countKey && counts != null && counts[app.countKey] > 0 && (
+                    <Badge
+                      className={cn(
+                        "h-5 min-w-5 rounded-full border-0 bg-muted px-1.5 text-xs font-medium text-muted-foreground dark:bg-white/10 dark:text-white/55",
+                        numClass
+                      )}
+                    >
+                      {formatCount(counts[app.countKey])}
+                    </Badge>
+                  )}
+                </span>
+                {/* The chevron a group row has, as empty space. */}
+                <span aria-hidden className="size-4 shrink-0" />
               </span>
             )}
           </DeferredNavLink>
@@ -308,16 +323,18 @@ export default function AppSidebarNav({
               </span>
               {!collapsed && (
               <span className="flex shrink-0 items-center gap-1.5">
-                {app.countKey && counts != null && counts[app.countKey] > 0 && (
-                  <Badge
-                    className={cn(
-                      "h-5 min-w-5 rounded-full border-0 bg-muted px-1.5 text-xs font-medium text-muted-foreground dark:bg-white/10 dark:text-white/55",
-                      numClass
-                    )}
-                  >
-                    {formatCount(counts[app.countKey])}
-                  </Badge>
-                )}
+                <span className="flex h-5 min-w-5 items-center justify-center">
+                  {app.countKey && counts != null && counts[app.countKey] > 0 && (
+                    <Badge
+                      className={cn(
+                        "h-5 min-w-5 rounded-full border-0 bg-muted px-1.5 text-xs font-medium text-muted-foreground dark:bg-white/10 dark:text-white/55",
+                        numClass
+                      )}
+                    >
+                      {formatCount(counts[app.countKey])}
+                    </Badge>
+                  )}
+                </span>
                 <ChevronRight
                   className={cn(
                     "size-4 shrink-0 transition-transform text-muted-foreground dark:text-white/50",
