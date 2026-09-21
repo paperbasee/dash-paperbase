@@ -139,6 +139,15 @@ export const supportTicketDetailQueryKey = (publicId: string) =>
 
 export const categoriesQueryKey = ["categories"] as const;
 
+export const brandsQueryKey = ["brands"] as const;
+
+export const reviewsQueryKeyRoot = ["reviews"] as const;
+
+/** One page of the Reviews tab: the list depends on the status filter. */
+export const reviewsQueryKey = (status: string) => [...reviewsQueryKeyRoot, "list", status] as const;
+
+export const reviewCountsQueryKey = [...reviewsQueryKeyRoot, "counts"] as const;
+
 export const variantsQueryKeyRoot = ["variants"] as const;
 
 /** Product picker on the Variants page: one page of products per typed search. */

@@ -27,9 +27,9 @@
  * twenty: change every `2026-09-22` above the first released entry to the real day.
  *
  * How to tell them apart: production has had nothing newer than **4.7.1**, so any
- * entry above that version is held. As of 2026-09-22 that is the WHOLE list bar
- * one — the released entries have aged off the 30-entry cap, and only
- * `2026-09-15-whats-new-panel` remains, kept because a test pins it. So on
+ * entry above that version is held. As of 2026-09-22 that is the WHOLE list —
+ * every released entry has now aged off the 30-entry cap, the last of them
+ * (`2026-09-15-whats-new-panel`) when customer reviews were added. So on
  * shipping day: restamp every `2026-09-22` in this file.
  *
  * This used to leave the list genuinely out of order, and
@@ -63,6 +63,195 @@ export interface WhatsNewEntry {
 export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
+  {
+    id: "2026-09-22-customers-can-create-an-account",
+    date: "2026-09-22",
+    version: "4.47.0",
+    tag: "improved",
+    title: {
+      en: "A proper sign-up for your customers",
+      bn: "ক্রেতাদের জন্য পূর্ণাঙ্গ সাইন-আপ",
+    },
+    body: {
+      en: "Your shop now has a Create account page that asks for a first name, last name, phone number and email, so you know who your customers are instead of only having an address. It tells them that creating an account accepts your shop's terms, and anyone who already has an account is pointed to sign in instead. There is still no password to remember — they get a link by email as before.",
+      bn: "আপনার দোকানে এখন একটি \"অ্যাকাউন্ট তৈরি করুন\" পাতা আছে, যেখানে নামের প্রথম ও শেষ অংশ, ফোন নম্বর আর ইমেইল চাওয়া হয় — ফলে শুধু ঠিকানা নয়, ক্রেতা কে তা-ও আপনি জানতে পারবেন। সেখানে লেখা থাকে যে অ্যাকাউন্ট তৈরি করলে তাঁরা আপনার দোকানের শর্তাবলিতে সম্মত হচ্ছেন, আর যাঁদের আগেই অ্যাকাউন্ট আছে তাঁদের সাইন ইনের দিকে পাঠানো হয়। আগের মতোই কোনো পাসওয়ার্ড মনে রাখতে হয় না — ইমেইলে লিংক চলে যায়।",
+    },
+  },
+  {
+    id: "2026-09-22-customer-figures-are-counted",
+    date: "2026-09-22",
+    version: "4.46.0",
+    tag: "fixed",
+    href: "/customers",
+    title: {
+      en: "Repeat customer filter shows the right people",
+      bn: "রিপিট কাস্টমার ফিল্টার এখন সঠিক তালিকা দেখায়",
+    },
+    body: {
+      en: "Filtering your customers by repeat buyers read a saved note that slowly went out of date, so it could show the wrong people while every figure beside it was right. Orders and spending are now counted fresh every time you look, so nothing can drift again. A parcel that came back no longer counts as money that customer spent, and someone who orders from a new address now has that address on their record.",
+      bn: "রিপিট কাস্টমার দিয়ে ফিল্টার করলে আগে একটি পুরোনো হয়ে যাওয়া হিসাব পড়া হতো, ফলে পাশের সব সংখ্যা ঠিক থাকলেও ভুল মানুষ তালিকায় আসতে পারত। এখন অর্ডার আর খরচ প্রতিবার নতুন করে গোনা হয়, তাই আর কোনো হিসাব পুরোনো হবে না। ফেরত আসা পার্সেল আর ক্রেতার খরচ হিসেবে গোনা হয় না, আর কেউ নতুন ঠিকানা থেকে অর্ডার করলে তাঁর রেকর্ডে সেই নতুন ঠিকানাই থাকে।",
+    },
+  },
+  {
+    id: "2026-09-22-order-status-everywhere",
+    date: "2026-09-22",
+    version: "4.45.0",
+    tag: "improved",
+    title: {
+      en: "Customers can see where their order is",
+      bn: "ক্রেতারা তাঁদের অর্ডার কোথায় আছে দেখতে পাবেন",
+    },
+    body: {
+      en: "On a customer's account page every order now shows where it has got to, which it did not show at all before — a cancelled order looked the same as a delivered one. On the order-tracking page they can now tell a confirmed order from one you have not looked at yet, instead of both saying the same thing.",
+      bn: "ক্রেতার অ্যাকাউন্ট পাতায় প্রতিটি অর্ডার এখন কোন অবস্থায় আছে তা দেখায় — আগে এটি একেবারেই দেখাত না, বাতিল হওয়া অর্ডার আর ডেলিভারি হওয়া অর্ডার একরকম দেখাত। অর্ডার ট্র্যাকিং পাতায় এখন নিশ্চিত করা অর্ডার আর আপনি এখনো দেখেননি এমন অর্ডারের পার্থক্য বোঝা যায়, আগে দুটোই একই কথা বলত।",
+    },
+  },
+  {
+    id: "2026-09-22-customer-reviews",
+    date: "2026-09-22",
+    version: "4.44.0",
+    tag: "new",
+    href: "/reviews",
+    title: {
+      en: "Customers can review your products",
+      bn: "ক্রেতারা এখন আপনার পণ্যের রিভিউ দিতে পারবেন",
+    },
+    body: {
+      en: "A signed-in customer can give a product stars, a few words and up to two photos, and nothing appears on your shop until you approve it in the new Reviews tab. You can approve, reject, reply, delete, or add one yourself from a screenshot — which is marked, so shoppers can tell. Anyone can read your reviews signed in or not, someone who actually received the item is marked a verified buyer, and a customer who edits their own sends it back to you for approval.",
+      bn: "সাইন-ইন করা ক্রেতা পণ্যে স্টার, কয়েক লাইন লেখা আর সর্বোচ্চ দুটি ছবি দিতে পারবেন, আর নতুন রিভিউ ট্যাবে আপনি অনুমোদন না করা পর্যন্ত দোকানে কিছুই দেখা যাবে না। অনুমোদন, বাতিল, উত্তর, মুছে ফেলা — সবই আপনার হাতে, আর স্ক্রিনশট থেকে নিজেও একটি যোগ করতে পারবেন, যেটি আলাদা করে চিহ্নিত থাকে। রিভিউ সবাই পড়তে পারবেন, যিনি সত্যিই পণ্যটি পেয়েছেন তাঁকে যাচাই করা ক্রেতা হিসেবে দেখানো হয়, আর কোনো ক্রেতা নিজের রিভিউ বদলালে সেটি আবার আপনার অনুমোদনের জন্য ফিরে আসে।",
+    },
+  },
+  {
+    id: "2026-09-22-whatsapp-link-in-the-footer-works",
+    date: "2026-09-22",
+    version: "4.43.0",
+    tag: "fixed",
+    href: "/settings",
+    title: {
+      en: "Your WhatsApp link in the footer works now",
+      bn: "ফুটারের হোয়াটসঅ্যাপ লিংক এখন কাজ করে",
+    },
+    body: {
+      en: "The WhatsApp box in Settings asks for a number or a link, but if you gave it a number the footer link went nowhere — it landed on a “page not found” on your own shop. Give it a number in any form you like now, with or without the dashes or the 880, and the link opens a chat with you.",
+      bn: "সেটিংসের হোয়াটসঅ্যাপ ঘরে নম্বর বা লিংক — যেকোনোটি দেওয়া যায়, কিন্তু নম্বর দিলে ফুটারের লিংকটি কোথাও যেত না, আপনার নিজের দোকানেই “পেজ পাওয়া যায়নি” দেখাত। এখন যেভাবেই নম্বর লিখুন — ড্যাশসহ বা ছাড়া, ৮৮০ সহ বা ছাড়া — লিংকে চাপ দিলে আপনার সঙ্গেই চ্যাট খুলবে।",
+    },
+  },
+  {
+    id: "2026-09-22-premium-parts-are-labelled",
+    date: "2026-09-22",
+    version: "4.42.0",
+    tag: "improved",
+    href: "/settings?tab=customization",
+    title: {
+      en: "Premium parts are shown, not hidden",
+      bn: "প্রিমিয়ামের অংশগুলো লুকানো নয়, দেখানো হয়",
+    },
+    body: {
+      en: "When you add something to a page in Customization, the parts that come with Premium are listed too, marked “On the Premium plan”, so you can see what your shop could have. If your plan ever lapses, anything you already placed stays saved exactly as you left it — your shop simply stops showing it, and it comes back the day you are on Premium again.",
+      bn: "কাস্টমাইজেশনে কোনো পাতায় কিছু যোগ করার সময় প্রিমিয়ামের সঙ্গে আসা অংশগুলোও তালিকায় থাকে, “প্রিমিয়াম প্ল্যানে পাওয়া যায়” লেখা সহ — তাই আপনার দোকানে আর কী কী থাকতে পারত তা দেখতে পাবেন। প্ল্যানের মেয়াদ শেষ হয়ে গেলেও আগে বসানো জিনিস যেমন ছিল তেমনই সেভ থাকে — দোকানে শুধু দেখানো বন্ধ হয়, আর আবার প্রিমিয়ামে ফিরলেই সেটি ফিরে আসে।",
+    },
+  },
+  {
+    id: "2026-09-22-answer-the-question-once",
+    date: "2026-09-22",
+    version: "4.41.0",
+    tag: "new",
+    href: "/products",
+    title: {
+      en: "Answer a question once, not forty times",
+      bn: "একবার উত্তর দিন, চল্লিশ বার নয়",
+    },
+    body: {
+      en: "Every product now has a Questions & answers box on its page in your dashboard — write “does it come in XL” and your answer once, and it shows on that product in your shop. There is a second one for questions about the whole shop, like delivery outside Dhaka or exchanges, which you can put on your home page, a category or the blog. Shoppers tap a question to open the answer, and their browser's find-on-page still reaches the text inside.",
+      bn: "প্রতিটি পণ্যের পাতায় এখন ড্যাশবোর্ডে “প্রশ্ন ও উত্তর” বক্স আছে — “XL সাইজ আছে কি” আর তার উত্তর একবার লিখে রাখলেই সেটি আপনার দোকানে ওই পণ্যের পাতায় দেখা যাবে। পুরো দোকান নিয়ে প্রশ্নের জন্য আলাদা একটি আছে — যেমন ঢাকার বাইরে ডেলিভারি বা বদলানোর নিয়ম — যা হোম পেজ, ক্যাটাগরি বা ব্লগে বসানো যায়। ক্রেতা প্রশ্নে চাপ দিলেই উত্তর খুলে যায়, আর ব্রাউজারের খোঁজার সুবিধাও ভেতরের লেখা পর্যন্ত পৌঁছায়।",
+    },
+  },
+  {
+    id: "2026-09-22-promotions-that-start-and-stop",
+    date: "2026-09-22",
+    version: "4.40.0",
+    tag: "new",
+    title: {
+      en: "Promotions that start and stop on their own",
+      bn: "নিজে থেকেই শুরু আর শেষ হওয়া প্রোমোশন",
+    },
+    body: {
+      en: "On Premium, a promotion band with a heading, a message and a button can be given a start and an end in Bangladesh time, and it appears and disappears by itself — no waking up at midnight to take a sale down. Switch on the countdown and shoppers see the time left ticking. It vanishes the second it ends, even for someone already sitting on the page.",
+      bn: "প্রিমিয়াম প্ল্যানে শিরোনাম, বার্তা আর বোতামসহ প্রোমোশন ব্যান্ডে বাংলাদেশ সময় অনুযায়ী শুরু আর শেষের সময় দেওয়া যায় — সেটি নিজে থেকেই আসবে আর চলে যাবে, সেল বন্ধ করতে মাঝরাতে জেগে থাকতে হবে না। কাউন্টডাউন চালু করলে ক্রেতারা বাকি সময় কমতে দেখবেন। শেষ হওয়ার সঙ্গে সঙ্গেই এটি চলে যায় — যিনি আগে থেকেই পাতায় আছেন তাঁর কাছেও।",
+    },
+  },
+  {
+    id: "2026-09-22-put-a-video-on-your-shop",
+    date: "2026-09-22",
+    version: "4.39.0",
+    tag: "new",
+    title: {
+      en: "Put a video on your shop",
+      bn: "দোকানে ভিডিও যোগ করুন",
+    },
+    body: {
+      en: "Paste a link from YouTube, Facebook or Vimeo and a video section appears on your home page, a category or a product — any normal link works, including a Shorts or a share link. Shoppers see your cover picture and a play button, and nothing is loaded from YouTube until somebody presses it, so the page stays fast and no shopper is reported to anyone who never watched. Reels and other tall videos have a shape of their own so they are not squeezed into a wide box.",
+      bn: "ইউটিউব, ফেসবুক বা ভিমিও থেকে একটি লিংক বসালেই আপনার হোম পেজ, ক্যাটাগরি বা পণ্যের পাতায় ভিডিও সেকশন যোগ হবে — শর্টস বা শেয়ার লিংকসহ সাধারণ যেকোনো লিংকই চলবে। ক্রেতারা আপনার কভার ছবি আর একটি প্লে বোতাম দেখবেন, আর কেউ সেটি না চাপা পর্যন্ত ইউটিউব থেকে কিছুই লোড হয় না — তাই পাতা দ্রুত থাকে আর যে ক্রেতা ভিডিও দেখেননি তাঁর কথা কোথাও যায় না। রিলসের মতো লম্বা ভিডিওর জন্য আলাদা আকার আছে, তাই সেগুলো চওড়া বাক্সে চেপে বসে না।",
+    },
+  },
+  {
+    id: "2026-09-22-a-block-of-text-anywhere",
+    date: "2026-09-22",
+    version: "4.39.0",
+    tag: "fixed",
+    title: {
+      en: "The Text section works now",
+      bn: "লেখার সেকশনটি এখন কাজ করে",
+    },
+    body: {
+      en: "Text has been on the list of sections you can add since customization opened, and adding it left that part of the page blank. It now draws the heading and the words you typed, keeping your line breaks, and it can go on the home page, a category, a product or the blog.",
+      bn: "কাস্টমাইজেশন চালু হওয়ার পর থেকেই যোগ করার তালিকায় লেখা সেকশনটি ছিল, কিন্তু যোগ করলে পাতার ওই অংশ ফাঁকা থেকে যেত। এখন আপনার শিরোনাম আর লেখা ঠিকঠাক দেখাবে, লাইন ভাঙাও অক্ষত থাকবে — আর এটি হোম পেজ, ক্যাটাগরি, পণ্য বা ব্লগ যেকোনো জায়গায় বসানো যাবে।",
+    },
+  },
+  {
+    id: "2026-09-22-theme-pictures-show-again",
+    date: "2026-09-22",
+    version: "4.39.0",
+    tag: "fixed",
+    title: {
+      en: "Pictures you placed in Customization show again",
+      bn: "কাস্টমাইজেশনে বসানো ছবিগুলো আবার দেখা যাবে",
+    },
+    body: {
+      en: "Shops customised before the single-design change kept an old name for their design inside their saved settings, and your shop could not match it to anything — so every picture you had placed there stopped loading, and Customization would not open. The saved settings have been corrected and nothing you arranged was changed.",
+      bn: "একক ডিজাইনে যাওয়ার আগে যেসব দোকান কাস্টমাইজ করা হয়েছিল, তাদের সেভ করা সেটিংসে ডিজাইনের পুরোনো নামটি রয়ে গিয়েছিল, আর দোকান সেটির সঙ্গে কিছু মেলাতে পারত না — ফলে ওখানে বসানো ছবিগুলো আর লোড হতো না এবং কাস্টমাইজেশনও খুলত না। সেভ করা সেটিংস ঠিক করে দেওয়া হয়েছে, আপনার সাজানো কিছুই বদলায়নি।",
+    },
+  },
+  {
+    id: "2026-09-22-brands-are-records",
+    date: "2026-09-22",
+    version: "4.38.0",
+    tag: "new",
+    href: "/brands",
+    title: {
+      en: "Your brands get a page of their own",
+      bn: "আপনার ব্র্যান্ডের জন্য আলাদা পাতা",
+    },
+    body: {
+      en: "Brands now have their own tab with a logo and a description, and each one gets a page in your shop with a link in the footer. On a product you pick a brand from the list instead of typing it, so Bata, bata and BATA can no longer be three brands — the ones you already had were merged, keeping the spelling you used most. A shop that sells only its own goods can leave the tab empty and nothing about it changes.",
+      bn: "ব্র্যান্ডের জন্য এখন আলাদা ট্যাব আছে, যেখানে লোগো আর বিবরণ দেওয়া যায়, আর প্রতিটি ব্র্যান্ড আপনার দোকানে নিজের পাতা পায় — ফুটারে তার লিংকও থাকে। পণ্যের পাতায় এখন ব্র্যান্ডের নাম টাইপ না করে তালিকা থেকে বেছে নিতে হয়, তাই Bata, bata আর BATA আর আলাদা তিনটি ব্র্যান্ড থাকতে পারে না — আগের নামগুলো এক করে দেওয়া হয়েছে, আর আপনি যে বানানটি সবচেয়ে বেশি লিখেছেন সেটিই রাখা হয়েছে। যে দোকান শুধু নিজের পণ্য বিক্রি করে, সে ট্যাবটি খালি রাখতে পারে — কিছুই বদলাবে না।",
+    },
+  },
+  {
+    id: "2026-09-22-team-can-reach-discount-codes",
+    date: "2026-09-22",
+    version: "4.38.0",
+    tag: "fixed",
+    href: "/settings?tab=team",
+    title: {
+      en: "Your team can reach discount codes again",
+      bn: "আপনার টিম আবার ডিসকাউন্ট কোডে পৌঁছাতে পারবে",
+    },
+    body: {
+      en: "Discount codes were reaching only the store owner: the permission existed but was never given to the Admin, Manager and Viewer roles on shops created before it. Those roles now have it, along with the new Brands permission, and anything you changed yourself on a role was left alone.",
+      bn: "ডিসকাউন্ট কোড শুধু দোকানের মালিকের কাছেই পৌঁছাত: অনুমতিটি ছিল, কিন্তু তার আগে তৈরি হওয়া দোকানগুলোর অ্যাডমিন, ম্যানেজার ও ভিউয়ার ভূমিকায় সেটি কখনো দেওয়া হয়নি। এখন ওই ভূমিকাগুলো সেটি পেয়েছে, সঙ্গে নতুন ব্র্যান্ড অনুমতিও — আর কোনো ভূমিকায় আপনি নিজে যা বদলেছিলেন তা অক্ষত আছে।",
+    },
+  },
   {
     id: "2026-09-22-order-numbers-are-numbers",
     date: "2026-09-22",
@@ -301,109 +490,6 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     },
   },
   {
-    id: "2026-09-22-popup-waits-its-turn",
-    date: "2026-09-22",
-    version: "4.12.5",
-    tag: "fixed",
-    title: {
-      en: "Your pop-up waits its turn",
-      bn: "আপনার পপ-আপ এখন অপেক্ষা করে",
-    },
-    body: {
-      en: "Your promotional pop-up used to appear on top of whatever a shopper was already looking at, including the panel confirming what they had just added to their cart. It now waits until the screen is free, and it is not counted as shown until the shopper actually sees it.",
-      bn: "আগে আপনার প্রচারের পপ-আপ ক্রেতার সামনে খোলা যেকোনো কিছুর ওপরেই চলে আসত—এমনকি কার্টে পণ্য যোগ হওয়ার বার্তার ওপরেও। এখন স্ক্রিন খালি হওয়া পর্যন্ত অপেক্ষা করে, আর ক্রেতা সত্যিই না দেখা পর্যন্ত সেটি দেখানো হয়েছে বলে ধরা হয় না।",
-    },
-  },
-  {
-    id: "2026-09-22-card-add-to-cart-counted",
-    date: "2026-09-22",
-    version: "4.12.5",
-    tag: "fixed",
-    title: {
-      en: "Add to cart from a card is now counted",
-      bn: "কার্ড থেকে কার্টে যোগ এখন হিসাবে আসে",
-    },
-    body: {
-      en: "When a shopper added a product straight from a card instead of opening the product page, your reports did not count it. Those add to cart numbers were lower than they should have been, and are now correct. Expect the figure to rise.",
-      bn: "ক্রেতা পণ্যের পেজে না গিয়ে সরাসরি কার্ড থেকে কার্টে যোগ করলে সেটি আপনার রিপোর্টে গণনা হতো না। কার্টে যোগের সংখ্যা তাই আসলের চেয়ে কম দেখাত, এখন তা ঠিক করা হয়েছে। সংখ্যাটি বাড়তে দেখলে অবাক হবেন না।",
-    },
-    href: "/analytics",
-  },
-  {
-    id: "2026-09-22-every-page-keeps-something",
-    date: "2026-09-22",
-    version: "4.12.5",
-    tag: "improved",
-    title: {
-      en: "A page can no longer be left empty",
-      bn: "কোনো পেজ আর একদম ফাঁকা করা যাবে না",
-    },
-    body: {
-      en: "In the theme editor, every page now keeps one part you cannot hide: the products on your home and category pages, the posts on your journal, the writing on a post. Everything else, banners included, is still yours to move or remove.",
-      bn: "থিম এডিটরে এখন প্রতিটি পেজে একটি অংশ থাকবেই, যা লুকানো যাবে না—হোম আর ক্যাটাগরিতে পণ্য, জার্নালে পোস্ট, পোস্টে লেখা। ব্যানারসহ বাকি সবকিছু আগের মতোই সরানো বা বাদ দেওয়া যাবে।",
-    },
-    href: "/settings/customize",
-  },
-  {
-    id: "2026-09-22-lighter-buy-buttons",
-    date: "2026-09-22",
-    version: "4.12.4",
-    tag: "improved",
-    title: {
-      en: "Softer text on the buy buttons",
-      bn: "কেনার বাটনের লেখা একটু হালকা",
-    },
-    body: {
-      en: "Order now and Add to cart are set a little lighter on your product pages. Nothing moved and nothing changed about how they work; they simply sit more quietly next to your product name and price.",
-      bn: "পণ্যের পেজে এখনই অর্ডার করুন আর কার্টে যোগ করুন লেখা দুটি একটু হালকা করা হয়েছে। কিছু সরেনি, কাজেও কোনো বদল নেই; শুধু পণ্যের নাম আর দামের পাশে আগের চেয়ে শান্ত দেখায়।",
-    },
-  },
-  {
-    id: "2026-09-22-banners-move-into-the-editor",
-    date: "2026-09-22",
-    version: "4.12.0",
-    tag: "improved",
-    title: {
-      en: "Banners move into the design editor",
-      bn: "ব্যানার এখন ডিজাইন এডিটরে",
-    },
-    body: {
-      en: "Your banner pictures are now part of your design, so you add and change them in Settings → Customization while watching your store beside you. The Banners page has left Promotions, which keeps your pop-up and your notice bar. Pictures you have used before are offered again, so you never upload the same photo twice.",
-      bn: "ব্যানারের ছবি এখন আপনার ডিজাইনের অংশ, তাই সেটিংস → কাস্টমাইজেশনে পাশে স্টোর দেখতে দেখতেই ছবি যোগ বা বদল করবেন। প্রোমোশন থেকে ব্যানার পেজটি সরানো হয়েছে, সেখানে পপ-আপ আর নোটিশ বার থাকছে। আগে ব্যবহার করা ছবিগুলো আবার দেখানো হয়, তাই একই ছবি দুবার আপলোড করতে হবে না।",
-    },
-    href: "/settings?tab=customization",
-  },
-  {
-    id: "2026-09-22-every-plan-can-customize",
-    date: "2026-09-22",
-    version: "4.12.0",
-    tag: "improved",
-    title: {
-      en: "Every plan can now customize its store",
-      bn: "এখন সব প্ল্যানেই স্টোর সাজানো যাবে",
-    },
-    body: {
-      en: "The design editor used to be Premium only. Now every store can open it and change the Basic design; Premium is what lets you pick a different theme. Each theme also keeps its own design, so looking at another one never costs you the work you have already done.",
-      bn: "ডিজাইন এডিটর আগে শুধু প্রিমিয়ামে ছিল। এখন যেকোনো স্টোর এটি খুলে বেসিক ডিজাইন বদলাতে পারবে; অন্য থিম বেছে নিতে প্রিমিয়াম লাগবে। প্রতিটি থিমের ডিজাইন আলাদাভাবে জমা থাকে, তাই অন্য থিম দেখে এলে আগের কাজ হারাবে না।",
-    },
-    href: "/settings?tab=customization",
-  },
-  {
-    id: "2026-09-22-team-screen-in-bangla",
-    date: "2026-09-22",
-    version: "4.12.0",
-    tag: "improved",
-    title: {
-      en: "Team and roles, in your language",
-      bn: "টিম আর রোল এখন আপনার ভাষায়",
-    },
-    body: {
-      en: "The Team screen and the role editor were in English, so the list of what a role may do was hard to read. Every name and message there is now in Bangla as well. The permissions themselves have not changed.",
-      bn: "টিম পেজ আর রোল এডিটর ইংরেজিতে ছিল, তাই কোন রোল কী কী করতে পারে তা পড়া কঠিন ছিল। সেখানকার সব নাম আর বার্তা এখন বাংলাতেও আছে। অনুমতিগুলোতে কোনো পরিবর্তন হয়নি।",
-    },
-    href: "/settings?tab=team",
-  },
-  {
     id: "2026-09-22-theme-editor-and-live-preview",
     date: "2026-09-22",
     version: "4.12.0",
@@ -417,91 +503,5 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
       bn: "সেটিংস → কাস্টমাইজেশন থেকে এখন একটি থিম বেছে নিয়ে পুরো স্ক্রিনের এডিটর খুলতে পারবেন, যেখানে প্রতিটি পেজের লেখা, লিংক আর অংশগুলো বদলাবেন আর পাশেই আপনার স্টোর বদলাতে দেখবেন। যা বদলান তা ড্রাফট হয়ে থাকে, ক্রেতারা দেখেন না; স্টোরে সংরক্ষণ বাটনে চাপলেই তা স্টোরে যায়, আর শেষ ২০টি সংরক্ষণ রাখা থাকে যাতে আগের চেহারায় ফিরতে পারেন। থিম প্রিমিয়াম প্ল্যানের অংশ।",
     },
     href: "/settings?tab=customization",
-  },
-  {
-    id: "2026-09-22-managers-can-edit-storefront-look",
-    date: "2026-09-22",
-    version: "4.8.5",
-    tag: "improved",
-    title: {
-      en: "Managers can now change your storefront's look",
-      bn: "ম্যানেজাররা এখন স্টোরফ্রন্টের ডিজাইন বদলাতে পারবেন",
-    },
-    body: {
-      en: "Team members with the Manager role can now edit Settings → Customization, like the owner and Admins. Staff and Viewers can't, even if the permission is ticked for their role, and a team member limited to some categories can't either.",
-      bn: "ম্যানেজার রোলের টিম মেম্বাররা এখন মালিক ও অ্যাডমিনের মতো সেটিংস → কাস্টমাইজেশন বদলাতে পারবেন। স্টাফ ও ভিউয়াররা পারবেন না, তাদের রোলে পারমিশন টিক দেওয়া থাকলেও না, আর কিছু ক্যাটাগরিতে সীমিত টিম মেম্বাররাও পারবেন না।",
-    },
-    href: "/settings?tab=customization",
-  },
-  {
-    id: "2026-09-22-purchases-count-at-order-time",
-    date: "2026-09-22",
-    version: "4.8.4",
-    tag: "improved",
-    title: {
-      en: "Purchases now count when the order is placed",
-      bn: "অর্ডার করার সাথে সাথেই পারচেজ গণনা হবে",
-    },
-    body: {
-      en: "Facebook and TikTok now count a cash on delivery order as a purchase as soon as the customer places it, instead of waiting for you to confirm. Your purchase numbers will look higher, because orders that are cancelled later stay counted. Prepaid orders still count when the customer pays.",
-      bn: "ক্যাশ অন ডেলিভারি অর্ডার এখন গ্রাহক অর্ডার করার সাথে সাথেই Facebook ও TikTok-এ পারচেজ হিসেবে গণনা হয়, আপনার কনফার্ম করার অপেক্ষা করে না। এতে পারচেজের সংখ্যা বেশি দেখাবে, কারণ পরে বাতিল হওয়া অর্ডারও গোনা থাকবে। প্রিপেইড অর্ডার আগের মতোই গ্রাহক পেমেন্ট করলে গণনা হবে।",
-    },
-  },
-  {
-    id: "2026-09-22-brief-glitch-no-longer-hides-a-product",
-    date: "2026-09-22",
-    version: "4.8.3",
-    tag: "fixed",
-    title: {
-      en: "A brief glitch no longer hides a product",
-      bn: "সাময়িক সমস্যায় পণ্য আর হারিয়ে যাবে না",
-    },
-    body: {
-      en: "If our servers hiccup while a product page is being prepared, your shop no longer shows \"product not found\" for the next few minutes. Products that really are gone still show a proper not-found page.",
-      bn: "পণ্যের পেজ তৈরির সময় আমাদের সার্ভারে সাময়িক সমস্যা হলে আপনার দোকান এখন আর কয়েক মিনিট ধরে \"পণ্য পাওয়া যায়নি\" দেখাবে না। সত্যিই মুছে ফেলা পণ্যের জন্য আগের মতোই সঠিক বার্তা দেখাবে।",
-    },
-  },
-  {
-    id: "2026-09-22-blog-posts-open-again",
-    date: "2026-09-22",
-    version: "4.8.2",
-    tag: "fixed",
-    title: {
-      en: "Blog posts open again",
-      bn: "ব্লগ পোস্ট আবার খুলছে",
-    },
-    body: {
-      en: "Opening a blog post on your storefront showed an error page instead of the article. Posts now open normally, and their text is cleaned on our servers so unsafe content never reaches shoppers.",
-      bn: "আপনার স্টোরফ্রন্টে ব্লগ পোস্ট খুললে আর্টিকেলের বদলে এরর পেজ আসত। এখন পোস্টগুলো ঠিকভাবে খোলে, আর পোস্টের লেখা আমাদের সার্ভারেই পরিষ্কার করা হয়, তাই ক্ষতিকর কিছু ক্রেতাদের কাছে পৌঁছায় না।",
-    },
-    href: "/blog",
-  },
-  {
-    id: "2026-09-22-faster-storefront",
-    date: "2026-09-22",
-    version: "4.8.1",
-    tag: "improved",
-    title: {
-      en: "Faster storefront and a lighter home page",
-      bn: "দোকান এখন দ্রুত, হোম পেজ হালকা",
-    },
-    body: {
-      en: "Your shop pages load faster and no longer jump about while loading. The home page now shows your first 6 categories with 8 products each, and shoppers reach the rest from the menu. Price and stock changes also appear sooner.",
-      bn: "আপনার দোকানের পেজগুলো এখন দ্রুত লোড হয় আর লোড হওয়ার সময় আগের মতো লাফায় না। হোম পেজে এখন প্রথম ৬টি ক্যাটাগরি দেখাবে, প্রতিটিতে ৮টি পণ্য, বাকিগুলো ক্রেতারা মেনু থেকে দেখতে পাবেন। দাম বা স্টক বদলালে সেটাও এখন আগের চেয়ে তাড়াতাড়ি দেখা যায়।",
-    },
-  },
-  {
-    id: "2026-09-15-whats-new-panel",
-    date: "2026-09-15",
-    version: "4.6.0",
-    tag: "new",
-    title: {
-      en: "See what's new in your dashboard",
-      bn: "ড্যাশবোর্ডে নতুন কী এল দেখুন",
-    },
-    body: {
-      en: "Open What's new from your profile menu to see recent updates. A small dot lets you know when something new arrives.",
-      bn: "প্রোফাইল মেনুর \"নতুন কী আছে\" থেকে সাম্প্রতিক আপডেটগুলো দেখুন। নতুন কিছু এলে ছোট একটি বিন্দু আপনাকে জানিয়ে দেবে।",
-    },
   },
 ];

@@ -18,6 +18,8 @@ import { useEnterNavigation } from "@/hooks/useEnterNavigation";
 import type { ExtraFieldValues } from "@/types/extra-fields";
 import { flattenCategoryOptions } from "@/lib/category-tree";
 import { useCategoriesQuery } from "@/hooks/useCategoriesQuery";
+import { BrandPicker } from "@/components/products/BrandPicker";
+import { ProductQuestions, type ProductQuestion } from "@/components/products/ProductQuestions";
 import { MAX_PRODUCT_IMAGES } from "@/lib/product-media";
 import {
   parseValidation,
@@ -63,6 +65,7 @@ export default function NewProductPage() {
     free_delivery: false,
     prepayment_type: "none" as "none" | "delivery_only" | "full",
   });
+  const [questions, setQuestions] = useState<ProductQuestion[]>([]);
   const [extraFields, setExtraFields] = useState<ExtraFieldValues>({});
   const [extraFieldsErrors, setExtraFieldsErrors] = useState<Record<string, string>>({});
   const { schema: extraFieldsSchema } = useExtraFieldsSchema("product");
@@ -198,9 +201,10 @@ export default function NewProductPage() {
     setError("");
 
     const formData = new FormData();
-    const normalizedBrand = form.brand.trim();
     formData.append("name", form.name);
-    if (normalizedBrand) formData.append("brand", normalizedBrand);
+    // The brand's public_id, or nothing at all. A blank would be read as an
+    // id, and there is no brand whose id is the empty string.
+    if (form.brand) formData.append("brand", form.brand);
     formData.append("price", form.price);
     formData.append("original_price", form.original_price.trim());
     formData.append("category", form.category);
@@ -212,6 +216,12 @@ export default function NewProductPage() {
     if (mainImageKey) formData.append("image_key", mainImageKey);
     if (Object.keys(extraFields).length > 0) {
       formData.append("extra_data", JSON.stringify(extraFields));
+    }
+    // A row with neither half typed is somebody who clicked Add and changed
+    // their mind; the API drops those too, so the two agree.
+    const askedAndAnswered = questions.filter((q) => q.question.trim() || q.answer.trim());
+    if (askedAndAnswered.length > 0) {
+      formData.append("faq", JSON.stringify(askedAndAnswered));
     }
 
     try {
@@ -349,14 +359,14 @@ export default function NewProductPage() {
                 />
               </Field>
               <Field label={tPages("productBrand")}>
-                <Input
-                  type="text"
+                <BrandPicker
                   value={form.brand}
-                  onChange={(e) => setForm({ ...form, brand: e.target.value })}
-                  placeholder={tPages("productBrandPlaceholder")}
-                  className={fieldControlClass}
-                  onKeyDown={handleKeyDown}
+                  onChange={(publicId) => setForm({ ...form, brand: publicId })}
+                  disabled={saving}
                 />
+              </Field>
+              <Field label={tPages("productQuestionsTitle")}>
+                <ProductQuestions value={questions} onChange={setQuestions} disabled={saving} />
               </Field>
             </CardContent>
           </Card>

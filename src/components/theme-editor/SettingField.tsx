@@ -13,6 +13,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { numberTextClass } from "@/lib/number-font";
 import type { FieldSpec } from "@/lib/theme-editor/field-specs";
 import { LINK_PAGES } from "@/lib/theme-editor/link-targets";
+import { toBdParts, toUtcIso } from "@/lib/theme-editor/schedule-field";
 import { characterCount, checkField, type FieldError } from "@/lib/theme-editor/validate";
 import { cn } from "@/lib/utils";
 
@@ -117,6 +118,10 @@ export function SettingField({
     );
   }
 
+  if (spec.kind === "datetime") {
+    return <ScheduleField spec={spec} value={value} onChange={onChange} id={id} />;
+  }
+
   if (spec.kind === "url") {
     const link = typeof value === "string" ? value : "";
     const page = LINK_PAGES.find((entry) => entry.path === link);
@@ -152,6 +157,71 @@ export function SettingField({
   }
 
   return <TypedField spec={spec} value={value} onChange={onChange} id={id} />;
+}
+
+/**
+ * A date and a time, in Bangladesh wall clock, stored as one UTC instant.
+ *
+ * Two native controls rather than `datetime-local`, which a browser reads in ITS OWN
+ * timezone -- a merchant whose laptop is still set to another zone would schedule their
+ * sale for the wrong hour with nothing on the screen to say so. The conversion is
+ * `@/utils/time`'s, so this agrees with the coupon and CTA forms.
+ *
+ * Clearing the date clears the setting, which is what "no limit" means: no start is
+ * "already running", no end is "until I take it down".
+ */
+function ScheduleField({
+  spec,
+  value,
+  onChange,
+  id,
+}: {
+  spec: FieldSpec;
+  value: unknown;
+  onChange: (value: unknown) => void;
+  id: string;
+}) {
+  const t = useTranslations("themeEditor");
+  const parts = toBdParts(value);
+
+  function set(date: string, time: string) {
+    onChange(toUtcIso(date, time));
+  }
+
+  return (
+    <FormField label={spec.label} hint={spec.help ?? t("fieldDateHint")} htmlFor={id}>
+      <div className="flex items-center gap-2">
+        <Input
+          id={id}
+          type="date"
+          value={parts.date}
+          className="min-w-0 flex-1"
+          onChange={(event) => set(event.target.value, parts.time)}
+        />
+        <Input
+          type="time"
+          aria-label={spec.label}
+          value={parts.time}
+          disabled={!parts.date}
+          className="w-[7.5rem] shrink-0"
+          onChange={(event) => set(parts.date, event.target.value)}
+        />
+        {parts.date ? (
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            className="size-11 shrink-0 md:size-9"
+            aria-label={t("fieldDateClear")}
+            title={t("fieldDateClear")}
+            onClick={() => onChange("")}
+          >
+            <X aria-hidden />
+          </Button>
+        ) : null}
+      </div>
+    </FormField>
+  );
 }
 
 /** The fields the merchant types into: one line, a paragraph, or a whole number. */

@@ -859,8 +859,8 @@ export default function ProductsPage() {
                       <div className="space-y-2 p-3">
                         <p className="truncate text-sm font-semibold text-foreground">{product.name}</p>
 
-                        {product.brand && (
-                          <p className="truncate text-xs text-muted-foreground">{product.brand}</p>
+                        {product.brand_name && (
+                          <p className="truncate text-xs text-muted-foreground">{product.brand_name}</p>
                         )}
 
                         {product.category_name && (
@@ -1116,7 +1116,7 @@ function ProductRowCells({
         </span>
       </td>
       <td className="px-4 py-3 text-foreground whitespace-nowrap">
-        {product.brand || "—"}
+        {product.brand_name || "—"}
       </td>
       <td className="px-4 py-3 text-muted-foreground whitespace-nowrap">
         {product.category_name ?? "—"}

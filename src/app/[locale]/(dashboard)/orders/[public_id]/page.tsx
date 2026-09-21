@@ -391,7 +391,7 @@ export default function OrderDetailPage() {
         public_id: null,
         product_public_id: product.public_id,
         product_name: product.name || tPages("orderNewProductUnavailable"),
-        product_brand: product.brand ?? undefined,
+        product_brand: product.brand_name ?? undefined,
         product_image: product.image_url ?? product.image ?? null,
         status: "active",
         variant_public_id: null,

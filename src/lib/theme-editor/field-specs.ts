@@ -1,6 +1,11 @@
 import type { ThemeManifest, ThemeSectionSpec, ThemeSettingSpec } from "./api";
 import { localLabel } from "./document-ops";
-import { MAX_LONG_TEXT_LENGTH, MAX_TEXT_LENGTH, MAX_URL_LENGTH } from "./rules";
+import {
+  MAX_DATETIME_LENGTH,
+  MAX_LONG_TEXT_LENGTH,
+  MAX_TEXT_LENGTH,
+  MAX_URL_LENGTH,
+} from "./rules";
 
 /*
  * The fields the settings panel draws, read from the theme file and written in the
@@ -14,7 +19,18 @@ import { MAX_LONG_TEXT_LENGTH, MAX_TEXT_LENGTH, MAX_URL_LENGTH } from "./rules";
  */
 
 /** The setting kinds the API validates (engine/apps/theming/manifest.py SETTING_TYPES). */
-export const FIELD_KINDS = ["text", "textarea", "boolean", "number", "select", "url", "image"] as const;
+export const FIELD_KINDS = [
+  "text",
+  "textarea",
+  "boolean",
+  "number",
+  "select",
+  "url",
+  "image",
+  // An instant, stored in UTC. The merchant types Bangladesh wall clock
+  // and this side converts, the way every other date in the product does.
+  "datetime",
+] as const;
 
 export type FieldKind = (typeof FIELD_KINDS)[number];
 
@@ -28,7 +44,7 @@ export type FieldSpec = {
   help: string | null;
   /** What the setting holds until the merchant changes it. */
   default: unknown;
-  /** text, textarea and url: the most characters the API stores. Null for the others. */
+  /** text, textarea, url and datetime: the most characters the API stores. Null for the others. */
   maxLength: number | null;
   /** number: the ends of the range the API accepts, both included. Null for the others. */
   min: number | null;
@@ -41,6 +57,7 @@ const LENGTHS: Partial<Record<FieldKind, number>> = {
   text: MAX_TEXT_LENGTH,
   textarea: MAX_LONG_TEXT_LENGTH,
   url: MAX_URL_LENGTH,
+  datetime: MAX_DATETIME_LENGTH,
 };
 
 function isKind(type: string): type is FieldKind {

@@ -28,6 +28,8 @@ export const manifest: ThemeManifest = {
       ...labels("Text"),
       settings: [{ id: "align", type: "select", ...labels("Alignment"), default: "center" }],
     },
+    // A section the theme sells rather than gives away, like `promo` in the real one.
+    promo: { ...labels("Promotion"), premium: true, settings: [] },
     product_gallery: { ...labels("Product images"), at_most_one: true, settings: [] },
     product_details: {
       ...labels("Product details"),
@@ -51,7 +53,7 @@ export const manifest: ThemeManifest = {
     footer: { ...labels("Footer"), sections: ["footer"] },
   },
   templates: {
-    home: { ...labels("Home"), sections: ["banner_slider", "rich_text"] },
+    home: { ...labels("Home"), sections: ["banner_slider", "rich_text", "promo"] },
     product: {
       ...labels("Product"),
       sections: ["product_gallery", "product_details", "rich_text"],

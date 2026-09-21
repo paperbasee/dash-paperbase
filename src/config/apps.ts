@@ -17,6 +17,8 @@ import {
   Trash,
   Heart as HeartIcon,
   Search,
+  Award,
+  Star,
   Phone as PhoneIcon,
   UserRound,
 } from "lucide-react";
@@ -115,6 +117,26 @@ export const APP_CONFIG: Record<string, AppConfig> = {
     href: "/products/wished",
     countKey: null,
     parentId: "products",
+  },
+  brands: {
+    id: "brands",
+    label: "Brands",
+    icon: Award,
+    description: "The makers whose goods this shop sells",
+    essential: false,
+    href: "/brands",
+    countKey: null,
+    parentId: "catalog",
+  },
+  reviews: {
+    id: "reviews",
+    label: "Reviews",
+    icon: Star,
+    description: "What shoppers said, waiting for your word",
+    essential: false,
+    href: "/reviews",
+    countKey: null,
+    parentId: "catalog",
   },
   categories: {
     id: "categories",
@@ -247,6 +269,21 @@ export const CATALOG_INCLUDED_APP_IDS = [
   "categories",
   "variants",
   "product_attributes",
+  // Reviews has no switch either, and for a stronger reason than Brands: a
+  // shopper can write one whether or not a merchant has opened this tab, and a
+  // switch that hid the tab would hide the queue where those reviews wait --
+  // leaving them unanswered and invisible rather than absent. The storefront
+  // sections that SHOW reviews are gated, and that is where the choice lives.
+  "reviews",
+  // Brands has no switch, and that is the decision rather than an omission.
+  //
+  // It is optional in the way that matters: a shop with no brands shows none.
+  // The storefront draws the brand pages and the footer link from the brands
+  // that exist, so a merchant who never opens this tab has exactly the shop
+  // they had before. A flag would only have hidden the tab -- which is the
+  // one screen where a brand can be renamed or removed -- and that is the
+  // mistake `ALWAYS_ON_EXTRA_APP_IDS` documents for `popup` and `cta`.
+  "brands",
 ] as const;
 
 export const OPTIONAL_APP_IDS = [
@@ -259,6 +296,8 @@ export const OPTIONAL_APP_IDS = [
 export const CATALOG_SUB_APP_IDS = [
   "products",
   "categories",
+  "brands",
+  "reviews",
   "variants",
   "product_attributes",
   // What shoppers saved. A sibling of Products rather than a child of it: the

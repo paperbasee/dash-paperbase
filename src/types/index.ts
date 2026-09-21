@@ -147,7 +147,17 @@ export interface Order {
 export interface Product {
   public_id: string;
   name: string;
-  brand: string | null;
+  /** Detail only: the brand's `public_id`, which is also what a save sends. */
+  brand?: string | null;
+  /** Read-only, on both list and detail. The id is not a thing to show anyone. */
+  brand_name?: string | null;
+  /** List only; the detail shape calls the same value `brand`. */
+  brand_public_id?: string | null;
+  /**
+   * Detail only: the questions the merchant wrote about this product, in their
+   * order. Merchant-authored — shoppers never submit here.
+   */
+  faq?: { question: string; answer: string }[];
   slug: string;
   price: string;
   original_price: string | null;
@@ -242,6 +252,63 @@ export interface AdminCategoryTreeNode {
   child_count: number;
   children: AdminCategoryTreeNode[];
 }
+
+/**
+ * One of the shop's brands (`/api/v1/admin/brands/`).
+ *
+ * `product_count` is what a merchant reads before deleting one. Deleting is
+ * safe either way -- the products keep existing and simply stop having a
+ * brand -- but a merchant deserves to know how many they are about to touch.
+ */
+export interface AdminBrand {
+  public_id: string;
+  name: string;
+  slug: string;
+  description: string;
+  image: string | null;
+  is_active: boolean;
+  product_count: number;
+  created_at: string;
+}
+
+/** One photo on a review (`/api/v1/admin/reviews/`). At most two per review. */
+export interface AdminReviewImage {
+  public_id: string;
+  image: string | null;
+  /** The card-sized copy. What the queue shows; `image` is the full one. */
+  thumbnail: string | null;
+  order: number;
+}
+
+/**
+ * A review as the Reviews tab reads it.
+ *
+ * Almost all of it is read-only: a merchant decides, answers, deletes, or adds
+ * one of their own. `reply` is the only field of theirs to write — a review the
+ * shop can rewrite is not a review.
+ */
+export interface AdminReview {
+  public_id: string;
+  product_public_id: string;
+  product_name: string;
+  /** Empty when the shop added it; `source` is what says so in words. */
+  account_public_id: string | null;
+  rating: number;
+  body: string;
+  display_name: string;
+  source: "shopper" | "merchant";
+  status: "pending" | "published" | "rejected";
+  is_verified_buyer: boolean;
+  images: AdminReviewImage[];
+  reply: string;
+  replied_at: string | null;
+  created_at: string;
+  /** Sent back on Approve, so a review edited since it was read is refused. */
+  updated_at: string;
+  moderated_at: string | null;
+}
+
+export type AdminReviewCounts = Record<AdminReview["status"], number>;
 
 /** Admin storefront CTA rows (`/api/v1/admin/notifications/`). Publishable API uses `cta_url` / `cta_label` / `start_at` / `end_at`. */
 export interface Notification {

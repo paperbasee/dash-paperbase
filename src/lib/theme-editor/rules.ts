@@ -13,6 +13,8 @@ export const MAX_ID_LENGTH = 40;
 export const MAX_TEXT_LENGTH = 200;
 export const MAX_LONG_TEXT_LENGTH = 2000;
 export const MAX_URL_LENGTH = 500;
+/** An ISO-8601 instant with an offset; what is stored is the 20-character `...Z` form. */
+export const MAX_DATETIME_LENGTH = 40;
 
 export type RuleReason =
   /** The shop needs it: the last shown copy of a required section. */
@@ -22,7 +24,9 @@ export type RuleReason =
   | "listFull"
   | "blocksFull"
   /** Not offered here by the theme. */
-  | "notAllowed";
+  | "notAllowed"
+  /** The theme sells this one, and this shop's plan does not include it. */
+  | "premium";
 
 function isShownCopy(section: ThemeSection, type: string, except?: ThemeSection): boolean {
   return section !== except && section.type === type && !section.hidden;
@@ -34,9 +38,17 @@ export function cannotAdd(
   allowed: readonly string[],
   sections: readonly ThemeSection[],
   type: string,
+  /**
+   * Whether this shop may serve the theme's premium sections. Defaults to true
+   * so an older API build, which sends no answer, locks nobody out of anything
+   * — the storefront is what actually withholds a premium band, and it asks
+   * the plan itself.
+   */
+  premiumSections = true,
 ): RuleReason | null {
   const spec = manifest.sections[type];
   if (!spec || !allowed.includes(type)) return "notAllowed";
+  if (spec.premium && !premiumSections) return "premium";
   if (sections.length >= MAX_SECTIONS_PER_LIST) return "listFull";
   if (spec.at_most_one && sections.some((s) => isShownCopy(s, type))) return "onlyOnce";
   return null;

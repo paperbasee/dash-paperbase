@@ -126,6 +126,22 @@ export const PERMISSION_GROUPS: PermissionGroup[] = [
     ],
   },
   {
+    id: "brands",
+    labelKey: "groupBrands",
+    permissions: [
+      { key: "brands.view", labelKey: "permBrandsView" },
+      { key: "brands.manage", labelKey: "permBrandsManage" },
+    ],
+  },
+  {
+    id: "reviews",
+    labelKey: "groupReviews",
+    permissions: [
+      { key: "reviews.view", labelKey: "permReviewsView" },
+      { key: "reviews.manage", labelKey: "permReviewsManage" },
+    ],
+  },
+  {
     id: "blogs",
     labelKey: "groupBlogs",
     permissions: [
@@ -241,6 +257,8 @@ export const APP_VIEW_PERMISSION: Record<string, string> = {
   orders: "orders.view",
   customers: "customers.view",
   categories: "categories.view",
+  brands: "brands.view",
+  reviews: "reviews.view",
   support_tickets: "support.view",
   cta: "notifications.view",
   variants: "products.view",

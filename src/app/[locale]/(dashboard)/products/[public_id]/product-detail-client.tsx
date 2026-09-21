@@ -22,6 +22,8 @@ import type { ExtraFieldValues } from "@/types/extra-fields";
 import type { Product, AdminCategoryTreeNode } from "@/types";
 import { flattenCategoryOptions } from "@/lib/category-tree";
 import { useCategoriesQuery } from "@/hooks/useCategoriesQuery";
+import { BrandPicker } from "@/components/products/BrandPicker";
+import { ProductQuestions, type ProductQuestion } from "@/components/products/ProductQuestions";
 import { useProductDetailQuery } from "@/hooks/useProductDetailQuery";
 import { MAX_PRODUCT_IMAGES } from "@/lib/product-media";
 import {
@@ -137,6 +139,7 @@ export default function ProductDetailClient() {
     free_delivery: false,
     prepayment_type: "none" as "none" | "delivery_only" | "full",
   });
+  const [questions, setQuestions] = useState<ProductQuestion[]>([]);
   const [extraFields, setExtraFields] = useState<ExtraFieldValues>({});
   const [extraFieldsErrors, setExtraFieldsErrors] = useState<Record<string, string>>({});
   const { schema: extraFieldsSchema } = useExtraFieldsSchema("product");
@@ -249,6 +252,7 @@ export default function ProductDetailClient() {
         ? (productData.extra_data as ExtraFieldValues)
         : {}
     );
+    setQuestions(Array.isArray(productData.faq) ? productData.faq : []);
   }, [productData]);
 
   useEffect(() => {
@@ -421,9 +425,10 @@ export default function ProductDetailClient() {
     setError("");
 
     const formData = new FormData();
-    const normalizedBrand = form.brand.trim();
     formData.append("name", form.name);
-    formData.append("brand", normalizedBrand);
+    // Always sent, blank included: blank is how a merchant takes the brand
+    // back off a product, and the API reads an empty string here as null.
+    formData.append("brand", form.brand);
     formData.append("price", form.price);
     formData.append("original_price", form.original_price.trim());
     formData.append("category", form.category);
@@ -437,6 +442,13 @@ export default function ProductDetailClient() {
     if (Object.keys(extraFields).length > 0) {
       formData.append("extra_data", JSON.stringify(extraFields));
     }
+    // Always sent, empty list included: that is how a merchant removes the
+    // last question. A row with neither half typed is somebody who clicked Add
+    // and changed their mind, and the API drops those too.
+    formData.append(
+      "faq",
+      JSON.stringify(questions.filter((q) => q.question.trim() || q.answer.trim()))
+    );
 
     const galleryIdsBeforeSave = galleryPublicIdsPerSlot(product);
 
@@ -650,14 +662,14 @@ export default function ProductDetailClient() {
                   />
                 </Field>
                 <Field label={tPages("productBrand")}>
-                  <Input
-                    type="text"
+                  <BrandPicker
                     value={form.brand}
-                    onChange={(e) => setForm({ ...form, brand: e.target.value })}
-                    placeholder={tPages("productBrandPlaceholder")}
-                    className={fieldControlClass}
-                    onKeyDown={handleKeyDown}
+                    onChange={(publicId) => setForm({ ...form, brand: publicId })}
+                    disabled={saving}
                   />
+                </Field>
+                <Field label={tPages("productQuestionsTitle")}>
+                  <ProductQuestions value={questions} onChange={setQuestions} disabled={saving} />
                 </Field>
                 <label className="flex cursor-pointer items-center gap-2">
                   <input
@@ -1080,8 +1092,28 @@ export default function ProductDetailClient() {
                 ) : null}
                 <div>
                   <p className="text-xs text-muted-foreground">{tPages("productBrand")}</p>
-                  <p className="text-foreground">{product.brand?.trim() || "—"}</p>
+                  <p className="text-foreground">{product.brand_name?.trim() || "—"}</p>
                 </div>
+                {product.faq && product.faq.length > 0 ? (
+                  <div>
+                    <p className="text-xs text-muted-foreground">
+                      {tPages("productQuestionsTitle")}
+                    </p>
+                    {/* Shown here, not just behind Edit: the description is, and
+                        a merchant checking what this product says should not
+                        have to open the form to read its answers. */}
+                    <dl className="mt-1 space-y-2">
+                      {product.faq.map((row, index) => (
+                        <div key={index}>
+                          <dt className="text-foreground">{row.question}</dt>
+                          <dd className="m-0 whitespace-pre-wrap text-muted-foreground">
+                            {row.answer}
+                          </dd>
+                        </div>
+                      ))}
+                    </dl>
+                  </div>
+                ) : null}
                 <div>
                   <p className="text-xs text-muted-foreground">{tPages("productActiveVisible")}</p>
                   <p className="text-foreground">

@@ -146,10 +146,4 @@ describe("what's new content", () => {
     expect(themeNotes[0]?.href).toBe("/settings?tab=customization");
   });
 
-  it("announces the What's new panel itself", () => {
-    const whatsNew = WHATS_NEW_ENTRIES.find((e) => e.id.endsWith("-whats-new-panel"));
-    expect(whatsNew).toBeDefined();
-    expect(whatsNew?.tag).toBe("new");
-    expect(whatsNew?.href).toBeUndefined();
-  });
 });

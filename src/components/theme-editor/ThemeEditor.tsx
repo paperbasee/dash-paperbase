@@ -169,6 +169,9 @@ export function ThemeEditor({ loaded, origin }: { loaded: ThemeEditorState; orig
   const closing = useRef(false);
 
   const { manifest, page } = state;
+  // Absent means yes: an older API build says nothing, and locking a paying
+  // shop out of its own sections is the worse way to be wrong.
+  const premiumSections = loaded.premium_sections !== false;
   const spec = pageSpec(manifest, page);
   const pageName = spec ? localLabel(spec, locale) : page;
   const allowed = spec?.sections ?? [];
@@ -509,12 +512,19 @@ export function ThemeEditor({ loaded, origin }: { loaded: ThemeEditorState; orig
   // What the two Add sheets offer: the theme's list, with the ones the rules refuse listed
   // but not offered, so a merchant sees what the page could hold and why it cannot now.
   const sectionItems: AddItem[] = allowed.map((type) => {
-    const refused = cannotAdd(manifest, allowed, sections, type);
+    const refused = cannotAdd(manifest, allowed, sections, type, premiumSections);
     const spec = manifest.sections[type];
     return {
       key: type,
       label: spec ? localLabel(spec, locale) : type,
-      note: refused === "onlyOnce" ? t("alreadyOnPage") : undefined,
+      note:
+        refused === "onlyOnce"
+          ? t("alreadyOnPage")
+          : // Listed rather than hidden, and named: a merchant should be able to
+            // see what their shop could have, and why it cannot have it yet.
+            refused === "premium"
+            ? t("premiumSection")
+            : undefined,
       disabled: refused !== null,
     };
   });

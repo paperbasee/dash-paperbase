@@ -49,6 +49,13 @@ export type ThemeAccess = {
   reason: "payment_pending" | "expired" | null;
   /** Holds theming.manage: the owner, Admin, or a store-wide Manager. */
   can_edit: boolean;
+  /**
+   * Whether this shop's storefront may DRAW the sections the theme marks
+   * premium. The same answer the feed and the preview use, so the lock here can
+   * never disagree with what a shopper sees. Optional: an older API build does
+   * not send it, and an absent answer must not lock a paying shop out.
+   */
+  premium_sections?: boolean;
 };
 
 export type ThemeCurrent = {
@@ -135,6 +142,8 @@ export type ThemeSectionSpec = {
   at_most_one?: boolean;
   /** Every list that allows it keeps one shown copy, so it is never hidden or removed. */
   required?: boolean;
+  /** Only a shop on a plan that includes it may serve this one. */
+  premium?: boolean;
   /** Blocks every copy of the section keeps. */
   required_blocks?: string[];
   blocks?: Record<string, ThemeBlockSpec>;
@@ -196,6 +205,12 @@ export type ThemeEditorState = {
   published_at: string | null;
   published_by_name: string;
   manifest_version: string;
+  /**
+   * Whether this shop may serve the sections the theme marks premium. Optional:
+   * an older API build sends no answer, and an absent answer must not lock a
+   * paying shop out — the storefront is what actually withholds a premium band.
+   */
+  premium_sections?: boolean;
   preview_version: string;
   /** The draft, else the saved document, else the theme's defaults. */
   document: ThemeDocument;

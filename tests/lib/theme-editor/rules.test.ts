@@ -18,6 +18,7 @@ import {
 import { manifest, section } from "./fixtures";
 
 const product = manifest.templates.product.sections;
+const home = manifest.templates.home.sections;
 
 describe("cannotAdd", () => {
   test("an allowed section on a page with room", () => {
@@ -104,5 +105,38 @@ describe("cannotAddBlock", () => {
       settings: {},
     }));
     expect(cannotAddBlock(manifest, { ...details, blocks }, "custom_text")).toBe("blocksFull");
+  });
+});
+
+/**
+ * A premium section is LISTED and refused, never hidden: a merchant should be able
+ * to see what their shop could have and why it cannot have it yet. The storefront
+ * is what actually withholds the band (documents.without_premium_sections) — this
+ * only keeps the editor from promising one the shop would not be served.
+ */
+describe("cannotAdd — premium sections", () => {
+  test("a shop on a plan that includes them may add one", () => {
+    expect(cannotAdd(manifest, home, [], "promo", true)).toBeNull();
+  });
+
+  test("a shop without them is refused, and told which reason", () => {
+    expect(cannotAdd(manifest, home, [], "promo", false)).toBe("premium");
+  });
+
+  test("an ordinary section is unaffected either way", () => {
+    expect(cannotAdd(manifest, home, [], "rich_text", false)).toBeNull();
+    expect(cannotAdd(manifest, home, [], "rich_text", true)).toBeNull();
+  });
+
+  test("no answer means yes, because an older API build sends none", () => {
+    // Locking a paying shop out of its own sections is the worse way to be wrong.
+    expect(cannotAdd(manifest, home, [], "promo")).toBeNull();
+  });
+
+  test("premium is decided before the page is full, so the reason is the useful one", () => {
+    const full = Array.from({ length: MAX_SECTIONS_PER_LIST }, (_, i) =>
+      section(`s${i}`, "rich_text"),
+    );
+    expect(cannotAdd(manifest, home, full, "promo", false)).toBe("premium");
   });
 });

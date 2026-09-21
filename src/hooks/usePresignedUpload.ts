@@ -15,6 +15,7 @@ export type UploadEntity =
   | "blog"
   | "banner"
   | "category"
+  | "brand"
   | "support"
   | "popup"
   /** Pictures a merchant places in the theme editor. */
