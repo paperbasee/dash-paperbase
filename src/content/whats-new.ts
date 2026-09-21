@@ -57,6 +57,36 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-09-22-discount-codes",
+    date: "2026-09-22",
+    version: "4.36.0",
+    tag: "new",
+    href: "/coupons",
+    title: {
+      en: "Discount codes",
+      bn: "ডিসকাউন্ট কোড",
+    },
+    body: {
+      en: "Create a code shoppers type at checkout for money off — taka or a percent, with a minimum spend, an end date, and limits on how many times it can be used in total and per customer. The list shows how often each one has been used and what it has given away. A code never takes free delivery away, and switching one off leaves past orders exactly as they were.",
+      bn: "এমন কোড তৈরি করুন যা ক্রেতারা চেকআউটে লিখে ছাড় পাবেন — টাকায় বা শতাংশে, সাথে সর্বনিম্ন কেনাকাটা, শেষ তারিখ, আর মোট ও প্রতি ক্রেতা কতবার ব্যবহার করা যাবে তার সীমা। তালিকায় দেখবেন প্রতিটি কোড কতবার ব্যবহার হয়েছে আর কত ছাড় দেওয়া হয়েছে। কোনো কোড ফ্রি ডেলিভারি কেড়ে নেবে না, আর কোড বন্ধ করলে আগের অর্ডারগুলো যেমন ছিল তেমনই থাকবে।",
+    },
+  },
+  {
+    id: "2026-09-22-accounts-in-every-shop",
+    date: "2026-09-22",
+    version: "4.36.0",
+    tag: "improved",
+    href: "/customers/accounts",
+    title: {
+      en: "Every shop has customer accounts",
+      bn: "প্রতিটি দোকানেই এখন ক্রেতা অ্যাকাউন্ট",
+    },
+    body: {
+      en: "Signing in is now part of every shop instead of something you switch on, so shoppers can always create an account with their email. Customers and Accounts have left Settings → Apps for the same reason. Letting shoppers save products is still yours to switch on, and it now works on its own.",
+      bn: "সাইন ইন এখন প্রতিটি দোকানের অংশ, আলাদা করে চালু করার কিছু নেই — তাই ক্রেতারা সব সময় ইমেইল দিয়ে অ্যাকাউন্ট খুলতে পারবেন। একই কারণে গ্রাহক ও অ্যাকাউন্ট সেটিংস → অ্যাপস থেকে সরানো হয়েছে। ক্রেতারা পণ্য সেভ করতে পারবেন কি না, সেটি আগের মতোই আপনার হাতে, আর সেটি এখন একাই কাজ করে।",
+    },
+  },
+  {
     id: "2026-09-21-shoppers-can-save-products",
     date: "2026-09-21",
     version: "4.35.0",
@@ -450,34 +480,6 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     body: {
       en: "If Steadfast does not answer or has an error while sending, the order goes back to not sent, and sending it again first checks Steadfast so you don't end up with a duplicate parcel. Delivery statuses now update correctly instead of showing Unknown, and orders stuck on Unknown fix themselves over the next few updates, so parcel status numbers in Analytics may change. Dashboard pages also keep working during brief server hiccups, though they may load a little slower.",
       bn: "Steadfast-এ পাঠানোর সময় সাড়া না পেলে বা কোনো সমস্যা হলে অর্ডারটি আবার \"পাঠানো হয়নি\" অবস্থায় ফিরে যায়, আর আবার পাঠালে আগে Steadfast-এ যাচাই করা হয়, যাতে একই পার্সেল দুবার তৈরি না হয়। ডেলিভারি স্ট্যাটাস এখন Unknown না দেখিয়ে সঠিকভাবে আপডেট হয়, আর Unknown-এ আটকে থাকা অর্ডারগুলো পরের কয়েকটি আপডেটে নিজে থেকেই ঠিক হয়ে যাবে, তাই Analytics-এ পার্সেল স্ট্যাটাসের সংখ্যা বদলে যেতে পারে। সার্ভারে সাময়িক সমস্যা হলেও ড্যাশবোর্ডের পেজগুলো এখন চালু থাকে, তবে একটু ধীরে লোড হতে পারে।",
-    },
-  },
-  {
-    id: "2026-09-15-ad-purchases-count-real-orders",
-    date: "2026-09-15",
-    version: "4.6.2",
-    tag: "improved",
-    title: {
-      en: "Ad purchases now count real orders",
-      bn: "বিজ্ঞাপনে এখন আসল অর্ডারই পারচেজ",
-    },
-    body: {
-      en: "Facebook Ads now counts a cash on delivery order as a purchase when you confirm it within 7 days, and a prepaid order when the customer pays, so your purchase numbers may drop to the real ones. TikTok keeps counting every order as \"Place an Order\" and adds a new Purchase count for confirmed and paid orders; switch your TikTok campaign goal to Purchase to use it. Customer phone numbers are now sent with the Bangladesh country code, so Facebook and TikTok can match more buyers to your ads, and ads may take a few days to adjust.",
-      bn: "Facebook বিজ্ঞাপনে ক্যাশ অন ডেলিভারি অর্ডার এখন পারচেজ হিসেবে গণ্য হবে ৭ দিনের মধ্যে আপনি কনফার্ম করলে, আর প্রিপেইড অর্ডার গ্রাহক পেমেন্ট করলে, তাই পারচেজের সংখ্যা কমে আসল সংখ্যায় আসতে পারে। TikTok আগের মতোই প্রতিটি অর্ডারকে \"Place an Order\" হিসেবে গুনবে, আর কনফার্ম ও পেমেন্ট হওয়া অর্ডারের জন্য নতুন একটি Purchase গণনা যোগ করবে; এটি ব্যবহার করতে আপনার TikTok ক্যাম্পেইনের লক্ষ্য Purchase-এ বদলে দিন। গ্রাহকের ফোন নম্বর এখন বাংলাদেশের কান্ট্রি কোডসহ পাঠানো হয়, ফলে Facebook ও TikTok আরও বেশি ক্রেতাকে আপনার বিজ্ঞাপনের সাথে মেলাতে পারে, আর বিজ্ঞাপন মানিয়ে নিতে কয়েক দিন সময় লাগতে পারে।",
-    },
-  },
-  {
-    id: "2026-09-15-sidebar-starts-collapsed",
-    date: "2026-09-15",
-    version: "4.6.1",
-    tag: "improved",
-    title: {
-      en: "More room for your pages",
-      bn: "পেজে এখন আরও বেশি জায়গা",
-    },
-    body: {
-      en: "On computers the sidebar now starts collapsed, showing only icons. Click the button at the top of the sidebar to expand it anytime.",
-      bn: "কম্পিউটারে সাইডবার এখন সংকুচিত অবস্থায় শুরু হয়, শুধু আইকন দেখায়। যেকোনো সময় সাইডবারের একেবারে উপরের বোতামে ক্লিক করে এটি প্রসারিত করুন।",
     },
   },
   {
