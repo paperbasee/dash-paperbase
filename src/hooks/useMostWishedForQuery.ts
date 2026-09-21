@@ -17,10 +17,25 @@ export async function fetchMostWishedFor(): Promise<MostWishedForProduct[]> {
   return data;
 }
 
+/**
+ * Always refetched, like the abandoned-checkout list and for the same reason.
+ *
+ * This list changes when a SHOPPER does something -- saves a product, signs
+ * in -- and that happens on the storefront, where the dashboard has no event
+ * to hear. There is nothing to invalidate on, so the only honest answer is
+ * not to trust the copy we hold. The app-wide two minutes is right for lists
+ * the dashboard itself changes; it is wrong here, where a merchant checks
+ * whether the thing they just tested actually arrived.
+ *
+ * Cached rows still paint immediately, so there is no flicker -- they are
+ * replaced when the answer lands.
+ */
 export function useMostWishedForQuery(options?: { enabled?: boolean }) {
   return useQuery({
     queryKey: mostWishedForQueryKey,
     queryFn: fetchMostWishedFor,
     enabled: options?.enabled ?? true,
+    staleTime: 0,
+    refetchOnMount: "always",
   });
 }
