@@ -26,9 +26,11 @@
  * then, and it is deliberately ONE date so that shipping day is one edit rather than
  * twenty: change every `2026-09-22` above the first released entry to the real day.
  *
- * How to tell them apart: production has had nothing newer than **4.7.1**
- * (`2026-09-18-fraud-check-new-provider`, the last thing actually deployed). Every
- * entry above it is held.
+ * How to tell them apart: production has had nothing newer than **4.7.1**, so any
+ * entry above that version is held. As of 2026-09-22 that is the WHOLE list bar
+ * one — the released entries have aged off the 30-entry cap, and only
+ * `2026-09-15-whats-new-panel` remains, kept because a test pins it. So on
+ * shipping day: restamp every `2026-09-22` in this file.
  *
  * This used to leave the list genuinely out of order, and
  * `tests/whats-new/content.test.ts` "is sorted newest first" FAILED for a real reason:
@@ -61,6 +63,80 @@ export interface WhatsNewEntry {
 export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
+  {
+    id: "2026-09-22-order-numbers-are-numbers",
+    date: "2026-09-22",
+    version: "4.37.0",
+    tag: "improved",
+    href: "/orders",
+    title: {
+      en: "Order numbers are just numbers",
+      bn: "অর্ডার নম্বর এখন শুধুই নম্বর",
+    },
+    body: {
+      en: "Your sixtieth order is now #60 instead of #00000060 — on the order list, the invoice, and in your shop. Nothing changed about which order is which, and a customer reading an older number off a printed invoice still finds their order.",
+      bn: "আপনার ষাটতম অর্ডার এখন #00000060 নয়, #60 — অর্ডার তালিকায়, ইনভয়েসে এবং আপনার দোকানে। কোন অর্ডার কোনটি তা বদলায়নি, আর পুরোনো ইনভয়েসে ছাপা নম্বর দিয়েও ক্রেতা তাঁর অর্ডার খুঁজে পাবেন।",
+    },
+  },
+  {
+    id: "2026-09-22-prices-show-what-you-charge",
+    date: "2026-09-22",
+    version: "4.37.0",
+    tag: "fixed",
+    title: {
+      en: "Your shop shows the exact amount you charge",
+      bn: "আপনার দোকান ঠিক যত টাকা নেওয়া হবে তত-ই দেখাবে",
+    },
+    body: {
+      en: "Your shop was rounding amounts to whole taka on screen while charging the real figure, so an order of ৳1,124.79 was shown to the shopper as ৳1,125 and recorded for you as ৳1,124.79. Prices now show their paisa when they have any, so the shelf, the basket, checkout, the invoice and your dashboard all say one number.",
+      bn: "আপনার দোকান পর্দায় টাকার অঙ্ক পূর্ণসংখ্যায় দেখালেও নেওয়া হতো আসল অঙ্কটাই — তাই ৳১,১২৪.৭৯ টাকার অর্ডার ক্রেতাকে দেখানো হতো ৳১,১২৫, আর আপনার হিসাবে থাকত ৳১,১২৪.৭৯। এখন পয়সা থাকলে পয়সাসহ দেখাবে, ফলে পণ্যের দাম, ব্যাগ, চেকআউট, ইনভয়েস আর ড্যাশবোর্ড — সবখানে একই অঙ্ক।",
+    },
+  },
+  {
+    id: "2026-09-22-shoppers-can-track-an-order",
+    date: "2026-09-22",
+    version: "4.37.0",
+    tag: "new",
+    href: "/settings?tab=apps",
+    title: {
+      en: "Let shoppers track an order without an account",
+      bn: "অ্যাকাউন্ট ছাড়াই ক্রেতারা অর্ডার ট্র্যাক করতে পারবেন",
+    },
+    body: {
+      en: "Switch on Order tracking in Settings → Apps and a shopper can find their order with its number and the phone they ordered with — no account needed, which matters most if your checkout does not ask for an email. That screen now also lists the things that are always on, so you can see everything your shop has.",
+      bn: "সেটিংস → অ্যাপস থেকে অর্ডার ট্র্যাকিং চালু করলে ক্রেতারা অর্ডার নম্বর আর যে ফোন নম্বর দিয়ে অর্ডার করেছেন তা দিয়েই অর্ডার খুঁজে নিতে পারবেন — অ্যাকাউন্ট লাগবে না, যা বিশেষভাবে কাজে লাগে যদি আপনার চেকআউটে ইমেইল না চাওয়া হয়। ওই পাতায় এখন সব সময় চালু থাকা জিনিসগুলোও দেখা যায়, তাই আপনার দোকানে কী কী আছে তার পুরোটাই এক জায়গায়।",
+    },
+  },
+  {
+    id: "2026-09-22-discount-codes-can-be-edited",
+    date: "2026-09-22",
+    version: "4.37.0",
+    tag: "improved",
+    href: "/coupons",
+    title: {
+      en: "Edit a discount code after making it",
+      bn: "তৈরি করার পরেও ডিসকাউন্ট কোড বদলানো যাবে",
+    },
+    body: {
+      en: "Every code now has an Edit beside it, so a minimum spend or an end date can be changed without making a second code. Paperbase also refuses a code that would take the whole of the smallest order it allows — 300 off with a minimum spend of 200 makes that order free and you still pay the delivery — and tells you which figure to raise.",
+      bn: "প্রতিটি কোডের পাশে এখন সম্পাদনা আছে, তাই নতুন কোড না বানিয়েই সর্বনিম্ন কেনাকাটা বা শেষ তারিখ বদলানো যাবে। এছাড়া যে কোড সবচেয়ে ছোট যোগ্য অর্ডারটির পুরো টাকাই কেড়ে নেবে সেটি আর সংরক্ষণ হবে না — ২০০ টাকার সর্বনিম্নে ৩০০ টাকা ছাড় দিলে ওই অর্ডার ফ্রি হয়ে যায় আর ডেলিভারির খরচ আপনারই থাকে — আর কোন অঙ্কটি বাড়াতে হবে তা জানিয়ে দেওয়া হবে।",
+    },
+  },
+  {
+    id: "2026-09-22-lists-show-what-just-happened",
+    date: "2026-09-22",
+    version: "4.37.0",
+    tag: "fixed",
+    href: "/orders/abandoned",
+    title: {
+      en: "Lists your shoppers fill are always up to date",
+      bn: "ক্রেতাদের কাজে ভরে ওঠা তালিকাগুলো সব সময় হালনাগাদ",
+    },
+    body: {
+      en: "Abandoned checkouts, Accounts and Most wished-for were showing what they held a couple of minutes ago, so an abandoned checkout stayed on the list after the shopper had ordered. All three now fetch fresh every time you open them. Most wished-for also says plainly that it counts shoppers who were signed in when they saved.",
+      bn: "অসমাপ্ত চেকআউট, অ্যাকাউন্ট আর সবচেয়ে পছন্দের — এই তালিকাগুলো কয়েক মিনিট আগের তথ্য দেখাত, তাই ক্রেতা অর্ডার করে ফেলার পরেও অসমাপ্ত চেকআউট তালিকায় থেকে যেত। এখন তিনটিই প্রতিবার খোলার সময় নতুন করে তথ্য আনে। সেই সাথে 'সবচেয়ে পছন্দের' পাতায় স্পষ্ট করে লেখা আছে যে এটি কেবল সাইন ইন করা অবস্থায় সেভ করা ক্রেতাদের গোনে।",
+    },
+  },
   {
     id: "2026-09-22-discount-codes",
     date: "2026-09-22",
@@ -412,79 +488,6 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     body: {
       en: "Your shop pages load faster and no longer jump about while loading. The home page now shows your first 6 categories with 8 products each, and shoppers reach the rest from the menu. Price and stock changes also appear sooner.",
       bn: "আপনার দোকানের পেজগুলো এখন দ্রুত লোড হয় আর লোড হওয়ার সময় আগের মতো লাফায় না। হোম পেজে এখন প্রথম ৬টি ক্যাটাগরি দেখাবে, প্রতিটিতে ৮টি পণ্য, বাকিগুলো ক্রেতারা মেনু থেকে দেখতে পাবেন। দাম বা স্টক বদলালে সেটাও এখন আগের চেয়ে তাড়াতাড়ি দেখা যায়।",
-    },
-  },
-  {
-    id: "2026-09-22-ivory-colours-and-language-in-store-info",
-    date: "2026-09-22",
-    version: "4.8.0",
-    tag: "improved",
-    title: {
-      en: "Colour choices removed, language moved to Store Info",
-      bn: "রঙ বাছাইয়ের অপশন সরানো হলো, ভাষা এখন স্টোর তথ্যে",
-    },
-    body: {
-      en: "Every store now uses the Ivory colours, so the colour choice is gone from Settings → Customization. Store language moved to Settings → Store Info and is saved with the Save button there. Your storefront pages also load a little lighter.",
-      bn: "সব স্টোর এখন Ivory রঙ ব্যবহার করে, তাই সেটিংস → কাস্টমাইজেশন থেকে রঙ বাছাইয়ের অপশন সরানো হয়েছে। স্টোরের ভাষা এখন সেটিংস → স্টোর তথ্য-এ, আর সেখানে সংরক্ষণ বাটনে চাপলে সেভ হয়। আপনার স্টোরফ্রন্টের পেজগুলোও এখন একটু হালকাভাবে লোড হয়।",
-    },
-    href: "/settings?tab=store",
-  },
-  {
-    id: "2026-09-18-fraud-check-new-provider",
-    date: "2026-09-18",
-    version: "4.7.1",
-    tag: "improved",
-    title: {
-      en: "Fraud Check runs on a new data source",
-      bn: "ফ্রড চেক এখন নতুন ডেটা সোর্সে চলছে",
-    },
-    body: {
-      en: "The courier delivery history behind Fraud Check now comes from a new provider. The success ratio and the courier breakdown work exactly as before, and there is nothing for you to change.",
-      bn: "ফ্রড চেকের পেছনের কুরিয়ার ডেলিভারি হিস্ট্রি এখন নতুন একটি সোর্স থেকে আসছে। সাকসেস রেশিও আর কুরিয়ারভিত্তিক হিসাব আগের মতোই কাজ করবে, আপনাকে কিছুই বদলাতে হবে না।",
-    },
-    href: "/orders",
-  },
-  {
-    id: "2026-09-16-promotions-and-shipping-in-settings",
-    date: "2026-09-16",
-    version: "4.7.0",
-    tag: "improved",
-    title: {
-      en: "Banners, Pop-up, CTA and Shipping moved to Settings",
-      bn: "ব্যানার, পপ-আপ, সিটিএ আর শিপিং এখন সেটিংসে",
-    },
-    body: {
-      en: "Banners, Pop-up, CTA and Shipping are no longer in the sidebar. Find Banners, Pop-up and CTA under Settings → Promotions, and your delivery zones, methods and rates under Settings → Shipping. Old links still take you there.",
-      bn: "ব্যানার, পপ-আপ, সিটিএ আর শিপিং এখন আর সাইডবারে নেই। ব্যানার, পপ-আপ আর সিটিএ পাবেন সেটিংস → প্রোমোশন-এ, আর ডেলিভারির জোন, পদ্ধতি ও রেট পাবেন সেটিংস → শিপিং-এ। পুরোনো লিংকগুলোও আপনাকে সেখানেই নিয়ে যাবে।",
-    },
-    href: "/settings?tab=promotions",
-  },
-  {
-    id: "2026-09-16-uploads-better-protected",
-    date: "2026-09-16",
-    version: "4.7.0",
-    tag: "fixed",
-    title: {
-      en: "Uploaded images are better protected",
-      bn: "আপলোড করা ছবি এখন আরও সুরক্ষিত",
-    },
-    body: {
-      en: "Images and files you upload can now only be used and removed by your own store.",
-      bn: "আপনার আপলোড করা ছবি ও ফাইল এখন শুধু আপনার নিজের স্টোরই ব্যবহার করতে ও মুছতে পারবে।",
-    },
-  },
-  {
-    id: "2026-09-15-safer-courier-sending-and-statuses",
-    date: "2026-09-15",
-    version: "4.6.3",
-    tag: "fixed",
-    title: {
-      en: "Safer courier sending and correct delivery statuses",
-      bn: "নিরাপদ কুরিয়ার পাঠানো আর সঠিক ডেলিভারি স্ট্যাটাস",
-    },
-    body: {
-      en: "If Steadfast does not answer or has an error while sending, the order goes back to not sent, and sending it again first checks Steadfast so you don't end up with a duplicate parcel. Delivery statuses now update correctly instead of showing Unknown, and orders stuck on Unknown fix themselves over the next few updates, so parcel status numbers in Analytics may change. Dashboard pages also keep working during brief server hiccups, though they may load a little slower.",
-      bn: "Steadfast-এ পাঠানোর সময় সাড়া না পেলে বা কোনো সমস্যা হলে অর্ডারটি আবার \"পাঠানো হয়নি\" অবস্থায় ফিরে যায়, আর আবার পাঠালে আগে Steadfast-এ যাচাই করা হয়, যাতে একই পার্সেল দুবার তৈরি না হয়। ডেলিভারি স্ট্যাটাস এখন Unknown না দেখিয়ে সঠিকভাবে আপডেট হয়, আর Unknown-এ আটকে থাকা অর্ডারগুলো পরের কয়েকটি আপডেটে নিজে থেকেই ঠিক হয়ে যাবে, তাই Analytics-এ পার্সেল স্ট্যাটাসের সংখ্যা বদলে যেতে পারে। সার্ভারে সাময়িক সমস্যা হলেও ড্যাশবোর্ডের পেজগুলো এখন চালু থাকে, তবে একটু ধীরে লোড হতে পারে।",
     },
   },
   {
