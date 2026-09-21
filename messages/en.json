@@ -103,7 +103,8 @@
     "wishlist": "Most wished-for",
     "groupSales": "Sales",
     "groupShoppers": "Shoppers",
-    "coupons": "Discount codes"
+    "coupons": "Discount codes",
+    "order_lookup": "Order tracking"
   },
   "analyticsPage": {
     "metrics": {
@@ -1821,6 +1822,10 @@
         "abandoned_checkouts": {
           "label": "Abandoned checkouts",
           "description": "See shoppers who filled in checkout and did not finish, with what was in their bag. Kept for 30 days, then deleted."
+        },
+        "order_lookup": {
+          "label": "Order tracking",
+          "description": "Let a shopper find their order with its number and the phone they ordered with — no account needed. Useful when your checkout does not ask for an email."
         }
       }
     },

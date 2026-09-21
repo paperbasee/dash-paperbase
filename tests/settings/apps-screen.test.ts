@@ -15,10 +15,16 @@ import {
  * asked a merchant to switch on the page they were already standing in.
  */
 describe("Settings → Apps", () => {
-  it("lists only apps that have a page of their own", () => {
-    for (const id of [...APPS_SCREEN_ALWAYS_ON_IDS, ...APPS_SCREEN_SWITCHABLE_IDS]) {
-      expect(APP_CONFIG[id].href).not.toBeNull();
-    }
+  it("lists a shop-facing feature that has no dashboard page", () => {
+    /*
+     * The screen used to list only apps with an `href`, which was a proxy for
+     * "is not a settings screen" and broke here: order tracking is a page in
+     * the SHOP with no dashboard page and nowhere else to switch it, so the
+     * href rule silently hid it and no merchant could ever turn the feature
+     * on. It was built and unreachable.
+     */
+    expect(APP_CONFIG.order_lookup.href).toBeNull();
+    expect(APPS_SCREEN_SWITCHABLE_IDS).toContain("order_lookup");
   });
 
   it("does not list the three settings screens", () => {
@@ -52,6 +58,7 @@ describe("Settings → Apps", () => {
       "blog",
       "wishlist",
       "coupons",
+      "order_lookup",
     ]);
   });
 });

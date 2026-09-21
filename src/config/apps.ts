@@ -16,6 +16,7 @@ import {
   TicketPercent,
   Trash,
   Heart as HeartIcon,
+  Search,
   Phone as PhoneIcon,
   UserRound,
 } from "lucide-react";
@@ -205,6 +206,18 @@ export const APP_CONFIG: Record<string, AppConfig> = {
     countKey: null,
     parentId: null,
   },
+  order_lookup: {
+    id: "order_lookup",
+    label: "Order tracking",
+    icon: Search,
+    description: "Let a shopper find their order with its number and phone, without an account",
+    essential: false,
+    // No dashboard page of its own: it is a page in the SHOP. The merchant's
+    // only decision about it is whether the shop offers it.
+    href: null,
+    countKey: null,
+    parentId: null,
+  },
   blog: {
     id: "blog",
     label: "Blog",
@@ -277,7 +290,7 @@ export const MORE_APP_IDS = ["support_tickets", "trash"] as const;
  * treats a missing flag as off, and the dashboard has to agree: a sidebar entry
  * for something the shop does not serve is a link to a 404.
  */
-export const OPT_IN_APP_IDS = ["wishlist", "coupons"] as const;
+export const OPT_IN_APP_IDS = ["wishlist", "coupons", "order_lookup"] as const;
 
 /**
  * Always on, and not listed in Settings → Apps.
@@ -348,8 +361,23 @@ export const NAV_GROUP_LABEL_KEYS: Record<string, string> = {
   customers: "groupShoppers",
 };
 
-/** Does this app have a place of its own, or is it a screen inside Settings? */
-const hasOwnPage = (id: string): boolean => Boolean(APP_CONFIG[id]?.href);
+/**
+ * Apps that are really SETTINGS SCREENS, reachable elsewhere in Settings.
+ *
+ * These are the only ones kept off Settings → Apps, because listing one asks a
+ * merchant to switch on the page they are already standing in: Shipping is
+ * Settings → Shipping, and Pop-up and CTA are the two Promotions tabs.
+ *
+ * Written out rather than derived from a missing `href`, which is what this
+ * used to do. That was a proxy for the real reason and it broke on
+ * `order_lookup`: a shopper-facing page in the SHOP, with no dashboard page of
+ * its own and nowhere else to switch it, which the href rule silently hid --
+ * leaving a built feature no merchant could ever turn on.
+ */
+const SETTINGS_SCREEN_APP_IDS = ["shipping", "popup", "cta"] as const;
+
+const isSettingsScreen = (id: string): boolean =>
+  (SETTINGS_SCREEN_APP_IDS as readonly string[]).includes(id);
 
 /**
  * What Settings → Apps lists, in its two groups.
@@ -372,9 +400,9 @@ const hasOwnPage = (id: string): boolean => Boolean(APP_CONFIG[id]?.href);
 export const APPS_SCREEN_ALWAYS_ON_IDS: readonly string[] = [
   ...ESSENTIAL_APP_IDS,
   ...ALWAYS_ON_EXTRA_APP_IDS,
-].filter(hasOwnPage);
+].filter((id) => !isSettingsScreen(id));
 
 export const APPS_SCREEN_SWITCHABLE_IDS: readonly string[] = [
   ...OPTIONAL_APP_IDS,
   ...OPT_IN_APP_IDS,
-].filter(hasOwnPage);
+].filter((id) => !isSettingsScreen(id));
