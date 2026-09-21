@@ -1209,7 +1209,9 @@
     "couponSwitchOff": "বন্ধ করুন",
     "couponSwitchOn": "চালু করুন",
     "couponDelete": "মুছুন",
-    "couponDeleteConfirm": "{code} মুছে ফেলবেন? যেসব অর্ডারে এটি ব্যবহার হয়েছে সেগুলোর ছাড় বহাল থাকবে।"
+    "couponDeleteConfirm": "{code} মুছে ফেলবেন? যেসব অর্ডারে এটি ব্যবহার হয়েছে সেগুলোর ছাড় বহাল থাকবে।",
+    "couponEdit": "সম্পাদনা",
+    "couponSaveChanges": "পরিবর্তন সংরক্ষণ করুন"
   },
   "sidebar": {
     "expandSidebar": "সাইডবার প্রসারিত করুন",

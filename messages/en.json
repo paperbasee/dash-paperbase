@@ -1209,7 +1209,9 @@
     "couponSwitchOff": "Switch off",
     "couponSwitchOn": "Switch on",
     "couponDelete": "Delete",
-    "couponDeleteConfirm": "Delete {code}? Orders that already used it keep their discount."
+    "couponDeleteConfirm": "Delete {code}? Orders that already used it keep their discount.",
+    "couponEdit": "Edit",
+    "couponSaveChanges": "Save changes"
   },
   "sidebar": {
     "expandSidebar": "Expand sidebar",

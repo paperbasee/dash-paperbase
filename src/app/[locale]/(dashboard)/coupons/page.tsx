@@ -28,7 +28,7 @@ import {
   useDeleteCoupon,
   useSaveCoupon,
 } from "@/hooks/useCouponsQuery";
-import type { CouponWrite } from "@/types";
+import type { Coupon, CouponWrite } from "@/types";
 
 const BLANK: CouponWrite = { code: "", kind: "fixed", value: "" };
 
@@ -45,6 +45,10 @@ export default function CouponsPage() {
 
   const [draft, setDraft] = useState<CouponWrite>(BLANK);
   const [open, setOpen] = useState(false);
+  // The code being edited, or null while writing a new one. One form for both:
+  // a campaign is six fields, and a separate edit screen would be the same six
+  // fields with a different heading.
+  const [editing, setEditing] = useState<string | null>(null);
 
   const coupons = useMemo(() => data ?? [], [data]);
 
@@ -53,14 +57,36 @@ export default function CouponsPage() {
     notify.error(error, { title: t("couponsFailedToLoad") });
   }, [isError, error, t]);
 
+  function startEdit(coupon: Coupon) {
+    setEditing(coupon.public_id);
+    setOpen(true);
+    setDraft({
+      code: coupon.code,
+      kind: coupon.kind,
+      value: coupon.value,
+      min_spend: coupon.min_spend,
+      usage_limit: coupon.usage_limit,
+      per_customer_limit: coupon.per_customer_limit,
+      expires_at: coupon.expires_at,
+    });
+  }
+
+  function cancel() {
+    setEditing(null);
+    setDraft(BLANK);
+    setOpen(false);
+  }
+
   function submit(e: React.FormEvent) {
     e.preventDefault();
     save.mutate(
-      { body: { ...draft, code: (draft.code || "").trim() } },
+      {
+        publicId: editing ?? undefined,
+        body: { ...draft, code: (draft.code || "").trim() },
+      },
       {
         onSuccess: () => {
-          setDraft(BLANK);
-          setOpen(false);
+          cancel();
           notify.success(t("couponSaved"));
         },
         onError: (err) => notify.error(err, { title: t("couponSaveFailed") }),
@@ -75,7 +101,11 @@ export default function CouponsPage() {
           {t("couponsTitle")}
         </h1>
         {canManage ? (
-          <Button type="button" size="sm" onClick={() => setOpen((v) => !v)}>
+          <Button
+            type="button"
+            size="sm"
+            onClick={() => (open ? cancel() : setOpen(true))}
+          >
             {open ? t("couponCancel") : t("couponNew")}
           </Button>
         ) : null}
@@ -172,10 +202,23 @@ export default function CouponsPage() {
               }
             />
           </label>
-          <div className="flex items-end">
+          <div className="flex items-end gap-2">
             <Button type="submit" size="sm" disabled={save.isPending}>
-              {save.isPending ? t("couponSaving") : t("couponCreate")}
+              {save.isPending
+                ? t("couponSaving")
+                : editing
+                  ? t("couponSaveChanges")
+                  : t("couponCreate")}
             </Button>
+            {editing ? (
+              <button
+                type="button"
+                onClick={cancel}
+                className="h-9 rounded-ui border border-border px-3 text-sm hover:bg-muted"
+              >
+                {t("couponCancel")}
+              </button>
+            ) : null}
           </div>
         </form>
       ) : null}
@@ -233,6 +276,13 @@ export default function CouponsPage() {
                   <td className="px-4 py-3 text-right">
                     {canManage ? (
                       <div className="flex justify-end gap-2">
+                        <button
+                          type="button"
+                          className="text-xs text-muted-foreground underline underline-offset-4 hover:text-foreground"
+                          onClick={() => startEdit(c)}
+                        >
+                          {t("couponEdit")}
+                        </button>
                         <button
                           type="button"
                           className="text-xs text-muted-foreground underline underline-offset-4 hover:text-foreground"
