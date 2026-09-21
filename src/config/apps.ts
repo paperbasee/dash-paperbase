@@ -239,7 +239,6 @@ export const CATALOG_INCLUDED_APP_IDS = [
 export const OPTIONAL_APP_IDS = [
   "analytics",
   "support_tickets",
-  "customers",
   "blog",
 ] as const;
 
@@ -278,7 +277,7 @@ export const MORE_APP_IDS = ["support_tickets", "trash"] as const;
  * treats a missing flag as off, and the dashboard has to agree: a sidebar entry
  * for something the shop does not serve is a link to a 404.
  */
-export const OPT_IN_APP_IDS = ["accounts", "wishlist", "coupons"] as const;
+export const OPT_IN_APP_IDS = ["wishlist", "coupons"] as const;
 
 /**
  * Always on, and not listed in Settings → Apps.
@@ -296,7 +295,23 @@ export const OPT_IN_APP_IDS = ["accounts", "wishlist", "coupons"] as const;
  * thing could be turned off -- and a merchant who used it once could not find
  * their pop-up again. Writing it inactive is how you turn it off.
  */
-export const ALWAYS_ON_EXTRA_APP_IDS = ["abandoned_checkouts", "popup", "cta"] as const;
+export const ALWAYS_ON_EXTRA_APP_IDS = [
+  "abandoned_checkouts",
+  "popup",
+  "cta",
+  // Owner's decision 2026-09-22: Shoppers cannot be switched off. Every shop
+  // has customers the moment it takes an order -- the list is built from the
+  // orders themselves -- so a switch that hid them only ever hid a merchant's
+  // own record of who bought from them. No storefront page reads this flag,
+  // so nothing a shopper sees changes.
+  "customers",
+  // The same decision, and this half DID change what shoppers see: signing in
+  // is now part of every shop rather than something a merchant switches on.
+  // The old switch had one unavoidable consequence -- a wishlist needs an
+  // account to belong to, so a shop with accounts off could not have a
+  // wishlist either, however much the merchant wanted one.
+  "accounts",
+] as const;
 
 /**
  * Sidebar groups: a row that opens a tree, exactly as `Catalog` does.

@@ -1154,7 +1154,6 @@
     "customerAccountDetailsUnverified": "যাচাই করা হয়নি",
     "toastTitleCustomerAccountUnavailable": "এই অ্যাকাউন্ট লোড করা যায়নি",
     "toastDescCustomerAccountUnavailable": "এই অ্যাকাউন্ট লোড করা যায়নি। এটি হয়তো সরিয়ে ফেলা হয়েছে।",
-    "customerAccountsSwitchedOff": "এই দোকানের জন্য অ্যাকাউন্ট বন্ধ আছে, তাই এখনও কেউ সাইন ইন করতে পারবেন না। ক্রেতাদের অ্যাকাউন্ট খুলতে দিতে এটি চালু করুন।",
     "productsTabsAria": "পণ্য ও ক্রেতারা যা চান",
     "productsTabProducts": "পণ্য",
     "productsTabMostWishedFor": "সবচেয়ে পছন্দের",

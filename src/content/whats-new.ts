@@ -141,8 +141,8 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
       bn: "ক্রেতারা অ্যাকাউন্ট খুলতে পারবেন",
     },
     body: {
-      en: "A shopper can sign in to your shop with their email — no password, just a link we send them. Your Customers page now has an Accounts tab showing everyone who has. It stays off until you switch it on.",
-      bn: "ক্রেতারা তাদের ইমেইল দিয়ে আপনার দোকানে সাইন ইন করতে পারবেন — কোনো পাসওয়ার্ড লাগবে না, আমরা একটি লিংক পাঠিয়ে দেব। গ্রাহক পাতায় এখন একটি অ্যাকাউন্ট ট্যাব আছে, যেখানে যারা সাইন ইন করেছেন তাদের দেখা যায়। আপনি চালু না করা পর্যন্ত এটি বন্ধ থাকবে।",
+      en: "A shopper can sign in to your shop with their email — no password, just a link we send them. Your Customers page now has an Accounts tab showing everyone who has. Every shop has this; there is nothing to switch on.",
+      bn: "ক্রেতারা তাদের ইমেইল দিয়ে আপনার দোকানে সাইন ইন করতে পারবেন — কোনো পাসওয়ার্ড লাগবে না, আমরা একটি লিংক পাঠিয়ে দেব। গ্রাহক পাতায় এখন একটি অ্যাকাউন্ট ট্যাব আছে, যেখানে যারা সাইন ইন করেছেন তাদের দেখা যায়। প্রতিটি দোকানেই এটি আছে, আলাদা করে চালু করার কিছু নেই।",
     },
   },
   {

@@ -23,7 +23,7 @@ describe("Settings → Apps", () => {
 
   it("does not list the three settings screens", () => {
     const listed = [...APPS_SCREEN_ALWAYS_ON_IDS, ...APPS_SCREEN_SWITCHABLE_IDS];
-    for (const id of ["shipping", "popup", "cta"]) {
+    for (const id of ["shipping", "popup", "cta", "customers", "accounts"]) {
       expect(listed).not.toContain(id);
     }
   });
@@ -33,9 +33,7 @@ describe("Settings → Apps", () => {
     expect(APPS_SCREEN_SWITCHABLE_IDS).toEqual([
       "analytics",
       "support_tickets",
-      "customers",
       "blog",
-      "accounts",
       "wishlist",
       "coupons",
     ]);
