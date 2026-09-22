@@ -64,6 +64,21 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-09-22-home-page-product-rows",
+    date: "2026-09-22",
+    version: "4.55.0",
+    tag: "new",
+    href: "/settings?tab=customization",
+    title: {
+      en: "Three new rows for your home page",
+      bn: "হোম পেজের জন্য তিনটি নতুন সারি",
+    },
+    body: {
+      en: "Under your categories you can now show a row of products you choose yourself, a row of your best sellers, and a row of whatever you added most recently. You fill the first one by ticking a list — up to eight at a time — and the other two fill themselves from your shop, so there is nothing to keep up to date. Each row scrolls sideways, and “Browse everything” opens a page of its own with the rest.",
+      bn: "ক্যাটাগরির নিচে এখন তিনটি সারি দেখানো যাবে — আপনার বেছে নেওয়া পণ্য, সবচেয়ে বেশি বিক্রি হওয়া পণ্য, আর সবশেষে যেগুলো যোগ করেছেন। প্রথম সারিটি একসাথে আটটি পণ্য টিক করে ভরা যায়, আর অন্য দুটি নিজেই ভরে যায়। প্রতিটি সারি পাশে সরানো যায়, আর “সব দেখুন” চাপলে বাকিগুলো নিয়ে আলাদা পাতা খোলে।",
+    },
+  },
+  {
     id: "2026-09-22-hero-pictures-in-customization",
     date: "2026-09-22",
     version: "4.53.0",
@@ -476,21 +491,6 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     },
   },
   {
-    id: "2026-09-22-shoppers-can-have-an-account",
-    date: "2026-09-22",
-    tag: "new",
-    version: "4.34.0",
-    href: "/customers",
-    title: {
-      en: "Shoppers can have an account",
-      bn: "ক্রেতারা অ্যাকাউন্ট খুলতে পারবেন",
-    },
-    body: {
-      en: "A shopper can sign in to your shop with their email — no password, just a link we send them. Your Customers page now has an Accounts tab showing everyone who has. Every shop has this; there is nothing to switch on.",
-      bn: "ক্রেতারা তাদের ইমেইল দিয়ে আপনার দোকানে সাইন ইন করতে পারবেন — কোনো পাসওয়ার্ড লাগবে না, আমরা একটি লিংক পাঠিয়ে দেব। গ্রাহক পাতায় এখন একটি অ্যাকাউন্ট ট্যাব আছে, যেখানে যারা সাইন ইন করেছেন তাদের দেখা যায়। প্রতিটি দোকানেই এটি আছে, আলাদা করে চালু করার কিছু নেই।",
-    },
-  },
-  {
     id: "2026-09-22-theme-editor-and-live-preview",
     date: "2026-09-22",
     version: "4.12.0",
@@ -500,8 +500,8 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
       bn: "থিম বেছে নিন, নিজের মতো স্টোর সাজান",
     },
     body: {
-      en: "In Settings → Customization you can now pick a theme and open a full screen editor, where you change each page's text, links and parts while your store updates beside you. What you change stays a draft your shoppers can't see until you press Save to store, and your last twenty saves are kept so you can go back to an older look. Themes are part of the Premium plan.",
-      bn: "সেটিংস → কাস্টমাইজেশন থেকে এখন একটি থিম বেছে নিয়ে পুরো স্ক্রিনের এডিটর খুলতে পারবেন, যেখানে প্রতিটি পেজের লেখা, লিংক আর অংশগুলো বদলাবেন আর পাশেই আপনার স্টোর বদলাতে দেখবেন। যা বদলান তা ড্রাফট হয়ে থাকে, ক্রেতারা দেখেন না; স্টোরে সংরক্ষণ বাটনে চাপলেই তা স্টোরে যায়, আর শেষ ২০টি সংরক্ষণ রাখা থাকে যাতে আগের চেহারায় ফিরতে পারেন। থিম প্রিমিয়াম প্ল্যানের অংশ।",
+      en: "In Settings → Customization you can now pick a theme and open a full screen editor, where you change each page's text, links and parts while your store updates beside you. What you change stays a draft your shoppers can't see until you press Save to store. Themes are part of the Premium plan.",
+      bn: "সেটিংস → কাস্টমাইজেশন থেকে এখন একটি থিম বেছে নিয়ে পুরো স্ক্রিনের এডিটর খুলতে পারবেন, যেখানে প্রতিটি পেজের লেখা, লিংক আর অংশগুলো বদলাবেন আর পাশেই আপনার স্টোর বদলাতে দেখবেন। যা বদলান তা ড্রাফট হয়ে থাকে, ক্রেতারা দেখেন না; স্টোরে সংরক্ষণ বাটনে চাপলেই তা স্টোরে যায়। থিম প্রিমিয়াম প্ল্যানের অংশ।",
     },
     href: "/settings?tab=customization",
   },

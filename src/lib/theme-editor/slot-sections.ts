@@ -156,9 +156,10 @@ export function slotValueFor(document: ThemeDocument, wiring: WiredSlot): string
 /**
  * Where a place's section goes when the page does not have one yet.
  *
- * **After the last section belonging to a place ABOVE it on the canvas.** The
- * canvas order is the page order -- that is the whole idea of the slot design --
- * so the category band goes under the hero, not below everything. It landed at
+ * **After the last section belonging to a place ABOVE it on the canvas** --
+ * including the places a merchant cannot edit, which still sit where they sit.
+ * The canvas order is the page order -- that is the whole idea of the slot
+ * design -- so the category band goes under the hero, not below everything. It landed at
  * the end until 2026-09-22, which was the right default while a merchant could
  * drag it afterwards and is simply wrong now that nothing drags.
  *
@@ -176,6 +177,10 @@ export function placeFor(
     if (slot.key === slotKey) break;
     const earlier = wiringFor(page, slot.key);
     if (earlier) for (const type of sectionTypesOf(earlier)) above.add(type);
+    // A place a merchant cannot edit still takes up its spot: the per-category
+    // rows sit between the picked band and the two that fill themselves, and a
+    // new band that ignored them landed above rows the canvas draws above it.
+    for (const type of slot.holds ?? []) above.add(type);
   }
 
   const sections = pageSections(document, wiring.page);

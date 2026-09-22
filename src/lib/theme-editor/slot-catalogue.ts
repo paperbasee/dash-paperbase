@@ -77,6 +77,18 @@ export type Slot = {
   /** `themeEditor.slots.*` key for that reason. */
   lockedBecause?: string;
   /**
+   * Section types this place holds that a merchant cannot choose.
+   *
+   * A locked place still OCCUPIES its spot on the page: the per-category rows
+   * sit between the picked band and the two that fill themselves. Without this
+   * the order was worked out from the places a merchant can edit alone, so a
+   * new band landed above rows the canvas draws above it -- the editor's
+   * drawing and the shop disagreeing, which is the one thing this canvas is
+   * for. A place a merchant CAN edit names its sections through its wiring
+   * instead, so this is only ever for the locked ones.
+   */
+  holds?: readonly string[];
+  /**
    * Places that sit BESIDE each other in the real page share a row name.
    *
    * Every other page in this editor is a stack of full-width bands, and drawing
@@ -202,7 +214,13 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
         { value: "off", label: "off", shape: "blank" },
       ],
     },
-    { key: "bands", label: "bands", locked: true, lockedBecause: "bandsWhy" },
+    {
+      key: "bands",
+      label: "bands",
+      locked: true,
+      lockedBecause: "bandsWhy",
+      holds: ["category_products"],
+    },
     {
       key: "promo",
       label: "promo",

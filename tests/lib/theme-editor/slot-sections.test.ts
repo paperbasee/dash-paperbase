@@ -10,6 +10,7 @@ import { describe, expect, test } from "vitest";
 
 import {
   ownerOf,
+  placeFor,
   sectionFor,
   sectionOfType,
   sectionTypesOf,
@@ -150,6 +151,32 @@ describe("the three product bands", () => {
       expect(sectionTypesOf(wiring)).toEqual([type]);
       expect(wiring.off).toBe("off");
     }
+  });
+
+  test("a band lands under the rows the canvas draws above it", () => {
+    /*
+      The owner, twice: "the featured this week again moved to the bottom."
+
+      The canvas puts the per-category rows between the picked band and the two
+      that fill themselves, and that place is LOCKED -- a merchant cannot change
+      it. Reading only the places they can change put a new band above rows the
+      drawing shows it under, and a shop that draws its page in a different
+      order from the drawing the merchant just edited is the one thing this
+      canvas exists to prevent.
+    */
+    const doc = document();
+    doc.templates.home.sections = [
+      section("banner-slider", "banner_slider"),
+      section("category-tiles", "category_tiles"),
+      section("featured-products", "featured_products"),
+      section("category-products", "category_products"),
+    ];
+
+    expect(placeFor(doc, "home", "arrivals", wiringFor("home", "arrivals")!)).toBe(4);
+    expect(placeFor(doc, "home", "bestsellers", wiringFor("home", "bestsellers")!)).toBe(4);
+    // And the picked band still goes straight under the departments.
+    doc.templates.home.sections.splice(2, 1);
+    expect(placeFor(doc, "home", "featured", wiringFor("home", "featured")!)).toBe(2);
   });
 
   test("every band is its own section, so two of them never fight", () => {
