@@ -64,6 +64,21 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-09-22-promises-on-your-home-page",
+    date: "2026-09-22",
+    version: "4.57.0",
+    tag: "new",
+    href: "/settings?tab=customization",
+    title: {
+      en: "Tell shoppers what you promise",
+      bn: "ক্রেতাকে জানান আপনি কী কথা দিচ্ছেন",
+    },
+    body: {
+      en: "Under your categories you can now show up to four promises — cash on delivery, easy returns, help every day — ticked from a list of sixteen. They are written in each shopper's own language, English or Bangla, so you never write them twice. The same four appear on every product page, where the old fixed wording used to sit.",
+      bn: "ক্যাটাগরির নিচে এখন চারটি পর্যন্ত প্রতিশ্রুতি দেখানো যাবে — ক্যাশ অন ডেলিভারি, সহজ রিটার্ন, প্রতিদিন সহায়তা — ষোলোটির তালিকা থেকে টিক করে। প্রতিটি ক্রেতা নিজের ভাষায় সেগুলো পড়বেন, ইংরেজি হোক বা বাংলা, তাই দুবার লিখতে হবে না। একই চারটি প্রতিটি প্রোডাক্ট পাতায়ও দেখা যাবে, যেখানে আগে বাঁধা লেখা ছিল।",
+    },
+  },
+  {
     id: "2026-09-22-home-page-product-rows",
     date: "2026-09-22",
     version: "4.55.0",
@@ -429,21 +444,6 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     body: {
       en: "A shopper can tap the heart on any product and keep a list of what they want in your shop. Catalog → Most wished-for shows you what they are saving, most-saved first, so you know what to restock or put on offer. It stays off until you switch it on.",
       bn: "ক্রেতারা যেকোনো পণ্যের হার্ট চিহ্নে চাপ দিয়ে আপনার দোকানে পছন্দের পণ্যের তালিকা রাখতে পারবেন। ক্যাটালগ → সবচেয়ে পছন্দের পাতায় দেখতে পাবেন তারা কী সেভ করছেন, সবচেয়ে বেশি সেভ হওয়া পণ্য আগে — কোনটি আবার আনবেন বা অফারে দেবেন তা বুঝতে সুবিধা হবে। আপনি চালু না করা পর্যন্ত এটি বন্ধ থাকবে।",
-    },
-  },
-  {
-    id: "2026-09-22-see-who-nearly-bought",
-    date: "2026-09-22",
-    version: "4.35.0",
-    tag: "new",
-    href: "/orders/abandoned",
-    title: {
-      en: "See who nearly bought",
-      bn: "যাঁরা প্রায় কিনেই ফেলেছিলেন তাঁদের দেখুন",
-    },
-    body: {
-      en: "When a shopper types their phone number into your checkout and then leaves without ordering, you now see them under Sales → Abandoned checkouts, along with what was in their bag. You can call them back. Each one is kept for 30 days and then deleted.",
-      bn: "কোনো ক্রেতা আপনার চেকআউটে ফোন নম্বর লিখে অর্ডার না করেই চলে গেলে এখন তাঁকে বিক্রয় → অসমাপ্ত চেকআউট-এ দেখতে পাবেন, সাথে তাঁর ব্যাগে কী ছিল তাও। আপনি ফোন করে যোগাযোগ করতে পারবেন। প্রতিটি তথ্য ৩০ দিন রাখা হয়, তারপর মুছে যায়।",
     },
   },
   {

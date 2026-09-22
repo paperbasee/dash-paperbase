@@ -89,3 +89,76 @@ describe("theme editor previews", () => {
     }
   });
 });
+
+describe("a wired place draws the merchant's own", () => {
+  /**
+   * The canvas is how a merchant knows their click worked. Ticking four
+   * promises and still seeing "FAST DELIVERY · EASY RETURNS · SECURE PAYMENT"
+   * says the editor did nothing -- which is what the owner reported the day
+   * the place was wired.
+   */
+  const promises = {
+    id: "promises",
+    type: "promises",
+    hidden: false,
+    settings: { layout: "marks" },
+    blocks: [
+      { id: "promise-1", type: "promise", settings: { promise: "cash_on_delivery" } },
+      { id: "promise-2", type: "promise", settings: { promise: "easy_returns" } },
+    ],
+  };
+  const words: Record<string, string> = {
+    cash_on_delivery: "Cash on delivery",
+    easy_returns: "Easy returns",
+  };
+  const drawPromises = (variant: string, live?: typeof promises) =>
+    renderToStaticMarkup(
+      <NextIntlClientProvider locale="en" messages={en}>
+        <ShopChrome
+          page="home"
+          slotKey="trust"
+          variant={variant}
+          settings={CHOICES.home}
+          live={live as never}
+          promiseWords={(name) => words[name] ?? name}
+        />
+      </NextIntlClientProvider>,
+    );
+
+  it("shows the promises that were ticked, with marks", () => {
+    const html = drawPromises("icons", promises);
+    expect(html).toContain("Cash on delivery");
+    expect(html).toContain("Easy returns");
+    expect(html).not.toContain(en.themeEditor.slots.trustDelivery);
+    expect((html.match(/<svg/g) ?? []).length).toBe(2);
+  });
+
+  it("shows them as one line when that is the shape", () => {
+    const html = drawPromises("line", promises);
+    expect(html).toContain("Cash on delivery · Easy returns");
+    expect(html).not.toContain("<svg");
+  });
+
+  it("falls back to an example while nothing is ticked", () => {
+    // A merchant who has picked none still sees what the place is FOR.
+    const html = drawPromises("icons");
+    expect(html).toContain(en.themeEditor.slots.trustDelivery);
+  });
+
+  it("draws the same words on the product page", () => {
+    const html = renderToStaticMarkup(
+      <NextIntlClientProvider locale="en" messages={en}>
+        <ShopChrome
+          page="product"
+          slotKey="trust"
+          variant="on"
+          settings={CHOICES.product}
+          live={promises as never}
+          promiseWords={(name) => words[name] ?? name}
+        />
+      </NextIntlClientProvider>,
+    );
+    expect(html).toContain("Cash on delivery · Easy returns");
+  });
+});
+

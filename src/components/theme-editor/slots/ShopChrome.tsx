@@ -3,6 +3,13 @@
 import { useTranslations } from "next-intl";
 import {
   Banknote,
+  BadgeCheck,
+  CalendarCheck,
+  CheckCircle,
+  Clock,
+  CreditCard,
+  Eye,
+  Gift,
   Hash,
   Headphones,
   Heart,
@@ -10,14 +17,46 @@ import {
   Mail,
   Map,
   MapPin,
+  MessageCircle,
   Phone,
   RotateCcw,
   Search,
   ShieldCheck,
   Smartphone,
+  Sparkles,
   Truck,
   User,
 } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
+
+/**
+ * The mark each promise is drawn with ON THE CANVAS.
+ *
+ * The shop draws the same sixteen with Phosphor, because that is the theme's
+ * icon set; this is the editor's, which is lucide. Two maps of one idea, and
+ * they cannot be one: a React component and a Liquid snippet do not share an
+ * icon. What they DO share is the sixteen names, which come from the theme's
+ * manifest -- so a promise added there and missed here draws `Sparkles` rather
+ * than nothing, and the canvas stays whole.
+ */
+const PROMISE_MARKS: Record<string, LucideIcon> = {
+  fast_delivery: Truck,
+  free_delivery: Gift,
+  dhaka_24_hours: Clock,
+  all_over_bangladesh: MapPin,
+  cash_on_delivery: Banknote,
+  secure_payment: Lock,
+  mobile_payment: Smartphone,
+  pay_your_way: CreditCard,
+  easy_returns: RotateCcw,
+  exchange_in_7_days: CalendarCheck,
+  check_before_paying: Eye,
+  genuine_product: BadgeCheck,
+  quality_checked: CheckCircle,
+  warranty_included: ShieldCheck,
+  help_every_day: Headphones,
+  reply_within_an_hour: MessageCircle,
+};
 
 import type { ThemeSection } from "@/lib/theme-editor/api";
 import { cn } from "@/lib/utils";
@@ -173,6 +212,7 @@ export function ShopChrome({
   live,
   pictureUrl,
   departments,
+  promiseWords,
 }: {
   page: SlotPageKey;
   slotKey: string;
@@ -211,6 +251,15 @@ export function ShopChrome({
    * this is handed in; empty falls back to examples rather than to a blank band.
    */
   departments?: string[];
+  /**
+   * A promise's name to the words a merchant reads, from the theme's own list.
+   *
+   * The canvas has no translations of its own for these: the sixteen are the
+   * THEME's, labelled in both languages in its manifest, and the shop says them
+   * to a shopper in the shopper's language. Handed in so both readings come
+   * from one place.
+   */
+  promiseWords?: (name: string) => string;
 }) {
   const t = useTranslations("themeEditor.slots");
 
@@ -618,31 +667,45 @@ export function ShopChrome({
       );
     }
 
-    case "home:trust":
+    case "home:trust": {
+      // The merchant's OWN four once they have ticked them, and an example
+      // until they do. A merchant who has just picked "Cash on delivery"
+      // should see it here, not a stranger's promise -- that is how they know
+      // the ticking worked.
+      const picked = (live?.blocks ?? [])
+        .map((block) => block.settings?.promise)
+        .filter((name): name is string => typeof name === "string" && name !== "");
+      const own = picked.map((name) => ({
+        name,
+        words: promiseWords?.(name) || name,
+        Mark: PROMISE_MARKS[name] ?? Sparkles,
+      }));
+      const shown = own.length
+        ? own
+        : [
+            { name: "delivery", words: t("trustDelivery"), Mark: Truck },
+            { name: "returns", words: t("trustReturns"), Mark: RotateCcw },
+            { name: "payment", words: t("trustPayment"), Mark: ShieldCheck },
+            { name: "support", words: t("trustSupport"), Mark: Headphones },
+          ];
+
       return variant === "line" ? (
         <p className="border-y border-current/10 px-4 py-3 text-center text-[11px] uppercase tracking-[0.06em] text-current/55">
-          {t("trustExample")}
+          {own.length ? own.map((one) => one.words).join(" · ") : t("trustExample")}
         </p>
       ) : (
         <div className="grid grid-cols-2 gap-3 border-y border-current/10 px-4 py-4 sm:grid-cols-4">
-          {[
-            [Truck, t("trustDelivery")],
-            [RotateCcw, t("trustReturns")],
-            [ShieldCheck, t("trustPayment")],
-            [Headphones, t("trustSupport")],
-          ].map(([Icon, label]) => {
-            const Mark = Icon as typeof Truck;
-            return (
-              <div key={label as string} className="flex items-center gap-2.5">
-                <span className="grid size-8 shrink-0 place-items-center rounded-full bg-current/8">
-                  <Mark className="size-3.5 text-current/55" aria-hidden />
-                </span>
-                <span className="min-w-0 truncate text-[11px] text-current/65">{label as string}</span>
-              </div>
-            );
-          })}
+          {shown.map(({ name, words, Mark }) => (
+            <div key={name} className="flex items-center gap-2.5">
+              <span className="grid size-8 shrink-0 place-items-center rounded-full bg-current/8">
+                <Mark className="size-3.5 text-current/55" aria-hidden />
+              </span>
+              <span className="min-w-0 truncate text-[11px] text-current/65">{words}</span>
+            </div>
+          ))}
         </div>
       );
+    }
 
     case "home:featured":
       return (
@@ -896,7 +959,19 @@ export function ShopChrome({
       );
     }
 
-    case "product:trust":
+    case "product:trust": {
+      // The same four the home page shows: picked once, drawn in two places.
+      const words = (live?.blocks ?? [])
+        .map((block) => block.settings?.promise)
+        .filter((name): name is string => typeof name === "string" && name !== "")
+        .map((name) => promiseWords?.(name) || name);
+      return (
+        <p className="border-y border-current/10 px-4 py-2.5 text-center text-[10px] uppercase tracking-[0.08em] text-current/50">
+          {words.length ? words.join(" · ") : t("trustExample")}
+        </p>
+      );
+    }
+
     case "cart:trust":
     case "checkout:trust":
       return (

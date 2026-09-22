@@ -171,6 +171,7 @@ function SlotRegion({
   live,
   pictureUrl,
   departments,
+  promiseWords,
   className,
   children,
 }: {
@@ -184,6 +185,8 @@ function SlotRegion({
   live?: ThemeSection;
   pictureUrl?: (key: string) => string;
   departments?: string[];
+  /** A promise's name to the words a merchant reads. See ShopChrome. */
+  promiseWords?: (name: string) => string;
   className?: string;
   /** The chooser, when this place is on its own and can hold it. */
   children?: React.ReactNode;
@@ -259,6 +262,7 @@ function SlotRegion({
           live={live}
           pictureUrl={pictureUrl}
           departments={departments}
+          promiseWords={promiseWords}
         />
       )}
 
@@ -308,6 +312,7 @@ export function SlotCanvas({
   pictures,
   pictureUrl,
   departments,
+  promiseWords,
   productName,
   onGoToPage,
 }: {
@@ -349,6 +354,8 @@ export function SlotCanvas({
   pictureUrl: (key: string) => string;
   /** This shop's own top-level department names, for the band that draws them. */
   departments: string[];
+  /** A promise's name to the words a merchant reads. See ShopChrome. */
+  promiseWords?: (name: string) => string;
   /** A product's public id to its name, so a picked band shows what it holds. */
   productName: (publicId: string) => string;
   /**
@@ -454,6 +461,7 @@ export function SlotCanvas({
                 live={liveOf(slot)}
                 pictureUrl={pictureUrl}
                 departments={departments}
+                promiseWords={promiseWords}
               >
                 {chooser}
               </SlotRegion>
@@ -486,6 +494,7 @@ export function SlotCanvas({
                         live={liveOf(slot)}
                         pictureUrl={pictureUrl}
                         departments={departments}
+                        promiseWords={promiseWords}
                       />
                     ))}
                   </div>

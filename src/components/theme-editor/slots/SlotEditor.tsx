@@ -1,7 +1,7 @@
 "use client";
 
 import { useReducer, useState } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { Monitor, Smartphone, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -10,6 +10,7 @@ import { Select } from "@/components/ui/select";
 import { notify } from "@/notifications";
 import api from "@/lib/api";
 import { cn } from "@/lib/utils";
+import { blockFields } from "@/lib/theme-editor/field-specs";
 import { CUSTOMIZATION_HREF } from "@/lib/theme-editor/access";
 import {
   discardThemeDraft,
@@ -83,6 +84,8 @@ export function SlotEditor({ loaded }: { loaded: ThemeEditorState }) {
   const t = useTranslations("themeEditor.slots");
   const tEditor = useTranslations("themeEditor");
   const tc = useTranslations("settings.customization");
+  // The theme labels its own choices in both languages; this is which one.
+  const locale = useLocale();
   const qc = useQueryClient();
 
   const [state, dispatch] = useReducer(editorReducer, loaded, (value) => initEditorState(value));
@@ -383,6 +386,17 @@ export function SlotEditor({ loaded }: { loaded: ThemeEditorState }) {
             pictures={images.data ?? []}
             pictureUrl={(key) => pictureUrls[key] ?? images.data?.find((row) => row.key === key)?.url ?? ""}
             departments={(categories.data ?? []).map((node) => node.name)}
+            /*
+              The sixteen promises, named in the merchant's language by the
+              theme itself. Read from the manifest rather than from this
+              editor's own words: the theme owns the list, and a second copy
+              here would be a second list to keep in step.
+            */
+            promiseWords={(name) =>
+              blockFields(state.manifest, "promises", "promise", locale).find(
+                (field) => field.id === "promise",
+              )?.options.find((option) => option.value === name)?.label ?? name
+            }
             productName={(publicId) =>
               (products.data?.results ?? []).find((row) => row.public_id === publicId)?.name ?? ""
             }
