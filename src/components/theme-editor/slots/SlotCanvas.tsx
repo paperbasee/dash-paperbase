@@ -170,6 +170,7 @@ function SlotRegion({
   settings,
   live,
   pictureUrl,
+  departments,
   className,
   children,
 }: {
@@ -182,6 +183,7 @@ function SlotRegion({
   /** A wired place's own SECTION, so the drawing shows the merchant's own. */
   live?: ThemeSection;
   pictureUrl?: (key: string) => string;
+  departments?: string[];
   className?: string;
   /** The chooser, when this place is on its own and can hold it. */
   children?: React.ReactNode;
@@ -256,6 +258,7 @@ function SlotRegion({
           settings={settings}
           live={live}
           pictureUrl={pictureUrl}
+          departments={departments}
         />
       )}
 
@@ -297,12 +300,15 @@ export function SlotCanvas({
   manifest,
   onSet,
   onSetBlock,
+  onSetBlocks,
   onAddBlock,
   onRemoveBlock,
   onMoveBlock,
   premiumSections,
   pictures,
   pictureUrl,
+  departments,
+  productName,
   onGoToPage,
 }: {
   page: SlotPageKey;
@@ -327,6 +333,12 @@ export function SlotCanvas({
     setting: string,
     value: unknown,
   ) => void;
+  onSetBlocks: (
+    owner: { page: SlotPageKey; key: string },
+    blockType: string,
+    setting: string,
+    values: string[],
+  ) => void;
   onAddBlock: (owner: { page: SlotPageKey; key: string }, blockType: string) => void;
   onRemoveBlock: (owner: { page: SlotPageKey; key: string }, blockId: string) => void;
   onMoveBlock: (owner: { page: SlotPageKey; key: string }, blockId: string, to: number) => void;
@@ -335,6 +347,10 @@ export function SlotCanvas({
   /** Pictures this shop has already placed, and how to draw one. */
   pictures: ThemeImage[];
   pictureUrl: (key: string) => string;
+  /** This shop's own top-level department names, for the band that draws them. */
+  departments: string[];
+  /** A product's public id to its name, so a picked band shows what it holds. */
+  productName: (publicId: string) => string;
   /**
    * Every page's settings, so an inherited slot can read the one that actually
    * drives it -- `slot.inheritedFrom` says which page and which key. Merging
@@ -437,6 +453,7 @@ export function SlotCanvas({
                 settings={settingsOf(slot)}
                 live={liveOf(slot)}
                 pictureUrl={pictureUrl}
+                departments={departments}
               >
                 {chooser}
               </SlotRegion>
@@ -468,6 +485,7 @@ export function SlotCanvas({
                         settings={settingsOf(slot)}
                         live={liveOf(slot)}
                         pictureUrl={pictureUrl}
+                        departments={departments}
                       />
                     ))}
                   </div>
@@ -488,9 +506,13 @@ export function SlotCanvas({
           premiumSections={premiumSections}
           pictures={pictures}
           pictureUrl={pictureUrl}
+          productName={productName}
           onChoose={(value) => onChoose(openOwner, value)}
           onSet={(setting, value) => onSet(openOwner, setting, value)}
           onSetBlock={(blockId, setting, value) => onSetBlock(openOwner, blockId, setting, value)}
+          onSetBlocks={(blockType, setting, values) =>
+            onSetBlocks(openOwner, blockType, setting, values)
+          }
           onAddBlock={(blockType) => onAddBlock(openOwner, blockType)}
           onRemoveBlock={(blockId) => onRemoveBlock(openOwner, blockId)}
           onMoveBlock={(blockId, to) => onMoveBlock(openOwner, blockId, to)}

@@ -30,6 +30,10 @@ export const FIELD_KINDS = [
   // An instant, stored in UTC. The merchant types Bangladesh wall clock
   // and this side converts, the way every other date in the product does.
   "datetime",
+  // One product of this shop, held as its public id. Picked from a search
+  // rather than typed: nobody knows a product by its id, and a shop with a
+  // thousand of them cannot be a list.
+  "product",
 ] as const;
 
 export type FieldKind = (typeof FIELD_KINDS)[number];

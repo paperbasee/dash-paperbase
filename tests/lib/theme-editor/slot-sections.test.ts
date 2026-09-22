@@ -12,6 +12,7 @@ import {
   ownerOf,
   sectionFor,
   sectionOfType,
+  sectionTypesOf,
   slotValueFor,
   wiringFor,
   WIRED_SLOTS,
@@ -126,5 +127,40 @@ describe("where a place is edited", () => {
   test("a place nobody else owns is its own", () => {
     const slot = SLOTS.home.find((entry) => !entry.inheritedFrom)!;
     expect(ownerOf("home", slot)).toEqual({ page: "home", key: slot.key });
+  });
+});
+
+describe("the three product bands", () => {
+  test("the one a merchant fills is its own section", () => {
+    expect(wiringFor("home", "featured")).toEqual({
+      page: "templates.home",
+      sections: { row: "featured_products" },
+      off: "off",
+    });
+  });
+
+  test("the two that fill themselves are one section each, and off", () => {
+    // No settings to tell values apart: there is one shape, and the shop reads
+    // its own numbers. A merchant sets nothing here but the heading.
+    for (const [key, type] of [
+      ["bestsellers", "best_sellers"],
+      ["arrivals", "new_arrivals"],
+    ] as const) {
+      const wiring = wiringFor("home", key)!;
+      expect(sectionTypesOf(wiring)).toEqual([type]);
+      expect(wiring.off).toBe("off");
+    }
+  });
+
+  test("every band is its own section, so two of them never fight", () => {
+    /*
+      Three places on one page, each adding and hiding by section TYPE. Two
+      sharing a type would mean one place hiding the other's band -- which is
+      exactly why the category band's two shapes are one section with a setting
+      and these three are not.
+    */
+    const home = WIRED_SLOTS.home ?? {};
+    const types = Object.values(home).flatMap((wiring) => sectionTypesOf(wiring));
+    expect(types.length).toBe(new Set(types).size);
   });
 });

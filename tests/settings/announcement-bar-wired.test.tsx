@@ -37,7 +37,7 @@ function editor(doc: ThemeDocument = document()) {
 
 /** A click on the bar's choices, taking the editor's own path. */
 function choose(state: EditorState, value: string): EditorState {
-  return choiceEdits(state.document, NOTICE, value).reduce(editorReducer, state);
+  return choiceEdits(state.document, NOTICE, value, { page: "header", key: "notice" }).reduce(editorReducer, state);
 }
 
 /** A setting typed into the bar, taking the editor's own path. */

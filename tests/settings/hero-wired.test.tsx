@@ -19,6 +19,7 @@ import {
   addBlockEdits,
   blockSettingEdits,
   choiceEdits,
+  setBlocksEdits,
   moveBlockEdits,
   removeBlockEdits,
   sectionFor,
@@ -104,7 +105,7 @@ const apply = (state: EditorState, edits: ReturnType<typeof choiceEdits>) =>
   edits.reduce(editorReducer, state);
 
 const choose = (state: EditorState, value: string) =>
-  apply(state, choiceEdits(state.document, HERO, value));
+  apply(state, choiceEdits(state.document, HERO, value, { page: "home", key: "hero" }));
 const addPicture = (state: EditorState) =>
   apply(state, addBlockEdits(state.document, HERO, "slide"));
 const removePicture = (state: EditorState, blockId: string) =>
@@ -206,5 +207,53 @@ describe("pictures or a video", () => {
     // the shop draws nothing for it either way.
     const empty = editor([section("hero", "banner_slider", { blocks: [] })]);
     expect(slotValueFor(empty.document, HERO)).toBe("slider");
+  });
+});
+
+
+describe("a band that is ticked rather than filled in", () => {
+  /**
+   * The featured band's part is ONE choice, so it is picked from a checklist
+   * (owner, 2026-09-23) -- eight products used to be eight rounds of
+   * open-search-pick-close. One action, so one document reaches autosave rather
+   * than eight.
+   *
+   * Proved on the hero's own manifest with a made-up section, because what is
+   * being tested is the reducer's rule, not the featured band's settings.
+   */
+  const picks = (state: EditorState) =>
+    (sectionFor(state.document, HERO)?.blocks ?? []).map((b) => b.settings.image);
+
+  const setAll = (state: EditorState, values: string[]) =>
+    apply(state, setBlocksEdits(state.document, HERO, "slide", "image", values));
+
+  const start = () =>
+    editor([section("hero", "banner_slider", { blocks: [picture("p1", "/one.jpg")] })]);
+
+  test("every pick lands in one action, in the order given", () => {
+    const after = setAll(start(), ["/two.jpg", "/one.jpg", "/three.jpg"]);
+    expect(picks(after)).toEqual(["/two.jpg", "/one.jpg", "/three.jpg"]);
+  });
+
+  test("a pick that was already there keeps everything else on it", () => {
+    const withAlt = apply(
+      start(),
+      blockSettingEdits(start().document, HERO, "p1", "alt", "Two people in raincoats"),
+    );
+
+    const after = setAll(withAlt, ["/one.jpg"]);
+
+    expect(sectionFor(after.document, HERO)?.blocks[0].settings.alt).toBe(
+      "Two people in raincoats",
+    );
+  });
+
+  test("unticking everything empties the band", () => {
+    expect(picks(setAll(start(), []))).toEqual([]);
+  });
+
+  test("it never takes more than the theme allows", () => {
+    const after = setAll(start(), ["/1", "/2", "/3", "/4", "/5", "/6", "/7"]);
+    expect(picks(after)).toHaveLength(5);
   });
 });

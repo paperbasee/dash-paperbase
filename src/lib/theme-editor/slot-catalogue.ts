@@ -192,9 +192,13 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
       initial: "row",
       emptyValues: ["off"],
       emptyLabel: "featuredEmpty",
+      /*
+        One shape. "A grid of eight" was a second option until 2026-09-23: the
+        band is one row that scrolls, with arrows and a link to the page that
+        holds every pick, so the grid is that page rather than a choice here.
+      */
       options: [
         { value: "row", label: "featuredRow", note: "featuredRowNote", shape: "row" },
-        { value: "grid", label: "featuredGrid", note: "featuredGridNote", shape: "block" },
         { value: "off", label: "off", shape: "blank" },
       ],
     },

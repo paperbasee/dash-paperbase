@@ -28,6 +28,8 @@ import {
 } from "@/lib/theme-editor/editor-actions";
 import { editorReducer, initEditorState } from "@/lib/theme-editor/editor-reducer";
 import { useThemeImagesQuery } from "@/hooks/useThemesQuery";
+import { useCategoriesQuery } from "@/hooks/useCategoriesQuery";
+import { useProductsQuery } from "@/hooks/useProductsQuery";
 import {
   initialChoices,
   PAGE_NOTES,
@@ -41,6 +43,7 @@ import {
   choiceEdits,
   moveBlockEdits,
   removeBlockEdits,
+  setBlocksEdits,
   settingEdits,
   wiringFor,
 } from "@/lib/theme-editor/slot-sections";
@@ -114,6 +117,13 @@ export function SlotEditor({ loaded }: { loaded: ThemeEditorState }) {
   // list was read: an upload answers with a key alone, and a field needs a URL
   // to draw the thumbnail before the next save refreshes the list.
   const images = useThemeImagesQuery({ enabled: true });
+  // This shop's own departments, so the category band draws the names a
+  // merchant will recognise rather than six invented ones.
+  const categories = useCategoriesQuery();
+  // Only the page of products the picker last searched, which is enough: a
+  // field shows the name of something the merchant just chose, and falls back
+  // to the id for a pick made in another session until they open the picker.
+  const products = useProductsQuery({ page_size: "20", ordering: "-created_at" });
   const [pictureUrls] = useState<Record<string, string>>({});
 
   function pickPage(next: SlotPageKey) {
@@ -138,7 +148,7 @@ export function SlotEditor({ loaded }: { loaded: ThemeEditorState }) {
       }));
       return;
     }
-    for (const edit of choiceEdits(state.document, wiring, value)) dispatch(edit);
+    for (const edit of choiceEdits(state.document, wiring, value, owner)) dispatch(edit);
   }
 
   function setSetting(owner: { page: SlotPageKey; key: string }, setting: string, value: unknown) {
@@ -355,6 +365,11 @@ export function SlotEditor({ loaded }: { loaded: ThemeEditorState }) {
                 blockSettingEdits(state.document, wiring, blockId, setting, value),
               )
             }
+            onSetBlocks={(owner, blockType, setting, values) =>
+              edits(owner, (wiring) =>
+                setBlocksEdits(state.document, wiring, blockType, setting, values),
+              )
+            }
             onAddBlock={(owner, blockType) =>
               edits(owner, (wiring) => addBlockEdits(state.document, wiring, blockType))
             }
@@ -367,6 +382,10 @@ export function SlotEditor({ loaded }: { loaded: ThemeEditorState }) {
             premiumSections={loaded.premium_sections !== false}
             pictures={images.data ?? []}
             pictureUrl={(key) => pictureUrls[key] ?? images.data?.find((row) => row.key === key)?.url ?? ""}
+            departments={(categories.data ?? []).map((node) => node.name)}
+            productName={(publicId) =>
+              (products.data?.results ?? []).find((row) => row.public_id === publicId)?.name ?? ""
+            }
             onGoToPage={(next, slotKey) => {
               setPage(next);
               setOpen(slotKey);

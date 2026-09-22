@@ -23,12 +23,14 @@ import { cn } from "@/lib/utils";
 import { EditorSheet } from "../EditorSheet";
 import { LinkPicker } from "../LinkPicker";
 import { PicturePicker } from "../PicturePicker";
+import { ProductPicker } from "../ProductPicker";
 import { SettingField } from "../SettingField";
 
 /** What the merchant is being asked for, over the dialog: a link, or a picture. */
 type Asked =
   | { kind: "link"; setting: string; value: string; blockId?: string }
-  | { kind: "picture"; setting: string; value: string; blockId?: string };
+  | { kind: "picture"; setting: string; value: string; blockId?: string }
+  | { kind: "product"; setting: string; value: string; blockId?: string };
 
 /**
  * A wired place, edited in a pop-up (owner, 2026-09-22).
@@ -50,9 +52,11 @@ export function SlotDialog({
   premiumSections,
   pictures,
   pictureUrl,
+  productName,
   onChoose,
   onSet,
   onSetBlock,
+  onSetBlocks,
   onAddBlock,
   onRemoveBlock,
   onMoveBlock,
@@ -68,9 +72,13 @@ export function SlotDialog({
   pictures: ThemeImage[];
   /** A picture key this shop uploaded, to the URL it draws from. */
   pictureUrl: (key: string) => string;
+  /** A product's public id to its name, for the field to show what it holds. */
+  productName: (publicId: string) => string;
   onChoose: (value: string) => void;
   onSet: (setting: string, value: unknown) => void;
   onSetBlock: (blockId: string, setting: string, value: unknown) => void;
+  /** Every part at once, for a place that is ticked from a list. */
+  onSetBlocks: (blockType: string, setting: string, values: string[]) => void;
   onAddBlock: (blockType: string) => void;
   onRemoveBlock: (blockId: string) => void;
   onMoveBlock: (blockId: string, to: number) => void;
@@ -80,6 +88,7 @@ export function SlotDialog({
   const tEditor = useTranslations("themeEditor");
   const locale = useLocale();
   const [asked, setAsked] = useState<Asked | null>(null);
+  const [picking, setPicking] = useState(false);
 
   const section = sectionFor(document, wiring);
   const chosen = slotValueFor(document, wiring);
@@ -114,6 +123,26 @@ export function SlotDialog({
 
   const fieldsFor = (block: ThemeBlock) =>
     section ? blockFields(manifest, section.type, block.type, locale) : [];
+
+  /**
+   * A place whose part is ONE choice is ticked from a list, not built one part
+   * at a time: the featured band is eight products, and adding eight parts to
+   * fill in one field each is eight rounds of the same three clicks.
+   *
+   * A part with more than one setting -- the hero's picture, link and
+   * description -- is a form, and stays a list of parts below.
+   */
+  const ticklist = (() => {
+    if (!section || !blockType) return null;
+    const specs = spec?.blocks?.[blockType]?.settings ?? [];
+    if (specs.length !== 1 || specs[0].type !== "product") return null;
+    return { blockType, setting: specs[0].id };
+  })();
+  const picked = ticklist
+    ? blocks
+        .map((block) => block.settings[ticklist.setting])
+        .filter((value): value is string => typeof value === "string" && value !== "")
+    : [];
 
   return (
     <>
@@ -184,12 +213,32 @@ export function SlotDialog({
                 onChange={(value) => onSet(fieldSpec.id, value)}
                 onPickLink={() => ask("link", fieldSpec)}
                 onPickPicture={() => ask("picture", fieldSpec)}
+                onPickProduct={() => ask("product", fieldSpec)}
                 pictureUrl={pictureUrl}
+                productName={productName}
               />
             ))}
 
+            {/* Ticked from a list: see `ticklist` above. */}
+            {section && ticklist ? (
+              <div className="space-y-3 border-t border-border-subtle pt-4">
+                <p className="text-sm text-muted-foreground">
+                  {t("partsChosen", { count: picked.length })}
+                </p>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="h-11 w-full md:h-9"
+                  onClick={() => setPicking(true)}
+                >
+                  <Plus aria-hidden />
+                  {picked.length ? t("partsChange") : t("addPart")}
+                </Button>
+              </div>
+            ) : null}
+
             {/* The things inside this place: the hero's pictures, in order. */}
-            {section && blockType ? (
+            {section && blockType && !ticklist ? (
               <div className="space-y-3 border-t border-border-subtle pt-4">
                 {blocks.map((block, index) => (
                   <div key={block.id} className="space-y-3 rounded-sm border border-border-subtle p-3">
@@ -245,7 +294,9 @@ export function SlotDialog({
                         onChange={(value) => onSetBlock(block.id, fieldSpec.id, value)}
                         onPickLink={() => ask("link", fieldSpec, block.id)}
                         onPickPicture={() => ask("picture", fieldSpec, block.id)}
+                        onPickProduct={() => ask("product", fieldSpec, block.id)}
                         pictureUrl={pictureUrl}
+                        productName={productName}
                       />
                     ))}
                   </div>
@@ -293,6 +344,22 @@ export function SlotDialog({
           value={asked?.value ?? ""}
           onPick={answer}
           onClose={() => setAsked(null)}
+        />
+      </EditorSheet>
+
+      <EditorSheet
+        open={picking}
+        title={tEditor("productTitle")}
+        hint={tEditor("productHint")}
+        tall
+        onClose={() => setPicking(false)}
+      >
+        <ProductPicker
+          open={picking}
+          value={picked}
+          most={typeof most === "number" ? most : picked.length + 1}
+          onDone={(values) => onSetBlocks(ticklist!.blockType, ticklist!.setting, values)}
+          onClose={() => setPicking(false)}
         />
       </EditorSheet>
 

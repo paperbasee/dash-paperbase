@@ -45,7 +45,18 @@ export type EditorAction =
   /** Edits kept on this device, brought back on top of the loaded document. */
   | { type: "restore"; document: ThemeDocument }
   | { type: "pickPage"; page: PageKey }
-  | { type: "add"; sectionType: string }
+  /**
+   * `settings` is for a section added AS a shape: the category band is tiles or
+   * a row of names by its `layout`, and a merchant choosing the row of names on
+   * a page that has no band yet must not get the tiles for a moment first. Its
+   * id is minted here, so nothing outside can write to it in the same breath.
+   *
+   * `at` is where it goes. The end is the only sensible default for a section a
+   * merchant will then place themselves -- but nothing drags any more, so a
+   * WIRED place says where it sits: the category band belongs under the hero,
+   * not below everything, which is where it landed until 2026-09-22.
+   */
+  | { type: "add"; sectionType: string; settings?: Record<string, unknown>; at?: number }
   | { type: "hide"; id: string }
   | { type: "show"; id: string }
   | { type: "remove"; id: string }
@@ -53,7 +64,20 @@ export type EditorAction =
   | { type: "setSetting"; id: string; blockId?: string; setting: string; value: unknown }
   | { type: "addBlock"; id: string; blockType: string }
   | { type: "removeBlock"; id: string; blockId: string }
-  | { type: "moveBlock"; id: string; blockId: string; to: number };
+  | { type: "moveBlock"; id: string; blockId: string; to: number }
+  /**
+   * Every part of a section at once, from a list of values for ONE setting.
+   *
+   * For a section whose part is a single choice -- the featured band's products
+   * -- where picking is ticking a list rather than filling in a form. Doing it
+   * with add/remove/move would mean naming ids this side of the reducer, and the
+   * reducer is what mints them; it would also mean eight actions for one press
+   * of Done, each one an autosave's worth of document.
+   *
+   * A part already holding a value is KEPT rather than rebuilt, so anything else
+   * on it survives a re-tick.
+   */
+  | { type: "setBlocks"; id: string; blockType: string; setting: string; values: string[] };
 
 const FIRST_PAGE: PageKey = "templates.home";
 
@@ -101,8 +125,13 @@ export function editorReducer(state: EditorState, action: EditorAction): EditorS
   if (action.type === "add") {
     const allowed = pageSpec(manifest, page)?.sections ?? [];
     if (cannotAdd(manifest, allowed, sections, action.sectionType)) return state;
-    const section = newSection(manifest, action.sectionType, sections.map((s) => s.id));
-    return edit([...sections, section]);
+    const fresh = newSection(manifest, action.sectionType, sections.map((s) => s.id));
+    const section = action.settings
+      ? { ...fresh, settings: { ...fresh.settings, ...action.settings } }
+      : fresh;
+    if (action.at === undefined) return edit([...sections, section]);
+    const at = Math.max(0, Math.min(sections.length, action.at));
+    return edit([...sections.slice(0, at), section, ...sections.slice(at)]);
   }
 
   const index = sections.findIndex((s) => s.id === action.id);
@@ -151,6 +180,34 @@ export function editorReducer(state: EditorState, action: EditorAction): EditorS
       const block = section.blocks.find((b) => b.id === action.blockId);
       if (!block || cannotRemoveBlock(manifest, section, block)) return state;
       return withSection({ ...section, blocks: section.blocks.filter((b) => b !== block) });
+    }
+    case "setBlocks": {
+      const spec = manifest.sections[section.type]?.blocks?.[action.blockType];
+      if (!spec) return state;
+      const most = manifest.sections[section.type]?.max_blocks;
+      const wanted = (typeof most === "number" ? action.values.slice(0, most) : action.values);
+      const held = new Map(
+        section.blocks
+          .filter((b) => b.type === action.blockType)
+          .map((b) => [String(b.settings[action.setting] ?? ""), b]),
+      );
+      const taken: string[] = [];
+      const blocks = wanted.map((value) => {
+        const already = held.get(value);
+        if (already) {
+          taken.push(already.id);
+          return already;
+        }
+        const fresh = newBlock(manifest, section.type, action.blockType, [
+          ...section.blocks.map((b) => b.id),
+          ...taken,
+        ]);
+        if (!fresh) return null;
+        taken.push(fresh.id);
+        return withSetting(fresh, action.setting, value);
+      });
+      if (blocks.some((b) => b === null)) return state;
+      return withSection({ ...section, blocks: blocks as typeof section.blocks });
     }
     case "moveBlock": {
       const from = section.blocks.findIndex((b) => b.id === action.blockId);

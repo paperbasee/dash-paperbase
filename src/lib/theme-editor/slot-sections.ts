@@ -1,7 +1,7 @@
 import type { ThemeDocument, ThemeSection } from "@/lib/theme-editor/api";
 import { pageSections, type PageKey } from "@/lib/theme-editor/document-ops";
 import type { EditorAction } from "@/lib/theme-editor/editor-reducer";
-import type { Slot, SlotPageKey } from "@/lib/theme-editor/slot-catalogue";
+import { SLOTS, type Slot, type SlotPageKey } from "@/lib/theme-editor/slot-catalogue";
 
 /**
  * Which place on the canvas is which section of the shop's document.
@@ -20,15 +20,22 @@ export type WiredSlot = {
   /** The list in the document that holds it: a group, or `templates.<name>`. */
   page: PageKey;
   /**
-   * What each of this place's values IS, as a section type.
+   * What each of this place's values IS: a section type, and the settings that
+   * make the section into THAT value.
    *
-   * Usually one: the notice strip is an announcement bar or it is nothing. The
-   * hero is two -- pictures or a video -- and they are different sections, so a
-   * place has to be able to say "this value means that section". Choosing one
-   * hides the other rather than removing it, so a merchant who tries the video
-   * and goes back still has the pictures they had.
+   * Three shapes, in the order they turned up:
+   *
+   *   one section        the notice strip is an announcement bar or nothing
+   *   two sections       the hero is pictures or a video -- different sections,
+   *                      so choosing one hides the other rather than removing
+   *                      it, and a merchant who tries the video still has the
+   *                      pictures they chose
+   *   one section, two   the category band is tiles or a row of names: the same
+   *   shapes             section with `layout` set differently, because the
+   *                      merchant is choosing how it LOOKS. Two sections would
+   *                      let them put both on the page.
    */
-  sections: Record<string, string>;
+  sections: Record<string, string | { type: string; settings: Record<string, unknown> }>;
   /**
    * The value that means nothing is here, when the place offers one. A place
    * whose every choice is a section (the hero) has none.
@@ -46,6 +53,17 @@ export const WIRED_SLOTS: Partial<Record<SlotPageKey, Record<string, WiredSlot>>
       page: "templates.home",
       sections: { slider: "banner_slider", video: "video" },
     },
+    categories: {
+      page: "templates.home",
+      sections: {
+        tiles: { type: "category_tiles", settings: { layout: "tiles" } },
+        strip: { type: "category_tiles", settings: { layout: "strip" } },
+      },
+      off: "off",
+    },
+    featured: { page: "templates.home", sections: { row: "featured_products" }, off: "off" },
+    bestsellers: { page: "templates.home", sections: { row: "best_sellers" }, off: "off" },
+    arrivals: { page: "templates.home", sections: { row: "new_arrivals" }, off: "off" },
   },
 };
 
@@ -68,9 +86,23 @@ export function wiringFor(page: SlotPageKey, slotKey: string): WiredSlot | null 
   return WIRED_SLOTS[page]?.[slotKey] ?? null;
 }
 
-/** The section types this place can hold. */
+/** What one of this place's values means: a section type and the settings for it. */
+export function meaningOf(
+  wiring: WiredSlot,
+  value: string,
+): { type: string; settings: Record<string, unknown> } | null {
+  const held = wiring.sections[value];
+  if (!held) return null;
+  return typeof held === "string" ? { type: held, settings: {} } : held;
+}
+
+/** The section types this place can hold, each once. */
 export function sectionTypesOf(wiring: WiredSlot): string[] {
-  return Object.values(wiring.sections);
+  return [
+    ...new Set(
+      Object.keys(wiring.sections).map((value) => meaningOf(wiring, value)!.type),
+    ),
+  ];
 }
 
 /** The section of one type in this place's list, or null when the document has none. */
@@ -104,11 +136,54 @@ export function sectionFor(document: ThemeDocument, wiring: WiredSlot): ThemeSec
  * pictures is still the pictures hero, waiting for one.
  */
 export function slotValueFor(document: ThemeDocument, wiring: WiredSlot): string {
-  for (const [value, type] of Object.entries(wiring.sections)) {
-    const section = sectionOfType(document, wiring, type);
-    if (section && !section.hidden) return value;
+  for (const value of Object.keys(wiring.sections)) {
+    const meaning = meaningOf(wiring, value)!;
+    const section = sectionOfType(document, wiring, meaning.type);
+    if (!section || section.hidden) continue;
+    // Where two values are the same section shaped differently, the settings
+    // are what tell them apart -- and a document written before a setting
+    // existed carries none, so a missing one reads as the theme's default
+    // rather than as neither value.
+    const matches = Object.entries(meaning.settings).every(
+      ([key, wanted]) =>
+        section.settings?.[key] === wanted || section.settings?.[key] === undefined,
+    );
+    if (matches) return value;
   }
   return wiring.off ?? Object.keys(wiring.sections)[0];
+}
+
+/**
+ * Where a place's section goes when the page does not have one yet.
+ *
+ * **After the last section belonging to a place ABOVE it on the canvas.** The
+ * canvas order is the page order -- that is the whole idea of the slot design --
+ * so the category band goes under the hero, not below everything. It landed at
+ * the end until 2026-09-22, which was the right default while a merchant could
+ * drag it afterwards and is simply wrong now that nothing drags.
+ *
+ * A page with none of those sections yet puts it first, which is as near its own
+ * place as an empty page allows.
+ */
+export function placeFor(
+  document: ThemeDocument,
+  page: SlotPageKey,
+  slotKey: string,
+  wiring: WiredSlot,
+): number {
+  const above = new Set<string>();
+  for (const slot of SLOTS[page] ?? []) {
+    if (slot.key === slotKey) break;
+    const earlier = wiringFor(page, slot.key);
+    if (earlier) for (const type of sectionTypesOf(earlier)) above.add(type);
+  }
+
+  const sections = pageSections(document, wiring.page);
+  let at = 0;
+  sections.forEach((section, index) => {
+    if (above.has(section.type)) at = index + 1;
+  });
+  return at;
 }
 
 /**
@@ -128,8 +203,12 @@ export function choiceEdits(
   document: ThemeDocument,
   wiring: WiredSlot,
   value: string,
+  /** Where this place sits on the canvas, so a new section lands there. */
+  where: { page: SlotPageKey; key: string },
 ): EditorAction[] {
-  const wanted = wiring.sections[value] ?? null;
+  const { page, key: slotKey } = where;
+  const meaning = meaningOf(wiring, value);
+  const wanted = meaning?.type ?? null;
   const edits: EditorAction[] = [{ type: "pickPage", page: wiring.page }];
 
   // Everything this place could be, hidden unless it is the one chosen. Hidden,
@@ -147,9 +226,28 @@ export function choiceEdits(
   }
 
   // A document written before this section existed simply does not carry it. A
-  // merchant asking for the hero means the hero, not an explanation.
-  if (wanted && !sectionOfType(document, wiring, wanted)) {
-    edits.push({ type: "add", sectionType: wanted });
+  // merchant asking for the hero means the hero, not an explanation. It is born
+  // with the settings that make it THIS value, rather than added and then set:
+  // its id is the reducer's to mint, so nothing out here could name it anyway.
+  const existing = wanted ? sectionOfType(document, wiring, wanted) : null;
+  if (wanted && !existing) {
+    edits.push({
+      type: "add",
+      sectionType: wanted,
+      settings: meaning?.settings,
+      at: placeFor(document, page, slotKey, wiring),
+    });
+  }
+
+  // And where the section is already there, the settings that reshape it: the
+  // category band becomes a row of names by its `layout`, not by a second
+  // section.
+  if (existing) {
+    for (const [setting, next] of Object.entries(meaning?.settings ?? {})) {
+      if (existing.settings?.[setting] !== next) {
+        edits.push({ type: "setSetting", id: existing.id, setting, value: next });
+      }
+    }
   }
 
   return edits.length > 1 ? edits : [];
@@ -211,6 +309,28 @@ export function removeBlockEdits(
   return [
     { type: "pickPage", page: wiring.page },
     { type: "removeBlock", id: section.id, blockId },
+  ];
+}
+
+/**
+ * Every part of this place at once, from a list of values for one setting.
+ *
+ * The featured band is picked by ticking a list, not by adding eight parts and
+ * filling each one in (owner, 2026-09-23). One action, so one document reaches
+ * autosave rather than eight.
+ */
+export function setBlocksEdits(
+  document: ThemeDocument,
+  wiring: WiredSlot,
+  blockType: string,
+  setting: string,
+  values: string[],
+): EditorAction[] {
+  const section = sectionFor(document, wiring);
+  if (!section) return [];
+  return [
+    { type: "pickPage", page: wiring.page },
+    { type: "setBlocks", id: section.id, blockType, setting, values },
   ];
 }
 

@@ -53,6 +53,7 @@ const SOURCES = [
   "src/components/theme-editor/slots/SlotEditor.tsx",
   "src/components/theme-editor/slots/SlotCanvas.tsx",
   "src/components/theme-editor/slots/SlotDialog.tsx",
+  "src/components/theme-editor/ProductPicker.tsx",
   "src/components/theme-editor/slots/ShopChrome.tsx",
   "src/components/theme-editor/slots/StylePanel.tsx",
 ];

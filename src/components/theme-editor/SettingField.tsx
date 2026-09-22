@@ -2,7 +2,7 @@
 
 import { useEffect, useId, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { Image as ImageIcon, Link2, Pencil, X } from "lucide-react";
+import { Image as ImageIcon, Link2, Package, Pencil, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { FormField } from "@/components/ui/form-field";
@@ -36,6 +36,9 @@ export type SettingFieldProps = {
   /** A picture field does the same, and needs a URL to draw the one it holds. */
   onPickPicture: () => void;
   pictureUrl?: (key: string) => string;
+  /** A product field asks for its own picker, and a name to show what it holds. */
+  onPickProduct?: () => void;
+  productName?: (publicId: string) => string;
 };
 
 export function SettingField({
@@ -45,6 +48,8 @@ export function SettingField({
   onPickLink,
   onPickPicture,
   pictureUrl,
+  onPickProduct,
+  productName,
 }: SettingFieldProps) {
   const t = useTranslations("themeEditor");
   const id = useId();
@@ -120,6 +125,42 @@ export function SettingField({
 
   if (spec.kind === "datetime") {
     return <ScheduleField spec={spec} value={value} onChange={onChange} id={id} />;
+  }
+
+  if (spec.kind === "product") {
+    const picked = typeof value === "string" ? value : "";
+    const name = picked ? (productName?.(picked) ?? "") : "";
+    return (
+      <FormField label={spec.label} hint={spec.help ?? undefined}>
+        <div className="flex items-center gap-2">
+          <p className="flex min-w-0 flex-1 items-center gap-2 rounded-xs border border-input-border bg-input-surface px-3 py-2 text-sm">
+            <Package className="size-4 shrink-0 text-muted-foreground" aria-hidden />
+            <span className={cn("truncate", picked ? "text-foreground" : "text-muted-foreground")}>
+              {/* The name once it is known, the id until then: a product whose
+                  list has not arrived yet must not read as an empty field. */}
+              {name || (picked ? picked : t("productNone"))}
+            </span>
+          </p>
+          <Button type="button" variant="outline" className="h-11 shrink-0 md:h-9" onClick={onPickProduct}>
+            <Pencil aria-hidden />
+            {picked ? t("productChange") : t("productChoose")}
+          </Button>
+          {picked ? (
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="size-11 shrink-0 md:size-9"
+              aria-label={t("productClear")}
+              title={t("productClear")}
+              onClick={() => onChange("")}
+            >
+              <X aria-hidden />
+            </Button>
+          ) : null}
+        </div>
+      </FormField>
+    );
   }
 
   if (spec.kind === "url") {

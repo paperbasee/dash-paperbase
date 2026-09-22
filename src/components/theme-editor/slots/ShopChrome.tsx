@@ -172,6 +172,7 @@ export function ShopChrome({
   settings,
   live,
   pictureUrl,
+  departments,
 }: {
   page: SlotPageKey;
   slotKey: string;
@@ -203,6 +204,13 @@ export function ShopChrome({
   live?: ThemeSection;
   /** A picture key this shop uploaded, to the URL it draws from. */
   pictureUrl?: (key: string) => string;
+  /**
+   * This shop's own top-level department names, for the band that draws them.
+   *
+   * The canvas cannot read the shop's catalogue the way the storefront does, so
+   * this is handed in; empty falls back to examples rather than to a blank band.
+   */
+  departments?: string[];
 }) {
   const t = useTranslations("themeEditor.slots");
 
@@ -572,20 +580,34 @@ export function ShopChrome({
       );
     }
 
-    case "home:categories":
+    case "home:categories": {
+      // The shop's OWN departments once this place is wired, and example names
+      // only until the list arrives. A merchant recognising their own
+      // departments is how they know this band is the one they mean -- and the
+      // heading is theirs too, drawn only when they have written one.
+      const EXAMPLES = ["Audio", "Men", "Women", "Wearables", "Kids", "Home"];
+      const names = departments?.length ? departments : EXAMPLES;
+      const heading = typeof live?.settings?.heading === "string" ? live.settings.heading.trim() : "";
+
       return variant === "strip" ? (
-        <div className="flex gap-2 overflow-hidden px-4 py-4">
-          {["Audio", "Men", "Women", "Wearables", "Kids", "Home"].map((name) => (
-            <span key={name} className="shrink-0 rounded-full border border-current/15 px-3 py-1.5 text-[11px]">
-              {name}
-            </span>
-          ))}
+        <div className="px-4 py-4">
+          {heading ? <SectionHead title={heading} /> : null}
+          <div className="flex gap-2 overflow-hidden">
+            {names.map((name) => (
+              <span
+                key={name}
+                className="shrink-0 rounded-full border border-current/15 px-3 py-1.5 text-[11px]"
+              >
+                {name}
+              </span>
+            ))}
+          </div>
         </div>
       ) : (
         <div className="px-4 py-4">
-          <SectionHead title={t("categoriesHeading")} />
+          {heading ? <SectionHead title={heading} /> : null}
           <div className="grid grid-cols-4 gap-3">
-            {["Audio", "Men", "Women", "Kids"].map((name) => (
+            {names.slice(0, 4).map((name) => (
               <div key={name} className="min-w-0">
                 <div className="aspect-[4/3] rounded-xs bg-current/8" />
                 <p className="mt-1.5 truncate text-center text-[11px] text-current/60">{name}</p>
@@ -594,6 +616,7 @@ export function ShopChrome({
           </div>
         </div>
       );
+    }
 
     case "home:trust":
       return variant === "line" ? (
