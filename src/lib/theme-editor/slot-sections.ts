@@ -1,7 +1,7 @@
 import type { ThemeDocument, ThemeSection } from "@/lib/theme-editor/api";
 import { pageSections, type PageKey } from "@/lib/theme-editor/document-ops";
 import type { EditorAction } from "@/lib/theme-editor/editor-reducer";
-import type { SlotPageKey } from "@/lib/theme-editor/slot-catalogue";
+import type { Slot, SlotPageKey } from "@/lib/theme-editor/slot-catalogue";
 
 /**
  * Which place on the canvas is which section of the shop's document.
@@ -33,6 +33,20 @@ export const WIRED_SLOTS: Partial<Record<SlotPageKey, Record<string, WiredSlot>>
     notice: { page: "header", type: "announcement_bar", on: "message", off: "off" },
   },
 };
+
+/**
+ * Where a place's value actually lives.
+ *
+ * Most places are their own: the Home page's banner is the Home page's. Some are
+ * drawn on every page and owned by one entry -- the notice strip is drawn
+ * everywhere and owned by Header -- and `inheritedFrom` on the catalogue says
+ * which. Everything that reads or writes a place has to ask this first, or the
+ * notice a merchant clicked on Home is looked up under Home, where there is
+ * nothing.
+ */
+export function ownerOf(page: SlotPageKey, slot: Slot): { page: SlotPageKey; key: string } {
+  return slot.inheritedFrom ?? { page, key: slot.key };
+}
 
 /** What this place is in the document, or null when it is still a drawing. */
 export function wiringFor(page: SlotPageKey, slotKey: string): WiredSlot | null {

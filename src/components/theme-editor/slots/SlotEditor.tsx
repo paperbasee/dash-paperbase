@@ -110,18 +110,25 @@ export function SlotEditor({ loaded }: { loaded: ThemeEditorState }) {
   /**
    * A choice: written to the shop's document when the place is wired, kept in
    * this component when it is still a drawing.
+   *
+   * `owner` is the entry that OWNS the place, which is not always the page it
+   * was clicked on -- the notice strip is drawn on every page and owned by
+   * Header. The canvas resolves that before it calls.
    */
-  function choose(slotPage: SlotPageKey, slotKey: string, value: string) {
-    const wiring = wiringFor(slotPage, slotKey);
+  function choose(owner: { page: SlotPageKey; key: string }, value: string) {
+    const wiring = wiringFor(owner.page, owner.key);
     if (!wiring) {
-      setChoices((all) => ({ ...all, [slotPage]: { ...all[slotPage], [slotKey]: value } }));
+      setChoices((all) => ({
+        ...all,
+        [owner.page]: { ...all[owner.page], [owner.key]: value },
+      }));
       return;
     }
     for (const edit of choiceEdits(state.document, wiring, value)) dispatch(edit);
   }
 
-  function setSetting(slotPage: SlotPageKey, slotKey: string, setting: string, value: unknown) {
-    const wiring = wiringFor(slotPage, slotKey);
+  function setSetting(owner: { page: SlotPageKey; key: string }, setting: string, value: unknown) {
+    const wiring = wiringFor(owner.page, owner.key);
     if (!wiring) return;
     for (const edit of settingEdits(state.document, wiring, setting, value)) dispatch(edit);
   }
@@ -314,11 +321,11 @@ export function SlotEditor({ loaded }: { loaded: ThemeEditorState }) {
             open={open}
             onOpen={setOpen}
             choices={choices[page]}
-            onChoose={(slotKey, value) => choose(page, slotKey, value)}
+            onChoose={choose}
             allChoices={choices}
             document={state.document}
             manifest={state.manifest}
-            onSet={(slotKey, setting, value) => setSetting(page, slotKey, setting, value)}
+            onSet={setSetting}
             onGoToPage={(next, slotKey) => {
               setPage(next);
               setOpen(slotKey);

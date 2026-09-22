@@ -8,7 +8,14 @@
 
 import { describe, expect, test } from "vitest";
 
-import { sectionFor, slotValueFor, wiringFor, WIRED_SLOTS } from "@/lib/theme-editor/slot-sections";
+import {
+  ownerOf,
+  sectionFor,
+  slotValueFor,
+  wiringFor,
+  WIRED_SLOTS,
+} from "@/lib/theme-editor/slot-sections";
+import { SLOTS } from "@/lib/theme-editor/slot-catalogue";
 import { document, section } from "./fixtures";
 
 describe("which places are wired", () => {
@@ -70,5 +77,26 @@ describe("reading the document", () => {
       section("home-bar", "announcement_bar", { hidden: false, settings: { text: "Not this one" } }),
     );
     expect(slotValueFor(doc, notice)).toBe("off");
+  });
+});
+
+describe("where a place is edited", () => {
+  test("the notice clicked on any page is the header group's bar", () => {
+    // It used to send the merchant to the Header entry to change the strip they
+    // were looking at -- a detour through a filing decision they should never
+    // have to know about. The pop-up opens where they clicked, and this is what
+    // makes it edit the right section anyway.
+    for (const page of ["home", "product", "cart"] as const) {
+      const slot = SLOTS[page].find((entry) => entry.key === "notice")!;
+      const owner = ownerOf(page, slot);
+
+      expect(owner).toEqual({ page: "header", key: "notice" });
+      expect(wiringFor(owner.page, owner.key)).not.toBeNull();
+    }
+  });
+
+  test("a place nobody else owns is its own", () => {
+    const slot = SLOTS.home.find((entry) => !entry.inheritedFrom)!;
+    expect(ownerOf("home", slot)).toEqual({ page: "home", key: slot.key });
   });
 });

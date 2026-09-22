@@ -13,7 +13,7 @@ import {
   type SlotOption,
   type SlotPageKey,
 } from "@/lib/theme-editor/slot-catalogue";
-import { sectionFor, slotValueFor, wiringFor } from "@/lib/theme-editor/slot-sections";
+import { ownerOf, sectionFor, slotValueFor, wiringFor } from "@/lib/theme-editor/slot-sections";
 import { ShopChrome } from "./ShopChrome";
 import { SlotDialog } from "./SlotDialog";
 
@@ -294,12 +294,16 @@ export function SlotCanvas({
   open: string | null;
   onOpen: (slotKey: string | null) => void;
   choices: Record<string, string>;
-  onChoose: (slotKey: string, value: string) => void;
+  /**
+   * A choice, named by the entry that OWNS the place rather than the page it was
+   * clicked on -- the notice strip is drawn on every page and owned by Header.
+   */
+  onChoose: (owner: { page: SlotPageKey; key: string }, value: string) => void;
   /** The shop's own document: what a WIRED place reads and writes. */
   document: ThemeDocument;
   manifest: ThemeManifest;
-  /** One setting of a wired place. */
-  onSet: (slotKey: string, setting: string, value: unknown) => void;
+  /** One setting of a wired place, named the same way. */
+  onSet: (owner: { page: SlotPageKey; key: string }, setting: string, value: unknown) => void;
   /**
    * Every page's settings, so an inherited slot can read the one that actually
    * drives it -- `slot.inheritedFrom` says which page and which key. Merging
@@ -311,9 +315,12 @@ export function SlotCanvas({
   onGoToPage: (page: SlotPageKey, slotKey: string) => void;
 }) {
   // The open place, and whether it is one of the wired ones. A wired place is
-  // edited in the dialog below rather than in a panel under its band.
+  // edited in the dialog below rather than in a panel under its band -- and it
+  // is looked up under the entry that owns it, so the strip a merchant clicked
+  // on Home is the header group's bar.
   const openSlot = open ? (SLOTS[page].find((slot) => slot.key === open) ?? null) : null;
-  const openWiring = openSlot ? wiringFor(page, openSlot.key) : null;
+  const openOwner = openSlot ? ownerOf(page, openSlot) : null;
+  const openWiring = openOwner ? wiringFor(openOwner.page, openOwner.key) : null;
 
   return (
     <div className="flex justify-center bg-muted/40 p-2 sm:p-3">
@@ -324,20 +331,33 @@ export function SlotCanvas({
         )}
       >
         {bandsOf(SLOTS[page]).map((band) => {
-          /** An inherited place is edited where it lives; everything else opens here. */
+          /**
+           * Everything opens where it was clicked, except a place that is drawn
+           * on every page and is still a DRAWING: those keep their choices under
+           * the band that owns them, on the entry that owns them, because an
+           * inline panel for another page's band under this page's band reads as
+           * if it belonged to this page.
+           *
+           * A wired one opens here (owner, 2026-09-22). It edits in a pop-up, so
+           * there is nothing under any band to be confused about, and being sent
+           * to Header to change the strip you are looking at is a detour through
+           * a filing decision the merchant should never have to know about.
+           */
           const activate = (slot: Slot) => () => {
             const source = slot.inheritedFrom;
-            if (source) onGoToPage(source.page, source.key);
-            else onOpen(open === slot.key ? null : slot.key);
+            if (source && !wiringFor(source.page, source.key)) {
+              onGoToPage(source.page, source.key);
+              return;
+            }
+            onOpen(open === slot.key ? null : slot.key);
           };
           /**
            * A place edited elsewhere is read from THERE -- `inheritedFrom` says
            * which entry owns it -- so the notice drawn on every page is the one
            * the Header entry holds.
            */
-          const ownerOf = (slot: Slot) => slot.inheritedFrom ?? { page, key: slot.key };
           const wiringOf = (slot: Slot) => {
-            const owner = ownerOf(slot);
+            const owner = ownerOf(page, slot);
             return wiringFor(owner.page, owner.key);
           };
           const valueOf = (slot: Slot) => {
@@ -368,7 +388,7 @@ export function SlotCanvas({
               <Chooser
                 slot={opened}
                 value={valueOf(opened)}
-                onPick={(next) => onChoose(opened.key, next)}
+                onPick={(next) => onChoose(ownerOf(page, opened), next)}
                 onDone={() => onOpen(null)}
               />
             ) : null;
@@ -427,14 +447,14 @@ export function SlotCanvas({
         })}
       </div>
 
-      {openWiring && openSlot ? (
+      {openWiring && openSlot && openOwner ? (
         <SlotDialog
           slot={openSlot}
           wiring={openWiring}
           manifest={manifest}
           document={document}
-          onChoose={(value) => onChoose(openSlot.key, value)}
-          onSet={(setting, value) => onSet(openSlot.key, setting, value)}
+          onChoose={(value) => onChoose(openOwner, value)}
+          onSet={(setting, value) => onSet(openOwner, setting, value)}
           onClose={() => onOpen(null)}
         />
       ) : null}
