@@ -32,6 +32,15 @@ export interface NavCounts {
   customers: number;
   supportTickets: number;
   blog: number;
+  /**
+   * Reviews waiting for a decision.
+   *
+   * Waiting, not written: a shop with four hundred published reviews and
+   * nothing left to read should show no badge at all. Nothing on a product
+   * page changes until a merchant approves one, so without this the queue was
+   * invisible until somebody went looking for it.
+   */
+  reviews: number;
 }
 
 export interface AppConfig {
@@ -135,7 +144,7 @@ export const APP_CONFIG: Record<string, AppConfig> = {
     description: "What shoppers said, waiting for your word",
     essential: false,
     href: "/reviews",
-    countKey: null,
+    countKey: "reviews",
     parentId: "catalog",
   },
   categories: {

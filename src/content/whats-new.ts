@@ -64,6 +64,21 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-09-22-you-are-told-a-review-is-waiting",
+    date: "2026-09-22",
+    version: "4.48.0",
+    tag: "improved",
+    href: "/reviews",
+    title: {
+      en: "You are told when a review is waiting",
+      bn: "রিভিউ অপেক্ষায় থাকলে আপনি জানতে পারবেন",
+    },
+    body: {
+      en: "Nothing a customer writes appears on your shop until you approve it, so a review could sit unread if you did not think to check the tab. Reviews now shows how many are waiting right on the sidebar, and a waiting review turns up in your notifications. Someone polishing their own review a few times only ever counts once.",
+      bn: "ক্রেতার লেখা কিছুই আপনার অনুমোদন ছাড়া দোকানে দেখা যায় না, তাই ট্যাবটি খুলে না দেখলে কোনো রিভিউ অনেকদিন পড়ে থাকতে পারত। এখন সাইডবারে রিভিউর পাশেই কতগুলো অপেক্ষায় আছে তা দেখা যায়, আর অপেক্ষমাণ রিভিউ আপনার নোটিফিকেশনেও আসে। কেউ নিজের রিভিউ কয়েকবার ঠিকঠাক করলেও সেটি একবারই গোনা হয়।",
+    },
+  },
+  {
     id: "2026-09-22-customers-can-create-an-account",
     date: "2026-09-22",
     version: "4.47.0",
@@ -73,8 +88,8 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
       bn: "ক্রেতাদের জন্য পূর্ণাঙ্গ সাইন-আপ",
     },
     body: {
-      en: "Your shop now has a Create account page that asks for a first name, last name, phone number and email, so you know who your customers are instead of only having an address. It tells them that creating an account accepts your shop's terms, and anyone who already has an account is pointed to sign in instead. There is still no password to remember — they get a link by email as before.",
-      bn: "আপনার দোকানে এখন একটি \"অ্যাকাউন্ট তৈরি করুন\" পাতা আছে, যেখানে নামের প্রথম ও শেষ অংশ, ফোন নম্বর আর ইমেইল চাওয়া হয় — ফলে শুধু ঠিকানা নয়, ক্রেতা কে তা-ও আপনি জানতে পারবেন। সেখানে লেখা থাকে যে অ্যাকাউন্ট তৈরি করলে তাঁরা আপনার দোকানের শর্তাবলিতে সম্মত হচ্ছেন, আর যাঁদের আগেই অ্যাকাউন্ট আছে তাঁদের সাইন ইনের দিকে পাঠানো হয়। আগের মতোই কোনো পাসওয়ার্ড মনে রাখতে হয় না — ইমেইলে লিংক চলে যায়।",
+      en: "Your shop now has a Create account page that asks for a first name, last name, phone number and email, so every customer in your Accounts list has a real name and number instead of just an address. Anyone signing in with an address you have never seen is asked the same three things before their account is made, so no nameless rows can appear. There is still no password to remember — they get a link by email as before.",
+      bn: "আপনার দোকানে এখন একটি \"অ্যাকাউন্ট তৈরি করুন\" পাতা আছে, যেখানে নামের প্রথম ও শেষ অংশ, ফোন নম্বর আর ইমেইল চাওয়া হয় — ফলে অ্যাকাউন্ট তালিকায় প্রত্যেক ক্রেতার আসল নাম ও নম্বর থাকবে, শুধু ঠিকানা নয়। আপনার কাছে আগে কখনো আসেনি এমন ঠিকানা দিয়ে কেউ সাইন ইন করলে অ্যাকাউন্ট তৈরির আগে তাঁকেও একই তিনটি তথ্য জিজ্ঞাসা করা হয়, তাই নামহীন কোনো সারি আর আসবে না। আগের মতোই কোনো পাসওয়ার্ড মনে রাখতে হয় না — ইমেইলে লিংক চলে যায়।",
     },
   },
   {
@@ -472,21 +487,6 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     body: {
       en: "Search never showed more than ten products, and there was no way to reach the rest — so a shop with two hundred shirts answered a search for shirts with ten of them. It now shows a full page at a time with working previous and next buttons, and the number beside your search is the real number of matches.",
       bn: "সার্চে কখনোই দশটির বেশি পণ্য দেখাত না, আর বাকিগুলোয় যাওয়ার কোনো উপায়ও ছিল না—ফলে দুইশ শার্টের দোকানে “শার্ট” খুঁজলে মাত্র দশটি আসত। এখন একবারে পুরো এক পাতা দেখায়, আগের-পরের বোতামও কাজ করে। আর সার্চের পাশে যে সংখ্যাটি থাকে, সেটিই আসল মিলে যাওয়া পণ্যের সংখ্যা।",
-    },
-  },
-  {
-    id: "2026-09-22-cart-page-in-your-language",
-    date: "2026-09-22",
-    // A storefront change: the dashboard version that is live, per the rule above.
-    version: "4.12.5",
-    tag: "fixed",
-    title: {
-      en: "Your cart page speaks your shop's language",
-      bn: "কার্ট পেজ এখন আপনার দোকানের ভাষায়",
-    },
-    body: {
-      en: "On the cart page the column headings, the estimated total and the button to check out were written in English whichever language your shop runs in, and they now follow your shop. The line under the total was wrong as well: it promised that taxes and discounts would be worked out at checkout, and Paperbase handles neither. It now says what is true — the delivery charge is added at checkout.",
-      bn: "কার্ট পেজে কলামের শিরোনাম, আনুমানিক মোট আর অর্ডারের বোতাম—আপনার দোকান যে ভাষাতেই চলুক, এগুলো ইংরেজিতেই দেখাত; এখন সেগুলো দোকানের ভাষা মেনে চলে। মোটের নিচের লাইনটিও ভুল ছিল: সেখানে লেখা ছিল ট্যাক্স ও ছাড় চেকআউটে হিসাব হবে, অথচ পেপারবেসে এর কোনোটিই নেই। এখন যা সত্যি তাই লেখা থাকে—ডেলিভারি চার্জ চেকআউটে যোগ হবে।",
     },
   },
   {

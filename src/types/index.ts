@@ -368,6 +368,8 @@ export interface DashboardStats {
   category_total: number;
   support_tickets: number;
   notifications: number;
+  /** Reviews WAITING for a decision — the sidebar badge, not a total. */
+  reviews_pending?: number;
   customers_count?: number;
   banners_count?: number;
   blogs_count?: number;

@@ -15,13 +15,18 @@ function formatCountBase(n: number): string {
   return String(n);
 }
 
-function mapStatsToNavCounts(stats: DashboardStats): NavCounts {
+/** Exported so the mapping can be tested as the data translation it is. */
+export function mapStatsToNavCounts(stats: DashboardStats): NavCounts {
   return {
     orders: stats.orders.total,
     products: stats.products.active,
     customers: stats.customers_count ?? 0,
     supportTickets: stats.support_tickets,
     blog: stats.blogs_count ?? 0,
+    // An older API answering without the field reads as nothing waiting,
+    // which is the safe way round: a badge that is absent is better than one
+    // that says NaN.
+    reviews: stats.reviews_pending ?? 0,
   };
 }
 

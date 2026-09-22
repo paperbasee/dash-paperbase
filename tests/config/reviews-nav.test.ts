@@ -22,6 +22,20 @@ describe("the Reviews tab", () => {
     expect(APP_CONFIG.reviews?.href).toBe("/reviews");
   });
 
+  test("shows how many reviews are WAITING", () => {
+    /*
+     * A review arrives pending and nothing on a product page changes until a
+     * merchant approves it -- so without a badge the queue is invisible until
+     * somebody goes looking, and the shopper who wrote one watches it never
+     * appear.
+     *
+     * `countKey` was null until 2026-09-22 even though the number already
+     * existed; that is the sort of thing that fails quietly, because a missing
+     * badge looks exactly like an empty queue.
+     */
+    expect(APP_CONFIG.reviews?.countKey).toBe("reviews");
+  });
+
   test("sits in the Catalog group, where the products it is about live", () => {
     expect(CATALOG_SUB_APP_IDS).toContain("reviews");
     expect(APP_CONFIG.reviews?.parentId).toBe("catalog");
