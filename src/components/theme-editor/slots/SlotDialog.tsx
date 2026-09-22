@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type CSSProperties } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { ArrowDown, ArrowUp, Plus, Trash2 } from "lucide-react";
 
@@ -130,10 +130,26 @@ export function SlotDialog({
               answer, and a merchant who wants it gone should not have to read
               five fields to find that out.
             */}
+            {/*
+              One row, split evenly: two choices take half each, three take a
+              third. A tab bar whose tabs are as wide as their own words reads
+              as a list of links rather than as a choice between two things --
+              and the wider target is the easier one to hit on a phone.
+
+              The column count is a CSS variable because Tailwind builds the
+              classes it can SEE, and a class assembled from a number at render
+              time is invisible to it. Same trick the canvas uses for a row of
+              places.
+            */}
             <div
               role="group"
               aria-label={t("whatGoesHere")}
-              className="flex flex-wrap gap-2 rounded-sm border border-border-subtle p-2"
+              className="grid gap-2 rounded-sm border border-border-subtle p-2 [grid-template-columns:var(--option-cols)]"
+              style={
+                {
+                  "--option-cols": `repeat(${(slot.options ?? []).length || 1}, minmax(0,1fr))`,
+                } as CSSProperties
+              }
             >
               {(slot.options ?? []).map((option) => {
                 const locked = Boolean(option.premium) && !premiumSections;
@@ -146,7 +162,7 @@ export function SlotDialog({
                     title={locked ? t("premiumSection") : undefined}
                     onClick={() => onChoose(option.value)}
                     className={cn(
-                      "rounded-xs px-3 py-1.5 text-xs font-medium",
+                      "min-h-9 rounded-xs px-3 py-1.5 text-center text-xs font-medium",
                       "disabled:cursor-not-allowed disabled:opacity-60",
                       chosen === option.value
                         ? "bg-primary text-primary-foreground"
