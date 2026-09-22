@@ -151,9 +151,14 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
       key: "hero",
       label: "hero",
       initial: "slider",
+      /*
+        Two, not three. "A still picture" was a third option until 2026-09-22,
+        and it was the same section as the slider: a hero with one picture IS a
+        still. A choice that decides nothing is exactly what this editor was
+        rebuilt to stop offering.
+      */
       options: [
         { value: "slider", label: "heroSlider", note: "heroSliderNote", shape: "block" },
-        { value: "still", label: "heroStill", note: "heroStillNote", shape: "block" },
         { value: "video", label: "heroVideo", note: "heroVideoNote", shape: "block", premium: true },
       ],
     },

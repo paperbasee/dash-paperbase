@@ -189,8 +189,6 @@ export function orderEditorVariantsQueryKey(productId: string) {
 
 export const popupsQueryKey = ["popups"] as const;
 
-export const bannersQueryKey = ["banners"] as const;
-
 export const blogsListQueryKeyRoot = ["blogs", "list"] as const;
 
 export type BlogsListParams = Record<string, string>;

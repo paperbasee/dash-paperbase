@@ -27,6 +27,7 @@ import {
   type EditorPorts,
 } from "@/lib/theme-editor/editor-actions";
 import { editorReducer, initEditorState } from "@/lib/theme-editor/editor-reducer";
+import { useThemeImagesQuery } from "@/hooks/useThemesQuery";
 import {
   initialChoices,
   PAGE_NOTES,
@@ -34,7 +35,15 @@ import {
   SLOT_PAGES,
   type SlotPageKey,
 } from "@/lib/theme-editor/slot-catalogue";
-import { choiceEdits, settingEdits, wiringFor } from "@/lib/theme-editor/slot-sections";
+import {
+  addBlockEdits,
+  blockSettingEdits,
+  choiceEdits,
+  moveBlockEdits,
+  removeBlockEdits,
+  settingEdits,
+  wiringFor,
+} from "@/lib/theme-editor/slot-sections";
 import { themesQueryKey } from "@/lib/query-keys";
 import { useQueryClient } from "@tanstack/react-query";
 import { ConflictDialog } from "../ConflictDialog";
@@ -101,6 +110,11 @@ export function SlotEditor({ loaded }: { loaded: ThemeEditorState }) {
   }));
 
   const save = useAutosave({ loaded, document: state.document, onSaved: () => {} });
+  // Pictures this shop has already placed, and the URLs of ones placed since the
+  // list was read: an upload answers with a key alone, and a field needs a URL
+  // to draw the thumbnail before the next save refreshes the list.
+  const images = useThemeImagesQuery({ enabled: true });
+  const [pictureUrls] = useState<Record<string, string>>({});
 
   function pickPage(next: SlotPageKey) {
     setPage(next);
@@ -131,6 +145,16 @@ export function SlotEditor({ loaded }: { loaded: ThemeEditorState }) {
     const wiring = wiringFor(owner.page, owner.key);
     if (!wiring) return;
     for (const edit of settingEdits(state.document, wiring, setting, value)) dispatch(edit);
+  }
+
+  /** The parts inside a wired place: the hero's pictures, in order. */
+  function edits(
+    owner: { page: SlotPageKey; key: string },
+    make: (wiring: NonNullable<ReturnType<typeof wiringFor>>) => ReturnType<typeof choiceEdits>,
+  ) {
+    const wiring = wiringFor(owner.page, owner.key);
+    if (!wiring) return;
+    for (const edit of make(wiring)) dispatch(edit);
   }
 
   const ports = (): EditorPorts => ({
@@ -326,6 +350,23 @@ export function SlotEditor({ loaded }: { loaded: ThemeEditorState }) {
             document={state.document}
             manifest={state.manifest}
             onSet={setSetting}
+            onSetBlock={(owner, blockId, setting, value) =>
+              edits(owner, (wiring) =>
+                blockSettingEdits(state.document, wiring, blockId, setting, value),
+              )
+            }
+            onAddBlock={(owner, blockType) =>
+              edits(owner, (wiring) => addBlockEdits(state.document, wiring, blockType))
+            }
+            onRemoveBlock={(owner, blockId) =>
+              edits(owner, (wiring) => removeBlockEdits(state.document, wiring, blockId))
+            }
+            onMoveBlock={(owner, blockId, to) =>
+              edits(owner, (wiring) => moveBlockEdits(state.document, wiring, blockId, to))
+            }
+            premiumSections={loaded.premium_sections !== false}
+            pictures={images.data ?? []}
+            pictureUrl={(key) => pictureUrls[key] ?? images.data?.find((row) => row.key === key)?.url ?? ""}
             onGoToPage={(next, slotKey) => {
               setPage(next);
               setOpen(slotKey);

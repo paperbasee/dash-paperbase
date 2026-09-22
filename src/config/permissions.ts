@@ -91,17 +91,6 @@ export const PERMISSION_GROUPS: PermissionGroup[] = [
     ],
   },
   {
-    // No dashboard screen since 2026-09-18: a theme holds its own pictures. The
-    // permission stays because the API's banners endpoints do, and this file is a
-    // mirror of its catalogue; it goes when those endpoints go.
-    id: "banners",
-    labelKey: "groupBanners",
-    permissions: [
-      { key: "banners.view", labelKey: "permBannersView" },
-      { key: "banners.manage", labelKey: "permBannersManage" },
-    ],
-  },
-  {
     id: "popups",
     labelKey: "groupPopups",
     permissions: [

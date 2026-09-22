@@ -19,6 +19,8 @@ import {
   User,
 } from "lucide-react";
 
+import type { ThemeSection } from "@/lib/theme-editor/api";
+import { cn } from "@/lib/utils";
 import type { SlotPageKey } from "@/lib/theme-editor/slot-catalogue";
 
 /**
@@ -169,6 +171,7 @@ export function ShopChrome({
   variant,
   settings,
   live,
+  pictureUrl,
 }: {
   page: SlotPageKey;
   slotKey: string;
@@ -185,14 +188,21 @@ export function ShopChrome({
    */
   settings?: Record<string, string>;
   /**
-   * A WIRED place's own settings, straight from the shop's document.
+   * A WIRED place's own SECTION, straight from the shop's document -- settings
+   * and the parts inside it.
    *
    * The drawing is a drawing everywhere else, and says so; where a place is
-   * real, it draws the merchant's own words instead of an example. The two are
-   * separate on purpose: `settings` is this editor's held choices, `live` is the
-   * shop's document, and reading one as the other is how a preview starts lying.
+   * real, it draws the merchant's own words and pictures instead of an example.
+   * The two are separate on purpose: `settings` is this editor's held choices,
+   * `live` is the shop's document, and reading one as the other is how a
+   * preview starts lying.
+   *
+   * The whole section rather than its settings, because the hero's pictures are
+   * its BLOCKS -- a place that is a list needs the list.
    */
-  live?: Record<string, unknown>;
+  live?: ThemeSection;
+  /** A picture key this shop uploaded, to the URL it draws from. */
+  pictureUrl?: (key: string) => string;
 }) {
   const t = useTranslations("themeEditor.slots");
 
@@ -205,7 +215,8 @@ export function ShopChrome({
     // strip drawn empty reads as a bug rather than as a blank.
     // One ground, not a choice: the owner took the colour setting off the bar
     // on 2026-09-22, because the palette already decides what the accent is.
-    const written = typeof live?.text === "string" ? live.text.trim() : "";
+    const text = live?.settings?.text;
+    const written = typeof text === "string" ? text.trim() : "";
     return (
       <p className="border-b border-border bg-muted px-4 py-2 text-center text-[11px] uppercase tracking-[0.06em] text-current/75">
         {written || t("noticeExample")}
@@ -495,6 +506,45 @@ export function ShopChrome({
      */
     case "home:hero": {
       const slider = variant === "slider" || variant === undefined;
+      // The merchant's own pictures, once this place is wired. Their first one
+      // is what a shopper opens the shop on, so it is what belongs here -- an
+      // example hero in its place is the editor telling a small lie about the
+      // most-looked-at thing on the page.
+      const pictures = (live?.blocks ?? [])
+        .map((block) => block.settings?.image)
+        .filter((key): key is string => typeof key === "string" && key !== "");
+      if (slider && live) {
+        return pictures.length ? (
+          <div className="relative aspect-[21/9] w-full overflow-hidden bg-current/8">
+            {/* eslint-disable-next-line @next/next/no-img-element -- a merchant
+                upload on a bucket the dashboard does not configure a loader for */}
+            <img
+              src={pictureUrl?.(pictures[0]) || pictures[0]}
+              alt=""
+              className="h-full w-full object-cover"
+            />
+            {pictures.length > 1 ? (
+              <div className="absolute inset-x-0 bottom-3 flex justify-center gap-1.5">
+                {pictures.map((key, index) => (
+                  <span
+                    key={key + index}
+                    className={cn(
+                      "size-1.5 rounded-full",
+                      index === 0 ? "bg-white" : "bg-white/50",
+                    )}
+                  />
+                ))}
+              </div>
+            ) : null}
+          </div>
+        ) : (
+          <div className="grid aspect-[21/9] w-full place-items-center bg-current/8 text-center">
+            <span className="max-w-[26ch] text-[11.5px] leading-relaxed text-current/55">
+              {t("heroEmpty")}
+            </span>
+          </div>
+        );
+      }
       return (
         <div className="relative flex min-h-[210px] flex-col justify-center gap-2.5 bg-current/8 px-7 pb-9 pt-7">
           {variant === "video" ? (

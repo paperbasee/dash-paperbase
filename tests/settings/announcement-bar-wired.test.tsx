@@ -15,6 +15,7 @@ import { editorReducer, initEditorState, type EditorState } from "@/lib/theme-ed
 import {
   choiceEdits,
   sectionFor,
+  sectionOfType,
   settingEdits,
   slotValueFor,
   wiringFor,
@@ -46,7 +47,7 @@ function type(state: EditorState, setting: string, value: unknown): EditorState 
 
 /** The bar as the canvas draws it, from the settings the document holds. */
 function drawn(doc: ThemeDocument) {
-  const section = sectionFor(doc, NOTICE);
+  const section = sectionOfType(doc, NOTICE, "announcement_bar");
   return renderToStaticMarkup(
     <NextIntlClientProvider locale="en" messages={en}>
       <ShopChrome
@@ -54,7 +55,7 @@ function drawn(doc: ThemeDocument) {
         slotKey="notice"
         variant={slotValueFor(doc, NOTICE)}
         settings={{}}
-        live={section?.settings}
+        live={section ?? undefined}
       />
     </NextIntlClientProvider>,
   );
@@ -63,8 +64,10 @@ function drawn(doc: ThemeDocument) {
 describe("switching the bar on and off", () => {
   test("choosing the message shows the section the shop already has", () => {
     const before = editor();
-    const section = sectionFor(before.document, NOTICE)!;
-    expect(section.hidden).toBe(true);
+    // There, and hidden: `sectionFor` answers what the place is SHOWING, so it
+    // is null until the merchant switches the bar on.
+    expect(sectionOfType(before.document, NOTICE, "announcement_bar")!.hidden).toBe(true);
+    expect(sectionFor(before.document, NOTICE)).toBeNull();
 
     const after = choose(before, "message");
 
@@ -80,7 +83,10 @@ describe("switching the bar on and off", () => {
     const off = choose(written, "off");
 
     expect(slotValueFor(off.document, NOTICE)).toBe("off");
-    expect(sectionFor(off.document, NOTICE)?.settings.text).toBe("Free delivery in Dhaka");
+    // Hidden, not removed: the words are still there for when it comes back.
+    expect(sectionOfType(off.document, NOTICE, "announcement_bar")?.settings.text).toBe(
+      "Free delivery in Dhaka",
+    );
   });
 });
 

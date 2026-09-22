@@ -354,7 +354,6 @@ export interface DashboardStats {
   /** Reviews WAITING for a decision — the sidebar badge, not a total. */
   reviews_pending?: number;
   customers_count?: number;
-  banners_count?: number;
   blogs_count?: number;
   recent_orders: Order[];
 }
@@ -445,32 +444,6 @@ export interface Blog {
   updated_at: string;
 }
 
-/** Single gallery image row from `GET/PATCH admin/banners/`. */
-export interface BannerImage {
-  public_id: string;
-  image_url: string | null;
-  order: number;
-  created_at: string;
-}
-
-/** Admin banner CRUD (`/api/v1/admin/banners/`). Storefront GET uses `images`, `image_url`, and `cta_url`. */
-export interface Banner {
-  public_id: string;
-  /** Thumbnail: first gallery image, else legacy main image URL. */
-  image: string | null;
-  images?: BannerImage[];
-  title: string;
-  cta_text: string;
-  cta_link: string;
-  is_active: boolean;
-  is_currently_active: boolean;
-  order: number;
-  placement_slots: string[];
-  start_at: string | null;
-  end_at: string | null;
-  created_at: string;
-  updated_at: string;
-}
 
 /** Store popup image row for `GET/PATCH admin/popups/` + storefront modal payload. */
 export interface StorePopupImage {
@@ -703,8 +676,6 @@ export interface StoreAPIKey {
 }
 
 export type {
-  StorefrontBanner,
-  StorefrontBannerImage,
   StorefrontCategory,
   StorefrontOrderItem,
   StorefrontProductDetail,

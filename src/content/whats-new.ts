@@ -64,6 +64,21 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-09-22-hero-pictures-in-customization",
+    date: "2026-09-22",
+    version: "4.53.0",
+    tag: "improved",
+    href: "/settings?tab=customization",
+    title: {
+      en: "Your home page pictures are yours again",
+      bn: "হোম পেজের ছবিগুলো আবার আপনার হাতে",
+    },
+    body: {
+      en: "Changing them meant asking us: the Banners screen had gone and nothing replaced it. They are in Customization now — click the big picture on your home page and you can add up to five, order them, choose where a tap goes, and set how long each one stays. Your shop is showing exactly the pictures it showed yesterday.",
+      bn: "এগুলো বদলাতে আমাদের বলতে হতো: ব্যানার পাতাটি উঠে গিয়েছিল আর তার বদলে কিছু আসেনি। এখন সেগুলো কাস্টমাইজেশনে — হোম পেজের বড় ছবিতে চাপ দিলে পাঁচটি পর্যন্ত ছবি যোগ করা যাবে, ক্রম বদলানো যাবে, চাপ দিলে কোথায় যাবে তা ঠিক করা যাবে, আর প্রতিটি ছবি কত সময় থাকবে তাও। গতকাল যে ছবিগুলো ছিল ঠিক সেগুলোই দেখাচ্ছে।",
+    },
+  },
+  {
     id: "2026-09-22-one-announcement-bar",
     date: "2026-09-22",
     version: "4.50.0",
@@ -473,20 +488,6 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     body: {
       en: "A shopper can sign in to your shop with their email — no password, just a link we send them. Your Customers page now has an Accounts tab showing everyone who has. Every shop has this; there is nothing to switch on.",
       bn: "ক্রেতারা তাদের ইমেইল দিয়ে আপনার দোকানে সাইন ইন করতে পারবেন — কোনো পাসওয়ার্ড লাগবে না, আমরা একটি লিংক পাঠিয়ে দেব। গ্রাহক পাতায় এখন একটি অ্যাকাউন্ট ট্যাব আছে, যেখানে যারা সাইন ইন করেছেন তাদের দেখা যায়। প্রতিটি দোকানেই এটি আছে, আলাদা করে চালু করার কিছু নেই।",
-    },
-  },
-  {
-    id: "2026-09-22-shoppers-can-track-their-order",
-    date: "2026-09-22",
-    tag: "new",
-    version: "4.34.0",
-    title: {
-      en: "Shoppers can track their own order",
-      bn: "ক্রেতারা নিজেরাই অর্ডার ট্র্যাক করতে পারবেন",
-    },
-    body: {
-      en: "With their order number and the phone they ordered with, a shopper can see where their parcel is. No account needed — which matters most if your checkout form does not ask for an email. It stays off until you switch it on.",
-      bn: "অর্ডার নম্বর আর যে ফোন নম্বর দিয়ে অর্ডার করেছেন, সেটি দিলেই ক্রেতা দেখতে পাবেন তার পার্সেল কোথায় আছে। কোনো অ্যাকাউন্ট লাগবে না — বিশেষ করে যদি আপনার চেকআউট ফর্মে ইমেইল না চাওয়া হয়। আপনি চালু না করা পর্যন্ত এটি বন্ধ থাকবে।",
     },
   },
   {

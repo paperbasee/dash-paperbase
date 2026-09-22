@@ -136,6 +136,12 @@ export type ThemeSectionSpec = {
   premium?: boolean;
   /** Blocks every copy of the section keeps. */
   required_blocks?: string[];
+  /**
+   * The most parts a merchant may add -- the hero's five pictures. Absent means
+   * the platform's own limit. The API refuses a document over it either way:
+   * a cap is a promise about the SECTION, not about this screen.
+   */
+  max_blocks?: number;
   blocks?: Record<string, ThemeBlockSpec>;
 };
 

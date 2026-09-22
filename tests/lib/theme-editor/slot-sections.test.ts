@@ -11,6 +11,7 @@ import { describe, expect, test } from "vitest";
 import {
   ownerOf,
   sectionFor,
+  sectionOfType,
   slotValueFor,
   wiringFor,
   WIRED_SLOTS,
@@ -20,8 +21,20 @@ import { document, section } from "./fixtures";
 
 describe("which places are wired", () => {
   test("the notice on the Header entry is the announcement bar", () => {
-    const wiring = wiringFor("header", "notice");
-    expect(wiring).toEqual({ page: "header", type: "announcement_bar", on: "message", off: "off" });
+    expect(wiringFor("header", "notice")).toEqual({
+      page: "header",
+      sections: { message: "announcement_bar" },
+      off: "off",
+    });
+  });
+
+  test("the hero is two different sections, one per choice", () => {
+    // The first place where a value picks the SECTION rather than just showing
+    // one. Choosing the video hides the pictures; it never removes them.
+    expect(wiringFor("home", "hero")).toEqual({
+      page: "templates.home",
+      sections: { slider: "banner_slider", video: "video" },
+    });
   });
 
   test("a place that is still a drawing answers null", () => {
@@ -32,12 +45,13 @@ describe("which places are wired", () => {
     expect(wiringFor("header", "layout")).toBeNull();
   });
 
-  test("every wired place names a section, on and off", () => {
+  test("every wired place names at least one section, and no value twice", () => {
     for (const [page, slots] of Object.entries(WIRED_SLOTS)) {
       for (const [key, wiring] of Object.entries(slots ?? {})) {
         const where = `${page}.${key}`;
-        expect(wiring.type, where).toBeTruthy();
-        expect(wiring.on, where).not.toBe(wiring.off);
+        const values = Object.keys(wiring.sections);
+        expect(values.length, where).toBeGreaterThan(0);
+        expect(values, where).not.toContain(wiring.off);
       }
     }
   });
@@ -47,8 +61,22 @@ describe("reading the document", () => {
   const notice = wiringFor("header", "notice")!;
 
   test("finds the section by type, whatever its id", () => {
+    // Ids are the editor's, not the theme's: a document written by an older
+    // build names them differently and is still this shop's bar.
     const doc = document();
     doc.header.sections[0].id = "written-by-an-older-build";
+    expect(sectionOfType(doc, notice, "announcement_bar")?.type).toBe("announcement_bar");
+  });
+
+  test("a hidden section is not the one this place is showing", () => {
+    // What the dialog draws fields for. A hidden bar has no fields, so a
+    // merchant switches it on and then writes -- rather than typing into
+    // something invisible and wondering why their shop never changed.
+    const doc = document();
+    expect(doc.header.sections[0].hidden).toBe(true);
+    expect(sectionFor(doc, notice)).toBeNull();
+
+    doc.header.sections[0].hidden = false;
     expect(sectionFor(doc, notice)?.type).toBe("announcement_bar");
   });
 

@@ -4,7 +4,7 @@ import { useTranslations } from "next-intl";
 import { Lock } from "lucide-react";
 
 import { cn } from "@/lib/utils";
-import type { ThemeDocument, ThemeManifest } from "@/lib/theme-editor/api";
+import type { ThemeDocument, ThemeImage, ThemeManifest, ThemeSection } from "@/lib/theme-editor/api";
 import {
   isEmpty,
   SLOTS,
@@ -169,6 +169,7 @@ function SlotRegion({
   onActivate,
   settings,
   live,
+  pictureUrl,
   className,
   children,
 }: {
@@ -178,8 +179,9 @@ function SlotRegion({
   isOpen: boolean;
   onActivate: () => void;
   settings: Record<string, string>;
-  /** A wired place's own settings, so the drawing shows the merchant's words. */
-  live?: Record<string, unknown>;
+  /** A wired place's own SECTION, so the drawing shows the merchant's own. */
+  live?: ThemeSection;
+  pictureUrl?: (key: string) => string;
   className?: string;
   /** The chooser, when this place is on its own and can hold it. */
   children?: React.ReactNode;
@@ -247,7 +249,14 @@ function SlotRegion({
           </span>
         </div>
       ) : (
-        <ShopChrome page={page} slotKey={slot.key} variant={value} settings={settings} live={live} />
+        <ShopChrome
+          page={page}
+          slotKey={slot.key}
+          variant={value}
+          settings={settings}
+          live={live}
+          pictureUrl={pictureUrl}
+        />
       )}
 
       {children}
@@ -287,6 +296,13 @@ export function SlotCanvas({
   document,
   manifest,
   onSet,
+  onSetBlock,
+  onAddBlock,
+  onRemoveBlock,
+  onMoveBlock,
+  premiumSections,
+  pictures,
+  pictureUrl,
   onGoToPage,
 }: {
   page: SlotPageKey;
@@ -304,6 +320,21 @@ export function SlotCanvas({
   manifest: ThemeManifest;
   /** One setting of a wired place, named the same way. */
   onSet: (owner: { page: SlotPageKey; key: string }, setting: string, value: unknown) => void;
+  /** One setting of one PART of a wired place -- a hero picture. */
+  onSetBlock: (
+    owner: { page: SlotPageKey; key: string },
+    blockId: string,
+    setting: string,
+    value: unknown,
+  ) => void;
+  onAddBlock: (owner: { page: SlotPageKey; key: string }, blockType: string) => void;
+  onRemoveBlock: (owner: { page: SlotPageKey; key: string }, blockId: string) => void;
+  onMoveBlock: (owner: { page: SlotPageKey; key: string }, blockId: string, to: number) => void;
+  /** Whether this shop's plan includes the theme's paid sections. */
+  premiumSections: boolean;
+  /** Pictures this shop has already placed, and how to draw one. */
+  pictures: ThemeImage[];
+  pictureUrl: (key: string) => string;
   /**
    * Every page's settings, so an inherited slot can read the one that actually
    * drives it -- `slot.inheritedFrom` says which page and which key. Merging
@@ -367,11 +398,10 @@ export function SlotCanvas({
               ? allChoices[slot.inheritedFrom.page]?.[slot.inheritedFrom.key]
               : choices[slot.key];
           };
-          /** A wired place's own settings, so the drawing carries the merchant's words. */
+          /** A wired place's own section, so the drawing carries the merchant's own. */
           const liveOf = (slot: Slot) => {
             const wiring = wiringOf(slot);
-            const section = wiring ? sectionFor(document, wiring) : null;
-            return section?.settings;
+            return (wiring ? sectionFor(document, wiring) : null) ?? undefined;
           };
           const settingsOf = (slot: Slot) =>
             slot.inheritedFrom ? (allChoices[slot.inheritedFrom.page] ?? {}) : choices;
@@ -406,6 +436,7 @@ export function SlotCanvas({
                 onActivate={activate(slot)}
                 settings={settingsOf(slot)}
                 live={liveOf(slot)}
+                pictureUrl={pictureUrl}
               >
                 {chooser}
               </SlotRegion>
@@ -436,6 +467,7 @@ export function SlotCanvas({
                         onActivate={activate(slot)}
                         settings={settingsOf(slot)}
                         live={liveOf(slot)}
+                        pictureUrl={pictureUrl}
                       />
                     ))}
                   </div>
@@ -453,8 +485,15 @@ export function SlotCanvas({
           wiring={openWiring}
           manifest={manifest}
           document={document}
+          premiumSections={premiumSections}
+          pictures={pictures}
+          pictureUrl={pictureUrl}
           onChoose={(value) => onChoose(openOwner, value)}
           onSet={(setting, value) => onSet(openOwner, setting, value)}
+          onSetBlock={(blockId, setting, value) => onSetBlock(openOwner, blockId, setting, value)}
+          onAddBlock={(blockType) => onAddBlock(openOwner, blockType)}
+          onRemoveBlock={(blockId) => onRemoveBlock(openOwner, blockId)}
+          onMoveBlock={(blockId, to) => onMoveBlock(openOwner, blockId, to)}
           onClose={() => onOpen(null)}
         />
       ) : null}
