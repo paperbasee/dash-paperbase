@@ -36,8 +36,23 @@ const flatten = (source: Record<string, any>, prefix = ""): Record<string, strin
 const enNs = flatten((en as Record<string, any>).themeEditor);
 const bnNs = flatten((bn as Record<string, any>).themeEditor);
 
-/** A key a component asked for, found under the namespace it reads or under `slots`. */
+/**
+ * A key carried as a VALUE -- a slot's label, a field's error -- found under
+ * either namespace, because nothing in the source says which reads it.
+ */
 const known = (ns: Record<string, string>, key: string) => key in ns || `slots.${key}` in ns;
+
+/**
+ * A key read through a translator, checked against THAT translator's namespace.
+ *
+ * `known` is not enough for these and being loose here cost a merchant a broken
+ * screen: `partsChosen` was written into `themeEditor` and read through the
+ * translator bound to `themeEditor.slots`, which this file called fine and
+ * next-intl called MISSING_MESSAGE in the browser. A namespace is part of the
+ * key, so the check has to be.
+ */
+const exact = (ns: Record<string, string>, namespace: string, key: string) =>
+  (namespace ? `${namespace}.${key}` : key) in ns;
 
 const SOURCES = [
   "src/app/[locale]/(dashboard)/settings/customize/page.tsx",
@@ -102,6 +117,8 @@ describe("theme editor copy", () => {
 
   it("every key the editor asks for exists in both languages", () => {
     const used = new Set<string>();
+    /** Keys read through a translator, by the namespace that translator reads. */
+    const read = new Map<string, Set<string>>();
     for (const rel of SOURCES) {
       const text = fs.readFileSync(path.join(ROOT, rel), "utf8");
       // Every translator bound to THIS namespace, whatever it is called. A
@@ -110,11 +127,16 @@ describe("theme editor copy", () => {
       // check that only knew about `t`, which is how `themeEditor.save` reached
       // the browser. Translators for other namespaces (`tc`, `tCommon`) are
       // deliberately not collected: their keys do not live here.
-      const ours = [...text.matchAll(/const\s+(\w+)\s*=\s*useTranslations\(\s*"themeEditor(?:\.\w+)?"/g)].map(
-        (m) => m[1],
-      );
-      for (const name of ours) {
-        for (const m of text.matchAll(new RegExp(`\\b${name}\\(\\s*"(\\w+)"`, "g"))) used.add(m[1]);
+      const ours = [
+        ...text.matchAll(/const\s+(\w+)\s*=\s*useTranslations\(\s*"themeEditor(\.\w+)?"/g),
+      ].map((m) => ({ name: m[1], namespace: (m[2] ?? "").replace(/^\./, "") }));
+      for (const { name, namespace } of ours) {
+        for (const m of text.matchAll(new RegExp(`\\b${name}\\(\\s*"(\\w+)"`, "g"))) {
+          used.add(m[1]);
+          const seen = read.get(namespace) ?? new Set<string>();
+          seen.add(m[1]);
+          read.set(namespace, seen);
+        }
       }
       for (const m of text.matchAll(/labelKey: "(\w+)"/g)) used.add(m[1]);
       // The notes for a page the shop has nothing to show on.
@@ -133,6 +155,17 @@ describe("theme editor copy", () => {
     expect(used.size).toBeGreaterThan(70);
     expect([...used].filter((k) => !known(enNs, k))).toEqual([]);
     expect([...used].filter((k) => !known(bnNs, k))).toEqual([]);
+
+    // And in the namespace it is actually read through -- see `exact`.
+    const misplaced: string[] = [];
+    for (const [namespace, keys] of read) {
+      for (const key of keys) {
+        const where = namespace ? `themeEditor.${namespace}.${key}` : `themeEditor.${key}`;
+        if (!exact(enNs, namespace, key)) misplaced.push(`en ${where}`);
+        if (!exact(bnNs, namespace, key)) misplaced.push(`bn ${where}`);
+      }
+    }
+    expect(misplaced).toEqual([]);
   });
 
   /**

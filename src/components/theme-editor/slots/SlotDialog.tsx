@@ -188,7 +188,10 @@ export function SlotDialog({
                     type="button"
                     aria-pressed={chosen === option.value}
                     disabled={locked}
-                    title={locked ? t("premiumSection") : undefined}
+                    // `themeEditor`, not `themeEditor.slots`: the badge on the
+                    // canvas is `slots.premium`, and this is the sentence the
+                    // settings panel already had.
+                    title={locked ? tEditor("premiumSection") : undefined}
                     onClick={() => onChoose(option.value)}
                     className={cn(
                       "min-h-9 rounded-xs px-3 py-1.5 text-center text-xs font-medium",
