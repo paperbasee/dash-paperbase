@@ -41,10 +41,6 @@ const known = (ns: Record<string, string>, key: string) => key in ns || `slots.$
 
 const SOURCES = [
   "src/app/[locale]/(dashboard)/settings/customize/page.tsx",
-  "src/app/[locale]/(dashboard)/settings/customize/sections/page.tsx",
-  "src/components/theme-editor/ThemeEditor.tsx",
-  "src/components/theme-editor/EditorTopBar.tsx",
-  "src/components/theme-editor/SectionList.tsx",
   "src/components/theme-editor/PreviewPane.tsx",
   "src/components/theme-editor/SaveStatus.tsx",
   "src/components/theme-editor/SettingsPanel.tsx",
@@ -52,12 +48,11 @@ const SOURCES = [
   "src/components/theme-editor/BlockList.tsx",
   "src/components/theme-editor/LinkPicker.tsx",
   "src/components/theme-editor/EditorSheet.tsx",
-  "src/components/theme-editor/EditorMenu.tsx",
-  "src/components/theme-editor/VersionHistorySheet.tsx",
   "src/components/theme-editor/CloseSheet.tsx",
   "src/components/theme-editor/ConflictDialog.tsx",
   "src/components/theme-editor/slots/SlotEditor.tsx",
   "src/components/theme-editor/slots/SlotCanvas.tsx",
+  "src/components/theme-editor/slots/SlotDialog.tsx",
   "src/components/theme-editor/slots/ShopChrome.tsx",
   "src/components/theme-editor/slots/StylePanel.tsx",
 ];

@@ -168,6 +168,7 @@ export function ShopChrome({
   slotKey,
   variant,
   settings,
+  live,
 }: {
   page: SlotPageKey;
   slotKey: string;
@@ -183,6 +184,15 @@ export function ShopChrome({
    * believed.
    */
   settings?: Record<string, string>;
+  /**
+   * A WIRED place's own settings, straight from the shop's document.
+   *
+   * The drawing is a drawing everywhere else, and says so; where a place is
+   * real, it draws the merchant's own words instead of an example. The two are
+   * separate on purpose: `settings` is this editor's held choices, `live` is the
+   * shop's document, and reading one as the other is how a preview starts lying.
+   */
+  live?: Record<string, unknown>;
 }) {
   const t = useTranslations("themeEditor.slots");
 
@@ -190,9 +200,15 @@ export function ShopChrome({
   // both live in the header group, so every page shows them and only the Header
   // entry in the picker edits them.
   if (slotKey === "notice") {
+    // The merchant's own line when this place is wired, an example when it is
+    // not -- and an example again when they have not written one yet, because a
+    // strip drawn empty reads as a bug rather than as a blank.
+    // One ground, not a choice: the owner took the colour setting off the bar
+    // on 2026-09-22, because the palette already decides what the accent is.
+    const written = typeof live?.text === "string" ? live.text.trim() : "";
     return (
       <p className="border-b border-border bg-muted px-4 py-2 text-center text-[11px] uppercase tracking-[0.06em] text-current/75">
-        {t("noticeExample")}
+        {written || t("noticeExample")}
       </p>
     );
   }

@@ -10,10 +10,10 @@ import { apiErrorParts, type ThemeDocument, type ThemeEditorState, type ThemePub
  * Two rules decide every order here:
  *
  * - **Autosave goes first.** Save puts the DRAFT on the shop, not what is on the screen, so an
- *   edit still waiting would be left behind. Discard, restore and loading the latest replace the
+ *   edit still waiting would be left behind. Discard and loading the latest replace the
  *   draft, so a save already on its way has to land before they run, or it writes the old draft
  *   back a moment later.
- * - **The screen and the manifest arrive together.** A discard or a restore can bring back a
+ * - **The screen and the manifest arrive together.** A discard can bring back a
  *   document of another theme, so its manifest comes in the same answer and is put on the screen
  *   with it.
  */
@@ -33,8 +33,6 @@ export type EditorPorts = {
   publish(expectedDraftRevision: number): Promise<ThemePublished>;
   /** POST editor/discard/ */
   discard(expectedDraftRevision: number): Promise<ThemeEditorState>;
-  /** POST editor/versions/<revision>/restore/ */
-  restore(revision: number, expectedDraftRevision: number): Promise<ThemeEditorState>;
   /** GET editor/, read again: what the draft is now, whoever changed it. */
   reload(): Promise<ThemeEditorState>;
   /** Put a fresh state on the screen: its document and its manifest. */
@@ -87,14 +85,6 @@ export async function saveToShop(ports: EditorPorts): Promise<EditorActionResult
  */
 export function discardDraft(ports: EditorPorts): Promise<EditorActionResult> {
   return replaceDraft(ports, (expected) => ports.discard(expected));
-}
-
-/**
- * Bring a saved version back into the draft. It reaches shoppers only when the merchant saves,
- * so a restore can be looked at first and a misclick costs nothing.
- */
-export function restoreVersion(ports: EditorPorts, revision: number): Promise<EditorActionResult> {
-  return replaceDraft(ports, (expected) => ports.restore(revision, expected));
 }
 
 /**
@@ -177,7 +167,7 @@ export function leaveChoice(snapshot: AutosaveSnapshot): LeaveChoice {
   return snapshot.hasDraft ? "askDraft" : "leave";
 }
 
-/** Discard, restore and loading the latest differ only in the call: the order is one order. */
+/** Discard and loading the latest differ only in the call: the order is one order. */
 async function replaceDraft(
   ports: EditorPorts,
   call: (expectedDraftRevision: number) => Promise<ThemeEditorState>,

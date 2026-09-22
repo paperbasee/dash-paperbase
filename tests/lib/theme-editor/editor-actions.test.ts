@@ -15,7 +15,6 @@ import {
   keepMyVersion,
   leaveChoice,
   loadLatest,
-  restoreVersion,
   saveToShop,
   type EditorPorts,
 } from "@/lib/theme-editor/editor-actions";
@@ -124,11 +123,6 @@ function setup({ hasDraft = true, draftRevision = 4 } = {}) {
     },
     discard: (expected) => {
       log.push(`discard(${expected})`);
-      calls.editorState = deferred<ThemeEditorState>();
-      return calls.editorState.promise;
-    },
-    restore: (revision, expected) => {
-      log.push(`restore(${revision},${expected})`);
       calls.editorState = deferred<ThemeEditorState>();
       return calls.editorState.promise;
     },
@@ -282,18 +276,6 @@ describe("discard, restore and load latest", () => {
       hasDraft: false,
     });
     expect(clock.waiting()).toBe(0);
-  });
-
-  test("restore asks for the version and comes back as a draft", async () => {
-    const { autosave, ports, calls, log } = setup({ draftRevision: 7 });
-    const result = restoreVersion(ports, 12);
-    await settle();
-    expect(log).toEqual(["restore(12,7)"]);
-
-    calls.editorState!.resolve(editorState({ draft_revision: 8, has_draft: true }));
-    expect(await result).toEqual({ ok: true });
-    expect(autosave.snapshot()).toMatchObject({ hasDraft: true, draftRevision: 8, unsent: false });
-    expect(autosave.snapshot().status).toEqual({ kind: "saved" });
   });
 
   test("load latest reads the editor again and gives up this editor's unsent edits", async () => {

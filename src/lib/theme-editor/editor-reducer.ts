@@ -48,7 +48,6 @@ export type EditorAction =
   | { type: "add"; sectionType: string }
   | { type: "hide"; id: string }
   | { type: "show"; id: string }
-  | { type: "move"; id: string; to: number }
   | { type: "remove"; id: string }
   /** One setting of a section, or of one of its blocks when `blockId` is given. */
   | { type: "setSetting"; id: string; blockId?: string; setting: string; value: unknown }
@@ -123,8 +122,6 @@ export function editorReducer(state: EditorState, action: EditorAction): EditorS
       if (refused) return state;
       return edit(sections.map((s, i) => (i === index ? { ...s, hidden } : s)));
     }
-    case "move":
-      return edit(moveItem(sections, index, action.to));
     case "remove":
       if (cannotRemove(manifest, sections, section)) return state;
       return edit(sections.filter((_, i) => i !== index));

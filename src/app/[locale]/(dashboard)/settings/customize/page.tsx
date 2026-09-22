@@ -12,14 +12,16 @@ import { themeErrorMessageKey } from "@/lib/theme-editor/api";
 import { notify } from "@/notifications";
 
 /**
- * Settings > Customization > Customize.
+ * Settings > Customization > Customize. **The editor.** There is no other one.
  *
- * **The slot editor, which is the design and not yet the wiring.** The owner
- * decided on 2026-09-20 that a merchant arranges nothing: every page has the
- * same places in the same order, and the only choice is what fills each one.
- * This screen is that idea, built to be used and argued with; it saves nothing
- * yet and says so across the top. The editor that does save is at `./sections`
- * until this one is wired, and then it goes.
+ * Every page has the same places in the same order; a merchant adds a section,
+ * removes one, and edits the ones that are there. Nothing is dragged, and
+ * nothing is kept as a version to go back to (owner, 2026-09-22) -- the screen
+ * that did those things, and the second address it lived at, are gone.
+ *
+ * It does not save yet, and says so across the top. What is left to do is the
+ * wiring: every choice on this screen writing into the shop's theme document,
+ * which is the document the storefront already reads.
  *
  * **The permission check stays.** Who may open the editor is the API's answer,
  * not this page's, and it does not change because the screen behind it did: a
@@ -47,7 +49,7 @@ export default function ThemeEditorPage() {
     router.replace(CUSTOMIZATION_HREF);
   }, [refusal, router, tc]);
 
-  if (editor.data) return <SlotEditor />;
+  if (editor.data) return <SlotEditor loaded={editor.data} />;
 
   return (
     <div className="flex flex-1 flex-col items-center justify-center gap-4 p-6 text-center">

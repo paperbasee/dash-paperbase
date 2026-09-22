@@ -14,10 +14,8 @@ import {
   EDITOR_REQUEST_TIMEOUT_MS,
   fetchThemeEditor,
   fetchThemeLibrary,
-  fetchThemeVersions,
   mintPreviewPass,
   publishThemeDraft,
-  restoreThemeVersion,
   saveThemeDraft,
   selectTheme,
   themeErrorMessageKey,
@@ -118,20 +116,6 @@ describe("draft and preview pass", () => {
     ]);
   });
 
-  test("the versions are GET theming/editor/versions/", async () => {
-    const { http, calls } = fakeHttp([]);
-    await expect(fetchThemeVersions(http)).resolves.toEqual([]);
-    expect(calls).toEqual([{ method: "GET", path: "theming/editor/versions/" }]);
-  });
-
-  test("a restore names the version in the path and the revision in the body", async () => {
-    const { http, calls } = fakeHttp({ draft_revision: 8 });
-    await expect(restoreThemeVersion(http, 12, 7)).resolves.toMatchObject({ draft_revision: 8 });
-    expect(calls).toEqual([
-      { method: "POST", path: "theming/editor/versions/12/restore/", body: { expected_draft_revision: 7 } },
-    ]);
-  });
-
   test("apiErrorParts reads the status, code, path and draft revision, and nothing that isn't there", () => {
     expect(
       apiErrorParts(httpError(400, { code: "invalid_document", path: "templates.home.sections[1]" })),
@@ -172,7 +156,6 @@ describe("themeErrorMessageKey", () => {
     [400, { code: "unknown_theme" }, "errorUnknownTheme"],
     [400, { code: "nothing_to_publish" }, "errorNothingToSave"],
     [400, { code: "invalid_document", path: "templates.home.sections[1]" }, "errorInvalidDocument"],
-    [404, { code: "version_not_found" }, "errorVersionGone"],
     [429, { detail: "Request was throttled." }, "errorTooManySaves"],
     [409, { detail: "other conflict" }, "errorGeneric"],
     [500, "<html>", "errorGeneric"],
@@ -193,7 +176,6 @@ describe("themeErrorMessageKey", () => {
       "errorUnknownTheme",
       "errorNothingToSave",
       "errorInvalidDocument",
-      "errorVersionGone",
       "errorTooManySaves",
       "errorGeneric",
       "lockNotEntitledBody",

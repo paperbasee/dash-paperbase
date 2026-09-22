@@ -124,32 +124,6 @@ describe("hide and show", () => {
   });
 });
 
-describe("move", () => {
-  test("moves within the page, clamped to its ends", () => {
-    const state = run(start(), { type: "add", sectionType: "rich_text" }, { type: "move", id: "rich-text", to: 0 });
-    expect(ids(state)).toEqual(["rich-text", "banner-slider"]);
-    expect(ids(run(state, { type: "move", id: "rich-text", to: 9 }))).toEqual(["banner-slider", "rich-text"]);
-  });
-
-  test("a move that goes nowhere returns the same state", () => {
-    const state = start("header");
-    expect(editorReducer(state, { type: "move", id: "announcement-bar", to: 0 })).toBe(state);
-  });
-
-  test("required sections move like any other", () => {
-    expect(ids(run(start("header"), { type: "move", id: "header", to: 0 }))).toEqual(["header", "announcement-bar"]);
-  });
-
-  test("moving back to the loaded order is unchanged", () => {
-    const state = run(
-      start("header"),
-      { type: "move", id: "header", to: 0 },
-      { type: "move", id: "header", to: 1 },
-    );
-    expect(state.changed).toBe(false);
-  });
-});
-
 describe("remove", () => {
   test("removes an optional section from its page only", () => {
     const state = run(start("header"), { type: "remove", id: "announcement-bar" });
@@ -277,7 +251,6 @@ describe("remove", () => {
     run(
       initEditorState({ document: loaded, manifest }, "header"),
       { type: "remove", id: "announcement-bar" },
-      { type: "move", id: "header", to: 0 },
       { type: "add", sectionType: "announcement_bar" },
     );
     expect(JSON.stringify(loaded)).toBe(before);

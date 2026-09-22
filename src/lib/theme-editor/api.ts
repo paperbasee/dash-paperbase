@@ -14,16 +14,6 @@ export type ThemeHttp = {
   post<T>(path: string, body?: unknown, config?: ThemeRequestConfig): Promise<{ data: T }>;
 };
 
-/** One saved version a merchant can bring back (GET editor/versions/), newest first. */
-export type ThemeVersion = {
-  revision: number;
-  theme_key: string;
-  published_at: string;
-  published_by_name: string;
-  /** This is the version shoppers see now. */
-  is_live: boolean;
-};
-
 /** What editor/publish/ answers. */
 export type ThemePublished = {
   revision: number;
@@ -267,30 +257,12 @@ export async function publishThemeDraft(
   return data;
 }
 
-/** The versions this shop can bring back: at most the last 20 saves, newest first. */
 /** One picture this shop has placed: the key a document stores, and where to draw it from. */
 export type ThemeImage = { key: string; url: string };
 
 export async function fetchThemeImages(http: ThemeHttp): Promise<ThemeImage[]> {
   const { data } = await http.get<ThemeImage[]>(`${BASE}editor/images/`, {
     timeout: EDITOR_REQUEST_TIMEOUT_MS,
-  });
-  return data;
-}
-
-export async function fetchThemeVersions(http: ThemeHttp): Promise<ThemeVersion[]> {
-  const { data } = await http.get<ThemeVersion[]>(`${BASE}editor/versions/`);
-  return data;
-}
-
-/** Load a saved version into the draft. It goes live only when the merchant saves. */
-export async function restoreThemeVersion(
-  http: ThemeHttp,
-  revision: number,
-  expectedDraftRevision: number,
-): Promise<ThemeEditorState> {
-  const { data } = await http.post<ThemeEditorState>(`${BASE}editor/versions/${revision}/restore/`, {
-    expected_draft_revision: expectedDraftRevision,
   });
   return data;
 }
@@ -366,7 +338,6 @@ export type ThemeErrorMessageKey =
   | "errorUnknownTheme"
   | "errorNothingToSave"
   | "errorInvalidDocument"
-  | "errorVersionGone"
   | "errorTooManySaves"
   | "errorGeneric"
   | "lockNotEntitledBody"
@@ -395,11 +366,10 @@ export function themeErrorMessageKey(error: unknown): ThemeErrorMessageKey {
     // be showing it as Premium-only, so this only has to say why the click did nothing.
     if (body.code === "theme_not_available") return "errorThemeNotAvailable";
     if (body.code === "nothing_to_publish") return "errorNothingToSave";
-    // Publish and restore validate the draft again, because a theme file can have changed
+    // Publishing validates the draft again, because a theme file can have changed
     // under it. Nothing comes right by waiting, so this says what the way out is instead.
     if (body.code === "invalid_document") return "errorInvalidDocument";
   }
-  if (status === 404 && body.code === "version_not_found") return "errorVersionGone";
   // The API allows 60 saves an hour per member per shop, and each one rebuilds the whole shop.
   if (status === 429) return "errorTooManySaves";
   return "errorGeneric";

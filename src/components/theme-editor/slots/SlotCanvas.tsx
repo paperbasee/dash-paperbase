@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl";
 import { Lock } from "lucide-react";
 
 import { cn } from "@/lib/utils";
+import type { ThemeDocument, ThemeManifest } from "@/lib/theme-editor/api";
 import {
   isEmpty,
   SLOTS,
@@ -12,7 +13,9 @@ import {
   type SlotOption,
   type SlotPageKey,
 } from "@/lib/theme-editor/slot-catalogue";
+import { sectionFor, slotValueFor, wiringFor } from "@/lib/theme-editor/slot-sections";
 import { ShopChrome } from "./ShopChrome";
+import { SlotDialog } from "./SlotDialog";
 
 /**
  * The page IS the editor.
@@ -165,6 +168,7 @@ function SlotRegion({
   isOpen,
   onActivate,
   settings,
+  live,
   className,
   children,
 }: {
@@ -174,6 +178,8 @@ function SlotRegion({
   isOpen: boolean;
   onActivate: () => void;
   settings: Record<string, string>;
+  /** A wired place's own settings, so the drawing shows the merchant's words. */
+  live?: Record<string, unknown>;
   className?: string;
   /** The chooser, when this place is on its own and can hold it. */
   children?: React.ReactNode;
@@ -241,7 +247,7 @@ function SlotRegion({
           </span>
         </div>
       ) : (
-        <ShopChrome page={page} slotKey={slot.key} variant={value} settings={settings} />
+        <ShopChrome page={page} slotKey={slot.key} variant={value} settings={settings} live={live} />
       )}
 
       {children}
@@ -278,6 +284,9 @@ export function SlotCanvas({
   choices,
   onChoose,
   allChoices,
+  document,
+  manifest,
+  onSet,
   onGoToPage,
 }: {
   page: SlotPageKey;
@@ -286,6 +295,11 @@ export function SlotCanvas({
   onOpen: (slotKey: string | null) => void;
   choices: Record<string, string>;
   onChoose: (slotKey: string, value: string) => void;
+  /** The shop's own document: what a WIRED place reads and writes. */
+  document: ThemeDocument;
+  manifest: ThemeManifest;
+  /** One setting of a wired place. */
+  onSet: (slotKey: string, setting: string, value: unknown) => void;
   /**
    * Every page's settings, so an inherited slot can read the one that actually
    * drives it -- `slot.inheritedFrom` says which page and which key. Merging
@@ -296,6 +310,11 @@ export function SlotCanvas({
   /** Clicking an inherited slot goes to the entry that owns it. */
   onGoToPage: (page: SlotPageKey, slotKey: string) => void;
 }) {
+  // The open place, and whether it is one of the wired ones. A wired place is
+  // edited in the dialog below rather than in a panel under its band.
+  const openSlot = open ? (SLOTS[page].find((slot) => slot.key === open) ?? null) : null;
+  const openWiring = openSlot ? wiringFor(page, openSlot.key) : null;
+
   return (
     <div className="flex justify-center bg-muted/40 p-2 sm:p-3">
       <div
@@ -311,22 +330,48 @@ export function SlotCanvas({
             if (source) onGoToPage(source.page, source.key);
             else onOpen(open === slot.key ? null : slot.key);
           };
-          const valueOf = (slot: Slot) =>
-            slot.inheritedFrom
+          /**
+           * A place edited elsewhere is read from THERE -- `inheritedFrom` says
+           * which entry owns it -- so the notice drawn on every page is the one
+           * the Header entry holds.
+           */
+          const ownerOf = (slot: Slot) => slot.inheritedFrom ?? { page, key: slot.key };
+          const wiringOf = (slot: Slot) => {
+            const owner = ownerOf(slot);
+            return wiringFor(owner.page, owner.key);
+          };
+          const valueOf = (slot: Slot) => {
+            const wiring = wiringOf(slot);
+            if (wiring) return slotValueFor(document, wiring);
+            return slot.inheritedFrom
               ? allChoices[slot.inheritedFrom.page]?.[slot.inheritedFrom.key]
               : choices[slot.key];
+          };
+          /** A wired place's own settings, so the drawing carries the merchant's words. */
+          const liveOf = (slot: Slot) => {
+            const wiring = wiringOf(slot);
+            const section = wiring ? sectionFor(document, wiring) : null;
+            return section?.settings;
+          };
           const settingsOf = (slot: Slot) =>
             slot.inheritedFrom ? (allChoices[slot.inheritedFrom.page] ?? {}) : choices;
 
           const opened = band.flat().find((slot) => open === slot.key);
-          const chooser = opened ? (
-            <Chooser
-              slot={opened}
-              value={valueOf(opened)}
-              onPick={(next) => onChoose(opened.key, next)}
-              onDone={() => onOpen(null)}
-            />
-          ) : null;
+          /*
+            A wired place is edited in a pop-up, not under the band: it is a form
+            rather than two tiles, and a form opening in place pushes the thing
+            being edited off the screen. Everything still a drawing opens here,
+            where the choices belong to what was clicked.
+          */
+          const chooser =
+            opened && !wiringOf(opened) ? (
+              <Chooser
+                slot={opened}
+                value={valueOf(opened)}
+                onPick={(next) => onChoose(opened.key, next)}
+                onDone={() => onOpen(null)}
+              />
+            ) : null;
 
           // A lone place keeps its choices inside its own outline.
           if (band.length === 1 && band[0].length === 1) {
@@ -340,6 +385,7 @@ export function SlotCanvas({
                 isOpen={open === slot.key}
                 onActivate={activate(slot)}
                 settings={settingsOf(slot)}
+                live={liveOf(slot)}
               >
                 {chooser}
               </SlotRegion>
@@ -369,6 +415,7 @@ export function SlotCanvas({
                         isOpen={open === slot.key}
                         onActivate={activate(slot)}
                         settings={settingsOf(slot)}
+                        live={liveOf(slot)}
                       />
                     ))}
                   </div>
@@ -379,6 +426,18 @@ export function SlotCanvas({
           );
         })}
       </div>
+
+      {openWiring && openSlot ? (
+        <SlotDialog
+          slot={openSlot}
+          wiring={openWiring}
+          manifest={manifest}
+          document={document}
+          onChoose={(value) => onChoose(openSlot.key, value)}
+          onSet={(setting, value) => onSet(openSlot.key, setting, value)}
+          onClose={() => onOpen(null)}
+        />
+      ) : null}
     </div>
   );
 }
