@@ -165,7 +165,7 @@ export function SettingField({
  * Two native controls rather than `datetime-local`, which a browser reads in ITS OWN
  * timezone -- a merchant whose laptop is still set to another zone would schedule their
  * sale for the wrong hour with nothing on the screen to say so. The conversion is
- * `@/utils/time`'s, so this agrees with the coupon and CTA forms.
+ * `@/utils/time`'s, so this agrees with the coupon form.
  *
  * Clearing the date clears the setting, which is what "no limit" means: no start is
  * "already running", no end is "until I take it down".

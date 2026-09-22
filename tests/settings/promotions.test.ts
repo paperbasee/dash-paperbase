@@ -2,21 +2,24 @@ import { describe, expect, it } from "vitest";
 
 import {
   PROMOTION_TABS,
-  PROMOTION_TAB_PARAM,
   promotionsHref,
-  resolvePromotionTab,
 } from "@/app/[locale]/(dashboard)/settings/sections/promotions/promotionTabs";
 import {
   SECTIONS,
   isSectionVisible,
   resolveSettingsSection,
 } from "@/app/[locale]/(dashboard)/settings/settingsSections";
-import { ALWAYS_ON_EXTRA_APP_IDS, APPS_SCREEN_SWITCHABLE_IDS } from "@/config/apps";
+import { ALWAYS_ON_EXTRA_APP_IDS, APP_CONFIG, APPS_SCREEN_SWITCHABLE_IDS } from "@/config/apps";
 import { APP_VIEW_PERMISSION } from "@/config/permissions";
 
 /**
- * Banners, Pop-up and CTA used to be sidebar links. They now live as tabs in
- * Settings → Promotions, and must stay exactly as reachable as they were.
+ * Banners, Pop-up and CTA used to be sidebar links, then tabs in Settings →
+ * Promotions, and they must stay exactly as reachable as they were.
+ *
+ * Only the pop-up is left. Banners moved into the theme editor on 2026-09-18,
+ * and the CTA followed on 2026-09-22 -- it and the editor's announcement bar
+ * were two bars doing one job. So there is no tab bar any more, and the tests
+ * that drove one went with it.
  */
 
 /** Access for a staff role with every app enabled, holding only the listed permission keys. */
@@ -44,11 +47,11 @@ describe("Promotions section visibility", () => {
     const owner = { has: () => true, isOwner: true, isSuperuser: false };
     expect(isSectionVisible("promotions", { ...owner, canShowApp: () => false })).toBe(false);
     expect(
-      isSectionVisible("promotions", { ...owner, canShowApp: (appId) => appId === "cta" }),
+      isSectionVisible("promotions", { ...owner, canShowApp: (appId) => appId === "popup" }),
     ).toBe(true);
   });
 
-  it("is hidden from a role that holds none of the three view keys", () => {
+  it("is hidden from a role that cannot view the pop-up", () => {
     expect(isSectionVisible("promotions", staff(["settings.view"]))).toBe(false);
   });
 
@@ -62,36 +65,41 @@ describe("Promotions section visibility", () => {
   });
 });
 
-describe("active promotion tab from the URL", () => {
-  const all = [...PROMOTION_TABS];
-
-  it("uses the tab named in the URL when the user can open it", () => {
-    expect(resolvePromotionTab("cta", all)).toBe("cta");
-    expect(resolvePromotionTab(" popup ", all)).toBe("popup");
+describe("the legacy /popup route", () => {
+  it("lands on Promotions, which is the pop-up and nothing else", () => {
+    const [pathname, query] = promotionsHref().split("?");
+    const params = new URLSearchParams(query);
+    expect(pathname).toBe("/settings");
+    expect(params.get("tab")).toBe("promotions");
+    // No `?promotion=` any more: one panel, so nothing to select.
+    expect(params.get("promotion")).toBeNull();
   });
 
-  it("falls back to the first visible tab when the param is missing or unknown", () => {
-    expect(resolvePromotionTab(null, all)).toBe("popup");
-    expect(resolvePromotionTab("", all)).toBe("popup");
-    expect(resolvePromotionTab("coupons", all)).toBe("popup");
+  it("has one promotions app left", () => {
+    expect([...PROMOTION_TABS]).toEqual(["popup"]);
+  });
+});
+
+describe("the CTA is gone", () => {
+  /*
+   * It and the theme editor's announcement bar were two bars doing one job,
+   * edited in two places. The bar won, and every shop's CTA was carried into
+   * its announcement bar by `theming/0014` so nothing a shopper saw changed.
+   *
+   * Asserted rather than assumed, because a nav entry or a permission left
+   * behind fails QUIETLY: an app with no page is a sidebar link to nothing,
+   * and a permission nothing checks is a role setting that decides nothing.
+   */
+  it("is not an app any more", () => {
+    expect(Object.keys(APP_CONFIG)).not.toContain("cta");
+    expect(ALWAYS_ON_EXTRA_APP_IDS as readonly string[]).not.toContain("cta");
   });
 
-  it("falls back to the first visible tab when the URL names a tab the user cannot open", () => {
-    expect(resolvePromotionTab("banners", ["popup", "cta"])).toBe("popup");
+  it("has no view permission of its own", () => {
+    expect(APP_VIEW_PERMISSION).not.toHaveProperty("cta");
   });
 
-  it("resolves to nothing when no tab is visible", () => {
-    expect(resolvePromotionTab("banners", [])).toBeNull();
-  });
-
-  it("builds the legacy-route redirect so each link lands on its own tab", () => {
-    for (const tab of PROMOTION_TABS) {
-      const href = promotionsHref(tab);
-      const [pathname, query] = href.split("?");
-      const params = new URLSearchParams(query);
-      expect(pathname).toBe("/settings");
-      expect(params.get("tab")).toBe("promotions");
-      expect(resolvePromotionTab(params.get(PROMOTION_TAB_PARAM), all)).toBe(tab);
-    }
+  it("leaves no promotions tab pointing at it", () => {
+    expect([...PROMOTION_TABS]).not.toContain("cta");
   });
 });

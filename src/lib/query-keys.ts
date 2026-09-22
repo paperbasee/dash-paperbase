@@ -187,8 +187,6 @@ export function orderEditorVariantsQueryKey(productId: string) {
   return [...orderEditorVariantsQueryKeyRoot, productId] as const;
 }
 
-export const notificationsQueryKey = ["notifications"] as const;
-
 export const popupsQueryKey = ["popups"] as const;
 
 export const bannersQueryKey = ["banners"] as const;

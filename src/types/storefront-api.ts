@@ -105,21 +105,6 @@ export interface StorefrontBanner {
   updated_at: string;
 }
 
-export interface StorefrontCTA {
-  public_id: string;
-  cta_text: string;
-  notification_type: string;
-  is_active: boolean;
-  is_currently_active: boolean;
-  cta_url: string | null;
-  cta_label: string;
-  order: number;
-  start_at: string | null;
-  end_at: string | null;
-  created_at: string;
-  updated_at: string;
-}
-
 export interface StorefrontOrderLineVariantOption {
   attribute_public_id: string;
   attribute_slug: string;

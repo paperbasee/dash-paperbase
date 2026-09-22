@@ -167,16 +167,6 @@ export const APP_CONFIG: Record<string, AppConfig> = {
     countKey: "supportTickets",
     parentId: "more",
   },
-  cta: {
-    id: "cta",
-    label: "CTA",
-    icon: Bell,
-    description: "Call-to-action banners and notifications",
-    essential: false,
-    href: null,
-    countKey: null,
-    parentId: null,
-  },
   variants: {
     id: "variants",
     label: "Variants",
@@ -291,7 +281,8 @@ export const CATALOG_INCLUDED_APP_IDS = [
   // that exist, so a merchant who never opens this tab has exactly the shop
   // they had before. A flag would only have hidden the tab -- which is the
   // one screen where a brand can be renamed or removed -- and that is the
-  // mistake `ALWAYS_ON_EXTRA_APP_IDS` documents for `popup` and `cta`.
+  // mistake `ALWAYS_ON_EXTRA_APP_IDS` documents for `popup` (and for `cta`,
+  // until it was removed on 2026-09-22).
   "brands",
 ] as const;
 
@@ -350,6 +341,8 @@ export const OPT_IN_APP_IDS = ["wishlist", "coupons", "order_lookup"] as const;
  * `engine.apps.checkout_attempts.services.KEEP_FOR_DAYS`.
  *
  * `popup` and `cta` joined it on the same day, moved off `OPTIONAL_APP_IDS`.
+ * `cta` left entirely on 2026-09-22: it and the theme editor's announcement
+ * bar were two bars doing one job, and the bar won.
  * Their switch only ever hid their own editor: neither flag is read by the
  * storefront, which draws a pop-up or a notice when the merchant has written
  * one and marked it active. So the switch turned off the only screen where the
@@ -359,7 +352,6 @@ export const OPT_IN_APP_IDS = ["wishlist", "coupons", "order_lookup"] as const;
 export const ALWAYS_ON_EXTRA_APP_IDS = [
   "abandoned_checkouts",
   "popup",
-  "cta",
   // Owner's decision 2026-09-22: Shoppers cannot be switched off. Every shop
   // has customers the moment it takes an order -- the list is built from the
   // orders themselves -- so a switch that hid them only ever hid a merchant's
@@ -422,7 +414,7 @@ export const NAV_GROUP_LABEL_KEYS: Record<string, string> = {
  * its own and nowhere else to switch it, which the href rule silently hid --
  * leaving a built feature no merchant could ever turn on.
  */
-const SETTINGS_SCREEN_APP_IDS = ["shipping", "popup", "cta"] as const;
+const SETTINGS_SCREEN_APP_IDS = ["shipping", "popup"] as const;
 
 const isSettingsScreen = (id: string): boolean =>
   (SETTINGS_SCREEN_APP_IDS as readonly string[]).includes(id);
@@ -431,7 +423,7 @@ const isSettingsScreen = (id: string): boolean =>
  * What Settings → Apps lists, in its two groups.
  *
  * An app earns its place on that screen by having a place of its own in the
- * sidebar. `shipping`, `popup` and `cta` have no `href` because they ARE
+ * sidebar. `shipping` and `popup` have no `href` because they ARE
  * settings screens -- Settings → Shipping, and the two Promotions tabs -- so
  * listing them there asked a merchant to switch on the page they were already
  * standing in, under a heading that says these are the apps in their shop.

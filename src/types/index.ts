@@ -310,22 +310,6 @@ export interface AdminReview {
 
 export type AdminReviewCounts = Record<AdminReview["status"], number>;
 
-/** Admin storefront CTA rows (`/api/v1/admin/notifications/`). Publishable API uses `cta_url` / `cta_label` / `start_at` / `end_at`. */
-export interface Notification {
-  public_id: string;
-  cta_text: string;
-  notification_type: string;
-  is_active: boolean;
-  is_currently_active: boolean;
-  link: string | null;
-  link_text: string;
-  start_date: string | null;
-  end_date: string | null;
-  order: number;
-  created_at: string;
-  updated_at: string;
-}
-
 export interface SupportTicketAttachment {
   public_id: string;
   file: string;
@@ -367,7 +351,6 @@ export interface DashboardStats {
   category_roots: number;
   category_total: number;
   support_tickets: number;
-  notifications: number;
   /** Reviews WAITING for a decision — the sidebar badge, not a total. */
   reviews_pending?: number;
   customers_count?: number;
@@ -723,7 +706,6 @@ export type {
   StorefrontBanner,
   StorefrontBannerImage,
   StorefrontCategory,
-  StorefrontCTA,
   StorefrontOrderItem,
   StorefrontProductDetail,
   StorefrontProductListItem,

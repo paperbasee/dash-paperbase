@@ -64,6 +64,21 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-09-22-one-announcement-bar",
+    date: "2026-09-22",
+    version: "4.50.0",
+    tag: "improved",
+    href: "/settings?tab=customization",
+    title: {
+      en: "Your notice bar moves into Customization",
+      bn: "নোটিশ বারটি কাস্টমাইজেশনে চলে এসেছে",
+    },
+    body: {
+      en: "The strip across the top of your shop was set in Settings → Promotions while a separate announcement bar sat in Customization doing the same thing. There is one now, in Customization, where you can also give it a link, the words to tap, and dates to start and stop on. Whatever your strip says today says exactly the same thing, and the two notice permissions have left your team's permission list — the bar is part of Customization now, so whoever may customise your shop may write it.",
+      bn: "দোকানের উপরের স্ট্রিপটি সেটিংস → প্রোমোশন থেকে ঠিক করা হতো, আবার কাস্টমাইজেশনে আলাদা একটি অ্যানাউন্সমেন্ট বারও একই কাজ করত। এখন একটিই আছে, কাস্টমাইজেশনে — সেখানে লিংক, চাপ দেওয়ার লেখা, আর শুরু ও শেষের তারিখও দিতে পারবেন। আপনার স্ট্রিপে আজ যা লেখা আছে ঠিক তা-ই থাকবে, আর টিমের পারমিশন তালিকা থেকে নোটিফিকেশনের দুটি পারমিশন সরে গেছে — বারটি এখন কাস্টমাইজেশনের অংশ, তাই যিনি দোকান কাস্টমাইজ করতে পারেন তিনিই এটি লিখতে পারবেন।",
+    },
+  },
+  {
     id: "2026-09-22-you-are-told-a-review-is-waiting",
     date: "2026-09-22",
     version: "4.48.0",
@@ -417,18 +432,18 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     },
   },
   {
-    id: "2026-09-22-popup-and-cta-always-there",
+    id: "2026-09-22-popup-always-there",
     date: "2026-09-22",
     version: "4.35.0",
     tag: "fixed",
     href: "/settings?tab=promotions",
     title: {
-      en: "Pop-up and CTA no longer hide themselves",
-      bn: "পপ-আপ আর সিটিএ আর নিজেরাই লুকাবে না",
+      en: "The pop-up no longer hides itself",
+      bn: "পপ-আপ আর নিজেই লুকাবে না",
     },
     body: {
-      en: "Settings → Apps no longer has switches for Pop-up, CTA and Shipping. Turning the Pop-up or CTA switch off only hid its own editor, leaving no screen to turn it back on from. Both are always in Settings → Promotions now — to stop one showing in your shop, set it to inactive there.",
-      bn: "সেটিংস → অ্যাপস-এ পপ-আপ, সিটিএ আর শিপিং-এর সুইচ আর নেই। পপ-আপ বা সিটিএ-র সুইচ বন্ধ করলে কেবল তার নিজের এডিটরই লুকিয়ে যেত, ফলে আবার চালু করার মতো কোনো পাতাই থাকত না। দুটিই এখন সব সময় সেটিংস → প্রোমোশন-এ থাকবে — দোকানে দেখানো বন্ধ করতে সেখান থেকে সেটিকে নিষ্ক্রিয় করুন।",
+      en: "Settings → Apps no longer has switches for Pop-up and Shipping. Turning the Pop-up switch off only hid its own editor, leaving no screen to turn it back on from. It is always in Settings → Promotions now — to stop it showing in your shop, set it to inactive there.",
+      bn: "সেটিংস → অ্যাপস-এ পপ-আপ আর শিপিং-এর সুইচ আর নেই। পপ-আপের সুইচ বন্ধ করলে কেবল তার নিজের এডিটরই লুকিয়ে যেত, ফলে আবার চালু করার মতো কোনো পাতাই থাকত না। এটি এখন সব সময় সেটিংস → প্রোমোশন-এ থাকবে — দোকানে দেখানো বন্ধ করতে সেখান থেকে নিষ্ক্রিয় করুন।",
     },
   },
   {
@@ -472,21 +487,6 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     body: {
       en: "With their order number and the phone they ordered with, a shopper can see where their parcel is. No account needed — which matters most if your checkout form does not ask for an email. It stays off until you switch it on.",
       bn: "অর্ডার নম্বর আর যে ফোন নম্বর দিয়ে অর্ডার করেছেন, সেটি দিলেই ক্রেতা দেখতে পাবেন তার পার্সেল কোথায় আছে। কোনো অ্যাকাউন্ট লাগবে না — বিশেষ করে যদি আপনার চেকআউট ফর্মে ইমেইল না চাওয়া হয়। আপনি চালু না করা পর্যন্ত এটি বন্ধ থাকবে।",
-    },
-  },
-  {
-    id: "2026-09-22-search-shows-every-match",
-    date: "2026-09-22",
-    // A storefront and API change: the dashboard version that is live, per the rule above.
-    version: "4.12.5",
-    tag: "fixed",
-    title: {
-      en: "Search can reach every matching product",
-      bn: "সার্চে এখন সব পণ্যেই পৌঁছানো যায়",
-    },
-    body: {
-      en: "Search never showed more than ten products, and there was no way to reach the rest — so a shop with two hundred shirts answered a search for shirts with ten of them. It now shows a full page at a time with working previous and next buttons, and the number beside your search is the real number of matches.",
-      bn: "সার্চে কখনোই দশটির বেশি পণ্য দেখাত না, আর বাকিগুলোয় যাওয়ার কোনো উপায়ও ছিল না—ফলে দুইশ শার্টের দোকানে “শার্ট” খুঁজলে মাত্র দশটি আসত। এখন একবারে পুরো এক পাতা দেখায়, আগের-পরের বোতামও কাজ করে। আর সার্চের পাশে যে সংখ্যাটি থাকে, সেটিই আসল মিলে যাওয়া পণ্যের সংখ্যা।",
     },
   },
   {

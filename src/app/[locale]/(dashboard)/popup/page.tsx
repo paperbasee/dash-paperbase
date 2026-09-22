@@ -8,5 +8,5 @@ export default async function LegacyPopupRedirect({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
-  redirect(`/${locale}${promotionsHref("popup")}`);
+  redirect(`/${locale}${promotionsHref()}`);
 }

@@ -91,14 +91,6 @@ export const PERMISSION_GROUPS: PermissionGroup[] = [
     ],
   },
   {
-    id: "notifications",
-    labelKey: "groupNotifications",
-    permissions: [
-      { key: "notifications.view", labelKey: "permNotificationsView" },
-      { key: "notifications.manage", labelKey: "permNotificationsManage" },
-    ],
-  },
-  {
     // No dashboard screen since 2026-09-18: a theme holds its own pictures. The
     // permission stays because the API's banners endpoints do, and this file is a
     // mirror of its catalogue; it goes when those endpoints go.
@@ -260,7 +252,6 @@ export const APP_VIEW_PERMISSION: Record<string, string> = {
   brands: "brands.view",
   reviews: "reviews.view",
   support_tickets: "support.view",
-  cta: "notifications.view",
   variants: "products.view",
   product_attributes: "products.view",
   inventory: "inventory.view",

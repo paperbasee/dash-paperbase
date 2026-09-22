@@ -1,33 +1,31 @@
 /**
- * Tabs of Settings → Promotions, in display order. Each id is also the app id in
- * config/apps.ts, so a tab follows that app's enabled flag and view permission.
+ * What Settings → Promotions holds. The id is also the app id in
+ * config/apps.ts, so it follows that app's enabled flag and view permission.
  *
- * Kept free of imports: the legacy /popup and /cta server redirects use it.
+ * Kept free of imports: the legacy /popup server redirect uses it.
+ *
+ * **There were two, and now there is one.** The CTA left on 2026-09-22: it and
+ * the theme editor's announcement bar were two bars doing one job, edited in
+ * two places, and the bar won. What that leaves is a list of one — kept,
+ * rather than inlined, because `settingsSections.SECTION_APPS` reads it to
+ * decide whether this settings section is shown to a given role at all.
+ *
+ * The tab bar, the `?promotion=` param and the resolver that read it went with
+ * the CTA. A tablist holding one tab is a control that decides nothing, and a
+ * screen reader announces it as a choice.
  */
-export const PROMOTION_TABS = ["popup", "cta"] as const;
+export const PROMOTION_TABS = ["popup"] as const;
 
 export type PromotionTab = (typeof PROMOTION_TABS)[number];
 
-/** Query param for the active tab; `tab` already selects the settings section. */
-export const PROMOTION_TAB_PARAM = "promotion";
-
-/** Settings URL (without locale) that opens Promotions on the given tab. */
-export function promotionsHref(tab: PromotionTab): string {
-  return `/settings?tab=promotions&${PROMOTION_TAB_PARAM}=${tab}`;
+/** Settings URL (without locale) that opens Promotions. */
+export function promotionsHref(): string {
+  return "/settings?tab=promotions";
 }
 
-/** Tabs whose app is enabled for the store AND viewable by the user's role. */
+/** The promotions apps this store has on AND this role may view. */
 export function visiblePromotionTabs(
   canShowApp: (appId: string) => boolean,
 ): PromotionTab[] {
   return PROMOTION_TABS.filter((tab) => canShowApp(tab));
-}
-
-/** The requested tab when the user can open it, else their first visible tab. */
-export function resolvePromotionTab(
-  requested: string | null,
-  visible: readonly PromotionTab[],
-): PromotionTab | null {
-  const candidate = (requested ?? "").trim();
-  return visible.find((tab) => tab === candidate) ?? visible[0] ?? null;
 }

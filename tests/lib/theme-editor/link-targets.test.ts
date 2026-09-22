@@ -127,7 +127,14 @@ describe("sectionContentPlace", () => {
     // Not the banners: since 2026-09-18 their pictures are the section's own, so it
     // points nowhere and the merchant never leaves the editor to place one.
     expect(sectionContentPlace("banner_slider")).toBeNull();
-    expect(sectionContentPlace("header")?.key).toBe("contentCta");
+    /*
+     * The header used to send a merchant to Promotions → CTA for its notice
+     * line. That was the problem this change fixed: the line was merchant
+     * content living in Settings while an `announcement_bar` section sat in
+     * the editor doing the same job. There is one bar now and it IS a section,
+     * so there is nowhere else to send anybody.
+     */
+    expect(sectionContentPlace("header")).toBeNull();
     expect(sectionContentPlace("footer")?.key).toBe("contentStore");
   });
 

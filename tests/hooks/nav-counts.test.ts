@@ -19,7 +19,6 @@ function stats(over: Partial<DashboardStats> = {}): DashboardStats {
     category_roots: 3,
     category_total: 9,
     support_tickets: 4,
-    notifications: 0,
     customers_count: 19,
     blogs_count: 5,
     recent_orders: [],

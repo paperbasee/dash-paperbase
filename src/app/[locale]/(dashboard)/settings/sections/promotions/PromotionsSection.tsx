@@ -1,40 +1,22 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useSearchParams } from "next/navigation";
-import { useRouter } from "@/i18n/navigation";
 import { useCanShowApp } from "@/hooks/useCanShowApp";
-import { cn } from "@/lib/utils";
 import { SettingsSectionBody, settingsSectionSurfaceClassName } from "../../SettingsSectionBody";
 import PopupPanel from "./PopupPanel";
-import CtaPanel from "./CtaPanel";
-import {
-  PROMOTION_TAB_PARAM,
-  resolvePromotionTab,
-  visiblePromotionTabs,
-  type PromotionTab,
-} from "./promotionTabs";
+import { visiblePromotionTabs } from "./promotionTabs";
 
 export default function PromotionsSection({ hidden }: { hidden: boolean }) {
   const t = useTranslations("settings");
-  const tNav = useTranslations("nav");
-  const router = useRouter();
-  const searchParams = useSearchParams();
   const canShowApp = useCanShowApp();
 
-  const tabs = visiblePromotionTabs(canShowApp);
-  const activeTab = resolvePromotionTab(searchParams.get(PROMOTION_TAB_PARAM), tabs);
-
-  // Mount only the open tab: each panel fetches, shows error toasts, runs timers and
-  // document listeners while mounted, and the panels reuse DOM ids such as is_active.
-  if (hidden || !activeTab) return null;
-
-  function selectTab(next: PromotionTab) {
-    if (next === activeTab) return;
-    const params = new URLSearchParams(searchParams.toString());
-    params.set(PROMOTION_TAB_PARAM, next);
-    router.replace(`/settings?${params.toString()}`, { scroll: false });
-  }
+  // Nothing to show when the pop-up is switched off for this shop or this
+  // user's role may not open it. The list is this section's access rule now
+  // rather than a set of tabs -- there is one panel left.
+  //
+  // It is also still a mount guard: the panel fetches, shows error toasts and
+  // runs timers while mounted, so a hidden section must not render it.
+  if (hidden || visiblePromotionTabs(canShowApp).length === 0) return null;
 
   return (
     <section
@@ -49,36 +31,14 @@ export default function PromotionsSection({ hidden }: { hidden: boolean }) {
           <p className="text-sm text-muted-foreground">{t("promotions.subtitle")}</p>
         </div>
 
-        <div
-          role="tablist"
-          aria-label={t("promotions.tabsAria")}
-          className="flex gap-1 rounded-md bg-muted p-0.5 w-fit"
-        >
-          {tabs.map((tab) => (
-            <button
-              key={tab}
-              type="button"
-              role="tab"
-              id={`promotion-tab-${tab}`}
-              aria-selected={activeTab === tab}
-              aria-controls="promotion-panel"
-              onClick={() => selectTab(tab)}
-              className={cn(
-                "rounded px-3 py-1.5 text-sm font-medium transition-colors",
-                activeTab === tab
-                  ? "bg-foreground text-background"
-                  : "text-muted-foreground hover:text-foreground"
-              )}
-            >
-              {tNav(tab)}
-            </button>
-          ))}
-        </div>
-
-        <div id="promotion-panel" role="tabpanel" aria-labelledby={`promotion-tab-${activeTab}`}>
-          {activeTab === "popup" && <PopupPanel />}
-          {activeTab === "cta" && <CtaPanel />}
-        </div>
+        {/*
+          One panel, so no tab bar. There were two -- the pop-up and a CTA --
+          until 2026-09-22, when the CTA and the theme editor's announcement bar
+          turned out to be two bars doing one job and the bar won. A tablist
+          holding a single tab is a control that decides nothing, and a screen
+          reader announces it as a choice.
+        */}
+        <PopupPanel />
       </SettingsSectionBody>
     </section>
   );
