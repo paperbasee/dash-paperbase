@@ -23,6 +23,7 @@ import { cn } from "@/lib/utils";
 import { EditorSheet } from "../EditorSheet";
 import { LinkPicker } from "../LinkPicker";
 import { PicturePicker } from "../PicturePicker";
+import { ChoicePicker } from "../ChoicePicker";
 import { ProductPicker } from "../ProductPicker";
 import { SettingField } from "../SettingField";
 
@@ -131,13 +132,26 @@ export function SlotDialog({
    *
    * A part with more than one setting -- the hero's picture, link and
    * description -- is a form, and stays a list of parts below.
+   *
+   * Two kinds of choice, and the difference is where the list comes from: a
+   * PRODUCT is one of the shop's own and is searched, because a catalogue can
+   * run to thousands; a SELECT is the theme's own list -- the sixteen promises
+   * -- and is simply shown.
    */
   const ticklist = (() => {
     if (!section || !blockType) return null;
     const specs = spec?.blocks?.[blockType]?.settings ?? [];
-    if (specs.length !== 1 || specs[0].type !== "product") return null;
-    return { blockType, setting: specs[0].id };
+    if (specs.length !== 1) return null;
+    if (specs[0].type !== "product" && specs[0].type !== "select") return null;
+    return { blockType, setting: specs[0].id, kind: specs[0].type };
   })();
+  /** The theme's own choices for a ticked select, in the merchant's language. */
+  const choices =
+    ticklist?.kind === "select" && section
+      ? (blockFields(manifest, section.type, ticklist.blockType, locale).find(
+          (field) => field.id === ticklist.setting,
+        )?.options ?? [])
+      : [];
   const picked = ticklist
     ? blocks
         .map((block) => block.settings[ticklist.setting])
@@ -235,7 +249,7 @@ export function SlotDialog({
                   onClick={() => setPicking(true)}
                 >
                   <Plus aria-hidden />
-                  {picked.length ? t("partsChange") : t("addPart")}
+                  {picked.length ? t("partsChange") : t("partsChoose")}
                 </Button>
               </div>
             ) : null}
@@ -351,16 +365,33 @@ export function SlotDialog({
       </EditorSheet>
 
       <EditorSheet
-        open={picking}
+        open={picking && ticklist?.kind === "product"}
         title={tEditor("productTitle")}
         hint={tEditor("productHint")}
         tall
         onClose={() => setPicking(false)}
       >
         <ProductPicker
-          open={picking}
+          open={picking && ticklist?.kind === "product"}
           value={picked}
           most={typeof most === "number" ? most : picked.length + 1}
+          onDone={(values) => onSetBlocks(ticklist!.blockType, ticklist!.setting, values)}
+          onClose={() => setPicking(false)}
+        />
+      </EditorSheet>
+
+      <EditorSheet
+        open={picking && ticklist?.kind === "select"}
+        title={tEditor("chooseTitle")}
+        hint={tEditor("chooseHint", { max: typeof most === "number" ? most : choices.length })}
+        tall
+        onClose={() => setPicking(false)}
+      >
+        <ChoicePicker
+          open={picking && ticklist?.kind === "select"}
+          options={choices}
+          value={picked}
+          most={typeof most === "number" ? most : choices.length}
           onDone={(values) => onSetBlocks(ticklist!.blockType, ticklist!.setting, values)}
           onClose={() => setPicking(false)}
         />

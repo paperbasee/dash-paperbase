@@ -198,7 +198,7 @@ export function ProductPicker({
       */}
       <div className="flex items-center justify-between gap-3 border-t border-border p-3">
         <p className="text-xs text-muted-foreground">
-          {t("productChosenCount", { count: ticked.length, max: most })}
+          {t("chosenCount", { count: ticked.length, max: most })}
         </p>
         <Button
           type="button"

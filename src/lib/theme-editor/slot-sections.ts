@@ -61,6 +61,24 @@ export const WIRED_SLOTS: Partial<Record<SlotPageKey, Record<string, WiredSlot>>
       },
       off: "off",
     },
+    /*
+      The shop's promises -- cash on delivery, easy returns -- ticked four at a
+      time out of sixteen. Two shapes of ONE section, like the category band:
+      the merchant is choosing how their promises look, not what they are, and
+      two sections would let them put both on the page.
+
+      Picked here and drawn in two places: the product page's Promises is an
+      inherited slot pointing back at this one, the way the notice strip is
+      owned by the Header entry and drawn everywhere.
+    */
+    trust: {
+      page: "templates.home",
+      sections: {
+        icons: { type: "promises", settings: { layout: "marks" } },
+        line: { type: "promises", settings: { layout: "line" } },
+      },
+      off: "off",
+    },
     featured: { page: "templates.home", sections: { row: "featured_products" }, off: "off" },
     bestsellers: { page: "templates.home", sections: { row: "best_sellers" }, off: "off" },
     arrivals: { page: "templates.home", sections: { row: "new_arrivals" }, off: "off" },

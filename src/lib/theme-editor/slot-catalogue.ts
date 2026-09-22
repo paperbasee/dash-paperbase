@@ -357,17 +357,12 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
         { value: "single", label: "gallerySingle", note: "gallerySingleNote", shape: "block" },
       ],
     },
-    {
-      key: "trust",
-      label: "trust",
-      initial: "on",
-      emptyValues: ["off"],
-      emptyLabel: "trustEmpty",
-      options: [
-        { value: "on", label: "on", note: "trustNote", shape: "line" },
-        { value: "off", label: "off", shape: "blank" },
-      ],
-    },
+    /*
+      The same four promises the home page shows, so a shopper is told the same
+      thing wherever they are standing. Picked once, on the Home page -- two
+      lists would be two answers to one question.
+    */
+    { key: "trust", label: "trust", inherited: true, inheritedFrom: { page: "home", key: "trust" } },
     {
       key: "description",
       label: "description",
