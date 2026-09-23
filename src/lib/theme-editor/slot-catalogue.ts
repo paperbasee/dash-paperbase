@@ -556,15 +556,16 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
       ],
     },
     /*
-      Getting to the rest. Numbered pages are the first answer and the theme's
-      default: a page of a shop is a cached document with an address, so
-      `?page=2` is bookmarkable, indexable and cacheable, and it works with no
-      JavaScript -- the rule the rest of the storefront follows.
+      Getting to the rest. Numbered pages are the theme's default: a page of a
+      shop is a cached document with an address, so `?page=2` is bookmarkable,
+      indexable and cacheable, and it works with no JavaScript -- the rule the
+      rest of the storefront follows.
 
-      **A Load more button is not offered yet.** It was a tile here from the day
-      this page was drawn, and the shop cannot draw one: it needs a script that
-      fetches the next page and appends it. Offering it would be the broken
-      promise this whole stage exists to end. It comes back with the script.
+      **The button is that same link**, upgraded by a script into fetch and
+      append. It was a tile here from the day this page was drawn and was taken
+      out on 2026-09-23 because the shop could not draw one; it came back the
+      same day with the script. A tile that changes nothing is the broken
+      promise this whole stretch of work exists to end.
     */
     {
       key: "more",
@@ -575,6 +576,7 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
       emptyLabel: "catMoreEmpty",
       options: [
         { value: "pages", label: "catMorePages", note: "catMorePagesNote", shape: "line" },
+        { value: "button", label: "catMoreButton", note: "catMoreButtonNote", shape: "line" },
         { value: "none", label: "catMoreNone", note: "catMoreNoneNote", shape: "blank" },
       ],
     },

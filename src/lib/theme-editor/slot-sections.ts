@@ -183,6 +183,7 @@ export const WIRED_SLOTS: Partial<Record<SlotPageKey, Record<string, WiredSlot>>
       page: "templates.category",
       sections: {
         pages: { type: "product_grid", settings: { more: "pages" } },
+        button: { type: "product_grid", settings: { more: "button" } },
         none: { type: "product_grid", settings: { more: "none" } },
       },
     },

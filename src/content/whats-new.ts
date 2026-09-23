@@ -64,6 +64,21 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-09-22-load-more-button",
+    date: "2026-09-22",
+    version: "4.70.0",
+    tag: "new",
+    href: "/settings?tab=customization",
+    title: {
+      en: "A Load more button for long categories",
+      bn: "বড় ক্যাটাগরির জন্য “আরও দেখুন” বোতাম",
+    },
+    body: {
+      en: "Under Category → Getting to the rest, you can now choose a Load more button instead of numbered pages: the next lot of products appears under the grid without the shopper leaving the page. Numbered pages are still there and still the easier ones to share and to find in search.",
+      bn: "ক্যাটাগরি → বাকিগুলোতে যাওয়া অংশে এখন নম্বর দেওয়া পাতার বদলে “আরও দেখুন” বোতাম বেছে নিতে পারেন: ক্রেতা পাতা না ছেড়েই গ্রিডের নিচে পরের পণ্যগুলো দেখতে পান। নম্বর দেওয়া পাতা আগের মতোই আছে, আর লিংক শেয়ার করা বা সার্চে আসা তাতেই সহজ।",
+    },
+  },
+  {
     id: "2026-09-22-shoppers-can-sort",
     date: "2026-09-22",
     version: "4.69.0",
@@ -474,21 +489,6 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     body: {
       en: "Every code now has an Edit beside it, so a minimum spend or an end date can be changed without making a second code. Paperbase also refuses a code that would take the whole of the smallest order it allows — 300 off with a minimum spend of 200 makes that order free and you still pay the delivery — and tells you which figure to raise.",
       bn: "প্রতিটি কোডের পাশে এখন সম্পাদনা আছে, তাই নতুন কোড না বানিয়েই সর্বনিম্ন কেনাকাটা বা শেষ তারিখ বদলানো যাবে। এছাড়া যে কোড সবচেয়ে ছোট যোগ্য অর্ডারটির পুরো টাকাই কেড়ে নেবে সেটি আর সংরক্ষণ হবে না — ২০০ টাকার সর্বনিম্নে ৩০০ টাকা ছাড় দিলে ওই অর্ডার ফ্রি হয়ে যায় আর ডেলিভারির খরচ আপনারই থাকে — আর কোন অঙ্কটি বাড়াতে হবে তা জানিয়ে দেওয়া হবে।",
-    },
-  },
-  {
-    id: "2026-09-22-lists-show-what-just-happened",
-    date: "2026-09-22",
-    version: "4.37.0",
-    tag: "fixed",
-    href: "/orders/abandoned",
-    title: {
-      en: "Lists your shoppers fill are always up to date",
-      bn: "ক্রেতাদের কাজে ভরে ওঠা তালিকাগুলো সব সময় হালনাগাদ",
-    },
-    body: {
-      en: "Abandoned checkouts, Accounts and Most wished-for were showing what they held a couple of minutes ago, so an abandoned checkout stayed on the list after the shopper had ordered. All three now fetch fresh every time you open them. Most wished-for also says plainly that it counts shoppers who were signed in when they saved.",
-      bn: "অসমাপ্ত চেকআউট, অ্যাকাউন্ট আর সবচেয়ে পছন্দের — এই তালিকাগুলো কয়েক মিনিট আগের তথ্য দেখাত, তাই ক্রেতা অর্ডার করে ফেলার পরেও অসমাপ্ত চেকআউট তালিকায় থেকে যেত। এখন তিনটিই প্রতিবার খোলার সময় নতুন করে তথ্য আনে। সেই সাথে 'সবচেয়ে পছন্দের' পাতায় স্পষ্ট করে লেখা আছে যে এটি কেবল সাইন ইন করা অবস্থায় সেভ করা ক্রেতাদের গোনে।",
     },
   },
   {

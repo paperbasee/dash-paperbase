@@ -61,7 +61,7 @@ const manifest: ThemeManifest = {
       required: true,
       settings: [
         choice("columns", ["four", "three", "two"], "four"),
-        choice("more", ["pages", "none"], "pages"),
+        choice("more", ["pages", "button", "none"], "pages"),
         choice("sort", ["off", "menu", "tabs"], "off"),
         choice("when_empty", ["text", "invite"], "text"),
       ],
@@ -268,10 +268,22 @@ describe("the grid, its pages and its empty answer are one section", () => {
     expect(sectionOfType(after.document, place("more"), "product_grid")?.hidden).toBe(false);
   });
 
-  test("a Load more button is not offered until the shop can draw one", () => {
+  test("all three ways to the rest are offered, and each writes its own", () => {
+    /*
+      The button was taken out on 2026-09-23 because the shop could not draw
+      one, and came back the same day with the script. A tile that changes
+      nothing is the broken promise this stretch of work exists to end.
+    */
     const slot = SLOTS.category.find((one) => one.key === "more")!;
-    expect((slot.options ?? []).map((option) => option.value)).toEqual(["pages", "none"]);
-    expect(Object.keys(place("more").sections)).toEqual(["pages", "none"]);
+    expect((slot.options ?? []).map((option) => option.value)).toEqual([
+      "pages",
+      "button",
+      "none",
+    ]);
+    expect(Object.keys(place("more").sections)).toEqual(["pages", "button", "none"]);
+    for (const answer of ["button", "none", "pages"]) {
+      expect(settingsOf(pick(PAGE(), "more", answer), "product_grid").more).toBe(answer);
+    }
   });
 
   test("numbered pages are what a page starts on", () => {
