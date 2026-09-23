@@ -64,6 +64,21 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-09-22-shoppers-can-sort",
+    date: "2026-09-22",
+    version: "4.69.0",
+    tag: "new",
+    href: "/settings?tab=customization",
+    title: {
+      en: "Let shoppers sort a category",
+      bn: "ক্রেতারা ক্যাটাগরি সাজাতে পারবেন",
+    },
+    body: {
+      en: "Under Category in your editor, Sorting can now be a small menu on the right or a row of choices: your own order, newest, price up, price down and most popular. Leave it off and your categories stay exactly as they are — in the order you arranged them.",
+      bn: "এডিটরের ক্যাটাগরি অংশে সাজানোর ক্রম এখন ডান পাশে ছোট মেনু বা পাশাপাশি কয়েকটি অপশন হিসেবে দেখানো যায়: আপনার নিজের ক্রম, নতুন আগে, দাম কম থেকে বেশি, বেশি থেকে কম আর সবচেয়ে জনপ্রিয়। বন্ধ রাখলে ক্যাটাগরি আপনার সাজানো ক্রমেই থাকবে।",
+    },
+  },
+  {
     id: "2026-09-22-category-pages-are-yours",
     date: "2026-09-22",
     version: "4.68.0",
@@ -474,21 +489,6 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     body: {
       en: "Abandoned checkouts, Accounts and Most wished-for were showing what they held a couple of minutes ago, so an abandoned checkout stayed on the list after the shopper had ordered. All three now fetch fresh every time you open them. Most wished-for also says plainly that it counts shoppers who were signed in when they saved.",
       bn: "অসমাপ্ত চেকআউট, অ্যাকাউন্ট আর সবচেয়ে পছন্দের — এই তালিকাগুলো কয়েক মিনিট আগের তথ্য দেখাত, তাই ক্রেতা অর্ডার করে ফেলার পরেও অসমাপ্ত চেকআউট তালিকায় থেকে যেত। এখন তিনটিই প্রতিবার খোলার সময় নতুন করে তথ্য আনে। সেই সাথে 'সবচেয়ে পছন্দের' পাতায় স্পষ্ট করে লেখা আছে যে এটি কেবল সাইন ইন করা অবস্থায় সেভ করা ক্রেতাদের গোনে।",
-    },
-  },
-  {
-    id: "2026-09-22-discount-codes",
-    date: "2026-09-22",
-    version: "4.36.0",
-    tag: "new",
-    href: "/coupons",
-    title: {
-      en: "Discount codes",
-      bn: "ডিসকাউন্ট কোড",
-    },
-    body: {
-      en: "Create a code shoppers type at checkout for money off — taka or a percent, with a minimum spend, an end date, and limits on how many times it can be used in total and per customer. The list shows how often each one has been used and what it has given away. A code never takes free delivery away, and switching one off leaves past orders exactly as they were.",
-      bn: "এমন কোড তৈরি করুন যা ক্রেতারা চেকআউটে লিখে ছাড় পাবেন — টাকায় বা শতাংশে, সাথে সর্বনিম্ন কেনাকাটা, শেষ তারিখ, আর মোট ও প্রতি ক্রেতা কতবার ব্যবহার করা যাবে তার সীমা। তালিকায় দেখবেন প্রতিটি কোড কতবার ব্যবহার হয়েছে আর কত ছাড় দেওয়া হয়েছে। কোনো কোড ফ্রি ডেলিভারি কেড়ে নেবে না, আর কোড বন্ধ করলে আগের অর্ডারগুলো যেমন ছিল তেমনই থাকবে।",
     },
   },
   {

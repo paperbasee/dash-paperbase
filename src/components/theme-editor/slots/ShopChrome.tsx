@@ -1101,10 +1101,23 @@ export function ShopChrome({
     case "category:count":
       return <p className="px-4 pb-1 text-[11px] text-current/45">{t("catCountExample", { count: 24 })}</p>;
 
-    case "category:sort":
+    /*
+      Five, the same five the shop draws. The first is the merchant's own shelf
+      order -- what the page is in until somebody sorts it -- so it is the one
+      filled in: a control showing "Newest" over a page in no such order is a
+      control lying about the page under it.
+    */
+    case "category:sort": {
+      const orders = [
+        t("sortFeatured"),
+        t("sortNewest"),
+        t("sortPriceLow"),
+        t("sortPriceHigh"),
+        t("sortPopular"),
+      ];
       return variant === "tabs" ? (
         <div className="flex flex-wrap gap-2 px-4 py-3">
-          {[t("sortNewest"), t("sortPriceLow"), t("sortPriceHigh"), t("sortPopular")].map((name, i) => (
+          {orders.map((name, i) => (
             <span
               key={name}
               // Never `bg-current` on something that also sets `color`: the fill
@@ -1123,13 +1136,14 @@ export function ShopChrome({
         <div className="flex items-center justify-end gap-2 px-4 py-3">
           <span className="text-[11px] text-current/45">{t("sortBy")}</span>
           <span className="inline-flex items-center gap-2 rounded-xs border border-current/15 px-2.5 py-1.5 text-[11px]">
-            {t("sortNewest")}
+            {orders[0]}
             <span className="text-current/40" aria-hidden>
               ▾
             </span>
           </span>
         </div>
       );
+    }
 
     /**
      * Filters, as a row or as a rail.

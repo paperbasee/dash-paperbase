@@ -62,6 +62,7 @@ const manifest: ThemeManifest = {
       settings: [
         choice("columns", ["four", "three", "two"], "four"),
         choice("more", ["pages", "none"], "pages"),
+        choice("sort", ["off", "menu", "tabs"], "off"),
         choice("when_empty", ["text", "invite"], "text"),
       ],
     },
@@ -129,19 +130,18 @@ const PAGE = () =>
 
 describe("every place is a page of the document", () => {
   test("they all edit the category template", () => {
-    for (const key of ["breadcrumb", "heading", "count", "grid", "more", "text", "empty"]) {
+    for (const key of ["breadcrumb", "heading", "count", "sort", "grid", "more", "text", "empty"]) {
       expect(place(key).page).toBe("templates.category");
     }
   });
 
-  test("sorting and filtering are still drawings", () => {
+  test("filtering is still a drawing", () => {
     /*
-      Both are real in the API and neither is in the shop. A place goes in when
-      its section can do everything the place promises -- so a merchant never
-      meets a choice that changes nothing, which is the complaint that started
-      this work.
+      Real in the API and not in the shop. A place goes in when its section can
+      do everything the place promises -- so a merchant never meets a choice
+      that changes nothing, which is the complaint that started this work.
+      Sorting was in the same state until stage 2.
     */
-    expect(wiringFor("category", "sort")).toBeNull();
     expect(wiringFor("category", "filters")).toBeNull();
   });
 });
@@ -224,6 +224,7 @@ describe("the heading and its count are one section", () => {
     expect(slotValueFor(page.document, place("grid"))).toBe("four");
     expect(slotValueFor(page.document, place("more"))).toBe("pages");
     expect(slotValueFor(page.document, place("empty"))).toBe("text");
+    expect(slotValueFor(page.document, place("sort"))).toBe("off");
   });
 });
 
@@ -324,9 +325,9 @@ describe("one decision, one control", () => {
     expect([...decided].sort()).toEqual(["layout", "show_count"]);
   });
 
-  test("the grid's dialog draws none of the three", () => {
+  test("the grid's dialog draws none of the four", () => {
     const decided = settingsDecidedOn("category", "product_grid");
-    expect([...decided].sort()).toEqual(["columns", "more", "when_empty"]);
+    expect([...decided].sort()).toEqual(["columns", "more", "sort", "when_empty"]);
   });
 
   test("a section whose place decides nothing still draws its fields", () => {
@@ -394,5 +395,45 @@ describe("the canvas draws the merchant's own category", () => {
     const html = draw("heading", "plain", []);
     expect(html).toContain("This category");
     expect(html).not.toContain("Bags");
+  });
+});
+
+describe("sorting", () => {
+  test("it is the grid's setting, not a section of its own", () => {
+    /*
+      A control that reorders a list it is not part of could be dropped on a
+      page with no list at all.
+    */
+    expect(sectionTypesOf(place("sort"))).toEqual(["product_grid"]);
+    expect(place("sort").off).toBeUndefined();
+  });
+
+  test("each shape is written to the grid", () => {
+    for (const shape of ["menu", "tabs", "off"]) {
+      const after = pick(PAGE(), "sort", shape);
+      expect(settingsOf(after, "product_grid").sort).toBe(shape);
+      expect(slotValueFor(after.document, place("sort"))).toBe(shape);
+    }
+  });
+
+  test("switching it on leaves how many across alone", () => {
+    const after = pick(pick(PAGE(), "grid", "two"), "sort", "tabs");
+    expect(settingsOf(after, "product_grid")).toMatchObject({ columns: "two", sort: "tabs" });
+  });
+
+  test("the grid's dialog draws none of the four it decides", () => {
+    expect([...settingsDecidedOn("category", "product_grid")].sort()).toEqual([
+      "columns",
+      "more",
+      "sort",
+      "when_empty",
+    ]);
+  });
+
+  test("off is what a shop that has never touched it reads as", () => {
+    /* No shop's page moves under this. */
+    const slot = SLOTS.category.find((one) => one.key === "sort")!;
+    expect(slot.initial).toBe("off");
+    expect(Object.keys(place("sort").sections)[0]).toBe("off");
   });
 });

@@ -507,6 +507,17 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
         { value: "off", label: "off", shape: "blank" },
       ],
     },
+    /*
+      Sorting, real since 2026-09-23. The API has taken `ordering` -- newest,
+      price up, price down, most popular -- since long before the editor, and
+      honoured it; nothing on the storefront had ever asked for it, so no
+      shopper could. This is the control, not the feature.
+
+      The shop offers FIVE, not the four drawn here: the fifth is the merchant's
+      own shelf order, which is what the page is in until somebody sorts it. A
+      control offering only four would show "Newest" filled over a page that was
+      in no such order.
+    */
     {
       key: "sort",
       label: "catSort",

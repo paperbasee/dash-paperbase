@@ -154,6 +154,23 @@ export const WIRED_SLOTS: Partial<Record<SlotPageKey, Record<string, WiredSlot>>
         on: { type: "category_header", settings: { show_count: true } },
       },
     },
+    /*
+      How a shopper reorders the list. `off` first, like every place whose
+      values are settings of one section: it is the theme's default, and a
+      missing setting reads as the first value that wants it.
+
+      Whether a shopper's `?sort=` is honoured AT ALL is this setting -- with no
+      control drawn, a typed order would reorder page one while the numbered
+      pages under it dropped it again.
+    */
+    sort: {
+      page: "templates.category",
+      sections: {
+        off: { type: "product_grid", settings: { sort: "off" } },
+        menu: { type: "product_grid", settings: { sort: "menu" } },
+        tabs: { type: "product_grid", settings: { sort: "tabs" } },
+      },
+    },
     grid: {
       page: "templates.category",
       sections: {
