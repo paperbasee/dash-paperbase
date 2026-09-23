@@ -64,6 +64,21 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-09-22-delivery-and-returns-terms",
+    date: "2026-09-22",
+    version: "4.76.0",
+    tag: "new",
+    href: "/settings?tab=customization",
+    title: {
+      en: "Tell shoppers your delivery terms",
+      bn: "ডেলিভারির শর্ত ক্রেতাকে জানান",
+    },
+    body: {
+      en: "Write your delivery and returns terms once, under Product in your editor, and they appear on every product page — folded away, or written out in full. Nothing is shown until you write something, so no shop promises a return policy it does not have.",
+      bn: "ডেলিভারি ও ফেরতের শর্ত একবার লিখুন — এডিটরের পণ্য অংশে — আর তা প্রতিটি পণ্যের পাতায় দেখা যাবে, ভাঁজ করা অবস্থায় বা পুরোটা লেখা। না লেখা পর্যন্ত কিছুই দেখানো হয় না, তাই কোনো দোকান এমন কিছুর প্রতিশ্রুতি দেয় না যা তার নেই।",
+    },
+  },
+  {
     id: "2026-09-22-product-page-choices",
     date: "2026-09-22",
     version: "4.73.0",
@@ -74,8 +89,8 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
       bn: "পণ্যের পেজ নিজের মতো সাজান",
     },
     body: {
-      en: "Under Product in your editor, seven choices are real now: show the path back up or hide it, pick how the pictures look — a frame with thumbnails, a column, or just one — put the description in a box or under a heading, show specifications in two columns or folded away, and switch \"You may also like\" and product questions on or off. Reviews can now be the full band or just the score and how many, and the recently-viewed strip can be switched off. On a phone, a bar with the price and the button now follows the shopper down a product page — switch it off under Product if you would rather not have one.",
-      bn: "এডিটরের পণ্য অংশে সাতটি পছন্দ এখন সত্যিকারের: উপরে ফেরার পথ দেখাবেন কি না; ছবি কেমন দেখাবে — থাম্বনেইলসহ একটি ছবি, ছবির কলাম, নাকি শুধু একটি; বিবরণ বাক্সে নাকি শিরোনামের নিচে; স্পেসিফিকেশন দুই কলামে নাকি ভাঁজ করা; আর “এগুলোও ভালো লাগতে পারে” ও পণ্যের প্রশ্ন চালু নাকি বন্ধ। রিভিউ এখন পুরো ব্যান্ড হিসেবে, নয়তো শুধু স্কোর আর কতজন দিয়েছেন; “সম্প্রতি দেখা” অংশটিও বন্ধ করা যায়। আর ফোনে পণ্যের পাতায় দাম আর বোতামসহ একটি বার এখন ক্রেতার সাথে নিচে নামে — না চাইলে পণ্য অংশ থেকে বন্ধ করে দিন।",
+      en: "Under Product in your editor, every choice is real now: show the path back up or hide it, pick how the pictures look — a frame with thumbnails, a column, or just one — put the description in a box or under a heading, and show specifications in two columns or folded away. Reviews can be the full band or just the score and how many, \"You may also like\", product questions and the recently-viewed strip each switch on or off. On a phone, a bar with the price and the button now follows the shopper down the page.",
+      bn: "এডিটরের পণ্য অংশে প্রতিটি পছন্দ এখন সত্যিকারের: উপরে ফেরার পথ দেখাবেন কি না; ছবি কেমন দেখাবে — থাম্বনেইলসহ একটি ছবি, ছবির কলাম, নাকি শুধু একটি; বিবরণ বাক্সে নাকি শিরোনামের নিচে; স্পেসিফিকেশন দুই কলামে নাকি ভাঁজ করা। রিভিউ পুরো ব্যান্ড হিসেবে নাকি শুধু স্কোর, আর “এগুলোও ভালো লাগতে পারে”, পণ্যের প্রশ্ন ও “সম্প্রতি দেখা” — প্রতিটিই চালু বা বন্ধ করা যায়। ফোনে পণ্যের পাতায় দাম আর বোতামসহ একটি বার এখন ক্রেতার সাথে নিচে নামে।",
     },
   },
   {
@@ -475,20 +490,6 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     body: {
       en: "Your sixtieth order is now #60 instead of #00000060 — on the order list, the invoice, and in your shop. Nothing changed about which order is which, and a customer reading an older number off a printed invoice still finds their order.",
       bn: "আপনার ষাটতম অর্ডার এখন #00000060 নয়, #60 — অর্ডার তালিকায়, ইনভয়েসে এবং আপনার দোকানে। কোন অর্ডার কোনটি তা বদলায়নি, আর পুরোনো ইনভয়েসে ছাপা নম্বর দিয়েও ক্রেতা তাঁর অর্ডার খুঁজে পাবেন।",
-    },
-  },
-  {
-    id: "2026-09-22-prices-show-what-you-charge",
-    date: "2026-09-22",
-    version: "4.37.0",
-    tag: "fixed",
-    title: {
-      en: "Your shop shows the exact amount you charge",
-      bn: "আপনার দোকান ঠিক যত টাকা নেওয়া হবে তত-ই দেখাবে",
-    },
-    body: {
-      en: "Your shop was rounding amounts to whole taka on screen while charging the real figure, so an order of ৳1,124.79 was shown to the shopper as ৳1,125 and recorded for you as ৳1,124.79. Prices now show their paisa when they have any, so the shelf, the basket, checkout, the invoice and your dashboard all say one number.",
-      bn: "আপনার দোকান পর্দায় টাকার অঙ্ক পূর্ণসংখ্যায় দেখালেও নেওয়া হতো আসল অঙ্কটাই — তাই ৳১,১২৪.৭৯ টাকার অর্ডার ক্রেতাকে দেখানো হতো ৳১,১২৫, আর আপনার হিসাবে থাকত ৳১,১২৪.৭৯। এখন পয়সা থাকলে পয়সাসহ দেখাবে, ফলে পণ্যের দাম, ব্যাগ, চেকআউট, ইনভয়েস আর ড্যাশবোর্ড — সবখানে একই অঙ্ক।",
     },
   },
   {

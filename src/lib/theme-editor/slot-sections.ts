@@ -157,6 +157,27 @@ export const WIRED_SLOTS: Partial<Record<SlotPageKey, Record<string, WiredSlot>>
       },
     },
     /*
+      Delivery and returns, 2026-09-23 (stage 4) -- the last place on this page.
+
+      The editor offered two SHAPES for words that existed nowhere: no field in
+      the dashboard, no setting in the theme, nothing. The owner chose shop-wide
+      words over a per-product field, because delivery terms are the same for
+      almost everything a shop sells and a field on every product is one more
+      empty box most would leave blank.
+
+      No migration: nothing was being drawn before, so no shop loses anything by
+      reading this as off until they write something. The section is in the
+      theme's default and draws nothing while it is empty.
+    */
+    shipping: {
+      page: "templates.product",
+      sections: {
+        folded: { type: "delivery_returns", settings: { layout: "folded" } },
+        plain: { type: "delivery_returns", settings: { layout: "plain" } },
+      },
+      off: "off",
+    },
+    /*
       Reviews, 2026-09-23 (stage 2). Two shapes of one section: the band as it
       has always been, or the score and the count alone. `off` REMOVES nothing
       -- it hides the section, so a shop that takes the band down for a month

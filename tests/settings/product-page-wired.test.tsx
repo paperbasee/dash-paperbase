@@ -60,6 +60,15 @@ const manifest: ThemeManifest = {
     },
     related_products: { ...labels("You may also like"), settings: [] },
     recently_viewed: { ...labels("Recently viewed"), at_most_one: true, settings: [] },
+    delivery_returns: {
+      ...labels("Delivery and returns"),
+      at_most_one: true,
+      settings: [
+        choice("layout", ["folded", "plain"], "folded"),
+        { id: "heading", type: "text", ...labels("Heading"), default: "" },
+        { id: "body", type: "textarea", ...labels("Your terms"), default: "" },
+      ],
+    },
     product_questions: { ...labels("Questions"), settings: [{ id: "heading", type: "text", ...labels("Heading"), default: "" }] },
     product_reviews: {
       ...labels("Reviews"),
@@ -83,6 +92,7 @@ const manifest: ThemeManifest = {
         "breadcrumb",
         "product_gallery",
         "product_details",
+        "delivery_returns",
         "related_products",
         "recently_viewed",
         "product_questions",
@@ -143,15 +153,15 @@ describe("what stage 1 wired", () => {
     }
   });
 
-  test("only delivery and returns is still a drawing", () => {
+  test("every place on this page is real now", () => {
     /*
-      A place goes in when its section can do everything the place promises.
-      Delivery-and-returns has no words anywhere yet -- stage 4 gives it some,
-      shop-wide, typed once in the editor (owner, 2026-09-23).
+      Stage 4 was the last one. A place goes in when its section can do
+      everything the place promises -- so a merchant never meets a choice that
+      changes nothing, which is the complaint that started this work.
     */
-    expect(wiringFor("product", "shipping")).toBeNull();
-    for (const key of ["recent", "stickybuy"]) {
-      expect(wiringFor("product", key), key).not.toBeNull();
+    for (const slot of SLOTS.product) {
+      if (slot.inherited) continue;
+      expect(wiringFor("product", slot.key), slot.key).not.toBeNull();
     }
   });
 
@@ -378,5 +388,57 @@ describe("the shopper's own trail, and the phone buy bar", () => {
       details_style: "plain",
       sticky_buy: false,
     });
+  });
+});
+
+describe("delivery and returns", () => {
+  test("two shapes of its own section, and an off", () => {
+    expect(sectionTypesOf(place("shipping"))).toEqual(["delivery_returns"]);
+    expect(place("shipping").off).toBe("off");
+  });
+
+  test("each shape is written to the section", () => {
+    for (const shape of ["plain", "folded"]) {
+      const after = pick(PAGE(), "shipping", shape);
+      expect(
+        sectionOfType(after.document, place("shipping"), "delivery_returns")?.settings.layout,
+      ).toBe(shape);
+      expect(slotValueFor(after.document, place("shipping"))).toBe(shape);
+    }
+  });
+
+  test("the theme's own default comes first", () => {
+    expect(Object.keys(place("shipping").sections)[0]).toBe("folded");
+  });
+
+  test("the words are the merchant's, and they are FIELDS rather than tiles", () => {
+    /*
+      The tiles decide the shape only. A merchant types the terms once and they
+      are the same on every product -- the owner's decision, 2026-09-23, over a
+      field on every product that most would leave blank.
+    */
+    const decided = settingsDecidedOn("product", "delivery_returns");
+    expect([...decided]).toEqual(["layout"]);
+    expect(decided.has("body")).toBe(false);
+    expect(decided.has("heading")).toBe(false);
+  });
+
+  test("turning it off keeps the words a merchant wrote", () => {
+    const written = editor([
+      section("details", "product_details"),
+      section("delivery", "delivery_returns", { settings: { body: "Two days inside Dhaka." } }),
+    ]);
+    const after = pick(written, "shipping", "off");
+    const band = sectionOfType(after.document, place("shipping"), "delivery_returns");
+    expect(band?.hidden).toBe(true);
+    expect(band?.settings.body).toBe("Two days inside Dhaka.");
+  });
+
+  test("it sits under the buying area, not at the end of the page", () => {
+    const after = pick(PAGE(), "shipping", "folded");
+    const sections = after.document.templates.product.sections;
+    expect(sections.findIndex((s) => s.type === "delivery_returns")).toBeGreaterThan(
+      sections.findIndex((s) => s.type === "product_details"),
+    );
   });
 });
