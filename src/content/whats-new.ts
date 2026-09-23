@@ -64,6 +64,21 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-09-22-a-promotion-with-a-picture",
+    date: "2026-09-22",
+    version: "4.62.0",
+    tag: "improved",
+    href: "/settings?tab=customization",
+    title: {
+      en: "Your promotion can carry a picture",
+      bn: "প্রোমোশনে এখন ছবি দেওয়া যাবে",
+    },
+    body: {
+      en: "A promotion was a coloured band with words on it. Now it comes three ways — words on a band, a picture beside them, or a picture behind them with your words over it — and you can add a small line above the headline, like “Limited time”. The countdown, the start and end times and everything else stay exactly where they were.",
+      bn: "আগে প্রোমোশন ছিল শুধু রঙিন ব্যান্ডে কিছু লেখা। এখন তিনভাবে দেখানো যায় — ব্যান্ডে শুধু লেখা, লেখার পাশে ছবি, কিংবা লেখার পেছনে ছবি — আর শিরোনামের উপরে ছোট একটি লাইনও দেওয়া যায়, যেমন “সীমিত সময়”। কাউন্টডাউন, শুরু-শেষের সময় আর বাকি সবকিছু আগের জায়গাতেই আছে।",
+    },
+  },
+  {
     id: "2026-09-22-three-departments-on-your-home-page",
     date: "2026-09-22",
     version: "4.59.0",
@@ -459,21 +474,6 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     body: {
       en: "A shopper can tap the heart on any product and keep a list of what they want in your shop. Catalog → Most wished-for shows you what they are saving, most-saved first, so you know what to restock or put on offer. It stays off until you switch it on.",
       bn: "ক্রেতারা যেকোনো পণ্যের হার্ট চিহ্নে চাপ দিয়ে আপনার দোকানে পছন্দের পণ্যের তালিকা রাখতে পারবেন। ক্যাটালগ → সবচেয়ে পছন্দের পাতায় দেখতে পাবেন তারা কী সেভ করছেন, সবচেয়ে বেশি সেভ হওয়া পণ্য আগে — কোনটি আবার আনবেন বা অফারে দেবেন তা বুঝতে সুবিধা হবে। আপনি চালু না করা পর্যন্ত এটি বন্ধ থাকবে।",
-    },
-  },
-  {
-    id: "2026-09-22-popup-always-there",
-    date: "2026-09-22",
-    version: "4.35.0",
-    tag: "fixed",
-    href: "/settings?tab=promotions",
-    title: {
-      en: "The pop-up no longer hides itself",
-      bn: "পপ-আপ আর নিজেই লুকাবে না",
-    },
-    body: {
-      en: "Settings → Apps no longer has switches for Pop-up and Shipping. Turning the Pop-up switch off only hid its own editor, leaving no screen to turn it back on from. It is always in Settings → Promotions now — to stop it showing in your shop, set it to inactive there.",
-      bn: "সেটিংস → অ্যাপস-এ পপ-আপ আর শিপিং-এর সুইচ আর নেই। পপ-আপের সুইচ বন্ধ করলে কেবল তার নিজের এডিটরই লুকিয়ে যেত, ফলে আবার চালু করার মতো কোনো পাতাই থাকত না। এটি এখন সব সময় সেটিংস → প্রোমোশন-এ থাকবে — দোকানে দেখানো বন্ধ করতে সেখান থেকে নিষ্ক্রিয় করুন।",
     },
   },
   {
