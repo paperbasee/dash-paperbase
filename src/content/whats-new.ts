@@ -64,6 +64,21 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-09-22-three-departments-on-your-home-page",
+    date: "2026-09-22",
+    version: "4.59.0",
+    tag: "improved",
+    href: "/settings?tab=customization",
+    title: {
+      en: "Your home page picks three categories",
+      bn: "হোম পেজে এখন তিনটি ক্যাটাগরি",
+    },
+    body: {
+      en: "Your home page used to show a row for every category you have, which on a full shop meant scrolling past twenty of them. Now you tick three in Customization, and each row carries that category and everything inside it. Under them is a new button that opens every product you sell, on a page of its own.",
+      bn: "আগে আপনার প্রতিটি ক্যাটাগরির জন্য একটি করে সারি দেখানো হতো — বড় দোকানে কুড়িটিরও বেশি। এখন কাস্টমাইজেশনে তিনটি টিক করে দেবেন, আর প্রতিটি সারিতে সেই ক্যাটাগরি ও তার ভেতরের সব পণ্য থাকবে। নিচে নতুন একটি বোতাম, যেখানে চাপ দিলে আপনার সব পণ্য নিয়ে আলাদা একটি পাতা খুলবে।",
+    },
+  },
+  {
     id: "2026-09-22-promises-on-your-home-page",
     date: "2026-09-22",
     version: "4.57.0",
@@ -444,21 +459,6 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     body: {
       en: "A shopper can tap the heart on any product and keep a list of what they want in your shop. Catalog → Most wished-for shows you what they are saving, most-saved first, so you know what to restock or put on offer. It stays off until you switch it on.",
       bn: "ক্রেতারা যেকোনো পণ্যের হার্ট চিহ্নে চাপ দিয়ে আপনার দোকানে পছন্দের পণ্যের তালিকা রাখতে পারবেন। ক্যাটালগ → সবচেয়ে পছন্দের পাতায় দেখতে পাবেন তারা কী সেভ করছেন, সবচেয়ে বেশি সেভ হওয়া পণ্য আগে — কোনটি আবার আনবেন বা অফারে দেবেন তা বুঝতে সুবিধা হবে। আপনি চালু না করা পর্যন্ত এটি বন্ধ থাকবে।",
-    },
-  },
-  {
-    id: "2026-09-22-sales-and-shoppers-menus",
-    date: "2026-09-22",
-    version: "4.35.0",
-    tag: "improved",
-    href: "/orders",
-    title: {
-      en: "Sales and Shoppers open as menus",
-      bn: "বিক্রয় ও ক্রেতা এখন মেনু হিসেবে খোলে",
-    },
-    body: {
-      en: "Orders and Customers are now called Sales and Shoppers, and each one opens a short menu instead of going straight to a page — the same way Catalog already did. Your order list and your customer list are the first item inside, so nothing is further away than one more click.",
-      bn: "অর্ডার ও গ্রাহক এখন বিক্রয় ও ক্রেতা নামে আছে, আর প্রতিটি সরাসরি পাতায় না গিয়ে একটি ছোট মেনু খোলে — ক্যাটালগ যেভাবে খুলত ঠিক সেভাবেই। ভেতরের প্রথম আইটেমই আপনার অর্ডার তালিকা ও গ্রাহক তালিকা, তাই কিছুই এক ক্লিকের বেশি দূরে নয়।",
     },
   },
   {
