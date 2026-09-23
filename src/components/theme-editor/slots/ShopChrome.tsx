@@ -275,6 +275,16 @@ export function ShopChrome({
   */
   const exampleCategory = departments?.[0]?.label || t("catExampleCategory");
 
+  /*
+    What the search page pretends somebody typed.
+
+    A department of this shop's own, because that is a thing shoppers really do
+    search for -- the Matching-categories place exists for exactly that -- and
+    because "bag" belonged to no shop on this platform. A shop with no
+    departments yet gets plain words rather than an invented product.
+  */
+  const exampleTerm = departments?.[0]?.label || t("searchExampleTerm");
+
   // The announcement and the masthead are drawn by key rather than by page:
   // both live in the header group, so every page shows them and only the Header
   // entry in the picker edits them.
@@ -1256,7 +1266,7 @@ export function ShopChrome({
       return (
         <div className="px-4 py-5">
           <h4 className="m-0 text-[19px] font-medium tracking-tight">
-            {t("searchResultsFor")} <span className="italic">“bag”</span>
+            {t("searchResultsFor")} <span className="italic">&ldquo;{exampleTerm}&rdquo;</span>
             {variant === "plain" ? null : (
               <span className="ml-2 text-[13px] font-normal text-current/45">({t("catCountExample", { count: 7 })})</span>
             )}
@@ -1264,27 +1274,44 @@ export function ShopChrome({
         </div>
       );
 
+    /* The shop's own departments: these are the categories it would match. */
     case "search:categories":
       return (
         <div className="px-4 py-4">
           <p className="mb-2.5 text-[11px] font-semibold">{t("searchCategoriesHeading")}</p>
           <div className="flex flex-wrap gap-2">
-            {["Bags", "Accessories", "Travel"].map((name) => (
-              <span key={name} className="rounded-full border border-current/15 px-3 py-1 text-[11px] text-current/60">
-                {name}
-              </span>
-            ))}
+            {(departments?.length ? departments.map((one) => one.label) : [exampleCategory])
+              .slice(0, 3)
+              .map((name) => (
+                <span
+                  key={name}
+                  className="rounded-full border border-current/15 px-3 py-1 text-[11px] text-current/60"
+                >
+                  {name}
+                </span>
+              ))}
           </div>
         </div>
       );
 
+    /*
+      Bars, not names.
+
+      What the shop puts here is near-miss PRODUCT names, and the editor has no
+      product list to draw from -- so this shows the shape of the answer rather
+      than inventing three products the merchant does not sell. It used to name
+      three bags. The row above it draws real departments, which is also what
+      keeps the two places from looking like each other.
+    */
     case "search:suggestions":
       return (
         <div className="px-4 py-4">
           <p className="mb-2 text-[11px] font-semibold">{t("searchSuggestionsHeading")}</p>
-          <p className="text-[11px] text-current/55">
-            {["Crossbody Bag", "Canvas Tote", "Laptop Bag"].join(" · ")}
-          </p>
+          <span className="flex flex-wrap items-center gap-2">
+            <Line w="7rem" h={6} />
+            <Line w="5rem" h={6} />
+            <Line w="6rem" h={6} />
+          </span>
         </div>
       );
 
@@ -1332,19 +1359,29 @@ export function ShopChrome({
           {variant === "invite" ? (
             <div className="grid place-items-center gap-3 py-3 text-center">
               <span>
-                <span className="block text-[14px] font-medium">{t("searchEmptyHeadingExample")}</span>
+                <span className="block text-[14px] font-medium">
+                  {t("searchEmptyHeadingExample", { term: exampleTerm })}
+                </span>
                 <span className="mt-1 block text-[11px] text-current/50">{t("searchEmptyBodyExample")}</span>
               </span>
+              {/* The categories it would offer: this shop's own, not three invented ones. */}
               <span className="flex flex-wrap justify-center gap-2">
-                {["Bags", "Shirts", "Shoes"].map((name) => (
-                  <span key={name} className="rounded-full border border-current/20 px-3 py-1 text-[11px]">
-                    {name}
-                  </span>
-                ))}
+                {(departments?.length ? departments.map((one) => one.label) : [exampleCategory])
+                  .slice(0, 3)
+                  .map((name) => (
+                    <span
+                      key={name}
+                      className="rounded-full border border-current/20 px-3 py-1 text-[11px]"
+                    >
+                      {name}
+                    </span>
+                  ))}
               </span>
             </div>
           ) : (
-            <p className="py-3 text-[12px] text-current/55">{t("searchEmptyTextExample")}</p>
+            <p className="py-3 text-[12px] text-current/55">
+              {t("searchEmptyTextExample", { term: exampleTerm })}
+            </p>
           )}
         </div>
       );
