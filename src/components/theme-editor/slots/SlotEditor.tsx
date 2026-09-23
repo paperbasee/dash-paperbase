@@ -91,7 +91,15 @@ export function SlotEditor({ loaded }: { loaded: ThemeEditorState }) {
   const [state, dispatch] = useReducer(editorReducer, loaded, (value) => initEditorState(value));
   const [page, setPage] = useState<SlotPageKey>("home");
   const [device, setDevice] = useState<"desktop" | "mobile">("desktop");
-  const [open, setOpen] = useState<string | null>("promo");
+  /*
+    Nothing is open when the editor opens.
+
+    It started on `"promo"` the day the slot design was drawn with nothing
+    wired -- handy for looking at one place's choices while building them, and
+    a pop-up in a merchant's face the moment that place became real. A merchant
+    opens the editor to see their shop, and picks what to edit themselves.
+  */
+  const [open, setOpen] = useState<string | null>(null);
   const [palette, setPalette] = useState("ivory");
   const [face, setFace] = useState("poppins");
   const [corner, setCorner] = useState("soft");
