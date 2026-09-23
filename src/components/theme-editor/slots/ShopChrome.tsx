@@ -266,6 +266,15 @@ export function ShopChrome({
 }) {
   const t = useTranslations("themeEditor.slots");
 
+  /*
+    The category page is a TEMPLATE, not a page: one drawing stands for every
+    category the shop has. It stands for them as the merchant's own first
+    department wherever there is one -- a merchant reading about somebody
+    else's aisle cannot tell whether this is their shop or a brochure -- and as
+    a plain example only for a shop that has no departments yet.
+  */
+  const exampleCategory = departments?.[0]?.label || t("catExampleCategory");
+
   // The announcement and the masthead are drawn by key rather than by page:
   // both live in the header group, so every page shows them and only the Header
   // entry in the picker edits them.
@@ -1052,10 +1061,17 @@ export function ShopChrome({
         </p>
       );
 
+    /*
+      The category page draws ONE category to stand for all of them -- it is a
+      template, not a page -- and that one is the merchant's own first
+      department wherever the shop has any. "Bags" belongs to no shop on this
+      platform, and a merchant reading a page about somebody else's aisle
+      cannot tell whether what they are looking at is their shop or a brochure.
+    */
     case "category:breadcrumb":
       return (
         <p className="px-4 py-3 text-[11px] text-current/45">
-          {t("breadcrumbHomeExample")} · Accessories · <span className="text-current/70">Bags</span>
+          {t("breadcrumbHomeExample")} · <span className="text-current/70">{exampleCategory}</span>
         </p>
       );
 
@@ -1064,7 +1080,7 @@ export function ShopChrome({
         return (
           <div className="relative grid h-[130px] place-items-center bg-current/10 px-4 text-center">
             <span>
-              <span className="block text-[22px] font-medium tracking-tight">Bags</span>
+              <span className="block text-[22px] font-medium tracking-tight">{exampleCategory}</span>
               <span className="mt-1 block text-[11px] text-current/55">{t("catDescriptionExample")}</span>
             </span>
           </div>
@@ -1075,7 +1091,7 @@ export function ShopChrome({
           {variant === "eyebrow" ? (
             <p className="mb-1.5 text-[10px] uppercase tracking-[0.1em] text-current/45">{t("catEyebrowExample")}</p>
           ) : null}
-          <h4 className="m-0 text-[22px] font-medium tracking-tight">Bags</h4>
+          <h4 className="m-0 text-[22px] font-medium tracking-tight">{exampleCategory}</h4>
           <p className="mt-1.5 max-w-[46ch] text-[11.5px] leading-relaxed text-current/55">
             {t("catDescriptionExample")}
           </p>
@@ -1166,15 +1182,35 @@ export function ShopChrome({
       );
     }
 
-    case "category:text":
+    /*
+      Words under the grid, and the merchant's own the moment they have typed
+      any -- a wired place drawing a stock example is a place that still looks
+      like a brochure. Each half falls back on its own: somebody who has written
+      a heading and no paragraph yet sees their heading, not their heading and a
+      stranger's words.
+    */
+    case "category:text": {
+      const written = (key: string) =>
+        typeof live?.settings?.[key] === "string" ? (live.settings[key] as string).trim() : "";
+      const heading = written("heading");
+      const body = written("body");
+      const left = live?.settings?.align === "left";
       return (
-        <div className="px-4 py-5 text-center">
-          <h4 className="m-0 mb-2 text-[14px] font-semibold">{t("catTextHeadingExample")}</h4>
-          <p className="mx-auto max-w-[52ch] text-[11.5px] leading-relaxed text-current/55">
-            {t("catTextBodyExample")}
+        <div className={cn("px-4 py-5", left ? "text-left" : "text-center")}>
+          <h4 className="m-0 mb-2 text-[14px] font-semibold">
+            {heading || t("catTextHeadingExample")}
+          </h4>
+          <p
+            className={cn(
+              "max-w-[52ch] text-[11.5px] leading-relaxed text-current/55",
+              left ? "" : "mx-auto",
+            )}
+          >
+            {body || t("catTextBodyExample")}
           </p>
         </div>
       );
+    }
 
     case "category:empty":
       return (
@@ -1183,7 +1219,9 @@ export function ShopChrome({
           {variant === "invite" ? (
             <div className="grid place-items-center gap-3 py-4 text-center">
               <span>
-                <span className="block text-[14px] font-medium">{t("catEmptyHeadingExample")}</span>
+                <span className="block text-[14px] font-medium">
+                  {t("catEmptyHeadingExample", { name: exampleCategory })}
+                </span>
                 <span className="mt-1 block text-[11px] text-current/50">{t("catEmptyBodyExample")}</span>
               </span>
               <span className="grid h-9 place-items-center rounded-xs bg-foreground px-5 text-[11px] font-semibold text-background">
@@ -1191,7 +1229,9 @@ export function ShopChrome({
               </span>
             </div>
           ) : (
-            <p className="py-4 text-[12px] text-current/55">{t("catEmptyTextExample")}</p>
+            <p className="py-4 text-[12px] text-current/55">
+              {t("catEmptyTextExample", { name: exampleCategory })}
+            </p>
           )}
         </div>
       );

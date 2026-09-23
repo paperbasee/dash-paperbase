@@ -544,17 +544,27 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
         { value: "two", label: "catGridTwo", note: "catGridTwoNote", shape: "block" },
       ],
     },
+    /*
+      Getting to the rest. Numbered pages are the first answer and the theme's
+      default: a page of a shop is a cached document with an address, so
+      `?page=2` is bookmarkable, indexable and cacheable, and it works with no
+      JavaScript -- the rule the rest of the storefront follows.
+
+      **A Load more button is not offered yet.** It was a tile here from the day
+      this page was drawn, and the shop cannot draw one: it needs a script that
+      fetches the next page and appends it. Offering it would be the broken
+      promise this whole stage exists to end. It comes back with the script.
+    */
     {
       key: "more",
       label: "catMore",
       hint: "catMoreHint",
-      initial: "none",
+      initial: "pages",
       emptyValues: ["none"],
       emptyLabel: "catMoreEmpty",
       options: [
-        { value: "none", label: "catMoreNone", note: "catMoreNoneNote", shape: "blank" },
-        { value: "button", label: "catMoreButton", note: "catMoreButtonNote", shape: "line" },
         { value: "pages", label: "catMorePages", note: "catMorePagesNote", shape: "line" },
+        { value: "none", label: "catMoreNone", note: "catMoreNoneNote", shape: "blank" },
       ],
     },
     {
@@ -574,8 +584,8 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
       hint: "catEmptyHint",
       initial: "text",
       options: [
-        { value: "text", label: "cartEmptyText", note: "catEmptyTextNote", shape: "line" },
-        { value: "invite", label: "cartEmptyInvite", note: "catEmptyInviteNote", shape: "block" },
+        { value: "text", label: "catEmptyText", note: "catEmptyTextNote", shape: "line" },
+        { value: "invite", label: "catEmptyInvite", note: "catEmptyInviteNote", shape: "block" },
       ],
     },
     { key: "footer", label: "footer", inherited: true, inheritedFrom: { page: "footer", key: "layout" } },

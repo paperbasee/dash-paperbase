@@ -18,8 +18,13 @@ import { blockFields, fieldValue, sectionFields } from "@/lib/theme-editor/field
 import type { FieldOption } from "@/lib/theme-editor/field-specs";
 import { linkPages } from "@/lib/theme-editor/link-targets";
 import type { FieldSpec } from "@/lib/theme-editor/field-specs";
-import type { Slot } from "@/lib/theme-editor/slot-catalogue";
-import { meaningOf, sectionFor, slotValueFor, type WiredSlot } from "@/lib/theme-editor/slot-sections";
+import type { Slot, SlotPageKey } from "@/lib/theme-editor/slot-catalogue";
+import {
+  sectionFor,
+  settingsDecidedOn,
+  slotValueFor,
+  type WiredSlot,
+} from "@/lib/theme-editor/slot-sections";
 import { cn } from "@/lib/utils";
 import { EditorSheet } from "../EditorSheet";
 import { LinkPicker } from "../LinkPicker";
@@ -48,6 +53,7 @@ type Asked =
  */
 export function SlotDialog({
   slot,
+  page,
   wiring,
   manifest,
   document,
@@ -66,6 +72,8 @@ export function SlotDialog({
   onClose,
 }: {
   slot: Slot;
+  /** The canvas entry this place was clicked on, for the settings other places decide. */
+  page: SlotPageKey;
   wiring: WiredSlot;
   manifest: ThemeManifest;
   document: ThemeDocument;
@@ -105,19 +113,20 @@ export function SlotDialog({
   const chosen = slotValueFor(document, wiring);
   const spec = section ? manifest.sections[section.type] : undefined;
   /**
-   * The settings this place does NOT decide for itself.
+   * The settings no place on this page decides with its tiles.
    *
    * A place whose choices are shapes of one section sets that section's shape
    * by the tiles at the top -- so drawing the same setting again as a field
    * below them is one decision with two controls, which is what the owner met
    * on 2026-09-23: "Picture behind the words" as a tile, and a "Shape"
    * dropdown under it saying the same thing.
+   *
+   * The whole page, not this place: the category page is the first where two
+   * places share a section -- the heading's shape and its count are both
+   * `category_header` -- and asking only the open place would draw each one's
+   * decision as a field in the other's dialog.
    */
-  const decided = new Set(
-    Object.keys(wiring.sections).flatMap((value) =>
-      Object.keys(meaningOf(wiring, value)?.settings ?? {}),
-    ),
-  );
+  const decided = section ? settingsDecidedOn(page, section.type) : new Set<string>();
   const specs = section
     ? sectionFields(manifest, section.type, locale).filter((field) => !decided.has(field.id))
     : [];

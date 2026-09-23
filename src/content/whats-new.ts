@@ -64,6 +64,21 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-09-22-category-pages-are-yours",
+    date: "2026-09-22",
+    version: "4.68.0",
+    tag: "new",
+    href: "/settings?tab=customization",
+    title: {
+      en: "Design your category pages",
+      bn: "ক্যাটাগরি পেজ নিজের মতো সাজান",
+    },
+    body: {
+      en: "The Category page in your editor is real now: the path back up, three shapes for the name including over the category's own picture, how many products are in it, and two, three or four across. Big categories get numbered pages, so shoppers reach everything instead of the first 48 — and you can say what an empty category shows and add words under the grid.",
+      bn: "এডিটরের ক্যাটাগরি পেজটি এখন সত্যিকারের: উপরে ফেরার পথ, নামের তিনটি চেহারা — ক্যাটাগরির নিজের ছবির উপরেও — ভেতরে কতগুলো পণ্য আছে, আর এক সারিতে দুই, তিন নাকি চারটি। বড় ক্যাটাগরিতে নম্বর দেওয়া পাতা আসে, ফলে ক্রেতারা প্রথম ৪৮টিতে আটকে না থেকে সবকিছুই দেখতে পান — খালি ক্যাটাগরিতে কী দেখানো হবে তাও বলে দিতে পারেন, আর গ্রিডের নিচে লেখা যোগ করতে পারেন।",
+    },
+  },
+  {
     id: "2026-09-22-corners-are-yours",
     date: "2026-09-22",
     version: "4.67.0",
@@ -474,21 +489,6 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     body: {
       en: "Create a code shoppers type at checkout for money off — taka or a percent, with a minimum spend, an end date, and limits on how many times it can be used in total and per customer. The list shows how often each one has been used and what it has given away. A code never takes free delivery away, and switching one off leaves past orders exactly as they were.",
       bn: "এমন কোড তৈরি করুন যা ক্রেতারা চেকআউটে লিখে ছাড় পাবেন — টাকায় বা শতাংশে, সাথে সর্বনিম্ন কেনাকাটা, শেষ তারিখ, আর মোট ও প্রতি ক্রেতা কতবার ব্যবহার করা যাবে তার সীমা। তালিকায় দেখবেন প্রতিটি কোড কতবার ব্যবহার হয়েছে আর কত ছাড় দেওয়া হয়েছে। কোনো কোড ফ্রি ডেলিভারি কেড়ে নেবে না, আর কোড বন্ধ করলে আগের অর্ডারগুলো যেমন ছিল তেমনই থাকবে।",
-    },
-  },
-  {
-    id: "2026-09-22-accounts-in-every-shop",
-    date: "2026-09-22",
-    version: "4.36.0",
-    tag: "improved",
-    href: "/customers/accounts",
-    title: {
-      en: "Every shop has customer accounts",
-      bn: "প্রতিটি দোকানেই এখন ক্রেতা অ্যাকাউন্ট",
-    },
-    body: {
-      en: "Signing in is now part of every shop instead of something you switch on, so shoppers can always create an account with their email. Customers and Accounts have left Settings → Apps for the same reason. Letting shoppers save products is still yours to switch on, and it now works on its own.",
-      bn: "সাইন ইন এখন প্রতিটি দোকানের অংশ, আলাদা করে চালু করার কিছু নেই — তাই ক্রেতারা সব সময় ইমেইল দিয়ে অ্যাকাউন্ট খুলতে পারবেন। একই কারণে গ্রাহক ও অ্যাকাউন্ট সেটিংস → অ্যাপস থেকে সরানো হয়েছে। ক্রেতারা পণ্য সেভ করতে পারবেন কি না, সেটি আগের মতোই আপনার হাতে, আর সেটি এখন একাই কাজ করে।",
     },
   },
   {

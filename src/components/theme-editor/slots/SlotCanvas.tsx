@@ -512,8 +512,11 @@ export function SlotCanvas({
       </div>
 
       {openWiring && openSlot && openOwner ? (
+        /* `page` is the one that OWNS the place, so the settings its neighbours
+           decide are looked up where those neighbours live. */
         <SlotDialog
           slot={openSlot}
+          page={openOwner.page}
           wiring={openWiring}
           manifest={manifest}
           document={document}

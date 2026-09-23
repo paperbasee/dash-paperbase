@@ -103,7 +103,115 @@ export const WIRED_SLOTS: Partial<Record<SlotPageKey, Record<string, WiredSlot>>
     bestsellers: { page: "templates.home", sections: { row: "best_sellers" }, off: "off" },
     arrivals: { page: "templates.home", sections: { row: "new_arrivals" }, off: "off" },
   },
+  /*
+    The category page, 2026-09-23. The shop's widest page: most people arrive on
+    a category from a search or the menu rather than on the home page.
+
+    Three of these places are settings of ONE section -- the heading's shape and
+    its count are both `category_header`, and how many across, how a shopper
+    reaches the rest and what an empty category says are all `product_grid`.
+    That is the first time two places have shared a section, and it is why
+    `settingsDecidedOn` exists: a setting one place decides must not also be
+    drawn as a field in the other's dialog.
+
+    Sorting and filtering stay drawings for now. Both are real in the API and
+    neither is in the shop yet, and a place goes in here only when its section
+    can do everything the place promises.
+  */
+  category: {
+    breadcrumb: { page: "templates.category", sections: { on: "breadcrumb" }, off: "off" },
+    /*
+      The heading's three shapes: the plain name, the name with a small label
+      above it, the name over the category's own picture. One section with a
+      `layout`, like the category band and the promotion -- the merchant is
+      choosing how their heading LOOKS, and two sections would let them put both
+      on the page.
+    */
+    heading: {
+      page: "templates.category",
+      sections: {
+        plain: { type: "category_header", settings: { layout: "plain" } },
+        eyebrow: { type: "category_header", settings: { layout: "eyebrow" } },
+        banner: { type: "category_header", settings: { layout: "banner" } },
+      },
+    },
+    /*
+      "24 products" under the name, which is the same section as the heading.
+
+      **The theme's own default value comes first**, here and in every place
+      below whose values are settings of one section: a document written before
+      the setting existed carries none, and `slotValueFor` reads a missing
+      setting as the first value that wants it. Put `on` first and a shop that
+      has never touched this would read as showing a count it does not show.
+
+      No `off` key: switching the count off is a setting, not an absent section.
+      `off` there would hide the heading itself.
+    */
+    count: {
+      page: "templates.category",
+      sections: {
+        off: { type: "category_header", settings: { show_count: false } },
+        on: { type: "category_header", settings: { show_count: true } },
+      },
+    },
+    grid: {
+      page: "templates.category",
+      sections: {
+        four: { type: "product_grid", settings: { columns: "four" } },
+        three: { type: "product_grid", settings: { columns: "three" } },
+        two: { type: "product_grid", settings: { columns: "two" } },
+      },
+    },
+    more: {
+      page: "templates.category",
+      sections: {
+        pages: { type: "product_grid", settings: { more: "pages" } },
+        none: { type: "product_grid", settings: { more: "none" } },
+      },
+    },
+    text: { page: "templates.category", sections: { block: "rich_text" }, off: "off" },
+    /*
+      `when_empty`, not `empty`: `empty` is a reserved word in Liquid, so a
+      setting named it is a path no template can write -- the product grid
+      raised rather than drawing. Renamed in theming migration 0024.
+    */
+    empty: {
+      page: "templates.category",
+      sections: {
+        text: { type: "product_grid", settings: { when_empty: "text" } },
+        invite: { type: "product_grid", settings: { when_empty: "invite" } },
+      },
+    },
+  },
 };
+
+/**
+ * Every setting the places on one page DECIDE for themselves, for one section.
+ *
+ * A place whose choices are shapes of one section sets that shape by the tiles
+ * at the top, so drawing the same setting again as a field below them is one
+ * decision with two controls -- which is what the owner met on 2026-09-23.
+ *
+ * It has to be the whole page rather than the one place, because the category
+ * page is the first where two places share a section: the heading's shape and
+ * its count are both `category_header`. Asking only the open place would draw
+ * the count as a field under the heading's tiles, and the shape as a dropdown
+ * under the count's -- each place offering the other's decision.
+ */
+export function settingsDecidedOn(page: SlotPageKey, sectionType: string): Set<string> {
+  const decided = new Set<string>();
+  for (const slot of SLOTS[page] ?? []) {
+    const wiring = wiringFor(ownerOf(page, slot).page, ownerOf(page, slot).key);
+    if (!wiring) continue;
+    for (const value of Object.keys(wiring.sections)) {
+      const meaning = meaningOf(wiring, value)!;
+      if (meaning.type === sectionType) {
+        for (const setting of Object.keys(meaning.settings)) decided.add(setting);
+      }
+    }
+  }
+  return decided;
+}
 
 /**
  * Where a place's value actually lives.
