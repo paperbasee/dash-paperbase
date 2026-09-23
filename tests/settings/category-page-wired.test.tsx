@@ -537,6 +537,16 @@ describe("filters", () => {
     expect(Object.keys(place("filters").sections)[0]).toBe("off");
   });
 
+  test("the two shapes are still spelled chips and rail in the document", () => {
+    /*
+      The BUTTON shape became a panel over the page on 2026-09-23 and its tile
+      was renamed with it. The stored value did not change: renaming a value a
+      shop has already saved is a migration, and this was a change of shape, not
+      of meaning.
+    */
+    expect(Object.keys(place("filters").sections)).toEqual(["off", "chips", "rail"]);
+  });
+
   test("switching them on leaves sorting and the columns alone", () => {
     const after = pick(pick(pick(PAGE(), "sort", "menu"), "grid", "two"), "filters", "rail");
     expect(settingsOf(after, "product_grid")).toMatchObject({

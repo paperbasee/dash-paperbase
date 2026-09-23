@@ -74,8 +74,8 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
       bn: "ক্রেতারা ক্যাটাগরি ফিল্টার করতে পারবেন",
     },
     body: {
-      en: "Under Category → Filters, pick a row of buttons or a column down the side, and shoppers can narrow by price, brand and whatever your products vary by — size, colour, whatever you have set up. Only the values a category actually has are offered, so a filter never leads to an empty page.",
-      bn: "ক্যাটাগরি → ফিল্টার অংশে পাশাপাশি বোতাম বা পাশে এক কলাম বেছে নিন, তাহলে ক্রেতারা দাম, ব্র্যান্ড আর আপনার পণ্য যেসব দিকে আলাদা — সাইজ, রঙ, যা আপনি যোগ করেছেন — সব দিয়ে খুঁজে নিতে পারবেন। কোনো ক্যাটাগরিতে যা সত্যিই আছে কেবল সেগুলোই দেখানো হয়, তাই ফিল্টার করে কখনো ফাঁকা পাতা আসে না।",
+      en: "Under Category → Filters, pick a button that opens a panel over the page or a column down the side, and shoppers can narrow by price, brand and whatever your products vary by — size, colour, whatever you have set up. Only the values a category actually has are offered, so a filter never leads to an empty page.",
+      bn: "ক্যাটাগরি → ফিল্টার অংশে পাতার উপরে খোলে এমন একটি বোতাম, নাকি পাশে এক কলাম — বেছে নিন। ক্রেতারা দাম, ব্র্যান্ড আর আপনার পণ্য যেসব দিকে আলাদা — সাইজ, রঙ, যা আপনি যোগ করেছেন — সব দিয়ে খুঁজে নিতে পারবেন। কোনো ক্যাটাগরিতে যা সত্যিই আছে কেবল সেগুলোই দেখানো হয়, তাই ফিল্টার করে কখনো ফাঁকা পাতা আসে না।",
     },
   },
   {

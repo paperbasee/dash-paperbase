@@ -1189,19 +1189,39 @@ export function ShopChrome({
           </div>
         );
       }
+      /*
+        One button, and what pressing it does (owner, 2026-09-23): the panel
+        comes in from the left OVER the page. Drawn rather than described,
+        because the whole point of this shape is that the grid underneath does
+        not move -- which a row of pills did not say at all.
+      */
       return (
-        <div className="flex flex-wrap items-center gap-2 px-4 py-3">
-          {groups.map((name) => (
-            <span
-              key={name}
-              className="inline-flex items-center gap-1.5 rounded-full border border-current/15 px-3 py-1 text-[11px] text-current/60"
-            >
-              {name}
-              <span className="text-current/35" aria-hidden>
-                ▾
+        <div className="px-4 py-3">
+          <span className="inline-flex items-center gap-1.5 rounded-xs border border-current/25 px-3 py-1 text-[11px]">
+            {t("catFilters")}
+          </span>
+          <div className="relative mt-2.5 overflow-hidden rounded-xs border border-current/10">
+            <div className="grid grid-cols-4 gap-2 p-2">
+              {Array.from({ length: 8 }, (_, i) => (
+                <span key={i} className="block aspect-square rounded-xs bg-current/8" />
+              ))}
+            </div>
+            <span className="absolute inset-0 bg-black/45" />
+            <span className="absolute inset-y-0 left-0 grid w-[46%] content-start gap-2 bg-background p-2">
+              <span className="flex items-center justify-between">
+                <span className="text-[10px] font-medium">{t("catFilters")}</span>
+                <span className="text-[11px] text-current/45" aria-hidden>
+                  ×
+                </span>
               </span>
+              {groups.slice(0, 3).map((name) => (
+                <span key={name} className="grid gap-1">
+                  <span className="text-[9px] uppercase tracking-[0.06em] text-current/45">{name}</span>
+                  <Line w="80%" h={5} />
+                </span>
+              ))}
             </span>
-          ))}
+          </div>
         </div>
       );
     }
