@@ -10,7 +10,7 @@ import { describe, expect, test } from "vitest";
 
 import type { ThemeDocument, ThemeEditorState, ThemeManifest } from "@/lib/theme-editor/api";
 import { editorReducer, initEditorState, type EditorState } from "@/lib/theme-editor/editor-reducer";
-import { CARD_STYLES } from "@/components/theme-editor/slots/style-catalogue";
+import { CARD_STYLES, CORNERS } from "@/components/theme-editor/slots/style-catalogue";
 
 const labels = (label: string) => ({ label, label_bn: `${label} (bn)` });
 
@@ -20,6 +20,18 @@ const manifest: ThemeManifest = {
   name_bn: "স্টোরফ্রন্ট",
   category: null,
   settings: [
+    {
+      id: "corner_style",
+      type: "select",
+      ...labels("Corners"),
+      options: ["square", "soft", "rounded"],
+      option_labels: {
+        square: { en: "Square", bn: "চোকো" },
+        soft: { en: "Soft", bn: "হালকা গোল" },
+        rounded: { en: "Rounded", bn: "গোল" },
+      },
+      default: "soft",
+    },
     {
       id: "card_style",
       type: "select",
@@ -76,7 +88,7 @@ describe("choosing the card style in the editor", () => {
   });
 
   test("the panel offers exactly what the theme does", () => {
-    const offered = manifest.settings[0].options;
+    const offered = manifest.settings.find((one) => one.id === "card_style")!.options;
     expect(CARD_STYLES.map((one) => one.key)).toEqual(offered);
   });
 
@@ -89,5 +101,35 @@ describe("choosing the card style in the editor", () => {
     const state = editor();
     const after = pick(state, "shelf");
     expect(after.page).toBe(state.page);
+  });
+});
+
+describe("choosing the corners in the editor", () => {
+  const corner = (state: EditorState, value: unknown) =>
+    editorReducer(state, { type: "setThemeSetting", setting: "corner_style", value });
+
+  test("it lands in the document, like the card style", () => {
+    const after = corner(editor(), "rounded");
+    expect(after.document.settings.corner_style).toBe("rounded");
+    expect(after.changed).toBe(true);
+  });
+
+  test("a corner the theme does not offer changes nothing", () => {
+    const before = editor();
+    expect(corner(before, "pill")).toBe(before);
+  });
+
+  test("the tiles offer exactly the theme's own values", () => {
+    /*
+      The keys ARE the stored values. `round` was a tile here while the theme
+      said `rounded`, which would have been a click that changed nothing and
+      said nothing -- the API's own `CornerStyleTests` pins the other side.
+    */
+    expect(CORNERS.map((one) => one.key)).toEqual(["square", "soft", "rounded"]);
+  });
+
+  test("and the tile's drawing matches the corner the shop really draws", () => {
+    // 0, 6, 14 -- the large radius of each scale in `storefront/looks.py`.
+    expect(CORNERS.map((one) => one.radius)).toEqual([0, 6, 14]);
   });
 });

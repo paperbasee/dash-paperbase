@@ -102,7 +102,12 @@ export function SlotEditor({ loaded }: { loaded: ThemeEditorState }) {
   const [open, setOpen] = useState<string | null>(null);
   const [palette, setPalette] = useState("ivory");
   const [face, setFace] = useState("poppins");
-  const [corner, setCorner] = useState("soft");
+  // The corners are the shop's document too, for the same reason the card
+  // style is: what a merchant chooses here is a draft until Save to store.
+  const corner =
+    typeof state.document.settings?.corner_style === "string"
+      ? state.document.settings.corner_style
+      : "soft";
   /*
     The card style is the shop's DOCUMENT since 2026-09-23, not a held-in-the-
     screen choice and not the column a picker outside the editor used to write.
@@ -363,7 +368,7 @@ export function SlotEditor({ loaded }: { loaded: ThemeEditorState }) {
             face={face}
             onFace={setFace}
             corner={corner}
-            onCorner={setCorner}
+            onCorner={(key) => dispatch({ type: "setThemeSetting", setting: "corner_style", value: key })}
             cardStyle={cardStyle}
             onCardStyle={(key) => dispatch({ type: "setThemeSetting", setting: "card_style", value: key })}
           />

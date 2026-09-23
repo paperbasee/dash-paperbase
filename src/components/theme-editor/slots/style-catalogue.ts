@@ -156,10 +156,20 @@ export type Corner = {
   radius: number;
 };
 
+/*
+  The keys are the THEME's values (`corner_style` in the manifest), not this
+  file's own names: a merchant's click writes one of them into the document, and
+  a key the theme does not offer is a click that changes nothing and says
+  nothing. `round` was one such until 2026-09-23, when this became real.
+
+  `radius` is for the drawing on the tile only. It matches the large radius the
+  shop actually draws for that choice -- 0, 6, 14 -- so the tile is a preview
+  rather than an illustration.
+*/
 export const CORNERS: Corner[] = [
   { key: "square", label: "cornerSquare", radius: 0 },
   { key: "soft", label: "cornerSoft", radius: 6 },
-  { key: "round", label: "cornerRound", radius: 14 },
+  { key: "rounded", label: "cornerRound", radius: 14 },
 ];
 
 /**

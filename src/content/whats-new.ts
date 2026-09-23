@@ -64,6 +64,21 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-09-22-corners-are-yours",
+    date: "2026-09-22",
+    version: "4.67.0",
+    tag: "new",
+    href: "/settings?tab=customization",
+    title: {
+      en: "Choose your shop's corners",
+      bn: "দোকানের কোণা নিজেই বেছে নিন",
+    },
+    body: {
+      en: "Square, soft or rounded — one choice for everything your shop draws a box around: cards, buttons, boxes you type in, pictures. It sits in Customization under Style, next to your product cards, and reaches shoppers when you press Save to store. Your shop keeps the corners it has until you change them.",
+      bn: "চোকো, হালকা গোল, নাকি গোল — দোকানে যেখানে যেখানে বাক্স আঁকা হয় সবখানে একই পছন্দ: কার্ড, বোতাম, লেখার ঘর, ছবি। এটি কাস্টমাইজেশনের স্টাইল অংশে, প্রোডাক্ট কার্ডের পাশেই, আর স্টোরে সংরক্ষণ চাপলেই ক্রেতাদের কাছে যাবে। নিজে না বদলানো পর্যন্ত দোকানের কোণা আগের মতোই থাকবে।",
+    },
+  },
+  {
     id: "2026-09-22-card-style-in-the-editor",
     date: "2026-09-22",
     version: "4.65.0",
@@ -474,21 +489,6 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     body: {
       en: "Signing in is now part of every shop instead of something you switch on, so shoppers can always create an account with their email. Customers and Accounts have left Settings → Apps for the same reason. Letting shoppers save products is still yours to switch on, and it now works on its own.",
       bn: "সাইন ইন এখন প্রতিটি দোকানের অংশ, আলাদা করে চালু করার কিছু নেই — তাই ক্রেতারা সব সময় ইমেইল দিয়ে অ্যাকাউন্ট খুলতে পারবেন। একই কারণে গ্রাহক ও অ্যাকাউন্ট সেটিংস → অ্যাপস থেকে সরানো হয়েছে। ক্রেতারা পণ্য সেভ করতে পারবেন কি না, সেটি আগের মতোই আপনার হাতে, আর সেটি এখন একাই কাজ করে।",
-    },
-  },
-  {
-    id: "2026-09-22-shoppers-can-save-products",
-    date: "2026-09-22",
-    version: "4.35.0",
-    tag: "new",
-    href: "/products/wished",
-    title: {
-      en: "Shoppers can save products for later",
-      bn: "ক্রেতারা পছন্দের পণ্য সেভ করে রাখতে পারবেন",
-    },
-    body: {
-      en: "A shopper can tap the heart on any product and keep a list of what they want in your shop. Catalog → Most wished-for shows you what they are saving, most-saved first, so you know what to restock or put on offer. It stays off until you switch it on.",
-      bn: "ক্রেতারা যেকোনো পণ্যের হার্ট চিহ্নে চাপ দিয়ে আপনার দোকানে পছন্দের পণ্যের তালিকা রাখতে পারবেন। ক্যাটালগ → সবচেয়ে পছন্দের পাতায় দেখতে পাবেন তারা কী সেভ করছেন, সবচেয়ে বেশি সেভ হওয়া পণ্য আগে — কোনটি আবার আনবেন বা অফারে দেবেন তা বুঝতে সুবিধা হবে। আপনি চালু না করা পর্যন্ত এটি বন্ধ থাকবে।",
     },
   },
   {
