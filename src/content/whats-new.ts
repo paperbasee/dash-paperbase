@@ -64,6 +64,21 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-09-22-sell-more-from-the-cart",
+    date: "2026-09-22",
+    version: "4.80.0",
+    tag: "new",
+    href: "/settings?tab=customization",
+    title: {
+      en: "Sell more from the cart",
+      bn: "কার্ট থেকে আরও বিক্রি",
+    },
+    body: {
+      en: "Add a row of things to buy alongside — your best sellers, or on Premium products chosen against what is already in the cart. You can also repeat your home-page promises there, show what the shopper looked at earlier, and put a Cart · Checkout · Done bar at the top so they can see how far there is to go.",
+      bn: "কার্টের সাথে কেনার মতো পণ্যের সারি যোগ করুন — আপনার সবচেয়ে বেশি বিক্রি হওয়া পণ্য, নয়তো প্রিমিয়ামে কার্ট মিলিয়ে বাছাই করা পণ্য। হোম পেজের প্রতিশ্রুতিগুলো এখানেও দেখাতে পারেন, ক্রেতা আগে যা দেখেছেন তা-ও, আর উপরে “কার্ট · চেকআউট · সম্পন্ন” বার দিলে আর কতদূর বাকি তা বোঝা যায়।",
+    },
+  },
+  {
     id: "2026-09-22-cart-page-choices",
     date: "2026-09-22",
     version: "4.77.0",
@@ -74,8 +89,8 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
       bn: "কার্ট পেজ নিজের মতো সাজান",
     },
     body: {
-      en: "The Cart page in your editor is real now. Show a \"Continue shopping\" link beside the title or leave it off, show the items as cards or as a table, give the total line by line or as one number, and choose whether an empty cart says one line or invites the shopper somewhere. You can also put the discount code box behind a link, show the ways they can pay, keep the total and Check out at the bottom of a phone screen, and add a row of things to buy alongside — either your best sellers or, on Premium, products chosen against what is already in the cart.",
-      bn: "এডিটরের কার্ট পেজটি এখন সত্যিকারের। শিরোনামের পাশে “আরও কিনুন” দেখাবেন কি না, পণ্যগুলো কার্ড হিসেবে নাকি টেবিলে, মোট ধাপে ধাপে নাকি একটিই সংখ্যা, আর কার্ট খালি থাকলে এক লাইন নাকি আমন্ত্রণ — সবই আপনার পছন্দ। ডিসকাউন্ট কোডের ঘর লিংকের পিছনে রাখা, টাকা দেওয়ার উপায়গুলো দেখানো, ফোনে স্ক্রল করার সময় মোট ও চেকআউট নিচে ধরে রাখা, আর সাথে কেনার মতো পণ্যের সারি যোগ করা — আপনার সবচেয়ে বেশি বিক্রি হওয়া পণ্য, নয়তো প্রিমিয়ামে কার্ট মিলিয়ে বাছাই করা পণ্য।",
+      en: "The Cart page in your editor is real now. Show a \"Continue shopping\" link beside the title or leave it off, show the items as cards or as a table, give the total line by line or as one number, and choose whether an empty cart says one line or invites the shopper somewhere. You can also put the discount code box behind a link, show the ways they can pay, and keep the total and Check out at the bottom of a phone screen while they scroll.",
+      bn: "এডিটরের কার্ট পেজটি এখন সত্যিকারের। শিরোনামের পাশে “আরও কিনুন” দেখাবেন কি না, পণ্যগুলো কার্ড হিসেবে নাকি টেবিলে, মোট ধাপে ধাপে নাকি একটিই সংখ্যা, আর কার্ট খালি থাকলে এক লাইন নাকি আমন্ত্রণ — সবই আপনার পছন্দ। ডিসকাউন্ট কোডের ঘর লিংকের পিছনে রাখা, টাকা দেওয়ার উপায়গুলো দেখানো, আর ফোনে স্ক্রল করার সময় মোট ও চেকআউট নিচে ধরে রাখা — এগুলোও এখন আছে।",
     },
   },
   {
@@ -475,21 +490,6 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     body: {
       en: "Brands now have their own tab with a logo and a description, and each one gets a page in your shop with a link in the footer. On a product you pick a brand from the list instead of typing it, so Bata, bata and BATA can no longer be three brands — the ones you already had were merged, keeping the spelling you used most. A shop that sells only its own goods can leave the tab empty and nothing about it changes.",
       bn: "ব্র্যান্ডের জন্য এখন আলাদা ট্যাব আছে, যেখানে লোগো আর বিবরণ দেওয়া যায়, আর প্রতিটি ব্র্যান্ড আপনার দোকানে নিজের পাতা পায় — ফুটারে তার লিংকও থাকে। পণ্যের পাতায় এখন ব্র্যান্ডের নাম টাইপ না করে তালিকা থেকে বেছে নিতে হয়, তাই Bata, bata আর BATA আর আলাদা তিনটি ব্র্যান্ড থাকতে পারে না — আগের নামগুলো এক করে দেওয়া হয়েছে, আর আপনি যে বানানটি সবচেয়ে বেশি লিখেছেন সেটিই রাখা হয়েছে। যে দোকান শুধু নিজের পণ্য বিক্রি করে, সে ট্যাবটি খালি রাখতে পারে — কিছুই বদলাবে না।",
-    },
-  },
-  {
-    id: "2026-09-22-team-can-reach-discount-codes",
-    date: "2026-09-22",
-    version: "4.38.0",
-    tag: "fixed",
-    href: "/settings?tab=team",
-    title: {
-      en: "Your team can reach discount codes again",
-      bn: "আপনার টিম আবার ডিসকাউন্ট কোডে পৌঁছাতে পারবে",
-    },
-    body: {
-      en: "Discount codes were reaching only the store owner: the permission existed but was never given to the Admin, Manager and Viewer roles on shops created before it. Those roles now have it, along with the new Brands permission, and anything you changed yourself on a role was left alone.",
-      bn: "ডিসকাউন্ট কোড শুধু দোকানের মালিকের কাছেই পৌঁছাত: অনুমতিটি ছিল, কিন্তু তার আগে তৈরি হওয়া দোকানগুলোর অ্যাডমিন, ম্যানেজার ও ভিউয়ার ভূমিকায় সেটি কখনো দেওয়া হয়নি। এখন ওই ভূমিকাগুলো সেটি পেয়েছে, সঙ্গে নতুন ব্র্যান্ড অনুমতিও — আর কোনো ভূমিকায় আপনি নিজে যা বদলেছিলেন তা অক্ষত আছে।",
     },
   },
   {

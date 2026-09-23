@@ -50,6 +50,8 @@ const manifest: ThemeManifest = {
         choice("coupon", ["open", "link", "off"], "open"),
         { id: "payments", type: "boolean", ...labels("Ways to pay"), default: false },
         { id: "sticky", type: "boolean", ...labels("Sticky total"), default: true },
+        { id: "trust", type: "boolean", ...labels("What you promise"), default: true },
+        { id: "steps", type: "boolean", ...labels("Three steps"), default: false },
         choice("when_empty", ["text", "invite"], "text"),
       ],
     },
@@ -119,13 +121,14 @@ describe("the cart joins the theme", () => {
     }
   });
 
-  test("two are still drawings", () => {
+  test("every place on this page is real now", () => {
     /*
-      A place goes in when its section can do everything the place promises.
-      Round 4 brings the trust line and the steps bar.
+      Four rounds, eleven places, no drawings left -- the third page after the
+      category and the product pages.
     */
-    for (const key of ["steps", "trust"]) {
-      expect(wiringFor("cart", key), key).toBeNull();
+    for (const slot of SLOTS.cart) {
+      if (slot.inherited) continue;
+      expect(wiringFor("cart", slot.key), slot.key).not.toBeNull();
     }
   });
 
@@ -173,8 +176,10 @@ describe("the four choices", () => {
       "heading_link",
       "lines",
       "payments",
+      "steps",
       "sticky",
       "total",
+      "trust",
       "when_empty",
     ]);
   });
@@ -270,5 +275,28 @@ describe("round 3: selling more", () => {
     expect(slotValueFor(PAGE().document, place("recent"))).toBe("off");
     const after = pick(PAGE(), "recent", "on");
     expect(sectionOfType(after.document, place("recent"), "recently_viewed")?.hidden).toBe(false);
+  });
+});
+
+describe("round 4: the last two", () => {
+  test("the trust line only says WHETHER, never what", () => {
+    /*
+      A merchant picks their promises once, on the home page. A second list
+      here would be a second thing to keep in step, and the first shop to edit
+      one and not the other would find out.
+    */
+    expect(sectionTypesOf(place("trust"))).toEqual(["cart"]);
+    expect(settingsOf(pick(PAGE(), "trust", "off")).trust).toBe(false);
+    expect(slotValueFor(PAGE().document, place("trust"))).toBe("on");
+  });
+
+  test("the steps bar starts at nothing", () => {
+    /*
+      A bar is a claim about how long this takes -- not something to start
+      making on a merchant's behalf.
+    */
+    expect(Object.keys(place("steps").sections)[0]).toBe("none");
+    expect(slotValueFor(PAGE().document, place("steps"))).toBe("none");
+    expect(settingsOf(pick(PAGE(), "steps", "bar")).steps).toBe(true);
   });
 });

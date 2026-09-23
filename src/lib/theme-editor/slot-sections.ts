@@ -293,6 +293,34 @@ export const WIRED_SLOTS: Partial<Record<SlotPageKey, Record<string, WiredSlot>>
       },
     },
     /*
+      What the shop promises, said before a shopper leaves the page -- round 4,
+      the last two places on this canvas.
+
+      **The words are not chosen here.** A merchant picks their promises once,
+      on the home page, and this only says whether the cart repeats them. The
+      product page does the same. A second list would be a second thing to keep
+      in step, and the first shop to edit one and not the other would find out.
+    */
+    trust: {
+      page: "templates.cart",
+      sections: {
+        on: { type: "cart", settings: { trust: true } },
+        off: { type: "cart", settings: { trust: false } },
+      },
+    },
+    /*
+      Cart, checkout, done. `none` first: it is the theme's default, and a bar
+      is a claim about how long this takes -- not something to start making on
+      a merchant's behalf.
+    */
+    steps: {
+      page: "templates.cart",
+      sections: {
+        none: { type: "cart", settings: { steps: false } },
+        bar: { type: "cart", settings: { steps: true } },
+      },
+    },
+    /*
       The row of things to add, 2026-09-23 (round 3). Two VALUES, two SECTIONS,
       like the hero's pictures and video -- and here that is not a style choice:
       the paid shape has to be its own section, because a premium SECTION is
