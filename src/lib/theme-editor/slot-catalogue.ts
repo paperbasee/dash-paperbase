@@ -213,6 +213,20 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
       is which three.
     */
     { key: "bands", label: "bands", hint: "bandsHint", initial: "on" },
+    /*
+      The promotion, wired 2026-09-23. Three shapes of one section -- words on a
+      band, a picture beside them, a picture behind them -- where the drawing
+      offered four choices, one of which ("a card with a picture") nothing had
+      built, and badged only two of them paid.
+
+      **Every shape is paid**, because the SECTION is: the theme marks it
+      premium and `without_premium_sections` strips it at serve time, so a shop
+      on Essential never had the free-looking one either.
+
+      The countdown is not a shape. It is a tick-box on any of them, and the
+      merchant needs an end time for it to count to -- which is why it lives in
+      the pop-up with the dates rather than out here.
+    */
     {
       key: "promo",
       label: "promo",
@@ -221,9 +235,9 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
       emptyLabel: "promoEmpty",
       options: [
         { value: "none", label: "nothing", shape: "blank" },
-        { value: "text", label: "promoText", shape: "line" },
-        { value: "countdown", label: "promoCountdown", note: "promoCountdownNote", shape: "line", premium: true },
-        { value: "card", label: "promoCard", note: "promoCardNote", shape: "block", premium: true },
+        { value: "strip", label: "promoStrip", note: "promoStripNote", shape: "line", premium: true },
+        { value: "beside", label: "promoBeside", note: "promoBesideNote", shape: "block", premium: true },
+        { value: "behind", label: "promoBehind", note: "promoBehindNote", shape: "block", premium: true },
       ],
     },
     {

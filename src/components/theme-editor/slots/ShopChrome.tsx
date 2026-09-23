@@ -749,27 +749,77 @@ export function ShopChrome({
       );
     }
 
-    case "home:promo":
-      return (
-        <div className="px-4 py-4">
-          {variant === "card" ? (
-            <div className="flex items-center gap-4 rounded-md bg-current/6 p-4">
-              <span className="size-16 shrink-0 rounded-md bg-current/10" />
-              <div className="min-w-0 flex-1">
-                <p className="text-[13.5px] font-semibold">{t("promoCardHeading")}</p>
-                <p className="mt-1 text-[11.5px] leading-relaxed text-current/55">{t("promoCardBodyExample")}</p>
-                <span className="mt-2.5 inline-block rounded-full bg-foreground px-4 py-1.5 text-[10.5px] font-semibold text-background">
-                  {t("browseAll")}
-                </span>
-              </div>
-            </div>
-          ) : (
-            <p className="text-center text-[12px] uppercase tracking-[0.08em] text-current/60">
-              {variant === "countdown" ? t("promoCountdownExample") : t("promoTextExample")}
-            </p>
-          )}
-        </div>
+    case "home:promo": {
+      // The merchant's OWN promotion once they have written one, and an
+      // example until they do. A shop with a sale on should see its own sale
+      // here -- that is how they know the pop-up reached the page.
+      const say = (key: string, fallback: string) => {
+        const written = live?.settings?.[key];
+        return typeof written === "string" && written.trim() ? written.trim() : fallback;
+      };
+      const eyebrow = typeof live?.settings?.eyebrow === "string" ? live.settings.eyebrow.trim() : "";
+      const heading = say("heading", t("promoTextExample"));
+      const body = typeof live?.settings?.body === "string" ? live.settings.body.trim() : "";
+      const button = typeof live?.settings?.button_label === "string" ? live.settings.button_label.trim() : "";
+      const ends = typeof live?.settings?.ends_at === "string" ? live.settings.ends_at.trim() : "";
+      const counting = Boolean(live?.settings?.show_countdown) && Boolean(ends);
+      const picture = typeof live?.settings?.image === "string" ? live.settings.image : "";
+      // The shop falls back to the plain band when a shape that needs a
+      // picture has none, so the drawing has to fall back with it.
+      const shape = picture ? variant : "strip";
+
+      const words = (
+        <>
+          {eyebrow ? (
+            <p className="text-[10px] uppercase tracking-[0.1em] opacity-70">{eyebrow}</p>
+          ) : null}
+          <p className="text-[13.5px] font-semibold leading-tight">{heading}</p>
+          {body ? <p className="mt-1 text-[11.5px] leading-relaxed opacity-70">{body}</p> : null}
+          {counting ? (
+            <p className="mt-1.5 text-[10.5px] tabular-nums opacity-70">{t("promoCountdownExample")}</p>
+          ) : null}
+          {button ? (
+            <span className="mt-2.5 inline-block rounded-full bg-current/15 px-4 py-1.5 text-[10.5px] font-semibold">
+              {button}
+            </span>
+          ) : null}
+        </>
       );
+
+      if (shape === "behind") {
+        return (
+          <div className="relative grid min-h-28 place-items-center overflow-hidden bg-current/70 px-4 py-6 text-center text-background">
+            {/* The picture, and the scrim the shop puts over it. */}
+            {pictureUrl?.(picture) ? (
+              // eslint-disable-next-line @next/next/no-img-element -- a merchant
+              // upload on a bucket the dashboard configures no loader for
+              <img
+                src={pictureUrl(picture)}
+                alt=""
+                className="absolute inset-0 size-full object-cover opacity-45"
+              />
+            ) : null}
+            <div className="relative">{words}</div>
+          </div>
+        );
+      }
+
+      if (shape === "beside") {
+        return (
+          <div className="grid grid-cols-2 items-stretch bg-current/8">
+            <div className="aspect-[4/3] bg-current/10">
+              {pictureUrl?.(picture) ? (
+                // eslint-disable-next-line @next/next/no-img-element -- as above
+                <img src={pictureUrl(picture)} alt="" className="size-full object-cover" />
+              ) : null}
+            </div>
+            <div className="flex flex-col justify-center px-4 py-4">{words}</div>
+          </div>
+        );
+      }
+
+      return <div className="bg-current/8 px-4 py-5 text-center">{words}</div>;
+    }
 
     case "home:bestsellers":
       return (

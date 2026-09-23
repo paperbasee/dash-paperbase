@@ -86,6 +86,20 @@ export const WIRED_SLOTS: Partial<Record<SlotPageKey, Record<string, WiredSlot>>
       decides is which three, not whether.
     */
     bands: { page: "templates.home", sections: { on: "category_products" } },
+    /*
+      The promotion: one section, three layouts, exactly like the category
+      band's two shapes. `none` hides it rather than removing it -- a merchant
+      who takes a sale down for a fortnight keeps the words they wrote.
+    */
+    promo: {
+      page: "templates.home",
+      sections: {
+        strip: { type: "promo", settings: { layout: "strip" } },
+        beside: { type: "promo", settings: { layout: "beside" } },
+        behind: { type: "promo", settings: { layout: "behind" } },
+      },
+      off: "none",
+    },
     bestsellers: { page: "templates.home", sections: { row: "best_sellers" }, off: "off" },
     arrivals: { page: "templates.home", sections: { row: "new_arrivals" }, off: "off" },
   },
