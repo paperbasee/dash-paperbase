@@ -74,8 +74,8 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
       bn: "কার্ট পেজ নিজের মতো সাজান",
     },
     body: {
-      en: "The Cart page in your editor is real now. Show a \"Continue shopping\" link beside the title or leave it off, show the items as cards or as a table, give the total line by line or as one number, and choose whether an empty cart says one line or invites the shopper somewhere.",
-      bn: "এডিটরের কার্ট পেজটি এখন সত্যিকারের। শিরোনামের পাশে “আরও কিনুন” দেখাবেন কি না, পণ্যগুলো কার্ড হিসেবে নাকি টেবিলে, মোট ধাপে ধাপে নাকি একটিই সংখ্যা, আর কার্ট খালি থাকলে এক লাইন নাকি ক্রেতাকে কোথাও পাঠানোর আমন্ত্রণ — সবই আপনার পছন্দ।",
+      en: "The Cart page in your editor is real now. Show a \"Continue shopping\" link beside the title or leave it off, show the items as cards or as a table, give the total line by line or as one number, and choose whether an empty cart says one line or invites the shopper somewhere. You can also put the discount code box behind a link, show the ways they can pay, and keep the total and Check out at the bottom of a phone screen while they scroll.",
+      bn: "এডিটরের কার্ট পেজটি এখন সত্যিকারের। শিরোনামের পাশে “আরও কিনুন” দেখাবেন কি না, পণ্যগুলো কার্ড হিসেবে নাকি টেবিলে, মোট ধাপে ধাপে নাকি একটিই সংখ্যা, আর কার্ট খালি থাকলে এক লাইন নাকি আমন্ত্রণ — সবই আপনার পছন্দ। ডিসকাউন্ট কোডের ঘর লিংকের পিছনে রাখা, টাকা দেওয়ার উপায়গুলো দেখানো, আর ফোনে স্ক্রল করার সময় মোট ও চেকআউট নিচে ধরে রাখা — এগুলোও এখন আছে।",
     },
   },
   {

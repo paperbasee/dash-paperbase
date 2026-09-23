@@ -12,6 +12,8 @@ import { describe, expect, test } from "vitest";
 import type { ThemeDocument, ThemeEditorState, ThemeManifest, ThemeSection } from "@/lib/theme-editor/api";
 import { editorReducer, initEditorState, type EditorState } from "@/lib/theme-editor/editor-reducer";
 import { SLOTS } from "@/lib/theme-editor/slot-catalogue";
+import en from "../../messages/en.json";
+import bn from "../../messages/bn.json";
 import {
   choiceEdits,
   sectionOfType,
@@ -45,6 +47,9 @@ const manifest: ThemeManifest = {
         { id: "heading_link", type: "boolean", ...labels("Continue shopping"), default: true },
         choice("lines", ["cards", "table"], "cards"),
         choice("total", ["full", "simple"], "full"),
+        choice("coupon", ["open", "link", "off"], "open"),
+        { id: "payments", type: "boolean", ...labels("Ways to pay"), default: false },
+        { id: "sticky", type: "boolean", ...labels("Sticky total"), default: true },
         choice("when_empty", ["text", "invite"], "text"),
       ],
     },
@@ -95,26 +100,26 @@ const settingsOf = (state: EditorState) =>
 const PAGE = () => editor([section("cart", "cart")]);
 
 describe("the cart joins the theme", () => {
-  test("the four that are real all write the cart page", () => {
-    for (const key of ["heading", "lines", "total", "empty"]) {
+  test("every real place writes the cart page", () => {
+    for (const key of ["heading", "lines", "total", "coupon", "payments", "sticky", "empty"]) {
       expect(place(key).page, key).toBe("templates.cart");
       expect(sectionTypesOf(place(key)), key).toEqual(["cart"]);
     }
   });
 
-  test("the other seven are still drawings", () => {
+  test("four are still drawings", () => {
     /*
       A place goes in when its section can do everything the place promises.
-      Rounds 2 to 4: the coupon and the payments row and the sticky bar, then
-      the upsell and recently viewed, then the trust line and the steps bar.
+      Round 3 brings the upsell and recently viewed; round 4 the trust line and
+      the steps bar.
     */
-    for (const key of ["steps", "coupon", "trust", "sticky", "upsell", "recent", "payments"]) {
+    for (const key of ["steps", "trust", "upsell", "recent"]) {
       expect(wiringFor("cart", key), key).toBeNull();
     }
   });
 
   test("none of them may be turned off: a cart page needs its cart", () => {
-    for (const key of ["heading", "lines", "total", "empty"]) {
+    for (const key of ["heading", "lines", "total", "coupon", "payments", "sticky", "empty"]) {
       expect(place(key).off, key).toBeUndefined();
     }
     expect(manifest.sections.cart.required).toBe(true);
@@ -151,10 +156,13 @@ describe("the four choices", () => {
     expect(Object.keys(place("empty").sections)[0]).toBe("text");
   });
 
-  test("the dialog draws none of the four, because the tiles decide them all", () => {
+  test("the dialog draws none of them, because the tiles decide them all", () => {
     expect([...settingsDecidedOn("cart", "cart")].sort()).toEqual([
+      "coupon",
       "heading_link",
       "lines",
+      "payments",
+      "sticky",
       "total",
       "when_empty",
     ]);
@@ -170,5 +178,39 @@ describe("the four choices", () => {
     expect(slot.key).toBe("empty");
     expect(Object.keys(place("empty").sections)).toEqual(["text", "invite"]);
     expect(settingsOf(pick(PAGE(), "empty", "invite")).when_empty).toBe("invite");
+  });
+});
+
+describe("round 2: the money", () => {
+  test("the coupon box has three shapes, and open comes first", () => {
+    expect(Object.keys(place("coupon").sections)).toEqual(["open", "link", "off"]);
+    expect(slotValueFor(PAGE().document, place("coupon"))).toBe("open");
+  });
+
+  test("each shape is written to the cart", () => {
+    for (const shape of ["link", "off", "open"]) {
+      expect(settingsOf(pick(PAGE(), "coupon", shape)).coupon).toBe(shape);
+    }
+  });
+
+  test("the payments row is off until a merchant asks", () => {
+    expect(slotValueFor(PAGE().document, place("payments"))).toBe("off");
+    expect(settingsOf(pick(PAGE(), "payments", "on")).payments).toBe(true);
+  });
+
+  test("the sticky total is on unless a merchant says otherwise", () => {
+    expect(slotValueFor(PAGE().document, place("sticky"))).toBe("on");
+    expect(settingsOf(pick(PAGE(), "sticky", "off")).sticky).toBe(false);
+  });
+
+  test("the coupon note no longer says the shop has no coupons", () => {
+    /*
+      It said "Paperbase has no coupons yet -- there is no code to make, no
+      limit, no expiry date", which stopped being true on 2026-09-22.
+    */
+    const slot = SLOTS.cart.find((one) => one.key === "coupon")!;
+    expect(slot.hint).toBe("checkoutCouponHint");
+    expect(en.themeEditor.slots.checkoutCouponHint).not.toContain("no coupons yet");
+    expect(bn.themeEditor.slots.checkoutCouponHint).not.toContain("কুপন নেই");
   });
 });

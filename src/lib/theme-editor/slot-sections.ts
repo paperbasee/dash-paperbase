@@ -260,6 +260,39 @@ export const WIRED_SLOTS: Partial<Record<SlotPageKey, Record<string, WiredSlot>>
       },
     },
     /*
+      The discount code box, 2026-09-23 (round 2). The FEATURE shipped on
+      2026-09-22; this is only its shape. `open` first, because it is what every
+      shop drew before there was a choice -- and the shop still draws nothing at
+      all where a merchant runs no codes, whichever shape is picked.
+    */
+    coupon: {
+      page: "templates.cart",
+      sections: {
+        open: { type: "cart", settings: { coupon: "open" } },
+        link: { type: "cart", settings: { coupon: "link" } },
+        off: { type: "cart", settings: { coupon: "off" } },
+      },
+    },
+    payments: {
+      page: "templates.cart",
+      sections: {
+        off: { type: "cart", settings: { payments: false } },
+        on: { type: "cart", settings: { payments: true } },
+      },
+    },
+    /*
+      The total and Check out, kept on a phone screen while a long cart is
+      scrolled. On, because that is what the editor has drawn since the slot
+      design -- the same call the product page's buy bar made.
+    */
+    sticky: {
+      page: "templates.cart",
+      sections: {
+        on: { type: "cart", settings: { sticky: true } },
+        off: { type: "cart", settings: { sticky: false } },
+      },
+    },
+    /*
       `when_empty`, not the obvious name: `empty` is a reserved word in Liquid
       and the category page's grid met it the hard way. The PLACE is still
       called `empty` -- that is the editor's own name for it and nothing in
