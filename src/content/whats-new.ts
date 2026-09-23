@@ -64,6 +64,21 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-09-22-cart-page-choices",
+    date: "2026-09-22",
+    version: "4.77.0",
+    tag: "new",
+    href: "/settings?tab=customization",
+    title: {
+      en: "Design your cart page",
+      bn: "কার্ট পেজ নিজের মতো সাজান",
+    },
+    body: {
+      en: "The Cart page in your editor is real now. Show a \"Continue shopping\" link beside the title or leave it off, show the items as cards or as a table, give the total line by line or as one number, and choose whether an empty cart says one line or invites the shopper somewhere.",
+      bn: "এডিটরের কার্ট পেজটি এখন সত্যিকারের। শিরোনামের পাশে “আরও কিনুন” দেখাবেন কি না, পণ্যগুলো কার্ড হিসেবে নাকি টেবিলে, মোট ধাপে ধাপে নাকি একটিই সংখ্যা, আর কার্ট খালি থাকলে এক লাইন নাকি ক্রেতাকে কোথাও পাঠানোর আমন্ত্রণ — সবই আপনার পছন্দ।",
+    },
+  },
+  {
     id: "2026-09-22-delivery-and-returns-terms",
     date: "2026-09-22",
     version: "4.76.0",
@@ -475,21 +490,6 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     body: {
       en: "Discount codes were reaching only the store owner: the permission existed but was never given to the Admin, Manager and Viewer roles on shops created before it. Those roles now have it, along with the new Brands permission, and anything you changed yourself on a role was left alone.",
       bn: "ডিসকাউন্ট কোড শুধু দোকানের মালিকের কাছেই পৌঁছাত: অনুমতিটি ছিল, কিন্তু তার আগে তৈরি হওয়া দোকানগুলোর অ্যাডমিন, ম্যানেজার ও ভিউয়ার ভূমিকায় সেটি কখনো দেওয়া হয়নি। এখন ওই ভূমিকাগুলো সেটি পেয়েছে, সঙ্গে নতুন ব্র্যান্ড অনুমতিও — আর কোনো ভূমিকায় আপনি নিজে যা বদলেছিলেন তা অক্ষত আছে।",
-    },
-  },
-  {
-    id: "2026-09-22-order-numbers-are-numbers",
-    date: "2026-09-22",
-    version: "4.37.0",
-    tag: "improved",
-    href: "/orders",
-    title: {
-      en: "Order numbers are just numbers",
-      bn: "অর্ডার নম্বর এখন শুধুই নম্বর",
-    },
-    body: {
-      en: "Your sixtieth order is now #60 instead of #00000060 — on the order list, the invoice, and in your shop. Nothing changed about which order is which, and a customer reading an older number off a printed invoice still finds their order.",
-      bn: "আপনার ষাটতম অর্ডার এখন #00000060 নয়, #60 — অর্ডার তালিকায়, ইনভয়েসে এবং আপনার দোকানে। কোন অর্ডার কোনটি তা বদলায়নি, আর পুরোনো ইনভয়েসে ছাপা নম্বর দিয়েও ক্রেতা তাঁর অর্ডার খুঁজে পাবেন।",
     },
   },
   {

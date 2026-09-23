@@ -228,6 +228,52 @@ export const WIRED_SLOTS: Partial<Record<SlotPageKey, Record<string, WiredSlot>>
     },
   },
   /*
+    The cart, 2026-09-23 (round 1 of four). The page was not part of the theme
+    at all -- no template, no section -- so all eleven of its places were
+    drawings with nowhere to write. `theming/0027` gives every document the
+    page; these four are the first with something behind them.
+
+    Everything writes ONE section, because the cart page is one thing: a
+    heading, the lines, the numbers and the way on. The coupon, the sticky bar,
+    the upsell and the rest join it in later rounds.
+  */
+  cart: {
+    heading: {
+      page: "templates.cart",
+      sections: {
+        withLink: { type: "cart", settings: { heading_link: true } },
+        plain: { type: "cart", settings: { heading_link: false } },
+      },
+    },
+    lines: {
+      page: "templates.cart",
+      sections: {
+        cards: { type: "cart", settings: { lines: "cards" } },
+        table: { type: "cart", settings: { lines: "table" } },
+      },
+    },
+    total: {
+      page: "templates.cart",
+      sections: {
+        full: { type: "cart", settings: { total: "full" } },
+        simple: { type: "cart", settings: { total: "simple" } },
+      },
+    },
+    /*
+      `when_empty`, not the obvious name: `empty` is a reserved word in Liquid
+      and the category page's grid met it the hard way. The PLACE is still
+      called `empty` -- that is the editor's own name for it and nothing in
+      Liquid reads it.
+    */
+    empty: {
+      page: "templates.cart",
+      sections: {
+        text: { type: "cart", settings: { when_empty: "text" } },
+        invite: { type: "cart", settings: { when_empty: "invite" } },
+      },
+    },
+  },
+  /*
     The category page, 2026-09-23. The shop's widest page: most people arrive on
     a category from a search or the menu rather than on the home page.
 
