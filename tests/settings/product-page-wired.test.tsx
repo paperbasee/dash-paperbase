@@ -59,7 +59,14 @@ const manifest: ThemeManifest = {
     },
     related_products: { ...labels("You may also like"), settings: [] },
     product_questions: { ...labels("Questions"), settings: [{ id: "heading", type: "text", ...labels("Heading"), default: "" }] },
-    product_reviews: { ...labels("Reviews"), settings: [] },
+    product_reviews: {
+      ...labels("Reviews"),
+      premium: true,
+      settings: [
+        choice("layout", ["cards", "summary"], "cards"),
+        { id: "heading", type: "text", ...labels("Heading"), default: "" },
+      ],
+    },
     header: { ...labels("Header"), at_most_one: true, required: true, settings: [] },
     footer: { ...labels("Footer"), at_most_one: true, required: true, settings: [] },
   },
@@ -128,7 +135,7 @@ const PAGE = () =>
 
 describe("what stage 1 wired", () => {
   test("every place edits the product template", () => {
-    for (const key of ["breadcrumb", "buy", "description", "specs", "related", "faq"]) {
+    for (const key of ["breadcrumb", "buy", "description", "specs", "reviews", "related", "faq"]) {
       expect(place(key).page, key).toBe("templates.product");
     }
   });
@@ -136,10 +143,10 @@ describe("what stage 1 wired", () => {
   test("the rest of the page is still a drawing", () => {
     /*
       A place goes in when its section can do everything the place promises.
-      Reviews have no shapes yet, recently viewed is drawn by the template and
-      neither the phone buy bar nor delivery-and-returns exists at all.
+      Recently viewed is drawn by the template, and neither the phone buy bar
+      nor delivery-and-returns exists at all. Reviews joined in stage 2.
     */
-    for (const key of ["reviews", "recent", "stickybuy", "shipping"]) {
+    for (const key of ["recent", "stickybuy", "shipping"]) {
       expect(wiringFor("product", key), key).toBeNull();
     }
   });
@@ -258,5 +265,59 @@ describe("the rows under the buying area", () => {
   test("turning related off keeps the section", () => {
     const after = pick(PAGE(), "related", "off");
     expect(sectionOfType(after.document, place("related"), "related_products")?.hidden).toBe(true);
+  });
+});
+
+describe("reviews", () => {
+  test("two shapes of one section, and an off that hides rather than removes", () => {
+    /*
+      A shop that takes the band down for a month keeps every review it has and
+      the heading it wrote.
+    */
+    expect(sectionTypesOf(place("reviews"))).toEqual(["product_reviews"]);
+    expect(place("reviews").off).toBe("off");
+  });
+
+  test("each shape is written to the section", () => {
+    for (const shape of ["summary", "cards"]) {
+      const after = pick(PAGE(), "reviews", shape);
+      expect(
+        sectionOfType(after.document, place("reviews"), "product_reviews")?.settings.layout,
+      ).toBe(shape);
+      expect(slotValueFor(after.document, place("reviews"))).toBe(shape);
+    }
+  });
+
+  test("the theme's own default comes first", () => {
+    expect(Object.keys(place("reviews").sections)[0]).toBe("cards");
+  });
+
+  test("turning it off keeps the heading a merchant wrote", () => {
+    const written = editor([
+      section("details", "product_details"),
+      section("reviews", "product_reviews", { settings: { heading: "What people say" } }),
+    ]);
+    const after = pick(written, "reviews", "off");
+    const band = sectionOfType(after.document, place("reviews"), "product_reviews");
+    expect(band?.hidden).toBe(true);
+    expect(band?.settings.heading).toBe("What people say");
+  });
+
+  test("both shapes are paid, and the gate is the theme's not the editor's", () => {
+    /*
+      A lapsed shop stops being SERVED the band and is never refused at save,
+      or a downgraded shop could not save its theme at all.
+    */
+    const slot = SLOTS.product.find((one) => one.key === "reviews")!;
+    for (const option of slot.options ?? []) {
+      if (option.value === "off") continue;
+      expect(option.premium, option.value).toBe(true);
+    }
+    expect(manifest.sections.product_reviews.premium).toBe(true);
+  });
+
+  test("a page with no band at all reads as off", () => {
+    const bare = editor([section("details", "product_details")]);
+    expect(slotValueFor(bare.document, place("reviews"))).toBe("off");
   });
 });

@@ -74,8 +74,8 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
       bn: "পণ্যের পেজ নিজের মতো সাজান",
     },
     body: {
-      en: "Under Product in your editor, six choices are real now: show the path back up or hide it, pick how the pictures look — a frame with thumbnails, a column, or just one — put the description in a box or under a heading, show specifications in two columns or folded away, and switch \"You may also like\" and product questions on or off.",
-      bn: "এডিটরের পণ্য অংশে ছয়টি পছন্দ এখন সত্যিকারের: উপরে ফেরার পথ দেখাবেন কি না; ছবি কেমন দেখাবে — থাম্বনেইলসহ একটি ছবি, ছবির কলাম, নাকি শুধু একটি; বিবরণ বাক্সে নাকি শিরোনামের নিচে; স্পেসিফিকেশন দুই কলামে নাকি ভাঁজ করা; আর “এগুলোও ভালো লাগতে পারে” ও পণ্যের প্রশ্ন চালু নাকি বন্ধ।",
+      en: "Under Product in your editor, seven choices are real now: show the path back up or hide it, pick how the pictures look — a frame with thumbnails, a column, or just one — put the description in a box or under a heading, show specifications in two columns or folded away, and switch \"You may also like\" and product questions on or off. Reviews can now be the full band or just the score and how many, which is the shorter way to show you are trusted.",
+      bn: "এডিটরের পণ্য অংশে সাতটি পছন্দ এখন সত্যিকারের: উপরে ফেরার পথ দেখাবেন কি না; ছবি কেমন দেখাবে — থাম্বনেইলসহ একটি ছবি, ছবির কলাম, নাকি শুধু একটি; বিবরণ বাক্সে নাকি শিরোনামের নিচে; স্পেসিফিকেশন দুই কলামে নাকি ভাঁজ করা; আর “এগুলোও ভালো লাগতে পারে” ও পণ্যের প্রশ্ন চালু নাকি বন্ধ। রিভিউ এখন পুরো ব্যান্ড হিসেবে, নয়তো শুধু স্কোর আর কতজন দিয়েছেন — অল্প জায়গায় ভরসার চিহ্ন।",
     },
   },
   {

@@ -156,6 +156,28 @@ export const WIRED_SLOTS: Partial<Record<SlotPageKey, Record<string, WiredSlot>>
         folded: { type: "product_details", settings: { extras_style: "accordions" } },
       },
     },
+    /*
+      Reviews, 2026-09-23 (stage 2). Two shapes of one section: the band as it
+      has always been, or the score and the count alone. `off` REMOVES nothing
+      -- it hides the section, so a shop that takes the band down for a month
+      keeps every review it has and the heading it wrote.
+
+      `cards` first: it is the theme's default and what every shop that has the
+      band is already drawing.
+
+      Both shapes are paid, and the gate is the theme's `premium` flag on the
+      section -- not anything here. A lapsed shop stops being SERVED the band
+      and is never refused at save, or a downgraded shop could not save its
+      theme at all.
+    */
+    reviews: {
+      page: "templates.product",
+      sections: {
+        cards: { type: "product_reviews", settings: { layout: "cards" } },
+        summary: { type: "product_reviews", settings: { layout: "summary" } },
+      },
+      off: "off",
+    },
     related: { page: "templates.product", sections: { on: "related_products" }, off: "off" },
     faq: { page: "templates.product", sections: { on: "product_questions" }, off: "off" },
   },
