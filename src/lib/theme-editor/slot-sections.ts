@@ -104,6 +104,62 @@ export const WIRED_SLOTS: Partial<Record<SlotPageKey, Record<string, WiredSlot>>
     arrivals: { page: "templates.home", sections: { row: "new_arrivals" }, off: "off" },
   },
   /*
+    The product page, 2026-09-23. Stage 1 of the same four-stage shape the
+    category page took: the places whose sections already exist.
+
+    Two of them write settings the shop has honoured all along and no place
+    wrote -- the description's box and the specifications' two columns -- which
+    is the exact complaint that started this work: a choice a merchant could
+    see and could not make.
+
+    **The tile values and the stored values differ here**, and that is fine: a
+    tile is what a merchant reads, a setting is what the theme understands. The
+    theme's own DEFAULT still has to come first in each map, or a document that
+    has never heard of the setting reads as the wrong tile.
+
+    Reviews, recently viewed, the phone buy bar and delivery-and-returns are
+    stages 2 to 4 and stay drawings until their sections can do what the place
+    promises.
+  */
+  product: {
+    breadcrumb: { page: "templates.product", sections: { on: "breadcrumb" }, off: "off" },
+    /*
+      The pictures. Three shapes of one section, like the category heading --
+      the merchant is choosing how their pictures are SHOWN, and two sections
+      would let them put both on the page.
+    */
+    buy: {
+      page: "templates.product",
+      sections: {
+        frame: { type: "product_gallery", settings: { gallery_style: "frame" } },
+        column: { type: "product_gallery", settings: { gallery_style: "column" } },
+        single: { type: "product_gallery", settings: { gallery_style: "single" } },
+      },
+    },
+    /*
+      The description and the specifications are both `product_details`, which
+      also holds the buying column itself -- so neither may ever be `off`: a
+      product page without its price and its buttons is not a product page. The
+      theme marks the section required, and these two choose only its shape.
+    */
+    description: {
+      page: "templates.product",
+      sections: {
+        box: { type: "product_details", settings: { details_style: "panel" } },
+        plain: { type: "product_details", settings: { details_style: "plain" } },
+      },
+    },
+    specs: {
+      page: "templates.product",
+      sections: {
+        grid: { type: "product_details", settings: { extras_style: "grid" } },
+        folded: { type: "product_details", settings: { extras_style: "accordions" } },
+      },
+    },
+    related: { page: "templates.product", sections: { on: "related_products" }, off: "off" },
+    faq: { page: "templates.product", sections: { on: "product_questions" }, off: "off" },
+  },
+  /*
     The category page, 2026-09-23. The shop's widest page: most people arrive on
     a category from a search or the menu rather than on the home page.
 

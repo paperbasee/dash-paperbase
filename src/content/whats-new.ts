@@ -64,6 +64,21 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-09-22-product-page-choices",
+    date: "2026-09-22",
+    version: "4.73.0",
+    tag: "new",
+    href: "/settings?tab=customization",
+    title: {
+      en: "Design your product pages",
+      bn: "পণ্যের পেজ নিজের মতো সাজান",
+    },
+    body: {
+      en: "Under Product in your editor, six choices are real now: show the path back up or hide it, pick how the pictures look — a frame with thumbnails, a column, or just one — put the description in a box or under a heading, show specifications in two columns or folded away, and switch \"You may also like\" and product questions on or off.",
+      bn: "এডিটরের পণ্য অংশে ছয়টি পছন্দ এখন সত্যিকারের: উপরে ফেরার পথ দেখাবেন কি না; ছবি কেমন দেখাবে — থাম্বনেইলসহ একটি ছবি, ছবির কলাম, নাকি শুধু একটি; বিবরণ বাক্সে নাকি শিরোনামের নিচে; স্পেসিফিকেশন দুই কলামে নাকি ভাঁজ করা; আর “এগুলোও ভালো লাগতে পারে” ও পণ্যের প্রশ্ন চালু নাকি বন্ধ।",
+    },
+  },
+  {
     id: "2026-09-22-shoppers-can-filter",
     date: "2026-09-22",
     version: "4.71.0",
@@ -474,21 +489,6 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     body: {
       en: "Your shop was rounding amounts to whole taka on screen while charging the real figure, so an order of ৳1,124.79 was shown to the shopper as ৳1,125 and recorded for you as ৳1,124.79. Prices now show their paisa when they have any, so the shelf, the basket, checkout, the invoice and your dashboard all say one number.",
       bn: "আপনার দোকান পর্দায় টাকার অঙ্ক পূর্ণসংখ্যায় দেখালেও নেওয়া হতো আসল অঙ্কটাই — তাই ৳১,১২৪.৭৯ টাকার অর্ডার ক্রেতাকে দেখানো হতো ৳১,১২৫, আর আপনার হিসাবে থাকত ৳১,১২৪.৭৯। এখন পয়সা থাকলে পয়সাসহ দেখাবে, ফলে পণ্যের দাম, ব্যাগ, চেকআউট, ইনভয়েস আর ড্যাশবোর্ড — সবখানে একই অঙ্ক।",
-    },
-  },
-  {
-    id: "2026-09-22-shoppers-can-track-an-order",
-    date: "2026-09-22",
-    version: "4.37.0",
-    tag: "new",
-    href: "/settings?tab=apps",
-    title: {
-      en: "Let shoppers track an order without an account",
-      bn: "অ্যাকাউন্ট ছাড়াই ক্রেতারা অর্ডার ট্র্যাক করতে পারবেন",
-    },
-    body: {
-      en: "Switch on Order tracking in Settings → Apps and a shopper can find their order with its number and the phone they ordered with — no account needed, which matters most if your checkout does not ask for an email. That screen now also lists the things that are always on, so you can see everything your shop has.",
-      bn: "সেটিংস → অ্যাপস থেকে অর্ডার ট্র্যাকিং চালু করলে ক্রেতারা অর্ডার নম্বর আর যে ফোন নম্বর দিয়ে অর্ডার করেছেন তা দিয়েই অর্ডার খুঁজে নিতে পারবেন — অ্যাকাউন্ট লাগবে না, যা বিশেষভাবে কাজে লাগে যদি আপনার চেকআউটে ইমেইল না চাওয়া হয়। ওই পাতায় এখন সব সময় চালু থাকা জিনিসগুলোও দেখা যায়, তাই আপনার দোকানে কী কী আছে তার পুরোটাই এক জায়গায়।",
     },
   },
   {
