@@ -95,7 +95,16 @@ export function SlotEditor({ loaded }: { loaded: ThemeEditorState }) {
   const [palette, setPalette] = useState("ivory");
   const [face, setFace] = useState("poppins");
   const [corner, setCorner] = useState("soft");
-  const [cardStyle, setCardStyle] = useState("classic");
+  /*
+    The card style is the shop's DOCUMENT since 2026-09-23, not a held-in-the-
+    screen choice and not the column a picker outside the editor used to write.
+    So it reads from the document and writes back to it -- a draft, like every
+    other look decision, until Save to store.
+  */
+  const cardStyle =
+    typeof state.document.settings?.card_style === "string"
+      ? state.document.settings.card_style
+      : "classic";
   // One whole-theme action at a time (Save, answering a clash).
   const [busy, setBusy] = useState(false);
   // The clash waiting for an answer, and where the draft stands so it can be saved over.
@@ -348,7 +357,7 @@ export function SlotEditor({ loaded }: { loaded: ThemeEditorState }) {
             corner={corner}
             onCorner={setCorner}
             cardStyle={cardStyle}
-            onCardStyle={setCardStyle}
+            onCardStyle={(key) => dispatch({ type: "setThemeSetting", setting: "card_style", value: key })}
           />
         </div>
         <div className="lg:min-h-0 lg:overflow-y-auto">

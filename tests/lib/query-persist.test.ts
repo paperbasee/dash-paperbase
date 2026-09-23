@@ -12,7 +12,7 @@ import { QueryClient, dehydrate } from "@tanstack/react-query";
 import { describe, expect, test } from "vitest";
 
 import { shouldPersistQuery } from "@/lib/queryPersister";
-import { themeEditorQueryKey, themeQueryKey, themesQueryKey } from "@/lib/query-keys";
+import { themeEditorQueryKey, themesQueryKey } from "@/lib/query-keys";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const read = (rel: string) => fs.readFileSync(path.join(ROOT, rel), "utf8");
@@ -43,8 +43,7 @@ describe("shouldPersistQuery", () => {
   });
 
   test("the theme keys sit outside ['theming'], so card style invalidations never touch them", () => {
-    expect(themesQueryKey[0]).not.toBe(themeQueryKey[0]);
-    expect(themeEditorQueryKey[0]).not.toBe(themeQueryKey[0]);
+    expect(themesQueryKey[0]).not.toBe(themeEditorQueryKey[0]);
   });
 
   test("the provider persists through the filter", () => {

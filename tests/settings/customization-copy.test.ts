@@ -38,7 +38,6 @@ describe("customization copy", () => {
     const used = new Set<string>();
     for (const m of read("sections/CustomizationSection.tsx").matchAll(/\btc\(\s*"(\w+)"/g)) used.add(m[1]);
     for (const file of [
-      "_components/CardVariantPicker.tsx",
       "_components/CurrentThemeCard.tsx",
       "_components/ThemeLibrary.tsx",
       "_components/ThemeLockNotice.tsx",
@@ -51,7 +50,10 @@ describe("customization copy", () => {
         used.add(m[2]);
       }
     }
-    expect(used.size).toBeGreaterThan(30);
+    // A floor, so a sweep that silently reads nothing fails rather than passes.
+    // It was 30 until the product-card picker moved into the theme editor and
+    // took eight of these keys with it.
+    expect(used.size).toBeGreaterThan(20);
     expect([...used].filter((k) => !(k in enNs))).toEqual([]);
     expect([...used].filter((k) => !(k in bnNs))).toEqual([]);
   });

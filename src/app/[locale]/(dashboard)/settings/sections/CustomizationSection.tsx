@@ -14,52 +14,13 @@ import { previewOrigin } from "@/lib/theme-editor/preview-origin";
 import { themeName } from "@/lib/theme-editor/theme-groups";
 import { notify } from "@/notifications";
 import { CustomizationShell } from "../_components/CustomizationShell";
-import { CardVariantPicker } from "../_components/CardVariantPicker";
 import { CurrentThemeCard } from "../_components/CurrentThemeCard";
 import { ThemeLibrary } from "../_components/ThemeLibrary";
 import { ThemeLockNotice } from "../_components/ThemeLockNotice";
-import { useThemeEditor } from "../_hooks/useThemeEditor";
 import { settingsSectionSurfaceClassName } from "../SettingsSectionBody";
 
 const PREVIEW_ORIGIN = previewOrigin(process.env.NEXT_PUBLIC_STOREFRONT_PREVIEW_ORIGIN);
 
-/**
- * The shop's product-card style.
- *
- * Shown when the LIVE theme actually draws it (`current.card_styles`, from that
- * theme's manifest) rather than when the live theme happens to be Basic, which
- * is what it used to check. Heritage honours the setting too, and the name check
- * hid the control from every shop on it.
- */
-function CardStyle({ canEdit }: { canEdit: boolean }) {
-  const t = useTranslations("settings");
-  const tc = useTranslations("settings.customization");
-  const { theme, loading, saving, error, selectCardVariant } = useThemeEditor();
-
-  if (loading) {
-    return (
-      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-        <Loader2 className="size-4 animate-spin" aria-hidden />
-        {tc("loadingTheme")}
-      </div>
-    );
-  }
-  return (
-    <div className="space-y-4">
-      {error === "saveFailed" ? (
-        <p className="text-sm text-destructive" role="alert">
-          {tc("saveFailed")}
-        </p>
-      ) : null}
-      <CardVariantPicker
-        selectedVariant={theme?.card_variant ?? null}
-        onSelect={selectCardVariant}
-        disabled={saving || !canEdit}
-      />
-      {saving ? <p className="text-xs text-muted-foreground">{t("saving")}</p> : null}
-    </div>
-  );
-}
 
 export default function CustomizationSection({ hidden }: { hidden: boolean }) {
   const tc = useTranslations("settings.customization");
@@ -162,7 +123,6 @@ export default function CustomizationSection({ hidden }: { hidden: boolean }) {
           busyKey={busyKey}
           onTry={(theme) => void handleTry(theme)}
         />
-        {current.card_styles ? <CardStyle canEdit={data.access.can_edit} /> : null}
       </div>
     );
   }

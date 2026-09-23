@@ -222,7 +222,6 @@ export const storeSettingsCurrentQueryKey = ["store-settings", "current"] as con
 
 export const emailNotificationPrefsQueryKey = storeSettingsCurrentQueryKey;
 
-export const themeQueryKey = ["theming"] as const;
 
 export const themePresetsQueryKey = ["theming", "presets"] as const;
 

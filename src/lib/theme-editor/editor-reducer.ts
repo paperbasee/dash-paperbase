@@ -10,7 +10,7 @@ import {
   withSetting,
   type PageKey,
 } from "./document-ops";
-import { blockFields, sectionFields, type FieldSpec } from "./field-specs";
+import { blockFields, fieldSpecs, sectionFields, type FieldSpec } from "./field-specs";
 import {
   cannotAdd,
   cannotAddBlock,
@@ -45,6 +45,16 @@ export type EditorAction =
   /** Edits kept on this device, brought back on top of the loaded document. */
   | { type: "restore"; document: ThemeDocument }
   | { type: "pickPage"; page: PageKey }
+  /**
+   * One of the THEME's own settings -- the ones that belong to no section.
+   *
+   * The product card style is the first: cards are drawn on the home page, a
+   * category, search, a brand, so a setting on one section would be a look
+   * decision that stopped at that section's edge. It was a column until
+   * 2026-09-23, changed by a picker outside the editor that took effect the
+   * instant it was clicked; here it is a draft like everything else.
+   */
+  | { type: "setThemeSetting"; setting: string; value: unknown }
   /**
    * `settings` is for a section added AS a shape: the category band is tiles or
    * a row of names by its `layout`, and a merchant choosing the row of names on
@@ -115,6 +125,15 @@ export function editorReducer(state: EditorState, action: EditorAction): EditorS
   if (action.type === "pickPage") {
     if (action.page === state.page || !editorPages(state.manifest).includes(action.page)) return state;
     return { ...state, page: action.page };
+  }
+
+  if (action.type === "setThemeSetting") {
+    const spec = fieldFor(fieldSpecs(state.manifest.settings, LABELS_UNUSED), action.setting);
+    if (!spec || checkField(spec, action.value)) return state;
+    return withDocument(state, {
+      ...state.document,
+      settings: { ...state.document.settings, [action.setting]: action.value },
+    });
   }
 
   const { manifest, document, page } = state;
