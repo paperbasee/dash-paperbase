@@ -158,11 +158,11 @@ describe("the three product bands", () => {
       The owner, twice: "the featured this week again moved to the bottom."
 
       The canvas puts the per-category rows between the picked band and the two
-      that fill themselves, and that place is LOCKED -- a merchant cannot change
-      it. Reading only the places they can change put a new band above rows the
-      drawing shows it under, and a shop that draws its page in a different
-      order from the drawing the merchant just edited is the one thing this
-      canvas exists to prevent.
+      that fill themselves. That place was LOCKED when this broke -- its section
+      belonged to nobody the order could read -- and it is wired now, so the
+      rule holds through the wiring instead. A shop that draws its page in a
+      different order from the drawing the merchant just edited is the one thing
+      this canvas exists to prevent.
     */
     const doc = document();
     doc.templates.home.sections = [

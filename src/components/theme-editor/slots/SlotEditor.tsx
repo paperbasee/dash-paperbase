@@ -385,7 +385,10 @@ export function SlotEditor({ loaded }: { loaded: ThemeEditorState }) {
             premiumSections={loaded.premium_sections !== false}
             pictures={images.data ?? []}
             pictureUrl={(key) => pictureUrls[key] ?? images.data?.find((row) => row.key === key)?.url ?? ""}
-            departments={(categories.data ?? []).map((node) => node.name)}
+            departments={(categories.data ?? []).map((node) => ({
+              value: node.public_id,
+              label: node.name,
+            }))}
             /*
               The sixteen promises, named in the merchant's language by the
               theme itself. Read from the manifest rather than from this

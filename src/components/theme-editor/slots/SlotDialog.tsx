@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/dialog";
 import type { ThemeBlock, ThemeDocument, ThemeImage, ThemeManifest } from "@/lib/theme-editor/api";
 import { blockFields, fieldValue, sectionFields } from "@/lib/theme-editor/field-specs";
+import type { FieldOption } from "@/lib/theme-editor/field-specs";
 import { linkPages } from "@/lib/theme-editor/link-targets";
 import type { FieldSpec } from "@/lib/theme-editor/field-specs";
 import type { Slot } from "@/lib/theme-editor/slot-catalogue";
@@ -54,6 +55,7 @@ export function SlotDialog({
   pictures,
   pictureUrl,
   productName,
+  departments,
   onChoose,
   onSet,
   onSetBlock,
@@ -75,6 +77,14 @@ export function SlotDialog({
   pictureUrl: (key: string) => string;
   /** A product's public id to its name, for the field to show what it holds. */
   productName: (publicId: string) => string;
+  /**
+   * This shop's own top-level departments, for the place that picks three.
+   *
+   * The shop's list, not the theme's: no theme can know what a merchant called
+   * their aisles. Top-level only -- the owner's decision, 2026-09-23 -- and a
+   * picked one carries everything filed beneath it.
+   */
+  departments: FieldOption[];
   onChoose: (value: string) => void;
   onSet: (setting: string, value: unknown) => void;
   onSetBlock: (blockId: string, setting: string, value: unknown) => void;
@@ -142,16 +152,26 @@ export function SlotDialog({
     if (!section || !blockType) return null;
     const specs = spec?.blocks?.[blockType]?.settings ?? [];
     if (specs.length !== 1) return null;
-    if (specs[0].type !== "product" && specs[0].type !== "select") return null;
-    return { blockType, setting: specs[0].id, kind: specs[0].type };
+    const kind = specs[0].type;
+    if (kind !== "product" && kind !== "select" && kind !== "category") return null;
+    return { blockType, setting: specs[0].id, kind };
   })();
-  /** The theme's own choices for a ticked select, in the merchant's language. */
+  /**
+   * What a ticked list offers.
+   *
+   * A `select` is the THEME's own list -- the sixteen promises, labelled in the
+   * manifest. A `category` is the SHOP's: its top-level departments, handed in,
+   * because no theme can know what a merchant called their aisles.
+   */
   const choices =
-    ticklist?.kind === "select" && section
-      ? (blockFields(manifest, section.type, ticklist.blockType, locale).find(
-          (field) => field.id === ticklist.setting,
-        )?.options ?? [])
-      : [];
+    ticklist?.kind === "category"
+      ? departments
+      : ticklist?.kind === "select" && section
+        ? (blockFields(manifest, section.type, ticklist.blockType, locale).find(
+            (field) => field.id === ticklist.setting,
+          )?.options ?? [])
+        : [];
+  const ticksFromAList = ticklist?.kind === "select" || ticklist?.kind === "category";
   const picked = ticklist
     ? blocks
         .map((block) => block.settings[ticklist.setting])
@@ -184,6 +204,14 @@ export function SlotDialog({
               time is invisible to it. Same trick the canvas uses for a row of
               places.
             */}
+            {/*
+              A place with one answer draws no chooser at all. The three
+              departments are always three departments -- what a merchant edits
+              is which -- and a row with a single tile in it is a choice that
+              decides nothing, which is what this editor was rebuilt to stop
+              offering.
+            */}
+            {(slot.options ?? []).length > 0 ? (
             <div
               role="group"
               aria-label={t("whatGoesHere")}
@@ -221,6 +249,7 @@ export function SlotDialog({
                 );
               })}
             </div>
+            ) : null}
 
             {specs.map((fieldSpec) => (
               <SettingField
@@ -381,14 +410,14 @@ export function SlotDialog({
       </EditorSheet>
 
       <EditorSheet
-        open={picking && ticklist?.kind === "select"}
+        open={picking && ticksFromAList}
         title={tEditor("chooseTitle")}
         hint={tEditor("chooseHint", { max: typeof most === "number" ? most : choices.length })}
         tall
         onClose={() => setPicking(false)}
       >
         <ChoicePicker
-          open={picking && ticklist?.kind === "select"}
+          open={picking && ticksFromAList}
           options={choices}
           value={picked}
           most={typeof most === "number" ? most : choices.length}

@@ -14,6 +14,7 @@ import {
   type SlotPageKey,
 } from "@/lib/theme-editor/slot-catalogue";
 import { ownerOf, sectionFor, slotValueFor, wiringFor } from "@/lib/theme-editor/slot-sections";
+import type { FieldOption } from "@/lib/theme-editor/field-specs";
 import { ShopChrome } from "./ShopChrome";
 import { SlotDialog } from "./SlotDialog";
 
@@ -184,7 +185,7 @@ function SlotRegion({
   /** A wired place's own SECTION, so the drawing shows the merchant's own. */
   live?: ThemeSection;
   pictureUrl?: (key: string) => string;
-  departments?: string[];
+  departments?: FieldOption[];
   /** A promise's name to the words a merchant reads. See ShopChrome. */
   promiseWords?: (name: string) => string;
   className?: string;
@@ -352,8 +353,12 @@ export function SlotCanvas({
   /** Pictures this shop has already placed, and how to draw one. */
   pictures: ThemeImage[];
   pictureUrl: (key: string) => string;
-  /** This shop's own top-level department names, for the band that draws them. */
-  departments: string[];
+  /**
+   * This shop's own top-level departments: what the category band draws, and
+   * what the three-department place is picked from. One list for both, so the
+   * canvas and the pop-up can never offer different aisles.
+   */
+  departments: FieldOption[];
   /** A promise's name to the words a merchant reads. See ShopChrome. */
   promiseWords?: (name: string) => string;
   /** A product's public id to its name, so a picked band shows what it holds. */
@@ -516,6 +521,7 @@ export function SlotCanvas({
           pictures={pictures}
           pictureUrl={pictureUrl}
           productName={productName}
+          departments={departments}
           onChoose={(value) => onChoose(openOwner, value)}
           onSet={(setting, value) => onSet(openOwner, setting, value)}
           onSetBlock={(blockId, setting, value) => onSetBlock(openOwner, blockId, setting, value)}

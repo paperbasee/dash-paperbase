@@ -28,6 +28,7 @@ import {
   User,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+import type { FieldOption } from "@/lib/theme-editor/field-specs";
 
 /**
  * The mark each promise is drawn with ON THE CANVAS.
@@ -245,12 +246,14 @@ export function ShopChrome({
   /** A picture key this shop uploaded, to the URL it draws from. */
   pictureUrl?: (key: string) => string;
   /**
-   * This shop's own top-level department names, for the band that draws them.
+   * This shop's own top-level departments, for the bands that draw them.
    *
    * The canvas cannot read the shop's catalogue the way the storefront does, so
    * this is handed in; empty falls back to examples rather than to a blank band.
+   * The same list the three-department place is picked from -- one list, so the
+   * drawing and the pop-up can never offer different aisles.
    */
-  departments?: string[];
+  departments?: FieldOption[];
   /**
    * A promise's name to the words a merchant reads, from the theme's own list.
    *
@@ -635,7 +638,7 @@ export function ShopChrome({
       // departments is how they know this band is the one they mean -- and the
       // heading is theirs too, drawn only when they have written one.
       const EXAMPLES = ["Audio", "Men", "Women", "Wearables", "Kids", "Home"];
-      const names = departments?.length ? departments : EXAMPLES;
+      const names = departments?.length ? departments.map((one) => one.label) : EXAMPLES;
       const heading = typeof live?.settings?.heading === "string" ? live.settings.heading.trim() : "";
 
       return variant === "strip" ? (
@@ -715,17 +718,36 @@ export function ShopChrome({
         </div>
       );
 
-    case "home:bands":
+    case "home:bands": {
+      // The merchant's OWN three departments once they have picked, and their
+      // first two otherwise -- which is what the shop draws when nothing is
+      // picked. Example names only for a shop with no departments at all.
+      // A plain object, not a Map: `Map` is one of this file's lucide icons.
+      const byId: Record<string, string> = {};
+      for (const one of departments ?? []) byId[one.value] = one.label;
+      const picked = (live?.blocks ?? [])
+        .map((block) => block.settings?.category)
+        .filter((id): id is string => typeof id === "string" && id !== "")
+        .map((id) => byId[id])
+        .filter((name): name is string => Boolean(name));
+      const fallback = (departments ?? []).map((one) => one.label).slice(0, 2);
+      const names = (picked.length ? picked : fallback).slice(0, 3);
+      const shown = names.length ? names : ["Button-Downs", "Outerwear"];
+      const rows = [FEATURED, ARRIVALS, BESTSELLERS];
+
       return (
         <div className="px-4 py-4">
-          <SectionHead title="Button-Downs" link={t("browseAll")} />
-          <Cards items={FEATURED} />
-          <div className="mt-5">
-            <SectionHead title="Outerwear" link={t("browseAll")} />
-            <Cards items={ARRIVALS} />
-          </div>
+          {shown.map((name, index) => (
+            <div key={name} className={index ? "mt-5" : undefined}>
+              <SectionHead title={name} link={t("browseAll")} />
+              <Cards items={rows[index % rows.length]} />
+            </div>
+          ))}
+          {/* The one button under all three, which the shop draws too. */}
+          <p className="mt-4 text-center text-[11px] text-current/55">{t("bandsBrowseAll")}</p>
         </div>
       );
+    }
 
     case "home:promo":
       return (

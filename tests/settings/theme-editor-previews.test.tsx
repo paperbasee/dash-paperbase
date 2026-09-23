@@ -162,3 +162,54 @@ describe("a wired place draws the merchant's own", () => {
   });
 });
 
+describe("the three departments the merchant picked", () => {
+  const departments = [
+    { value: "cat_a", label: "Menswear" },
+    { value: "cat_b", label: "Shoes" },
+    { value: "cat_c", label: "Home" },
+  ];
+  const live = {
+    id: "bands",
+    type: "category_products",
+    hidden: false,
+    settings: {},
+    blocks: [
+      { id: "band-1", type: "band", settings: { category: "cat_c" } },
+      { id: "band-2", type: "band", settings: { category: "cat_a" } },
+    ],
+  };
+  const draw = (over: { live?: typeof live; departments?: typeof departments } = {}) =>
+    renderToStaticMarkup(
+      <NextIntlClientProvider locale="en" messages={en}>
+        <ShopChrome
+          page="home"
+          slotKey="bands"
+          variant="on"
+          settings={CHOICES.home}
+          live={over.live as never}
+          departments={over.departments ?? departments}
+        />
+      </NextIntlClientProvider>,
+    );
+
+  it("draws their names, in the order they were picked", () => {
+    const html = draw({ live });
+    expect(html).toContain("Home");
+    expect(html).toContain("Menswear");
+    expect(html.indexOf("Home")).toBeLessThan(html.indexOf("Menswear"));
+    expect(html).not.toContain("Shoes");
+  });
+
+  it("draws the shop's own first two while nothing is picked", () => {
+    // Which is what the shop itself falls back to, so the drawing does not
+    // promise an arrangement the page will not honour.
+    const html = draw();
+    expect(html).toContain("Menswear");
+    expect(html).toContain("Shoes");
+  });
+
+  it("says there is a button to everything, because the page has one", () => {
+    expect(draw({ live })).toContain(en.themeEditor.slots.bandsBrowseAll);
+  });
+});
+

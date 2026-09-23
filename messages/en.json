@@ -2504,7 +2504,6 @@
       "arrivalsRow": "A row of four",
       "arrivalsRowNote": "Your newest products, kept up to date",
       "bands": "Products by category",
-      "bandsWhy": "Every shop shows its products here. Which categories, and their order, you choose in Products — not in the editor.",
       "bestsellers": "Best sellers",
       "bestsellersEmpty": "Best sellers — turned off",
       "bestsellersHeading": "Best sellers",
@@ -3218,7 +3217,9 @@
       "articleQuoteExample": "If a tannery will not tell you where a hide was split, it is because the answer would lose them the order.",
       "articleBodyThree": "It works out dearer per bag and considerably cheaper per year, which is the sum that matters to anyone still carrying one in 2029.",
       "accountOrderNumber": "Order number",
-      "partsChoose": "Choose"
+      "partsChoose": "Choose",
+      "bandsHint": "Three of your categories. Each row shows that category and everything in it.",
+      "bandsBrowseAll": "Browse all products"
     },
     "chosenCount": "{count, number} of {max, number} chosen",
     "chooseTitle": "Choose what to show",

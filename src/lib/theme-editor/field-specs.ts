@@ -34,6 +34,10 @@ export const FIELD_KINDS = [
   // rather than typed: nobody knows a product by its id, and a shop with a
   // thousand of them cannot be a list.
   "product",
+  // One department of this shop, held as its public id. Always TICKED from a
+  // list of the shop's own -- the home page's three -- never typed, which is
+  // why no field draws one.
+  "category",
 ] as const;
 
 export type FieldKind = (typeof FIELD_KINDS)[number];
