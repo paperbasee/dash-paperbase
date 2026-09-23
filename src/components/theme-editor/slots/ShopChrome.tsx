@@ -1199,7 +1199,9 @@ export function ShopChrome({
     /*
       Words under the grid, and the merchant's own the moment they have typed
       any -- a wired place drawing a stock example is a place that still looks
-      like a brochure. Each half falls back on its own: somebody who has written
+      like a brochure. The example names their own department too: this one said
+      "About our bags" over a shop that sells cameras until the owner pointed at
+      it on 2026-09-23. Each half falls back on its own: somebody who has written
       a heading and no paragraph yet sees their heading, not their heading and a
       stranger's words.
     */
@@ -1212,7 +1214,7 @@ export function ShopChrome({
       return (
         <div className={cn("px-4 py-5", left ? "text-left" : "text-center")}>
           <h4 className="m-0 mb-2 text-[14px] font-semibold">
-            {heading || t("catTextHeadingExample")}
+            {heading || t("catTextHeadingExample", { name: exampleCategory })}
           </h4>
           <p
             className={cn(
@@ -1220,7 +1222,7 @@ export function ShopChrome({
               left ? "" : "mx-auto",
             )}
           >
-            {body || t("catTextBodyExample")}
+            {body || t("catTextBodyExample", { name: exampleCategory })}
           </p>
         </div>
       );

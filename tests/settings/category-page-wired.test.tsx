@@ -422,6 +422,54 @@ describe("the canvas draws the merchant's own category", () => {
     expect(draw("empty", "invite")).toContain("Nothing in Wearables just now");
   });
 
+  test("so do the words under the grid", () => {
+    /*
+      This one said "About our bags" over a shop that sells cameras, which the
+      owner caught on 2026-09-23 -- the heading and the empty state had been
+      fixed and this had not.
+    */
+    const html = draw("text", "block");
+    expect(html).toContain("About Wearables");
+    expect(html).not.toContain("bags");
+  });
+
+  test("but the merchant's own words win over any example", () => {
+    const html = renderToStaticMarkup(
+      <NextIntlClientProvider locale="en" messages={en}>
+        <ShopChrome
+          page="category"
+          slotKey="text"
+          variant="block"
+          settings={{}}
+          departments={DEPARTMENTS}
+          live={{
+            id: "words",
+            type: "rich_text",
+            hidden: false,
+            settings: { heading: "Made in Dhaka" },
+            blocks: [],
+          }}
+        />
+      </NextIntlClientProvider>,
+    );
+    expect(html).toContain("Made in Dhaka");
+    expect(html).not.toContain("About Wearables");
+  });
+
+  test("nothing on this page names a category no shop has", () => {
+    /*
+      The whole canvas, not the places I happened to think of: the editor drew
+      "Bags" in four places and each was found separately.
+    */
+    for (const slot of SLOTS.category) {
+      for (const option of slot.options ?? [{ value: slot.initial }]) {
+        expect(draw(slot.key, option.value as string), `${slot.key}=${option.value}`).not.toContain(
+          "Bags",
+        );
+      }
+    }
+  });
+
   test("a shop with no departments yet gets plain words, never somebody else's aisle", () => {
     const html = draw("heading", "plain", []);
     expect(html).toContain("This category");
