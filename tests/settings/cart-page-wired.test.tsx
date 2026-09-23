@@ -53,6 +53,14 @@ const manifest: ThemeManifest = {
         choice("when_empty", ["text", "invite"], "text"),
       ],
     },
+    cart_upsell: { ...labels("You might also like"), at_most_one: true, settings: [] },
+    cart_upsell_picks: {
+      ...labels("Chosen against the cart"),
+      at_most_one: true,
+      premium: true,
+      settings: [],
+    },
+    recently_viewed: { ...labels("Recently viewed"), at_most_one: true, settings: [] },
     header: { ...labels("Header"), at_most_one: true, required: true, settings: [] },
     footer: { ...labels("Footer"), at_most_one: true, required: true, settings: [] },
   },
@@ -61,7 +69,11 @@ const manifest: ThemeManifest = {
     footer: { ...labels("Footer"), sections: ["footer"], default: [] },
   },
   templates: {
-    cart: { ...labels("Cart"), sections: ["cart"], default: [] },
+    cart: {
+      ...labels("Cart"),
+      sections: ["cart", "cart_upsell", "cart_upsell_picks", "recently_viewed"],
+      default: [],
+    },
   },
 } as unknown as ThemeManifest;
 
@@ -107,13 +119,12 @@ describe("the cart joins the theme", () => {
     }
   });
 
-  test("four are still drawings", () => {
+  test("two are still drawings", () => {
     /*
       A place goes in when its section can do everything the place promises.
-      Round 3 brings the upsell and recently viewed; round 4 the trust line and
-      the steps bar.
+      Round 4 brings the trust line and the steps bar.
     */
-    for (const key of ["steps", "trust", "upsell", "recent"]) {
+    for (const key of ["steps", "trust"]) {
       expect(wiringFor("cart", key), key).toBeNull();
     }
   });
@@ -212,5 +223,52 @@ describe("round 2: the money", () => {
     expect(slot.hint).toBe("checkoutCouponHint");
     expect(en.themeEditor.slots.checkoutCouponHint).not.toContain("no coupons yet");
     expect(bn.themeEditor.slots.checkoutCouponHint).not.toContain("কুপন নেই");
+  });
+});
+
+describe("round 3: selling more", () => {
+  test("the upsell's two shapes are two SECTIONS, not two options", () => {
+    /*
+      Not a style choice. A premium SECTION is what the serve-time gate strips,
+      and there is no per-option equivalent -- so the paid shape has to be its
+      own section or a shop that stops paying quietly keeps it.
+    */
+    expect(sectionTypesOf(place("upsell"))).toEqual(["cart_upsell", "cart_upsell_picks"]);
+    expect(manifest.sections.cart_upsell_picks.premium).toBe(true);
+    expect(manifest.sections.cart_upsell.premium).toBeUndefined();
+  });
+
+  test("choosing one hides the other rather than removing it", () => {
+    const both = editor([
+      section("cart", "cart"),
+      section("row", "cart_upsell"),
+      section("picks", "cart_upsell_picks", { hidden: true }),
+    ]);
+    const after = pick(both, "upsell", "picks");
+    expect(sectionOfType(after.document, place("upsell"), "cart_upsell")?.hidden).toBe(true);
+    expect(sectionOfType(after.document, place("upsell"), "cart_upsell_picks")?.hidden).toBe(false);
+  });
+
+  test("off hides both", () => {
+    const on = pick(PAGE(), "upsell", "row");
+    const after = pick(on, "upsell", "off");
+    expect(sectionOfType(after.document, place("upsell"), "cart_upsell")?.hidden).toBe(true);
+    expect(slotValueFor(after.document, place("upsell"))).toBe("off");
+  });
+
+  test("a cart with neither band reads as off", () => {
+    expect(slotValueFor(PAGE().document, place("upsell"))).toBe("off");
+  });
+
+  test("recently viewed is the product page's own section", () => {
+    expect(sectionTypesOf(place("recent"))).toEqual(["recently_viewed"]);
+    expect(sectionTypesOf(wiringFor("product", "recent")!)).toEqual(["recently_viewed"]);
+    expect(place("recent").off).toBe("off");
+  });
+
+  test("and it is off on the cart until a merchant asks", () => {
+    expect(slotValueFor(PAGE().document, place("recent"))).toBe("off");
+    const after = pick(PAGE(), "recent", "on");
+    expect(sectionOfType(after.document, place("recent"), "recently_viewed")?.hidden).toBe(false);
   });
 });

@@ -293,6 +293,27 @@ export const WIRED_SLOTS: Partial<Record<SlotPageKey, Record<string, WiredSlot>>
       },
     },
     /*
+      The row of things to add, 2026-09-23 (round 3). Two VALUES, two SECTIONS,
+      like the hero's pictures and video -- and here that is not a style choice:
+      the paid shape has to be its own section, because a premium SECTION is
+      what `documents.without_premium_sections` strips at serve time and there
+      is no per-option gate. A shop that stops paying loses the clever band
+      rather than quietly keeping a paid feature.
+
+      Both draw the same row. They differ in which products the view fetches.
+    */
+    upsell: {
+      page: "templates.cart",
+      sections: { row: "cart_upsell", picks: "cart_upsell_picks" },
+      off: "off",
+    },
+    /*
+      What they looked at and did not take. The same section the product page
+      uses -- a trail is a trail -- and off by default here, which is what the
+      editor has always drawn for the cart.
+    */
+    recent: { page: "templates.cart", sections: { on: "recently_viewed" }, off: "off" },
+    /*
       `when_empty`, not the obvious name: `empty` is a reserved word in Liquid
       and the category page's grid met it the hard way. The PLACE is still
       called `empty` -- that is the editor's own name for it and nothing in
