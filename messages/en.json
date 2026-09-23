@@ -3215,12 +3215,13 @@
       "partsChoose": "Choose",
       "bandsHint": "Three of your categories. Each row shows that category and everything in it.",
       "bandsBrowseAll": "Browse all products",
-      "promoStrip": "Words on a band",
+      "promoStrip": "Words only",
       "promoStripNote": "A headline, a message and a button",
-      "promoBeside": "Picture beside the words",
+      "promoBeside": "Picture beside",
       "promoBesideNote": "Half picture, half offer",
-      "promoBehind": "Picture behind the words",
-      "promoBehindNote": "Full width, words over the photo"
+      "promoBehind": "Picture behind",
+      "promoBehindNote": "Full width, words over the photo",
+      "placeIsPaid": "This section is part of Premium."
     },
     "chosenCount": "{count, number} of {max, number} chosen",
     "chooseTitle": "Choose what to show",

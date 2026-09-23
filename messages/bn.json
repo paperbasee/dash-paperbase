@@ -3215,12 +3215,13 @@
       "partsChoose": "বেছে নিন",
       "bandsHint": "আপনার তিনটি ক্যাটাগরি। প্রতিটি সারিতে সেই ক্যাটাগরি আর তার ভেতরের সব পণ্য দেখানো হবে।",
       "bandsBrowseAll": "সব পণ্য দেখুন",
-      "promoStrip": "ব্যান্ডে শুধু লেখা",
+      "promoStrip": "শুধু লেখা",
       "promoStripNote": "শিরোনাম, বার্তা আর একটি বোতাম",
-      "promoBeside": "লেখার পাশে ছবি",
+      "promoBeside": "পাশে ছবি",
       "promoBesideNote": "অর্ধেক ছবি, অর্ধেক অফার",
-      "promoBehind": "লেখার পেছনে ছবি",
-      "promoBehindNote": "পুরো চওড়ায় ছবি, তার উপরে লেখা"
+      "promoBehind": "পেছনে ছবি",
+      "promoBehindNote": "পুরো চওড়ায় ছবি, তার উপরে লেখা",
+      "placeIsPaid": "এই সেকশনটি প্রিমিয়ামের অংশ।"
     },
     "chosenCount": "{max, number} টির মধ্যে {count, number} টি বাছা হয়েছে",
     "chooseTitle": "কী কী দেখাবেন বেছে নিন",

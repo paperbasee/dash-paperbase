@@ -17,6 +17,7 @@ import type { ThemeDocument, ThemeEditorState, ThemeManifest, ThemeSection } fro
 import { ShopChrome } from "@/components/theme-editor/slots/ShopChrome";
 import { editorReducer, initEditorState, type EditorState } from "@/lib/theme-editor/editor-reducer";
 import { SLOTS, initialChoices } from "@/lib/theme-editor/slot-catalogue";
+import { sectionFields } from "@/lib/theme-editor/field-specs";
 import {
   choiceEdits,
   meaningOf,
@@ -250,3 +251,73 @@ describe("the canvas draws the merchant's own", () => {
     expect(asked({ ends_at: ends })).not.toContain(example);
   });
 });
+
+describe("the pop-up asks each thing once", () => {
+  /**
+   * The owner, looking at the promotion's pop-up on 2026-09-23: the tiles said
+   * "Picture behind the words" and a dropdown under them said the same thing,
+   * and every tile carried "· Premium".
+   *
+   * A place whose choices ARE shapes of one section decides that section's
+   * shape with its tiles; drawing the setting again as a field is one decision
+   * with two controls, and they can disagree in front of the merchant.
+   */
+  test("the shape the tiles decide is not also a field", () => {
+    const decided = new Set(
+      Object.keys(PLACE.sections).flatMap((value) =>
+        Object.keys(meaningOf(PLACE, value)?.settings ?? {}),
+      ),
+    );
+    expect([...decided]).toEqual(["layout"]);
+
+    const fields = sectionFields(manifest, "promo", "en").map((field) => field.id);
+    const drawn = fields.filter((id) => !decided.has(id));
+    expect(fields).toContain("layout");
+    expect(drawn).not.toContain("layout");
+    // And everything a merchant DOES type is still asked for.
+    expect(drawn).toEqual([
+      "image",
+      "eyebrow",
+      "heading",
+      "body",
+      "button_label",
+      "button_link",
+      "show_countdown",
+      "starts_at",
+      "ends_at",
+    ]);
+  });
+
+  test("the same rule covers the category band, which had it too", () => {
+    const band = wiringFor("home", "categories")!;
+    const decided = new Set(
+      Object.keys(band.sections).flatMap((value) =>
+        Object.keys(meaningOf(band, value)?.settings ?? {}),
+      ),
+    );
+    expect([...decided]).toEqual(["layout"]);
+  });
+
+  test("every shape being paid is a fact about the place, not about a tile", () => {
+    const slot = SLOTS.home.find((one) => one.key === "promo")!;
+    const shapes = (slot.options ?? []).filter((option) => option.value !== PLACE.off);
+    expect(shapes.every((option) => option.premium)).toBe(true);
+    // Said once under the row. The words exist in both languages; the copy
+    // test is what proves that.
+    expect(en.themeEditor.slots.placeIsPaid).toBeTruthy();
+  });
+
+  test("the tiles say what they are in two or three words", () => {
+    /*
+      Four tiles share one row, so a label that runs to three lines is a tile
+      nobody can read at a glance -- which is what "Picture beside the words ·
+      Premium" did.
+    */
+    const slot = SLOTS.home.find((one) => one.key === "promo")!;
+    for (const option of slot.options ?? []) {
+      const words = (en.themeEditor.slots as Record<string, string>)[option.label] ?? option.label;
+      expect(words.split(/\s+/).length, words).toBeLessThanOrEqual(3);
+    }
+  });
+});
+

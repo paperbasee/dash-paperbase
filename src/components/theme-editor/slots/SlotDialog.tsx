@@ -19,7 +19,7 @@ import type { FieldOption } from "@/lib/theme-editor/field-specs";
 import { linkPages } from "@/lib/theme-editor/link-targets";
 import type { FieldSpec } from "@/lib/theme-editor/field-specs";
 import type { Slot } from "@/lib/theme-editor/slot-catalogue";
-import { sectionFor, slotValueFor, type WiredSlot } from "@/lib/theme-editor/slot-sections";
+import { meaningOf, sectionFor, slotValueFor, type WiredSlot } from "@/lib/theme-editor/slot-sections";
 import { cn } from "@/lib/utils";
 import { EditorSheet } from "../EditorSheet";
 import { LinkPicker } from "../LinkPicker";
@@ -104,13 +104,36 @@ export function SlotDialog({
   const section = sectionFor(document, wiring);
   const chosen = slotValueFor(document, wiring);
   const spec = section ? manifest.sections[section.type] : undefined;
-  const specs = section ? sectionFields(manifest, section.type, locale) : [];
+  /**
+   * The settings this place does NOT decide for itself.
+   *
+   * A place whose choices are shapes of one section sets that section's shape
+   * by the tiles at the top -- so drawing the same setting again as a field
+   * below them is one decision with two controls, which is what the owner met
+   * on 2026-09-23: "Picture behind the words" as a tile, and a "Shape"
+   * dropdown under it saying the same thing.
+   */
+  const decided = new Set(
+    Object.keys(wiring.sections).flatMap((value) =>
+      Object.keys(meaningOf(wiring, value)?.settings ?? {}),
+    ),
+  );
+  const specs = section
+    ? sectionFields(manifest, section.type, locale).filter((field) => !decided.has(field.id))
+    : [];
   // One kind of part per wired section so far -- a picture, a question. A
   // section with two would need the merchant asked which, and none has two.
   const blockType = Object.keys(spec?.blocks ?? {})[0];
   const blocks = section?.blocks ?? [];
   const most = spec?.max_blocks;
   const full = typeof most === "number" && blocks.length >= most;
+
+  /** Whether every shape of this place is paid -- the promotion, today. */
+  const allPaid =
+    (slot.options ?? []).length > 0 &&
+    (slot.options ?? [])
+      .filter((option) => option.value !== wiring.off)
+      .every((option) => option.premium);
 
   const held = (settings: Record<string, unknown> | undefined, setting: string) => {
     const value = settings?.[setting];
@@ -211,6 +234,11 @@ export function SlotDialog({
               decides nothing, which is what this editor was rebuilt to stop
               offering.
             */}
+            {/*
+              When EVERY shape of a place is paid, saying so on each tile says
+              nothing about which tile -- it is a fact about the place, said
+              once under the row.
+            */}
             {(slot.options ?? []).length > 0 ? (
             <div
               role="group"
@@ -244,11 +272,17 @@ export function SlotDialog({
                     )}
                   >
                     {t(option.label)}
-                    {option.premium ? ` · ${t("premium")}` : null}
+                    {option.premium && !allPaid ? ` · ${t("premium")}` : null}
                   </button>
                 );
               })}
             </div>
+            ) : null}
+
+            {allPaid ? (
+              <p className="text-xs text-muted-foreground">
+                {premiumSections ? t("placeIsPaid") : tEditor("premiumSection")}
+              </p>
             ) : null}
 
             {specs.map((fieldSpec) => (
