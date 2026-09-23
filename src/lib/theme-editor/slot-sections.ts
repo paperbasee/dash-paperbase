@@ -171,6 +171,22 @@ export const WIRED_SLOTS: Partial<Record<SlotPageKey, Record<string, WiredSlot>>
         tabs: { type: "product_grid", settings: { sort: "tabs" } },
       },
     },
+    /*
+      What a shopper can narrow the list by. `off` first, like every other place
+      whose values are settings of one section.
+
+      The VALUES are never the theme's: they are whatever that category's own
+      products have, read per category so a Footwear page never offers a brand
+      that would return nothing. Nothing to choose here but the shape.
+    */
+    filters: {
+      page: "templates.category",
+      sections: {
+        off: { type: "product_grid", settings: { filters: "off" } },
+        chips: { type: "product_grid", settings: { filters: "chips" } },
+        rail: { type: "product_grid", settings: { filters: "rail" } },
+      },
+    },
     grid: {
       page: "templates.category",
       sections: {

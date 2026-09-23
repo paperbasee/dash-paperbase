@@ -63,6 +63,7 @@ const manifest: ThemeManifest = {
         choice("columns", ["four", "three", "two"], "four"),
         choice("more", ["pages", "button", "none"], "pages"),
         choice("sort", ["off", "menu", "tabs"], "off"),
+        choice("filters", ["off", "chips", "rail"], "off"),
         choice("when_empty", ["text", "invite"], "text"),
       ],
     },
@@ -130,19 +131,31 @@ const PAGE = () =>
 
 describe("every place is a page of the document", () => {
   test("they all edit the category template", () => {
-    for (const key of ["breadcrumb", "heading", "count", "sort", "grid", "more", "text", "empty"]) {
+    for (const key of [
+      "breadcrumb",
+      "heading",
+      "count",
+      "sort",
+      "filters",
+      "grid",
+      "more",
+      "text",
+      "empty",
+    ]) {
       expect(place(key).page).toBe("templates.category");
     }
   });
 
-  test("filtering is still a drawing", () => {
+  test("every place on this page is real now", () => {
     /*
-      Real in the API and not in the shop. A place goes in when its section can
-      do everything the place promises -- so a merchant never meets a choice
-      that changes nothing, which is the complaint that started this work.
-      Sorting was in the same state until stage 2.
+      Stage 4 was the last one. A place goes in when its section can do
+      everything the place promises -- so a merchant never meets a choice that
+      changes nothing, which is the complaint that started this work.
     */
-    expect(wiringFor("category", "filters")).toBeNull();
+    for (const slot of SLOTS.category) {
+      if (slot.inherited) continue;
+      expect(wiringFor("category", slot.key), slot.key).not.toBeNull();
+    }
   });
 });
 
@@ -339,7 +352,13 @@ describe("one decision, one control", () => {
 
   test("the grid's dialog draws none of the four", () => {
     const decided = settingsDecidedOn("category", "product_grid");
-    expect([...decided].sort()).toEqual(["columns", "more", "sort", "when_empty"]);
+    expect([...decided].sort()).toEqual([
+      "columns",
+      "filters",
+      "more",
+      "sort",
+      "when_empty",
+    ]);
   });
 
   test("a section whose place decides nothing still draws its fields", () => {
@@ -436,6 +455,7 @@ describe("sorting", () => {
   test("the grid's dialog draws none of the four it decides", () => {
     expect([...settingsDecidedOn("category", "product_grid")].sort()).toEqual([
       "columns",
+      "filters",
       "more",
       "sort",
       "when_empty",
@@ -447,5 +467,34 @@ describe("sorting", () => {
     const slot = SLOTS.category.find((one) => one.key === "sort")!;
     expect(slot.initial).toBe("off");
     expect(Object.keys(place("sort").sections)[0]).toBe("off");
+  });
+});
+
+describe("filters", () => {
+  test("they are the grid's setting, like sorting", () => {
+    expect(sectionTypesOf(place("filters"))).toEqual(["product_grid"]);
+    expect(place("filters").off).toBeUndefined();
+  });
+
+  test("each shape is written to the grid", () => {
+    for (const shape of ["chips", "rail", "off"]) {
+      const after = pick(PAGE(), "filters", shape);
+      expect(settingsOf(after, "product_grid").filters).toBe(shape);
+      expect(slotValueFor(after.document, place("filters"))).toBe(shape);
+    }
+  });
+
+  test("off is what a shop that has never touched it reads as", () => {
+    expect(slotValueFor(PAGE().document, place("filters"))).toBe("off");
+    expect(Object.keys(place("filters").sections)[0]).toBe("off");
+  });
+
+  test("switching them on leaves sorting and the columns alone", () => {
+    const after = pick(pick(pick(PAGE(), "sort", "menu"), "grid", "two"), "filters", "rail");
+    expect(settingsOf(after, "product_grid")).toMatchObject({
+      sort: "menu",
+      columns: "two",
+      filters: "rail",
+    });
   });
 });

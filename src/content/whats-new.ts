@@ -64,6 +64,21 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-09-22-shoppers-can-filter",
+    date: "2026-09-22",
+    version: "4.71.0",
+    tag: "new",
+    href: "/settings?tab=customization",
+    title: {
+      en: "Let shoppers filter a category",
+      bn: "ক্রেতারা ক্যাটাগরি ফিল্টার করতে পারবেন",
+    },
+    body: {
+      en: "Under Category → Filters, pick a row of buttons or a column down the side, and shoppers can narrow by price, brand and whatever your products vary by — size, colour, whatever you have set up. Only the values a category actually has are offered, so a filter never leads to an empty page.",
+      bn: "ক্যাটাগরি → ফিল্টার অংশে পাশাপাশি বোতাম বা পাশে এক কলাম বেছে নিন, তাহলে ক্রেতারা দাম, ব্র্যান্ড আর আপনার পণ্য যেসব দিকে আলাদা — সাইজ, রঙ, যা আপনি যোগ করেছেন — সব দিয়ে খুঁজে নিতে পারবেন। কোনো ক্যাটাগরিতে যা সত্যিই আছে কেবল সেগুলোই দেখানো হয়, তাই ফিল্টার করে কখনো ফাঁকা পাতা আসে না।",
+    },
+  },
+  {
     id: "2026-09-22-load-more-button",
     date: "2026-09-22",
     version: "4.70.0",
@@ -474,21 +489,6 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     body: {
       en: "Switch on Order tracking in Settings → Apps and a shopper can find their order with its number and the phone they ordered with — no account needed, which matters most if your checkout does not ask for an email. That screen now also lists the things that are always on, so you can see everything your shop has.",
       bn: "সেটিংস → অ্যাপস থেকে অর্ডার ট্র্যাকিং চালু করলে ক্রেতারা অর্ডার নম্বর আর যে ফোন নম্বর দিয়ে অর্ডার করেছেন তা দিয়েই অর্ডার খুঁজে নিতে পারবেন — অ্যাকাউন্ট লাগবে না, যা বিশেষভাবে কাজে লাগে যদি আপনার চেকআউটে ইমেইল না চাওয়া হয়। ওই পাতায় এখন সব সময় চালু থাকা জিনিসগুলোও দেখা যায়, তাই আপনার দোকানে কী কী আছে তার পুরোটাই এক জায়গায়।",
-    },
-  },
-  {
-    id: "2026-09-22-discount-codes-can-be-edited",
-    date: "2026-09-22",
-    version: "4.37.0",
-    tag: "improved",
-    href: "/coupons",
-    title: {
-      en: "Edit a discount code after making it",
-      bn: "তৈরি করার পরেও ডিসকাউন্ট কোড বদলানো যাবে",
-    },
-    body: {
-      en: "Every code now has an Edit beside it, so a minimum spend or an end date can be changed without making a second code. Paperbase also refuses a code that would take the whole of the smallest order it allows — 300 off with a minimum spend of 200 makes that order free and you still pay the delivery — and tells you which figure to raise.",
-      bn: "প্রতিটি কোডের পাশে এখন সম্পাদনা আছে, তাই নতুন কোড না বানিয়েই সর্বনিম্ন কেনাকাটা বা শেষ তারিখ বদলানো যাবে। এছাড়া যে কোড সবচেয়ে ছোট যোগ্য অর্ডারটির পুরো টাকাই কেড়ে নেবে সেটি আর সংরক্ষণ হবে না — ২০০ টাকার সর্বনিম্নে ৩০০ টাকা ছাড় দিলে ওই অর্ডার ফ্রি হয়ে যায় আর ডেলিভারির খরচ আপনারই থাকে — আর কোন অঙ্কটি বাড়াতে হবে তা জানিয়ে দেওয়া হবে।",
     },
   },
   {
