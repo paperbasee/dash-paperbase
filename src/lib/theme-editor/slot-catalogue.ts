@@ -436,7 +436,10 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
     {
       key: "recent",
       label: "recent",
-      initial: "off",
+      // On, because that is what every shop has been drawing since the page
+      // was built -- the switch simply had nothing to write to until
+      // 2026-09-23, when the strip became a section of its own.
+      initial: "on",
       emptyValues: ["off"],
       emptyLabel: "recentEmpty",
       options: [

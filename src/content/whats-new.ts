@@ -74,8 +74,8 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
       bn: "পণ্যের পেজ নিজের মতো সাজান",
     },
     body: {
-      en: "Under Product in your editor, seven choices are real now: show the path back up or hide it, pick how the pictures look — a frame with thumbnails, a column, or just one — put the description in a box or under a heading, show specifications in two columns or folded away, and switch \"You may also like\" and product questions on or off. Reviews can now be the full band or just the score and how many, which is the shorter way to show you are trusted.",
-      bn: "এডিটরের পণ্য অংশে সাতটি পছন্দ এখন সত্যিকারের: উপরে ফেরার পথ দেখাবেন কি না; ছবি কেমন দেখাবে — থাম্বনেইলসহ একটি ছবি, ছবির কলাম, নাকি শুধু একটি; বিবরণ বাক্সে নাকি শিরোনামের নিচে; স্পেসিফিকেশন দুই কলামে নাকি ভাঁজ করা; আর “এগুলোও ভালো লাগতে পারে” ও পণ্যের প্রশ্ন চালু নাকি বন্ধ। রিভিউ এখন পুরো ব্যান্ড হিসেবে, নয়তো শুধু স্কোর আর কতজন দিয়েছেন — অল্প জায়গায় ভরসার চিহ্ন।",
+      en: "Under Product in your editor, seven choices are real now: show the path back up or hide it, pick how the pictures look — a frame with thumbnails, a column, or just one — put the description in a box or under a heading, show specifications in two columns or folded away, and switch \"You may also like\" and product questions on or off. Reviews can now be the full band or just the score and how many, and the recently-viewed strip can be switched off. On a phone, a bar with the price and the button now follows the shopper down a product page — switch it off under Product if you would rather not have one.",
+      bn: "এডিটরের পণ্য অংশে সাতটি পছন্দ এখন সত্যিকারের: উপরে ফেরার পথ দেখাবেন কি না; ছবি কেমন দেখাবে — থাম্বনেইলসহ একটি ছবি, ছবির কলাম, নাকি শুধু একটি; বিবরণ বাক্সে নাকি শিরোনামের নিচে; স্পেসিফিকেশন দুই কলামে নাকি ভাঁজ করা; আর “এগুলোও ভালো লাগতে পারে” ও পণ্যের প্রশ্ন চালু নাকি বন্ধ। রিভিউ এখন পুরো ব্যান্ড হিসেবে, নয়তো শুধু স্কোর আর কতজন দিয়েছেন; “সম্প্রতি দেখা” অংশটিও বন্ধ করা যায়। আর ফোনে পণ্যের পাতায় দাম আর বোতামসহ একটি বার এখন ক্রেতার সাথে নিচে নামে — না চাইলে পণ্য অংশ থেকে বন্ধ করে দিন।",
     },
   },
   {

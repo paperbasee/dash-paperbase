@@ -180,6 +180,31 @@ export const WIRED_SLOTS: Partial<Record<SlotPageKey, Record<string, WiredSlot>>
     },
     related: { page: "templates.product", sections: { on: "related_products" }, off: "off" },
     faq: { page: "templates.product", sections: { on: "product_questions" }, off: "off" },
+    /*
+      The shopper's own trail, 2026-09-23 (stage 3). It was rendered by the
+      template, last on the page, so the switch here had nothing to write to.
+      A section of its own now -- `theming/0026` puts one in every document, or
+      every shop would have lost the strip the day the template stopped drawing
+      it.
+    */
+    recent: { page: "templates.product", sections: { on: "recently_viewed" }, off: "off" },
+    /*
+      The phone buy bar. A SETTING of the buying column, not a section: it is
+      part of buying, it lives inside `[data-buy-scope]` so the cart and the
+      variant picker drive it with no code of its own, and a merchant does not
+      arrange it anywhere.
+
+      `true` first, because the theme's default is on -- which is what the
+      editor has drawn since the slot design, so what a merchant reads is what
+      they get.
+    */
+    stickybuy: {
+      page: "templates.product",
+      sections: {
+        on: { type: "product_details", settings: { sticky_buy: true } },
+        off: { type: "product_details", settings: { sticky_buy: false } },
+      },
+    },
   },
   /*
     The category page, 2026-09-23. The shop's widest page: most people arrive on

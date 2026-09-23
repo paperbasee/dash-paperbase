@@ -53,11 +53,13 @@ const manifest: ThemeManifest = {
       required: true,
       settings: [
         { id: "show_sku", type: "boolean", ...labels("Show the code"), default: false },
+        { id: "sticky_buy", type: "boolean", ...labels("Buy bar on a phone"), default: true },
         choice("details_style", ["panel", "plain"], "panel"),
         choice("extras_style", ["grid", "accordions"], "grid"),
       ],
     },
     related_products: { ...labels("You may also like"), settings: [] },
+    recently_viewed: { ...labels("Recently viewed"), at_most_one: true, settings: [] },
     product_questions: { ...labels("Questions"), settings: [{ id: "heading", type: "text", ...labels("Heading"), default: "" }] },
     product_reviews: {
       ...labels("Reviews"),
@@ -82,6 +84,7 @@ const manifest: ThemeManifest = {
         "product_gallery",
         "product_details",
         "related_products",
+        "recently_viewed",
         "product_questions",
         "product_reviews",
       ],
@@ -140,14 +143,15 @@ describe("what stage 1 wired", () => {
     }
   });
 
-  test("the rest of the page is still a drawing", () => {
+  test("only delivery and returns is still a drawing", () => {
     /*
       A place goes in when its section can do everything the place promises.
-      Recently viewed is drawn by the template, and neither the phone buy bar
-      nor delivery-and-returns exists at all. Reviews joined in stage 2.
+      Delivery-and-returns has no words anywhere yet -- stage 4 gives it some,
+      shop-wide, typed once in the editor (owner, 2026-09-23).
     */
-    for (const key of ["recent", "stickybuy", "shipping"]) {
-      expect(wiringFor("product", key), key).toBeNull();
+    expect(wiringFor("product", "shipping")).toBeNull();
+    for (const key of ["recent", "stickybuy"]) {
+      expect(wiringFor("product", key), key).not.toBeNull();
     }
   });
 
@@ -233,10 +237,11 @@ describe("the description and the specifications share the buying area", () => {
     });
   });
 
-  test("the dialog draws neither of the two its tiles decide", () => {
+  test("the dialog draws none of the three its tiles decide", () => {
     expect([...settingsDecidedOn("product", "product_details")].sort()).toEqual([
       "details_style",
       "extras_style",
+      "sticky_buy",
     ]);
   });
 
@@ -319,5 +324,59 @@ describe("reviews", () => {
   test("a page with no band at all reads as off", () => {
     const bare = editor([section("details", "product_details")]);
     expect(slotValueFor(bare.document, place("reviews"))).toBe("off");
+  });
+});
+
+describe("the shopper's own trail, and the phone buy bar", () => {
+  test("recently viewed is a section that can be turned off", () => {
+    expect(sectionTypesOf(place("recent"))).toEqual(["recently_viewed"]);
+    expect(place("recent").off).toBe("off");
+  });
+
+  test("it is born last, under everything a merchant did arrange", () => {
+    const page = PAGE();
+    expect(placeFor(page.document, "product", "recent", place("recent"))).toBe(
+      page.document.templates.product.sections.length,
+    );
+  });
+
+  test("a page that has it reads as on", () => {
+    const withStrip = editor([
+      section("details", "product_details"),
+      section("strip", "recently_viewed"),
+    ]);
+    expect(slotValueFor(withStrip.document, place("recent"))).toBe("on");
+  });
+
+  test("the buy bar is a setting of the buying column, not a section", () => {
+    /*
+      It is part of buying: it sits inside the buy scope so the cart and the
+      variant picker drive it, and a merchant does not arrange it anywhere.
+    */
+    expect(sectionTypesOf(place("stickybuy"))).toEqual(["product_details"]);
+    expect(place("stickybuy").off).toBeUndefined();
+  });
+
+  test("it is on for a shop that has never chosen, because the theme says so", () => {
+    expect(slotValueFor(PAGE().document, place("stickybuy"))).toBe("on");
+    expect(Object.keys(place("stickybuy").sections)[0]).toBe("on");
+    expect(manifest.sections.product_details.settings.find((s) => s.id === "sticky_buy")?.default).toBe(
+      true,
+    );
+  });
+
+  test("turning it off writes false rather than removing the column", () => {
+    const after = pick(PAGE(), "stickybuy", "off");
+    const details = sectionOfType(after.document, place("stickybuy"), "product_details");
+    expect(details?.settings.sticky_buy).toBe(false);
+    expect(details?.hidden).toBe(false);
+  });
+
+  test("and leaves the description and the specifications alone", () => {
+    const after = pick(pick(PAGE(), "description", "plain"), "stickybuy", "off");
+    expect(sectionOfType(after.document, place("stickybuy"), "product_details")?.settings).toMatchObject({
+      details_style: "plain",
+      sticky_buy: false,
+    });
   });
 });
