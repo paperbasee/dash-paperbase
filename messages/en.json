@@ -3224,7 +3224,8 @@
     "chosenCount": "{count, number} of {max, number} chosen",
     "chooseTitle": "Choose what to show",
     "chooseHint": "Tick the ones you want, up to {max, number}.",
-    "chooseDone": "Done"
+    "chooseDone": "Done",
+    "noProducts": "No products"
   },
   "billingSuccess": {
     "title": "Subscription activated",

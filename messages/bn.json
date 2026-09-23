@@ -3224,7 +3224,8 @@
     "chosenCount": "{max, number} টির মধ্যে {count, number} টি বাছা হয়েছে",
     "chooseTitle": "কী কী দেখাবেন বেছে নিন",
     "chooseHint": "যেগুলো চান টিক দিন, সর্বোচ্চ {max, number}টি।",
-    "chooseDone": "হয়ে গেছে"
+    "chooseDone": "হয়ে গেছে",
+    "noProducts": "কোনো পণ্য নেই"
   },
   "checkoutPage": {
     "title": "পেমেন্ট সম্পন্ন করুন",

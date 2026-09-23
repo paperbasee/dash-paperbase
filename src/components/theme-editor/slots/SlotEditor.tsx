@@ -385,9 +385,21 @@ export function SlotEditor({ loaded }: { loaded: ThemeEditorState }) {
             premiumSections={loaded.premium_sections !== false}
             pictures={images.data ?? []}
             pictureUrl={(key) => pictureUrls[key] ?? images.data?.find((row) => row.key === key)?.url ?? ""}
+            /*
+              A department with nothing in it says so. It can still be ticked --
+              a merchant setting a shop up picks the aisle they are about to
+              fill -- but the shop draws no row for an empty one, and finding
+              that out by looking at the page is how the owner found it out.
+
+              `product_count` on the tree is already rolled up through
+              sub-departments, so "Men" counts what is in "Men > Shirts". It
+              counts every product though, drafts included, so this flags what
+              is certainly empty rather than everything that will draw nothing.
+            */
             departments={(categories.data ?? []).map((node) => ({
               value: node.public_id,
               label: node.name,
+              note: node.product_count === 0 ? tEditor("noProducts") : undefined,
             }))}
             /*
               The sixteen promises, named in the merchant's language by the

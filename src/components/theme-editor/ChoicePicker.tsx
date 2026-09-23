@@ -8,14 +8,18 @@ import type { FieldOption } from "@/lib/theme-editor/field-specs";
 import { cn } from "@/lib/utils";
 
 /**
- * Ticking several of a theme's own choices: the shop's promises, four out of
- * sixteen.
+ * Ticking several choices off a list short enough to show: the shop's sixteen
+ * promises, four at a time; its own departments, three at a time.
  *
- * **The sister of `ProductPicker`, for a list the THEME holds.** That one
- * searches a shop's catalogue, which may run to thousands and cannot be listed;
- * these are sixteen fixed words that ship with the theme, so they are simply
- * all here, in the order the theme wrote them -- which groups them the way a
- * merchant thinks: getting it, paying for it, changing their mind.
+ * **The sister of `ProductPicker`.** That one searches a catalogue, which may
+ * run to thousands and cannot be listed; these lists are tens of things, so
+ * they are simply all here, in the order they were given -- which for the
+ * promises is how a merchant thinks about them (getting it, paying for it,
+ * changing their mind) and for departments is the merchant's own arrangement.
+ *
+ * An option may carry a `note` -- "No products" beside an empty department --
+ * and it never stops the tick: a merchant setting a shop up picks the aisle
+ * they are about to fill.
  *
  * The order of the ticks is the order they will be drawn, so a merchant who
  * unticks one and ticks another finds the new one at the end rather than in the
@@ -91,6 +95,9 @@ export function ChoicePicker({
                     className="size-4 shrink-0 accent-[var(--primary)]"
                   />
                   <span className="min-w-0 flex-1 truncate text-sm">{option.label}</span>
+                  {option.note ? (
+                    <span className="shrink-0 text-xs text-muted-foreground">{option.note}</span>
+                  ) : null}
                 </label>
               </li>
             );

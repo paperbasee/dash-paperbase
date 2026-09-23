@@ -42,7 +42,19 @@ export const FIELD_KINDS = [
 
 export type FieldKind = (typeof FIELD_KINDS)[number];
 
-export type FieldOption = { value: string; label: string };
+export type FieldOption = {
+  value: string;
+  label: string;
+  /**
+   * A word beside the name, for something true about this choice that a
+   * merchant should know before picking it -- a department with no products in
+   * it, which draws no row at all.
+   *
+   * Never a reason it cannot be picked: a merchant setting a shop up ticks the
+   * department they are about to fill.
+   */
+  note?: string;
+};
 
 export type FieldSpec = {
   id: string;

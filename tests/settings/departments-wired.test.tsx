@@ -9,7 +9,12 @@
  * It is also the first ticked list whose options come from the SHOP rather than
  * from the theme: no theme can know what a merchant called their aisles.
  */
+import { renderToStaticMarkup } from "react-dom/server";
+import { NextIntlClientProvider } from "next-intl";
 import { describe, expect, test } from "vitest";
+
+import { ChoicePicker } from "@/components/theme-editor/ChoicePicker";
+import en from "../../messages/en.json";
 
 import type { ThemeDocument, ThemeEditorState, ThemeManifest, ThemeSection } from "@/lib/theme-editor/api";
 import { editorReducer, initEditorState, type EditorState } from "@/lib/theme-editor/editor-reducer";
@@ -151,5 +156,72 @@ describe("picking three", () => {
       section("featured", "featured_products"),
     ]);
     expect(placeFor(page.document, "home", "bands", PLACE)).toBe(3);
+  });
+});
+
+describe("an empty department says so", () => {
+  /**
+   * The owner ticked three and the page drew one: two of their departments had
+   * no products, and the shop skips a department with nothing in it rather
+   * than drawing a heading over a blank space. The checklist says which those
+   * are now -- and still lets them be ticked, because a merchant setting a
+   * shop up picks the aisle they are about to fill.
+   */
+  const options = [
+    { value: CAT(1), label: "Men" },
+    { value: CAT(2), label: "Audio", note: "No products" },
+  ];
+  const draw = (value: string[] = []) =>
+    renderToStaticMarkup(
+      <NextIntlClientProvider locale="en" messages={en}>
+        <ChoicePicker
+          open
+          options={options}
+          value={value}
+          most={3}
+          onDone={() => {}}
+          onClose={() => {}}
+        />
+      </NextIntlClientProvider>,
+    );
+
+  test("the note is drawn beside the name", () => {
+    const html = draw();
+    expect(html).toContain("Audio");
+    expect(html).toContain("No products");
+  });
+
+  test("and it does not stop the tick", () => {
+    /*
+      The only thing that disables a box is the CAP, and three is the cap here
+      with nothing ticked. A note is a word, not a lock: a merchant setting a
+      shop up ticks the aisle they are about to fill.
+    */
+    // The boxes, not the Done button -- whose CSS classes say "disabled" for a
+    // state it is not in.
+    const boxes = (html: string) => html.match(/<input[^>]*disabled/g);
+    expect(boxes(draw())).toBeNull();
+    // At the cap, the unticked ones close -- which is the cap talking, not the
+    // note: the department with products closes too.
+    const full = renderToStaticMarkup(
+      <NextIntlClientProvider locale="en" messages={en}>
+        <ChoicePicker
+          open
+          options={[...options, { value: CAT(3), label: "Kids" }]}
+          value={[CAT(1), CAT(2), CAT(3)]}
+          most={3}
+          onDone={() => {}}
+          onClose={() => {}}
+        />
+      </NextIntlClientProvider>,
+    );
+    expect(boxes(full)).toBeNull();
+  });
+
+  test("a department with products carries no note", () => {
+    const html = draw();
+    const men = html.slice(0, html.indexOf("Audio"));
+    expect(men).toContain("Men");
+    expect(men).not.toContain("No products");
   });
 });
