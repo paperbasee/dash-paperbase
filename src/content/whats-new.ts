@@ -64,6 +64,21 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-09-22-card-style-in-the-editor",
+    date: "2026-09-22",
+    version: "4.65.0",
+    tag: "improved",
+    href: "/settings?tab=customization",
+    title: {
+      en: "Product cards move into the editor",
+      bn: "প্রোডাক্ট কার্ড এখন এডিটরের ভেতরে",
+    },
+    body: {
+      en: "Choosing Classic or Shelf was a control in Settings, and it changed your shop the moment you clicked it. It now sits with the rest of your look, in Customization under Style — you can see the other style on your own shop first, and it reaches shoppers when you press Save to store.",
+      bn: "ক্ল্যাসিক না শেলফ — এই পছন্দটি সেটিংসে ছিল, আর চাপ দেওয়ামাত্রই দোকানে বদলে যেত। এখন এটি আপনার বাকি ডিজাইনের সাথেই আছে, কাস্টমাইজেশনের স্টাইল অংশে — অন্য স্টাইলটি আগে নিজের দোকানে দেখে নিতে পারবেন, আর স্টোরে সংরক্ষণ চাপলেই সেটি ক্রেতাদের কাছে যাবে।",
+    },
+  },
+  {
     id: "2026-09-22-a-promotion-with-a-picture",
     date: "2026-09-22",
     version: "4.62.0",
@@ -474,20 +489,6 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     body: {
       en: "A shopper can tap the heart on any product and keep a list of what they want in your shop. Catalog → Most wished-for shows you what they are saving, most-saved first, so you know what to restock or put on offer. It stays off until you switch it on.",
       bn: "ক্রেতারা যেকোনো পণ্যের হার্ট চিহ্নে চাপ দিয়ে আপনার দোকানে পছন্দের পণ্যের তালিকা রাখতে পারবেন। ক্যাটালগ → সবচেয়ে পছন্দের পাতায় দেখতে পাবেন তারা কী সেভ করছেন, সবচেয়ে বেশি সেভ হওয়া পণ্য আগে — কোনটি আবার আনবেন বা অফারে দেবেন তা বুঝতে সুবিধা হবে। আপনি চালু না করা পর্যন্ত এটি বন্ধ থাকবে।",
-    },
-  },
-  {
-    id: "2026-09-22-sidebar-highlights-one-page",
-    date: "2026-09-22",
-    version: "4.35.0",
-    tag: "fixed",
-    title: {
-      en: "The menu highlights one page at a time",
-      bn: "মেনুতে একসাথে একটি পাতাই হাইলাইট হবে",
-    },
-    body: {
-      en: "Opening Abandoned checkouts also lit up Orders, and opening Accounts also lit up Customers, so the menu made it look like you were in two places at once. Only the page you are actually on is highlighted now.",
-      bn: "অসমাপ্ত চেকআউট খুললে সাথে অর্ডারও হাইলাইট হয়ে থাকত, আর অ্যাকাউন্ট খুললে গ্রাহকও — ফলে মনে হতো আপনি একসাথে দুই জায়গায় আছেন। এখন আপনি আসলে যে পাতায় আছেন কেবল সেটিই হাইলাইট হবে।",
     },
   },
   {
