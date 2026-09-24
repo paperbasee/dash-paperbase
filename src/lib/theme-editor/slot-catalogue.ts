@@ -1400,15 +1400,20 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
         { value: "off", label: "off", shape: "blank" },
       ],
     },
+    /*
+      Wired 2026-09-24, the last places on the editor. Three arrangements where
+      this offered five: "logo left, menu beside it" and "menu left, logo
+      centred" were taken back -- with ten to nineteen departments only a few
+      fit beside a name, which the centred name already does. Search lost its
+      "off": the header is the only place a shopper can search.
+    */
     {
       key: "layout",
       label: "headerLayout",
       initial: "bar",
       options: [
         { value: "bar", label: "headerBar", note: "headerBarNote", shape: "line" },
-        { value: "inline", label: "headerInline", note: "headerInlineNote", shape: "line" },
         { value: "masthead", label: "headerMasthead", note: "headerMastheadNote", shape: "block" },
-        { value: "split", label: "headerSplit", note: "headerSplitNote", shape: "row" },
         { value: "drawer", label: "headerDrawer", note: "headerDrawerNote", shape: "blank" },
       ],
     },
@@ -1419,7 +1424,6 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
       options: [
         { value: "box", label: "searchBox", note: "searchBoxNote", shape: "line" },
         { value: "icon", label: "searchIcon", note: "searchIconNote", shape: "blank" },
-        { value: "off", label: "off", shape: "blank" },
       ],
     },
     {

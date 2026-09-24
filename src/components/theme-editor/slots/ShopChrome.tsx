@@ -422,30 +422,51 @@ export function ShopChrome({
     );
   }
 
-  if (slotKey === "header") {
-    const set = settings ?? {};
-    const layout = variant ?? set.layout ?? "bar";
-    const search = set.search ?? "box";
-    const marks = (set.marks ?? "off") === "on" ? 4 : 2;
-    const logo = <span className="text-sm font-semibold tracking-[0.14em]">GADZILLA</span>;
-    // Search is a mark in the row unless it has a box of its own, and the
-    // account and wishlist marks appear only when they are switched on.
+  /*
+    The header, WIRED 2026-09-24 like the footer: its choices are the header
+    section's settings, read from `live` -- the shop's document -- and only
+    from this editor's held choices where there is no section to read. `force`
+    is the value an open place is showing. Drawn with the shop's own name and
+    departments; it drew "GADZILLA" and five invented aisles for every shop.
+  */
+  const headerDrawing = (force: { layout?: string; search?: string; marks?: string } = {}) => {
+    const held = live?.type === "header" ? (live.settings ?? {}) : {};
+    const layout =
+      force.layout ?? (typeof held.header_layout === "string" ? held.header_layout : (settings?.layout ?? "bar"));
+    const search = force.search ?? (typeof held.search === "string" ? held.search : (settings?.search ?? "box"));
+    const marksOn =
+      (force.marks ??
+        (typeof held.show_account_links === "boolean"
+          ? held.show_account_links
+            ? "on"
+            : "off"
+          : (settings?.marks ?? "off"))) === "on";
+    // The account mark always (every shop has accounts), the wishlist only
+    // where it is switched on, and the cart.
+    const marks = marksOn ? (shop && !shop.wishlist ? 2 : 3) : 1;
+    const name = (shop?.name || t("footerShopName")).toUpperCase();
+    const aisles = departments?.length ? departments.map((one) => one.label) : [t("catExampleCategory")];
+    const logo = <span className="text-sm font-semibold tracking-[0.14em]">{name}</span>;
+    const box = <span className="h-7 min-w-0 flex-1 rounded-xs bg-current/12" />;
+    const searchMark = <span className="size-4 rounded-full border border-current/35" />;
     const icons = (
       <span className="flex shrink-0 items-center gap-2.5">
-        {search === "icon" ? <span className="size-4 rounded-full border border-current/35" /> : null}
+        {search === "icon" ? searchMark : null}
         {Array.from({ length: marks }, (_, i) => (
           <span key={i} className="size-4 rounded-xs bg-current/25" />
         ))}
       </span>
     );
-    const nav = (centred: boolean) => (
+    const nav = (centred: boolean, count?: number) => (
       <div
         className={`flex gap-4 overflow-hidden px-4 py-2.5 text-[10px] uppercase tracking-[0.08em] text-current/50 ${
           centred ? "justify-center" : ""
         }`}
       >
-        {["Audio", "Men", "Wearables", "Women", "Kids"].map((name) => (
-          <span key={name}>{name}</span>
+        {(count ? aisles.slice(0, count) : aisles).map((aisle) => (
+          <span key={aisle} className="shrink-0">
+            {aisle}
+          </span>
         ))}
       </div>
     );
@@ -454,44 +475,21 @@ export function ShopChrome({
     );
 
     if (layout === "masthead") {
+      // The name on its own line; under it search, five departments, the marks.
       return (
         <div>
-          <div className="border-b border-border bg-muted px-4 py-5 text-center text-foreground">{logo}</div>
-          <div className="border-b border-current/10">{nav(true)}</div>
-        </div>
-      );
-    }
-    if (layout === "split") {
-      return (
-        <div className="border-b border-current/10">
-          {bar(
-            <>
-              <span className="flex flex-1 gap-3 overflow-hidden text-[10px] uppercase tracking-[0.08em] text-current/65">
-                <span>Men</span>
-                <span>Women</span>
-                <span>Kids</span>
-              </span>
-              {logo}
-              <span className="flex flex-1 justify-end">{icons}</span>
-            </>,
-          )}
-        </div>
-      );
-    }
-    if (layout === "inline") {
-      return (
-        <div className="border-b border-current/10">
-          {bar(
-            <>
-              {logo}
-              <span className="flex flex-1 gap-3.5 overflow-hidden text-[10px] uppercase tracking-[0.08em] text-current/65">
-                {["Audio", "Men", "Wearables", "Women"].map((name) => (
-                  <span key={name}>{name}</span>
+          <div className="border-b border-border bg-muted px-4 pb-3 pt-5 text-center text-foreground">
+            {logo}
+            <div className="mt-3 grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-3">
+              <span className="flex min-w-0">{search === "box" ? <span className="h-6 w-full max-w-[7rem] rounded-xs bg-current/12" /> : searchMark}</span>
+              {nav(true, 5)}
+              <span className="flex justify-end">
+                {Array.from({ length: marks }, (_, i) => (
+                  <span key={i} className="ml-2.5 size-4 rounded-xs bg-current/25" />
                 ))}
               </span>
-              {icons}
-            </>,
-          )}
+            </div>
+          </div>
         </div>
       );
     }
@@ -506,31 +504,29 @@ export function ShopChrome({
                 <span className="block h-px bg-current/60" />
               </span>
               {logo}
-              <span className="flex-1" />
+              {search === "box" ? box : <span className="flex-1" />}
               {icons}
             </>,
           )}
         </div>
       );
     }
-    // bar: the shop's name, a search box across the middle, the nav underneath.
+    // bar: the shop's name, search, the marks, and every department underneath.
     return (
       <div>
         {bar(
           <>
             {logo}
-            {search === "box" ? (
-              <span className="h-7 flex-1 rounded-xs bg-current/12" />
-            ) : (
-              <span className="flex-1" />
-            )}
+            {search === "box" ? box : <span className="flex-1" />}
             {icons}
           </>,
         )}
         <div className="border-b border-current/10">{nav(false)}</div>
       </div>
     );
-  }
+  };
+
+  if (slotKey === "header") return headerDrawing({ layout: variant });
 
   /*
     The footer is WIRED (2026-09-24): its choices are the footer section's
@@ -2912,25 +2908,13 @@ export function ShopChrome({
     case "checkout:after":
       return <p className="px-4 py-3 text-center text-[11px] text-current/55">{t("afterExample")}</p>;
 
+    // The arrangement is the whole header; search and the marks draw it too,
+    // with the value they are showing, so a merchant sees the choice in place.
     case "header:layout":
-      return <ShopChrome page={page} slotKey="header" variant={variant} settings={settings} />;
+      return headerDrawing({ layout: variant });
 
     case "header:search":
-      return variant === "off" ? (
-        <p className="px-4 py-3 text-center text-[12px] text-current/55">{t("searchOffExample")}</p>
-      ) : variant === "icon" ? (
-        <div className="flex items-center justify-center gap-2 px-4 py-3 text-[12px] text-current/55">
-          <span className="size-4 rounded-full border border-current/30" aria-hidden />
-          {t("searchIconExample")}
-        </div>
-      ) : (
-        <div className="px-4 py-3">
-          <span className="flex h-9 items-center gap-2 rounded-xs border border-current/15 px-3 text-[12px] text-current/45">
-            <span className="size-3.5 rounded-full border border-current/30" aria-hidden />
-            {t("searchBoxExample")}
-          </span>
-        </div>
-      );
+      return headerDrawing({ search: variant });
 
     case "header:sticky":
       return (
@@ -2940,11 +2924,7 @@ export function ShopChrome({
       );
 
     case "header:marks":
-      return (
-        <p className="px-4 py-3 text-center text-[12px] text-current/55">
-          {variant === "on" ? t("marksBothExample") : t("marksCartOnly")}
-        </p>
-      );
+      return headerDrawing({ marks: variant });
 
     // The arrangement is the whole footer; every other footer place draws its
     // own part, from the same function, with the value it is showing.

@@ -71,7 +71,17 @@ const manifest: ThemeManifest = {
       ...labels("Text"),
       settings: [{ id: "heading", type: "text", ...labels("Heading"), default: "" }],
     },
-    header: { ...labels("Header"), at_most_one: true, required: true, settings: [] },
+    header: {
+      ...labels("Header"),
+      at_most_one: true,
+      required: true,
+      settings: [
+        { id: "header_layout", type: "select", ...labels("header_layout"), options: ["bar", "masthead", "drawer"], default: "bar" },
+        { id: "search", type: "select", ...labels("search"), options: ["box", "icon"], default: "box" },
+        { id: "sticky", type: "boolean", ...labels("sticky"), default: true },
+        { id: "show_account_links", type: "boolean", ...labels("show_account_links"), default: false },
+      ],
+    },
     // Wired since 2026-09-24, and drawn at the bottom of this page -- so the
     // settings its places decide are ones this manifest has to offer.
     footer: {

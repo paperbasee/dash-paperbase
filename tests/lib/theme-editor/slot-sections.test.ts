@@ -18,7 +18,8 @@ import {
   wiringFor,
   WIRED_SLOTS,
 } from "@/lib/theme-editor/slot-sections";
-import { SLOTS } from "@/lib/theme-editor/slot-catalogue";
+import { SLOTS, type SlotPageKey } from "@/lib/theme-editor/slot-catalogue";
+import { storeSettingFor } from "@/lib/theme-editor/store-setting-slots";
 import { document, section } from "./fixtures";
 
 describe("which places are wired", () => {
@@ -39,12 +40,29 @@ describe("which places are wired", () => {
     });
   });
 
-  test("a place that is still a drawing answers null", () => {
-    // Its own key on another entry, and another key on this one: neither is the
-    // announcement bar, and reading either as wired would write to the wrong
-    // section.
+  test("a place that is not wired answers null", () => {
+    // Its own key on another entry: the notice is the Header entry's, and
+    // reading it as the home page's would write to the wrong section. Since
+    // 2026-09-24 every place on the editor is wired, so the second example is
+    // a key no page has.
     expect(wiringFor("home", "notice")).toBeNull();
-    expect(wiringFor("header", "layout")).toBeNull();
+    expect(wiringFor("header", "nothing-here")).toBeNull();
+  });
+
+  test("every place on every page is real", () => {
+    // The whole point of the work that began on 2026-09-22: no choice on the
+    // canvas that changes nothing in the shop. Inherited places are read from
+    // their owner.
+    const drawings: string[] = [];
+    for (const [page, slots] of Object.entries(SLOTS)) {
+      for (const slot of slots) {
+        const owner = slot.inheritedFrom ?? { page, key: slot.key };
+        if (!wiringFor(owner.page as SlotPageKey, owner.key) && !storeSettingFor(owner.page as SlotPageKey, owner.key)) {
+          drawings.push(`${page}.${slot.key}`);
+        }
+      }
+    }
+    expect(drawings).toEqual([]);
   });
 
   test("every wired place names at least one section, and no value twice", () => {

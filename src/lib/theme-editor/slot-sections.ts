@@ -59,6 +59,39 @@ export type WiredSlot = {
 export const WIRED_SLOTS: Partial<Record<SlotPageKey, Record<string, WiredSlot>>> = {
   header: {
     notice: { page: "header", sections: { message: "announcement_bar" }, off: "off" },
+    /*
+      The rest of the header, 2026-09-24: four settings of the one `header`
+      section, the theme's default first in each map.
+    */
+    layout: {
+      page: "header",
+      sections: {
+        bar: { type: "header", settings: { header_layout: "bar" } },
+        masthead: { type: "header", settings: { header_layout: "masthead" } },
+        drawer: { type: "header", settings: { header_layout: "drawer" } },
+      },
+    },
+    search: {
+      page: "header",
+      sections: {
+        box: { type: "header", settings: { search: "box" } },
+        icon: { type: "header", settings: { search: "icon" } },
+      },
+    },
+    sticky: {
+      page: "header",
+      sections: {
+        on: { type: "header", settings: { sticky: true } },
+        off: { type: "header", settings: { sticky: false } },
+      },
+    },
+    marks: {
+      page: "header",
+      sections: {
+        off: { type: "header", settings: { show_account_links: false } },
+        on: { type: "header", settings: { show_account_links: true } },
+      },
+    },
   },
   home: {
     hero: {
