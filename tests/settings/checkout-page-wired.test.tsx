@@ -11,6 +11,8 @@
  * answers in its view and hands the layout a shell. A page cannot take its own
  * header off from the inside.
  */
+import { readFileSync } from "node:fs";
+
 import { renderToStaticMarkup } from "react-dom/server";
 import { NextIntlClientProvider } from "next-intl";
 import { describe, expect, test } from "vitest";
@@ -19,6 +21,7 @@ import { ShopChrome } from "@/components/theme-editor/slots/ShopChrome";
 import type { ThemeDocument, ThemeEditorState, ThemeManifest, ThemeSection } from "@/lib/theme-editor/api";
 import { editorReducer, initEditorState, type EditorState } from "@/lib/theme-editor/editor-reducer";
 import { SLOTS } from "@/lib/theme-editor/slot-catalogue";
+import { storeSettingFor } from "@/lib/theme-editor/store-setting-slots";
 import en from "../../messages/en.json";
 import { choiceEdits, sectionOfType, slotValueFor, wiringFor } from "@/lib/theme-editor/slot-sections";
 
@@ -124,13 +127,47 @@ describe("the checkout page is wired", () => {
     }
   });
 
-  test("and the one it does not claim is still a drawing", () => {
+  test("the form is not wired to the document, and must not be", () => {
     /*
-      A place goes in only when its half of the shop can do everything the
-      place promises. The form is round 4, and that one writes a STORE setting
-      rather than the document -- machinery this editor has never had.
+      It is `StorefrontCheckoutSettings.customer_form_variant`, a shop setting
+      that Settings → Checkout has written since long before this screen
+      existed. Copying it into the theme document would make the tile's own
+      promise — "change it in one place and it changes in both" — false the
+      first time a merchant changed one and not the other.
     */
     expect(wiringFor("checkout", "form")).toBeFalsy();
+    expect(storeSettingFor("checkout", "form")?.setting).toBe("customer_form_variant");
+  });
+
+  test("and every other place on this page writes the document, not the shop", () => {
+    for (const slot of SLOTS.checkout) {
+      if (slot.key === "form" || slot.inherited) continue;
+      expect(storeSettingFor("checkout", slot.key), slot.key).toBeUndefined();
+    }
+  });
+
+  test("the tile says it saves straight away, or a merchant expects the draft to hold it", () => {
+    const slot = SLOTS.checkout.find((one) => one.key === "form")!;
+    const hint = (en.themeEditor.slots as Record<string, string>)[slot.hint!];
+    expect(hint).toContain("saves straight away");
+  });
+
+  test("and no longer sends a merchant to a screen that does not have it", () => {
+    /*
+      Settings → Checkout stopped offering the chooser on 2026-09-24 (owner):
+      this canvas is the only screen that writes it now, so a hint promising
+      the two agree would be describing a screen that no longer asks.
+    */
+    const slot = SLOTS.checkout.find((one) => one.key === "form")!;
+    const hint = (en.themeEditor.slots as Record<string, string>)[slot.hint!];
+    expect(hint).not.toContain("Settings");
+
+    const section = readFileSync(
+      "src/app/[locale]/(dashboard)/settings/sections/CheckoutSettingsSection.tsx",
+      "utf8",
+    );
+    expect(section).not.toContain('name="customer_form_variant"');
+    expect(section).toContain("tab=customization");
   });
 
   test("a message above the button is off until a merchant asks for one", () => {

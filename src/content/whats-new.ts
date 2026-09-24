@@ -73,6 +73,21 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-09-22-checkout-form-moves",
+    date: "2026-09-22",
+    version: "4.86.0",
+    tag: "improved",
+    href: "/settings?tab=customization",
+    title: {
+      en: "The customer form moves into the editor",
+      bn: "ক্রেতার ফর্ম চলে এল এডিটরে",
+    },
+    body: {
+      en: "Choosing the short or long customer form has moved from Settings → Checkout to your checkout page in the editor, where you can see the form while you decide. It is still the same setting and it still saves the moment you pick it. The short form now really is shorter: name, phone, district and area, with no email or street address box at all.",
+      bn: "ক্রেতার ছোট নাকি বড় ফর্ম হবে — এই পছন্দটি সেটিংস → চেকআউট থেকে সরে এডিটরের চেকআউট পেজে এসেছে, যেখানে ফর্মটি দেখতে দেখতেই ঠিক করতে পারবেন। সেটিংটি আগের মতোই এক, আর বেছে নেওয়ার সঙ্গে সঙ্গেই সংরক্ষিত হয়। ছোট ফর্মটি এখন সত্যিই ছোট: নাম, ফোন, জেলা ও থানা — ইমেইল বা রাস্তার ঠিকানার ঘর একেবারেই নেই।",
+    },
+  },
+  {
     id: "2026-09-22-checkout-page-shell",
     date: "2026-09-22",
     version: "4.83.0",
@@ -133,54 +148,9 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     },
   },
   {
-    id: "2026-09-22-shoppers-can-filter",
-    date: "2026-09-22",
-    version: "4.71.0",
-    tag: "new",
-    href: "/settings?tab=customization",
-    title: {
-      en: "Let shoppers filter a category",
-      bn: "ক্রেতারা ক্যাটাগরি ফিল্টার করতে পারবেন",
-    },
-    body: {
-      en: "Under Category → Filters, pick a button that opens a panel over the page or a column down the side, and shoppers can narrow by price, brand and whatever your products vary by — size, colour, whatever you have set up. Only the values a category actually has are offered, so a filter never leads to an empty page.",
-      bn: "ক্যাটাগরি → ফিল্টার অংশে পাতার উপরে খোলে এমন একটি বোতাম, নাকি পাশে এক কলাম — বেছে নিন। ক্রেতারা দাম, ব্র্যান্ড আর আপনার পণ্য যেসব দিকে আলাদা — সাইজ, রঙ, যা আপনি যোগ করেছেন — সব দিয়ে খুঁজে নিতে পারবেন। কোনো ক্যাটাগরিতে যা সত্যিই আছে কেবল সেগুলোই দেখানো হয়, তাই ফিল্টার করে কখনো ফাঁকা পাতা আসে না।",
-    },
-  },
-  {
-    id: "2026-09-22-load-more-button",
-    date: "2026-09-22",
-    version: "4.70.0",
-    tag: "new",
-    href: "/settings?tab=customization",
-    title: {
-      en: "A Load more button for long categories",
-      bn: "বড় ক্যাটাগরির জন্য “আরও দেখুন” বোতাম",
-    },
-    body: {
-      en: "Under Category → Getting to the rest, you can now choose a Load more button instead of numbered pages: the next lot of products appears under the grid without the shopper leaving the page. Numbered pages are still there and still the easier ones to share and to find in search.",
-      bn: "ক্যাটাগরি → বাকিগুলোতে যাওয়া অংশে এখন নম্বর দেওয়া পাতার বদলে “আরও দেখুন” বোতাম বেছে নিতে পারেন: ক্রেতা পাতা না ছেড়েই গ্রিডের নিচে পরের পণ্যগুলো দেখতে পান। নম্বর দেওয়া পাতা আগের মতোই আছে, আর লিংক শেয়ার করা বা সার্চে আসা তাতেই সহজ।",
-    },
-  },
-  {
-    id: "2026-09-22-shoppers-can-sort",
-    date: "2026-09-22",
-    version: "4.69.0",
-    tag: "new",
-    href: "/settings?tab=customization",
-    title: {
-      en: "Let shoppers sort a category",
-      bn: "ক্রেতারা ক্যাটাগরি সাজাতে পারবেন",
-    },
-    body: {
-      en: "Under Category in your editor, Sorting can now be a small menu on the right or a row of choices: your own order, newest, price up, price down and most popular. Leave it off and your categories stay exactly as they are — in the order you arranged them.",
-      bn: "এডিটরের ক্যাটাগরি অংশে সাজানোর ক্রম এখন ডান পাশে ছোট মেনু বা পাশাপাশি কয়েকটি অপশন হিসেবে দেখানো যায়: আপনার নিজের ক্রম, নতুন আগে, দাম কম থেকে বেশি, বেশি থেকে কম আর সবচেয়ে জনপ্রিয়। বন্ধ রাখলে ক্যাটাগরি আপনার সাজানো ক্রমেই থাকবে।",
-    },
-  },
-  {
     id: "2026-09-22-category-pages-are-yours",
     date: "2026-09-22",
-    version: "4.68.0",
+    version: "4.71.0",
     tag: "new",
     href: "/settings?tab=customization",
     title: {
@@ -188,8 +158,8 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
       bn: "ক্যাটাগরি পেজ নিজের মতো সাজান",
     },
     body: {
-      en: "The Category page in your editor is real now: the path back up, three shapes for the name including over the category's own picture, how many products are in it, and two, three or four across. Big categories get numbered pages, so shoppers reach everything instead of the first 48 — and you can say what an empty category shows and add words under the grid.",
-      bn: "এডিটরের ক্যাটাগরি পেজটি এখন সত্যিকারের: উপরে ফেরার পথ, নামের তিনটি চেহারা — ক্যাটাগরির নিজের ছবির উপরেও — ভেতরে কতগুলো পণ্য আছে, আর এক সারিতে দুই, তিন নাকি চারটি। বড় ক্যাটাগরিতে নম্বর দেওয়া পাতা আসে, ফলে ক্রেতারা প্রথম ৪৮টিতে আটকে না থেকে সবকিছুই দেখতে পান — খালি ক্যাটাগরিতে কী দেখানো হবে তাও বলে দিতে পারেন, আর গ্রিডের নিচে লেখা যোগ করতে পারেন।",
+      en: "The Category page in your editor is real now: the path back up, three shapes for the heading, the product count, two, three or four across, and what an empty category says. Shoppers can sort it — newest, price, name — and narrow it by the brands, sizes and colours that category actually has, either from a panel that slides in over the page or a rail beside the grid. A long category can end in numbered pages or a Load more button that keeps the shopper where they are.",
+      bn: "এডিটরের ক্যাটাগরি পেজটি এখন সত্যিকারের: উপরে ফেরার পথ, শিরোনামের তিন রকম চেহারা, পণ্যের সংখ্যা, সারিতে দুই-তিন-চারটি, আর ক্যাটাগরি খালি থাকলে কী লেখা থাকবে। ক্রেতারা সাজিয়ে নিতে পারেন — নতুন, দাম, নাম — আর ওই ক্যাটাগরিতে সত্যিই আছে এমন ব্র্যান্ড, মাপ ও রঙ দিয়ে ছেঁকে নিতে পারেন, পাশ থেকে ভেসে ওঠা প্যানেলে নয়তো গ্রিডের পাশের সারিতে। লম্বা ক্যাটাগরি শেষ হতে পারে নম্বর দেওয়া পাতায়, নয়তো “আরও দেখুন” বোতামে যা ক্রেতাকে যেখানে আছেন সেখানেই রাখে।",
     },
   },
   {

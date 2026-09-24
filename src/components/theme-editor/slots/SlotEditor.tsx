@@ -1,6 +1,6 @@
 "use client";
 
-import { useReducer, useState } from "react";
+import { useEffect, useReducer, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Monitor, Smartphone, X } from "lucide-react";
 
@@ -48,7 +48,9 @@ import {
   settingEdits,
   wiringFor,
 } from "@/lib/theme-editor/slot-sections";
-import { themesQueryKey } from "@/lib/query-keys";
+import { storeSettingFor, storeSettingValue } from "@/lib/theme-editor/store-setting-slots";
+import { useCheckoutSettingsQuery } from "@/hooks/useCheckoutSettingsQuery";
+import { checkoutSettingsQueryKey, themesQueryKey } from "@/lib/query-keys";
 import { useQueryClient } from "@tanstack/react-query";
 import { ConflictDialog } from "../ConflictDialog";
 import { SaveStatus } from "../SaveStatus";
@@ -137,6 +139,23 @@ export function SlotEditor({ loaded }: { loaded: ThemeEditorState }) {
     footer: initialChoices("footer"),
   }));
 
+  /*
+    The one setting on this canvas that is NOT the theme's: which form the
+    checkout asks a shopper to fill in. It is a shop setting, shared with
+    Settings -> Checkout, so it is read from there and written straight back --
+    see `lib/theme-editor/store-setting-slots.ts`.
+  */
+  const checkoutSettings = useCheckoutSettingsQuery();
+  const formVariant = checkoutSettings.data?.customer_form_variant;
+  useEffect(() => {
+    if (!formVariant) return;
+    setChoices((all) =>
+      all.checkout.form === formVariant
+        ? all
+        : { ...all, checkout: { ...all.checkout, form: formVariant } },
+    );
+  }, [formVariant]);
+
   const save = useAutosave({ loaded, document: state.document, onSaved: () => {} });
   // Pictures this shop has already placed, and the URLs of ones placed since the
   // list was read: an upload answers with a key alone, and a field needs a URL
@@ -165,6 +184,31 @@ export function SlotEditor({ loaded }: { loaded: ThemeEditorState }) {
    * Header. The canvas resolves that before it calls.
    */
   function choose(owner: { page: SlotPageKey; key: string }, value: string) {
+    // A shop setting, not the theme's: written the moment it is clicked, and
+    // Save to store has nothing to do with it. The tile shows the new value at
+    // once and goes back to what the shop says if the write fails -- a tile
+    // that kept a value the shop refused would be the worst of both.
+    const store = storeSettingFor(owner.page, owner.key);
+    if (store) {
+      setChoices((all) => ({
+        ...all,
+        [owner.page]: { ...all[owner.page], [owner.key]: value },
+      }));
+      void (async () => {
+        try {
+          await api.patch("store/checkout-settings/", {
+            [store.setting]: storeSettingValue(store, value),
+          });
+          notify.success(tEditor("shopSettingSaved"), { title: tc("heading") });
+        } catch {
+          notify.warning(tEditor("shopSettingFailed"), { title: tc("heading") });
+        } finally {
+          void qc.invalidateQueries({ queryKey: checkoutSettingsQueryKey });
+        }
+      })();
+      return;
+    }
+
     const wiring = wiringFor(owner.page, owner.key);
     if (!wiring) {
       setChoices((all) => ({

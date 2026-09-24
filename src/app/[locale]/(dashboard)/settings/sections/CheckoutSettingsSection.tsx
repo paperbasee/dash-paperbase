@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { useQueryClient } from "@tanstack/react-query";
 import { isApiHttpError } from "@/lib/api-client";
 import { Loader2 } from "lucide-react";
@@ -18,7 +19,6 @@ import {
   REPEAT_ORDER_COOLDOWN_MAX_MINUTES,
   useCheckoutSettingsQuery,
   type CheckoutSettings,
-  type CustomerFormVariant,
 } from "@/hooks/useCheckoutSettingsQuery";
 import { checkoutSettingsQueryKey } from "@/lib/query-keys";
 import AutopilotSettingsPanel from "./AutopilotSettingsPanel";
@@ -55,11 +55,6 @@ export default function CheckoutSettingsSection({
   const queryClient = useQueryClient();
   const { data, isLoading: loading, isError, error } = useCheckoutSettingsQuery();
   const [saving, setSaving] = useState(false);
-  const [loadedVariant, setLoadedVariant] = useState<CustomerFormVariant | null>(
-    null
-  );
-  const [selectedVariant, setSelectedVariant] =
-    useState<CustomerFormVariant>("extended");
   const [message, setMessage] = useState<SettingsMessage>(null);
   // The cooldown is edited as text so a merchant can clear the box mid-edit
   // without the field snapping to 0; it is parsed once, on save.
@@ -68,8 +63,6 @@ export default function CheckoutSettingsSection({
 
   useEffect(() => {
     if (!data) return;
-    setLoadedVariant(data.customer_form_variant);
-    setSelectedVariant(data.customer_form_variant);
     setLoadedCooldown(data.repeat_order_cooldown_minutes);
     setCooldownInput(String(data.repeat_order_cooldown_minutes));
     setMessage(null);
@@ -77,7 +70,6 @@ export default function CheckoutSettingsSection({
 
   useEffect(() => {
     if (!isError) return;
-    setLoadedVariant(null);
     setMessage({ type: "error", text: errorMessage(error) });
   }, [isError, error]);
 
@@ -88,12 +80,10 @@ export default function CheckoutSettingsSection({
     const n = Number(trimmed);
     return n <= REPEAT_ORDER_COOLDOWN_MAX_MINUTES ? n : null;
   })();
-  const variantDirty = loadedVariant !== null && selectedVariant !== loadedVariant;
   const cooldownDirty = loadedCooldown !== null && cooldownInput.trim() !== String(loadedCooldown);
 
   const handleSave = async () => {
-    if (loadedVariant === null || loadedCooldown === null) return;
-    if (!variantDirty && !cooldownDirty) return;
+    if (loadedCooldown === null || !cooldownDirty) return;
     if (cooldownDirty && parsedCooldown === null) {
       setMessage({
         type: "error",
@@ -102,17 +92,17 @@ export default function CheckoutSettingsSection({
       return;
     }
     // Send only what changed: the API rejects unknown keys and applies the rest.
+    // The form variant is NOT one of them any more -- the theme editor writes
+    // that, and a screen that also wrote it would be two screens racing over
+    // one row.
     const patch: Partial<CheckoutSettings> = {};
-    if (variantDirty) patch.customer_form_variant = selectedVariant;
-    if (cooldownDirty && parsedCooldown !== null) patch.repeat_order_cooldown_minutes = parsedCooldown;
+    if (parsedCooldown !== null) patch.repeat_order_cooldown_minutes = parsedCooldown;
 
     setSaving(true);
     setMessage(null);
     try {
       const { data: patchData } = await api.patch<CheckoutSettings>("store/checkout-settings/", patch);
       const saved = parseCheckoutSettings(patchData);
-      setLoadedVariant(saved.customer_form_variant);
-      setSelectedVariant(saved.customer_form_variant);
       setLoadedCooldown(saved.repeat_order_cooldown_minutes);
       setCooldownInput(String(saved.repeat_order_cooldown_minutes));
       setMessage({ type: "success", text: "Saved." });
@@ -124,7 +114,7 @@ export default function CheckoutSettingsSection({
     }
   };
 
-  const unchanged = !variantDirty && !cooldownDirty;
+  const unchanged = !cooldownDirty;
   // Checkout settings persist via settings.manage; view-only roles can't change them.
   const { has } = usePermissions();
   const canManage = has("settings.manage");
@@ -141,73 +131,33 @@ export default function CheckoutSettingsSection({
       {!loading ? (
         <SettingsSectionBody>
           <div className="w-full space-y-6">
+            {/*
+              The customer form moved into the theme editor on 2026-09-24
+              (owner). It is the same shop setting it always was -- the editor's
+              tile writes this very row -- but a merchant designing their
+              checkout should not have to leave the page they are designing it
+              on to decide how many boxes it has.
+
+              A line is left here rather than nothing at all: this is where it
+              lived, and a setting that simply vanishes reads as a setting that
+              was taken away.
+            */}
             <div className="space-y-1">
               <h2 className="text-lg font-medium text-foreground">
                 Customer Information Form
               </h2>
               <p className="text-sm text-muted-foreground">
-                Choose how much information customers fill in at checkout.
+                How much a customer fills in at checkout is now part of your checkout
+                page, in{" "}
+                <Link
+                  href="/settings?tab=customization"
+                  className="underline underline-offset-4 hover:text-foreground"
+                >
+                  Customization
+                </Link>
+                {" "}— open the editor and choose it on the Checkout page, where you can
+                see the form while you decide.
               </p>
-            </div>
-
-            <div className="space-y-3">
-              <div
-                className={cn(
-                  "space-y-3",
-                  (loadedVariant === null || !canManage) &&
-                    "pointer-events-none opacity-60"
-                )}
-                role="radiogroup"
-                aria-label="Customer information form variant"
-              >
-                <label
-                  className={cn(
-                    "flex cursor-pointer gap-3 rounded-xs border border-border p-4 transition-colors",
-                    selectedVariant === "extended" && "border-foreground/40 bg-muted/30"
-                  )}
-                >
-                  <input
-                    type="radio"
-                    name="customer_form_variant"
-                    value="extended"
-                    checked={selectedVariant === "extended"}
-                    onChange={() => setSelectedVariant("extended")}
-                    className="mt-1 size-4 shrink-0 accent-foreground"
-                    disabled={loadedVariant === null}
-                  />
-                  <div className="min-w-0 space-y-1">
-                    <div className="text-sm font-medium text-foreground">
-                      Extended (recommended)
-                    </div>
-                    <div className="text-sm text-muted-foreground">
-                      Full details — name, phone, email, address, city, zone
-                    </div>
-                  </div>
-                </label>
-
-                <label
-                  className={cn(
-                    "flex cursor-pointer gap-3 rounded-xs border border-border p-4 transition-colors",
-                    selectedVariant === "minimal" && "border-foreground/40 bg-muted/30"
-                  )}
-                >
-                  <input
-                    type="radio"
-                    name="customer_form_variant"
-                    value="minimal"
-                    checked={selectedVariant === "minimal"}
-                    onChange={() => setSelectedVariant("minimal")}
-                    className="mt-1 size-4 shrink-0 accent-foreground"
-                    disabled={loadedVariant === null}
-                  />
-                  <div className="min-w-0 space-y-1">
-                    <div className="text-sm font-medium text-foreground">Minimal</div>
-                    <div className="text-sm text-muted-foreground">
-                      Faster checkout — name, phone, city, zone only
-                    </div>
-                  </div>
-                </label>
-              </div>
             </div>
 
             <div className="space-y-3 border-t border-border pt-6">
@@ -271,7 +221,7 @@ export default function CheckoutSettingsSection({
               type="button"
               variant="outline"
               className={`${settingsInvertedButtonClassName} gap-2`}
-              disabled={saving || unchanged || loadedVariant === null || !canManage}
+              disabled={saving || unchanged || loadedCooldown === null || !canManage}
               onClick={() => void handleSave()}
             >
               {saving && <Loader2 className="size-4 animate-spin" />}
