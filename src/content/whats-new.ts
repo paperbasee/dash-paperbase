@@ -76,7 +76,7 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
     id: "2026-09-22-search-page-choices",
     date: "2026-09-22",
-    version: "4.91.1",
+    version: "4.91.2",
     tag: "new",
     href: "/settings?tab=customization",
     title: {
@@ -84,8 +84,8 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
       bn: "আরও ভালো সার্চ, আর নিজের মতো সার্চ পেজ",
     },
     body: {
-      en: "Choose whether the results heading says how many were found, whether matching categories sit above the products, and how many products go across. A long answer can now reach past the first 48 with a Load more button or numbered pages, a search that finds nothing can offer your categories as a way on, and an empty search box can show your best sellers instead of a line of help. Search itself got better too: results drop down under the search box as a shopper types, and half a word or a plural now finds what they meant.",
-      bn: "ফলাফলের শিরোনামে কয়টি পাওয়া গেল তা দেখাবেন কি না, পণ্যের উপরে মিলে যাওয়া ক্যাটাগরি থাকবে কি না, আর একসারিতে কয়টি পণ্য — ঠিক করুন। লম্বা উত্তরে এখন প্রথম ৪৮টির পরেও যাওয়া যায় “আরও দেখুন” বোতাম বা নম্বর দেওয়া পাতায়, কিছু না মিললে আপনার ক্যাটাগরিগুলো এগোনোর পথ হিসেবে দেখানো যায়, আর খালি সার্চ বক্সে সাহায্যের লাইনের বদলে আপনার সবচেয়ে বেশি বিক্রি হওয়া পণ্য দেখানো যায়। সার্চ নিজেও ভালো হয়েছে: ক্রেতা লিখতে লিখতেই সার্চ বক্সের নিচে ফলাফল চলে আসে, আর অর্ধেক শব্দ বা বহুবচন লিখলেও এখন তাঁরা যা খুঁজছেন তা পাওয়া যায়।",
+      en: "Choose whether the results heading says how many were found, whether matching categories sit above the products, and how many products go across. A long answer can now reach past the first 48 with a Load more button or numbered pages, a search that finds nothing can offer your categories as a way on, and an empty search box can show your best sellers instead of a line of help. Search itself got better too: the search box opens a full-screen search that answers as a shopper types, and half a word or a plural now finds what they meant.",
+      bn: "ফলাফলের শিরোনামে কয়টি পাওয়া গেল তা দেখাবেন কি না, পণ্যের উপরে মিলে যাওয়া ক্যাটাগরি থাকবে কি না, আর একসারিতে কয়টি পণ্য — ঠিক করুন। লম্বা উত্তরে এখন প্রথম ৪৮টির পরেও যাওয়া যায় “আরও দেখুন” বোতাম বা নম্বর দেওয়া পাতায়, কিছু না মিললে আপনার ক্যাটাগরিগুলো এগোনোর পথ হিসেবে দেখানো যায়, আর খালি সার্চ বক্সে সাহায্যের লাইনের বদলে আপনার সবচেয়ে বেশি বিক্রি হওয়া পণ্য দেখানো যায়। সার্চ নিজেও ভালো হয়েছে: সার্চ বক্সে চাপলে পুরো স্ক্রিন জুড়ে সার্চ খোলে, ক্রেতা লিখতে লিখতেই ফলাফল চলে আসে, আর অর্ধেক শব্দ বা বহুবচন লিখলেও এখন তাঁরা যা খুঁজছেন তা পাওয়া যায়।",
     },
   },
   {
