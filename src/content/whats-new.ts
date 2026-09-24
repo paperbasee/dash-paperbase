@@ -25,7 +25,8 @@
  * drop a held one to make room. (The search page's entry, the same day, merged
  * the checkout's two -- its page and the form that moved onto it -- and the
  * blog's merged the corners and the card style, both the Style panel -- and
- * the footer's merged the home page's two band entries.)
+ * the footer's merged the home page's two band entries -- and a blog post's
+ * was folded into the blog page's, one feature told once.)
  *
  * ## Entries written before their release — ONE DATE, RESTAMP IT ON THE DAY
  *
@@ -76,6 +77,21 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-09-22-blog-choices",
+    date: "2026-09-22",
+    version: "4.94.0",
+    tag: "new",
+    href: "/settings?tab=customization",
+    title: {
+      en: "Design your blog and its posts",
+      bn: "ব্লগ আর তার পোস্ট সাজান",
+    },
+    body: {
+      en: "Give your blog its own name and opening line, let readers narrow the posts by typing or by tag, and choose how the featured posts, the rest and each card look — with the date or how many times a post has been read underneath, and every read counts now. On each post, choose where its picture goes, whether the writer's name sits beside the date, how wide the words run, and whether readers see its tags, the posts before and after it, and three more to read. You can also add a few words of your own under the posts, and posts written as plain text now keep their paragraphs.",
+      bn: "ব্লগকে নিজের নাম আর প্রথম লাইন দিন, পাঠক যেন লিখে বা ট্যাগ বেছে পোস্টগুলো ছেঁকে নিতে পারেন, আর বাছাই করা পোস্ট, বাকি পোস্ট ও প্রতিটি কার্ড কেমন দেখাবে তা ঠিক করুন — নিচে তারিখ, নয়তো পোস্টটি কতবার পড়া হয়েছে; এখন প্রতিবার পড়াই গোনা হয়। প্রতিটি পোস্টে ছবি কোথায় বসবে, তারিখের পাশে লেখকের নাম থাকবে কি না, লেখা কতটা চওড়া হবে, আর পাঠক ট্যাগ, আগের ও পরের পোস্ট এবং পড়ার মতো আরও তিনটি পোস্ট দেখবেন কি না — ঠিক করুন। পোস্টের নিচে নিজের কিছু কথাও যোগ করতে পারেন, আর সাধারণ লেখায় লেখা পোস্টে এখন অনুচ্ছেদগুলো ঠিক থাকে।",
+    },
+  },
+  {
     id: "2026-09-22-footer-choices",
     date: "2026-09-22",
     version: "4.93.0",
@@ -88,21 +104,6 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     body: {
       en: "Arrange your footer in columns, with your shop on one side, centred, or as a single short line, and choose whether it shows your address and phone or only your email. Show your social links as names or as round marks, the ways you take payment, a button that opens WhatsApp to your number, and your policy pages beside the year. Everything comes from what you already set in Settings, and appears on every page.",
       bn: "ফুটার সাজান কলামে, একপাশে দোকান রেখে, মাঝখানে, নয়তো ছোট এক লাইনে — আর ঠিক করুন ঠিকানা ও ফোন দেখাবে নাকি শুধু ইমেইল। সোশ্যাল লিংক দেখান নামে বা গোল চিহ্নে, আপনি যেভাবে টাকা নেন, আপনার নম্বরে হোয়াটসঅ্যাপ খোলার একটি বোতাম, আর সালের পাশে নীতিমালার পেজগুলো। সবকিছু আসে সেটিংসে আগে থেকে দেওয়া তথ্য থেকে, আর প্রতিটি পাতায় দেখা যায়।",
-    },
-  },
-  {
-    id: "2026-09-22-blog-page-choices",
-    date: "2026-09-22",
-    version: "4.92.0",
-    tag: "new",
-    href: "/settings?tab=customization",
-    title: {
-      en: "Design your blog page",
-      bn: "ব্লগ পেজ সাজান",
-    },
-    body: {
-      en: "Give your blog its own name and opening line, let readers narrow the posts by typing or by tag, and show your featured posts as one large or four across. Choose a grid or a list for the rest, what each card carries, and whether the line under it is the date or how many times the post has been read — every read counts now. You can also add a few words of your own under the posts.",
-      bn: "ব্লগকে নিজের নাম আর প্রথম লাইন দিন, পাঠক যেন লিখে বা ট্যাগ বেছে পোস্টগুলো ছেঁকে নিতে পারেন, আর বাছাই করা পোস্ট দেখান একটি বড় করে নয়তো পাশাপাশি চারটি। বাকি পোস্ট গ্রিডে না তালিকায়, প্রতিটি কার্ডে কী থাকবে, আর নিচের লাইনে তারিখ নাকি পোস্টটি কতবার পড়া হয়েছে — ঠিক করুন; এখন প্রতিবার পড়াই গোনা হয়। পোস্টের নিচে নিজের কিছু কথাও যোগ করতে পারেন।",
     },
   },
   {
