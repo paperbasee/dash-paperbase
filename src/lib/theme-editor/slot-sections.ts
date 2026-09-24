@@ -356,6 +356,71 @@ export const WIRED_SLOTS: Partial<Record<SlotPageKey, Record<string, WiredSlot>>
     },
   },
   /*
+    The checkout, 2026-09-24 (round 1). The page the whole shop is for, and the
+    last one still drawn in markup no merchant could reach: `theming/0028` gives
+    every document the page, exactly as `0027` did for the cart the day before.
+
+    Five places here, and they are the page's SHELL and what stands above the
+    form. The header and the footer are the two that make this page different
+    from every other one wired so far: they are drawn OUTSIDE the template, in
+    the layout, so the shop reads these two answers in `views/checkout.py` and
+    hands `render_page` a shell. A page cannot take its own header off from the
+    inside.
+
+    The order, the coupon, the form, the words before Place order, the payment
+    row and the line after it are still drawings. Each goes in when its half of
+    the shop can do everything the place promises.
+  */
+  checkout: {
+    /*
+      Reduced FIRST, because it is the theme's default and what the editor has
+      drawn since the slot design: every shop that sells seriously strips this
+      page, and a menu, a search box and a category row are all ways out of a
+      page somebody is halfway through paying on.
+    */
+    chrome: {
+      page: "templates.checkout",
+      sections: {
+        reduced: { type: "checkout", settings: { chrome: "reduced" } },
+        full: { type: "checkout", settings: { chrome: "full" } },
+      },
+    },
+    footerStyle: {
+      page: "templates.checkout",
+      sections: {
+        policies: { type: "checkout", settings: { footer: "policies" } },
+        same: { type: "checkout", settings: { footer: "same" } },
+        none: { type: "checkout", settings: { footer: "none" } },
+      },
+    },
+    /*
+      The same bar the cart draws, standing on the second step -- one snippet in
+      the shop, because it is one bar. `none` first: it is the theme's default,
+      and a bar is a claim about how long this takes.
+    */
+    steps: {
+      page: "templates.checkout",
+      sections: {
+        none: { type: "checkout", settings: { steps: false } },
+        bar: { type: "checkout", settings: { steps: true } },
+      },
+    },
+    /*
+      The promises, or the merchant's own line, ABOVE the form -- which is the
+      only place it can do any good: a sentence about returns read after the
+      order is placed is a sentence nobody needed. The words themselves are
+      picked once on the home page; `trust_text` in this section's dialog is
+      what overrides them for this page, as it does on the cart.
+    */
+    trust: {
+      page: "templates.checkout",
+      sections: {
+        on: { type: "checkout", settings: { trust: true } },
+        off: { type: "checkout", settings: { trust: false } },
+      },
+    },
+  },
+  /*
     The category page, 2026-09-23. The shop's widest page: most people arrive on
     a category from a search or the menu rather than on the home page.
 

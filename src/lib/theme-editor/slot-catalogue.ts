@@ -1265,15 +1265,15 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
       ],
     },
     /**
-     * A coupon box -- and the one place in this editor with NO feature behind it.
+     * The promo field, INSIDE the summary beside it -- the cart's rule, for the
+     * same reason: a box floating under the panel is not where anybody looks
+     * for a discount, and a shopper who typed a code one page ago looks for it
+     * in the same place here.
      *
-     * Paperbase has no coupons: no code, no limit, no expiry, nowhere to make
-     * one. `discount_total` on an order is the sum of per-line product
-     * discounts, which is a sale price and not a code a shopper types. So this
-     * is off to begin with, and the chooser says why rather than letting a
-     * merchant switch on a box that cannot take anything.
-     *
-     * Whoever wires this: the design is the small half of the job.
+     * Off to begin with. Most shops run no campaign, and a box with nothing
+     * behind it sends a shopper off to hunt for a code that does not exist.
+     * (Paperbase has run discount codes since 2026-09-22; this note said it had
+     * none until 2026-09-24.)
      */
     {
       key: "coupon",

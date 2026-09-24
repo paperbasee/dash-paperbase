@@ -15,6 +15,15 @@
  * - Write for merchants: what they can now do or what got better, in plain words. Never
  *   mention code. Title under ~8 words, body 1-3 short sentences, natural Bangla in `bn`.
  *
+ * ## The cap, while NOTHING in this list has shipped
+ *
+ * "Delete the oldest" assumes the oldest has been seen. Every entry here is
+ * held behind the theme system, so deleting one deletes an announcement nobody
+ * has read — the checkout's entry on 2026-09-24 was the first addition to hit
+ * the cap that way. What that one did instead: it MERGED the two cart entries,
+ * which were one feature told twice. Do that, or drop a released entry; never
+ * drop a held one to make room.
+ *
  * ## Entries written before their release — ONE DATE, RESTAMP IT ON THE DAY
  *
  * An entry is usually written with the work, and the work usually ships within days.
@@ -64,24 +73,24 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
-    id: "2026-09-22-sell-more-from-the-cart",
+    id: "2026-09-22-checkout-page-shell",
     date: "2026-09-22",
-    version: "4.80.0",
+    version: "4.83.0",
     tag: "new",
     href: "/settings?tab=customization",
     title: {
-      en: "Sell more from the cart",
-      bn: "কার্ট থেকে আরও বিক্রি",
+      en: "Design your checkout page",
+      bn: "চেকআউট পেজ নিজের মতো সাজান",
     },
     body: {
-      en: "Add a row of things to buy alongside — your best sellers, or on Premium products chosen against what is already in the cart. You can also repeat your home-page promises there or write a line of your own, show what the shopper looked at earlier, and put a Cart · Checkout · Done bar at the top so they can see how far there is to go. On a wide screen the items and the total now sit side by side, with the total and Check out always in view.",
-      bn: "কার্টের সাথে কেনার মতো পণ্যের সারি যোগ করুন — আপনার সবচেয়ে বেশি বিক্রি হওয়া পণ্য, নয়তো প্রিমিয়ামে কার্ট মিলিয়ে বাছাই করা পণ্য। হোম পেজের প্রতিশ্রুতিগুলো এখানেও দেখাতে পারেন বা নিজের এক লাইন লিখতে পারেন, ক্রেতা আগে যা দেখেছেন তা-ও, আর উপরে “কার্ট · চেকআউট · সম্পন্ন” বার দিলে আর কতদূর বাকি তা বোঝা যায়। বড় স্ক্রিনে পণ্য আর মোট এখন পাশাপাশি বসে, মোট আর চেকআউট সবসময় চোখের সামনে।",
+      en: "The Checkout page in your editor is real now, starting with the page itself. Strip the header down to your shop's name so nothing leads a shopper away mid-order, or keep the full one; end the page with your privacy, returns and cancellation links, the whole footer, or nothing. You can also show a Cart · Checkout · Done bar at the top, and repeat your promises — or a line of your own — above the form.",
+      bn: "এডিটরের চেকআউট পেজটি এখন সত্যিকারের, শুরু পেজটিকে দিয়েই। হেডার ছোট করে শুধু দোকানের নাম রাখুন, যাতে অর্ডারের মাঝপথে ক্রেতাকে কিছু অন্যদিকে না টানে — নয়তো পুরোটাই রাখুন; পেজের শেষে গোপনীয়তা, ফেরত ও বাতিলের লিংক, পুরো ফুটার, কিংবা কিছুই না। উপরে “কার্ট · চেকআউট · সম্পন্ন” বারও দিতে পারেন, আর ফর্মের উপরে আপনার প্রতিশ্রুতি বা নিজের এক লাইন।",
     },
   },
   {
     id: "2026-09-22-cart-page-choices",
     date: "2026-09-22",
-    version: "4.77.0",
+    version: "4.80.0",
     tag: "new",
     href: "/settings?tab=customization",
     title: {
@@ -89,8 +98,8 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
       bn: "কার্ট পেজ নিজের মতো সাজান",
     },
     body: {
-      en: "The Cart page in your editor is real now. Show a \"Continue shopping\" link beside the title or leave it off, show the items as cards or as a table, give the total line by line or as one number, and choose whether an empty cart says one line or invites the shopper somewhere. The items fill their own column with a picture on every line, and everything the shopper owes sits in one panel beside them — the discount code box inside it, behind a link if you would rather, with the ways they can pay underneath.",
-      bn: "এডিটরের কার্ট পেজটি এখন সত্যিকারের। শিরোনামের পাশে “আরও কিনুন” দেখাবেন কি না, পণ্যগুলো কার্ড হিসেবে নাকি টেবিলে, মোট ধাপে ধাপে নাকি একটিই সংখ্যা, আর কার্ট খালি থাকলে এক লাইন নাকি আমন্ত্রণ — সবই আপনার পছন্দ। পণ্যগুলো নিজের কলামে বসে, প্রতিটি লাইনে ছবিসহ, আর ক্রেতার দেয় সবকিছু পাশে একটি প্যানেলে — ডিসকাউন্ট কোডের ঘর সেটির ভিতরেই, চাইলে লিংকের পিছনে, নিচে টাকা দেওয়ার উপায়গুলো।",
+      en: "The Cart page in your editor is real now: a \"Continue shopping\" link beside the title or not, the items as cards or as a table, the total line by line or as one number, and an empty cart that says one line or invites the shopper somewhere. The items fill their own column with a picture on every line, and everything owed sits in one panel beside them — the discount code box inside it, behind a link if you would rather, with the ways they can pay underneath. You can also add a row of things to buy alongside, repeat your home-page promises or write a line of your own, show what the shopper looked at earlier, and put a Cart · Checkout · Done bar at the top.",
+      bn: "এডিটরের কার্ট পেজটি এখন সত্যিকারের: শিরোনামের পাশে “আরও কিনুন” থাকবে কি না, পণ্যগুলো কার্ড হিসেবে নাকি টেবিলে, মোট ধাপে ধাপে নাকি একটিই সংখ্যা, আর কার্ট খালি থাকলে এক লাইন নাকি আমন্ত্রণ। পণ্যগুলো নিজের কলামে বসে, প্রতিটি লাইনে ছবিসহ, আর ক্রেতার দেয় সবকিছু পাশে একটি প্যানেলে — ডিসকাউন্ট কোডের ঘর সেটির ভিতরেই, চাইলে লিংকের পিছনে, নিচে টাকা দেওয়ার উপায়গুলো। সাথে কেনার মতো পণ্যের সারিও দিতে পারেন, হোম পেজের প্রতিশ্রুতি বা নিজের এক লাইন, ক্রেতা আগে যা দেখেছেন তা, আর উপরে “কার্ট · চেকআউট · সম্পন্ন” বার।",
     },
   },
   {
