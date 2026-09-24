@@ -15,7 +15,7 @@ import {
 } from "@/lib/theme-editor/slot-catalogue";
 import { ownerOf, sectionFor, slotValueFor, wiringFor } from "@/lib/theme-editor/slot-sections";
 import type { FieldOption } from "@/lib/theme-editor/field-specs";
-import { type BlogPreview, ShopChrome } from "./ShopChrome";
+import { type BlogPreview, ShopChrome, type ShopIdentity } from "./ShopChrome";
 import { SlotDialog } from "./SlotDialog";
 
 /**
@@ -174,6 +174,7 @@ function SlotRegion({
   departments,
   promiseWords,
   blog,
+  shop,
   className,
   children,
 }: {
@@ -191,6 +192,8 @@ function SlotRegion({
   promiseWords?: (name: string) => string;
   /** This shop's own posts and tags, for the blog's drawings. See ShopChrome. */
   blog?: BlogPreview;
+  /** This shop's own name, contact and links, for the footer. See ShopChrome. */
+  shop?: ShopIdentity;
   className?: string;
   /** The chooser, when this place is on its own and can hold it. */
   children?: React.ReactNode;
@@ -268,6 +271,7 @@ function SlotRegion({
           departments={departments}
           promiseWords={promiseWords}
           blog={blog}
+          shop={shop}
         />
       )}
 
@@ -319,6 +323,7 @@ export function SlotCanvas({
   departments,
   promiseWords,
   blog,
+  shop,
   productName,
   onGoToPage,
 }: {
@@ -368,6 +373,8 @@ export function SlotCanvas({
   promiseWords?: (name: string) => string;
   /** This shop's own posts and tags, for the blog's drawings. See ShopChrome. */
   blog?: BlogPreview;
+  /** This shop's own name, contact and links, for the footer. See ShopChrome. */
+  shop?: ShopIdentity;
   /** A product's public id to its name, so a picked band shows what it holds. */
   productName: (publicId: string) => string;
   /**
@@ -475,6 +482,7 @@ export function SlotCanvas({
                 departments={departments}
                 promiseWords={promiseWords}
                 blog={blog}
+                shop={shop}
               >
                 {chooser}
               </SlotRegion>
@@ -509,6 +517,7 @@ export function SlotCanvas({
                         departments={departments}
                         promiseWords={promiseWords}
                         blog={blog}
+                        shop={shop}
                       />
                     ))}
                   </div>

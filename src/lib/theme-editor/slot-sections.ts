@@ -630,6 +630,66 @@ export const WIRED_SLOTS: Partial<Record<SlotPageKey, Record<string, WiredSlot>>
     can do everything the place promises.
   */
   /*
+    The footer, 2026-09-24. All six places are settings of the one `footer`
+    section in the footer group, so a choice here is drawn at the bottom of
+    every page -- the composed footer reads the section, not this editor's
+    held choices.
+
+    Each map starts with the theme's default, so a document written before
+    today reads as the shop drew it: columns, the address and phone, the social
+    links as NAMES (what the shop wrote out), no payment marks, no sign-up, the
+    year. The sign-up is WhatsApp or nothing: the email newsletter was dropped
+    on 2026-09-22 and nothing stores an address.
+  */
+  footer: {
+    layout: {
+      page: "footer",
+      sections: {
+        columns: { type: "footer", settings: { footer_layout: "columns" } },
+        split: { type: "footer", settings: { footer_layout: "split" } },
+        centred: { type: "footer", settings: { footer_layout: "centred" } },
+        minimal: { type: "footer", settings: { footer_layout: "minimal" } },
+      },
+    },
+    contact: {
+      page: "footer",
+      sections: {
+        full: { type: "footer", settings: { contact: "full" } },
+        email: { type: "footer", settings: { contact: "email" } },
+        off: { type: "footer", settings: { contact: "off" } },
+      },
+    },
+    social: {
+      page: "footer",
+      sections: {
+        names: { type: "footer", settings: { social: "names" } },
+        marks: { type: "footer", settings: { social: "marks" } },
+        off: { type: "footer", settings: { social: "off" } },
+      },
+    },
+    payments: {
+      page: "footer",
+      sections: {
+        off: { type: "footer", settings: { payments: false } },
+        on: { type: "footer", settings: { payments: true } },
+      },
+    },
+    newsletter: {
+      page: "footer",
+      sections: {
+        off: { type: "footer", settings: { signup: "off" } },
+        whatsapp: { type: "footer", settings: { signup: "whatsapp" } },
+      },
+    },
+    bottom: {
+      page: "footer",
+      sections: {
+        copyright: { type: "footer", settings: { bottom: "copyright" } },
+        policies: { type: "footer", settings: { bottom: "policies" } },
+      },
+    },
+  },
+  /*
     The blog, 2026-09-24. Seven places are settings of the one `blog_list`
     section every document holds -- the widest sharing yet, which is why a
     place can now claim its own words (`fields`): the blog's name and opening

@@ -72,7 +72,21 @@ const manifest: ThemeManifest = {
       settings: [{ id: "heading", type: "text", ...labels("Heading"), default: "" }],
     },
     header: { ...labels("Header"), at_most_one: true, required: true, settings: [] },
-    footer: { ...labels("Footer"), at_most_one: true, required: true, settings: [] },
+    // Wired since 2026-09-24, and drawn at the bottom of this page -- so the
+    // settings its places decide are ones this manifest has to offer.
+    footer: {
+      ...labels("Footer"),
+      at_most_one: true,
+      required: true,
+      settings: [
+        { id: "footer_layout", type: "select", ...labels("footer_layout"), options: ["columns", "split", "centred", "minimal"], default: "columns" },
+        { id: "contact", type: "select", ...labels("contact"), options: ["full", "email", "off"], default: "full" },
+        { id: "social", type: "select", ...labels("social"), options: ["names", "marks", "off"], default: "names" },
+        { id: "payments", type: "boolean", ...labels("payments"), default: false },
+        { id: "signup", type: "select", ...labels("signup"), options: ["off", "whatsapp"], default: "off" },
+        { id: "bottom", type: "select", ...labels("bottom"), options: ["copyright", "policies"], default: "copyright" },
+      ],
+    },
   },
   groups: {
     header: { ...labels("Header"), sections: ["header"], default: [] },

@@ -61,6 +61,8 @@ const PROMISE_MARKS: Record<string, LucideIcon> = {
 
 import type { ThemeSection } from "@/lib/theme-editor/api";
 import { cn } from "@/lib/utils";
+import SocialLinkGlyph from "@/app/[locale]/(dashboard)/settings/sections/SocialLinkGlyph";
+import type { StoreSocialLinkKey } from "@/lib/storeSocialLinks";
 import type { SlotPageKey } from "@/lib/theme-editor/slot-catalogue";
 
 /**
@@ -173,6 +175,26 @@ export type PostPreview = {
 export type BlogPreview = { posts: PostPreview[]; tags: string[] };
 
 /**
+ * This shop's own details, for the footer: what Settings holds, as the shop
+ * draws it.
+ *
+ * The footer used to be drawn as "Gadzilla, 12 Gulshan Avenue, +880 1700
+ * 000000" with pages called Careers and Wholesale for every merchant -- a
+ * footer no shop of theirs has. Only what is filled in is drawn, as on the
+ * shop, and the links that depend on a switch follow the switch.
+ */
+export type ShopIdentity = {
+  name: string;
+  address: string;
+  phone: string;
+  email: string;
+  /** The filled social links only, in the shop's order: facebook, instagram, whatsapp, tiktok. */
+  social: StoreSocialLinkKey[];
+  wishlist: boolean;
+  orderLookup: boolean;
+};
+
+/**
  * Post cards, drawn the way the blog's own two settings say.
  *
  * The shelves do not own this: `cards` decides what a card carries and `line`
@@ -243,6 +265,7 @@ export function ShopChrome({
   departments,
   promiseWords,
   blog,
+  shop,
 }: {
   page: SlotPageKey;
   slotKey: string;
@@ -294,6 +317,8 @@ export function ShopChrome({
   promiseWords?: (name: string) => string;
   /** This shop's own posts and tags. See `BlogPreview`. */
   blog?: BlogPreview;
+  /** This shop's own name, contact and links. See `ShopIdentity`. */
+  shop?: ShopIdentity;
 }) {
   const t = useTranslations("themeEditor.slots");
 
@@ -460,9 +485,43 @@ export function ShopChrome({
     );
   }
 
-  if (slotKey === "footer") {
-    const set = settings ?? {};
-    const layout = variant ?? set.layout ?? "columns";
+  /*
+    The footer is WIRED (2026-09-24): its choices are the footer section's
+    settings, so they are read from `live` -- the section in the shop's document
+    -- and only fall back to this editor's held choices where there is no
+    section to read, as in the checkout's small drawing of it. One function
+    draws every part, so the composed footer and each footer place's own band
+    can never draw a part two ways; `force` is the value the open place shows.
+  */
+  const footerParts = (force: Record<string, string> = {}) => {
+    const held = live?.settings ?? {};
+    const chosen = (key: string, legacy: string, fallback: string) => {
+      const value = held[key];
+      if (typeof value === "string" && value) return value;
+      return settings?.[legacy] ?? fallback;
+    };
+    const set = {
+      contact: force.contact ?? chosen("contact", "contact", "full"),
+      social: force.social ?? chosen("social", "social", "names"),
+      payments:
+        force.payments ??
+        (typeof held.payments === "boolean" ? (held.payments ? "on" : "off") : (settings?.payments ?? "off")),
+      newsletter: force.newsletter ?? chosen("signup", "newsletter", "off"),
+      bottom: force.bottom ?? chosen("bottom", "bottom", "copyright"),
+    };
+    const layout = force.layout ?? chosen("footer_layout", "layout", "columns");
+    const me = shop ?? {
+      name: "",
+      address: "",
+      phone: "",
+      email: "",
+      social: [],
+      wishlist: false,
+      orderLookup: false,
+    };
+    const name = me.name || t("footerShopName");
+    const year = new Date().getFullYear();
+
     const heading = (text: string) => (
       <p className="mb-2.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-foreground">{text}</p>
     );
@@ -473,26 +532,83 @@ export function ShopChrome({
         </p>
       ));
 
-    const contact = set.contact ?? "full";
-    const shop = (
+    // The shop's own three columns, as `views/catalog._footer_columns` builds them.
+    const columns = [
+      {
+        head: t("footerInformation"),
+        items: [t("footerBlog"), t("footerPrivacy"), t("footerReturns"), t("footerCancellation")],
+      },
+      {
+        head: t("footerService"),
+        items: [
+          t("footerAccount"),
+          ...(me.orderLookup ? [t("footerTrack")] : []),
+          ...(me.wishlist ? [t("footerWishlistLink")] : []),
+          t("footerContactUs"),
+        ],
+      },
+      { head: t("footerCompany"), items: [t("footerAbout")] },
+    ];
+
+    const contactLines =
+      set.contact === "off"
+        ? []
+        : set.contact === "email"
+          ? [me.email].filter(Boolean)
+          : [me.address, me.phone, me.email].filter(Boolean);
+    const contactNote =
+      set.contact !== "off" && contactLines.length === 0 ? (
+        <p className="text-[10.5px] italic text-current/45">{t("footerNoContact")}</p>
+      ) : null;
+    const shopBlock = (
       <div>
-        {heading("Gadzilla")}
-        {contact === "off" ? null : contact === "email" ? (
-          <p className="text-[11px]">hello@gadzilla.com</p>
-        ) : (
-          <>
-            <p className="text-[11px] leading-relaxed">12 Gulshan Avenue, Dhaka 1212</p>
-            <p className="mt-1.5 text-[11px]">+880 1700 000000</p>
-          </>
-        )}
+        {heading(name)}
+        {contactLines.map((line) => (
+          <p key={line} className="mb-1.5 text-[11px] leading-relaxed">
+            {line}
+          </p>
+        ))}
+        {contactNote}
       </div>
     );
 
-    const columns = [
-      { head: "Information", items: ["About us", "Blog", "Privacy policy"] },
-      { head: "Customer service", items: ["Contact us", "Returns", "Track order"] },
-      { head: "Company", items: ["Careers", "Wholesale", "Stores"] },
-    ];
+    const socialWords: Record<string, string> = {
+      facebook: t("socialFacebook"),
+      instagram: t("socialInstagram"),
+      whatsapp: t("socialWhatsapp"),
+      tiktok: t("socialTiktok"),
+    };
+    const centred = layout === "centred" || layout === "minimal";
+    const social =
+      set.social === "off" ? null : me.social.length === 0 ? (
+        <p className="mt-5 text-[10.5px] italic text-current/45">{t("footerNoSocial")}</p>
+      ) : set.social === "marks" ? (
+        <div className={cn("mt-5 flex gap-2.5", centred && "justify-center")}>
+          {me.social.map((key) => (
+            <span key={key} className="grid size-8 place-items-center rounded-full bg-current/12 text-foreground">
+              <SocialLinkGlyph platform={key} />
+            </span>
+          ))}
+        </div>
+      ) : (
+        <p className="mt-5 text-[11px]">{me.social.map((key) => socialWords[key]).join(" · ")}</p>
+      );
+
+    // What the shop takes: cash always, bKash and Nagad where a product is paid
+    // for up front (the tile says so). No card -- there is no card gateway.
+    const payments =
+      set.payments === "off" ? null : (
+        <div className="mt-5">
+          <p className="mb-2 text-[10px] uppercase tracking-[0.08em] text-current/45">{t("paymentsHeading")}</p>
+          <div className={cn("flex flex-wrap gap-2", centred && "justify-center")}>
+            {[t("cashOnDelivery"), "bKash", "Nagad"].map((method) => (
+              <span key={method} className="rounded-xs border border-current/15 px-2.5 py-1 text-[10px] text-current/70">
+                {method}
+              </span>
+            ))}
+          </div>
+        </div>
+      );
 
     /**
      * The sign-up sits AFTER the links, not above them.
@@ -500,67 +616,57 @@ export function ShopChrome({
      * At the top it competed with the shop's own name for the first line of the
      * footer and read as something stuck on. A shopper who has scrolled this far
      * has finished looking; the ask belongs after they have found what they came
-     * for, and before the marks that reassure them. It gets its own panel rather
-     * than a bare rule so it reads as a thing and not a stray form.
+     * for. WhatsApp only: a heading and the button that opens the chat -- no box
+     * to type in, because there is nothing to type.
      */
     const newsletter =
-      (set.newsletter ?? "off") === "off" ? null : (
+      set.newsletter !== "whatsapp" ? null : (
         <div
-          className={`mt-6 flex flex-wrap items-center gap-4 rounded-sm bg-current/[0.06] px-4 py-4${
-            layout === "centred" || layout === "minimal" ? " justify-center text-center" : ""
-          }`}
+          className={cn(
+            "mt-6 flex flex-wrap items-center gap-4 rounded-sm bg-current/[0.06] px-4 py-4",
+            centred && "justify-center text-center",
+          )}
         >
-          <p className="min-w-0 flex-1 text-[12px] font-semibold text-foreground">
-            {set.newsletter === "whatsapp" ? t("signupWhatsappHeading") : t("signupEmailHeading")}
-          </p>
-          <div className="flex w-full max-w-xs gap-2 sm:w-auto">
-            <span className="h-9 flex-1 rounded-xs bg-current/12 sm:w-44" />
-            <span className="grid h-9 shrink-0 place-items-center rounded-xs bg-white px-4 text-[11px] font-medium text-[#1a1a1a]">
-              {set.newsletter === "whatsapp" ? t("signupWhatsappButton") : t("signupEmailButton")}
+          <p className="min-w-0 flex-1 text-[12px] font-semibold text-foreground">{t("footerSignupHeading")}</p>
+          {me.social.includes("whatsapp") ? (
+            <span className="inline-flex h-9 shrink-0 items-center gap-2 rounded-xs bg-foreground px-4 text-[11px] font-medium text-background">
+              <SocialLinkGlyph platform="whatsapp" />
+              {t("footerSignupButton")}
             </span>
-          </div>
+          ) : (
+            <span className="text-[10.5px] italic text-current/45">{t("footerSignupNoNumber")}</span>
+          )}
         </div>
       );
 
-    const social =
-      (set.social ?? "marks") === "off" ? null : (set.social ?? "marks") === "names" ? (
-        <p className="mt-5 text-[11px]">Facebook · Instagram · YouTube · TikTok</p>
-      ) : (
-        <div className="mt-5 flex gap-2.5">
-          {Array.from({ length: 4 }, (_, i) => (
-            <span key={i} className="size-8 rounded-full bg-current/12" />
-          ))}
-        </div>
-      );
-
-    const payments =
-      (set.payments ?? "on") === "off" ? null : (
-        <div className="mt-5">
-          <p className="mb-2 text-[10px] uppercase tracking-[0.08em] text-current/45">{t("paymentsHeading")}</p>
-          <div className="flex flex-wrap gap-2">
-            {["bKash", "Nagad", "Rocket", "Visa", "Mastercard", t("cashOnDelivery")].map((name) => (
-              <span key={name} className="rounded-xs border border-current/15 px-2.5 py-1 text-[10px] text-current/70">
-                {name}
-              </span>
-            ))}
-          </div>
-        </div>
-      );
-
+    const policies = [t("footerPrivacy"), t("footerReturns"), t("footerCancellation")].join(" · ");
     const bottom =
-      (set.bottom ?? "copyright") === "policies" ? (
+      set.bottom === "policies" ? (
         <div className="mt-5 flex flex-wrap items-center justify-between gap-2 border-t border-current/12 pt-4 text-[10px] text-current/45">
-          <span>© 2026 Gadzilla · powered by Paperbase</span>
-          <span>Privacy · Returns · Terms</span>
+          <span>
+            © {year} {name} · powered by Paperbase
+          </span>
+          <span>{policies}</span>
         </div>
       ) : (
         <p className="mt-5 border-t border-current/12 pt-4 text-[10px] text-current/45">
-          © 2026 Gadzilla — All rights reserved · powered by Paperbase
+          © {year} {name} — {t("footerRights")} · powered by Paperbase
         </p>
       );
 
-    const shell = (children: React.ReactNode, centred = false) => (
-      <div className={`border-t border-border bg-muted px-5 py-6 text-current/65${centred ? " text-center" : ""}`}>
+    const band = (children: React.ReactNode) => (
+      <div className={cn("border-t border-border bg-muted px-5 py-5 text-current/65", centred && "text-center")}>
+        {children}
+      </div>
+    );
+    return { layout, set, name, columns, contactLines, contactNote, shopBlock, heading, links, social, payments, newsletter, bottom, band, centred };
+  };
+
+  if (slotKey === "footer") {
+    const { layout, name, columns, contactLines, contactNote, shopBlock, heading, links, social, payments, newsletter, bottom, centred } =
+      footerParts(variant ? { layout: variant } : {});
+    const shell = (children: React.ReactNode) => (
+      <div className={cn("border-t border-border bg-muted px-5 py-6 text-current/65", centred && "text-center")}>
         {children}
         {newsletter}
         {social}
@@ -572,32 +678,28 @@ export function ShopChrome({
     if (layout === "minimal") {
       return shell(
         <>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-foreground">Gadzilla</p>
-          <p className="mt-2.5 text-[11px]">About · Contact · Returns · Privacy</p>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-foreground">{name}</p>
+          <p className="mt-2.5 text-[11px]">
+            {[t("footerAbout"), t("footerContactUs"), t("footerReturns"), t("footerPrivacy")].join(" · ")}
+          </p>
         </>,
-        true,
       );
     }
     if (layout === "centred") {
       return shell(
         <>
-          <p className="text-[12px] font-semibold uppercase tracking-[0.12em] text-foreground">Gadzilla</p>
-          {contact === "off" ? null : (
-            <p className="mt-2.5 text-[11px]">
-              {contact === "email" ? "hello@gadzilla.com" : "12 Gulshan Avenue, Dhaka 1212 · +880 1700 000000"}
-            </p>
-          )}
-          <p className="mt-3 text-[11px]">About us · Blog · Contact us · Returns · Privacy policy</p>
+          <p className="text-[12px] font-semibold uppercase tracking-[0.12em] text-foreground">{name}</p>
+          {contactLines.length ? <p className="mt-2.5 text-[11px]">{contactLines.join(" · ")}</p> : contactNote}
+          <p className="mt-3 text-[11px]">{columns.flatMap((column) => column.items).join(" · ")}</p>
         </>,
-        true,
       );
     }
     if (layout === "split") {
       return shell(
         <div className="grid gap-6 sm:grid-cols-[minmax(0,1fr)_auto]">
-          {shop}
+          {shopBlock}
           <div className="grid grid-cols-2 gap-x-8 gap-y-5">
-            {columns.slice(0, 2).map((column) => (
+            {columns.map((column) => (
               <div key={column.head}>
                 {heading(column.head)}
                 {links(column.items)}
@@ -609,7 +711,7 @@ export function ShopChrome({
     }
     return shell(
       <div className="grid grid-cols-2 gap-x-5 gap-y-5 sm:grid-cols-4">
-        {shop}
+        {shopBlock}
         {columns.map((column) => (
           <div key={column.head}>
             {heading(column.head)}
@@ -2712,84 +2814,31 @@ export function ShopChrome({
         </p>
       );
 
+    // The arrangement is the whole footer; every other footer place draws its
+    // own part, from the same function, with the value it is showing.
     case "footer:layout":
-      return <ShopChrome page={page} slotKey="footer" variant={variant} settings={settings} />;
+      return <ShopChrome page={page} slotKey="footer" variant={variant} settings={settings} live={live} shop={shop} />;
 
-    case "footer:contact":
-      return (
-        <div className="border-t border-border bg-muted px-5 py-5 text-current/65">
-          <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.08em] text-foreground">Gadzilla</p>
-          {variant === "email" ? (
-            <p className="text-[11px]">hello@gadzilla.com</p>
-          ) : (
-            <>
-              <p className="text-[11px] leading-relaxed">12 Gulshan Avenue, Dhaka 1212</p>
-              <p className="mt-1.5 text-[11px]">+880 1700 000000 · hello@gadzilla.com</p>
-            </>
-          )}
-        </div>
-      );
-
-    case "footer:social":
-      return (
-        <div className="border-t border-border bg-muted px-5 py-5 text-current/65">
-          {variant === "names" ? (
-            <p className="text-[11px]">Facebook · Instagram · YouTube · TikTok</p>
-          ) : (
-            <div className="flex gap-2.5">
-              {Array.from({ length: 4 }, (_, i) => (
-                <span key={i} className="size-8 rounded-full bg-current/12" />
-              ))}
-            </div>
-          )}
-        </div>
-      );
-
-    case "footer:payments":
-      return (
-        <div className="border-t border-border bg-muted px-5 py-5">
-          <p className="mb-2.5 text-[10px] uppercase tracking-[0.08em] text-current/45">{t("paymentsHeading")}</p>
-          <div className="flex flex-wrap gap-2">
-            {["bKash", "Nagad", "Rocket", "Visa", "Mastercard", t("cashOnDelivery")].map((name) => (
-              <span
-                key={name}
-                className="rounded-xs border border-current/15 px-2.5 py-1 text-[10px] text-current/70"
-              >
-                {name}
-              </span>
-            ))}
-          </div>
-        </div>
-      );
-
-    case "footer:newsletter":
-      return (
-        <div className="border-t border-border bg-muted px-5 py-5 text-current/65">
-          <p className="text-[12px] font-semibold text-foreground">
-            {variant === "whatsapp" ? t("signupWhatsappHeading") : t("signupEmailHeading")}
-          </p>
-          <div className="mt-3 flex max-w-sm gap-2">
-            <span className="h-9 flex-1 rounded-xs bg-current/12" />
-            <span className="grid h-9 place-items-center rounded-xs bg-white px-4 text-[11px] text-[#1a1a1a]">
-              {variant === "whatsapp" ? t("signupWhatsappButton") : t("signupEmailButton")}
-            </span>
-          </div>
-        </div>
-      );
-
-    case "footer:bottom":
-      return (
-        <div className="border-t border-border bg-muted px-5 py-4 text-[10px] text-current/45">
-          {variant === "policies" ? (
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <span>© 2026 Gadzilla · powered by Paperbase</span>
-              <span>Privacy · Returns · Terms</span>
-            </div>
-          ) : (
-            <span>© 2026 Gadzilla — All rights reserved · powered by Paperbase</span>
-          )}
-        </div>
-      );
+    case "footer:contact": {
+      const parts = footerParts({ contact: variant ?? "full" });
+      return parts.band(parts.shopBlock);
+    }
+    case "footer:social": {
+      const parts = footerParts({ social: variant ?? "names" });
+      return parts.band(parts.social);
+    }
+    case "footer:payments": {
+      const parts = footerParts({ payments: variant ?? "off" });
+      return parts.band(parts.payments);
+    }
+    case "footer:newsletter": {
+      const parts = footerParts({ newsletter: variant ?? "off" });
+      return parts.band(parts.newsletter);
+    }
+    case "footer:bottom": {
+      const parts = footerParts({ bottom: variant ?? "copyright" });
+      return parts.band(parts.bottom);
+    }
 
     /**
      * Nothing drew this slot.

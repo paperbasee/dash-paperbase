@@ -1456,41 +1456,45 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
       ],
     },
     {
+      // Names first: the shop wrote them out, and a merchant's footer does not
+      // change under them until they choose the marks.
       key: "social",
       label: "footerSocial",
-      initial: "marks",
+      initial: "names",
       emptyValues: ["off"],
       emptyLabel: "footerSocialEmpty",
       options: [
-        { value: "marks", label: "socialMarks", note: "socialMarksNote", shape: "row" },
         { value: "names", label: "socialNames", note: "socialNamesNote", shape: "line" },
+        { value: "marks", label: "socialMarks", note: "socialMarksNote", shape: "row" },
         { value: "off", label: "off", shape: "blank" },
       ],
     },
     {
+      // Off first, as the shop drew it. What it names is what the shop takes:
+      // cash on delivery always, bKash and Nagad only where a product is paid
+      // for up front -- there is no card gateway, so no card is named.
       key: "payments",
       label: "footerPayments",
-      initial: "on",
+      initial: "off",
       emptyValues: ["off"],
       emptyLabel: "footerPaymentsEmpty",
       options: [
-        { value: "on", label: "paymentsOn", note: "paymentsOnNote", shape: "row" },
         { value: "off", label: "off", shape: "blank" },
+        { value: "on", label: "paymentsOn", note: "paymentsOnNote", shape: "row" },
       ],
     },
     {
-      // On by default, and the home page's own sign-up is off: the footer is
-      // where a shopper expects this, so a shop gets one out of the box and a
-      // merchant adds the second deliberately rather than discovering two.
+      // WhatsApp or nothing (2026-09-24). The email option went: the email
+      // newsletter was dropped on 2026-09-22 and nothing stores an address, so
+      // a box asking for one would take addresses into nowhere.
       key: "newsletter",
       label: "footerNewsletter",
-      initial: "email",
+      initial: "off",
       emptyValues: ["off"],
       emptyLabel: "footerNewsletterEmpty",
       options: [
-        { value: "email", label: "signupEmail", note: "footerNewsletterEmailNote", shape: "line" },
-        { value: "whatsapp", label: "signupWhatsapp", note: "footerNewsletterWhatsappNote", shape: "line" },
         { value: "off", label: "off", shape: "blank" },
+        { value: "whatsapp", label: "signupWhatsapp", note: "footerNewsletterWhatsappNote", shape: "line" },
       ],
     },
     {

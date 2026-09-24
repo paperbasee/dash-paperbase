@@ -57,7 +57,10 @@ import { ConflictDialog } from "../ConflictDialog";
 import { SaveStatus } from "../SaveStatus";
 import { useAutosave } from "../useAutosave";
 import { SlotCanvas } from "./SlotCanvas";
-import type { BlogPreview } from "./ShopChrome";
+import type { BlogPreview, ShopIdentity } from "./ShopChrome";
+import { useBranding } from "@/context/BrandingContext";
+import { useStoreSettingsCurrentQuery } from "@/hooks/useStoreSettingsCurrentQuery";
+import { STORE_SOCIAL_LINK_KEYS } from "@/lib/storeSocialLinks";
 import { StylePanel } from "./StylePanel";
 
 /**
@@ -184,6 +187,19 @@ export function SlotEditor({ loaded }: { loaded: ThemeEditorState }) {
   // field shows the name of something the merchant just chose, and falls back
   // to the id for a pick made in another session until they open the picker.
   const products = useProductsQuery({ page_size: "20", ordering: "-created_at" });
+  // This shop's own name, contact and social links, so the footer is its
+  // footer; and the two switches its Customer Service column follows.
+  const { branding } = useBranding();
+  const storeSettings = useStoreSettingsCurrentQuery();
+  const shop: ShopIdentity = {
+    name: branding?.admin_name?.trim() ?? "",
+    address: branding?.address?.trim() ?? "",
+    phone: branding?.phone?.trim() ?? "",
+    email: branding?.contact_email?.trim() ?? "",
+    social: STORE_SOCIAL_LINK_KEYS.filter((key) => (branding?.social_links?.[key] ?? "").trim() !== ""),
+    wishlist: storeSettings.data?.modules_enabled?.wishlist === true,
+    orderLookup: storeSettings.data?.modules_enabled?.order_lookup === true,
+  };
   // This shop's own posts and tags, so the blog's drawings are its blog. Only
   // what a shopper can see -- published and public -- newest first, as the
   // shop lists them; the date written the way the shop writes it. The tags are
@@ -553,6 +569,7 @@ export function SlotEditor({ loaded }: { loaded: ThemeEditorState }) {
               here would be a second list to keep in step.
             */
             blog={blog}
+            shop={shop}
             promiseWords={(name) =>
               blockFields(state.manifest, "promises", "promise", locale).find(
                 (field) => field.id === "promise",
