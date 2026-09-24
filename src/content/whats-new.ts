@@ -22,7 +22,8 @@
  * has read — the checkout's entry on 2026-09-24 was the first addition to hit
  * the cap that way. What that one did instead: it MERGED the two cart entries,
  * which were one feature told twice. Do that, or drop a released entry; never
- * drop a held one to make room.
+ * drop a held one to make room. (The search page's entry, the same day, merged
+ * the checkout's two -- its page and the form that moved onto it.)
  *
  * ## Entries written before their release — ONE DATE, RESTAMP IT ON THE DAY
  *
@@ -73,6 +74,21 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-09-22-search-page-choices",
+    date: "2026-09-22",
+    version: "4.91.0",
+    tag: "new",
+    href: "/settings?tab=customization",
+    title: {
+      en: "Design your search page",
+      bn: "সার্চ পেজ সাজান",
+    },
+    body: {
+      en: "Choose whether the results heading says how many were found, whether matching categories sit above the products, and how many products go across. A long answer can now reach past the first 48 with a Load more button or numbered pages, a search that finds nothing can offer your categories as a way on, and an empty search box can show your best sellers instead of a line of help.",
+      bn: "ফলাফলের শিরোনামে কয়টি পাওয়া গেল তা দেখাবেন কি না, পণ্যের উপরে মিলে যাওয়া ক্যাটাগরি থাকবে কি না, আর একসারিতে কয়টি পণ্য — ঠিক করুন। লম্বা উত্তরে এখন প্রথম ৪৮টির পরেও যাওয়া যায় “আরও দেখুন” বোতাম বা নম্বর দেওয়া পাতায়, কিছু না মিললে আপনার ক্যাটাগরিগুলো এগোনোর পথ হিসেবে দেখানো যায়, আর খালি সার্চ বক্সে সাহায্যের লাইনের বদলে আপনার সবচেয়ে বেশি বিক্রি হওয়া পণ্য দেখানো যায়।",
+    },
+  },
+  {
     id: "2026-09-22-wishlist-page-choices",
     date: "2026-09-22",
     version: "4.90.0",
@@ -103,24 +119,9 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     },
   },
   {
-    id: "2026-09-22-checkout-form-moves",
-    date: "2026-09-22",
-    version: "4.86.0",
-    tag: "improved",
-    href: "/settings?tab=customization",
-    title: {
-      en: "The customer form moves into the editor",
-      bn: "ক্রেতার ফর্ম চলে এল এডিটরে",
-    },
-    body: {
-      en: "Choosing the short or long customer form has moved from Settings → Checkout to your checkout page in the editor, where you can see the form while you decide. It is saved the same way as everything else there — when you press Save to store. The short form now really is shorter: name, phone, district and area, with no email or street address box at all.",
-      bn: "ক্রেতার ছোট নাকি বড় ফর্ম হবে — এই পছন্দটি সেটিংস → চেকআউট থেকে সরে এডিটরের চেকআউট পেজে এসেছে, যেখানে ফর্মটি দেখতে দেখতেই ঠিক করতে পারবেন। সেখানকার বাকি সবকিছুর মতোই এটি সংরক্ষিত হয় — আপনি “স্টোরে সংরক্ষণ” চাপলে। ছোট ফর্মটি এখন সত্যিই ছোট: নাম, ফোন, জেলা ও থানা — ইমেইল বা রাস্তার ঠিকানার ঘর একেবারেই নেই।",
-    },
-  },
-  {
     id: "2026-09-22-checkout-page-shell",
     date: "2026-09-22",
-    version: "4.83.0",
+    version: "4.86.0",
     tag: "new",
     href: "/settings?tab=customization",
     title: {
@@ -128,8 +129,8 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
       bn: "চেকআউট পেজ নিজের মতো সাজান",
     },
     body: {
-      en: "The Checkout page in your editor is real now: strip the header down to your shop's name so nothing leads a shopper away mid-order or keep the full one, and end the page with your privacy, returns and cancellation links, the whole footer, or nothing. The order sits beside the form where it can be seen — quantities still theirs to change or fixed, the discount code box inside the summary, the ways they can pay beside the button, a Cart · Checkout · Done bar at the top, and your promises above the form. You can also write a line of your own to be read in the second before someone pays — quietly, or in a box they cannot miss.",
-      bn: "এডিটরের চেকআউট পেজটি এখন সত্যিকারের: হেডার ছোট করে শুধু দোকানের নাম রাখুন যাতে অর্ডারের মাঝপথে ক্রেতাকে কিছু অন্যদিকে না টানে, নয়তো পুরোটাই রাখুন; আর পেজের শেষে গোপনীয়তা, ফেরত ও বাতিলের লিংক, পুরো ফুটার, কিংবা কিছুই না। অর্ডারটি এখন ফর্মের পাশেই থাকে, চোখের সামনে — সংখ্যা বদলানো যাবে নাকি স্থির, ডিসকাউন্ট কোডের ঘর সারাংশের ভিতরে, টাকা দেওয়ার উপায়গুলো বাটনের পাশে, উপরে “কার্ট · চেকআউট · সম্পন্ন” বার, আর ফর্মের উপরে প্রতিশ্রুতিগুলো। টাকা দেওয়ার ঠিক আগের মুহূর্তে পড়ার জন্য নিজের এক লাইনও লিখতে পারেন — চুপচাপ, নয়তো এমন বাক্সে যা চোখ এড়ায় না।",
+      en: "The Checkout page in your editor is real now: keep the full header or strip it to your shop's name, end the page with your policy links, the whole footer or nothing, and set the order beside the form with the discount code box, the ways to pay, a Cart · Checkout · Done bar and your promises. The short or long customer form is chosen there too, where you can see it — it moved from Settings → Checkout, is saved when you press Save to store, and the short form is now really short: name, phone, district and area. You can also write a line of your own to be read in the second before someone pays.",
+      bn: "এডিটরের চেকআউট পেজটি এখন সত্যিকারের: পুরো হেডার রাখুন নাকি শুধু দোকানের নাম, পেজের শেষে নীতিমালার লিংক, পুরো ফুটার নাকি কিছুই না, আর অর্ডারটি ফর্মের পাশে — সাথে ডিসকাউন্ট কোডের ঘর, টাকা দেওয়ার উপায়, “কার্ট · চেকআউট · সম্পন্ন” বার আর আপনার প্রতিশ্রুতিগুলো। ক্রেতার ছোট নাকি বড় ফর্ম — সেটিও এখন সেখানেই, দেখতে দেখতে ঠিক করা যায়: সেটিংস → চেকআউট থেকে সরে এসেছে, “স্টোরে সংরক্ষণ” চাপলে সংরক্ষিত হয়, আর ছোট ফর্মটি এখন সত্যিই ছোট — নাম, ফোন, জেলা ও থানা। টাকা দেওয়ার ঠিক আগের মুহূর্তে পড়ার জন্য নিজের এক লাইনও লিখতে পারেন।",
     },
   },
   {
