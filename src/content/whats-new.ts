@@ -24,7 +24,8 @@
  * which were one feature told twice. Do that, or drop a released entry; never
  * drop a held one to make room. (The search page's entry, the same day, merged
  * the checkout's two -- its page and the form that moved onto it -- and the
- * blog's merged the corners and the card style, both the Style panel.)
+ * blog's merged the corners and the card style, both the Style panel -- and
+ * the footer's merged the home page's two band entries.)
  *
  * ## Entries written before their release — ONE DATE, RESTAMP IT ON THE DAY
  *
@@ -74,6 +75,21 @@ export interface WhatsNewEntry {
 export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
+  {
+    id: "2026-09-22-footer-choices",
+    date: "2026-09-22",
+    version: "4.93.0",
+    tag: "new",
+    href: "/settings?tab=customization",
+    title: {
+      en: "Design your footer",
+      bn: "ফুটার সাজান",
+    },
+    body: {
+      en: "Arrange your footer in columns, with your shop on one side, centred, or as a single short line, and choose whether it shows your address and phone or only your email. Show your social links as names or as round marks, the ways you take payment, a button that opens WhatsApp to your number, and your policy pages beside the year. Everything comes from what you already set in Settings, and appears on every page.",
+      bn: "ফুটার সাজান কলামে, একপাশে দোকান রেখে, মাঝখানে, নয়তো ছোট এক লাইনে — আর ঠিক করুন ঠিকানা ও ফোন দেখাবে নাকি শুধু ইমেইল। সোশ্যাল লিংক দেখান নামে বা গোল চিহ্নে, আপনি যেভাবে টাকা নেন, আপনার নম্বরে হোয়াটসঅ্যাপ খোলার একটি বোতাম, আর সালের পাশে নীতিমালার পেজগুলো। সবকিছু আসে সেটিংসে আগে থেকে দেওয়া তথ্য থেকে, আর প্রতিটি পাতায় দেখা যায়।",
+    },
+  },
   {
     id: "2026-09-22-blog-page-choices",
     date: "2026-09-22",
@@ -243,15 +259,15 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     id: "2026-09-22-three-departments-on-your-home-page",
     date: "2026-09-22",
     version: "4.59.0",
-    tag: "improved",
+    tag: "new",
     href: "/settings?tab=customization",
     title: {
-      en: "Your home page picks three categories",
-      bn: "হোম পেজে এখন তিনটি ক্যাটাগরি",
+      en: "New rows for your home page",
+      bn: "হোম পেজের নতুন সারি",
     },
     body: {
-      en: "Your home page used to show a row for every category you have, which on a full shop meant scrolling past twenty of them. Now you tick three in Customization, and each row carries that category and everything inside it. Under them is a new button that opens every product you sell, on a page of its own.",
-      bn: "আগে আপনার প্রতিটি ক্যাটাগরির জন্য একটি করে সারি দেখানো হতো — বড় দোকানে কুড়িটিরও বেশি। এখন কাস্টমাইজেশনে তিনটি টিক করে দেবেন, আর প্রতিটি সারিতে সেই ক্যাটাগরি ও তার ভেতরের সব পণ্য থাকবে। নিচে নতুন একটি বোতাম, যেখানে চাপ দিলে আপনার সব পণ্য নিয়ে আলাদা একটি পাতা খুলবে।",
+      en: "Your home page shows three categories you tick, each with everything inside it, instead of a row for every category you have — and a button under them opens every product you sell on a page of its own. You can also show a row of products you choose, a row of your best sellers and a row of your newest, the last two filling themselves. Each row scrolls sideways, and “Browse everything” opens the rest.",
+      bn: "হোম পেজে এখন আপনার প্রতিটি ক্যাটাগরির সারির বদলে আপনার টিক করা তিনটি ক্যাটাগরি, ভেতরের সব পণ্যসহ — আর নিচের একটি বোতাম আপনার সব পণ্য নিয়ে আলাদা পাতা খোলে। আপনার বেছে নেওয়া পণ্য, সবচেয়ে বেশি বিক্রি হওয়া পণ্য আর নতুন পণ্যের সারিও দেখাতে পারেন, শেষের দুটি নিজেই ভরে যায়। প্রতিটি সারি পাশে সরানো যায়, আর “সব দেখুন” চাপলে বাকিগুলো খোলে।",
     },
   },
   {
@@ -267,21 +283,6 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     body: {
       en: "Under your categories you can now show up to four promises — cash on delivery, easy returns, help every day — ticked from a list of sixteen. They are written in each shopper's own language, English or Bangla, so you never write them twice. The same four appear on every product page, where the old fixed wording used to sit.",
       bn: "ক্যাটাগরির নিচে এখন চারটি পর্যন্ত প্রতিশ্রুতি দেখানো যাবে — ক্যাশ অন ডেলিভারি, সহজ রিটার্ন, প্রতিদিন সহায়তা — ষোলোটির তালিকা থেকে টিক করে। প্রতিটি ক্রেতা নিজের ভাষায় সেগুলো পড়বেন, ইংরেজি হোক বা বাংলা, তাই দুবার লিখতে হবে না। একই চারটি প্রতিটি প্রোডাক্ট পাতায়ও দেখা যাবে, যেখানে আগে বাঁধা লেখা ছিল।",
-    },
-  },
-  {
-    id: "2026-09-22-home-page-product-rows",
-    date: "2026-09-22",
-    version: "4.55.0",
-    tag: "new",
-    href: "/settings?tab=customization",
-    title: {
-      en: "Three new rows for your home page",
-      bn: "হোম পেজের জন্য তিনটি নতুন সারি",
-    },
-    body: {
-      en: "Under your categories you can now show a row of products you choose yourself, a row of your best sellers, and a row of whatever you added most recently. You fill the first one by ticking a list — up to eight at a time — and the other two fill themselves from your shop, so there is nothing to keep up to date. Each row scrolls sideways, and “Browse everything” opens a page of its own with the rest.",
-      bn: "ক্যাটাগরির নিচে এখন তিনটি সারি দেখানো যাবে — আপনার বেছে নেওয়া পণ্য, সবচেয়ে বেশি বিক্রি হওয়া পণ্য, আর সবশেষে যেগুলো যোগ করেছেন। প্রথম সারিটি একসাথে আটটি পণ্য টিক করে ভরা যায়, আর অন্য দুটি নিজেই ভরে যায়। প্রতিটি সারি পাশে সরানো যায়, আর “সব দেখুন” চাপলে বাকিগুলো নিয়ে আলাদা পাতা খোলে।",
     },
   },
   {
