@@ -1,10 +1,11 @@
 /**
  * The footer, wired (2026-09-24).
  *
- * All six places are settings of the one `footer` section, drawn at the bottom
- * of every page. A document never touched reads as the shop drew it. The
- * sign-up is WhatsApp or nothing -- the email newsletter was dropped -- and the
- * drawing is the shop's own: its name, contact, social links and pages, where
+ * All five places are settings of the one `footer` section, drawn at the bottom
+ * of every page. A document never touched reads as the shop drew it. There is
+ * no sign-up: the email one went with the email newsletter, and the WhatsApp
+ * one with the home page's band (owner, 2026-09-24). And the drawing is the
+ * shop's own: its name, contact, social links and pages, where
  * it used to be "Gadzilla, 12 Gulshan Avenue" with Careers and Wholesale for
  * every merchant, and Visa and Mastercard for a platform with no card gateway.
  */
@@ -44,7 +45,6 @@ const manifest: ThemeManifest = {
         choice("contact", ["full", "email", "off"], "full"),
         choice("social", ["names", "marks", "off"], "names"),
         { id: "payments", type: "boolean", ...labels("payments"), default: false },
-        choice("signup", ["off", "whatsapp"], "off"),
         choice("bottom", ["copyright", "policies"], "copyright"),
       ],
     },
@@ -101,7 +101,6 @@ describe("the footer is wired", () => {
     expect(slotValueFor(document, place("contact"))).toBe("full");
     expect(slotValueFor(document, place("social"))).toBe("names");
     expect(slotValueFor(document, place("payments"))).toBe("off");
-    expect(slotValueFor(document, place("newsletter"))).toBe("off");
     expect(slotValueFor(document, place("bottom"))).toBe("copyright");
   });
 
@@ -110,14 +109,12 @@ describe("the footer is wired", () => {
     expect(settingsOf(pick(editor(), "contact", "email")).contact).toBe("email");
     expect(settingsOf(pick(editor(), "social", "marks")).social).toBe("marks");
     expect(settingsOf(pick(editor(), "payments", "on")).payments).toBe(true);
-    expect(settingsOf(pick(editor(), "newsletter", "whatsapp")).signup).toBe("whatsapp");
     expect(settingsOf(pick(editor(), "bottom", "policies")).bottom).toBe("policies");
   });
 
-  test("there is no email sign-up", () => {
-    const newsletter = SLOTS.footer.find((one) => one.key === "newsletter")!;
-    expect(newsletter.options!.map((one) => one.value)).toEqual(["off", "whatsapp"]);
-    expect(newsletter.initial).toBe("off");
+  test("there is no sign-up at all: the home page's band is the one", () => {
+    expect(SLOTS.footer.map((one) => one.key)).not.toContain("newsletter");
+    expect(wiringFor("footer", "newsletter")).toBeNull();
   });
 
   test("the defaults the tiles start on are the shop's", () => {
@@ -152,7 +149,7 @@ describe("the canvas draws this shop's footer", () => {
     for (const slot of SLOTS.footer) {
       for (const option of slot.options ?? []) {
         const html = draw(slot.key, option.value, {
-          live: footer({ payments: true, signup: "whatsapp", social: "names", bottom: "policies" }),
+          live: footer({ payments: true, social: "names", bottom: "policies" }),
         });
         for (const word of ["12 Gulshan", "+880 1700", "hello@gadzilla", "Careers", "Wholesale", "YouTube", "Visa", "Mastercard", "Rocket"]) {
           if (html.includes(word)) guilty.push(`${slot.key}=${option.value} says "${word}"`);
@@ -189,12 +186,6 @@ describe("the canvas draws this shop's footer", () => {
   test("the payment marks are what the shop takes", () => {
     const html = draw("payments", "on");
     for (const method of ["Cash on delivery", "bKash", "Nagad"]) expect(html).toContain(method);
-  });
-
-  test("the WhatsApp sign-up is a button, and says what is missing without a number", () => {
-    expect(draw("newsletter", "whatsapp")).toContain("Message us on WhatsApp");
-    const none = draw("newsletter", "whatsapp", { shop: { ...SHOP, social: [] } });
-    expect(none).toContain("Add a WhatsApp number in Settings");
   });
 
   test("the policies are the pages the shop has", () => {

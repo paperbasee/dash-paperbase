@@ -549,7 +549,6 @@ export function ShopChrome({
       payments:
         force.payments ??
         (typeof held.payments === "boolean" ? (held.payments ? "on" : "off") : (settings?.payments ?? "off")),
-      newsletter: force.newsletter ?? chosen("signup", "newsletter", "off"),
       bottom: force.bottom ?? chosen("bottom", "bottom", "copyright"),
     };
     const layout = force.layout ?? chosen("footer_layout", "layout", "columns");
@@ -653,35 +652,6 @@ export function ShopChrome({
         </div>
       );
 
-    /**
-     * The sign-up sits AFTER the links, not above them.
-     *
-     * At the top it competed with the shop's own name for the first line of the
-     * footer and read as something stuck on. A shopper who has scrolled this far
-     * has finished looking; the ask belongs after they have found what they came
-     * for. WhatsApp only: a heading and the button that opens the chat -- no box
-     * to type in, because there is nothing to type.
-     */
-    const newsletter =
-      set.newsletter !== "whatsapp" ? null : (
-        <div
-          className={cn(
-            "mt-6 flex flex-wrap items-center gap-4 rounded-sm bg-current/[0.06] px-4 py-4",
-            centred && "justify-center text-center",
-          )}
-        >
-          <p className="min-w-0 flex-1 text-[12px] font-semibold text-foreground">{t("footerSignupHeading")}</p>
-          {me.social.includes("whatsapp") ? (
-            <span className="inline-flex h-9 shrink-0 items-center gap-2 rounded-xs bg-foreground px-4 text-[11px] font-medium text-background">
-              <SocialLinkGlyph platform="whatsapp" />
-              {t("footerSignupButton")}
-            </span>
-          ) : (
-            <span className="text-[10.5px] italic text-current/45">{t("footerSignupNoNumber")}</span>
-          )}
-        </div>
-      );
-
     const policies = [t("footerPrivacy"), t("footerReturns"), t("footerCancellation")].join(" · ");
     const bottom =
       set.bottom === "policies" ? (
@@ -702,16 +672,15 @@ export function ShopChrome({
         {children}
       </div>
     );
-    return { layout, set, name, columns, contactLines, contactNote, shopBlock, heading, links, social, payments, newsletter, bottom, band, centred };
+    return { layout, set, name, columns, contactLines, contactNote, shopBlock, heading, links, social, payments, bottom, band, centred };
   };
 
   if (slotKey === "footer") {
-    const { layout, name, columns, contactLines, contactNote, shopBlock, heading, links, social, payments, newsletter, bottom, centred } =
+    const { layout, name, columns, contactLines, contactNote, shopBlock, heading, links, social, payments, bottom, centred } =
       footerParts(variant ? { layout: variant } : {});
     const shell = (children: React.ReactNode) => (
       <div className={cn("border-t border-border bg-muted px-5 py-6 text-current/65", centred && "text-center")}>
         {children}
-        {newsletter}
         {social}
         {payments}
         {bottom}
@@ -1147,7 +1116,7 @@ export function ShopChrome({
               {words("button_label", t("signupWhatsappButton"))}
             </span>
           ) : (
-            <p className="mt-3 text-[11px] italic text-current/50">{t("footerSignupNoNumber")}</p>
+            <p className="mt-3 text-[11px] italic text-current/50">{t("signupNoNumber")}</p>
           )}
         </div>
       );
@@ -2942,10 +2911,6 @@ export function ShopChrome({
     case "footer:payments": {
       const parts = footerParts({ payments: variant ?? "off" });
       return parts.band(parts.payments);
-    }
-    case "footer:newsletter": {
-      const parts = footerParts({ newsletter: variant ?? "off" });
-      return parts.band(parts.newsletter);
     }
     case "footer:bottom": {
       const parts = footerParts({ bottom: variant ?? "copyright" });

@@ -1498,20 +1498,12 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
         { value: "on", label: "paymentsOn", note: "paymentsOnNote", shape: "row" },
       ],
     },
-    {
-      // WhatsApp or nothing (2026-09-24). The email option went: the email
-      // newsletter was dropped on 2026-09-22 and nothing stores an address, so
-      // a box asking for one would take addresses into nowhere.
-      key: "newsletter",
-      label: "footerNewsletter",
-      initial: "off",
-      emptyValues: ["off"],
-      emptyLabel: "footerNewsletterEmpty",
-      options: [
-        { value: "off", label: "off", shape: "blank" },
-        { value: "whatsapp", label: "signupWhatsapp", note: "footerNewsletterWhatsappNote", shape: "line" },
-      ],
-    },
+    /*
+      A sign-up place sat here until 2026-09-24 -- email, then WhatsApp or
+      nothing -- and the home page's WhatsApp band put the same invitation on a
+      page twice. The owner kept the band: "remove one WhatsApp, from the
+      footer". `theming/0032` took the setting out of every document.
+    */
     {
       key: "bottom",
       label: "footerBottom",

@@ -688,9 +688,9 @@ export const WIRED_SLOTS: Partial<Record<SlotPageKey, Record<string, WiredSlot>>
 
     Each map starts with the theme's default, so a document written before
     today reads as the shop drew it: columns, the address and phone, the social
-    links as NAMES (what the shop wrote out), no payment marks, no sign-up, the
-    year. The sign-up is WhatsApp or nothing: the email newsletter was dropped
-    on 2026-09-22 and nothing stores an address.
+    links as NAMES (what the shop wrote out), no payment marks, the year. It
+    had a WhatsApp sign-up until the home page's band made it a second one
+    (owner, 2026-09-24).
   */
   footer: {
     layout: {
@@ -723,13 +723,6 @@ export const WIRED_SLOTS: Partial<Record<SlotPageKey, Record<string, WiredSlot>>
       sections: {
         off: { type: "footer", settings: { payments: false } },
         on: { type: "footer", settings: { payments: true } },
-      },
-    },
-    newsletter: {
-      page: "footer",
-      sections: {
-        off: { type: "footer", settings: { signup: "off" } },
-        whatsapp: { type: "footer", settings: { signup: "whatsapp" } },
       },
     },
     bottom: {
