@@ -73,6 +73,21 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-09-22-wishlist-page-choices",
+    date: "2026-09-22",
+    version: "4.90.0",
+    tag: "new",
+    href: "/settings?tab=customization",
+    title: {
+      en: "Design your wishlist page",
+      bn: "উইশলিস্ট পেজ সাজান",
+    },
+    body: {
+      en: "Show how many things are saved beside the title or just the word, lay them out as a grid of cards or as a compact list that fits more on a screen, and say something inviting when nothing is saved yet — which is the version of the page most people meet. You can also decide whether a saved thing can be bought straight from the list or only opened, which is the one choice here that changes what the page is for.",
+      bn: "শিরোনামের পাশে কয়টি সংরক্ষিত আছে দেখাবেন নাকি শুধু শব্দটি, পণ্যগুলো কার্ডের গ্রিডে নাকি ছোট তালিকায় — যাতে একসাথে বেশি দেখা যায় — আর কিছু সংরক্ষিত না থাকলে আমন্ত্রণমূলক কিছু বলা, যেটি বেশিরভাগ মানুষ দেখেন। সংরক্ষিত পণ্যটি তালিকা থেকেই কেনা যাবে নাকি শুধু খোলা যাবে, সেটিও ঠিক করতে পারেন — এই পাতার একমাত্র সিদ্ধান্ত যা পাতাটির উদ্দেশ্যই বদলে দেয়।",
+    },
+  },
+  {
     id: "2026-09-22-account-page-choices",
     date: "2026-09-22",
     version: "4.88.0",

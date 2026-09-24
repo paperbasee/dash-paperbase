@@ -356,6 +356,59 @@ export const WIRED_SLOTS: Partial<Record<SlotPageKey, Record<string, WiredSlot>>
     },
   },
   /*
+    The wishlist, 2026-09-24. The fifth and last page that was drawn in markup
+    no merchant could reach -- and unlike the account's, all four of its places
+    were real things the shop could do, two of which it already did.
+
+    `items` decides what the VIEW renders in two places: a shopper who is not
+    signed in has a list only their browser knows, so those cards are asked for
+    afterwards and drawn on their own. Both go through one snippet, or the two
+    halves of one page disagree about their shape.
+  */
+  wishlist: {
+    heading: {
+      page: "templates.wishlist",
+      sections: {
+        withCount: { type: "wishlist", settings: { heading: "count" } },
+        plain: { type: "wishlist", settings: { heading: "plain" } },
+      },
+    },
+    items: {
+      page: "templates.wishlist",
+      sections: {
+        grid: { type: "wishlist", settings: { items: "grid" } },
+        rows: { type: "wishlist", settings: { items: "rows" } },
+      },
+    },
+    /*
+      What a saved item offers. "Add to cart" leaves the card exactly as the
+      shop draws it everywhere else -- the owner's call on 2026-09-24 -- so a
+      shop whose card style carries Order now shows Order now here. "Just the
+      product" takes the shortcut away WITHOUT changing what the card is: it is
+      `quiet`, not a third card style, because drawing the shelf card for it
+      changed nothing at all on a shop whose cards are already shelf.
+    */
+    action: {
+      page: "templates.wishlist",
+      sections: {
+        cart: { type: "wishlist", settings: { action: "cart" } },
+        look: { type: "wishlist", settings: { action: "look" } },
+      },
+    },
+    /*
+      Almost everyone who opens a wishlist for the first time sees this, so it
+      is the version of the page most people meet. `invite` first: it is the
+      theme's default and what every shop drew before this was a choice.
+    */
+    empty: {
+      page: "templates.wishlist",
+      sections: {
+        invite: { type: "wishlist", settings: { when_empty: "invite" } },
+        text: { type: "wishlist", settings: { when_empty: "text" } },
+      },
+    },
+  },
+  /*
     The account, 2026-09-24. The last of the four pages drawn in markup no
     merchant could reach -- and the one whose places were furthest from the
     truth: two of the five offered things the shop has never had, and none of
