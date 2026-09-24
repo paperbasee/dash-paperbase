@@ -114,6 +114,24 @@ export const WIRED_SLOTS: Partial<Record<SlotPageKey, Record<string, WiredSlot>>
     },
     bestsellers: { page: "templates.home", sections: { row: "best_sellers" }, off: "off" },
     arrivals: { page: "templates.home", sections: { row: "new_arrivals" }, off: "off" },
+    /*
+      The rest of the page, 2026-09-24. Brands, reviews and posts are read from
+      the shop -- a heading is all a merchant writes -- and the reviews are one
+      section in two shapes, like the category band. The questions are the
+      `faq` section's own blocks, written in the pop-up.
+    */
+    brands: { page: "templates.home", sections: { row: "brand_row" }, off: "off" },
+    reviews: {
+      page: "templates.home",
+      sections: {
+        cards: { type: "review_highlights", settings: { layout: "cards" } },
+        quote: { type: "review_highlights", settings: { layout: "quote" } },
+      },
+      off: "off",
+    },
+    posts: { page: "templates.home", sections: { three: "latest_posts" }, off: "off" },
+    signup: { page: "templates.home", sections: { whatsapp: "whatsapp" }, off: "off" },
+    faq: { page: "templates.home", sections: { on: "faq" }, off: "off" },
   },
   /*
     The product page, 2026-09-23. Stage 1 of the same four-stage shape the

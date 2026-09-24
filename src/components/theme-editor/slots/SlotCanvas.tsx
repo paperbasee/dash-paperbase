@@ -15,7 +15,7 @@ import {
 } from "@/lib/theme-editor/slot-catalogue";
 import { ownerOf, sectionFor, slotValueFor, wiringFor } from "@/lib/theme-editor/slot-sections";
 import type { FieldOption } from "@/lib/theme-editor/field-specs";
-import { type BlogPreview, ShopChrome, type ShopIdentity } from "./ShopChrome";
+import { type BlogPreview, type BrandPreview, type ReviewPreview, ShopChrome, type ShopIdentity } from "./ShopChrome";
 import { SlotDialog } from "./SlotDialog";
 
 /**
@@ -175,6 +175,8 @@ function SlotRegion({
   promiseWords,
   blog,
   shop,
+  brands,
+  reviews,
   className,
   children,
 }: {
@@ -194,6 +196,9 @@ function SlotRegion({
   blog?: BlogPreview;
   /** This shop's own name, contact and links, for the footer. See ShopChrome. */
   shop?: ShopIdentity;
+  /** This shop's brands and good reviews, for the home page. See ShopChrome. */
+  brands?: BrandPreview[];
+  reviews?: ReviewPreview[];
   className?: string;
   /** The chooser, when this place is on its own and can hold it. */
   children?: React.ReactNode;
@@ -272,6 +277,8 @@ function SlotRegion({
           promiseWords={promiseWords}
           blog={blog}
           shop={shop}
+          brands={brands}
+          reviews={reviews}
         />
       )}
 
@@ -324,6 +331,8 @@ export function SlotCanvas({
   promiseWords,
   blog,
   shop,
+  brands,
+  reviews,
   productName,
   onGoToPage,
 }: {
@@ -375,6 +384,9 @@ export function SlotCanvas({
   blog?: BlogPreview;
   /** This shop's own name, contact and links, for the footer. See ShopChrome. */
   shop?: ShopIdentity;
+  /** This shop's brands and good reviews, for the home page. See ShopChrome. */
+  brands?: BrandPreview[];
+  reviews?: ReviewPreview[];
   /** A product's public id to its name, so a picked band shows what it holds. */
   productName: (publicId: string) => string;
   /**
@@ -483,6 +495,8 @@ export function SlotCanvas({
                 promiseWords={promiseWords}
                 blog={blog}
                 shop={shop}
+                brands={brands}
+                reviews={reviews}
               >
                 {chooser}
               </SlotRegion>
@@ -518,6 +532,8 @@ export function SlotCanvas({
                         promiseWords={promiseWords}
                         blog={blog}
                         shop={shop}
+                        brands={brands}
+                        reviews={reviews}
                       />
                     ))}
                   </div>

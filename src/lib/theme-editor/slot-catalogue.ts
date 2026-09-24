@@ -264,6 +264,16 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
         { value: "off", label: "off", shape: "blank" },
       ],
     },
+    /*
+      The rest of the page, wired 2026-09-24. A "Video" place sat between the
+      reviews and the posts until then, and it was the same `video` section the
+      hero's Video choice already owns -- two places cannot both own one
+      section, and the hero offers a video. Taken back.
+
+      Brands, reviews and posts are READ from the shop, so what a merchant
+      decides is whether they are on (and, for reviews, their shape); the
+      sign-up is WhatsApp or nothing, the email newsletter having been dropped.
+    */
     {
       key: "brands",
       label: "brands",
@@ -288,17 +298,6 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
       ],
     },
     {
-      key: "video",
-      label: "video",
-      initial: "off",
-      emptyValues: ["off"],
-      emptyLabel: "videoEmpty",
-      options: [
-        { value: "on", label: "videoOn", note: "videoOnNote", shape: "block", premium: true },
-        { value: "off", label: "off", shape: "blank" },
-      ],
-    },
-    {
       key: "posts",
       label: "posts",
       initial: "off",
@@ -317,7 +316,6 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
       emptyLabel: "signupEmpty",
       options: [
         { value: "whatsapp", label: "signupWhatsapp", note: "signupWhatsappNote", shape: "line" },
-        { value: "email", label: "signupEmail", note: "signupEmailNote", shape: "line" },
         { value: "off", label: "off", shape: "blank" },
       ],
     },

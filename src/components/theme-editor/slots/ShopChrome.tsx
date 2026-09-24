@@ -184,6 +184,17 @@ export type PostPreview = {
 export type BlogPreview = { posts: PostPreview[]; tags: string[] };
 
 /**
+ * The home page's brands and reviews, as the shop picks them (2026-09-24).
+ *
+ * Handed in by the editor, like the posts: "Nusrat J." and six grey logos were
+ * nobody's shop. The brands are the ones with the most products, active ones
+ * only; the reviews are the newest published ones with four or five stars and
+ * something written -- the shop's own rule, so the drawing and the page agree.
+ */
+export type BrandPreview = { name: string; logo: boolean };
+export type ReviewPreview = { name: string; rating: number; body: string; product: string; byShop: boolean };
+
+/**
  * This shop's own details, for the footer: what Settings holds, as the shop
  * draws it.
  *
@@ -278,6 +289,8 @@ export function ShopChrome({
   promiseWords,
   blog,
   shop,
+  brands,
+  reviews,
 }: {
   page: SlotPageKey;
   slotKey: string;
@@ -331,6 +344,9 @@ export function ShopChrome({
   blog?: BlogPreview;
   /** This shop's own name, contact and links. See `ShopIdentity`. */
   shop?: ShopIdentity;
+  /** This shop's brands and good reviews, for the home page. See `BrandPreview`. */
+  brands?: BrandPreview[];
+  reviews?: ReviewPreview[];
 }) {
   const t = useTranslations("themeEditor.slots");
 
@@ -364,6 +380,8 @@ export function ShopChrome({
     const held = live?.settings?.[key];
     return typeof held === "string" ? held : (settings?.[key] ?? fallback);
   };
+  /** A wired band's own heading, as the merchant wrote it, or "". */
+  const liveHeading = typeof live?.settings?.heading === "string" ? live.settings.heading.trim() : "";
   const postLine = (meta: string) => (post: PostPreview) =>
     meta === "reads" ? t("blogReadsExample", { count: post.reads }) : meta === "none" ? null : post.date || null;
 
@@ -1034,101 +1052,138 @@ export function ShopChrome({
         </div>
       );
 
-    case "home:brands":
+    /*
+      The rest of the home page, 2026-09-24: the shop's own brands, reviews,
+      posts and questions, and a line saying so where there is nothing -- the
+      shop draws nothing then, and a band of examples would say otherwise.
+    */
+    case "home:brands": {
+      const shown = (brands ?? []).slice(0, 6);
       return (
         <div className="px-4 py-5">
-          <SectionHead title={t("brandsHeading")} />
-          <div className="grid grid-cols-3 gap-4 sm:grid-cols-6">
-            {Array.from({ length: 6 }, (_, i) => (
-              <span key={i} className="h-8 rounded-xs bg-current/8" />
-            ))}
-          </div>
+          <SectionHead title={liveHeading || t("brandsHeading")} link={t("allBrands")} />
+          {shown.length ? (
+            <div className="grid grid-cols-3 gap-2 sm:grid-cols-6">
+              {shown.map((brand) => (
+                <div
+                  key={brand.name}
+                  className="flex min-h-14 flex-col items-center justify-center gap-1.5 rounded-xs border border-current/10 px-2 py-2 text-center"
+                >
+                  {brand.logo ? <span className="h-5 w-10 rounded-xs bg-current/10" aria-hidden /> : null}
+                  <span className="text-[10px] uppercase tracking-[0.06em] text-current/70">{brand.name}</span>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-[11px] italic text-current/45">{t("brandsNone")}</p>
+          )}
         </div>
       );
+    }
 
-    case "home:reviews":
+    case "home:reviews": {
+      const shown = (reviews ?? []).slice(0, 3);
+      const stars = (rating: number) => "★".repeat(rating) + "☆".repeat(5 - rating);
+      const who = (review: ReviewPreview) => (review.byShop ? `${review.name} · ${t("reviewsByShop")}` : review.name);
+      if (!shown.length) {
+        return (
+          <div className="px-4 py-5">
+            <SectionHead title={liveHeading || t("reviewsHeading")} />
+            <p className="text-[11px] italic text-current/45">{t("reviewsNone")}</p>
+          </div>
+        );
+      }
       return variant === "quote" ? (
         <div className="px-6 py-6 text-center">
-          <p className="text-[14px] leading-relaxed text-current/70">“{t("reviewsQuoteExample")}”</p>
-          <p className="mt-2.5 text-[11px] uppercase tracking-[0.08em] text-current/45">Nusrat J. · Dhaka</p>
+          <p className="text-[11px] text-current/70">{stars(shown[0].rating)}</p>
+          <p className="mt-2 text-[14px] leading-relaxed text-current/70">“{shown[0].body}”</p>
+          <p className="mt-2.5 text-[11px] uppercase tracking-[0.08em] text-current/45">
+            {who(shown[0])} · {shown[0].product}
+          </p>
         </div>
       ) : (
         <div className="px-4 py-4">
-          <SectionHead title={t("reviewsHeading")} />
+          <SectionHead title={liveHeading || t("reviewsHeading")} />
           <div className="grid gap-3 sm:grid-cols-3">
-            {[
-              ["Nusrat J.", t("reviewOne")],
-              ["Rafiq H.", t("reviewTwo")],
-              ["Tanvir A.", t("reviewThree")],
-            ].map(([name, words]) => (
-              <div key={name} className="rounded-md border border-current/12 p-3.5">
-                <p className="text-[11px] text-current/70">★★★★★</p>
-                <p className="mt-2 text-[11.5px] leading-relaxed text-current/65">{words}</p>
-                <p className="mt-3 flex items-center gap-2 text-[11px] font-medium">
-                  <span className="size-6 shrink-0 rounded-full bg-current/12" aria-hidden />
-                  {name}
-                </p>
+            {shown.map((review, index) => (
+              <div key={index} className="rounded-md border border-current/12 p-3.5">
+                <p className="text-[11px] text-current/70">{stars(review.rating)}</p>
+                <p className="mt-2 line-clamp-5 text-[11.5px] leading-relaxed text-current/65">{review.body}</p>
+                <p className="mt-3 text-[11px] font-medium">{who(review)}</p>
+                <p className="mt-0.5 truncate text-[10.5px] text-current/45">{review.product}</p>
               </div>
             ))}
           </div>
         </div>
       );
+    }
 
-    case "home:video":
-      return (
-        <div className="grid h-[150px] place-items-center bg-current/8 px-4">
-          <span className="grid size-12 place-items-center rounded-full bg-current/15 text-[15px]" aria-hidden>
-            ▶
-          </span>
-        </div>
-      );
-
-    case "home:posts":
+    case "home:posts": {
+      const newest = (blog?.posts ?? []).slice(0, 3);
       return (
         <div className="px-4 py-4">
-          <SectionHead title={t("postsHeading")} link={t("browseAll")} />
-          <div className="grid gap-3 sm:grid-cols-3">
-            {[t("postOne"), t("postTwo"), t("postThree")].map((title) => (
-              <div key={title} className="min-w-0">
-                <div className="aspect-[16/10] rounded-xs bg-current/8" />
-                <p className="mt-2 text-[12px] font-medium leading-snug">{title}</p>
-              </div>
-            ))}
-          </div>
+          <SectionHead title={liveHeading || t("postsHeading")} link={t("articleAllPosts")} />
+          {newest.length ? (
+            <PostCards posts={newest} line={(post) => post.date || null} cards="full" columns={3} />
+          ) : (
+            <p className="text-[11px] italic text-current/45">{t("postsNone")}</p>
+          )}
         </div>
       );
+    }
 
-    case "home:signup":
+    case "home:signup": {
+      // The shop's own words until the merchant writes theirs, and no button
+      // at all without a number to open a chat with -- as on the shop.
+      const words = (key: string, fallback: string) => {
+        const held = live?.settings?.[key];
+        return typeof held === "string" && held.trim() ? held.trim() : fallback;
+      };
+      const number = shop ? shop.social.includes("whatsapp") : true;
       return (
-        <div className="bg-current/6 px-6 py-6 text-center">
-          <p className="text-[14px] font-semibold">
-            {variant === "whatsapp" ? t("signupWhatsappHeading") : t("signupEmailHeading")}
+        <div className="bg-[color:var(--color-accent)]/15 px-6 py-6 text-center">
+          <p className="text-[15px] font-semibold">{words("heading", t("signupWhatsappHeading"))}</p>
+          <p className="mx-auto mt-1.5 max-w-md text-[11.5px] leading-relaxed text-current/65">
+            {words("body", t("signupWhatsappBody"))}
           </p>
-          <div className="mx-auto mt-3 flex max-w-sm gap-2">
-            <span className="h-9 flex-1 rounded-xs bg-current/10" />
-            <span className="grid h-9 place-items-center rounded-xs bg-foreground px-4 text-[11px] text-background">
-              {variant === "whatsapp" ? t("signupWhatsappButton") : t("signupEmailButton")}
+          {number ? (
+            <span className="mt-3 inline-grid h-9 place-items-center rounded-xs bg-foreground px-4 text-[11px] text-background">
+              {words("button_label", t("signupWhatsappButton"))}
             </span>
-          </div>
+          ) : (
+            <p className="mt-3 text-[11px] italic text-current/50">{t("footerSignupNoNumber")}</p>
+          )}
         </div>
       );
+    }
 
-    case "home:faq":
+    case "home:faq": {
+      // The merchant's own questions, as the pop-up writes them. The shop
+      // draws a heading only when one is written, so the drawing does too.
+      const asked = (live?.blocks ?? [])
+        .filter((block) => block.type === "question")
+        .map((block) => (typeof block.settings?.question === "string" ? block.settings.question.trim() : ""))
+        .filter(Boolean);
       return (
         <div className="px-4 py-4">
-          <SectionHead title={t("faqHeading")} />
-          <div className="divide-y divide-current/10 border-y border-current/10">
-            {[t("faqOne"), t("faqTwo"), t("faqThree")].map((q) => (
-              <p key={q} className="flex items-center justify-between gap-3 py-3 text-[12px] text-current/70">
-                {q}
-                <span aria-hidden className="text-current/40">
-                  +
-                </span>
-              </p>
-            ))}
-          </div>
+          {liveHeading ? <SectionHead title={liveHeading} /> : null}
+          {asked.length ? (
+            <div className="divide-y divide-current/10 border-y border-current/10">
+              {asked.map((question, index) => (
+                <p key={index} className="flex items-center justify-between gap-3 py-3 text-[12px] text-current/70">
+                  {question}
+                  <span aria-hidden className="text-current/40">
+                    +
+                  </span>
+                </p>
+              ))}
+            </div>
+          ) : (
+            <p className="text-[11px] italic text-current/45">{t("faqNone")}</p>
+          )}
         </div>
       );
+    }
 
     /**
      * The buying column, and the pictures beside it.
@@ -2451,11 +2506,16 @@ export function ShopChrome({
         <div className="px-4 py-4">
           <SectionHead title={t("productReviewsHeading")} />
           <div className="grid gap-3 sm:grid-cols-3">
-            {[
-              ["Nusrat J.", t("reviewOne")],
-              ["Rafiq H.", t("reviewTwo")],
-              ["Tanvir A.", t("reviewThree")],
-            ].map(([name, words]) => (
+            {/* The shop's own good reviews standing in for a product's, where it
+                has some; the examples only for a shop with none yet. */}
+            {(reviews?.length
+              ? reviews.slice(0, 3).map((review) => [review.name, review.body])
+              : [
+                  ["Nusrat J.", t("reviewOne")],
+                  ["Rafiq H.", t("reviewTwo")],
+                  ["Tanvir A.", t("reviewThree")],
+                ]
+            ).map(([name, words]) => (
               <div key={name} className="rounded-md border border-current/12 p-3.5">
                 <p className="text-[11px] text-current/70">★★★★★</p>
                 <p className="mt-2 text-[11.5px] leading-relaxed text-current/65">{words}</p>

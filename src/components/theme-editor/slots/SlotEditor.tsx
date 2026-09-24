@@ -32,6 +32,8 @@ import { useThemeImagesQuery } from "@/hooks/useThemesQuery";
 import { useCategoriesQuery } from "@/hooks/useCategoriesQuery";
 import { useProductsQuery } from "@/hooks/useProductsQuery";
 import { useBlogsQuery } from "@/hooks/useBlogsQuery";
+import { useBrandsQuery } from "@/hooks/useBrandsQuery";
+import { useReviewsQuery } from "@/hooks/useReviewsQuery";
 import { postWords } from "@/lib/theme-editor/post-words";
 import {
   initialChoices,
@@ -58,7 +60,7 @@ import { ConflictDialog } from "../ConflictDialog";
 import { SaveStatus } from "../SaveStatus";
 import { useAutosave } from "../useAutosave";
 import { SlotCanvas } from "./SlotCanvas";
-import type { BlogPreview, ShopIdentity } from "./ShopChrome";
+import type { BlogPreview, BrandPreview, ReviewPreview, ShopIdentity } from "./ShopChrome";
 import { useBranding } from "@/context/BrandingContext";
 import { useStoreSettingsCurrentQuery } from "@/hooks/useStoreSettingsCurrentQuery";
 import { STORE_SOCIAL_LINK_KEYS } from "@/lib/storeSocialLinks";
@@ -235,6 +237,27 @@ export function SlotEditor({ loaded }: { loaded: ThemeEditorState }) {
       }));
     return { posts, tags };
   })();
+  // The home page's brands and reviews, picked by the shop's own rules (see
+  // `BrandPreview`): the active brands with the most products, and the newest
+  // published four- and five-star reviews with something written.
+  const brandList = useBrandsQuery();
+  const brands: BrandPreview[] = (brandList.data ?? [])
+    .filter((brand) => brand.is_active && brand.product_count > 0)
+    .sort((a, b) => b.product_count - a.product_count || a.name.localeCompare(b.name))
+    .slice(0, 6)
+    .map((brand) => ({ name: brand.name, logo: Boolean(brand.image) }));
+  const published = useReviewsQuery("published");
+  const reviews: ReviewPreview[] = (published.data ?? [])
+    .filter((review) => review.rating >= 4 && review.body.trim())
+    .sort((a, b) => Date.parse(b.created_at) - Date.parse(a.created_at))
+    .slice(0, 3)
+    .map((review) => ({
+      name: review.display_name,
+      rating: review.rating,
+      body: review.body.trim(),
+      product: review.product_name,
+      byShop: review.source === "merchant",
+    }));
   const [pictureUrls] = useState<Record<string, string>>({});
 
   function pickPage(next: SlotPageKey) {
@@ -576,6 +599,8 @@ export function SlotEditor({ loaded }: { loaded: ThemeEditorState }) {
             */
             blog={blog}
             shop={shop}
+            brands={brands}
+            reviews={reviews}
             promiseWords={(name) =>
               blockFields(state.manifest, "promises", "promise", locale).find(
                 (field) => field.id === "promise",
