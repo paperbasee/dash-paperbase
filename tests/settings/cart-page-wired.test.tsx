@@ -51,6 +51,7 @@ const manifest: ThemeManifest = {
         { id: "payments", type: "boolean", ...labels("Ways to pay"), default: false },
         { id: "sticky", type: "boolean", ...labels("Sticky total"), default: true },
         { id: "trust", type: "boolean", ...labels("What you promise"), default: true },
+        { id: "trust_text", type: "text", ...labels("Your own words"), default: "" },
         { id: "steps", type: "boolean", ...labels("Three steps"), default: false },
         choice("when_empty", ["text", "invite"], "text"),
       ],
@@ -279,15 +280,17 @@ describe("round 3: selling more", () => {
 });
 
 describe("round 4: the last two", () => {
-  test("the trust line only says WHETHER, never what", () => {
+  test("the trust line's tile says WHETHER; its words are a field", () => {
     /*
-      A merchant picks their promises once, on the home page. A second list
-      here would be a second thing to keep in step, and the first shop to edit
-      one and not the other would find out.
+      The promises are picked once, on the home page, and a blank box means
+      "repeat those". The owner asked for a way to write something else here
+      (2026-09-24), so the words are a FIELD in the dialog -- not a tile, which
+      is why `settingsDecidedOn` must not claim them.
     */
     expect(sectionTypesOf(place("trust"))).toEqual(["cart"]);
     expect(settingsOf(pick(PAGE(), "trust", "off")).trust).toBe(false);
     expect(slotValueFor(PAGE().document, place("trust"))).toBe("on");
+    expect(settingsDecidedOn("cart", "cart").has("trust_text")).toBe(false);
   });
 
   test("the steps bar starts at nothing", () => {

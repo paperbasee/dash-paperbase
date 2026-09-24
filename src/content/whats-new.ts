@@ -74,8 +74,8 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
       bn: "কার্ট থেকে আরও বিক্রি",
     },
     body: {
-      en: "Add a row of things to buy alongside — your best sellers, or on Premium products chosen against what is already in the cart. You can also repeat your home-page promises there, show what the shopper looked at earlier, and put a Cart · Checkout · Done bar at the top so they can see how far there is to go.",
-      bn: "কার্টের সাথে কেনার মতো পণ্যের সারি যোগ করুন — আপনার সবচেয়ে বেশি বিক্রি হওয়া পণ্য, নয়তো প্রিমিয়ামে কার্ট মিলিয়ে বাছাই করা পণ্য। হোম পেজের প্রতিশ্রুতিগুলো এখানেও দেখাতে পারেন, ক্রেতা আগে যা দেখেছেন তা-ও, আর উপরে “কার্ট · চেকআউট · সম্পন্ন” বার দিলে আর কতদূর বাকি তা বোঝা যায়।",
+      en: "Add a row of things to buy alongside — your best sellers, or on Premium products chosen against what is already in the cart. You can also repeat your home-page promises there or write a line of your own, show what the shopper looked at earlier, and put a Cart · Checkout · Done bar at the top so they can see how far there is to go. On a wide screen the items and the total now sit side by side, with the total and Check out always in view.",
+      bn: "কার্টের সাথে কেনার মতো পণ্যের সারি যোগ করুন — আপনার সবচেয়ে বেশি বিক্রি হওয়া পণ্য, নয়তো প্রিমিয়ামে কার্ট মিলিয়ে বাছাই করা পণ্য। হোম পেজের প্রতিশ্রুতিগুলো এখানেও দেখাতে পারেন বা নিজের এক লাইন লিখতে পারেন, ক্রেতা আগে যা দেখেছেন তা-ও, আর উপরে “কার্ট · চেকআউট · সম্পন্ন” বার দিলে আর কতদূর বাকি তা বোঝা যায়। বড় স্ক্রিনে পণ্য আর মোট এখন পাশাপাশি বসে, মোট আর চেকআউট সবসময় চোখের সামনে।",
     },
   },
   {

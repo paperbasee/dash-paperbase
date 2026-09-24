@@ -1063,13 +1063,26 @@ export function ShopChrome({
       );
     }
 
+    /*
+      The trust line, and the merchant's own the moment they have any: their
+      words if they typed some, otherwise the promises they picked for the home
+      page, which is what the shop draws. An example only for a shop that has
+      neither.
+    */
     case "cart:trust":
-    case "checkout:trust":
+    case "checkout:trust": {
+      // `live` here is the CART's own section, not the promises band -- the
+      // promises are picked on the home page and this canvas cannot see them
+      // from here. So: the merchant's typed line when there is one, and an
+      // example of the shape otherwise.
+      const written =
+        typeof live?.settings?.trust_text === "string" ? live.settings.trust_text.trim() : "";
       return (
         <p className="border-t border-current/10 px-4 py-3 text-center text-[11px] uppercase tracking-[0.06em] text-current/55">
-          {page === "product" ? t("trustExample") : t("trustLineExample")}
+          {written || (page === "product" ? t("trustExample") : t("trustLineExample"))}
         </p>
       );
+    }
 
     /*
       The category page draws ONE category to stand for all of them -- it is a
@@ -2102,14 +2115,31 @@ export function ShopChrome({
         </div>
       );
 
+    /*
+      What this shop can ACTUALLY be paid with, which is not what this drew
+      until 2026-09-24: it listed Rocket, Visa and Mastercard, and Paperbase has
+      no card gateway at all. A merchant switching this on and finding two marks
+      where the editor showed six is the same broken promise as a tile that does
+      nothing.
+
+      Cash on delivery always; bKash and Nagad where something in the cart asks
+      for money up front, which is per product -- so they are drawn quieter, and
+      the tile's note says when they appear.
+    */
     case "cart:payments":
     case "checkout:payments":
       return (
         <div className="px-4 py-4">
           <p className="mb-2 text-[10px] uppercase tracking-[0.08em] text-current/45">{t("paymentsHeading")}</p>
-          <div className="flex flex-wrap gap-2">
-            {["bKash", "Nagad", "Rocket", "Visa", "Mastercard", t("cashOnDelivery")].map((name) => (
-              <span key={name} className="rounded-xs border border-current/15 px-2.5 py-1 text-[10px] text-current/60">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="rounded-xs border border-current/15 px-2.5 py-1 text-[10px] text-current/60">
+              {t("cashOnDelivery")}
+            </span>
+            {["bKash", "Nagad"].map((name) => (
+              <span
+                key={name}
+                className="rounded-xs border border-dashed border-current/15 px-2.5 py-1 text-[10px] text-current/40"
+              >
                 {name}
               </span>
             ))}
