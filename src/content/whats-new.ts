@@ -26,7 +26,8 @@
  * the checkout's two -- its page and the form that moved onto it -- and the
  * blog's merged the corners and the card style, both the Style panel -- and
  * the footer's merged the home page's two band entries -- and a blog post's
- * was folded into the blog page's, one feature told once.)
+ * was folded into the blog page's, one feature told once -- and the rest of the
+ * home page into the home page's rows.)
  *
  * ## Entries written before their release — ONE DATE, RESTAMP IT ON THE DAY
  *
@@ -76,6 +77,21 @@ export interface WhatsNewEntry {
 export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
+  {
+    id: "2026-09-22-home-page-rows",
+    date: "2026-09-22",
+    version: "4.95.0",
+    tag: "new",
+    href: "/settings?tab=customization",
+    title: {
+      en: "New rows for your home page",
+      bn: "হোম পেজের নতুন সারি",
+    },
+    body: {
+      en: "Your home page shows three categories you tick, each with everything inside it, instead of a row for every category you have — and a button under them opens every product you sell on a page of its own. You can also show a row of products you choose, your best sellers and your newest, the last two filling themselves. Further down, add your brands, your newest good reviews on Premium, your three newest blog posts, a button that opens WhatsApp to your number, and questions you answer once — each kept up to date from your shop.",
+      bn: "হোম পেজে এখন আপনার প্রতিটি ক্যাটাগরির সারির বদলে আপনার টিক করা তিনটি ক্যাটাগরি, ভেতরের সব পণ্যসহ — আর নিচের একটি বোতাম আপনার সব পণ্য নিয়ে আলাদা পাতা খোলে। আপনার বেছে নেওয়া পণ্য, সবচেয়ে বেশি বিক্রি হওয়া পণ্য আর নতুন পণ্যের সারিও দেখাতে পারেন, শেষের দুটি নিজেই ভরে যায়। আরও নিচে যোগ করুন আপনার ব্র্যান্ড, প্রিমিয়ামে আপনার সর্বশেষ ভালো রিভিউ, ব্লগের নতুন তিনটি পোস্ট, আপনার নম্বরে হোয়াটসঅ্যাপ খোলার একটি বোতাম, আর একবার উত্তর দেওয়া প্রশ্নগুলো — সবই আপনার দোকান থেকে নিজে নিজে হালনাগাদ থাকে।",
+    },
+  },
   {
     id: "2026-09-22-blog-choices",
     date: "2026-09-22",
@@ -254,21 +270,6 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     body: {
       en: "A promotion was a coloured band with words on it. Now it comes three ways — words on a band, a picture beside them, or a picture behind them with your words over it — and you can add a small line above the headline, like “Limited time”. The countdown, the start and end times and everything else stay exactly where they were.",
       bn: "আগে প্রোমোশন ছিল শুধু রঙিন ব্যান্ডে কিছু লেখা। এখন তিনভাবে দেখানো যায় — ব্যান্ডে শুধু লেখা, লেখার পাশে ছবি, কিংবা লেখার পেছনে ছবি — আর শিরোনামের উপরে ছোট একটি লাইনও দেওয়া যায়, যেমন “সীমিত সময়”। কাউন্টডাউন, শুরু-শেষের সময় আর বাকি সবকিছু আগের জায়গাতেই আছে।",
-    },
-  },
-  {
-    id: "2026-09-22-three-departments-on-your-home-page",
-    date: "2026-09-22",
-    version: "4.59.0",
-    tag: "new",
-    href: "/settings?tab=customization",
-    title: {
-      en: "New rows for your home page",
-      bn: "হোম পেজের নতুন সারি",
-    },
-    body: {
-      en: "Your home page shows three categories you tick, each with everything inside it, instead of a row for every category you have — and a button under them opens every product you sell on a page of its own. You can also show a row of products you choose, a row of your best sellers and a row of your newest, the last two filling themselves. Each row scrolls sideways, and “Browse everything” opens the rest.",
-      bn: "হোম পেজে এখন আপনার প্রতিটি ক্যাটাগরির সারির বদলে আপনার টিক করা তিনটি ক্যাটাগরি, ভেতরের সব পণ্যসহ — আর নিচের একটি বোতাম আপনার সব পণ্য নিয়ে আলাদা পাতা খোলে। আপনার বেছে নেওয়া পণ্য, সবচেয়ে বেশি বিক্রি হওয়া পণ্য আর নতুন পণ্যের সারিও দেখাতে পারেন, শেষের দুটি নিজেই ভরে যায়। প্রতিটি সারি পাশে সরানো যায়, আর “সব দেখুন” চাপলে বাকিগুলো খোলে।",
     },
   },
   {
