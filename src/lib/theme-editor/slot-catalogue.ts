@@ -127,20 +127,22 @@ export const SLOT_PAGES: readonly SlotPageKey[] = [
 /**
  * Pages whose FEATURE does not exist yet, and the line that says so.
  *
- * The editor is design-only everywhere and says that across the top. These two
- * are a second thing: `/account` and `/wishlist` are `renderPlaceholderPage`
- * calls that print "This page is not ready yet", there is no wishlist anywhere
- * in the API, and a shopper cannot sign in at all -- `Customer` is a record the
- * merchant's CRM keeps, with no password and no session.
+ * Designing a page ahead of building it is reasonable; letting a merchant
+ * believe they are arranging a page their shoppers can reach is not. So a page
+ * in here says which it is, in the same place the design-only line is said.
  *
- * Designing them ahead of building them is reasonable; letting a merchant
- * believe they are arranging a page their shoppers can reach is not. So the
- * page says which it is, in the same place the design-only line is said.
+ * **Empty since 2026-09-24, and that is the point.** It held `account` and
+ * `wishlist`, saying a shopper "cannot sign in at all" and that there is "no
+ * wishlist in Paperbase yet". Both were built on 2026-09-21 and both lines
+ * stayed up for three days, on the screen a merchant designs those pages from.
+ * The owner found the account one.
+ *
+ * *A note about what does not exist yet has to be deleted by whoever makes it
+ * exist.* Nothing else will: it reads as deliberate, it is in a file nobody
+ * opens to ship a feature, and the merchant it misleads is the one person who
+ * cannot check.
  */
-export const PAGE_NOTES: Partial<Record<SlotPageKey, string>> = {
-  wishlist: "wishlistNotBuilt",
-  account: "accountNotBuilt",
-};
+export const PAGE_NOTES: Partial<Record<SlotPageKey, string>> = {};
 export const SLOT_GROUPS: readonly SlotPageKey[] = ["header", "footer"] as const;
 
 export const SLOTS: Record<SlotPageKey, Slot[]> = {

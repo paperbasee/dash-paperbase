@@ -148,7 +148,7 @@ describe("the promises this page could not keep are gone", () => {
   test("and the reviews it has held since 2026-09-22 are finally on the canvas", () => {
     const slot = SLOTS.account.find((one) => one.key === "reviews")!;
     expect(slot.initial).toBe("on");
-    expect(slot.options.map((one) => one.value)).toEqual(["on", "off"]);
+    expect(slot.options!.map((one) => one.value)).toEqual(["on", "off"]);
   });
 });
 

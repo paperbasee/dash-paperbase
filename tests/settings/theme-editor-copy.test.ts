@@ -188,8 +188,13 @@ describe("theme editor copy", () => {
    * current value, so one keyed to a page nobody can select says nothing.
    */
   it("says which pages are not built yet, in both languages", () => {
+    /*
+      There are none as of 2026-09-24: the account and the wishlist were the
+      last two, both built on 2026-09-21, and both notes stayed up for three
+      days telling merchants the feature did not exist. So this no longer
+      insists on at least one -- it insists that whatever IS here is real.
+    */
     const notes = Object.entries(PAGE_NOTES);
-    expect(notes.length).toBeGreaterThan(0);
     for (const [page, key] of notes) {
       expect(SLOT_PAGES, `${page} is not in the page picker`).toContain(page);
       expect(known(enNs, key), `en is missing ${key}`).toBe(true);

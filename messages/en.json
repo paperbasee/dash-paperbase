@@ -3096,8 +3096,6 @@
       "blogMetaWhat": "The line under every post on this page",
       "wishlist": "Wishlist",
       "account": "Account",
-      "wishlistNotBuilt": "There is no wishlist in Paperbase yet — nothing saves a product, and the heart in your header has nowhere to put one. This page is a placeholder in your shop. Design it here; it needs building before a shopper can use it.",
-      "accountNotBuilt": "Shoppers cannot sign in to a Paperbase shop yet — there is no account, no password and no code to a phone. The customer records you see in the dashboard are built from orders, not signed into. This page is a placeholder in your shop.",
       "wishHeading": "Title",
       "wishHeadingCount": "With how many",
       "wishHeadingCountNote": "Wishlist (4). A number worth seeing when it has grown.",
