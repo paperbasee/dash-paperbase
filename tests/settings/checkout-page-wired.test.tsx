@@ -45,6 +45,10 @@ const manifest: ThemeManifest = {
       settings: [
         choice("chrome", ["reduced", "full"], "reduced"),
         choice("footer", ["policies", "same", "none"], "policies"),
+        choice("order", ["quantity", "fixed"], "quantity"),
+        choice("coupon", ["open", "link", "off"], "open"),
+        { id: "payments", type: "boolean", ...labels("Ways to pay"), default: true },
+        { id: "after", type: "boolean", ...labels("A line under the button"), default: true },
         { id: "steps", type: "boolean", ...labels("Steps"), default: false },
         { id: "trust", type: "boolean", ...labels("Trust line"), default: true },
         { id: "trust_text", type: "text", ...labels("Your own words"), default: "" },
@@ -100,22 +104,48 @@ const settingsOf = (state: EditorState) =>
 const PAGE = () => editor([section("checkout", "checkout")]);
 
 describe("the checkout page is wired", () => {
-  test("every place round 1 claims writes the one section", () => {
-    for (const key of ["chrome", "footerStyle", "steps", "trust"]) {
+  test("every place wired so far writes the one section", () => {
+    for (const key of ["chrome", "footerStyle", "steps", "trust", "summary", "coupon", "payments", "after"]) {
       const wiring = wiringFor("checkout", key);
       expect(wiring, key).toBeTruthy();
       expect(wiring!.page).toBe("templates.checkout");
     }
   });
 
-  test("and the places it does not claim are still drawings", () => {
+  test("and the two it does not claim are still drawings", () => {
     /*
       A place goes in only when its half of the shop can do everything the
-      place promises. These five are rounds 2 to 4.
+      place promises. The merchant's own words above the button are round 3,
+      and the form is round 4 -- and that one writes a STORE setting rather
+      than the document, which is machinery this editor has never had.
     */
-    for (const key of ["summary", "coupon", "form", "beforePay", "payments", "after"]) {
+    for (const key of ["form", "beforePay"]) {
       expect(wiringFor("checkout", key), key).toBeFalsy();
     }
+  });
+
+  test("the order can still be changed here unless the merchant fixes it", () => {
+    expect(slotValueFor(PAGE().document, place("summary"))).toBe("quantity");
+    expect(settingsOf(pick(PAGE(), "summary", "fixed")).order).toBe("fixed");
+  });
+
+  test("the code box is open to begin with, as it is on the cart", () => {
+    expect(slotValueFor(PAGE().document, place("coupon"))).toBe("open");
+    for (const value of ["open", "link", "off"]) {
+      expect(settingsOf(pick(PAGE(), "coupon", value)).coupon).toBe(value);
+    }
+  });
+
+  test("the ways to pay are shown here, where the doubt is", () => {
+    /* On by default HERE and off on the cart: how they will pay is a question
+       a shopper is actually asking on this page. */
+    expect(slotValueFor(PAGE().document, place("payments"))).toBe("on");
+    expect(settingsOf(pick(PAGE(), "payments", "off")).payments).toBe(false);
+  });
+
+  test("and a line under the button says what happens after it", () => {
+    expect(slotValueFor(PAGE().document, place("after"))).toBe("line");
+    expect(settingsOf(pick(PAGE(), "after", "none")).after).toBe(false);
   });
 
   test("the stripped header is what a shop gets unless it asks otherwise", () => {
@@ -167,6 +197,23 @@ describe("the canvas says what the shop draws", () => {
     const slot = SLOTS.checkout.find((one) => one.key === "steps")!;
     const label = slot.options!.find((one) => one.value === "bar")!.label;
     expect((en.themeEditor.slots as Record<string, string>)[label]).toBe("Cart → Checkout → Done");
+  });
+
+  test("the short form asks for a district, which an order cannot do without", () => {
+    /*
+      It drew the short form with an area and no district. An order REQUIRES a
+      district whichever form asked for it, so the form drawn here could not
+      have placed one — and a courier cannot deliver to a district, which is
+      why the area is in both too.
+    */
+    const short = draw("form", "minimal");
+    expect(short).toContain(en.themeEditor.slots.fieldDistrict);
+    expect(short).toContain(en.themeEditor.slots.fieldArea);
+  });
+
+  test("and the tile that offers it counts the fields it really asks for", () => {
+    expect(en.themeEditor.slots.formMinimal).toContain("district");
+    expect(en.themeEditor.slots.formMinimalNote).toContain("Four");
   });
 
   test("the policies footer names the three pages the shop actually serves", () => {

@@ -83,8 +83,8 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
       bn: "চেকআউট পেজ নিজের মতো সাজান",
     },
     body: {
-      en: "The Checkout page in your editor is real now, starting with the page itself. Strip the header down to your shop's name so nothing leads a shopper away mid-order, or keep the full one; end the page with your privacy, returns and cancellation links, the whole footer, or nothing. You can also show a Cart · Checkout · Done bar at the top, and repeat your promises — or a line of your own — above the form.",
-      bn: "এডিটরের চেকআউট পেজটি এখন সত্যিকারের, শুরু পেজটিকে দিয়েই। হেডার ছোট করে শুধু দোকানের নাম রাখুন, যাতে অর্ডারের মাঝপথে ক্রেতাকে কিছু অন্যদিকে না টানে — নয়তো পুরোটাই রাখুন; পেজের শেষে গোপনীয়তা, ফেরত ও বাতিলের লিংক, পুরো ফুটার, কিংবা কিছুই না। উপরে “কার্ট · চেকআউট · সম্পন্ন” বারও দিতে পারেন, আর ফর্মের উপরে আপনার প্রতিশ্রুতি বা নিজের এক লাইন।",
+      en: "The Checkout page in your editor is real now. Strip the header down to your shop's name so nothing leads a shopper away mid-order or keep the full one, and end the page with your privacy, returns and cancellation links, the whole footer, or nothing. The order now sits beside the form where it can be seen — quantities still theirs to change or fixed, the discount code box inside the summary, the ways they can pay beside the button, a Cart · Checkout · Done bar at the top, and your promises or a line of your own above it all.",
+      bn: "এডিটরের চেকআউট পেজটি এখন সত্যিকারের। হেডার ছোট করে শুধু দোকানের নাম রাখুন, যাতে অর্ডারের মাঝপথে ক্রেতাকে কিছু অন্যদিকে না টানে — নয়তো পুরোটাই রাখুন; আর পেজের শেষে গোপনীয়তা, ফেরত ও বাতিলের লিংক, পুরো ফুটার, কিংবা কিছুই না। অর্ডারটি এখন ফর্মের পাশেই থাকে, চোখের সামনে — সংখ্যা বদলানো যাবে নাকি স্থির, ডিসকাউন্ট কোডের ঘর সারাংশের ভিতরে, টাকা দেওয়ার উপায়গুলো বাটনের পাশে, উপরে “কার্ট · চেকআউট · সম্পন্ন” বার, আর সবার উপরে আপনার প্রতিশ্রুতি বা নিজের এক লাইন।",
     },
   },
   {

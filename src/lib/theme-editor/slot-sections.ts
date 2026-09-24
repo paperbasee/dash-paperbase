@@ -406,6 +406,60 @@ export const WIRED_SLOTS: Partial<Record<SlotPageKey, Record<string, WiredSlot>>
       },
     },
     /*
+      Round 2, 2026-09-24. The order column and what stands around the button.
+
+      `order`, not `summary`: the PLACE is the editor's "summary", but what the
+      section stores is what the order can still do, and a setting called
+      `summary` in a document that also has a summary section would read as the
+      section's own.
+    */
+    summary: {
+      page: "templates.checkout",
+      sections: {
+        quantity: { type: "checkout", settings: { order: "quantity" } },
+        fixed: { type: "checkout", settings: { order: "fixed" } },
+      },
+    },
+    /*
+      The code box, drawn INSIDE the summary panel on both pages -- a field
+      floating under it is not where anybody looks for a discount. `open` first,
+      because that is what every shop drew before this was a choice, and the
+      shop still draws nothing at all where a merchant runs no codes.
+    */
+    coupon: {
+      page: "templates.checkout",
+      sections: {
+        open: { type: "checkout", settings: { coupon: "open" } },
+        link: { type: "checkout", settings: { coupon: "link" } },
+        off: { type: "checkout", settings: { coupon: "off" } },
+      },
+    },
+    /*
+      What this order can be paid with, beside the button rather than down the
+      page: near the button is where the doubt is. ON by default here and OFF on
+      the cart, which is the editor's own call and a fair one -- how they will
+      pay is a question a shopper is actually asking on this page.
+    */
+    payments: {
+      page: "templates.checkout",
+      sections: {
+        on: { type: "checkout", settings: { payments: true } },
+        off: { type: "checkout", settings: { payments: false } },
+      },
+    },
+    /*
+      One line under the button, saying what happens after it is pressed. The
+      shop writes the words: they have to be TRUE for this order, and a basket
+      with something prepaid in it is not paid for at the door.
+    */
+    after: {
+      page: "templates.checkout",
+      sections: {
+        line: { type: "checkout", settings: { after: true } },
+        none: { type: "checkout", settings: { after: false } },
+      },
+    },
+    /*
       The promises, or the merchant's own line, ABOVE the form -- which is the
       only place it can do any good: a sentence about returns read after the
       order is placed is a sentence nobody needed. The words themselves are

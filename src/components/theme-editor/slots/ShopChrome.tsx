@@ -2428,10 +2428,15 @@ export function ShopChrome({
             2,
             t("deliveryHeading"),
             <>
+              {/* District and area are asked for in BOTH forms, and this drew
+                  the short one with only an area until 2026-09-24. An order
+                  REQUIRES a district whichever form asked -- see
+                  `checkout_rules.MINIMAL_REQUIRED_FIELDS` -- so the short form
+                  drawn here could not have placed one. A courier cannot
+                  deliver to a district either, which is why the area is
+                  required in both too. */}
               {minimal ? null : field(MapPin, t("fieldAddress"), t("fieldAddressHint"))}
-              {minimal
-                ? field(Map, t("fieldArea"))
-                : pair(field(Map, t("fieldDistrict")), field(Map, t("fieldArea")))}
+              {pair(field(Map, t("fieldDistrict")), field(Map, t("fieldArea")))}
               <span className="flex items-center justify-between rounded-md border border-current/15 px-3 py-2.5 text-[11px]">
                 <span className="flex items-center gap-2 text-current/65">
                   <span className="size-2.5 rounded-full border-[3px] border-current/45" aria-hidden />
