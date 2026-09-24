@@ -1096,15 +1096,15 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
       ],
     },
     /**
-     * The promo field, under the summary it would come off -- and, like the
-     * checkout's, a box with nothing behind it. Paperbase has no coupons: no
-     * code to make, no limit, no expiry. Off to begin with, and the chooser
-     * says why rather than letting a merchant switch on a field that cannot
-     * take anything.
+     * The promo field, INSIDE the summary it would come off -- a box floating
+     * under the panel is not where anybody looks for a discount. Off to begin
+     * with: most shops run no campaign, and a box with nothing behind it sends
+     * a shopper off to hunt for a code that does not exist.
      *
      * The summary above reads this: a discount line has no business in the
-     * totals of a shop that cannot give one, so it appears only when the field
-     * a shopper would type into does.
+     * totals of a shop that is not offering one, so it appears only when the
+     * field a shopper would type into does. (Paperbase has run discount codes
+     * since 2026-09-22; the note here said it did not until 2026-09-24.)
      */
     {
       key: "coupon",
@@ -1120,6 +1120,26 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
         { value: "off", label: "off", note: "couponOffNote", shape: "blank" },
         { value: "link", label: "couponLink", note: "couponLinkNote", shape: "line" },
         { value: "open", label: "couponOpen", note: "couponOpenNote", shape: "row" },
+      ],
+    },
+    /**
+     * What this cart can be paid with, under the summary rather than down the
+     * page: it is read on the way to the button, or it is not read at all.
+     *
+     * A band is one column here, so it has to sit beside the ones it shares
+     * that column with -- `bandsOf` groups CONSECUTIVE slots of the same row.
+     */
+    {
+      key: "payments",
+      label: "checkoutPayments",
+      row: "body",
+      stack: "right",
+      initial: "off",
+      emptyValues: ["off"],
+      emptyLabel: "checkoutPaymentsEmpty",
+      options: [
+        { value: "on", label: "paymentsOn", note: "cartPaymentsNote", shape: "row" },
+        { value: "off", label: "off", shape: "blank" },
       ],
     },
     {
@@ -1165,17 +1185,6 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
       emptyLabel: "recentEmpty",
       options: [
         { value: "on", label: "on", note: "cartRecentNote", shape: "row" },
-        { value: "off", label: "off", shape: "blank" },
-      ],
-    },
-    {
-      key: "payments",
-      label: "checkoutPayments",
-      initial: "off",
-      emptyValues: ["off"],
-      emptyLabel: "checkoutPaymentsEmpty",
-      options: [
-        { value: "on", label: "paymentsOn", note: "cartPaymentsNote", shape: "row" },
         { value: "off", label: "off", shape: "blank" },
       ],
     },

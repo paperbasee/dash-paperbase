@@ -7,7 +7,11 @@
  *
  * All four write ONE section: the cart page is one thing, not a stack of bands.
  */
+import { renderToStaticMarkup } from "react-dom/server";
+import { NextIntlClientProvider } from "next-intl";
 import { describe, expect, test } from "vitest";
+
+import { ShopChrome } from "@/components/theme-editor/slots/ShopChrome";
 
 import type { ThemeDocument, ThemeEditorState, ThemeManifest, ThemeSection } from "@/lib/theme-editor/api";
 import { editorReducer, initEditorState, type EditorState } from "@/lib/theme-editor/editor-reducer";
@@ -301,5 +305,52 @@ describe("round 4: the last two", () => {
     expect(Object.keys(place("steps").sections)[0]).toBe("none");
     expect(slotValueFor(PAGE().document, place("steps"))).toBe("none");
     expect(settingsOf(pick(PAGE(), "steps", "bar")).steps).toBe(true);
+  });
+});
+
+/**
+ * What the owner asked for on 2026-09-24, looking at a real cart: "the design
+ * looks unfinished, make it exactly like the editor".
+ *
+ * Most of that was the shop's to fix. Two things were the editor's: it drew
+ * the payment marks as a band down at the bottom of the page when the shop
+ * puts them under the summary, and it said what delivery costs twice on the
+ * full total -- once as a row, once as a line under the button.
+ */
+describe("the editor promises the page the shop draws", () => {
+  const slot = (key: string) => SLOTS.cart.find((one) => one.key === key)!;
+
+  test("the payment marks sit in the money column, not down the page", () => {
+    expect(slot("payments").row).toBe("body");
+    expect(slot("payments").stack).toBe("right");
+  });
+
+  test("and next to the places that share that column, which is what groups them", () => {
+    /*
+      `bandsOf` in SlotCanvas groups CONSECUTIVE slots of the same row. A
+      right-hand place with anything in between starts a band of its own and
+      drops back down the page -- which is exactly where this one was.
+    */
+    const right = SLOTS.cart.filter((one) => one.row === "body");
+    const at = (key: string) => right.findIndex((one) => one.key === key);
+    expect(SLOTS.cart.indexOf(right[0])).toBe(SLOTS.cart.indexOf(right.at(-1)!) - (right.length - 1));
+    expect(at("total")).toBeLessThan(at("coupon"));
+    expect(at("coupon")).toBeLessThan(at("payments"));
+  });
+
+  test("what delivery costs is drawn once, whichever total is chosen", () => {
+    const draw = (variant: string) =>
+      renderToStaticMarkup(
+        <NextIntlClientProvider locale="en" messages={en}>
+          <ShopChrome page="cart" slotKey="total" variant={variant} settings={{}} />
+        </NextIntlClientProvider>,
+      );
+    const note = en.themeEditor.slots.cartTotalNoteExample;
+    // The row, rather than the word: the note itself begins "Delivery".
+    const row = `>${en.themeEditor.slots.delivery}<`;
+    expect(draw("full")).toContain(row);
+    expect(draw("full")).not.toContain(note);
+    expect(draw("simple")).toContain(note);
+    expect(draw("simple")).not.toContain(row);
   });
 });

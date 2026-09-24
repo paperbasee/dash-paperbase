@@ -2077,7 +2077,13 @@ export function ShopChrome({
             <span className="mt-3 grid h-11 place-items-center rounded-full bg-foreground text-[12px] font-semibold text-background">
               {t("cartGoToCheckout")} &#8594;
             </span>
-            <p className="mt-2 text-center text-[10px] text-current/45">{t("cartTotalNoteExample")}</p>
+            {/* What delivery costs is said ONCE. The full shape has a row for
+                it; the one-number shape has no rows at all, so it is said here
+                instead -- and never in both places, which is what the page
+                itself does. */}
+            {full ? null : (
+              <p className="mt-2 text-center text-[10px] text-current/45">{t("cartTotalNoteExample")}</p>
+            )}
           </div>
         </div>
       );
