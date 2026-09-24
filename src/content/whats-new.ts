@@ -27,7 +27,7 @@
  * blog's merged the corners and the card style, both the Style panel -- and
  * the footer's merged the home page's two band entries -- and a blog post's
  * was folded into the blog page's, one feature told once -- and the rest of the
- * home page into the home page's rows.)
+ * home page into the home page's rows, and the header into the footer's.)
  *
  * ## Entries written before their release — ONE DATE, RESTAMP IT ON THE DAY
  *
@@ -78,6 +78,21 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-09-22-header-and-footer-choices",
+    date: "2026-09-22",
+    version: "4.96.0",
+    tag: "new",
+    href: "/settings?tab=customization",
+    title: {
+      en: "Design your header and footer",
+      bn: "হেডার আর ফুটার সাজান",
+    },
+    body: {
+      en: "Arrange your header as a bar with every category under it, with your name centred over five of them, or with the categories behind a menu button as on a phone — and show search as a box or a small mark, keep the header on screen as shoppers scroll, and add account and wishlist beside the cart. Arrange your footer in columns, with your shop on one side, centred, or as a single short line, and choose what it shows: your address and phone or only your email, your social links as names or round marks, the ways you take payment, a button that opens WhatsApp to your number, and your policy pages beside the year.",
+      bn: "হেডার সাজান নিচে সব ক্যাটাগরিসহ একটি বার হিসেবে, পাঁচটি ক্যাটাগরির উপরে মাঝখানে নাম রেখে, নয়তো ফোনের মতো একটি মেনু বোতামের পেছনে ক্যাটাগরি রেখে — আর সার্চ দেখান বক্সে বা ছোট চিহ্নে, ক্রেতা স্ক্রল করলেও হেডার স্ক্রিনে রাখুন, আর কার্টের পাশে অ্যাকাউন্ট ও উইশলিস্ট যোগ করুন। ফুটার সাজান কলামে, একপাশে দোকান রেখে, মাঝখানে, নয়তো ছোট এক লাইনে, আর ঠিক করুন কী দেখাবে: ঠিকানা ও ফোন নাকি শুধু ইমেইল, সোশ্যাল লিংক নামে বা গোল চিহ্নে, আপনি যেভাবে টাকা নেন, আপনার নম্বরে হোয়াটসঅ্যাপ খোলার একটি বোতাম, আর সালের পাশে নীতিমালার পেজগুলো।",
+    },
+  },
+  {
     id: "2026-09-22-home-page-rows",
     date: "2026-09-22",
     version: "4.95.0",
@@ -105,21 +120,6 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     body: {
       en: "Give your blog its own name and opening line, let readers narrow the posts by typing or by tag, and choose how the featured posts, the rest and each card look — with the date or how many times a post has been read underneath, and every read counts now. On each post, choose where its picture goes, whether the writer's name sits beside the date, how wide the words run, and whether readers see its tags, the posts before and after it, and three more to read. You can also add a few words of your own under the posts, and posts written as plain text now keep their paragraphs.",
       bn: "ব্লগকে নিজের নাম আর প্রথম লাইন দিন, পাঠক যেন লিখে বা ট্যাগ বেছে পোস্টগুলো ছেঁকে নিতে পারেন, আর বাছাই করা পোস্ট, বাকি পোস্ট ও প্রতিটি কার্ড কেমন দেখাবে তা ঠিক করুন — নিচে তারিখ, নয়তো পোস্টটি কতবার পড়া হয়েছে; এখন প্রতিবার পড়াই গোনা হয়। প্রতিটি পোস্টে ছবি কোথায় বসবে, তারিখের পাশে লেখকের নাম থাকবে কি না, লেখা কতটা চওড়া হবে, আর পাঠক ট্যাগ, আগের ও পরের পোস্ট এবং পড়ার মতো আরও তিনটি পোস্ট দেখবেন কি না — ঠিক করুন। পোস্টের নিচে নিজের কিছু কথাও যোগ করতে পারেন, আর সাধারণ লেখায় লেখা পোস্টে এখন অনুচ্ছেদগুলো ঠিক থাকে।",
-    },
-  },
-  {
-    id: "2026-09-22-footer-choices",
-    date: "2026-09-22",
-    version: "4.93.0",
-    tag: "new",
-    href: "/settings?tab=customization",
-    title: {
-      en: "Design your footer",
-      bn: "ফুটার সাজান",
-    },
-    body: {
-      en: "Arrange your footer in columns, with your shop on one side, centred, or as a single short line, and choose whether it shows your address and phone or only your email. Show your social links as names or as round marks, the ways you take payment, a button that opens WhatsApp to your number, and your policy pages beside the year. Everything comes from what you already set in Settings, and appears on every page.",
-      bn: "ফুটার সাজান কলামে, একপাশে দোকান রেখে, মাঝখানে, নয়তো ছোট এক লাইনে — আর ঠিক করুন ঠিকানা ও ফোন দেখাবে নাকি শুধু ইমেইল। সোশ্যাল লিংক দেখান নামে বা গোল চিহ্নে, আপনি যেভাবে টাকা নেন, আপনার নম্বরে হোয়াটসঅ্যাপ খোলার একটি বোতাম, আর সালের পাশে নীতিমালার পেজগুলো। সবকিছু আসে সেটিংসে আগে থেকে দেওয়া তথ্য থেকে, আর প্রতিটি পাতায় দেখা যায়।",
     },
   },
   {
