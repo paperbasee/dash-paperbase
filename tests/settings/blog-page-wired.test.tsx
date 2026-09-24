@@ -172,8 +172,8 @@ describe("a place keeps its own words", () => {
 
 const BLOG: BlogPreview = {
   posts: [
-    { title: "How to find your perfect denim fit", excerpt: "Three measurements.", tag: "Style guide", date: "Sep 15, 2026", reads: 101, featured: true },
-    { title: "Caring for cotton and linen", excerpt: "Cold water.", tag: "Care and craft", date: "Sep 10, 2026", reads: 6, featured: false },
+    { title: "How to find your perfect denim fit", excerpt: "Three measurements.", tag: "Style guide", date: "Sep 15, 2026", reads: 101, featured: true, tags: ["Style guide"], pictured: true, author: "", words: [] },
+    { title: "Caring for cotton and linen", excerpt: "Cold water.", tag: "Care and craft", date: "Sep 10, 2026", reads: 6, featured: false, tags: ["Care and craft"], pictured: true, author: "", words: [] },
   ],
   tags: ["Care and craft", "Style guide"],
 };

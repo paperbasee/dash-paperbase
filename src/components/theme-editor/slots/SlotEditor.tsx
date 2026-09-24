@@ -32,6 +32,7 @@ import { useThemeImagesQuery } from "@/hooks/useThemesQuery";
 import { useCategoriesQuery } from "@/hooks/useCategoriesQuery";
 import { useProductsQuery } from "@/hooks/useProductsQuery";
 import { useBlogsQuery } from "@/hooks/useBlogsQuery";
+import { postWords } from "@/lib/theme-editor/post-words";
 import {
   initialChoices,
   PAGE_NOTES,
@@ -226,6 +227,11 @@ export function SlotEditor({ loaded }: { loaded: ThemeEditorState }) {
         date: dated.format(new Date(post.published_at as string)),
         reads: post.views ?? 0,
         featured: post.is_featured,
+        tags: post.tags.map((tag) => tag.name),
+        pictured: Boolean(post.featured_image_url),
+        // The name the shop prints: the API's rule, never the email.
+        author: post.author_name ?? "",
+        words: postWords(post.content ?? ""),
       }));
     return { posts, tags };
   })();

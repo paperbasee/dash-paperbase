@@ -724,6 +724,12 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
    * says so); the read count was counted only when a ten-minute cache ran out
    * (the API counts every read now); and the search box had a button that did
    * nothing, since it narrows the posts as a reader types.
+   *
+   * **The post, wired the same day.** The shop drew a third of it: no way
+   * back, no date, no posts either side, a More posts shelf that never
+   * appeared, and words with no styling at all -- printed as their own tags.
+   * The name under the title is the account's first and last name and NEVER
+   * its email, which both serializers had fallen back to.
    */
   blog: [
     { key: "notice", label: "notice", inherited: true, inheritedFrom: { page: "header", key: "notice" } },
@@ -835,13 +841,20 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
         { value: "off", label: "off", note: "articleBackOffNote", shape: "blank" },
       ],
     },
+    /*
+      The picture. "Title only" used to be the first tile and said it was what
+      the shop did today -- and the shop drew the post's picture under its
+      title. That is the default now, named for what it is, and title-only is
+      the third choice rather than the claim.
+    */
     {
       key: "head",
       label: "articleHead",
-      initial: "plain",
+      initial: "under",
       options: [
-        { value: "plain", label: "articleHeadPlain", note: "articleHeadPlainNote", shape: "line" },
-        { value: "picture", label: "articleHeadPicture", note: "articleHeadPictureNote", shape: "block" },
+        { value: "under", label: "articleHeadUnder", note: "articleHeadUnderNote", shape: "block" },
+        { value: "top", label: "articleHeadTop", note: "articleHeadTopNote", shape: "block" },
+        { value: "off", label: "articleHeadOff", note: "articleHeadOffNote", shape: "line" },
       ],
     },
     {

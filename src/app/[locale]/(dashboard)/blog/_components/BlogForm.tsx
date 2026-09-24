@@ -479,12 +479,15 @@ export function BlogForm({
                     "[field-sizing:fixed] h-64 resize-none overflow-y-auto font-mono text-sm",
                     fieldErrors.content && "border-destructive",
                   )}
-                  placeholder="Markdown or HTML. Inline images: paste external URLs."
+                  placeholder="Plain text or HTML. Leave an empty line between paragraphs."
                 />
+                {/* It said "Markdown or HTML", and the shop has never read
+                    Markdown: a merchant's `## Heading` reached shoppers as
+                    two hashes. This is what the shop does with it. */}
                 <p className="mt-1 text-xs text-muted-foreground">
-                  The body is stored as plain text — storefront rendering decides
-                  whether to treat it as markdown or HTML. Use external image URLs
-                  for inline images.
+                  Plain text: an empty line starts a new paragraph. HTML:
+                  headings, lists, quotes, links and pictures (by their web
+                  address) are kept; anything else is removed when you save.
                 </p>
               </Field>
             </CardContent>

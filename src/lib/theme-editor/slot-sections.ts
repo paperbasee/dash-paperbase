@@ -769,6 +769,59 @@ export const WIRED_SLOTS: Partial<Record<SlotPageKey, Record<string, WiredSlot>>
     read, and whether the best sellers are fetched for an empty box -- so the
     shop reads them in `views/pages.search` before it queries anything.
   */
+  /*
+    A blog post, 2026-09-24. Six of its places are settings of the one
+    `article_body` section -- none of them `off`, which would HIDE the post --
+    and the seventh, More posts, is the `article_related` section being there
+    or not. The theme's default comes first in each map.
+  */
+  article: {
+    back: {
+      page: "templates.blog_article",
+      sections: {
+        on: { type: "article_body", settings: { back: true } },
+        off: { type: "article_body", settings: { back: false } },
+      },
+    },
+    head: {
+      page: "templates.blog_article",
+      sections: {
+        under: { type: "article_body", settings: { picture: "under" } },
+        top: { type: "article_body", settings: { picture: "top" } },
+        off: { type: "article_body", settings: { picture: "off" } },
+      },
+    },
+    byline: {
+      page: "templates.blog_article",
+      sections: {
+        date: { type: "article_body", settings: { byline: "date" } },
+        author: { type: "article_body", settings: { byline: "author" } },
+        none: { type: "article_body", settings: { byline: "none" } },
+      },
+    },
+    body: {
+      page: "templates.blog_article",
+      sections: {
+        narrow: { type: "article_body", settings: { width: "narrow" } },
+        wide: { type: "article_body", settings: { width: "wide" } },
+      },
+    },
+    tags: {
+      page: "templates.blog_article",
+      sections: {
+        on: { type: "article_body", settings: { tags: true } },
+        off: { type: "article_body", settings: { tags: false } },
+      },
+    },
+    prevNext: {
+      page: "templates.blog_article",
+      sections: {
+        on: { type: "article_body", settings: { prev_next: true } },
+        off: { type: "article_body", settings: { prev_next: false } },
+      },
+    },
+    related: { page: "templates.blog_article", sections: { on: "article_related" }, off: "off" },
+  },
   search: {
     heading: {
       page: "templates.search",

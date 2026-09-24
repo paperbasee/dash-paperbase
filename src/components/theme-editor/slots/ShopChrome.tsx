@@ -59,6 +59,7 @@ const PROMISE_MARKS: Record<string, LucideIcon> = {
   reply_within_an_hour: MessageCircle,
 };
 
+import type { PostWord } from "@/lib/theme-editor/post-words";
 import type { ThemeSection } from "@/lib/theme-editor/api";
 import { cn } from "@/lib/utils";
 import SocialLinkGlyph from "@/app/[locale]/(dashboard)/settings/sections/SocialLinkGlyph";
@@ -161,6 +162,14 @@ export type PostPreview = {
   date: string;
   reads: number;
   featured: boolean;
+  /** Every tag on it, first first. The blog-post page's tag row. */
+  tags: string[];
+  /** Whether a picture is uploaded: a post without one shows its title only. */
+  pictured: boolean;
+  /** The writer's name as the shop prints it -- never the email -- or "". */
+  author: string;
+  /** Its first few blocks, as words. See `postWords`. */
+  words: PostWord[];
 };
 
 /**
@@ -206,13 +215,16 @@ function PostCards({
   posts,
   cards,
   line,
+  columns = 4,
 }: {
   posts: PostPreview[];
   cards: string;
   line: (post: PostPreview) => string | null;
+  /** Four across on the blog; three for the shelf under a post. */
+  columns?: 3 | 4;
 }) {
   return (
-    <div className="grid grid-cols-2 gap-3.5 sm:grid-cols-4">
+    <div className={`grid grid-cols-2 gap-3.5 ${columns === 3 ? "sm:grid-cols-3" : "sm:grid-cols-4"}`}>
       {posts.map((post) => {
         const under = line(post);
         return (
@@ -329,7 +341,24 @@ export function ShopChrome({
   */
   const shopPosts: PostPreview[] = blog?.posts.length
     ? blog.posts
-    : POSTS.map((post) => ({ ...post, tag: "", date: "12 Sep 2026", reads: 1240, featured: false }));
+    : POSTS.map((post) => ({
+        ...post,
+        tag: "",
+        date: "12 Sep 2026",
+        reads: 1240,
+        featured: false,
+        tags: [],
+        pictured: true,
+        author: "",
+        words: [],
+      }));
+  /*
+    The post the blog-post page stands for: the shop's second newest where it
+    has three or more, so the posts either side can both be drawn -- the newest
+    has nothing after it, the oldest nothing before.
+  */
+  const article = shopPosts[shopPosts.length > 2 ? 1 : 0];
+  const articleAt = shopPosts.indexOf(article);
   /** A blog setting as the shop's document holds it, else this editor's choice. */
   const blogChoice = (key: string, fallback: string) => {
     const held = live?.settings?.[key];
@@ -1965,87 +1994,130 @@ export function ShopChrome({
 
     /* ----------------------------------------------------------- article -- */
 
+    /*
+      A blog post, 2026-09-24: the shop's own (see `article`), drawn in the
+      shop's order -- the title and its picture are one place and the line over
+      the words the next, which is why the shop puts that line under a picture
+      that sits under the title.
+    */
     case "article:back":
-      return <p className="px-4 py-3 text-[11px] text-current/55">← {t("articleBackExample")}</p>;
+      return <p className="px-4 py-3 text-[11px] text-current/55">← {t("articleAllPosts")}</p>;
 
-    case "article:head":
-      if (variant === "picture") {
-        return (
-          <div>
-            <div className="aspect-[21/8] bg-current/8" aria-hidden />
-            <div className="px-4 pt-4">
-              <p className="mb-1.5 text-[9.5px] uppercase tracking-[0.1em] text-current/45">{POSTS[0].tag}</p>
-              <h4 className="m-0 max-w-[26ch] text-[22px] font-semibold leading-[1.2] tracking-tight">
-                {POSTS[0].title}
-              </h4>
-            </div>
-          </div>
-        );
-      }
+    case "article:head": {
+      const picture =
+        article.pictured && variant !== "off" ? (
+          <div className={variant === "top" ? "aspect-[21/8] bg-current/8" : "mt-3 aspect-[16/9] max-w-[34rem] rounded-md bg-current/8"} aria-hidden />
+        ) : null;
       return (
-        <div className="px-4 pt-5">
-          <p className="mb-1.5 text-[9.5px] uppercase tracking-[0.1em] text-current/45">{POSTS[0].tag}</p>
-          <h4 className="m-0 max-w-[26ch] text-[22px] font-semibold leading-[1.2] tracking-tight">{POSTS[0].title}</h4>
+        <div className={variant === "top" ? "" : "px-4 pt-5"}>
+          {variant === "top" ? picture : null}
+          <div className={variant === "top" ? "px-4 pt-4" : ""}>
+            {article.tag ? (
+              <p className="mb-1.5 text-[9.5px] uppercase tracking-[0.1em] text-current/45">{article.tag}</p>
+            ) : null}
+            <h4 className="m-0 max-w-[26ch] text-[22px] font-semibold leading-[1.2] tracking-tight">{article.title}</h4>
+            {variant === "under" ? picture : null}
+          </div>
         </div>
       );
+    }
 
-    case "article:byline":
+    case "article:byline": {
+      const named = variant === "author" && article.author;
       return (
-        <p className="px-4 py-2.5 text-[11px] text-current/45">
-          {variant === "author" ? t("articleBylineExample") : "12 September 2026"}
-        </p>
+        <div className="px-4 py-2.5">
+          <p className="text-[11px] text-current/45">
+            {named ? t("articleBylineLine", { name: article.author, date: article.date }) : article.date}
+          </p>
+          {/* Said rather than left to be puzzled over: the choice changed
+              nothing a merchant can see, because the account has no name. */}
+          {variant === "author" && !article.author ? (
+            <p className="mt-1 text-[10px] italic text-current/40">{t("articleBylineNoName")}</p>
+          ) : null}
+        </div>
       );
+    }
 
     case "article:body": {
-      const wide = variant === "wide";
+      const words = article.words.length
+        ? article.words
+        : [
+            { kind: "p" as const, text: t("articleBodyExample") },
+            { kind: "p" as const, text: t("articleBodyTwo") },
+            { kind: "quote" as const, text: t("articleQuoteExample") },
+            { kind: "p" as const, text: t("articleBodyThree") },
+          ];
       return (
-        <div className={wide ? "px-4 py-5" : "mx-auto max-w-[34rem] px-4 py-5"}>
-          {/* Real paragraphs. The choice on this slot is how WIDE a line of text
-              runs, and that cannot be judged against grey bars of a fixed
-              length -- they are the same shape at either setting. */}
-          <p className="text-[12.5px] leading-[1.8] text-current/75">{t("articleBodyExample")}</p>
-          <p className="mt-3.5 text-[12.5px] leading-[1.8] text-current/70">{t("articleBodyTwo")}</p>
-          <p className="mt-4 border-l-2 border-current/25 pl-4 text-[13px] italic leading-[1.7] text-current/70">
-            {t("articleQuoteExample")}
-          </p>
-          <p className="mt-4 text-[12.5px] leading-[1.8] text-current/70">{t("articleBodyThree")}</p>
+        // Real sentences, because the choice is how WIDE a line of text runs,
+        // and grey bars are the same shape at either width. Left-aligned like
+        // the shop: every page starts where every other page starts.
+        <div className={variant === "wide" ? "px-4 py-5" : "max-w-[34rem] px-4 py-5"}>
+          {words.map((word, index) =>
+            word.kind === "h" ? (
+              <p key={index} className="mt-4 text-[14px] font-semibold leading-snug first:mt-0">
+                {word.text}
+              </p>
+            ) : word.kind === "quote" ? (
+              <p key={index} className="mt-4 border-l-2 border-current/25 pl-4 text-[13px] italic leading-[1.7] text-current/70 first:mt-0">
+                {word.text}
+              </p>
+            ) : (
+              <p key={index} className="mt-3.5 text-[12.5px] leading-[1.8] text-current/75 first:mt-0">
+                {word.text}
+              </p>
+            ),
+          )}
         </div>
       );
     }
 
     case "article:tags":
-      return (
+      return article.tags.length ? (
         <div className="flex flex-wrap gap-2 px-4 py-3">
-          {["Care", "Materials"].map((name) => (
-            <span key={name} className="rounded-full border border-current/15 px-3 py-1 text-[11px] text-current/60">
+          {article.tags.map((name) => (
+            <span key={name} className="rounded-xs border border-current/15 px-3 py-1 text-[11px] text-current/60">
               {name}
             </span>
           ))}
         </div>
+      ) : (
+        <p className="px-4 py-3 text-[11px] italic text-current/40">{t("articleNoTags")}</p>
       );
 
-    case "article:prevNext":
+    case "article:prevNext": {
+      // Newest first, as the shop lists them: the older post is the next one.
+      const older = shopPosts[articleAt + 1];
+      const newer = articleAt > 0 ? shopPosts[articleAt - 1] : undefined;
       return (
         <div className="grid gap-3 px-4 py-4 sm:grid-cols-2">
-          {[
-            { dir: `← ${t("articlePrev")}`, title: POSTS[1].title, align: "" },
-            { dir: `${t("articleNext")} →`, title: POSTS[2].title, align: "sm:text-right" },
-          ].map((item) => (
-            <div key={item.dir} className={`rounded-md border border-current/12 p-3.5 ${item.align}`}>
-              <p className="text-[10px] uppercase tracking-[0.08em] text-current/40">{item.dir}</p>
-              <p className="mt-1.5 truncate text-[12.5px] font-semibold">{item.title}</p>
+          {older ? (
+            <div className="rounded-md border border-current/12 p-3.5">
+              <p className="text-[10px] uppercase tracking-[0.08em] text-current/40">← {t("articlePrev")}</p>
+              <p className="mt-1.5 truncate text-[12.5px] font-semibold">{older.title}</p>
             </div>
-          ))}
+          ) : null}
+          {newer ? (
+            <div className="rounded-md border border-current/12 p-3.5 sm:col-start-2 sm:text-right">
+              <p className="text-[10px] uppercase tracking-[0.08em] text-current/40">{t("articleNext")} →</p>
+              <p className="mt-1.5 truncate text-[12.5px] font-semibold">{newer.title}</p>
+            </div>
+          ) : null}
         </div>
       );
+    }
 
-    case "article:related":
+    case "article:related": {
+      // As the shop picks them: the ones sharing a tag first, then the newest.
+      const others = shopPosts.filter((post) => post !== article);
+      const alike = others.filter((post) => post.tags.some((tag) => article.tags.includes(tag)));
+      const shelf = [...alike, ...others.filter((post) => !alike.includes(post))].slice(0, 3);
       return (
         <div className="px-4 py-4">
-          <SectionHead title={t("articleRelatedHeadingExample")} />
-          <PostCards posts={shopPosts} line={(post) => post.date || null} cards="full" />
+          <SectionHead title={t("articleRelatedHeading")} />
+          <PostCards posts={shelf} line={(post) => post.date || null} cards="full" columns={3} />
         </div>
       );
+    }
 
     case "cart:heading":
       return (
