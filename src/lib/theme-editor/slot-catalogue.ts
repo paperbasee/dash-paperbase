@@ -628,8 +628,11 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
    * exactly when the spelling is wrong. It can come back when search itself
    * learns to forgive a spelling.
    *
-   * "Before they have typed" is the page with fewer than two letters in the
-   * box, the same floor the header's own search keeps.
+   * "Before they have typed" is what the whole-screen search shows the moment
+   * it opens, and until two letters are in the box -- the one place a shopper
+   * types a search since 2026-09-24, when the page lost its own field (owner:
+   * "why are there two input boxes?"). The page shows the same choice to
+   * anyone who reaches it with nothing searched.
    */
   search: [
     { key: "notice", label: "notice", inherited: true, inheritedFrom: { page: "header", key: "notice" } },

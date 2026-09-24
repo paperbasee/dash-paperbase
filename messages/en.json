@@ -2994,7 +2994,7 @@
       "searchEmptyHeadingExample": "Nothing matched “{term}”",
       "searchEmptyBodyExample": "Try a shorter word, or start from one of these.",
       "searchPrompt": "Before they have typed",
-      "searchPromptHint": "What the search page shows before anything is typed, and after one letter — it takes two to search.",
+      "searchPromptHint": "What a shopper sees the moment search opens, and after one letter — it takes two to search.",
       "searchPromptWhen": "Before they type",
       "searchPromptHintOption": "A line of help",
       "searchPromptHintNote": "“Type at least two letters to search.” Short, and it says why nothing has happened yet.",
