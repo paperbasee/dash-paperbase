@@ -155,6 +155,20 @@ export function SlotEditor({ loaded }: { loaded: ThemeEditorState }) {
         : { ...all, checkout: { ...all.checkout, form: formVariant } },
     );
   }, [formVariant]);
+  /*
+    Shop settings chosen on this canvas and not yet written.
+
+    **They wait for Save to store, like everything else here** (owner,
+    2026-09-24, reversing the same day's first answer). They are not in the
+    draft -- they are not part of the theme at all -- but this editor has ONE
+    save, and a tile that wrote itself the moment it was clicked was a second
+    one a merchant had not asked for.
+
+    Held in the screen, so they do not survive a reload the way a draft does.
+    The tile's hint says when they are saved; nothing else here would tell a
+    merchant.
+  */
+  const [pendingStore, setPendingStore] = useState<Record<string, string>>({});
 
   const save = useAutosave({ loaded, document: state.document, onSaved: () => {} });
   // Pictures this shop has already placed, and the URLs of ones placed since the
@@ -194,18 +208,7 @@ export function SlotEditor({ loaded }: { loaded: ThemeEditorState }) {
         ...all,
         [owner.page]: { ...all[owner.page], [owner.key]: value },
       }));
-      void (async () => {
-        try {
-          await api.patch("store/checkout-settings/", {
-            [store.setting]: storeSettingValue(store, value),
-          });
-          notify.success(tEditor("shopSettingSaved"), { title: tc("heading") });
-        } catch {
-          notify.warning(tEditor("shopSettingFailed"), { title: tc("heading") });
-        } finally {
-          void qc.invalidateQueries({ queryKey: checkoutSettingsQueryKey });
-        }
-      })();
+      setPendingStore((all) => ({ ...all, [store.setting]: storeSettingValue(store, value) }));
       return;
     }
 
@@ -276,11 +279,56 @@ export function SlotEditor({ loaded }: { loaded: ThemeEditorState }) {
     }
   }
 
+  /**
+   * The shop settings chosen on this canvas, written with the rest of the save.
+   *
+   * Never throws: a shop setting that would not save must not take the theme's
+   * own save down with it. It stays pending instead, so the next Save tries it
+   * again, and the merchant is told which half did not land.
+   */
+  async function saveShopSettings(): Promise<boolean> {
+    const patch = pendingStore;
+    if (!Object.keys(patch).length) return true;
+    try {
+      await api.patch("store/checkout-settings/", patch);
+      setPendingStore({});
+      return true;
+    } catch {
+      notify.warning(tEditor("shopSettingFailed"), { title: tc("heading") });
+      return false;
+    } finally {
+      void qc.invalidateQueries({ queryKey: checkoutSettingsQueryKey });
+    }
+  }
+
+  /*
+    One button, both halves. The shop settings go FIRST: publishing can fail for
+    reasons that have nothing to do with them -- a clash, or a draft that is not
+    there to publish -- and a merchant who pressed Save should not lose a choice
+    to an argument about something else.
+  */
   const handleSave = () =>
-    void run(() => saveToShop(ports()), () =>
-      notify.success(tEditor("savedToShop"), { title: tc("heading") }),
+    void run(
+      async () => {
+        await saveShopSettings();
+        return saveToShop(ports());
+      },
+      () => notify.success(tEditor("savedToShop"), { title: tc("heading") }),
     );
   const answered = () => setConflict(null);
+  /**
+   * Answering a clash with "load latest" gives up the edits this editor had not
+   * sent -- and a shop setting chosen on the canvas and not yet saved is one of
+   * them. It goes back to what the shop says rather than waiting to be written
+   * by a later Save the merchant did not connect it to.
+   */
+  const startedOver = () => {
+    setPendingStore({});
+    if (formVariant) {
+      setChoices((all) => ({ ...all, checkout: { ...all.checkout, form: formVariant } }));
+    }
+    answered();
+  };
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
@@ -494,7 +542,7 @@ export function SlotEditor({ loaded }: { loaded: ThemeEditorState }) {
         busy={busy}
         canKeepMine={conflict?.draftRevision != null}
         hasUnsent={save.unsent}
-        onLoadLatest={() => void run(() => loadLatest(ports()), answered)}
+        onLoadLatest={() => void run(() => loadLatest(ports()), startedOver)}
         onKeepMine={() =>
           conflict?.draftRevision != null
             ? void run(() => keepMyVersion(ports(), conflict.draftRevision as number), answered)

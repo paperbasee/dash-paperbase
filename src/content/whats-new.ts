@@ -83,8 +83,8 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
       bn: "ক্রেতার ফর্ম চলে এল এডিটরে",
     },
     body: {
-      en: "Choosing the short or long customer form has moved from Settings → Checkout to your checkout page in the editor, where you can see the form while you decide. It is still the same setting and it still saves the moment you pick it. The short form now really is shorter: name, phone, district and area, with no email or street address box at all.",
-      bn: "ক্রেতার ছোট নাকি বড় ফর্ম হবে — এই পছন্দটি সেটিংস → চেকআউট থেকে সরে এডিটরের চেকআউট পেজে এসেছে, যেখানে ফর্মটি দেখতে দেখতেই ঠিক করতে পারবেন। সেটিংটি আগের মতোই এক, আর বেছে নেওয়ার সঙ্গে সঙ্গেই সংরক্ষিত হয়। ছোট ফর্মটি এখন সত্যিই ছোট: নাম, ফোন, জেলা ও থানা — ইমেইল বা রাস্তার ঠিকানার ঘর একেবারেই নেই।",
+      en: "Choosing the short or long customer form has moved from Settings → Checkout to your checkout page in the editor, where you can see the form while you decide. It is saved the same way as everything else there — when you press Save to store. The short form now really is shorter: name, phone, district and area, with no email or street address box at all.",
+      bn: "ক্রেতার ছোট নাকি বড় ফর্ম হবে — এই পছন্দটি সেটিংস → চেকআউট থেকে সরে এডিটরের চেকআউট পেজে এসেছে, যেখানে ফর্মটি দেখতে দেখতেই ঠিক করতে পারবেন। সেখানকার বাকি সবকিছুর মতোই এটি সংরক্ষিত হয় — আপনি “স্টোরে সংরক্ষণ” চাপলে। ছোট ফর্মটি এখন সত্যিই ছোট: নাম, ফোন, জেলা ও থানা — ইমেইল বা রাস্তার ঠিকানার ঘর একেবারেই নেই।",
     },
   },
   {

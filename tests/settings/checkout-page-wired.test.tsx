@@ -146,10 +146,27 @@ describe("the checkout page is wired", () => {
     }
   });
 
-  test("the tile says it saves straight away, or a merchant expects the draft to hold it", () => {
+  test("the tile says when it is saved, and it is saved like everything else here", () => {
+    /*
+      It wrote itself the moment it was clicked for about an hour on
+      2026-09-24, until the owner said no: this editor has ONE save, and a tile
+      that wrote itself was a second one nobody asked for.
+    */
     const slot = SLOTS.checkout.find((one) => one.key === "form")!;
     const hint = (en.themeEditor.slots as Record<string, string>)[slot.hint!];
-    expect(hint).toContain("saves straight away");
+    expect(hint).toContain("Save to store");
+    expect(hint).not.toContain("straight away");
+  });
+
+  test("and the editor holds it until then rather than writing on the click", () => {
+    const editor = readFileSync(
+      "src/components/theme-editor/slots/SlotEditor.tsx",
+      "utf8",
+    );
+    const choose = editor.slice(editor.indexOf("function choose("), editor.indexOf("function setSetting("));
+    expect(choose).toContain("setPendingStore");
+    expect(choose).not.toContain("api.patch");
+    expect(editor).toContain("await saveShopSettings();");
   });
 
   test("and no longer sends a merchant to a screen that does not have it", () => {

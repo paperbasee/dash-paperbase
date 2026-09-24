@@ -156,7 +156,8 @@ export default function CheckoutSettingsSection({
                   Customization
                 </Link>
                 {" "}— open the editor and choose it on the Checkout page, where you can
-                see the form while you decide.
+                see the form while you decide. It saves when you press Save to store,
+                like the rest of your design.
               </p>
             </div>
 

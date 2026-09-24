@@ -2804,7 +2804,7 @@
       "orderFixed": "Listed, not editable",
       "orderFixedNote": "Quantities are shown only. To change anything they go back to the cart.",
       "checkoutForm": "Order form",
-      "checkoutFormHint": "The right column. Which form your checkout asks for is a shop setting, not part of the theme — so this one saves straight away, without waiting for Save to store.",
+      "checkoutFormHint": "The right column. Which form your checkout asks for is a shop setting rather than part of the theme, but it is saved the same way as everything else here: when you press Save to store.",
       "formExtended": "Full address",
       "formExtendedNote": "Name, email, phone, district, area and street address. The courier has everything it needs.",
       "formMinimal": "Name, phone, district, area",
@@ -3225,8 +3225,7 @@
     "chooseHint": "Tick the ones you want, up to {max, number}.",
     "chooseDone": "Done",
     "noProducts": "No products",
-    "shopSettingSaved": "Saved to your shop. This one is a shop setting, so it does not wait for Save to store.",
-    "shopSettingFailed": "That could not be saved. Nothing changed."
+    "shopSettingFailed": "Your checkout form could not be saved. Everything else was."
   },
   "billingSuccess": {
     "title": "Subscription activated",

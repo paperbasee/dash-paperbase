@@ -2,10 +2,16 @@
  * Places in this editor that write a SHOP SETTING rather than the theme document.
  *
  * Every other place on this canvas edits the theme: the choice lands in a
- * draft, the merchant reads it in the preview beside them, and nothing reaches
- * a shopper until Save to store. This kind does not. It writes a row the shop
- * already had before the editor existed, it writes it the moment it is clicked,
- * and Save to store has nothing to do with it.
+ * draft, and nothing reaches a shopper until Save to store. This kind writes a
+ * row the shop already had before the editor existed -- so it is not in the
+ * draft and `documents.ts` knows nothing about it.
+ *
+ * **It is still saved by Save to store and by nothing else** (owner,
+ * 2026-09-24, reversing the same day's first answer: it wrote itself the moment
+ * it was clicked, and that was a second save a merchant had not asked for).
+ * `SlotEditor` holds the choice until then and sends it with the rest. The
+ * consequence to know: a pending choice lives in the screen, so it does not
+ * survive a reload the way a draft does.
  *
  * **There is exactly one so far.** The checkout's form -- short or long -- is
  * `StorefrontCheckoutSettings.customer_form_variant`, which Settings ->
@@ -19,8 +25,9 @@
  * should not have to leave the page they are designing to decide how many boxes
  * it has.
  *
- * A place listed here must SAY it saves straight away, in its hint, or a
- * merchant will expect the draft to hold it.
+ * A place listed here must SAY in its hint when it is saved. It looks like every
+ * other tile and it is not one, and the difference only shows on the day
+ * something goes wrong with one half and not the other.
  */
 import type { SlotPageKey } from "./slot-catalogue";
 
