@@ -80,7 +80,7 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
     id: "2026-09-22-header-and-footer-choices",
     date: "2026-09-22",
-    version: "4.96.0",
+    version: "4.97.0",
     tag: "new",
     href: "/settings?tab=customization",
     title: {
@@ -88,8 +88,8 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
       bn: "হেডার আর ফুটার সাজান",
     },
     body: {
-      en: "Arrange your header as a bar with every category under it, with your name centred over five of them, or with the categories behind a menu button as on a phone — and show search as a box or a small mark, keep the header on screen as shoppers scroll, and add account and wishlist beside the cart. Arrange your footer in columns, with your shop on one side, centred, or as a single short line, and choose what it shows: your address and phone or only your email, your social links as names or round marks, the ways you take payment, a button that opens WhatsApp to your number, and your policy pages beside the year.",
-      bn: "হেডার সাজান নিচে সব ক্যাটাগরিসহ একটি বার হিসেবে, পাঁচটি ক্যাটাগরির উপরে মাঝখানে নাম রেখে, নয়তো ফোনের মতো একটি মেনু বোতামের পেছনে ক্যাটাগরি রেখে — আর সার্চ দেখান বক্সে বা ছোট চিহ্নে, ক্রেতা স্ক্রল করলেও হেডার স্ক্রিনে রাখুন, আর কার্টের পাশে অ্যাকাউন্ট ও উইশলিস্ট যোগ করুন। ফুটার সাজান কলামে, একপাশে দোকান রেখে, মাঝখানে, নয়তো ছোট এক লাইনে, আর ঠিক করুন কী দেখাবে: ঠিকানা ও ফোন নাকি শুধু ইমেইল, সোশ্যাল লিংক নামে বা গোল চিহ্নে, আপনি যেভাবে টাকা নেন, আপনার নম্বরে হোয়াটসঅ্যাপ খোলার একটি বোতাম, আর সালের পাশে নীতিমালার পেজগুলো।",
+      en: "Arrange your header as a bar with every category under it, with your name centred over five of them, or with the categories behind a menu button as on a phone — and show search as a box or a small mark, keep the header on screen as shoppers scroll, and add account and wishlist beside the cart. Arrange your footer in columns, with your shop on one side, centred, or as a single short line, and choose what it shows: your address and phone or only your email, your social links as names or round marks, the ways you take payment, and your policy pages beside the year.",
+      bn: "হেডার সাজান নিচে সব ক্যাটাগরিসহ একটি বার হিসেবে, পাঁচটি ক্যাটাগরির উপরে মাঝখানে নাম রেখে, নয়তো ফোনের মতো একটি মেনু বোতামের পেছনে ক্যাটাগরি রেখে — আর সার্চ দেখান বক্সে বা ছোট চিহ্নে, ক্রেতা স্ক্রল করলেও হেডার স্ক্রিনে রাখুন, আর কার্টের পাশে অ্যাকাউন্ট ও উইশলিস্ট যোগ করুন। ফুটার সাজান কলামে, একপাশে দোকান রেখে, মাঝখানে, নয়তো ছোট এক লাইনে, আর ঠিক করুন কী দেখাবে: ঠিকানা ও ফোন নাকি শুধু ইমেইল, সোশ্যাল লিংক নামে বা গোল চিহ্নে, আপনি যেভাবে টাকা নেন, আর সালের পাশে নীতিমালার পেজগুলো।",
     },
   },
   {
@@ -459,8 +459,8 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
       bn: "দোকানে ভিডিও যোগ করুন",
     },
     body: {
-      en: "Paste a link from YouTube, Facebook or Vimeo and a video section appears on your home page, a category or a product — any normal link works, including a Shorts or a share link. Shoppers see your cover picture and a play button, and nothing is loaded from YouTube until somebody presses it, so the page stays fast and no shopper is reported to anyone who never watched. Reels and other tall videos have a shape of their own so they are not squeezed into a wide box.",
-      bn: "ইউটিউব, ফেসবুক বা ভিমিও থেকে একটি লিংক বসালেই আপনার হোম পেজ, ক্যাটাগরি বা পণ্যের পাতায় ভিডিও সেকশন যোগ হবে — শর্টস বা শেয়ার লিংকসহ সাধারণ যেকোনো লিংকই চলবে। ক্রেতারা আপনার কভার ছবি আর একটি প্লে বোতাম দেখবেন, আর কেউ সেটি না চাপা পর্যন্ত ইউটিউব থেকে কিছুই লোড হয় না — তাই পাতা দ্রুত থাকে আর যে ক্রেতা ভিডিও দেখেননি তাঁর কথা কোথাও যায় না। রিলসের মতো লম্বা ভিডিওর জন্য আলাদা আকার আছে, তাই সেগুলো চওড়া বাক্সে চেপে বসে না।",
+      en: "On Premium, your home page can open with a video instead of pictures: paste a link from YouTube, Facebook or Vimeo — any normal link works, including a Shorts or a share link. Shoppers see your cover picture and a play button, and nothing is loaded from YouTube until somebody presses it, so the page stays fast and no shopper is reported to anyone who never watched. Reels and other tall videos have a shape of their own so they are not squeezed into a wide box.",
+      bn: "প্রিমিয়ামে আপনার হোম পেজ ছবির বদলে একটি ভিডিও দিয়ে শুরু হতে পারে: ইউটিউব, ফেসবুক বা ভিমিও থেকে একটি লিংক বসান — শর্টস বা শেয়ার লিংকসহ সাধারণ যেকোনো লিংকই চলবে। ক্রেতারা আপনার কভার ছবি আর একটি প্লে বোতাম দেখবেন, আর কেউ সেটি না চাপা পর্যন্ত ইউটিউব থেকে কিছুই লোড হয় না — তাই পাতা দ্রুত থাকে আর যে ক্রেতা ভিডিও দেখেননি তাঁর কথা কোথাও যায় না। রিলসের মতো লম্বা ভিডিওর জন্য আলাদা আকার আছে, তাই সেগুলো চওড়া বাক্সে চেপে বসে না।",
     },
   },
   {
