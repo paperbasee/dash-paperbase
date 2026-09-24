@@ -23,7 +23,8 @@
  * the cap that way. What that one did instead: it MERGED the two cart entries,
  * which were one feature told twice. Do that, or drop a released entry; never
  * drop a held one to make room. (The search page's entry, the same day, merged
- * the checkout's two -- its page and the form that moved onto it.)
+ * the checkout's two -- its page and the form that moved onto it -- and the
+ * blog's merged the corners and the card style, both the Style panel.)
  *
  * ## Entries written before their release — ONE DATE, RESTAMP IT ON THE DAY
  *
@@ -73,6 +74,21 @@ export interface WhatsNewEntry {
 export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
+  {
+    id: "2026-09-22-blog-page-choices",
+    date: "2026-09-22",
+    version: "4.92.0",
+    tag: "new",
+    href: "/settings?tab=customization",
+    title: {
+      en: "Design your blog page",
+      bn: "ব্লগ পেজ সাজান",
+    },
+    body: {
+      en: "Give your blog its own name and opening line, let readers narrow the posts by typing or by tag, and show your featured posts as one large or four across. Choose a grid or a list for the rest, what each card carries, and whether the line under it is the date or how many times the post has been read — every read counts now. You can also add a few words of your own under the posts.",
+      bn: "ব্লগকে নিজের নাম আর প্রথম লাইন দিন, পাঠক যেন লিখে বা ট্যাগ বেছে পোস্টগুলো ছেঁকে নিতে পারেন, আর বাছাই করা পোস্ট দেখান একটি বড় করে নয়তো পাশাপাশি চারটি। বাকি পোস্ট গ্রিডে না তালিকায়, প্রতিটি কার্ডে কী থাকবে, আর নিচের লাইনে তারিখ নাকি পোস্টটি কতবার পড়া হয়েছে — ঠিক করুন; এখন প্রতিবার পড়াই গোনা হয়। পোস্টের নিচে নিজের কিছু কথাও যোগ করতে পারেন।",
+    },
+  },
   {
     id: "2026-09-22-search-page-choices",
     date: "2026-09-22",
@@ -200,27 +216,12 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     tag: "new",
     href: "/settings?tab=customization",
     title: {
-      en: "Choose your shop's corners",
-      bn: "দোকানের কোণা নিজেই বেছে নিন",
+      en: "Your cards and corners, in the editor",
+      bn: "কার্ড আর কোণা, এখন এডিটরে",
     },
     body: {
-      en: "Square, soft or rounded — one choice for everything your shop draws a box around: cards, buttons, boxes you type in, pictures. It sits in Customization under Style, next to your product cards, and reaches shoppers when you press Save to store. Your shop keeps the corners it has until you change them.",
-      bn: "চোকো, হালকা গোল, নাকি গোল — দোকানে যেখানে যেখানে বাক্স আঁকা হয় সবখানে একই পছন্দ: কার্ড, বোতাম, লেখার ঘর, ছবি। এটি কাস্টমাইজেশনের স্টাইল অংশে, প্রোডাক্ট কার্ডের পাশেই, আর স্টোরে সংরক্ষণ চাপলেই ক্রেতাদের কাছে যাবে। নিজে না বদলানো পর্যন্ত দোকানের কোণা আগের মতোই থাকবে।",
-    },
-  },
-  {
-    id: "2026-09-22-card-style-in-the-editor",
-    date: "2026-09-22",
-    version: "4.65.0",
-    tag: "improved",
-    href: "/settings?tab=customization",
-    title: {
-      en: "Product cards move into the editor",
-      bn: "প্রোডাক্ট কার্ড এখন এডিটরের ভেতরে",
-    },
-    body: {
-      en: "Choosing Classic or Shelf was a control in Settings, and it changed your shop the moment you clicked it. It now sits with the rest of your look, in Customization under Style — you can see the other style on your own shop first, and it reaches shoppers when you press Save to store.",
-      bn: "ক্ল্যাসিক না শেলফ — এই পছন্দটি সেটিংসে ছিল, আর চাপ দেওয়ামাত্রই দোকানে বদলে যেত। এখন এটি আপনার বাকি ডিজাইনের সাথেই আছে, কাস্টমাইজেশনের স্টাইল অংশে — অন্য স্টাইলটি আগে নিজের দোকানে দেখে নিতে পারবেন, আর স্টোরে সংরক্ষণ চাপলেই সেটি ক্রেতাদের কাছে যাবে।",
+      en: "Choose square, soft or rounded corners for everything your shop draws a box around — cards, buttons, boxes you type in, pictures. Choosing Classic or Shelf product cards moved there too, out of Settings where it changed your shop the moment you clicked. Both sit in Customization under Style, and reach shoppers when you press Save to store.",
+      bn: "দোকানে যেখানে যেখানে বাক্স আঁকা হয় — কার্ড, বোতাম, লেখার ঘর, ছবি — সবখানের কোণা চোকো, হালকা গোল নাকি গোল হবে, বেছে নিন। ক্ল্যাসিক না শেলফ প্রোডাক্ট কার্ড — এই পছন্দটিও সেটিংস থেকে সেখানে এসেছে, যেখানে চাপ দেওয়ামাত্রই দোকান বদলে যেত। দুটোই কাস্টমাইজেশনের স্টাইল অংশে, আর স্টোরে সংরক্ষণ চাপলেই ক্রেতাদের কাছে যাবে।",
     },
   },
   {
