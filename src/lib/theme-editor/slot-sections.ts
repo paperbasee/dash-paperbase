@@ -356,6 +356,59 @@ export const WIRED_SLOTS: Partial<Record<SlotPageKey, Record<string, WiredSlot>>
     },
   },
   /*
+    The account, 2026-09-24. The last of the four pages drawn in markup no
+    merchant could reach -- and the one whose places were furthest from the
+    truth: two of the five offered things the shop has never had, and none of
+    them mentioned the reviews it has held since 2026-09-22. See the note on
+    `SLOTS.account` for what went and why.
+
+    Two of these decide what the VIEW FETCHES and not only what is drawn -- the
+    pictures on an order card, and the reviews themselves -- so the shop reads
+    them in `views/account.py` before it queries anything.
+  */
+  account: {
+    greeting: {
+      page: "templates.account",
+      sections: {
+        name: { type: "account", settings: { greeting: "name" } },
+        plain: { type: "account", settings: { greeting: "plain" } },
+        none: { type: "account", settings: { greeting: "none" } },
+      },
+    },
+    orders: {
+      page: "templates.account",
+      sections: {
+        rows: { type: "account", settings: { orders: "rows" } },
+        cards: { type: "account", settings: { orders: "cards" } },
+      },
+    },
+    /*
+      ON first, because it is the theme's default and because switching it off
+      has a cost a merchant should meet deliberately: a review waiting for
+      approval that its own author cannot find reads as lost, and the natural
+      response to that is to write it again.
+    */
+    reviews: {
+      page: "templates.account",
+      sections: {
+        on: { type: "account", settings: { reviews: true } },
+        off: { type: "account", settings: { reviews: false } },
+      },
+    },
+    /*
+      `when_empty`, not `empty`: a reserved word in Liquid. The PLACE is still
+      called `empty` -- that is the editor's own name for it and nothing in
+      Liquid reads it.
+    */
+    empty: {
+      page: "templates.account",
+      sections: {
+        text: { type: "account", settings: { when_empty: "text" } },
+        invite: { type: "account", settings: { when_empty: "invite" } },
+      },
+    },
+  },
+  /*
     The checkout, 2026-09-24 (round 1). The page the whole shop is for, and the
     last one still drawn in markup no merchant could reach: `theming/0028` gives
     every document the page, exactly as `0027` did for the cart the day before.

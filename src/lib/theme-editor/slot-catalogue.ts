@@ -972,19 +972,26 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
    * opens this page to ask. Signing in answers more, and costs an entire
    * feature. Both are offered rather than the second being assumed.
    */
+  /**
+   * The account: the page a shopper reaches once the shop knows who they are.
+   *
+   * **Three of the five places here were promises the shop could not keep**,
+   * and they were rewritten on 2026-09-24 when the page was wired:
+   *
+   * - "Before they are known" offered order-tracking OR signing in. Both are
+   *   on: accounts belong to every shop (owner, 2026-09-22) and the tracker is
+   *   a module switch in Settings. Neither is the theme's to decide, so the
+   *   place is gone.
+   * - "What the page holds" offered editable details and an address book. The
+   *   shop has neither -- and the one thing this page DOES hold that no other
+   *   page does, the shopper's own reviews, was not mentioned at all. So that
+   *   place is gone too, and `reviews` stands in its place.
+   * - Its notes said signing in "needs sign-in built first -- there is none
+   *   today". It was built on 2026-09-21.
+   */
   account: [
     { key: "notice", label: "notice", inherited: true, inheritedFrom: { page: "header", key: "notice" } },
     { key: "header", label: "header", inherited: true, inheritedFrom: { page: "header", key: "layout" } },
-    {
-      key: "door",
-      label: "accountDoor",
-      hint: "accountDoorHint",
-      initial: "lookup",
-      options: [
-        { value: "lookup", label: "accountDoorLookup", note: "accountDoorLookupNote", shape: "block" },
-        { value: "signIn", label: "accountDoorSignIn", note: "accountDoorSignInNote", shape: "block" },
-      ],
-    },
     {
       key: "greeting",
       label: "accountGreeting",
@@ -998,17 +1005,6 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
       ],
     },
     {
-      key: "panels",
-      label: "accountPanels",
-      hint: "accountPanelsHint",
-      initial: "orders",
-      options: [
-        { value: "orders", label: "accountPanelsOrders", note: "accountPanelsOrdersNote", shape: "line" },
-        { value: "details", label: "accountPanelsDetails", note: "accountPanelsDetailsNote", shape: "row" },
-        { value: "everything", label: "accountPanelsEverything", note: "accountPanelsEverythingNote", shape: "block" },
-      ],
-    },
-    {
       key: "orders",
       label: "accountOrders",
       initial: "rows",
@@ -1017,10 +1013,30 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
         { value: "cards", label: "accountOrdersCards", note: "accountOrdersCardsNote", shape: "block" },
       ],
     },
+    /**
+     * What they have written, in every state -- including the ones only they
+     * and the shop can see.
+     *
+     * **On, and a merchant switching it off is choosing something with a
+     * cost**: a review waiting for approval that its own author cannot find
+     * reads as lost, and the natural response to that is to write it again.
+     */
+    {
+      key: "reviews",
+      label: "accountReviews",
+      hint: "accountReviewsHint",
+      initial: "on",
+      emptyValues: ["off"],
+      emptyLabel: "accountReviewsEmpty",
+      options: [
+        { value: "on", label: "on", note: "accountReviewsOnNote", shape: "block" },
+        { value: "off", label: "off", note: "accountReviewsOffNote", shape: "blank" },
+      ],
+    },
     {
       key: "empty",
       label: "accountEmpty",
-      initial: "invite",
+      initial: "text",
       options: [
         { value: "text", label: "cartEmptyText", note: "accountEmptyTextNote", shape: "line" },
         { value: "invite", label: "cartEmptyInvite", note: "accountEmptyInviteNote", shape: "block" },

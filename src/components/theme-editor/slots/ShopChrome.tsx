@@ -1553,38 +1553,6 @@ export function ShopChrome({
 
     /* ----------------------------------------------------------- account -- */
 
-    case "account:door": {
-      const lookup = variant === "lookup";
-      return (
-        <div className="border-b border-dashed border-current/15 px-4 py-5">
-          <p className="mb-3 text-[10px] uppercase tracking-[0.06em] text-current/40">{t("accountDoorWhen")}</p>
-          <div className="mx-auto max-w-[23rem] rounded-md border border-current/12 p-5">
-            <p className="mb-1 text-[15px] font-semibold">
-              {lookup ? t("accountLookupHeading") : t("accountSignInHeading")}
-            </p>
-            <p className="mb-4 text-[11px] leading-relaxed text-current/50">
-              {lookup ? t("accountLookupBody") : t("accountSignInBody")}
-            </p>
-            <div className="grid gap-2.5">
-              <span className="flex items-center gap-2 rounded-md border border-current/15 bg-current/[0.03] px-3 py-2.5">
-                <Phone className="size-3.5 shrink-0 text-current/35" aria-hidden />
-                <span className="text-[11.5px] text-current/40">{t("fieldPhone")}</span>
-              </span>
-              {lookup ? (
-                <span className="flex items-center gap-2 rounded-md border border-current/15 bg-current/[0.03] px-3 py-2.5">
-                  <Hash className="size-3.5 shrink-0 text-current/35" aria-hidden />
-                  <span className="text-[11.5px] text-current/40">{t("accountOrderNumber")}</span>
-                </span>
-              ) : null}
-              <span className="grid h-10 place-items-center rounded-full bg-foreground text-[11.5px] font-semibold text-background">
-                {lookup ? t("accountLookupButton") : t("accountSignInButton")}
-              </span>
-            </div>
-          </div>
-        </div>
-      );
-    }
-
     case "account:greeting":
       return (
         <div className="px-4 py-5">
@@ -1594,27 +1562,46 @@ export function ShopChrome({
         </div>
       );
 
-    case "account:panels": {
-      const panels =
-        variant === "everything"
-          ? [t("accountTabOrders"), t("accountTabDetails"), t("accountTabAddresses"), t("wishTitleExample")]
-          : variant === "details"
-            ? [t("accountTabOrders"), t("accountTabDetails")]
-            : [t("accountTabOrders")];
+    /**
+     * What they have written, in every state -- including the ones only they
+     * and the shop can see, which is the point: a review waiting for approval
+     * that its own author cannot find reads as lost.
+     *
+     * Drawn as the shop draws it, down to the word for each state, because a
+     * merchant deciding whether to keep this band is deciding whether their
+     * customers can find a review they are still waiting on.
+     */
+    case "account:reviews": {
+      if (variant === "off") {
+        return (
+          <p className="px-4 py-4 text-center text-[11px] text-current/45">{t("accountReviewsOffExample")}</p>
+        );
+      }
+      const mine = [
+        { product: t("accountReviewProduct"), state: t("accountReviewPublished"), tone: "text-current/45" },
+        { product: t("accountReviewProductTwo"), state: t("accountReviewWaiting"), tone: "text-[#b4571f]" },
+      ];
       return (
-        <div className="flex flex-wrap gap-2 border-b border-current/10 px-4 py-3">
-          {panels.map((name, i) => (
-            <span
-              key={name}
-              className={
-                i === 0
-                  ? "rounded-xs bg-foreground px-3 py-1 text-[11px] text-background"
-                  : "rounded-xs border border-current/15 px-3 py-1 text-[11px] text-current/60"
-              }
-            >
-              {name}
-            </span>
-          ))}
+        <div className="px-4 py-4">
+          <p className="mb-2.5 text-[12.5px] font-semibold">{t("accountReviewsHeading")}</p>
+          <div className="rounded-md border border-current/12">
+            {mine.map((one, i) => (
+              <div key={one.product} className={`p-3 ${i ? "border-t border-current/10" : ""}`}>
+                <div className="flex items-baseline justify-between gap-3">
+                  <span className="min-w-0 truncate text-[12px] font-medium">{one.product}</span>
+                  <span className={`shrink-0 text-[10px] ${one.tone}`}>{one.state}</span>
+                </div>
+                <div className="mt-1 flex items-center gap-2">
+                  <span className="text-[11px] tracking-[0.1em] text-current/45" aria-hidden>
+                    &#9733;&#9733;&#9733;&#9733;&#9733;
+                  </span>
+                  <span className="text-[10px] text-current/45">
+                    {t("accountReviewEdit")} &middot; {t("accountReviewDelete")}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       );
     }

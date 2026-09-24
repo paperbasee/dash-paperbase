@@ -73,6 +73,21 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-09-22-account-page-choices",
+    date: "2026-09-22",
+    version: "4.88.0",
+    tag: "new",
+    href: "/settings?tab=customization",
+    title: {
+      en: "Design your customers' account page",
+      bn: "ক্রেতার অ্যাকাউন্ট পেজ সাজান",
+    },
+    body: {
+      en: "Greet them by name, by the plain word, or not at all; list their orders as a list or as cards with the pictures of what was in each one; and send an empty account to your shop rather than to nothing. You can also choose whether they see the reviews they have written — every one, including the ones waiting for you and the ones you turned down, theirs to change or delete. That last one is on to begin with, because a review its author cannot find looks lost, and they simply write it again.",
+      bn: "নাম ধরে, শুধু শব্দটি দিয়ে, নাকি কোনো অভ্যর্থনাই নয় — আপনার পছন্দ; তাঁদের অর্ডার তালিকা হিসেবে নাকি ভিতরে কী ছিল তার ছবিসহ কার্ড হিসেবে; আর খালি অ্যাকাউন্ট থেকে শূন্যতার বদলে দোকানে পাঠানো। তাঁরা নিজেদের লেখা রিভিউ দেখতে পাবেন কি না, সেটিও ঠিক করতে পারেন — সবগুলোই, আপনার অপেক্ষায় থাকা আর ফিরিয়ে দেওয়াগুলোসহ, নিজেরাই বদলাতে বা মুছতে পারেন। শেষেরটি শুরু থেকেই চালু, কারণ যে রিভিউ তার লেখকই খুঁজে পান না তা হারিয়ে গেছে মনে হয়, আর তিনি আবার লেখেন।",
+    },
+  },
+  {
     id: "2026-09-22-checkout-form-moves",
     date: "2026-09-22",
     version: "4.86.0",
