@@ -92,13 +92,4 @@ describe("the canvas names this shop's own departments", () => {
     for (const word of NOT_THIS_SHOPS) expect(html).not.toContain(word);
   });
 
-  test("the suggestions draw a shape rather than three products", () => {
-    /*
-      What the shop puts there is near-miss PRODUCT names and the editor has no
-      product list, so it shows the shape of the answer. It named three bags.
-    */
-    const html = draw("search", "suggestions", "on");
-    expect(html).not.toContain("Tote");
-    expect(html).toContain("You might also try");
-  });
 });

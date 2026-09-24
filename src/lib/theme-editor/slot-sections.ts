@@ -614,6 +614,72 @@ export const WIRED_SLOTS: Partial<Record<SlotPageKey, Record<string, WiredSlot>>
     neither is in the shop yet, and a place goes in here only when its section
     can do everything the place promises.
   */
+  /*
+    Search, 2026-09-24. Every place is a setting of the one section the page
+    has always had, so a document written before today reads as the shop drew
+    it: each map starts with the theme's default, and a missing setting reads
+    as the first value that wants it.
+
+    Three of these decide what the VIEW does and not only what is drawn --
+    whether the matching categories are looked up, which page of results is
+    read, and whether the best sellers are fetched for an empty box -- so the
+    shop reads them in `views/pages.search` before it queries anything.
+  */
+  search: {
+    heading: {
+      page: "templates.search",
+      sections: {
+        withCount: { type: "search_results", settings: { heading: "count" } },
+        plain: { type: "search_results", settings: { heading: "plain" } },
+      },
+    },
+    /*
+      A boolean like the account's reviews, and no `off` key for the same
+      reason: `off` there would hide the whole section, results and all.
+    */
+    categories: {
+      page: "templates.search",
+      sections: {
+        on: { type: "search_results", settings: { categories: true } },
+        off: { type: "search_results", settings: { categories: false } },
+      },
+    },
+    grid: {
+      page: "templates.search",
+      sections: {
+        four: { type: "search_results", settings: { columns: "four" } },
+        three: { type: "search_results", settings: { columns: "three" } },
+        two: { type: "search_results", settings: { columns: "two" } },
+      },
+    },
+    /*
+      `none` first: the theme's default, and what the shop did before this was
+      a choice. The category page's default is `pages`; search's is not,
+      because a shop's answer to one word is rarely longer than a page.
+    */
+    more: {
+      page: "templates.search",
+      sections: {
+        none: { type: "search_results", settings: { more: "none" } },
+        button: { type: "search_results", settings: { more: "button" } },
+        pages: { type: "search_results", settings: { more: "pages" } },
+      },
+    },
+    empty: {
+      page: "templates.search",
+      sections: {
+        text: { type: "search_results", settings: { when_empty: "text" } },
+        invite: { type: "search_results", settings: { when_empty: "invite" } },
+      },
+    },
+    prompt: {
+      page: "templates.search",
+      sections: {
+        hint: { type: "search_results", settings: { prompt: "hint" } },
+        trending: { type: "search_results", settings: { prompt: "trending" } },
+      },
+    },
+  },
   category: {
     breadcrumb: { page: "templates.category", sections: { on: "breadcrumb" }, off: "off" },
     /*

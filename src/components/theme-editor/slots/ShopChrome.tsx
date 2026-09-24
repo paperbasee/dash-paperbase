@@ -1327,27 +1327,6 @@ export function ShopChrome({
         </div>
       );
 
-    /*
-      Bars, not names.
-
-      What the shop puts here is near-miss PRODUCT names, and the editor has no
-      product list to draw from -- so this shows the shape of the answer rather
-      than inventing three products the merchant does not sell. It used to name
-      three bags. The row above it draws real departments, which is also what
-      keeps the two places from looking like each other.
-    */
-    case "search:suggestions":
-      return (
-        <div className="px-4 py-4">
-          <p className="mb-2 text-[11px] font-semibold">{t("searchSuggestionsHeading")}</p>
-          <span className="flex flex-wrap items-center gap-2">
-            <Line w="7rem" h={6} />
-            <Line w="5rem" h={6} />
-            <Line w="6rem" h={6} />
-          </span>
-        </div>
-      );
-
     case "search:grid":
     case "category:grid": {
       const cols = variant === "two" ? 2 : variant === "three" ? 3 : 4;

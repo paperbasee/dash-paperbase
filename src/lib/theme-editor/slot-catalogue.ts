@@ -612,26 +612,24 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
   /**
    * Search: the page for a shopper who already knows what they want.
    *
-   * The most intent anyone shows in a shop, and the page with the least built
-   * behind it. Two things are true of it today and both are said at the point
-   * of choosing rather than left to be discovered:
+   * The most intent anyone shows in a shop. Wired 2026-09-24, and the notes
+   * that were here described the RETIRED storefront: ten results at most and a
+   * prev/next that could never appear. The shop on Django shows 48 at a time
+   * and reaches the rest the way a category does.
    *
-   * - **It returns at most ten products, ever.** `StorefrontSearchView` slices
-   *   the query `[:10]` server side. A shop with two hundred shirts answers
-   *   "shirt" with ten of them and no way to the rest.
-   * - **Its pagination cannot appear.** The section computes its page count
-   *   from `count / PRODUCT_SEARCH_PAGE_SIZE`, `count` is the length of what
-   *   came back (≤ 10) and the page size is 24, so the answer is always one
-   *   and the prev/next block is unreachable. `getStorefrontSearchResults`
-   *   takes a page number as `_page` and never uses it.
+   * **The categories come ABOVE the products** (owner, 2026-09-24). Someone who
+   * types a department's name usually wants the whole department, and the shop
+   * has always drawn them first; the canvas had them under the grid.
    *
-   * So "Getting to the rest" starts at nothing and says why. The older
-   * `products/search/` endpoint does paginate properly, which is where a fix
-   * would start.
+   * **"Other things to try" is gone** (owner, 2026-09-24). It promised
+   * near-miss names, "so a bad spelling is not a dead end" -- and nothing in
+   * Paperbase finds a near miss. The only suggestions the API has are the
+   * names of products that ALREADY matched: a repeat of the grid, and empty
+   * exactly when the spelling is wrong. It can come back when search itself
+   * learns to forgive a spelling.
    *
-   * What IS built and unused: the same endpoint returns twelve popular
-   * products for a query-less search when asked for `trending`. The page shows
-   * a line of text instead.
+   * "Before they have typed" is the page with fewer than two letters in the
+   * box, the same floor the header's own search keeps.
    */
   search: [
     { key: "notice", label: "notice", inherited: true, inheritedFrom: { page: "header", key: "notice" } },
@@ -646,17 +644,6 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
       ],
     },
     {
-      key: "grid",
-      label: "catGrid",
-      hint: "catGridHint",
-      initial: "four",
-      options: [
-        { value: "four", label: "catGridFour", note: "searchGridFourNote", shape: "row" },
-        { value: "three", label: "catGridThree", note: "catGridThreeNote", shape: "row" },
-        { value: "two", label: "catGridTwo", note: "catGridTwoNote", shape: "block" },
-      ],
-    },
-    {
       key: "categories",
       label: "searchCategories",
       initial: "on",
@@ -668,14 +655,14 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
       ],
     },
     {
-      key: "suggestions",
-      label: "searchSuggestions",
-      initial: "on",
-      emptyValues: ["off"],
-      emptyLabel: "searchSuggestionsEmpty",
+      key: "grid",
+      label: "catGrid",
+      hint: "catGridHint",
+      initial: "four",
       options: [
-        { value: "on", label: "on", note: "searchSuggestionsNote", shape: "line" },
-        { value: "off", label: "off", shape: "blank" },
+        { value: "four", label: "catGridFour", note: "catGridFourNote", shape: "row" },
+        { value: "three", label: "catGridThree", note: "catGridThreeNote", shape: "row" },
+        { value: "two", label: "catGridTwo", note: "catGridTwoNote", shape: "block" },
       ],
     },
     {
