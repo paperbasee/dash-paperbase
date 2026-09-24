@@ -149,50 +149,78 @@ const POSTS = [
   { title: "Why our hardware never changed", excerpt: "Six years, and nothing has worn out yet.", tag: "Materials" },
 ];
 
+/** One post as the blog's drawings need it: this shop's own, or an example. */
+export type PostPreview = {
+  title: string;
+  excerpt: string;
+  /** Its first tag, or "" -- never an invented one. */
+  tag: string;
+  /** When it went up, already written in the merchant's language. */
+  date: string;
+  reads: number;
+  featured: boolean;
+};
+
+/**
+ * This shop's own posts and tags, handed in by the editor.
+ *
+ * The blog's drawings are its OWN posts since 2026-09-24: a merchant reading
+ * "How we choose leather" on a shop that sells phones cannot tell their blog
+ * from a brochure, and "Care" and "Materials" are tags no shop of theirs ever
+ * had -- the same complaint as an invented category. Only published posts,
+ * because those are the ones a shopper sees.
+ */
+export type BlogPreview = { posts: PostPreview[]; tags: string[] };
+
 /**
  * Post cards, drawn the way the blog's own two settings say.
  *
- * The shelves do not own this: `cards` decides what a card carries and `meta`
- * decides the line under it, and both are chosen on their own bands. Passing
- * them through is what lets a merchant change the card shape and watch every
- * shelf on the page change with it.
+ * The shelves do not own this: `cards` decides what a card carries and `line`
+ * the words under it -- a date, a read count, or nothing -- and both are chosen
+ * on their own bands. Passing them through is what lets a merchant change the
+ * card shape and watch every shelf on the page change with it.
  */
 function PostCards({
   posts,
   cards,
-  meta,
+  line,
 }: {
-  posts: { title: string; excerpt: string; tag: string }[];
+  posts: PostPreview[];
   cards: string;
-  meta: string | null;
+  line: (post: PostPreview) => string | null;
 }) {
   return (
     <div className="grid grid-cols-2 gap-3.5 sm:grid-cols-4">
-      {posts.map((post) => (
-        <div key={post.title} className="min-w-0">
-          {cards === "words" ? null : (
-            <div className="relative overflow-hidden rounded-md bg-current/8 aspect-[4/3]" aria-hidden>
-              <span className="absolute left-2 top-2 rounded-full bg-[color:var(--color-background)]/85 px-2 py-0.5 text-[9px] font-medium text-current/70">
+      {posts.map((post) => {
+        const under = line(post);
+        return (
+          <div key={post.title} className="min-w-0">
+            {cards === "words" ? null : (
+              <div className="relative overflow-hidden rounded-md bg-current/8 aspect-[4/3]" aria-hidden>
+                {post.tag ? (
+                  <span className="absolute left-2 top-2 rounded-full bg-[color:var(--color-background)]/85 px-2 py-0.5 text-[9px] font-medium text-current/70">
+                    {post.tag}
+                  </span>
+                ) : null}
+              </div>
+            )}
+            {/* A words-only card has nothing to lean on, so it gets a rule and the
+                tag it would otherwise have worn on the picture. */}
+            {cards === "words" ? (
+              <p className="mb-1.5 border-t-2 border-current/20 pt-2 text-[9px] uppercase tracking-[0.1em] text-current/45">
                 {post.tag}
-              </span>
-            </div>
-          )}
-          {/* A words-only card has nothing to lean on, so it gets a rule and the
-              tag it would otherwise have worn on the picture. */}
-          {cards === "words" ? (
-            <p className="mb-1.5 border-t-2 border-current/20 pt-2 text-[9px] uppercase tracking-[0.1em] text-current/45">
-              {post.tag}
+              </p>
+            ) : null}
+            <p className={`${cards === "words" ? "" : "mt-2.5"} text-[12.5px] font-semibold leading-snug`}>
+              {post.title}
             </p>
-          ) : null}
-          <p className={`${cards === "words" ? "" : "mt-2.5"} text-[12.5px] font-semibold leading-snug`}>
-            {post.title}
-          </p>
-          {cards === "picture" ? null : (
-            <p className="mt-1 text-[10.5px] leading-relaxed text-current/50">{post.excerpt}</p>
-          )}
-          {meta ? <p className="mt-1.5 text-[10px] text-current/40">{meta}</p> : null}
-        </div>
-      ))}
+            {cards === "picture" ? null : (
+              <p className="mt-1 text-[10.5px] leading-relaxed text-current/50">{post.excerpt}</p>
+            )}
+            {under ? <p className="mt-1.5 text-[10px] text-current/40">{under}</p> : null}
+          </div>
+        );
+      })}
     </div>
   );
 }
@@ -214,6 +242,7 @@ export function ShopChrome({
   pictureUrl,
   departments,
   promiseWords,
+  blog,
 }: {
   page: SlotPageKey;
   slotKey: string;
@@ -263,8 +292,26 @@ export function ShopChrome({
    * from one place.
    */
   promiseWords?: (name: string) => string;
+  /** This shop's own posts and tags. See `BlogPreview`. */
+  blog?: BlogPreview;
 }) {
   const t = useTranslations("themeEditor.slots");
+
+  /*
+    The blog's posts: this shop's own where it has any. A shop with none yet
+    gets the examples WITHOUT their tags -- a card has to show something
+    card-shaped, but a tag is a group the merchant never made.
+  */
+  const shopPosts: PostPreview[] = blog?.posts.length
+    ? blog.posts
+    : POSTS.map((post) => ({ ...post, tag: "", date: "12 Sep 2026", reads: 1240, featured: false }));
+  /** A blog setting as the shop's document holds it, else this editor's choice. */
+  const blogChoice = (key: string, fallback: string) => {
+    const held = live?.settings?.[key];
+    return typeof held === "string" ? held : (settings?.[key] ?? fallback);
+  };
+  const postLine = (meta: string) => (post: PostPreview) =>
+    meta === "reads" ? t("blogReadsExample", { count: post.reads }) : meta === "none" ? null : post.date || null;
 
   /*
     The category page is a TEMPLATE, not a page: one drawing stands for every
@@ -1660,31 +1707,36 @@ export function ShopChrome({
 
     /* -------------------------------------------------------------- blog -- */
 
-    case "blog:heading":
+    /* The merchant's own name and line, or the shop's own words until they write some. */
+    case "blog:heading": {
+      const written = (key: string) =>
+        typeof live?.settings?.[key] === "string" ? (live.settings[key] as string).trim() : "";
       return (
         <div className="px-4 py-5">
-          <h4 className="m-0 text-[20px] font-medium tracking-tight">{t("blogTitleExample")}</h4>
-          <p className="mt-1.5 max-w-[46ch] text-[11.5px] leading-relaxed text-current/55">{t("blogIntroExample")}</p>
+          <h4 className="m-0 text-[20px] font-medium tracking-tight">{written("title") || t("blogTitleDefault")}</h4>
+          <p className="mt-1.5 max-w-[46ch] text-[11.5px] leading-relaxed text-current/55">
+            {written("intro") || t("blogIntroDefault")}
+          </p>
         </div>
       );
+    }
 
+    /* No button: it narrows the posts as a reader types, so a button would do nothing. */
     case "blog:search":
       return (
-        <div className="flex gap-2 px-4 py-3">
-          <span className="flex h-9 flex-1 items-center gap-2 rounded-full border border-current/15 bg-current/[0.04] px-3.5 text-[11px] text-current/40">
+        <div className="px-4 py-3">
+          <span className="flex h-9 items-center gap-2 rounded-full border border-current/15 bg-current/[0.04] px-3.5 text-[11px] text-current/40">
             <Search className="size-3.5 shrink-0 text-current/30" aria-hidden />
             {t("blogSearchPlaceholder")}
           </span>
-          <span className="grid h-9 shrink-0 place-items-center rounded-full bg-foreground px-5 text-[11px] font-semibold text-background">
-            {t("blogSearchButton")}
-          </span>
         </div>
       );
 
+    /* This shop's own tags -- "All" alone for a shop that has none yet. */
     case "blog:tags":
       return (
         <div className="flex flex-wrap gap-2 px-4 py-3">
-          {[t("blogTagAll"), "Care", "Materials", "Behind the seams", "Stockists"].map((name, i) => (
+          {[t("blogTagAll"), ...(blog?.tags ?? []).slice(0, 6)].map((name, i) => (
             <span
               key={name}
               className={
@@ -1700,29 +1752,34 @@ export function ShopChrome({
       );
 
     /**
-     * The featured shelf, or one post given the whole width.
+     * The featured posts: one given the width, or four in a row.
      *
-     * `is_featured` already marks them; the only question is whether four small
-     * ones or one large one does more for a blog whose best post is the reason
-     * anybody is on the page.
+     * The merchant's own marked posts; a shop that has marked none sees its
+     * newest in their place, so the shape can still be judged.
      */
     case "blog:featured": {
-      const meta = settings?.meta ?? "date";
-      const cardMeta =
-        meta === "reads" ? t("blogReadsExample", { count: 1240 }) : meta === "none" ? null : "12 Sep 2026";
+      const line = postLine(blogChoice("meta", "date"));
+      const marked = shopPosts.filter((post) => post.featured);
+      const shown = marked.length ? marked : shopPosts;
       if (variant === "hero") {
+        const lead = shown[0];
+        const under = line(lead);
         return (
           <div className="px-4 py-4">
             <SectionHead title={t("blogFeaturedHeadingExample")} />
             <div className="grid gap-4 sm:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)]">
               <div className="aspect-[16/10] rounded-md bg-current/8" aria-hidden />
               <div className="flex flex-col justify-center gap-2">
-                <p className="w-fit rounded-full bg-current/8 px-2.5 py-0.5 text-[9.5px] font-medium uppercase tracking-[0.08em] text-current/55">
-                  {POSTS[0].tag}
-                </p>
-                <p className="text-[17px] font-semibold leading-snug">{POSTS[0].title}</p>
-                <p className="text-[11.5px] leading-relaxed text-current/55">{POSTS[0].excerpt}</p>
-                {cardMeta ? <p className="text-[10px] text-current/40">{cardMeta}</p> : null}
+                {lead.tag ? (
+                  <p className="w-fit rounded-full bg-current/8 px-2.5 py-0.5 text-[9.5px] font-medium uppercase tracking-[0.08em] text-current/55">
+                    {lead.tag}
+                  </p>
+                ) : null}
+                <p className="text-[17px] font-semibold leading-snug">{lead.title}</p>
+                {blogChoice("cards", "full") === "full" ? (
+                  <p className="text-[11.5px] leading-relaxed text-current/55">{lead.excerpt}</p>
+                ) : null}
+                {under ? <p className="text-[10px] text-current/40">{under}</p> : null}
                 <p className="mt-0.5 text-[11px] font-medium underline underline-offset-4">{t("blogReadOn")}</p>
               </div>
             </div>
@@ -1732,31 +1789,34 @@ export function ShopChrome({
       return (
         <div className="px-4 py-4">
           <SectionHead title={t("blogFeaturedHeadingExample")} />
-          <PostCards posts={POSTS} meta={cardMeta} cards={settings?.cards ?? "full"} />
+          <PostCards posts={shown.slice(0, 4)} line={line} cards={blogChoice("cards", "full")} />
         </div>
       );
     }
 
     case "blog:latest": {
-      const meta = settings?.meta ?? "date";
-      const cardMeta =
-        meta === "reads" ? t("blogReadsExample", { count: 1240 }) : meta === "none" ? null : "12 Sep 2026";
+      const line = postLine(blogChoice("meta", "date"));
       if (variant === "rows") {
         return (
           <div className="px-4 py-4">
             <SectionHead title={t("blogLatestHeadingExample")} />
             <div className="grid gap-3">
-              {POSTS.slice(0, 3).map((post) => (
-                <div key={post.title} className="flex items-center gap-3.5 border-b border-current/10 pb-3.5">
-                  <span className="h-16 w-24 shrink-0 rounded-md bg-current/8" aria-hidden />
-                  <span className="min-w-0 flex-1">
-                    <span className="block text-[9.5px] uppercase tracking-[0.08em] text-current/40">{post.tag}</span>
-                    <span className="mt-0.5 block truncate text-[13px] font-semibold">{post.title}</span>
-                    <span className="mt-0.5 block truncate text-[11px] text-current/50">{post.excerpt}</span>
-                  </span>
-                  {cardMeta ? <span className="shrink-0 text-[10px] text-current/40">{cardMeta}</span> : null}
-                </div>
-              ))}
+              {shopPosts.slice(0, 3).map((post) => {
+                const under = line(post);
+                return (
+                  <div key={post.title} className="flex items-center gap-3.5 border-b border-current/10 pb-3.5">
+                    <span className="h-16 w-24 shrink-0 rounded-md bg-current/8" aria-hidden />
+                    <span className="min-w-0 flex-1">
+                      {post.tag ? (
+                        <span className="block text-[9.5px] uppercase tracking-[0.08em] text-current/40">{post.tag}</span>
+                      ) : null}
+                      <span className="mt-0.5 block truncate text-[13px] font-semibold">{post.title}</span>
+                      <span className="mt-0.5 block truncate text-[11px] text-current/50">{post.excerpt}</span>
+                    </span>
+                    {under ? <span className="shrink-0 text-[10px] text-current/40">{under}</span> : null}
+                  </div>
+                );
+              })}
             </div>
           </div>
         );
@@ -1764,7 +1824,7 @@ export function ShopChrome({
       return (
         <div className="px-4 py-4">
           <SectionHead title={t("blogLatestHeadingExample")} />
-          <PostCards posts={POSTS} meta={cardMeta} cards={settings?.cards ?? "full"} />
+          <PostCards posts={shopPosts.slice(0, 4)} line={line} cards={blogChoice("cards", "full")} />
         </div>
       );
     }
@@ -1779,28 +1839,27 @@ export function ShopChrome({
             {slotKey === "cards" ? t("blogCardsWhat") : t("blogMetaWhat")}
           </p>
           <PostCards
-            posts={POSTS.slice(0, 2)}
-            cards={slotKey === "cards" ? (variant ?? "full") : (settings?.cards ?? "full")}
-            meta={
-              slotKey === "meta"
-                ? variant === "reads"
-                  ? t("blogReadsExample", { count: 1240 })
-                  : variant === "none"
-                    ? null
-                    : "12 Sep 2026"
-                : "12 Sep 2026"
-            }
+            posts={shopPosts.slice(0, 2)}
+            cards={slotKey === "cards" ? (variant ?? "full") : blogChoice("cards", "full")}
+            line={postLine(slotKey === "meta" ? (variant ?? "date") : blogChoice("meta", "date"))}
           />
         </div>
       );
 
-    case "blog:text":
+    /* The merchant's own words under the posts, as on the category page. */
+    case "blog:text": {
+      const written = (key: string) =>
+        typeof live?.settings?.[key] === "string" ? (live.settings[key] as string).trim() : "";
+      const left = live?.settings?.align === "left";
       return (
-        <div className="px-4 py-5 text-center">
-          <h4 className="m-0 mb-2 text-[14px] font-semibold">{t("blogTextHeadingExample")}</h4>
-          <p className="mx-auto max-w-[52ch] text-[11.5px] leading-relaxed text-current/55">{t("blogTextBodyExample")}</p>
+        <div className={cn("px-4 py-5", left ? "text-left" : "text-center")}>
+          <h4 className="m-0 mb-2 text-[14px] font-semibold">{written("heading") || t("blogTextHeadingExample")}</h4>
+          <p className={cn("max-w-[52ch] text-[11.5px] leading-relaxed text-current/55", left ? "" : "mx-auto")}>
+            {written("body") || t("blogTextBodyExample")}
+          </p>
         </div>
       );
+    }
 
     /* ----------------------------------------------------------- article -- */
 
@@ -1882,7 +1941,7 @@ export function ShopChrome({
       return (
         <div className="px-4 py-4">
           <SectionHead title={t("articleRelatedHeadingExample")} />
-          <PostCards posts={POSTS} meta="12 Sep 2026" cards="full" />
+          <PostCards posts={shopPosts} line={(post) => post.date || null} cards="full" />
         </div>
       );
 

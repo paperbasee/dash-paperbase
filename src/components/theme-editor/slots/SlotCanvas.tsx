@@ -15,7 +15,7 @@ import {
 } from "@/lib/theme-editor/slot-catalogue";
 import { ownerOf, sectionFor, slotValueFor, wiringFor } from "@/lib/theme-editor/slot-sections";
 import type { FieldOption } from "@/lib/theme-editor/field-specs";
-import { ShopChrome } from "./ShopChrome";
+import { type BlogPreview, ShopChrome } from "./ShopChrome";
 import { SlotDialog } from "./SlotDialog";
 
 /**
@@ -173,6 +173,7 @@ function SlotRegion({
   pictureUrl,
   departments,
   promiseWords,
+  blog,
   className,
   children,
 }: {
@@ -188,6 +189,8 @@ function SlotRegion({
   departments?: FieldOption[];
   /** A promise's name to the words a merchant reads. See ShopChrome. */
   promiseWords?: (name: string) => string;
+  /** This shop's own posts and tags, for the blog's drawings. See ShopChrome. */
+  blog?: BlogPreview;
   className?: string;
   /** The chooser, when this place is on its own and can hold it. */
   children?: React.ReactNode;
@@ -264,6 +267,7 @@ function SlotRegion({
           pictureUrl={pictureUrl}
           departments={departments}
           promiseWords={promiseWords}
+          blog={blog}
         />
       )}
 
@@ -314,6 +318,7 @@ export function SlotCanvas({
   pictureUrl,
   departments,
   promiseWords,
+  blog,
   productName,
   onGoToPage,
 }: {
@@ -361,6 +366,8 @@ export function SlotCanvas({
   departments: FieldOption[];
   /** A promise's name to the words a merchant reads. See ShopChrome. */
   promiseWords?: (name: string) => string;
+  /** This shop's own posts and tags, for the blog's drawings. See ShopChrome. */
+  blog?: BlogPreview;
   /** A product's public id to its name, so a picked band shows what it holds. */
   productName: (publicId: string) => string;
   /**
@@ -467,6 +474,7 @@ export function SlotCanvas({
                 pictureUrl={pictureUrl}
                 departments={departments}
                 promiseWords={promiseWords}
+                blog={blog}
               >
                 {chooser}
               </SlotRegion>
@@ -500,6 +508,7 @@ export function SlotCanvas({
                         pictureUrl={pictureUrl}
                         departments={departments}
                         promiseWords={promiseWords}
+                        blog={blog}
                       />
                     ))}
                   </div>

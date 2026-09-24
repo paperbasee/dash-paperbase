@@ -20,7 +20,9 @@ import { linkPages } from "@/lib/theme-editor/link-targets";
 import type { FieldSpec } from "@/lib/theme-editor/field-specs";
 import type { Slot, SlotPageKey } from "@/lib/theme-editor/slot-catalogue";
 import {
+  ownerOf,
   sectionFor,
+  settingsClaimedElsewhere,
   settingsDecidedOn,
   slotValueFor,
   type WiredSlot,
@@ -127,8 +129,15 @@ export function SlotDialog({
    * decision as a field in the other's dialog.
    */
   const decided = section ? settingsDecidedOn(page, section.type) : new Set<string>();
+  // And the words another place on this page owns: the blog's name belongs to
+  // its heading, not to every place that shares the blog's section.
+  const claimed = section
+    ? settingsClaimedElsewhere(page, section.type, ownerOf(page, slot))
+    : new Set<string>();
   const specs = section
-    ? sectionFields(manifest, section.type, locale).filter((field) => !decided.has(field.id))
+    ? sectionFields(manifest, section.type, locale).filter(
+        (field) => !decided.has(field.id) && !claimed.has(field.id),
+      )
     : [];
   // One kind of part per wired section so far -- a picture, a question. A
   // section with two would need the merchant asked which, and none has two.

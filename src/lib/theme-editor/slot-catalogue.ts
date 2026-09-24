@@ -718,6 +718,12 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
    * `?tag=<slug>` on the public list, `views` ships on every card, and
    * `author_name` is on the DETAIL serializer only. That last one is why a
    * byline is a choice on a post and not on a card: the list does not know it.
+   *
+   * **Wired 2026-09-24.** Three things were not as drawn: the shop showed ONE
+   * featured post large, not "four across" (so one large is the default and
+   * says so); the read count was counted only when a ten-minute cache ran out
+   * (the API counts every read now); and the search box had a button that did
+   * nothing, since it narrows the posts as a reader types.
    */
   blog: [
     { key: "notice", label: "notice", inherited: true, inheritedFrom: { page: "header", key: "notice" } },
@@ -736,12 +742,12 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
     {
       key: "search",
       label: "blogSearch",
-      initial: "on",
+      initial: "off",
       emptyValues: ["off"],
       emptyLabel: "blogSearchEmpty",
       options: [
-        { value: "on", label: "on", note: "blogSearchNote", shape: "line" },
         { value: "off", label: "off", shape: "blank" },
+        { value: "on", label: "on", note: "blogSearchNote", shape: "line" },
       ],
     },
     {
@@ -760,12 +766,12 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
       key: "featured",
       label: "blogFeatured",
       hint: "blogFeaturedHint",
-      initial: "shelf",
+      initial: "hero",
       emptyValues: ["off"],
       emptyLabel: "blogFeaturedEmpty",
       options: [
-        { value: "shelf", label: "blogFeaturedShelf", note: "blogFeaturedShelfNote", shape: "row" },
         { value: "hero", label: "blogFeaturedHero", note: "blogFeaturedHeroNote", shape: "block" },
+        { value: "shelf", label: "blogFeaturedShelf", note: "blogFeaturedShelfNote", shape: "row" },
         { value: "off", label: "off", shape: "blank" },
       ],
     },
@@ -898,13 +904,12 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
   ],
 
   /**
-   * The wishlist: designed, not built.
+   * The wishlist, wired 2026-09-24 (see `WIRED_SLOTS.wishlist`).
    *
-   * There is no wishlist in Paperbase -- no model, no endpoint, nothing that
-   * remembers a saved product. The page is a placeholder and the heart in the
-   * header has nowhere to put anything. What is offered here is deliberately
-   * few and structural: inventing ten settings for a feature nobody has written
-   * would be pretending to know more about it than anyone does.
+   * This note used to say there was no wishlist in Paperbase -- true when the
+   * slot design was drawn, false since 2026-09-21, and still here three days
+   * later. A note about what does not exist yet has to be deleted by whoever
+   * makes it exist.
    */
   wishlist: [
     { key: "notice", label: "notice", inherited: true, inheritedFrom: { page: "header", key: "notice" } },

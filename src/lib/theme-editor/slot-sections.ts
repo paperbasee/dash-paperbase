@@ -41,6 +41,18 @@ export type WiredSlot = {
    * whose every choice is a section (the hero) has none.
    */
   off?: string;
+  /**
+   * The section's words this place OWNS, drawn as fields in its dialog and in
+   * no other.
+   *
+   * Several places share one section on the cart, the checkout and the blog,
+   * and a setting no tile decides used to be drawn as a field in EVERY one of
+   * them -- the words said before paying turned up under the discount code,
+   * and the blog's name would have turned up under its tags. A place that
+   * claims its words keeps them; a setting nobody claims is still drawn
+   * wherever the section is, as before.
+   */
+  fields?: string[];
 };
 
 /** Wired places, by the page picker entry that edits them. */
@@ -307,6 +319,7 @@ export const WIRED_SLOTS: Partial<Record<SlotPageKey, Record<string, WiredSlot>>
         on: { type: "cart", settings: { trust: true } },
         off: { type: "cart", settings: { trust: false } },
       },
+      fields: ["trust_text"],
     },
     /*
       Cart, checkout, done. `none` first: it is the theme's default, and a bar
@@ -571,6 +584,7 @@ export const WIRED_SLOTS: Partial<Record<SlotPageKey, Record<string, WiredSlot>>
         note: { type: "checkout", settings: { before_pay: "note" } },
         warning: { type: "checkout", settings: { before_pay: "warning" } },
       },
+      fields: ["before_pay_text"],
     },
     /*
       One line under the button, saying what happens after it is pressed. The
@@ -597,6 +611,7 @@ export const WIRED_SLOTS: Partial<Record<SlotPageKey, Record<string, WiredSlot>>
         on: { type: "checkout", settings: { trust: true } },
         off: { type: "checkout", settings: { trust: false } },
       },
+      fields: ["trust_text"],
     },
   },
   /*
@@ -614,6 +629,75 @@ export const WIRED_SLOTS: Partial<Record<SlotPageKey, Record<string, WiredSlot>>
     neither is in the shop yet, and a place goes in here only when its section
     can do everything the place promises.
   */
+  /*
+    The blog, 2026-09-24. Seven places are settings of the one `blog_list`
+    section every document holds -- the widest sharing yet, which is why a
+    place can now claim its own words (`fields`): the blog's name and opening
+    line belong to the heading and are drawn in no other dialog. The eighth,
+    words under the posts, is the `rich_text` section, exactly as on the
+    category page.
+
+    Each map starts with the theme's default, so a document written before
+    today reads as the shop drew it: the name on, no search box, no tags, ONE
+    featured post large (the editor used to call four across "what your shop
+    does today", and it was not), a grid, picture and first line, the date.
+  */
+  blog: {
+    heading: {
+      page: "templates.blog",
+      sections: {
+        on: { type: "blog_list", settings: { heading: true } },
+        off: { type: "blog_list", settings: { heading: false } },
+      },
+      fields: ["title", "intro"],
+    },
+    search: {
+      page: "templates.blog",
+      sections: {
+        off: { type: "blog_list", settings: { search: false } },
+        on: { type: "blog_list", settings: { search: true } },
+      },
+    },
+    tags: {
+      page: "templates.blog",
+      sections: {
+        off: { type: "blog_list", settings: { tags: false } },
+        row: { type: "blog_list", settings: { tags: true } },
+      },
+    },
+    featured: {
+      page: "templates.blog",
+      sections: {
+        hero: { type: "blog_list", settings: { featured: "hero" } },
+        shelf: { type: "blog_list", settings: { featured: "shelf" } },
+        off: { type: "blog_list", settings: { featured: "off" } },
+      },
+    },
+    latest: {
+      page: "templates.blog",
+      sections: {
+        grid: { type: "blog_list", settings: { latest: "grid" } },
+        rows: { type: "blog_list", settings: { latest: "rows" } },
+      },
+    },
+    cards: {
+      page: "templates.blog",
+      sections: {
+        full: { type: "blog_list", settings: { cards: "full" } },
+        picture: { type: "blog_list", settings: { cards: "picture" } },
+        words: { type: "blog_list", settings: { cards: "words" } },
+      },
+    },
+    meta: {
+      page: "templates.blog",
+      sections: {
+        date: { type: "blog_list", settings: { meta: "date" } },
+        reads: { type: "blog_list", settings: { meta: "reads" } },
+        none: { type: "blog_list", settings: { meta: "none" } },
+      },
+    },
+    text: { page: "templates.blog", sections: { block: "rich_text" }, off: "off" },
+  },
   /*
     Search, 2026-09-24. Every place is a setting of the one section the page
     has always had, so a document written before today reads as the shop drew
@@ -807,6 +891,27 @@ export function settingsDecidedOn(page: SlotPageKey, sectionType: string): Set<s
     }
   }
   return decided;
+}
+
+/**
+ * The settings OTHER places on this page have claimed as their own words, for
+ * one section -- so a dialog does not draw them. See `WiredSlot.fields`.
+ */
+export function settingsClaimedElsewhere(
+  page: SlotPageKey,
+  sectionType: string,
+  owner: { page: SlotPageKey; key: string },
+): Set<string> {
+  const claimed = new Set<string>();
+  for (const slot of SLOTS[page] ?? []) {
+    const other = ownerOf(page, slot);
+    if (other.page === owner.page && other.key === owner.key) continue;
+    const wiring = wiringFor(other.page, other.key);
+    if (!wiring?.fields) continue;
+    if (!sectionTypesOf(wiring).includes(sectionType)) continue;
+    for (const setting of wiring.fields) claimed.add(setting);
+  }
+  return claimed;
 }
 
 /**

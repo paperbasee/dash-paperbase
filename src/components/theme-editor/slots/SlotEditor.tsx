@@ -31,6 +31,7 @@ import { editorReducer, initEditorState } from "@/lib/theme-editor/editor-reduce
 import { useThemeImagesQuery } from "@/hooks/useThemesQuery";
 import { useCategoriesQuery } from "@/hooks/useCategoriesQuery";
 import { useProductsQuery } from "@/hooks/useProductsQuery";
+import { useBlogsQuery } from "@/hooks/useBlogsQuery";
 import {
   initialChoices,
   PAGE_NOTES,
@@ -56,6 +57,7 @@ import { ConflictDialog } from "../ConflictDialog";
 import { SaveStatus } from "../SaveStatus";
 import { useAutosave } from "../useAutosave";
 import { SlotCanvas } from "./SlotCanvas";
+import type { BlogPreview } from "./ShopChrome";
 import { StylePanel } from "./StylePanel";
 
 /**
@@ -182,6 +184,35 @@ export function SlotEditor({ loaded }: { loaded: ThemeEditorState }) {
   // field shows the name of something the merchant just chose, and falls back
   // to the id for a pick made in another session until they open the picker.
   const products = useProductsQuery({ page_size: "20", ordering: "-created_at" });
+  // This shop's own posts and tags, so the blog's drawings are its blog. Only
+  // what a shopper can see -- published and public -- newest first, as the
+  // shop lists them; the date written the way the shop writes it. The tags are
+  // the ones ON those posts, as the shop's row offers them: a tag with nothing
+  // published behind it would lead a reader to an empty list.
+  const blogs = useBlogsQuery({});
+  const blog: BlogPreview = (() => {
+    const now = Date.now();
+    const dated = new Intl.DateTimeFormat(locale === "bn" ? "bn-BD" : "en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
+    const published = (blogs.data ?? [])
+      .filter((post) => post.is_public && post.published_at && Date.parse(post.published_at) <= now)
+      .sort((a, b) => Date.parse(b.published_at ?? "") - Date.parse(a.published_at ?? ""));
+    const tags = [...new Set(published.flatMap((post) => post.tags.map((tag) => tag.name)))].sort(
+      (a, b) => a.localeCompare(b, locale),
+    );
+    const posts = published.map((post) => ({
+        title: post.title,
+        excerpt: post.excerpt,
+        tag: post.tags[0]?.name ?? "",
+        date: dated.format(new Date(post.published_at as string)),
+        reads: post.views ?? 0,
+        featured: post.is_featured,
+      }));
+    return { posts, tags };
+  })();
   const [pictureUrls] = useState<Record<string, string>>({});
 
   function pickPage(next: SlotPageKey) {
@@ -521,6 +552,7 @@ export function SlotEditor({ loaded }: { loaded: ThemeEditorState }) {
               editor's own words: the theme owns the list, and a second copy
               here would be a second list to keep in step.
             */
+            blog={blog}
             promiseWords={(name) =>
               blockFields(state.manifest, "promises", "promise", locale).find(
                 (field) => field.id === "promise",
