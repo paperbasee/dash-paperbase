@@ -48,6 +48,8 @@ const manifest: ThemeManifest = {
         choice("order", ["quantity", "fixed"], "quantity"),
         choice("coupon", ["open", "link", "off"], "open"),
         { id: "payments", type: "boolean", ...labels("Ways to pay"), default: true },
+        choice("before_pay", ["off", "note", "warning"], "off"),
+        { id: "before_pay_text", type: "text", ...labels("What it says"), default: "" },
         { id: "after", type: "boolean", ...labels("A line under the button"), default: true },
         { id: "steps", type: "boolean", ...labels("Steps"), default: false },
         { id: "trust", type: "boolean", ...labels("Trust line"), default: true },
@@ -105,22 +107,38 @@ const PAGE = () => editor([section("checkout", "checkout")]);
 
 describe("the checkout page is wired", () => {
   test("every place wired so far writes the one section", () => {
-    for (const key of ["chrome", "footerStyle", "steps", "trust", "summary", "coupon", "payments", "after"]) {
+    for (const key of [
+      "chrome",
+      "footerStyle",
+      "steps",
+      "trust",
+      "summary",
+      "coupon",
+      "payments",
+      "beforePay",
+      "after",
+    ]) {
       const wiring = wiringFor("checkout", key);
       expect(wiring, key).toBeTruthy();
       expect(wiring!.page).toBe("templates.checkout");
     }
   });
 
-  test("and the two it does not claim are still drawings", () => {
+  test("and the one it does not claim is still a drawing", () => {
     /*
       A place goes in only when its half of the shop can do everything the
-      place promises. The merchant's own words above the button are round 3,
-      and the form is round 4 -- and that one writes a STORE setting rather
-      than the document, which is machinery this editor has never had.
+      place promises. The form is round 4, and that one writes a STORE setting
+      rather than the document -- machinery this editor has never had.
     */
-    for (const key of ["form", "beforePay"]) {
-      expect(wiringFor("checkout", key), key).toBeFalsy();
+    expect(wiringFor("checkout", "form")).toBeFalsy();
+  });
+
+  test("a message above the button is off until a merchant asks for one", () => {
+    /* Something a merchant chooses to say, not something a shop starts saying
+       on their behalf. */
+    expect(slotValueFor(PAGE().document, place("beforePay"))).toBe("off");
+    for (const value of ["note", "warning"]) {
+      expect(settingsOf(pick(PAGE(), "beforePay", value)).before_pay).toBe(value);
     }
   });
 
@@ -214,6 +232,34 @@ describe("the canvas says what the shop draws", () => {
   test("and the tile that offers it counts the fields it really asks for", () => {
     expect(en.themeEditor.slots.formMinimal).toContain("district");
     expect(en.themeEditor.slots.formMinimalNote).toContain("Four");
+  });
+
+  test("the message above the button is the merchant's own words, not an example", () => {
+    const html = renderToStaticMarkup(
+      <NextIntlClientProvider locale="en" messages={en}>
+        <ShopChrome
+          page="checkout"
+          slotKey="beforePay"
+          variant="warning"
+          settings={{}}
+          live={
+            {
+              id: "checkout",
+              type: "checkout",
+              hidden: false,
+              settings: { before_pay_text: "Sale items cannot be exchanged." },
+              blocks: [],
+            } as never
+          }
+        />
+      </NextIntlClientProvider>,
+    );
+    expect(html).toContain("Sale items cannot be exchanged.");
+    expect(html).not.toContain(en.themeEditor.slots.beforePayWarningExample);
+  });
+
+  test("and the example is what an empty box shows instead", () => {
+    expect(draw("beforePay", "note")).toContain(en.themeEditor.slots.beforePayNoteExample);
   });
 
   test("the policies footer names the three pages the shop actually serves", () => {

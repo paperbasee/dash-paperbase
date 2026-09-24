@@ -448,6 +448,25 @@ export const WIRED_SLOTS: Partial<Record<SlotPageKey, Record<string, WiredSlot>>
       },
     },
     /*
+      Round 3, 2026-09-24: the merchant's own words, read in the second before a
+      shopper pays.
+
+      `off` FIRST -- the theme's default, and the right one: a message here is
+      something a merchant chooses to say, not something a shop should start
+      saying on their behalf. The words live in `before_pay_text`, one field for
+      both shapes, so switching between them keeps what was written; and nothing
+      is drawn at all until there are words, because an empty coloured box is a
+      shop shouting with nothing to say.
+    */
+    beforePay: {
+      page: "templates.checkout",
+      sections: {
+        off: { type: "checkout", settings: { before_pay: "off" } },
+        note: { type: "checkout", settings: { before_pay: "note" } },
+        warning: { type: "checkout", settings: { before_pay: "warning" } },
+      },
+    },
+    /*
       One line under the button, saying what happens after it is pressed. The
       shop writes the words: they have to be TRUE for this order, and a basket
       with something prepaid in it is not paid for at the door.

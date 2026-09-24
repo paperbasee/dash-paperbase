@@ -2514,16 +2514,26 @@ export function ShopChrome({
      * would recognise, and a banner directly above Place order is.
      */
     case "checkout:beforePay": {
+      // The merchant's own words wherever they have written any -- this is
+      // THEIR message, and an example standing in for it on the canvas while
+      // the shop draws something else is the "Bags" problem again. The example
+      // is what an empty box is for: showing the shape.
+      const said =
+        typeof live?.settings?.before_pay_text === "string"
+          ? live.settings.before_pay_text.trim()
+          : "";
       const banner =
         variant === "warning" ? (
           // The amber is in the edge and the fill, not the words: the canvas
           // takes the dashboard's own ground, and a fixed dark ink disappears
           // on the dark one.
           <p className="mb-3 rounded-xs border border-[#b4571f]/45 bg-[#b4571f]/12 px-3 py-2.5 text-[11px] leading-relaxed">
-            {t("beforePayWarningExample")}
+            {said || t("beforePayWarningExample")}
           </p>
         ) : variant === "note" ? (
-          <p className="mb-3 text-center text-[11px] leading-relaxed text-current/55">{t("beforePayNoteExample")}</p>
+          <p className="mb-3 text-center text-[11px] leading-relaxed text-current/55">
+            {said || t("beforePayNoteExample")}
+          </p>
         ) : null;
       return (
         <div className="px-4 pb-4">
