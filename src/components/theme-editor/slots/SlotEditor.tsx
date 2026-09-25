@@ -255,7 +255,8 @@ export function SlotEditor({ loaded }: { loaded: ThemeEditorState }) {
   })();
   // The home page's brands and reviews, picked by the shop's own rules (see
   // `BrandPreview`): the active brands with the most products, and the newest
-  // published four- and five-star reviews with something written.
+  // ten published four- and five-star reviews with something written -- ten,
+  // because the quotation takes turns through that many.
   const brandList = useBrandsQuery();
   const brands: BrandPreview[] = (brandList.data ?? [])
     .filter((brand) => brand.is_active && brand.product_count > 0)
@@ -266,7 +267,7 @@ export function SlotEditor({ loaded }: { loaded: ThemeEditorState }) {
   const reviews: ReviewPreview[] = (published.data ?? [])
     .filter((review) => review.rating >= 4 && review.body.trim())
     .sort((a, b) => Date.parse(b.created_at) - Date.parse(a.created_at))
-    .slice(0, 3)
+    .slice(0, 10)
     .map((review) => ({
       name: review.display_name,
       rating: review.rating,

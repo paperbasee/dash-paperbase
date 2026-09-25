@@ -261,6 +261,22 @@ describe("the canvas draws this shop's own", () => {
     expect(quote).not.toContain("Good sound for the price");
   });
 
+  test("the quotation has its heading and a dot for each review it takes turns through", () => {
+    // Owner, 2026-09-25: the quotation drew no heading while the editor offered one.
+    const quote = draw("reviews", "quote", { live: section("r", "review_highlights", { settings: { layout: "quote", heading: "From you" } }) });
+    expect(quote).toContain("From you");
+    expect(quote.match(/rounded-full/g)?.length).toBe(3);
+    const one = draw("reviews", "quote", { reviews: REVIEWS.slice(0, 1) });
+    expect(one).not.toContain("rounded-full");
+  });
+
+  test("three cards, however many reviews there are", () => {
+    const ten = Array.from({ length: 10 }, (_, n) => ({ ...REVIEWS[0], body: `Words number ${n}.` }));
+    const cards = draw("reviews", "cards", { reviews: ten });
+    expect(cards).toContain("Words number 2.");
+    expect(cards).not.toContain("Words number 3.");
+  });
+
   test("its three newest posts", () => {
     const html = draw("posts", "three");
     expect(html).toContain("One");
@@ -274,6 +290,13 @@ describe("the canvas draws this shop's own", () => {
     expect(written).toContain("Chat with us");
     const none = draw("signup", "whatsapp", { shop: { ...SHOP, social: [] } });
     expect(none).toContain("Add a WhatsApp number in Settings");
+  });
+
+  test("its WhatsApp band on the brand colour, with the button turned inside out", () => {
+    // Owner, 2026-09-25: the button "blended with the background".
+    const html = draw("signup", "whatsapp");
+    expect(html).toContain("bg-shop-brand px-6");
+    expect(html).toMatch(/bg-shop-brand-foreground[^"]*text-shop-brand"/);
   });
 
   test("its own questions, as the pop-up writes them", () => {

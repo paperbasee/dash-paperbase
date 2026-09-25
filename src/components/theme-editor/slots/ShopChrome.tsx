@@ -1154,7 +1154,16 @@ export function ShopChrome({
             <p className="mt-1.5 text-[10.5px] tabular-nums opacity-70">{t("promoCountdownExample")}</p>
           ) : null}
           {button ? (
-            <span className="mt-2.5 inline-block rounded-full bg-current/15 px-4 py-1.5 text-[10.5px] font-semibold">
+            // On the brand band, the band turned inside out; on a picture, the
+            // brand colour -- the shop's two answers (2026-09-25).
+            <span
+              className={cn(
+                "mt-2.5 inline-block rounded-full px-4 py-1.5 text-[10.5px] font-semibold",
+                shape === "behind"
+                  ? "bg-shop-brand text-shop-brand-foreground"
+                  : "bg-shop-brand-foreground text-shop-brand",
+              )}
+            >
               {button}
             </span>
           ) : null}
@@ -1181,7 +1190,7 @@ export function ShopChrome({
 
       if (shape === "beside") {
         return (
-          <div className="grid grid-cols-2 items-stretch bg-current/8">
+          <div className="grid grid-cols-2 items-stretch bg-shop-brand text-shop-brand-foreground">
             <div className="aspect-[4/3] bg-current/10">
               {pictureUrl?.(picture) ? (
                 // eslint-disable-next-line @next/next/no-img-element -- as above
@@ -1193,7 +1202,7 @@ export function ShopChrome({
         );
       }
 
-      return <div className="bg-current/8 px-4 py-5 text-center">{words}</div>;
+      return <div className="bg-shop-brand px-4 py-5 text-center text-shop-brand-foreground">{words}</div>;
     }
 
     case "home:bestsellers":
@@ -1242,7 +1251,10 @@ export function ShopChrome({
     }
 
     case "home:reviews": {
-      const shown = (reviews ?? []).slice(0, 3);
+      // Up to ten, as the shop reads them: the cards draw three, the quotation
+      // takes turns through them all -- drawn here as its first, with a dot
+      // for each so the merchant can see it moves on (2026-09-25).
+      const shown = (reviews ?? []).slice(0, 10);
       const stars = (rating: number) => "★".repeat(rating) + "☆".repeat(5 - rating);
       const who = (review: ReviewPreview) => (review.byShop ? `${review.name} · ${t("reviewsByShop")}` : review.name);
       if (!shown.length) {
@@ -1254,18 +1266,29 @@ export function ShopChrome({
         );
       }
       return variant === "quote" ? (
-        <div className="px-6 py-6 text-center">
+        <div className="px-6 py-5 text-center">
+          <SectionHead band title={liveHeading || t("reviewsHeading")} />
           <p className="text-[11px] text-current/70">{stars(shown[0].rating)}</p>
-          <p className="mt-2 text-[14px] leading-relaxed text-current/70">“{shown[0].body}”</p>
+          <p className="mt-2 line-clamp-5 text-[14px] leading-relaxed text-current/70">“{shown[0].body}”</p>
           <p className="mt-2.5 text-[11px] uppercase tracking-[0.08em] text-current/45">
             {who(shown[0])} · {shown[0].product}
           </p>
+          {shown.length > 1 ? (
+            <div className="mt-3 flex justify-center gap-1.5" aria-hidden>
+              {shown.map((review, index) => (
+                <span
+                  key={index}
+                  className={`size-1.5 rounded-full ${index === 0 ? "bg-current/70" : "bg-current/20"}`}
+                />
+              ))}
+            </div>
+          ) : null}
         </div>
       ) : (
         <div className="px-4 py-4">
           <SectionHead band title={liveHeading || t("reviewsHeading")} />
           <div className="grid gap-3 sm:grid-cols-3">
-            {shown.map((review, index) => (
+            {shown.slice(0, 3).map((review, index) => (
               <div key={index} className="rounded-md border border-current/12 p-3.5">
                 <p className="text-[11px] text-current/70">{stars(review.rating)}</p>
                 <p className="mt-2 line-clamp-5 text-[11.5px] leading-relaxed text-current/65">{review.body}</p>
@@ -1300,18 +1323,21 @@ export function ShopChrome({
         return typeof held === "string" && held.trim() ? held.trim() : fallback;
       };
       const number = shop ? shop.social.includes("whatsapp") : true;
+      // On the shop's brand colour, as the shop draws it, and the button that
+      // colour turned inside out -- a brand-coloured button on a brand-coloured
+      // band vanished into it (owner, 2026-09-25).
       return (
-        <div className="bg-[color:var(--color-accent)]/15 px-6 py-6 text-center">
+        <div className="bg-shop-brand px-6 py-6 text-center text-shop-brand-foreground">
           <p className="text-[15px] font-semibold">{words("heading", t("signupWhatsappHeading"))}</p>
-          <p className="mx-auto mt-1.5 max-w-md text-[11.5px] leading-relaxed text-current/65">
+          <p className="mx-auto mt-1.5 max-w-md text-[11.5px] leading-relaxed opacity-80">
             {words("body", t("signupWhatsappBody"))}
           </p>
           {number ? (
-            <span className="mt-3 inline-grid h-9 place-items-center rounded-xs bg-shop-brand px-4 text-[11px] text-shop-brand-foreground">
+            <span className="mt-3 inline-grid h-9 place-items-center rounded-xs bg-shop-brand-foreground px-4 text-[11px] text-shop-brand">
               {words("button_label", t("signupWhatsappButton"))}
             </span>
           ) : (
-            <p className="mt-3 text-[11px] italic text-current/50">{t("signupNoNumber")}</p>
+            <p className="mt-3 text-[11px] italic opacity-70">{t("signupNoNumber")}</p>
           )}
         </div>
       );
