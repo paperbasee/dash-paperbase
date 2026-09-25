@@ -84,6 +84,21 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-09-22-customer-reviews",
+    date: "2026-09-22",
+    version: "4.111.0",
+    tag: "new",
+    href: "/reviews",
+    title: {
+      en: "Customers can review your products",
+      bn: "ক্রেতারা এখন আপনার পণ্যের রিভিউ দিতে পারবেন",
+    },
+    body: {
+      en: "A signed-in customer can give a product stars, a few words and up to two photos, and nothing appears on your shop until you approve it in the new Reviews tab — the sidebar shows how many are waiting, and each one reaches your notifications too. You can approve, reject, reply, delete, or add one yourself from a screenshot — which is marked, so shoppers can tell. Anyone can read your reviews signed in or not — beside each product, and on Premium on a page of their own that shoppers narrow by stars, category and product, linked from your home page and product pages — someone who actually received the item is marked a verified buyer, and a customer who edits their own sends it back to you for approval.",
+      bn: "সাইন-ইন করা ক্রেতা পণ্যে স্টার, কয়েক লাইন লেখা আর সর্বোচ্চ দুটি ছবি দিতে পারবেন, আর নতুন রিভিউ ট্যাবে আপনি অনুমোদন না করা পর্যন্ত দোকানে কিছুই দেখা যাবে না — কতগুলো অপেক্ষায় আছে তা সাইডবারেই দেখা যায়, আর প্রতিটি আপনার নোটিফিকেশনেও আসে। অনুমোদন, বাতিল, উত্তর, মুছে ফেলা — সবই আপনার হাতে, আর স্ক্রিনশট থেকে নিজেও একটি যোগ করতে পারবেন, যেটি আলাদা করে চিহ্নিত থাকে। রিভিউ সবাই পড়তে পারবেন — প্রতিটি পণ্যের পাশে, আর প্রিমিয়ামে আলাদা একটি পেজে, যেখানে ক্রেতারা তারা, ক্যাটাগরি ও পণ্য দিয়ে বাছাই করেন আর যার লিংক থাকে হোম পেজ ও পণ্যের পেজে —, যিনি সত্যিই পণ্যটি পেয়েছেন তাঁকে যাচাই করা ক্রেতা হিসেবে দেখানো হয়, আর কোনো ক্রেতা নিজের রিভিউ বদলালে সেটি আবার আপনার অনুমোদনের জন্য ফিরে আসে।",
+    },
+  },
+  {
     id: "2026-09-22-home-page-rows",
     date: "2026-09-22",
     version: "4.110.0",
@@ -424,21 +439,6 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     body: {
       en: "On a customer's account page every order now shows where it has got to, which it did not show at all before — a cancelled order looked the same as a delivered one. On the order-tracking page they can now tell a confirmed order from one you have not looked at yet, instead of both saying the same thing.",
       bn: "ক্রেতার অ্যাকাউন্ট পাতায় প্রতিটি অর্ডার এখন কোন অবস্থায় আছে তা দেখায় — আগে এটি একেবারেই দেখাত না, বাতিল হওয়া অর্ডার আর ডেলিভারি হওয়া অর্ডার একরকম দেখাত। অর্ডার ট্র্যাকিং পাতায় এখন নিশ্চিত করা অর্ডার আর আপনি এখনো দেখেননি এমন অর্ডারের পার্থক্য বোঝা যায়, আগে দুটোই একই কথা বলত।",
-    },
-  },
-  {
-    id: "2026-09-22-customer-reviews",
-    date: "2026-09-22",
-    version: "4.44.0",
-    tag: "new",
-    href: "/reviews",
-    title: {
-      en: "Customers can review your products",
-      bn: "ক্রেতারা এখন আপনার পণ্যের রিভিউ দিতে পারবেন",
-    },
-    body: {
-      en: "A signed-in customer can give a product stars, a few words and up to two photos, and nothing appears on your shop until you approve it in the new Reviews tab — the sidebar shows how many are waiting, and each one reaches your notifications too. You can approve, reject, reply, delete, or add one yourself from a screenshot — which is marked, so shoppers can tell. Anyone can read your reviews signed in or not, someone who actually received the item is marked a verified buyer, and a customer who edits their own sends it back to you for approval.",
-      bn: "সাইন-ইন করা ক্রেতা পণ্যে স্টার, কয়েক লাইন লেখা আর সর্বোচ্চ দুটি ছবি দিতে পারবেন, আর নতুন রিভিউ ট্যাবে আপনি অনুমোদন না করা পর্যন্ত দোকানে কিছুই দেখা যাবে না — কতগুলো অপেক্ষায় আছে তা সাইডবারেই দেখা যায়, আর প্রতিটি আপনার নোটিফিকেশনেও আসে। অনুমোদন, বাতিল, উত্তর, মুছে ফেলা — সবই আপনার হাতে, আর স্ক্রিনশট থেকে নিজেও একটি যোগ করতে পারবেন, যেটি আলাদা করে চিহ্নিত থাকে। রিভিউ সবাই পড়তে পারবেন, যিনি সত্যিই পণ্যটি পেয়েছেন তাঁকে যাচাই করা ক্রেতা হিসেবে দেখানো হয়, আর কোনো ক্রেতা নিজের রিভিউ বদলালে সেটি আবার আপনার অনুমোদনের জন্য ফিরে আসে।",
     },
   },
   {
