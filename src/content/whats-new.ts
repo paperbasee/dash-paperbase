@@ -84,6 +84,21 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-09-22-wishlist-page-choices",
+    date: "2026-09-22",
+    version: "4.113.2",
+    tag: "new",
+    href: "/settings?tab=customization",
+    title: {
+      en: "Design your wishlist page",
+      bn: "উইশলিস্ট পেজ সাজান",
+    },
+    body: {
+      en: "Show how many things are saved beside the title or just the word, lay them out as a grid of cards or as a compact list that fits more on a screen, and say something inviting when nothing is saved yet — which is the version of the page most people meet. You can also decide whether a saved thing can be bought straight from the list or only opened, which is the one choice here that changes what the page is for — and on your shop the heart now fills red with a little burst when a shopper saves something, and breaks in two when they take it back.",
+      bn: "শিরোনামের পাশে কয়টি সংরক্ষিত আছে দেখাবেন নাকি শুধু শব্দটি, পণ্যগুলো কার্ডের গ্রিডে নাকি ছোট তালিকায় — যাতে একসাথে বেশি দেখা যায় — আর কিছু সংরক্ষিত না থাকলে আমন্ত্রণমূলক কিছু বলা, যেটি বেশিরভাগ মানুষ দেখেন। সংরক্ষিত পণ্যটি তালিকা থেকেই কেনা যাবে নাকি শুধু খোলা যাবে, সেটিও ঠিক করতে পারেন — এই পাতার একমাত্র সিদ্ধান্ত যা পাতাটির উদ্দেশ্যই বদলে দেয় — আর আপনার দোকানে ক্রেতা কিছু সংরক্ষণ করলে হার্টটি ছোট্ট একটি ঝলকে লাল হয়ে ভরে ওঠে, আর ফিরিয়ে নিলে দুই টুকরো হয়ে ভেঙে যায়।",
+    },
+  },
+  {
     id: "2026-09-22-header-and-footer-choices",
     date: "2026-09-22",
     version: "4.113.1",
@@ -306,21 +321,6 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     body: {
       en: "Give your blog its own name and opening line, let readers narrow the posts by typing or by tag, and choose how the featured posts, the rest and each card look — with the date or how many times a post has been read underneath, and every read counts now. On each post, choose where its picture goes, whether the writer's name sits beside the date, how wide the words run, and whether readers see its tags, the posts before and after it, and three more to read. You can also add a few words of your own under the posts, and posts written as plain text now keep their paragraphs.",
       bn: "ব্লগকে নিজের নাম আর প্রথম লাইন দিন, পাঠক যেন লিখে বা ট্যাগ বেছে পোস্টগুলো ছেঁকে নিতে পারেন, আর বাছাই করা পোস্ট, বাকি পোস্ট ও প্রতিটি কার্ড কেমন দেখাবে তা ঠিক করুন — নিচে তারিখ, নয়তো পোস্টটি কতবার পড়া হয়েছে; এখন প্রতিবার পড়াই গোনা হয়। প্রতিটি পোস্টে ছবি কোথায় বসবে, তারিখের পাশে লেখকের নাম থাকবে কি না, লেখা কতটা চওড়া হবে, আর পাঠক ট্যাগ, আগের ও পরের পোস্ট এবং পড়ার মতো আরও তিনটি পোস্ট দেখবেন কি না — ঠিক করুন। পোস্টের নিচে নিজের কিছু কথাও যোগ করতে পারেন, আর সাধারণ লেখায় লেখা পোস্টে এখন অনুচ্ছেদগুলো ঠিক থাকে।",
-    },
-  },
-  {
-    id: "2026-09-22-wishlist-page-choices",
-    date: "2026-09-22",
-    version: "4.90.0",
-    tag: "new",
-    href: "/settings?tab=customization",
-    title: {
-      en: "Design your wishlist page",
-      bn: "উইশলিস্ট পেজ সাজান",
-    },
-    body: {
-      en: "Show how many things are saved beside the title or just the word, lay them out as a grid of cards or as a compact list that fits more on a screen, and say something inviting when nothing is saved yet — which is the version of the page most people meet. You can also decide whether a saved thing can be bought straight from the list or only opened, which is the one choice here that changes what the page is for.",
-      bn: "শিরোনামের পাশে কয়টি সংরক্ষিত আছে দেখাবেন নাকি শুধু শব্দটি, পণ্যগুলো কার্ডের গ্রিডে নাকি ছোট তালিকায় — যাতে একসাথে বেশি দেখা যায় — আর কিছু সংরক্ষিত না থাকলে আমন্ত্রণমূলক কিছু বলা, যেটি বেশিরভাগ মানুষ দেখেন। সংরক্ষিত পণ্যটি তালিকা থেকেই কেনা যাবে নাকি শুধু খোলা যাবে, সেটিও ঠিক করতে পারেন — এই পাতার একমাত্র সিদ্ধান্ত যা পাতাটির উদ্দেশ্যই বদলে দেয়।",
     },
   },
   {
