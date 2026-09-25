@@ -35,6 +35,8 @@ import { flattenCategoryOptionsRich } from "@/lib/category-tree";
 import {
   ORDER_STATUS_OPTIONS,
   formatOrderStatusLabel,
+  orderStatusOptionReading,
+  shownOrderStatus,
 } from "@/lib/orders/order-statuses";
 import {
   ORDER_PAYMENT_STATUS_OPTIONS,
@@ -395,6 +397,16 @@ export default function OrdersPage() {
         "dark:[&_[data-slot=select]]:text-amber-200",
       ].join(" ");
     }
+    // The shopper has paid and it is the merchant's turn: not amber like an
+    // order still waiting on the shopper.
+    if (s === "payment_submitted") {
+      return [
+        "[&_[data-slot=select]]:bg-sky-50",
+        "[&_[data-slot=select]]:text-sky-950",
+        "dark:[&_[data-slot=select]]:bg-sky-500/20",
+        "dark:[&_[data-slot=select]]:text-sky-200",
+      ].join(" ");
+    }
     return "";
   }
 
@@ -421,6 +433,7 @@ export default function OrdersPage() {
     if (s === "confirmed") return { ...base, color: "#34d399" }; // emerald-400
     if (s === "cancelled") return { ...base, color: "#fb7185" }; // rose-400
     if (s === "pending" || s === "payment_pending") return { ...base, color: "#fbbf24" }; // amber-400
+    if (s === "payment_submitted") return { ...base, color: "#38bdf8" }; // sky-400
     return base;
   }
 
@@ -1380,7 +1393,7 @@ export default function OrdersPage() {
                           <div className="space-y-1">
                             {order.has_unavailable_products ? (
                               <p className="text-xs text-rose-600 dark:text-rose-400">
-                                {formatOrderStatusLabel(order.status, (key) =>
+                                {formatOrderStatusLabel(shownOrderStatus(order), (key) =>
                                   tPages(key)
                                 )}{" "}
                                 •{" "}
@@ -1390,7 +1403,7 @@ export default function OrdersPage() {
                               </p>
                             ) : (
                               <Select
-                                className={`w-[180px] capitalize ${statusSelectToneClass(order.status)}`}
+                                className={`w-[180px] capitalize ${statusSelectToneClass(shownOrderStatus(order))}`}
                                 value={order.status}
                                 disabled={
                                   order.status === "cancelled" ||
@@ -1416,8 +1429,14 @@ export default function OrdersPage() {
                                   }
                                   return true;
                                 }).map((s) => (
-                                  <option key={s} value={s} style={statusOptionStyleFor(s)}>
-                                    {formatOrderStatusLabel(s, (key) => tPages(key))}
+                                  <option
+                                    key={s}
+                                    value={s}
+                                    style={statusOptionStyleFor(orderStatusOptionReading(order, s))}
+                                  >
+                                    {formatOrderStatusLabel(orderStatusOptionReading(order, s), (key) =>
+                                      tPages(key)
+                                    )}
                                   </option>
                                 ))}
                               </Select>
@@ -1425,7 +1444,7 @@ export default function OrdersPage() {
                             {!order.has_unavailable_products &&
                             (order.unavailable_products_count ?? 0) > 0 ? (
                               <p className="text-xs text-rose-600 dark:text-rose-400">
-                                {formatOrderStatusLabel(order.status, (key) =>
+                                {formatOrderStatusLabel(shownOrderStatus(order), (key) =>
                                   tPages(key)
                                 )}{" "}
                                 •{" "}

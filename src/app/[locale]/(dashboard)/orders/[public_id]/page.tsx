@@ -25,6 +25,8 @@ import { useBranding } from "@/context/BrandingContext";
 import {
   ORDER_STATUS_OPTIONS,
   formatOrderStatusLabel,
+  orderStatusOptionReading,
+  shownOrderStatus,
 } from "@/lib/orders/order-statuses";
 import { ORDER_FLAG_OPTIONS, formatOrderFlagLabel } from "@/lib/orders/order-flags";
 import { formatOrderPaymentStatusLabel } from "@/lib/orders/payment-statuses";
@@ -1067,7 +1069,7 @@ export default function OrderDetailPage() {
               <CardDescription>
                 {tPages("orderDetailOrderStatusCurrent")}:{" "}
                 <span className="text-foreground">
-                  {formatOrderStatusLabel(order.status, tPages)}
+                  {formatOrderStatusLabel(shownOrderStatus(order), tPages)}
                 </span>
               </CardDescription>
             </CardHeader>
@@ -1079,7 +1081,7 @@ export default function OrderDetailPage() {
                   </p>
                 ) : order.has_unavailable_products ? (
                   <p className="text-sm text-muted-foreground">
-                    {formatOrderStatusLabel(order.status, tPages)} •{" "}
+                    {formatOrderStatusLabel(shownOrderStatus(order), tPages)} •{" "}
                     {(order.unavailable_products_count ?? 0) === 1
                       ? "Product data corrupted."
                       : `${order.unavailable_products_count} products data corrupted.`}
@@ -1112,7 +1114,7 @@ export default function OrderDetailPage() {
                             return true;
                           }).map((s) => (
                             <option key={s} value={s}>
-                              {formatOrderStatusLabel(s, tPages)}
+                              {formatOrderStatusLabel(orderStatusOptionReading(order, s), tPages)}
                             </option>
                           ))}
                         </Select>
@@ -1184,7 +1186,7 @@ export default function OrderDetailPage() {
                     Action
                   </label>
                   <Input
-                    value={formatOrderStatusLabel(order.status, tPages)}
+                    value={formatOrderStatusLabel(shownOrderStatus(order), tPages)}
                     readOnly
                     className="cursor-default bg-muted/50"
                     onKeyDown={handleKeyDown}

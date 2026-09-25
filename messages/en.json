@@ -379,6 +379,7 @@
     "orderNewCreateFailed": "Failed to create order. Check the details and try again.",
     "orderStatusPending": "Pending",
     "orderStatusPaymentPending": "Payment pending",
+    "orderStatusPaymentSubmitted": "Payment submitted",
     "orderStatusConfirmed": "Confirmed",
     "orderStatusCancelled": "Cancelled",
     "orderPaymentStatusNone": "Not required",

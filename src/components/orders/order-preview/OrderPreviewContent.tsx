@@ -6,7 +6,7 @@ import { User } from "lucide-react";
 import { formatDashboardDateTime } from "@/lib/datetime-display";
 import { numberTextClass } from "@/lib/number-font";
 import { formatOrderPaymentStatusLabel } from "@/lib/orders/payment-statuses";
-import { formatOrderStatusLabel } from "@/lib/orders/order-statuses";
+import { formatOrderStatusLabel, shownOrderStatus } from "@/lib/orders/order-statuses";
 import type { Order } from "@/types";
 import { cn } from "@/lib/utils";
 import { OrderPreviewLineItem } from "./OrderPreviewLineItem";
@@ -96,7 +96,7 @@ function OrderPreviewBody({
     <div className="flex min-h-0 flex-col gap-4 md:gap-5">
       <div className="flex shrink-0 flex-wrap items-center gap-2">
         <span className="inline-flex items-center rounded-ui bg-muted px-2.5 py-0.5 text-xs font-medium capitalize text-foreground">
-          {formatOrderStatusLabel(order.status, (key) => tPages(key))}
+          {formatOrderStatusLabel(shownOrderStatus(order), (key) => tPages(key))}
         </span>
         <span className="inline-flex items-center rounded-ui bg-muted px-2.5 py-0.5 text-xs font-medium text-foreground">
           {formatOrderPaymentStatusLabel(order.payment_status, (key) => tPages(key))}
