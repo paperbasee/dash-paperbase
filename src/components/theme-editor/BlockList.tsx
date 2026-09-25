@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import type { ThemeBlock, ThemeManifest, ThemeSection } from "@/lib/theme-editor/api";
 import { localLabel } from "@/lib/theme-editor/document-ops";
-import { MAX_BLOCKS_PER_SECTION, cannotAddBlock, cannotRemoveBlock } from "@/lib/theme-editor/rules";
+import { blockLimit, cannotAddBlock, cannotRemoveBlock } from "@/lib/theme-editor/rules";
 
 /*
  * The parts inside one section: add, open, move and remove.
@@ -45,7 +45,8 @@ export function BlockList({
     return blockSpec ? localLabel(blockSpec, locale) : block.type;
   };
   const addable = blockTypes.some((type) => !cannotAddBlock(manifest, section, type));
-  const full = section.blocks.length >= MAX_BLOCKS_PER_SECTION;
+  const limit = blockLimit(manifest, section);
+  const full = section.blocks.length >= limit;
 
   return (
     <section className="space-y-2 border-t border-border pt-4">
@@ -121,7 +122,7 @@ export function BlockList({
         </ul>
       )}
       {full ? (
-        <p className="text-sm text-muted-foreground">{t("blocksFull", { max: MAX_BLOCKS_PER_SECTION })}</p>
+        <p className="text-sm text-muted-foreground">{t("blocksFull", { max: limit })}</p>
       ) : addable ? (
         <Button type="button" variant="outline" className="h-11 w-full md:h-10" onClick={onAdd}>
           <Plus aria-hidden />

@@ -89,6 +89,17 @@ export function cannotShow(
   return sections.some((s) => isShownCopy(s, section.type, section)) ? "onlyOnce" : null;
 }
 
+/**
+ * How many parts `section` may hold: the theme's own `max_blocks` where it
+ * sets one -- the hero's five pictures, the top bar's three messages -- never
+ * more than the platform's cap. The API refuses a document over either, so a
+ * part the editor let in past the theme's number was one it could never save.
+ */
+export function blockLimit(manifest: ThemeManifest, section: ThemeSection): number {
+  const most = manifest.sections[section.type]?.max_blocks;
+  return typeof most === "number" ? Math.min(most, MAX_BLOCKS_PER_SECTION) : MAX_BLOCKS_PER_SECTION;
+}
+
 /** Why a block of `blockType` cannot be added to `section`. */
 export function cannotAddBlock(
   manifest: ThemeManifest,
@@ -96,7 +107,7 @@ export function cannotAddBlock(
   blockType: string,
 ): RuleReason | null {
   if (!manifest.sections[section.type]?.blocks?.[blockType]) return "notAllowed";
-  return section.blocks.length >= MAX_BLOCKS_PER_SECTION ? "blocksFull" : null;
+  return section.blocks.length >= blockLimit(manifest, section) ? "blocksFull" : null;
 }
 
 /**

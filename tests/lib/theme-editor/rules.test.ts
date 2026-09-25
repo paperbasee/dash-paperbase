@@ -10,6 +10,7 @@ import {
   MAX_BLOCKS_PER_SECTION,
   MAX_SECTIONS_PER_LIST,
   cannotAdd,
+  blockLimit,
   cannotAddBlock,
   cannotHide,
   cannotRemove,
@@ -105,6 +106,21 @@ describe("cannotAddBlock", () => {
       settings: {},
     }));
     expect(cannotAddBlock(manifest, { ...details, blocks }, "custom_text")).toBe("blocksFull");
+  });
+
+  test("the theme's own number, where it sets one -- the API refuses a part past it", () => {
+    const capped = {
+      ...manifest,
+      sections: { ...manifest.sections, product_details: { ...manifest.sections.product_details, max_blocks: 2 } },
+    } as typeof manifest;
+    const details = section("d", "product_details");
+    const two = [0, 1].map((i) => ({ id: `b${i}`, type: "custom_text", settings: {} }));
+    expect(blockLimit(capped, details)).toBe(2);
+    expect(cannotAddBlock(capped, { ...details, blocks: two.slice(0, 1) }, "custom_text")).toBeNull();
+    expect(cannotAddBlock(capped, { ...details, blocks: two }, "custom_text")).toBe("blocksFull");
+    // Never more than the platform's cap, whatever the theme says.
+    const huge = { ...capped, sections: { ...capped.sections, product_details: { ...capped.sections.product_details, max_blocks: 1000 } } } as typeof manifest;
+    expect(blockLimit(huge, details)).toBe(MAX_BLOCKS_PER_SECTION);
   });
 });
 
