@@ -283,7 +283,7 @@ export function SlotEditor({ loaded }: { loaded: ThemeEditorState }) {
     path: policyPath(policy),
     written: policy.is_written,
   }));
-  const [pictureUrls] = useState<Record<string, string>>({});
+  const [pictureUrls, setPictureUrls] = useState<Record<string, string>>({});
 
   function pickPage(next: SlotPageKey) {
     setPage(next);
@@ -590,6 +590,7 @@ export function SlotEditor({ loaded }: { loaded: ThemeEditorState }) {
             premiumSections={loaded.premium_sections !== false}
             pictures={images.data ?? []}
             pictureUrl={(key) => pictureUrls[key] ?? images.data?.find((row) => row.key === key)?.url ?? ""}
+            onPictureUrl={(key, url) => setPictureUrls((known) => ({ ...known, [key]: url }))}
             /*
               A department with nothing in it says so. It can still be ticked --
               a merchant setting a shop up picks the aisle they are about to

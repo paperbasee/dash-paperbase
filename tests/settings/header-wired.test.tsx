@@ -18,6 +18,7 @@ import { SLOTS } from "@/lib/theme-editor/slot-catalogue";
 import { choiceEdits, sectionOfType, slotValueFor, wiringFor } from "@/lib/theme-editor/slot-sections";
 import { ShopChrome, type ShopIdentity } from "@/components/theme-editor/slots/ShopChrome";
 import { categoryIndex, type CategoryEntry } from "@/lib/theme-editor/link-targets";
+import { fieldSpecs } from "@/lib/theme-editor/field-specs";
 import en from "../../messages/en.json";
 
 const labels = (label: string) => ({ label, label_bn: `${label} (bn)` });
@@ -165,6 +166,7 @@ function draw(
     shop?: ShopIdentity;
     page?: "header" | "home";
     categories?: Record<string, CategoryEntry>;
+    pictureUrl?: (key: string) => string;
   } = {},
 ) {
   return renderToStaticMarkup(
@@ -178,6 +180,7 @@ function draw(
         shop={over.shop ?? SHOP}
         departments={DEPARTMENTS}
         categories={over.categories}
+        pictureUrl={over.pictureUrl}
       />
     </NextIntlClientProvider>,
   );
@@ -315,6 +318,43 @@ describe("the menu (step 3, 2026-09-25)", () => {
     // Centred shows eight, so seven fit and there is no More.
     const centred = draw("menu", "links", { live: header({ header_layout: "centred" }), categories: many });
     expect(centred).not.toContain("data-menu-more");
+  });
+});
+
+describe("the shop's logo (2026-09-26)", () => {
+  const LOGO = "tenants/str_x/themes/logo_a.svg";
+  const url = (key: string) => (key === LOGO ? "https://cdn.example.com/logo.svg" : "");
+
+  test("is a place of the header, its sizes as tiles and its picture as its own field", () => {
+    const wiring = wiringFor("header", "logo")!;
+    expect(Object.keys(wiring.sections)).toEqual(["medium", "small", "large"]);
+    expect(wiring.fields).toEqual(["logo"]);
+    expect(SLOTS.header.find((slot) => slot.key === "logo")?.initial).toBe("medium");
+  });
+
+  test("stands in the header in place of the name, at the size shown", () => {
+    const live = header({ header_layout: "classic", logo: LOGO, logo_size: "large" });
+    const html = draw("logo", "small", { live, pictureUrl: url });
+    expect(html).toContain('src="https://cdn.example.com/logo.svg"');
+    expect(html).toContain("h-5");
+    expect(draw("layout", "classic", { live, pictureUrl: url })).toContain("h-9");
+  });
+
+  test("is the name while there is no picture", () => {
+    const html = draw("logo", "medium", { live: header({ header_layout: "centred" }), pictureUrl: url });
+    expect(html).not.toContain("data-logo");
+    expect(html).toContain("GADZILLA");
+  });
+
+  test("the picture may be an SVG, and the field knows it", () => {
+    const fields = fieldSpecs(
+      [
+        { id: "logo", type: "image", svg: true, label: "Logo", label_bn: "লোগো", default: "" },
+        { id: "picture", type: "image", label: "Picture", label_bn: "ছবি", default: "" },
+      ],
+      "en",
+    );
+    expect(fields.map((field) => field.svg)).toEqual([true, false]);
   });
 });
 

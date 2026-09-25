@@ -588,7 +588,7 @@ export function ShopChrome({
     cart's shape ARE the choices being made.
   */
   const headerDrawing = (
-    force: { layout?: string; marks?: string; icons?: string; words?: string; cart?: string } = {},
+    force: { layout?: string; marks?: string; icons?: string; words?: string; cart?: string; logoSize?: string } = {},
   ) => {
     const held = live?.type === "header" ? (live.settings ?? {}) : {};
     const chosen = (key: string, place: string, fallback: string) => {
@@ -684,7 +684,21 @@ export function ShopChrome({
         ) : null}
       </span>
     );
-    const logo = <span className="shrink-0 text-sm font-semibold tracking-[0.14em]">{name}</span>;
+    // The shop's own logo in place of its name (2026-09-26), at the size chosen;
+    // the name when there is no picture, or none this editor can draw yet.
+    const logoKey = typeof held.logo === "string" ? held.logo : "";
+    const logoSrc = logoKey ? (pictureUrl?.(logoKey) ?? "") : "";
+    const logoSize = force.logoSize ?? chosen("logo_size", "logo", "medium");
+    const logoHeight = logoSize === "small" ? "h-5" : logoSize === "large" ? "h-9" : "h-7";
+    const brandMark = (wordClass: string) =>
+      logoSrc ? (
+        // eslint-disable-next-line @next/next/no-img-element -- a merchant upload on a
+        // bucket the dashboard configures no loader for
+        <img src={logoSrc} alt={name} data-logo className={`${logoHeight} w-auto max-w-[10rem] shrink-0 object-contain`} />
+      ) : (
+        <span className={wordClass}>{name}</span>
+      );
+    const logo = brandMark("shrink-0 text-sm font-semibold tracking-[0.14em]");
     const frame = "border-b border-border bg-shop-header text-shop-header-foreground";
 
     if (layout === "centred") {
@@ -693,7 +707,7 @@ export function ShopChrome({
         <div className={frame}>
           <div className="grid grid-cols-[minmax(max-content,1fr)_auto_minmax(max-content,1fr)] items-center gap-3 px-4 py-3.5">
             <span className="flex">{mark(MagnifyingGlassIcon, "search", t("headerWordSearch"), true)}</span>
-            <span className="text-base font-semibold tracking-[0.16em]">{name}</span>
+            {brandMark("text-base font-semibold tracking-[0.16em]")}
             <span className="flex justify-end">{icons(false)}</span>
           </div>
           <div className="flex justify-center border-t border-current/10 bg-current/[0.04] px-4 py-2">
@@ -3315,6 +3329,10 @@ export function ShopChrome({
     // The menu is drawn where it lives: in the header, as the design has it.
     case "header:menu":
       return headerDrawing();
+
+    // The logo in the header, at the size the tile shows.
+    case "header:logo":
+      return headerDrawing({ logoSize: variant });
 
     case "header:sticky":
       return (

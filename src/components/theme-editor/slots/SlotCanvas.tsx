@@ -347,6 +347,7 @@ export function SlotCanvas({
   premiumSections,
   pictures,
   pictureUrl,
+  onPictureUrl,
   departments,
   categories,
   promiseWords,
@@ -401,6 +402,8 @@ export function SlotCanvas({
   premiumSections: boolean;
   /** Pictures this shop has already placed, and how to draw one. */
   pictures: ThemeImage[];
+  /** A picture just uploaded, and where it is. See SlotDialog. */
+  onPictureUrl?: (key: string, url: string) => void;
   pictureUrl: (key: string) => string;
   /**
    * This shop's own top-level departments: what the category band draws, and
@@ -612,6 +615,7 @@ export function SlotCanvas({
           onAddBlock={(blockType) => onAddBlock(openOwner, blockType)}
           onRemoveBlock={(blockId) => onRemoveBlock(openOwner, blockId)}
           onMoveBlock={(blockId, to) => onMoveBlock(openOwner, blockId, to)}
+          onPictureUrl={onPictureUrl}
           onClose={() => onOpen(null)}
         />
       ) : null}

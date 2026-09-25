@@ -1438,6 +1438,23 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
       ],
     },
     /*
+      The shop's own logo (2026-09-26): the picture in the dialog -- SVG, PNG,
+      WebP or JPEG, uploaded through the API so an SVG is cleaned -- and how tall
+      it stands, as tiles. With no picture the header shows the shop's name, as
+      it always has.
+    */
+    {
+      key: "logo",
+      label: "logoPlace",
+      hint: "logoPlaceHint",
+      initial: "medium",
+      options: [
+        { value: "small", label: "logoSmall", note: "logoSmallNote", shape: "line" },
+        { value: "medium", label: "logoMedium", note: "logoMediumNote", shape: "line" },
+        { value: "large", label: "logoLarge", note: "logoLargeNote", shape: "line" },
+      ],
+    },
+    /*
       The menu (step 3, 2026-09-25): the merchant's own links -- a page, a
       category or a web address each, with optional words and a highlight --
       and whether a category opens its subcategories. No tiles: a list is

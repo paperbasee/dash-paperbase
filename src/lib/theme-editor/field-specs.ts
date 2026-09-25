@@ -71,6 +71,8 @@ export type FieldSpec = {
   max: number | null;
   /** select: the choices, named in the merchant's language. Empty for the others. */
   options: FieldOption[];
+  /** image: may be an SVG, uploaded through the API's cleaning (the logo). */
+  svg: boolean;
 };
 
 const LENGTHS: Partial<Record<FieldKind, number>> = {
@@ -124,6 +126,7 @@ export function fieldSpecs(
               label: optionLabel(spec, option, locale),
             }))
           : [],
+      svg: spec.type === "image" && spec.svg === true,
     });
   }
   return out;

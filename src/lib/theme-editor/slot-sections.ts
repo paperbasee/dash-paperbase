@@ -75,6 +75,19 @@ export const WIRED_SLOTS: Partial<Record<SlotPageKey, Record<string, WiredSlot>>
       theme's default FIRST in each map -- a document that has never chosen
       reads as the first value whose settings it does not contradict.
     */
+    /*
+      The logo, 2026-09-26: the size as tiles, medium first (the theme's
+      default), and the picture as this place's own field.
+    */
+    logo: {
+      page: "header",
+      sections: {
+        medium: { type: "header", settings: { logo_size: "medium" } },
+        small: { type: "header", settings: { logo_size: "small" } },
+        large: { type: "header", settings: { logo_size: "large" } },
+      },
+      fields: ["logo"],
+    },
     layout: {
       page: "header",
       sections: {

@@ -39,7 +39,7 @@ import { SettingField } from "../SettingField";
 /** What the merchant is being asked for, over the dialog: a link, or a picture. */
 type Asked =
   | { kind: "link"; setting: string; value: string; blockId?: string }
-  | { kind: "picture"; setting: string; value: string; blockId?: string }
+  | { kind: "picture"; setting: string; value: string; blockId?: string; svg?: boolean }
   | { kind: "product"; setting: string; value: string; blockId?: string };
 
 /**
@@ -72,6 +72,7 @@ export function SlotDialog({
   onAddBlock,
   onRemoveBlock,
   onMoveBlock,
+  onPictureUrl,
   onClose,
 }: {
   slot: Slot;
@@ -104,6 +105,8 @@ export function SlotDialog({
   onAddBlock: (blockType: string) => void;
   onRemoveBlock: (blockId: string) => void;
   onMoveBlock: (blockId: string, to: number) => void;
+  /** A picture just uploaded, and where it is: so the canvas draws it before a save. */
+  onPictureUrl?: (key: string, url: string) => void;
   onClose: () => void;
 }) {
   const t = useTranslations("themeEditor.slots");
@@ -170,7 +173,8 @@ export function SlotDialog({
       setting: spec_.id,
       value: held(blockId ? blocks.find((b) => b.id === blockId)?.settings : section?.settings, spec_.id),
       blockId,
-    });
+      ...(kind === "picture" ? { svg: spec_.svg } : {}),
+    } as Asked);
 
   const answer = (value: string) => {
     if (!asked) return;
@@ -503,7 +507,12 @@ export function SlotDialog({
           open={asked?.kind === "picture"}
           used={pictures}
           current={asked?.value ?? ""}
-          onPick={(picture) => answer(picture.key)}
+          svg={asked?.kind === "picture" ? asked.svg === true : false}
+          onPick={(picture) => {
+            // An upload that came back with its address can be drawn at once.
+            if (picture.url) onPictureUrl?.(picture.key, picture.url);
+            answer(picture.key);
+          }}
           onClose={() => setAsked(null)}
         />
       </EditorSheet>

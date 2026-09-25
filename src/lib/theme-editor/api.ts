@@ -116,6 +116,11 @@ export type ThemeSettingSpec = {
   /** number: the range the API accepts, ends included. */
   min?: number;
   max?: number;
+  /**
+   * image: this picture may be an SVG (the header's logo, 2026-09-26). Its uploads
+   * go through the API, which cleans an SVG before storing it.
+   */
+  svg?: boolean;
 };
 
 export type ThemeBlockSpec = {
