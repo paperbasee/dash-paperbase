@@ -918,6 +918,34 @@ export function ShopChrome({
       const pictures = (live?.blocks ?? [])
         .map((block) => block.settings?.image)
         .filter((key): key is string => typeof key === "string" && key !== "");
+      // The video, once it is the hero: the merchant's own cover picture with
+      // the shop's play mark on it, in the shape they chose -- it drew the
+      // example hero instead, so the editor never showed the picture a
+      // shopper sees first (owner, 2026-09-25).
+      if (variant === "video" && live?.type === "video") {
+        const poster = typeof live.settings?.poster === "string" ? live.settings.poster : "";
+        const tall = live.settings?.ratio === "portrait";
+        return (
+          <div className="px-4 py-4">
+            <div
+              className={cn(
+                "relative overflow-hidden rounded-md bg-current/8",
+                tall ? "mx-auto aspect-[9/16] w-[40%]" : "aspect-[16/9] w-full",
+              )}
+            >
+              {poster ? (
+                // eslint-disable-next-line @next/next/no-img-element -- a merchant upload, as the slider's
+                <img src={pictureUrl?.(poster) || poster} alt="" className="absolute inset-0 h-full w-full object-cover" />
+              ) : null}
+              <span className="absolute inset-0 grid place-items-center bg-black/20" data-video-cover>
+                <span className="grid size-12 place-items-center rounded-full bg-white text-black shadow-md" aria-hidden>
+                  <PlayIcon size={18} weight="fill" />
+                </span>
+              </span>
+            </div>
+          </div>
+        );
+      }
       if (slider && live) {
         return pictures.length ? (
           <div className="relative aspect-[21/9] w-full overflow-hidden bg-current/8">
@@ -1296,8 +1324,10 @@ export function ShopChrome({
         .filter((block) => block.type === "question")
         .map((block) => (typeof block.settings?.question === "string" ? block.settings.question.trim() : ""))
         .filter(Boolean);
+      // A centred column under a centred title, as the shop draws it (a 48rem
+      // column in a page about 1180 wide) -- it was the canvas's full width.
       return (
-        <div className="px-4 py-4">
+        <div className="mx-auto w-full max-w-[65%] px-4 py-4">
           {liveHeading ? <SectionHead band title={liveHeading} /> : null}
           {asked.length ? (
             <div className="divide-y divide-current/10 border-y border-current/10">
@@ -2683,10 +2713,11 @@ export function ShopChrome({
         </div>
       );
 
+    // The shop's column and band title, as on the home page's questions.
     case "product:faq":
       return (
-        <div className="px-4 py-4">
-          <SectionHead title={t("productFaqHeading")} />
+        <div className="mx-auto w-full max-w-[65%] px-4 py-4">
+          <SectionHead band title={t("productFaqHeading")} />
           <div className="divide-y divide-current/10 border-y border-current/10">
             {[t("productFaqOne"), t("productFaqTwo")].map((q) => (
               <p key={q} className="flex items-center justify-between gap-3 py-3 text-[12px] text-current/70">
