@@ -86,15 +86,15 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
     id: "2026-09-22-theme-editor-and-live-preview",
     date: "2026-09-22",
-    version: "4.118.0",
+    version: "4.118.1",
     tag: "new",
     title: {
       en: "Design your store",
       bn: "নিজের মতো স্টোর সাজান",
     },
     body: {
-      en: "In Settings → Customization, open the editor to see your real store as your shoppers will — on a phone or a computer, in your own fonts and colours — and click any part of it to change it in a calm panel beside it, where every part of the page is also listed with your colours, corners and product cards. The cart, checkout, wishlist and account pages are filled with a sample of your own products so you can see them full, and nothing in that sample is saved. What you change stays a draft your shoppers can't see until you press Save to store, and customizing your store is part of the Premium plan.",
-      bn: "সেটিংস → কাস্টমাইজেশন থেকে এডিটর খুললে আপনার আসল স্টোরটি দেখবেন, ঠিক যেমন ক্রেতারা দেখবেন — ফোনে বা কম্পিউটারে, আপনার নিজের ফন্ট ও রঙে — আর যেকোনো অংশে ক্লিক করে পাশের একটি শান্ত প্যানেলে তা বদলান, যেখানে পাতার প্রতিটি অংশের তালিকা আর আপনার রং, কোণ ও পণ্যের কার্ডও থাকে। কার্ট, চেকআউট, উইশলিস্ট আর অ্যাকাউন্ট পাতা আপনার নিজের পণ্যের একটি নমুনা দিয়ে ভরা থাকে, যাতে পুরো পাতাটি দেখতে পান, আর সেই নমুনার কিছুই সেভ হয় না। যা বদলান তা ড্রাফট হয়ে থাকে, ক্রেতারা দেখেন না, স্টোরে সংরক্ষণ বাটনে চাপলেই তা স্টোরে যায়; স্টোর সাজানো প্রিমিয়াম প্ল্যানের অংশ।",
+      en: "In Settings → Customization, open the editor to see your real store as your shoppers will — on a phone or a computer, in your own fonts and colours — and click any part of it to change it in a calm panel beside it, where every part of the page is also listed with your colours, corners and product cards, and where you can always upload a new picture however many you have placed. The cart, checkout, wishlist and account pages are filled with a sample of your own products so you can see them full, and nothing in that sample is saved. What you change stays a draft your shoppers can't see until you press Save to store, and customizing your store is part of the Premium plan.",
+      bn: "সেটিংস → কাস্টমাইজেশন থেকে এডিটর খুললে আপনার আসল স্টোরটি দেখবেন, ঠিক যেমন ক্রেতারা দেখবেন — ফোনে বা কম্পিউটারে, আপনার নিজের ফন্ট ও রঙে — আর যেকোনো অংশে ক্লিক করে পাশের একটি শান্ত প্যানেলে তা বদলান, যেখানে পাতার প্রতিটি অংশের তালিকা আর আপনার রং, কোণ ও পণ্যের কার্ডও থাকে, আর যত ছবিই রাখুন, নতুন ছবি সবসময় আপলোড করতে পারবেন। কার্ট, চেকআউট, উইশলিস্ট আর অ্যাকাউন্ট পাতা আপনার নিজের পণ্যের একটি নমুনা দিয়ে ভরা থাকে, যাতে পুরো পাতাটি দেখতে পান, আর সেই নমুনার কিছুই সেভ হয় না। যা বদলান তা ড্রাফট হয়ে থাকে, ক্রেতারা দেখেন না, স্টোরে সংরক্ষণ বাটনে চাপলেই তা স্টোরে যায়; স্টোর সাজানো প্রিমিয়াম প্ল্যানের অংশ।",
     },
     href: "/settings?tab=customization",
   },
