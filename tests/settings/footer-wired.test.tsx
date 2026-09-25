@@ -190,14 +190,14 @@ describe("the canvas draws this shop's footer", () => {
 
   test("the policies are the pages the shop has", () => {
     const html = draw("bottom", "policies");
-    expect(html).toContain("Privacy policy · Return &amp; refund · Cancellation policy");
+    expect(html).toContain("Privacy policy · Return &amp; refund · Shipping policy");
     expect(html).not.toContain("Terms");
   });
 
   test("the whole footer reads the section, not the editor's old held choices", () => {
     const html = draw("layout", "columns", { live: footer({ social: "off", bottom: "policies" }) });
     expect(html).not.toContain(">WhatsApp<");
-    expect(html).toContain("Cancellation policy</span>");
+    expect(html).toContain("Shipping policy</span>");
   });
 
   test("a shop that has filled nothing in is told where to", () => {

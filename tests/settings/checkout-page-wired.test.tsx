@@ -322,7 +322,7 @@ describe("the canvas says what the shop draws", () => {
       footer's Information column links to are the three this draws.
     */
     const html = draw("footerStyle", "policies");
-    expect(html).toContain("Cancellation");
+    expect(html).toContain("Shipping");
     expect(html).not.toContain("Terms");
   });
 });

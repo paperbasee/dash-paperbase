@@ -758,7 +758,7 @@ export function ShopChrome({
     const columns = [
       {
         head: t("footerInformation"),
-        items: [t("footerBlog"), t("footerPrivacy"), t("footerReturns"), t("footerCancellation")],
+        items: [t("footerBlog"), t("footerPrivacy"), t("footerReturns"), t("footerShipping")],
       },
       {
         head: t("footerService"),
@@ -832,7 +832,7 @@ export function ShopChrome({
         </div>
       );
 
-    const policies = [t("footerPrivacy"), t("footerReturns"), t("footerCancellation")].join(" · ");
+    const policies = [t("footerPrivacy"), t("footerReturns"), t("footerShipping")].join(" · ");
     const bottom =
       set.bottom === "policies" ? (
         <div className="mt-5 flex flex-wrap items-center justify-between gap-2 border-t border-current/12 pt-4 text-[10px] text-current/45">
