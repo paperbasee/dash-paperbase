@@ -143,3 +143,13 @@ describe("the screen-wide note", () => {
     expect(bn.themeEditor.slots).not.toHaveProperty("partlyWired");
   });
 });
+
+describe("the typefaces, not wired yet (2026-09-26)", () => {
+  test("are shown faded and cannot be clicked", () => {
+    const html = panel({});
+    const faces = html.match(/<button[^>]*aria-pressed[^>]*opacity-45[^>]*>/g) ?? [];
+    expect(faces.length).toBeGreaterThan(0);
+    for (const face of faces) expect(face).toContain("disabled");
+    expect(html).toContain("Coming soon");
+  });
+});

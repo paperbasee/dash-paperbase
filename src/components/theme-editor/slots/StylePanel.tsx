@@ -97,20 +97,30 @@ function FaceRow({
   face,
   chosen,
   onPick,
+  disabled = false,
 }: {
   face: Face;
   chosen: boolean;
   onPick: () => void;
+  /**
+   * Not wired to the shop yet (owner, 2026-09-26: "faded out so nobody can
+   * click"): shown so a merchant sees what is coming, and not a choice until a
+   * pick is saved and drawn.
+   */
+  disabled?: boolean;
 }) {
   const t = useTranslations("themeEditor.slots");
   return (
     <button
       type="button"
       aria-pressed={chosen}
-      onClick={onPick}
+      disabled={disabled}
+      onClick={disabled ? undefined : onPick}
       className={cn(
         "flex w-full flex-col gap-1.5 rounded-sm border px-4 py-3.5 text-left transition-colors",
-        "hover:border-primary focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-primary",
+        disabled
+          ? "cursor-not-allowed opacity-45"
+          : "hover:border-primary focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-primary",
         chosen ? "border-primary ring-1 ring-inset ring-primary" : "border-border-subtle",
       )}
     >
@@ -292,6 +302,7 @@ export function StylePanel({
                     face={item}
                     chosen={face === item.key}
                     onPick={() => onFace(item.key)}
+                    disabled
                   />
                 ))}
               </div>
