@@ -16,7 +16,14 @@ import {
 import { ownerOf, sectionFor, slotValueFor, wiringFor } from "@/lib/theme-editor/slot-sections";
 import type { FieldOption } from "@/lib/theme-editor/field-specs";
 import type { CategoryEntry } from "@/lib/theme-editor/link-targets";
-import { type BlogPreview, type BrandPreview, type ReviewPreview, ShopChrome, type ShopIdentity } from "./ShopChrome";
+import {
+  type BlogPreview,
+  type BrandPreview,
+  type PolicyPreview,
+  type ReviewPreview,
+  ShopChrome,
+  type ShopIdentity,
+} from "./ShopChrome";
 import { SlotDialog } from "./SlotDialog";
 
 /**
@@ -179,6 +186,8 @@ function SlotRegion({
   shop,
   brands,
   reviews,
+  policies,
+  footerSection,
   className,
   children,
 }: {
@@ -203,6 +212,10 @@ function SlotRegion({
   /** This shop's brands and good reviews, for the home page. See ShopChrome. */
   brands?: BrandPreview[];
   reviews?: ReviewPreview[];
+  /** This shop's policies, for the footer's links. See ShopChrome. */
+  policies?: PolicyPreview[];
+  /** The footer section, for a place that draws the footer. See ShopChrome. */
+  footerSection?: ThemeSection;
   className?: string;
   /** The chooser, when this place is on its own and can hold it. */
   children?: React.ReactNode;
@@ -284,6 +297,8 @@ function SlotRegion({
           shop={shop}
           brands={brands}
           reviews={reviews}
+          policies={policies}
+          footerSection={footerSection}
         />
       )}
 
@@ -339,6 +354,8 @@ export function SlotCanvas({
   shop,
   brands,
   reviews,
+  policies,
+  footerSection,
   productName,
   onGoToPage,
   colours,
@@ -402,6 +419,10 @@ export function SlotCanvas({
   /** This shop's brands and good reviews, for the home page. See ShopChrome. */
   brands?: BrandPreview[];
   reviews?: ReviewPreview[];
+  /** This shop's policies, for the footer's links. See ShopChrome. */
+  policies?: PolicyPreview[];
+  /** The footer section, for a place that draws the footer. See ShopChrome. */
+  footerSection?: ThemeSection;
   /** A product's public id to its name, so a picked band shows what it holds. */
   productName: (publicId: string) => string;
   /**
@@ -515,6 +536,8 @@ export function SlotCanvas({
                 shop={shop}
                 brands={brands}
                 reviews={reviews}
+                policies={policies}
+                footerSection={footerSection}
               >
                 {chooser}
               </SlotRegion>
@@ -553,6 +576,8 @@ export function SlotCanvas({
                         shop={shop}
                         brands={brands}
                         reviews={reviews}
+                        policies={policies}
+                        footerSection={footerSection}
                       />
                     ))}
                   </div>

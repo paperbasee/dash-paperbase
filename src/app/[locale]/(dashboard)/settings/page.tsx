@@ -24,6 +24,7 @@ import SecuritySection from "./sections/SecuritySection";
 import TeamSection from "./sections/team/TeamSection";
 import BillingSection from "./sections/BillingSection";
 import CustomizationSection from "./sections/CustomizationSection";
+import PoliciesSection from "./sections/PoliciesSection";
 import PromotionsSection from "./sections/promotions/PromotionsSection";
 import CheckoutSettingsSection from "./sections/CheckoutSettingsSection";
 import ShippingSection from "./sections/shipping/ShippingSection";
@@ -214,6 +215,8 @@ export default function SettingsPage() {
               <InvoiceSettingsPanel />
             </div>
           )}
+
+          <PoliciesSection hidden={activeSection !== "policies"} />
 
           <CustomizationSection hidden={activeSection !== "customization"} />
 

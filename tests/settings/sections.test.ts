@@ -420,3 +420,18 @@ describe("domains section is gated until the platform can serve custom domains",
     expect(hidden).toEqual(["domains"]);
   });
 });
+
+describe("Policies (2026-09-25)", () => {
+  it("is a section after Store Info, behind the permission its API asks for", () => {
+    const ids = ALL_SECTIONS.map((row) => row.id);
+    expect(ids.indexOf("policies")).toBe(ids.indexOf("store") + 1);
+    // admin/policies/ reads under settings.view and writes under settings.manage.
+    expect(SECTION_PERMISSION.policies).toBe("settings.view");
+  });
+
+  it("is named in both languages", () => {
+    for (const locale of ["en", "bn"] as const) {
+      expect(loadSettingsMessages(locale).sectionPolicies, locale).toBeTruthy();
+    }
+  });
+});

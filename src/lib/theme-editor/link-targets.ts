@@ -33,9 +33,18 @@ export const LINK_PAGES: readonly LinkPage[] = [
   { path: "/cart", key: "linkPageCart" },
   { path: "/checkout", key: "linkPageCheckout" },
   { path: "/support", key: "linkPageSupport" },
+  // The pages a footer column links to (2026-09-25): the columns became the merchant's,
+  // and every page the shop's own columns held has to be one they can pick. The shop
+  // leaves a link out where the page is switched off (the wishlist, the order tracker).
+  { path: "/reviews", key: "linkPageReviews" },
+  { path: "/account", key: "linkPageAccount" },
+  { path: "/account/find-order", key: "linkPageTrackOrder" },
+  { path: "/wishlist", key: "linkPageWishlist" },
+  { path: "/contact-us", key: "linkPageContact" },
+  { path: "/about-us", key: "linkPageAbout" },
 ] as const;
 
-export type LinkTab = "pages" | "categories" | "web";
+export type LinkTab = "pages" | "categories" | "policies" | "web";
 
 /** One category a link can point at, in tree order. */
 export type CategoryLink = {
@@ -112,5 +121,6 @@ export function linkTab(value: string): LinkTab {
   if (!link) return "pages";
   if (LINK_PAGES.some((page) => page.path === link)) return "pages";
   if (link.startsWith("/categories/")) return "categories";
+  if (link.startsWith("/policies/")) return "policies";
   return "web";
 }

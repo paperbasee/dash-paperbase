@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { FormField } from "@/components/ui/form-field";
 import { Input } from "@/components/ui/input";
 import { useCategoriesQuery } from "@/hooks/useCategoriesQuery";
+import { policyPath, usePoliciesQuery } from "@/hooks/usePoliciesQuery";
 import { flattenCategoryOptions } from "@/lib/category-tree";
 import {
   categoryLinks,
@@ -57,13 +58,14 @@ export function LinkPicker({
   const TABS: { key: LinkTab; label: string }[] = [
     { key: "pages", label: t("linkTabPages") },
     { key: "categories", label: t("linkTabCategories") },
+    { key: "policies", label: t("linkTabPolicies") },
     { key: "web", label: t("linkTabWeb") },
   ];
 
   return (
     <EditorSheet open={open} title={t("linkTitle")} hint={t("linkHint")} tall onClose={onClose}>
       <div className="shrink-0 px-4 pt-3">
-        <div role="tablist" aria-label={t("linkTitle")} className="grid grid-cols-3 gap-1 rounded-md bg-muted p-0.5">
+        <div role="tablist" aria-label={t("linkTitle")} className="grid grid-cols-4 gap-1 rounded-md bg-muted p-0.5">
           {TABS.map(({ key, label }) => (
             <button
               key={key}
@@ -93,6 +95,8 @@ export function LinkPicker({
           </ul>
         ) : tab === "categories" ? (
           <CategoryTab value={value} onPick={onPick} />
+        ) : tab === "policies" ? (
+          <PolicyTab value={value} onPick={onPick} />
         ) : (
           <WebTab value={linkTab(value) === "web" ? value : ""} onPick={onPick} />
         )}
@@ -111,10 +115,13 @@ export function LinkPicker({
 
 function PickRow({
   label,
+  note,
   picked,
   onPick,
 }: {
   label: string;
+  /** A line under the name: a policy not written yet. */
+  note?: string;
   picked: boolean;
   onPick: () => void;
 }) {
@@ -128,7 +135,10 @@ function PickRow({
         picked ? "border-foreground bg-accent" : "border-border",
       )}
     >
-      <span className="min-w-0 flex-1 text-foreground">{label}</span>
+      <span className="min-w-0 flex-1">
+        <span className="block text-foreground">{label}</span>
+        {note ? <span className="block text-xs text-muted-foreground">{note}</span> : null}
+      </span>
       {picked ? <Check className="size-4 shrink-0 text-foreground" aria-hidden /> : null}
     </button>
   );
@@ -171,6 +181,46 @@ function CategoryTab({ value, onPick }: { value: string; onPick: (link: string) 
       </ul>
       <p className="text-xs text-muted-foreground">{t("linkRenameNote")}</p>
     </div>
+  );
+}
+
+/**
+ * The shop's own policies (2026-09-25), written in Settings -> Policies. One not written yet
+ * can still be picked -- a merchant building the footer before the words -- and says it will
+ * not show on the shop until it is.
+ */
+function PolicyTab({ value, onPick }: { value: string; onPick: (link: string) => void }) {
+  const t = useTranslations("themeEditor");
+  const policies = usePoliciesQuery();
+
+  if (policies.isPending) {
+    return (
+      <p role="status" className="flex items-center gap-2 text-sm text-muted-foreground">
+        <Loader2 className="size-4 animate-spin" aria-hidden />
+        {t("linkPoliciesLoading")}
+      </p>
+    );
+  }
+  if (policies.isError) {
+    return <p className="text-sm text-destructive">{t("linkPoliciesFailed")}</p>;
+  }
+  const rows = policies.data ?? [];
+  if (rows.length === 0) {
+    return <p className="text-sm text-muted-foreground">{t("linkPoliciesEmpty")}</p>;
+  }
+  return (
+    <ul className="space-y-2">
+      {rows.map((policy) => (
+        <li key={policy.public_id}>
+          <PickRow
+            label={policy.title}
+            note={policy.is_written ? undefined : t("linkPolicyNotWritten")}
+            picked={value === policyPath(policy)}
+            onPick={() => onPick(policyPath(policy))}
+          />
+        </li>
+      ))}
+    </ul>
   );
 }
 

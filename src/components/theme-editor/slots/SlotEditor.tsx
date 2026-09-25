@@ -62,7 +62,8 @@ import { ConflictDialog } from "../ConflictDialog";
 import { SaveStatus } from "../SaveStatus";
 import { useAutosave } from "../useAutosave";
 import { SlotCanvas } from "./SlotCanvas";
-import type { BlogPreview, BrandPreview, ReviewPreview, ShopIdentity } from "./ShopChrome";
+import type { BlogPreview, BrandPreview, PolicyPreview, ReviewPreview, ShopIdentity } from "./ShopChrome";
+import { policyPath, usePoliciesQuery } from "@/hooks/usePoliciesQuery";
 import { useBranding } from "@/context/BrandingContext";
 import { useStoreSettingsCurrentQuery } from "@/hooks/useStoreSettingsCurrentQuery";
 import { STORE_SOCIAL_LINK_KEYS } from "@/lib/storeSocialLinks";
@@ -274,6 +275,14 @@ export function SlotEditor({ loaded }: { loaded: ThemeEditorState }) {
       product: review.product_name,
       byShop: review.source === "merchant",
     }));
+  // The shop's policies, for the footer's links: a column link names its policy,
+  // and the small links beside the year list every written one (2026-09-25).
+  const policyList = usePoliciesQuery();
+  const policyPreviews: PolicyPreview[] = (policyList.data ?? []).map((policy) => ({
+    title: policy.title,
+    path: policyPath(policy),
+    written: policy.is_written,
+  }));
   const [pictureUrls] = useState<Record<string, string>>({});
 
   function pickPage(next: SlotPageKey) {
@@ -593,6 +602,8 @@ export function SlotEditor({ loaded }: { loaded: ThemeEditorState }) {
               is certainly empty rather than everything that will draw nothing.
             */
             categories={categoryIndexOf}
+            policies={policyPreviews}
+            footerSection={(state.document.footer?.sections ?? []).find((section) => section.type === "footer")}
             departments={(categories.data ?? []).map((node) => ({
               value: node.public_id,
               label: node.name,

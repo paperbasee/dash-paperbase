@@ -102,8 +102,12 @@ describe("linkTab", () => {
     expect(linkTab("/categories/men/shirts")).toBe("categories");
     expect(linkTab("https://example.com")).toBe("web");
     expect(linkTab("mailto:a@b.com")).toBe("web");
+    // The shop's own policies have a tab of their own (2026-09-25).
+    expect(linkTab("/policies/privacy-policy")).toBe("policies");
+    // The wishlist is a page the picker offers now, for the footer's columns.
+    expect(linkTab("/wishlist")).toBe("pages");
     // A path the picker does not offer is still something the merchant typed.
-    expect(linkTab("/wishlist")).toBe("web");
+    expect(linkTab("/somewhere-else")).toBe("web");
   });
 });
 

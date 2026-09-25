@@ -18,6 +18,7 @@ import {
   Users,
   Globe,
   Megaphone,
+  FileText,
 } from "lucide-react";
 import { PROMOTION_TABS } from "./sections/promotions/promotionTabs";
 
@@ -27,6 +28,7 @@ export type SettingsSectionIcon = LucideIcon | PhosphorIcon;
 export type SettingsSection =
   | "account"
   | "store"
+  | "policies"
   | "customization"
   | "promotions"
   | "checkout"
@@ -42,6 +44,7 @@ export type SettingsSection =
 
 export type SettingsSectionLabelKey =
   | "sectionStore"
+  | "sectionPolicies"
   | "sectionCustomization"
   | "sectionPromotions"
   | "sectionShipping"
@@ -73,6 +76,7 @@ export type SettingsSectionNavItem =
  */
 export const SECTION_PERMISSION: Partial<Record<SettingsSection, string | string[]>> = {
   store: "settings.view",
+  policies: "settings.view",
   customization: "theming.view",
   checkout: "settings.view",
   eav: "products.view",
@@ -141,6 +145,7 @@ export function resolveSettingsSection(
 /** Every settings section that exists, before any feature-flag filtering. */
 export const ALL_SECTIONS: SettingsSectionNavItem[] = [
   { id: "store", labelKey: "sectionStore", icon: StorefrontIcon },
+  { id: "policies", labelKey: "sectionPolicies", icon: FileText },
   { id: "customization", labelKey: "sectionCustomization", icon: Palette },
   { id: "promotions", labelKey: "sectionPromotions", icon: Megaphone },
   {

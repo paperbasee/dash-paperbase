@@ -275,6 +275,13 @@ function goodReviews(reviews: ReviewPreview[] | undefined): ReviewPreview[] {
 const starRow = (rating: number) => "★".repeat(rating) + "☆".repeat(5 - rating);
 
 /**
+ * One of this shop's policies (Settings -> Policies, 2026-09-25), for the footer's
+ * drawing: a column link names it, and the small links list every written one. An
+ * unwritten policy is drawn greyed with a note, where the shop leaves it out.
+ */
+export type PolicyPreview = { title: string; path: string; written: boolean };
+
+/**
  * This shop's own details, for the footer: what Settings holds, as the shop
  * draws it.
  *
@@ -395,6 +402,8 @@ export function ShopChrome({
   shop,
   brands,
   reviews,
+  policies,
+  footerSection,
 }: {
   page: SlotPageKey;
   slotKey: string;
@@ -458,6 +467,14 @@ export function ShopChrome({
   /** This shop's brands and good reviews, for the home page. See `BrandPreview`. */
   brands?: BrandPreview[];
   reviews?: ReviewPreview[];
+  /** This shop's policies, for the footer's links. See `PolicyPreview`. */
+  policies?: PolicyPreview[];
+  /**
+   * The footer section itself, for a place that draws the footer without being one
+   * of its places -- the checkout's "the shop's own footer" -- so its columns are
+   * the merchant's there too. A footer place has it as `live`.
+   */
+  footerSection?: ThemeSection;
 }) {
   const t = useTranslations("themeEditor.slots");
   const tEditor = useTranslations("themeEditor");
@@ -761,30 +778,52 @@ export function ShopChrome({
     const heading = (text: string) => (
       <p className="mb-2.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-foreground">{text}</p>
     );
-    const links = (items: string[]) =>
-      items.map((link) => (
-        <p key={link} className="mb-1.5 text-[11px] leading-relaxed">
-          {link}
+    const links = (items: { label: string; unwritten: boolean }[]) =>
+      items.map((link, index) => (
+        <p
+          key={`${link.label}-${index}`}
+          data-footer-link
+          className={cn("mb-1.5 text-[11px] leading-relaxed", link.unwritten && "text-current/35")}
+        >
+          {link.label}
+          {link.unwritten ? <span className="ml-1 italic">({t("footerPolicyNotWritten")})</span> : null}
         </p>
       ));
+    const linkLine = (items: { label: string; unwritten: boolean }[]) =>
+      items
+        .filter((link) => !link.unwritten)
+        .map((link) => link.label)
+        .join(" · ");
 
-    // The shop's own three columns, as `views/catalog._footer_columns` builds them.
-    const columns = [
-      {
-        head: t("footerInformation"),
-        items: [t("footerBlog"), t("footerPrivacy"), t("footerReturns"), t("footerShipping")],
-      },
-      {
-        head: t("footerService"),
-        items: [
-          t("footerAccount"),
-          ...(me.orderLookup ? [t("footerTrack")] : []),
-          ...(me.wishlist ? [t("footerWishlistLink")] : []),
-          t("footerContactUs"),
-        ],
-      },
-      { head: t("footerCompany"), items: [t("footerAbout")] },
-    ];
+    // The merchant's own columns (2026-09-25), from the footer's `column` parts: a
+    // title and up to six links, each named as the shop names it -- its own words,
+    // else the policy's title, the category's name or the page's -- and left out
+    // where the shop leaves it out: a web address with no words, a page this shop
+    // has switched off. A policy not written yet is drawn greyed, with a note.
+    const footer = live?.type === "footer" ? live : footerSection;
+    const columns = (footer?.blocks ?? [])
+      .filter((block) => block.type === "column")
+      .map((block) => {
+        const held_ = block.settings ?? {};
+        const items = [1, 2, 3, 4, 5, 6].flatMap((n) => {
+          const link = String(held_[`link_${n}`] ?? "").trim();
+          if (!link) return [];
+          const path = link.split(/[?#]/)[0];
+          if (path === "/wishlist" && !me.wishlist) return [];
+          if (path === "/account/find-order" && !me.orderLookup) return [];
+          const policy = policies?.find((one) => one.path === path);
+          const page = LINK_PAGES.find((one) => one.path === path);
+          const label =
+            String(held_[`label_${n}`] ?? "").trim() ||
+            policy?.title ||
+            categories?.[path]?.name ||
+            (page ? tEditor(page.key) : "");
+          if (!label) return [];
+          return [{ label, unwritten: path.startsWith("/policies/") && !policy?.written }];
+        });
+        return { head: String(held_.heading ?? "").trim(), items };
+      })
+      .filter((column) => column.head || column.items.length);
 
     const contactLines =
       set.contact === "off"
@@ -846,14 +885,19 @@ export function ShopChrome({
         </div>
       );
 
-    const policies = [t("footerPrivacy"), t("footerReturns"), t("footerShipping")].join(" · ");
+    // Every WRITTEN policy, on its own (the owner's choice, 2026-09-25).
+    const written = (policies ?? []).filter((one) => one.written).map((one) => one.title);
     const bottom =
       set.bottom === "policies" ? (
         <div className="mt-5 flex flex-wrap items-center justify-between gap-2 border-t border-current/12 pt-4 text-[10px] text-current/45">
           <span>
             © {year} {name} · powered by Paperbase
           </span>
-          <span>{policies}</span>
+          {written.length ? (
+            <span data-footer-policies>{written.join(" · ")}</span>
+          ) : (
+            <span className="italic">{t("footerNoPolicies")}</span>
+          )}
         </div>
       ) : (
         <p className="mt-5 border-t border-current/12 pt-4 text-[10px] text-current/45">
@@ -866,11 +910,11 @@ export function ShopChrome({
         {children}
       </div>
     );
-    return { layout, set, name, columns, contactLines, contactNote, shopBlock, heading, links, social, payments, bottom, band, centred };
+    return { layout, set, name, columns, contactLines, contactNote, shopBlock, heading, links, linkLine, social, payments, bottom, band, centred, written };
   };
 
   if (slotKey === "footer") {
-    const { layout, name, columns, contactLines, contactNote, shopBlock, heading, links, social, payments, bottom, centred } =
+    const { layout, name, columns, contactLines, contactNote, shopBlock, heading, links, linkLine, social, payments, bottom, centred } =
       footerParts(variant ? { layout: variant } : {});
     const shell = (children: React.ReactNode) => (
       <div className={cn("border-t border-border bg-muted px-5 py-6 text-current/65", centred && "text-center")}>
@@ -885,9 +929,7 @@ export function ShopChrome({
       return shell(
         <>
           <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-foreground">{name}</p>
-          <p className="mt-2.5 text-[11px]">
-            {[t("footerAbout"), t("footerContactUs"), t("footerReturns"), t("footerPrivacy")].join(" · ")}
-          </p>
+          <p className="mt-2.5 text-[11px]">{linkLine(columns.flatMap((column) => column.items))}</p>
         </>,
       );
     }
@@ -896,7 +938,7 @@ export function ShopChrome({
         <>
           <p className="text-[12px] font-semibold uppercase tracking-[0.12em] text-foreground">{name}</p>
           {contactLines.length ? <p className="mt-2.5 text-[11px]">{contactLines.join(" · ")}</p> : contactNote}
-          <p className="mt-3 text-[11px]">{columns.flatMap((column) => column.items).join(" · ")}</p>
+          <p className="mt-3 text-[11px]">{linkLine(columns.flatMap((column) => column.items))}</p>
         </>,
       );
     }
@@ -905,9 +947,9 @@ export function ShopChrome({
         <div className="grid gap-6 sm:grid-cols-[minmax(0,1fr)_auto]">
           {shopBlock}
           <div className="grid grid-cols-2 gap-x-8 gap-y-5">
-            {columns.map((column) => (
-              <div key={column.head}>
-                {heading(column.head)}
+            {columns.map((column, index) => (
+              <div key={`${column.head}-${index}`}>
+                {column.head ? heading(column.head) : null}
                 {links(column.items)}
               </div>
             ))}
@@ -918,9 +960,9 @@ export function ShopChrome({
     return shell(
       <div className="grid grid-cols-2 gap-x-5 gap-y-5 sm:grid-cols-4">
         {shopBlock}
-        {columns.map((column) => (
-          <div key={column.head}>
-            {heading(column.head)}
+        {columns.map((column, index) => (
+          <div key={`${column.head}-${index}`}>
+            {column.head ? heading(column.head) : null}
             {links(column.items)}
           </div>
         ))}
@@ -2947,14 +2989,28 @@ export function ShopChrome({
       );
     }
 
-    case "checkout:footerStyle":
-      return variant === "same" ? (
-        <ShopChrome page="footer" slotKey="footer" variant="columns" />
-      ) : (
+    case "checkout:footerStyle": {
+      if (variant === "same") {
+        return (
+          <ShopChrome
+            page="footer"
+            slotKey="footer"
+            variant="columns"
+            shop={shop}
+            categories={categories}
+            policies={policies}
+            footerSection={footerSection}
+          />
+        );
+      }
+      // The policies line: every written policy, as the shop draws it.
+      const written = (policies ?? []).filter((one) => one.written).map((one) => one.title);
+      return (
         <p className="border-t border-current/10 px-4 py-4 text-center text-[11px] text-current/50">
-          {t("checkoutFooterExample")}
+          {written.length ? written.join(" · ") : <span className="italic">{t("footerNoPolicies")}</span>}
         </p>
       );
+    }
 
     /**
      * The right column: everything a shopper fills in before they can buy.
@@ -3286,7 +3342,38 @@ export function ShopChrome({
     // The arrangement is the whole footer; every other footer place draws its
     // own part, from the same function, with the value it is showing.
     case "footer:layout":
-      return <ShopChrome page={page} slotKey="footer" variant={variant} settings={settings} live={live} shop={shop} />;
+      return (
+        <ShopChrome
+          page={page}
+          slotKey="footer"
+          variant={variant}
+          settings={settings}
+          live={live}
+          shop={shop}
+          categories={categories}
+          policies={policies}
+        />
+      );
+
+    // The merchant's own columns (2026-09-25): the columns part of the footer, or a
+    // line saying there are none.
+    case "footer:columns": {
+      const parts = footerParts();
+      return parts.band(
+        parts.columns.length ? (
+          <div className="grid grid-cols-2 gap-x-5 gap-y-5 sm:grid-cols-4">
+            {parts.columns.map((column, index) => (
+              <div key={`${column.head}-${index}`} data-footer-column>
+                {column.head ? parts.heading(column.head) : null}
+                {parts.links(column.items)}
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-[11px] italic text-current/45">{t("footerColumnsEmpty")}</p>
+        ),
+      );
+    }
 
     case "footer:contact": {
       const parts = footerParts({ contact: variant ?? "full" });

@@ -735,6 +735,15 @@ export const WIRED_SLOTS: Partial<Record<SlotPageKey, Record<string, WiredSlot>>
     (owner, 2026-09-24).
   */
   footer: {
+    /*
+      The footer's own columns, its `column` parts -- a dialog like the header's
+      menu, since a list is built rather than chosen.
+    */
+    columns: {
+      page: "footer",
+      sections: { links: "footer" },
+      blocks: "column",
+    },
     layout: {
       page: "footer",
       sections: {

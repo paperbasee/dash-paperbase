@@ -1511,6 +1511,12 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
         { value: "minimal", label: "footerMinimal", note: "footerMinimalNote", shape: "blank" },
       ],
     },
+    /*
+      The merchant's own columns (2026-09-25): a title and up to six links each --
+      pages, categories, their policies, web addresses -- up to four columns. No
+      tiles: a list is built, not chosen, as the header's menu is.
+    */
+    { key: "columns", label: "footerColumnsPlace", hint: "footerColumnsHint" },
     {
       key: "contact",
       label: "footerContact",

@@ -6,6 +6,9 @@ export const navCountsQueryKey = ["nav-counts"] as const;
 
 export const featuresQueryKey = ["features"] as const;
 
+/** The shop's own policies (Settings -> Policies), also read by the theme editor. */
+export const policiesQueryKey = ["policies"] as const;
+
 export const myPermissionsQueryKey = ["me", "permissions"] as const;
 export const teamRolesQueryKey = ["team", "roles"] as const;
 export const teamMembersQueryKey = ["team", "members"] as const;

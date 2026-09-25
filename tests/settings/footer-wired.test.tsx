@@ -17,7 +17,7 @@ import type { ThemeDocument, ThemeEditorState, ThemeManifest, ThemeSection } fro
 import { editorReducer, initEditorState, type EditorState } from "@/lib/theme-editor/editor-reducer";
 import { SLOTS } from "@/lib/theme-editor/slot-catalogue";
 import { choiceEdits, sectionOfType, slotValueFor, wiringFor } from "@/lib/theme-editor/slot-sections";
-import { ShopChrome, type ShopIdentity } from "@/components/theme-editor/slots/ShopChrome";
+import { type PolicyPreview, ShopChrome, type ShopIdentity } from "@/components/theme-editor/slots/ShopChrome";
 import en from "../../messages/en.json";
 
 const labels = (label: string) => ({ label, label_bn: `${label} (bn)` });
@@ -133,15 +133,44 @@ const SHOP: ShopIdentity = {
   orderLookup: false,
 };
 
-function draw(slotKey: string, variant: string | undefined, over: { shop?: ShopIdentity; live?: ThemeSection } = {}) {
+const POLICIES: PolicyPreview[] = [
+  { title: "Privacy policy", path: "/policies/privacy-policy", written: true },
+  { title: "Shipping policy", path: "/policies/shipping-policy", written: true },
+  { title: "Warranty", path: "/policies/warranty", written: false },
+];
+
+function draw(
+  slotKey: string,
+  variant: string | undefined,
+  over: { shop?: ShopIdentity; live?: ThemeSection; policies?: PolicyPreview[] } = {},
+) {
   return renderToStaticMarkup(
     <NextIntlClientProvider locale="en" messages={en}>
-      <ShopChrome page="footer" slotKey={slotKey} variant={variant} settings={{}} shop={over.shop ?? SHOP} live={over.live} />
+      <ShopChrome
+        page="footer"
+        slotKey={slotKey}
+        variant={variant}
+        settings={{}}
+        shop={over.shop ?? SHOP}
+        live={over.live}
+        policies={over.policies ?? POLICIES}
+      />
     </NextIntlClientProvider>,
   );
 }
 
-const footer = (settings: Record<string, unknown>) => section("footer", "footer", { settings });
+/** A column part: a title, then links (with optional words). */
+const column = (id: string, heading: string, links: [string, string?][]) => ({
+  id,
+  type: "column",
+  settings: {
+    heading,
+    ...Object.fromEntries(links.flatMap(([link, words], i) => [[`link_${i + 1}`, link], [`label_${i + 1}`, words ?? ""]])),
+  },
+});
+
+const footer = (settings: Record<string, unknown>, blocks: ReturnType<typeof column>[] = []) =>
+  section("footer", "footer", { settings, blocks } as Partial<ThemeSection>);
 
 describe("the canvas draws this shop's footer", () => {
   test("nothing another shop has, and no card the platform cannot take", () => {
@@ -172,9 +201,35 @@ describe("the canvas draws this shop's footer", () => {
     expect(html).not.toContain("Barishal");
   });
 
+  test("the columns are the merchant's own, each link named as the shop names it", () => {
+    const live = footer({}, [
+      column("c1", "Help", [["/contact-us"], ["/policies/shipping-policy"], ["https://wa.me/1", "WhatsApp us"]]),
+      column("c2", "Policies", [["/policies/privacy-policy"], ["/policies/warranty"]]),
+    ]);
+    const html = draw("columns", undefined, { live });
+    expect(html).toContain(">Help<");
+    expect(html).toContain("Contact us");
+    expect(html).toContain("Shipping policy");
+    expect(html).toContain("WhatsApp us");
+    // A policy not written yet is drawn greyed, with what the shop does about it.
+    expect(html).toContain("Warranty");
+    expect(html).toContain("not written yet");
+  });
+
   test("the links follow the shop's own switches", () => {
-    expect(draw("layout", "columns")).toContain("Wishlist");
-    expect(draw("layout", "columns")).not.toContain("Track your order");
+    const live = footer({}, [column("c1", "Customer Service", [["/wishlist"], ["/account/find-order"]])]);
+    const html = draw("layout", "columns", { live });
+    expect(html).toContain("Wishlist");
+    expect(html).not.toContain("Track your order");
+  });
+
+  test("a web address with no words is left out, as the shop leaves it out", () => {
+    const live = footer({}, [column("c1", "Elsewhere", [["https://example.com"]])]);
+    expect(draw("columns", undefined, { live })).not.toContain("example.com");
+  });
+
+  test("no columns says so", () => {
+    expect(draw("columns", undefined, { live: footer({}) })).toContain("No columns yet");
   });
 
   test("only the social links the merchant filled in", () => {
@@ -188,16 +243,17 @@ describe("the canvas draws this shop's footer", () => {
     for (const method of ["Cash on delivery", "bKash", "Nagad"]) expect(html).toContain(method);
   });
 
-  test("the policies are the pages the shop has", () => {
+  test("the small links are every written policy, and only those (2026-09-25)", () => {
     const html = draw("bottom", "policies");
-    expect(html).toContain("Privacy policy · Return &amp; refund · Shipping policy");
-    expect(html).not.toContain("Terms");
+    expect(html).toContain("Privacy policy · Shipping policy");
+    expect(html).not.toContain("Warranty");
+    expect(draw("bottom", "policies", { policies: [] })).toContain("No policy written yet");
   });
 
   test("the whole footer reads the section, not the editor's old held choices", () => {
     const html = draw("layout", "columns", { live: footer({ social: "off", bottom: "policies" }) });
     expect(html).not.toContain(">WhatsApp<");
-    expect(html).toContain("Shipping policy</span>");
+    expect(html).toContain("Privacy policy · Shipping policy</span>");
   });
 
   test("a shop that has filled nothing in is told where to", () => {

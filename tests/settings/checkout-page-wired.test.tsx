@@ -316,13 +316,27 @@ describe("the canvas says what the shop draws", () => {
     expect(draw("beforePay", "note")).toContain(en.themeEditor.slots.beforePayNoteExample);
   });
 
-  test("the policies footer names the three pages the shop actually serves", () => {
+  test("the policies footer lists the policies the shop has written (2026-09-25)", () => {
     /*
-      It drew "Terms", which is not a page any Paperbase shop has. The three the
-      footer's Information column links to are the three this draws.
+      It drew three fixed pages the platform made; the owner took those out, and
+      the checkout's line is every policy the merchant has written, on its own.
     */
-    const html = draw("footerStyle", "policies");
-    expect(html).toContain("Shipping");
-    expect(html).not.toContain("Terms");
+    const html = renderToStaticMarkup(
+      <NextIntlClientProvider locale="en" messages={en}>
+        <ShopChrome
+          page="checkout"
+          slotKey="footerStyle"
+          variant="policies"
+          settings={{}}
+          policies={[
+            { title: "Terms & conditions", path: "/policies/terms-conditions", written: true },
+            { title: "Warranty", path: "/policies/warranty", written: false },
+          ]}
+        />
+      </NextIntlClientProvider>,
+    );
+    expect(html).toContain("Terms &amp; conditions");
+    expect(html).not.toContain("Warranty");
+    expect(draw("footerStyle", "policies")).toContain("No policy written yet");
   });
 });
