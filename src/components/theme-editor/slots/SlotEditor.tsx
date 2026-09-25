@@ -133,7 +133,9 @@ export function SlotEditor({ loaded }: { loaded: ThemeEditorState }) {
   */
   const [styleOpen, setStyleOpen] = useState(false);
   const wide = useMediaQuery("(min-width: 1024px)");
-  const [face, setFace] = useState("poppins");
+  // The face the shop is set in. Not a choice yet (the typeface is on hold,
+  // 2026-09-26): Style shows every face, faded, and says which one this is.
+  const face = "poppins";
   /*
     The palette is the shop's DOCUMENT since 2026-09-25, like the corners and
     the card style: a draft until Save to store. The six come from the API with
@@ -483,7 +485,6 @@ export function SlotEditor({ loaded }: { loaded: ThemeEditorState }) {
       palette={palette}
       onPalette={(key) => dispatch({ type: "setThemeSetting", setting: "palette", value: key })}
       face={face}
-      onFace={setFace}
       corner={corner}
       onCorner={(key) => dispatch({ type: "setThemeSetting", setting: "corner_style", value: key })}
       cardStyle={cardStyle}

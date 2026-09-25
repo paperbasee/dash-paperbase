@@ -2402,6 +2402,7 @@
   },
   "themeEditor": {
     "kit": {
+      "comingSoon": "শীঘ্রই আসছে",
       "styleTitle": "স্টাইল",
       "styleHint": "আপনার পুরো দোকান দেখতে কেমন হবে। বদলাতে পাতার যেকোনো অংশে চাপুন।",
       "panelLabel": "সেটিংস",
@@ -3314,7 +3315,6 @@
       "messagePartNumber": "বার্তা {number}",
       "messagePartRemove": "বার্তা {number} সরান",
       "palettesFailed": "রঙের পছন্দগুলো লোড করা যায়নি। আবার চেষ্টা করতে পাতাটি রিফ্রেশ করুন।",
-      "typeNotSavedYet": "শিগগিরই আসছে: এখানে বাছাই করা ফন্ট এখনো আপনার দোকানে সেভ হয় না।",
       "headerClassic": "ক্লাসিক",
       "headerClassicNote": "বাঁয়ে নাম ও মেনু, ডানে আইকন",
       "headerCentred": "মাঝখানে",

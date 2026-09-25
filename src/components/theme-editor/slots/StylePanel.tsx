@@ -4,8 +4,8 @@ import { useLocale, useTranslations } from "next-intl";
 
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
-import { KitChoice, KitGroup, KitNote, KitPanel } from "../kit";
-import { HELP } from "../kit/styles";
+import { KitBadge, KitChoice, KitGroup, KitNote, KitPanel } from "../kit";
+import { CAPTION, HELP } from "../kit/styles";
 import { paletteName, type ShopPalette } from "@/lib/theme-editor/palettes";
 import {
   CARD_STYLES,
@@ -65,9 +65,29 @@ function Swatches({ palette }: { palette: ShopPalette }) {
   );
 }
 
-/** A face, set in itself. */
-function Specimen({ face }: { face: Face }) {
-  return <span className={cn("block truncate text-[17px] leading-snug", FACE_FAMILY[face.key])}>{face.specimen}</span>;
+/**
+ * A face as a type specimen (owner, 2026-09-26: the preview was "horrible"):
+ * one to a row, the sample large and set in the face itself, its name beside
+ * it and what it is for under it. Squeezed two to a row as choice cards, the
+ * samples were cut off mid-word and the one Bengali face sat in half a row.
+ *
+ * Not a button: the faces are not wired to the shop yet (owner, 2026-09-26:
+ * "faded out so nobody can click"), so they are shown, faded, and nothing about
+ * them invites a click.
+ */
+function FaceSpecimen({ face }: { face: Face }) {
+  const t = useTranslations("themeEditor.slots");
+  return (
+    <li className="flex flex-col gap-1.5 rounded-card bg-muted/50 px-4 py-3.5">
+      <span className="flex items-baseline justify-between gap-3">
+        <span className={cn("min-w-0 truncate text-[22px] leading-tight text-foreground", FACE_FAMILY[face.key])}>
+          {face.specimen}
+        </span>
+        <span className="shrink-0 text-[11.5px] text-muted-foreground">{face.name}</span>
+      </span>
+      <span className={HELP}>{t(face.note)}</span>
+    </li>
+  );
 }
 
 /** A corner, shown at the size a card would wear it. */
@@ -122,7 +142,6 @@ export function StylePanel({
   palette,
   onPalette,
   face,
-  onFace,
   corner,
   onCorner,
   cardStyle,
@@ -134,8 +153,8 @@ export function StylePanel({
   palettesFailed: boolean;
   palette: string;
   onPalette: (key: string) => void;
+  /** The face the shop is set in -- not a choice yet: see the Type group below. */
   face: string;
-  onFace: (key: string) => void;
   corner: string;
   onCorner: (key: string) => void;
   cardStyle: string;
@@ -201,29 +220,26 @@ export function StylePanel({
       </KitGroup>
 
       {/*
-        Type last, and faded: not wired to the shop yet (owner, 2026-09-26:
-        "faded out so nobody can click"), shown so a merchant sees what is
-        coming. The consequence -- a face picks the language -- is said where
+        Type last, and faded: not wired to the shop yet, shown so a merchant
+        sees what is coming -- said once, as a tag on the heading, rather than
+        in a box. The consequence -- a face picks the language -- is said where
         it would be chosen, not in a note elsewhere.
       */}
-      <KitGroup title={t("type")}>
-        <KitNote>{t("typeNotSavedYet")}</KitNote>
+      <KitGroup title={t("type")} aside={<KitBadge>{tKit("comingSoon")}</KitBadge>}>
         <p className={HELP}>{t("typeNote")}</p>
-        {(["en", "bn"] as const).map((language) => (
-          <KitChoice
-            key={language}
-            label={t(language === "en" ? "facesEnglish" : "facesBengali")}
-            value={face}
-            onChange={onFace}
-            options={FACES.filter((item) => item.language === language).map((item) => ({
-              value: item.key,
-              label: item.name,
-              mark: <Specimen face={item} />,
-              disabled: true,
-            }))}
-          />
-        ))}
-        <KitNote>{t("pairedWith", { face: current.pairedWith })}</KitNote>
+        <div aria-disabled="true" className="flex flex-col gap-5 opacity-60">
+          {(["en", "bn"] as const).map((language) => (
+            <div key={language} className="flex flex-col gap-2">
+              <p className={CAPTION}>{t(language === "en" ? "facesEnglish" : "facesBengali")}</p>
+              <ul className="flex flex-col gap-2">
+                {FACES.filter((item) => item.language === language).map((item) => (
+                  <FaceSpecimen key={item.key} face={item} />
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+        <p className={HELP}>{t("pairedWith", { face: current.pairedWith })}</p>
       </KitGroup>
     </KitPanel>
   );

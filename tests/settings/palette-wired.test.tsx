@@ -44,7 +44,6 @@ function panel(props: Partial<Parameters<typeof StylePanel>[0]>, locale: "en" | 
         palette="porcelain"
         onPalette={noop}
         face="poppins"
-        onFace={noop}
         corner="soft"
         onCorner={noop}
         cardStyle="classic"
@@ -83,8 +82,11 @@ describe("the Style panel's colours", () => {
     expect(failed).toContain('role="alert"');
   });
 
-  test("the typeface says it is not saved yet, where it is chosen", () => {
-    expect(panel({})).toContain(asHtml(en.themeEditor.slots.typeNotSavedYet));
+  test("the typeface says it is coming, on its own heading", () => {
+    const html = panel({});
+    const heading = html.indexOf(`>${en.themeEditor.slots.type}<`);
+    expect(heading).toBeGreaterThan(-1);
+    expect(html.indexOf(en.themeEditor.kit.comingSoon, heading)).toBeGreaterThan(heading);
   });
 });
 
@@ -148,10 +150,21 @@ describe("the screen-wide note", () => {
 describe("the typefaces, not wired yet (2026-09-26)", () => {
   test("are shown faded and cannot be clicked", () => {
     const html = panel({});
-    // Every face is a disabled answer: shown, and not a choice until it is wired.
+    // A type specimen, faded, and nothing in it a button: shown, not a choice
+    // until it is wired (owner: "faded out so nobody can click").
     const type = html.slice(html.indexOf("Coming soon"));
-    const faces = type.match(/<button[^>]*role="radio"[^>]*>/g) ?? [];
-    expect(faces.length).toBeGreaterThan(0);
-    for (const face of faces) expect(face).toContain("disabled");
+    expect(type).toContain('aria-disabled="true"');
+    expect(type).toContain("opacity-60");
+    expect(type).not.toContain("<button");
+  });
+
+  test("each face is a full-width specimen, set in itself, named, and described (2026-09-26)", () => {
+    const html = panel({});
+    // Squeezed two to a row as cards, the samples were cut off mid-word.
+    expect(html).not.toMatch(/grid-cols-2[^"]*"[^>]*>(?:(?!<\/div>)[\s\S])*Denim Work Shirt/);
+    for (const name of ["Poppins", "Archivo", "Playfair Display", "Cinzel", "Noto Sans Bengali"]) expect(html).toContain(name);
+    expect(html).toContain("[font-family:var(--font-playfair)]");
+    expect(html).toContain("English faces");
+    expect(html).toContain("Bengali faces");
   });
 });
