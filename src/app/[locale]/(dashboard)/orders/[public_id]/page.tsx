@@ -29,7 +29,10 @@ import {
   shownOrderStatus,
 } from "@/lib/orders/order-statuses";
 import { ORDER_FLAG_OPTIONS, formatOrderFlagLabel } from "@/lib/orders/order-flags";
-import { formatOrderPaymentStatusLabel } from "@/lib/orders/payment-statuses";
+import {
+  formatOrderPaymentStatusLabel,
+  formatPaymentProviderLabel,
+} from "@/lib/orders/payment-statuses";
 import {
   ensureOrderEditorVariants,
   invalidateOrderEditorVariants,
@@ -841,6 +844,13 @@ export default function OrderDetailPage() {
                   <dt className="text-muted-foreground">{tPages("orderDetailPaymentTitle")}</dt>
                   <dd className="text-right text-muted-foreground">
                     {formatOrderPaymentStatusLabel(order.payment_status, (key) => tPages(key))}
+                  </dd>
+                </div>
+                {/* Which app to check the money in (owner, 2026-09-25). */}
+                <div className="flex justify-between gap-3">
+                  <dt className="text-muted-foreground">{tPages("orderDetailPaymentProviderLabel")}</dt>
+                  <dd className="text-right font-medium">
+                    {formatPaymentProviderLabel(order.payment_provider, (key) => tPages(key))}
                   </dd>
                 </div>
                 <div className="flex justify-between gap-3">

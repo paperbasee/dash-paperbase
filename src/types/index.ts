@@ -104,6 +104,8 @@ export interface Order {
   payment_status?: OrderPaymentStatus;
   transaction_id?: string | null;
   payer_number?: string | null;
+  /** bKash or Nagad, as the customer chose; blank when the payment did not say. */
+  payment_provider?: string | null;
   flag?: string | null;
   subtotal_before_discount: string;
   discount_total: string;
