@@ -84,6 +84,21 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-09-22-header-and-footer-choices",
+    date: "2026-09-22",
+    version: "4.116.0",
+    tag: "new",
+    href: "/settings?tab=customization",
+    title: {
+      en: "Header designs, your own menu and footer, and policies",
+      bn: "পাঁচটি হেডার ডিজাইন, আপনার নিজের মেনু ও ফুটার, আর আপনার নীতিমালা",
+    },
+    body: {
+      en: "Choose one of five header designs — your name and menu on the left, your name centred with the menu in a row below, the menu in the middle of the page, a quieter small-capitals menu, or everything behind a menu button — with your own logo in place of your name, small, medium or large and sharpest as an SVG (without one, a long name sits on two lines at most), and icons in a fine, regular or strong line, with or without their words, and a bag, basket or cart. Build its menu from your own pages, categories and links, in your order — a category opens its subcategories, one link can be in your brand colour, whatever does not fit waits under More, a category with nothing in it stays out, and a link you have not filled in yet leaves your categories in place — keep the header on screen always, only while shoppers scroll back up, or not at all, and add account and wishlist beside the cart, a button of your own after it — like “Order on WhatsApp” — and, on your home page, a header that sits clear over your first picture until shoppers scroll. Write your policies in Settings → Policies and build your footer's columns yourself — up to four, each a title and six links to your pages, categories, policies or the web — with your shop on one side, centred, or as a single short line, and choose what it shows: your address and phone or only your email, your social links as names or round marks, the ways you take payment, and beside the year every policy you have written, with the footer resting at the bottom of the screen even on a short page.",
+      bn: "পাঁচটি হেডার ডিজাইনের একটি বেছে নিন — বাঁয়ে নাম ও মেনু, মাঝখানে নাম আর নিচের সারিতে মেনু, পাতার মাঝখানে মেনু, ছোট বড়-হাতের অক্ষরে শান্ত একটি মেনু, নয়তো সবকিছু একটি মেনু বোতামের পেছনে — নামের জায়গায় আপনার নিজের লোগো, ছোট, মাঝারি বা বড়, SVG হলে সবচেয়ে ঝকঝকে (লোগো না থাকলে লম্বা নাম সর্বোচ্চ দুই লাইনে বসে), আর আইকন সরু, সাধারণ বা মোটা রেখায়, লেখাসহ বা ছাড়া, আর ব্যাগ, ঝুড়ি নাকি কার্ট। আপনার নিজের পাতা, ক্যাটাগরি ও লিংক দিয়ে আপনার ক্রমে মেনু বানান — ক্যাটাগরির ভেতরের ক্যাটাগরিগুলো খোলে, একটি লিংক আপনার ব্র্যান্ডের রঙে রাখা যায়, যা জায়গায় ধরে না তা থাকে “আরও”-র ভেতরে, যে ক্যাটাগরিতে কিছু নেই সেটি মেনুতে আসে না, আর যে লিংক এখনো পূরণ করেননি তাতে আপনার ক্যাটাগরিগুলো আগের মতোই থাকে — হেডার সবসময় স্ক্রিনে রাখুন, শুধু ক্রেতা উপরে স্ক্রল করলে দেখান, নয়তো একেবারেই না রাখুন, আর কার্টের পাশে অ্যাকাউন্ট ও উইশলিস্ট যোগ করুন, তার পরে আপনার নিজের একটি বোতাম — যেমন “হোয়াটসঅ্যাপে অর্ডার করুন” — আর হোম পেজে এমন একটি হেডার, যা ক্রেতা স্ক্রল না করা পর্যন্ত আপনার প্রথম ছবির ওপরে স্বচ্ছভাবে বসে থাকে। সেটিংস → নীতিমালায় আপনার নীতিগুলো লিখুন আর ফুটারের কলামগুলো নিজেই বানান — চারটি পর্যন্ত, প্রতিটিতে একটি শিরোনাম আর আপনার পাতা, ক্যাটাগরি, নীতি বা ওয়েবের ছয়টি লিংক — একপাশে দোকান রেখে, মাঝখানে, নয়তো ছোট এক লাইনে, আর ঠিক করুন কী দেখাবে: ঠিকানা ও ফোন নাকি শুধু ইমেইল, সোশ্যাল লিংক নামে বা গোল চিহ্নে, আপনি যেভাবে টাকা নেন, আর সালের পাশে আপনার লেখা প্রতিটি নীতি, আর ছোট পেজেও ফুটার থাকে স্ক্রিনের একেবারে নিচে।",
+    },
+  },
+  {
     id: "2026-09-22-home-page-rows",
     date: "2026-09-22",
     version: "4.115.0",
@@ -96,21 +111,6 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     body: {
       en: "Your home page shows three categories you tick, each with everything inside it, instead of a row for every category you have — and a button under them opens every product you sell on a page of its own. You can also show a row of products you choose, your best sellers and your newest, the last two filling themselves and naming themselves when you leave their title empty; every row's title is centred, in capitals, with its link underneath, and each row — and the top of your three categories — can open with your own picture, a few words and a button, which a switch hides and keeps. Further down, add your brands, your newest good reviews on Premium — three cards, or one large quotation that takes turns through your ten newest — your three newest blog posts, a button that opens WhatsApp to your number, and questions you answer once, each under its own title and kept up to date from your shop; the WhatsApp button and your promotion's now stand out on your brand colour instead of melting into it.",
       bn: "হোম পেজে এখন আপনার প্রতিটি ক্যাটাগরির সারির বদলে আপনার টিক করা তিনটি ক্যাটাগরি, ভেতরের সব পণ্যসহ — আর নিচের একটি বোতাম আপনার সব পণ্য নিয়ে আলাদা পাতা খোলে। আপনার বেছে নেওয়া পণ্য, সবচেয়ে বেশি বিক্রি হওয়া পণ্য আর নতুন পণ্যের সারিও দেখাতে পারেন, শেষের দুটি নিজেই ভরে যায় আর শিরোনাম খালি রাখলে নিজের নামটিই দেখায়; প্রতিটি সারির শিরোনাম মাঝখানে, বড় হাতের অক্ষরে, নিচে তার লিংক, আর প্রতিটি সারি — আর আপনার তিনটি ক্যাটাগরির উপরের অংশ — আপনার নিজের ছবি, কিছু লেখা আর একটি বোতাম দিয়ে শুরু হতে পারে, যা একটি সুইচে লুকানো যায় আর রেখে দেওয়া হয়। আরও নিচে যোগ করুন আপনার ব্র্যান্ড, প্রিমিয়ামে আপনার সর্বশেষ ভালো রিভিউ — তিনটি কার্ডে, নয়তো একটি বড় উদ্ধৃতিতে যা আপনার সর্বশেষ দশটি রিভিউ একটির পর একটি দেখায় —, ব্লগের নতুন তিনটি পোস্ট, আপনার নম্বরে হোয়াটসঅ্যাপ খোলার একটি বোতাম, আর একবার উত্তর দেওয়া প্রশ্নগুলো, প্রতিটি নিজের শিরোনামের নিচে আর আপনার দোকান থেকে নিজে নিজে হালনাগাদ; হোয়াটসঅ্যাপ বোতাম আর আপনার প্রোমোশনের বোতাম এখন ব্র্যান্ডের রঙে মিশে না গিয়ে তার ওপর স্পষ্ট দেখা যায়।",
-    },
-  },
-  {
-    id: "2026-09-22-header-and-footer-choices",
-    date: "2026-09-22",
-    version: "4.114.3",
-    tag: "new",
-    href: "/settings?tab=customization",
-    title: {
-      en: "Header designs, your own menu and footer, and policies",
-      bn: "পাঁচটি হেডার ডিজাইন, আপনার নিজের মেনু ও ফুটার, আর আপনার নীতিমালা",
-    },
-    body: {
-      en: "Choose one of five header designs — your name and menu on the left, your name centred with the menu in a row below, the menu in the middle of the page, a quieter small-capitals menu, or everything behind a menu button — with your own logo in place of your name, small, medium or large and sharpest as an SVG (without one, a long name sits on two lines at most), and icons in a fine, regular or strong line, with or without their words, and a bag, basket or cart. Build its menu from your own pages, categories and links, in your order — a category opens its subcategories, one link can be in your brand colour, whatever does not fit waits under More, a category with nothing in it stays out, and a link you have not filled in yet leaves your categories in place — keep the header on screen always, only while shoppers scroll back up, or not at all, and add account and wishlist beside the cart. Write your policies in Settings → Policies and build your footer's columns yourself — up to four, each a title and six links to your pages, categories, policies or the web — with your shop on one side, centred, or as a single short line, and choose what it shows: your address and phone or only your email, your social links as names or round marks, the ways you take payment, and beside the year every policy you have written, with the footer resting at the bottom of the screen even on a short page.",
-      bn: "পাঁচটি হেডার ডিজাইনের একটি বেছে নিন — বাঁয়ে নাম ও মেনু, মাঝখানে নাম আর নিচের সারিতে মেনু, পাতার মাঝখানে মেনু, ছোট বড়-হাতের অক্ষরে শান্ত একটি মেনু, নয়তো সবকিছু একটি মেনু বোতামের পেছনে — নামের জায়গায় আপনার নিজের লোগো, ছোট, মাঝারি বা বড়, SVG হলে সবচেয়ে ঝকঝকে (লোগো না থাকলে লম্বা নাম সর্বোচ্চ দুই লাইনে বসে), আর আইকন সরু, সাধারণ বা মোটা রেখায়, লেখাসহ বা ছাড়া, আর ব্যাগ, ঝুড়ি নাকি কার্ট। আপনার নিজের পাতা, ক্যাটাগরি ও লিংক দিয়ে আপনার ক্রমে মেনু বানান — ক্যাটাগরির ভেতরের ক্যাটাগরিগুলো খোলে, একটি লিংক আপনার ব্র্যান্ডের রঙে রাখা যায়, যা জায়গায় ধরে না তা থাকে “আরও”-র ভেতরে, যে ক্যাটাগরিতে কিছু নেই সেটি মেনুতে আসে না, আর যে লিংক এখনো পূরণ করেননি তাতে আপনার ক্যাটাগরিগুলো আগের মতোই থাকে — হেডার সবসময় স্ক্রিনে রাখুন, শুধু ক্রেতা উপরে স্ক্রল করলে দেখান, নয়তো একেবারেই না রাখুন, আর কার্টের পাশে অ্যাকাউন্ট ও উইশলিস্ট যোগ করুন। সেটিংস → নীতিমালায় আপনার নীতিগুলো লিখুন আর ফুটারের কলামগুলো নিজেই বানান — চারটি পর্যন্ত, প্রতিটিতে একটি শিরোনাম আর আপনার পাতা, ক্যাটাগরি, নীতি বা ওয়েবের ছয়টি লিংক — একপাশে দোকান রেখে, মাঝখানে, নয়তো ছোট এক লাইনে, আর ঠিক করুন কী দেখাবে: ঠিকানা ও ফোন নাকি শুধু ইমেইল, সোশ্যাল লিংক নামে বা গোল চিহ্নে, আপনি যেভাবে টাকা নেন, আর সালের পাশে আপনার লেখা প্রতিটি নীতি, আর ছোট পেজেও ফুটার থাকে স্ক্রিনের একেবারে নিচে।",
     },
   },
   {
