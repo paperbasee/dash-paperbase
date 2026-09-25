@@ -16,10 +16,12 @@ import { numberTextClass } from "@/lib/number-font";
 import { cn } from "@/lib/utils";
 import {
   MAX_PIXELS_PER_SERVICE,
+  disconnectPath,
   marketingIntegrationPath,
   pixelsLeft,
   serviceState,
   setServiceActive,
+  switchTargets,
   type PixelService,
 } from "@/lib/integrations/services";
 import { Button } from "@/components/ui/button";
@@ -29,9 +31,16 @@ import { useEnterNavigation } from "@/hooks/useEnterNavigation";
 import { useConfirm } from "@/context/ConfirmDialogContext";
 import { usePermissions } from "@/context/PermissionsContext";
 import { notify } from "@/notifications";
-import { SettingsActionDialog } from "@/components/settings/SettingsActionDialog";
-import { settingsInvertedButtonClassName } from "../../SettingsSectionBody";
-import { ConnectionRow, ServiceCard } from "./ServiceCard";
+import {
+  ConnectionRow,
+  ConnectionSwitch,
+  DialogScreen,
+  DisconnectedMark,
+  ServiceCard,
+  ServiceDialog,
+  StatusLine,
+  type ServiceTone,
+} from "./ServiceCard";
 
 type EventKey = keyof IntegrationEventSettings;
 
@@ -46,7 +55,15 @@ const EVENT_KEYS: { key: EventKey; label: string }[] = [
 type PixelForm = { pixel_id: string; access_token: string; test_event_code: string };
 const emptyForm: PixelForm = { pixel_id: "", access_token: "", test_event_code: "" };
 
-type Dialog = null | { kind: "connect" } | { kind: "edit"; id: string } | { kind: "events"; id: string };
+/** One screen of the pop-up at a time. */
+type Screen =
+  | { kind: "list" }
+  | { kind: "connect" }
+  | { kind: "edit"; id: string }
+  | { kind: "events"; id: string }
+  | { kind: "reconnect"; id: string }
+  | { kind: "disconnect"; id: string }
+  | { kind: "remove"; id: string };
 
 const inputGuards = {
   autoComplete: "off",
@@ -59,19 +76,17 @@ const inputGuards = {
 } as const;
 
 /**
- * Meta or TikTok: one card for the service, every pixel inside it
- * (owner, 2026-09-25). The card's switch is the whole service; each pixel keeps
- * its own switch, its event switches, its details and Disconnect.
+ * Meta or TikTok: one card for the service, every pixel in its pop-up
+ * (owner, 2026-09-25). The card's switch is the whole service; each pixel
+ * keeps its own switch, its event switches, Edit and Disconnect. Disconnect
+ * is not delete: the pixel stays with its settings, without its token, until
+ * it is reconnected -- or removed.
  */
 export default function PixelServiceCard({
   provider,
-  expanded,
-  onToggleExpanded,
   panelHidden,
 }: {
   provider: PixelService;
-  expanded: boolean;
-  onToggleExpanded: () => void;
   panelHidden: boolean;
 }) {
   const locale = useLocale();
@@ -89,25 +104,29 @@ export default function PixelServiceCard({
   const words = (key: string) =>
     (t as (k: string) => string)(provider === "facebook" ? `marketing.${key}` : `marketing.tiktok.${key}`);
   const idLabel = words("pixelLabel").replace(/:\s*$/, "");
+  const pixelName = (pixel: MarketingIntegration) => `${idLabel} ${maskCredentialPreview(pixel.pixel_id)}`;
 
-  const [dialog, setDialog] = useState<Dialog>(null);
+  const [open, setOpen] = useState(false);
+  const [screen, setScreen] = useState<Screen>({ kind: "list" });
   const [form, setForm] = useState<PixelForm>(emptyForm);
   const [formError, setFormError] = useState("");
-  const [saving, setSaving] = useState(false);
+  const [busy, setBusy] = useState(false);
   const [switchingAll, setSwitchingAll] = useState(false);
   const [switchingId, setSwitchingId] = useState<string | null>(null);
   const [eventSavingId, setEventSavingId] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
   const { handleKeyDown } = useEnterNavigation(() => formRef.current?.requestSubmit());
+  const formId = `pixel-form-${provider}`;
 
-  const dialogPixel =
-    dialog && dialog.kind !== "connect" ? pixels.find((one) => one.public_id === dialog.id) : undefined;
+  const screenPixel = screen.kind === "list" || screen.kind === "connect"
+    ? undefined
+    : pixels.find((one) => one.public_id === screen.id);
 
-  // A pixel disconnected elsewhere closes its dialog rather than leaving it empty.
+  // A pixel removed elsewhere returns its screen to the list rather than leaving it empty.
   useEffect(() => {
-    if (dialog && dialog.kind !== "connect" && !dialogPixel) setDialog(null);
-  }, [dialog, dialogPixel]);
+    if (screen.kind !== "list" && screen.kind !== "connect" && !screenPixel) setScreen({ kind: "list" });
+  }, [screen, screenPixel]);
 
   useEffect(() => {
     if (!copied) return;
@@ -117,45 +136,56 @@ export default function PixelServiceCard({
 
   const refresh = () => queryClient.invalidateQueries({ queryKey: marketingIntegrationsQueryKey });
   const saveFailed = (error: unknown) =>
-    notify.error(error, {
-      title: tI("saveFailedTitle"),
-      fallbackMessage: tI("saveFailedBody", { service }),
-    });
+    notify.error(error, { title: tI("saveFailedTitle"), fallbackMessage: tI("saveFailedBody", { service }) });
 
-  function closeDialog() {
-    setDialog(null);
-    setForm(emptyForm);
+  function go(next: Screen) {
     setFormError("");
-    setSaving(false);
+    setBusy(false);
+    setScreen(next);
   }
 
-  function openConnect() {
-    setForm(emptyForm);
-    setFormError("");
-    setDialog({ kind: "connect" });
+  function openAt(next: Screen) {
+    if (next.kind === "connect") setForm(emptyForm);
+    go(next);
+    setOpen(true);
   }
 
-  function openEdit(pixel: MarketingIntegration) {
+  function back() {
+    // With nothing connected there is no list to go back to.
+    if (pixels.length === 0) setOpen(false);
+    else go({ kind: "list" });
+  }
+
+  function startEdit(pixel: MarketingIntegration) {
     setForm({ pixel_id: pixel.pixel_id, access_token: "", test_event_code: pixel.test_event_code });
-    setFormError("");
-    setDialog({ kind: "edit", id: pixel.public_id });
+    go({ kind: "edit", id: pixel.public_id });
+  }
+
+  function startReconnect(pixel: MarketingIntegration) {
+    setForm({ ...emptyForm, pixel_id: pixel.pixel_id });
+    go({ kind: "reconnect", id: pixel.public_id });
   }
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
-    const fallback = dialog?.kind === "edit" ? tI("saveFailedBody", { service }) : words("connectFailed");
+    const fallback = screen.kind === "connect" ? words("connectFailed") : tI("saveFailedBody", { service });
     setFormError("");
-    setSaving(true);
+    setBusy(true);
     try {
-      if (dialog?.kind === "edit" && dialogPixel) {
+      if (screen.kind === "edit" && screenPixel) {
         // Only what changed; an empty token keeps the saved one.
         const body: Partial<PixelForm> = {};
-        if (form.pixel_id.trim() !== dialogPixel.pixel_id) body.pixel_id = form.pixel_id.trim();
+        if (form.pixel_id.trim() !== screenPixel.pixel_id) body.pixel_id = form.pixel_id.trim();
         if (form.access_token.trim()) body.access_token = form.access_token.trim();
-        if (form.test_event_code.trim() !== dialogPixel.test_event_code) {
+        if (form.test_event_code.trim() !== screenPixel.test_event_code) {
           body.test_event_code = form.test_event_code.trim();
         }
-        if (Object.keys(body).length) await api.patch(marketingIntegrationPath(dialogPixel.public_id), body);
+        if (Object.keys(body).length) await api.patch(marketingIntegrationPath(screenPixel.public_id), body);
+      } else if (screen.kind === "reconnect" && screenPixel) {
+        await api.patch(marketingIntegrationPath(screenPixel.public_id), {
+          access_token: form.access_token.trim(),
+          is_active: true,
+        });
       } else {
         await api.post("admin/marketing-integrations/", {
           provider,
@@ -164,12 +194,39 @@ export default function PixelServiceCard({
           test_event_code: form.test_event_code.trim(),
         });
       }
-      closeDialog();
-      void refresh();
+      await refresh();
+      setForm(emptyForm);
+      go({ kind: "list" });
     } catch (err) {
       setFormError(formatAdminApiErrorFromAxios(err, fallback));
-    } finally {
-      setSaving(false);
+      setBusy(false);
+    }
+  }
+
+  async function disconnect(pixel: MarketingIntegration) {
+    setBusy(true);
+    try {
+      await api.post(disconnectPath(marketingIntegrationPath(pixel.public_id)));
+      await refresh();
+      notify.success(tI("disconnectedBody", { service }), { title: tI("disconnectedTitle") });
+      go({ kind: "list" });
+    } catch (err) {
+      saveFailed(err);
+      setBusy(false);
+    }
+  }
+
+  async function remove(pixel: MarketingIntegration) {
+    setBusy(true);
+    try {
+      await api.delete(marketingIntegrationPath(pixel.public_id));
+      await refresh();
+      notify.success(tI("removedBody"), { title: tI("removedTitle") });
+      if (pixels.length <= 1) setOpen(false);
+      go({ kind: "list" });
+    } catch (err) {
+      saveFailed(err);
+      setBusy(false);
     }
   }
 
@@ -190,18 +247,19 @@ export default function PixelServiceCard({
   }
 
   function onCardSwitch(turnOn: boolean) {
+    const count = switchTargets(pixels, turnOn).length;
     if (!turnOn) {
       void confirm({
         title: tI("offTitle", { service }),
-        message: tI("offPixels", { count: state.count, service }),
+        message: tI("offPixels", { count, service }),
         variant: "danger",
         confirmText: tI("offConfirm"),
         cancelText: tI("keepOn"),
         onConfirm: () => switchAll(false),
       });
-    } else if (state.count > 1) {
+    } else if (count > 1) {
       void confirm({
-        title: tI("onPixelsTitle", { count: state.count, service }),
+        title: tI("onPixelsTitle", { count, service }),
         message: tI("onPixelsBody", { service }),
         confirmText: tI("onConfirm"),
         onConfirm: () => switchAll(true),
@@ -235,25 +293,6 @@ export default function PixelServiceCard({
     }
   }
 
-  function disconnect(pixel: MarketingIntegration) {
-    void confirm({
-      title: words("modalDisconnectTitle"),
-      message: words("modalDisconnectDescription"),
-      variant: "danger",
-      confirmText: tI("disconnect"),
-      onConfirm: async () => {
-        try {
-          await api.delete(marketingIntegrationPath(pixel.public_id));
-          void refresh();
-          notify.success(tI("disconnectedBody", { service }), { title: tI("disconnectedTitle") });
-        } catch (err) {
-          saveFailed(err);
-          throw err;
-        }
-      },
-    });
-  }
-
   async function copyId(value: string) {
     try {
       await navigator.clipboard.writeText(value);
@@ -263,102 +302,115 @@ export default function PixelServiceCard({
     }
   }
 
+  const baseStatus =
+    state.shape === "none"
+      ? tI("statusNotConnected")
+      : state.shape === "disconnected"
+        ? tI("pixelsDisconnected", { count: state.count })
+        : state.shape === "all_on"
+          ? tI("pixelsOn", { count: state.connected })
+          : state.shape === "all_off"
+            ? tI("pixelsOff", { count: state.connected })
+            : tI("pixelsSome", { active: state.active, count: state.connected });
   const status = isLoading
     ? tI("checking")
-    : state.shape === "none"
-      ? tI("statusNotConnected")
-      : state.shape === "all_on"
-        ? tI("pixelsOn", { count: state.count })
-        : state.shape === "all_off"
-          ? tI("pixelsOff", { count: state.count })
-          : tI("pixelsSome", { active: state.active, count: state.count });
+    : state.disconnected && state.connected
+      ? `${baseStatus} · ${tI("disconnectedCount", { count: state.disconnected })}`
+      : baseStatus;
+  const tone: ServiceTone = state.on ? "on" : state.count ? "off" : "none";
 
-  const control = isLoading ? null : state.count === 0 ? (
+  const cardControl = isLoading ? null : state.count === 0 ? (
     canManage ? (
-      <Button type="button" variant="outline" size="sm" className="text-[12px]" onClick={openConnect}>
+      <Button type="button" variant="outline" size="sm" className="text-[12px]" onClick={() => openAt({ kind: "connect" })}>
         {tI("connect")}
       </Button>
     ) : null
-  ) : (
+  ) : state.connected ? (
     <Switch
       checked={state.on}
       onCheckedChange={onCardSwitch}
       disabled={!canManage || switchingAll}
       aria-label={tI("serviceSwitchLabel", { service })}
     />
-  );
+  ) : null;
 
   const left = pixelsLeft(pixels);
-  const formOpen = dialog?.kind === "connect" || (dialog?.kind === "edit" && !!dialogPixel);
-  const editing = dialog?.kind === "edit";
+  const small = "text-[12px]";
 
-  return (
-    <>
-      <ServiceCard
-        service={provider}
-        name={service}
-        status={status}
-        tone={state.on ? "on" : state.count ? "off" : "none"}
-        control={control}
-        expanded={expanded}
-        onToggleExpanded={state.count ? onToggleExpanded : undefined}
-      >
-        {pixels.map((pixel) => (
-          <ConnectionRow
-            key={pixel.public_id}
-            title={
-              <>
-                {idLabel} <span className={cn("font-mono", numClass)}>{maskCredentialPreview(pixel.pixel_id)}</span>
-              </>
-            }
-            detail={[
-              tI("connectedOn", { date: formatDashboardDate(pixel.created_at, locale) }),
-              pixel.test_event_code ? tI("testCodeSet") : null,
-              pixel.is_active ? null : tI("connectionOff"),
-            ]
-              .filter(Boolean)
-              .join(" · ")}
-            active={pixel.is_active}
-            switchLabel={tI("connectionSwitchLabel", { name: `${idLabel} ${maskCredentialPreview(pixel.pixel_id)}` })}
-            canManage={canManage}
-            switching={switchingId === pixel.public_id || switchingAll}
-            onSwitch={(next) => void switchOne(pixel, next)}
-            actions={
-              <>
-                {pixel.event_settings ? (
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    className="text-[12px]"
-                    onClick={() => setDialog({ kind: "events", id: pixel.public_id })}
-                  >
-                    {tI("events")}
-                  </Button>
-                ) : null}
-                {canManage ? (
+  function listScreen() {
+    return (
+      <>
+        {pixels.map((pixel) =>
+          pixel.is_connected ? (
+            <ConnectionRow
+              key={pixel.public_id}
+              lead={
+                <ConnectionSwitch
+                  active={pixel.is_active}
+                  label={tI("connectionSwitchLabel", { name: pixelName(pixel) })}
+                  disabled={!canManage || switchingAll || switchingId === pixel.public_id}
+                  onSwitch={(next) => void switchOne(pixel, next)}
+                />
+              }
+              title={<PixelTitle label={idLabel} id={pixel.pixel_id} numClass={numClass} />}
+              detail={[
+                tI("connectedOn", { date: formatDashboardDate(pixel.created_at, locale) }),
+                pixel.test_event_code ? tI("testCodeSet") : null,
+                pixel.is_active ? null : tI("connectionOff"),
+              ]
+                .filter(Boolean)
+                .join(" · ")}
+              actions={
+                <>
+                  {pixel.event_settings ? (
+                    <Button type="button" variant="outline" size="sm" className={small} onClick={() => go({ kind: "events", id: pixel.public_id })}>
+                      {tI("events")}
+                    </Button>
+                  ) : null}
+                  {canManage ? (
+                    <>
+                      <Button type="button" variant="outline" size="sm" className={small} onClick={() => startEdit(pixel)}>
+                        {tI("edit")}
+                      </Button>
+                      <Button type="button" variant="ghost" size="sm" className={small} onClick={() => go({ kind: "disconnect", id: pixel.public_id })}>
+                        {tI("disconnect")}
+                      </Button>
+                    </>
+                  ) : null}
+                </>
+              }
+            />
+          ) : (
+            <ConnectionRow
+              key={pixel.public_id}
+              lead={<DisconnectedMark />}
+              title={<PixelTitle label={idLabel} id={pixel.pixel_id} numClass={numClass} />}
+              detail={tI("disconnectedKept")}
+              detailTone="warning"
+              actions={
+                canManage ? (
                   <>
-                    <Button type="button" variant="outline" size="sm" className="text-[12px]" onClick={() => openEdit(pixel)}>
-                      {tI("edit")}
+                    <Button type="button" variant="outline" size="sm" className={small} onClick={() => startReconnect(pixel)}>
+                      {tI("reconnect")}
                     </Button>
                     <Button
                       type="button"
                       variant="ghost"
                       size="sm"
-                      className="text-[12px] text-destructive hover:bg-destructive/10"
-                      onClick={() => disconnect(pixel)}
+                      className={cn(small, "text-destructive hover:bg-destructive/10")}
+                      onClick={() => go({ kind: "remove", id: pixel.public_id })}
                     >
-                      {tI("disconnect")}
+                      {tI("remove")}
                     </Button>
                   </>
-                ) : null}
-              </>
-            }
-          />
-        ))}
-        <div className="flex flex-wrap items-center gap-3 border-t border-border px-3.5 py-2.5">
+                ) : null
+              }
+            />
+          ),
+        )}
+        <div className="flex flex-wrap items-center gap-3 border-t border-border px-4 py-3 sm:px-5">
           {canManage && left > 0 ? (
-            <Button type="button" variant="outline" size="sm" className="text-[12px]" onClick={openConnect}>
+            <Button type="button" variant="outline" size="sm" className={small} onClick={() => openAt({ kind: "connect" })}>
               <Plus className="size-3.5" aria-hidden />
               {tI("addPixel")}
             </Button>
@@ -371,37 +423,51 @@ export default function PixelServiceCard({
                 : tI("pixelsFull", { max: MAX_PIXELS_PER_SERVICE })}
           </p>
         </div>
-      </ServiceCard>
+      </>
+    );
+  }
 
-      <SettingsActionDialog
-        open={formOpen}
-        onOpenChange={(next) => {
-          if (!next) closeDialog();
-        }}
-        title={editing ? tI("editTitle", { service }) : words("modalConnectTitle")}
-        description={editing ? tI("editDescription") : words("modalConnectDescription")}
+  function formScreen() {
+    const reconnecting = screen.kind === "reconnect";
+    const editing = screen.kind === "edit";
+    return (
+      <DialogScreen
+        formId={formId}
+        confirmLabel={editing ? tI("saveChanges") : reconnecting ? tI("reconnect") : tI("connect")}
+        busy={busy}
+        onCancel={back}
       >
-        <form ref={formRef} onSubmit={submit} className="space-y-3" autoComplete="off">
+        <form id={formId} ref={formRef} onSubmit={submit} className="space-y-3" autoComplete="off">
           {formError ? (
             <div className="rounded-card border border-destructive/30 bg-destructive/10 px-3 py-2 text-xs text-destructive">
               {formError}
             </div>
           ) : null}
-          <div className="flex flex-col gap-1.5">
-            <label htmlFor={`pixel-id-${provider}`} className="text-sm font-medium text-foreground">
-              {words("pixelId")}
-            </label>
-            <Input
-              required
-              id={`pixel-id-${provider}`}
-              name={`pixel_id_${provider}`}
-              value={form.pixel_id}
-              onChange={(e) => setForm({ ...form, pixel_id: e.target.value })}
-              placeholder={words("pixelPlaceholder")}
-              onKeyDown={handleKeyDown}
-              {...inputGuards}
-            />
-          </div>
+          {reconnecting ? (
+            <>
+              <p className="text-[13px] text-muted-foreground">{tI("reconnectPixelNote")}</p>
+              <div className="rounded-ui border border-border bg-muted/40 px-3 py-2">
+                <p className="text-[11px] text-muted-foreground">{idLabel}</p>
+                <p className={cn("break-all font-mono text-[13px]", numClass)}>{form.pixel_id}</p>
+              </div>
+            </>
+          ) : (
+            <div className="flex flex-col gap-1.5">
+              <label htmlFor={`pixel-id-${provider}`} className="text-sm font-medium text-foreground">
+                {words("pixelId")}
+              </label>
+              <Input
+                required
+                id={`pixel-id-${provider}`}
+                name={`pixel_id_${provider}`}
+                value={form.pixel_id}
+                onChange={(e) => setForm({ ...form, pixel_id: e.target.value })}
+                placeholder={words("pixelPlaceholder")}
+                onKeyDown={handleKeyDown}
+                {...inputGuards}
+              />
+            </div>
+          )}
           <div className="flex flex-col gap-1.5">
             <label htmlFor={`pixel-token-${provider}`} className="text-sm font-medium text-foreground">
               {words("accessToken")}{" "}
@@ -419,93 +485,150 @@ export default function PixelServiceCard({
               {...inputGuards}
             />
           </div>
-          <div className="flex flex-col gap-1.5">
-            <label htmlFor={`pixel-test-${provider}`} className="text-sm font-medium text-foreground">
-              {words("testEventCode")} <span className="font-normal text-muted-foreground">{t("optionalTag")}</span>
-            </label>
-            <Input
-              id={`pixel-test-${provider}`}
-              name={`pixel_test_${provider}`}
-              value={form.test_event_code}
-              onChange={(e) => setForm({ ...form, test_event_code: e.target.value })}
-              placeholder={words("testEventPlaceholder")}
-              onKeyDown={handleKeyDown}
-              {...inputGuards}
-            />
-            <p className="text-[12px] text-muted-foreground">{tI("testCodeHint")}</p>
-          </div>
-          <div className="flex flex-col gap-2 pt-1 sm:flex-row sm:flex-wrap">
-            <Button
-              type="submit"
-              variant="outline"
-              className={settingsInvertedButtonClassName}
-              disabled={saving}
-              loading={saving}
-            >
-              {editing ? tI("saveChanges") : tI("connect")}
-            </Button>
-            <Button type="button" variant="outline" className={settingsInvertedButtonClassName} onClick={closeDialog}>
-              {t("cancel")}
-            </Button>
-          </div>
-        </form>
-      </SettingsActionDialog>
-
-      <SettingsActionDialog
-        open={dialog?.kind === "events" && !!dialogPixel}
-        onOpenChange={(next) => {
-          if (!next) closeDialog();
-        }}
-        title={words("modalConfigureTitle")}
-        description={words("modalConfigureDescription")}
-      >
-        {dialog?.kind === "events" && dialogPixel ? (
-          <div className="space-y-4">
-            <div>
-              <p className="mb-1 text-xs font-medium text-muted-foreground">{idLabel}</p>
-              <div className="flex flex-wrap items-center gap-2">
-                <code className="min-w-0 break-all rounded-ui border border-border bg-muted/50 px-2 py-1 font-mono text-xs">
-                  {dialogPixel.pixel_id || "—"}
-                </code>
-                {dialogPixel.pixel_id ? (
-                  <Button type="button" variant="ghost" className="shrink-0" onClick={() => void copyId(dialogPixel.pixel_id)}>
-                    {copied ? (
-                      <>
-                        <Check className="mr-1 size-3.5" aria-hidden />
-                        {tI("copied")}
-                      </>
-                    ) : (
-                      <>
-                        <ClipboardTextIcon className="mr-1 size-3.5" aria-hidden />
-                        {words("copyPixel")}
-                      </>
-                    )}
-                  </Button>
-                ) : null}
-              </div>
+          {reconnecting ? null : (
+            <div className="flex flex-col gap-1.5">
+              <label htmlFor={`pixel-test-${provider}`} className="text-sm font-medium text-foreground">
+                {words("testEventCode")} <span className="font-normal text-muted-foreground">{t("optionalTag")}</span>
+              </label>
+              <Input
+                id={`pixel-test-${provider}`}
+                name={`pixel_test_${provider}`}
+                value={form.test_event_code}
+                onChange={(e) => setForm({ ...form, test_event_code: e.target.value })}
+                placeholder={words("testEventPlaceholder")}
+                onKeyDown={handleKeyDown}
+                {...inputGuards}
+              />
+              <p className="text-[12px] text-muted-foreground">{tI("testCodeHint")}</p>
             </div>
-            {dialogPixel.event_settings ? (
-              <div className="border-t border-border pt-3">
-                <p className="mb-2 text-xs font-medium text-foreground">{t("marketing.eventTracking")}</p>
-                <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:gap-x-5">
-                  {EVENT_KEYS.map(({ key, label }) => (
-                    <label key={key} className="inline-flex cursor-pointer items-center gap-2 text-xs text-muted-foreground">
-                      <input
-                        type="checkbox"
-                        checked={dialogPixel.event_settings![key]}
-                        disabled={!canManage || eventSavingId === dialogPixel.public_id}
-                        onChange={(e) => void switchEvent(dialogPixel, key, e.target.checked)}
-                        className="form-checkbox size-3.5"
-                      />
-                      {(t as (k: string) => string)(`marketing.${label}`)}
-                    </label>
-                  ))}
-                </div>
-              </div>
+          )}
+        </form>
+      </DialogScreen>
+    );
+  }
+
+  function eventsScreen(pixel: MarketingIntegration) {
+    return (
+      <div className="space-y-4 px-4 py-4 sm:px-5">
+        <div>
+          <p className="mb-1 text-xs font-medium text-muted-foreground">{idLabel}</p>
+          <div className="flex flex-wrap items-center gap-2">
+            <code className="min-w-0 break-all rounded-ui border border-border bg-muted/50 px-2 py-1 font-mono text-xs">
+              {pixel.pixel_id || "—"}
+            </code>
+            {pixel.pixel_id ? (
+              <Button type="button" variant="ghost" className="shrink-0" onClick={() => void copyId(pixel.pixel_id)}>
+                {copied ? (
+                  <>
+                    <Check className="mr-1 size-3.5" aria-hidden />
+                    {tI("copied")}
+                  </>
+                ) : (
+                  <>
+                    <ClipboardTextIcon className="mr-1 size-3.5" aria-hidden />
+                    {words("copyPixel")}
+                  </>
+                )}
+              </Button>
             ) : null}
           </div>
+        </div>
+        {pixel.event_settings ? (
+          <div className="border-t border-border pt-3">
+            <p className="mb-2 text-xs font-medium text-foreground">{t("marketing.eventTracking")}</p>
+            <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:gap-x-5">
+              {EVENT_KEYS.map(({ key, label }) => (
+                <label key={key} className="inline-flex cursor-pointer items-center gap-2 text-xs text-muted-foreground">
+                  <input
+                    type="checkbox"
+                    checked={pixel.event_settings![key]}
+                    disabled={!canManage || eventSavingId === pixel.public_id}
+                    onChange={(e) => void switchEvent(pixel, key, e.target.checked)}
+                    className="form-checkbox size-3.5"
+                  />
+                  {(t as (k: string) => string)(`marketing.${label}`)}
+                </label>
+              ))}
+            </div>
+          </div>
         ) : null}
-      </SettingsActionDialog>
+      </div>
+    );
+  }
+
+  const heading =
+    screen.kind === "connect"
+      ? { title: words("modalConnectTitle"), subtitle: words("modalConnectDescription") }
+      : screen.kind === "edit"
+        ? { title: tI("editTitle", { service }), subtitle: tI("editDescription") }
+        : screen.kind === "reconnect"
+          ? { title: tI("reconnectPixelTitle", { service }), subtitle: screenPixel ? pixelName(screenPixel) : "" }
+          : screen.kind === "events"
+            ? { title: words("modalConfigureTitle"), subtitle: words("modalConfigureDescription") }
+            : screen.kind === "disconnect"
+              ? { title: tI("disconnectPixelTitle"), subtitle: screenPixel ? pixelName(screenPixel) : "" }
+              : screen.kind === "remove"
+                ? { title: tI("removePixelTitle"), subtitle: screenPixel ? pixelName(screenPixel) : "" }
+                : { title: service, subtitle: <StatusLine tone={tone}>{status}</StatusLine> };
+
+  return (
+    <>
+      <ServiceCard
+        service={provider}
+        name={service}
+        status={status}
+        tone={tone}
+        control={cardControl}
+        onOpen={state.count ? () => openAt({ kind: "list" }) : undefined}
+      />
+
+      <ServiceDialog
+        open={open}
+        onOpenChange={setOpen}
+        service={provider}
+        title={heading.title}
+        subtitle={heading.subtitle}
+        onBack={screen.kind === "list" ? undefined : back}
+      >
+        {screen.kind === "list"
+          ? listScreen()
+          : screen.kind === "connect" || screen.kind === "edit" || screen.kind === "reconnect"
+            ? formScreen()
+            : screen.kind === "events" && screenPixel
+              ? eventsScreen(screenPixel)
+              : screen.kind === "disconnect" && screenPixel
+                ? (
+                  <DialogScreen
+                    confirmLabel={tI("disconnect")}
+                    busy={busy}
+                    onCancel={back}
+                    onConfirm={() => void disconnect(screenPixel)}
+                  >
+                    <p className="text-[13px] leading-relaxed text-muted-foreground">{tI("disconnectPixelBody")}</p>
+                  </DialogScreen>
+                )
+                : screen.kind === "remove" && screenPixel
+                  ? (
+                    <DialogScreen
+                      confirmLabel={tI("remove")}
+                      confirmDanger
+                      busy={busy}
+                      onCancel={back}
+                      onConfirm={() => void remove(screenPixel)}
+                    >
+                      <p className="text-[13px] leading-relaxed text-muted-foreground">{tI("removePixelBody")}</p>
+                    </DialogScreen>
+                  )
+                  : null}
+      </ServiceDialog>
+    </>
+  );
+}
+
+function PixelTitle({ label, id, numClass }: { label: string; id: string; numClass: string }) {
+  return (
+    <>
+      {label} <span className={cn("font-mono", numClass)}>{maskCredentialPreview(id)}</span>
     </>
   );
 }

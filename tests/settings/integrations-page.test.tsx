@@ -8,7 +8,12 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { NextIntlClientProvider, createTranslator } from "next-intl";
 import { describe, expect, test } from "vitest";
 
-import { ConnectionRow, ServiceCard } from "@/app/[locale]/(dashboard)/settings/sections/integrations/ServiceCard";
+import {
+  ConnectionRow,
+  ConnectionSwitch,
+  DisconnectedMark,
+  ServiceCard,
+} from "@/app/[locale]/(dashboard)/settings/sections/integrations/ServiceCard";
 import { AD_SERVICES, AD_SERVICES_COMING_SOON, DELIVERY_SERVICES_COMING_SOON } from "@/lib/integrations/services";
 import en from "../../messages/en.json";
 import bn from "../../messages/bn.json";
@@ -32,7 +37,7 @@ describe("a service card", () => {
     expect(html).toContain('src="/assets/courier-assets/steadfast-logo.png"');
   });
 
-  test("a connected service opens on click and keeps its switch outside the button", () => {
+  test("a connected service opens its pop-up, with its switch outside the button", () => {
     const html = render(
       <ServiceCard
         service="facebook"
@@ -40,23 +45,13 @@ describe("a service card", () => {
         status="2 pixels · sending events"
         tone="on"
         control={<span data-testid="switch" />}
-        onToggleExpanded={noop}
+        onOpen={noop}
       />,
     );
-    expect(html).toContain('aria-expanded="false"');
+    expect(html).toContain('aria-haspopup="dialog"');
+    expect(html).not.toContain("aria-expanded");
     expect(html).not.toMatch(/<button[^>]*>(?:(?!<\/button>)[\s\S])*data-testid="switch"/);
     expect(html).toContain('data-testid="switch"');
-  });
-
-  test("opened, it spans the whole grid and holds the connections", () => {
-    const html = render(
-      <ServiceCard service="tiktok" name="TikTok" status="1 pixel" tone="on" expanded onToggleExpanded={noop}>
-        <p>the pixels</p>
-      </ServiceCard>,
-    );
-    expect(html).toContain("col-span-full");
-    expect(html).toContain('aria-expanded="true"');
-    expect(html).toContain("the pixels");
   });
 
   test("a card that cannot open is not a button", () => {
@@ -79,19 +74,25 @@ describe("a connection row", () => {
   test("its switch is named and cannot be flipped by someone who only views", () => {
     const html = render(
       <ConnectionRow
+        lead={
+          <ConnectionSwitch active label="Dataset ID 1234****4821 on or off" disabled onSwitch={noop} />
+        }
         title="Dataset ID 1234****4821"
         detail="Connected 12 Sep 2026"
-        active
-        switchLabel="Dataset ID 1234****4821 on or off"
-        canManage={false}
-        switching={false}
-        onSwitch={noop}
       />,
     );
     expect(html).toContain('role="switch"');
     expect(html).toContain('aria-checked="true"');
     expect(html).toContain('aria-label="Dataset ID 1234****4821 on or off"');
     expect(html).toMatch(/role="switch"[^>]*disabled=""|disabled=""[^>]*role="switch"/);
+  });
+
+  test("a disconnected connection has no switch until it is reconnected", () => {
+    const html = render(
+      <ConnectionRow lead={<DisconnectedMark />} title="Dataset ID 1234****4821" detail="Disconnected · settings kept" detailTone="warning" />,
+    );
+    expect(html).not.toContain('role="switch"');
+    expect(html).toContain("Disconnected · settings kept");
   });
 });
 
@@ -120,6 +121,22 @@ describe("the page's words", () => {
       t("pixelsLeft", { left: count });
     }
     t("pixelsSome", { active: 1, count: 3 });
+    for (const count of [1, 2]) {
+      t("pixelsDisconnected", { count });
+      t("accountsDisconnected", { count });
+      t("disconnectedCount", { count });
+    }
+    for (const key of [
+      "back", "reconnect", "remove", "disconnectedKept", "reconnectPixelNote", "reconnectAccountNote",
+      "disconnectPixelTitle", "disconnectPixelBody", "disconnectAccountTitle", "disconnectAccountBody",
+      "removePixelTitle", "removePixelBody", "removeAccountTitle", "removeAccountBody", "removedTitle",
+      "removedBody", "tokenKeep",
+    ]) {
+      expect(t(key as never), key).toBeTruthy();
+    }
+    t("reconnectPixelTitle", { service: "Meta" });
+    t("reconnectAccountTitle", { service: "Steadfast" });
+    t("disconnectedBody", { service: "Meta" });
     t("accountsSome", { active: 1, count: 3 });
     t("pixelsFull", { max: 3 });
 
@@ -141,5 +158,26 @@ describe("the page's words", () => {
     expect(t("offPixels", { count: 2, service: "Meta" })).toContain("all 2 Meta pixels");
     expect(t("offPixels", { count: 1, service: "Meta" })).toContain("your Meta pixel");
     expect(t("onPixelsTitle", { count: 2, service: "Meta" })).toBe("Turn on all 2 Meta pixels?");
+  });
+});
+
+describe("the connect forms' placeholders", () => {
+  test.each([
+    ["en", en],
+    ["bn", bn],
+  ] as const)("%s: short examples, not sentences", (_locale, messages) => {
+    const meta = messages.settings.marketing;
+    const tiktok = messages.settings.marketing.tiktok;
+    for (const value of [
+      meta.pixelPlaceholder,
+      meta.accessTokenPlaceholder,
+      meta.testEventPlaceholder,
+      tiktok.pixelPlaceholder,
+      tiktok.accessTokenPlaceholder,
+      tiktok.testEventPlaceholder,
+    ]) {
+      expect(value.length, value).toBeLessThanOrEqual(28);
+      expect(value, value).not.toMatch(/^e\.g\./i);
+    }
   });
 });

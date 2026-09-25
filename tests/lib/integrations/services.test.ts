@@ -16,6 +16,7 @@ import {
   PLATFORM_MARK_SRC,
   SERVICE_LOGO_FILES,
   courierPath,
+  disconnectPath,
   marketingIntegrationPath,
   pixelsLeft,
   serviceState,
@@ -23,12 +24,34 @@ import {
   switchTargets,
 } from "@/lib/integrations/services";
 
-const on = (id: string) => ({ public_id: id, is_active: true });
-const off = (id: string) => ({ public_id: id, is_active: false });
+const on = (id: string) => ({ public_id: id, is_active: true, is_connected: true });
+const off = (id: string) => ({ public_id: id, is_active: false, is_connected: true });
+/** Disconnected: credentials forgotten, settings kept, and off. */
+const gone = (id: string) => ({ public_id: id, is_active: false, is_connected: false });
 
 describe("serviceState", () => {
   test("nothing connected", () => {
-    expect(serviceState([])).toEqual({ count: 0, active: 0, on: false, shape: "none" });
+    expect(serviceState([])).toEqual({ count: 0, connected: 0, disconnected: 0, active: 0, on: false, shape: "none" });
+  });
+
+  test("only disconnected connections: the card has nothing to switch", () => {
+    expect(serviceState([gone("a"), gone("b")])).toMatchObject({
+      count: 2,
+      connected: 0,
+      disconnected: 2,
+      on: false,
+      shape: "disconnected",
+    });
+  });
+
+  test("a disconnected connection is counted apart from the switchable ones", () => {
+    expect(serviceState([on("a"), gone("b")])).toMatchObject({
+      count: 2,
+      connected: 1,
+      disconnected: 1,
+      active: 1,
+      shape: "all_on",
+    });
   });
 
   test("the card reads on while any connection is on", () => {
@@ -44,10 +67,15 @@ describe("switchTargets", () => {
     expect(switchTargets(all, false).map((one) => one.public_id)).toEqual(["a", "c"]);
     expect(switchTargets(all, true).map((one) => one.public_id)).toEqual(["b"]);
   });
+
+  test("a disconnected connection is never switched on: only reconnecting can", () => {
+    expect(switchTargets([gone("a"), off("b")], true).map((one) => one.public_id)).toEqual(["b"]);
+    expect(switchTargets([gone("a")], true)).toEqual([]);
+  });
 });
 
 describe("pixelsLeft", () => {
-  test("counts down to zero and never below", () => {
+  test("counts down to zero and never below; a disconnected pixel still takes its place", () => {
     expect(MAX_PIXELS_PER_SERVICE).toBe(3);
     expect(pixelsLeft([])).toBe(3);
     expect(pixelsLeft([1, 2])).toBe(1);
@@ -90,10 +118,15 @@ describe("setServiceActive", () => {
     expect(result.errors).toHaveLength(1);
   });
 
-  test("nothing to change sends nothing", async () => {
+  test("nothing to change sends nothing, and a disconnected one is left alone", async () => {
     const { http, calls } = fakeHttp();
-    await setServiceActive(http, courierPath, [on("a")], true);
+    await setServiceActive(http, courierPath, [on("a"), gone("b")], true);
     expect(calls).toEqual([]);
+  });
+
+  test("the disconnect address sits under the connection's own", () => {
+    expect(disconnectPath(marketingIntegrationPath("a"))).toBe("admin/marketing-integrations/a/disconnect/");
+    expect(disconnectPath(courierPath("b"))).toBe("admin/couriers/b/disconnect/");
   });
 });
 

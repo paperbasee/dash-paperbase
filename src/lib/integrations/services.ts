@@ -9,6 +9,10 @@
  * service-wide flag stored anywhere: two layers of switches would let a pixel be
  * "on" inside a service that is "off", and nobody could tell whether it sends.
  *
+ * A DISCONNECTED connection (its credentials forgotten, its settings kept) is
+ * outside all of that: no switch reaches it, because only reconnecting --
+ * new credentials -- can turn it on again. The API refuses anything else.
+ *
  * Services that do not work yet are shown as "Coming soon", with no button.
  */
 
@@ -53,30 +57,50 @@ export const SERVICE_LOGO_FILES: Partial<Record<ServiceKey, { src: string; wide:
 /** The Paperbase mark: the dashboard's own icon, so a white-label build shows its own. */
 export const PLATFORM_MARK_SRC = "/favicon-128x128.png";
 
-export type Switchable = { public_id: string; is_active: boolean };
+export type Switchable = { public_id: string; is_active: boolean; is_connected: boolean };
 
 export type ServiceState = {
+  /** Every connection, disconnected ones included (they count toward the limit). */
   count: number;
+  /** Those that still hold their credentials: what the switches act on. */
+  connected: number;
+  disconnected: number;
   active: number;
   /** What the card switch shows: on while any connection is on. */
   on: boolean;
-  shape: "none" | "all_on" | "all_off" | "some_on";
+  shape: "none" | "disconnected" | "all_on" | "all_off" | "some_on";
 };
 
 export function serviceState(connections: readonly Switchable[]): ServiceState {
   const count = connections.length;
-  const active = connections.filter((one) => one.is_active).length;
+  const connected = connections.filter((one) => one.is_connected);
+  const active = connected.filter((one) => one.is_active).length;
   const shape =
-    count === 0 ? "none" : active === count ? "all_on" : active === 0 ? "all_off" : "some_on";
-  return { count, active, on: active > 0, shape };
+    count === 0
+      ? "none"
+      : connected.length === 0
+        ? "disconnected"
+        : active === connected.length
+          ? "all_on"
+          : active === 0
+            ? "all_off"
+            : "some_on";
+  return {
+    count,
+    connected: connected.length,
+    disconnected: count - connected.length,
+    active,
+    on: active > 0,
+    shape,
+  };
 }
 
-/** The connections a card switch has to change to reach `turnOn`. */
+/** The connections a card switch has to change to reach `turnOn`: connected ones only. */
 export function switchTargets<T extends Switchable>(connections: readonly T[], turnOn: boolean): T[] {
-  return connections.filter((one) => one.is_active !== turnOn);
+  return connections.filter((one) => one.is_connected && one.is_active !== turnOn);
 }
 
-/** Room for another pixel. */
+/** Room for another pixel; a disconnected one still takes its place. */
 export function pixelsLeft(connections: readonly unknown[]): number {
   return Math.max(0, MAX_PIXELS_PER_SERVICE - connections.length);
 }
@@ -112,3 +136,5 @@ export async function setServiceActive<T extends Switchable>(
 export const marketingIntegrationPath = (publicId: string) =>
   `admin/marketing-integrations/${publicId}/`;
 export const courierPath = (publicId: string) => `admin/couriers/${publicId}/`;
+/** POST: forget the credentials, keep the connection (Remove is DELETE on the path above). */
+export const disconnectPath = (path: string) => `${path}disconnect/`;

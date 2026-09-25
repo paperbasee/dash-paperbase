@@ -1,19 +1,29 @@
 "use client";
 
-import { useId, type ReactNode } from "react";
+import type { ReactNode } from "react";
 import { useTranslations } from "next-intl";
-import { ArrowsLeftRightIcon, MetaLogoIcon, TiktokLogoIcon } from "@phosphor-icons/react";
-import { ChevronDown } from "lucide-react";
+import { ArrowsLeftRightIcon, LinkBreakIcon, MetaLogoIcon, TiktokLogoIcon } from "@phosphor-icons/react";
+import { ArrowLeft, ChevronRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
 import { PLATFORM_MARK_SRC, SERVICE_LOGO_FILES, type ServiceKey } from "@/lib/integrations/services";
+import { settingsInvertedButtonClassName } from "../../SettingsSectionBody";
 
 /**
  * One service on Settings > Integrations (owner, 2026-09-25, from a reference
  * they chose): the Paperbase mark and the service's own logo joined by arrows,
- * the service's name and state, and its switch. Clicking it opens the card
- * across the whole grid, where every connection of the service is listed.
+ * the service's name and state, and its switch. Clicking it opens the
+ * service's pop-up, where every connection of the service is listed -- not
+ * inline: the owner found a card opening in the grid "unprofessional".
  */
 
 export type ServiceTone = "on" | "off" | "none";
@@ -55,7 +65,7 @@ export function LogoPair({ service, compact }: { service: ServiceKey; compact?: 
   );
 }
 
-function StatusLine({ tone, children }: { tone: ServiceTone; children: ReactNode }) {
+export function StatusLine({ tone, children }: { tone: ServiceTone; children: ReactNode }) {
   return (
     <span className="flex min-w-0 items-center gap-1.5 text-[12px] text-muted-foreground">
       <span
@@ -76,10 +86,8 @@ export function ServiceCard({
   status,
   tone,
   control,
-  expanded = false,
-  onToggleExpanded,
+  onOpen,
   comingSoon = false,
-  children,
 }: {
   service: ServiceKey;
   name: string;
@@ -87,73 +95,29 @@ export function ServiceCard({
   tone: ServiceTone;
   /** The card's switch, its Connect button, or nothing. */
   control?: ReactNode;
-  expanded?: boolean;
-  /** Absent: the card does not open (a service that is not connected, or not built yet). */
-  onToggleExpanded?: () => void;
+  /** Opens the service's pop-up. Absent: nothing to open (not connected, or not built yet). */
+  onOpen?: () => void;
   comingSoon?: boolean;
-  /** What the opened card holds: the service's connections. */
-  children?: ReactNode;
 }) {
   const t = useTranslations("settings.integrations");
-  const bodyId = useId();
-  const open = expanded && !!onToggleExpanded;
-  const words = (
-    <span className="flex min-w-0 flex-1 flex-col gap-0.5 text-start">
-      <span className="flex min-w-0 items-center gap-1.5">
-        <span className="truncate text-[13px] font-medium text-foreground">{name}</span>
-        {onToggleExpanded ? (
-          <ChevronDown
-            aria-hidden
-            className={cn(
-              "size-3.5 shrink-0 text-muted-foreground transition-transform duration-150",
-              open && "rotate-180",
-            )}
-          />
-        ) : null}
-      </span>
-      <StatusLine tone={tone}>{status}</StatusLine>
-    </span>
-  );
-  const badge = comingSoon ? (
-    <Badge variant="outline" className="shrink-0 text-[11px] font-normal text-muted-foreground">
-      {t("comingSoon")}
-    </Badge>
-  ) : null;
-
-  if (open) {
-    return (
-      <div
-        data-service={service}
-        className="col-span-full min-w-0 overflow-hidden rounded-card border border-border bg-card"
-      >
-        <div className="flex min-w-0 items-center gap-3 bg-muted/40 px-3.5 py-2.5">
-          <LogoPair service={service} compact />
-          <button
-            type="button"
-            aria-expanded
-            aria-controls={bodyId}
-            onClick={onToggleExpanded}
-            className="flex min-h-11 min-w-0 flex-1 items-center rounded-ui outline-none focus-visible:ring-[3px] focus-visible:ring-ring/20"
-          >
-            {words}
-          </button>
-          {control}
-        </div>
-        <div id={bodyId} className="border-t border-border">
-          {children}
-        </div>
-      </div>
-    );
-  }
-
-  // The logos and the words are ONE button, so a click anywhere opens the card;
-  // the switch sits beside it rather than inside it (a control in a control).
   const top = (
     <span className="flex h-[76px] w-full items-center justify-center border-b border-border bg-muted/40">
       <LogoPair service={service} />
     </span>
   );
-  const bottom = <span className="flex min-h-[52px] w-full items-center px-3.5 py-2.5 pe-24">{words}</span>;
+  const bottom = (
+    <span className="flex min-h-[52px] w-full items-center px-3.5 py-2.5 pe-24">
+      <span className="flex min-w-0 flex-1 flex-col gap-0.5 text-start">
+        <span className="flex min-w-0 items-center gap-1">
+          <span className="truncate text-[13px] font-medium text-foreground">{name}</span>
+          {onOpen ? <ChevronRight aria-hidden className="size-3.5 shrink-0 text-muted-foreground" /> : null}
+        </span>
+        <StatusLine tone={tone}>{status}</StatusLine>
+      </span>
+    </span>
+  );
+  // The logos and the words are ONE button, so a click anywhere opens the
+  // pop-up; the switch sits beside it rather than inside it (a control in a control).
   return (
     <div
       data-service={service}
@@ -162,12 +126,11 @@ export function ServiceCard({
         comingSoon && "opacity-60",
       )}
     >
-      {onToggleExpanded ? (
+      {onOpen ? (
         <button
           type="button"
-          aria-expanded={false}
-          aria-controls={bodyId}
-          onClick={onToggleExpanded}
+          aria-haspopup="dialog"
+          onClick={onOpen}
           className="flex w-full flex-col outline-none transition-colors hover:bg-muted/20 focus-visible:ring-[3px] focus-visible:ring-ring/20"
         >
           {top}
@@ -179,46 +142,172 @@ export function ServiceCard({
           {bottom}
         </div>
       )}
-      <div className="absolute end-3.5 bottom-0 flex h-[52px] items-center">{control ?? badge}</div>
+      <div className="absolute end-3.5 bottom-0 flex h-[52px] items-center">
+        {comingSoon ? (
+          <Badge variant="outline" className="shrink-0 text-[11px] font-normal text-muted-foreground">
+            {t("comingSoon")}
+          </Badge>
+        ) : (
+          control
+        )}
+      </div>
     </div>
   );
 }
 
-/** One connection inside an opened card: its switch, what it is, and what can be done to it. */
+/**
+ * A service's pop-up. It holds one screen at a time -- the list, or a form or
+ * a question opened from it, with a Back arrow -- so a pop-up never opens on
+ * top of another. On a phone it fills the screen.
+ */
+export function ServiceDialog({
+  open,
+  onOpenChange,
+  service,
+  title,
+  subtitle,
+  onBack,
+  children,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  service: ServiceKey;
+  title: string;
+  subtitle: ReactNode;
+  /** Shown on every screen but the list. */
+  onBack?: () => void;
+  children: ReactNode;
+}) {
+  const t = useTranslations("settings.integrations");
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent
+        className={cn(
+          "flex h-dvh max-h-dvh w-screen max-w-none flex-col gap-0 overflow-hidden rounded-none p-0",
+          "sm:h-auto sm:max-h-[min(88dvh,40rem)] sm:w-[calc(100vw-2rem)] sm:max-w-xl sm:rounded-card",
+        )}
+      >
+        <DialogHeader className="shrink-0 border-b border-border px-4 py-3 pe-12 sm:px-5">
+          <div className="flex min-w-0 items-center gap-3">
+            {onBack ? (
+              <Button type="button" variant="ghost" size="icon" className="-ms-2 shrink-0" onClick={onBack} aria-label={t("back")}>
+                <ArrowLeft className="size-4 rtl:rotate-180" aria-hidden />
+              </Button>
+            ) : (
+              <LogoPair service={service} compact />
+            )}
+            <div className="min-w-0 space-y-0.5 text-start">
+              <DialogTitle className="truncate text-[15px] font-medium leading-snug">{title}</DialogTitle>
+              <DialogDescription asChild className="text-[12px]">
+                <div>{subtitle}</div>
+              </DialogDescription>
+            </div>
+          </div>
+        </DialogHeader>
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">{children}</div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+/** A form or a question inside the pop-up: its body, then its two buttons. */
+export function DialogScreen({
+  children,
+  confirmLabel,
+  confirmDanger = false,
+  busy,
+  onCancel,
+  onConfirm,
+  formId,
+}: {
+  children: ReactNode;
+  confirmLabel: string;
+  confirmDanger?: boolean;
+  busy: boolean;
+  onCancel: () => void;
+  /** A question's action; a form submits through `formId` instead. */
+  onConfirm?: () => void;
+  formId?: string;
+}) {
+  const t = useTranslations("settings");
+  return (
+    <div className="flex flex-col gap-4 px-4 py-4 sm:px-5">
+      {children}
+      <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+        <Button type="button" variant="outline" onClick={onCancel} disabled={busy}>
+          {t("cancel")}
+        </Button>
+        <Button
+          type={formId ? "submit" : "button"}
+          form={formId}
+          variant={confirmDanger ? "destructive" : "outline"}
+          className={confirmDanger ? undefined : settingsInvertedButtonClassName}
+          onClick={onConfirm}
+          disabled={busy}
+          loading={busy}
+        >
+          {confirmLabel}
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+/** A connection's on/off, named for the connection. */
+export function ConnectionSwitch({
+  active,
+  label,
+  disabled,
+  onSwitch,
+}: {
+  active: boolean;
+  label: string;
+  disabled: boolean;
+  onSwitch: (next: boolean) => void;
+}) {
+  return <Switch checked={active} onCheckedChange={onSwitch} disabled={disabled} aria-label={label} />;
+}
+
+/** Where a disconnected connection's switch would be: it has none until reconnected. */
+export function DisconnectedMark() {
+  return (
+    <span className="flex h-11 w-10 shrink-0 items-center justify-center text-muted-foreground md:h-9" aria-hidden>
+      <LinkBreakIcon className="size-4" />
+    </span>
+  );
+}
+
+/** One connection in a service's pop-up: its switch, what it is, and what can be done to it. */
 export function ConnectionRow({
+  lead,
   title,
   detail,
-  active,
-  switchLabel,
-  canManage,
-  switching,
-  onSwitch,
+  detailTone,
   actions,
   children,
 }: {
+  lead: ReactNode;
   title: ReactNode;
   detail: ReactNode;
-  active: boolean;
-  switchLabel: string;
-  canManage: boolean;
-  switching: boolean;
-  onSwitch: (next: boolean) => void;
+  detailTone?: "warning";
   actions?: ReactNode;
   /** Anything the connection carries below its row (Steadfast's webhook setup). */
   children?: ReactNode;
 }) {
   return (
     <div className="border-b border-border last:border-b-0">
-      <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1 px-3.5 py-2">
-        <Switch
-          checked={active}
-          onCheckedChange={onSwitch}
-          disabled={!canManage || switching}
-          aria-label={switchLabel}
-        />
+      <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1 px-4 py-2 sm:px-5">
+        {lead}
         <div className="min-w-0 flex-1">
           <p className="truncate text-[13px] font-medium text-foreground">{title}</p>
-          <p className="truncate text-[12px] text-muted-foreground">{detail}</p>
+          <p
+            className={cn(
+              "truncate text-[12px]",
+              detailTone === "warning" ? "text-amber-700 dark:text-amber-400" : "text-muted-foreground",
+            )}
+          >
+            {detail}
+          </p>
         </div>
         {actions ? <div className="flex flex-wrap items-center gap-1.5">{actions}</div> : null}
       </div>

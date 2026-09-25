@@ -633,6 +633,8 @@ export interface Courier {
   api_key_masked: string;
   secret_key_masked: string;
   has_webhook_token?: boolean;
+  /** False once disconnected: the account stays, its keys are gone. */
+  is_connected: boolean;
   is_active: boolean;
   created_at: string;
   updated_at: string;
@@ -661,6 +663,8 @@ export interface MarketingIntegration {
   provider: "facebook" | "google_analytics" | "tiktok";
   pixel_id: string;
   access_token_masked: string;
+  /** False once disconnected: the pixel and its settings stay, the token is gone. */
+  is_connected: boolean;
   test_event_code: string;
   is_active: boolean;
   event_settings: IntegrationEventSettings | null;

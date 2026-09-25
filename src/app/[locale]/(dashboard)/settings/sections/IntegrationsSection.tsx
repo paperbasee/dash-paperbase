@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
 import { useTranslations } from "next-intl";
 import { SettingsSectionBody, settingsSectionSurfaceClassName } from "../SettingsSectionBody";
 import { cn } from "@/lib/utils";
@@ -32,13 +32,11 @@ const GRID = "grid min-w-0 grid-cols-1 gap-3 @min-[36rem]:grid-cols-2 @min-[54re
 
 /**
  * Settings > Integrations (owner, 2026-09-25): a card per service, the
- * Paperbase mark and the service's logo joined by arrows. One card is open at a
- * time, across the whole grid, listing that service's connections.
+ * Paperbase mark and the service's logo joined by arrows. A card opens its
+ * service's pop-up, which lists that service's connections.
  */
 export default function IntegrationsSection({ hidden }: { hidden: boolean }) {
   const t = useTranslations("settings.integrations");
-  const [open, setOpen] = useState<ServiceKey | null>(null);
-  const toggle = (key: ServiceKey) => () => setOpen((current) => (current === key ? null : key));
 
   // Both queries feed several cards; a failure is reported once, here.
   const marketing = useMarketingIntegrationsQuery({ enabled: !hidden });
@@ -78,13 +76,7 @@ export default function IntegrationsSection({ hidden }: { hidden: boolean }) {
           <Group title={t("sectionAds")}>
             <div className={GRID}>
               {AD_SERVICES.map((provider) => (
-                <PixelServiceCard
-                  key={provider}
-                  provider={provider}
-                  expanded={open === provider}
-                  onToggleExpanded={toggle(provider)}
-                  panelHidden={hidden}
-                />
+                <PixelServiceCard key={provider} provider={provider} panelHidden={hidden} />
               ))}
               {AD_SERVICES_COMING_SOON.map(comingSoon)}
             </div>
@@ -94,11 +86,7 @@ export default function IntegrationsSection({ hidden }: { hidden: boolean }) {
 
           <Group title={t("sectionDelivery")}>
             <div className={GRID}>
-              <SteadfastServiceCard
-                expanded={open === "steadfast"}
-                onToggleExpanded={toggle("steadfast")}
-                panelHidden={hidden}
-              />
+              <SteadfastServiceCard panelHidden={hidden} />
               {DELIVERY_SERVICES_COMING_SOON.map(comingSoon)}
             </div>
           </Group>
