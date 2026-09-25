@@ -9,16 +9,12 @@
  * it used to be "Gadzilla, 12 Gulshan Avenue" with Careers and Wholesale for
  * every merchant, and Visa and Mastercard for a platform with no card gateway.
  */
-import { renderToStaticMarkup } from "react-dom/server";
-import { NextIntlClientProvider } from "next-intl";
 import { describe, expect, test } from "vitest";
 
 import type { ThemeDocument, ThemeEditorState, ThemeManifest, ThemeSection } from "@/lib/theme-editor/api";
 import { editorReducer, initEditorState, type EditorState } from "@/lib/theme-editor/editor-reducer";
 import { SLOTS } from "@/lib/theme-editor/slot-catalogue";
 import { choiceEdits, sectionOfType, slotValueFor, wiringFor } from "@/lib/theme-editor/slot-sections";
-import { type PolicyPreview, ShopChrome, type ShopIdentity } from "@/components/theme-editor/slots/ShopChrome";
-import en from "../../messages/en.json";
 
 const labels = (label: string) => ({ label, label_bn: `${label} (bn)` });
 const choice = (id: string, options: string[], fallback: string) => ({
@@ -123,42 +119,6 @@ describe("the footer is wired", () => {
   });
 });
 
-const SHOP: ShopIdentity = {
-  name: "Gadzilla",
-  address: "College avenue lane No. 10, Barishal",
-  phone: "01234567891",
-  email: "contact@gadzilla.com",
-  social: ["whatsapp"],
-  wishlist: true,
-  orderLookup: false,
-};
-
-const POLICIES: PolicyPreview[] = [
-  { title: "Privacy policy", path: "/policies/privacy-policy", written: true },
-  { title: "Shipping policy", path: "/policies/shipping-policy", written: true },
-  { title: "Warranty", path: "/policies/warranty", written: false },
-];
-
-function draw(
-  slotKey: string,
-  variant: string | undefined,
-  over: { shop?: ShopIdentity; live?: ThemeSection; policies?: PolicyPreview[] } = {},
-) {
-  return renderToStaticMarkup(
-    <NextIntlClientProvider locale="en" messages={en}>
-      <ShopChrome
-        page="footer"
-        slotKey={slotKey}
-        variant={variant}
-        settings={{}}
-        shop={over.shop ?? SHOP}
-        live={over.live}
-        policies={over.policies ?? POLICIES}
-      />
-    </NextIntlClientProvider>,
-  );
-}
-
 /** A column part: a title, then links (with optional words). */
 const column = (id: string, heading: string, links: [string, string?][]) => ({
   id,
@@ -172,93 +132,3 @@ const column = (id: string, heading: string, links: [string, string?][]) => ({
 const footer = (settings: Record<string, unknown>, blocks: ReturnType<typeof column>[] = []) =>
   section("footer", "footer", { settings, blocks } as Partial<ThemeSection>);
 
-describe("the canvas draws this shop's footer", () => {
-  test("nothing another shop has, and no card the platform cannot take", () => {
-    const guilty: string[] = [];
-    for (const slot of SLOTS.footer) {
-      for (const option of slot.options ?? []) {
-        const html = draw(slot.key, option.value, {
-          live: footer({ payments: true, social: "names", bottom: "policies" }),
-        });
-        for (const word of ["12 Gulshan", "+880 1700", "hello@gadzilla", "Careers", "Wholesale", "YouTube", "Visa", "Mastercard", "Rocket"]) {
-          if (html.includes(word)) guilty.push(`${slot.key}=${option.value} says "${word}"`);
-        }
-      }
-    }
-    expect(guilty).toEqual([]);
-  });
-
-  test("the merchant's own name and contact", () => {
-    const html = draw("layout", "columns");
-    expect(html).toContain("College avenue lane No. 10, Barishal");
-    expect(html).toContain("01234567891");
-    expect(html).toContain("contact@gadzilla.com");
-  });
-
-  test("email only is the email only", () => {
-    const html = draw("contact", "email");
-    expect(html).toContain("contact@gadzilla.com");
-    expect(html).not.toContain("Barishal");
-  });
-
-  test("the columns are the merchant's own, each link named as the shop names it", () => {
-    const live = footer({}, [
-      column("c1", "Help", [["/contact-us"], ["/policies/shipping-policy"], ["https://wa.me/1", "WhatsApp us"]]),
-      column("c2", "Policies", [["/policies/privacy-policy"], ["/policies/warranty"]]),
-    ]);
-    const html = draw("columns", undefined, { live });
-    expect(html).toContain(">Help<");
-    expect(html).toContain("Contact us");
-    expect(html).toContain("Shipping policy");
-    expect(html).toContain("WhatsApp us");
-    // A policy not written yet is drawn greyed, with what the shop does about it.
-    expect(html).toContain("Warranty");
-    expect(html).toContain("not written yet");
-  });
-
-  test("the links follow the shop's own switches", () => {
-    const live = footer({}, [column("c1", "Customer Service", [["/wishlist"], ["/account/find-order"]])]);
-    const html = draw("layout", "columns", { live });
-    expect(html).toContain("Wishlist");
-    expect(html).not.toContain("Track your order");
-  });
-
-  test("a web address with no words is left out, as the shop leaves it out", () => {
-    const live = footer({}, [column("c1", "Elsewhere", [["https://example.com"]])]);
-    expect(draw("columns", undefined, { live })).not.toContain("example.com");
-  });
-
-  test("no columns says so", () => {
-    expect(draw("columns", undefined, { live: footer({}) })).toContain("No columns yet");
-  });
-
-  test("only the social links the merchant filled in", () => {
-    const html = draw("social", "names");
-    expect(html).toContain("WhatsApp");
-    expect(html).not.toContain("Facebook");
-  });
-
-  test("the payment marks are what the shop takes", () => {
-    const html = draw("payments", "on");
-    for (const method of ["Cash on delivery", "bKash", "Nagad"]) expect(html).toContain(method);
-  });
-
-  test("the small links are every written policy, and only those (2026-09-25)", () => {
-    const html = draw("bottom", "policies");
-    expect(html).toContain("Privacy policy · Shipping policy");
-    expect(html).not.toContain("Warranty");
-    expect(draw("bottom", "policies", { policies: [] })).toContain("No policy written yet");
-  });
-
-  test("the whole footer reads the section, not the editor's old held choices", () => {
-    const html = draw("layout", "columns", { live: footer({ social: "off", bottom: "policies" }) });
-    expect(html).not.toContain(">WhatsApp<");
-    expect(html).toContain("Privacy policy · Shipping policy</span>");
-  });
-
-  test("a shop that has filled nothing in is told where to", () => {
-    const empty: ShopIdentity = { ...SHOP, address: "", phone: "", email: "", social: [] };
-    expect(draw("contact", "full", { shop: empty })).toContain("Add your address, phone and email in Settings");
-    expect(draw("social", "names", { shop: empty })).toContain("Add your social links in Settings");
-  });
-});

@@ -19,7 +19,8 @@ describe("the editor opens on the shop, not on a pop-up", () => {
       was real it met every merchant with a dialog over their own shop.
     */
     const source = fs.readFileSync(EDITOR, "utf8");
-    const opened = source.match(/const \[open, setOpen\] = useState<string \| null>\(([^)]*)\)/);
+    // A place is named by the page that owns it since the editor became the real shop (2026-09-26).
+    const opened = source.match(/const \[open, setOpen\] = useState<PlaceRef \| null>\(([^)]*)\)/);
     expect(opened?.[1]).toBe("null");
   });
 });

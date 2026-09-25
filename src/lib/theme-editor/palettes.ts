@@ -8,12 +8,9 @@
  * like the corners and the card style -- and one it has never made is
  * Porcelain.
  *
- * **The sketch repaints in the chosen palette.** The editor has no live shop
- * beside it: the canvas is a drawing in the dashboard's own colour variables.
- * So the canvas frame re-points those variables at the palette's colours --
- * page, ink, frames, lines -- and three of the shop's own: its brand colour
- * (the big buttons and the notice strip) and its header. The editor's
- * selection marks keep the dashboard's colours; only the drawing changes.
+ * **The preview shows it.** The editor's page is the shop itself drawing the
+ * draft (2026-09-26), so a palette picked here is the shop in those colours the
+ * moment the draft saves -- nothing in the dashboard repaints to imitate it.
  */
 
 import type { ThemeDocument, ThemeHttp } from "./api";
@@ -43,47 +40,4 @@ export function chosenPalette(document: Pick<ThemeDocument, "settings"> | null |
 
 export function paletteName(palette: ShopPalette, locale: string): string {
   return locale === "bn" && palette.name_bn ? palette.name_bn : palette.name;
-}
-
-/** `#1F2B48` as the dashboard writes a colour variable: `222 40% 20.2%`. */
-export function hexToHslTriplet(hex: string): string {
-  const value = hex.replace("#", "");
-  const [r, g, b] = [0, 2, 4].map((at) => parseInt(value.slice(at, at + 2), 16) / 255);
-  const max = Math.max(r, g, b);
-  const min = Math.min(r, g, b);
-  const light = (max + min) / 2;
-  let hue = 0;
-  let sat = 0;
-  if (max !== min) {
-    const d = max - min;
-    sat = light > 0.5 ? d / (2 - max - min) : d / (max + min);
-    hue = max === r ? (g - b) / d + (g < b ? 6 : 0) : max === g ? (b - r) / d + 2 : (r - g) / d + 4;
-    hue *= 60;
-  }
-  const round = (n: number) => Math.round(n * 10) / 10;
-  return `${round(hue)} ${round(sat * 100)}% ${round(light * 100)}%`;
-}
-
-/** The canvas frame's variables for one palette. */
-export function canvasColours(tokens: PaletteTokens): Record<string, string> {
-  const pairs: [string, string][] = [
-    ["--background", "background"],
-    ["--foreground", "foreground"],
-    ["--muted", "muted"],
-    ["--muted-foreground", "muted_foreground"],
-    ["--border", "border"],
-    ["--border-subtle", "border"],
-    ["--card", "card"],
-    ["--card-foreground", "card_foreground"],
-    ["--shop-brand", "primary"],
-    ["--shop-brand-foreground", "primary_foreground"],
-    ["--shop-header", "header"],
-    ["--shop-header-foreground", "header_foreground"],
-  ];
-  const out: Record<string, string> = {};
-  for (const [variable, role] of pairs) {
-    const hex = tokens[role];
-    if (typeof hex === "string" && /^#[0-9a-f]{6}$/i.test(hex)) out[variable] = hexToHslTriplet(hex);
-  }
-  return out;
 }

@@ -38,10 +38,9 @@ const FACE_FAMILY: Record<string, string> = {
  * Colour and type: the half of a shop's look that is not a slot.
  *
  * With one theme and fixed places, this panel is what actually makes two shops
- * look different. It is not a nice-to-have beside the canvas -- it is the main
- * lever, which is why it is what the side panel shows whenever nothing on the
- * page is clicked (2026-09-26; it was the left two fifths of the editor), and
- * a button of its own in the top bar where there is no room for a column.
+ * look different. It is not a nice-to-have beside the shop -- it is the main
+ * lever, which is why it is one of the side panel's two tabs whenever nothing
+ * on the page is picked (2026-09-26; it was the left two fifths of the editor).
  *
  * **Picking a face picks the language.** There is no language control, by the
  * owner's decision on 2026-09-20: a shop chooses a face and the language

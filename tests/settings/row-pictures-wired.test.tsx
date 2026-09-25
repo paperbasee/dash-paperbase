@@ -12,95 +12,12 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { renderToStaticMarkup } from "react-dom/server";
-import { NextIntlClientProvider } from "next-intl";
 import { describe, expect, test } from "vitest";
 
-import type { ThemeManifest, ThemeSection, ThemeSettingSpec } from "@/lib/theme-editor/api";
-import { ShopChrome } from "@/components/theme-editor/slots/ShopChrome";
+import type { ThemeManifest, ThemeSettingSpec } from "@/lib/theme-editor/api";
 import { tickedParts } from "@/lib/theme-editor/slot-sections";
-import en from "../../messages/en.json";
 
 const BESIDE = ["picture_on", "picture", "picture_heading", "picture_text", "picture_button"];
-const url = (key: string) => `https://cdn.example.com/${key}`;
-const DEPARTMENTS = [
-  { value: "cat_men", label: "Men" },
-  { value: "cat_women", label: "Women" },
-  { value: "cat_kids", label: "Kids" },
-];
-
-const section = (type: string, settings: Record<string, unknown> = {}, blocks: ThemeSection["blocks"] = []) =>
-  ({ id: type, type, hidden: false, settings, blocks }) as ThemeSection;
-
-const draw = (slotKey: string, live: ThemeSection) =>
-  renderToStaticMarkup(
-    <NextIntlClientProvider locale="en" messages={en}>
-      <ShopChrome
-        page="home"
-        slotKey={slotKey}
-        variant={undefined}
-        live={live}
-        departments={DEPARTMENTS}
-        pictureUrl={url}
-      />
-    </NextIntlClientProvider>,
-  );
-
-const WORDS = { picture: "tenants/s/themes/row.jpg", picture_heading: "New in", picture_text: "Just landed", picture_button: "Shop" };
-
-describe("the rows' pictures on the canvas", () => {
-  for (const [slotKey, type] of [
-    ["featured", "featured_products"],
-    ["bestsellers", "best_sellers"],
-    ["arrivals", "new_arrivals"],
-  ] as const) {
-    test(`${slotKey}: beside the products, with the merchant's words`, () => {
-      const html = draw(slotKey, section(type, WORDS));
-      expect(html).toContain('data-row-picture="beside"');
-      expect(html).toContain('src="https://cdn.example.com/tenants/s/themes/row.jpg"');
-      for (const word of ["New in", "Just landed", "Shop"]) expect(html).toContain(word);
-    });
-
-    test(`${slotKey}: switched off, it is kept and not drawn`, () => {
-      expect(draw(slotKey, section(type, { ...WORDS, picture_on: false }))).not.toContain("data-row-picture");
-    });
-
-    test(`${slotKey}: no picture, the row as before`, () => {
-      expect(draw(slotKey, section(type, { picture_heading: "New in" }))).not.toContain("data-row-picture");
-    });
-  }
-
-  test("a row saved before the switch existed draws its picture: a missing switch is on", () => {
-    const { picture } = WORDS;
-    expect(draw("bestsellers", section("best_sellers", { picture }))).toContain('data-row-picture="beside"');
-  });
-
-  test("the picture takes two products' room on a wide screen, and sits on top on a narrow one", () => {
-    const html = draw("bestsellers", section("best_sellers", WORDS));
-    expect(html).toMatch(/data-row-picture="beside" class="[^"]*col-span-2/);
-    expect((html.match(/@xl:hidden/g) ?? []).length).toBeGreaterThan(0);
-  });
-
-  test("the departments: a wide picture above all three, and each its own", () => {
-    const live = section("category_products", { picture: "tenants/s/themes/top.jpg" }, [
-      { id: "a", type: "band", settings: { category: "cat_men", picture: "tenants/s/themes/men.jpg" } },
-      { id: "b", type: "band", settings: { category: "cat_women", picture: "tenants/s/themes/women.jpg", picture_on: false } },
-      { id: "c", type: "band", settings: { category: "cat_kids" } },
-    ]);
-    const html = draw("bands", live);
-    expect(html).toContain('data-row-picture="top"');
-    expect(html.indexOf("top.jpg")).toBeLessThan(html.indexOf(">Men<"));
-    expect(html).toContain("men.jpg");
-    expect(html).not.toContain("women.jpg");
-    expect((html.match(/data-row-picture="beside"/g) ?? []).length).toBe(1);
-  });
-
-  test("the departments' top picture switched off draws none", () => {
-    const live = section("category_products", { picture: "tenants/s/themes/top.jpg", picture_on: false });
-    expect(draw("bands", live)).not.toContain('data-row-picture="top"');
-  });
-});
-
 const spec = (id: string, type: string): ThemeSettingSpec =>
   ({ id, type, label: id, label_bn: id, default: "" }) as ThemeSettingSpec;
 
@@ -137,25 +54,3 @@ describe.skipIf(!fs.existsSync(THEME))("against the real theme", () => {
   });
 });
 
-describe("the preview lays itself out by its own width (2026-09-26)", () => {
-  /*
-   * In the phone view the preview is 320px wide inside a wide window, and every
-   * drawing used the WINDOW's width: the computer layout squeezed into a phone
-   * -- prices into the next card, the footer's four columns into each other.
-   */
-  test("no drawing asks the window how wide it is", () => {
-    const chrome = fs.readFileSync(path.join(__dirname, "../../src/components/theme-editor/slots/ShopChrome.tsx"), "utf8");
-    expect(chrome).not.toMatch(/(?<![\w@-])(?:sm|md|lg|xl):/);
-  });
-
-  test("the frame they are drawn in is the container they measure, and places sit side by side by it too", () => {
-    const canvas = fs.readFileSync(path.join(__dirname, "../../src/components/theme-editor/slots/SlotCanvas.tsx"), "utf8");
-    expect(canvas).toContain('"@container w-full');
-    expect(canvas).toContain('"grid @xl:[grid-template-columns:var(--slot-cols)]"');
-  });
-
-  test("the shop's own colours, never the dashboard's: a tag on a post stays readable in dark mode", () => {
-    const text = fs.readFileSync(path.join(__dirname, "../../src/components/theme-editor/slots/ShopChrome.tsx"), "utf8");
-    expect(text).not.toContain("var(--color-");
-  });
-});

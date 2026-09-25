@@ -66,44 +66,6 @@ export function categoryLinks(nodes: CategoryNode[]): Map<string, CategoryLink> 
   return out;
 }
 
-/** A category as a menu link names it: its own name, and whether categories sit inside it. */
-/**
- * `stocked`: something is in it or under it. The shop's menus leave an empty
- * category out (2026-09-25), and a panel opens only where something inside is
- * stocked -- `product_count` is rolled up through the categories inside.
- */
-export type CategoryEntry = { name: string; opens: boolean; stocked: boolean };
-
-type NamedCategoryNode = CategoryNode & { name: string; children?: NamedCategoryNode[] };
-
-/**
- * Every active category by the link a merchant would store for it
- * ("/categories/men/shirts"), in tree order -- so the editor's drawing of the
- * header's menu can name a category link the merchant wrote no words for, and
- * mark the ones that open a panel, as the shop does.
- */
-export function categoryIndex(nodes: NamedCategoryNode[]): Record<string, CategoryEntry> {
-  const byId = new Map<string, NamedCategoryNode>();
-  const walk = (list: NamedCategoryNode[]) =>
-    list.forEach((node) => {
-      byId.set(node.public_id, node);
-      walk(node.children ?? []);
-    });
-  walk(nodes);
-  const out: Record<string, CategoryEntry> = {};
-  for (const [id, link] of categoryLinks(nodes)) {
-    const node = byId.get(id);
-    if (node) {
-      out[link.path] = {
-        name: node.name,
-        opens: (node.children ?? []).some((child) => child.is_active && child.product_count > 0),
-        stocked: node.product_count > 0,
-      };
-    }
-  }
-  return out;
-}
-
 /**
  * A typed path that already names a language ("/en/cart", "/bn"). The API stores it happily,
  * but the storefront draws every path through next-intl's Link and puts the shopper's own

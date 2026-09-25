@@ -4,13 +4,14 @@ import type { EditorAction } from "@/lib/theme-editor/editor-reducer";
 import { SLOTS, type Slot, type SlotPageKey } from "@/lib/theme-editor/slot-catalogue";
 
 /**
- * Which place on the canvas is which section of the shop's document.
+ * Which of the editor's places is which section of the shop's document.
  *
  * The slot catalogue describes the editor a merchant sees; the theme manifest
  * describes what the storefront can draw. This is the one file that says they
  * are the same thing, place by place. A slot that is in here is **wired**: its
  * choice is read from the shop's own document and every edit is written back to
- * it. A slot that is not is still the drawing it has always been.
+ * it. The one place that is not -- the checkout's form -- is a shop setting
+ * (`store-setting-slots.ts`).
  *
  * One entry at a time, deliberately. A place goes in here when its section can
  * do everything the place promises -- so a merchant never meets a choice that
@@ -403,7 +404,7 @@ export const WIRED_SLOTS: Partial<Record<SlotPageKey, Record<string, WiredSlot>>
     },
     /*
       What the shop promises, said before a shopper leaves the page -- round 4,
-      the last two places on this canvas.
+      the last two places on this page.
 
       **The words are not chosen here.** A merchant picks their promises once,
       on the home page, and this only says whether the cart repeats them. The
@@ -1236,8 +1237,8 @@ export function slotValueFor(document: ThemeDocument, wiring: WiredSlot): string
 /**
  * Where a place's section goes when the page does not have one yet.
  *
- * **After the last section belonging to a place ABOVE it on the canvas.**
- * The canvas order is the page order -- that is the whole idea of the slot
+ * **After the last section belonging to a place ABOVE it in the editor's list.**
+ * The list's order is the page order -- that is the whole idea of the slot
  * design -- so the category band goes under the hero, not below everything. It landed at
  * the end until 2026-09-22, which was the right default while a merchant could
  * drag it afterwards and is simply wrong now that nothing drags.
@@ -1271,7 +1272,7 @@ export function placeFor(
  *
  * Every edit starts by picking the list it belongs to. The reducer works on the
  * page it is holding -- that is what makes "remove this section" mean anything
- * -- and the canvas's own page picker is a different thing: a merchant editing
+ * -- and the editor's own page picker is a different thing: a merchant editing
  * the notice is looking at the Home page, while the notice lives in the header
  * group. Without this, the edit went to the page on screen, found no bar there,
  * and changed nothing at all. Silently.
@@ -1283,7 +1284,7 @@ export function choiceEdits(
   document: ThemeDocument,
   wiring: WiredSlot,
   value: string,
-  /** Where this place sits on the canvas, so a new section lands there. */
+  /** Where this place sits in the editor's list, so a new section lands there. */
   where: { page: SlotPageKey; key: string },
 ): EditorAction[] {
   const { page, key: slotKey } = where;

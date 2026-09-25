@@ -50,16 +50,12 @@ export type SlotOption = {
 
 export type Slot = {
   key: string;
-  /** `themeEditor.slots.*` key for the tab that names this place. */
+  /** `themeEditor.slots.*` key for the name of this place. */
   label: string;
   /**
-   * Drawn on every page and edited once, so this page shows it but does not
-   * offer it. The tab says which, and clicking it goes there.
-   */
-  inherited?: boolean;
-  /**
-   * Where an inherited slot's value actually lives: which entry in the page
-   * picker owns it, and under which key.
+   * A place drawn on this page and owned by another -- the header, the footer,
+   * the product page's promises (the home page's): which entry owns it, and
+   * under which key. The preview's marks and the list both use the owner.
    *
    * It has to be said rather than guessed. A page drew its header from a
    * setting called `header`, but the Header entry stores its arrangement under
@@ -77,38 +73,12 @@ export type Slot = {
   locked?: boolean;
   /** `themeEditor.slots.*` key for that reason. */
   lockedBecause?: string;
-  /**
-   * Places that sit BESIDE each other in the real page share a row name.
-   *
-   * Every other page in this editor is a stack of full-width bands, and drawing
-   * it that way is honest. The checkout is not a stack: the order sits on the
-   * left and the form on the right, and a merchant who is shown two bands will
-   * not recognise their own checkout when they meet it. So consecutive slots
-   * with the same `row` are drawn side by side, each still its own place with
-   * its own tab and its own choices, and they stack on a phone exactly as the
-   * shop's own page does.
-   */
-  row?: string;
-  /**
-   * Places that share one side of a row, one above the other.
-   *
-   * A column of a real page is not one thing: the checkout's right-hand side is
-   * the form, and then a message, and then the button. Slots in the same `row`
-   * that name the same `stack` are that column, in the order written.
-   */
-  stack?: string;
-  /** Its share of that row, as a grid fraction. Taken from the first slot of a stack. */
-  span?: number;
   /** `themeEditor.slots.*` key: something true about the place, said before the choices. */
   hint?: string;
   /** What a merchant may put here. Empty when locked or inherited. */
   options?: SlotOption[];
   /** The value that is in the slot to begin with. */
   initial?: string;
-  /** Values that mean "nothing here": the slot draws its empty state instead. */
-  emptyValues?: string[];
-  /** `themeEditor.slots.*` key for what the empty state says. */
-  emptyLabel?: string;
 };
 
 /** In the order a shopper meets them. */
@@ -145,12 +115,11 @@ export const SLOT_PAGES: readonly SlotPageKey[] = [
  * cannot check.
  */
 export const PAGE_NOTES: Partial<Record<SlotPageKey, string>> = {};
-export const SLOT_GROUPS: readonly SlotPageKey[] = ["header", "footer"] as const;
 
 export const SLOTS: Record<SlotPageKey, Slot[]> = {
   home: [
-    { key: "notice", label: "notice", inherited: true, inheritedFrom: { page: "header", key: "notice" } },
-    { key: "header", label: "header", inherited: true, inheritedFrom: { page: "header", key: "layout" } },
+    { key: "notice", label: "notice", inheritedFrom: { page: "header", key: "notice" } },
+    { key: "header", label: "header", inheritedFrom: { page: "header", key: "layout" } },
     {
       key: "hero",
       label: "hero",
@@ -170,8 +139,6 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
       key: "categories",
       label: "categories",
       initial: "tiles",
-      emptyValues: ["off"],
-      emptyLabel: "categoriesEmpty",
       options: [
         { value: "tiles", label: "categoriesTiles", note: "categoriesTilesNote", shape: "row" },
         { value: "strip", label: "categoriesStrip", note: "categoriesStripNote", shape: "line" },
@@ -182,8 +149,6 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
       key: "trust",
       label: "trustRow",
       initial: "icons",
-      emptyValues: ["off"],
-      emptyLabel: "trustRowEmpty",
       options: [
         { value: "icons", label: "trustIcons", note: "trustIconsNote", shape: "row" },
         { value: "line", label: "trustLinePlain", note: "trustLinePlainNote", shape: "line" },
@@ -194,8 +159,6 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
       key: "featured",
       label: "featured",
       initial: "row",
-      emptyValues: ["off"],
-      emptyLabel: "featuredEmpty",
       /*
         One shape. "A grid of eight" was a second option until 2026-09-23: the
         band is one row that scrolls, with arrows and a link to the page that
@@ -235,8 +198,6 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
       key: "promo",
       label: "promo",
       initial: "none",
-      emptyValues: ["none"],
-      emptyLabel: "promoEmpty",
       options: [
         { value: "none", label: "nothing", shape: "blank" },
         { value: "strip", label: "promoStrip", note: "promoStripNote", shape: "line", premium: true },
@@ -248,8 +209,6 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
       key: "bestsellers",
       label: "bestsellers",
       initial: "row",
-      emptyValues: ["off"],
-      emptyLabel: "bestsellersEmpty",
       options: [
         { value: "row", label: "bestsellersRow", note: "bestsellersRowNote", shape: "row" },
         { value: "off", label: "off", shape: "blank" },
@@ -259,8 +218,6 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
       key: "arrivals",
       label: "arrivals",
       initial: "off",
-      emptyValues: ["off"],
-      emptyLabel: "arrivalsEmpty",
       options: [
         { value: "row", label: "arrivalsRow", note: "arrivalsRowNote", shape: "row" },
         { value: "off", label: "off", shape: "blank" },
@@ -280,8 +237,6 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
       key: "brands",
       label: "brands",
       initial: "off",
-      emptyValues: ["off"],
-      emptyLabel: "brandsEmpty",
       options: [
         { value: "row", label: "brandsRow", note: "brandsRowNote", shape: "row" },
         { value: "off", label: "off", shape: "blank" },
@@ -291,8 +246,6 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
       key: "reviews",
       label: "reviews",
       initial: "off",
-      emptyValues: ["off"],
-      emptyLabel: "reviewsEmpty",
       options: [
         { value: "cards", label: "reviewsCards", note: "reviewsCardsNote", shape: "row", premium: true },
         { value: "quote", label: "reviewsQuote", note: "reviewsQuoteNote", shape: "line", premium: true },
@@ -303,8 +256,6 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
       key: "posts",
       label: "posts",
       initial: "off",
-      emptyValues: ["off"],
-      emptyLabel: "postsEmpty",
       options: [
         { value: "three", label: "postsThree", note: "postsThreeNote", shape: "row" },
         { value: "off", label: "off", shape: "blank" },
@@ -314,8 +265,6 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
       key: "signup",
       label: "signup",
       initial: "off",
-      emptyValues: ["off"],
-      emptyLabel: "signupEmpty",
       options: [
         { value: "whatsapp", label: "signupWhatsapp", note: "signupWhatsappNote", shape: "line" },
         { value: "off", label: "off", shape: "blank" },
@@ -325,25 +274,21 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
       key: "faq",
       label: "faq",
       initial: "off",
-      emptyValues: ["off"],
-      emptyLabel: "faqEmpty",
       options: [
         { value: "on", label: "faqOn", note: "faqOnNote", shape: "line" },
         { value: "off", label: "off", shape: "blank" },
       ],
     },
-    { key: "footer", label: "footer", inherited: true, inheritedFrom: { page: "footer", key: "layout" } },
+    { key: "footer", label: "footer", inheritedFrom: { page: "footer", key: "layout" } },
   ],
 
   product: [
-    { key: "notice", label: "notice", inherited: true, inheritedFrom: { page: "header", key: "notice" } },
-    { key: "header", label: "header", inherited: true, inheritedFrom: { page: "header", key: "layout" } },
+    { key: "notice", label: "notice", inheritedFrom: { page: "header", key: "notice" } },
+    { key: "header", label: "header", inheritedFrom: { page: "header", key: "layout" } },
     {
       key: "breadcrumb",
       label: "breadcrumb",
       initial: "on",
-      emptyValues: ["off"],
-      emptyLabel: "breadcrumbEmpty",
       options: [
         { value: "on", label: "on", note: "breadcrumbNote", shape: "line" },
         { value: "off", label: "off", shape: "blank" },
@@ -370,7 +315,7 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
       thing wherever they are standing. Picked once, on the Home page -- two
       lists would be two answers to one question.
     */
-    { key: "trust", label: "trust", inherited: true, inheritedFrom: { page: "home", key: "trust" } },
+    { key: "trust", label: "trust", inheritedFrom: { page: "home", key: "trust" } },
     /*
       The fold-out rows that end the buying column (2026-09-25). No options: a
       place with one answer draws no chooser -- what a merchant edits here is
@@ -381,8 +326,6 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
       key: "reviews",
       label: "productReviews",
       initial: "off",
-      emptyValues: ["off"],
-      emptyLabel: "productReviewsEmpty",
       options: [
         { value: "cards", label: "productReviewsCards", note: "productReviewsCardsNote", shape: "row", premium: true },
         { value: "summary", label: "productReviewsSummary", note: "productReviewsSummaryNote", shape: "line", premium: true },
@@ -393,8 +336,6 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
       key: "faq",
       label: "productFaq",
       initial: "off",
-      emptyValues: ["off"],
-      emptyLabel: "productFaqEmpty",
       options: [
         { value: "on", label: "productFaqOn", note: "productFaqOnNote", shape: "line" },
         { value: "off", label: "off", shape: "blank" },
@@ -404,8 +345,6 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
       key: "related",
       label: "related",
       initial: "on",
-      emptyValues: ["off"],
-      emptyLabel: "relatedEmpty",
       options: [
         { value: "on", label: "on", note: "relatedNote", shape: "row" },
         { value: "off", label: "off", shape: "blank" },
@@ -418,8 +357,6 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
       // was built -- the switch simply had nothing to write to until
       // 2026-09-23, when the strip became a section of its own.
       initial: "on",
-      emptyValues: ["off"],
-      emptyLabel: "recentEmpty",
       options: [
         { value: "on", label: "recentOn", note: "recentOnNote", shape: "row" },
         { value: "off", label: "off", shape: "blank" },
@@ -434,7 +371,7 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
         { value: "off", label: "off", note: "stickyBuyOffNote", shape: "blank" },
       ],
     },
-    { key: "footer", label: "footer", inherited: true, inheritedFrom: { page: "footer", key: "layout" } },
+    { key: "footer", label: "footer", inheritedFrom: { page: "footer", key: "layout" } },
   ],
 
   /**
@@ -454,14 +391,12 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
    * they are offered here rather than left out the way the coupon nearly was.
    */
   category: [
-    { key: "notice", label: "notice", inherited: true, inheritedFrom: { page: "header", key: "notice" } },
-    { key: "header", label: "header", inherited: true, inheritedFrom: { page: "header", key: "layout" } },
+    { key: "notice", label: "notice", inheritedFrom: { page: "header", key: "notice" } },
+    { key: "header", label: "header", inheritedFrom: { page: "header", key: "layout" } },
     {
       key: "breadcrumb",
       label: "breadcrumb",
       initial: "on",
-      emptyValues: ["off"],
-      emptyLabel: "breadcrumbEmpty",
       options: [
         { value: "on", label: "on", note: "catBreadcrumbNote", shape: "line" },
         { value: "off", label: "off", shape: "blank" },
@@ -481,8 +416,6 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
       key: "count",
       label: "catCount",
       initial: "off",
-      emptyValues: ["off"],
-      emptyLabel: "catCountEmpty",
       options: [
         { value: "on", label: "on", note: "catCountNote", shape: "line" },
         { value: "off", label: "off", shape: "blank" },
@@ -504,8 +437,6 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
       label: "catSort",
       hint: "catSortHint",
       initial: "off",
-      emptyValues: ["off"],
-      emptyLabel: "catSortEmpty",
       options: [
         { value: "off", label: "off", note: "catSortOffNote", shape: "blank" },
         { value: "menu", label: "catSortMenu", note: "catSortMenuNote", shape: "line" },
@@ -517,8 +448,6 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
       label: "catFilters",
       hint: "catFiltersHint",
       initial: "off",
-      emptyValues: ["off"],
-      emptyLabel: "catFiltersEmpty",
       options: [
         { value: "off", label: "off", shape: "blank" },
         { value: "chips", label: "catFiltersChips", note: "catFiltersChipsNote", shape: "line" },
@@ -553,8 +482,6 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
       label: "catMore",
       hint: "catMoreHint",
       initial: "pages",
-      emptyValues: ["none"],
-      emptyLabel: "catMoreEmpty",
       options: [
         { value: "pages", label: "catMorePages", note: "catMorePagesNote", shape: "line" },
         { value: "button", label: "catMoreButton", note: "catMoreButtonNote", shape: "line" },
@@ -565,8 +492,6 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
       key: "text",
       label: "catText",
       initial: "off",
-      emptyValues: ["off"],
-      emptyLabel: "catTextEmpty",
       options: [
         { value: "off", label: "off", shape: "blank" },
         { value: "block", label: "catTextBlock", note: "catTextBlockNote", shape: "block" },
@@ -582,7 +507,7 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
         { value: "invite", label: "catEmptyInvite", note: "catEmptyInviteNote", shape: "block" },
       ],
     },
-    { key: "footer", label: "footer", inherited: true, inheritedFrom: { page: "footer", key: "layout" } },
+    { key: "footer", label: "footer", inheritedFrom: { page: "footer", key: "layout" } },
   ],
 
   /**
@@ -611,8 +536,8 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
    * anyone who reaches it with nothing searched.
    */
   search: [
-    { key: "notice", label: "notice", inherited: true, inheritedFrom: { page: "header", key: "notice" } },
-    { key: "header", label: "header", inherited: true, inheritedFrom: { page: "header", key: "layout" } },
+    { key: "notice", label: "notice", inheritedFrom: { page: "header", key: "notice" } },
+    { key: "header", label: "header", inheritedFrom: { page: "header", key: "layout" } },
     {
       key: "heading",
       label: "searchHeading",
@@ -626,8 +551,6 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
       key: "categories",
       label: "searchCategories",
       initial: "on",
-      emptyValues: ["off"],
-      emptyLabel: "searchCategoriesEmpty",
       options: [
         { value: "on", label: "on", note: "searchCategoriesNote", shape: "row" },
         { value: "off", label: "off", shape: "blank" },
@@ -649,8 +572,6 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
       label: "catMore",
       hint: "searchMoreHint",
       initial: "none",
-      emptyValues: ["none"],
-      emptyLabel: "catMoreEmpty",
       options: [
         { value: "none", label: "catMoreNone", note: "searchMoreNoneNote", shape: "blank" },
         { value: "button", label: "catMoreButton", note: "catMoreButtonNote", shape: "line" },
@@ -677,7 +598,7 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
         { value: "trending", label: "searchPromptTrending", note: "searchPromptTrendingNote", shape: "row" },
       ],
     },
-    { key: "footer", label: "footer", inherited: true, inheritedFrom: { page: "footer", key: "layout" } },
+    { key: "footer", label: "footer", inheritedFrom: { page: "footer", key: "layout" } },
   ],
 
   /**
@@ -708,14 +629,12 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
    * its email, which both serializers had fallen back to.
    */
   blog: [
-    { key: "notice", label: "notice", inherited: true, inheritedFrom: { page: "header", key: "notice" } },
-    { key: "header", label: "header", inherited: true, inheritedFrom: { page: "header", key: "layout" } },
+    { key: "notice", label: "notice", inheritedFrom: { page: "header", key: "notice" } },
+    { key: "header", label: "header", inheritedFrom: { page: "header", key: "layout" } },
     {
       key: "heading",
       label: "blogHeading",
       initial: "on",
-      emptyValues: ["off"],
-      emptyLabel: "blogHeadingEmpty",
       options: [
         { value: "on", label: "on", note: "blogHeadingNote", shape: "line" },
         { value: "off", label: "off", note: "blogHeadingOffNote", shape: "blank" },
@@ -725,8 +644,6 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
       key: "search",
       label: "blogSearch",
       initial: "off",
-      emptyValues: ["off"],
-      emptyLabel: "blogSearchEmpty",
       options: [
         { value: "off", label: "off", shape: "blank" },
         { value: "on", label: "on", note: "blogSearchNote", shape: "line" },
@@ -737,8 +654,6 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
       label: "blogTags",
       hint: "blogTagsHint",
       initial: "off",
-      emptyValues: ["off"],
-      emptyLabel: "blogTagsEmpty",
       options: [
         { value: "off", label: "off", shape: "blank" },
         { value: "row", label: "blogTagsRow", note: "blogTagsRowNote", shape: "line" },
@@ -749,8 +664,6 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
       label: "blogFeatured",
       hint: "blogFeaturedHint",
       initial: "hero",
-      emptyValues: ["off"],
-      emptyLabel: "blogFeaturedEmpty",
       options: [
         { value: "hero", label: "blogFeaturedHero", note: "blogFeaturedHeroNote", shape: "block" },
         { value: "shelf", label: "blogFeaturedShelf", note: "blogFeaturedShelfNote", shape: "row" },
@@ -781,8 +694,6 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
       label: "blogMeta",
       hint: "blogMetaHint",
       initial: "date",
-      emptyValues: ["none"],
-      emptyLabel: "blogMetaEmpty",
       options: [
         { value: "date", label: "blogMetaDate", note: "blogMetaDateNote", shape: "line" },
         { value: "reads", label: "blogMetaReads", note: "blogMetaReadsNote", shape: "line" },
@@ -793,25 +704,21 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
       key: "text",
       label: "catText",
       initial: "off",
-      emptyValues: ["off"],
-      emptyLabel: "catTextEmpty",
       options: [
         { value: "off", label: "off", shape: "blank" },
         { value: "block", label: "catTextBlock", note: "blogTextBlockNote", shape: "block" },
       ],
     },
-    { key: "footer", label: "footer", inherited: true, inheritedFrom: { page: "footer", key: "layout" } },
+    { key: "footer", label: "footer", inheritedFrom: { page: "footer", key: "layout" } },
   ],
 
   article: [
-    { key: "notice", label: "notice", inherited: true, inheritedFrom: { page: "header", key: "notice" } },
-    { key: "header", label: "header", inherited: true, inheritedFrom: { page: "header", key: "layout" } },
+    { key: "notice", label: "notice", inheritedFrom: { page: "header", key: "notice" } },
+    { key: "header", label: "header", inheritedFrom: { page: "header", key: "layout" } },
     {
       key: "back",
       label: "articleBack",
       initial: "on",
-      emptyValues: ["off"],
-      emptyLabel: "articleBackEmpty",
       options: [
         { value: "on", label: "on", note: "articleBackNote", shape: "line" },
         { value: "off", label: "off", note: "articleBackOffNote", shape: "blank" },
@@ -838,8 +745,6 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
       label: "articleByline",
       hint: "articleBylineHint",
       initial: "date",
-      emptyValues: ["none"],
-      emptyLabel: "articleBylineEmpty",
       options: [
         { value: "date", label: "articleBylineDate", note: "articleBylineDateNote", shape: "line" },
         { value: "author", label: "articleBylineAuthor", note: "articleBylineAuthorNote", shape: "line" },
@@ -860,8 +765,6 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
       key: "tags",
       label: "blogTags",
       initial: "on",
-      emptyValues: ["off"],
-      emptyLabel: "blogTagsEmpty",
       options: [
         { value: "on", label: "on", note: "articleTagsNote", shape: "line" },
         { value: "off", label: "off", shape: "blank" },
@@ -871,8 +774,6 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
       key: "prevNext",
       label: "articlePrevNext",
       initial: "on",
-      emptyValues: ["off"],
-      emptyLabel: "articlePrevNextEmpty",
       options: [
         { value: "on", label: "on", note: "articlePrevNextNote", shape: "row" },
         { value: "off", label: "off", shape: "blank" },
@@ -882,14 +783,12 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
       key: "related",
       label: "articleRelated",
       initial: "on",
-      emptyValues: ["off"],
-      emptyLabel: "articleRelatedEmpty",
       options: [
         { value: "on", label: "on", note: "articleRelatedNote", shape: "row" },
         { value: "off", label: "off", shape: "blank" },
       ],
     },
-    { key: "footer", label: "footer", inherited: true, inheritedFrom: { page: "footer", key: "layout" } },
+    { key: "footer", label: "footer", inheritedFrom: { page: "footer", key: "layout" } },
   ],
 
   /**
@@ -901,8 +800,8 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
    * only where a (premium) reviews section is shown.
    */
   reviews: [
-    { key: "notice", label: "notice", inherited: true, inheritedFrom: { page: "header", key: "notice" } },
-    { key: "header", label: "header", inherited: true, inheritedFrom: { page: "header", key: "layout" } },
+    { key: "notice", label: "notice", inheritedFrom: { page: "header", key: "notice" } },
+    { key: "header", label: "header", inheritedFrom: { page: "header", key: "layout" } },
     {
       key: "summary",
       label: "reviewsPageSummary",
@@ -922,7 +821,7 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
         { value: "cards", label: "reviewsPageCards", note: "reviewsPageCardsNote", shape: "row", premium: true },
       ],
     },
-    { key: "footer", label: "footer", inherited: true, inheritedFrom: { page: "footer", key: "layout" } },
+    { key: "footer", label: "footer", inheritedFrom: { page: "footer", key: "layout" } },
   ],
 
   /**
@@ -934,8 +833,8 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
    * makes it exist.
    */
   wishlist: [
-    { key: "notice", label: "notice", inherited: true, inheritedFrom: { page: "header", key: "notice" } },
-    { key: "header", label: "header", inherited: true, inheritedFrom: { page: "header", key: "layout" } },
+    { key: "notice", label: "notice", inheritedFrom: { page: "header", key: "notice" } },
+    { key: "header", label: "header", inheritedFrom: { page: "header", key: "layout" } },
     {
       key: "heading",
       label: "wishHeading",
@@ -974,7 +873,7 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
         { value: "invite", label: "cartEmptyInvite", note: "wishEmptyInviteNote", shape: "block" },
       ],
     },
-    { key: "footer", label: "footer", inherited: true, inheritedFrom: { page: "footer", key: "layout" } },
+    { key: "footer", label: "footer", inheritedFrom: { page: "footer", key: "layout" } },
   ],
 
   /**
@@ -1009,8 +908,8 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
    *   today". It was built on 2026-09-21.
    */
   account: [
-    { key: "notice", label: "notice", inherited: true, inheritedFrom: { page: "header", key: "notice" } },
-    { key: "header", label: "header", inherited: true, inheritedFrom: { page: "header", key: "layout" } },
+    { key: "notice", label: "notice", inheritedFrom: { page: "header", key: "notice" } },
+    { key: "header", label: "header", inheritedFrom: { page: "header", key: "layout" } },
     /**
      * The welcome card (owner, 2026-09-25): their face, how the shop reaches
      * them, how long they have been a member, what they have here and their
@@ -1022,8 +921,6 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
       label: "accountGreeting",
       hint: "accountGreetingHint",
       initial: "name",
-      emptyValues: ["none"],
-      emptyLabel: "accountGreetingEmpty",
       options: [
         { value: "name", label: "accountGreetingName", note: "accountGreetingNameNote", shape: "line" },
         { value: "plain", label: "accountGreetingPlain", note: "accountGreetingPlainNote", shape: "line" },
@@ -1052,8 +949,6 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
       label: "accountReviews",
       hint: "accountReviewsHint",
       initial: "on",
-      emptyValues: ["off"],
-      emptyLabel: "accountReviewsEmpty",
       options: [
         { value: "on", label: "on", note: "accountReviewsOnNote", shape: "block" },
         { value: "off", label: "off", note: "accountReviewsOffNote", shape: "blank" },
@@ -1068,7 +963,7 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
         { value: "invite", label: "cartEmptyInvite", note: "accountEmptyInviteNote", shape: "block" },
       ],
     },
-    { key: "footer", label: "footer", inherited: true, inheritedFrom: { page: "footer", key: "layout" } },
+    { key: "footer", label: "footer", inheritedFrom: { page: "footer", key: "layout" } },
   ],
 
   /**
@@ -1080,8 +975,8 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
    * they nearly bought, and what an empty cart says instead of nothing.
    */
   cart: [
-    { key: "notice", label: "notice", inherited: true, inheritedFrom: { page: "header", key: "notice" } },
-    { key: "header", label: "header", inherited: true, inheritedFrom: { page: "header", key: "layout" } },
+    { key: "notice", label: "notice", inheritedFrom: { page: "header", key: "notice" } },
+    { key: "header", label: "header", inheritedFrom: { page: "header", key: "layout" } },
     {
       key: "heading",
       label: "cartHeading",
@@ -1095,8 +990,6 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
       key: "steps",
       label: "checkoutSteps",
       initial: "none",
-      emptyValues: ["none"],
-      emptyLabel: "checkoutStepsEmpty",
       options: [
         { value: "none", label: "nothing", note: "checkoutStepsNoneNote", shape: "blank" },
         { value: "bar", label: "checkoutStepsBar", note: "cartStepsBarNote", shape: "line" },
@@ -1114,9 +1007,6 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
     {
       key: "lines",
       label: "cartLines",
-      row: "body",
-      stack: "left",
-      span: 1.45,
       hint: "cartLinesHint",
       initial: "cards",
       options: [
@@ -1127,9 +1017,6 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
     {
       key: "total",
       label: "cartTotal",
-      row: "body",
-      stack: "right",
-      span: 1,
       hint: "cartTotalHint",
       initial: "full",
       options: [
@@ -1151,8 +1038,6 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
     {
       key: "coupon",
       label: "checkoutCoupon",
-      row: "body",
-      stack: "right",
       hint: "checkoutCouponHint",
       initial: "off",
       /* No empty state: the summary above is where this actually appears, so
@@ -1174,11 +1059,7 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
     {
       key: "payments",
       label: "checkoutPayments",
-      row: "body",
-      stack: "right",
       initial: "off",
-      emptyValues: ["off"],
-      emptyLabel: "checkoutPaymentsEmpty",
       options: [
         { value: "on", label: "paymentsOn", note: "cartPaymentsNote", shape: "row" },
         { value: "off", label: "off", shape: "blank" },
@@ -1188,8 +1069,6 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
       key: "trust",
       label: "trustLine",
       initial: "on",
-      emptyValues: ["off"],
-      emptyLabel: "trustEmpty",
       options: [
         { value: "on", label: "on", note: "cartTrustNote", shape: "line" },
         { value: "off", label: "off", shape: "blank" },
@@ -1199,8 +1078,6 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
       key: "sticky",
       label: "cartSticky",
       initial: "on",
-      emptyValues: ["off"],
-      emptyLabel: "cartStickyEmpty",
       options: [
         { value: "on", label: "on", note: "cartStickyNote", shape: "line" },
         { value: "off", label: "off", note: "cartStickyOffNote", shape: "blank" },
@@ -1211,8 +1088,6 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
       label: "cartUpsell",
       hint: "cartUpsellHint",
       initial: "row",
-      emptyValues: ["off"],
-      emptyLabel: "cartUpsellEmpty",
       options: [
         { value: "off", label: "off", shape: "blank" },
         { value: "row", label: "cartUpsellRow", note: "cartUpsellRowNote", shape: "row" },
@@ -1223,8 +1098,6 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
       key: "recent",
       label: "recent",
       initial: "off",
-      emptyValues: ["off"],
-      emptyLabel: "recentEmpty",
       options: [
         { value: "on", label: "on", note: "cartRecentNote", shape: "row" },
         { value: "off", label: "off", shape: "blank" },
@@ -1240,11 +1113,11 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
         { value: "invite", label: "cartEmptyInvite", note: "cartEmptyInviteNote", shape: "block" },
       ],
     },
-    { key: "footer", label: "footer", inherited: true, inheritedFrom: { page: "footer", key: "layout" } },
+    { key: "footer", label: "footer", inheritedFrom: { page: "footer", key: "layout" } },
   ],
 
   checkout: [
-    { key: "notice", label: "notice", inherited: true, inheritedFrom: { page: "header", key: "notice" } },
+    { key: "notice", label: "notice", inheritedFrom: { page: "header", key: "notice" } },
     {
       /**
        * Checkout gets its OWN header and footer rather than inheriting them.
@@ -1266,8 +1139,6 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
       key: "trust",
       label: "trustLine",
       initial: "on",
-      emptyValues: ["off"],
-      emptyLabel: "trustEmpty",
       options: [
         { value: "on", label: "on", note: "trustLineNote", shape: "line" },
         { value: "off", label: "off", shape: "blank" },
@@ -1277,8 +1148,6 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
       key: "steps",
       label: "checkoutSteps",
       initial: "none",
-      emptyValues: ["none"],
-      emptyLabel: "checkoutStepsEmpty",
       options: [
         { value: "none", label: "nothing", note: "checkoutStepsNoneNote", shape: "blank" },
         { value: "bar", label: "checkoutStepsBar", note: "checkoutStepsBarNote", shape: "line" },
@@ -1296,9 +1165,6 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
     {
       key: "summary",
       label: "checkoutOrder",
-      row: "body",
-      stack: "left",
-      span: 1,
       hint: "checkoutOrderHint",
       initial: "quantity",
       options: [
@@ -1320,8 +1186,6 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
     {
       key: "coupon",
       label: "checkoutCoupon",
-      row: "body",
-      stack: "left",
       hint: "checkoutCouponHint",
       initial: "off",
       /* No empty state, for the reason the cart's has none: the promo row is
@@ -1337,9 +1201,6 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
     {
       key: "form",
       label: "checkoutForm",
-      row: "body",
-      stack: "right",
-      span: 1.15,
       /* The same value as Settings > Checkout. Said here, because two screens
          editing one setting is a thing a merchant should be told, not find. */
       hint: "checkoutFormHint",
@@ -1360,8 +1221,6 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
     {
       key: "beforePay",
       label: "checkoutBeforePay",
-      row: "body",
-      stack: "right",
       hint: "checkoutBeforePayHint",
       initial: "off",
       options: [
@@ -1374,8 +1233,6 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
       key: "payments",
       label: "checkoutPayments",
       initial: "on",
-      emptyValues: ["off"],
-      emptyLabel: "checkoutPaymentsEmpty",
       options: [
         { value: "on", label: "paymentsOn", note: "checkoutPaymentsNote", shape: "row" },
         { value: "off", label: "off", shape: "blank" },
@@ -1385,8 +1242,6 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
       key: "after",
       label: "after",
       initial: "line",
-      emptyValues: ["none"],
-      emptyLabel: "afterEmpty",
       options: [
         { value: "line", label: "afterLine", note: "afterLineNote", shape: "line" },
         { value: "none", label: "nothing", shape: "blank" },
@@ -1396,8 +1251,6 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
       key: "footerStyle",
       label: "checkoutFooter",
       initial: "policies",
-      emptyValues: ["none"],
-      emptyLabel: "checkoutFooterEmpty",
       options: [
         { value: "policies", label: "checkoutFooterPolicies", note: "checkoutFooterPoliciesNote", shape: "line" },
         { value: "same", label: "checkoutFooterSame", note: "checkoutFooterSameNote", shape: "row" },
@@ -1411,8 +1264,6 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
       key: "notice",
       label: "notice",
       initial: "message",
-      emptyValues: ["off"],
-      emptyLabel: "noticeEmpty",
       options: [
         { value: "message", label: "noticeMessage", note: "noticeMessageNote", shape: "line" },
         { value: "off", label: "off", shape: "blank" },
@@ -1543,8 +1394,6 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
       key: "contact",
       label: "footerContact",
       initial: "full",
-      emptyValues: ["off"],
-      emptyLabel: "footerContactEmpty",
       options: [
         { value: "full", label: "contactFull", note: "contactFullNote", shape: "line" },
         { value: "email", label: "contactEmail", note: "contactEmailNote", shape: "line" },
@@ -1557,8 +1406,6 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
       key: "social",
       label: "footerSocial",
       initial: "names",
-      emptyValues: ["off"],
-      emptyLabel: "footerSocialEmpty",
       options: [
         { value: "names", label: "socialNames", note: "socialNamesNote", shape: "line" },
         { value: "marks", label: "socialMarks", note: "socialMarksNote", shape: "row" },
@@ -1572,8 +1419,6 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
       key: "payments",
       label: "footerPayments",
       initial: "off",
-      emptyValues: ["off"],
-      emptyLabel: "footerPaymentsEmpty",
       options: [
         { value: "off", label: "off", shape: "blank" },
         { value: "on", label: "paymentsOn", note: "paymentsOnNote", shape: "row" },
@@ -1606,7 +1451,3 @@ export function initialChoices(page: SlotPageKey): Record<string, string> {
   return out;
 }
 
-/** Is this slot showing nothing at all right now? */
-export function isEmpty(slot: Slot, value: string | undefined): boolean {
-  return Boolean(slot.emptyValues?.includes(value ?? ""));
-}

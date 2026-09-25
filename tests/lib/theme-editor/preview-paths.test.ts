@@ -25,13 +25,19 @@ describe("templateForPath", () => {
     expect(templateForPath("/en/search?q=shirt")).toBe("templates.search");
     expect(templateForPath("/en/blog")).toBe("templates.blog");
     expect(templateForPath("/en/blog/summer-sale")).toBe("templates.blog_article");
+    // Drawn from a sample of the shop's own products in the preview (2026-09-26).
+    expect(templateForPath("/en/reviews")).toBe("templates.reviews");
+    expect(templateForPath("/en/wishlist")).toBe("templates.wishlist");
+    expect(templateForPath("/bn/account")).toBe("templates.account");
+    expect(templateForPath("/en/cart")).toBe("templates.cart");
+    expect(templateForPath("/en/checkout?zone=x")).toBe("templates.checkout");
   });
 
   test("pages themes don't draw are null", () => {
     for (const path of [
-      "/en/cart",
-      "/en/checkout",
       "/en/checkout/payment",
+      "/en/account/sign-in",
+      "/en/cart/drawer",
       "/en/about-us",
       "/en/categories",
       "/en/products",
@@ -69,6 +75,11 @@ describe("previewTarget", () => {
     });
     expect(previewTarget("templates.blog", all, "en")).toEqual({ path: "/en/blog" });
     expect(previewTarget("templates.blog_article", all, "en")).toEqual({ path: "/en/blog/summer-sale" });
+    expect(previewTarget("templates.reviews", all, "en")).toEqual({ path: "/en/reviews" });
+    expect(previewTarget("templates.wishlist", none, "bn")).toEqual({ path: "/bn/wishlist" });
+    expect(previewTarget("templates.account", none, "en")).toEqual({ path: "/en/account" });
+    expect(previewTarget("templates.cart", none, "en")).toEqual({ path: "/en/cart" });
+    expect(previewTarget("templates.checkout", none, "en")).toEqual({ path: "/en/checkout" });
   });
 
   test("a shop with nothing to show says what it lacks; home, search and the blog list always exist", () => {

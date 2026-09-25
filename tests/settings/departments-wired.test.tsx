@@ -119,7 +119,7 @@ describe("a place with one answer", () => {
     expect(PLACE.off).toBeUndefined();
   });
 
-  test("the canvas offers no choices, so the pop-up draws no chooser", () => {
+  test("the place offers no choices, so the panel draws no chooser", () => {
     const slot = SLOTS.home.find((one) => one.key === "bands")!;
     expect(slot.options ?? []).toEqual([]);
     expect(slot.locked).toBeUndefined();
@@ -149,7 +149,7 @@ describe("picking three", () => {
     expect(fields[0].options).toEqual([]);
   });
 
-  test("it sits under the featured band, where the canvas draws it", () => {
+  test("it sits under the featured band, where the editor lists it", () => {
     const page = editor([
       section("hero", "banner_slider"),
       section("cats", "category_tiles"),

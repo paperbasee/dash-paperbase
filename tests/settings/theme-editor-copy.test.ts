@@ -63,8 +63,10 @@ const SOURCES = [
   "src/components/theme-editor/EditorSheet.tsx",
   "src/components/theme-editor/ConflictDialog.tsx",
   "src/components/theme-editor/slots/SlotEditor.tsx",
-  "src/components/theme-editor/slots/SlotCanvas.tsx",
   "src/components/theme-editor/slots/SlotPanel.tsx",
+  // The shop itself in the middle, and the list of places beside it (2026-09-26).
+  "src/components/theme-editor/PreviewPane.tsx",
+  "src/components/theme-editor/slots/PagePlaces.tsx",
   // The editor kit (2026-09-26): its own few words, read through `themeEditor.kit`.
   "src/components/theme-editor/kit/Panel.tsx",
   "src/components/theme-editor/kit/Picture.tsx",
@@ -72,7 +74,6 @@ const SOURCES = [
   "src/components/theme-editor/PicturePicker.tsx",
   "src/components/theme-editor/ProductPicker.tsx",
   "src/components/theme-editor/ChoicePicker.tsx",
-  "src/components/theme-editor/slots/ShopChrome.tsx",
   "src/components/theme-editor/slots/StylePanel.tsx",
 ];
 
@@ -153,7 +154,7 @@ describe("theme editor copy", () => {
       // The message keys a refused value carries (validate.ts FieldProblem).
       for (const m of text.matchAll(/^ {2}\| "(field\w+)"$/gm)) used.add(m[1]);
       // Every slot, option, hint and locked reason names its key as a value.
-      for (const m of text.matchAll(/\b(?:label|note|hint|lockedBecause|emptyLabel):\s*"(\w+)"/g)) used.add(m[1]);
+      for (const m of text.matchAll(/\b(?:label|note|hint|lockedBecause):\s*"(\w+)"/g)) used.add(m[1]);
     }
     expect(used.size).toBeGreaterThan(70);
     expect([...used].filter((k) => !known(enNs, k))).toEqual([]);

@@ -95,7 +95,7 @@ const PAGE = () => editor([section("wishlist", "wishlist")]);
 describe("the wishlist page is wired", () => {
   test("every place on it is real", () => {
     for (const slot of SLOTS.wishlist) {
-      if (slot.inherited) continue;
+      if (slot.inheritedFrom) continue;
       const wiring = wiringFor("wishlist", slot.key);
       expect(wiring, slot.key).toBeTruthy();
       expect(wiring!.page, slot.key).toBe("templates.wishlist");

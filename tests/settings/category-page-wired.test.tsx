@@ -11,12 +11,8 @@
  * Sorting and filtering are still drawings, deliberately: a place is wired when
  * its section can do everything the place promises.
  */
-import { renderToStaticMarkup } from "react-dom/server";
-import { NextIntlClientProvider } from "next-intl";
 import { describe, expect, test } from "vitest";
 
-import { ShopChrome } from "@/components/theme-editor/slots/ShopChrome";
-import en from "../../messages/en.json";
 
 import type { ThemeDocument, ThemeEditorState, ThemeManifest, ThemeSection } from "@/lib/theme-editor/api";
 import { editorReducer, initEditorState, type EditorState } from "@/lib/theme-editor/editor-reducer";
@@ -182,7 +178,7 @@ describe("every place is a page of the document", () => {
       changes nothing, which is the complaint that started this work.
     */
     for (const slot of SLOTS.category) {
-      if (slot.inherited) continue;
+      if (slot.inheritedFrom) continue;
       expect(wiringFor("category", slot.key), slot.key).not.toBeNull();
     }
   });
@@ -407,102 +403,6 @@ describe("one decision, one control", () => {
         expect(offered.has(setting), `${type}.${setting}`).toBe(true);
       }
     }
-  });
-});
-
-describe("the canvas draws the merchant's own category", () => {
-  /**
-   * The owner's question, 2026-09-23: a shop has many categories, so why does
-   * the editor talk about Bags? The page is a TEMPLATE -- one drawing stands
-   * for every category -- and the one it stands for is now the merchant's own
-   * first department. "Bags" belonged to no shop on this platform.
-   */
-  const DEPARTMENTS = [
-    { value: "cat_1", label: "Wearables" },
-    { value: "cat_2", label: "Audio" },
-  ];
-
-  const draw = (slotKey: string, variant: string, departments = DEPARTMENTS) =>
-    renderToStaticMarkup(
-      <NextIntlClientProvider locale="en" messages={en}>
-        <ShopChrome
-          page="category"
-          slotKey={slotKey}
-          variant={variant}
-          settings={{}}
-          departments={departments}
-        />
-      </NextIntlClientProvider>,
-    );
-
-  test("the heading is their department, not an invented one", () => {
-    for (const shape of ["plain", "eyebrow", "banner"]) {
-      expect(draw("heading", shape)).toContain("Wearables");
-      expect(draw("heading", shape)).not.toContain("Bags");
-    }
-  });
-
-  test("so is the trail", () => {
-    expect(draw("breadcrumb", "on")).toContain("Wearables");
-  });
-
-  test("and both empty answers name it, the way the shop does", () => {
-    expect(draw("empty", "text")).toContain("No products in Wearables yet.");
-    expect(draw("empty", "invite")).toContain("Nothing in Wearables just now");
-  });
-
-  test("so do the words under the grid", () => {
-    /*
-      This one said "About our bags" over a shop that sells cameras, which the
-      owner caught on 2026-09-23 -- the heading and the empty state had been
-      fixed and this had not.
-    */
-    const html = draw("text", "block");
-    expect(html).toContain("About Wearables");
-    expect(html).not.toContain("bags");
-  });
-
-  test("but the merchant's own words win over any example", () => {
-    const html = renderToStaticMarkup(
-      <NextIntlClientProvider locale="en" messages={en}>
-        <ShopChrome
-          page="category"
-          slotKey="text"
-          variant="block"
-          settings={{}}
-          departments={DEPARTMENTS}
-          live={{
-            id: "words",
-            type: "rich_text",
-            hidden: false,
-            settings: { heading: "Made in Dhaka" },
-            blocks: [],
-          }}
-        />
-      </NextIntlClientProvider>,
-    );
-    expect(html).toContain("Made in Dhaka");
-    expect(html).not.toContain("About Wearables");
-  });
-
-  test("nothing on this page names a category no shop has", () => {
-    /*
-      The whole canvas, not the places I happened to think of: the editor drew
-      "Bags" in four places and each was found separately.
-    */
-    for (const slot of SLOTS.category) {
-      for (const option of slot.options ?? [{ value: slot.initial }]) {
-        expect(draw(slot.key, option.value as string), `${slot.key}=${option.value}`).not.toContain(
-          "Bags",
-        );
-      }
-    }
-  });
-
-  test("a shop with no departments yet gets plain words, never somebody else's aisle", () => {
-    const html = draw("heading", "plain", []);
-    expect(html).toContain("This category");
-    expect(html).not.toContain("Bags");
   });
 });
 

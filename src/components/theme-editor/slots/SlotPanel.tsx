@@ -84,7 +84,7 @@ export function SlotPanel({
   onClose,
 }: {
   slot: Slot;
-  /** The canvas entry this place was clicked on, for the settings other places decide. */
+  /** The page that owns this place, for the settings other places decide. */
   page: SlotPageKey;
   wiring: WiredSlot;
   manifest: ThemeManifest;
@@ -113,7 +113,7 @@ export function SlotPanel({
   onAddBlock: (blockType: string) => void;
   onRemoveBlock: (blockId: string) => void;
   onMoveBlock: (blockId: string, to: number) => void;
-  /** A picture just uploaded, and where it is: so the canvas draws it before a save. */
+  /** A picture just uploaded, and where it is: so its field shows it before a save. */
   onPictureUrl?: (key: string, url: string) => void;
   onClose: () => void;
 }) {

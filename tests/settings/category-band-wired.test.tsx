@@ -1,5 +1,5 @@
 /**
- * The category band on the canvas: picture tiles, or a row of names.
+ * The category band in the editor: picture tiles, or a row of names.
  *
  * The first place where two of its choices are the SAME section shaped
  * differently -- one `category_tiles` with `layout` set one way or the other.
@@ -156,7 +156,7 @@ describe("changing it", () => {
 
   test("the band lands under the hero, not below everything", () => {
     /*
-      The canvas order IS the page order -- that is the whole idea of the slot
+      The editor's order IS the page order -- that is the whole idea of the slot
       design. `add` put a new section at the end until 2026-09-22, which was
       right while a merchant could drag it afterwards and simply wrong once
       nothing drags: the owner clicked the band and found it under their
@@ -181,8 +181,8 @@ describe("changing it", () => {
     expect(after.document.templates.home.sections[0].type).toBe("category_tiles");
   });
 
-  test("where it goes is the canvas order, not a number written here", () => {
-    // `placeFor` reads the slot catalogue, so a place that moves on the canvas
+  test("where it goes is the editor's order, not a number written here", () => {
+    // `placeFor` reads the slot catalogue, so a place that moves in the editor's list
     // moves on the page without anybody remembering to change a second list.
     const page = editor([section("hero", "banner_slider")]);
     expect(placeFor(page.document, "home", "categories", BAND)).toBe(1);

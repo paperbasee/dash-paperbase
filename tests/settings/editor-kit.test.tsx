@@ -193,6 +193,9 @@ describe("every settings view is built from the kit (owner, 2026-09-26)", () => 
     "ChoicePicker.tsx",
     "EditorSheet.tsx",
     "ConflictDialog.tsx",
+    // The shop in the middle and the list beside it (2026-09-26).
+    "PreviewPane.tsx",
+    "slots/PagePlaces.tsx",
   ];
   const PLAIN = ["ui/button", "ui/input", "ui/textarea", "ui/select", "ui/form-field", "ui/switch"];
 

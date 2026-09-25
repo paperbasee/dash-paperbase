@@ -1,5 +1,5 @@
 /**
- * The hero, on the canvas: pictures a merchant adds, removes and orders.
+ * The hero, in the editor: pictures a merchant adds, removes and orders.
  *
  * The first wired place with a LIST inside it, and the first where one choice
  * means a different section from another -- pictures or a video. Both are easy

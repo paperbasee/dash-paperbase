@@ -1,15 +1,13 @@
 /**
  * The palette, wired (owner, 2026-09-25): six palettes from the API in the
- * Style panel, picked into the shop's document, and a sketch that is drawn in
- * the shop's colours -- its brand colour on the buttons the shop fills with it,
- * its header on the header. The screen-wide "only these places save" note is
- * gone; the typeface, still not saved, says so where it is chosen.
+ * Style panel, picked into the shop's document -- which the preview then draws
+ * in those colours. The screen-wide "only these places save" note is gone; the
+ * typeface, still not saved, says so where it is chosen.
  */
 import { renderToStaticMarkup } from "react-dom/server";
 import { NextIntlClientProvider } from "next-intl";
 import { describe, expect, test } from "vitest";
 
-import { ShopChrome } from "@/components/theme-editor/slots/ShopChrome";
 import { StylePanel } from "@/components/theme-editor/slots/StylePanel";
 import { editorReducer, initEditorState } from "@/lib/theme-editor/editor-reducer";
 import type { ThemeEditorState } from "@/lib/theme-editor/api";
@@ -117,26 +115,6 @@ describe("picking a palette", () => {
     expect(chosenPalette(before.document)).toBe("porcelain");
     const after = editorReducer(before, { type: "setThemeSetting", setting: "palette", value: "emerald" });
     expect(chosenPalette(after.document)).toBe("emerald");
-  });
-});
-
-describe("the sketch in the shop's colours", () => {
-  const draw = (page: string, slotKey: string, variant?: string) =>
-    renderToStaticMarkup(
-      <NextIntlClientProvider locale="en" messages={en}>
-        <ShopChrome page={page as never} slotKey={slotKey} variant={variant} />
-      </NextIntlClientProvider>,
-    );
-
-  test("Add to cart and Checkout are the brand colour, as the shop's big buttons are", () => {
-    expect(draw("product", "buy")).toContain("bg-shop-brand");
-    expect(draw("cart", "total")).toContain("bg-shop-brand");
-  });
-
-  test("the header is the palette's header, and the notice strip its brand colour", () => {
-    expect(draw("home", "header", "bar")).toContain("bg-shop-header");
-    expect(draw("home", "header", "masthead")).toContain("bg-shop-header");
-    expect(draw("home", "notice")).toContain("bg-shop-brand");
   });
 });
 

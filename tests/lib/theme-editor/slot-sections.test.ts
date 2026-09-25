@@ -1,5 +1,5 @@
 /**
- * Which place on the canvas is which section of the shop's document.
+ * Which of the editor's places is which section of the shop's document.
  *
  * This is the file that decides whether a merchant's click reaches their shop
  * or only this screen's own state, so getting it wrong is silent in the worst
@@ -52,8 +52,8 @@ describe("which places are wired", () => {
   });
 
   test("every place on every page is real", () => {
-    // The whole point of the work that began on 2026-09-22: no choice on the
-    // canvas that changes nothing in the shop. Inherited places are read from
+    // The whole point of the work that began on 2026-09-22: no choice in the
+    // editor that changes nothing in the shop. Inherited places are read from
     // their owner.
     const drawings: string[] = [];
     for (const [page, slots] of Object.entries(SLOTS)) {
@@ -174,16 +174,16 @@ describe("the three product bands", () => {
     }
   });
 
-  test("a band lands under the rows the canvas draws above it", () => {
+  test("a band lands under the rows the editor lists above it", () => {
     /*
       The owner, twice: "the featured this week again moved to the bottom."
 
-      The canvas puts the per-category rows between the picked band and the two
+      The editor lists the per-category rows between the picked band and the two
       that fill themselves. That place was LOCKED when this broke -- its section
       belonged to nobody the order could read -- and it is wired now, so the
       rule holds through the wiring instead. A shop that draws its page in a
-      different order from the drawing the merchant just edited is the one thing
-      this canvas exists to prevent.
+      different order from the list the merchant just edited is the one thing
+      this editor exists to prevent.
     */
     const doc = document();
     doc.templates.home.sections = [

@@ -9,6 +9,7 @@ import { useThemeEditorQuery } from "@/hooks/useThemesQuery";
 import { useRouter } from "@/i18n/navigation";
 import { CUSTOMIZATION_HREF } from "@/lib/theme-editor/access";
 import { themeErrorMessageKey } from "@/lib/theme-editor/api";
+import { previewOrigin } from "@/lib/theme-editor/preview-origin";
 import { notify } from "@/notifications";
 
 /**
@@ -19,19 +20,21 @@ import { notify } from "@/notifications";
  * nothing is kept as a version to go back to (owner, 2026-09-22) -- the screen
  * that did those things, and the second address it lived at, are gone.
  *
- * It does not save yet, and says so across the top. What is left to do is the
- * wiring: every choice on this screen writing into the shop's theme document,
- * which is the document the storefront already reads.
+ * Every choice writes the shop's theme document as a private draft, and the
+ * page in the middle is the shop itself drawing that draft (2026-09-26).
  *
  * **The permission check stays.** Who may open the editor is the API's answer,
  * not this page's, and it does not change because the screen behind it did: a
  * member without `theming.manage`, or a locked shop, gets a 403 and is sent
  * back to Customization with the reason.
  *
- * What it no longer waits for is the preview host. The old editor could not open
- * without one because it had nothing to show; this one draws its own shop, so a
- * missing preview origin is no longer a reason to refuse a merchant the screen.
+ * **It needs the preview host.** The page in the middle is the storefront drawing
+ * the draft on its private host, so without that host's address there is nothing
+ * to show; Customization does not offer the editor then, and this says why to
+ * anyone who reaches the address anyway.
  */
+const PREVIEW_ORIGIN = previewOrigin(process.env.NEXT_PUBLIC_STOREFRONT_PREVIEW_ORIGIN);
+
 export default function ThemeEditorPage() {
   const tc = useTranslations("settings.customization");
   const tCommon = useTranslations("common");
@@ -49,7 +52,17 @@ export default function ThemeEditorPage() {
     router.replace(CUSTOMIZATION_HREF);
   }, [refusal, router, tc]);
 
-  if (editor.data) return <SlotEditor loaded={editor.data} />;
+  if (PREVIEW_ORIGIN === null) {
+    return (
+      <div className="flex flex-1 flex-col items-center justify-center gap-4 p-6 text-center">
+        <p role="alert" className="max-w-sm text-sm text-muted-foreground">
+          {tc("previewNotSetUp")}
+        </p>
+      </div>
+    );
+  }
+
+  if (editor.data) return <SlotEditor loaded={editor.data} origin={PREVIEW_ORIGIN} />;
 
   return (
     <div className="flex flex-1 flex-col items-center justify-center gap-4 p-6 text-center">

@@ -102,7 +102,7 @@ const PAGE = () => editor([section("search-results", "search_results")]);
 describe("the search page is wired", () => {
   test("every place on it is real", () => {
     for (const slot of SLOTS.search) {
-      if (slot.inherited) continue;
+      if (slot.inheritedFrom) continue;
       const wiring = wiringFor("search", slot.key);
       expect(wiring, slot.key).toBeTruthy();
       expect(wiring!.page, slot.key).toBe("templates.search");

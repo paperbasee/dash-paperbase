@@ -171,7 +171,7 @@ describe("picking them", () => {
     expect(sectionOfType(after.document, PLACE, "promises")?.settings.layout).toBe("line");
   });
 
-  test("it lands under the departments, where the canvas draws it", () => {
+  test("it lands under the departments, where the editor lists it", () => {
     const page = editor([section("hero", "banner_slider"), section("cats", "category_tiles")]);
     expect(placeFor(page.document, "home", "trust", PLACE)).toBe(2);
   });
@@ -233,7 +233,6 @@ describe("the checklist the dialog draws", () => {
 describe("the product page shows the same four", () => {
   test("its Promises place is inherited from Home", () => {
     const slot = SLOTS.product.find((one) => one.key === "trust")!;
-    expect(slot.inherited).toBe(true);
     expect(ownerOf("product", slot)).toEqual({ page: "home", key: "trust" });
   });
 

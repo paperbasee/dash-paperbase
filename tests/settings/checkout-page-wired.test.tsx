@@ -13,11 +13,8 @@
  */
 import { readFileSync } from "node:fs";
 
-import { renderToStaticMarkup } from "react-dom/server";
-import { NextIntlClientProvider } from "next-intl";
 import { describe, expect, test } from "vitest";
 
-import { ShopChrome } from "@/components/theme-editor/slots/ShopChrome";
 import type { ThemeDocument, ThemeEditorState, ThemeManifest, ThemeSection } from "@/lib/theme-editor/api";
 import { editorReducer, initEditorState, type EditorState } from "@/lib/theme-editor/editor-reducer";
 import { SLOTS } from "@/lib/theme-editor/slot-catalogue";
@@ -141,7 +138,7 @@ describe("the checkout page is wired", () => {
 
   test("and every other place on this page writes the document, not the shop", () => {
     for (const slot of SLOTS.checkout) {
-      if (slot.key === "form" || slot.inherited) continue;
+      if (slot.key === "form" || slot.inheritedFrom) continue;
       expect(storeSettingFor("checkout", slot.key), slot.key).toBeUndefined();
     }
   });
@@ -172,7 +169,7 @@ describe("the checkout page is wired", () => {
   test("and no longer sends a merchant to a screen that does not have it", () => {
     /*
       Settings → Checkout stopped offering the chooser on 2026-09-24 (owner):
-      this canvas is the only screen that writes it now, so a hint promising
+      this editor is the only screen that writes it now, so a hint promising
       the two agree would be describing a screen that no longer asks.
     */
     const slot = SLOTS.checkout.find((one) => one.key === "form")!;
@@ -244,99 +241,15 @@ describe("the checkout page is wired", () => {
   });
 });
 
-describe("the canvas says what the shop draws", () => {
-  const draw = (slotKey: string, variant: string) =>
-    renderToStaticMarkup(
-      <NextIntlClientProvider locale="en" messages={en}>
-        <ShopChrome page="checkout" slotKey={slotKey} variant={variant} settings={{}} />
-      </NextIntlClientProvider>,
-    );
-
-  test("the steps bar names the same three steps the shop names", () => {
-    /*
-      The editor said "Details" where the shop says "Checkout" — one bar, drawn
-      on two halves of the product, saying two different things. The owner
-      caught the same kind of mismatch on the cart's upsell heading.
-    */
-    const bar = draw("steps", "bar");
-    expect(bar).toContain("Cart");
-    expect(bar).toContain("Checkout");
-    expect(bar).toContain("Done");
-    expect(bar).not.toContain("Details");
-  });
-
+describe("the editor says what the shop draws", () => {
   test("and the tile that offers it says the same", () => {
     const slot = SLOTS.checkout.find((one) => one.key === "steps")!;
     const label = slot.options!.find((one) => one.value === "bar")!.label;
     expect((en.themeEditor.slots as Record<string, string>)[label]).toBe("Cart → Checkout → Done");
   });
 
-  test("the short form asks for a district, which an order cannot do without", () => {
-    /*
-      It drew the short form with an area and no district. An order REQUIRES a
-      district whichever form asked for it, so the form drawn here could not
-      have placed one — and a courier cannot deliver to a district, which is
-      why the area is in both too.
-    */
-    const short = draw("form", "minimal");
-    expect(short).toContain(en.themeEditor.slots.fieldDistrict);
-    expect(short).toContain(en.themeEditor.slots.fieldArea);
-  });
-
   test("and the tile that offers it counts the fields it really asks for", () => {
     expect(en.themeEditor.slots.formMinimal).toContain("district");
     expect(en.themeEditor.slots.formMinimalNote).toContain("Four");
-  });
-
-  test("the message above the button is the merchant's own words, not an example", () => {
-    const html = renderToStaticMarkup(
-      <NextIntlClientProvider locale="en" messages={en}>
-        <ShopChrome
-          page="checkout"
-          slotKey="beforePay"
-          variant="warning"
-          settings={{}}
-          live={
-            {
-              id: "checkout",
-              type: "checkout",
-              hidden: false,
-              settings: { before_pay_text: "Sale items cannot be exchanged." },
-              blocks: [],
-            } as never
-          }
-        />
-      </NextIntlClientProvider>,
-    );
-    expect(html).toContain("Sale items cannot be exchanged.");
-    expect(html).not.toContain(en.themeEditor.slots.beforePayWarningExample);
-  });
-
-  test("and the example is what an empty box shows instead", () => {
-    expect(draw("beforePay", "note")).toContain(en.themeEditor.slots.beforePayNoteExample);
-  });
-
-  test("the policies footer lists the policies the shop has written (2026-09-25)", () => {
-    /*
-      It drew three fixed pages the platform made; the owner took those out, and
-      the checkout's line is every policy the merchant has written, on its own.
-    */
-    const html = renderToStaticMarkup(
-      <NextIntlClientProvider locale="en" messages={en}>
-        <ShopChrome
-          page="checkout"
-          slotKey="footerStyle"
-          variant="policies"
-          settings={{}}
-          policies={[
-            { title: "Terms & conditions", path: "/policies/terms-conditions", written: true },
-            { title: "Warranty", path: "/policies/warranty", written: false },
-          ]}
-        />
-      </NextIntlClientProvider>,
-    );
-    expect(html).toContain("Terms &amp; conditions");
-    expect(html).not.toContain("Warranty");
-    expect(draw("footerStyle", "policies")).toContain("No policy written yet");
   });
 });

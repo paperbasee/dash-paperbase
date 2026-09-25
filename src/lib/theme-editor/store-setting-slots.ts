@@ -1,7 +1,7 @@
 /**
  * Places in this editor that write a SHOP SETTING rather than the theme document.
  *
- * Every other place on this canvas edits the theme: the choice lands in a
+ * Every other place in this editor edits the theme: the choice lands in a
  * draft, and nothing reaches a shopper until Save to store. This kind writes a
  * row the shop already had before the editor existed -- so it is not in the
  * draft and `documents.ts` knows nothing about it.
@@ -20,7 +20,7 @@
  * to change one and not the other would have found out.
  *
  * On 2026-09-24 the owner moved it here outright: Settings -> Checkout no
- * longer offers it, it is chosen on the canvas that draws the form, and this is
+ * longer offers it, it is chosen in the editor beside the form, and this is
  * now the only screen that writes it. A merchant designing their checkout
  * should not have to leave the page they are designing to decide how many boxes
  * it has.

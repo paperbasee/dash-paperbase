@@ -9,12 +9,9 @@
  * premium and the API strips it at serve time, so the drawing that badged only
  * two of four was telling an Essential shop it could have the other two.
  */
-import { renderToStaticMarkup } from "react-dom/server";
-import { NextIntlClientProvider } from "next-intl";
 import { describe, expect, test } from "vitest";
 
 import type { ThemeDocument, ThemeEditorState, ThemeManifest, ThemeSection } from "@/lib/theme-editor/api";
-import { ShopChrome } from "@/components/theme-editor/slots/ShopChrome";
 import { editorReducer, initEditorState, type EditorState } from "@/lib/theme-editor/editor-reducer";
 import { SLOTS, initialChoices } from "@/lib/theme-editor/slot-catalogue";
 import { sectionFields } from "@/lib/theme-editor/field-specs";
@@ -178,77 +175,12 @@ describe("editing it", () => {
     expect(held?.settings.heading).toBe("Eid sale");
   });
 
-  test("it lands under the per-category rows, where the canvas draws it", () => {
+  test("it lands under the per-category rows, where the editor lists it", () => {
     const page = editor([
       section("hero", "banner_slider"),
       section("bands", "category_products"),
     ]);
     expect(placeFor(page.document, "home", "promo", PLACE)).toBe(2);
-  });
-});
-
-describe("the canvas draws the merchant's own", () => {
-  const draw = (variant: string, live?: ThemeSection) =>
-    renderToStaticMarkup(
-      <NextIntlClientProvider locale="en" messages={en}>
-        <ShopChrome
-          page="home"
-          slotKey="promo"
-          variant={variant}
-          settings={initialChoices("home")}
-          live={live as never}
-          pictureUrl={(key) => (key ? `https://cdn.example.com/${key}` : "")}
-        />
-      </NextIntlClientProvider>,
-    );
-
-  test("their words, not an example, once they have written any", () => {
-    const html = draw(
-      "strip",
-      promo("strip", {
-        settings: {
-          layout: "strip",
-          heading: "Eid sale, 40% off",
-          eyebrow: "Limited time",
-          button_label: "Shop the sale",
-        },
-      }),
-    );
-    expect(html).toContain("Eid sale, 40% off");
-    expect(html).toContain("Limited time");
-    expect(html).toContain("Shop the sale");
-    expect(html).not.toContain(en.themeEditor.slots.promoTextExample);
-  });
-
-  test("an example until they have", () => {
-    expect(draw("strip")).toContain(en.themeEditor.slots.promoTextExample);
-  });
-
-  test("the picture they chose, where the shape puts it", () => {
-    const withPhoto = promo("behind", {
-      settings: { layout: "behind", heading: "Eid sale", image: "tenants/x/themes/p.jpg" },
-    });
-    expect(draw("behind", withPhoto)).toContain("https://cdn.example.com/tenants/x/themes/p.jpg");
-  });
-
-  test("and the plain band when a shape that needs a picture has none", () => {
-    /*
-      The shop falls back to the strip, so the drawing has to fall back with it
-      -- a canvas that shows a photo layout the page will not draw is a canvas
-      that lies.
-    */
-    const html = draw("behind", promo("behind", { settings: { layout: "behind", heading: "Eid sale" } }));
-    expect(html).not.toContain("<img");
-  });
-
-  test("the countdown only when it is asked for and has an end to count to", () => {
-    const ends = "2026-09-30T18:00:00Z";
-    const example = en.themeEditor.slots.promoCountdownExample;
-    const asked = (settings: Record<string, unknown>) =>
-      draw("strip", promo("strip", { settings: { layout: "strip", heading: "Sale", ...settings } }));
-    expect(asked({ show_countdown: true, ends_at: ends })).toContain(example);
-    expect(asked({ show_countdown: true })).not.toContain(example);
-    expect(asked({ ends_at: ends })).not.toContain(example);
   });
 });
 

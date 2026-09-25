@@ -168,7 +168,7 @@ describe("what stage 1 wired", () => {
       changes nothing, which is the complaint that started this work.
     */
     for (const slot of SLOTS.product) {
-      if (slot.inherited) continue;
+      if (slot.inheritedFrom) continue;
       expect(wiringFor("product", slot.key), slot.key).not.toBeNull();
     }
   });
@@ -256,7 +256,7 @@ describe("the details rows that end the buying column", () => {
 
   test("the old strip below the product is written by no place", () => {
     for (const slot of SLOTS.product) {
-      if (slot.inherited) continue;
+      if (slot.inheritedFrom) continue;
       expect(sectionTypesOf(place(slot.key)), slot.key).not.toContain("delivery_returns");
     }
   });

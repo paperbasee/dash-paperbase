@@ -7,23 +7,12 @@
  * newsletter. And the drawing is the shop's own -- "Nusrat J.", six grey logos
  * and three invented posts were nobody's shop.
  */
-import { renderToStaticMarkup } from "react-dom/server";
-import { NextIntlClientProvider } from "next-intl";
 import { describe, expect, test } from "vitest";
 
 import type { ThemeDocument, ThemeEditorState, ThemeManifest, ThemeSection } from "@/lib/theme-editor/api";
 import { editorReducer, initEditorState, type EditorState } from "@/lib/theme-editor/editor-reducer";
 import { SLOTS } from "@/lib/theme-editor/slot-catalogue";
 import { choiceEdits, sectionOfType, slotValueFor, wiringFor } from "@/lib/theme-editor/slot-sections";
-import {
-  ShopChrome,
-  type BlogPreview,
-  type BrandPreview,
-  type PostPreview,
-  type ReviewPreview,
-  type ShopIdentity,
-} from "@/components/theme-editor/slots/ShopChrome";
-import en from "../../messages/en.json";
 
 const labels = (label: string) => ({ label, label_bn: `${label} (bn)` });
 const heading = { id: "heading", type: "text", ...labels("Heading"), default: "" };
@@ -120,7 +109,7 @@ const types = (state: EditorState) => state.document.templates.home.sections.map
 describe("the rest of the home page is wired", () => {
   test("every place on the home page is real now", () => {
     for (const slot of SLOTS.home) {
-      if (slot.inherited) continue;
+      if (slot.inheritedFrom) continue;
       expect(wiringFor("home", slot.key), slot.key).toBeTruthy();
     }
   });
@@ -139,7 +128,7 @@ describe("the rest of the home page is wired", () => {
     for (const key of PLACES) expect(slotValueFor(editor().document, place(key)), key).toBe("off");
   });
 
-  test("each one adds its own section, in the canvas's order", () => {
+  test("each one adds its own section, in the editor's order", () => {
     let state = editor();
     state = pick(state, "faq", "on");
     state = pick(state, "brands", "row");
@@ -175,143 +164,3 @@ describe("the rest of the home page is wired", () => {
   });
 });
 
-const BRANDS: BrandPreview[] = [
-  { name: "Active", logo: false },
-  { name: "Footwear", logo: true },
-];
-const REVIEWS: ReviewPreview[] = [
-  { name: "Nadia", rating: 5, body: "Arrived the next day, exactly as shown.", product: "Anker Soundcore Q20", byShop: false },
-  { name: "Karim", rating: 4, body: "Good sound for the price.", product: "Baseus Bowie", byShop: false },
-  { name: "Gadzilla", rating: 5, body: "Our best seller this month.", product: "Anker Q20", byShop: true },
-];
-const post = (title: string): PostPreview => ({
-  title,
-  excerpt: `${title}, in a line.`,
-  tag: "Style guide",
-  date: "Sep 15, 2026",
-  reads: 3,
-  featured: false,
-  tags: ["Style guide"],
-  pictured: true,
-  author: "",
-  words: [],
-});
-const BLOG: BlogPreview = { posts: ["One", "Two", "Three", "Four"].map(post), tags: ["Style guide"] };
-const SHOP: ShopIdentity = {
-  name: "Gadzilla",
-  address: "",
-  phone: "",
-  email: "",
-  social: ["whatsapp"],
-  wishlist: false,
-  orderLookup: false,
-};
-
-function draw(
-  slotKey: string,
-  variant: string,
-  over: { live?: ThemeSection; brands?: BrandPreview[]; reviews?: ReviewPreview[]; blog?: BlogPreview; shop?: ShopIdentity } = {},
-) {
-  return renderToStaticMarkup(
-    <NextIntlClientProvider locale="en" messages={en}>
-      <ShopChrome
-        page="home"
-        slotKey={slotKey}
-        variant={variant}
-        settings={{}}
-        live={over.live}
-        brands={over.brands ?? BRANDS}
-        reviews={over.reviews ?? REVIEWS}
-        blog={over.blog ?? BLOG}
-        shop={over.shop ?? SHOP}
-      />
-    </NextIntlClientProvider>,
-  );
-}
-
-describe("the canvas draws this shop's own", () => {
-  test("nobody else's reviewers, posts or questions", () => {
-    const guilty: string[] = [];
-    for (const key of PLACES) {
-      const slot = SLOTS.home.find((one) => one.key === key)!;
-      for (const option of slot.options ?? []) {
-        const html = draw(key, option.value);
-        for (const word of ["Nusrat", "Rafiq", "Tanvir", "How long does delivery take", "Order on WhatsApp", "journal"]) {
-          if (html.includes(word)) guilty.push(`${key}=${option.value} says "${word}"`);
-        }
-      }
-    }
-    expect(guilty).toEqual([]);
-  });
-
-  test("its brands, by name", () => {
-    const html = draw("brands", "row");
-    expect(html).toContain("Active");
-    expect(html).toContain("Footwear");
-    expect(html).toContain("All brands");
-  });
-
-  test("its reviews, each with its product, and the shop's own marked", () => {
-    const cards = draw("reviews", "cards");
-    expect(cards).toContain("Arrived the next day");
-    expect(cards).toContain("Anker Soundcore Q20");
-    expect(cards).toContain("Gadzilla · From the shop");
-    const quote = draw("reviews", "quote");
-    expect(quote).toContain("Arrived the next day");
-    expect(quote).not.toContain("Good sound for the price");
-  });
-
-  test("the quotation has its heading and a dot for each review it takes turns through", () => {
-    // Owner, 2026-09-25: the quotation drew no heading while the editor offered one.
-    const quote = draw("reviews", "quote", { live: section("r", "review_highlights", { settings: { layout: "quote", heading: "From you" } }) });
-    expect(quote).toContain("From you");
-    expect(quote.match(/rounded-full/g)?.length).toBe(3);
-    const one = draw("reviews", "quote", { reviews: REVIEWS.slice(0, 1) });
-    expect(one).not.toContain("rounded-full");
-  });
-
-  test("three cards, however many reviews there are", () => {
-    const ten = Array.from({ length: 10 }, (_, n) => ({ ...REVIEWS[0], body: `Words number ${n}.` }));
-    const cards = draw("reviews", "cards", { reviews: ten });
-    expect(cards).toContain("Words number 2.");
-    expect(cards).not.toContain("Words number 3.");
-  });
-
-  test("its three newest posts", () => {
-    const html = draw("posts", "three");
-    expect(html).toContain("One");
-    expect(html).toContain("Three");
-    expect(html).not.toContain(">Four<");
-  });
-
-  test("its WhatsApp band says what the shop says, and nothing without a number", () => {
-    expect(draw("signup", "whatsapp")).toContain("Message us on WhatsApp");
-    const written = draw("signup", "whatsapp", { live: section("wa", "whatsapp", { settings: { button_label: "Chat with us" } }) });
-    expect(written).toContain("Chat with us");
-    const none = draw("signup", "whatsapp", { shop: { ...SHOP, social: [] } });
-    expect(none).toContain("Add a WhatsApp number in Settings");
-  });
-
-  test("its WhatsApp band on the brand colour, with the button turned inside out", () => {
-    // Owner, 2026-09-25: the button "blended with the background".
-    const html = draw("signup", "whatsapp");
-    expect(html).toContain("bg-shop-brand px-6");
-    expect(html).toMatch(/bg-shop-brand-foreground[^"]*text-shop-brand"/);
-  });
-
-  test("its own questions, as the pop-up writes them", () => {
-    const live = section("faq", "faq", {
-      blocks: [
-        { id: "q1", type: "question", settings: { question: "Do you deliver to Barishal?", answer: "Yes." } },
-      ],
-    } as Partial<ThemeSection>);
-    expect(draw("faq", "on", { live })).toContain("Do you deliver to Barishal?");
-  });
-
-  test("a line saying so where the shop would show nothing", () => {
-    expect(draw("brands", "row", { brands: [] })).toContain("nothing shows on your shop");
-    expect(draw("reviews", "cards", { reviews: [] })).toContain("nothing shows on your shop");
-    expect(draw("posts", "three", { blog: { posts: [], tags: [] } })).toContain("nothing shows on your shop");
-    expect(draw("faq", "on")).toContain("Nothing shows on your shop until you write one");
-  });
-});

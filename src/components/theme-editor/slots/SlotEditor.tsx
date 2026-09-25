@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useMemo, useReducer, useState } from "react";
+import { useEffect, useReducer, useRef, useState, type ReactNode } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { Monitor, Palette, Smartphone, X } from "lucide-react";
+import { Monitor, SlidersHorizontal, Smartphone, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { DeferredNavLink } from "@/components/navigation/DeferredNavLink";
@@ -10,8 +10,6 @@ import { Select } from "@/components/ui/select";
 import { notify } from "@/notifications";
 import api from "@/lib/api";
 import { cn } from "@/lib/utils";
-import { blockFields } from "@/lib/theme-editor/field-specs";
-import { categoryIndex } from "@/lib/theme-editor/link-targets";
 import { CUSTOMIZATION_HREF } from "@/lib/theme-editor/access";
 import {
   discardThemeDraft,
@@ -29,27 +27,28 @@ import {
   type EditorPorts,
 } from "@/lib/theme-editor/editor-actions";
 import { editorReducer, initEditorState } from "@/lib/theme-editor/editor-reducer";
-import { useThemeImagesQuery } from "@/hooks/useThemesQuery";
+import { pathLocale, previewTarget, templateForPath } from "@/lib/theme-editor/preview-paths";
+import {
+  markForPlace,
+  placeForMark,
+  placesOn,
+  PREVIEW_MODE_MESSAGE,
+  PREVIEW_OUTLINE_MESSAGE,
+  TEMPLATE_PAGES,
+  templateOf,
+  type PickMessage,
+  type PlaceRef,
+} from "@/lib/theme-editor/preview-picks";
+import type { PreviewMessage, PreviewState } from "@/lib/theme-editor/preview-session";
+import { usePreviewExamplesQuery, useThemeImagesQuery } from "@/hooks/useThemesQuery";
 import { useCategoriesQuery } from "@/hooks/useCategoriesQuery";
 import { useProductsQuery } from "@/hooks/useProductsQuery";
-import { useBlogsQuery } from "@/hooks/useBlogsQuery";
-import { useBrandsQuery } from "@/hooks/useBrandsQuery";
-import { useReviewsQuery } from "@/hooks/useReviewsQuery";
-import { postWords } from "@/lib/theme-editor/post-words";
-import {
-  initialChoices,
-  PAGE_NOTES,
-  SLOT_GROUPS,
-  SLOT_PAGES,
-  SLOTS,
-  type SlotPageKey,
-} from "@/lib/theme-editor/slot-catalogue";
+import { initialChoices, PAGE_NOTES, SLOT_PAGES, SLOTS, type SlotPageKey } from "@/lib/theme-editor/slot-catalogue";
 import {
   addBlockEdits,
   blockSettingEdits,
   choiceEdits,
   moveBlockEdits,
-  ownerOf,
   removeBlockEdits,
   setBlocksEdits,
   settingEdits,
@@ -60,52 +59,59 @@ import { storeSettingFor, storeSettingValue } from "@/lib/theme-editor/store-set
 import { useCheckoutSettingsQuery } from "@/hooks/useCheckoutSettingsQuery";
 import { checkoutSettingsQueryKey, themePresetsQueryKey, themesQueryKey } from "@/lib/query-keys";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { canvasColours, chosenPalette, fetchPalettes } from "@/lib/theme-editor/palettes";
+import { chosenPalette, fetchPalettes } from "@/lib/theme-editor/palettes";
 import { ConflictDialog } from "../ConflictDialog";
+import { PreviewPane } from "../PreviewPane";
 import { SaveStatus } from "../SaveStatus";
 import { useAutosave } from "../useAutosave";
-import { KitBadge, KitChoice, KitNote, KitPanel, KitShape } from "../kit";
+import { usePreviewSession } from "../usePreviewSession";
+import { KitBadge, KitChoice, KitNote, KitPanel, KitShape, KitTabs } from "../kit";
 import { SHEET_TOP } from "../kit/styles";
 import { useMediaQuery } from "../useMediaQuery";
-import { SlotCanvas } from "./SlotCanvas";
+import { PagePlaces, type PlaceRow } from "./PagePlaces";
 import { SlotPanel } from "./SlotPanel";
-import type { BlogPreview, BrandPreview, PolicyPreview, ReviewPreview, ShopIdentity } from "./ShopChrome";
-import { policyPath, usePoliciesQuery } from "@/hooks/usePoliciesQuery";
-import { useBranding } from "@/context/BrandingContext";
-import { useStoreSettingsCurrentQuery } from "@/hooks/useStoreSettingsCurrentQuery";
-import { STORE_SOCIAL_LINK_KEYS } from "@/lib/storeSocialLinks";
 import { StylePanel } from "./StylePanel";
 
+/** The preview's two widths: a phone's, and the whole column. */
+const WIDTHS = { mobile: "390px", desktop: "100%" } as const;
+
+/** What the preview says when the shop has nothing to show for a page. */
+const MISSING_NOTE = {
+  category: "previewNoCategory",
+  product: "previewNoProduct",
+  post: "previewNoPost",
+} as const;
+
 /**
- * The theme editor, built around slots.
- *
- * **Being wired, one place at a time.** A place listed in `slot-sections.ts` is
- * real: its choice is read from this shop's own document and every edit is
- * written back to it, saved as a draft on its own and put on the shop when the
- * merchant presses Save. Every other place is still the drawing it was, with
- * its choice held in this component -- so the screen can be argued with before
- * the section behind it is built.
- *
- * The announcement bar is the first, because it is the only section finished on
- * both sides: six settings the storefront draws, and two live shops already
- * showing it.
- *
- * What the owner asked for, on 2026-09-20 and 2026-09-22 -- and on 2026-09-26,
- * a side panel after all:
- *
- *   the page first    the page is in the middle, and a click on it opens that
- *                     place's settings in a calm panel at the right (a sheet
- *                     from the bottom on a phone); with nothing clicked the
- *                     panel is Style. It replaced a pop-up that covered the
- *                     very thing being changed.
- *   click the page    a merchant clicks the section they want, where it sits
- *   fixed places      nothing drags and nothing reorders; a merchant adds a
- *                     section, removes one, and edits the ones that are there
- *   no history        a save goes on the shop; there is no version to go back to
- *   premium in view   a paid option shows its badge in the list, so a merchant
- *                     sees what the tier adds before they pay for it
+ * Pages the preview fills from a sample of the shop's own products, because a merchant looking
+ * at their draft has nothing in a cart (shop-paperbase `storefront/preview_samples.py`).
  */
-export function SlotEditor({ loaded }: { loaded: ThemeEditorState }) {
+const SAMPLE_PAGES: readonly SlotPageKey[] = ["cart", "checkout", "wishlist", "account"];
+
+const placeId = (ref: PlaceRef) => `${ref.page}:${ref.key}`;
+
+/**
+ * The theme editor.
+ *
+ * **The page in the middle is the shop itself** (owner, 2026-09-26): the merchant's draft, drawn
+ * by the storefront on the private preview host, at a phone's width or the computer's -- so what
+ * they see is what their shoppers will see after Save to store, fonts and all. It replaced a
+ * drawing of the shop that could never quite be it.
+ *
+ * What the owner asked for, on 2026-09-20, 2026-09-22 and 2026-09-26:
+ *
+ *   point and change  a merchant clicks the part of their shop they want to change, and its
+ *                     settings open in a calm panel at the right (a sheet from the bottom on a
+ *                     phone); with nothing picked, the panel lists every place on the page, so
+ *                     the ones the page cannot show -- set to nothing, the empty cart's message
+ *                     -- are a click away too, and Style is the other tab
+ *   fixed places      nothing drags and nothing reorders; a merchant adds a section, removes
+ *                     one, and edits the ones that are there
+ *   a draft           every change saves itself as a private draft, which is what the preview
+ *                     draws; Save to store puts it on the shop. There is no version to go back to
+ *   premium in view   a paid option shows its badge, so a merchant sees what the tier adds
+ */
+export function SlotEditor({ loaded, origin }: { loaded: ThemeEditorState; origin: string }) {
   const t = useTranslations("themeEditor.slots");
   const tEditor = useTranslations("themeEditor");
   const tc = useTranslations("settings.customization");
@@ -118,28 +124,30 @@ export function SlotEditor({ loaded }: { loaded: ThemeEditorState }) {
   const [page, setPage] = useState<SlotPageKey>("home");
   const [device, setDevice] = useState<"desktop" | "mobile">("desktop");
   /*
-    Nothing is open when the editor opens.
-
-    It started on `"promo"` the day the slot design was drawn with nothing
-    wired -- handy for looking at one place's choices while building them, and
-    a pop-up in a merchant's face the moment that place became real. A merchant
-    opens the editor to see their shop, and picks what to edit themselves.
+    The place whose settings are open, by the page that owns it. Nothing when
+    the editor opens: a merchant opens it to see their shop, and picks what to
+    change themselves.
   */
-  const [open, setOpen] = useState<string | null>(null);
+  const [open, setOpen] = useState<PlaceRef | null>(null);
+  /** With nothing open, which the panel shows: this page's places, or Style. */
+  const [tab, setTab] = useState<"page" | "style">("page");
   /*
-    On a computer the panel is always there, showing Style when nothing is
-    clicked. On a narrower screen it is a sheet over the page, so Style is
-    asked for -- the top bar's button -- and this says it was.
+    On a computer the panel is always there. On a narrower screen it is a
+    sheet over the page, asked for with the top bar's Edit -- or opened by
+    picking a place in the shop.
   */
-  const [styleOpen, setStyleOpen] = useState(false);
+  const [sheet, setSheet] = useState(false);
   const wide = useMediaQuery("(min-width: 1024px)");
+  /** Whether a click in the preview picks a place (Select) or does what it does for a shopper (Browse). */
+  const [selecting, setSelecting] = useState(true);
+  /** The place under the pointer in the preview, said above it. */
+  const [hovered, setHovered] = useState<PlaceRef | null>(null);
   // The face the shop is set in. Not a choice yet (the typeface is on hold,
   // 2026-09-26): Style shows every face, faded, and says which one this is.
   const face = "poppins";
   /*
     The palette is the shop's DOCUMENT since 2026-09-25, like the corners and
-    the card style: a draft until Save to store. The six come from the API with
-    their colours, so the sketch can repaint in the one chosen.
+    the card style: a draft until Save to store. The six come from the API.
   */
   const palette = chosenPalette(state.document);
   const palettes = useQuery({
@@ -147,7 +155,6 @@ export function SlotEditor({ loaded }: { loaded: ThemeEditorState }) {
     queryFn: () => fetchPalettes(api),
     staleTime: 60 * 60 * 1000,
   });
-  const paletteTokens = palettes.data?.find((item) => item.key === palette)?.tokens;
   // The corners are the shop's document too, for the same reason the card
   // style is: what a merchant chooses here is a draft until Save to store.
   const corner =
@@ -185,7 +192,7 @@ export function SlotEditor({ loaded }: { loaded: ThemeEditorState }) {
   }));
 
   /*
-    The one setting on this canvas that is NOT the theme's: which form the
+    The one setting in this editor that is NOT the theme's: which form the
     checkout asks a shopper to fill in. It is a shop setting, shared with
     Settings -> Checkout, so it is read from there and written straight back --
     see `lib/theme-editor/store-setting-slots.ts`.
@@ -201,33 +208,96 @@ export function SlotEditor({ loaded }: { loaded: ThemeEditorState }) {
     );
   }, [formVariant]);
   /*
-    Shop settings chosen on this canvas and not yet written.
+    Shop settings chosen here and not yet written.
 
     **They wait for Save to store, like everything else here** (owner,
     2026-09-24, reversing the same day's first answer). They are not in the
-    draft -- they are not part of the theme at all -- but this editor has ONE
-    save, and a tile that wrote itself the moment it was clicked was a second
-    one a merchant had not asked for.
-
-    Held in the screen, so they do not survive a reload the way a draft does.
-    The tile's hint says when they are saved; nothing else here would tell a
-    merchant.
+    draft -- they are not part of the theme at all -- so the preview shows
+    them once they are saved; the place's hint says so.
   */
   const [pendingStore, setPendingStore] = useState<Record<string, string>>({});
 
-  const save = useAutosave({ loaded, document: state.document, onSaved: () => {} });
+  /*
+    The shop, in the middle. The frame follows the page picker, and the picker
+    follows the frame when the merchant browses to another page inside it -- but
+    not for the ready that answers entering, which lands on home whatever page
+    is picked (the frame is taken to the picked page instead), nor while it is
+    being taken there.
+  */
+  const documentRef = useRef(state.document);
+  documentRef.current = state.document;
+  const openRef = useRef(open);
+  openRef.current = open;
+  const selectingRef = useRef(selecting);
+  selectingRef.current = selecting;
+  const preview = usePreviewSession({
+    origin,
+    storePublicId: "",
+    savedVersion: loaded.preview_version,
+    onMessage: followFrame,
+    onPick,
+  });
+  const save = useAutosave({ loaded, document: state.document, onSaved: preview.saved });
+  const examples = usePreviewExamplesQuery();
+
+  /** Tell the page whether a click picks, and what to outline -- after every page it shows. */
+  function tellFrame(scroll: boolean) {
+    preview.post({ type: PREVIEW_MODE_MESSAGE, select: selectingRef.current });
+    const picked = openRef.current;
+    preview.post({
+      type: PREVIEW_OUTLINE_MESSAGE,
+      picked: picked ? markForPlace(picked, documentRef.current) : null,
+      scroll,
+    });
+  }
+
+  function followFrame(message: PreviewMessage, before: PreviewState) {
+    if (message.type !== "ready" && message.type !== "navigated") return;
+    tellFrame(false);
+    if (message.type === "ready" && before.phase === "entering") return;
+    const { phase } = preview.current();
+    if (phase === "otherStore" || phase === "loading") return;
+    const template = templateForPath(message.path);
+    const next = template ? TEMPLATE_PAGES[template] : undefined;
+    if (next && next !== page) {
+      setPage(next);
+      // A place on the page left behind is not on this one; the header's and footer's are.
+      setOpen((current) => (current && current.page !== "header" && current.page !== "footer" ? null : current));
+    }
+  }
+
+  function onPick(pick: PickMessage) {
+    const place = pick.mark ? placeForMark(pick.mark, documentRef.current) : null;
+    if (pick.type === "hover") {
+      setHovered(place);
+      return;
+    }
+    if (place) openPlace(place, { scroll: false });
+  }
+
+  // Where the preview should go to show the picked page, from where it is now.
+  const { current: currentPreview, show } = preview;
+  const frameShown = preview.state.hasShown;
+  const template = templateOf(page);
+  const targetFor = (path: string) =>
+    examples.data && template ? previewTarget(template, examples.data, pathLocale(path) ?? locale) : null;
+
+  // The frame follows the page picker, and catches up once it has first shown and once the
+  // examples arrive (a page picked while the preview was still opening).
+  useEffect(() => {
+    const path = currentPreview().path;
+    if (!frameShown || !path || !template || templateForPath(path) === template || !examples.data) return;
+    const target = previewTarget(template, examples.data, pathLocale(path) ?? locale);
+    if (target && "path" in target) show(target.path);
+  }, [template, examples.data, frameShown, currentPreview, show, locale]);
+
   // Pictures this shop has already placed, and the URLs of ones placed since the
   // list was read: an upload answers with a key alone, and a field needs a URL
   // to draw the thumbnail before the next save refreshes the list.
   const images = useThemeImagesQuery({ enabled: true });
-  // This shop's own departments, so the category band draws the names a
-  // merchant will recognise rather than six invented ones.
+  // This shop's own departments, for the three-department place: the answers
+  // a merchant will recognise rather than six invented ones.
   const categories = useCategoriesQuery();
-  // Every category by the link a merchant stores for it, for the header
-  // menu's drawing: names for links with no words, carets where a panel opens.
-  const categoryIndexOf = useMemo(() => categoryIndex(categories.data ?? []), [categories.data]);
-  // The same departments as answers: what the category band draws and what the
-  // three-department place is picked from, so the two never disagree.
   const departmentOptions = (categories.data ?? []).map((node) => ({
     value: node.public_id,
     label: node.name,
@@ -237,81 +307,6 @@ export function SlotEditor({ loaded }: { loaded: ThemeEditorState }) {
   // field shows the name of something the merchant just chose, and falls back
   // to the id for a pick made in another session until they open the picker.
   const products = useProductsQuery({ page_size: "20", ordering: "-created_at" });
-  // This shop's own name, contact and social links, so the footer is its
-  // footer; and the two switches its Customer Service column follows.
-  const { branding } = useBranding();
-  const storeSettings = useStoreSettingsCurrentQuery();
-  const shop: ShopIdentity = {
-    name: branding?.admin_name?.trim() ?? "",
-    address: branding?.address?.trim() ?? "",
-    phone: branding?.phone?.trim() ?? "",
-    email: branding?.contact_email?.trim() ?? "",
-    social: STORE_SOCIAL_LINK_KEYS.filter((key) => (branding?.social_links?.[key] ?? "").trim() !== ""),
-    wishlist: storeSettings.data?.modules_enabled?.wishlist === true,
-    orderLookup: storeSettings.data?.modules_enabled?.order_lookup === true,
-  };
-  // This shop's own posts and tags, so the blog's drawings are its blog. Only
-  // what a shopper can see -- published and public -- newest first, as the
-  // shop lists them; the date written the way the shop writes it. The tags are
-  // the ones ON those posts, as the shop's row offers them: a tag with nothing
-  // published behind it would lead a reader to an empty list.
-  const blogs = useBlogsQuery({});
-  const blog: BlogPreview = (() => {
-    const now = Date.now();
-    const dated = new Intl.DateTimeFormat(locale === "bn" ? "bn-BD" : "en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    });
-    const published = (blogs.data ?? [])
-      .filter((post) => post.is_public && post.published_at && Date.parse(post.published_at) <= now)
-      .sort((a, b) => Date.parse(b.published_at ?? "") - Date.parse(a.published_at ?? ""));
-    const tags = [...new Set(published.flatMap((post) => post.tags.map((tag) => tag.name)))].sort(
-      (a, b) => a.localeCompare(b, locale),
-    );
-    const posts = published.map((post) => ({
-        title: post.title,
-        excerpt: post.excerpt,
-        tag: post.tags[0]?.name ?? "",
-        date: dated.format(new Date(post.published_at as string)),
-        reads: post.views ?? 0,
-        featured: post.is_featured,
-        tags: post.tags.map((tag) => tag.name),
-        pictured: Boolean(post.featured_image_url),
-        // The name the shop prints: the API's rule, never the email.
-        author: post.author_name ?? "",
-        words: postWords(post.content ?? ""),
-      }));
-    return { posts, tags };
-  })();
-  // The home page's brands, picked by the shop's own rule (see `BrandPreview`):
-  // the active brands with the most products. And every published review,
-  // newest first -- each drawing picks from them by the shop's own rule, the
-  // home page its ten good ones, the reviews page all of them.
-  const brandList = useBrandsQuery();
-  const brands: BrandPreview[] = (brandList.data ?? [])
-    .filter((brand) => brand.is_active && brand.product_count > 0)
-    .sort((a, b) => b.product_count - a.product_count || a.name.localeCompare(b.name))
-    .slice(0, 6)
-    .map((brand) => ({ name: brand.name, logo: Boolean(brand.image) }));
-  const published = useReviewsQuery("published");
-  const reviews: ReviewPreview[] = (published.data ?? [])
-    .sort((a, b) => Date.parse(b.created_at) - Date.parse(a.created_at))
-    .map((review) => ({
-      name: review.display_name,
-      rating: review.rating,
-      body: review.body.trim(),
-      product: review.product_name,
-      byShop: review.source === "merchant",
-    }));
-  // The shop's policies, for the footer's links: a column link names its policy,
-  // and the small links beside the year list every written one (2026-09-25).
-  const policyList = usePoliciesQuery();
-  const policyPreviews: PolicyPreview[] = (policyList.data ?? []).map((policy) => ({
-    title: policy.title,
-    path: policyPath(policy),
-    written: policy.is_written,
-  }));
   const [pictureUrls, setPictureUrls] = useState<Record<string, string>>({});
 
   function pickPage(next: SlotPageKey) {
@@ -319,19 +314,25 @@ export function SlotEditor({ loaded }: { loaded: ThemeEditorState }) {
     setOpen(null);
   }
 
-  /** Select a place on the page: its settings replace whatever the panel held. */
-  function openPlace(slotKey: string | null) {
-    setOpen(slotKey);
-    setStyleOpen(false);
+  /**
+   * Open a place: its settings replace whatever the panel held, and the shop
+   * outlines it -- scrolling to it when it was picked from the list, since a
+   * place clicked in the shop is already in view.
+   */
+  function openPlace(ref: PlaceRef | null, { scroll }: { scroll: boolean }) {
+    setOpen(ref);
+    openRef.current = ref;
+    if (ref) setSheet(true);
+    tellFrame(scroll);
   }
 
   /**
    * A choice: written to the shop's document when the place is wired, kept in
-   * this component when it is still a drawing.
+   * this component when it is a shop setting (the checkout's form).
    *
    * `owner` is the entry that OWNS the place, which is not always the page it
-   * was clicked on -- the notice strip is drawn on every page and owned by
-   * Header. The canvas resolves that before it calls.
+   * was clicked on -- the notice strip is on every page and owned by Header.
+   * The preview's marks and the list both name places by their owner.
    */
   function choose(owner: { page: SlotPageKey; key: string }, value: string) {
     // A shop setting, not the theme's: written the moment it is clicked, and
@@ -381,9 +382,9 @@ export function SlotEditor({ loaded }: { loaded: ThemeEditorState }) {
     discard: (expected) => discardThemeDraft(api, expected),
     reload: () => fetchThemeEditor(api),
     load: (next) => dispatch({ type: "load", document: next.document, manifest: next.manifest }),
-    // No preview frame on this screen: the canvas draws the document it is holding,
-    // so there is nothing to tell about a save.
-    refreshPreview: () => {},
+    // Saving to the shop, discarding and loading the latest all change the draft
+    // the preview draws: it redraws at that version.
+    refreshPreview: (version) => preview.saved(version),
     // No copy of unsent edits is kept on the device yet, so there is none to forget.
     forgetDeviceCopy: () => {},
     // Customization reads the library again for its Live and Draft badges.
@@ -416,7 +417,7 @@ export function SlotEditor({ loaded }: { loaded: ThemeEditorState }) {
   }
 
   /**
-   * The shop settings chosen on this canvas, written with the rest of the save.
+   * The shop settings chosen in this editor, written with the rest of the save.
    *
    * Never throws: a shop setting that would not save must not take the theme's
    * own save down with it. It stays pending instead, so the next Save tries it
@@ -454,7 +455,7 @@ export function SlotEditor({ loaded }: { loaded: ThemeEditorState }) {
   const answered = () => setConflict(null);
   /**
    * Answering a clash with "load latest" gives up the edits this editor had not
-   * sent -- and a shop setting chosen on the canvas and not yet saved is one of
+   * sent -- and a shop setting chosen here and not yet saved is one of
    * them. It goes back to what the shop says rather than waiting to be written
    * by a later Save the merchant did not connect it to.
    */
@@ -471,12 +472,11 @@ export function SlotEditor({ loaded }: { loaded: ThemeEditorState }) {
 
     A wired place is its settings (`SlotPanel`). A place still decided here --
     the checkout's form, a shop setting -- is its answers, drawn the same way; a
-    place that is set says why. Nothing clicked is Style.
+    place that is set says why. Nothing open is this page's places, or Style.
   */
-  const openSlot = open ? (SLOTS[page].find((slot) => slot.key === open) ?? null) : null;
-  const openOwner = openSlot ? ownerOf(page, openSlot) : null;
-  const openWiring = openOwner ? wiringFor(openOwner.page, openOwner.key) : null;
-  const closePlace = () => openPlace(null);
+  const openSlot = open ? (SLOTS[open.page].find((slot) => slot.key === open.key) ?? null) : null;
+  const openWiring = open ? wiringFor(open.page, open.key) : null;
+  const closePlace = () => openPlace(null, { scroll: false });
 
   const stylePanel = (
     <StylePanel
@@ -489,18 +489,58 @@ export function SlotEditor({ loaded }: { loaded: ThemeEditorState }) {
       onCorner={(key) => dispatch({ type: "setThemeSetting", setting: "corner_style", value: key })}
       cardStyle={cardStyle}
       onCardStyle={(key) => dispatch({ type: "setThemeSetting", setting: "card_style", value: key })}
-      onClose={wide ? undefined : () => setStyleOpen(false)}
+      onClose={wide ? undefined : () => setSheet(false)}
     />
   );
 
+  /** What a place is set to, in the merchant's words, for the list. */
+  function valueOf(ref: PlaceRef): string {
+    const slot = SLOTS[ref.page].find((one) => one.key === ref.key);
+    if (!slot?.options?.length) return "";
+    const wiring = wiringFor(ref.page, ref.key);
+    const value = wiring ? slotValueFor(state.document, wiring) : choices[ref.page]?.[ref.key];
+    const option = slot.options.find((one) => one.value === value);
+    return option ? t(option.label) : "";
+  }
+
+  const groups = placesOn(page).map((group) => ({
+    title: group.group === "header" ? t("header") : group.group === "footer" ? t("footer") : t(page),
+    rows: group.places.map((ref): PlaceRow => {
+      const slot = SLOTS[ref.page].find((one) => one.key === ref.key);
+      return {
+        id: placeId(ref),
+        name: slot ? t(slot.label) : ref.key,
+        value: valueOf(ref),
+        locked: Boolean(slot?.locked),
+      };
+    }),
+  }));
+  const placesPanel = (
+    <KitPanel
+      title={t(page)}
+      hint={tKit("placesHint")}
+      onClose={wide ? undefined : () => setSheet(false)}
+      className="h-full"
+    >
+      <PagePlaces
+        groups={groups}
+        openId={open ? placeId(open) : null}
+        onOpen={(id) => {
+          const [owner, key] = id.split(":") as [SlotPageKey, string];
+          openPlace({ page: owner, key }, { scroll: true });
+        }}
+      />
+    </KitPanel>
+  );
+
   const placePanel =
-    openSlot && openOwner && openWiring ? (
+    open && openSlot && openWiring ? (
       /* `page` is the one that OWNS the place, so the settings its neighbours
          decide are looked up where those neighbours live. */
       <SlotPanel
-        key={`${openOwner.page}:${openOwner.key}`}
+        key={placeId(open)}
         slot={openSlot}
-        page={openOwner.page}
+        page={open.page}
         wiring={openWiring}
         manifest={state.manifest}
         document={state.document}
@@ -511,23 +551,23 @@ export function SlotEditor({ loaded }: { loaded: ThemeEditorState }) {
           (products.data?.results ?? []).find((row) => row.public_id === publicId)?.name ?? ""
         }
         departments={departmentOptions}
-        onChoose={(value) => choose(openOwner, value)}
-        onSet={(setting, value) => setSetting(openOwner, setting, value)}
+        onChoose={(value) => choose(open, value)}
+        onSet={(setting, value) => setSetting(open, setting, value)}
         onSetBlock={(blockId, setting, value) =>
-          edits(openOwner, (wiring) => blockSettingEdits(state.document, wiring, blockId, setting, value))
+          edits(open, (wiring) => blockSettingEdits(state.document, wiring, blockId, setting, value))
         }
         onSetBlocks={(blockType, setting, values) =>
-          edits(openOwner, (wiring) => setBlocksEdits(state.document, wiring, blockType, setting, values))
+          edits(open, (wiring) => setBlocksEdits(state.document, wiring, blockType, setting, values))
         }
-        onAddBlock={(blockType) => edits(openOwner, (wiring) => addBlockEdits(state.document, wiring, blockType))}
-        onRemoveBlock={(blockId) => edits(openOwner, (wiring) => removeBlockEdits(state.document, wiring, blockId))}
-        onMoveBlock={(blockId, to) => edits(openOwner, (wiring) => moveBlockEdits(state.document, wiring, blockId, to))}
+        onAddBlock={(blockType) => edits(open, (wiring) => addBlockEdits(state.document, wiring, blockType))}
+        onRemoveBlock={(blockId) => edits(open, (wiring) => removeBlockEdits(state.document, wiring, blockId))}
+        onMoveBlock={(blockId, to) => edits(open, (wiring) => moveBlockEdits(state.document, wiring, blockId, to))}
         onPictureUrl={(key, url) => setPictureUrls((known) => ({ ...known, [key]: url }))}
         onClose={closePlace}
       />
-    ) : openSlot && openOwner ? (
+    ) : open && openSlot ? (
       <KitPanel
-        key={`${openOwner.page}:${openOwner.key}`}
+        key={placeId(open)}
         title={t(openSlot.label)}
         hint={openSlot.hint ? t(openSlot.hint) : undefined}
         onClose={closePlace}
@@ -538,8 +578,8 @@ export function SlotEditor({ loaded }: { loaded: ThemeEditorState }) {
         ) : (
           <KitChoice
             label={t(openSlot.label)}
-            value={choices[openOwner.page]?.[openOwner.key]}
-            onChange={(value) => choose(openOwner, value)}
+            value={choices[open.page]?.[open.key]}
+            onChange={(value) => choose(open, value)}
             options={(openSlot.options ?? []).map((option) => ({
               value: option.value,
               label: t(option.label),
@@ -552,10 +592,56 @@ export function SlotEditor({ loaded }: { loaded: ThemeEditorState }) {
       </KitPanel>
     ) : null;
 
-  /** The panel's contents: the open place, or Style. */
-  const panel = placePanel ?? stylePanel;
+  /** The panel's contents: the open place, or this page's places, or Style. */
+  const panel = placePanel ?? (
+    <div className="flex h-full min-h-0 flex-col">
+      <div className="shrink-0 px-5 pt-4">
+        <KitTabs
+          label={tKit("panelLabel")}
+          value={tab}
+          onChange={setTab}
+          tabs={[
+            { key: "page", label: tKit("thisPage") },
+            { key: "style", label: tKit("styleTitle") },
+          ]}
+        />
+      </div>
+      <div className="min-h-0 flex-1">{tab === "page" ? placesPanel : stylePanel}</div>
+    </div>
+  );
   /** On a narrower screen the sheet shows only when something asked for it. */
-  const sheetOpen = !wide && (placePanel !== null || styleOpen);
+  const sheetOpen = !wide && (placePanel !== null || sheet);
+
+  // What the line over the preview says: the place under the pointer, else what this page is.
+  const hoveredSlot = hovered ? SLOTS[hovered.page].find((one) => one.key === hovered.key) : null;
+  const status = hoveredSlot && selecting ? (
+    <span className="truncate">{tEditor("previewHover", { place: t(hoveredSlot.label) })}</span>
+  ) : null;
+  let note: ReactNode = SAMPLE_PAGES.includes(page) ? (
+    <span className="truncate">{tEditor("previewSample")}</span>
+  ) : null;
+  const framePath = preview.state.path;
+  if (framePath && template && templateForPath(framePath) !== template) {
+    const target = targetFor(framePath);
+    if (target && "missing" in target) {
+      note = <span className="truncate">{tEditor(MISSING_NOTE[target.missing])}</span>;
+    } else if (templateForPath(framePath) === null) {
+      note = (
+        <>
+          <span className="truncate">{tEditor("previewCantCustomize")}</span>
+          {target && "path" in target ? (
+            <button
+              type="button"
+              onClick={() => show(target.path)}
+              className="shrink-0 rounded-button px-1 py-0.5 font-medium text-foreground underline underline-offset-2"
+            >
+              {tEditor("previewShowPage", { page: t(page) })}
+            </button>
+          ) : null}
+        </>
+      );
+    }
+  }
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
@@ -580,40 +666,18 @@ export function SlotEditor({ loaded }: { loaded: ThemeEditorState }) {
           onChange={(event) => pickPage(event.target.value as SlotPageKey)}
           className="w-auto min-w-[10rem]"
         >
-          <optgroup label={tEditor("pagesGroup")}>
-            {SLOT_PAGES.map((key) => (
-              <option key={key} value={key}>
-                {t(key)}
-              </option>
-            ))}
-          </optgroup>
-          <optgroup label={tEditor("everyPageGroup")}>
-            {SLOT_GROUPS.map((key) => (
-              <option key={key} value={key}>
-                {t(key)}
-              </option>
-            ))}
-          </optgroup>
+          {SLOT_PAGES.map((key) => (
+            <option key={key} value={key}>
+              {t(key)}
+            </option>
+          ))}
         </Select>
 
-        <p role="status" className="text-xs text-muted-foreground">
-          {open ? t("hintChoosing") : t("hintClick")}
-        </p>
-
-        {/* On a narrower screen Style is a sheet, asked for here. */}
+        {/* On a narrower screen the panel is a sheet, asked for here. */}
         {wide ? null : (
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            aria-pressed={styleOpen}
-            onClick={() => {
-              setOpen(null);
-              setStyleOpen(true);
-            }}
-          >
-            <Palette aria-hidden />
-            {tKit("styleTitle")}
+          <Button type="button" variant="ghost" size="sm" aria-pressed={sheetOpen} onClick={() => setSheet(true)}>
+            <SlidersHorizontal aria-hidden />
+            {tEditor("tabEdit")}
           </Button>
         )}
 
@@ -657,8 +721,7 @@ export function SlotEditor({ loaded }: { loaded: ThemeEditorState }) {
 
       {/*
         A note for a page whose shop page does not exist yet, and only there.
-        None today: every place on every page is real (the line that said which
-        places saved went with the palettes on 2026-09-25). A page added to the
+        None today: every place on every page is real. A page added to the
         editor before its shop page is built says so here.
       */}
       {PAGE_NOTES[page] ? (
@@ -668,57 +731,29 @@ export function SlotEditor({ loaded }: { loaded: ThemeEditorState }) {
       ) : null}
 
       {/*
-        The page in the middle and the panel at its right (2026-09-26) -- the
-        page is what a merchant is changing, so it keeps the room and stays in
-        view while they type. Each scrolls on its own: `overflow-hidden` on the
-        row is what lets them, since a child with `overflow-y-auto` and no
-        height of its own just grows past its row.
+        The shop in the middle and the panel at its right (2026-09-26) -- the
+        shop is what a merchant is changing, so it keeps the room and stays in
+        view while they type. `overflow-hidden` on the row is what lets the
+        panel scroll on its own.
 
         On a narrower screen there is no room for a column, so the panel rises
-        from the bottom as a sheet over the lower part of the page, and the page
-        above it is still the page -- still clickable, still changing.
+        from the bottom as a sheet over the lower part of the shop.
       */}
       <div className="flex min-h-0 flex-1 overflow-hidden">
-        <div className={cn("min-w-0 flex-1 overflow-y-auto", sheetOpen && "pb-[45dvh]")}>
-          <SlotCanvas
-            page={page}
-            device={device}
-            open={open}
-            onOpen={openPlace}
-            choices={choices[page]}
-            allChoices={choices}
-            document={state.document}
-            pictureUrl={(key) => pictureUrls[key] ?? images.data?.find((row) => row.key === key)?.url ?? ""}
-            /*
-              A department with nothing in it says so. It can still be ticked --
-              a merchant setting a shop up picks the aisle they are about to
-              fill -- but the shop draws no row for an empty one, and finding
-              that out by looking at the page is how the owner found it out.
-            */
-            categories={categoryIndexOf}
-            policies={policyPreviews}
-            footerSection={(state.document.footer?.sections ?? []).find((section) => section.type === "footer")}
-            departments={departmentOptions}
-            blog={blog}
-            shop={shop}
-            brands={brands}
-            reviews={reviews}
-            /*
-              The sixteen promises, named in the merchant's language by the
-              theme itself. Read from the manifest rather than from this
-              editor's own words: the theme owns the list, and a second copy
-              here would be a second list to keep in step.
-            */
-            promiseWords={(name) =>
-              blockFields(state.manifest, "promises", "promise", locale).find(
-                (field) => field.id === "promise",
-              )?.options.find((option) => option.value === name)?.label ?? name
-            }
-            onGoToPage={(next, slotKey) => {
-              setPage(next);
-              openPlace(slotKey);
+        <div className={cn("flex min-w-0 flex-1 flex-col", sheetOpen && "pb-[45dvh]")}>
+          <PreviewPane
+            origin={origin}
+            width={WIDTHS[device]}
+            session={preview}
+            note={note}
+            status={status}
+            selecting={selecting}
+            onSelecting={(next) => {
+              setSelecting(next);
+              selectingRef.current = next;
+              if (!next) setHovered(null);
+              preview.post({ type: PREVIEW_MODE_MESSAGE, select: next });
             }}
-            colours={paletteTokens ? canvasColours(paletteTokens) : undefined}
           />
         </div>
 
@@ -738,7 +773,8 @@ export function SlotEditor({ loaded }: { loaded: ThemeEditorState }) {
           aria-label={tKit("panelLabel")}
           onKeyDown={(event) => {
             if (event.key !== "Escape") return;
-            closePlace();
+            if (open) closePlace();
+            else setSheet(false);
           }}
           className={cn(
             "fixed inset-x-0 bottom-0 z-40 flex max-h-[72dvh] flex-col border-t border-border bg-background pb-[env(safe-area-inset-bottom)] shadow-[0_-12px_40px_rgb(0_0_0/0.16)]",

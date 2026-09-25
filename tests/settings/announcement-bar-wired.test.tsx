@@ -1,5 +1,5 @@
 /**
- * The announcement bar, end to end on the canvas.
+ * The announcement bar, end to end in the editor.
  *
  * This is the first place in the editor that is not a drawing: what a merchant
  * types lands in the shop's own document. The failure this guards against is
@@ -12,24 +12,11 @@
  * than the shared fixtures' made-up one, where the bar is still just "a
  * section with a text and a link" for the editor's own mechanics.
  */
-import { renderToStaticMarkup } from "react-dom/server";
-import { NextIntlClientProvider } from "next-intl";
 import { describe, expect, test } from "vitest";
 
-import { ShopChrome, type ShopIdentity } from "@/components/theme-editor/slots/ShopChrome";
 import { editorReducer, initEditorState, type EditorState } from "@/lib/theme-editor/editor-reducer";
-import {
-  addBlockEdits,
-  blockSettingEdits,
-  choiceEdits,
-  sectionFor,
-  sectionOfType,
-  settingEdits,
-  slotValueFor,
-  wiringFor,
-} from "@/lib/theme-editor/slot-sections";
+import { addBlockEdits, blockSettingEdits, choiceEdits, sectionFor, sectionOfType, slotValueFor, wiringFor } from "@/lib/theme-editor/slot-sections";
 import type { ThemeDocument, ThemeEditorState, ThemeManifest, ThemeSection } from "@/lib/theme-editor/api";
-import en from "../../messages/en.json";
 
 const NOTICE = wiringFor("header", "notice")!;
 const labels = (label: string) => ({ label, label_bn: `${label} (bn)` });
@@ -136,22 +123,6 @@ function write(state: EditorState, settings: Record<string, unknown>): EditorSta
 
 const messages = (state: EditorState) => sectionFor(state.document, NOTICE)?.blocks ?? [];
 
-/** The bar as the canvas draws it, from the document. */
-function drawn(doc: ThemeDocument, shop?: ShopIdentity) {
-  return renderToStaticMarkup(
-    <NextIntlClientProvider locale="en" messages={en}>
-      <ShopChrome
-        page="header"
-        slotKey="notice"
-        variant={slotValueFor(doc, NOTICE)}
-        settings={{}}
-        live={sectionOfType(doc, NOTICE, "announcement_bar") ?? undefined}
-        shop={shop}
-      />
-    </NextIntlClientProvider>,
-  );
-}
-
 describe("switching the bar on and off", () => {
   test("choosing the message shows the section the shop already has", () => {
     const before = editor();
@@ -180,53 +151,17 @@ describe("switching the bar on and off", () => {
 });
 
 describe("what the merchant writes", () => {
-  test("a message reaches the document and the drawing", () => {
+  test("a message reaches the document", () => {
     const after = write(choose(editor(), "message"), { text: "Eid delivery until Thursday" });
 
     expect(messages(after)[0].type).toBe("message");
     expect(messages(after)[0].settings.text).toBe("Eid delivery until Thursday");
-    expect(drawn(after.document)).toContain("Eid delivery until Thursday");
   });
 
   test("three at most", () => {
     let state = choose(editor(), "message");
     for (const text of ["One", "Two", "Three", "Four"]) state = write(state, { text });
     expect(messages(state).map((one) => one.settings.text)).toEqual(["One", "Two", "Three"]);
-  });
-
-  test("the canvas draws the first, and a dot for each when there are more", () => {
-    let state = choose(editor(), "message");
-    state = write(state, { text: "One" });
-    expect(drawn(state.document)).not.toContain("data-notice-dot");
-    state = write(state, { text: "Two" });
-    const html = drawn(state.document);
-    expect(html).toContain("One");
-    expect(html).not.toContain("Two");
-    expect(html.match(/data-notice-dot/g)?.length).toBe(2);
-  });
-
-  test("its icon and its link words", () => {
-    const html = drawn(write(choose(editor(), "message"), { text: "Sale", icon: "tag", link: "/sale", link_text: "Shop now" }).document);
-    expect(html).toContain("data-notice-icon");
-    expect(html).toContain("Shop now");
-    // Link words with no link go nowhere, so the shop draws none -- nor does the canvas.
-    const dead = drawn(write(choose(editor(), "message"), { text: "Sale", link_text: "Shop now" }).document);
-    expect(dead).not.toContain("Shop now");
-  });
-
-  test("an empty bar draws the example, not an empty strip", () => {
-    // A bar drawn blank reads as a bug. The example says what the place is for
-    // until the merchant has written their own line.
-    expect(drawn(choose(editor(), "message").document)).toContain(en.themeEditor.slots.noticeExample);
-  });
-
-  test("Track order and Help where they are on, Track order only with the tracker", () => {
-    const on = run(choose(editor(), "message"), settingEdits(choose(editor(), "message").document, NOTICE, "quick_links", true));
-    const shop = { name: "Gadzilla", address: "", phone: "", email: "", social: [], wishlist: true, orderLookup: true };
-    expect(drawn(on.document, shop)).toContain(en.themeEditor.slots.noticeTrackOrder);
-    expect(drawn(on.document, shop)).toContain(en.themeEditor.slots.noticeHelp);
-    expect(drawn(on.document, { ...shop, orderLookup: false })).not.toContain(en.themeEditor.slots.noticeTrackOrder);
-    expect(drawn(choose(editor(), "message").document, shop)).not.toContain(en.themeEditor.slots.noticeHelp);
   });
 
   test("the loaded document is never edited in place", () => {

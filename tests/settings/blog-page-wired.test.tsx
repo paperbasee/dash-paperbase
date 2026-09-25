@@ -10,8 +10,6 @@
  * And the drawings are the shop's own posts and tags now -- "Care" and
  * "Materials" were groups no merchant of ours ever made.
  */
-import { renderToStaticMarkup } from "react-dom/server";
-import { NextIntlClientProvider } from "next-intl";
 import { describe, expect, test } from "vitest";
 
 import type { ThemeDocument, ThemeEditorState, ThemeManifest, ThemeSection } from "@/lib/theme-editor/api";
@@ -25,7 +23,6 @@ import {
   slotValueFor,
   wiringFor,
 } from "@/lib/theme-editor/slot-sections";
-import { ShopChrome, type BlogPreview } from "@/components/theme-editor/slots/ShopChrome";
 import en from "../../messages/en.json";
 
 const labels = (label: string) => ({ label, label_bn: `${label} (bn)` });
@@ -106,7 +103,7 @@ const PAGE = () => editor([section("blog-list", "blog_list")]);
 describe("the blog page is wired", () => {
   test("every place on it is real", () => {
     for (const slot of SLOTS.blog) {
-      if (slot.inherited) continue;
+      if (slot.inheritedFrom) continue;
       expect(wiringFor("blog", slot.key), slot.key).toBeTruthy();
       expect(wiringFor("blog", slot.key)!.page, slot.key).toBe("templates.blog");
     }
@@ -152,7 +149,7 @@ describe("the blog page is wired", () => {
 describe("a place keeps its own words", () => {
   test("the blog's name and line belong to the heading and to no other place", () => {
     for (const slot of SLOTS.blog) {
-      if (slot.inherited) continue;
+      if (slot.inheritedFrom) continue;
       const claimed = settingsClaimedElsewhere("blog", "blog_list", ownerOf("blog", slot));
       if (slot.key === "heading") {
         expect(claimed.has("title"), slot.key).toBe(false);
@@ -170,64 +167,3 @@ describe("a place keeps its own words", () => {
   });
 });
 
-const BLOG: BlogPreview = {
-  posts: [
-    { title: "How to find your perfect denim fit", excerpt: "Three measurements.", tag: "Style guide", date: "Sep 15, 2026", reads: 101, featured: true, tags: ["Style guide"], pictured: true, author: "", words: [] },
-    { title: "Caring for cotton and linen", excerpt: "Cold water.", tag: "Care and craft", date: "Sep 10, 2026", reads: 6, featured: false, tags: ["Care and craft"], pictured: true, author: "", words: [] },
-  ],
-  tags: ["Care and craft", "Style guide"],
-};
-
-function draw(slotKey: string, variant: string | undefined, over: { blog?: BlogPreview; live?: ThemeSection } = {}) {
-  return renderToStaticMarkup(
-    <NextIntlClientProvider locale="en" messages={en}>
-      <ShopChrome page="blog" slotKey={slotKey} variant={variant} settings={{}} blog={over.blog ?? BLOG} live={over.live} />
-    </NextIntlClientProvider>,
-  );
-}
-
-describe("the canvas draws this shop's blog", () => {
-  test("its own posts and tags, never an invented group", () => {
-    for (const slot of SLOTS.blog) {
-      if (slot.inherited) continue;
-      for (const option of slot.options ?? []) {
-        const html = draw(slot.key, option.value);
-        for (const word of ["Care<", "Materials", "Workshop", "Behind the seams", "Stockists", "Journal"]) {
-          expect(html, `${slot.key}=${option.value}`).not.toContain(word);
-        }
-      }
-    }
-    expect(draw("tags", "row")).toContain("Care and craft");
-    expect(draw("latest", "grid")).toContain("How to find your perfect denim fit");
-  });
-
-  test("a shop with no posts yet sees example cards but no invented tags", () => {
-    const html = draw("latest", "grid", { blog: { posts: [], tags: [] } });
-    expect(html).not.toContain("Materials");
-    expect(draw("tags", "row", { blog: { posts: [], tags: [] } })).not.toContain("Care");
-  });
-
-  test("the featured shelf is the posts the merchant marked", () => {
-    const html = draw("featured", "hero");
-    expect(html).toContain("How to find your perfect denim fit");
-    expect(html).not.toContain("Caring for cotton and linen");
-  });
-
-  test("the read count is each post's own", () => {
-    const html = draw("meta", "reads");
-    expect(html).toContain("101 reads");
-    expect(html).toContain("6 reads");
-  });
-
-  test("the name is the merchant's own, and the shop's words until they write one", () => {
-    expect(draw("heading", "on")).toContain("Discover our latest news");
-    const live = section("blog-list", "blog_list", { settings: { title: "Gadzilla notes", intro: "" } });
-    expect(draw("heading", "on", { live })).toContain("Gadzilla notes");
-  });
-
-  test("the search box has no button, because it filters as they type", () => {
-    const html = draw("search", "on");
-    expect(html).toContain("Search articles");
-    expect(html).not.toContain(">Search<");
-  });
-});

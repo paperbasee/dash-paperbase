@@ -4,7 +4,10 @@ import type { PageKey } from "./document-ops";
 /*
  * Which page template a preview address draws, and an address that shows each template.
  *
- * Home, search and the blog list always exist. A category, a product and a blog post need one of
+ * Home, search, the blog list, the reviews page, the cart, the checkout, the wishlist and the
+ * account page always exist -- the last four drawn in the preview from a sample of the shop's own
+ * products, since a merchant looking at their draft has nothing in a cart (shop-paperbase
+ * `storefront/preview_samples.py`, 2026-09-26). A category, a product and a blog post need one of
  * the shop's own, so the editor asks the dashboard API for one of each when it opens: the first
  * active category (one with products if there is one), the newest active product, and the newest
  * published post. Owner, Admin and Manager, the only members who can open the editor, can read all
@@ -56,8 +59,19 @@ export function templateForPath(path: string): PageKey | null {
   if (first === "search" && !second) return "templates.search";
   if (first === "blog" && !second) return "templates.blog";
   if (first === "blog" && second && rest.length === 0) return "templates.blog_article";
+  // One address each, nothing under it: /checkout/payment and /account/sign-in are other pages.
+  if (second === undefined && first && SINGLE_PAGES[first]) return SINGLE_PAGES[first];
   return null;
 }
+
+/** The pages at one fixed address, by that address's only segment. */
+const SINGLE_PAGES: Record<string, PageKey> = {
+  reviews: "templates.reviews",
+  wishlist: "templates.wishlist",
+  account: "templates.account",
+  cart: "templates.cart",
+  checkout: "templates.checkout",
+};
 
 export function previewTarget(page: PageKey, examples: PreviewExamples, locale: string): PreviewTarget {
   const at = (path: string) => ({ path: `/${locale}${path}` });
@@ -74,6 +88,16 @@ export function previewTarget(page: PageKey, examples: PreviewExamples, locale: 
       return at("/blog");
     case "templates.blog_article":
       return examples.post ? at(examples.post) : { missing: "post" };
+    case "templates.reviews":
+      return at("/reviews");
+    case "templates.wishlist":
+      return at("/wishlist");
+    case "templates.account":
+      return at("/account");
+    case "templates.cart":
+      return at("/cart");
+    case "templates.checkout":
+      return at("/checkout");
     default:
       return null;
   }
