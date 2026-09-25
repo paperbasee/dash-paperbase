@@ -230,7 +230,7 @@ function PictureBand({ picture }: { picture: RowPicture }) {
 
 function Cards({ items, ratio = "1", picture }: { items: Card[]; ratio?: string; picture?: RowPicture | null }) {
   return (
-    <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+    <div className="grid grid-cols-2 gap-3 @xl:grid-cols-4">
       {/*
         The row's picture: two products wide beside the products on a wide
         screen, which then shows two of them; on top of all four on a narrow
@@ -239,7 +239,7 @@ function Cards({ items, ratio = "1", picture }: { items: Card[]; ratio?: string;
       {picture ? (
         <div
           data-row-picture="beside"
-          className="relative col-span-2 aspect-[16/9] overflow-hidden rounded-md bg-current/8 sm:aspect-auto"
+          className="relative col-span-2 aspect-[16/9] overflow-hidden rounded-md bg-current/8 @xl:aspect-auto"
         >
           {/* eslint-disable-next-line @next/next/no-img-element -- a merchant upload, as the hero's */}
           <img src={picture.src} alt="" className="absolute inset-0 h-full w-full object-cover" />
@@ -247,7 +247,7 @@ function Cards({ items, ratio = "1", picture }: { items: Card[]; ratio?: string;
         </div>
       ) : null}
       {items.map((item, index) => (
-        <div key={item.name} className={cn("min-w-0", picture && index >= 2 && "sm:hidden")}>
+        <div key={item.name} className={cn("min-w-0", picture && index >= 2 && "@xl:hidden")}>
           <div className="relative overflow-hidden rounded-md bg-current/8" style={{ aspectRatio: ratio }}>
             {item.off ? (
               <span className="absolute left-1.5 top-1.5 rounded-full bg-[#d64545] px-1.5 py-0.5 text-[9px] font-semibold text-white">
@@ -256,7 +256,7 @@ function Cards({ items, ratio = "1", picture }: { items: Card[]; ratio?: string;
             ) : null}
           </div>
           <p className="mt-2 truncate text-[11.5px] font-medium">{item.name}</p>
-          <p className="mt-0.5 flex items-baseline gap-1.5">
+          <p className="mt-0.5 flex flex-wrap items-baseline gap-x-1.5">
             <span className="text-[12.5px] font-semibold tabular-nums">{item.price}</span>
             {item.was ? (
               <span className="text-[10px] tabular-nums text-current/35 line-through">{item.was}</span>
@@ -394,7 +394,7 @@ function PostCards({
   columns?: 3 | 4;
 }) {
   return (
-    <div className={`grid grid-cols-2 gap-3.5 ${columns === 3 ? "sm:grid-cols-3" : "sm:grid-cols-4"}`}>
+    <div className={`grid grid-cols-2 gap-3.5 ${columns === 3 ? "@xl:grid-cols-3" : "@xl:grid-cols-4"}`}>
       {posts.map((post) => {
         const under = line(post);
         return (
@@ -402,7 +402,7 @@ function PostCards({
             {cards === "words" ? null : (
               <div className="relative overflow-hidden rounded-md bg-current/8 aspect-[4/3]" aria-hidden>
                 {post.tag ? (
-                  <span className="absolute left-2 top-2 rounded-full bg-[color:var(--color-background)]/85 px-2 py-0.5 text-[9px] font-medium text-current/70">
+                  <span className="absolute left-2 top-2 rounded-full bg-background/85 px-2 py-0.5 text-[9px] font-medium text-foreground/70">
                     {post.tag}
                   </span>
                 ) : null}
@@ -626,7 +626,8 @@ export function ShopChrome({
     const quick = live?.settings?.quick_links === true;
     return (
       <div className="flex items-center gap-3 border-b border-border bg-shop-brand px-4 py-2 text-[11px] text-shop-brand-foreground/85">
-        <span className="flex w-24 shrink-0 gap-3 text-[10px]">
+        {/* The shop's phone bar is its message alone: Track order and Help are in the phone's menu. */}
+        <span className="hidden w-24 shrink-0 gap-3 text-[10px] @xl:flex">
           {quick && shop?.orderLookup !== false ? <span>{t("noticeTrackOrder")}</span> : null}
           {quick ? <span>{t("noticeHelp")}</span> : null}
         </span>
@@ -635,7 +636,7 @@ export function ShopChrome({
           <span className="truncate">{first ? String(first.text) : t("noticeExample")}</span>
           {linkWords ? <span className="shrink-0 underline">{linkWords}</span> : null}
         </p>
-        <span className="flex w-24 shrink-0 items-center justify-end gap-1" aria-hidden>
+        <span className="hidden w-24 shrink-0 items-center justify-end gap-1 @xl:flex" aria-hidden>
           {messages.length > 1
             ? messages.map((_, index) => (
                 <span
@@ -809,9 +810,36 @@ export function ShopChrome({
     const logo = brandMark(`${nameFits} text-sm font-semibold tracking-[0.14em]`);
     const frame = "@container border-b border-border bg-shop-header text-shop-header-foreground";
 
+    /*
+      The phone's header, one shape for every design, as the shop draws it:
+      the menu and search, the name in the middle, the account and the cart.
+      Shown when the preview is phone-wide (2026-09-26) -- it drew the
+      computer's header squeezed into 320px, menu row and all.
+    */
+    const phone = (
+      <div data-header-phone className={`grid grid-cols-[1fr_auto_1fr] items-center gap-2 px-3 py-3 @xl:hidden ${frame}`}>
+        <span className="flex items-center gap-2.5">
+          <ListIcon size={15} weight={weight} aria-hidden />
+          <MagnifyingGlassIcon size={15} weight={weight} aria-hidden />
+        </span>
+        {brandMark(`${nameFits} text-center text-sm font-semibold tracking-[0.14em]`)}
+        <span className="flex items-center justify-end gap-2.5">
+          {marksOn ? <UserIcon size={15} weight={weight} aria-hidden /> : null}
+          <CartIcon size={15} weight={weight} aria-hidden />
+        </span>
+      </div>
+    );
+    /** The computer's header for this design, and the phone's beside it -- the preview's width picks. */
+    const both = (computer: React.ReactNode) => (
+      <>
+        {phone}
+        <div className="hidden @xl:block">{computer}</div>
+      </>
+    );
+
     if (layout === "centred") {
       // Search, the name in the middle, the icons; the menu in its own row.
-      return (
+      return both(
         <div className={frame}>
           <div className="grid grid-cols-[minmax(max-content,1fr)_minmax(0,auto)_minmax(max-content,1fr)] items-center gap-3 px-4 py-3.5">
             <span className="flex">{mark(MagnifyingGlassIcon, "search", t("headerWordSearch"), true)}</span>
@@ -826,7 +854,7 @@ export function ShopChrome({
     }
     if (layout === "split") {
       // The menu in the middle of the page, between the name and the icons.
-      return (
+      return both(
         // The outer two never narrower than what they hold, as on the shop, so
         // the menu takes what is left rather than sliding under them.
         <div
@@ -840,7 +868,7 @@ export function ShopChrome({
     }
     if (layout === "compact") {
       // The menu behind a button, as on a phone.
-      return (
+      return both(
         <div className={`flex items-center gap-3 px-4 py-3 ${frame}`}>
           <ListIcon size={16} weight={weight} aria-hidden data-mark="menu" />
           {logo}
@@ -850,7 +878,7 @@ export function ShopChrome({
       );
     }
     // Classic, and Minimal: the same row in small capitals.
-    return (
+    return both(
       <div className={`flex items-center gap-4 px-4 py-3 ${frame}`}>
         {logo}
         {nav(5, layout === "minimal", "flex-1")}
@@ -1066,7 +1094,7 @@ export function ShopChrome({
     }
     if (layout === "split") {
       return shell(
-        <div className="grid gap-6 sm:grid-cols-[minmax(0,1fr)_auto]">
+        <div className="grid gap-6 @xl:grid-cols-[minmax(0,1fr)_auto]">
           {shopBlock}
           <div className="grid grid-cols-2 gap-x-8 gap-y-5">
             {columns.map((column, index) => (
@@ -1080,7 +1108,7 @@ export function ShopChrome({
       );
     }
     return shell(
-      <div className="grid grid-cols-2 gap-x-5 gap-y-5 sm:grid-cols-4">
+      <div className="grid grid-cols-2 gap-x-5 gap-y-5 @xl:grid-cols-4">
         {shopBlock}
         {columns.map((column, index) => (
           <div key={`${column.head}-${index}`}>
@@ -1265,7 +1293,7 @@ export function ShopChrome({
           {own.length ? own.map((one) => one.words).join(" · ") : t("trustExample")}
         </p>
       ) : (
-        <div className="grid grid-cols-2 gap-3 border-y border-current/10 px-4 py-4 sm:grid-cols-4">
+        <div className="grid grid-cols-2 gap-3 border-y border-current/10 px-4 py-4 @xl:grid-cols-4">
           {shown.map(({ name, words, Mark }) => (
             <div key={name} className="flex items-center gap-2.5">
               <span className="grid size-8 shrink-0 place-items-center rounded-full bg-current/8">
@@ -1435,14 +1463,14 @@ export function ShopChrome({
         <div className="px-4 py-5">
           <SectionHead band title={liveHeading || t("brandsHeading")} link={t("allBrands")} />
           {shown.length ? (
-            <div className="grid grid-cols-3 gap-2 sm:grid-cols-6">
+            <div className="grid grid-cols-3 gap-2 @xl:grid-cols-6">
               {shown.map((brand) => (
                 <div
                   key={brand.name}
                   className="flex min-h-14 flex-col items-center justify-center gap-1.5 rounded-xs border border-current/10 px-2 py-2 text-center"
                 >
                   {brand.logo ? <span className="h-5 w-10 rounded-xs bg-current/10" aria-hidden /> : null}
-                  <span className="text-[10px] uppercase tracking-[0.06em] text-current/70">{brand.name}</span>
+                  <span className="max-w-full truncate text-[10px] uppercase tracking-[0.06em] text-current/70">{brand.name}</span>
                 </div>
               ))}
             </div>
@@ -1490,7 +1518,7 @@ export function ShopChrome({
       ) : (
         <div className="px-4 py-4">
           <SectionHead band title={liveHeading || t("reviewsHeading")} />
-          <div className="grid gap-3 sm:grid-cols-3">
+          <div className="grid gap-3 @xl:grid-cols-3">
             {shown.slice(0, 3).map((review, index) => (
               <div key={index} className="rounded-md border border-current/12 p-3.5">
                 <p className="text-[11px] text-current/70">{stars(review.rating)}</p>
@@ -1617,7 +1645,7 @@ export function ShopChrome({
         </span>
       );
       return (
-        <div className="grid gap-6 px-4 py-4 sm:grid-cols-2">
+        <div className="grid gap-6 px-4 py-4 @xl:grid-cols-2">
           {pictures}
           <div className="min-w-0">
             <h4 className="m-0 text-[19px] font-semibold leading-snug">Gradient Graphic T-shirt</h4>
@@ -1804,7 +1832,7 @@ export function ShopChrome({
       const groups = [t("filterPrice"), t("filterBrand"), t("filterSize"), t("filterColour")];
       if (variant === "rail") {
         return (
-          <div className="grid gap-4 px-4 py-4 sm:grid-cols-[minmax(0,10rem)_minmax(0,1fr)]">
+          <div className="grid gap-4 px-4 py-4 @xl:grid-cols-[minmax(0,10rem)_minmax(0,1fr)]">
             <div className="grid content-start gap-3">
               {groups.map((name) => (
                 <span key={name}>
@@ -2104,7 +2132,7 @@ export function ShopChrome({
       return variant === "cards" ? (
         <div className="px-4 py-4">
           {filters}
-          <div className="mt-3 grid gap-3 sm:grid-cols-3">
+          <div className="mt-3 grid gap-3 @xl:grid-cols-3">
             {shown.map((review, index) => (
               <div key={index} className="rounded-md border border-current/12 p-3.5">
                 <p className="truncate text-[10.5px] text-current/45 underline">{review.product}</p>
@@ -2184,11 +2212,11 @@ export function ShopChrome({
       }
       return (
         <div className="px-4 py-4">
-          <div className="grid grid-cols-2 gap-3.5 sm:grid-cols-4">
+          <div className="grid grid-cols-2 gap-3.5 @xl:grid-cols-4">
             {BESTSELLERS.map((item) => (
               <div key={item.name} className="min-w-0">
                 <span className="relative block aspect-square overflow-hidden rounded-md bg-current/8">
-                  <span className="absolute right-2 top-2 grid size-7 place-items-center rounded-full bg-[color:var(--color-background)] shadow-sm">
+                  <span className="absolute right-2 top-2 grid size-7 place-items-center rounded-full bg-background shadow-sm">
                     <Heart className="size-3.5 fill-current text-[#d64545]" aria-hidden />
                   </span>
                   {item.off ? (
@@ -2198,7 +2226,7 @@ export function ShopChrome({
                   ) : null}
                 </span>
                 <p className="mt-2 truncate text-[11.5px] font-medium">{item.name}</p>
-                <p className="mt-0.5 flex items-baseline gap-1.5">
+                <p className="mt-0.5 flex flex-wrap items-baseline gap-x-1.5">
                   <span className="text-[12.5px] font-semibold tabular-nums">{item.price}</span>
                   {item.was ? (
                     <span className="text-[10px] tabular-nums text-current/35 line-through">{item.was}</span>
@@ -2352,7 +2380,7 @@ export function ShopChrome({
       ];
       if (variant === "cards") {
         return (
-          <div className="grid gap-3 px-4 py-4 sm:grid-cols-2">
+          <div className="grid gap-3 px-4 py-4 @xl:grid-cols-2">
             {orders.map((order) => (
               <div key={order.id} className="rounded-md border border-current/12 p-3.5">
                 <div className="flex items-baseline justify-between gap-3">
@@ -2478,7 +2506,7 @@ export function ShopChrome({
         return (
           <div className="px-4 py-4">
             <SectionHead title={t("blogFeaturedHeadingExample")} />
-            <div className="grid gap-4 sm:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)]">
+            <div className="grid gap-4 @xl:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)]">
               <div className="aspect-[16/10] rounded-md bg-current/8" aria-hidden />
               <div className="flex flex-col justify-center gap-2">
                 {lead.tag ? (
@@ -2669,7 +2697,7 @@ export function ShopChrome({
       const older = shopPosts[articleAt + 1];
       const newer = articleAt > 0 ? shopPosts[articleAt - 1] : undefined;
       return (
-        <div className="grid gap-3 px-4 py-4 sm:grid-cols-2">
+        <div className="grid gap-3 px-4 py-4 @xl:grid-cols-2">
           {older ? (
             <div className="rounded-md border border-current/12 p-3.5">
               <p className="text-[10px] uppercase tracking-[0.08em] text-current/40">← {t("articlePrev")}</p>
@@ -2677,7 +2705,7 @@ export function ShopChrome({
             </div>
           ) : null}
           {newer ? (
-            <div className="rounded-md border border-current/12 p-3.5 sm:col-start-2 sm:text-right">
+            <div className="rounded-md border border-current/12 p-3.5 @xl:col-start-2 @xl:text-right">
               <p className="text-[10px] uppercase tracking-[0.08em] text-current/40">{t("articleNext")} →</p>
               <p className="mt-1.5 truncate text-[12.5px] font-semibold">{newer.title}</p>
             </div>
@@ -2979,8 +3007,8 @@ export function ShopChrome({
         rows.push({ key: block.id, title: heading.trim(), Mark: ROW_MARKS[String(icon)] ?? Info });
       }
       return (
-        <div className="grid gap-6 px-4 py-3 sm:grid-cols-2">
-          <div aria-hidden className="hidden sm:block" />
+        <div className="grid gap-6 px-4 py-3 @xl:grid-cols-2">
+          <div aria-hidden className="hidden @xl:block" />
           <div className="min-w-0">
             {rows.map(({ key, title, Mark }) => (
               <p key={key} className="flex items-center gap-3 py-2.5 text-[13px]">
@@ -3016,7 +3044,7 @@ export function ShopChrome({
       ) : (
         <div className="px-4 py-4">
           <SectionHead title={t("productReviewsHeading")} />
-          <div className="grid gap-3 sm:grid-cols-3">
+          <div className="grid gap-3 @xl:grid-cols-3">
             {/* The shop's own good reviews standing in for a product's, where it
                 has some; the examples only for a shop with none yet. */}
             {(good.length
@@ -3502,7 +3530,7 @@ export function ShopChrome({
       const parts = footerParts();
       return parts.band(
         parts.columns.length ? (
-          <div className="grid grid-cols-2 gap-x-5 gap-y-5 sm:grid-cols-4">
+          <div className="grid grid-cols-2 gap-x-5 gap-y-5 @xl:grid-cols-4">
             {parts.columns.map((column, index) => (
               <div key={`${column.head}-${index}`} data-footer-column>
                 {column.head ? parts.heading(column.head) : null}

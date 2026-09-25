@@ -163,7 +163,8 @@ describe("the canvas draws this shop's own reviews", () => {
 
   test("a list reads in a column and cards go across", () => {
     expect(draw("layout", "rows")).toContain("max-w-lg");
-    expect(draw("layout", "cards")).toContain("sm:grid-cols-3");
+    // Across by the preview's own width, not the window's (2026-09-26).
+    expect(draw("layout", "cards")).toContain("@xl:grid-cols-3");
   });
 
   test("a shop with none yet is told what its page says", () => {

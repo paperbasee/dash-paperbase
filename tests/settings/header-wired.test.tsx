@@ -413,3 +413,17 @@ describe("step 4: the header's button (2026-09-26)", () => {
   });
 
 });
+
+describe("the header at phone width (2026-09-26)", () => {
+  test("every design draws the phone's one header, and its own only where the preview is wide", () => {
+    for (const layout of ["classic", "centred", "split", "minimal", "compact"]) {
+      const html = draw("layout", layout, { live: header({ header_layout: layout }) });
+      expect(html, layout).toMatch(/data-header-phone class="[^"]*@xl:hidden/);
+      expect(html, layout).toContain('<div class="hidden @xl:block">');
+      // Menu and search, the name, account and cart -- no menu row on a phone.
+      const phone = html.slice(html.indexOf("data-header-phone"), html.indexOf('<div class="hidden @xl:block">'));
+      expect(phone, layout).not.toContain("data-menu-item");
+      expect(phone, layout).toContain("GADZILLA");
+    }
+  });
+});

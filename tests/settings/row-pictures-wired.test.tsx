@@ -78,7 +78,7 @@ describe("the rows' pictures on the canvas", () => {
   test("the picture takes two products' room on a wide screen, and sits on top on a narrow one", () => {
     const html = draw("bestsellers", section("best_sellers", WORDS));
     expect(html).toMatch(/data-row-picture="beside" class="[^"]*col-span-2/);
-    expect((html.match(/sm:hidden/g) ?? []).length).toBeGreaterThan(0);
+    expect((html.match(/@xl:hidden/g) ?? []).length).toBeGreaterThan(0);
   });
 
   test("the departments: a wide picture above all three, and each its own", () => {
@@ -134,5 +134,28 @@ describe.skipIf(!fs.existsSync(THEME))("against the real theme", () => {
   test("the featured picks and the promises stay plain ticks", () => {
     expect(tickedParts(manifest.sections.featured_products.blocks?.product?.settings)?.details).toEqual([]);
     expect(tickedParts(manifest.sections.promises.blocks?.promise?.settings)?.details).toEqual([]);
+  });
+});
+
+describe("the preview lays itself out by its own width (2026-09-26)", () => {
+  /*
+   * In the phone view the preview is 320px wide inside a wide window, and every
+   * drawing used the WINDOW's width: the computer layout squeezed into a phone
+   * -- prices into the next card, the footer's four columns into each other.
+   */
+  test("no drawing asks the window how wide it is", () => {
+    const chrome = fs.readFileSync(path.join(__dirname, "../../src/components/theme-editor/slots/ShopChrome.tsx"), "utf8");
+    expect(chrome).not.toMatch(/(?<![\w@-])(?:sm|md|lg|xl):/);
+  });
+
+  test("the frame they are drawn in is the container they measure, and places sit side by side by it too", () => {
+    const canvas = fs.readFileSync(path.join(__dirname, "../../src/components/theme-editor/slots/SlotCanvas.tsx"), "utf8");
+    expect(canvas).toContain('"@container w-full');
+    expect(canvas).toContain('"grid @xl:[grid-template-columns:var(--slot-cols)]"');
+  });
+
+  test("the shop's own colours, never the dashboard's: a tag on a post stays readable in dark mode", () => {
+    const text = fs.readFileSync(path.join(__dirname, "../../src/components/theme-editor/slots/ShopChrome.tsx"), "utf8");
+    expect(text).not.toContain("var(--color-");
   });
 });

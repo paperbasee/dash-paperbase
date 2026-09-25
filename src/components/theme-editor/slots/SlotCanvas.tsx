@@ -146,7 +146,7 @@ function SlotRegion({
           className="grid h-full place-items-center py-9 text-center"
           style={{
             backgroundImage:
-              "repeating-linear-gradient(135deg, transparent, transparent 8px, var(--color-border-subtle) 8px, var(--color-border-subtle) 9px)",
+              "repeating-linear-gradient(135deg, transparent, transparent 8px, hsl(var(--border-subtle)) 8px, hsl(var(--border-subtle)) 9px)",
           }}
         >
           <span className="rounded-full bg-background px-3 py-1.5 text-xs text-muted-foreground">
@@ -267,8 +267,16 @@ export function SlotCanvas({
   return (
     <div className="flex justify-center bg-muted/40 p-2 sm:p-3">
       <div
+        /*
+          A container (2026-09-26): every drawing inside lays itself out by the
+          width of THIS frame, not the browser window's -- so the phone view is
+          the shop's phone layout. It drew the computer layout squeezed into
+          320px, because the window around it was wide: prices ran into the
+          next card, brand names into each other, the footer's four columns
+          into one another.
+        */
         className={cn(
-          "w-full overflow-hidden rounded-sm border border-border-subtle bg-background text-foreground transition-[max-width]",
+          "@container w-full overflow-hidden rounded-sm border border-border-subtle bg-background text-foreground transition-[max-width]",
           device === "mobile" ? "max-w-[320px]" : "max-w-none",
         )}
         style={colours as React.CSSProperties | undefined}
@@ -347,7 +355,7 @@ export function SlotCanvas({
           return (
             <div key={band[0][0].row}>
               <div
-                className={cn("grid", device === "mobile" ? "" : "sm:[grid-template-columns:var(--slot-cols)]")}
+                className="grid @xl:[grid-template-columns:var(--slot-cols)]"
                 style={
                   {
                     "--slot-cols": band.map((col) => `minmax(0,${col[0].span ?? 1}fr)`).join(" "),
