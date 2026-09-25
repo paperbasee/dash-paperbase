@@ -78,6 +78,21 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-09-22-search-page-choices",
+    date: "2026-09-22",
+    version: "4.98.0",
+    tag: "new",
+    href: "/settings?tab=customization",
+    title: {
+      en: "A better search, and a page you design",
+      bn: "আরও ভালো সার্চ, আর নিজের মতো সার্চ পেজ",
+    },
+    body: {
+      en: "Choose whether the results heading says how many were found, whether matching categories sit above the products, and how many products go across. A long answer can now reach past the first 48 with a Load more button or numbered pages, a search that finds nothing can offer your categories as a way on, and an empty search box can show your best sellers instead of a line of help. Search itself got better too: the search box opens a full-screen search that answers as a shopper types, and half a word, a plural or a misspelling now finds what they meant — “shrit” shows your shirts, and says so.",
+      bn: "ফলাফলের শিরোনামে কয়টি পাওয়া গেল তা দেখাবেন কি না, পণ্যের উপরে মিলে যাওয়া ক্যাটাগরি থাকবে কি না, আর একসারিতে কয়টি পণ্য — ঠিক করুন। লম্বা উত্তরে এখন প্রথম ৪৮টির পরেও যাওয়া যায় “আরও দেখুন” বোতাম বা নম্বর দেওয়া পাতায়, কিছু না মিললে আপনার ক্যাটাগরিগুলো এগোনোর পথ হিসেবে দেখানো যায়, আর খালি সার্চ বক্সে সাহায্যের লাইনের বদলে আপনার সবচেয়ে বেশি বিক্রি হওয়া পণ্য দেখানো যায়। সার্চ নিজেও ভালো হয়েছে: সার্চ বক্সে চাপলে পুরো স্ক্রিন জুড়ে সার্চ খোলে, ক্রেতা লিখতে লিখতেই ফলাফল চলে আসে, আর অর্ধেক শব্দ, বহুবচন বা ভুল বানানে লিখলেও এখন তাঁরা যা খুঁজছেন তা পাওয়া যায় — “শারি” লিখলে শাড়ি দেখায়, আর তা জানিয়েও দেয়।",
+    },
+  },
+  {
     id: "2026-09-22-header-and-footer-choices",
     date: "2026-09-22",
     version: "4.97.0",
@@ -120,21 +135,6 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     body: {
       en: "Give your blog its own name and opening line, let readers narrow the posts by typing or by tag, and choose how the featured posts, the rest and each card look — with the date or how many times a post has been read underneath, and every read counts now. On each post, choose where its picture goes, whether the writer's name sits beside the date, how wide the words run, and whether readers see its tags, the posts before and after it, and three more to read. You can also add a few words of your own under the posts, and posts written as plain text now keep their paragraphs.",
       bn: "ব্লগকে নিজের নাম আর প্রথম লাইন দিন, পাঠক যেন লিখে বা ট্যাগ বেছে পোস্টগুলো ছেঁকে নিতে পারেন, আর বাছাই করা পোস্ট, বাকি পোস্ট ও প্রতিটি কার্ড কেমন দেখাবে তা ঠিক করুন — নিচে তারিখ, নয়তো পোস্টটি কতবার পড়া হয়েছে; এখন প্রতিবার পড়াই গোনা হয়। প্রতিটি পোস্টে ছবি কোথায় বসবে, তারিখের পাশে লেখকের নাম থাকবে কি না, লেখা কতটা চওড়া হবে, আর পাঠক ট্যাগ, আগের ও পরের পোস্ট এবং পড়ার মতো আরও তিনটি পোস্ট দেখবেন কি না — ঠিক করুন। পোস্টের নিচে নিজের কিছু কথাও যোগ করতে পারেন, আর সাধারণ লেখায় লেখা পোস্টে এখন অনুচ্ছেদগুলো ঠিক থাকে।",
-    },
-  },
-  {
-    id: "2026-09-22-search-page-choices",
-    date: "2026-09-22",
-    version: "4.91.2",
-    tag: "new",
-    href: "/settings?tab=customization",
-    title: {
-      en: "A better search, and a page you design",
-      bn: "আরও ভালো সার্চ, আর নিজের মতো সার্চ পেজ",
-    },
-    body: {
-      en: "Choose whether the results heading says how many were found, whether matching categories sit above the products, and how many products go across. A long answer can now reach past the first 48 with a Load more button or numbered pages, a search that finds nothing can offer your categories as a way on, and an empty search box can show your best sellers instead of a line of help. Search itself got better too: the search box opens a full-screen search that answers as a shopper types, and half a word or a plural now finds what they meant.",
-      bn: "ফলাফলের শিরোনামে কয়টি পাওয়া গেল তা দেখাবেন কি না, পণ্যের উপরে মিলে যাওয়া ক্যাটাগরি থাকবে কি না, আর একসারিতে কয়টি পণ্য — ঠিক করুন। লম্বা উত্তরে এখন প্রথম ৪৮টির পরেও যাওয়া যায় “আরও দেখুন” বোতাম বা নম্বর দেওয়া পাতায়, কিছু না মিললে আপনার ক্যাটাগরিগুলো এগোনোর পথ হিসেবে দেখানো যায়, আর খালি সার্চ বক্সে সাহায্যের লাইনের বদলে আপনার সবচেয়ে বেশি বিক্রি হওয়া পণ্য দেখানো যায়। সার্চ নিজেও ভালো হয়েছে: সার্চ বক্সে চাপলে পুরো স্ক্রিন জুড়ে সার্চ খোলে, ক্রেতা লিখতে লিখতেই ফলাফল চলে আসে, আর অর্ধেক শব্দ বা বহুবচন লিখলেও এখন তাঁরা যা খুঁজছেন তা পাওয়া যায়।",
     },
   },
   {
