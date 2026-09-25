@@ -84,6 +84,21 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-09-22-account-page-choices",
+    date: "2026-09-22",
+    version: "4.105.0",
+    tag: "new",
+    href: "/settings?tab=customization",
+    title: {
+      en: "A more personal account page for your customers",
+      bn: "ক্রেতাদের জন্য আরও ব্যক্তিগত অ্যাকাউন্ট পেজ",
+    },
+    body: {
+      en: "The page now opens on a welcome card: the customer's own picture, how you reach them, how long they have been a member, how many orders, reviews and saved things they have, and their newest order. Greet them by name, by the plain word, or leave the card out; list their orders as a list or as cards with pictures; and send an empty account to your shop rather than to nothing. They also see every review they have written, including the ones waiting for you or turned down, theirs to change or delete — on to begin with, so a review never looks lost.",
+      bn: "পেজটি এখন একটি স্বাগত কার্ড দিয়ে শুরু হয়: ক্রেতার নিজের ছবি, তাঁর সঙ্গে যোগাযোগের উপায়, কতদিন ধরে সদস্য, কতগুলো অর্ডার, রিভিউ ও সেভ করা জিনিস আছে, আর সর্বশেষ অর্ডার। নাম ধরে, শুধু শব্দটি দিয়ে স্বাগত জানান, নাকি কার্ডটিই বাদ দিন; অর্ডার তালিকা হিসেবে নাকি ছবিসহ কার্ড হিসেবে দেখান; আর খালি অ্যাকাউন্ট থেকে শূন্যতার বদলে দোকানে পাঠান। তাঁরা নিজেদের লেখা সব রিভিউও দেখেন, আপনার অপেক্ষায় থাকা বা ফিরিয়ে দেওয়াগুলোসহ, নিজেরাই বদলাতে বা মুছতে পারেন — শুরু থেকেই চালু, যাতে কোনো রিভিউ হারিয়ে গেছে মনে না হয়।",
+    },
+  },
+  {
     id: "2026-09-22-home-page-rows",
     date: "2026-09-22",
     version: "4.104.1",
@@ -232,21 +247,6 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     body: {
       en: "Show how many things are saved beside the title or just the word, lay them out as a grid of cards or as a compact list that fits more on a screen, and say something inviting when nothing is saved yet — which is the version of the page most people meet. You can also decide whether a saved thing can be bought straight from the list or only opened, which is the one choice here that changes what the page is for.",
       bn: "শিরোনামের পাশে কয়টি সংরক্ষিত আছে দেখাবেন নাকি শুধু শব্দটি, পণ্যগুলো কার্ডের গ্রিডে নাকি ছোট তালিকায় — যাতে একসাথে বেশি দেখা যায় — আর কিছু সংরক্ষিত না থাকলে আমন্ত্রণমূলক কিছু বলা, যেটি বেশিরভাগ মানুষ দেখেন। সংরক্ষিত পণ্যটি তালিকা থেকেই কেনা যাবে নাকি শুধু খোলা যাবে, সেটিও ঠিক করতে পারেন — এই পাতার একমাত্র সিদ্ধান্ত যা পাতাটির উদ্দেশ্যই বদলে দেয়।",
-    },
-  },
-  {
-    id: "2026-09-22-account-page-choices",
-    date: "2026-09-22",
-    version: "4.88.0",
-    tag: "new",
-    href: "/settings?tab=customization",
-    title: {
-      en: "Design your customers' account page",
-      bn: "ক্রেতার অ্যাকাউন্ট পেজ সাজান",
-    },
-    body: {
-      en: "Greet them by name, by the plain word, or not at all; list their orders as a list or as cards with the pictures of what was in each one; and send an empty account to your shop rather than to nothing. You can also choose whether they see the reviews they have written — every one, including the ones waiting for you and the ones you turned down, theirs to change or delete. That last one is on to begin with, because a review its author cannot find looks lost, and they simply write it again.",
-      bn: "নাম ধরে, শুধু শব্দটি দিয়ে, নাকি কোনো অভ্যর্থনাই নয় — আপনার পছন্দ; তাঁদের অর্ডার তালিকা হিসেবে নাকি ভিতরে কী ছিল তার ছবিসহ কার্ড হিসেবে; আর খালি অ্যাকাউন্ট থেকে শূন্যতার বদলে দোকানে পাঠানো। তাঁরা নিজেদের লেখা রিভিউ দেখতে পাবেন কি না, সেটিও ঠিক করতে পারেন — সবগুলোই, আপনার অপেক্ষায় থাকা আর ফিরিয়ে দেওয়াগুলোসহ, নিজেরাই বদলাতে বা মুছতে পারেন। শেষেরটি শুরু থেকেই চালু, কারণ যে রিভিউ তার লেখকই খুঁজে পান না তা হারিয়ে গেছে মনে হয়, আর তিনি আবার লেখেন।",
     },
   },
   {
