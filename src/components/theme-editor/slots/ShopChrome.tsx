@@ -625,12 +625,13 @@ export function ShopChrome({
         } ${className}`}
       >
         {menu.slice(0, count).map((item, index) => (
-          <span
-            key={`${item.label}-${index}`}
-            data-menu-item
-            className={`inline-flex shrink-0 items-center gap-0.5 ${item.highlight ? "text-shop-brand" : ""}`}
-          >
-            {item.label}
+          <span key={`${item.label}-${index}`} data-menu-item className="inline-flex shrink-0 items-center gap-0.5">
+            {/* The shop's chip in the brand colour: in Porcelain the brand colour is the ink. */}
+            {item.highlight ? (
+              <span className="rounded-xs bg-shop-brand px-1.5 text-shop-brand-foreground">{item.label}</span>
+            ) : (
+              item.label
+            )}
             {item.opens ? <CaretDownIcon size={9} weight={weight} aria-hidden data-menu-opens /> : null}
           </span>
         ))}

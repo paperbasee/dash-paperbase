@@ -259,7 +259,8 @@ describe("the menu (step 3, 2026-09-25)", () => {
     const { __blocks, ...settings } = live.settings as Record<string, unknown> & { __blocks: ThemeSection["blocks"] };
     return { ...live, settings, blocks: __blocks };
   };
-  const items = (html: string) => [...html.matchAll(/data-menu-item[^>]*>([^<]*)/g)].map((m) => m[1]);
+  const items = (html: string) =>
+    [...html.matchAll(/data-menu-item[^>]*>(?:<span[^>]*>)?([^<]*)/g)].map((m) => m[1]);
 
   test("its dialog holds the links and the one switch no tile decides", () => {
     const wiring = wiringFor("header", "menu")!;
@@ -272,7 +273,8 @@ describe("the menu (step 3, 2026-09-25)", () => {
     const live = withBlocks(menu([item("/categories/women"), item("/new-arrivals"), item("/products", "Sale", true)]));
     const html = draw("menu", "links", { live, categories: CATEGORIES });
     expect(items(html)).toEqual(["Women", "New arrivals", "Sale"]);
-    expect(html).toMatch(/text-shop-brand[^>]*>Sale/);
+    // A chip in the brand colour, as the shop draws it.
+    expect(html).toMatch(/bg-shop-brand[^"]*text-shop-brand-foreground">Sale</);
   });
 
   test("a caret where a panel opens, and none once they are switched off", () => {
