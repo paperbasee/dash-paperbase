@@ -84,6 +84,21 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-09-22-one-announcement-bar",
+    date: "2026-09-22",
+    version: "4.107.0",
+    tag: "improved",
+    href: "/settings?tab=customization",
+    title: {
+      en: "Up to three messages in your top bar",
+      bn: "টপ বারে তিনটি পর্যন্ত বার্তা",
+    },
+    body: {
+      en: "Your top bar lives in Customization, and it now holds up to three messages that take turns, each with its own link, the words to tap and a small icon — delivery, a gift, a sale and more — with dates to start and stop on. Switch on Track order and Help to show them at the left of the bar on a computer and at the bottom of the menu on a phone. Whatever your bar says today it still says, and whoever may customise your shop may write it.",
+      bn: "আপনার টপ বারটি কাস্টমাইজেশনে আছে, আর এখন এতে পালা করে দেখানো তিনটি পর্যন্ত বার্তা রাখা যায় — প্রতিটির নিজস্ব লিংক, চাপ দেওয়ার লেখা আর ছোট একটি আইকন (ডেলিভারি, উপহার, ছাড় ইত্যাদি) — সঙ্গে শুরু ও শেষের তারিখ। অর্ডার ট্র্যাক ও সাহায্য চালু করলে কম্পিউটারে বারের বাঁ পাশে আর ফোনে মেনুর নিচে সেগুলো দেখায়। আপনার বারে আজ যা লেখা আছে তা-ই থাকবে, আর যিনি দোকান কাস্টমাইজ করতে পারেন তিনিই এটি লিখতে পারবেন।",
+    },
+  },
+  {
     id: "2026-09-22-header-and-footer-choices",
     date: "2026-09-22",
     version: "4.106.0",
@@ -337,21 +352,6 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     body: {
       en: "Changing them meant asking us: the Banners screen had gone and nothing replaced it. They are in Customization now — click the big picture on your home page and you can add up to five, order them, choose where a tap goes, and set how long each one stays. Your shop shows exactly the pictures it showed yesterday, and pictures placed in Customization that had stopped loading, keeping Customization from opening, show again with nothing you arranged changed.",
       bn: "এগুলো বদলাতে আমাদের বলতে হতো: ব্যানার পাতাটি উঠে গিয়েছিল আর তার বদলে কিছু আসেনি। এখন সেগুলো কাস্টমাইজেশনে — হোম পেজের বড় ছবিতে চাপ দিলে পাঁচটি পর্যন্ত ছবি যোগ করা যাবে, ক্রম বদলানো যাবে, চাপ দিলে কোথায় যাবে তা ঠিক করা যাবে, আর প্রতিটি ছবি কত সময় থাকবে তাও। গতকাল যে ছবিগুলো ছিল ঠিক সেগুলোই দেখাচ্ছে, আর কাস্টমাইজেশনে বসানো যে ছবিগুলো লোড হওয়া বন্ধ হয়ে গিয়েছিল — যার ফলে কাস্টমাইজেশনও খুলত না — সেগুলো আবার দেখা যাচ্ছে, আপনার সাজানো কিছুই না বদলে।",
-    },
-  },
-  {
-    id: "2026-09-22-one-announcement-bar",
-    date: "2026-09-22",
-    version: "4.50.0",
-    tag: "improved",
-    href: "/settings?tab=customization",
-    title: {
-      en: "Your notice bar moves into Customization",
-      bn: "নোটিশ বারটি কাস্টমাইজেশনে চলে এসেছে",
-    },
-    body: {
-      en: "The strip across the top of your shop was set in Settings → Promotions while a separate announcement bar sat in Customization doing the same thing. There is one now, in Customization, where you can also give it a link, the words to tap, and dates to start and stop on. Whatever your strip says today says exactly the same thing, and the two notice permissions have left your team's permission list — the bar is part of Customization now, so whoever may customise your shop may write it.",
-      bn: "দোকানের উপরের স্ট্রিপটি সেটিংস → প্রোমোশন থেকে ঠিক করা হতো, আবার কাস্টমাইজেশনে আলাদা একটি অ্যানাউন্সমেন্ট বারও একই কাজ করত। এখন একটিই আছে, কাস্টমাইজেশনে — সেখানে লিংক, চাপ দেওয়ার লেখা, আর শুরু ও শেষের তারিখও দিতে পারবেন। আপনার স্ট্রিপে আজ যা লেখা আছে ঠিক তা-ই থাকবে, আর টিমের পারমিশন তালিকা থেকে নোটিফিকেশনের দুটি পারমিশন সরে গেছে — বারটি এখন কাস্টমাইজেশনের অংশ, তাই যিনি দোকান কাস্টমাইজ করতে পারেন তিনিই এটি লিখতে পারবেন।",
     },
   },
   {
