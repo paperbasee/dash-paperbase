@@ -81,6 +81,21 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-09-22-when-a-sale-counts",
+    date: "2026-09-22",
+    version: "4.101.0",
+    tag: "new",
+    href: "/settings?tab=integrations",
+    title: {
+      en: "Choose when a sale counts for your ads",
+      bn: "বিজ্ঞাপনে কখন বিক্রি গোনা হবে, আপনিই ঠিক করুন",
+    },
+    body: {
+      en: "In Settings → Integrations you can now choose when a cash on delivery order counts as a sale on Meta and TikTok: as soon as it is placed, or only once you confirm it, so fake and refused orders stop teaching your ads the wrong buyers. bKash and Nagad orders always count when the customer submits the payment. The four event switches on each connection — Purchase, Initiate checkout, Add to cart and View content — now really turn those events on and off, and all four start switched on.",
+      bn: "সেটিংস → ইন্টিগ্রেশনে এখন ঠিক করতে পারবেন ক্যাশ অন ডেলিভারি অর্ডার Meta ও TikTok-এ কখন বিক্রি হিসেবে গোনা হবে: অর্ডার দেওয়ার সাথে সাথে, নাকি আপনি নিশ্চিত করলে — যাতে ভুয়া ও ফেরত হওয়া অর্ডার আপনার বিজ্ঞাপনকে ভুল ক্রেতা খুঁজতে না শেখায়। বিকাশ ও নগদ অর্ডার সবসময় ক্রেতা পেমেন্ট জমা দিলে গোনা হয়। প্রতিটি কানেকশনের চারটি ইভেন্ট সুইচ — ক্রয়, চেকআউট শুরু, কার্টে যোগ করা আর কনটেন্ট দেখা — এখন সত্যিই সেই ইভেন্টগুলো চালু ও বন্ধ করে, আর চারটিই চালু অবস্থায় শুরু হয়।",
+    },
+  },
+  {
     id: "2026-09-22-payment-submitted-in-orders",
     date: "2026-09-22",
     version: "4.99.2",
