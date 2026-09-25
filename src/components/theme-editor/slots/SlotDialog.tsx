@@ -26,6 +26,7 @@ import {
   settingsClaimedElsewhere,
   settingsDecidedOn,
   slotValueFor,
+  tickedParts,
   type WiredSlot,
 } from "@/lib/theme-editor/slot-sections";
 import { cn } from "@/lib/utils";
@@ -194,27 +195,9 @@ export function SlotDialog({
   const fieldsFor = (block: ThemeBlock) =>
     section ? blockFields(manifest, section.type, block.type, locale) : [];
 
-  /**
-   * A place whose part is ONE choice is ticked from a list, not built one part
-   * at a time: the featured band is eight products, and adding eight parts to
-   * fill in one field each is eight rounds of the same three clicks.
-   *
-   * A part with more than one setting -- the hero's picture, link and
-   * description -- is a form, and stays a list of parts below.
-   *
-   * Two kinds of choice, and the difference is where the list comes from: a
-   * PRODUCT is one of the shop's own and is searched, because a catalogue can
-   * run to thousands; a SELECT is the theme's own list -- the sixteen promises
-   * -- and is simply shown.
-   */
-  const ticklist = (() => {
-    if (!section || !blockType) return null;
-    const specs = spec?.blocks?.[blockType]?.settings ?? [];
-    if (specs.length !== 1) return null;
-    const kind = specs[0].type;
-    if (kind !== "product" && kind !== "select" && kind !== "category") return null;
-    return { blockType, setting: specs[0].id, kind };
-  })();
+  /** Ticked from a list, or built one part at a time: see `tickedParts`. */
+  const ticked = section && blockType ? tickedParts(spec?.blocks?.[blockType]?.settings) : null;
+  const ticklist = ticked && blockType ? { blockType, setting: ticked.setting, kind: ticked.kind } : null;
   /**
    * What a ticked list offers.
    *
@@ -236,6 +219,14 @@ export function SlotDialog({
         .map((block) => block.settings[ticklist.setting])
         .filter((value): value is string => typeof value === "string" && value !== "")
     : [];
+  /** What a ticked part is called, for the card that holds its details. */
+  const pickedName = (value: string) =>
+    ticklist?.kind === "product"
+      ? productName(value)
+      : (choices.find((choice) => choice.value === value)?.label ?? value);
+  /** A ticked part's details: every setting of it but the choice itself. */
+  const detailsOf = (block: ThemeBlock) =>
+    ticked ? fieldsFor(block).filter((field) => ticked.details.includes(field.id)) : [];
 
   return (
     <>
@@ -350,6 +341,33 @@ export function SlotDialog({
                   <Plus aria-hidden />
                   {picked.length ? t("partsChange") : t("partsChoose")}
                 </Button>
+
+                {/* Each ticked one's details, in the order they are drawn. */}
+                {blocks.map((block) => {
+                  const value = block.settings[ticklist.setting];
+                  const details = detailsOf(block);
+                  if (typeof value !== "string" || !value || details.length === 0) return null;
+                  return (
+                    <div key={block.id} className="space-y-3 rounded-sm border border-border-subtle p-3">
+                      <strong className="block text-xs font-semibold uppercase tracking-[0.04em] text-muted-foreground">
+                        {pickedName(value)}
+                      </strong>
+                      {details.map((fieldSpec) => (
+                        <SettingField
+                          key={fieldSpec.id}
+                          spec={fieldSpec}
+                          value={fieldValue(fieldSpec, block.settings)}
+                          onChange={(next) => onSetBlock(block.id, fieldSpec.id, next)}
+                          onPickLink={() => ask("link", fieldSpec, block.id)}
+                          onPickPicture={() => ask("picture", fieldSpec, block.id)}
+                          onPickProduct={() => ask("product", fieldSpec, block.id)}
+                          pictureUrl={pictureUrl}
+                          productName={productName}
+                        />
+                      ))}
+                    </div>
+                  );
+                })}
               </div>
             ) : null}
 

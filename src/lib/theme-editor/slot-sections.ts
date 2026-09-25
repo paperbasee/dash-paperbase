@@ -1,4 +1,4 @@
-import type { ThemeDocument, ThemeSection } from "@/lib/theme-editor/api";
+import type { ThemeDocument, ThemeSection, ThemeSettingSpec } from "@/lib/theme-editor/api";
 import { pageSections, type PageKey } from "@/lib/theme-editor/document-ops";
 import type { EditorAction } from "@/lib/theme-editor/editor-reducer";
 import { SLOTS, type Slot, type SlotPageKey } from "@/lib/theme-editor/slot-catalogue";
@@ -1371,6 +1371,27 @@ export function placeParts(
     every,
     stepTo: (index, step) => every.findIndex((block) => block.id === blocks[index + step]?.id),
   };
+}
+
+/**
+ * Whether a place's parts are ticked from a list rather than built one at a
+ * time, and what each ticked one holds besides its choice.
+ *
+ * The featured band is eight products, and adding eight parts to fill in one
+ * field each is eight rounds of the same three clicks. So a part whose FIRST
+ * setting is a choice -- a product, one of the theme's own options, one of the
+ * shop's departments -- is ticked; anything else it holds is that choice's
+ * details, filled in under the list for each one ticked: a department's own
+ * picture (owner, 2026-09-26). A part that is a form from the start -- the
+ * hero's picture, link and description -- is null here, a list of parts.
+ */
+export function tickedParts(
+  settings: ThemeSettingSpec[] | undefined,
+): { setting: string; kind: "product" | "select" | "category"; details: string[] } | null {
+  const [first, ...rest] = settings ?? [];
+  if (!first) return null;
+  if (first.type !== "product" && first.type !== "select" && first.type !== "category") return null;
+  return { setting: first.id, kind: first.type, details: rest.map((one) => one.id) };
 }
 
 /** The edits one setting of one PART of that section makes -- a hero picture, say. */

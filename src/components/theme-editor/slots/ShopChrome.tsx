@@ -171,11 +171,83 @@ function SectionHead({ title, link, band = false }: { title: string; link?: stri
  */
 type Card = { name: string; price: string; was?: string; off?: number };
 
-function Cards({ items, ratio = "1" }: { items: Card[]; ratio?: string }) {
+/**
+ * The merchant's own picture at the start of a product row (owner,
+ * 2026-09-26), with its words: null where there is none, or it is switched
+ * off -- the switch hides it and keeps it. A row saved before it existed has
+ * no switch at all, which is ON, the theme's default: a missing boolean is not
+ * false.
+ */
+type RowPicture = { src: string; heading: string; line: string; button: string };
+
+function rowPicture(
+  settings: Record<string, unknown> | undefined,
+  pictureUrl?: (key: string) => string,
+): RowPicture | null {
+  const key = typeof settings?.picture === "string" ? settings.picture : "";
+  if (!key || settings?.picture_on === false) return null;
+  const words = (id: string) => {
+    const value = settings?.[id];
+    return typeof value === "string" ? value.trim() : "";
+  };
+  return {
+    src: pictureUrl?.(key) || key,
+    heading: words("picture_heading"),
+    line: words("picture_text"),
+    button: words("picture_button"),
+  };
+}
+
+/** The words on a row's picture, over the foot of it -- as the shop draws them. */
+function PictureWords({ picture }: { picture: RowPicture }) {
+  if (!picture.heading && !picture.line && !picture.button) return null;
+  return (
+    <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/65 via-black/30 to-transparent p-3 pt-10 text-white">
+      {picture.heading ? <p className="text-[13px] font-semibold leading-tight">{picture.heading}</p> : null}
+      {picture.line ? <p className="mt-0.5 text-[10.5px] leading-snug text-white/85">{picture.line}</p> : null}
+      {picture.button ? (
+        <span className="mt-2 inline-block rounded-full bg-white px-2.5 py-1 text-[10px] font-semibold text-black">
+          {picture.button}
+        </span>
+      ) : null}
+    </div>
+  );
+}
+
+/**
+ * The departments' one wide picture, above all three rows. Wide because there
+ * is nothing beside it to share the row with.
+ */
+function PictureBand({ picture }: { picture: RowPicture }) {
+  return (
+    <div data-row-picture="top" className="relative mb-5 aspect-[3/1] overflow-hidden rounded-md bg-current/8">
+      {/* eslint-disable-next-line @next/next/no-img-element -- a merchant upload, as the hero's */}
+      <img src={picture.src} alt="" className="absolute inset-0 h-full w-full object-cover" />
+      <PictureWords picture={picture} />
+    </div>
+  );
+}
+
+function Cards({ items, ratio = "1", picture }: { items: Card[]; ratio?: string; picture?: RowPicture | null }) {
   return (
     <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-      {items.map((item) => (
-        <div key={item.name} className="min-w-0">
+      {/*
+        The row's picture: two products wide beside the products on a wide
+        screen, which then shows two of them; on top of all four on a narrow
+        one -- the shop's two shapes.
+      */}
+      {picture ? (
+        <div
+          data-row-picture="beside"
+          className="relative col-span-2 aspect-[16/9] overflow-hidden rounded-md bg-current/8 sm:aspect-auto"
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element -- a merchant upload, as the hero's */}
+          <img src={picture.src} alt="" className="absolute inset-0 h-full w-full object-cover" />
+          <PictureWords picture={picture} />
+        </div>
+      ) : null}
+      {items.map((item, index) => (
+        <div key={item.name} className={cn("min-w-0", picture && index >= 2 && "sm:hidden")}>
           <div className="relative overflow-hidden rounded-md bg-current/8" style={{ aspectRatio: ratio }}>
             {item.off ? (
               <span className="absolute left-1.5 top-1.5 rounded-full bg-[#d64545] px-1.5 py-0.5 text-[9px] font-semibold text-white">
@@ -1183,7 +1255,10 @@ export function ShopChrome({
       return (
         <div className="px-4 py-4">
           <SectionHead band title={liveHeading} link={t("browseAll")} />
-          <Cards items={variant === "grid" ? [...FEATURED, ...BESTSELLERS] : FEATURED} />
+          <Cards
+            items={variant === "grid" ? [...FEATURED, ...BESTSELLERS] : FEATURED}
+            picture={live?.type === "featured_products" ? rowPicture(live.settings, pictureUrl) : null}
+          />
         </div>
       );
 
@@ -1194,22 +1269,29 @@ export function ShopChrome({
       // A plain object, not a Map: `Map` is one of this file's lucide icons.
       const byId: Record<string, string> = {};
       for (const one of departments ?? []) byId[one.value] = one.label;
-      const picked = (live?.blocks ?? [])
-        .map((block) => block.settings?.category)
-        .filter((id): id is string => typeof id === "string" && id !== "")
-        .map((id) => byId[id])
-        .filter((name): name is string => Boolean(name));
+      // Each picked department with its own settings -- its picture is its
+      // own (owner, 2026-09-26).
+      const pickedBlocks = (live?.blocks ?? []).filter((block) => {
+        const id = block.settings?.category;
+        return typeof id === "string" && id !== "" && Boolean(byId[id]);
+      });
+      const picked = pickedBlocks.map((block) => byId[block.settings.category as string]);
       const fallback = (departments ?? []).map((one) => one.label).slice(0, 2);
       const names = (picked.length ? picked : fallback).slice(0, 3);
       const shown = names.length ? names : ["Button-Downs", "Outerwear"];
       const rows = [FEATURED, ARRIVALS, BESTSELLERS];
+      const top = live?.type === "category_products" ? rowPicture(live.settings, pictureUrl) : null;
 
       return (
         <div className="px-4 py-4">
+          {top ? <PictureBand picture={top} /> : null}
           {shown.map((name, index) => (
             <div key={name} className={index ? "mt-5" : undefined}>
               <SectionHead band title={name} link={t("browseAll")} />
-              <Cards items={rows[index % rows.length]} />
+              <Cards
+                items={rows[index % rows.length]}
+                picture={picked.length ? rowPicture(pickedBlocks[index]?.settings, pictureUrl) : null}
+              />
             </div>
           ))}
           {/* The one button under all three, which the shop draws too. */}
@@ -1303,7 +1385,7 @@ export function ShopChrome({
       return (
         <div className="px-4 py-4">
           <SectionHead band title={liveHeading || t("bestsellersHeading")} link={t("browseAll")} />
-          <Cards items={BESTSELLERS} />
+          <Cards items={BESTSELLERS} picture={live?.type === "best_sellers" ? rowPicture(live.settings, pictureUrl) : null} />
         </div>
       );
 
@@ -1311,7 +1393,7 @@ export function ShopChrome({
       return (
         <div className="px-4 py-4">
           <SectionHead band title={liveHeading || t("arrivalsHeading")} link={t("browseAll")} />
-          <Cards items={ARRIVALS} />
+          <Cards items={ARRIVALS} picture={live?.type === "new_arrivals" ? rowPicture(live.settings, pictureUrl) : null} />
         </div>
       );
 
