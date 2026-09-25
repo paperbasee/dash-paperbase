@@ -114,7 +114,19 @@ function Line({ w = "100%", h = 6 }: { w?: string; h?: number }) {
   return <span className="block rounded-full bg-current/12" style={{ width: w, height: h }} />;
 }
 
-function SectionHead({ title, link }: { title: string; link?: string }) {
+function SectionHead({ title, link, band = false }: { title: string; link?: string; band?: boolean }) {
+  if (band) {
+    // A band's title on the HOME page, drawn as the shop draws it since
+    // 2026-09-25 (`band-heading`): centred, in capitals, light, no extra
+    // letter-spacing, with its link centred underneath. A band the merchant
+    // left untitled still has its link, as it does on the shop.
+    return (
+      <div className="mb-3 flex flex-col items-center gap-1 text-center">
+        {title ? <h4 className="m-0 text-[19px] font-light uppercase">{title}</h4> : null}
+        {link ? <span className="text-[10px] uppercase tracking-[0.08em] text-current/45">{link}</span> : null}
+      </div>
+    );
+  }
   return (
     <div className="mb-3 flex items-baseline justify-between gap-3">
       <h4 className="m-0 text-[15px] font-semibold">{title}</h4>
@@ -852,7 +864,7 @@ export function ShopChrome({
 
       return variant === "strip" ? (
         <div className="px-4 py-4">
-          {heading ? <SectionHead title={heading} /> : null}
+          {heading ? <SectionHead band title={heading} /> : null}
           <div className="flex gap-2 overflow-hidden">
             {names.map((name) => (
               <span
@@ -866,7 +878,7 @@ export function ShopChrome({
         </div>
       ) : (
         <div className="px-4 py-4">
-          {heading ? <SectionHead title={heading} /> : null}
+          {heading ? <SectionHead band title={heading} /> : null}
           <div className="grid grid-cols-4 gap-3">
             {names.slice(0, 4).map((name) => (
               <div key={name} className="min-w-0">
@@ -922,7 +934,7 @@ export function ShopChrome({
     case "home:featured":
       return (
         <div className="px-4 py-4">
-          <SectionHead title={t("featuredHeading")} link={t("browseAll")} />
+          <SectionHead band title={liveHeading} link={t("browseAll")} />
           <Cards items={variant === "grid" ? [...FEATURED, ...BESTSELLERS] : FEATURED} />
         </div>
       );
@@ -948,7 +960,7 @@ export function ShopChrome({
         <div className="px-4 py-4">
           {shown.map((name, index) => (
             <div key={name} className={index ? "mt-5" : undefined}>
-              <SectionHead title={name} link={t("browseAll")} />
+              <SectionHead band title={name} link={t("browseAll")} />
               <Cards items={rows[index % rows.length]} />
             </div>
           ))}
@@ -1033,7 +1045,7 @@ export function ShopChrome({
     case "home:bestsellers":
       return (
         <div className="px-4 py-4">
-          <SectionHead title={t("bestsellersHeading")} link={t("browseAll")} />
+          <SectionHead band title={liveHeading || t("bestsellersHeading")} link={t("browseAll")} />
           <Cards items={BESTSELLERS} />
         </div>
       );
@@ -1041,7 +1053,7 @@ export function ShopChrome({
     case "home:arrivals":
       return (
         <div className="px-4 py-4">
-          <SectionHead title={t("arrivalsHeading")} link={t("browseAll")} />
+          <SectionHead band title={liveHeading || t("arrivalsHeading")} link={t("browseAll")} />
           <Cards items={ARRIVALS} />
         </div>
       );
@@ -1055,7 +1067,7 @@ export function ShopChrome({
       const shown = (brands ?? []).slice(0, 6);
       return (
         <div className="px-4 py-5">
-          <SectionHead title={liveHeading || t("brandsHeading")} link={t("allBrands")} />
+          <SectionHead band title={liveHeading || t("brandsHeading")} link={t("allBrands")} />
           {shown.length ? (
             <div className="grid grid-cols-3 gap-2 sm:grid-cols-6">
               {shown.map((brand) => (
@@ -1082,7 +1094,7 @@ export function ShopChrome({
       if (!shown.length) {
         return (
           <div className="px-4 py-5">
-            <SectionHead title={liveHeading || t("reviewsHeading")} />
+            <SectionHead band title={liveHeading || t("reviewsHeading")} />
             <p className="text-[11px] italic text-current/45">{t("reviewsNone")}</p>
           </div>
         );
@@ -1097,7 +1109,7 @@ export function ShopChrome({
         </div>
       ) : (
         <div className="px-4 py-4">
-          <SectionHead title={liveHeading || t("reviewsHeading")} />
+          <SectionHead band title={liveHeading || t("reviewsHeading")} />
           <div className="grid gap-3 sm:grid-cols-3">
             {shown.map((review, index) => (
               <div key={index} className="rounded-md border border-current/12 p-3.5">
@@ -1116,7 +1128,7 @@ export function ShopChrome({
       const newest = (blog?.posts ?? []).slice(0, 3);
       return (
         <div className="px-4 py-4">
-          <SectionHead title={liveHeading || t("postsHeading")} link={t("articleAllPosts")} />
+          <SectionHead band title={liveHeading || t("postsHeading")} link={t("articleAllPosts")} />
           {newest.length ? (
             <PostCards posts={newest} line={(post) => post.date || null} cards="full" columns={3} />
           ) : (
@@ -1160,7 +1172,7 @@ export function ShopChrome({
         .filter(Boolean);
       return (
         <div className="px-4 py-4">
-          {liveHeading ? <SectionHead title={liveHeading} /> : null}
+          {liveHeading ? <SectionHead band title={liveHeading} /> : null}
           {asked.length ? (
             <div className="divide-y divide-current/10 border-y border-current/10">
               {asked.map((question, index) => (
