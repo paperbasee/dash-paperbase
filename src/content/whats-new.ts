@@ -84,6 +84,21 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-09-22-theme-editor-and-live-preview",
+    date: "2026-09-22",
+    version: "4.117.0",
+    tag: "new",
+    title: {
+      en: "Design your store",
+      bn: "নিজের মতো স্টোর সাজান",
+    },
+    body: {
+      en: "In Settings → Customization, open the editor and click any part of your store: its settings open in a calm panel beside the page, and the page changes as you type — on a phone they rise from the bottom. With nothing clicked the panel holds your colours, corners and product cards, and pictures, links and products are picked in the same calm style. What you change stays a draft your shoppers can't see until you press Save to store, and customizing your store is part of the Premium plan.",
+      bn: "সেটিংস → কাস্টমাইজেশন থেকে এডিটর খুলে আপনার স্টোরের যেকোনো অংশে চাপুন: তার সেটিংস পাতার পাশে একটি শান্ত প্যানেলে খোলে, আর আপনি লিখতে লিখতেই পাতা বদলায় — ফোনে সেগুলো নিচ থেকে উঠে আসে। কিছুতে চাপা না থাকলে প্যানেলে থাকে আপনার রং, কোণ আর পণ্যের কার্ড, আর ছবি, লিংক ও পণ্যও একই শান্ত ধাঁচে বেছে নেন। যা বদলান তা ড্রাফট হয়ে থাকে, ক্রেতারা দেখেন না, স্টোরে সংরক্ষণ বাটনে চাপলেই তা স্টোরে যায়; স্টোর সাজানো প্রিমিয়াম প্ল্যানের অংশ।",
+    },
+    href: "/settings?tab=customization",
+  },
+  {
     id: "2026-09-22-header-and-footer-choices",
     date: "2026-09-22",
     version: "4.116.1",
@@ -513,20 +528,5 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
       en: "Brands now have their own tab with a logo and a description, and each one gets a page in your shop with a link in the footer. On a product you pick a brand from the list instead of typing it, so Bata, bata and BATA can no longer be three brands — the ones you already had were merged, keeping the spelling you used most. A shop that sells only its own goods can leave the tab empty and nothing about it changes.",
       bn: "ব্র্যান্ডের জন্য এখন আলাদা ট্যাব আছে, যেখানে লোগো আর বিবরণ দেওয়া যায়, আর প্রতিটি ব্র্যান্ড আপনার দোকানে নিজের পাতা পায় — ফুটারে তার লিংকও থাকে। পণ্যের পাতায় এখন ব্র্যান্ডের নাম টাইপ না করে তালিকা থেকে বেছে নিতে হয়, তাই Bata, bata আর BATA আর আলাদা তিনটি ব্র্যান্ড থাকতে পারে না — আগের নামগুলো এক করে দেওয়া হয়েছে, আর আপনি যে বানানটি সবচেয়ে বেশি লিখেছেন সেটিই রাখা হয়েছে। যে দোকান শুধু নিজের পণ্য বিক্রি করে, সে ট্যাবটি খালি রাখতে পারে — কিছুই বদলাবে না।",
     },
-  },
-  {
-    id: "2026-09-22-theme-editor-and-live-preview",
-    date: "2026-09-22",
-    version: "4.12.0",
-    tag: "new",
-    title: {
-      en: "Design your store",
-      bn: "নিজের মতো স্টোর সাজান",
-    },
-    body: {
-      en: "In Settings → Customization you can now open a full screen editor, where you change each page's text, links and parts while your store updates beside you. What you change stays a draft your shoppers can't see until you press Save to store. Customizing your store is part of the Premium plan.",
-      bn: "সেটিংস → কাস্টমাইজেশন থেকে এখন পুরো স্ক্রিনের এডিটর খুলতে পারবেন, যেখানে প্রতিটি পেজের লেখা, লিংক আর অংশগুলো বদলাবেন আর পাশেই আপনার স্টোর বদলাতে দেখবেন। যা বদলান তা ড্রাফট হয়ে থাকে, ক্রেতারা দেখেন না; স্টোরে সংরক্ষণ বাটনে চাপলেই তা স্টোরে যায়। স্টোর সাজানো প্রিমিয়াম প্ল্যানের অংশ।",
-    },
-    href: "/settings?tab=customization",
   },
 ];
