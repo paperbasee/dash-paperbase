@@ -17,6 +17,7 @@ import { editorReducer, initEditorState, type EditorState } from "@/lib/theme-ed
 import { SLOTS } from "@/lib/theme-editor/slot-catalogue";
 import { choiceEdits, sectionOfType, slotValueFor, wiringFor } from "@/lib/theme-editor/slot-sections";
 import { ShopChrome, type ShopIdentity } from "@/components/theme-editor/slots/ShopChrome";
+import { categoryIndex, type CategoryEntry } from "@/lib/theme-editor/link-targets";
 import en from "../../messages/en.json";
 
 const labels = (label: string) => ({ label, label_bn: `${label} (bn)` });
@@ -144,7 +145,28 @@ const DEPARTMENTS = ["Audio", "Men", "Wearables", "Women", "Kids", "Smart Home",
   label,
 }));
 
-function draw(slotKey: string, variant: string, over: { live?: ThemeSection; shop?: ShopIdentity; page?: "header" | "home" } = {}) {
+const CATEGORIES = categoryIndex([
+  {
+    public_id: "c1",
+    slug: "women",
+    name: "Women",
+    is_active: true,
+    product_count: 4,
+    children: [{ public_id: "c2", slug: "dresses", name: "Dresses", is_active: true, product_count: 2 }],
+  },
+  { public_id: "c3", slug: "kids", name: "Kids", is_active: true, product_count: 1 },
+]);
+
+function draw(
+  slotKey: string,
+  variant: string,
+  over: {
+    live?: ThemeSection;
+    shop?: ShopIdentity;
+    page?: "header" | "home";
+    categories?: Record<string, CategoryEntry>;
+  } = {},
+) {
   return renderToStaticMarkup(
     <NextIntlClientProvider locale="en" messages={en}>
       <ShopChrome
@@ -155,6 +177,7 @@ function draw(slotKey: string, variant: string, over: { live?: ThemeSection; sho
         live={over.live}
         shop={over.shop ?? SHOP}
         departments={DEPARTMENTS}
+        categories={over.categories}
       />
     </NextIntlClientProvider>,
   );
@@ -223,3 +246,45 @@ describe("the canvas draws this shop's header", () => {
     expect(html).toContain(">Account</span>");
   });
 });
+
+describe("the menu (step 3, 2026-09-25)", () => {
+  const item = (link: string, label = "", highlight = false) => ({
+    id: `i-${link}-${label}`,
+    type: "item",
+    settings: { link, label, highlight },
+  });
+  const menu = (blocks: ReturnType<typeof item>[], settings: Record<string, unknown> = {}) =>
+    header({ header_layout: "classic", ...settings, __blocks: blocks });
+  const withBlocks = (live: ThemeSection) => {
+    const { __blocks, ...settings } = live.settings as Record<string, unknown> & { __blocks: ThemeSection["blocks"] };
+    return { ...live, settings, blocks: __blocks };
+  };
+  const items = (html: string) => [...html.matchAll(/data-menu-item[^>]*>([^<]*)/g)].map((m) => m[1]);
+
+  test("its dialog holds the links and the one switch no tile decides", () => {
+    const wiring = wiringFor("header", "menu")!;
+    expect(wiring.blocks).toBe("item");
+    expect(wiring.fields).toEqual(["dropdowns"]);
+    expect(SLOTS.header.find((slot) => slot.key === "menu")?.hint).toBe("headerMenuHint");
+  });
+
+  test("each link is named as the shop names it", () => {
+    const live = withBlocks(menu([item("/categories/women"), item("/new-arrivals"), item("/products", "Sale", true)]));
+    const html = draw("menu", "links", { live, categories: CATEGORIES });
+    expect(items(html)).toEqual(["Women", "New arrivals", "Sale"]);
+    expect(html).toMatch(/text-shop-brand[^>]*>Sale/);
+  });
+
+  test("a caret where a panel opens, and none once they are switched off", () => {
+    const live = withBlocks(menu([item("/categories/women"), item("/categories/kids")]));
+    expect((draw("menu", "links", { live, categories: CATEGORIES }).match(/data-menu-opens/g) ?? []).length).toBe(1);
+    const off = withBlocks(menu([item("/categories/women")], { dropdowns: false }));
+    expect(draw("menu", "links", { live: off, categories: CATEGORIES })).not.toContain("data-menu-opens");
+  });
+
+  test("with no links, the shop's categories", () => {
+    const html = draw("menu", "links", { live: header({ header_layout: "classic" }), categories: CATEGORIES });
+    expect(items(html)).toEqual(["Women", "Kids"]);
+  });
+});
+

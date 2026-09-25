@@ -1402,6 +1402,13 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
         { value: "compact", label: "headerCompact", note: "headerCompactNote", shape: "blank" },
       ],
     },
+    /*
+      The menu (step 3, 2026-09-25): the merchant's own links -- a page, a
+      category or a web address each, with optional words and a highlight --
+      and whether a category opens its subcategories. No tiles: a list is
+      built, not chosen. Empty, the shop draws its categories as before.
+    */
+    { key: "menu", label: "headerMenu", hint: "headerMenuHint" },
     {
       key: "sticky",
       label: "sticky",

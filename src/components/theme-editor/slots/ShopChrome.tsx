@@ -42,6 +42,7 @@ import {
   ArrowsLeftRightIcon,
   BagIcon,
   BasketIcon,
+  CaretDownIcon,
   ClockIcon,
   GiftIcon,
   HeadsetIcon,
@@ -115,6 +116,7 @@ import { cn } from "@/lib/utils";
 import SocialLinkGlyph from "@/app/[locale]/(dashboard)/settings/sections/SocialLinkGlyph";
 import type { StoreSocialLinkKey } from "@/lib/storeSocialLinks";
 import type { SlotPageKey } from "@/lib/theme-editor/slot-catalogue";
+import { LINK_PAGES, type CategoryEntry } from "@/lib/theme-editor/link-targets";
 
 /**
  * What a slot actually shows, drawn as the shop rather than as a grey box.
@@ -371,6 +373,7 @@ export function ShopChrome({
   live,
   pictureUrl,
   departments,
+  categories,
   promiseWords,
   blog,
   shop,
@@ -417,6 +420,13 @@ export function ShopChrome({
    */
   departments?: FieldOption[];
   /**
+   * Every category by the link a merchant stores for it, with its name and
+   * whether categories sit inside it -- so the header's menu is drawn as the
+   * shop draws it: a category link with no words named, a caret on one that
+   * opens a panel.
+   */
+  categories?: Record<string, CategoryEntry>;
+  /**
    * A promise's name to the words a merchant reads, from the theme's own list.
    *
    * The canvas has no translations of its own for these: the sixteen are the
@@ -434,6 +444,7 @@ export function ShopChrome({
   reviews?: ReviewPreview[];
 }) {
   const t = useTranslations("themeEditor.slots");
+  const tEditor = useTranslations("themeEditor");
 
   /*
     The blog's posts: this shop's own where it has any. A shop with none yet
@@ -564,6 +575,26 @@ export function ShopChrome({
     const marksOn = (force.marks ?? switched("show_account_links", "marks")) === "on";
     const name = (shop?.name || t("footerShopName")).toUpperCase();
     const aisles = departments?.length ? departments.map((one) => one.label) : [t("catExampleCategory")];
+    // The menu (step 3, 2026-09-25): the merchant's own links where they made
+    // some, else the shop's categories -- each named as the shop names it, the
+    // highlighted one in the brand colour, a caret where a panel opens.
+    const dropdownsOn = held.dropdowns !== false;
+    const links = live?.type === "header" ? (live.blocks ?? []).filter((block) => block.type === "item") : [];
+    const roots = Object.entries(categories ?? {}).filter(([path]) => path.split("/").length === 3);
+    const menu: { label: string; highlight: boolean; opens: boolean }[] = links.length
+      ? links.flatMap((block) => {
+          const link = String(block.settings.link ?? "").trim();
+          const path = link.split(/[?#]/)[0];
+          const category = categories?.[path];
+          const page = LINK_PAGES.find((one) => one.path === path);
+          const label = String(block.settings.label ?? "").trim() || category?.name || (page ? tEditor(page.key) : "");
+          return link && label
+            ? [{ label, highlight: block.settings.highlight === true, opens: dropdownsOn && category?.opens === true }]
+            : [];
+        })
+      : roots.length
+        ? roots.map(([, entry]) => ({ label: entry.name, highlight: false, opens: dropdownsOn && entry.opens }))
+        : aisles.map((label) => ({ label, highlight: false, opens: false }));
     const CartIcon = cart === "basket" ? BasketIcon : cart === "cart" ? ShoppingCartSimpleIcon : BagIcon;
 
     // A mark and its word: the word before the icon, as the shop draws
@@ -593,9 +624,14 @@ export function ShopChrome({
           caps ? "text-[9.5px] uppercase tracking-[0.08em]" : "text-[11px]"
         } ${className}`}
       >
-        {aisles.slice(0, count).map((aisle) => (
-          <span key={aisle} className="shrink-0">
-            {aisle}
+        {menu.slice(0, count).map((item, index) => (
+          <span
+            key={`${item.label}-${index}`}
+            data-menu-item
+            className={`inline-flex shrink-0 items-center gap-0.5 ${item.highlight ? "text-shop-brand" : ""}`}
+          >
+            {item.label}
+            {item.opens ? <CaretDownIcon size={9} weight={weight} aria-hidden data-menu-opens /> : null}
           </span>
         ))}
       </span>
@@ -3030,6 +3066,10 @@ export function ShopChrome({
     // with the value they are showing, so a merchant sees the choice in place.
     case "header:layout":
       return headerDrawing({ layout: variant });
+
+    // The menu is drawn where it lives: in the header, as the design has it.
+    case "header:menu":
+      return headerDrawing();
 
     case "header:sticky":
       return (

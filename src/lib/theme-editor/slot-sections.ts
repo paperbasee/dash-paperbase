@@ -85,6 +85,16 @@ export const WIRED_SLOTS: Partial<Record<SlotPageKey, Record<string, WiredSlot>>
         compact: { type: "header", settings: { header_layout: "compact" } },
       },
     },
+    /*
+      The menu's dialog: the header section's `item` parts, and the one switch
+      no tile decides -- whether a category opens its subcategories.
+    */
+    menu: {
+      page: "header",
+      sections: { links: "header" },
+      fields: ["dropdowns"],
+      blocks: "item",
+    },
     sticky: {
       page: "header",
       sections: {

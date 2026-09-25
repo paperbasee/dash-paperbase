@@ -14,7 +14,8 @@ import bn from "../../messages/bn.json";
 
 // The top bar's `message` joined on 2026-09-25 -- found by the owner as a
 // MISSING_MESSAGE the moment its dialog opened, because this list had not.
-const LISTED = ["slide", "question", "row", "message"] as const;
+// And the header menu's `item` -- a link -- with step 3 of the header redesign.
+const LISTED = ["slide", "question", "row", "message", "item"] as const;
 const WORDS = ["Add", "Number", "Remove"] as const;
 const slots = (messages: typeof en) => messages.themeEditor.slots as unknown as Record<string, string>;
 

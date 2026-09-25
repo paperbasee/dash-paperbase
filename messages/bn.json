@@ -2514,6 +2514,9 @@
     "linkTabWeb": "ওয়েব ঠিকানা",
     "linkPageHome": "হোম",
     "linkPageProducts": "সব পণ্য",
+    "linkPageNewArrivals": "নতুন পণ্য",
+    "linkPageBestSellers": "বেস্ট সেলার",
+    "linkPageBrands": "ব্র্যান্ড",
     "linkPageSearch": "সার্চ",
     "linkPageBlog": "ব্লগ",
     "linkPageCart": "কার্ট",
@@ -3272,7 +3275,12 @@
       "headerWordAccount": "অ্যাকাউন্ট",
       "headerWordCart": "কার্ট",
       "noticeTrackOrder": "অর্ডার ট্র্যাক",
-      "noticeHelp": "সাহায্য"
+      "noticeHelp": "সাহায্য",
+      "headerMenu": "মেনু",
+      "headerMenuHint": "হেডার জুড়ে আপনার নিজের লিংক: দোকানের পাতা, আপনার ক্যাটাগরি বা যেকোনো ওয়েব ঠিকানা, আপনার ক্রমে — চাইলে একটি আপনার ব্র্যান্ডের রঙে। আপনার ক্যাটাগরি দেখাতে খালি রাখুন।",
+      "itemPartAdd": "একটি লিংক যোগ করুন",
+      "itemPartNumber": "লিংক {number}",
+      "itemPartRemove": "লিংক {number} সরান"
     },
     "chosenCount": "{max, number} টির মধ্যে {count, number} টি বাছা হয়েছে",
     "chooseTitle": "কী কী দেখাবেন বেছে নিন",

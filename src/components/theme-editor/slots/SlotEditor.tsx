@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useReducer, useState } from "react";
+import { useEffect, useMemo, useReducer, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Monitor, Smartphone, X } from "lucide-react";
 
@@ -11,6 +11,7 @@ import { notify } from "@/notifications";
 import api from "@/lib/api";
 import { cn } from "@/lib/utils";
 import { blockFields } from "@/lib/theme-editor/field-specs";
+import { categoryIndex } from "@/lib/theme-editor/link-targets";
 import { CUSTOMIZATION_HREF } from "@/lib/theme-editor/access";
 import {
   discardThemeDraft,
@@ -198,6 +199,9 @@ export function SlotEditor({ loaded }: { loaded: ThemeEditorState }) {
   // This shop's own departments, so the category band draws the names a
   // merchant will recognise rather than six invented ones.
   const categories = useCategoriesQuery();
+  // Every category by the link a merchant stores for it, for the header
+  // menu's drawing: names for links with no words, carets where a panel opens.
+  const categoryIndexOf = useMemo(() => categoryIndex(categories.data ?? []), [categories.data]);
   // Only the page of products the picker last searched, which is enough: a
   // field shows the name of something the merchant just chose, and falls back
   // to the id for a pick made in another session until they open the picker.
@@ -588,6 +592,7 @@ export function SlotEditor({ loaded }: { loaded: ThemeEditorState }) {
               counts every product though, drafts included, so this flags what
               is certainly empty rather than everything that will draw nothing.
             */
+            categories={categoryIndexOf}
             departments={(categories.data ?? []).map((node) => ({
               value: node.public_id,
               label: node.name,

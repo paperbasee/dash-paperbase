@@ -2514,6 +2514,9 @@
     "linkTabWeb": "Web address",
     "linkPageHome": "Home",
     "linkPageProducts": "All products",
+    "linkPageNewArrivals": "New arrivals",
+    "linkPageBestSellers": "Best sellers",
+    "linkPageBrands": "Brands",
     "linkPageSearch": "Search",
     "linkPageBlog": "Blog",
     "linkPageCart": "Cart",
@@ -3272,7 +3275,12 @@
       "headerWordAccount": "Account",
       "headerWordCart": "Cart",
       "noticeTrackOrder": "Track order",
-      "noticeHelp": "Help"
+      "noticeHelp": "Help",
+      "headerMenu": "Menu",
+      "headerMenuHint": "Your own links across the header: pages of your shop, your categories or any web address, in your order, one of them in your brand colour if you like. Leave it empty to show your categories.",
+      "itemPartAdd": "Add a link",
+      "itemPartNumber": "Link {number}",
+      "itemPartRemove": "Remove link {number}"
     },
     "chosenCount": "{count, number} of {max, number} chosen",
     "chooseTitle": "Choose what to show",

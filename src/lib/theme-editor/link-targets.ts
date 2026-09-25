@@ -23,6 +23,11 @@ export const LINK_PAGES: readonly LinkPage[] = [
   // products" sent shoppers to the home page (owner, 2026-09-25). `theming/0038` moved the
   // links already saved.
   { path: "/products", key: "linkPageProducts" },
+  // The shop's own pages of the newest and the best-selling, the home page
+  // bands' "see all" -- a header menu's usual first links (2026-09-25).
+  { path: "/new-arrivals", key: "linkPageNewArrivals" },
+  { path: "/best-sellers", key: "linkPageBestSellers" },
+  { path: "/brands", key: "linkPageBrands" },
   { path: "/search", key: "linkPageSearch" },
   { path: "/blog", key: "linkPageBlog" },
   { path: "/cart", key: "linkPageCart" },
@@ -48,6 +53,33 @@ export function categoryLinks(nodes: CategoryNode[]): Map<string, CategoryLink> 
   const out = new Map<string, CategoryLink>();
   for (const [id, { path }] of categoryPaths(nodes)) {
     out.set(id, { id, path: `/categories/${path}` });
+  }
+  return out;
+}
+
+/** A category as a menu link names it: its own name, and whether categories sit inside it. */
+export type CategoryEntry = { name: string; opens: boolean };
+
+type NamedCategoryNode = CategoryNode & { name: string; children?: NamedCategoryNode[] };
+
+/**
+ * Every active category by the link a merchant would store for it
+ * ("/categories/men/shirts"), in tree order -- so the editor's drawing of the
+ * header's menu can name a category link the merchant wrote no words for, and
+ * mark the ones that open a panel, as the shop does.
+ */
+export function categoryIndex(nodes: NamedCategoryNode[]): Record<string, CategoryEntry> {
+  const byId = new Map<string, NamedCategoryNode>();
+  const walk = (list: NamedCategoryNode[]) =>
+    list.forEach((node) => {
+      byId.set(node.public_id, node);
+      walk(node.children ?? []);
+    });
+  walk(nodes);
+  const out: Record<string, CategoryEntry> = {};
+  for (const [id, link] of categoryLinks(nodes)) {
+    const node = byId.get(id);
+    if (node) out[link.path] = { name: node.name, opens: (node.children ?? []).some((child) => child.is_active) };
   }
   return out;
 }

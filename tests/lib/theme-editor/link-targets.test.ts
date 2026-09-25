@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { sectionContentPlace } from "@/lib/theme-editor/content-links";
 import {
   LINK_PAGES,
+  categoryIndex,
   categoryLinks,
   languageInPath,
   linkTab,
@@ -128,3 +129,18 @@ describe("sectionContentPlace", () => {
     expect(sectionContentPlace("not_a_section")).toBeNull();
   });
 });
+
+describe("categoryIndex", () => {
+  it("names every active category by the link a merchant stores, and marks the ones that open", () => {
+    const index = categoryIndex([
+      { ...node("c1", "men"), name: "Men", children: [{ ...node("c2", "shirts"), name: "Shirts" }] },
+      { ...node("c3", "kids"), name: "Kids", children: [{ ...node("c4", "hats", { is_active: false }), name: "Hats" }] },
+    ] as Parameters<typeof categoryIndex>[0]);
+    expect(index["/categories/men"]).toEqual({ name: "Men", opens: true });
+    expect(index["/categories/men/shirts"]).toEqual({ name: "Shirts", opens: false });
+    // A category with only switched-off ones inside opens nothing.
+    expect(index["/categories/kids"]).toEqual({ name: "Kids", opens: false });
+    expect(index["/categories/kids/hats"]).toBeUndefined();
+  });
+});
+

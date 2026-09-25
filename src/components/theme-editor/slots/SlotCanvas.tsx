@@ -15,6 +15,7 @@ import {
 } from "@/lib/theme-editor/slot-catalogue";
 import { ownerOf, sectionFor, slotValueFor, wiringFor } from "@/lib/theme-editor/slot-sections";
 import type { FieldOption } from "@/lib/theme-editor/field-specs";
+import type { CategoryEntry } from "@/lib/theme-editor/link-targets";
 import { type BlogPreview, type BrandPreview, type ReviewPreview, ShopChrome, type ShopIdentity } from "./ShopChrome";
 import { SlotDialog } from "./SlotDialog";
 
@@ -172,6 +173,7 @@ function SlotRegion({
   live,
   pictureUrl,
   departments,
+  categories,
   promiseWords,
   blog,
   shop,
@@ -190,6 +192,8 @@ function SlotRegion({
   live?: ThemeSection;
   pictureUrl?: (key: string) => string;
   departments?: FieldOption[];
+  /** Every category by its link, for the header menu's drawing. See ShopChrome. */
+  categories?: Record<string, CategoryEntry>;
   /** A promise's name to the words a merchant reads. See ShopChrome. */
   promiseWords?: (name: string) => string;
   /** This shop's own posts and tags, for the blog's drawings. See ShopChrome. */
@@ -274,6 +278,7 @@ function SlotRegion({
           live={live}
           pictureUrl={pictureUrl}
           departments={departments}
+          categories={categories}
           promiseWords={promiseWords}
           blog={blog}
           shop={shop}
@@ -328,6 +333,7 @@ export function SlotCanvas({
   pictures,
   pictureUrl,
   departments,
+  categories,
   promiseWords,
   blog,
   shop,
@@ -385,6 +391,8 @@ export function SlotCanvas({
    * canvas and the pop-up can never offer different aisles.
    */
   departments: FieldOption[];
+  /** Every category by its link, for the header menu's drawing. See ShopChrome. */
+  categories?: Record<string, CategoryEntry>;
   /** A promise's name to the words a merchant reads. See ShopChrome. */
   promiseWords?: (name: string) => string;
   /** This shop's own posts and tags, for the blog's drawings. See ShopChrome. */
@@ -501,6 +509,7 @@ export function SlotCanvas({
                 live={liveOf(slot)}
                 pictureUrl={pictureUrl}
                 departments={departments}
+                categories={categories}
                 promiseWords={promiseWords}
                 blog={blog}
                 shop={shop}
@@ -538,6 +547,7 @@ export function SlotCanvas({
                         live={liveOf(slot)}
                         pictureUrl={pictureUrl}
                         departments={departments}
+                        categories={categories}
                         promiseWords={promiseWords}
                         blog={blog}
                         shop={shop}
