@@ -182,3 +182,64 @@ describe("the canvas draws what the shop draws", () => {
     expect(html).not.toContain(en.themeEditor.slots.accountReviewWaiting);
   });
 });
+
+describe("the welcome is a card, as the shop draws it", () => {
+  /*
+    Made personal the way a Shopify customer account is (owner, 2026-09-25):
+    a DiceBear face, how the shop reaches them, how long they have been a
+    member, what they have here, and their newest order.
+  */
+  const slots = en.themeEditor.slots;
+  const shop = {
+    name: "Gadzilla",
+    address: "",
+    phone: "",
+    email: "",
+    social: [],
+    wishlist: true,
+    orderLookup: true,
+  };
+  const draw = (variant: string, settings: Record<string, string> = {}, over: Partial<typeof shop> = {}) =>
+    renderToStaticMarkup(
+      <NextIntlClientProvider locale="en" messages={en}>
+        <ShopChrome
+          page="account"
+          slotKey="greeting"
+          variant={variant}
+          settings={settings}
+          shop={{ ...shop, ...over }}
+        />
+      </NextIntlClientProvider>,
+    );
+
+  test("with a DiceBear thumbs face, the style the dashboard's own people have", () => {
+    expect(draw("name")).toContain("https://api.dicebear.com/9.x/thumbs/svg?seed=");
+  });
+
+  test("the greeting is the merchant's choice and the plain word is the shop's own", () => {
+    expect(draw("name")).toContain(slots.accountGreetingExample);
+    expect(draw("plain")).toContain("Your account");
+    expect(slots.accountTitleExample).toBe("Your account");
+  });
+
+  test("it says how to reach them, since when, and what they have here", () => {
+    const html = draw("name");
+    expect(html).toContain(slots.accountContactExample);
+    expect(html).toContain(slots.accountMemberSinceExample);
+    for (const label of [slots.accountCountOrders, slots.accountCountReviews, slots.accountCountSaved]) {
+      expect(html).toContain(label);
+    }
+    expect(html).toContain(slots.accountLatestOrder);
+  });
+
+  test("a count whose page does not exist is not drawn, as on the shop", () => {
+    expect(draw("name", { reviews: "off" })).not.toContain(`>${slots.accountCountReviews}<`);
+    expect(draw("name", {}, { wishlist: false })).not.toContain(`>${slots.accountCountSaved}<`);
+  });
+
+  test("the place says what the card holds, and nothing leaves the whole card out", () => {
+    const greeting = SLOTS.account.find((slot) => slot.key === "greeting")!;
+    expect(greeting.hint).toBe("accountGreetingHint");
+    expect(slots.accountGreetingEmpty).toBe("No welcome card");
+  });
+});

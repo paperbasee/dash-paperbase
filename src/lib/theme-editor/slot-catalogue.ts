@@ -976,9 +976,16 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
   account: [
     { key: "notice", label: "notice", inherited: true, inheritedFrom: { page: "header", key: "notice" } },
     { key: "header", label: "header", inherited: true, inheritedFrom: { page: "header", key: "layout" } },
+    /**
+     * The welcome card (owner, 2026-09-25): their face, how the shop reaches
+     * them, how long they have been a member, what they have here and their
+     * newest order. The choice is how it greets them; "nothing" leaves the
+     * whole card out, and sign-out stays at the foot of the page either way.
+     */
     {
       key: "greeting",
       label: "accountGreeting",
+      hint: "accountGreetingHint",
       initial: "name",
       emptyValues: ["none"],
       emptyLabel: "accountGreetingEmpty",

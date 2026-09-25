@@ -7,6 +7,7 @@ import {
   BadgeCheck,
   CalendarCheck,
   CheckCircle,
+  ChevronRight,
   ClipboardList,
   Clock,
   CreditCard,
@@ -89,6 +90,7 @@ const ROW_MARKS: Record<string, LucideIcon> = {
 
 import type { PostWord } from "@/lib/theme-editor/post-words";
 import type { ThemeSection } from "@/lib/theme-editor/api";
+import { getAvatarUrl } from "@/lib/avatar";
 import { cn } from "@/lib/utils";
 import SocialLinkGlyph from "@/app/[locale]/(dashboard)/settings/sections/SocialLinkGlyph";
 import type { StoreSocialLinkKey } from "@/lib/storeSocialLinks";
@@ -316,6 +318,13 @@ const ARRIVALS: Card[] = [
   { name: "Suede Loafer", price: "৳3,600", was: "৳4,200", off: 15 },
   { name: "Cotton Socks", price: "৳320" },
 ];
+
+/**
+ * The example shopper's face on the account page's welcome card. A fixed seed,
+ * so the drawing does not change between visits; the shop seeds each real
+ * account by its random id.
+ */
+const EXAMPLE_SHOPPER_SEED = "example-shopper";
 
 /** The mock shop, one slot at a time. `variant` is whatever the merchant chose. */
 export function ShopChrome({
@@ -1771,14 +1780,51 @@ export function ShopChrome({
 
     /* ----------------------------------------------------------- account -- */
 
-    case "account:greeting":
+    /**
+     * The welcome card, drawn as the shop draws it (owner, 2026-09-25): the
+     * shopper's DiceBear face, the greeting, how the shop reaches them, how
+     * long they have been a member, what they have here, and their newest
+     * order. Reviews and Saved are counted only where their page exists -- the
+     * reviews place on this page, the wishlist switch in Settings -- as the
+     * shop leaves them out too.
+     */
+    case "account:greeting": {
+      const counts = [
+        { n: "3", label: t("accountCountOrders") },
+        ...(settings?.reviews === "off" ? [] : [{ n: "2", label: t("accountCountReviews") }]),
+        ...(shop && !shop.wishlist ? [] : [{ n: "5", label: t("accountCountSaved") }]),
+      ];
       return (
         <div className="px-4 py-5">
-          <h4 className="m-0 text-[19px] font-medium tracking-tight">
-            {variant === "name" ? t("accountGreetingExample") : t("accountTitleExample")}
-          </h4>
+          <div className="flex flex-col items-center rounded-md border border-current/12 px-4 py-5 text-center">
+            {/* eslint-disable-next-line @next/next/no-img-element -- a fixed DiceBear drawing, as the dashboard's own avatars */}
+            <img src={getAvatarUrl(EXAMPLE_SHOPPER_SEED)} alt="" className="size-12 rounded-full" />
+            <h4 className="m-0 mt-2.5 text-[20px] font-light uppercase">
+              {variant === "name" ? t("accountGreetingExample") : t("accountTitleExample")}
+            </h4>
+            <p className="m-0 mt-1 text-[11px] text-current/55">{t("accountContactExample")}</p>
+            <p className="m-0 mt-0.5 text-[10px] text-current/45">{t("accountMemberSinceExample")}</p>
+            <div className="mt-3 flex w-full gap-1.5">
+              {counts.map((count) => (
+                <div key={count.label} className="flex-1 rounded-sm bg-current/8 py-2">
+                  <p className="m-0 text-[14px] tabular-nums">{count.n}</p>
+                  <p className="m-0 text-[10px] text-current/55">{count.label}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="mt-2 flex items-center gap-3 rounded-md border border-current/12 p-3">
+            <span className="size-9 shrink-0 rounded-sm bg-current/8" aria-hidden />
+            <div className="min-w-0 flex-1">
+              <p className="m-0 text-[10px] text-current/45">{t("accountLatestOrder")}</p>
+              <p className="m-0 mt-0.5 text-[12px] tabular-nums">#1042 &middot; ৳4,670</p>
+              <p className="m-0 text-[10px] text-current/55">{t("orderOnTheWay")}</p>
+            </div>
+            <ChevronRight className="size-4 shrink-0 text-current/40" aria-hidden />
+          </div>
         </div>
       );
+    }
 
     /**
      * What they have written, in every state -- including the ones only they
