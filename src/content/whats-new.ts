@@ -86,7 +86,7 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
     id: "2026-09-22-theme-editor-and-live-preview",
     date: "2026-09-22",
-    version: "4.117.0",
+    version: "4.117.1",
     tag: "new",
     title: {
       en: "Design your store",
