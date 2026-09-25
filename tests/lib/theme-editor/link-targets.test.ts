@@ -5,7 +5,6 @@ import {
   LINK_PAGES,
   categoryLinks,
   languageInPath,
-  linkPages,
   linkTab,
 } from "@/lib/theme-editor/link-targets";
 import { checkLink } from "@/lib/theme-editor/validate";
@@ -37,28 +36,13 @@ describe("LINK_PAGES", () => {
   });
 });
 
-describe("linkPages", () => {
-  const home = (sections: ReturnType<typeof section>[]) => {
-    const doc = document();
-    doc.templates.home.sections = sections;
-    return doc;
-  };
-  const shelves = section("category-products", "category_products");
-  const paths = (doc: ReturnType<typeof document>) => linkPages(doc).map((page) => page.path);
-
-  it("offers the product shelves while the home page draws them", () => {
-    expect(paths(home([shelves]))).toContain("/#products");
-    expect(paths(home([shelves]))).toEqual(LINK_PAGES.map((page) => page.path));
-  });
-
-  it("drops them once the home page has none shown, so no link scrolls nowhere", () => {
-    expect(paths(home([]))).not.toContain("/#products");
-    expect(paths(home([{ ...shelves, hidden: true }]))).not.toContain("/#products");
-    expect(paths(home([]))).toHaveLength(LINK_PAGES.length - 1);
-  });
-
-  it("leaves every other page alone", () => {
-    expect(paths(home([]))).toEqual(LINK_PAGES.filter((p) => p.path !== "/#products").map((p) => p.path));
+describe("All products", () => {
+  it("is the shop's own page of every product, not the old home page's anchor", () => {
+    // "/#products" scrolled to the old storefront's shelves; this shop has none, so a merchant
+    // who picked it sent shoppers to the home page (owner, 2026-09-25).
+    const products = LINK_PAGES.find((page) => page.key === "linkPageProducts");
+    expect(products?.path).toBe("/products");
+    expect(LINK_PAGES.some((page) => page.path.includes("#"))).toBe(false);
   });
 });
 

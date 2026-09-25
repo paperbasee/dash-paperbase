@@ -16,7 +16,7 @@ import {
 import type { ThemeBlock, ThemeDocument, ThemeImage, ThemeManifest } from "@/lib/theme-editor/api";
 import { blockFields, fieldValue, sectionFields } from "@/lib/theme-editor/field-specs";
 import type { FieldOption } from "@/lib/theme-editor/field-specs";
-import { linkPages } from "@/lib/theme-editor/link-targets";
+import { LINK_PAGES } from "@/lib/theme-editor/link-targets";
 import type { FieldSpec } from "@/lib/theme-editor/field-specs";
 import type { Slot, SlotPageKey } from "@/lib/theme-editor/slot-catalogue";
 import {
@@ -452,7 +452,7 @@ export function SlotDialog({
       >
         <LinkPicker
           open={asked?.kind === "link"}
-          pages={linkPages(document)}
+          pages={LINK_PAGES}
           value={asked?.value ?? ""}
           onPick={answer}
           onClose={() => setAsked(null)}

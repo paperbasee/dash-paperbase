@@ -1,13 +1,12 @@
-import type { ThemeDocument } from "./api";
-import { pageSections } from "./document-ops";
 import { categoryPaths, pathLocale, type CategoryNode } from "./preview-paths";
 
 /*
  * Where a link setting can point.
  *
- * A stored link is a path with no language in it ("/categories/men/shirts"). The storefront
- * draws it through next-intl's Link, which puts the shopper's language in front; a path that
- * already carried one would send a Bangla shopper to the English page.
+ * A stored link is a path with no language in it ("/categories/men/shirts"). The shop draws
+ * it through its `shop_link` filter, which puts the shopper's language in front (the old
+ * storefront did the same with next-intl's Link); a path that already carried one would send
+ * a Bangla shopper to the English page.
  *
  * The pages below are the ones every shop serves, so a merchant can pick one without typing.
  * A category is picked from the shop's own tree, and anything else is typed as a web address
@@ -17,33 +16,19 @@ import { categoryPaths, pathLocale, type CategoryNode } from "./preview-paths";
 /** A page every shop has. `key` names it under `themeEditor`. */
 export type LinkPage = { path: string; key: string };
 
-/** The home page's product shelves. Only the shelves section carries that anchor. */
-const PRODUCTS_ANCHOR = "/#products";
-const SHELVES_SECTION = "category_products";
-
 export const LINK_PAGES: readonly LinkPage[] = [
   { path: "/", key: "linkPageHome" },
-  // The storefront's own "keep shopping" links go here.
-  { path: PRODUCTS_ANCHOR, key: "linkPageProducts" },
+  // The shop's own page of every product. It was "/#products" -- the old storefront's home
+  // page shelves, an anchor this shop does not have -- so a merchant who picked "All
+  // products" sent shoppers to the home page (owner, 2026-09-25). `theming/0038` moved the
+  // links already saved.
+  { path: "/products", key: "linkPageProducts" },
   { path: "/search", key: "linkPageSearch" },
   { path: "/blog", key: "linkPageBlog" },
   { path: "/cart", key: "linkPageCart" },
   { path: "/checkout", key: "linkPageCheckout" },
   { path: "/support", key: "linkPageSupport" },
 ] as const;
-
-/**
- * The pages this shop can be linked to now. "/#products" scrolls to the home page's product
- * shelves, so it is offered only while the home page still shows them: a merchant who takes
- * that section off would otherwise be handed a link that lands on home and scrolls nowhere.
- * A link picked earlier keeps its name, so a stored one still reads as the page it named.
- */
-export function linkPages(document: ThemeDocument): readonly LinkPage[] {
-  const shelves = pageSections(document, "templates.home").some(
-    (section) => section.type === SHELVES_SECTION && !section.hidden,
-  );
-  return shelves ? LINK_PAGES : LINK_PAGES.filter((page) => page.path !== PRODUCTS_ANCHOR);
-}
 
 export type LinkTab = "pages" | "categories" | "web";
 
