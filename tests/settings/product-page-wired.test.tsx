@@ -52,7 +52,6 @@ const manifest: ThemeManifest = {
       at_most_one: true,
       required: true,
       settings: [
-        { id: "show_sku", type: "boolean", ...labels("Show the code"), default: false },
         { id: "sticky_buy", type: "boolean", ...labels("Buy bar on a phone"), default: true },
         choice("details_style", ["panel", "plain"], "panel"),
         choice("extras_style", ["grid", "accordions"], "grid"),
@@ -255,10 +254,9 @@ describe("the description and the specifications share the buying area", () => {
     ]);
   });
 
-  test("but it still draws the one no place decides", () => {
-    /* `show_sku` is a field in the pop-up, not a tile on the canvas. */
-    expect(settingsDecidedOn("product", "product_details").has("show_sku")).toBe(false);
-  });
+  /* `show_sku` was a field in this pop-up until 2026-09-25, and never hid the
+     code; the theme dropped it (theming/0033) and the shop draws the code
+     once, under the product's name. */
 });
 
 describe("the rows under the buying area", () => {
