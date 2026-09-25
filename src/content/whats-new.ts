@@ -81,7 +81,7 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
     id: "2026-09-22-payment-submitted-in-orders",
     date: "2026-09-22",
-    version: "4.99.1",
+    version: "4.99.2",
     tag: "improved",
     href: "/orders",
     title: {
@@ -89,8 +89,8 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
       bn: "কোন পেমেন্ট আপনার যাচাইয়ের অপেক্ষায়, দেখুন",
     },
     body: {
-      en: "An order paid in advance by bKash or Nagad said Payment pending both before and after the customer sent the money. Now it says Payment submitted, in blue, once they have sent it and typed in the transaction ID, so you can see at a glance which orders are waiting for you to check. When you verify the payment it says Confirmed, as before.",
-      bn: "বিকাশ বা নগদে আগে পেমেন্টের অর্ডার ক্রেতা টাকা পাঠানোর আগে ও পরে — দুই সময়েই “পেমেন্ট মুলতুবি” দেখাত। এখন ক্রেতা টাকা পাঠিয়ে ট্রানজেকশন আইডি দিলে নীল রঙে “পেমেন্ট জমা হয়েছে” দেখায়, তাই কোন অর্ডারগুলো আপনার যাচাইয়ের অপেক্ষায় আছে তা এক নজরেই বোঝা যায়। পেমেন্ট যাচাই করলে আগের মতোই “নিশ্চিত” দেখাবে।",
+      en: "An order paid in advance by bKash or Nagad said Payment pending both before and after the customer sent the money. Now it says Payment submitted, in blue, once they have sent it and typed in the transaction ID, so you can see at a glance which orders are waiting for you to check. When you verify it, it says Confirmed as before — and the Verify payment card now says whether the money was sent by bKash or Nagad, so you check the right app.",
+      bn: "বিকাশ বা নগদে আগে পেমেন্টের অর্ডার ক্রেতা টাকা পাঠানোর আগে ও পরে — দুই সময়েই “পেমেন্ট মুলতুবি” দেখাত। এখন ক্রেতা টাকা পাঠিয়ে ট্রানজেকশন আইডি দিলে নীল রঙে “পেমেন্ট জমা হয়েছে” দেখায়, তাই কোন অর্ডারগুলো আপনার যাচাইয়ের অপেক্ষায় আছে তা এক নজরেই বোঝা যায়। পেমেন্ট যাচাই করলে আগের মতোই “নিশ্চিত” দেখাবে — আর যাচাইয়ের কার্ডে এখন লেখা থাকে টাকা বিকাশে নাকি নগদে পাঠানো হয়েছে, যাতে আপনি সঠিক অ্যাপে মিলিয়ে দেখতে পারেন।",
     },
   },
 
