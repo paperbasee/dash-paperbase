@@ -84,6 +84,36 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-09-22-home-page-rows",
+    date: "2026-09-22",
+    version: "4.110.0",
+    tag: "new",
+    href: "/settings?tab=customization",
+    title: {
+      en: "New rows for your home page",
+      bn: "হোম পেজের নতুন সারি",
+    },
+    body: {
+      en: "Your home page shows three categories you tick, each with everything inside it, instead of a row for every category you have — and a button under them opens every product you sell on a page of its own. You can also show a row of products you choose, your best sellers and your newest, the last two filling themselves and naming themselves when you leave their title empty; every row's title is centred, in capitals, with its link underneath. Further down, add your brands, your newest good reviews on Premium — three cards, or one large quotation that takes turns through your ten newest — your three newest blog posts, a button that opens WhatsApp to your number, and questions you answer once, each under its own title and kept up to date from your shop; the WhatsApp button and your promotion's now stand out on your brand colour instead of melting into it.",
+      bn: "হোম পেজে এখন আপনার প্রতিটি ক্যাটাগরির সারির বদলে আপনার টিক করা তিনটি ক্যাটাগরি, ভেতরের সব পণ্যসহ — আর নিচের একটি বোতাম আপনার সব পণ্য নিয়ে আলাদা পাতা খোলে। আপনার বেছে নেওয়া পণ্য, সবচেয়ে বেশি বিক্রি হওয়া পণ্য আর নতুন পণ্যের সারিও দেখাতে পারেন, শেষের দুটি নিজেই ভরে যায় আর শিরোনাম খালি রাখলে নিজের নামটিই দেখায়; প্রতিটি সারির শিরোনাম মাঝখানে, বড় হাতের অক্ষরে, নিচে তার লিংক। আরও নিচে যোগ করুন আপনার ব্র্যান্ড, প্রিমিয়ামে আপনার সর্বশেষ ভালো রিভিউ — তিনটি কার্ডে, নয়তো একটি বড় উদ্ধৃতিতে যা আপনার সর্বশেষ দশটি রিভিউ একটির পর একটি দেখায় —, ব্লগের নতুন তিনটি পোস্ট, আপনার নম্বরে হোয়াটসঅ্যাপ খোলার একটি বোতাম, আর একবার উত্তর দেওয়া প্রশ্নগুলো, প্রতিটি নিজের শিরোনামের নিচে আর আপনার দোকান থেকে নিজে নিজে হালনাগাদ; হোয়াটসঅ্যাপ বোতাম আর আপনার প্রোমোশনের বোতাম এখন ব্র্যান্ডের রঙে মিশে না গিয়ে তার ওপর স্পষ্ট দেখা যায়।",
+    },
+  },
+  {
+    id: "2026-09-22-hero-pictures-in-customization",
+    date: "2026-09-22",
+    version: "4.110.0",
+    tag: "improved",
+    href: "/settings?tab=customization",
+    title: {
+      en: "Your home page pictures are yours again",
+      bn: "হোম পেজের ছবিগুলো আবার আপনার হাতে",
+    },
+    body: {
+      en: "Changing them meant asking us: the Banners screen had gone and nothing replaced it. They are in Customization now — click the big picture on your home page and you can add up to five, order them, choose where a tap goes, and set how long each one stays; they wait while a shopper points at them, and the dots under them now show which one is up. Your shop shows exactly the pictures it showed yesterday, and pictures placed in Customization that had stopped loading, keeping Customization from opening, show again with nothing you arranged changed.",
+      bn: "এগুলো বদলাতে আমাদের বলতে হতো: ব্যানার পাতাটি উঠে গিয়েছিল আর তার বদলে কিছু আসেনি। এখন সেগুলো কাস্টমাইজেশনে — হোম পেজের বড় ছবিতে চাপ দিলে পাঁচটি পর্যন্ত ছবি যোগ করা যাবে, ক্রম বদলানো যাবে, চাপ দিলে কোথায় যাবে তা ঠিক করা যাবে, আর প্রতিটি ছবি কত সময় থাকবে তাও; ক্রেতা ছবির ওপর মাউস রাখলে সেগুলো অপেক্ষা করে, আর নিচের বিন্দুগুলো এখন দেখায় কোনটি চলছে। গতকাল যে ছবিগুলো ছিল ঠিক সেগুলোই দেখাচ্ছে, আর কাস্টমাইজেশনে বসানো যে ছবিগুলো লোড হওয়া বন্ধ হয়ে গিয়েছিল — যার ফলে কাস্টমাইজেশনও খুলত না — সেগুলো আবার দেখা যাচ্ছে, আপনার সাজানো কিছুই না বদলে।",
+    },
+  },
+  {
     id: "2026-09-22-answer-the-question-once",
     date: "2026-09-22",
     version: "4.109.3",
@@ -155,21 +185,6 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     body: {
       en: "The page now opens on a welcome card: the customer's own picture, how you reach them, how long they have been a member, how many orders, reviews and saved things they have, and their newest order. Greet them by name, by the plain word, or leave the card out; list their orders as a list or as cards with pictures; and send an empty account to your shop rather than to nothing. They also see every review they have written, including the ones waiting for you or turned down, theirs to change or delete — on to begin with, so a review never looks lost.",
       bn: "পেজটি এখন একটি স্বাগত কার্ড দিয়ে শুরু হয়: ক্রেতার নিজের ছবি, তাঁর সঙ্গে যোগাযোগের উপায়, কতদিন ধরে সদস্য, কতগুলো অর্ডার, রিভিউ ও সেভ করা জিনিস আছে, আর সর্বশেষ অর্ডার। নাম ধরে, শুধু শব্দটি দিয়ে স্বাগত জানান, নাকি কার্ডটিই বাদ দিন; অর্ডার তালিকা হিসেবে নাকি ছবিসহ কার্ড হিসেবে দেখান; আর খালি অ্যাকাউন্ট থেকে শূন্যতার বদলে দোকানে পাঠান। তাঁরা নিজেদের লেখা সব রিভিউও দেখেন, আপনার অপেক্ষায় থাকা বা ফিরিয়ে দেওয়াগুলোসহ, নিজেরাই বদলাতে বা মুছতে পারেন — শুরু থেকেই চালু, যাতে কোনো রিভিউ হারিয়ে গেছে মনে না হয়।",
-    },
-  },
-  {
-    id: "2026-09-22-home-page-rows",
-    date: "2026-09-22",
-    version: "4.104.1",
-    tag: "new",
-    href: "/settings?tab=customization",
-    title: {
-      en: "New rows for your home page",
-      bn: "হোম পেজের নতুন সারি",
-    },
-    body: {
-      en: "Your home page shows three categories you tick, each with everything inside it, instead of a row for every category you have — and a button under them opens every product you sell on a page of its own. You can also show a row of products you choose, your best sellers and your newest, the last two filling themselves and naming themselves when you leave their title empty; every row's title is centred, in capitals, with its link underneath. Further down, add your brands, your newest good reviews on Premium, your three newest blog posts, a button that opens WhatsApp to your number, and questions you answer once — each kept up to date from your shop.",
-      bn: "হোম পেজে এখন আপনার প্রতিটি ক্যাটাগরির সারির বদলে আপনার টিক করা তিনটি ক্যাটাগরি, ভেতরের সব পণ্যসহ — আর নিচের একটি বোতাম আপনার সব পণ্য নিয়ে আলাদা পাতা খোলে। আপনার বেছে নেওয়া পণ্য, সবচেয়ে বেশি বিক্রি হওয়া পণ্য আর নতুন পণ্যের সারিও দেখাতে পারেন, শেষের দুটি নিজেই ভরে যায় আর শিরোনাম খালি রাখলে নিজের নামটিই দেখায়; প্রতিটি সারির শিরোনাম মাঝখানে, বড় হাতের অক্ষরে, নিচে তার লিংক। আরও নিচে যোগ করুন আপনার ব্র্যান্ড, প্রিমিয়ামে আপনার সর্বশেষ ভালো রিভিউ, ব্লগের নতুন তিনটি পোস্ট, আপনার নম্বরে হোয়াটসঅ্যাপ খোলার একটি বোতাম, আর একবার উত্তর দেওয়া প্রশ্নগুলো — সবই আপনার দোকান থেকে নিজে নিজে হালনাগাদ থাকে।",
     },
   },
   {
@@ -366,21 +381,6 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     body: {
       en: "Under your categories you can now show up to four promises — cash on delivery, easy returns, help every day — ticked from a list of sixteen. They are written in each shopper's own language, English or Bangla, so you never write them twice. The same four appear on every product page, where the old fixed wording used to sit.",
       bn: "ক্যাটাগরির নিচে এখন চারটি পর্যন্ত প্রতিশ্রুতি দেখানো যাবে — ক্যাশ অন ডেলিভারি, সহজ রিটার্ন, প্রতিদিন সহায়তা — ষোলোটির তালিকা থেকে টিক করে। প্রতিটি ক্রেতা নিজের ভাষায় সেগুলো পড়বেন, ইংরেজি হোক বা বাংলা, তাই দুবার লিখতে হবে না। একই চারটি প্রতিটি প্রোডাক্ট পাতায়ও দেখা যাবে, যেখানে আগে বাঁধা লেখা ছিল।",
-    },
-  },
-  {
-    id: "2026-09-22-hero-pictures-in-customization",
-    date: "2026-09-22",
-    version: "4.53.0",
-    tag: "improved",
-    href: "/settings?tab=customization",
-    title: {
-      en: "Your home page pictures are yours again",
-      bn: "হোম পেজের ছবিগুলো আবার আপনার হাতে",
-    },
-    body: {
-      en: "Changing them meant asking us: the Banners screen had gone and nothing replaced it. They are in Customization now — click the big picture on your home page and you can add up to five, order them, choose where a tap goes, and set how long each one stays. Your shop shows exactly the pictures it showed yesterday, and pictures placed in Customization that had stopped loading, keeping Customization from opening, show again with nothing you arranged changed.",
-      bn: "এগুলো বদলাতে আমাদের বলতে হতো: ব্যানার পাতাটি উঠে গিয়েছিল আর তার বদলে কিছু আসেনি। এখন সেগুলো কাস্টমাইজেশনে — হোম পেজের বড় ছবিতে চাপ দিলে পাঁচটি পর্যন্ত ছবি যোগ করা যাবে, ক্রম বদলানো যাবে, চাপ দিলে কোথায় যাবে তা ঠিক করা যাবে, আর প্রতিটি ছবি কত সময় থাকবে তাও। গতকাল যে ছবিগুলো ছিল ঠিক সেগুলোই দেখাচ্ছে, আর কাস্টমাইজেশনে বসানো যে ছবিগুলো লোড হওয়া বন্ধ হয়ে গিয়েছিল — যার ফলে কাস্টমাইজেশনও খুলত না — সেগুলো আবার দেখা যাচ্ছে, আপনার সাজানো কিছুই না বদলে।",
     },
   },
   {
