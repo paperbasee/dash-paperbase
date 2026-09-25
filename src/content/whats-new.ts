@@ -28,7 +28,9 @@
  * the footer's merged the home page's two band entries -- and a blog post's
  * was folded into the blog page's, one feature told once -- and the rest of the
  * home page into the home page's rows, and the header into the footer's -- and
- * the order list's "Payment submitted" merged the two review entries.)
+ * the order list's "Payment submitted" merged the two review entries -- and
+ * the product page's fold-out rows took in the delivery terms' entry, whose
+ * strip they replaced.)
  *
  * ## Entries written before their release — ONE DATE, RESTAMP IT ON THE DAY
  *
@@ -105,8 +107,8 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
       bn: "পণ্যের পেজ নিজের মতো সাজান",
     },
     body: {
-      en: "Under Product in your editor, every choice is real now: show the path back up or hide it, pick how the pictures look — a frame with thumbnails, a column, or just one — put the description in a box or under a heading, and show specifications in two columns or folded away. Reviews can be the full band or just the score and how many, \"You may also like\", product questions and the recently-viewed strip each switch on or off. On a phone, a bar with the price and the button now follows the shopper down the page, and the product code shows once, right under the product's name.",
-      bn: "এডিটরের পণ্য অংশে প্রতিটি পছন্দ এখন সত্যিকারের: উপরে ফেরার পথ দেখাবেন কি না; ছবি কেমন দেখাবে — থাম্বনেইলসহ একটি ছবি, ছবির কলাম, নাকি শুধু একটি; বিবরণ বাক্সে নাকি শিরোনামের নিচে; স্পেসিফিকেশন দুই কলামে নাকি ভাঁজ করা। রিভিউ পুরো ব্যান্ড হিসেবে নাকি শুধু স্কোর, আর “এগুলোও ভালো লাগতে পারে”, পণ্যের প্রশ্ন ও “সম্প্রতি দেখা” — প্রতিটিই চালু বা বন্ধ করা যায়। ফোনে পণ্যের পাতায় দাম আর বোতামসহ একটি বার এখন ক্রেতার সাথে নিচে নামে, আর পণ্যের কোড একবারই দেখায় — পণ্যের নামের ঠিক নিচে।",
+      en: "Under Product in your editor, every choice is real now: show the path back up or hide it, pick how the pictures look — a frame with thumbnails, a column, or just one — and switch reviews (the full band or just the score), \"You may also like\", product questions and the recently-viewed strip on or off. The buying column now ends in fold-out rows with icons: Product details with its specifications inside, your Shipping details and Exchange policy written once for every product, and rows of your own such as Wash & Care — a row with nothing written is not shown. On a phone, a bar with the price and the button follows the shopper down the page, and the product code shows once, right under the product's name.",
+      bn: "এডিটরের পণ্য অংশে প্রতিটি পছন্দ এখন সত্যিকারের: উপরে ফেরার পথ দেখাবেন কি না; ছবি কেমন দেখাবে — থাম্বনেইলসহ একটি ছবি, ছবির কলাম, নাকি শুধু একটি; আর রিভিউ (পুরো ব্যান্ড বা শুধু স্কোর), “এগুলোও ভালো লাগতে পারে”, পণ্যের প্রশ্ন ও “সম্প্রতি দেখা” চালু বা বন্ধ করা যায়। কেনার অংশ এখন আইকনসহ ভাঁজ করা সারিতে শেষ হয়: স্পেসিফিকেশনসহ পণ্যের বিবরণ, একবার লিখে দেওয়া আপনার শিপিং তথ্য ও এক্সচেঞ্জ নীতি, আর ধোয়া ও যত্নের মতো আপনার নিজের সারি — লেখা না থাকলে সারিটি দেখানো হয় না। ফোনে পণ্যের পাতায় দাম আর বোতামসহ একটি বার ক্রেতার সাথে নিচে নামে, আর পণ্যের কোড একবারই দেখায় — পণ্যের নামের ঠিক নিচে।",
     },
   },
   {
@@ -227,21 +229,6 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     body: {
       en: "The Cart page in your editor is real now: a \"Continue shopping\" link beside the title or not, the items as cards or as a table, the total line by line or as one number, and an empty cart that says one line or invites the shopper somewhere. The items fill their own column with a picture on every line, and everything owed sits in one panel beside them — the discount code box inside it, behind a link if you would rather, with the ways they can pay underneath. You can also add a row of things to buy alongside, repeat your home-page promises or write a line of your own, show what the shopper looked at earlier, and put a Cart · Checkout · Done bar at the top.",
       bn: "এডিটরের কার্ট পেজটি এখন সত্যিকারের: শিরোনামের পাশে “আরও কিনুন” থাকবে কি না, পণ্যগুলো কার্ড হিসেবে নাকি টেবিলে, মোট ধাপে ধাপে নাকি একটিই সংখ্যা, আর কার্ট খালি থাকলে এক লাইন নাকি আমন্ত্রণ। পণ্যগুলো নিজের কলামে বসে, প্রতিটি লাইনে ছবিসহ, আর ক্রেতার দেয় সবকিছু পাশে একটি প্যানেলে — ডিসকাউন্ট কোডের ঘর সেটির ভিতরেই, চাইলে লিংকের পিছনে, নিচে টাকা দেওয়ার উপায়গুলো। সাথে কেনার মতো পণ্যের সারিও দিতে পারেন, হোম পেজের প্রতিশ্রুতি বা নিজের এক লাইন, ক্রেতা আগে যা দেখেছেন তা, আর উপরে “কার্ট · চেকআউট · সম্পন্ন” বার।",
-    },
-  },
-  {
-    id: "2026-09-22-delivery-and-returns-terms",
-    date: "2026-09-22",
-    version: "4.76.0",
-    tag: "new",
-    href: "/settings?tab=customization",
-    title: {
-      en: "Tell shoppers your delivery terms",
-      bn: "ডেলিভারির শর্ত ক্রেতাকে জানান",
-    },
-    body: {
-      en: "Write your delivery and returns terms once, under Product in your editor, and they appear on every product page — folded away, or written out in full. Nothing is shown until you write something, so no shop promises a return policy it does not have.",
-      bn: "ডেলিভারি ও ফেরতের শর্ত একবার লিখুন — এডিটরের পণ্য অংশে — আর তা প্রতিটি পণ্যের পাতায় দেখা যাবে, ভাঁজ করা অবস্থায় বা পুরোটা লেখা। না লেখা পর্যন্ত কিছুই দেখানো হয় না, তাই কোনো দোকান এমন কিছুর প্রতিশ্রুতি দেয় না যা তার নেই।",
     },
   },
   {
