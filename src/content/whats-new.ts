@@ -78,6 +78,21 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-09-22-product-page-choices",
+    date: "2026-09-22",
+    version: "4.99.0",
+    tag: "new",
+    href: "/settings?tab=customization",
+    title: {
+      en: "Design your product pages",
+      bn: "পণ্যের পেজ নিজের মতো সাজান",
+    },
+    body: {
+      en: "Under Product in your editor, every choice is real now: show the path back up or hide it, pick how the pictures look — a frame with thumbnails, a column, or just one — put the description in a box or under a heading, and show specifications in two columns or folded away. Reviews can be the full band or just the score and how many, \"You may also like\", product questions and the recently-viewed strip each switch on or off. On a phone, a bar with the price and the button now follows the shopper down the page, and the product code shows once, right under the product's name.",
+      bn: "এডিটরের পণ্য অংশে প্রতিটি পছন্দ এখন সত্যিকারের: উপরে ফেরার পথ দেখাবেন কি না; ছবি কেমন দেখাবে — থাম্বনেইলসহ একটি ছবি, ছবির কলাম, নাকি শুধু একটি; বিবরণ বাক্সে নাকি শিরোনামের নিচে; স্পেসিফিকেশন দুই কলামে নাকি ভাঁজ করা। রিভিউ পুরো ব্যান্ড হিসেবে নাকি শুধু স্কোর, আর “এগুলোও ভালো লাগতে পারে”, পণ্যের প্রশ্ন ও “সম্প্রতি দেখা” — প্রতিটিই চালু বা বন্ধ করা যায়। ফোনে পণ্যের পাতায় দাম আর বোতামসহ একটি বার এখন ক্রেতার সাথে নিচে নামে, আর পণ্যের কোড একবারই দেখায় — পণ্যের নামের ঠিক নিচে।",
+    },
+  },
+  {
     id: "2026-09-22-search-page-choices",
     date: "2026-09-22",
     version: "4.98.0",
@@ -210,21 +225,6 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     body: {
       en: "Write your delivery and returns terms once, under Product in your editor, and they appear on every product page — folded away, or written out in full. Nothing is shown until you write something, so no shop promises a return policy it does not have.",
       bn: "ডেলিভারি ও ফেরতের শর্ত একবার লিখুন — এডিটরের পণ্য অংশে — আর তা প্রতিটি পণ্যের পাতায় দেখা যাবে, ভাঁজ করা অবস্থায় বা পুরোটা লেখা। না লেখা পর্যন্ত কিছুই দেখানো হয় না, তাই কোনো দোকান এমন কিছুর প্রতিশ্রুতি দেয় না যা তার নেই।",
-    },
-  },
-  {
-    id: "2026-09-22-product-page-choices",
-    date: "2026-09-22",
-    version: "4.73.0",
-    tag: "new",
-    href: "/settings?tab=customization",
-    title: {
-      en: "Design your product pages",
-      bn: "পণ্যের পেজ নিজের মতো সাজান",
-    },
-    body: {
-      en: "Under Product in your editor, every choice is real now: show the path back up or hide it, pick how the pictures look — a frame with thumbnails, a column, or just one — put the description in a box or under a heading, and show specifications in two columns or folded away. Reviews can be the full band or just the score and how many, \"You may also like\", product questions and the recently-viewed strip each switch on or off. On a phone, a bar with the price and the button now follows the shopper down the page.",
-      bn: "এডিটরের পণ্য অংশে প্রতিটি পছন্দ এখন সত্যিকারের: উপরে ফেরার পথ দেখাবেন কি না; ছবি কেমন দেখাবে — থাম্বনেইলসহ একটি ছবি, ছবির কলাম, নাকি শুধু একটি; বিবরণ বাক্সে নাকি শিরোনামের নিচে; স্পেসিফিকেশন দুই কলামে নাকি ভাঁজ করা। রিভিউ পুরো ব্যান্ড হিসেবে নাকি শুধু স্কোর, আর “এগুলোও ভালো লাগতে পারে”, পণ্যের প্রশ্ন ও “সম্প্রতি দেখা” — প্রতিটিই চালু বা বন্ধ করা যায়। ফোনে পণ্যের পাতায় দাম আর বোতামসহ একটি বার এখন ক্রেতার সাথে নিচে নামে।",
     },
   },
   {
