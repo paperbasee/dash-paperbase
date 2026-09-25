@@ -1461,6 +1461,22 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
       built, not chosen. Empty, the shop draws its categories as before.
     */
     { key: "menu", label: "headerMenu", hint: "headerMenuHint" },
+    /*
+      Step 4 (owner, 2026-09-26): a button of the merchant's own -- words and a
+      link, no tiles -- and whether the header sits clear over the home page's
+      first picture, off unless a merchant turns it on.
+    */
+    { key: "button", label: "headerButton", hint: "headerButtonHint" },
+    {
+      key: "over",
+      label: "headerOver",
+      hint: "headerOverHint",
+      initial: "off",
+      options: [
+        { value: "off", label: "headerOverOff", shape: "line" },
+        { value: "on", label: "headerOverOn", note: "headerOverOnNote", shape: "block" },
+      ],
+    },
     {
       key: "sticky",
       label: "sticky",

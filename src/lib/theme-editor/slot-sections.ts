@@ -109,6 +109,23 @@ export const WIRED_SLOTS: Partial<Record<SlotPageKey, Record<string, WiredSlot>>
       fields: ["dropdowns"],
       blocks: "item",
     },
+    /*
+      Step 4 (2026-09-26): the merchant's button -- its words and its link, as
+      this place's own fields -- and the header over the home page's first
+      picture, off first because it is the theme's default.
+    */
+    button: {
+      page: "header",
+      sections: { on: "header" },
+      fields: ["button_label", "button_link"],
+    },
+    over: {
+      page: "header",
+      sections: {
+        off: { type: "header", settings: { over_hero: false } },
+        on: { type: "header", settings: { over_hero: true } },
+      },
+    },
     sticky: {
       page: "header",
       sections: {

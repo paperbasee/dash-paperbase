@@ -660,7 +660,18 @@ export function ShopChrome({
     cart's shape ARE the choices being made.
   */
   const headerDrawing = (
-    force: { layout?: string; marks?: string; icons?: string; words?: string; cart?: string; logoSize?: string } = {},
+    force: {
+      layout?: string;
+      marks?: string;
+      icons?: string;
+      words?: string;
+      cart?: string;
+      logoSize?: string;
+      /** Drawn clear, in white, over a picture: the Over place's "on". */
+      overPicture?: boolean;
+      /** The Button place: an outline where the button goes, until there is one. */
+      buttonHint?: boolean;
+    } = {},
   ) => {
     const held = live?.type === "header" ? (live.settings ?? {}) : {};
     const chosen = (key: string, place: string, fallback: string) => {
@@ -719,6 +730,23 @@ export function ShopChrome({
         {word && after ? <span className="text-[10px]">{word}</span> : null}
       </span>
     );
+    // The merchant's own button (step 4, 2026-09-26), after the cart as on the
+    // shop: shown with its words and a link, in the brand colour.
+    const buttonWords = typeof held.button_label === "string" ? held.button_label.trim() : "";
+    const buttonLink = typeof held.button_link === "string" ? held.button_link.trim() : "";
+    const button =
+      buttonWords && buttonLink ? (
+        <span
+          data-header-button
+          className="shrink-0 rounded-md bg-shop-brand px-2.5 py-1 text-[10px] font-semibold text-shop-brand-foreground"
+        >
+          {buttonWords}
+        </span>
+      ) : force.buttonHint ? (
+        <span data-header-button-hint className="shrink-0 rounded-md border border-dashed border-current/40 px-2.5 py-1 text-[10px] text-current/60">
+          {t("headerButton")}
+        </span>
+      ) : null;
     const icons = (withSearch: boolean) => (
       <span className="flex shrink-0 items-center gap-2.5">
         {withSearch ? mark(MagnifyingGlassIcon, "search", words ? t("headerWordSearch") : undefined, true) : null}
@@ -726,6 +754,7 @@ export function ShopChrome({
         {/* The wishlist only where it is switched on. */}
         {marksOn && !(shop && !shop.wishlist) ? mark(HeartIcon, "wishlist") : null}
         {mark(CartIcon, "cart", words ? t("headerWordCart") : undefined)}
+        {button}
       </span>
     );
     // Plain letters in Classic and Split, small spaced capitals in Centred and
@@ -780,7 +809,9 @@ export function ShopChrome({
     // screen is the shop's.
     const nameFits = "min-w-0 max-w-[40cqw] line-clamp-2 break-words";
     const logo = brandMark(`${nameFits} text-sm font-semibold tracking-[0.14em]`);
-    const frame = "@container border-b border-border bg-shop-header text-shop-header-foreground";
+    const frame = force.overPicture
+      ? "@container text-white"
+      : "@container border-b border-border bg-shop-header text-shop-header-foreground";
 
     if (layout === "centred") {
       // Search, the name in the middle, the icons; the menu in its own row.
@@ -3447,6 +3478,37 @@ export function ShopChrome({
 
     case "header:cart":
       return headerDrawing({ cart: variant });
+
+    // The merchant's button where it sits, or an outline of where it would.
+    case "header:button":
+      return headerDrawing({ buttonHint: true });
+
+    /*
+      The header over the home page's first picture (step 4, 2026-09-26): the
+      same header, clear and in white over a picture with a shade at its top,
+      or above it as every other page has it. A stand-in picture, named as
+      one: the header page holds no home page to borrow the real one from.
+    */
+    case "header:over": {
+      const picture = (
+        <div data-over-picture className="relative h-28 overflow-hidden bg-[linear-gradient(135deg,#6b7c85,#2f3a40)]">
+          <span className="absolute bottom-2 right-3 text-[10px] text-white/75">{t("headerOverExample")}</span>
+        </div>
+      );
+      return variant === "on" ? (
+        <div data-header-over="on" className="relative">
+          {picture}
+          <div className="absolute inset-x-0 top-0 bg-gradient-to-b from-black/45 to-transparent">
+            {headerDrawing({ overPicture: true })}
+          </div>
+        </div>
+      ) : (
+        <div data-header-over="off">
+          {headerDrawing()}
+          {picture}
+        </div>
+      );
+    }
 
     // The arrangement is the whole footer; every other footer place draws its
     // own part, from the same function, with the value it is showing.
