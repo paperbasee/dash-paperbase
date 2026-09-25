@@ -149,6 +149,7 @@ export function SlotEditor({ loaded }: { loaded: ThemeEditorState }) {
     home: initialChoices("home"),
     category: initialChoices("category"),
     product: initialChoices("product"),
+    reviews: initialChoices("reviews"),
     search: initialChoices("search"),
     wishlist: initialChoices("wishlist"),
     account: initialChoices("account"),
@@ -253,10 +254,10 @@ export function SlotEditor({ loaded }: { loaded: ThemeEditorState }) {
       }));
     return { posts, tags };
   })();
-  // The home page's brands and reviews, picked by the shop's own rules (see
-  // `BrandPreview`): the active brands with the most products, and the newest
-  // ten published four- and five-star reviews with something written -- ten,
-  // because the quotation takes turns through that many.
+  // The home page's brands, picked by the shop's own rule (see `BrandPreview`):
+  // the active brands with the most products. And every published review,
+  // newest first -- each drawing picks from them by the shop's own rule, the
+  // home page its ten good ones, the reviews page all of them.
   const brandList = useBrandsQuery();
   const brands: BrandPreview[] = (brandList.data ?? [])
     .filter((brand) => brand.is_active && brand.product_count > 0)
@@ -265,9 +266,7 @@ export function SlotEditor({ loaded }: { loaded: ThemeEditorState }) {
     .map((brand) => ({ name: brand.name, logo: Boolean(brand.image) }));
   const published = useReviewsQuery("published");
   const reviews: ReviewPreview[] = (published.data ?? [])
-    .filter((review) => review.rating >= 4 && review.body.trim())
     .sort((a, b) => Date.parse(b.created_at) - Date.parse(a.created_at))
-    .slice(0, 10)
     .map((review) => ({
       name: review.display_name,
       rating: review.rating,

@@ -441,6 +441,27 @@ export const WIRED_SLOTS: Partial<Record<SlotPageKey, Record<string, WiredSlot>>
     },
   },
   /*
+    Every review in the shop, 2026-09-25: one section, `review_page`, whose two
+    settings are these two places. The first key of each is the theme's default
+    -- the score above, the reviews as a list.
+  */
+  reviews: {
+    summary: {
+      page: "templates.reviews",
+      sections: {
+        bars: { type: "review_page", settings: { summary: "bars" } },
+        none: { type: "review_page", settings: { summary: "none" } },
+      },
+    },
+    layout: {
+      page: "templates.reviews",
+      sections: {
+        rows: { type: "review_page", settings: { layout: "rows" } },
+        cards: { type: "review_page", settings: { layout: "cards" } },
+      },
+    },
+  },
+  /*
     The wishlist, 2026-09-24. The fifth and last page that was drawn in markup
     no merchant could reach -- and unlike the account's, all four of its places
     were real things the shop could do, two of which it already did.

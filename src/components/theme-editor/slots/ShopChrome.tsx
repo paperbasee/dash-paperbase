@@ -257,7 +257,22 @@ export type BlogPreview = { posts: PostPreview[]; tags: string[] };
  * something written -- the shop's own rule, so the drawing and the page agree.
  */
 export type BrandPreview = { name: string; logo: boolean };
+/**
+ * One of this shop's published reviews. The editor hands in EVERY one, newest
+ * first (2026-09-25), and each drawing picks by the shop's own rule: the home
+ * page's good ones (`goodReviews`), the reviews page all of them.
+ */
 export type ReviewPreview = { name: string; rating: number; body: string; product: string; byShop: boolean };
+
+/**
+ * The home page's rule, as the shop's `reviews.highlights` has it: four or five
+ * stars, something written, the newest ten.
+ */
+function goodReviews(reviews: ReviewPreview[] | undefined): ReviewPreview[] {
+  return (reviews ?? []).filter((review) => review.rating >= 4 && review.body.trim()).slice(0, 10);
+}
+
+const starRow = (rating: number) => "★".repeat(rating) + "☆".repeat(5 - rating);
 
 /**
  * This shop's own details, for the footer: what Settings holds, as the shop
@@ -1254,8 +1269,8 @@ export function ShopChrome({
       // Up to ten, as the shop reads them: the cards draw three, the quotation
       // takes turns through them all -- drawn here as its first, with a dot
       // for each so the merchant can see it moves on (2026-09-25).
-      const shown = (reviews ?? []).slice(0, 10);
-      const stars = (rating: number) => "★".repeat(rating) + "☆".repeat(5 - rating);
+      const shown = goodReviews(reviews);
+      const stars = starRow;
       const who = (review: ReviewPreview) => (review.byShop ? `${review.name} · ${t("reviewsByShop")}` : review.name);
       if (!shown.length) {
         return (
@@ -1833,6 +1848,103 @@ export function ShopChrome({
           )}
         </div>
       );
+
+    /* ----------------------------------------------------------- reviews -- */
+    /*
+      Every review in the shop (2026-09-25), from this shop's own published
+      reviews -- the score worked out from them as the shop works it out, and
+      the newest drawn as the page draws them, each naming its product.
+    */
+    case "reviews:summary": {
+      const all = reviews ?? [];
+      const average = all.length ? all.reduce((sum, review) => sum + review.rating, 0) / all.length : 0;
+      return (
+        <div className="px-4 pb-1 pt-5">
+          <p className="text-center text-[19px] font-light uppercase">{t("reviewsPageTitle")}</p>
+          {variant === "none" || !all.length ? null : (
+            <div className="mx-auto mt-4 flex max-w-lg items-start gap-5" data-review-score>
+              <div className="shrink-0">
+                <p className="text-[22px] font-semibold leading-none tabular-nums">{average.toFixed(1)}</p>
+                <p className="mt-1 text-[11px] text-current/70">{starRow(Math.round(average))}</p>
+                <p className="mt-1 text-[10.5px] text-current/45">{t("reviewsPageCount", { count: all.length })}</p>
+              </div>
+              <div className="flex-1 space-y-1">
+                {[5, 4, 3, 2, 1].map((rating) => {
+                  const count = all.filter((review) => review.rating === rating).length;
+                  return (
+                    <div key={rating} className="flex items-center gap-2 text-[10px] text-current/45">
+                      <span className="w-2 tabular-nums">{rating}</span>
+                      <span className="h-1 flex-1 rounded-full bg-current/10">
+                        <span
+                          className="block h-full rounded-full bg-shop-brand"
+                          style={{ width: `${(count / all.length) * 100}%` }}
+                        />
+                      </span>
+                      <span className="w-3 text-right tabular-nums">{count}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    case "reviews:layout": {
+      const all = reviews ?? [];
+      const who = (review: ReviewPreview) => (review.byShop ? `${review.name} · ${t("reviewsByShop")}` : review.name);
+      // The three filters are always there -- not a choice -- so they are drawn
+      // above whichever shape the reviews take.
+      const filters = (
+        <div className="flex flex-wrap gap-1.5">
+          {[t("reviewsPageAllStars"), t("reviewsPageAllCategories"), t("reviewsPageAllProducts")].map((word) => (
+            <span key={word} className="rounded-xs border border-current/15 px-2.5 py-1.5 text-[10.5px]">
+              {word} ▾
+            </span>
+          ))}
+        </div>
+      );
+      if (!all.length) {
+        return (
+          <div className="mx-auto max-w-lg px-4 py-4">
+            <p className="text-[11px] italic text-current/45">{t("reviewsPageEmpty")}</p>
+          </div>
+        );
+      }
+      const shown = all.slice(0, 3);
+      return variant === "cards" ? (
+        <div className="px-4 py-4">
+          {filters}
+          <div className="mt-3 grid gap-3 sm:grid-cols-3">
+            {shown.map((review, index) => (
+              <div key={index} className="rounded-md border border-current/12 p-3.5">
+                <p className="truncate text-[10.5px] text-current/45 underline">{review.product}</p>
+                <p className="mt-1 text-[11px] text-current/70">{starRow(review.rating)}</p>
+                <p className="mt-1.5 line-clamp-4 text-[11.5px] leading-relaxed text-current/65">{review.body}</p>
+                <p className="mt-2 text-[11px] font-medium">{who(review)}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : (
+        <div className="mx-auto max-w-lg px-4 py-4">
+          {filters}
+          <div className="mt-2">
+            {shown.map((review, index) => (
+              <div key={index} className="border-t border-current/10 py-3 first:border-t-0">
+                <p className="text-[10.5px] text-current/45 underline">{review.product}</p>
+                <p className="mt-1 flex items-center gap-2 text-[11px]">
+                  <span className="text-current/70">{starRow(review.rating)}</span>
+                  <span className="font-medium">{who(review)}</span>
+                </p>
+                <p className="mt-1 line-clamp-3 text-[11.5px] leading-relaxed text-current/65">{review.body}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    }
 
     /* ---------------------------------------------------------- wishlist -- */
 
@@ -2705,7 +2817,8 @@ export function ShopChrome({
         </p>
       );
 
-    case "product:reviews":
+    case "product:reviews": {
+      const good = goodReviews(reviews);
       return variant === "summary" ? (
         <div className="flex flex-wrap items-center gap-3 border-y border-current/12 px-4 py-4">
           <span className="text-[19px] font-semibold tabular-nums">4.7</span>
@@ -2718,8 +2831,8 @@ export function ShopChrome({
           <div className="grid gap-3 sm:grid-cols-3">
             {/* The shop's own good reviews standing in for a product's, where it
                 has some; the examples only for a shop with none yet. */}
-            {(reviews?.length
-              ? reviews.slice(0, 3).map((review) => [review.name, review.body])
+            {(good.length
+              ? good.slice(0, 3).map((review) => [review.name, review.body])
               : [
                   ["Nusrat J.", t("reviewOne")],
                   ["Rafiq H.", t("reviewTwo")],
@@ -2738,6 +2851,7 @@ export function ShopChrome({
           </div>
         </div>
       );
+    }
 
     // The shop's column and band title, as on the home page's questions.
     case "product:faq":

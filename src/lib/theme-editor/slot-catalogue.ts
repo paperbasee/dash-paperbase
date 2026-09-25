@@ -22,6 +22,7 @@ export type SlotPageKey =
   | "home"
   | "category"
   | "product"
+  | "reviews"
   | "search"
   | "blog"
   | "article"
@@ -115,6 +116,7 @@ export const SLOT_PAGES: readonly SlotPageKey[] = [
   "home",
   "category",
   "product",
+  "reviews",
   "search",
   "blog",
   "article",
@@ -885,6 +887,39 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
       options: [
         { value: "on", label: "on", note: "articleRelatedNote", shape: "row" },
         { value: "off", label: "off", shape: "blank" },
+      ],
+    },
+    { key: "footer", label: "footer", inherited: true, inheritedFrom: { page: "footer", key: "layout" } },
+  ],
+
+  /**
+   * Every review in the shop, on a page of its own (owner, 2026-09-25), wired
+   * from the start (see `WIRED_SLOTS.reviews`). Shoppers narrow it by stars,
+   * category and product -- always there, so not a choice -- and a merchant
+   * decides the two things that are: the score above the reviews, and whether
+   * the reviews are a list or cards. Sold with the reviews: the shop opens it
+   * only where a (premium) reviews section is shown.
+   */
+  reviews: [
+    { key: "notice", label: "notice", inherited: true, inheritedFrom: { page: "header", key: "notice" } },
+    { key: "header", label: "header", inherited: true, inheritedFrom: { page: "header", key: "layout" } },
+    {
+      key: "summary",
+      label: "reviewsPageSummary",
+      initial: "bars",
+      options: [
+        { value: "bars", label: "reviewsPageBars", note: "reviewsPageBarsNote", shape: "block", premium: true },
+        { value: "none", label: "reviewsPageNothing", note: "reviewsPageNothingNote", shape: "blank", premium: true },
+      ],
+    },
+    {
+      key: "layout",
+      label: "reviewsPageLayout",
+      hint: "reviewsPageLayoutHint",
+      initial: "rows",
+      options: [
+        { value: "rows", label: "wishItemsRows", note: "reviewsPageRowsNote", shape: "line", premium: true },
+        { value: "cards", label: "reviewsPageCards", note: "reviewsPageCardsNote", shape: "row", premium: true },
       ],
     },
     { key: "footer", label: "footer", inherited: true, inheritedFrom: { page: "footer", key: "layout" } },
