@@ -30,7 +30,9 @@
  * home page into the home page's rows, and the header into the footer's -- and
  * the order list's "Payment submitted" merged the two review entries -- and
  * the product page's fold-out rows took in the delivery terms' entry, whose
- * strip they replaced.)
+ * strip they replaced -- and the Integrations cards merged the two entries
+ * about pictures in Customization, the pictures given back and the ones that
+ * had stopped loading.)
  *
  * ## Entries written before their release — ONE DATE, RESTAMP IT ON THE DAY
  *
@@ -80,6 +82,21 @@ export interface WhatsNewEntry {
 export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
+  {
+    id: "2026-09-22-integrations-cards",
+    date: "2026-09-22",
+    version: "4.102.0",
+    tag: "improved",
+    href: "/settings?tab=integrations",
+    title: {
+      en: "Integrations get a new look",
+      bn: "ইন্টিগ্রেশনের নতুন চেহারা",
+    },
+    body: {
+      en: "Settings → Integrations now shows a card for each service — Meta, TikTok and Steadfast — with one switch that turns the whole service off or on, after a warning. Open a card to see every pixel or account inside it, each with its own switch, and to change a pixel's ID, token or test code without disconnecting it. Google Analytics and more couriers are listed as coming soon, and the Steadfast setup steps are now in Bangla too.",
+      bn: "সেটিংস → ইন্টিগ্রেশনে এখন প্রতিটি সেবার — Meta, TikTok ও স্টেডফাস্ট — আলাদা কার্ড আছে, যার একটি সুইচ সতর্কবার্তার পর পুরো সেবাটি বন্ধ বা চালু করে। কার্ড খুললে ভেতরের প্রতিটি পিক্সেল বা অ্যাকাউন্ট তার নিজের সুইচসহ দেখা যায়, আর বিচ্ছিন্ন না করেই পিক্সেলের আইডি, টোকেন বা টেস্ট কোড বদলানো যায়। Google Analytics ও আরও কুরিয়ার “শিগগিরই আসছে” হিসেবে দেখানো আছে, আর স্টেডফাস্ট সেটআপের ধাপগুলো এখন বাংলাতেও।",
+    },
+  },
   {
     id: "2026-09-22-when-a-sale-counts",
     date: "2026-09-22",
@@ -317,8 +334,8 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
       bn: "হোম পেজের ছবিগুলো আবার আপনার হাতে",
     },
     body: {
-      en: "Changing them meant asking us: the Banners screen had gone and nothing replaced it. They are in Customization now — click the big picture on your home page and you can add up to five, order them, choose where a tap goes, and set how long each one stays. Your shop is showing exactly the pictures it showed yesterday.",
-      bn: "এগুলো বদলাতে আমাদের বলতে হতো: ব্যানার পাতাটি উঠে গিয়েছিল আর তার বদলে কিছু আসেনি। এখন সেগুলো কাস্টমাইজেশনে — হোম পেজের বড় ছবিতে চাপ দিলে পাঁচটি পর্যন্ত ছবি যোগ করা যাবে, ক্রম বদলানো যাবে, চাপ দিলে কোথায় যাবে তা ঠিক করা যাবে, আর প্রতিটি ছবি কত সময় থাকবে তাও। গতকাল যে ছবিগুলো ছিল ঠিক সেগুলোই দেখাচ্ছে।",
+      en: "Changing them meant asking us: the Banners screen had gone and nothing replaced it. They are in Customization now — click the big picture on your home page and you can add up to five, order them, choose where a tap goes, and set how long each one stays. Your shop shows exactly the pictures it showed yesterday, and pictures placed in Customization that had stopped loading, keeping Customization from opening, show again with nothing you arranged changed.",
+      bn: "এগুলো বদলাতে আমাদের বলতে হতো: ব্যানার পাতাটি উঠে গিয়েছিল আর তার বদলে কিছু আসেনি। এখন সেগুলো কাস্টমাইজেশনে — হোম পেজের বড় ছবিতে চাপ দিলে পাঁচটি পর্যন্ত ছবি যোগ করা যাবে, ক্রম বদলানো যাবে, চাপ দিলে কোথায় যাবে তা ঠিক করা যাবে, আর প্রতিটি ছবি কত সময় থাকবে তাও। গতকাল যে ছবিগুলো ছিল ঠিক সেগুলোই দেখাচ্ছে, আর কাস্টমাইজেশনে বসানো যে ছবিগুলো লোড হওয়া বন্ধ হয়ে গিয়েছিল — যার ফলে কাস্টমাইজেশনও খুলত না — সেগুলো আবার দেখা যাচ্ছে, আপনার সাজানো কিছুই না বদলে।",
     },
   },
   {
@@ -479,20 +496,6 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     body: {
       en: "Text has been on the list of sections you can add since customization opened, and adding it left that part of the page blank. It now draws the heading and the words you typed, keeping your line breaks, and it can go on the home page, a category, a product or the blog.",
       bn: "কাস্টমাইজেশন চালু হওয়ার পর থেকেই যোগ করার তালিকায় লেখা সেকশনটি ছিল, কিন্তু যোগ করলে পাতার ওই অংশ ফাঁকা থেকে যেত। এখন আপনার শিরোনাম আর লেখা ঠিকঠাক দেখাবে, লাইন ভাঙাও অক্ষত থাকবে — আর এটি হোম পেজ, ক্যাটাগরি, পণ্য বা ব্লগ যেকোনো জায়গায় বসানো যাবে।",
-    },
-  },
-  {
-    id: "2026-09-22-theme-pictures-show-again",
-    date: "2026-09-22",
-    version: "4.39.0",
-    tag: "fixed",
-    title: {
-      en: "Pictures you placed in Customization show again",
-      bn: "কাস্টমাইজেশনে বসানো ছবিগুলো আবার দেখা যাবে",
-    },
-    body: {
-      en: "Shops customised before the single-design change kept an old name for their design inside their saved settings, and your shop could not match it to anything — so every picture you had placed there stopped loading, and Customization would not open. The saved settings have been corrected and nothing you arranged was changed.",
-      bn: "একক ডিজাইনে যাওয়ার আগে যেসব দোকান কাস্টমাইজ করা হয়েছিল, তাদের সেভ করা সেটিংসে ডিজাইনের পুরোনো নামটি রয়ে গিয়েছিল, আর দোকান সেটির সঙ্গে কিছু মেলাতে পারত না — ফলে ওখানে বসানো ছবিগুলো আর লোড হতো না এবং কাস্টমাইজেশনও খুলত না। সেভ করা সেটিংস ঠিক করে দেওয়া হয়েছে, আপনার সাজানো কিছুই বদলায়নি।",
     },
   },
   {
