@@ -32,7 +32,8 @@
  * the product page's fold-out rows took in the delivery terms' entry, whose
  * strip they replaced -- and the Integrations cards merged the two entries
  * about pictures in Customization, the pictures given back and the ones that
- * had stopped loading.)
+ * had stopped loading -- and the six palettes took in the corners-and-cards
+ * entry: the three choices of one Style panel, told once.)
  *
  * ## Entries written before their release — ONE DATE, RESTAMP IT ON THE DAY
  *
@@ -82,6 +83,21 @@ export interface WhatsNewEntry {
 export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
+  {
+    id: "2026-09-22-colours-cards-and-corners",
+    date: "2026-09-22",
+    version: "4.104.0",
+    tag: "new",
+    href: "/settings?tab=customization",
+    title: {
+      en: "Your colours, cards and corners, in the editor",
+      bn: "রং, কার্ড আর কোণা, এখন এডিটরে",
+    },
+    body: {
+      en: "Pick one of six premium palettes — Porcelain, Sage, Clay, Rosé, Navy or Emerald — and your whole shop is drawn in it, from the page and the header to the Add to cart button; every shop starts on Porcelain. Choose square, soft or rounded corners for everything your shop draws a box around, and Classic or Shelf product cards, which moved out of Settings where they changed your shop the moment you clicked. All three sit in Customization under Style, and reach shoppers when you press Save to store.",
+      bn: "ছয়টি প্রিমিয়াম প্যালেটের একটি বেছে নিন — পোর্সেলিন, সেজ সবুজ, পোড়ামাটি, গোলাপি, নেভি নীল বা পান্না সবুজ — পাতা আর হেডার থেকে কার্টে যোগের বোতাম পর্যন্ত পুরো দোকান সেই রঙে সাজবে; প্রতিটি দোকান শুরু হয় পোর্সেলিনে। দোকানে যেখানে যেখানে বাক্স আঁকা হয় সবখানের কোণা চোকো, হালকা গোল নাকি গোল হবে, আর ক্ল্যাসিক না শেলফ প্রোডাক্ট কার্ড — এই পছন্দটিও সেটিংস থেকে এসেছে, যেখানে চাপ দেওয়ামাত্রই দোকান বদলে যেত। তিনটিই কাস্টমাইজেশনের স্টাইল অংশে, আর স্টোরে সংরক্ষণ চাপলেই ক্রেতাদের কাছে যাবে।",
+    },
+  },
   {
     id: "2026-09-22-integrations-cards",
     date: "2026-09-22",
@@ -276,21 +292,6 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     body: {
       en: "The Category page in your editor is real now: the path back up, three shapes for the heading, the product count, two, three or four across, and what an empty category says. Shoppers can sort it — newest, price, name — and narrow it by the brands, sizes and colours that category actually has, either from a panel that slides in over the page or a rail beside the grid. A long category can end in numbered pages or a Load more button that keeps the shopper where they are.",
       bn: "এডিটরের ক্যাটাগরি পেজটি এখন সত্যিকারের: উপরে ফেরার পথ, শিরোনামের তিন রকম চেহারা, পণ্যের সংখ্যা, সারিতে দুই-তিন-চারটি, আর ক্যাটাগরি খালি থাকলে কী লেখা থাকবে। ক্রেতারা সাজিয়ে নিতে পারেন — নতুন, দাম, নাম — আর ওই ক্যাটাগরিতে সত্যিই আছে এমন ব্র্যান্ড, মাপ ও রঙ দিয়ে ছেঁকে নিতে পারেন, পাশ থেকে ভেসে ওঠা প্যানেলে নয়তো গ্রিডের পাশের সারিতে। লম্বা ক্যাটাগরি শেষ হতে পারে নম্বর দেওয়া পাতায়, নয়তো “আরও দেখুন” বোতামে যা ক্রেতাকে যেখানে আছেন সেখানেই রাখে।",
-    },
-  },
-  {
-    id: "2026-09-22-corners-are-yours",
-    date: "2026-09-22",
-    version: "4.67.0",
-    tag: "new",
-    href: "/settings?tab=customization",
-    title: {
-      en: "Your cards and corners, in the editor",
-      bn: "কার্ড আর কোণা, এখন এডিটরে",
-    },
-    body: {
-      en: "Choose square, soft or rounded corners for everything your shop draws a box around — cards, buttons, boxes you type in, pictures. Choosing Classic or Shelf product cards moved there too, out of Settings where it changed your shop the moment you clicked. Both sit in Customization under Style, and reach shoppers when you press Save to store.",
-      bn: "দোকানে যেখানে যেখানে বাক্স আঁকা হয় — কার্ড, বোতাম, লেখার ঘর, ছবি — সবখানের কোণা চোকো, হালকা গোল নাকি গোল হবে, বেছে নিন। ক্ল্যাসিক না শেলফ প্রোডাক্ট কার্ড — এই পছন্দটিও সেটিংস থেকে সেখানে এসেছে, যেখানে চাপ দেওয়ামাত্রই দোকান বদলে যেত। দুটোই কাস্টমাইজেশনের স্টাইল অংশে, আর স্টোরে সংরক্ষণ চাপলেই ক্রেতাদের কাছে যাবে।",
     },
   },
   {
