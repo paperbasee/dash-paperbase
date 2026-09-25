@@ -50,6 +50,7 @@ import {
   ListIcon,
   MagnifyingGlassIcon,
   MoneyIcon,
+  PlayIcon,
   SealCheckIcon,
   ShieldCheckIcon,
   ShoppingCartSimpleIcon,
@@ -952,11 +953,13 @@ export function ShopChrome({
       return (
         <div className="relative flex min-h-[210px] flex-col justify-center gap-2.5 bg-current/8 px-7 pb-9 pt-7">
           {variant === "video" ? (
+            // The shop's play mark: Phosphor's filled play in a white disc.
             <span
-              className="absolute right-6 top-1/2 grid size-11 -translate-y-1/2 place-items-center rounded-full border border-current/25 text-[13px]"
+              className="absolute right-6 top-1/2 grid size-11 -translate-y-1/2 place-items-center rounded-full bg-white text-black shadow-md"
               aria-hidden
+              data-play-mark
             >
-              ▶
+              <PlayIcon size={16} weight="fill" />
             </span>
           ) : null}
           <p className="text-[10px] uppercase tracking-[0.14em] text-current/45">{t("heroEyebrowExample")}</p>
