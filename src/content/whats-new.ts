@@ -501,12 +501,12 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     version: "4.12.0",
     tag: "new",
     title: {
-      en: "Choose a theme and design your store",
-      bn: "থিম বেছে নিন, নিজের মতো স্টোর সাজান",
+      en: "Design your store",
+      bn: "নিজের মতো স্টোর সাজান",
     },
     body: {
-      en: "In Settings → Customization you can now pick a theme and open a full screen editor, where you change each page's text, links and parts while your store updates beside you. What you change stays a draft your shoppers can't see until you press Save to store. Themes are part of the Premium plan.",
-      bn: "সেটিংস → কাস্টমাইজেশন থেকে এখন একটি থিম বেছে নিয়ে পুরো স্ক্রিনের এডিটর খুলতে পারবেন, যেখানে প্রতিটি পেজের লেখা, লিংক আর অংশগুলো বদলাবেন আর পাশেই আপনার স্টোর বদলাতে দেখবেন। যা বদলান তা ড্রাফট হয়ে থাকে, ক্রেতারা দেখেন না; স্টোরে সংরক্ষণ বাটনে চাপলেই তা স্টোরে যায়। থিম প্রিমিয়াম প্ল্যানের অংশ।",
+      en: "In Settings → Customization you can now open a full screen editor, where you change each page's text, links and parts while your store updates beside you. What you change stays a draft your shoppers can't see until you press Save to store. Customizing your store is part of the Premium plan.",
+      bn: "সেটিংস → কাস্টমাইজেশন থেকে এখন পুরো স্ক্রিনের এডিটর খুলতে পারবেন, যেখানে প্রতিটি পেজের লেখা, লিংক আর অংশগুলো বদলাবেন আর পাশেই আপনার স্টোর বদলাতে দেখবেন। যা বদলান তা ড্রাফট হয়ে থাকে, ক্রেতারা দেখেন না; স্টোরে সংরক্ষণ বাটনে চাপলেই তা স্টোরে যায়। স্টোর সাজানো প্রিমিয়াম প্ল্যানের অংশ।",
     },
     href: "/settings?tab=customization",
   },
