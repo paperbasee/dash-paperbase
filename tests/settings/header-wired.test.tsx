@@ -292,6 +292,14 @@ describe("the menu (step 3, 2026-09-25)", () => {
     expect(items(html)).toEqual(["Women", "Kids"]);
   });
 
+  test("a link not filled in yet leaves the categories where they were (2026-09-26)", () => {
+    // Counting it as the merchant's menu took every category off the shop.
+    const live = withBlocks(menu([item("")]));
+    expect(items(draw("menu", "links", { live, categories: CATEGORIES }))).toEqual(["Women", "Kids"]);
+    const filled = withBlocks(menu([item(""), item("/new-arrivals")]));
+    expect(items(draw("menu", "links", { live: filled, categories: CATEGORIES }))).toEqual(["New arrivals"]);
+  });
+
   test("an empty category is left out of the shop's own list (2026-09-25)", () => {
     const withEmpty = categoryIndex([
       { public_id: "c1", slug: "women", name: "Women", is_active: true, product_count: 4 },

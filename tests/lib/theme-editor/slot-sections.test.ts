@@ -28,6 +28,7 @@ describe("which places are wired", () => {
       page: "header",
       sections: { message: "announcement_bar" },
       off: "off",
+      blocks: "message",
     });
   });
 
@@ -37,6 +38,7 @@ describe("which places are wired", () => {
     expect(wiringFor("home", "hero")).toEqual({
       page: "templates.home",
       sections: { slider: "banner_slider", video: "video" },
+      blocks: "slide",
     });
   });
 
@@ -155,6 +157,7 @@ describe("the three product bands", () => {
       page: "templates.home",
       sections: { row: "featured_products" },
       off: "off",
+      blocks: "product",
     });
   });
 

@@ -54,14 +54,15 @@ export type WiredSlot = {
    */
   fields?: string[];
   /**
-   * The kind of part this place's dialog adds, removes and orders, when its
-   * section holds more than one kind.
+   * The kind of part this place's dialog adds, removes and orders -- a picture,
+   * a question, a menu link. A place that does not name one edits no parts.
    *
-   * Every section with parts had ONE kind -- a picture, a question -- and the
-   * dialog took the first it found. The buying column holds its name, price,
-   * picker and buttons as parts too, and a merchant's own fold-out rows beside
-   * them (2026-09-25); taking the first there offered to add a second product
-   * name. A section with one kind still needs nothing said.
+   * It was guessed, once: a section with ONE kind of part had it edited by
+   * every place on that section. The header's only part is a menu link and its
+   * footer's a column, so the Logo, Design, Icons, Sticky... boxes each offered
+   * "Add a link" (owner, 2026-09-26) -- and the empty link one press made took
+   * every category off the shop's menu. Several places share the header, the
+   * footer and the buying column; only one of them owns their parts.
    */
   blocks?: string;
 };
@@ -69,7 +70,7 @@ export type WiredSlot = {
 /** Wired places, by the page picker entry that edits them. */
 export const WIRED_SLOTS: Partial<Record<SlotPageKey, Record<string, WiredSlot>>> = {
   header: {
-    notice: { page: "header", sections: { message: "announcement_bar" }, off: "off" },
+    notice: { page: "header", sections: { message: "announcement_bar" }, off: "off", blocks: "message" },
     /*
       The rest of the header: settings of the one `header` section, the
       theme's default FIRST in each map -- a document that has never chosen
@@ -151,6 +152,7 @@ export const WIRED_SLOTS: Partial<Record<SlotPageKey, Record<string, WiredSlot>>
     hero: {
       page: "templates.home",
       sections: { slider: "banner_slider", video: "video" },
+      blocks: "slide",
     },
     categories: {
       page: "templates.home",
@@ -177,14 +179,15 @@ export const WIRED_SLOTS: Partial<Record<SlotPageKey, Record<string, WiredSlot>>
         line: { type: "promises", settings: { layout: "line" } },
       },
       off: "off",
+      blocks: "promise",
     },
-    featured: { page: "templates.home", sections: { row: "featured_products" }, off: "off" },
+    featured: { page: "templates.home", sections: { row: "featured_products" }, off: "off", blocks: "product" },
     /*
       The three departments. One value and no `off`: the theme marks this
       section required, so it cannot be hidden or removed -- what a merchant
       decides is which three, not whether.
     */
-    bands: { page: "templates.home", sections: { on: "category_products" } },
+    bands: { page: "templates.home", sections: { on: "category_products" }, blocks: "band" },
     /*
       The promotion: one section, three layouts, exactly like the category
       band's two shapes. `none` hides it rather than removing it -- a merchant
@@ -218,7 +221,7 @@ export const WIRED_SLOTS: Partial<Record<SlotPageKey, Record<string, WiredSlot>>
     },
     posts: { page: "templates.home", sections: { three: "latest_posts" }, off: "off" },
     signup: { page: "templates.home", sections: { whatsapp: "whatsapp" }, off: "off" },
-    faq: { page: "templates.home", sections: { on: "faq" }, off: "off" },
+    faq: { page: "templates.home", sections: { on: "faq" }, off: "off", blocks: "question" },
   },
   /*
     The product page, 2026-09-23. Stage 1 of the same four-stage shape the
@@ -1339,11 +1342,10 @@ export function settingEdits(
 /**
  * The parts a place's dialog lists, adds and orders.
  *
- * The kind is the one the place's wiring names (`WiredSlot.blocks`), or the
- * only kind its section has -- a picture, a question. A section with several
- * kinds and no name given (the buying column, seen from the phone buy bar)
- * offers no parts at all: taking the first kind there offered to add a second
- * product name.
+ * The kind is the one the place's wiring names (`WiredSlot.blocks`) -- a
+ * picture, a question -- and only if the section holds that kind. A place that
+ * names none offers no parts at all, whatever its section holds: the Logo box
+ * shares the header with the Menu box, and guessing gave it the menu's links.
  *
  * `stepTo` is where a part lands when it moves one step, as a position in the
  * WHOLE section, which is what a move is applied to -- only this place's parts
@@ -1359,7 +1361,8 @@ export function placeParts(
   every: ThemeSection["blocks"];
   stepTo: (index: number, step: -1 | 1) => number;
 } {
-  const blockType = wiring.blocks ?? (kinds.length === 1 ? kinds[0] : undefined);
+  // Named, and a kind this section holds: the hero's video has no pictures.
+  const blockType = wiring.blocks && kinds.includes(wiring.blocks) ? wiring.blocks : undefined;
   const every = section?.blocks ?? [];
   const blocks = blockType ? every.filter((block) => block.type === blockType) : [];
   return {

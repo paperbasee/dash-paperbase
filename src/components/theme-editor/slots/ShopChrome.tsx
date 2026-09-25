@@ -618,17 +618,21 @@ export function ShopChrome({
     const roots = Object.entries(categories ?? {}).filter(
       ([path, entry]) => path.split("/").length === 3 && entry.stocked,
     );
-    const menu: { label: string; highlight: boolean; opens: boolean }[] = links.length
-      ? links.flatMap((block) => {
-          const link = String(block.settings.link ?? "").trim();
-          const path = link.split(/[?#]/)[0];
-          const category = categories?.[path];
-          const page = LINK_PAGES.find((one) => one.path === path);
-          const label = String(block.settings.label ?? "").trim() || category?.name || (page ? tEditor(page.key) : "");
-          return link && label
-            ? [{ label, highlight: block.settings.highlight === true, opens: dropdownsOn && category?.opens === true }]
-            : [];
-        })
+    const own = links.flatMap((block) => {
+      const link = String(block.settings.link ?? "").trim();
+      const path = link.split(/[?#]/)[0];
+      const category = categories?.[path];
+      const page = LINK_PAGES.find((one) => one.path === path);
+      const label = String(block.settings.label ?? "").trim() || category?.name || (page ? tEditor(page.key) : "");
+      return link && label
+        ? [{ label, highlight: block.settings.highlight === true, opens: dropdownsOn && category?.opens === true }]
+        : [];
+    });
+    // The merchant's menu is the links that lead somewhere: one added and not
+    // yet filled in is a menu being written, and counting it took every
+    // category off the shop (2026-09-26) -- the shop's rule too.
+    const menu: { label: string; highlight: boolean; opens: boolean }[] = own.length
+      ? own
       : roots.length
         ? roots.map(([, entry]) => ({ label: entry.name, highlight: false, opens: dropdownsOn && entry.opens }))
         : aisles.map((label) => ({ label, highlight: false, opens: false }));

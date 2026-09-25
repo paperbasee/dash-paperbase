@@ -15,6 +15,7 @@ import type { ThemeManifest, ThemeSettingSpec } from "@/lib/theme-editor/api";
 import { editorPages, newSection, pageSpec } from "@/lib/theme-editor/document-ops";
 import { FIELD_KINDS, fieldSpecs } from "@/lib/theme-editor/field-specs";
 import { cannotAdd, cannotHide } from "@/lib/theme-editor/rules";
+import { placeParts, sectionTypesOf, WIRED_SLOTS } from "@/lib/theme-editor/slot-sections";
 import { checkField } from "@/lib/theme-editor/validate";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../..");
@@ -109,6 +110,31 @@ describe.skipIf(files.length === 0)("theme files in api-paperbase", () => {
           expect(cannotHide(manifest, defaults, shown!)).toBe("required");
         }
       }
+    });
+
+    /*
+     * Several boxes share one section -- the Logo, Design, Sticky and Menu boxes
+     * are all the header -- and only one of them owns its parts. Guessing gave
+     * every one of them the menu's "Add a link" (owner, 2026-09-26), and the
+     * empty link one press made took every category off the shop's menu.
+     */
+    test(`${file}: a section's parts are edited by exactly one box`, () => {
+      const owners: Record<string, string[]> = {};
+      for (const [page, places] of Object.entries(WIRED_SLOTS)) {
+        for (const [key, wiring] of Object.entries(places ?? {})) {
+          for (const type of sectionTypesOf(wiring)) {
+            const kinds = Object.keys(manifest.sections[type]?.blocks ?? {});
+            if (kinds.length === 0) continue;
+            const stub = { id: type, type, hidden: false, settings: {}, blocks: [] };
+            owners[type] ??= [];
+            if (placeParts(stub, kinds, wiring).blockType) owners[type].push(`${page}:${key}`);
+          }
+        }
+      }
+      expect(Object.keys(owners).length).toBeGreaterThan(0);
+      for (const [type, places] of Object.entries(owners)) expect(places, type).toHaveLength(1);
+      expect(owners.header).toEqual(["header:menu"]);
+      expect(owners.footer).toEqual(["footer:columns"]);
     });
   }
 });

@@ -424,10 +424,32 @@ describe("the parts a place's dialog edits", () => {
     expect(stepTo(0, 1)).toBe(3); // "Wash & Care" down: to where "Size guide" is
   });
 
-  test("a section with one kind of part needs nothing said", () => {
+  test("a box edits the parts it names", () => {
     const faq = section("faq", "faq", { blocks: [{ id: "q", type: "question", settings: {} }] } as Partial<ThemeSection>);
-    const { blockType, blocks } = placeParts(faq, ["question"], { page: "templates.product", sections: { on: "faq" } });
+    const { blockType, blocks } = placeParts(faq, ["question"], {
+      page: "templates.home",
+      sections: { on: "faq" },
+      blocks: "question",
+    });
     expect(blockType).toBe("question");
     expect(blocks).toHaveLength(1);
+  });
+
+  test("and none it does not, even on a section with one kind (owner, 2026-09-26)", () => {
+    // The Logo box shares the header with the Menu box. Guessing gave it the
+    // menu's "Add a link", and an empty link took every category off the shop.
+    const header = section("header", "header", {
+      blocks: [{ id: "item", type: "item", settings: { link: "/about" } }],
+    } as Partial<ThemeSection>);
+    const logo = placeParts(header, ["item"], wiringFor("header", "logo")!);
+    expect(logo.blockType).toBeUndefined();
+    expect(logo.blocks).toHaveLength(0);
+    expect(placeParts(header, ["item"], wiringFor("header", "menu")!).blockType).toBe("item");
+  });
+
+  test("a named kind the section does not hold is no parts", () => {
+    // The hero names its pictures; its video section has none.
+    const video = section("video", "video");
+    expect(placeParts(video, [], wiringFor("home", "hero")!).blockType).toBeUndefined();
   });
 });
