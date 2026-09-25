@@ -84,6 +84,21 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-09-22-header-and-footer-choices",
+    date: "2026-09-22",
+    version: "4.106.0",
+    tag: "new",
+    href: "/settings?tab=customization",
+    title: {
+      en: "Five header designs, and your footer",
+      bn: "পাঁচটি হেডার ডিজাইন, আর আপনার ফুটার",
+    },
+    body: {
+      en: "Choose one of five header designs — your name and menu on the left, your name centred with the menu in a row below, the menu in the middle of the page, a quieter small-capitals menu, or everything behind a menu button — and choose how its icons are drawn: a fine, regular or strong line, with or without their words, and a bag, basket or cart. Keep the header on screen always, only while shoppers scroll back up, or not at all, and add account and wishlist beside the cart. Arrange your footer in columns, with your shop on one side, centred, or as a single short line, and choose what it shows: your address and phone or only your email, your social links as names or round marks, the ways you take payment, and your policy pages beside the year.",
+      bn: "পাঁচটি হেডার ডিজাইনের একটি বেছে নিন — বাঁয়ে নাম ও মেনু, মাঝখানে নাম আর নিচের সারিতে মেনু, পাতার মাঝখানে মেনু, ছোট বড়-হাতের অক্ষরে শান্ত একটি মেনু, নয়তো সবকিছু একটি মেনু বোতামের পেছনে — আর ঠিক করুন আইকন কেমন আঁকা হবে: সরু, সাধারণ বা মোটা রেখায়, লেখাসহ বা ছাড়া, আর ব্যাগ, ঝুড়ি নাকি কার্ট। হেডার সবসময় স্ক্রিনে রাখুন, শুধু ক্রেতা উপরে স্ক্রল করলে দেখান, নয়তো একেবারেই না রাখুন, আর কার্টের পাশে অ্যাকাউন্ট ও উইশলিস্ট যোগ করুন। ফুটার সাজান কলামে, একপাশে দোকান রেখে, মাঝখানে, নয়তো ছোট এক লাইনে, আর ঠিক করুন কী দেখাবে: ঠিকানা ও ফোন নাকি শুধু ইমেইল, সোশ্যাল লিংক নামে বা গোল চিহ্নে, আপনি যেভাবে টাকা নেন, আর সালের পাশে নীতিমালার পেজগুলো।",
+    },
+  },
+  {
     id: "2026-09-22-account-page-choices",
     date: "2026-09-22",
     version: "4.105.0",
@@ -202,21 +217,6 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     body: {
       en: "Choose whether the results heading says how many were found, whether matching categories sit above the products, and how many products go across. A long answer can now reach past the first 48 with a Load more button or numbered pages, a search that finds nothing can offer your categories as a way on, and an empty search box can show your best sellers instead of a line of help. Search itself got better too: the search box opens a full-screen search that answers as a shopper types, and half a word, a plural or a misspelling now finds what they meant — “shrit” shows your shirts, and says so.",
       bn: "ফলাফলের শিরোনামে কয়টি পাওয়া গেল তা দেখাবেন কি না, পণ্যের উপরে মিলে যাওয়া ক্যাটাগরি থাকবে কি না, আর একসারিতে কয়টি পণ্য — ঠিক করুন। লম্বা উত্তরে এখন প্রথম ৪৮টির পরেও যাওয়া যায় “আরও দেখুন” বোতাম বা নম্বর দেওয়া পাতায়, কিছু না মিললে আপনার ক্যাটাগরিগুলো এগোনোর পথ হিসেবে দেখানো যায়, আর খালি সার্চ বক্সে সাহায্যের লাইনের বদলে আপনার সবচেয়ে বেশি বিক্রি হওয়া পণ্য দেখানো যায়। সার্চ নিজেও ভালো হয়েছে: সার্চ বক্সে চাপলে পুরো স্ক্রিন জুড়ে সার্চ খোলে, ক্রেতা লিখতে লিখতেই ফলাফল চলে আসে, আর অর্ধেক শব্দ, বহুবচন বা ভুল বানানে লিখলেও এখন তাঁরা যা খুঁজছেন তা পাওয়া যায় — “শারি” লিখলে শাড়ি দেখায়, আর তা জানিয়েও দেয়।",
-    },
-  },
-  {
-    id: "2026-09-22-header-and-footer-choices",
-    date: "2026-09-22",
-    version: "4.97.0",
-    tag: "new",
-    href: "/settings?tab=customization",
-    title: {
-      en: "Design your header and footer",
-      bn: "হেডার আর ফুটার সাজান",
-    },
-    body: {
-      en: "Arrange your header as a bar with every category under it, with your name centred over five of them, or with the categories behind a menu button as on a phone — and show search as a box or a small mark, keep the header on screen as shoppers scroll, and add account and wishlist beside the cart. Arrange your footer in columns, with your shop on one side, centred, or as a single short line, and choose what it shows: your address and phone or only your email, your social links as names or round marks, the ways you take payment, and your policy pages beside the year.",
-      bn: "হেডার সাজান নিচে সব ক্যাটাগরিসহ একটি বার হিসেবে, পাঁচটি ক্যাটাগরির উপরে মাঝখানে নাম রেখে, নয়তো ফোনের মতো একটি মেনু বোতামের পেছনে ক্যাটাগরি রেখে — আর সার্চ দেখান বক্সে বা ছোট চিহ্নে, ক্রেতা স্ক্রল করলেও হেডার স্ক্রিনে রাখুন, আর কার্টের পাশে অ্যাকাউন্ট ও উইশলিস্ট যোগ করুন। ফুটার সাজান কলামে, একপাশে দোকান রেখে, মাঝখানে, নয়তো ছোট এক লাইনে, আর ঠিক করুন কী দেখাবে: ঠিকানা ও ফোন নাকি শুধু ইমেইল, সোশ্যাল লিংক নামে বা গোল চিহ্নে, আপনি যেভাবে টাকা নেন, আর সালের পাশে নীতিমালার পেজগুলো।",
     },
   },
   {
