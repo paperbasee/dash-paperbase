@@ -667,8 +667,6 @@ export function ShopChrome({
       words?: string;
       cart?: string;
       logoSize?: string;
-      /** Drawn clear, in white, over a picture: the Over place's "on". */
-      overPicture?: boolean;
       /** The Button place: an outline where the button goes, until there is one. */
       buttonHint?: boolean;
     } = {},
@@ -809,9 +807,7 @@ export function ShopChrome({
     // screen is the shop's.
     const nameFits = "min-w-0 max-w-[40cqw] line-clamp-2 break-words";
     const logo = brandMark(`${nameFits} text-sm font-semibold tracking-[0.14em]`);
-    const frame = force.overPicture
-      ? "@container text-white"
-      : "@container border-b border-border bg-shop-header text-shop-header-foreground";
+    const frame = "@container border-b border-border bg-shop-header text-shop-header-foreground";
 
     if (layout === "centred") {
       // Search, the name in the middle, the icons; the menu in its own row.
@@ -3483,32 +3479,6 @@ export function ShopChrome({
     case "header:button":
       return headerDrawing({ buttonHint: true });
 
-    /*
-      The header over the home page's first picture (step 4, 2026-09-26): the
-      same header, clear and in white over a picture with a shade at its top,
-      or above it as every other page has it. A stand-in picture, named as
-      one: the header page holds no home page to borrow the real one from.
-    */
-    case "header:over": {
-      const picture = (
-        <div data-over-picture className="relative h-28 overflow-hidden bg-[linear-gradient(135deg,#6b7c85,#2f3a40)]">
-          <span className="absolute bottom-2 right-3 text-[10px] text-white/75">{t("headerOverExample")}</span>
-        </div>
-      );
-      return variant === "on" ? (
-        <div data-header-over="on" className="relative">
-          {picture}
-          <div className="absolute inset-x-0 top-0 bg-gradient-to-b from-black/45 to-transparent">
-            {headerDrawing({ overPicture: true })}
-          </div>
-        </div>
-      ) : (
-        <div data-header-over="off">
-          {headerDrawing()}
-          {picture}
-        </div>
-      );
-    }
 
     // The arrangement is the whole footer; every other footer place draws its
     // own part, from the same function, with the value it is showing.

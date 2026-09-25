@@ -49,7 +49,6 @@ const manifest: ThemeManifest = {
         { id: "cart_icon", type: "select", ...labels("cart"), options: ["bag", "basket", "cart"], default: "bag" },
         { id: "button_label", type: "text", ...labels("button"), default: "" },
         { id: "button_link", type: "url", ...labels("button link"), default: "" },
-        { id: "over_hero", type: "boolean", ...labels("over"), default: false },
       ],
     },
     announcement_bar: { ...labels("Notice"), settings: [] },
@@ -383,19 +382,16 @@ describe("the shop's logo (2026-09-26)", () => {
   });
 });
 
-describe("step 4: the header's button and the header over the picture (2026-09-26)", () => {
+describe("step 4: the header's button (2026-09-26)", () => {
+  test("over the picture is gone: the owner dropped it the same day", () => {
+    expect(SLOTS.header.find((slot) => slot.key === "over")).toBeUndefined();
+    expect(wiringFor("header", "over")).toBeNull();
+  });
+
   test("the button is words and a link, in its own box", () => {
     const wiring = wiringFor("header", "button")!;
     expect(wiring.fields).toEqual(["button_label", "button_link"]);
     expect(SLOTS.header.find((slot) => slot.key === "button")?.options).toBeUndefined();
-  });
-
-  test("over the picture is off first, and each answer writes the switch", () => {
-    const options = SLOTS.header.find((slot) => slot.key === "over")!.options!.map((one) => one.value);
-    expect(options).toEqual(["off", "on"]);
-    expect(slotValueFor(editor().document, place("over"))).toBe("off");
-    expect(settingsOf(pick(editor(), "over", "on")).over_hero).toBe(true);
-    expect(settingsOf(pick(pick(editor(), "over", "on"), "over", "off")).over_hero).toBe(false);
   });
 
   test("the button is drawn after the cart with the merchant's words, in the brand colour", () => {
@@ -416,13 +412,4 @@ describe("step 4: the header's button and the header over the picture (2026-09-2
     expect(draw("button", "on", { live: set })).not.toContain("data-header-button-hint");
   });
 
-  test("over the picture: the same header, clear and white, on a picture", () => {
-    const on = draw("over", "on", { live: header({}) });
-    expect(on).toContain('data-header-over="on"');
-    expect(on.indexOf("data-over-picture")).toBeLessThan(on.indexOf("@container"));
-    expect(on).toMatch(/class="[^"]*@container text-white/);
-    const off = draw("over", "off", { live: header({}) });
-    expect(off.indexOf("@container")).toBeLessThan(off.indexOf("data-over-picture"));
-    expect(off).toContain("bg-shop-header");
-  });
 });
