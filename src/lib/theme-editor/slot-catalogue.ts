@@ -170,6 +170,21 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
       ],
     },
     /*
+      Best sellers straight under the picked band (owner, 2026-09-26, after the
+      research): the products that already sell come early, not after three
+      long department rows. The API's seed order and its migration 0042 say the
+      same, and a test holds the two lists together.
+    */
+    {
+      key: "bestsellers",
+      label: "bestsellers",
+      initial: "row",
+      options: [
+        { value: "row", label: "bestsellersRow", note: "bestsellersRowNote", shape: "row" },
+        { value: "off", label: "off", shape: "blank" },
+      ],
+    },
+    /*
       Three departments, picked here since 2026-09-23. It was LOCKED before --
       "which categories, and their order, you choose in Products" -- because the
       page drew one band per department, all of them, and a real shop came out
@@ -203,15 +218,6 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
         { value: "strip", label: "promoStrip", note: "promoStripNote", shape: "line", premium: true },
         { value: "beside", label: "promoBeside", note: "promoBesideNote", shape: "block", premium: true },
         { value: "behind", label: "promoBehind", note: "promoBehindNote", shape: "block", premium: true },
-      ],
-    },
-    {
-      key: "bestsellers",
-      label: "bestsellers",
-      initial: "row",
-      options: [
-        { value: "row", label: "bestsellersRow", note: "bestsellersRowNote", shape: "row" },
-        { value: "off", label: "off", shape: "blank" },
       ],
     },
     {

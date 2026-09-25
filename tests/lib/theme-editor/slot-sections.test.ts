@@ -194,7 +194,8 @@ describe("the three product bands", () => {
     ];
 
     expect(placeFor(doc, "home", "arrivals", wiringFor("home", "arrivals")!)).toBe(4);
-    expect(placeFor(doc, "home", "bestsellers", wiringFor("home", "bestsellers")!)).toBe(4);
+    // Best sellers go straight under the picked band, above the rows (2026-09-26).
+    expect(placeFor(doc, "home", "bestsellers", wiringFor("home", "bestsellers")!)).toBe(3);
     // And the picked band still goes straight under the departments.
     doc.templates.home.sections.splice(2, 1);
     expect(placeFor(doc, "home", "featured", wiringFor("home", "featured")!)).toBe(2);
