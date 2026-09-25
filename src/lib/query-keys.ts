@@ -217,6 +217,7 @@ export const checkoutSettingsQueryKey = ["checkout-settings"] as const;
 export const domainsQueryKey = ["domains"] as const;
 
 export const marketingIntegrationsQueryKey = ["marketing-integrations"] as const;
+export const purchaseTimingQueryKey = ["marketing-integrations", "purchase-timing"] as const;
 
 export const storeSettingsCurrentQueryKey = ["store-settings", "current"] as const;
 

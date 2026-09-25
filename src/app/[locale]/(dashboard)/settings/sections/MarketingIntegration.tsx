@@ -3,6 +3,7 @@
 import { useTranslations } from "next-intl";
 import MarketingProviderCard from "./MarketingProviderCard";
 import OtherMarketingIntegrations from "./OtherMarketingIntegrations";
+import PurchaseTimingBlock from "./PurchaseTimingBlock";
 
 /**
  * Facebook CAPI and TikTok Events API each get a dedicated card (independent load/error),
@@ -22,6 +23,8 @@ export default function MarketingIntegration({
       <div className="flex min-w-0 w-full flex-col divide-y divide-border overflow-hidden rounded-lg border border-border">
         <MarketingProviderCard provider="facebook" panelHidden={panelHidden} />
         <MarketingProviderCard provider="tiktok" panelHidden={panelHidden} />
+        {/* One choice for both of them, so it sits under both. */}
+        <PurchaseTimingBlock panelHidden={panelHidden} />
       </div>
       <div className="mt-6">
         <OtherMarketingIntegrations panelHidden={panelHidden} />
