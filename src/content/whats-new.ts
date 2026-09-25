@@ -86,7 +86,7 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
     id: "2026-09-22-one-announcement-bar",
     date: "2026-09-22",
-    version: "4.107.0",
+    version: "4.108.0",
     tag: "improved",
     href: "/settings?tab=customization",
     title: {
@@ -94,8 +94,8 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
       bn: "টপ বারে তিনটি পর্যন্ত বার্তা",
     },
     body: {
-      en: "Your top bar lives in Customization, and it now holds up to three messages that take turns, each with its own link, the words to tap and a small icon — delivery, a gift, a sale and more — with dates to start and stop on. Switch on Track order and Help to show them at the left of the bar on a computer and at the bottom of the menu on a phone. Whatever your bar says today it still says, and whoever may customise your shop may write it.",
-      bn: "আপনার টপ বারটি কাস্টমাইজেশনে আছে, আর এখন এতে পালা করে দেখানো তিনটি পর্যন্ত বার্তা রাখা যায় — প্রতিটির নিজস্ব লিংক, চাপ দেওয়ার লেখা আর ছোট একটি আইকন (ডেলিভারি, উপহার, ছাড় ইত্যাদি) — সঙ্গে শুরু ও শেষের তারিখ। অর্ডার ট্র্যাক ও সাহায্য চালু করলে কম্পিউটারে বারের বাঁ পাশে আর ফোনে মেনুর নিচে সেগুলো দেখায়। আপনার বারে আজ যা লেখা আছে তা-ই থাকবে, আর যিনি দোকান কাস্টমাইজ করতে পারেন তিনিই এটি লিখতে পারবেন।",
+      en: "Your top bar holds up to three messages — taking turns on a computer and moving along one line on a phone — each with its own link, the words to tap and a small icon, and a message with a link but no words to tap makes the whole bar take shoppers there. Switch on Track order and Help to show them at the left of the bar on a computer and at the bottom of the menu on a phone. Links now open in your shopper's own language, and All products opens your page of every product.",
+      bn: "আপনার টপ বারে তিনটি পর্যন্ত বার্তা রাখা যায় — কম্পিউটারে পালা করে, ফোনে এক লাইনে চলমান — প্রতিটির নিজস্ব লিংক, চাপ দেওয়ার লেখা আর ছোট একটি আইকন; আর লিংক আছে কিন্তু চাপ দেওয়ার লেখা নেই এমন বার্তায় পুরো বারটিই ক্রেতাকে সেখানে নিয়ে যায়। অর্ডার ট্র্যাক ও সাহায্য চালু করলে কম্পিউটারে বারের বাঁ পাশে আর ফোনে মেনুর নিচে সেগুলো দেখায়। লিংক এখন ক্রেতার নিজের ভাষায় খোলে, আর সব পণ্য খোলে আপনার সব পণ্যের পাতা।",
     },
   },
   {
