@@ -86,7 +86,7 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
     id: "2026-09-22-header-and-footer-choices",
     date: "2026-09-22",
-    version: "4.114.1",
+    version: "4.114.2",
     tag: "new",
     href: "/settings?tab=customization",
     title: {
