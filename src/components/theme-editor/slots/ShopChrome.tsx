@@ -2,10 +2,12 @@
 
 import { useTranslations } from "next-intl";
 import {
+  ArrowLeftRight,
   Banknote,
   BadgeCheck,
   CalendarCheck,
   CheckCircle,
+  ClipboardList,
   Clock,
   CreditCard,
   Eye,
@@ -13,19 +15,26 @@ import {
   Hash,
   Headphones,
   Heart,
+  Info,
+  Leaf,
   Lock,
   Mail,
   Map,
   MapPin,
   MessageCircle,
+  Package,
   Phone,
   RotateCcw,
+  Ruler,
   Search,
   ShieldCheck,
+  Shirt,
   Smartphone,
   Sparkles,
   Truck,
+  Upload,
   User,
+  WashingMachine,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import type { FieldOption } from "@/lib/theme-editor/field-specs";
@@ -57,6 +66,25 @@ const PROMISE_MARKS: Record<string, LucideIcon> = {
   warranty_included: ShieldCheck,
   help_every_day: Headphones,
   reply_within_an_hour: MessageCircle,
+};
+
+/**
+ * The mark each fold-out row of the product page is drawn with on the canvas:
+ * the names the theme's `product_details.row.icon` offers, in the editor's icon
+ * set -- two maps of one idea, for the reason the promises give above. An icon
+ * the theme adds and this misses draws `Info` rather than nothing.
+ */
+const ROW_MARKS: Record<string, LucideIcon> = {
+  info: Info,
+  "washing-machine": WashingMachine,
+  ruler: Ruler,
+  "t-shirt": Shirt,
+  leaf: Leaf,
+  "shield-check": ShieldCheck,
+  package: Package,
+  truck: Truck,
+  "arrows-left-right": ArrowLeftRight,
+  gift: Gift,
 };
 
 import type { PostWord } from "@/lib/theme-editor/post-words";
@@ -2396,68 +2424,53 @@ export function ShopChrome({
         </div>
       );
 
-    case "product:description":
+    /*
+      The fold-out rows that end the buying column, as the shop draws them
+      (2026-09-25): an icon, a name and a plus, no lines between, then Share.
+      Product details is always there; Shipping details, Exchange policy and a
+      merchant's own rows only once the shop has written them -- the canvas
+      shows what the shop will show, in the shop's own words. Under the right
+      half, where the buying column is.
+    */
+    case "product:details": {
+      const held = live?.settings ?? {};
+      const said = (value: unknown): value is string => typeof value === "string" && value.trim() !== "";
+      const rows: { key: string; title: string; Mark: LucideIcon }[] = [
+        { key: "details", title: t("detailRowProduct"), Mark: ClipboardList },
+      ];
+      if (said(held.shipping_text)) rows.push({ key: "shipping", title: t("detailRowShipping"), Mark: Truck });
+      if (said(held.exchange_text)) rows.push({ key: "exchange", title: t("detailRowExchange"), Mark: ArrowLeftRight });
+      for (const block of live?.blocks ?? []) {
+        if (block.type !== "row") continue;
+        const { heading, body, icon } = block.settings ?? {};
+        if (!said(heading) || !said(body)) continue;
+        rows.push({ key: block.id, title: heading.trim(), Mark: ROW_MARKS[String(icon)] ?? Info });
+      }
       return (
-        <div className="px-4 py-4">
-          <div className={variant === "box" ? "rounded-md border border-current/12 p-4" : ""}>
-            <p className="mb-2 text-[14px] font-semibold">{t("descriptionHeading")}</p>
-            {/* Real sentences. A merchant judging whether their own words have
-                room here cannot do it against two grey bars. */}
-            <p className="max-w-[62ch] text-[12px] leading-[1.7] text-current/65">{t("productDescriptionExample")}</p>
+        <div className="grid gap-6 px-4 py-3 sm:grid-cols-2">
+          <div aria-hidden className="hidden sm:block" />
+          <div className="min-w-0">
+            {rows.map(({ key, title, Mark }) => (
+              <p key={key} className="flex items-center gap-3 py-2.5 text-[13px]">
+                <Mark aria-hidden className="size-4 shrink-0 text-current/55" strokeWidth={1.6} />
+                <span className="min-w-0 flex-1 truncate">{title}</span>
+                <span aria-hidden className="text-[15px] leading-none text-current/70">+</span>
+              </p>
+            ))}
+            <p className="mt-1 flex items-center gap-2 text-[12px] text-current/70">
+              <Upload aria-hidden className="size-3.5" strokeWidth={1.8} />
+              {t("detailRowShare")}
+            </p>
           </div>
         </div>
       );
-
-    case "product:specs":
-      return (
-        <div className="px-4 py-4">
-          {variant === "folded" ? (
-            <div className="flex items-center justify-between rounded-md border border-current/12 px-3.5 py-3 text-[12px] font-medium text-current/70">
-              <span>{t("specsHeading")}</span>
-              <span aria-hidden>+</span>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 gap-x-8 sm:grid-cols-2">
-              {[
-                [t("specMaterial"), "100% cotton"],
-                [t("specFit"), "Regular"],
-                [t("specCare"), "Machine wash cold"],
-                [t("specMadeIn"), "Bangladesh"],
-              ].map(([label, value]) => (
-                <p key={label} className="flex justify-between gap-4 border-b border-current/10 py-2 text-[11.5px]">
-                  <span className="text-current/45">{label}</span>
-                  <span className="text-right text-current/75">{value}</span>
-                </p>
-              ))}
-            </div>
-          )}
-        </div>
-      );
+    }
 
     case "product:breadcrumb":
       return (
         <p className="px-4 py-3 text-[11px] text-current/45">
           {t("breadcrumbHomeExample")} · Men · <span className="text-current/70">Gradient Graphic T-shirt</span>
         </p>
-      );
-
-    case "product:shipping":
-      return variant === "plain" ? (
-        <div className="px-4 py-4">
-          <SectionHead title={t("shippingHeading")} />
-          <div className="space-y-2 text-[11.5px] leading-relaxed text-current/60">
-            <p>{t("shippingInside")}</p>
-            <p>{t("shippingOutside")}</p>
-            <p>{t("shippingReturns")}</p>
-          </div>
-        </div>
-      ) : (
-        <div className="px-4 py-4">
-          <div className="flex items-center justify-between rounded-md border border-current/12 px-3.5 py-3 text-[12px] font-medium text-current/70">
-            <span>{t("shippingHeading")}</span>
-            <span aria-hidden>+</span>
-          </div>
-        </div>
       );
 
     case "product:reviews":

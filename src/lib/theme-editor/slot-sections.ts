@@ -53,6 +53,17 @@ export type WiredSlot = {
    * wherever the section is, as before.
    */
   fields?: string[];
+  /**
+   * The kind of part this place's dialog adds, removes and orders, when its
+   * section holds more than one kind.
+   *
+   * Every section with parts had ONE kind -- a picture, a question -- and the
+   * dialog took the first it found. The buying column holds its name, price,
+   * picker and buttons as parts too, and a merchant's own fold-out rows beside
+   * them (2026-09-25); taking the first there offered to add a second product
+   * name. A section with one kind still needs nothing said.
+   */
+  blocks?: string;
 };
 
 /** Wired places, by the page picker entry that edits them. */
@@ -200,45 +211,25 @@ export const WIRED_SLOTS: Partial<Record<SlotPageKey, Record<string, WiredSlot>>
       },
     },
     /*
-      The description and the specifications are both `product_details`, which
-      also holds the buying column itself -- so neither may ever be `off`: a
-      product page without its price and its buttons is not a product page. The
-      theme marks the section required, and these two choose only its shape.
-    */
-    description: {
-      page: "templates.product",
-      sections: {
-        box: { type: "product_details", settings: { details_style: "panel" } },
-        plain: { type: "product_details", settings: { details_style: "plain" } },
-      },
-    },
-    specs: {
-      page: "templates.product",
-      sections: {
-        grid: { type: "product_details", settings: { extras_style: "grid" } },
-        folded: { type: "product_details", settings: { extras_style: "accordions" } },
-      },
-    },
-    /*
-      Delivery and returns, 2026-09-23 (stage 4) -- the last place on this page.
+      The column's fold-out rows (owner, 2026-09-25: "like this, with icons"):
+      Product details -- the description, with the specifications inside it --
+      then Shipping details and Exchange policy, the shop's words for every
+      product, then rows the merchant adds (a heading, an icon, some text).
 
-      The editor offered two SHAPES for words that existed nowhere: no field in
-      the dashboard, no setting in the theme, nothing. The owner chose shop-wide
-      words over a per-product field, because delivery terms are the same for
-      almost everything a shop sells and a field on every product is one more
-      empty box most would leave blank.
+      One place, and no tiles: there is nothing to choose between, only words
+      to write and rows to add. It replaces three -- the description's box or
+      heading, the specifications' grid or fold, and the "Delivery and returns"
+      strip below the product -- which `theming/0034` folded into the column:
+      the strip's words are the Shipping details now.
 
-      No migration: nothing was being drawn before, so no shop loses anything by
-      reading this as off until they write something. The section is in the
-      theme's default and draws nothing while it is empty.
+      `product_details` is also the buying column, so there is no `off`: the
+      rows with nothing written are simply not drawn.
     */
-    shipping: {
+    details: {
       page: "templates.product",
-      sections: {
-        folded: { type: "delivery_returns", settings: { layout: "folded" } },
-        plain: { type: "delivery_returns", settings: { layout: "plain" } },
-      },
-      off: "off",
+      sections: { rows: "product_details" },
+      fields: ["shipping_text", "exchange_text"],
+      blocks: "row",
     },
     /*
       Reviews, 2026-09-23 (stage 2). Two shapes of one section: the band as it
@@ -1270,6 +1261,40 @@ export function settingEdits(
     { type: "pickPage", page: wiring.page },
     { type: "setSetting", id: section.id, setting, value },
   ];
+}
+
+/**
+ * The parts a place's dialog lists, adds and orders.
+ *
+ * The kind is the one the place's wiring names (`WiredSlot.blocks`), or the
+ * only kind its section has -- a picture, a question. A section with several
+ * kinds and no name given (the buying column, seen from the phone buy bar)
+ * offers no parts at all: taking the first kind there offered to add a second
+ * product name.
+ *
+ * `stepTo` is where a part lands when it moves one step, as a position in the
+ * WHOLE section, which is what a move is applied to -- only this place's parts
+ * are listed, and the column's fixed parts sit among them.
+ */
+export function placeParts(
+  section: ThemeSection | null | undefined,
+  kinds: string[],
+  wiring: WiredSlot,
+): {
+  blockType: string | undefined;
+  blocks: ThemeSection["blocks"];
+  every: ThemeSection["blocks"];
+  stepTo: (index: number, step: -1 | 1) => number;
+} {
+  const blockType = wiring.blocks ?? (kinds.length === 1 ? kinds[0] : undefined);
+  const every = section?.blocks ?? [];
+  const blocks = blockType ? every.filter((block) => block.type === blockType) : [];
+  return {
+    blockType,
+    blocks,
+    every,
+    stepTo: (index, step) => every.findIndex((block) => block.id === blocks[index + step]?.id),
+  };
 }
 
 /** The edits one setting of one PART of that section makes -- a hero picture, say. */

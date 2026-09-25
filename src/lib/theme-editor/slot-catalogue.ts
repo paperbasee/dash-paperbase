@@ -369,36 +369,12 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
       lists would be two answers to one question.
     */
     { key: "trust", label: "trust", inherited: true, inheritedFrom: { page: "home", key: "trust" } },
-    {
-      key: "description",
-      label: "description",
-      initial: "box",
-      options: [
-        { value: "box", label: "descriptionBox", note: "descriptionBoxNote", shape: "block" },
-        { value: "plain", label: "descriptionPlain", note: "descriptionPlainNote", shape: "line" },
-      ],
-    },
-    {
-      key: "specs",
-      label: "specs",
-      initial: "grid",
-      options: [
-        { value: "grid", label: "specsGrid", note: "specsGridNote", shape: "row" },
-        { value: "folded", label: "specsFolded", note: "specsFoldedNote", shape: "line" },
-      ],
-    },
-    {
-      key: "shipping",
-      label: "shipping",
-      initial: "folded",
-      emptyValues: ["off"],
-      emptyLabel: "shippingEmpty",
-      options: [
-        { value: "folded", label: "shippingFolded", note: "shippingFoldedNote", shape: "line" },
-        { value: "plain", label: "shippingPlain", note: "shippingPlainNote", shape: "block" },
-        { value: "off", label: "off", shape: "blank" },
-      ],
-    },
+    /*
+      The fold-out rows that end the buying column (2026-09-25). No options: a
+      place with one answer draws no chooser -- what a merchant edits here is
+      the words and the rows, in the dialog.
+    */
+    { key: "details", label: "detailRows", hint: "detailRowsHint" },
     {
       key: "reviews",
       label: "productReviews",

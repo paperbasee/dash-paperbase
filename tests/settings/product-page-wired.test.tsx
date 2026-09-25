@@ -6,8 +6,10 @@
  * markup in the template, and the description's box and the specifications'
  * two columns were settings the shop honoured all along that no place wrote.
  *
- * Reviews, recently viewed, the phone buy bar and delivery-and-returns are
- * stages 2 to 4 and must still read as drawings here.
+ * Reviews, recently viewed, the phone buy bar and delivery-and-returns were
+ * stages 2 to 4. On 2026-09-25 the description, the specifications and the
+ * delivery-and-returns strip became ONE place: the fold-out rows that end the
+ * buying column (`theming/0034`).
  */
 import { describe, expect, test } from "vitest";
 
@@ -15,10 +17,13 @@ import type { ThemeDocument, ThemeEditorState, ThemeManifest, ThemeSection } fro
 import { editorReducer, initEditorState, type EditorState } from "@/lib/theme-editor/editor-reducer";
 import { SLOTS } from "@/lib/theme-editor/slot-catalogue";
 import {
+  addBlockEdits,
   choiceEdits,
+  placeParts,
   placeFor,
   sectionOfType,
   sectionTypesOf,
+  settingsClaimedElsewhere,
   settingsDecidedOn,
   slotValueFor,
   wiringFor,
@@ -53,21 +58,26 @@ const manifest: ThemeManifest = {
       required: true,
       settings: [
         { id: "sticky_buy", type: "boolean", ...labels("Buy bar on a phone"), default: true },
-        choice("details_style", ["panel", "plain"], "panel"),
-        choice("extras_style", ["grid", "accordions"], "grid"),
+        { id: "shipping_text", type: "textarea", ...labels("Shipping details"), default: "" },
+        { id: "exchange_text", type: "textarea", ...labels("Exchange policy"), default: "" },
       ],
+      blocks: {
+        title: { ...labels("Product name"), settings: [] },
+        price: { ...labels("Price"), settings: [] },
+        buy_buttons: { ...labels("Buy buttons"), settings: [] },
+        description: { ...labels("Description"), settings: [] },
+        row: {
+          ...labels("Fold-out row"),
+          settings: [
+            { id: "heading", type: "text", ...labels("Heading"), default: "" },
+            choice("icon", ["info", "washing-machine"], "info"),
+            { id: "body", type: "textarea", ...labels("Text"), default: "" },
+          ],
+        },
+      },
     },
     related_products: { ...labels("You may also like"), settings: [] },
     recently_viewed: { ...labels("Recently viewed"), at_most_one: true, settings: [] },
-    delivery_returns: {
-      ...labels("Delivery and returns"),
-      at_most_one: true,
-      settings: [
-        choice("layout", ["folded", "plain"], "folded"),
-        { id: "heading", type: "text", ...labels("Heading"), default: "" },
-        { id: "body", type: "textarea", ...labels("Your terms"), default: "" },
-      ],
-    },
     product_questions: { ...labels("Questions"), settings: [{ id: "heading", type: "text", ...labels("Heading"), default: "" }] },
     product_reviews: {
       ...labels("Reviews"),
@@ -91,7 +101,6 @@ const manifest: ThemeManifest = {
         "breadcrumb",
         "product_gallery",
         "product_details",
-        "delivery_returns",
         "related_products",
         "recently_viewed",
         "product_questions",
@@ -147,7 +156,7 @@ const PAGE = () =>
 
 describe("what stage 1 wired", () => {
   test("every place edits the product template", () => {
-    for (const key of ["breadcrumb", "buy", "description", "specs", "reviews", "related", "faq"]) {
+    for (const key of ["breadcrumb", "buy", "details", "reviews", "related", "faq"]) {
       expect(place(key).page, key).toBe("templates.product");
     }
   });
@@ -210,53 +219,47 @@ describe("the pictures", () => {
   });
 });
 
-describe("the description and the specifications share the buying area", () => {
-  test("both write product_details", () => {
-    expect(sectionTypesOf(place("description"))).toEqual(["product_details"]);
-    expect(sectionTypesOf(place("specs"))).toEqual(["product_details"]);
+describe("the details rows that end the buying column", () => {
+  /*
+    Owner, 2026-09-25: Product details (with the specifications inside),
+    Shipping details, Exchange policy and rows of the shop's own, each with an
+    icon. One place for all of it, where there were three.
+  */
+  test("it writes the buying column, which can never be turned off", () => {
+    expect(sectionTypesOf(place("details"))).toEqual(["product_details"]);
+    expect(place("details").off).toBeUndefined();
   });
 
-  test("neither may be turned off, because the price and the buttons are in there", () => {
-    expect(place("description").off).toBeUndefined();
-    expect(place("specs").off).toBeUndefined();
+  test("there is nothing to choose between, so no tiles", () => {
+    const slot = SLOTS.product.find((one) => one.key === "details")!;
+    expect(slot.options ?? []).toEqual([]);
+    expect(slot.hint).toBe("detailRowsHint");
   });
 
-  test("the tile a merchant reads is not the value the theme stores", () => {
-    /* "In a box" is `details_style: panel`; "folded away" is `accordions`. */
-    expect(settingsOf(pick(PAGE(), "description", "box"), "product_details").details_style).toBe(
-      "panel",
-    );
-    expect(settingsOf(pick(PAGE(), "specs", "folded"), "product_details").extras_style).toBe(
-      "accordions",
-    );
+  test("the shop's words are this place's fields, and nobody else's", () => {
+    expect(place("details").fields).toEqual(["shipping_text", "exchange_text"]);
+    const bar = SLOTS.product.find((one) => one.key === "stickybuy")!;
+    const claimed = settingsClaimedElsewhere("product", "product_details", { page: "product", key: bar.key });
+    expect(claimed.has("shipping_text") && claimed.has("exchange_text")).toBe(true);
   });
 
-  test("and the theme's default still comes first in each map", () => {
-    expect(Object.keys(place("description").sections)[0]).toBe("box");
-    expect(Object.keys(place("specs").sections)[0]).toBe("grid");
-    expect(slotValueFor(PAGE().document, place("description"))).toBe("box");
-    expect(slotValueFor(PAGE().document, place("specs"))).toBe("grid");
+  test("no tile decides anything here but the phone buy bar", () => {
+    expect([...settingsDecidedOn("product", "product_details")]).toEqual(["sticky_buy"]);
   });
 
-  test("choosing one leaves the other alone", () => {
-    const after = pick(pick(PAGE(), "description", "plain"), "specs", "folded");
-    expect(settingsOf(after, "product_details")).toMatchObject({
-      details_style: "plain",
-      extras_style: "accordions",
-    });
+  test("its parts are the shop's own rows, not the column's name or price", () => {
+    expect(place("details").blocks).toBe("row");
+    const after = addBlockEdits(PAGE().document, place("details"), "row").reduce(editorReducer, PAGE());
+    const blocks = sectionOfType(after.document, place("details"), "product_details")?.blocks ?? [];
+    expect(blocks.map((block) => block.type)).toEqual(["row"]);
   });
 
-  test("the dialog draws none of the three its tiles decide", () => {
-    expect([...settingsDecidedOn("product", "product_details")].sort()).toEqual([
-      "details_style",
-      "extras_style",
-      "sticky_buy",
-    ]);
+  test("the old strip below the product is written by no place", () => {
+    for (const slot of SLOTS.product) {
+      if (slot.inherited) continue;
+      expect(sectionTypesOf(place(slot.key)), slot.key).not.toContain("delivery_returns");
+    }
   });
-
-  /* `show_sku` was a field in this pop-up until 2026-09-25, and never hid the
-     code; the theme dropped it (theming/0033) and the shop draws the code
-     once, under the product's name. */
 });
 
 describe("the rows under the buying area", () => {
@@ -380,63 +383,51 @@ describe("the shopper's own trail, and the phone buy bar", () => {
     expect(details?.hidden).toBe(false);
   });
 
-  test("and leaves the description and the specifications alone", () => {
-    const after = pick(pick(PAGE(), "description", "plain"), "stickybuy", "off");
+  test("and leaves the shop's words alone", () => {
+    const written = editor([
+      section("details", "product_details", { settings: { shipping_text: "Two days inside Dhaka." } }),
+    ]);
+    const after = pick(written, "stickybuy", "off");
     expect(sectionOfType(after.document, place("stickybuy"), "product_details")?.settings).toMatchObject({
-      details_style: "plain",
+      shipping_text: "Two days inside Dhaka.",
       sticky_buy: false,
     });
   });
 });
 
-describe("delivery and returns", () => {
-  test("two shapes of its own section, and an off", () => {
-    expect(sectionTypesOf(place("shipping"))).toEqual(["delivery_returns"]);
-    expect(place("shipping").off).toBe("off");
+describe("the parts a place's dialog edits", () => {
+  const column = section("details", "product_details", {
+    blocks: [
+      { id: "title", type: "title", settings: {} },
+      { id: "wash", type: "row", settings: { heading: "Wash & Care" } },
+      { id: "price", type: "price", settings: {} },
+      { id: "size", type: "row", settings: { heading: "Size guide" } },
+    ],
+  } as Partial<ThemeSection>);
+  const kinds = ["title", "price", "buy_buttons", "description", "row"];
+
+  test("the rows place lists the shop's own rows and nothing of the column's", () => {
+    const { blockType, blocks } = placeParts(column, kinds, place("details"));
+    expect(blockType).toBe("row");
+    expect(blocks.map((block) => block.id)).toEqual(["wash", "size"]);
   });
 
-  test("each shape is written to the section", () => {
-    for (const shape of ["plain", "folded"]) {
-      const after = pick(PAGE(), "shipping", shape);
-      expect(
-        sectionOfType(after.document, place("shipping"), "delivery_returns")?.settings.layout,
-      ).toBe(shape);
-      expect(slotValueFor(after.document, place("shipping"))).toBe(shape);
-    }
+  test("a place on the column that names no kind offers no parts", () => {
+    const { blockType, blocks } = placeParts(column, kinds, place("stickybuy"));
+    expect(blockType).toBeUndefined();
+    expect(blocks).toEqual([]);
   });
 
-  test("the theme's own default comes first", () => {
-    expect(Object.keys(place("shipping").sections)[0]).toBe("folded");
+  test("a move is a position in the whole column, past the parts between", () => {
+    const { stepTo } = placeParts(column, kinds, place("details"));
+    expect(stepTo(1, -1)).toBe(1); // "Size guide" up: to where "Wash & Care" is
+    expect(stepTo(0, 1)).toBe(3); // "Wash & Care" down: to where "Size guide" is
   });
 
-  test("the words are the merchant's, and they are FIELDS rather than tiles", () => {
-    /*
-      The tiles decide the shape only. A merchant types the terms once and they
-      are the same on every product -- the owner's decision, 2026-09-23, over a
-      field on every product that most would leave blank.
-    */
-    const decided = settingsDecidedOn("product", "delivery_returns");
-    expect([...decided]).toEqual(["layout"]);
-    expect(decided.has("body")).toBe(false);
-    expect(decided.has("heading")).toBe(false);
-  });
-
-  test("turning it off keeps the words a merchant wrote", () => {
-    const written = editor([
-      section("details", "product_details"),
-      section("delivery", "delivery_returns", { settings: { body: "Two days inside Dhaka." } }),
-    ]);
-    const after = pick(written, "shipping", "off");
-    const band = sectionOfType(after.document, place("shipping"), "delivery_returns");
-    expect(band?.hidden).toBe(true);
-    expect(band?.settings.body).toBe("Two days inside Dhaka.");
-  });
-
-  test("it sits under the buying area, not at the end of the page", () => {
-    const after = pick(PAGE(), "shipping", "folded");
-    const sections = after.document.templates.product.sections;
-    expect(sections.findIndex((s) => s.type === "delivery_returns")).toBeGreaterThan(
-      sections.findIndex((s) => s.type === "product_details"),
-    );
+  test("a section with one kind of part needs nothing said", () => {
+    const faq = section("faq", "faq", { blocks: [{ id: "q", type: "question", settings: {} }] } as Partial<ThemeSection>);
+    const { blockType, blocks } = placeParts(faq, ["question"], { page: "templates.product", sections: { on: "faq" } });
+    expect(blockType).toBe("question");
+    expect(blocks).toHaveLength(1);
   });
 });

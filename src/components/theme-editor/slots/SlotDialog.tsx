@@ -21,6 +21,7 @@ import type { FieldSpec } from "@/lib/theme-editor/field-specs";
 import type { Slot, SlotPageKey } from "@/lib/theme-editor/slot-catalogue";
 import {
   ownerOf,
+  placeParts,
   sectionFor,
   settingsClaimedElsewhere,
   settingsDecidedOn,
@@ -139,12 +140,17 @@ export function SlotDialog({
         (field) => !decided.has(field.id) && !claimed.has(field.id),
       )
     : [];
-  // One kind of part per wired section so far -- a picture, a question. A
-  // section with two would need the merchant asked which, and none has two.
-  const blockType = Object.keys(spec?.blocks ?? {})[0];
-  const blocks = section?.blocks ?? [];
+  // The parts this place edits, and where one lands when it moves: see
+  // `placeParts` -- the buying column holds several kinds of part.
+  const {
+    blockType,
+    blocks,
+    every: everyBlock,
+    stepTo,
+  } = placeParts(section, Object.keys(spec?.blocks ?? {}), wiring);
   const most = spec?.max_blocks;
-  const full = typeof most === "number" && blocks.length >= most;
+  // The theme's cap is on the section's parts, every kind of them.
+  const full = typeof most === "number" && everyBlock.length >= most;
 
   /** Whether every shape of this place is paid -- the promotion, today. */
   const allPaid =
@@ -352,7 +358,7 @@ export function SlotDialog({
                           className="size-9"
                           aria-label={tEditor("moveUp", { name: t(slot.label) })}
                           aria-disabled={index === 0}
-                          onClick={index === 0 ? undefined : () => onMoveBlock(block.id, index - 1)}
+                          onClick={index === 0 ? undefined : () => onMoveBlock(block.id, stepTo(index, -1))}
                         >
                           <ArrowUp aria-hidden />
                         </Button>
@@ -366,7 +372,7 @@ export function SlotDialog({
                           onClick={
                             index === blocks.length - 1
                               ? undefined
-                              : () => onMoveBlock(block.id, index + 1)
+                              : () => onMoveBlock(block.id, stepTo(index, 1))
                           }
                         >
                           <ArrowDown aria-hidden />
