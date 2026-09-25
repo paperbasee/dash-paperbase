@@ -2402,6 +2402,13 @@
   },
   "themeEditor": {
     "kit": {
+      "styleTitle": "স্টাইল",
+      "styleHint": "আপনার পুরো দোকান দেখতে কেমন হবে। বদলাতে পাতার যেকোনো অংশে চাপুন।",
+      "panelLabel": "সেটিংস",
+      "pickedProducts": "পণ্য",
+      "pickedCategories": "ক্যাটাগরি",
+      "pickedChoices": "বাছাই করা",
+      "foldPictureWords": "ছবির ওপরের লেখা বদলান",
       "back": "ফিরে যান",
       "close": "বন্ধ করুন",
       "replace": "বদলান",

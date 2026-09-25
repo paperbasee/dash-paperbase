@@ -4,7 +4,7 @@ import { forwardRef, useId, type ComponentProps, type ReactNode } from "react";
 
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
-import { FIELD, HELP, LABEL } from "./styles";
+import { FIELD, HELP, LABEL, SELECT_ARROW } from "./styles";
 
 /**
  * A label above, the control, and the line under it that explains it -- or
@@ -50,6 +50,21 @@ export const KitInput = forwardRef<HTMLInputElement, ComponentProps<"input">>(fu
   ref,
 ) {
   return <input ref={ref} className={cn(FIELD, className)} {...props} />;
+});
+
+/**
+ * One answer out of a long list -- an icon, a size among many -- where a pill
+ * bar would not fit: the soft field, holding the browser's own list.
+ */
+export const KitSelect = forwardRef<HTMLSelectElement, ComponentProps<"select">>(function KitSelect(
+  { className, children, ...props },
+  ref,
+) {
+  return (
+    <select ref={ref} className={cn(FIELD, "cursor-pointer appearance-none pr-9", SELECT_ARROW, className)} {...props}>
+      {children}
+    </select>
+  );
 });
 
 /** A paragraph. */

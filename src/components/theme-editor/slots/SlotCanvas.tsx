@@ -4,15 +4,8 @@ import { useTranslations } from "next-intl";
 import { Lock } from "lucide-react";
 
 import { cn } from "@/lib/utils";
-import type { ThemeDocument, ThemeImage, ThemeManifest, ThemeSection } from "@/lib/theme-editor/api";
-import {
-  isEmpty,
-  SLOTS,
-  type OptionShape,
-  type Slot,
-  type SlotOption,
-  type SlotPageKey,
-} from "@/lib/theme-editor/slot-catalogue";
+import type { ThemeDocument, ThemeSection } from "@/lib/theme-editor/api";
+import { isEmpty, SLOTS, type Slot, type SlotPageKey } from "@/lib/theme-editor/slot-catalogue";
 import { ownerOf, sectionFor, slotValueFor, wiringFor } from "@/lib/theme-editor/slot-sections";
 import type { FieldOption } from "@/lib/theme-editor/field-specs";
 import type { CategoryEntry } from "@/lib/theme-editor/link-targets";
@@ -24,15 +17,16 @@ import {
   ShopChrome,
   type ShopIdentity,
 } from "./ShopChrome";
-import { SlotDialog } from "./SlotDialog";
 
 /**
  * The page IS the editor.
  *
- * There is no list beside the canvas: a merchant clicks the thing they want to
- * change, where it sits, and the choices open underneath it. That is the whole
- * interaction, and it is why the shop is drawn as a shop rather than as grey
- * bars -- you cannot click the thing you want if you cannot recognise it.
+ * A merchant clicks the thing they want to change, where it sits, and its
+ * settings open in the side panel beside the page (on a phone, a sheet from
+ * the bottom) -- 2026-09-26; they opened underneath it, then in a pop-up over
+ * it, and both hid the page being changed. That is the whole interaction, and
+ * it is why the shop is drawn as a shop rather than as grey bars -- you cannot
+ * click the thing you want if you cannot recognise it.
  *
  * Three kinds of place, told apart before the click rather than after it:
  *
@@ -46,129 +40,9 @@ import { SlotDialog } from "./SlotDialog";
  * merchant cannot see is a slot they will never fill.
  */
 
-/** The little wireframe on an option's tile: the shape it makes, not a picture of it. */
-function OptionShapeMark({ shape }: { shape: OptionShape }) {
-  if (shape === "blank") {
-    return <span className="block h-12 rounded-xs bg-muted" aria-hidden />;
-  }
-  if (shape === "block") {
-    return <span className="block h-12 rounded-xs bg-muted-foreground/20" aria-hidden />;
-  }
-  if (shape === "row") {
-    return (
-      <span className="flex h-12 gap-1 rounded-xs bg-muted p-2" aria-hidden>
-        <span className="flex-1 rounded-[2px] bg-muted-foreground/20" />
-        <span className="flex-1 rounded-[2px] bg-muted-foreground/20" />
-      </span>
-    );
-  }
-  return (
-    <span className="flex h-12 flex-col justify-center gap-1.5 rounded-xs bg-muted px-2" aria-hidden>
-      <span className="h-1 rounded-full bg-muted-foreground/25" />
-      <span className="h-1 rounded-full bg-muted-foreground/25" />
-      <span className="h-1 w-1/2 rounded-full bg-muted-foreground/25" />
-    </span>
-  );
-}
-
-function OptionTile({
-  option,
-  chosen,
-  onPick,
-}: {
-  option: SlotOption;
-  chosen: boolean;
-  onPick: () => void;
-}) {
-  const t = useTranslations("themeEditor.slots");
-  return (
-    <button
-      type="button"
-      aria-pressed={chosen}
-      onClick={(event) => {
-        event.stopPropagation();
-        onPick();
-      }}
-      className={cn(
-        "flex flex-col gap-2.5 rounded-sm border p-3 text-left transition-colors",
-        "hover:border-primary focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-primary",
-        chosen ? "border-primary ring-1 ring-inset ring-primary" : "border-border-subtle",
-      )}
-    >
-      <OptionShapeMark shape={option.shape} />
-      <span className="flex flex-wrap items-center gap-1.5 text-[13px] font-medium">
-        {t(option.label)}
-        {option.premium ? (
-          <span className="accent-yellow rounded-[4px] bg-[hsl(var(--accent-yellow)/0.14)] px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-[0.05em]">
-            {t("premium")}
-          </span>
-        ) : null}
-      </span>
-      {option.note ? <span className="text-[11.5px] leading-relaxed text-muted-foreground">{t(option.note)}</span> : null}
-    </button>
-  );
-}
-
-/** The choices, opened in place under the slot they belong to. */
-function Chooser({
-  slot,
-  value,
-  onPick,
-  onDone,
-}: {
-  slot: Slot;
-  value: string | undefined;
-  onPick: (next: string) => void;
-  onDone: () => void;
-}) {
-  const t = useTranslations("themeEditor.slots");
-  return (
-    <div
-      className="border-t border-border bg-card px-4 py-4 text-card-foreground"
-      onClick={(event) => event.stopPropagation()}
-    >
-      <div className="mb-3.5 flex flex-wrap items-baseline gap-x-3 gap-y-1">
-        <strong className="text-sm font-semibold">
-          {slot.locked ? t("thisOneIsSet") : t("whatGoesHere")}
-        </strong>
-        <span className="text-xs text-muted-foreground">{t(slot.label)}</span>
-        <button
-          type="button"
-          onClick={onDone}
-          className="ml-auto rounded-xs px-1 py-0.5 text-xs font-medium text-muted-foreground hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-primary"
-        >
-          {t("done")}
-        </button>
-      </div>
-
-      {slot.hint ? (
-        <p className="m-0 mb-3.5 max-w-prose text-[12.5px] leading-relaxed text-muted-foreground">{t(slot.hint)}</p>
-      ) : null}
-
-      {slot.locked ? (
-        <p className="m-0 max-w-prose text-[13px] leading-relaxed text-muted-foreground">{t(slot.lockedBecause ?? "lockedWhy")}</p>
-      ) : (
-        <div className="grid gap-3 [grid-template-columns:repeat(auto-fit,minmax(148px,1fr))]">
-          {slot.options?.map((option) => (
-            <OptionTile
-              key={option.value}
-              option={option}
-              chosen={value === option.value}
-              onPick={() => onPick(option.value)}
-            />
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
-
 /**
- * One place on the page: the tab that names it, and what it is showing.
- *
- * The chooser is NOT drawn here. A place in a row has to open its choices under
- * the whole row rather than under its own half, or the tiles get a 150px column
- * to live in and the merchant chooses blind.
+ * One place on the page: the tab that names it, and what it is showing. Its
+ * settings are the side panel's, never drawn here.
  */
 function SlotRegion({
   slot,
@@ -189,7 +63,6 @@ function SlotRegion({
   policies,
   footerSection,
   className,
-  children,
 }: {
   slot: Slot;
   page: SlotPageKey;
@@ -217,8 +90,6 @@ function SlotRegion({
   /** The footer section, for a place that draws the footer. See ShopChrome. */
   footerSection?: ThemeSection;
   className?: string;
-  /** The chooser, when this place is on its own and can hold it. */
-  children?: React.ReactNode;
 }) {
   const t = useTranslations("themeEditor.slots");
   const blank = isEmpty(slot, value);
@@ -301,8 +172,6 @@ function SlotRegion({
           footerSection={footerSection}
         />
       )}
-
-      {children}
     </div>
   );
 }
@@ -334,20 +203,9 @@ export function SlotCanvas({
   open,
   onOpen,
   choices,
-  onChoose,
   allChoices,
   document,
-  manifest,
-  onSet,
-  onSetBlock,
-  onSetBlocks,
-  onAddBlock,
-  onRemoveBlock,
-  onMoveBlock,
-  premiumSections,
-  pictures,
   pictureUrl,
-  onPictureUrl,
   departments,
   categories,
   promiseWords,
@@ -357,7 +215,6 @@ export function SlotCanvas({
   reviews,
   policies,
   footerSection,
-  productName,
   onGoToPage,
   colours,
 }: {
@@ -369,46 +226,17 @@ export function SlotCanvas({
    * moment a palette is picked. Absent: the dashboard's own colours.
    */
   colours?: Record<string, string>;
+  /** The place selected: outlined here, its settings in the side panel. */
   open: string | null;
   onOpen: (slotKey: string | null) => void;
   choices: Record<string, string>;
-  /**
-   * A choice, named by the entry that OWNS the place rather than the page it was
-   * clicked on -- the notice strip is drawn on every page and owned by Header.
-   */
-  onChoose: (owner: { page: SlotPageKey; key: string }, value: string) => void;
-  /** The shop's own document: what a WIRED place reads and writes. */
+  /** The shop's own document: what a WIRED place draws from. */
   document: ThemeDocument;
-  manifest: ThemeManifest;
-  /** One setting of a wired place, named the same way. */
-  onSet: (owner: { page: SlotPageKey; key: string }, setting: string, value: unknown) => void;
-  /** One setting of one PART of a wired place -- a hero picture. */
-  onSetBlock: (
-    owner: { page: SlotPageKey; key: string },
-    blockId: string,
-    setting: string,
-    value: unknown,
-  ) => void;
-  onSetBlocks: (
-    owner: { page: SlotPageKey; key: string },
-    blockType: string,
-    setting: string,
-    values: string[],
-  ) => void;
-  onAddBlock: (owner: { page: SlotPageKey; key: string }, blockType: string) => void;
-  onRemoveBlock: (owner: { page: SlotPageKey; key: string }, blockId: string) => void;
-  onMoveBlock: (owner: { page: SlotPageKey; key: string }, blockId: string, to: number) => void;
-  /** Whether this shop's plan includes the theme's paid sections. */
-  premiumSections: boolean;
-  /** Pictures this shop has already placed, and how to draw one. */
-  pictures: ThemeImage[];
-  /** A picture just uploaded, and where it is. See SlotDialog. */
-  onPictureUrl?: (key: string, url: string) => void;
   pictureUrl: (key: string) => string;
   /**
    * This shop's own top-level departments: what the category band draws, and
    * what the three-department place is picked from. One list for both, so the
-   * canvas and the pop-up can never offer different aisles.
+   * canvas and the panel can never offer different aisles.
    */
   departments: FieldOption[];
   /** Every category by its link, for the header menu's drawing. See ShopChrome. */
@@ -426,8 +254,6 @@ export function SlotCanvas({
   policies?: PolicyPreview[];
   /** The footer section, for a place that draws the footer. See ShopChrome. */
   footerSection?: ThemeSection;
-  /** A product's public id to its name, so a picked band shows what it holds. */
-  productName: (publicId: string) => string;
   /**
    * Every page's settings, so an inherited slot can read the one that actually
    * drives it -- `slot.inheritedFrom` says which page and which key. Merging
@@ -438,14 +264,6 @@ export function SlotCanvas({
   /** Clicking an inherited slot goes to the entry that owns it. */
   onGoToPage: (page: SlotPageKey, slotKey: string) => void;
 }) {
-  // The open place, and whether it is one of the wired ones. A wired place is
-  // edited in the dialog below rather than in a panel under its band -- and it
-  // is looked up under the entry that owns it, so the strip a merchant clicked
-  // on Home is the header group's bar.
-  const openSlot = open ? (SLOTS[page].find((slot) => slot.key === open) ?? null) : null;
-  const openOwner = openSlot ? ownerOf(page, openSlot) : null;
-  const openWiring = openOwner ? wiringFor(openOwner.page, openOwner.key) : null;
-
   return (
     <div className="flex justify-center bg-muted/40 p-2 sm:p-3">
       <div
@@ -458,14 +276,11 @@ export function SlotCanvas({
       >
         {bandsOf(SLOTS[page]).map((band) => {
           /**
-           * Everything opens where it was clicked, except a place that is drawn
-           * on every page and is still a DRAWING: those keep their choices under
-           * the band that owns them, on the entry that owns them, because an
-           * inline panel for another page's band under this page's band reads as
-           * if it belonged to this page.
-           *
-           * A wired one opens here (owner, 2026-09-22). It edits in a pop-up, so
-           * there is nothing under any band to be confused about, and being sent
+           * A click selects the place, and the side panel shows its settings --
+           * a second click leaves it selected rather than taking the panel away
+           * mid-thought; the panel's ✕ does that. A place drawn on every page
+           * and still a DRAWING sends the merchant to the entry that owns it; a
+           * wired one is edited right here (owner, 2026-09-22), since being sent
            * to Header to change the strip you are looking at is a detour through
            * a filing decision the merchant should never have to know about.
            */
@@ -475,7 +290,7 @@ export function SlotCanvas({
               onGoToPage(source.page, source.key);
               return;
             }
-            onOpen(open === slot.key ? null : slot.key);
+            onOpen(slot.key);
           };
           /**
            * A place edited elsewhere is read from THERE -- `inheritedFrom` says
@@ -501,24 +316,6 @@ export function SlotCanvas({
           const settingsOf = (slot: Slot) =>
             slot.inheritedFrom ? (allChoices[slot.inheritedFrom.page] ?? {}) : choices;
 
-          const opened = band.flat().find((slot) => open === slot.key);
-          /*
-            A wired place is edited in a pop-up, not under the band: it is a form
-            rather than two tiles, and a form opening in place pushes the thing
-            being edited off the screen. Everything still a drawing opens here,
-            where the choices belong to what was clicked.
-          */
-          const chooser =
-            opened && !wiringOf(opened) ? (
-              <Chooser
-                slot={opened}
-                value={valueOf(opened)}
-                onPick={(next) => onChoose(ownerOf(page, opened), next)}
-                onDone={() => onOpen(null)}
-              />
-            ) : null;
-
-          // A lone place keeps its choices inside its own outline.
           if (band.length === 1 && band[0].length === 1) {
             const slot = band[0][0];
             return (
@@ -541,9 +338,7 @@ export function SlotCanvas({
                 reviews={reviews}
                 policies={policies}
                 footerSection={footerSection}
-              >
-                {chooser}
-              </SlotRegion>
+              />
             );
           }
 
@@ -586,39 +381,11 @@ export function SlotCanvas({
                   </div>
                 ))}
               </div>
-              {chooser}
             </div>
           );
         })}
       </div>
 
-      {openWiring && openSlot && openOwner ? (
-        /* `page` is the one that OWNS the place, so the settings its neighbours
-           decide are looked up where those neighbours live. */
-        <SlotDialog
-          slot={openSlot}
-          page={openOwner.page}
-          wiring={openWiring}
-          manifest={manifest}
-          document={document}
-          premiumSections={premiumSections}
-          pictures={pictures}
-          pictureUrl={pictureUrl}
-          productName={productName}
-          departments={departments}
-          onChoose={(value) => onChoose(openOwner, value)}
-          onSet={(setting, value) => onSet(openOwner, setting, value)}
-          onSetBlock={(blockId, setting, value) => onSetBlock(openOwner, blockId, setting, value)}
-          onSetBlocks={(blockType, setting, values) =>
-            onSetBlocks(openOwner, blockType, setting, values)
-          }
-          onAddBlock={(blockType) => onAddBlock(openOwner, blockType)}
-          onRemoveBlock={(blockId) => onRemoveBlock(openOwner, blockId)}
-          onMoveBlock={(blockId, to) => onMoveBlock(openOwner, blockId, to)}
-          onPictureUrl={onPictureUrl}
-          onClose={() => onOpen(null)}
-        />
-      ) : null}
     </div>
   );
 }

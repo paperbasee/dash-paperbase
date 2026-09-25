@@ -5,7 +5,7 @@
  * that keeps it so.
  */
 export { KitGroup, KitNote, KitPanel } from "./Panel";
-export { KitField, KitInput, KitSwitchRow, KitTextarea } from "./Field";
-export { KitBadge, KitChoice, type KitOption } from "./Choice";
+export { KitField, KitInput, KitSelect, KitSwitchRow, KitTextarea } from "./Field";
+export { KitBadge, KitChoice, KitShape, type KitOption } from "./Choice";
 export { KitPicture, type KitPictureWords } from "./Picture";
 export { KitAdd, KitFold, KitPart, KitPicked, KitValueRow } from "./Rows";

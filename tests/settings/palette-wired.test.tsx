@@ -59,8 +59,9 @@ describe("the Style panel's colours", () => {
   test("offers the API's six, named in the dashboard's language, the chosen one pressed", () => {
     const html = panel({ palette: "sage" });
     for (const item of SIX) expect(html).toContain(item.name);
-    expect(html.match(/aria-pressed="true"/g)?.length).toBeGreaterThanOrEqual(1);
-    expect(html).toMatch(/aria-pressed="true"[^>]*>(?:(?!<\/button>)[\s\S])*Sage/);
+    // One answer out of six: a pick-one group since the kit (2026-09-26).
+    expect(html.match(/aria-checked="true"/g)?.length).toBeGreaterThanOrEqual(1);
+    expect(html).toMatch(/aria-checked="true"[^>]*>(?:(?!<\/button>)[\s\S])*Sage/);
 
     const bangla = panel({}, "bn");
     for (const item of SIX) expect(bangla).toContain(item.name_bn);
@@ -147,9 +148,10 @@ describe("the screen-wide note", () => {
 describe("the typefaces, not wired yet (2026-09-26)", () => {
   test("are shown faded and cannot be clicked", () => {
     const html = panel({});
-    const faces = html.match(/<button[^>]*aria-pressed[^>]*opacity-45[^>]*>/g) ?? [];
+    // Every face is a disabled answer: shown, and not a choice until it is wired.
+    const type = html.slice(html.indexOf("Coming soon"));
+    const faces = type.match(/<button[^>]*role="radio"[^>]*>/g) ?? [];
     expect(faces.length).toBeGreaterThan(0);
     for (const face of faces) expect(face).toContain("disabled");
-    expect(html).toContain("Coming soon");
   });
 });

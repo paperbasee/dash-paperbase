@@ -51,3 +51,7 @@ export const PICTURE = "relative w-full overflow-hidden rounded-[14px] bg-muted"
 
 /** The panel's corners on a phone, where it rises from the bottom. */
 export const SHEET_TOP = "rounded-t-[20px]";
+
+/** The small arrow a long list wears, drawn in the stylesheet so no icon sits on the field. */
+export const SELECT_ARROW =
+  "bg-[length:14px] bg-[position:right_12px_center] bg-no-repeat [background-image:url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E\")]";

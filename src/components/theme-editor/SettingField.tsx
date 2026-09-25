@@ -2,23 +2,31 @@
 
 import { useEffect, useId, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { Image as ImageIcon, Link2, Package, Pencil, X } from "lucide-react";
+import { Link2, Package, X } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
-import { FormField } from "@/components/ui/form-field";
-import { Input } from "@/components/ui/input";
-import { Select } from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
-import { Textarea } from "@/components/ui/textarea";
 import { numberTextClass } from "@/lib/number-font";
 import type { FieldSpec } from "@/lib/theme-editor/field-specs";
 import { LINK_PAGES } from "@/lib/theme-editor/link-targets";
 import { toBdParts, toUtcIso } from "@/lib/theme-editor/schedule-field";
 import { characterCount, checkField, type FieldError } from "@/lib/theme-editor/validate";
 import { cn } from "@/lib/utils";
+import {
+  KitChoice,
+  KitField,
+  KitInput,
+  KitPicture,
+  KitSelect,
+  KitSwitchRow,
+  KitTextarea,
+  KitValueRow,
+  type KitPictureWords,
+} from "./kit";
+import { LABEL, ROUND } from "./kit/styles";
 
 /*
- * One setting of a section or a block, drawn from the theme file.
+ * One setting of a section or a block, drawn from the theme file -- in the
+ * editor kit's pieces since 2026-09-26, so every setting in every place looks
+ * the same without any of them being styled here.
  *
  * What the merchant is typing is kept here, and only a value the API would accept is handed
  * up: an edit the rules refuse never reaches the document, so autosave never starts for it
@@ -39,7 +47,14 @@ export type SettingFieldProps = {
   /** A product field asks for its own picker, and a name to show what it holds. */
   onPickProduct?: () => void;
   productName?: (publicId: string) => string;
+  /** A picture's words, drawn on it the way the shop lays them. */
+  words?: KitPictureWords;
+  /** A picture that is a band across the page rather than a tile. */
+  wide?: boolean;
 };
+
+/** A select with this many answers or fewer is a pill bar; more is a list. */
+const PILLED = 3;
 
 export function SettingField({
   spec,
@@ -50,76 +65,58 @@ export function SettingField({
   pictureUrl,
   onPickProduct,
   productName,
+  words,
+  wide,
 }: SettingFieldProps) {
   const t = useTranslations("themeEditor");
   const id = useId();
 
   if (spec.kind === "boolean") {
-    const on = value === true;
     return (
-      <div className="form-field">
-        <div className="flex items-center justify-between gap-3">
-          <label htmlFor={id} className="field-label mb-0">
-            {spec.label}
-          </label>
-          <Switch id={id} checked={on} onCheckedChange={onChange} aria-describedby={spec.help ? `${id}-help` : undefined} />
-        </div>
-        {spec.help ? (
-          <p id={`${id}-help`} className="text-xs text-muted-foreground">
-            {spec.help}
-          </p>
-        ) : null}
-      </div>
+      <KitSwitchRow label={spec.label} help={spec.help ?? undefined} checked={value === true} onChange={onChange} />
     );
   }
 
   if (spec.kind === "select") {
+    if (spec.options.length <= PILLED) {
+      return (
+        <div className="flex flex-col gap-2">
+          <p className={LABEL}>{spec.label}</p>
+          <KitChoice
+            label={spec.label}
+            options={spec.options.map((option) => ({ value: option.value, label: option.label }))}
+            value={String(value ?? "")}
+            onChange={onChange}
+            help={spec.help ?? undefined}
+          />
+        </div>
+      );
+    }
     return (
-      <FormField label={spec.label} htmlFor={id} hint={spec.help ?? undefined}>
-        <Select id={id} value={String(value ?? "")} onChange={(event) => onChange(event.target.value)}>
+      <KitField label={spec.label} htmlFor={id} help={spec.help ?? undefined}>
+        <KitSelect id={id} value={String(value ?? "")} onChange={(event) => onChange(event.target.value)}>
           {spec.options.map((option) => (
             <option key={option.value} value={option.value}>
               {option.label}
             </option>
           ))}
-        </Select>
-      </FormField>
+        </KitSelect>
+      </KitField>
     );
   }
 
   if (spec.kind === "image") {
     const key = typeof value === "string" ? value : "";
-    const url = key ? (pictureUrl?.(key) ?? "") : "";
     return (
-      <FormField label={spec.label} hint={spec.help ?? undefined}>
-        <div className="flex items-center gap-2">
-          <div className="flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-ui border border-input-border bg-input-surface">
-            {url ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={url} alt="" className="size-full object-cover" />
-            ) : (
-              <ImageIcon className="size-5 text-muted-foreground" aria-hidden />
-            )}
-          </div>
-          <Button type="button" variant="outline" className="h-11 shrink-0 md:h-9" onClick={onPickPicture}>
-            <Pencil aria-hidden />
-            {key ? t("pictureChange") : t("pictureChoose")}
-          </Button>
-          {key ? (
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              className="size-11 shrink-0 md:size-9"
-              aria-label={t("pictureClear")}
-              title={t("pictureClear")}
-              onClick={() => onChange("")}
-            >
-              <X aria-hidden />
-            </Button>
-          ) : null}
-        </div>
-      </FormField>
+      <KitPicture
+        label={spec.label}
+        help={spec.help ?? undefined}
+        url={key ? (pictureUrl?.(key) ?? "") : ""}
+        words={words}
+        wide={wide}
+        onChoose={onPickPicture}
+        onRemove={() => onChange("")}
+      />
     );
   }
 
@@ -131,35 +128,18 @@ export function SettingField({
     const picked = typeof value === "string" ? value : "";
     const name = picked ? (productName?.(picked) ?? "") : "";
     return (
-      <FormField label={spec.label} hint={spec.help ?? undefined}>
-        <div className="flex items-center gap-2">
-          <p className="flex min-w-0 flex-1 items-center gap-2 rounded-xs border border-input-border bg-input-surface px-3 py-2 text-sm">
-            <Package className="size-4 shrink-0 text-muted-foreground" aria-hidden />
-            <span className={cn("truncate", picked ? "text-foreground" : "text-muted-foreground")}>
-              {/* The name once it is known, the id until then: a product whose
-                  list has not arrived yet must not read as an empty field. */}
-              {name || (picked ? picked : t("productNone"))}
-            </span>
-          </p>
-          <Button type="button" variant="outline" className="h-11 shrink-0 md:h-9" onClick={onPickProduct}>
-            <Pencil aria-hidden />
-            {picked ? t("productChange") : t("productChoose")}
-          </Button>
-          {picked ? (
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              className="size-11 shrink-0 md:size-9"
-              aria-label={t("productClear")}
-              title={t("productClear")}
-              onClick={() => onChange("")}
-            >
-              <X aria-hidden />
-            </Button>
-          ) : null}
-        </div>
-      </FormField>
+      <KitValueRow
+        label={spec.label}
+        help={spec.help ?? undefined}
+        icon={<Package className="size-4" />}
+        /* The name once it is known, the id until then: a product whose list
+           has not arrived yet must not read as an empty field. */
+        value={name || picked}
+        empty={t("productNone")}
+        onPick={() => onPickProduct?.()}
+        onClear={() => onChange("")}
+        clearLabel={t("productClear")}
+      />
     );
   }
 
@@ -167,33 +147,16 @@ export function SettingField({
     const link = typeof value === "string" ? value : "";
     const page = LINK_PAGES.find((entry) => entry.path === link);
     return (
-      <FormField label={spec.label} hint={spec.help ?? undefined}>
-        <div className="flex items-center gap-2">
-          <p className="flex min-w-0 flex-1 items-center gap-2 rounded-xs border border-input-border bg-input-surface px-3 py-2 text-sm">
-            <Link2 className="size-4 shrink-0 text-muted-foreground" aria-hidden />
-            <span className={cn("truncate", link ? "text-foreground" : "text-muted-foreground")}>
-              {page ? t(page.key) : link || t("linkNone")}
-            </span>
-          </p>
-          <Button type="button" variant="outline" className="h-11 shrink-0 md:h-9" onClick={onPickLink}>
-            <Pencil aria-hidden />
-            {link ? t("linkChange") : t("linkChoose")}
-          </Button>
-          {link ? (
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              className="size-11 shrink-0 md:size-9"
-              aria-label={t("linkClear")}
-              title={t("linkClear")}
-              onClick={() => onChange("")}
-            >
-              <X aria-hidden />
-            </Button>
-          ) : null}
-        </div>
-      </FormField>
+      <KitValueRow
+        label={spec.label}
+        help={spec.help ?? undefined}
+        icon={<Link2 className="size-4" />}
+        value={page ? t(page.key) : link}
+        empty={t("linkNone")}
+        onPick={onPickLink}
+        onClear={() => onChange("")}
+        clearLabel={t("linkClear")}
+      />
     );
   }
 
@@ -230,16 +193,16 @@ function ScheduleField({
   }
 
   return (
-    <FormField label={spec.label} hint={spec.help ?? t("fieldDateHint")} htmlFor={id}>
-      <div className="flex items-center gap-2">
-        <Input
+    <KitField label={spec.label} help={spec.help ?? t("fieldDateHint")} htmlFor={id}>
+      <div className="flex items-center gap-1.5">
+        <KitInput
           id={id}
           type="date"
           value={parts.date}
-          className="min-w-0 flex-1"
+          className="flex-1"
           onChange={(event) => set(event.target.value, parts.time)}
         />
-        <Input
+        <KitInput
           type="time"
           aria-label={spec.label}
           value={parts.time}
@@ -248,20 +211,18 @@ function ScheduleField({
           onChange={(event) => set(parts.date, event.target.value)}
         />
         {parts.date ? (
-          <Button
+          <button
             type="button"
-            variant="ghost"
-            size="icon"
-            className="size-11 shrink-0 md:size-9"
+            className={ROUND}
             aria-label={t("fieldDateClear")}
             title={t("fieldDateClear")}
             onClick={() => onChange("")}
           >
-            <X aria-hidden />
-          </Button>
+            <X className="size-4" aria-hidden />
+          </button>
         ) : null}
       </div>
-    </FormField>
+    </KitField>
   );
 }
 
@@ -324,9 +285,9 @@ function TypedField({
   const used = counted ? characterCount(typed) : 0;
 
   return (
-    <FormField label={spec.label} htmlFor={id} hint={spec.help ?? undefined} error={message}>
+    <KitField label={spec.label} htmlFor={id} help={spec.help ?? undefined} error={message}>
       {spec.kind === "textarea" ? (
-        <Textarea
+        <KitTextarea
           id={id}
           rows={4}
           value={typed}
@@ -335,7 +296,7 @@ function TypedField({
           {...typing}
         />
       ) : (
-        <Input
+        <KitInput
           id={id}
           type={spec.kind === "number" ? "number" : "text"}
           inputMode={spec.kind === "number" ? "numeric" : undefined}
@@ -358,6 +319,6 @@ function TypedField({
           {t("fieldCounter", { used, max: spec.maxLength ?? 0 })}
         </p>
       ) : null}
-    </FormField>
+    </KitField>
   );
 }

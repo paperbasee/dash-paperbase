@@ -40,7 +40,8 @@ const bnNs = flatten((bn as Record<string, any>).themeEditor);
  * A key carried as a VALUE -- a slot's label, a field's error -- found under
  * either namespace, because nothing in the source says which reads it.
  */
-const known = (ns: Record<string, string>, key: string) => key in ns || `slots.${key}` in ns;
+const known = (ns: Record<string, string>, key: string) =>
+  key in ns || `slots.${key}` in ns || `kit.${key}` in ns;
 
 /**
  * A key read through a translator, checked against THAT translator's namespace.
@@ -67,7 +68,12 @@ const SOURCES = [
   "src/components/theme-editor/ConflictDialog.tsx",
   "src/components/theme-editor/slots/SlotEditor.tsx",
   "src/components/theme-editor/slots/SlotCanvas.tsx",
-  "src/components/theme-editor/slots/SlotDialog.tsx",
+  "src/components/theme-editor/slots/SlotPanel.tsx",
+  // The editor kit (2026-09-26): its own few words, read through `themeEditor.kit`.
+  "src/components/theme-editor/kit/Panel.tsx",
+  "src/components/theme-editor/kit/Picture.tsx",
+  "src/components/theme-editor/kit/Rows.tsx",
+  "src/components/theme-editor/PicturePicker.tsx",
   "src/components/theme-editor/ProductPicker.tsx",
   "src/components/theme-editor/ChoicePicker.tsx",
   "src/components/theme-editor/slots/ShopChrome.tsx",

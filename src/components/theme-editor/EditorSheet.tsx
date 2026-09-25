@@ -1,32 +1,27 @@
 "use client";
 
-import { useSyncExternalStore, type ReactNode } from "react";
+import type { ReactNode } from "react";
 import { useTranslations } from "next-intl";
 import { X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
+import { useMediaQuery } from "./useMediaQuery";
 
 /*
- * The panel the editor opens over its left column: the list to add from, and the link picker.
+ * The picker the editor opens over its side panel: a picture, a link, products, a list to tick.
+ * From the right on a computer -- where the panel that asked for it stands (2026-09-26) -- and
+ * from the bottom on a phone.
  *
  * One shell for all of them, because the chrome is the same choice every time — where it comes
  * from, how wide it is, and the close button a phone needs to be able to hit. Each one fills in
  * its own body.
  */
 
-const WIDE = "(min-width: 768px)";
-
-function subscribeWide(onChange: () => void) {
-  const query = window.matchMedia(WIDE);
-  query.addEventListener("change", onChange);
-  return () => query.removeEventListener("change", onChange);
-}
-
-/** Wider screens slide a panel over the editor's left column; phones get it from the bottom. */
+/** Wider screens slide a panel in from the side; phones get it from the bottom. */
 export function useWide() {
-  return useSyncExternalStore(subscribeWide, () => window.matchMedia(WIDE).matches, () => false);
+  return useMediaQuery("(min-width: 768px)");
 }
 
 export function EditorSheet({
@@ -56,7 +51,7 @@ export function EditorSheet({
       }}
     >
       <SheetContent
-        side={wide ? "left" : "bottom"}
+        side={wide ? "right" : "bottom"}
         showCloseButton={false}
         className={cn(
           "gap-0 p-0",

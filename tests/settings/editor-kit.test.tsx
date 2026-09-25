@@ -68,9 +68,9 @@ describe("a choice", () => {
 
   test("more than three, or answers that are shapes, are cards", () => {
     const five = ["classic", "centred", "split", "minimal", "compact"].map((value) => ({ value, label: value }));
-    expect(draw(<KitChoice label="Design" options={five} value="split" onChange={nothing} />)).toContain("grid grid-cols-2");
+    expect(draw(<KitChoice label="Design" options={five} value="split" onChange={nothing} />)).toContain("grid-cols-2");
     const shaped = two.map((option) => ({ ...option, mark: <span>shape</span> }));
-    expect(draw(<KitChoice label="Row" options={shaped} value="on" onChange={nothing} />)).toContain("grid grid-cols-2");
+    expect(draw(<KitChoice label="Row" options={shaped} value="on" onChange={nothing} />)).toContain("grid-cols-2");
   });
 });
 

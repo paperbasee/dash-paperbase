@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useReducer, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { Monitor, Smartphone, X } from "lucide-react";
+import { Monitor, Palette, Smartphone, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { DeferredNavLink } from "@/components/navigation/DeferredNavLink";
@@ -41,6 +41,7 @@ import {
   PAGE_NOTES,
   SLOT_GROUPS,
   SLOT_PAGES,
+  SLOTS,
   type SlotPageKey,
 } from "@/lib/theme-editor/slot-catalogue";
 import {
@@ -48,9 +49,11 @@ import {
   blockSettingEdits,
   choiceEdits,
   moveBlockEdits,
+  ownerOf,
   removeBlockEdits,
   setBlocksEdits,
   settingEdits,
+  slotValueFor,
   wiringFor,
 } from "@/lib/theme-editor/slot-sections";
 import { storeSettingFor, storeSettingValue } from "@/lib/theme-editor/store-setting-slots";
@@ -61,7 +64,11 @@ import { canvasColours, chosenPalette, fetchPalettes } from "@/lib/theme-editor/
 import { ConflictDialog } from "../ConflictDialog";
 import { SaveStatus } from "../SaveStatus";
 import { useAutosave } from "../useAutosave";
+import { KitBadge, KitChoice, KitNote, KitPanel, KitShape } from "../kit";
+import { SHEET_TOP } from "../kit/styles";
+import { useMediaQuery } from "../useMediaQuery";
 import { SlotCanvas } from "./SlotCanvas";
+import { SlotPanel } from "./SlotPanel";
 import type { BlogPreview, BrandPreview, PolicyPreview, ReviewPreview, ShopIdentity } from "./ShopChrome";
 import { policyPath, usePoliciesQuery } from "@/hooks/usePoliciesQuery";
 import { useBranding } from "@/context/BrandingContext";
@@ -83,9 +90,14 @@ import { StylePanel } from "./StylePanel";
  * both sides: six settings the storefront draws, and two live shops already
  * showing it.
  *
- * What the owner asked for, on 2026-09-20 and 2026-09-22:
+ * What the owner asked for, on 2026-09-20 and 2026-09-22 -- and on 2026-09-26,
+ * a side panel after all:
  *
- *   no sidebar        the canvas fills the editor
+ *   the page first    the page is in the middle, and a click on it opens that
+ *                     place's settings in a calm panel at the right (a sheet
+ *                     from the bottom on a phone); with nothing clicked the
+ *                     panel is Style. It replaced a pop-up that covered the
+ *                     very thing being changed.
  *   click the page    a merchant clicks the section they want, where it sits
  *   fixed places      nothing drags and nothing reorders; a merchant adds a
  *                     section, removes one, and edits the ones that are there
@@ -97,6 +109,7 @@ export function SlotEditor({ loaded }: { loaded: ThemeEditorState }) {
   const t = useTranslations("themeEditor.slots");
   const tEditor = useTranslations("themeEditor");
   const tc = useTranslations("settings.customization");
+  const tKit = useTranslations("themeEditor.kit");
   // The theme labels its own choices in both languages; this is which one.
   const locale = useLocale();
   const qc = useQueryClient();
@@ -113,6 +126,13 @@ export function SlotEditor({ loaded }: { loaded: ThemeEditorState }) {
     opens the editor to see their shop, and picks what to edit themselves.
   */
   const [open, setOpen] = useState<string | null>(null);
+  /*
+    On a computer the panel is always there, showing Style when nothing is
+    clicked. On a narrower screen it is a sheet over the page, so Style is
+    asked for -- the top bar's button -- and this says it was.
+  */
+  const [styleOpen, setStyleOpen] = useState(false);
+  const wide = useMediaQuery("(min-width: 1024px)");
   const [face, setFace] = useState("poppins");
   /*
     The palette is the shop's DOCUMENT since 2026-09-25, like the corners and
@@ -204,6 +224,13 @@ export function SlotEditor({ loaded }: { loaded: ThemeEditorState }) {
   // Every category by the link a merchant stores for it, for the header
   // menu's drawing: names for links with no words, carets where a panel opens.
   const categoryIndexOf = useMemo(() => categoryIndex(categories.data ?? []), [categories.data]);
+  // The same departments as answers: what the category band draws and what the
+  // three-department place is picked from, so the two never disagree.
+  const departmentOptions = (categories.data ?? []).map((node) => ({
+    value: node.public_id,
+    label: node.name,
+    note: node.product_count === 0 ? tEditor("noProducts") : undefined,
+  }));
   // Only the page of products the picker last searched, which is enough: a
   // field shows the name of something the merchant just chose, and falls back
   // to the id for a pick made in another session until they open the picker.
@@ -288,6 +315,12 @@ export function SlotEditor({ loaded }: { loaded: ThemeEditorState }) {
   function pickPage(next: SlotPageKey) {
     setPage(next);
     setOpen(null);
+  }
+
+  /** Select a place on the page: its settings replace whatever the panel held. */
+  function openPlace(slotKey: string | null) {
+    setOpen(slotKey);
+    setStyleOpen(false);
   }
 
   /**
@@ -431,6 +464,98 @@ export function SlotEditor({ loaded }: { loaded: ThemeEditorState }) {
     answered();
   };
 
+  /*
+    What the panel shows.
+
+    A wired place is its settings (`SlotPanel`). A place still decided here --
+    the checkout's form, a shop setting -- is its answers, drawn the same way; a
+    place that is set says why. Nothing clicked is Style.
+  */
+  const openSlot = open ? (SLOTS[page].find((slot) => slot.key === open) ?? null) : null;
+  const openOwner = openSlot ? ownerOf(page, openSlot) : null;
+  const openWiring = openOwner ? wiringFor(openOwner.page, openOwner.key) : null;
+  const closePlace = () => openPlace(null);
+
+  const stylePanel = (
+    <StylePanel
+      palettes={palettes.data}
+      palettesFailed={palettes.isError}
+      palette={palette}
+      onPalette={(key) => dispatch({ type: "setThemeSetting", setting: "palette", value: key })}
+      face={face}
+      onFace={setFace}
+      corner={corner}
+      onCorner={(key) => dispatch({ type: "setThemeSetting", setting: "corner_style", value: key })}
+      cardStyle={cardStyle}
+      onCardStyle={(key) => dispatch({ type: "setThemeSetting", setting: "card_style", value: key })}
+      onClose={wide ? undefined : () => setStyleOpen(false)}
+    />
+  );
+
+  const placePanel =
+    openSlot && openOwner && openWiring ? (
+      /* `page` is the one that OWNS the place, so the settings its neighbours
+         decide are looked up where those neighbours live. */
+      <SlotPanel
+        key={`${openOwner.page}:${openOwner.key}`}
+        slot={openSlot}
+        page={openOwner.page}
+        wiring={openWiring}
+        manifest={state.manifest}
+        document={state.document}
+        premiumSections={loaded.premium_sections !== false}
+        pictures={images.data ?? []}
+        pictureUrl={(key) => pictureUrls[key] ?? images.data?.find((row) => row.key === key)?.url ?? ""}
+        productName={(publicId) =>
+          (products.data?.results ?? []).find((row) => row.public_id === publicId)?.name ?? ""
+        }
+        departments={departmentOptions}
+        onChoose={(value) => choose(openOwner, value)}
+        onSet={(setting, value) => setSetting(openOwner, setting, value)}
+        onSetBlock={(blockId, setting, value) =>
+          edits(openOwner, (wiring) => blockSettingEdits(state.document, wiring, blockId, setting, value))
+        }
+        onSetBlocks={(blockType, setting, values) =>
+          edits(openOwner, (wiring) => setBlocksEdits(state.document, wiring, blockType, setting, values))
+        }
+        onAddBlock={(blockType) => edits(openOwner, (wiring) => addBlockEdits(state.document, wiring, blockType))}
+        onRemoveBlock={(blockId) => edits(openOwner, (wiring) => removeBlockEdits(state.document, wiring, blockId))}
+        onMoveBlock={(blockId, to) => edits(openOwner, (wiring) => moveBlockEdits(state.document, wiring, blockId, to))}
+        onPictureUrl={(key, url) => setPictureUrls((known) => ({ ...known, [key]: url }))}
+        onClose={closePlace}
+      />
+    ) : openSlot && openOwner ? (
+      <KitPanel
+        key={`${openOwner.page}:${openOwner.key}`}
+        title={t(openSlot.label)}
+        hint={openSlot.hint ? t(openSlot.hint) : undefined}
+        onClose={closePlace}
+        className="h-full"
+      >
+        {openSlot.locked ? (
+          <KitNote>{t(openSlot.lockedBecause ?? "lockedWhy")}</KitNote>
+        ) : (
+          <KitChoice
+            label={t(openSlot.label)}
+            value={choices[openOwner.page]?.[openOwner.key]}
+            onChange={(value) => choose(openOwner, value)}
+            options={(openSlot.options ?? []).map((option) => ({
+              value: option.value,
+              label: t(option.label),
+              note: option.note ? t(option.note) : undefined,
+              mark: (openSlot.options ?? []).length > 3 ? <KitShape shape={option.shape} /> : undefined,
+              badge: option.premium ? <KitBadge>{t("premium")}</KitBadge> : undefined,
+            }))}
+          />
+        )}
+      </KitPanel>
+    ) : null;
+
+  /** The panel's contents: the open place, or Style. */
+  const panel = placePanel ?? stylePanel;
+  /** On a narrower screen the sheet shows only when something asked for it. */
+  const sheetOpen = !wide && (placePanel !== null || styleOpen);
+
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       <div className="flex flex-wrap items-center gap-3 border-b border-border px-3 py-3 md:px-4">
@@ -473,6 +598,23 @@ export function SlotEditor({ loaded }: { loaded: ThemeEditorState }) {
         <p role="status" className="text-xs text-muted-foreground">
           {open ? t("hintChoosing") : t("hintClick")}
         </p>
+
+        {/* On a narrower screen Style is a sheet, asked for here. */}
+        {wide ? null : (
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            aria-pressed={styleOpen}
+            onClick={() => {
+              setOpen(null);
+              setStyleOpen(true);
+            }}
+          >
+            <Palette aria-hidden />
+            {tKit("styleTitle")}
+          </Button>
+        )}
 
         <div className="flex-1" />
 
@@ -525,117 +667,87 @@ export function SlotEditor({ loaded }: { loaded: ThemeEditorState }) {
       ) : null}
 
       {/*
-        Two fifths for colour and type, three for the page.
+        The page in the middle and the panel at its right (2026-09-26) -- the
+        page is what a merchant is changing, so it keeps the room and stays in
+        view while they type. Each scrolls on its own: `overflow-hidden` on the
+        row is what lets them, since a child with `overflow-y-auto` and no
+        height of its own just grows past its row.
 
-        With one theme and fixed places, the palette and the face are what make
-        two shops look different -- so they are not a tab somewhere, they are
-        half the screen. On a narrow window they stack above the page rather
-        than squeezing: a 40% column of swatches is unusable at that width.
+        On a narrower screen there is no room for a column, so the panel rises
+        from the bottom as a sheet over the lower part of the page, and the page
+        above it is still the page -- still clickable, still changing.
       */}
-      {/*
-        Two panes that scroll on their own, and one column that scrolls as a
-        whole when there is no room for two.
-
-        `overflow-hidden` on the container is what makes the panes scrollable at
-        all: a grid item stretches to the row, but a child with `overflow-y-auto`
-        and no height of its own just grows past it and the scrollbar never
-        appears. The container has to refuse to grow first.
-      */}
-      <div className="flex min-h-0 flex-1 flex-col overflow-y-auto lg:grid lg:grid-cols-[2fr_3fr] lg:overflow-hidden">
-        <div className="shrink-0 border-b border-border lg:min-h-0 lg:overflow-y-auto lg:border-b-0 lg:border-r">
-          <StylePanel
-            palettes={palettes.data}
-            palettesFailed={palettes.isError}
-            palette={palette}
-            onPalette={(key) => dispatch({ type: "setThemeSetting", setting: "palette", value: key })}
-            face={face}
-            onFace={setFace}
-            corner={corner}
-            onCorner={(key) => dispatch({ type: "setThemeSetting", setting: "corner_style", value: key })}
-            cardStyle={cardStyle}
-            onCardStyle={(key) => dispatch({ type: "setThemeSetting", setting: "card_style", value: key })}
-          />
-        </div>
-        <div className="lg:min-h-0 lg:overflow-y-auto">
+      <div className="flex min-h-0 flex-1 overflow-hidden">
+        <div className={cn("min-w-0 flex-1 overflow-y-auto", sheetOpen && "pb-[45dvh]")}>
           <SlotCanvas
             page={page}
             device={device}
             open={open}
-            onOpen={setOpen}
+            onOpen={openPlace}
             choices={choices[page]}
-            onChoose={choose}
             allChoices={choices}
             document={state.document}
-            manifest={state.manifest}
-            onSet={setSetting}
-            onSetBlock={(owner, blockId, setting, value) =>
-              edits(owner, (wiring) =>
-                blockSettingEdits(state.document, wiring, blockId, setting, value),
-              )
-            }
-            onSetBlocks={(owner, blockType, setting, values) =>
-              edits(owner, (wiring) =>
-                setBlocksEdits(state.document, wiring, blockType, setting, values),
-              )
-            }
-            onAddBlock={(owner, blockType) =>
-              edits(owner, (wiring) => addBlockEdits(state.document, wiring, blockType))
-            }
-            onRemoveBlock={(owner, blockId) =>
-              edits(owner, (wiring) => removeBlockEdits(state.document, wiring, blockId))
-            }
-            onMoveBlock={(owner, blockId, to) =>
-              edits(owner, (wiring) => moveBlockEdits(state.document, wiring, blockId, to))
-            }
-            premiumSections={loaded.premium_sections !== false}
-            pictures={images.data ?? []}
             pictureUrl={(key) => pictureUrls[key] ?? images.data?.find((row) => row.key === key)?.url ?? ""}
-            onPictureUrl={(key, url) => setPictureUrls((known) => ({ ...known, [key]: url }))}
             /*
               A department with nothing in it says so. It can still be ticked --
               a merchant setting a shop up picks the aisle they are about to
               fill -- but the shop draws no row for an empty one, and finding
               that out by looking at the page is how the owner found it out.
-
-              `product_count` on the tree is already rolled up through
-              sub-departments, so "Men" counts what is in "Men > Shirts". It
-              counts every product though, drafts included, so this flags what
-              is certainly empty rather than everything that will draw nothing.
             */
             categories={categoryIndexOf}
             policies={policyPreviews}
             footerSection={(state.document.footer?.sections ?? []).find((section) => section.type === "footer")}
-            departments={(categories.data ?? []).map((node) => ({
-              value: node.public_id,
-              label: node.name,
-              note: node.product_count === 0 ? tEditor("noProducts") : undefined,
-            }))}
+            departments={departmentOptions}
+            blog={blog}
+            shop={shop}
+            brands={brands}
+            reviews={reviews}
             /*
               The sixteen promises, named in the merchant's language by the
               theme itself. Read from the manifest rather than from this
               editor's own words: the theme owns the list, and a second copy
               here would be a second list to keep in step.
             */
-            blog={blog}
-            shop={shop}
-            brands={brands}
-            reviews={reviews}
             promiseWords={(name) =>
               blockFields(state.manifest, "promises", "promise", locale).find(
                 (field) => field.id === "promise",
               )?.options.find((option) => option.value === name)?.label ?? name
             }
-            productName={(publicId) =>
-              (products.data?.results ?? []).find((row) => row.public_id === publicId)?.name ?? ""
-            }
             onGoToPage={(next, slotKey) => {
               setPage(next);
-              setOpen(slotKey);
+              openPlace(slotKey);
             }}
             colours={paletteTokens ? canvasColours(paletteTokens) : undefined}
           />
         </div>
+
+        {wide ? (
+          <aside
+            aria-label={tKit("panelLabel")}
+            className="flex w-[380px] shrink-0 flex-col border-l border-border bg-background xl:w-[400px]"
+          >
+            {panel}
+          </aside>
+        ) : null}
       </div>
+
+      {sheetOpen ? (
+        <div
+          role="dialog"
+          aria-label={tKit("panelLabel")}
+          onKeyDown={(event) => {
+            if (event.key !== "Escape") return;
+            closePlace();
+          }}
+          className={cn(
+            "fixed inset-x-0 bottom-0 z-40 flex max-h-[72dvh] flex-col border-t border-border bg-background pb-[env(safe-area-inset-bottom)] shadow-[0_-12px_40px_rgb(0_0_0/0.16)]",
+            SHEET_TOP,
+          )}
+        >
+          <span aria-hidden className="mx-auto mt-2 h-1 w-9 shrink-0 rounded-full bg-border" />
+          {panel}
+        </div>
+      ) : null}
 
       <ConflictDialog
         open={conflict !== null}

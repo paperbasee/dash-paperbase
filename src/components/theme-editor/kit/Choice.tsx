@@ -34,12 +34,15 @@ export function KitChoice({
   value,
   onChange,
   help,
+  columns = 2,
 }: {
   label: string;
   options: KitOption[];
   value: string | undefined;
   onChange: (next: string) => void;
   help?: ReactNode;
+  /** Cards to a row, for a choice drawn as cards: three for three small drawings. */
+  columns?: 2 | 3;
 }) {
   const chosen = options.find((option) => option.value === value);
   const cards = options.length > 3 || options.some((option) => option.mark);
@@ -48,7 +51,7 @@ export function KitChoice({
   return (
     <div className="flex flex-col gap-2.5">
       {cards ? (
-        <div role="radiogroup" aria-label={label} className="grid grid-cols-2 gap-2">
+        <div role="radiogroup" aria-label={label} className={cn("grid gap-2", columns === 3 ? "grid-cols-3" : "grid-cols-2")}>
           {options.map((option) => {
             const on = option.value === value;
             return (
@@ -95,6 +98,29 @@ export function KitChoice({
       )}
       {note ? <p className={HELP}>{note}</p> : null}
     </div>
+  );
+}
+
+/**
+ * The little drawing on a choice card: the shape an answer makes on the page,
+ * not a picture of it -- a line, a row of two, a block, or nothing.
+ */
+export function KitShape({ shape }: { shape: "line" | "row" | "block" | "blank" }) {
+  if (shape === "blank") return <span className="block h-10 rounded-[8px] bg-background/60" />;
+  if (shape === "block") return <span className="block h-10 rounded-[8px] bg-foreground/15" />;
+  if (shape === "row") {
+    return (
+      <span className="flex h-10 gap-1 rounded-[8px] bg-background/60 p-1.5">
+        <span className="flex-1 rounded-[4px] bg-foreground/15" />
+        <span className="flex-1 rounded-[4px] bg-foreground/15" />
+      </span>
+    );
+  }
+  return (
+    <span className="flex h-10 flex-col justify-center gap-1.5 rounded-[8px] bg-background/60 px-2">
+      <span className="h-1 rounded-full bg-foreground/20" />
+      <span className="h-1 w-1/2 rounded-full bg-foreground/20" />
+    </span>
   );
 }
 

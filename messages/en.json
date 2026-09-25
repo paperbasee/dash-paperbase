@@ -2402,6 +2402,13 @@
   },
   "themeEditor": {
     "kit": {
+      "styleTitle": "Style",
+      "styleHint": "How your whole shop looks. Click any part of the page to change it.",
+      "panelLabel": "Settings",
+      "pickedProducts": "Products",
+      "pickedCategories": "Categories",
+      "pickedChoices": "Chosen",
+      "foldPictureWords": "Edit the words on the picture",
       "back": "Back",
       "close": "Close",
       "replace": "Replace",
