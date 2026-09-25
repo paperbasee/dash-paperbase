@@ -179,6 +179,14 @@ export function SlotDialog({
     setAsked(null);
   };
 
+  /**
+   * The words for this place's parts: a picture, a question, a row. They were
+   * a picture's for every place, so the home page's questions offered to "Add
+   * a picture", and so did the product page's rows (owner, 2026-09-25).
+   */
+  const partWords = (word: "Add" | "Number" | "Remove", values?: { number: number }) =>
+    t(`${blockType}Part${word}`, values);
+
   const fieldsFor = (block: ThemeBlock) =>
     section ? blockFields(manifest, section.type, block.type, locale) : [];
 
@@ -348,7 +356,7 @@ export function SlotDialog({
                   <div key={block.id} className="space-y-3 rounded-sm border border-border-subtle p-3">
                     <div className="flex items-center justify-between gap-2">
                       <strong className="text-xs font-semibold uppercase tracking-[0.04em] text-muted-foreground">
-                        {t("partNumber", { number: index + 1 })}
+                        {partWords("Number", { number: index + 1 })}
                       </strong>
                       <div className="flex items-center gap-0.5">
                         <Button
@@ -382,7 +390,7 @@ export function SlotDialog({
                           variant="ghost"
                           size="icon"
                           className="size-9"
-                          aria-label={t("removePart", { number: index + 1 })}
+                          aria-label={partWords("Remove", { number: index + 1 })}
                           onClick={() => onRemoveBlock(block.id)}
                         >
                           <Trash2 aria-hidden />
@@ -420,7 +428,7 @@ export function SlotDialog({
                     onClick={() => onAddBlock(blockType)}
                   >
                     <Plus aria-hidden />
-                    {t("addPart")}
+                    {partWords("Add")}
                   </Button>
                 )}
               </div>
