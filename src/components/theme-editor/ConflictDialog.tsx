@@ -2,7 +2,6 @@
 
 import { useTranslations } from "next-intl";
 
-import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -11,6 +10,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { cn } from "@/lib/utils";
+import { KitNote } from "./kit";
+import { HELP, PRIMARY, SECONDARY } from "./kit/styles";
 
 /**
  * Two people (or one merchant in two tabs) changed the same theme, and this one's save came back
@@ -21,6 +23,9 @@ import {
  * Each button says what it costs before it is pressed: "Keep my version" replaces the draft the
  * other one made, and "Load latest" gives up the edits this editor had not sent — it is the
  * button a stray tap lands on, so the sentence is there whenever there is something to lose.
+ *
+ * The dashboard's own dialog frame -- a question that must be answered is a true dialog, not a
+ * panel -- with the editor kit's words and buttons inside it (2026-09-26).
  */
 export function ConflictDialog({
   open,
@@ -51,26 +56,25 @@ export function ConflictDialog({
         className="w-[min(100%,calc(100vw-2.5rem))] max-w-md"
       >
         <DialogHeader>
-          <DialogTitle>{t("conflictTitle")}</DialogTitle>
-          <DialogDescription>{t("conflictMessage")}</DialogDescription>
+          <DialogTitle className="text-[15px] font-semibold">{t("conflictTitle")}</DialogTitle>
+          <DialogDescription className={HELP}>{t("conflictMessage")}</DialogDescription>
         </DialogHeader>
-        <div className="space-y-2 px-6 py-4 text-sm text-muted-foreground">
-          {hasUnsent ? <p>{t("conflictLoadWarning")}</p> : null}
-          <p>{t("conflictKeepWarning")}</p>
+        <div className="flex flex-col gap-2 px-6 py-4">
+          {hasUnsent ? <KitNote>{t("conflictLoadWarning")}</KitNote> : null}
+          <KitNote>{t("conflictKeepWarning")}</KitNote>
         </div>
         <DialogFooter className="flex-col-reverse gap-2 sm:flex-row">
-          <Button
+          <button
             type="button"
-            variant="outline"
-            className="h-11 w-full sm:h-9 sm:w-auto"
+            className={cn(SECONDARY, "w-full sm:w-auto")}
             disabled={busy || !canKeepMine}
             onClick={onKeepMine}
           >
             {t("conflictKeep")}
-          </Button>
-          <Button type="button" className="h-11 w-full sm:h-9 sm:w-auto" disabled={busy} onClick={onLoadLatest}>
+          </button>
+          <button type="button" className={cn(PRIMARY, "w-full sm:w-auto")} disabled={busy} onClick={onLoadLatest}>
             {t("conflictLoad")}
-          </Button>
+          </button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

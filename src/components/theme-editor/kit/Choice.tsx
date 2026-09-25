@@ -106,18 +106,18 @@ export function KitChoice({
  * not a picture of it -- a line, a row of two, a block, or nothing.
  */
 export function KitShape({ shape }: { shape: "line" | "row" | "block" | "blank" }) {
-  if (shape === "blank") return <span className="block h-10 rounded-[8px] bg-background/60" />;
-  if (shape === "block") return <span className="block h-10 rounded-[8px] bg-foreground/15" />;
+  if (shape === "blank") return <span className="block h-10 rounded-xs bg-background/60" />;
+  if (shape === "block") return <span className="block h-10 rounded-xs bg-foreground/15" />;
   if (shape === "row") {
     return (
-      <span className="flex h-10 gap-1 rounded-[8px] bg-background/60 p-1.5">
-        <span className="flex-1 rounded-[4px] bg-foreground/15" />
-        <span className="flex-1 rounded-[4px] bg-foreground/15" />
+      <span className="flex h-10 gap-1 rounded-xs bg-background/60 p-1.5">
+        <span className="flex-1 rounded-xs bg-foreground/15" />
+        <span className="flex-1 rounded-xs bg-foreground/15" />
       </span>
     );
   }
   return (
-    <span className="flex h-10 flex-col justify-center gap-1.5 rounded-[8px] bg-background/60 px-2">
+    <span className="flex h-10 flex-col justify-center gap-1.5 rounded-xs bg-background/60 px-2">
       <span className="h-1 rounded-full bg-foreground/20" />
       <span className="h-1 w-1/2 rounded-full bg-foreground/20" />
     </span>
@@ -127,7 +127,7 @@ export function KitShape({ shape }: { shape: "line" | "row" | "block" | "blank" 
 /** The small word a paid answer wears. */
 export function KitBadge({ children }: { children: ReactNode }) {
   return (
-    <span className="rounded-full bg-[hsl(var(--accent-yellow)/0.16)] px-1.5 py-px text-[9.5px] font-semibold uppercase tracking-[0.05em] text-foreground/80">
+    <span className="rounded-xs bg-[hsl(var(--accent-yellow)/0.16)] px-1.5 py-px text-[9.5px] font-semibold uppercase tracking-[0.05em] text-foreground/80">
       {children}
     </span>
   );

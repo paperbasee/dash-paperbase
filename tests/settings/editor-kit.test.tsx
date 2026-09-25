@@ -3,6 +3,9 @@
  * editor is built from. The owner asked for one central design system rather
  * than boxes styled one by one -- these pin what each piece promises.
  */
+import fs from "node:fs";
+import path from "node:path";
+
 import { renderToStaticMarkup } from "react-dom/server";
 import { NextIntlClientProvider } from "next-intl";
 import { describe, expect, test } from "vitest";
@@ -60,7 +63,7 @@ describe("a choice", () => {
   test("three or fewer answers are a pill bar, and the chosen one's note is said once", () => {
     const html = draw(<KitChoice label="Row" options={two} value="off" onChange={nothing} />);
     expect(html).toContain('role="radiogroup"');
-    expect(html).toContain('rounded-full bg-muted/70');
+    expect(html).toContain('rounded-ui bg-muted/70');
     expect(html.match(/role="radio"/g)).toHaveLength(2);
     expect(html).toMatch(/aria-checked="true"[^>]*>Hidden</);
     expect(html).toContain("Shoppers do not see it.");
@@ -154,5 +157,50 @@ describe("folds and parts", () => {
     const full = draw(<KitAdd label="Add a picture" full="Five is the most." onAdd={nothing} />);
     expect(full).toContain("Five is the most.");
     expect(full).not.toContain("<button");
+  });
+});
+
+describe("the kit's corners are the dashboard's (owner, 2026-09-26)", () => {
+  test("no corner in the kit's look is a number of its own", () => {
+    const styles = fs.readFileSync(path.join(__dirname, "../../src/components/theme-editor/kit/styles.ts"), "utf8");
+    expect(styles).not.toMatch(/rounded-(?:t-)?\[/);
+    expect(styles).not.toContain("rounded-full");
+    for (const token of ["rounded-card", "rounded-button", "rounded-input", "rounded-dialog"]) expect(styles).toContain(token);
+  });
+
+  test("nor in the pieces themselves", () => {
+    const dir = path.join(__dirname, "../../src/components/theme-editor/kit");
+    for (const file of fs.readdirSync(dir).filter((name) => name.endsWith(".tsx"))) {
+      expect(fs.readFileSync(path.join(dir, file), "utf8"), file).not.toMatch(/rounded-(?:t-)?\[/);
+    }
+  });
+});
+
+describe("every settings view is built from the kit (owner, 2026-09-26)", () => {
+  /*
+   * The panel, the fields it draws, Style and the pickers it opens: none of them
+   * reaches for the dashboard's plain controls, or the look would drift one box
+   * at a time -- which is what the owner asked to stop. A frame that is a true
+   * sheet or dialog (EditorSheet, ConflictDialog) keeps the dashboard's.
+   */
+  const VIEWS = [
+    "slots/SlotPanel.tsx",
+    "slots/StylePanel.tsx",
+    "SettingField.tsx",
+    "PicturePicker.tsx",
+    "LinkPicker.tsx",
+    "ProductPicker.tsx",
+    "ChoicePicker.tsx",
+    "EditorSheet.tsx",
+    "ConflictDialog.tsx",
+  ];
+  const PLAIN = ["ui/button", "ui/input", "ui/textarea", "ui/select", "ui/form-field", "ui/switch"];
+
+  test("none imports a plain control", () => {
+    const root = path.join(__dirname, "../../src/components/theme-editor");
+    for (const view of VIEWS) {
+      const text = fs.readFileSync(path.join(root, view), "utf8");
+      for (const plain of PLAIN) expect(text, `${view} imports ${plain}`).not.toContain(`@/components/${plain}"`);
+    }
   });
 });

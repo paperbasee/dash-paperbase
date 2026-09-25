@@ -57,7 +57,7 @@ const FACE_FAMILY: Record<string, string> = {
 function Swatches({ palette }: { palette: ShopPalette }) {
   const order = ["background", "muted", "border", "primary", "foreground"];
   return (
-    <span className="flex h-9 overflow-hidden rounded-[8px]">
+    <span className="flex h-9 overflow-hidden rounded-xs">
       {order.map((role) => (
         <span key={role} className="flex-1" style={{ backgroundColor: palette.tokens[role] }} />
       ))}
@@ -169,7 +169,7 @@ export function StylePanel({
         ) : (
           <div className="grid grid-cols-2 gap-2">
             {Array.from({ length: 6 }, (_, i) => (
-              <Skeleton key={i} className="h-[74px] rounded-[12px]" />
+              <Skeleton key={i} className="h-[74px] rounded-card" />
             ))}
           </div>
         )}

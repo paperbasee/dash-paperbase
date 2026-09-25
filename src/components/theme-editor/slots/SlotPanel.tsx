@@ -399,13 +399,7 @@ export function SlotPanel({
         tall
         onClose={() => setAsked(null)}
       >
-        <LinkPicker
-          open={asked?.kind === "link"}
-          pages={LINK_PAGES}
-          value={asked?.value ?? ""}
-          onPick={answer}
-          onClose={() => setAsked(null)}
-        />
+        <LinkPicker open={asked?.kind === "link"} pages={LINK_PAGES} value={asked?.value ?? ""} onPick={answer} />
       </EditorSheet>
 
       <EditorSheet
@@ -443,8 +437,8 @@ export function SlotPanel({
 
       <EditorSheet
         open={asked?.kind === "picture"}
-        title={tEditor("pictureTitle")}
-        hint={tEditor("pictureHint")}
+        title={tEditor(asked?.kind === "picture" && asked.svg ? "logoPickerTitle" : "pictureTitle")}
+        hint={tEditor(asked?.kind === "picture" && asked.svg ? "logoPickerHint" : "pictureHint")}
         tall
         onClose={() => setAsked(null)}
       >

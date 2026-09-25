@@ -55,7 +55,7 @@ export function KitPicture({
               {words?.heading ? <p className="text-[14px] font-semibold leading-tight">{words.heading}</p> : null}
               {words?.line ? <p className="mt-0.5 text-[11.5px] leading-snug text-white/85">{words.line}</p> : null}
               {words?.button ? (
-                <span className="mt-2 inline-block rounded-full bg-white px-2.5 py-1 text-[10.5px] font-semibold text-black">
+                <span className="mt-2 inline-block rounded-button bg-white px-2.5 py-1 text-[10.5px] font-semibold text-black">
                   {words.button}
                 </span>
               ) : null}
@@ -65,7 +65,7 @@ export function KitPicture({
             <button
               type="button"
               onClick={onChoose}
-              className="rounded-full bg-white/92 px-3 py-1 text-[12px] font-medium text-neutral-900 shadow-sm transition-colors hover:bg-white focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-white"
+              className="rounded-button bg-white/92 px-3 py-1 text-[12px] font-medium text-neutral-900 shadow-sm transition-colors hover:bg-white focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-white"
             >
               {t("replace")}
             </button>
@@ -74,7 +74,7 @@ export function KitPicture({
               onClick={onRemove}
               aria-label={t("removePicture")}
               title={t("removePicture")}
-              className="grid size-7 place-items-center rounded-full bg-white/92 text-neutral-900 shadow-sm transition-colors hover:bg-white focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-white"
+              className="grid size-7 place-items-center rounded-button bg-white/92 text-neutral-900 shadow-sm transition-colors hover:bg-white focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-white"
             >
               <Trash2 className="size-3.5" aria-hidden />
             </button>

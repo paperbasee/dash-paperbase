@@ -1,16 +1,16 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { ImagePlus, Loader2 } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
-import { EditorSheet } from "@/components/theme-editor/EditorSheet";
 import { uploadFile, validateUploadFile } from "@/hooks/usePresignedUpload";
 import api from "@/lib/api";
 import { isApiHttpError } from "@/lib/api-client";
 import type { ThemeImage } from "@/lib/theme-editor/api";
 import { cn } from "@/lib/utils";
+import { KitNote } from "./kit";
+import { CAPTION, HELP, PICTURE } from "./kit/styles";
 
 /*
  * Choosing a picture for one setting: upload a new one, or take one already placed
@@ -22,6 +22,9 @@ import { cn } from "@/lib/utils";
  *
  * A picture is stored as its KEY and drawn from its URL; both travel together here,
  * because the editor has no way to turn one into the other.
+ *
+ * Only the body: the side panel frames every picker in one `EditorSheet` (2026-09-26) --
+ * this one framed itself too, and two sheets opened on top of each other.
  */
 
 export type PicturePickerProps = {
@@ -59,6 +62,11 @@ export function PicturePicker({ open, onClose, used, current, svg = false, onPic
   const fileInput = useRef<HTMLInputElement | null>(null);
   const [busy, setBusy] = useState(false);
   const [problem, setProblem] = useState<string | null>(null);
+
+  // Each opening starts clean: a refusal was about the last file, not the next.
+  useEffect(() => {
+    if (open) setProblem(null);
+  }, [open]);
 
   async function take(file: File | undefined) {
     if (!file) return;
@@ -115,75 +123,74 @@ export function PicturePicker({ open, onClose, used, current, svg = false, onPic
   }
 
   return (
-    <EditorSheet
-      open={open}
-      onClose={onClose}
-      title={t(svg ? "logoPickerTitle" : "pictureTitle")}
-      hint={t(svg ? "logoPickerHint" : "pictureHint")}
-    >
-      <div className="space-y-4">
-        <input
-          ref={fileInput}
-          type="file"
-          accept={svg ? LOGO_TYPES.join(",") : "image/jpeg,image/png,image/webp,image/gif"}
-          className="sr-only"
-          onChange={(event) => {
-            void take(event.target.files?.[0]);
-            event.target.value = "";
-          }}
-        />
-        <Button
-          type="button"
-          variant="outline"
-          className="h-11 w-full md:h-10"
-          disabled={busy}
-          onClick={() => fileInput.current?.click()}
-        >
-          {busy ? <Loader2 className="animate-spin" aria-hidden /> : <ImagePlus aria-hidden />}
-          {busy ? t("pictureUploading") : t("pictureUpload")}
-        </Button>
-        {problem ? (
-          <p role="alert" className="text-sm text-destructive">
-            {problem}
-          </p>
-        ) : null}
-
-        {used.length > 0 ? (
-          <div className="space-y-2">
-            <p className="text-sm font-medium text-foreground">{t("pictureUsedHeading")}</p>
-            <p className="text-sm text-muted-foreground">{t("pictureUsedHint")}</p>
-            <ul className="grid grid-cols-3 gap-2">
-              {used.map((picture) => (
-                <li key={picture.key}>
-                  <button
-                    type="button"
-                    className={cn(
-                      "block w-full overflow-hidden rounded-ui border",
-                      picture.key === current ? "border-foreground" : "border-border",
-                    )}
-                    onClick={() => {
-                      onPick(picture);
-                      onClose();
-                    }}
-                  >
-                    {/* Plain img: these are merchant uploads on a bucket the dashboard
-                        does not configure for next/image, and they are thumbnails. */}
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={picture.url}
-                      alt=""
-                      className={cn("aspect-[4/3] w-full bg-muted", svg ? "object-contain p-2" : "object-cover")}
-                      loading="lazy"
-                    />
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </div>
-        ) : (
-          <p className="text-sm text-muted-foreground">{t("pictureNoneYet")}</p>
+    <div className="flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto px-5 pb-8 pt-1">
+      <input
+        ref={fileInput}
+        type="file"
+        accept={svg ? LOGO_TYPES.join(",") : "image/jpeg,image/png,image/webp,image/gif"}
+        className="sr-only"
+        onChange={(event) => {
+          void take(event.target.files?.[0]);
+          event.target.value = "";
+        }}
+      />
+      {/* A new one: the soft empty frame is the button, as it is in the panel. */}
+      <button
+        type="button"
+        disabled={busy}
+        onClick={() => fileInput.current?.click()}
+        className={cn(
+          PICTURE,
+          "grid aspect-[16/7] place-items-center border border-dashed border-border bg-muted/40 text-muted-foreground transition-colors hover:bg-muted/70 hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-ring disabled:cursor-wait",
         )}
-      </div>
-    </EditorSheet>
+      >
+        <span className="flex flex-col items-center gap-1.5 text-[13px] font-medium">
+          {busy ? <Loader2 className="size-5 animate-spin" aria-hidden /> : <ImagePlus className="size-5" aria-hidden />}
+          {busy ? t("pictureUploading") : t("pictureUpload")}
+        </span>
+      </button>
+      {problem ? <KitNote role="alert">{problem}</KitNote> : null}
+
+      {used.length > 0 ? (
+        <div className="flex flex-col gap-3">
+          <div>
+            <p className={CAPTION}>{t("pictureUsedHeading")}</p>
+            <p className={cn(HELP, "mt-1")}>{t("pictureUsedHint")}</p>
+          </div>
+          <ul className="grid grid-cols-2 gap-2.5">
+            {used.map((picture) => (
+              <li key={picture.key}>
+                <button
+                  type="button"
+                  aria-current={picture.key === current ? "true" : undefined}
+                  className={cn(
+                    "block w-full overflow-hidden rounded-card bg-muted transition-shadow focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring",
+                    picture.key === current
+                      ? "shadow-[0_0_0_2px_hsl(var(--foreground))]"
+                      : "hover:shadow-[0_0_0_1.5px_hsl(var(--border))]",
+                  )}
+                  onClick={() => {
+                    onPick(picture);
+                    onClose();
+                  }}
+                >
+                  {/* Plain img: these are merchant uploads on a bucket the dashboard
+                      does not configure for next/image, and they are thumbnails. */}
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={picture.url}
+                    alt=""
+                    className={cn("aspect-[4/3] w-full", svg ? "object-contain p-3" : "object-cover")}
+                    loading="lazy"
+                  />
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : (
+        <p className={HELP}>{t("pictureNoneYet")}</p>
+      )}
+    </div>
   );
 }

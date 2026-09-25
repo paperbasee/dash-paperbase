@@ -9,3 +9,4 @@ export { KitField, KitInput, KitSelect, KitSwitchRow, KitTextarea } from "./Fiel
 export { KitBadge, KitChoice, KitShape, type KitOption } from "./Choice";
 export { KitPicture, type KitPictureWords } from "./Picture";
 export { KitAdd, KitFold, KitPart, KitPicked, KitValueRow } from "./Rows";
+export { KitBar, KitPickRow, KitSearch, KitTabs, KitTickRow } from "./Pick";

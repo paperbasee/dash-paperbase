@@ -4,9 +4,9 @@ import type { ReactNode } from "react";
 import { useTranslations } from "next-intl";
 import { X } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
+import { HELP, ROUND } from "./kit/styles";
 import { useMediaQuery } from "./useMediaQuery";
 
 /*
@@ -54,29 +54,23 @@ export function EditorSheet({
         side={wide ? "right" : "bottom"}
         showCloseButton={false}
         className={cn(
-          "gap-0 p-0",
+          "gap-0 bg-background p-0",
           wide
-            ? "w-80 sm:max-w-none xl:w-[360px]"
+            ? "w-[380px] sm:max-w-none xl:w-[400px]"
             : cn("pb-[env(safe-area-inset-bottom)]", tall ? "h-dvh max-h-dvh rounded-none" : "max-h-[85dvh]"),
         )}
       >
-        <SheetHeader className="flex-row items-start justify-between gap-2 border-b border-border">
+        {/* The editor kit's header, so a picker reads as part of the panel that opened it. */}
+        <SheetHeader className="flex-row items-start justify-between gap-3 px-5 pb-3 pt-5">
           <div className="min-w-0 space-y-1">
-            <SheetTitle>{title}</SheetTitle>
-            <SheetDescription>{hint}</SheetDescription>
+            <SheetTitle className="text-[15px] font-semibold leading-snug">{title}</SheetTitle>
+            <SheetDescription className={HELP}>{hint}</SheetDescription>
           </div>
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            className="-mr-2 -mt-2 size-11 md:size-9"
-            aria-label={tCommon("close")}
-            onClick={onClose}
-          >
-            <X aria-hidden />
-          </Button>
+          <button type="button" className={cn(ROUND, "-mr-1.5 bg-muted/60")} aria-label={tCommon("close")} onClick={onClose}>
+            <X className="size-4" aria-hidden />
+          </button>
         </SheetHeader>
-        {children}
+        <div className="flex min-h-0 flex-1 flex-col">{children}</div>
       </SheetContent>
     </Sheet>
   );

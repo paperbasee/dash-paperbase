@@ -94,7 +94,7 @@ export function KitGroup({
 /** A soft note: why a place is set, what is not saved yet, a list that failed. */
 export function KitNote({ children, role }: { children: ReactNode; role?: "alert" | "status" }) {
   return (
-    <p role={role} className="rounded-[12px] bg-muted/60 px-3.5 py-3 text-[12.5px] leading-relaxed text-muted-foreground">
+    <p role={role} className="rounded-card bg-muted/60 px-3.5 py-3 text-[12.5px] leading-relaxed text-muted-foreground">
       {children}
     </p>
   );

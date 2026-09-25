@@ -154,13 +154,13 @@ export function KitPart({
 }) {
   const [open, setOpen] = useState(defaultOpen);
   return (
-    <div className="rounded-[14px] bg-muted/50">
+    <div className="rounded-card bg-muted/50">
       <div className="flex items-center gap-1 py-1 pl-1 pr-1.5">
         <button
           type="button"
           aria-expanded={open}
           onClick={() => setOpen(!open)}
-          className="flex min-w-0 flex-1 items-center gap-2 rounded-[10px] px-2.5 py-2 text-left focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-ring"
+          className="flex min-w-0 flex-1 items-center gap-2 rounded-button px-2.5 py-2 text-left focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-ring"
         >
           <ChevronRight className={cn("size-3.5 shrink-0 text-muted-foreground transition-transform", open && "rotate-90")} aria-hidden />
           <span className="min-w-0">
@@ -188,7 +188,7 @@ export function KitAdd({ label, full, onAdd }: { label: ReactNode; full?: ReactN
   if (full) return <p className={HELP}>{full}</p>;
   return (
     <button type="button" onClick={onAdd} className={cn(QUIET, "-ml-2 self-start")}>
-      <span aria-hidden className="grid size-5 place-items-center rounded-full bg-muted text-[14px] leading-none">
+      <span aria-hidden className="grid size-5 place-items-center rounded-button bg-muted text-[14px] leading-none">
         +
       </span>
       {label}

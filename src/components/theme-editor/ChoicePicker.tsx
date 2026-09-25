@@ -3,9 +3,9 @@
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 
-import { Button } from "@/components/ui/button";
 import type { FieldOption } from "@/lib/theme-editor/field-specs";
-import { cn } from "@/lib/utils";
+import { KitBar, KitTickRow } from "./kit";
+import { HELP, PRIMARY } from "./kit/styles";
 
 /**
  * Ticking several choices off a list short enough to show: the shop's sixteen
@@ -62,43 +62,28 @@ export function ChoicePicker({
   const full = ticked.length >= most;
 
   return (
-    <div className="flex min-h-0 flex-col">
-      <div className="min-h-0 flex-1 overflow-y-auto p-2">
-        <ul className="m-0 list-none space-y-1 p-0">
+    <>
+      <div className="min-h-0 flex-1 overflow-y-auto px-3 py-2">
+        <ul className="m-0 flex list-none flex-col gap-0.5 p-0">
           {options.map((option) => {
             const chosen = ticked.includes(option.value);
             return (
               <li key={option.value}>
-                <label
-                  className={cn(
-                    "flex min-h-11 w-full cursor-pointer items-center gap-3 rounded-card px-3 py-1.5",
-                    "hover:bg-accent has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-1 has-[:focus-visible]:outline-primary",
-                    chosen && "bg-accent",
-                  )}
-                >
-                  <input
-                    type="checkbox"
-                    checked={chosen}
-                    // Full means the ticked ones can still be UNticked and
-                    // nothing else added -- a disabled row a merchant has
-                    // ticked would trap them at four.
-                    disabled={!chosen && full}
-                    onChange={() =>
-                      setTicked((current) =>
-                        current.includes(option.value)
-                          ? current.filter((one) => one !== option.value)
-                          : full
-                            ? current
-                            : [...current, option.value],
-                      )
-                    }
-                    className="size-4 shrink-0 accent-[var(--primary)]"
-                  />
-                  <span className="min-w-0 flex-1 truncate text-sm">{option.label}</span>
-                  {option.note ? (
-                    <span className="shrink-0 text-xs text-muted-foreground">{option.note}</span>
-                  ) : null}
-                </label>
+                <KitTickRow
+                  label={option.label}
+                  note={option.note}
+                  checked={chosen}
+                  disabled={!chosen && full}
+                  onToggle={() =>
+                    setTicked((current) =>
+                      current.includes(option.value)
+                        ? current.filter((one) => one !== option.value)
+                        : full
+                          ? current
+                          : [...current, option.value],
+                    )
+                  }
+                />
               </li>
             );
           })}
@@ -109,20 +94,19 @@ export function ChoicePicker({
         The count says where the merchant stands against the cap before they
         press Done, rather than a refusal afterwards.
       */}
-      <div className="flex items-center justify-between gap-3 border-t border-border p-3">
-        <p className="text-xs text-muted-foreground">
-          {t("chosenCount", { count: ticked.length, max: most })}
-        </p>
-        <Button
+      <KitBar>
+        <p className={HELP}>{t("chosenCount", { count: ticked.length, max: most })}</p>
+        <button
           type="button"
+          className={`${PRIMARY} ml-auto`}
           onClick={() => {
             onDone(ticked);
             onClose();
           }}
         >
           {t("chooseDone")}
-        </Button>
-      </div>
-    </div>
+        </button>
+      </KitBar>
+    </>
   );
 }

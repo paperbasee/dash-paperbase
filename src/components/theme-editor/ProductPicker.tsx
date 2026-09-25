@@ -2,12 +2,11 @@
 
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
-import { Loader2, Search } from "lucide-react";
+import { Loader2 } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { useProductsQuery } from "@/hooks/useProductsQuery";
-import { cn } from "@/lib/utils";
+import { KitBar, KitNote, KitSearch, KitTickRow } from "./kit";
+import { HELP, PRIMARY } from "./kit/styles";
 
 /**
  * Choosing the products for a band the merchant fills by hand.
@@ -118,72 +117,35 @@ export function ProductPicker({
   }
 
   return (
-    <div className="flex min-h-0 flex-col">
-      <div className="border-b border-border p-3">
-        <div className="relative">
-          <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
-          <Input
-            value={typed}
-            onChange={(event) => setTyped(event.target.value)}
-            placeholder={t("productSearch")}
-            aria-label={t("productSearch")}
-            className="pl-9"
-          />
-        </div>
+    <>
+      <div className="shrink-0 px-5 pb-2 pt-1">
+        <KitSearch value={typed} onChange={setTyped} placeholder={t("productSearch")} />
       </div>
 
-      <div className="min-h-0 flex-1 overflow-y-auto p-2">
+      <div className="min-h-0 flex-1 overflow-y-auto px-3 py-2">
         {products.isPending ? (
-          <p className="flex items-center gap-2 p-3 text-sm text-muted-foreground">
+          <p role="status" className="flex items-center gap-2 px-2 py-3 text-[13px] text-muted-foreground">
             <Loader2 className="size-4 animate-spin" aria-hidden />
             {t("productLoading")}
           </p>
         ) : products.isError ? (
-          <p role="alert" className="p-3 text-sm text-destructive">
-            {t("productFailed")}
-          </p>
+          <KitNote role="alert">{t("productFailed")}</KitNote>
         ) : shown.length === 0 ? (
-          <p className="p-3 text-sm text-muted-foreground">
-            {search ? t("productNoMatches", { search }) : t("productNoneYet")}
-          </p>
+          <KitNote>{search ? t("productNoMatches", { search }) : t("productNoneYet")}</KitNote>
         ) : (
-          <ul className="m-0 list-none space-y-1 p-0">
+          <ul className="m-0 flex list-none flex-col gap-0.5 p-0">
             {shown.map((product) => {
               const chosen = ticked.includes(product.public_id);
               return (
                 <li key={product.public_id}>
-                  <label
-                    className={cn(
-                      "flex min-h-14 w-full cursor-pointer items-center gap-3 rounded-card px-2 py-1.5",
-                      "hover:bg-accent has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-1 has-[:focus-visible]:outline-primary",
-                      chosen && "bg-accent",
-                    )}
-                  >
-                    <input
-                      type="checkbox"
-                      checked={chosen}
-                      // Full means the ticked ones can still be UNticked, and
-                      // nothing else can be added -- a disabled row a merchant
-                      // has ticked would trap them at eight.
-                      disabled={!chosen && full}
-                      onChange={() => toggle(product.public_id)}
-                      className="size-4 shrink-0 accent-[var(--primary)]"
-                    />
-                    {/* eslint-disable-next-line @next/next/no-img-element -- a
-                        merchant upload on a bucket the dashboard configures no
-                        loader for */}
-                    <img
-                      src={product.image_url ?? product.image ?? ""}
-                      alt=""
-                      className="size-10 shrink-0 rounded-xs border border-border-subtle object-cover"
-                    />
-                    <span className="min-w-0 flex-1">
-                      <span className="block truncate text-sm font-medium">{product.name}</span>
-                      <span className="block truncate text-xs text-muted-foreground">
-                        {product.category_name ?? ""}
-                      </span>
-                    </span>
-                  </label>
+                  <KitTickRow
+                    label={product.name}
+                    note={product.category_name ?? ""}
+                    picture={product.image_url ?? product.image ?? ""}
+                    checked={chosen}
+                    disabled={!chosen && full}
+                    onToggle={() => toggle(product.public_id)}
+                  />
                 </li>
               );
             })}
@@ -196,20 +158,19 @@ export function ProductPicker({
         stands against the cap before they press it, rather than a refusal
         afterwards.
       */}
-      <div className="flex items-center justify-between gap-3 border-t border-border p-3">
-        <p className="text-xs text-muted-foreground">
-          {t("chosenCount", { count: ticked.length, max: most })}
-        </p>
-        <Button
+      <KitBar>
+        <p className={HELP}>{t("chosenCount", { count: ticked.length, max: most })}</p>
+        <button
           type="button"
+          className={`${PRIMARY} ml-auto`}
           onClick={() => {
             onDone(ticked);
             onClose();
           }}
         >
           {t("productDone")}
-        </Button>
-      </div>
-    </div>
+        </button>
+      </KitBar>
+    </>
   );
 }
