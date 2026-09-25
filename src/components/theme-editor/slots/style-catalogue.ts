@@ -1,10 +1,11 @@
 /**
- * What a merchant may set their shop in: the palettes, and the faces.
+ * What a merchant may set their shop in: the faces, the corners and the card
+ * styles.
  *
- * **Design data, like `slot-catalogue.ts`.** The palettes are the ones the API
- * already ships in `engine/apps/theming/presets.py`, plus the two the owner was
- * shown on 2026-09-19 and did not choose -- real options, not invented ones, so
- * the panel can be judged at the size it will really be.
+ * **Not the palettes.** Their colours are the API's (`theming/presets.py`,
+ * served at `theming/presets/`) since the six replaced these drawings on
+ * 2026-09-25 -- see `lib/theme-editor/palettes.ts` -- so no colour is written
+ * down twice.
  *
  * **The face carries the language.** The owner decided on 2026-09-20 that a shop
  * does not choose a language and then a font: it chooses a font, and the
@@ -24,61 +25,6 @@
  * is, and which is not the actual problem. So this file stays pure data and the
  * panel maps each key to the class the loader made.
  */
-
-export type Palette = {
-  key: string;
-  /** `themeEditor.slots.*` key. */
-  label: string;
-  /** Shown as swatches, in the order a shop meets them. */
-  background: string;
-  foreground: string;
-  accent: string;
-  muted: string;
-  border: string;
-  /** In the API's presets today. The rest are drawn for the panel. */
-  shipped?: boolean;
-};
-
-export const PALETTES: Palette[] = [
-  {
-    key: "ivory",
-    label: "paletteIvory",
-    background: "#FAFAF8",
-    foreground: "#1A1A1A",
-    accent: "#C9A96E",
-    muted: "#F0EFEA",
-    border: "#E5E4DF",
-    shipped: true,
-  },
-  {
-    key: "verdigris",
-    label: "paletteVerdigris",
-    background: "#EEE7DA",
-    foreground: "#1F1A15",
-    accent: "#2E5E58",
-    muted: "#F7F2E8",
-    border: "#D5C9B4",
-    shipped: true,
-  },
-  {
-    key: "garnet",
-    label: "paletteGarnet",
-    background: "#F3EDE6",
-    foreground: "#241C19",
-    accent: "#7A2E2B",
-    muted: "#EAE0D6",
-    border: "#D9CCC0",
-  },
-  {
-    key: "indigo",
-    label: "paletteIndigo",
-    background: "#F4F2EC",
-    foreground: "#1C2030",
-    accent: "#2F3A5C",
-    muted: "#E8E5DC",
-    border: "#CFCBBF",
-  },
-];
 
 export type ShopLanguage = "en" | "bn";
 

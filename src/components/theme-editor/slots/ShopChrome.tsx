@@ -440,11 +440,12 @@ export function ShopChrome({
     // not -- and an example again when they have not written one yet, because a
     // strip drawn empty reads as a bug rather than as a blank.
     // One ground, not a choice: the owner took the colour setting off the bar
-    // on 2026-09-22, because the palette already decides what the accent is.
+    // on 2026-09-22, because the palette already decides what the accent is --
+    // so it is drawn in the palette's brand colour, as the shop's strip is.
     const text = live?.settings?.text;
     const written = typeof text === "string" ? text.trim() : "";
     return (
-      <p className="border-b border-border bg-muted px-4 py-2 text-center text-[11px] uppercase tracking-[0.06em] text-current/75">
+      <p className="border-b border-border bg-shop-brand px-4 py-2 text-center text-[11px] uppercase tracking-[0.06em] text-shop-brand-foreground/85">
         {written || t("noticeExample")}
       </p>
     );
@@ -499,14 +500,14 @@ export function ShopChrome({
       </div>
     );
     const bar = (children: React.ReactNode) => (
-      <div className="flex items-center gap-3 border-b border-border bg-muted px-4 py-3 text-foreground">{children}</div>
+      <div className="flex items-center gap-3 border-b border-border bg-shop-header px-4 py-3 text-shop-header-foreground">{children}</div>
     );
 
     if (layout === "masthead") {
       // The name on its own line; under it search, five departments, the marks.
       return (
         <div>
-          <div className="border-b border-border bg-muted px-4 pb-3 pt-5 text-center text-foreground">
+          <div className="border-b border-border bg-shop-header px-4 pb-3 pt-5 text-center text-shop-header-foreground">
             {logo}
             <div className="mt-3 grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-3">
               <span className="flex min-w-0">{search === "box" ? <span className="h-6 w-full max-w-[7rem] rounded-xs bg-current/12" /> : searchMark}</span>
@@ -826,7 +827,7 @@ export function ShopChrome({
           <p className="text-[10px] uppercase tracking-[0.14em] text-current/45">{t("heroEyebrowExample")}</p>
           <p className="max-w-[22ch] text-[22px] font-semibold leading-[1.15]">{t("heroHeadingExample")}</p>
           <p className="max-w-[34ch] text-[11.5px] leading-relaxed text-current/55">{t("heroBodyExample")}</p>
-          <span className="mt-1 grid h-9 w-fit place-items-center rounded-full bg-foreground px-6 text-[11.5px] font-semibold text-background">
+          <span className="mt-1 grid h-9 w-fit place-items-center rounded-full bg-shop-brand px-6 text-[11.5px] font-semibold text-shop-brand-foreground">
             {t("heroButtonExample")}
           </span>
           {slider ? (
@@ -1140,7 +1141,7 @@ export function ShopChrome({
             {words("body", t("signupWhatsappBody"))}
           </p>
           {number ? (
-            <span className="mt-3 inline-grid h-9 place-items-center rounded-xs bg-foreground px-4 text-[11px] text-background">
+            <span className="mt-3 inline-grid h-9 place-items-center rounded-xs bg-shop-brand px-4 text-[11px] text-shop-brand-foreground">
               {words("button_label", t("signupWhatsappButton"))}
             </span>
           ) : (
@@ -1260,7 +1261,7 @@ export function ShopChrome({
                 <span className="px-2 py-2.5 tabular-nums">1</span>
                 <span className="px-3 py-2.5 text-current/45">+</span>
               </span>
-              <span className="grid h-11 flex-1 place-items-center rounded-full bg-foreground text-[12px] font-semibold text-background">
+              <span className="grid h-11 flex-1 place-items-center rounded-full bg-shop-brand text-[12px] font-semibold text-shop-brand-foreground">
                 {t("addToCart")}
               </span>
             </div>
@@ -1675,7 +1676,7 @@ export function ShopChrome({
                     </span>
                   </span>
                   {buy ? (
-                    <span className="grid h-9 shrink-0 place-items-center rounded-full bg-foreground px-4 text-[11px] font-semibold text-background">
+                    <span className="grid h-9 shrink-0 place-items-center rounded-full bg-shop-brand px-4 text-[11px] font-semibold text-shop-brand-foreground">
                       {t("addToCart")}
                     </span>
                   ) : null}
@@ -1710,7 +1711,7 @@ export function ShopChrome({
                   ) : null}
                 </p>
                 {buy ? (
-                  <span className="mt-2 grid h-9 place-items-center rounded-full bg-foreground text-[11px] font-semibold text-background">
+                  <span className="mt-2 grid h-9 place-items-center rounded-full bg-shop-brand text-[11px] font-semibold text-shop-brand-foreground">
                     {t("addToCart")}
                   </span>
                 ) : null}
@@ -2321,7 +2322,7 @@ export function ShopChrome({
               </div>
             )}
 
-            <span className="mt-3 grid h-11 place-items-center rounded-full bg-foreground text-[12px] font-semibold text-background">
+            <span className="mt-3 grid h-11 place-items-center rounded-full bg-shop-brand text-[12px] font-semibold text-shop-brand-foreground">
               {t("cartGoToCheckout")} &#8594;
             </span>
             {/* What delivery costs is said ONCE. The full shape has a row for
@@ -2345,7 +2346,7 @@ export function ShopChrome({
               <span className="block text-[10px] uppercase tracking-[0.06em] text-current/45">{t("total")}</span>
               <span className="block text-[14px] font-semibold tabular-nums">৳4,670</span>
             </span>
-            <span className="grid h-9 shrink-0 place-items-center rounded-full bg-foreground px-4 text-[11px] font-semibold text-background">
+            <span className="grid h-9 shrink-0 place-items-center rounded-full bg-shop-brand px-4 text-[11px] font-semibold text-shop-brand-foreground">
               {t("cartGoToCheckout")}
             </span>
           </div>
@@ -2542,7 +2543,7 @@ export function ShopChrome({
               <span className="block truncate text-[12px] font-medium">Gradient Graphic T-shirt</span>
               <span className="block text-[13px] font-semibold tabular-nums">৳1,450</span>
             </span>
-            <span className="grid h-9 shrink-0 place-items-center rounded-full bg-foreground px-5 text-[11px] font-semibold text-background">
+            <span className="grid h-9 shrink-0 place-items-center rounded-full bg-shop-brand px-5 text-[11px] font-semibold text-shop-brand-foreground">
               {t("addToCart")}
             </span>
           </div>
@@ -2778,7 +2779,7 @@ export function ShopChrome({
           {/* The same near-black the rest of the mock shop fills a button with.
               Not `bg-current`: the label sets `color`, so currentColor would
               paint the button in the label's colour and it would disappear. */}
-          <span className="flex h-11 items-center justify-center gap-2 rounded-full bg-foreground text-[12px] font-semibold text-background">
+          <span className="flex h-11 items-center justify-center gap-2 rounded-full bg-shop-brand text-[12px] font-semibold text-shop-brand-foreground">
             <Lock className="size-3.5" aria-hidden />
             {t("placeOrder")}
           </span>

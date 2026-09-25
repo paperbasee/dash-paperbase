@@ -248,6 +248,14 @@
   --color-destructive-foreground: hsl(var(--destructive-foreground));
   --color-border: hsl(var(--border));
   --color-border-subtle: hsl(var(--border-subtle));
+  /* The theme editor's sketch of a shop, painted in the shop's palette: its
+     brand colour (the big buttons, the notice strip) and its header. The
+     canvas frame sets these from the chosen palette (lib/theme-editor/
+     palettes.ts); anywhere else they are the dashboard's own ink and panel. */
+  --color-shop-brand: hsl(var(--shop-brand, var(--foreground)));
+  --color-shop-brand-foreground: hsl(var(--shop-brand-foreground, var(--background)));
+  --color-shop-header: hsl(var(--shop-header, var(--muted)));
+  --color-shop-header-foreground: hsl(var(--shop-header-foreground, var(--foreground)));
   --color-border-hover: hsl(var(--border-hover));
   --color-border-divider: hsl(var(--border-divider));
   --color-card-border: hsl(var(--card-border));

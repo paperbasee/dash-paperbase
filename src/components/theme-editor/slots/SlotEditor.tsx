@@ -54,8 +54,9 @@ import {
 } from "@/lib/theme-editor/slot-sections";
 import { storeSettingFor, storeSettingValue } from "@/lib/theme-editor/store-setting-slots";
 import { useCheckoutSettingsQuery } from "@/hooks/useCheckoutSettingsQuery";
-import { checkoutSettingsQueryKey, themesQueryKey } from "@/lib/query-keys";
-import { useQueryClient } from "@tanstack/react-query";
+import { checkoutSettingsQueryKey, themePresetsQueryKey, themesQueryKey } from "@/lib/query-keys";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { canvasColours, chosenPalette, fetchPalettes } from "@/lib/theme-editor/palettes";
 import { ConflictDialog } from "../ConflictDialog";
 import { SaveStatus } from "../SaveStatus";
 import { useAutosave } from "../useAutosave";
@@ -110,8 +111,19 @@ export function SlotEditor({ loaded }: { loaded: ThemeEditorState }) {
     opens the editor to see their shop, and picks what to edit themselves.
   */
   const [open, setOpen] = useState<string | null>(null);
-  const [palette, setPalette] = useState("ivory");
   const [face, setFace] = useState("poppins");
+  /*
+    The palette is the shop's DOCUMENT since 2026-09-25, like the corners and
+    the card style: a draft until Save to store. The six come from the API with
+    their colours, so the sketch can repaint in the one chosen.
+  */
+  const palette = chosenPalette(state.document);
+  const palettes = useQuery({
+    queryKey: themePresetsQueryKey,
+    queryFn: () => fetchPalettes(api),
+    staleTime: 60 * 60 * 1000,
+  });
+  const paletteTokens = palettes.data?.find((item) => item.key === palette)?.tokens;
   // The corners are the shop's document too, for the same reason the card
   // style is: what a merchant chooses here is a draft until Save to store.
   const corner =
@@ -488,22 +500,10 @@ export function SlotEditor({ loaded }: { loaded: ThemeEditorState }) {
       </div>
 
       {/*
-        Said plainly, and it names what IS wired rather than claiming the screen
-        works. A screen that looks finished and saves half of what it shows is
-        worse than one that says which half.
-      */}
-      <p className="border-b border-border bg-[hsl(var(--accent-yellow)/0.1)] px-4 py-2.5 text-xs leading-relaxed text-muted-foreground">
-        {t("partlyWired")}
-      </p>
-
-      {/*
-        A second, different warning, and only on the pages that need it.
-
-        The line above says which places on this SCREEN save. This one says the
-        PAGE itself does not exist yet -- the wishlist and the account are
-        placeholders in the shop with no feature behind them. They are not the
-        same admission, and a merchant who reads only the first would come away
-        believing the wrong thing.
+        A note for a page whose shop page does not exist yet, and only there.
+        None today: every place on every page is real (the line that said which
+        places saved went with the palettes on 2026-09-25). A page added to the
+        editor before its shop page is built says so here.
       */}
       {PAGE_NOTES[page] ? (
         <p className="border-b border-border bg-muted px-4 py-2.5 text-xs leading-relaxed text-muted-foreground">
@@ -531,8 +531,10 @@ export function SlotEditor({ loaded }: { loaded: ThemeEditorState }) {
       <div className="flex min-h-0 flex-1 flex-col overflow-y-auto lg:grid lg:grid-cols-[2fr_3fr] lg:overflow-hidden">
         <div className="shrink-0 border-b border-border lg:min-h-0 lg:overflow-y-auto lg:border-b-0 lg:border-r">
           <StylePanel
+            palettes={palettes.data}
+            palettesFailed={palettes.isError}
             palette={palette}
-            onPalette={setPalette}
+            onPalette={(key) => dispatch({ type: "setThemeSetting", setting: "palette", value: key })}
             face={face}
             onFace={setFace}
             corner={corner}
@@ -613,6 +615,7 @@ export function SlotEditor({ loaded }: { loaded: ThemeEditorState }) {
               setPage(next);
               setOpen(slotKey);
             }}
+            colours={paletteTokens ? canvasColours(paletteTokens) : undefined}
           />
         </div>
       </div>

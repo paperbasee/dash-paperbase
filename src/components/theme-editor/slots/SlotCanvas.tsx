@@ -335,9 +335,16 @@ export function SlotCanvas({
   reviews,
   productName,
   onGoToPage,
+  colours,
 }: {
   page: SlotPageKey;
   device: "desktop" | "mobile";
+  /**
+   * The chosen palette as the drawing's colour variables
+   * (lib/theme-editor/palettes.ts `canvasColours`), so the sketch repaints the
+   * moment a palette is picked. Absent: the dashboard's own colours.
+   */
+  colours?: Record<string, string>;
   open: string | null;
   onOpen: (slotKey: string | null) => void;
   choices: Record<string, string>;
@@ -414,6 +421,8 @@ export function SlotCanvas({
           "w-full overflow-hidden rounded-sm border border-border-subtle bg-background text-foreground transition-[max-width]",
           device === "mobile" ? "max-w-[320px]" : "max-w-none",
         )}
+        style={colours as React.CSSProperties | undefined}
+        data-palette-painted={colours ? "" : undefined}
       >
         {bandsOf(SLOTS[page]).map((band) => {
           /**

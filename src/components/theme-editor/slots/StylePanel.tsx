@@ -1,18 +1,18 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { Check } from "lucide-react";
 
+import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
+import { paletteName, type ShopPalette } from "@/lib/theme-editor/palettes";
 import {
   CARD_STYLES,
   CORNERS,
   FACES,
-  PALETTES,
   type CardStyle,
   type Corner,
   type Face,
-  type Palette,
 } from "./style-catalogue";
 
 /**
@@ -48,12 +48,16 @@ const FACE_FAMILY: Record<string, string> = {
  * date format, the digits, and the `/en/` or `/bn/` in every address.
  */
 
-function Swatches({ palette }: { palette: Palette }) {
-  const order: (keyof Palette)[] = ["background", "muted", "border", "accent", "foreground"];
+/**
+ * A palette as a shopper meets it: the page, its panels, a line, the brand
+ * colour the buttons are filled with, and the ink.
+ */
+function Swatches({ palette }: { palette: ShopPalette }) {
+  const order = ["background", "muted", "border", "primary", "foreground"];
   return (
-    <span className="flex overflow-hidden rounded-xs" aria-hidden>
+    <span className="flex overflow-hidden rounded-xs border border-border-subtle" aria-hidden>
       {order.map((role) => (
-        <span key={role} className="h-12 flex-1" style={{ backgroundColor: palette[role] as string }} />
+        <span key={role} className="h-12 flex-1" style={{ backgroundColor: palette.tokens[role] }} />
       ))}
     </span>
   );
@@ -64,11 +68,11 @@ function PaletteCard({
   chosen,
   onPick,
 }: {
-  palette: Palette;
+  palette: ShopPalette;
   chosen: boolean;
   onPick: () => void;
 }) {
-  const t = useTranslations("themeEditor.slots");
+  const locale = useLocale();
   return (
     <button
       type="button"
@@ -83,7 +87,7 @@ function PaletteCard({
       <Swatches palette={palette} />
       <span className="flex items-center gap-1.5 text-xs font-medium">
         {chosen ? <Check className="size-3 shrink-0 text-primary" aria-hidden /> : null}
-        {t(palette.label)}
+        {paletteName(palette, locale)}
       </span>
     </button>
   );
@@ -204,6 +208,8 @@ function CardStyleCard({
 }
 
 export function StylePanel({
+  palettes,
+  palettesFailed,
   palette,
   onPalette,
   face,
@@ -213,6 +219,9 @@ export function StylePanel({
   cardStyle,
   onCardStyle,
 }: {
+  /** The six, from the API; undefined while they load. */
+  palettes: ShopPalette[] | undefined;
+  palettesFailed: boolean;
   palette: string;
   onPalette: (key: string) => void;
   face: string;
@@ -235,16 +244,24 @@ export function StylePanel({
           {t("colours")}
         </h3>
         <p className="mb-4 max-w-[42ch] text-[12.5px] leading-relaxed text-muted-foreground">{t("coloursNote")}</p>
-        <div className="grid grid-cols-2 gap-3">
-          {PALETTES.map((item) => (
-            <PaletteCard
-              key={item.key}
-              palette={item}
-              chosen={palette === item.key}
-              onPick={() => onPalette(item.key)}
-            />
-          ))}
-        </div>
+        {palettesFailed ? (
+          <p role="alert" className="rounded-sm bg-muted/60 px-3.5 py-3 text-[12px] text-muted-foreground">
+            {t("palettesFailed")}
+          </p>
+        ) : (
+          <div className="grid grid-cols-2 gap-3">
+            {palettes
+              ? palettes.map((item) => (
+                  <PaletteCard
+                    key={item.key}
+                    palette={item}
+                    chosen={palette === item.key}
+                    onPick={() => onPalette(item.key)}
+                  />
+                ))
+              : Array.from({ length: 6 }, (_, i) => <Skeleton key={i} className="h-[86px] rounded-sm" />)}
+          </div>
+        )}
       </section>
 
       <section>
@@ -253,6 +270,14 @@ export function StylePanel({
         </h3>
         {/* The consequence, at the point of choosing rather than in a note elsewhere. */}
         <p className="mb-4 max-w-[42ch] text-[12.5px] leading-relaxed text-muted-foreground">{t("typeNote")}</p>
+        {/*
+          The one choice on this panel that is not saved yet, said where it is
+          made -- the screen-wide note that listed what saved went when the
+          palettes became real (2026-09-25).
+        */}
+        <p className="mb-4 rounded-sm bg-muted/60 px-3.5 py-2.5 text-[11.5px] leading-relaxed text-muted-foreground">
+          {t("typeNotSavedYet")}
+        </p>
 
         <div className="flex flex-col gap-5">
           {(["en", "bn"] as const).map((language) => (
