@@ -27,7 +27,8 @@
  * blog's merged the corners and the card style, both the Style panel -- and
  * the footer's merged the home page's two band entries -- and a blog post's
  * was folded into the blog page's, one feature told once -- and the rest of the
- * home page into the home page's rows, and the header into the footer's.)
+ * home page into the home page's rows, and the header into the footer's -- and
+ * the order list's "Payment submitted" merged the two review entries.)
  *
  * ## Entries written before their release — ONE DATE, RESTAMP IT ON THE DAY
  *
@@ -77,6 +78,22 @@ export interface WhatsNewEntry {
 export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
+  {
+    id: "2026-09-22-payment-submitted-in-orders",
+    date: "2026-09-22",
+    version: "4.99.1",
+    tag: "improved",
+    href: "/orders",
+    title: {
+      en: "See which payments are waiting for you",
+      bn: "কোন পেমেন্ট আপনার যাচাইয়ের অপেক্ষায়, দেখুন",
+    },
+    body: {
+      en: "An order paid in advance by bKash or Nagad said Payment pending both before and after the customer sent the money. Now it says Payment submitted, in blue, once they have sent it and typed in the transaction ID, so you can see at a glance which orders are waiting for you to check. When you verify the payment it says Confirmed, as before.",
+      bn: "বিকাশ বা নগদে আগে পেমেন্টের অর্ডার ক্রেতা টাকা পাঠানোর আগে ও পরে — দুই সময়েই “পেমেন্ট মুলতুবি” দেখাত। এখন ক্রেতা টাকা পাঠিয়ে ট্রানজেকশন আইডি দিলে নীল রঙে “পেমেন্ট জমা হয়েছে” দেখায়, তাই কোন অর্ডারগুলো আপনার যাচাইয়ের অপেক্ষায় আছে তা এক নজরেই বোঝা যায়। পেমেন্ট যাচাই করলে আগের মতোই “নিশ্চিত” দেখাবে।",
+    },
+  },
+
   {
     id: "2026-09-22-product-page-choices",
     date: "2026-09-22",
@@ -318,21 +335,6 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     },
   },
   {
-    id: "2026-09-22-you-are-told-a-review-is-waiting",
-    date: "2026-09-22",
-    version: "4.48.0",
-    tag: "improved",
-    href: "/reviews",
-    title: {
-      en: "You are told when a review is waiting",
-      bn: "রিভিউ অপেক্ষায় থাকলে আপনি জানতে পারবেন",
-    },
-    body: {
-      en: "Nothing a customer writes appears on your shop until you approve it, so a review could sit unread if you did not think to check the tab. Reviews now shows how many are waiting right on the sidebar, and a waiting review turns up in your notifications. Someone polishing their own review a few times only ever counts once.",
-      bn: "ক্রেতার লেখা কিছুই আপনার অনুমোদন ছাড়া দোকানে দেখা যায় না, তাই ট্যাবটি খুলে না দেখলে কোনো রিভিউ অনেকদিন পড়ে থাকতে পারত। এখন সাইডবারে রিভিউর পাশেই কতগুলো অপেক্ষায় আছে তা দেখা যায়, আর অপেক্ষমাণ রিভিউ আপনার নোটিফিকেশনেও আসে। কেউ নিজের রিভিউ কয়েকবার ঠিকঠাক করলেও সেটি একবারই গোনা হয়।",
-    },
-  },
-  {
     id: "2026-09-22-customers-can-create-an-account",
     date: "2026-09-22",
     version: "4.47.0",
@@ -386,8 +388,8 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
       bn: "ক্রেতারা এখন আপনার পণ্যের রিভিউ দিতে পারবেন",
     },
     body: {
-      en: "A signed-in customer can give a product stars, a few words and up to two photos, and nothing appears on your shop until you approve it in the new Reviews tab. You can approve, reject, reply, delete, or add one yourself from a screenshot — which is marked, so shoppers can tell. Anyone can read your reviews signed in or not, someone who actually received the item is marked a verified buyer, and a customer who edits their own sends it back to you for approval.",
-      bn: "সাইন-ইন করা ক্রেতা পণ্যে স্টার, কয়েক লাইন লেখা আর সর্বোচ্চ দুটি ছবি দিতে পারবেন, আর নতুন রিভিউ ট্যাবে আপনি অনুমোদন না করা পর্যন্ত দোকানে কিছুই দেখা যাবে না। অনুমোদন, বাতিল, উত্তর, মুছে ফেলা — সবই আপনার হাতে, আর স্ক্রিনশট থেকে নিজেও একটি যোগ করতে পারবেন, যেটি আলাদা করে চিহ্নিত থাকে। রিভিউ সবাই পড়তে পারবেন, যিনি সত্যিই পণ্যটি পেয়েছেন তাঁকে যাচাই করা ক্রেতা হিসেবে দেখানো হয়, আর কোনো ক্রেতা নিজের রিভিউ বদলালে সেটি আবার আপনার অনুমোদনের জন্য ফিরে আসে।",
+      en: "A signed-in customer can give a product stars, a few words and up to two photos, and nothing appears on your shop until you approve it in the new Reviews tab — the sidebar shows how many are waiting, and each one reaches your notifications too. You can approve, reject, reply, delete, or add one yourself from a screenshot — which is marked, so shoppers can tell. Anyone can read your reviews signed in or not, someone who actually received the item is marked a verified buyer, and a customer who edits their own sends it back to you for approval.",
+      bn: "সাইন-ইন করা ক্রেতা পণ্যে স্টার, কয়েক লাইন লেখা আর সর্বোচ্চ দুটি ছবি দিতে পারবেন, আর নতুন রিভিউ ট্যাবে আপনি অনুমোদন না করা পর্যন্ত দোকানে কিছুই দেখা যাবে না — কতগুলো অপেক্ষায় আছে তা সাইডবারেই দেখা যায়, আর প্রতিটি আপনার নোটিফিকেশনেও আসে। অনুমোদন, বাতিল, উত্তর, মুছে ফেলা — সবই আপনার হাতে, আর স্ক্রিনশট থেকে নিজেও একটি যোগ করতে পারবেন, যেটি আলাদা করে চিহ্নিত থাকে। রিভিউ সবাই পড়তে পারবেন, যিনি সত্যিই পণ্যটি পেয়েছেন তাঁকে যাচাই করা ক্রেতা হিসেবে দেখানো হয়, আর কোনো ক্রেতা নিজের রিভিউ বদলালে সেটি আবার আপনার অনুমোদনের জন্য ফিরে আসে।",
     },
   },
   {
