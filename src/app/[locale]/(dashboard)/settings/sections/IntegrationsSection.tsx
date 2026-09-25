@@ -1,17 +1,65 @@
 "use client";
 
+import { useEffect, useState, type ReactNode } from "react";
 import { useTranslations } from "next-intl";
 import { SettingsSectionBody, settingsSectionSurfaceClassName } from "../SettingsSectionBody";
 import { cn } from "@/lib/utils";
-import CourierIntegration from "./CourierIntegration";
-import MarketingIntegration from "./MarketingIntegration";
+import { useCouriersQuery } from "@/hooks/useCouriersQuery";
+import { useMarketingIntegrationsQuery } from "@/hooks/useMarketingIntegrationsQuery";
+import { notify } from "@/notifications";
+import {
+  AD_SERVICES,
+  AD_SERVICES_COMING_SOON,
+  DELIVERY_SERVICES_COMING_SOON,
+  type ServiceKey,
+} from "@/lib/integrations/services";
+import { ServiceCard } from "./integrations/ServiceCard";
+import PixelServiceCard from "./integrations/PixelServiceCard";
+import SteadfastServiceCard from "./integrations/SteadfastServiceCard";
+import PurchaseTimingBlock from "./PurchaseTimingBlock";
 
-export default function IntegrationsSection({
-  hidden,
-}: {
-  hidden: boolean;
-}) {
-  const t = useTranslations("settings");
+function Group({ title, children }: { title: string; children: ReactNode }) {
+  return (
+    <div className="min-w-0">
+      <p className="mb-2 text-[11px] font-medium uppercase tracking-[0.06em] text-muted-foreground">{title}</p>
+      {children}
+    </div>
+  );
+}
+
+/** Columns follow the settings panel's width (sidebar, iPad), not the screen's -- as on Apps. */
+const GRID = "grid min-w-0 grid-cols-1 gap-3 @min-[36rem]:grid-cols-2 @min-[54rem]:grid-cols-3";
+
+/**
+ * Settings > Integrations (owner, 2026-09-25): a card per service, the
+ * Paperbase mark and the service's logo joined by arrows. One card is open at a
+ * time, across the whole grid, listing that service's connections.
+ */
+export default function IntegrationsSection({ hidden }: { hidden: boolean }) {
+  const t = useTranslations("settings.integrations");
+  const [open, setOpen] = useState<ServiceKey | null>(null);
+  const toggle = (key: ServiceKey) => () => setOpen((current) => (current === key ? null : key));
+
+  // Both queries feed several cards; a failure is reported once, here.
+  const marketing = useMarketingIntegrationsQuery({ enabled: !hidden });
+  const couriers = useCouriersQuery({ enabled: !hidden });
+  useEffect(() => {
+    const error = marketing.error ?? couriers.error;
+    if (!error) return;
+    notify.error(error, { title: t("loadFailedTitle"), fallbackMessage: t("loadFailedBody") });
+  }, [marketing.error, couriers.error, t]);
+
+  const comingSoon = (key: ServiceKey) => (
+    <ServiceCard
+      key={key}
+      service={key}
+      name={t(`services.${key}`)}
+      status={t("comingSoonNote")}
+      tone="none"
+      comingSoon
+    />
+  );
+
   return (
     <section
       id="panel-integrations"
@@ -22,13 +70,38 @@ export default function IntegrationsSection({
     >
       <SettingsSectionBody>
         <div className="space-y-1">
-          <h2 className="mb-1 text-[15px] font-medium text-foreground">{t("integrations.heading")}</h2>
-          <p className="text-[13px] text-muted-foreground">{t("integrations.subtitle")}</p>
+          <h2 className="mb-1 text-[15px] font-medium text-foreground">{t("heading")}</h2>
+          <p className="text-[13px] text-muted-foreground">{t("subtitle")}</p>
         </div>
 
-        <div className="flex min-w-0 w-full flex-col gap-0">
-          <MarketingIntegration panelHidden={hidden} />
-          <CourierIntegration panelHidden={hidden} />
+        <div className="@container flex min-w-0 flex-col gap-6">
+          <Group title={t("sectionAds")}>
+            <div className={GRID}>
+              {AD_SERVICES.map((provider) => (
+                <PixelServiceCard
+                  key={provider}
+                  provider={provider}
+                  expanded={open === provider}
+                  onToggleExpanded={toggle(provider)}
+                  panelHidden={hidden}
+                />
+              ))}
+              {AD_SERVICES_COMING_SOON.map(comingSoon)}
+            </div>
+            {/* One choice for Meta and TikTok together, so it sits under both. */}
+            <PurchaseTimingBlock panelHidden={hidden} />
+          </Group>
+
+          <Group title={t("sectionDelivery")}>
+            <div className={GRID}>
+              <SteadfastServiceCard
+                expanded={open === "steadfast"}
+                onToggleExpanded={toggle("steadfast")}
+                panelHidden={hidden}
+              />
+              {DELIVERY_SERVICES_COMING_SOON.map(comingSoon)}
+            </div>
+          </Group>
         </div>
       </SettingsSectionBody>
     </section>

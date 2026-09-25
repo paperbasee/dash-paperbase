@@ -65,6 +65,8 @@ describe("purchase timing words", () => {
     "prepaidNote",
     "askToChange",
     "saving",
+    "saveFailedTitle",
+    "saveFailedBody",
   ];
 
   test.each([

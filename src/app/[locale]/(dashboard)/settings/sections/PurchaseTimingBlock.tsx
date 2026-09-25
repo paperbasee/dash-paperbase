@@ -29,7 +29,6 @@ import { notify } from "@/notifications";
  */
 export default function PurchaseTimingBlock({ panelHidden = false }: { panelHidden?: boolean }) {
   const t = useTranslations("settings.marketing.purchaseTiming");
-  const tPages = useTranslations("pages");
   const queryClient = useQueryClient();
   const canManage = usePermissions().has("integrations.manage");
   const { data: connections = [] } = useMarketingIntegrationsQuery({ enabled: !panelHidden });
@@ -47,8 +46,8 @@ export default function PurchaseTimingBlock({ panelHidden = false }: { panelHidd
     onSuccess: (timing) => queryClient.setQueryData(purchaseTimingQueryKey, timing),
     onError: (error) =>
       notify.error(error, {
-        title: tPages("toastTitleMarketingLinkFailed"),
-        fallbackMessage: tPages("toastDescMarketingLinkFailed"),
+        title: t("saveFailedTitle"),
+        fallbackMessage: t("saveFailedBody"),
       }),
     onSettled: () => setSaving(null),
   });
@@ -56,7 +55,7 @@ export default function PurchaseTimingBlock({ panelHidden = false }: { panelHidd
   if (!tracks || !chosen) return null;
 
   return (
-    <div className="px-3.5 py-3">
+    <div className="mt-3 rounded-card border border-border px-3.5 py-3">
       <p id="purchase-timing-title" className="text-[13px] font-medium text-foreground">
         {t("title")}
       </p>
