@@ -85,7 +85,7 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
     id: "2026-09-22-integrations-cards",
     date: "2026-09-22",
-    version: "4.102.0",
+    version: "4.103.0",
     tag: "improved",
     href: "/settings?tab=integrations",
     title: {
@@ -93,8 +93,8 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
       bn: "ইন্টিগ্রেশনের নতুন চেহারা",
     },
     body: {
-      en: "Settings → Integrations now shows a card for each service — Meta, TikTok and Steadfast — with one switch that turns the whole service off or on, after a warning. Open a card to see every pixel or account inside it, each with its own switch, and to change a pixel's ID, token or test code without disconnecting it. Google Analytics and more couriers are listed as coming soon, and the Steadfast setup steps are now in Bangla too.",
-      bn: "সেটিংস → ইন্টিগ্রেশনে এখন প্রতিটি সেবার — Meta, TikTok ও স্টেডফাস্ট — আলাদা কার্ড আছে, যার একটি সুইচ সতর্কবার্তার পর পুরো সেবাটি বন্ধ বা চালু করে। কার্ড খুললে ভেতরের প্রতিটি পিক্সেল বা অ্যাকাউন্ট তার নিজের সুইচসহ দেখা যায়, আর বিচ্ছিন্ন না করেই পিক্সেলের আইডি, টোকেন বা টেস্ট কোড বদলানো যায়। Google Analytics ও আরও কুরিয়ার “শিগগিরই আসছে” হিসেবে দেখানো আছে, আর স্টেডফাস্ট সেটআপের ধাপগুলো এখন বাংলাতেও।",
+      en: "Settings → Integrations now shows a card for each service — Meta, TikTok and Steadfast — with one switch that turns the whole service off or on, after a warning. A card opens a pop-up listing every pixel or account with its own switch, where you can edit a pixel, and Disconnect now keeps its settings and only forgets its keys — Remove is what deletes. Google Analytics and more couriers are listed as coming soon, and the Steadfast setup steps are now in Bangla too.",
+      bn: "সেটিংস → ইন্টিগ্রেশনে এখন প্রতিটি সেবার — Meta, TikTok ও স্টেডফাস্ট — আলাদা কার্ড আছে, যার একটি সুইচ সতর্কবার্তার পর পুরো সেবাটি বন্ধ বা চালু করে। কার্ডে চাপ দিলে একটি পপ-আপে প্রতিটি পিক্সেল বা অ্যাকাউন্ট তার নিজের সুইচসহ দেখা যায়, সেখানে পিক্সেল সম্পাদনা করা যায়, আর বিচ্ছিন্ন করলে এখন সেটিংস রাখা থাকে, শুধু কী ভুলে যাওয়া হয় — মুছে ফেলে “মুছে ফেলুন”। Google Analytics ও আরও কুরিয়ার “শিগগিরই আসছে” হিসেবে দেখানো আছে, আর স্টেডফাস্ট সেটআপের ধাপগুলো এখন বাংলাতেও।",
     },
   },
   {
