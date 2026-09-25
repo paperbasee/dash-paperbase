@@ -288,5 +288,33 @@ describe("the menu (step 3, 2026-09-25)", () => {
     const html = draw("menu", "links", { live: header({ header_layout: "classic" }), categories: CATEGORIES });
     expect(items(html)).toEqual(["Women", "Kids"]);
   });
+
+  test("an empty category is left out of the shop's own list (2026-09-25)", () => {
+    const withEmpty = categoryIndex([
+      { public_id: "c1", slug: "women", name: "Women", is_active: true, product_count: 4 },
+      { public_id: "c9", slug: "gaming", name: "Gaming", is_active: true, product_count: 0 },
+    ]);
+    const html = draw("menu", "links", { live: header({ header_layout: "classic" }), categories: withEmpty });
+    expect(items(html)).toEqual(["Women"]);
+  });
+
+  test("More follows the row when there are more links than the design shows (2026-09-25)", () => {
+    const many = categoryIndex(
+      Array.from({ length: 7 }, (_, n) => ({
+        public_id: `c${n}`,
+        slug: `department-${n}`,
+        name: `Department ${n}`,
+        is_active: true,
+        product_count: 1,
+      })),
+    );
+    const classic = draw("menu", "links", { live: header({ header_layout: "classic" }), categories: many });
+    expect(items(classic)).toHaveLength(5);
+    expect(classic).toContain("data-menu-more");
+    expect(classic).toContain(">More<");
+    // Centred shows eight, so seven fit and there is no More.
+    const centred = draw("menu", "links", { live: header({ header_layout: "centred" }), categories: many });
+    expect(centred).not.toContain("data-menu-more");
+  });
 });
 

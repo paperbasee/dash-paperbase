@@ -58,7 +58,12 @@ export function categoryLinks(nodes: CategoryNode[]): Map<string, CategoryLink> 
 }
 
 /** A category as a menu link names it: its own name, and whether categories sit inside it. */
-export type CategoryEntry = { name: string; opens: boolean };
+/**
+ * `stocked`: something is in it or under it. The shop's menus leave an empty
+ * category out (2026-09-25), and a panel opens only where something inside is
+ * stocked -- `product_count` is rolled up through the categories inside.
+ */
+export type CategoryEntry = { name: string; opens: boolean; stocked: boolean };
 
 type NamedCategoryNode = CategoryNode & { name: string; children?: NamedCategoryNode[] };
 
@@ -79,7 +84,13 @@ export function categoryIndex(nodes: NamedCategoryNode[]): Record<string, Catego
   const out: Record<string, CategoryEntry> = {};
   for (const [id, link] of categoryLinks(nodes)) {
     const node = byId.get(id);
-    if (node) out[link.path] = { name: node.name, opens: (node.children ?? []).some((child) => child.is_active) };
+    if (node) {
+      out[link.path] = {
+        name: node.name,
+        opens: (node.children ?? []).some((child) => child.is_active && child.product_count > 0),
+        stocked: node.product_count > 0,
+      };
+    }
   }
   return out;
 }

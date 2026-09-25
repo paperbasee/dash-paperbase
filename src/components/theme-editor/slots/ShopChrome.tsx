@@ -596,7 +596,11 @@ export function ShopChrome({
     // highlighted one in the brand colour, a caret where a panel opens.
     const dropdownsOn = held.dropdowns !== false;
     const links = live?.type === "header" ? (live.blocks ?? []).filter((block) => block.type === "item") : [];
-    const roots = Object.entries(categories ?? {}).filter(([path]) => path.split("/").length === 3);
+    // The shop's own list leaves an empty category out (2026-09-25); a link the
+    // merchant added stays, as on the shop.
+    const roots = Object.entries(categories ?? {}).filter(
+      ([path, entry]) => path.split("/").length === 3 && entry.stocked,
+    );
     const menu: { label: string; highlight: boolean; opens: boolean }[] = links.length
       ? links.flatMap((block) => {
           const link = String(block.settings.link ?? "").trim();
@@ -633,24 +637,34 @@ export function ShopChrome({
     );
     // Plain letters in Classic and Split, small spaced capitals in Centred and
     // Minimal -- the shop's `header-menu` letters. One line tall and wrapping,
-    // like the shop's, so a department that does not fit is hidden whole.
+    // like the shop's, so a department that does not fit is hidden whole -- and
+    // "More" after the row, where the menu has more than the design shows
+    // (2026-09-25), as on the shop.
     const nav = (count: number, caps: boolean, className = "") => (
       <span
-        className={`flex h-4 min-w-0 flex-wrap items-center gap-x-4 overflow-hidden leading-4 ${
+        className={`flex min-w-0 items-center gap-x-4 leading-4 ${
           caps ? "text-[9.5px] uppercase tracking-[0.08em]" : "text-[11px]"
         } ${className}`}
       >
-        {menu.slice(0, count).map((item, index) => (
-          <span key={`${item.label}-${index}`} data-menu-item className="inline-flex shrink-0 items-center gap-0.5">
-            {/* The shop's chip in the brand colour: in Porcelain the brand colour is the ink. */}
-            {item.highlight ? (
-              <span className="rounded-xs bg-shop-brand px-1.5 text-shop-brand-foreground">{item.label}</span>
-            ) : (
-              item.label
-            )}
-            {item.opens ? <CaretDownIcon size={9} weight={weight} aria-hidden data-menu-opens /> : null}
+        <span className="flex h-4 min-w-0 flex-wrap items-center gap-x-4 overflow-hidden">
+          {menu.slice(0, count).map((item, index) => (
+            <span key={`${item.label}-${index}`} data-menu-item className="inline-flex shrink-0 items-center gap-0.5">
+              {/* The shop's chip in the brand colour: in Porcelain the brand colour is the ink. */}
+              {item.highlight ? (
+                <span className="rounded-xs bg-shop-brand px-1.5 text-shop-brand-foreground">{item.label}</span>
+              ) : (
+                item.label
+              )}
+              {item.opens ? <CaretDownIcon size={9} weight={weight} aria-hidden data-menu-opens /> : null}
+            </span>
+          ))}
+        </span>
+        {menu.length > count ? (
+          <span data-menu-more className="inline-flex shrink-0 items-center gap-0.5">
+            {t("headerMore")}
+            <CaretDownIcon size={9} weight={weight} aria-hidden />
           </span>
-        ))}
+        ) : null}
       </span>
     );
     const logo = <span className="shrink-0 text-sm font-semibold tracking-[0.14em]">{name}</span>;

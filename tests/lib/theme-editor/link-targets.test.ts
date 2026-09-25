@@ -133,14 +133,39 @@ describe("sectionContentPlace", () => {
 describe("categoryIndex", () => {
   it("names every active category by the link a merchant stores, and marks the ones that open", () => {
     const index = categoryIndex([
-      { ...node("c1", "men"), name: "Men", children: [{ ...node("c2", "shirts"), name: "Shirts" }] },
-      { ...node("c3", "kids"), name: "Kids", children: [{ ...node("c4", "hats", { is_active: false }), name: "Hats" }] },
+      {
+        ...node("c1", "men", { product_count: 3 }),
+        name: "Men",
+        children: [{ ...node("c2", "shirts", { product_count: 3 }), name: "Shirts" }],
+      },
+      {
+        ...node("c3", "kids", { product_count: 2 }),
+        name: "Kids",
+        children: [{ ...node("c4", "hats", { is_active: false, product_count: 2 }), name: "Hats" }],
+      },
     ] as Parameters<typeof categoryIndex>[0]);
-    expect(index["/categories/men"]).toEqual({ name: "Men", opens: true });
-    expect(index["/categories/men/shirts"]).toEqual({ name: "Shirts", opens: false });
+    expect(index["/categories/men"]).toEqual({ name: "Men", opens: true, stocked: true });
+    expect(index["/categories/men/shirts"]).toEqual({ name: "Shirts", opens: false, stocked: true });
     // A category with only switched-off ones inside opens nothing.
-    expect(index["/categories/kids"]).toEqual({ name: "Kids", opens: false });
+    expect(index["/categories/kids"]).toEqual({ name: "Kids", opens: false, stocked: true });
     expect(index["/categories/kids/hats"]).toBeUndefined();
+  });
+
+  it("says which are empty, and an empty one inside opens no panel (2026-09-25)", () => {
+    const index = categoryIndex([
+      {
+        ...node("c1", "men", { product_count: 3 }),
+        name: "Men",
+        children: [
+          { ...node("c2", "shirts", { product_count: 0 }), name: "Shirts" },
+          { ...node("c3", "tees", { product_count: 3 }), name: "Tees" },
+        ],
+      },
+      { ...node("c4", "gaming", { product_count: 0 }), name: "Gaming", children: [{ ...node("c5", "consoles"), name: "Consoles" }] },
+    ] as Parameters<typeof categoryIndex>[0]);
+    expect(index["/categories/gaming"]).toEqual({ name: "Gaming", opens: false, stocked: false });
+    expect(index["/categories/men/shirts"]?.stocked).toBe(false);
+    expect(index["/categories/men"]?.opens).toBe(true);
   });
 });
 
