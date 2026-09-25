@@ -2959,7 +2959,7 @@
       "searchMoreHint": "Search shows 48 products at a time. This is how a shopper reaches the rest of a long answer.",
       "searchMoreNoneNote": "The first 48 and no way to the rest. What your shop does today.",
       "searchEmpty": "When nothing matches",
-      "searchEmptyHint": "Someone who searched and found nothing told you exactly what they wanted and you did not have it. The least you can do is not leave them on a blank page.",
+      "searchEmptyHint": "Someone who searched and found nothing told you exactly what they wanted and you did not have it. The least you can do is not leave them on a blank page. A misspelled word is caught first: when a search finds nothing, a word one or two letters away from your own product names is searched for instead, and the shopper is told.",
       "searchEmptyWhen": "When nothing matches",
       "searchEmptyTextNote": "“Nothing found for that.” What your shop says today.",
       "searchEmptyInviteNote": "Says it, then offers the categories you do have.",
