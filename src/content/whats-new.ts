@@ -86,7 +86,7 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
     id: "2026-09-22-header-and-footer-choices",
     date: "2026-09-22",
-    version: "4.113.0",
+    version: "4.113.1",
     tag: "new",
     href: "/settings?tab=customization",
     title: {
@@ -94,8 +94,23 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
       bn: "পাঁচটি হেডার ডিজাইন, আপনার নিজের মেনু ও ফুটার, আর আপনার নীতিমালা",
     },
     body: {
-      en: "Choose one of five header designs — your name and menu on the left, your name centred with the menu in a row below, the menu in the middle of the page, a quieter small-capitals menu, or everything behind a menu button — with icons in a fine, regular or strong line, with or without their words, and a bag, basket or cart. Build its menu from your own pages, categories and links, in your order — a category opens its subcategories, one link can be in your brand colour, whatever does not fit waits under More, and a category with nothing in it stays out — keep the header on screen always, only while shoppers scroll back up, or not at all, and add account and wishlist beside the cart. Write your policies in Settings → Policies and build your footer's columns yourself — up to four, each a title and six links to your pages, categories or policies — with your shop on one side, centred, or as a single short line, and choose what it shows: your address and phone or only your email, your social links as names or round marks, the ways you take payment, and beside the year every policy you have written, with the footer resting at the bottom of the screen even on a short page.",
-      bn: "পাঁচটি হেডার ডিজাইনের একটি বেছে নিন — বাঁয়ে নাম ও মেনু, মাঝখানে নাম আর নিচের সারিতে মেনু, পাতার মাঝখানে মেনু, ছোট বড়-হাতের অক্ষরে শান্ত একটি মেনু, নয়তো সবকিছু একটি মেনু বোতামের পেছনে — আইকন সরু, সাধারণ বা মোটা রেখায়, লেখাসহ বা ছাড়া, আর ব্যাগ, ঝুড়ি নাকি কার্ট। আপনার নিজের পাতা, ক্যাটাগরি ও লিংক দিয়ে আপনার ক্রমে মেনু বানান — ক্যাটাগরির ভেতরের ক্যাটাগরিগুলো খোলে, একটি লিংক আপনার ব্র্যান্ডের রঙে রাখা যায়, যা জায়গায় ধরে না তা থাকে “আরও”-র ভেতরে, আর যে ক্যাটাগরিতে কিছু নেই সেটি মেনুতে আসে না — হেডার সবসময় স্ক্রিনে রাখুন, শুধু ক্রেতা উপরে স্ক্রল করলে দেখান, নয়তো একেবারেই না রাখুন, আর কার্টের পাশে অ্যাকাউন্ট ও উইশলিস্ট যোগ করুন। সেটিংস → নীতিমালায় আপনার নীতিগুলো লিখুন আর ফুটারের কলামগুলো নিজেই বানান — চারটি পর্যন্ত, প্রতিটিতে একটি শিরোনাম আর আপনার পাতা, ক্যাটাগরি বা নীতির ছয়টি লিংক — একপাশে দোকান রেখে, মাঝখানে, নয়তো ছোট এক লাইনে, আর ঠিক করুন কী দেখাবে: ঠিকানা ও ফোন নাকি শুধু ইমেইল, সোশ্যাল লিংক নামে বা গোল চিহ্নে, আপনি যেভাবে টাকা নেন, আর সালের পাশে আপনার লেখা প্রতিটি নীতি, আর ছোট পেজেও ফুটার থাকে স্ক্রিনের একেবারে নিচে।",
+      en: "Choose one of five header designs — your name and menu on the left, your name centred with the menu in a row below, the menu in the middle of the page, a quieter small-capitals menu, or everything behind a menu button — with icons in a fine, regular or strong line, with or without their words, and a bag, basket or cart. Build its menu from your own pages, categories and links, in your order — a category opens its subcategories, one link can be in your brand colour, whatever does not fit waits under More, and a category with nothing in it stays out — keep the header on screen always, only while shoppers scroll back up, or not at all, and add account and wishlist beside the cart. Write your policies in Settings → Policies and build your footer's columns yourself — up to four, each a title and six links to your pages, categories, policies or the web — with your shop on one side, centred, or as a single short line, and choose what it shows: your address and phone or only your email, your social links as names or round marks, the ways you take payment, and beside the year every policy you have written, with the footer resting at the bottom of the screen even on a short page.",
+      bn: "পাঁচটি হেডার ডিজাইনের একটি বেছে নিন — বাঁয়ে নাম ও মেনু, মাঝখানে নাম আর নিচের সারিতে মেনু, পাতার মাঝখানে মেনু, ছোট বড়-হাতের অক্ষরে শান্ত একটি মেনু, নয়তো সবকিছু একটি মেনু বোতামের পেছনে — আইকন সরু, সাধারণ বা মোটা রেখায়, লেখাসহ বা ছাড়া, আর ব্যাগ, ঝুড়ি নাকি কার্ট। আপনার নিজের পাতা, ক্যাটাগরি ও লিংক দিয়ে আপনার ক্রমে মেনু বানান — ক্যাটাগরির ভেতরের ক্যাটাগরিগুলো খোলে, একটি লিংক আপনার ব্র্যান্ডের রঙে রাখা যায়, যা জায়গায় ধরে না তা থাকে “আরও”-র ভেতরে, আর যে ক্যাটাগরিতে কিছু নেই সেটি মেনুতে আসে না — হেডার সবসময় স্ক্রিনে রাখুন, শুধু ক্রেতা উপরে স্ক্রল করলে দেখান, নয়তো একেবারেই না রাখুন, আর কার্টের পাশে অ্যাকাউন্ট ও উইশলিস্ট যোগ করুন। সেটিংস → নীতিমালায় আপনার নীতিগুলো লিখুন আর ফুটারের কলামগুলো নিজেই বানান — চারটি পর্যন্ত, প্রতিটিতে একটি শিরোনাম আর আপনার পাতা, ক্যাটাগরি, নীতি বা ওয়েবের ছয়টি লিংক — একপাশে দোকান রেখে, মাঝখানে, নয়তো ছোট এক লাইনে, আর ঠিক করুন কী দেখাবে: ঠিকানা ও ফোন নাকি শুধু ইমেইল, সোশ্যাল লিংক নামে বা গোল চিহ্নে, আপনি যেভাবে টাকা নেন, আর সালের পাশে আপনার লেখা প্রতিটি নীতি, আর ছোট পেজেও ফুটার থাকে স্ক্রিনের একেবারে নিচে।",
+    },
+  },
+  {
+    id: "2026-09-22-colours-cards-and-corners",
+    date: "2026-09-22",
+    version: "4.113.1",
+    tag: "new",
+    href: "/settings?tab=customization",
+    title: {
+      en: "Your colours, cards and corners, in the editor",
+      bn: "রং, কার্ড আর কোণা, এখন এডিটরে",
+    },
+    body: {
+      en: "Pick one of six premium palettes — Porcelain, Sage, Clay, Rosé, Navy or Emerald — and your whole shop is drawn in it, from the page and the header to the Add to cart button; every shop starts on Porcelain. Choose square, soft or rounded corners for everything your shop draws a box around, and Classic or Shelf product cards, which moved out of Settings where they changed your shop the moment you clicked. All three sit in Customization under Style, and reach shoppers when you press Save to store; the typefaces beside them are shown faded, as a preview of what is coming, until they can be saved too.",
+      bn: "ছয়টি প্রিমিয়াম প্যালেটের একটি বেছে নিন — পোর্সেলিন, সেজ সবুজ, পোড়ামাটি, গোলাপি, নেভি নীল বা পান্না সবুজ — পাতা আর হেডার থেকে কার্টে যোগের বোতাম পর্যন্ত পুরো দোকান সেই রঙে সাজবে; প্রতিটি দোকান শুরু হয় পোর্সেলিনে। দোকানে যেখানে যেখানে বাক্স আঁকা হয় সবখানের কোণা চোকো, হালকা গোল নাকি গোল হবে, আর ক্ল্যাসিক না শেলফ প্রোডাক্ট কার্ড — এই পছন্দটিও সেটিংস থেকে এসেছে, যেখানে চাপ দেওয়ামাত্রই দোকান বদলে যেত। তিনটিই কাস্টমাইজেশনের স্টাইল অংশে, আর স্টোরে সংরক্ষণ চাপলেই ক্রেতাদের কাছে যাবে; পাশের ফন্টগুলো আসছে তার আভাস হিসেবে ঝাপসা দেখায়, যতক্ষণ না সেগুলোও সংরক্ষণ করা যায়।",
     },
   },
   {
@@ -200,21 +215,6 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     body: {
       en: "The page now opens on a welcome card: the customer's own picture, how you reach them, how long they have been a member, how many orders, reviews and saved things they have, and their newest order. Greet them by name, by the plain word, or leave the card out; list their orders as a list or as cards with pictures; and send an empty account to your shop rather than to nothing. They also see every review they have written, including the ones waiting for you or turned down, theirs to change or delete — on to begin with, so a review never looks lost.",
       bn: "পেজটি এখন একটি স্বাগত কার্ড দিয়ে শুরু হয়: ক্রেতার নিজের ছবি, তাঁর সঙ্গে যোগাযোগের উপায়, কতদিন ধরে সদস্য, কতগুলো অর্ডার, রিভিউ ও সেভ করা জিনিস আছে, আর সর্বশেষ অর্ডার। নাম ধরে, শুধু শব্দটি দিয়ে স্বাগত জানান, নাকি কার্ডটিই বাদ দিন; অর্ডার তালিকা হিসেবে নাকি ছবিসহ কার্ড হিসেবে দেখান; আর খালি অ্যাকাউন্ট থেকে শূন্যতার বদলে দোকানে পাঠান। তাঁরা নিজেদের লেখা সব রিভিউও দেখেন, আপনার অপেক্ষায় থাকা বা ফিরিয়ে দেওয়াগুলোসহ, নিজেরাই বদলাতে বা মুছতে পারেন — শুরু থেকেই চালু, যাতে কোনো রিভিউ হারিয়ে গেছে মনে না হয়।",
-    },
-  },
-  {
-    id: "2026-09-22-colours-cards-and-corners",
-    date: "2026-09-22",
-    version: "4.104.0",
-    tag: "new",
-    href: "/settings?tab=customization",
-    title: {
-      en: "Your colours, cards and corners, in the editor",
-      bn: "রং, কার্ড আর কোণা, এখন এডিটরে",
-    },
-    body: {
-      en: "Pick one of six premium palettes — Porcelain, Sage, Clay, Rosé, Navy or Emerald — and your whole shop is drawn in it, from the page and the header to the Add to cart button; every shop starts on Porcelain. Choose square, soft or rounded corners for everything your shop draws a box around, and Classic or Shelf product cards, which moved out of Settings where they changed your shop the moment you clicked. All three sit in Customization under Style, and reach shoppers when you press Save to store.",
-      bn: "ছয়টি প্রিমিয়াম প্যালেটের একটি বেছে নিন — পোর্সেলিন, সেজ সবুজ, পোড়ামাটি, গোলাপি, নেভি নীল বা পান্না সবুজ — পাতা আর হেডার থেকে কার্টে যোগের বোতাম পর্যন্ত পুরো দোকান সেই রঙে সাজবে; প্রতিটি দোকান শুরু হয় পোর্সেলিনে। দোকানে যেখানে যেখানে বাক্স আঁকা হয় সবখানের কোণা চোকো, হালকা গোল নাকি গোল হবে, আর ক্ল্যাসিক না শেলফ প্রোডাক্ট কার্ড — এই পছন্দটিও সেটিংস থেকে এসেছে, যেখানে চাপ দেওয়ামাত্রই দোকান বদলে যেত। তিনটিই কাস্টমাইজেশনের স্টাইল অংশে, আর স্টোরে সংরক্ষণ চাপলেই ক্রেতাদের কাছে যাবে।",
     },
   },
   {
