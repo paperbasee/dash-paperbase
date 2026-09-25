@@ -9,6 +9,7 @@ import { NextIntlClientProvider, createTranslator } from "next-intl";
 import { describe, expect, test } from "vitest";
 
 import {
+  ConnectionList,
   ConnectionRow,
   ConnectionSwitch,
   DisconnectedMark,
@@ -67,6 +68,14 @@ describe("a service card", () => {
     expect(html).toContain("opacity-60");
     expect(html).not.toContain("<button");
     expect(html).not.toContain('role="switch"');
+  });
+});
+
+describe("the pop-up's list", () => {
+  test("keeps room for three connections, the most a service has, and no more", () => {
+    // One or two pixels looked "too small" (owner); three is the limit.
+    expect(render(<ConnectionList kind="pixels">x</ConnectionList>)).toContain("sm:min-h-[calc(3*(3.5rem_+_1px))]");
+    expect(render(<ConnectionList kind="accounts">x</ConnectionList>)).toContain("sm:min-h-[calc(3*(6rem_+_2px))]");
   });
 });
 

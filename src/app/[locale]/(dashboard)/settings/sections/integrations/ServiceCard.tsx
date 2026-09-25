@@ -184,7 +184,7 @@ export function ServiceDialog({
       <DialogContent
         className={cn(
           "flex h-dvh max-h-dvh w-screen max-w-none flex-col gap-0 overflow-hidden rounded-none p-0",
-          "sm:h-auto sm:max-h-[min(88dvh,40rem)] sm:w-[calc(100vw-2rem)] sm:max-w-xl sm:rounded-card",
+          "sm:h-auto sm:max-h-[min(90dvh,44rem)] sm:w-[calc(100vw-2rem)] sm:max-w-[40rem] sm:rounded-card",
         )}
       >
         <DialogHeader className="shrink-0 border-b border-border px-4 py-3 pe-12 sm:px-5">
@@ -277,6 +277,21 @@ export function DisconnectedMark() {
   );
 }
 
+/**
+ * The pop-up keeps room for THREE connections, the most a service has (owner,
+ * 2026-09-25: one or two "looks too small"), and never grows past it. A row is
+ * one 3.5rem line plus its 1px border; a Steadfast account adds its 2.5rem
+ * delivery-updates line and that line's border.
+ */
+const ROOM_FOR_THREE = {
+  pixels: "sm:min-h-[calc(3*(3.5rem_+_1px))]",
+  accounts: "sm:min-h-[calc(3*(6rem_+_2px))]",
+} as const;
+
+export function ConnectionList({ kind, children }: { kind: keyof typeof ROOM_FOR_THREE; children: ReactNode }) {
+  return <div className={ROOM_FOR_THREE[kind]}>{children}</div>;
+}
+
 /** One connection in a service's pop-up: its switch, what it is, and what can be done to it. */
 export function ConnectionRow({
   lead,
@@ -296,7 +311,7 @@ export function ConnectionRow({
 }) {
   return (
     <div className="border-b border-border last:border-b-0">
-      <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1 px-4 py-2 sm:px-5">
+      <div className="flex min-h-14 min-w-0 flex-wrap items-center gap-x-3 gap-y-1 px-4 py-2 sm:px-5">
         {lead}
         <div className="min-w-0 flex-1">
           <p className="truncate text-[13px] font-medium text-foreground">{title}</p>

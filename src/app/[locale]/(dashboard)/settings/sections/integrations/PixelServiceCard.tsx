@@ -32,6 +32,7 @@ import { useConfirm } from "@/context/ConfirmDialogContext";
 import { usePermissions } from "@/context/PermissionsContext";
 import { notify } from "@/notifications";
 import {
+  ConnectionList,
   ConnectionRow,
   ConnectionSwitch,
   DialogScreen,
@@ -340,74 +341,76 @@ export default function PixelServiceCard({
   function listScreen() {
     return (
       <>
-        {pixels.map((pixel) =>
-          pixel.is_connected ? (
-            <ConnectionRow
-              key={pixel.public_id}
-              lead={
-                <ConnectionSwitch
-                  active={pixel.is_active}
-                  label={tI("connectionSwitchLabel", { name: pixelName(pixel) })}
-                  disabled={!canManage || switchingAll || switchingId === pixel.public_id}
-                  onSwitch={(next) => void switchOne(pixel, next)}
-                />
-              }
-              title={<PixelTitle label={idLabel} id={pixel.pixel_id} numClass={numClass} />}
-              detail={[
-                tI("connectedOn", { date: formatDashboardDate(pixel.created_at, locale) }),
-                pixel.test_event_code ? tI("testCodeSet") : null,
-                pixel.is_active ? null : tI("connectionOff"),
-              ]
-                .filter(Boolean)
-                .join(" · ")}
-              actions={
-                <>
-                  {pixel.event_settings ? (
-                    <Button type="button" variant="outline" size="sm" className={small} onClick={() => go({ kind: "events", id: pixel.public_id })}>
-                      {tI("events")}
-                    </Button>
-                  ) : null}
-                  {canManage ? (
-                    <>
-                      <Button type="button" variant="outline" size="sm" className={small} onClick={() => startEdit(pixel)}>
-                        {tI("edit")}
+        <ConnectionList kind="pixels">
+          {pixels.map((pixel) =>
+            pixel.is_connected ? (
+              <ConnectionRow
+                key={pixel.public_id}
+                lead={
+                  <ConnectionSwitch
+                    active={pixel.is_active}
+                    label={tI("connectionSwitchLabel", { name: pixelName(pixel) })}
+                    disabled={!canManage || switchingAll || switchingId === pixel.public_id}
+                    onSwitch={(next) => void switchOne(pixel, next)}
+                  />
+                }
+                title={<PixelTitle label={idLabel} id={pixel.pixel_id} numClass={numClass} />}
+                detail={[
+                  tI("connectedOn", { date: formatDashboardDate(pixel.created_at, locale) }),
+                  pixel.test_event_code ? tI("testCodeSet") : null,
+                  pixel.is_active ? null : tI("connectionOff"),
+                ]
+                  .filter(Boolean)
+                  .join(" · ")}
+                actions={
+                  <>
+                    {pixel.event_settings ? (
+                      <Button type="button" variant="outline" size="sm" className={small} onClick={() => go({ kind: "events", id: pixel.public_id })}>
+                        {tI("events")}
                       </Button>
-                      <Button type="button" variant="ghost" size="sm" className={small} onClick={() => go({ kind: "disconnect", id: pixel.public_id })}>
-                        {tI("disconnect")}
+                    ) : null}
+                    {canManage ? (
+                      <>
+                        <Button type="button" variant="outline" size="sm" className={small} onClick={() => startEdit(pixel)}>
+                          {tI("edit")}
+                        </Button>
+                        <Button type="button" variant="ghost" size="sm" className={small} onClick={() => go({ kind: "disconnect", id: pixel.public_id })}>
+                          {tI("disconnect")}
+                        </Button>
+                      </>
+                    ) : null}
+                  </>
+                }
+              />
+            ) : (
+              <ConnectionRow
+                key={pixel.public_id}
+                lead={<DisconnectedMark />}
+                title={<PixelTitle label={idLabel} id={pixel.pixel_id} numClass={numClass} />}
+                detail={tI("disconnectedKept")}
+                detailTone="warning"
+                actions={
+                  canManage ? (
+                    <>
+                      <Button type="button" variant="outline" size="sm" className={small} onClick={() => startReconnect(pixel)}>
+                        {tI("reconnect")}
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className={cn(small, "text-destructive hover:bg-destructive/10")}
+                        onClick={() => go({ kind: "remove", id: pixel.public_id })}
+                      >
+                        {tI("remove")}
                       </Button>
                     </>
-                  ) : null}
-                </>
-              }
-            />
-          ) : (
-            <ConnectionRow
-              key={pixel.public_id}
-              lead={<DisconnectedMark />}
-              title={<PixelTitle label={idLabel} id={pixel.pixel_id} numClass={numClass} />}
-              detail={tI("disconnectedKept")}
-              detailTone="warning"
-              actions={
-                canManage ? (
-                  <>
-                    <Button type="button" variant="outline" size="sm" className={small} onClick={() => startReconnect(pixel)}>
-                      {tI("reconnect")}
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      className={cn(small, "text-destructive hover:bg-destructive/10")}
-                      onClick={() => go({ kind: "remove", id: pixel.public_id })}
-                    >
-                      {tI("remove")}
-                    </Button>
-                  </>
-                ) : null
-              }
-            />
-          ),
-        )}
+                  ) : null
+                }
+              />
+            ),
+          )}
+        </ConnectionList>
         <div className="flex flex-wrap items-center gap-3 border-t border-border px-4 py-3 sm:px-5">
           {canManage && left > 0 ? (
             <Button type="button" variant="outline" size="sm" className={small} onClick={() => openAt({ kind: "connect" })}>

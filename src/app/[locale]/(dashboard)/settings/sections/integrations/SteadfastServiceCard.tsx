@@ -26,6 +26,7 @@ import { usePermissions } from "@/context/PermissionsContext";
 import { notify } from "@/notifications";
 import { cn } from "@/lib/utils";
 import {
+  ConnectionList,
   ConnectionRow,
   ConnectionSwitch,
   DialogScreen,
@@ -251,68 +252,70 @@ export default function SteadfastServiceCard({ panelHidden }: { panelHidden: boo
   function listScreen() {
     return (
       <>
-        {accounts.map((account) =>
-          account.is_connected ? (
-            <ConnectionRow
-              key={account.public_id}
-              lead={
-                <ConnectionSwitch
-                  active={account.is_active}
-                  label={tI("connectionSwitchLabel", { name: accountName(account) })}
-                  disabled={!canManage || switchingAll || switchingId === account.public_id}
-                  onSwitch={(next) => void switchOne(account, next)}
-                />
-              }
-              title={
-                <>
-                  {t("courier.apiKey")} <span className="font-mono">{account.api_key_masked || "—"}</span>
-                </>
-              }
-              detail={[
-                tI("connectedOn", { date: formatDashboardDate(account.created_at, locale) }),
-                account.has_webhook_token ? tI("webhookSet") : null,
-                account.is_active ? null : tI("connectionOff"),
-              ]
-                .filter(Boolean)
-                .join(" · ")}
-              actions={
-                canManage ? (
-                  <Button type="button" variant="ghost" size="sm" className={small} onClick={() => go({ kind: "disconnect", id: account.public_id })}>
-                    {tI("disconnect")}
-                  </Button>
-                ) : null
-              }
-            >
-              {canManage && account.is_active ? <SteadfastWebhookSetup courier={account} /> : null}
-            </ConnectionRow>
-          ) : (
-            <ConnectionRow
-              key={account.public_id}
-              lead={<DisconnectedMark />}
-              title={t("courier.apiKey")}
-              detail={tI("disconnectedKept")}
-              detailTone="warning"
-              actions={
-                canManage ? (
+        <ConnectionList kind="accounts">
+          {accounts.map((account) =>
+            account.is_connected ? (
+              <ConnectionRow
+                key={account.public_id}
+                lead={
+                  <ConnectionSwitch
+                    active={account.is_active}
+                    label={tI("connectionSwitchLabel", { name: accountName(account) })}
+                    disabled={!canManage || switchingAll || switchingId === account.public_id}
+                    onSwitch={(next) => void switchOne(account, next)}
+                  />
+                }
+                title={
                   <>
-                    <Button type="button" variant="outline" size="sm" className={small} onClick={() => go({ kind: "reconnect", id: account.public_id })}>
-                      {tI("reconnect")}
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      className={cn(small, "text-destructive hover:bg-destructive/10")}
-                      onClick={() => go({ kind: "remove", id: account.public_id })}
-                    >
-                      {tI("remove")}
-                    </Button>
+                    {t("courier.apiKey")} <span className="font-mono">{account.api_key_masked || "—"}</span>
                   </>
-                ) : null
-              }
-            />
-          ),
-        )}
+                }
+                detail={[
+                  tI("connectedOn", { date: formatDashboardDate(account.created_at, locale) }),
+                  account.has_webhook_token ? tI("webhookSet") : null,
+                  account.is_active ? null : tI("connectionOff"),
+                ]
+                  .filter(Boolean)
+                  .join(" · ")}
+                actions={
+                  canManage ? (
+                    <Button type="button" variant="ghost" size="sm" className={small} onClick={() => go({ kind: "disconnect", id: account.public_id })}>
+                      {tI("disconnect")}
+                    </Button>
+                  ) : null
+                }
+              >
+                {canManage && account.is_active ? <SteadfastWebhookSetup courier={account} /> : null}
+              </ConnectionRow>
+            ) : (
+              <ConnectionRow
+                key={account.public_id}
+                lead={<DisconnectedMark />}
+                title={t("courier.apiKey")}
+                detail={tI("disconnectedKept")}
+                detailTone="warning"
+                actions={
+                  canManage ? (
+                    <>
+                      <Button type="button" variant="outline" size="sm" className={small} onClick={() => go({ kind: "reconnect", id: account.public_id })}>
+                        {tI("reconnect")}
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className={cn(small, "text-destructive hover:bg-destructive/10")}
+                        onClick={() => go({ kind: "remove", id: account.public_id })}
+                      >
+                        {tI("remove")}
+                      </Button>
+                    </>
+                  ) : null
+                }
+              />
+            ),
+          )}
+        </ConnectionList>
         <div className="flex flex-wrap items-center gap-3 border-t border-border px-4 py-3 sm:px-5">
           {canManage ? (
             <Button type="button" variant="outline" size="sm" className={small} onClick={() => go({ kind: "connect" })}>

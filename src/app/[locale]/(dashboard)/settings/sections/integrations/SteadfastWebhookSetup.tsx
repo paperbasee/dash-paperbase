@@ -132,7 +132,7 @@ export default function SteadfastWebhookSetup({ courier }: { courier: Courier })
       <button
         type="button"
         aria-expanded={open}
-        className="flex w-full items-center gap-1.5 px-3.5 py-2.5 text-start text-[12px] text-muted-foreground transition-colors hover:bg-muted/40"
+        className="flex min-h-10 w-full items-center gap-1.5 px-4 py-2.5 text-start text-[12px] text-muted-foreground transition-colors hover:bg-muted/40 sm:px-5"
         onClick={() => setOpen((v) => !v)}
       >
         <ChevronRight
@@ -145,7 +145,7 @@ export default function SteadfastWebhookSetup({ courier }: { courier: Courier })
         </span>
       </button>
       {open ? (
-        <div className="flex flex-col gap-3.5 px-3.5 pb-3.5">
+        <div className="flex flex-col gap-3.5 px-4 pb-3.5 sm:px-5">
           <Step n={1} title={t("step1Title")}>
             <p className="text-[12px] text-muted-foreground">{t("step1Body")}</p>
           </Step>
