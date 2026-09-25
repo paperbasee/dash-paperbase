@@ -122,75 +122,85 @@ export function PicturePicker({ open, onClose, used, current, svg = false, onPic
     }
   }
 
+  /*
+    The scrolling area is a plain box and the column sits INSIDE it, as in the
+    panel (`KitPanel`). It was one element -- a column of fixed height that
+    also scrolled -- and a column that runs out of room shrinks what it may:
+    the upload frame clips its own content, so it was allowed to shrink to
+    nothing. With twelve pictures placed it was four pixels of border, and a
+    merchant saw only the pictures they had (owner, 2026-09-26).
+  */
   return (
-    <div className="flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto px-5 pb-8 pt-1">
-      <input
-        ref={fileInput}
-        type="file"
-        accept={svg ? LOGO_TYPES.join(",") : "image/jpeg,image/png,image/webp,image/gif"}
-        className="sr-only"
-        onChange={(event) => {
-          void take(event.target.files?.[0]);
-          event.target.value = "";
-        }}
-      />
-      {/* A new one: the soft empty frame is the button, as it is in the panel. */}
-      <button
-        type="button"
-        disabled={busy}
-        onClick={() => fileInput.current?.click()}
-        className={cn(
-          PICTURE,
-          "grid aspect-[16/7] place-items-center border border-dashed border-border bg-muted/40 text-muted-foreground transition-colors hover:bg-muted/70 hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-ring disabled:cursor-wait",
-        )}
-      >
-        <span className="flex flex-col items-center gap-1.5 text-[13px] font-medium">
-          {busy ? <Loader2 className="size-5 animate-spin" aria-hidden /> : <ImagePlus className="size-5" aria-hidden />}
-          {busy ? t("pictureUploading") : t("pictureUpload")}
-        </span>
-      </button>
-      {problem ? <KitNote role="alert">{problem}</KitNote> : null}
+    <div className="min-h-0 flex-1 overflow-y-auto px-5 pb-8 pt-1">
+      <div className="flex flex-col gap-6">
+        <input
+          ref={fileInput}
+          type="file"
+          accept={svg ? LOGO_TYPES.join(",") : "image/jpeg,image/png,image/webp,image/gif"}
+          className="sr-only"
+          onChange={(event) => {
+            void take(event.target.files?.[0]);
+            event.target.value = "";
+          }}
+        />
+        {/* A new one: the soft empty frame is the button, as it is in the panel. */}
+        <button
+          type="button"
+          disabled={busy}
+          onClick={() => fileInput.current?.click()}
+          className={cn(
+            PICTURE,
+            "grid aspect-[16/7] place-items-center border border-dashed border-border bg-muted/40 text-muted-foreground transition-colors hover:bg-muted/70 hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-ring disabled:cursor-wait",
+          )}
+        >
+          <span className="flex flex-col items-center gap-1.5 text-[13px] font-medium">
+            {busy ? <Loader2 className="size-5 animate-spin" aria-hidden /> : <ImagePlus className="size-5" aria-hidden />}
+            {busy ? t("pictureUploading") : t("pictureUpload")}
+          </span>
+        </button>
+        {problem ? <KitNote role="alert">{problem}</KitNote> : null}
 
-      {used.length > 0 ? (
-        <div className="flex flex-col gap-3">
-          <div>
-            <p className={CAPTION}>{t("pictureUsedHeading")}</p>
-            <p className={cn(HELP, "mt-1")}>{t("pictureUsedHint")}</p>
+        {used.length > 0 ? (
+          <div className="flex flex-col gap-3">
+            <div>
+              <p className={CAPTION}>{t("pictureUsedHeading")}</p>
+              <p className={cn(HELP, "mt-1")}>{t("pictureUsedHint")}</p>
+            </div>
+            <ul className="grid grid-cols-2 gap-2.5">
+              {used.map((picture) => (
+                <li key={picture.key}>
+                  <button
+                    type="button"
+                    aria-current={picture.key === current ? "true" : undefined}
+                    className={cn(
+                      "block w-full overflow-hidden rounded-card bg-muted transition-shadow focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring",
+                      picture.key === current
+                        ? "shadow-[0_0_0_2px_hsl(var(--foreground))]"
+                        : "hover:shadow-[0_0_0_1.5px_hsl(var(--border))]",
+                    )}
+                    onClick={() => {
+                      onPick(picture);
+                      onClose();
+                    }}
+                  >
+                    {/* Plain img: these are merchant uploads on a bucket the dashboard
+                        does not configure for next/image, and they are thumbnails. */}
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={picture.url}
+                      alt=""
+                      className={cn("aspect-[4/3] w-full", svg ? "object-contain p-3" : "object-cover")}
+                      loading="lazy"
+                    />
+                  </button>
+                </li>
+              ))}
+            </ul>
           </div>
-          <ul className="grid grid-cols-2 gap-2.5">
-            {used.map((picture) => (
-              <li key={picture.key}>
-                <button
-                  type="button"
-                  aria-current={picture.key === current ? "true" : undefined}
-                  className={cn(
-                    "block w-full overflow-hidden rounded-card bg-muted transition-shadow focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring",
-                    picture.key === current
-                      ? "shadow-[0_0_0_2px_hsl(var(--foreground))]"
-                      : "hover:shadow-[0_0_0_1.5px_hsl(var(--border))]",
-                  )}
-                  onClick={() => {
-                    onPick(picture);
-                    onClose();
-                  }}
-                >
-                  {/* Plain img: these are merchant uploads on a bucket the dashboard
-                      does not configure for next/image, and they are thumbnails. */}
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={picture.url}
-                    alt=""
-                    className={cn("aspect-[4/3] w-full", svg ? "object-contain p-3" : "object-cover")}
-                    loading="lazy"
-                  />
-                </button>
-              </li>
-            ))}
-          </ul>
-        </div>
-      ) : (
-        <p className={HELP}>{t("pictureNoneYet")}</p>
-      )}
+        ) : (
+          <p className={HELP}>{t("pictureNoneYet")}</p>
+        )}
+      </div>
     </div>
   );
 }
