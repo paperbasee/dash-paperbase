@@ -2068,7 +2068,7 @@
         "placementNote": "Every order counts as soon as it's placed, so your ads learn fastest. Orders later cancelled or refused still count.",
         "confirmation": "When I confirm the order",
         "confirmationNote": "An order counts only once you confirm it, so fake and refused orders don't teach your ads who to find.",
-        "confirmationLate": "Sales reach Meta and TikTok only when you confirm, so confirm orders quickly. Meta credits an ad only for sales within 7 days of the click.",
+        "confirmationLate": "Sales reach Meta and TikTok only when you confirm, so confirm orders quickly. An order confirmed more than 7 days after it was placed never counts.",
         "confirmationGoal": "Every new order is still sent as \"OrderPlaced\". To aim Meta ads at it, create a Custom Conversion for OrderPlaced in Meta.",
         "prepaidNote": "bKash and Nagad orders always count when the customer submits the payment.",
         "askToChange": "Only the store owner and admins can change this.",

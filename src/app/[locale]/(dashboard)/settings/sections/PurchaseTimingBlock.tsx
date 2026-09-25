@@ -112,8 +112,10 @@ export default function PurchaseTimingBlock({ panelHidden = false }: { panelHidd
 
       {/*
         What a merchant who waits for confirmation has to know -- the two things
-        that surprise people: a sale only counts once confirmed, and Meta cannot
-        aim ads at a custom event without a custom conversion.
+        that surprise people: an order left unconfirmed for 7 days never counts
+        (the API's hourly sweep expires its match details,
+        TRACKING_PURCHASE_MATCH_RETENTION_DAYS), and Meta cannot aim ads at a
+        custom event without a custom conversion.
       */}
       {chosen === "confirmation" ? (
         <ul className="mt-2.5 list-disc space-y-1 ps-5 text-[12px] leading-relaxed text-muted-foreground">
