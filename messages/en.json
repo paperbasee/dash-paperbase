@@ -3233,6 +3233,9 @@
       "rowPartAdd": "Add a row",
       "rowPartNumber": "Row {number}",
       "rowPartRemove": "Remove row {number}",
+      "messagePartAdd": "Add a message",
+      "messagePartNumber": "Message {number}",
+      "messagePartRemove": "Remove message {number}",
       "palettesFailed": "Your colour choices couldn't be loaded. Refresh the page to try again.",
       "typeNotSavedYet": "Coming soon: the face you pick here isn't saved to your shop yet.",
       "headerClassic": "Classic",
@@ -3267,7 +3270,9 @@
       "cartCart": "Cart",
       "headerWordSearch": "Search",
       "headerWordAccount": "Account",
-      "headerWordCart": "Cart"
+      "headerWordCart": "Cart",
+      "noticeTrackOrder": "Track order",
+      "noticeHelp": "Help"
     },
     "chosenCount": "{count, number} of {max, number} chosen",
     "chooseTitle": "Choose what to show",

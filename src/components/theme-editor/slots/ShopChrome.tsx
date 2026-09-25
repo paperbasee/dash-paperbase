@@ -39,12 +39,21 @@ import {
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import {
+  ArrowsLeftRightIcon,
   BagIcon,
   BasketIcon,
+  ClockIcon,
+  GiftIcon,
+  HeadsetIcon,
   HeartIcon,
   ListIcon,
   MagnifyingGlassIcon,
+  MoneyIcon,
+  SealCheckIcon,
+  ShieldCheckIcon,
   ShoppingCartSimpleIcon,
+  TagIcon,
+  TruckIcon,
   UserIcon,
   type Icon as PhosphorIcon,
   type IconWeight,
@@ -331,6 +340,22 @@ const ARRIVALS: Card[] = [
 ];
 
 /**
+ * A top-bar message's icon, by the name the theme stores -- the shop's own
+ * Phosphor drawings, so the canvas shows the mark the shop will.
+ */
+const NOTICE_ICONS: Record<string, PhosphorIcon> = {
+  truck: TruckIcon,
+  gift: GiftIcon,
+  tag: TagIcon,
+  money: MoneyIcon,
+  clock: ClockIcon,
+  "shield-check": ShieldCheckIcon,
+  "seal-check": SealCheckIcon,
+  "arrows-left-right": ArrowsLeftRightIcon,
+  headset: HeadsetIcon,
+};
+
+/**
  * The example shopper's face on the account page's welcome card. A fixed seed,
  * so the drawing does not change between visits; the shop seeds each real
  * account by its random id.
@@ -468,18 +493,44 @@ export function ShopChrome({
   // both live in the header group, so every page shows them and only the Header
   // entry in the picker edits them.
   if (slotKey === "notice") {
-    // The merchant's own line when this place is wired, an example when it is
-    // not -- and an example again when they have not written one yet, because a
-    // strip drawn empty reads as a bug rather than as a blank.
-    // One ground, not a choice: the owner took the colour setting off the bar
-    // on 2026-09-22, because the palette already decides what the accent is --
-    // so it is drawn in the palette's brand colour, as the shop's strip is.
-    const text = live?.settings?.text;
-    const written = typeof text === "string" ? text.trim() : "";
+    // The top bar (2026-09-25): up to three messages that take turns, each a
+    // part with its own words, link and icon. The canvas draws the FIRST -- the
+    // merchant's own where this place is wired, an example where they have not
+    // written one, because a strip drawn empty reads as a bug -- with a dot per
+    // message when there are more, and Track order and Help at its left where
+    // they are on (Track order only while the order tracker is). One ground,
+    // not a choice: the palette's brand colour, as the shop's strip is.
+    const messages = (live?.blocks ?? [])
+      .filter((block) => block.type === "message")
+      .map((block) => block.settings ?? {})
+      .filter((one) => typeof one.text === "string" && one.text.trim());
+    const first = messages[0];
+    const Icon = typeof first?.icon === "string" ? NOTICE_ICONS[first.icon] : undefined;
+    const linkWords = first && first.link && typeof first.link_text === "string" ? first.link_text.trim() : "";
+    const quick = live?.settings?.quick_links === true;
     return (
-      <p className="border-b border-border bg-shop-brand px-4 py-2 text-center text-[11px] uppercase tracking-[0.06em] text-shop-brand-foreground/85">
-        {written || t("noticeExample")}
-      </p>
+      <div className="flex items-center gap-3 border-b border-border bg-shop-brand px-4 py-2 text-[11px] text-shop-brand-foreground/85">
+        <span className="flex w-24 shrink-0 gap-3 text-[10px]">
+          {quick && shop?.orderLookup !== false ? <span>{t("noticeTrackOrder")}</span> : null}
+          {quick ? <span>{t("noticeHelp")}</span> : null}
+        </span>
+        <p className="m-0 flex min-w-0 flex-1 items-center justify-center gap-1.5 text-center uppercase tracking-[0.06em]">
+          {Icon ? <Icon size={13} aria-hidden data-notice-icon /> : null}
+          <span className="truncate">{first ? String(first.text) : t("noticeExample")}</span>
+          {linkWords ? <span className="shrink-0 underline">{linkWords}</span> : null}
+        </p>
+        <span className="flex w-24 shrink-0 items-center justify-end gap-1" aria-hidden>
+          {messages.length > 1
+            ? messages.map((_, index) => (
+                <span
+                  key={index}
+                  data-notice-dot
+                  className={`size-1 rounded-full ${index ? "bg-current/40" : "bg-current"}`}
+                />
+              ))
+            : null}
+        </span>
+      </div>
     );
   }
 

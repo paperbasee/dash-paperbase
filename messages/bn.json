@@ -3233,6 +3233,9 @@
       "rowPartAdd": "একটি সারি যোগ করুন",
       "rowPartNumber": "সারি {number}",
       "rowPartRemove": "সারি {number} সরান",
+      "messagePartAdd": "একটি বার্তা যোগ করুন",
+      "messagePartNumber": "বার্তা {number}",
+      "messagePartRemove": "বার্তা {number} সরান",
       "palettesFailed": "রঙের পছন্দগুলো লোড করা যায়নি। আবার চেষ্টা করতে পাতাটি রিফ্রেশ করুন।",
       "typeNotSavedYet": "শিগগিরই আসছে: এখানে বাছাই করা ফন্ট এখনো আপনার দোকানে সেভ হয় না।",
       "headerClassic": "ক্লাসিক",
@@ -3267,7 +3270,9 @@
       "cartCart": "কার্ট",
       "headerWordSearch": "সার্চ",
       "headerWordAccount": "অ্যাকাউন্ট",
-      "headerWordCart": "কার্ট"
+      "headerWordCart": "কার্ট",
+      "noticeTrackOrder": "অর্ডার ট্র্যাক",
+      "noticeHelp": "সাহায্য"
     },
     "chosenCount": "{max, number} টির মধ্যে {count, number} টি বাছা হয়েছে",
     "chooseTitle": "কী কী দেখাবেন বেছে নিন",

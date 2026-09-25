@@ -12,7 +12,9 @@ import { describe, expect, test } from "vitest";
 import en from "../../messages/en.json";
 import bn from "../../messages/bn.json";
 
-const LISTED = ["slide", "question", "row"] as const;
+// The top bar's `message` joined on 2026-09-25 -- found by the owner as a
+// MISSING_MESSAGE the moment its dialog opened, because this list had not.
+const LISTED = ["slide", "question", "row", "message"] as const;
 const WORDS = ["Add", "Number", "Remove"] as const;
 const slots = (messages: typeof en) => messages.themeEditor.slots as unknown as Record<string, string>;
 
@@ -33,5 +35,6 @@ describe("the words for a dialog's parts", () => {
   test("a row is not called a picture", () => {
     expect(slots(en).rowPartAdd.toLowerCase()).not.toContain("picture");
     expect(slots(en).questionPartAdd.toLowerCase()).not.toContain("picture");
+    expect(slots(en).messagePartAdd.toLowerCase()).not.toContain("picture");
   });
 });

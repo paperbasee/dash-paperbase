@@ -5,14 +5,22 @@
  * types lands in the shop's own document. The failure this guards against is
  * the quiet one -- the screen accepting a click, looking right, and writing
  * nothing -- so these assertions are about the DOCUMENT, not about the markup.
+ *
+ * Since 2026-09-25 the bar holds up to three messages that take turns, each a
+ * part (`message` block) with its own words, link and icon, and can carry
+ * Track order and Help -- so this file describes the bar's real shape rather
+ * than the shared fixtures' made-up one, where the bar is still just "a
+ * section with a text and a link" for the editor's own mechanics.
  */
 import { renderToStaticMarkup } from "react-dom/server";
 import { NextIntlClientProvider } from "next-intl";
 import { describe, expect, test } from "vitest";
 
-import { ShopChrome } from "@/components/theme-editor/slots/ShopChrome";
+import { ShopChrome, type ShopIdentity } from "@/components/theme-editor/slots/ShopChrome";
 import { editorReducer, initEditorState, type EditorState } from "@/lib/theme-editor/editor-reducer";
 import {
+  addBlockEdits,
+  blockSettingEdits,
   choiceEdits,
   sectionFor,
   sectionOfType,
@@ -20,11 +28,82 @@ import {
   slotValueFor,
   wiringFor,
 } from "@/lib/theme-editor/slot-sections";
-import type { ThemeDocument, ThemeEditorState } from "@/lib/theme-editor/api";
-import { document, manifest } from "../lib/theme-editor/fixtures";
+import type { ThemeDocument, ThemeEditorState, ThemeManifest, ThemeSection } from "@/lib/theme-editor/api";
 import en from "../../messages/en.json";
 
 const NOTICE = wiringFor("header", "notice")!;
+const labels = (label: string) => ({ label, label_bn: `${label} (bn)` });
+
+/** The bar as the theme declares it since `theming/0037`. */
+const manifest = {
+  key: "storefront",
+  name: "Storefront",
+  name_bn: "স্টোরফ্রন্ট",
+  category: null,
+  settings: [],
+  sections: {
+    announcement_bar: {
+      ...labels("Announcement bar"),
+      max_blocks: 3,
+      settings: [
+        { id: "quick_links", type: "boolean", ...labels("Track order and Help"), default: false },
+        { id: "starts_at", type: "datetime", ...labels("Starts"), default: "" },
+        { id: "ends_at", type: "datetime", ...labels("Ends"), default: "" },
+      ],
+      blocks: {
+        message: {
+          ...labels("Message"),
+          settings: [
+            { id: "text", type: "text", ...labels("Message"), default: "" },
+            { id: "link", type: "url", ...labels("Link"), default: "" },
+            { id: "link_text", type: "text", ...labels("Link text"), default: "" },
+            {
+              id: "icon",
+              type: "select",
+              ...labels("Icon"),
+              options: ["none", "truck", "gift", "tag"],
+              default: "none",
+            },
+          ],
+        },
+      },
+    },
+    header: { ...labels("Header"), at_most_one: true, required: true, settings: [] },
+    footer: { ...labels("Footer"), at_most_one: true, required: true, settings: [] },
+  },
+  groups: {
+    header: { ...labels("Header"), sections: ["announcement_bar", "header"], default: [] },
+    footer: { ...labels("Footer"), sections: ["footer"], default: [] },
+  },
+  templates: {},
+} as unknown as ThemeManifest;
+
+const section = (id: string, type: string, over: Partial<ThemeSection> = {}): ThemeSection => ({
+  id,
+  type,
+  hidden: false,
+  settings: {},
+  blocks: [],
+  ...over,
+});
+
+function document(): ThemeDocument {
+  return {
+    theme: "storefront",
+    settings: {},
+    header: {
+      sections: [
+        section("announcement-bar", "announcement_bar", {
+          hidden: true,
+          settings: { quick_links: false, starts_at: "", ends_at: "" },
+        }),
+        section("header", "header"),
+      ],
+    },
+    footer: { sections: [section("footer", "footer")] },
+    templates: {},
+  } as unknown as ThemeDocument;
+}
 
 function editor(doc: ThemeDocument = document()) {
   return initEditorState({
@@ -35,19 +114,30 @@ function editor(doc: ThemeDocument = document()) {
   } as unknown as ThemeEditorState);
 }
 
+const run = (state: EditorState, actions: ReturnType<typeof choiceEdits>) => actions.reduce(editorReducer, state);
+
 /** A click on the bar's choices, taking the editor's own path. */
-function choose(state: EditorState, value: string): EditorState {
-  return choiceEdits(state.document, NOTICE, value, { page: "header", key: "notice" }).reduce(editorReducer, state);
+const choose = (state: EditorState, value: string) =>
+  run(state, choiceEdits(state.document, NOTICE, value, { page: "header", key: "notice" }));
+
+/** A new message with these words, taking the editor's own path: add a part, then type into it. */
+function write(state: EditorState, settings: Record<string, unknown>): EditorState {
+  const before = sectionFor(state.document, NOTICE)?.blocks.length ?? 0;
+  const added = run(state, addBlockEdits(state.document, NOTICE, "message"));
+  const blocks = sectionFor(added.document, NOTICE)!.blocks;
+  // Refused -- the bar is full -- so there is no new part to type into.
+  if (blocks.length === before) return added;
+  const id = blocks[blocks.length - 1].id;
+  return Object.entries(settings).reduce(
+    (next, [setting, value]) => run(next, blockSettingEdits(next.document, NOTICE, id, setting, value)),
+    added,
+  );
 }
 
-/** A setting typed into the bar, taking the editor's own path. */
-function type(state: EditorState, setting: string, value: unknown): EditorState {
-  return settingEdits(state.document, NOTICE, setting, value).reduce(editorReducer, state);
-}
+const messages = (state: EditorState) => sectionFor(state.document, NOTICE)?.blocks ?? [];
 
-/** The bar as the canvas draws it, from the settings the document holds. */
-function drawn(doc: ThemeDocument) {
-  const section = sectionOfType(doc, NOTICE, "announcement_bar");
+/** The bar as the canvas draws it, from the document. */
+function drawn(doc: ThemeDocument, shop?: ShopIdentity) {
   return renderToStaticMarkup(
     <NextIntlClientProvider locale="en" messages={en}>
       <ShopChrome
@@ -55,7 +145,8 @@ function drawn(doc: ThemeDocument) {
         slotKey="notice"
         variant={slotValueFor(doc, NOTICE)}
         settings={{}}
-        live={section ?? undefined}
+        live={sectionOfType(doc, NOTICE, "announcement_bar") ?? undefined}
+        shop={shop}
       />
     </NextIntlClientProvider>,
   );
@@ -77,31 +168,65 @@ describe("switching the bar on and off", () => {
 
   test("choosing Off hides it rather than removing it", () => {
     // Hiding keeps the words. A merchant who switches the strip off for a week
-    // and back on again must not have to type their line a second time.
-    const written = type(choose(editor(), "message"), "text", "Free delivery in Dhaka");
+    // and back on again must not have to type their messages a second time.
+    const written = write(choose(editor(), "message"), { text: "Free delivery in Dhaka" });
 
     const off = choose(written, "off");
 
     expect(slotValueFor(off.document, NOTICE)).toBe("off");
-    // Hidden, not removed: the words are still there for when it comes back.
-    expect(sectionOfType(off.document, NOTICE, "announcement_bar")?.settings.text).toBe(
-      "Free delivery in Dhaka",
-    );
+    const kept = sectionOfType(off.document, NOTICE, "announcement_bar")!;
+    expect(kept.blocks[0].settings.text).toBe("Free delivery in Dhaka");
   });
 });
 
-describe("what the merchant types", () => {
+describe("what the merchant writes", () => {
   test("a message reaches the document and the drawing", () => {
-    const after = type(choose(editor(), "message"), "text", "Eid delivery until Thursday");
+    const after = write(choose(editor(), "message"), { text: "Eid delivery until Thursday" });
 
-    expect(sectionFor(after.document, NOTICE)?.settings.text).toBe("Eid delivery until Thursday");
+    expect(messages(after)[0].type).toBe("message");
+    expect(messages(after)[0].settings.text).toBe("Eid delivery until Thursday");
     expect(drawn(after.document)).toContain("Eid delivery until Thursday");
   });
 
-  test("an empty message draws the example, not an empty strip", () => {
+  test("three at most", () => {
+    let state = choose(editor(), "message");
+    for (const text of ["One", "Two", "Three", "Four"]) state = write(state, { text });
+    expect(messages(state).map((one) => one.settings.text)).toEqual(["One", "Two", "Three"]);
+  });
+
+  test("the canvas draws the first, and a dot for each when there are more", () => {
+    let state = choose(editor(), "message");
+    state = write(state, { text: "One" });
+    expect(drawn(state.document)).not.toContain("data-notice-dot");
+    state = write(state, { text: "Two" });
+    const html = drawn(state.document);
+    expect(html).toContain("One");
+    expect(html).not.toContain("Two");
+    expect(html.match(/data-notice-dot/g)?.length).toBe(2);
+  });
+
+  test("its icon and its link words", () => {
+    const html = drawn(write(choose(editor(), "message"), { text: "Sale", icon: "tag", link: "/sale", link_text: "Shop now" }).document);
+    expect(html).toContain("data-notice-icon");
+    expect(html).toContain("Shop now");
+    // Link words with no link go nowhere, so the shop draws none -- nor does the canvas.
+    const dead = drawn(write(choose(editor(), "message"), { text: "Sale", link_text: "Shop now" }).document);
+    expect(dead).not.toContain("Shop now");
+  });
+
+  test("an empty bar draws the example, not an empty strip", () => {
     // A bar drawn blank reads as a bug. The example says what the place is for
     // until the merchant has written their own line.
     expect(drawn(choose(editor(), "message").document)).toContain(en.themeEditor.slots.noticeExample);
+  });
+
+  test("Track order and Help where they are on, Track order only with the tracker", () => {
+    const on = run(choose(editor(), "message"), settingEdits(choose(editor(), "message").document, NOTICE, "quick_links", true));
+    const shop = { name: "Gadzilla", address: "", phone: "", email: "", social: [], wishlist: true, orderLookup: true };
+    expect(drawn(on.document, shop)).toContain(en.themeEditor.slots.noticeTrackOrder);
+    expect(drawn(on.document, shop)).toContain(en.themeEditor.slots.noticeHelp);
+    expect(drawn(on.document, { ...shop, orderLookup: false })).not.toContain(en.themeEditor.slots.noticeTrackOrder);
+    expect(drawn(choose(editor(), "message").document, shop)).not.toContain(en.themeEditor.slots.noticeHelp);
   });
 
   test("the loaded document is never edited in place", () => {
@@ -111,7 +236,7 @@ describe("what the merchant types", () => {
     const loaded = document();
     const before = JSON.stringify(loaded);
 
-    type(choose(editor(loaded), "message"), "text", "Written");
+    write(choose(editor(loaded), "message"), { text: "Written" });
 
     expect(JSON.stringify(loaded)).toBe(before);
   });
