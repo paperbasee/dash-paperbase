@@ -226,19 +226,6 @@ export async function fetchThemeEditor(http: ThemeHttp): Promise<ThemeEditorStat
   return data;
 }
 
-/** Start a draft from a theme's defaults. The live shop changes only on publish. */
-export async function selectTheme(
-  http: ThemeHttp,
-  themeKey: string,
-  expectedDraftRevision: number,
-): Promise<ThemeEditorState> {
-  const { data } = await http.post<ThemeEditorState>(`${BASE}editor/select/`, {
-    theme_key: themeKey,
-    expected_draft_revision: expectedDraftRevision,
-  });
-  return data;
-}
-
 export async function discardThemeDraft(
   http: ThemeHttp,
   expectedDraftRevision: number,

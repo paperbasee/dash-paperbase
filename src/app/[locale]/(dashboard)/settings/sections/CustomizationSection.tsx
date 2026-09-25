@@ -1,21 +1,16 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
-import { useLocale, useTranslations } from "next-intl";
+import type { ReactNode } from "react";
+import { useTranslations } from "next-intl";
 import { Loader2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { usePermissions } from "@/context/PermissionsContext";
-import { useDeferredNavigate } from "@/hooks/useDeferredNavigate";
-import { useSelectTheme, useThemesQuery } from "@/hooks/useThemesQuery";
-import { THEME_EDITOR_HREF, themePageState } from "@/lib/theme-editor/access";
-import { themeErrorMessageKey, type ThemeSummary } from "@/lib/theme-editor/api";
+import { useThemesQuery } from "@/hooks/useThemesQuery";
+import { themePageState } from "@/lib/theme-editor/access";
 import { previewOrigin } from "@/lib/theme-editor/preview-origin";
-import { themeName } from "@/lib/theme-editor/theme-groups";
-import { notify } from "@/notifications";
 import { CustomizationShell } from "../_components/CustomizationShell";
 import { CurrentThemeCard } from "../_components/CurrentThemeCard";
-import { ThemeLibrary } from "../_components/ThemeLibrary";
 import { ThemeLockNotice } from "../_components/ThemeLockNotice";
 import { settingsSectionSurfaceClassName } from "../SettingsSectionBody";
 
@@ -25,13 +20,9 @@ const PREVIEW_ORIGIN = previewOrigin(process.env.NEXT_PUBLIC_STOREFRONT_PREVIEW_
 export default function CustomizationSection({ hidden }: { hidden: boolean }) {
   const tc = useTranslations("settings.customization");
   const tCommon = useTranslations("common");
-  const locale = useLocale();
-  const navigate = useDeferredNavigate();
   const { isOwner } = usePermissions();
   // Loads only while the tab is open, like the Team section.
   const library = useThemesQuery({ enabled: !hidden });
-  const select = useSelectTheme();
-  const [busyKey, setBusyKey] = useState<string | null>(null);
 
   if (hidden) return null;
 
@@ -40,41 +31,6 @@ export default function CustomizationSection({ hidden }: { hidden: boolean }) {
   // can_edit comes from the server, never from has(), which is true while loading.
   const canEdit = page?.canEdit === true;
   const canOpenEditor = canEdit && PREVIEW_ORIGIN !== null;
-
-  function reportFailure(error: unknown) {
-    const key = themeErrorMessageKey(error);
-    // The library has been refetched by now, so the page already shows why.
-    if (key === "errorGeneric" || key === "errorUnknownTheme") {
-      notify.error(tc(key), { title: tc("heading") });
-    } else {
-      notify.warning(tc(key), { title: tc("heading") });
-    }
-  }
-
-  async function handleTry(theme: ThemeSummary) {
-    // A draft nobody can open would only replace the one the merchant has.
-    if (!data || !canOpenEditor || busyKey) return;
-    const name = themeName(theme, locale);
-    // Nothing is asked and nothing is lost: every theme keeps its own design, so
-    // opening one puts the work it already had back in front of the merchant.
-    setBusyKey(theme.key);
-    try {
-      await select.mutateAsync({
-        themeKey: theme.key,
-        expectedDraftRevision: data.current.draft_revision,
-      });
-    } catch (error) {
-      reportFailure(error);
-      return;
-    } finally {
-      setBusyKey(null);
-    }
-    const started = data.current.started_themes.includes(theme.key);
-    notify.success(tc(started ? "draftReopened" : "draftStarted", { theme: name }), {
-      title: tc("heading"),
-    });
-    void navigate(THEME_EDITOR_HREF);
-  }
 
   let body: ReactNode;
   if (library.isLoading) {
@@ -109,19 +65,17 @@ export default function CustomizationSection({ hidden }: { hidden: boolean }) {
             {tc("readOnlyNotice")}
           </p>
         ) : null}
+        {/*
+          The shop's theme and the way into the editor. The gallery of themes
+          that stood under it went on 2026-09-25: there is one theme (owner:
+          "there is only one thing, so no need to keep the themes").
+        */}
         <CurrentThemeCard
           themes={themes}
           current={current}
           locked={page.lock !== null}
           canOpenEditor={canOpenEditor}
           previewMissing={canEdit && PREVIEW_ORIGIN === null}
-        />
-        <ThemeLibrary
-          themes={themes}
-          current={current}
-          canOpenEditor={canOpenEditor}
-          busyKey={busyKey}
-          onTry={(theme) => void handleTry(theme)}
         />
       </div>
     );

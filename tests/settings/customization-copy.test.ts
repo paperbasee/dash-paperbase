@@ -39,7 +39,7 @@ describe("customization copy", () => {
     for (const m of read("sections/CustomizationSection.tsx").matchAll(/\btc\(\s*"(\w+)"/g)) used.add(m[1]);
     for (const file of [
       "_components/CurrentThemeCard.tsx",
-      "_components/ThemeLibrary.tsx",
+      "_components/ThemeCardParts.tsx",
       "_components/ThemeLockNotice.tsx",
     ]) {
       const text = read(file);

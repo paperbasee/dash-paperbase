@@ -1739,12 +1739,7 @@
       "notCustomized": "Not customized yet",
       "customize": "Customize",
       "previewNotSetUp": "Preview isn't set up yet",
-      "themesHeading": "Themes",
       "themeUnnamed": "Another theme",
-      "tryTheme": "Try",
-      "continueTheme": "Continue",
-      "tryThemeLabel": "Try {theme}",
-      "continueThemeLabel": "Continue with {theme}",
       "categoryFashion": "Fashion",
       "categoryElectronics": "Electronics",
       "categoryToys": "Toys",
@@ -1752,8 +1747,6 @@
       "confirmDiscardTitle": "Discard draft?",
       "confirmDiscardMessage": "Your {draft} draft will be deleted and you keep using {theme}. Your live store doesn't change.",
       "confirmDiscard": "Discard draft",
-      "draftStarted": "Draft started from {theme}. Your live store hasn't changed.",
-      "draftReopened": "Back on {theme}, with your saved changes.",
       "draftDiscarded": "Draft discarded. Your live store hasn't changed.",
       "errorDraftConflict": "Your draft was changed somewhere else, maybe in another tab. This page now shows the latest version. Check it, then try again.",
       "errorNoPermission": "You don't have permission to change the theme. Ask the store owner.",
@@ -1764,7 +1757,6 @@
       "errorTooManySaves": "You've saved a lot in the last hour. Try again in a minute.",
       "errorGeneric": "Could not change the theme. Try again.",
       "lockedBadge": "Paused",
-      "themeNeedsPremium": "On the Premium plan.",
       "lockNotEntitledBody": "Upgrade to Premium to choose a theme and customize your store.",
       "lockPaymentPending": "Available once your payment is approved.",
       "lockExpired": "Renew to edit. Your theme is kept.",
@@ -1775,7 +1767,7 @@
     },
     "promotions": {
       "heading": "Promotions",
-      "subtitle": "Show banners, a pop-up and a call-to-action message on your storefront.",
+      "subtitle": "Show a pop-up on your storefront: an offer or a message with a picture and a button, after the delay you choose, as often and for as long as you set.",
       "tabsAria": "Promotion types"
     },
     "shipping": {

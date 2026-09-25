@@ -17,7 +17,6 @@ import {
   mintPreviewPass,
   publishThemeDraft,
   saveThemeDraft,
-  selectTheme,
   themeErrorMessageKey,
   type ThemeDocument,
   type ThemeHttp,
@@ -53,18 +52,6 @@ describe("fetchers", () => {
     const { http, calls } = fakeHttp({ draft_revision: 3 });
     await expect(fetchThemeEditor(http)).resolves.toEqual({ draft_revision: 3 });
     expect(calls).toEqual([{ method: "GET", path: "theming/editor/" }]);
-  });
-
-  test("select sends the theme and the draft revision the page holds", async () => {
-    const { http, calls } = fakeHttp({ theme_key: "basic" });
-    await selectTheme(http, "minimal", 7);
-    expect(calls).toEqual([
-      {
-        method: "POST",
-        path: "theming/editor/select/",
-        body: { theme_key: "minimal", expected_draft_revision: 7 },
-      },
-    ]);
   });
 
   test("discard sends the draft revision, including 0", async () => {

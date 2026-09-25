@@ -14,7 +14,6 @@ import {
   fetchThemeEditor,
   fetchThemeLibrary,
   fetchThemeImages,
-  selectTheme,
 } from "@/lib/theme-editor/api";
 import { fetchPreviewExamples } from "@/lib/theme-editor/preview-paths";
 
@@ -109,13 +108,6 @@ function useThemeDraftMutation<TVariables>(
       return qc.invalidateQueries({ queryKey: themesQueryKey });
     },
   });
-}
-
-export function useSelectTheme() {
-  return useThemeDraftMutation(
-    ({ themeKey, expectedDraftRevision }: { themeKey: string; expectedDraftRevision: number }) =>
-      selectTheme(api, themeKey, expectedDraftRevision),
-  );
 }
 
 export function useDiscardThemeDraft() {

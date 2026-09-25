@@ -1,7 +1,6 @@
 /**
- * The theme list: Basic is the free default outside every group, Fashion leads
- * (owner decision), other categories keep the API's order, and names follow the
- * viewer's language.
+ * A theme's name and category in the viewer's language. (The grouped gallery of
+ * themes these once also ordered went on 2026-09-25: the shop has one theme.)
  */
 
 import { describe, expect, test } from "vitest";
@@ -12,7 +11,6 @@ import type { ThemeSummary } from "@/lib/theme-editor/api";
 import {
   CATEGORY_MESSAGE_KEYS,
   categoryLabel,
-  groupThemes,
   themeName,
   themeNameByKey,
 } from "@/lib/theme-editor/theme-groups";
@@ -27,57 +25,6 @@ const theme = (key: string, category: string | null, name_bn = `${key}-bn`): The
 });
 
 const BASIC = theme("basic", null, "বেসিক");
-const keys = (list: ThemeSummary[]) => list.map((t) => t.key);
-
-describe("groupThemes", () => {
-  test("only Basic: no groups and no headings", () => {
-    expect(groupThemes([BASIC])).toEqual({ basic: BASIC, groups: [], showHeadings: false });
-  });
-
-  test("one category needs no heading", () => {
-    const out = groupThemes([BASIC, theme("minimal", "fashion"), theme("bold", "fashion")]);
-    expect(out.basic).toBe(BASIC);
-    expect(out.groups.map((g) => [g.category, keys(g.themes)])).toEqual([
-      ["fashion", ["minimal", "bold"]],
-    ]);
-    expect(out.showHeadings).toBe(false);
-  });
-
-  test("Fashion leads, other categories keep the API's order, uncategorised last", () => {
-    const out = groupThemes([
-      BASIC,
-      theme("volt", "electronics"),
-      theme("loose", null),
-      theme("toybox", "toys"),
-      theme("minimal", "Fashion"),
-      theme("circuit", "electronics"),
-      theme("bold", " fashion "),
-    ]);
-    expect(out.groups.map((g) => [g.category, keys(g.themes)])).toEqual([
-      ["fashion", ["minimal", "bold"]],
-      ["electronics", ["volt", "circuit"]],
-      ["toys", ["toybox"]],
-      [null, ["loose"]],
-    ]);
-    expect(out.showHeadings).toBe(true);
-  });
-
-  test("Basic is found wherever the API puts it, and never inside a group", () => {
-    const out = groupThemes([theme("minimal", "fashion"), BASIC]);
-    expect(out.basic).toBe(BASIC);
-    expect(out.groups.flatMap((g) => keys(g.themes))).toEqual(["minimal"]);
-  });
-
-  test("no Basic in the list", () => {
-    expect(groupThemes([theme("minimal", "fashion")]).basic).toBeNull();
-  });
-
-  test("does not reorder the caller's array", () => {
-    const list = [BASIC, theme("volt", "electronics"), theme("minimal", "fashion")];
-    groupThemes(list);
-    expect(keys(list)).toEqual(["basic", "volt", "minimal"]);
-  });
-});
 
 describe("names by locale", () => {
   test("Bangla viewers get name_bn, everyone else the English name", () => {

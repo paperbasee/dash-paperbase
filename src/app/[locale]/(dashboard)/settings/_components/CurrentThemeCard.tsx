@@ -10,7 +10,7 @@ import { THEME_EDITOR_HREF } from "@/lib/theme-editor/access";
 import type { ThemeCurrent, ThemeSummary } from "@/lib/theme-editor/api";
 import { BASIC_THEME_KEY, themeNameByKey } from "@/lib/theme-editor/theme-groups";
 import { settingsInvertedButtonClassName } from "../SettingsSectionBody";
-import { ThemePill, ThemeThumbnail, useCategoryLabel } from "./ThemeLibrary";
+import { ThemePill, ThemeThumbnail, useCategoryLabel } from "./ThemeCardParts";
 
 /** The theme shoppers see now, who last saved it, and whether a draft is waiting. */
 export function CurrentThemeCard({
