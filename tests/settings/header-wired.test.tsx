@@ -1,11 +1,12 @@
 /**
- * The header, wired (2026-09-24) -- the last places on the editor.
- *
- * Four settings of the one `header` section. Three arrangements where this
- * offered five (the two with the menu beside the name were taken back), and
- * search is a box or a mark with no "off". The drawing is the shop's own name
- * and departments -- it said "GADZILLA" over five invented aisles for every
- * shop -- and reads the section, not the editor's held choices.
+ * The header, wired (2026-09-24) -- the last places on the editor -- and five
+ * designs since 2026-09-25 (owner: "every image I give you will be one
+ * design"): classic, centred, split, minimal and compact. Search is always an
+ * icon; the icons' weight, their words and the cart's shape are places of
+ * their own; staying on screen has three answers. The drawing is the shop's
+ * own name and departments -- it said "GADZILLA" over five invented aisles for
+ * every shop -- with the shop's Phosphor icons, and reads the section, not the
+ * editor's held choices.
  */
 import { renderToStaticMarkup } from "react-dom/server";
 import { NextIntlClientProvider } from "next-intl";
@@ -32,10 +33,18 @@ const manifest: ThemeManifest = {
       at_most_one: true,
       required: true,
       settings: [
-        { id: "header_layout", type: "select", ...labels("layout"), options: ["bar", "masthead", "drawer"], default: "bar" },
-        { id: "search", type: "select", ...labels("search"), options: ["box", "icon"], default: "box" },
-        { id: "sticky", type: "boolean", ...labels("sticky"), default: true },
+        {
+          id: "header_layout",
+          type: "select",
+          ...labels("layout"),
+          options: ["classic", "centred", "split", "minimal", "compact"],
+          default: "classic",
+        },
+        { id: "sticky", type: "select", ...labels("sticky"), options: ["off", "always", "scroll_up"], default: "scroll_up" },
         { id: "show_account_links", type: "boolean", ...labels("marks"), default: false },
+        { id: "icon_weight", type: "select", ...labels("icons"), options: ["light", "regular", "bold"], default: "regular" },
+        { id: "icon_labels", type: "boolean", ...labels("words"), default: false },
+        { id: "cart_icon", type: "select", ...labels("cart"), options: ["bag", "basket", "cart"], default: "bag" },
       ],
     },
     announcement_bar: { ...labels("Notice"), settings: [] },
@@ -57,7 +66,7 @@ const section = (id: string, type: string, over: Partial<ThemeSection> = {}): Th
   ...over,
 });
 
-/** As every stored document holds it today: sticky, the bar, no account links. */
+/** As `theming/0036` left a document that had the bar: classic, staying when scrolling up, no account links. */
 function editor(): EditorState {
   return initEditorState({
     document: {
@@ -66,7 +75,9 @@ function editor(): EditorState {
       header: {
         sections: [
           section("announcement-bar", "announcement_bar", { hidden: true }),
-          section("header", "header", { settings: { header_layout: "bar", sticky: true, show_account_links: false } }),
+          section("header", "header", {
+            settings: { header_layout: "classic", sticky: "scroll_up", show_account_links: false },
+          }),
         ],
       },
       footer: { sections: [section("footer", "footer")] },
@@ -89,25 +100,33 @@ describe("the header is wired", () => {
     for (const slot of SLOTS.header) expect(wiringFor("header", slot.key), slot.key).toBeTruthy();
   });
 
-  test("three arrangements, and search is never off", () => {
+  test("five designs, and no search box to choose", () => {
     const options = (key: string) => SLOTS.header.find((one) => one.key === key)!.options!.map((one) => one.value);
-    expect(options("layout")).toEqual(["bar", "masthead", "drawer"]);
-    expect(options("search")).toEqual(["box", "icon"]);
+    expect(options("layout")).toEqual(["classic", "centred", "split", "minimal", "compact"]);
+    expect(options("sticky")).toEqual(["scroll_up", "always", "off"]);
+    expect(options("icons")).toEqual(["light", "regular", "bold"]);
+    expect(options("cart")).toEqual(["bag", "basket", "cart"]);
+    expect(SLOTS.header.find((one) => one.key === "search")).toBeUndefined();
   });
 
-  test("a document written before search was a choice reads as what the shop drew", () => {
+  test("a document that never chose the icons reads as the theme's defaults", () => {
     const document = editor().document;
-    expect(slotValueFor(document, place("layout"))).toBe("bar");
-    expect(slotValueFor(document, place("search"))).toBe("box");
-    expect(slotValueFor(document, place("sticky"))).toBe("on");
+    expect(slotValueFor(document, place("layout"))).toBe("classic");
+    expect(slotValueFor(document, place("sticky"))).toBe("scroll_up");
     expect(slotValueFor(document, place("marks"))).toBe("off");
+    expect(slotValueFor(document, place("icons"))).toBe("regular");
+    expect(slotValueFor(document, place("words"))).toBe("off");
+    expect(slotValueFor(document, place("cart"))).toBe("bag");
   });
 
   test("each choice writes its own setting", () => {
-    expect(settingsOf(pick(editor(), "layout", "drawer")).header_layout).toBe("drawer");
-    expect(settingsOf(pick(editor(), "search", "icon")).search).toBe("icon");
-    expect(settingsOf(pick(editor(), "sticky", "off")).sticky).toBe(false);
+    expect(settingsOf(pick(editor(), "layout", "centred")).header_layout).toBe("centred");
+    expect(settingsOf(pick(editor(), "sticky", "always")).sticky).toBe("always");
+    expect(settingsOf(pick(editor(), "sticky", "off")).sticky).toBe("off");
     expect(settingsOf(pick(editor(), "marks", "on")).show_account_links).toBe(true);
+    expect(settingsOf(pick(editor(), "icons", "light")).icon_weight).toBe("light");
+    expect(settingsOf(pick(editor(), "words", "on")).icon_labels).toBe(true);
+    expect(settingsOf(pick(editor(), "cart", "basket")).cart_icon).toBe("basket");
   });
 });
 
@@ -142,45 +161,65 @@ function draw(slotKey: string, variant: string, over: { live?: ThemeSection; sho
 }
 
 const header = (settings: Record<string, unknown>) => section("header", "header", { settings });
-const marks = (html: string) => (html.match(/size-4 rounded-xs bg-current\/25/g) ?? []).length;
+const marks = (html: string) => (html.match(/data-mark="/g) ?? []).length;
+const has = (html: string, mark: string) => html.includes(`data-mark="${mark}"`);
 
 describe("the canvas draws this shop's header", () => {
   test("its own name and departments", () => {
-    const html = draw("layout", "bar");
+    const html = draw("layout", "classic");
     expect(html).toContain("GADZILLA");
-    expect(html).toContain("Smart Home");
+    expect(html).toContain("Kids");
   });
 
-  test("the bar carries every department, the centred name five", () => {
-    expect(draw("layout", "bar")).toContain("Footwear");
-    const masthead = draw("layout", "masthead");
-    expect(masthead).toContain("Kids");
-    expect(masthead).not.toContain("Smart Home");
+  test("classic, split and minimal carry five departments, centred eight in a row below", () => {
+    for (const design of ["classic", "split", "minimal"]) {
+      const html = draw("layout", design);
+      expect(html, design).toContain("Kids");
+      expect(html, design).not.toContain("Smart Home");
+    }
+    expect(draw("layout", "centred")).toContain("Footwear");
   });
 
-  test("the drawer hides the departments behind a menu mark", () => {
-    const html = draw("layout", "drawer");
+  test("minimal and centred are in small capitals, classic and split are not", () => {
+    expect(draw("layout", "minimal")).toContain("uppercase tracking-[0.08em]");
+    expect(draw("layout", "centred")).toContain("uppercase tracking-[0.08em]");
+    expect(draw("layout", "classic")).not.toContain("uppercase tracking-[0.08em]");
+    expect(draw("layout", "split")).not.toContain("uppercase tracking-[0.08em]");
+  });
+
+  test("centred always writes Search beside its glass", () => {
+    expect(draw("layout", "centred")).toContain(">Search</span>");
+  });
+
+  test("compact hides the departments behind a menu mark", () => {
+    const html = draw("layout", "compact");
     expect(html).not.toContain("Audio");
-    expect(html).toContain("gap-[3px]");
-  });
-
-  test("search as a box or a mark", () => {
-    expect(draw("search", "box")).toContain("rounded-xs bg-current/12");
-    const icon = draw("search", "icon");
-    expect(icon).not.toContain("rounded-xs bg-current/12");
-    expect(icon).toContain("rounded-full border border-current/35");
+    expect(has(html, "menu")).toBe(true);
   });
 
   test("account and wishlist beside the cart, and no wishlist where it is off", () => {
-    expect(marks(draw("marks", "off"))).toBe(1);
-    expect(marks(draw("marks", "on"))).toBe(3);
-    expect(marks(draw("marks", "on", { shop: { ...SHOP, wishlist: false } }))).toBe(2);
+    expect(marks(draw("marks", "off"))).toBe(2); // search and cart
+    expect(marks(draw("marks", "on"))).toBe(4);
+    expect(has(draw("marks", "on", { shop: { ...SHOP, wishlist: false } }), "wishlist")).toBe(false);
+  });
+
+  test("the icons are drawn in the weight being chosen, the cart in its shape", () => {
+    expect(new Set(["light", "regular", "bold"].map((weight) => draw("icons", weight))).size).toBe(3);
+    expect(new Set(["bag", "basket", "cart"].map((cart) => draw("cart", cart))).size).toBe(3);
+  });
+
+  test("words beside the icons", () => {
+    expect(draw("words", "on")).toContain(">Cart</span>");
+    expect(draw("words", "off")).not.toContain(">Cart</span>");
   });
 
   test("every page's header reads the section, not the editor's held choices", () => {
-    const live = header({ header_layout: "bar", search: "icon", show_account_links: true });
-    const html = draw("header", "bar", { live, page: "home" });
-    expect(html).not.toContain("rounded-xs bg-current/12");
-    expect(marks(html)).toBe(3);
+    const live = header({ header_layout: "compact", show_account_links: true, icon_labels: true });
+    // The design is handed in as the variant, as every page does; the marks
+    // and the words are read from the section, with no held choices at all.
+    const html = draw("header", "compact", { live, page: "home" });
+    expect(has(html, "menu")).toBe(true);
+    expect(marks(html)).toBe(5);
+    expect(html).toContain(">Account</span>");
   });
 });

@@ -1384,37 +1384,31 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
       ],
     },
     /*
-      Wired 2026-09-24, the last places on the editor. Three arrangements where
-      this offered five: "logo left, menu beside it" and "menu left, logo
-      centred" were taken back -- with ten to nineteen departments only a few
-      fit beside a name, which the centred name already does. Search lost its
-      "off": the header is the only place a shopper can search.
+      Wired 2026-09-24, the last places on the editor; five designs since
+      2026-09-25 (owner: "every image I give you will be one design") -- four
+      from the shops the owner pointed at, and the menu button kept from
+      before. Search lost its box: every design searches from an icon, as every
+      one of those shops does, and there is still no "off".
     */
     {
       key: "layout",
       label: "headerLayout",
-      initial: "bar",
+      initial: "classic",
       options: [
-        { value: "bar", label: "headerBar", note: "headerBarNote", shape: "line" },
-        { value: "masthead", label: "headerMasthead", note: "headerMastheadNote", shape: "block" },
-        { value: "drawer", label: "headerDrawer", note: "headerDrawerNote", shape: "blank" },
-      ],
-    },
-    {
-      key: "search",
-      label: "headerSearch",
-      initial: "box",
-      options: [
-        { value: "box", label: "searchBox", note: "searchBoxNote", shape: "line" },
-        { value: "icon", label: "searchIcon", note: "searchIconNote", shape: "blank" },
+        { value: "classic", label: "headerClassic", note: "headerClassicNote", shape: "line" },
+        { value: "centred", label: "headerCentred", note: "headerCentredNote", shape: "block" },
+        { value: "split", label: "headerSplit", note: "headerSplitNote", shape: "line" },
+        { value: "minimal", label: "headerMinimal", note: "headerMinimalNote", shape: "line" },
+        { value: "compact", label: "headerCompact", note: "headerCompactNote", shape: "blank" },
       ],
     },
     {
       key: "sticky",
       label: "sticky",
-      initial: "on",
+      initial: "scroll_up",
       options: [
-        { value: "on", label: "on", note: "stickyNote", shape: "line" },
+        { value: "scroll_up", label: "stickyScrollUp", note: "stickyScrollUpNote", shape: "line" },
+        { value: "always", label: "stickyAlways", note: "stickyAlwaysNote", shape: "line" },
         { value: "off", label: "off", note: "stickyOffNote", shape: "blank" },
       ],
     },
@@ -1425,6 +1419,40 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
       options: [
         { value: "off", label: "marksCartOnly", shape: "line" },
         { value: "on", label: "marksBoth", note: "marksBothNote", shape: "row" },
+      ],
+    },
+    /*
+      The icons, 2026-09-25: how heavy they are drawn (Phosphor's weights,
+      regular the owner's pick of 2026-09-19), whether their words sit beside
+      them on a computer, and which shape the cart is.
+    */
+    {
+      key: "icons",
+      label: "headerIcons",
+      initial: "regular",
+      options: [
+        { value: "light", label: "iconsLight", note: "iconsLightNote", shape: "line" },
+        { value: "regular", label: "iconsRegular", note: "iconsRegularNote", shape: "line" },
+        { value: "bold", label: "iconsBold", note: "iconsBoldNote", shape: "line" },
+      ],
+    },
+    {
+      key: "words",
+      label: "headerWords",
+      initial: "off",
+      options: [
+        { value: "off", label: "headerWordsOff", shape: "line" },
+        { value: "on", label: "headerWordsOn", note: "headerWordsOnNote", shape: "row" },
+      ],
+    },
+    {
+      key: "cart",
+      label: "headerCart",
+      initial: "bag",
+      options: [
+        { value: "bag", label: "cartBag", shape: "line" },
+        { value: "basket", label: "cartBasket", shape: "line" },
+        { value: "cart", label: "cartCart", shape: "line" },
       ],
     },
   ],

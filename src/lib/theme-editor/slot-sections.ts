@@ -71,29 +71,26 @@ export const WIRED_SLOTS: Partial<Record<SlotPageKey, Record<string, WiredSlot>>
   header: {
     notice: { page: "header", sections: { message: "announcement_bar" }, off: "off" },
     /*
-      The rest of the header, 2026-09-24: four settings of the one `header`
-      section, the theme's default first in each map.
+      The rest of the header: settings of the one `header` section, the
+      theme's default FIRST in each map -- a document that has never chosen
+      reads as the first value whose settings it does not contradict.
     */
     layout: {
       page: "header",
       sections: {
-        bar: { type: "header", settings: { header_layout: "bar" } },
-        masthead: { type: "header", settings: { header_layout: "masthead" } },
-        drawer: { type: "header", settings: { header_layout: "drawer" } },
-      },
-    },
-    search: {
-      page: "header",
-      sections: {
-        box: { type: "header", settings: { search: "box" } },
-        icon: { type: "header", settings: { search: "icon" } },
+        classic: { type: "header", settings: { header_layout: "classic" } },
+        centred: { type: "header", settings: { header_layout: "centred" } },
+        split: { type: "header", settings: { header_layout: "split" } },
+        minimal: { type: "header", settings: { header_layout: "minimal" } },
+        compact: { type: "header", settings: { header_layout: "compact" } },
       },
     },
     sticky: {
       page: "header",
       sections: {
-        on: { type: "header", settings: { sticky: true } },
-        off: { type: "header", settings: { sticky: false } },
+        scroll_up: { type: "header", settings: { sticky: "scroll_up" } },
+        always: { type: "header", settings: { sticky: "always" } },
+        off: { type: "header", settings: { sticky: "off" } },
       },
     },
     marks: {
@@ -101,6 +98,29 @@ export const WIRED_SLOTS: Partial<Record<SlotPageKey, Record<string, WiredSlot>>
       sections: {
         off: { type: "header", settings: { show_account_links: false } },
         on: { type: "header", settings: { show_account_links: true } },
+      },
+    },
+    icons: {
+      page: "header",
+      sections: {
+        regular: { type: "header", settings: { icon_weight: "regular" } },
+        light: { type: "header", settings: { icon_weight: "light" } },
+        bold: { type: "header", settings: { icon_weight: "bold" } },
+      },
+    },
+    words: {
+      page: "header",
+      sections: {
+        off: { type: "header", settings: { icon_labels: false } },
+        on: { type: "header", settings: { icon_labels: true } },
+      },
+    },
+    cart: {
+      page: "header",
+      sections: {
+        bag: { type: "header", settings: { cart_icon: "bag" } },
+        basket: { type: "header", settings: { cart_icon: "basket" } },
+        cart: { type: "header", settings: { cart_icon: "cart" } },
       },
     },
   },

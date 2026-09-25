@@ -38,6 +38,17 @@ import {
   WashingMachine,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+import {
+  BagIcon,
+  BasketIcon,
+  HeartIcon,
+  ListIcon,
+  MagnifyingGlassIcon,
+  ShoppingCartSimpleIcon,
+  UserIcon,
+  type Icon as PhosphorIcon,
+  type IconWeight,
+} from "@phosphor-icons/react";
 import type { FieldOption } from "@/lib/theme-editor/field-specs";
 
 /**
@@ -473,105 +484,120 @@ export function ShopChrome({
   }
 
   /*
-    The header, WIRED 2026-09-24 like the footer: its choices are the header
-    section's settings, read from `live` -- the shop's document -- and only
-    from this editor's held choices where there is no section to read. `force`
-    is the value an open place is showing. Drawn with the shop's own name and
-    departments; it drew "GADZILLA" and five invented aisles for every shop.
+    The header, WIRED 2026-09-24 like the footer; five designs since
+    2026-09-25. Its choices are the header section's settings, read from
+    `live` -- the shop's document -- and only from this editor's held choices
+    where there is no section to read. `force` is the value an open place is
+    showing. Drawn with the shop's own name and departments, and with the
+    shop's own Phosphor icons in the chosen weight, because the weight and the
+    cart's shape ARE the choices being made.
   */
-  const headerDrawing = (force: { layout?: string; search?: string; marks?: string } = {}) => {
+  const headerDrawing = (
+    force: { layout?: string; marks?: string; icons?: string; words?: string; cart?: string } = {},
+  ) => {
     const held = live?.type === "header" ? (live.settings ?? {}) : {};
-    const layout =
-      force.layout ?? (typeof held.header_layout === "string" ? held.header_layout : (settings?.layout ?? "bar"));
-    const search = force.search ?? (typeof held.search === "string" ? held.search : (settings?.search ?? "box"));
-    const marksOn =
-      (force.marks ??
-        (typeof held.show_account_links === "boolean"
-          ? held.show_account_links
-            ? "on"
-            : "off"
-          : (settings?.marks ?? "off"))) === "on";
-    // The account mark always (every shop has accounts), the wishlist only
-    // where it is switched on, and the cart.
-    const marks = marksOn ? (shop && !shop.wishlist ? 2 : 3) : 1;
+    const chosen = (key: string, place: string, fallback: string) => {
+      const value = held[key];
+      if (typeof value === "string" && value) return value;
+      return settings?.[place] ?? fallback;
+    };
+    const switched = (key: string, place: string) => {
+      const value = held[key];
+      if (typeof value === "boolean") return value ? "on" : "off";
+      return settings?.[place] ?? "off";
+    };
+    const layout = force.layout ?? chosen("header_layout", "layout", "classic");
+    const weight = (force.icons ?? chosen("icon_weight", "icons", "regular")) as IconWeight;
+    const cart = force.cart ?? chosen("cart_icon", "cart", "bag");
+    const words = (force.words ?? switched("icon_labels", "words")) === "on";
+    const marksOn = (force.marks ?? switched("show_account_links", "marks")) === "on";
     const name = (shop?.name || t("footerShopName")).toUpperCase();
     const aisles = departments?.length ? departments.map((one) => one.label) : [t("catExampleCategory")];
-    const logo = <span className="text-sm font-semibold tracking-[0.14em]">{name}</span>;
-    const box = <span className="h-7 min-w-0 flex-1 rounded-xs bg-current/12" />;
-    const searchMark = <span className="size-4 rounded-full border border-current/35" />;
-    const icons = (
-      <span className="flex shrink-0 items-center gap-2.5">
-        {search === "icon" ? searchMark : null}
-        {Array.from({ length: marks }, (_, i) => (
-          <span key={i} className="size-4 rounded-xs bg-current/25" />
-        ))}
+    const CartIcon = cart === "basket" ? BasketIcon : cart === "cart" ? ShoppingCartSimpleIcon : BagIcon;
+
+    // A mark and its word: the word before the icon, as the shop draws
+    // Account and Cart; after it for Search.
+    const mark = (Icon: PhosphorIcon, label: string, word?: string, after = false) => (
+      <span key={label} data-mark={label} className="flex items-center gap-1.5">
+        {word && !after ? <span className="text-[10px]">{word}</span> : null}
+        <Icon size={15} weight={weight} aria-hidden />
+        {word && after ? <span className="text-[10px]">{word}</span> : null}
       </span>
     );
-    const nav = (centred: boolean, count?: number) => (
-      <div
-        className={`flex gap-4 overflow-hidden px-4 py-2.5 text-[10px] uppercase tracking-[0.08em] text-current/50 ${
-          centred ? "justify-center" : ""
-        }`}
+    const icons = (withSearch: boolean) => (
+      <span className="flex shrink-0 items-center gap-2.5">
+        {withSearch ? mark(MagnifyingGlassIcon, "search", words ? t("headerWordSearch") : undefined, true) : null}
+        {marksOn ? mark(UserIcon, "account", words ? t("headerWordAccount") : undefined) : null}
+        {/* The wishlist only where it is switched on. */}
+        {marksOn && !(shop && !shop.wishlist) ? mark(HeartIcon, "wishlist") : null}
+        {mark(CartIcon, "cart", words ? t("headerWordCart") : undefined)}
+      </span>
+    );
+    // Plain letters in Classic and Split, small spaced capitals in Centred and
+    // Minimal -- the shop's `header-menu` letters. One line tall and wrapping,
+    // like the shop's, so a department that does not fit is hidden whole.
+    const nav = (count: number, caps: boolean, className = "") => (
+      <span
+        className={`flex h-4 min-w-0 flex-wrap items-center gap-x-4 overflow-hidden leading-4 ${
+          caps ? "text-[9.5px] uppercase tracking-[0.08em]" : "text-[11px]"
+        } ${className}`}
       >
-        {(count ? aisles.slice(0, count) : aisles).map((aisle) => (
+        {aisles.slice(0, count).map((aisle) => (
           <span key={aisle} className="shrink-0">
             {aisle}
           </span>
         ))}
-      </div>
+      </span>
     );
-    const bar = (children: React.ReactNode) => (
-      <div className="flex items-center gap-3 border-b border-border bg-shop-header px-4 py-3 text-shop-header-foreground">{children}</div>
-    );
+    const logo = <span className="shrink-0 text-sm font-semibold tracking-[0.14em]">{name}</span>;
+    const frame = "border-b border-border bg-shop-header text-shop-header-foreground";
 
-    if (layout === "masthead") {
-      // The name on its own line; under it search, five departments, the marks.
+    if (layout === "centred") {
+      // Search, the name in the middle, the icons; the menu in its own row.
       return (
-        <div>
-          <div className="border-b border-border bg-shop-header px-4 pb-3 pt-5 text-center text-shop-header-foreground">
-            {logo}
-            <div className="mt-3 grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-3">
-              <span className="flex min-w-0">{search === "box" ? <span className="h-6 w-full max-w-[7rem] rounded-xs bg-current/12" /> : searchMark}</span>
-              {nav(true, 5)}
-              <span className="flex justify-end">
-                {Array.from({ length: marks }, (_, i) => (
-                  <span key={i} className="ml-2.5 size-4 rounded-xs bg-current/25" />
-                ))}
-              </span>
-            </div>
+        <div className={frame}>
+          <div className="grid grid-cols-[minmax(max-content,1fr)_auto_minmax(max-content,1fr)] items-center gap-3 px-4 py-3.5">
+            <span className="flex">{mark(MagnifyingGlassIcon, "search", t("headerWordSearch"), true)}</span>
+            <span className="text-base font-semibold tracking-[0.16em]">{name}</span>
+            <span className="flex justify-end">{icons(false)}</span>
+          </div>
+          <div className="flex justify-center border-t border-current/10 bg-current/[0.04] px-4 py-2">
+            {nav(8, true, "justify-center")}
           </div>
         </div>
       );
     }
-    if (layout === "drawer") {
+    if (layout === "split") {
+      // The menu in the middle of the page, between the name and the icons.
       return (
-        <div className="border-b border-current/10">
-          {bar(
-            <>
-              <span className="flex size-4 shrink-0 flex-col justify-center gap-[3px]" aria-hidden>
-                <span className="block h-px bg-current/60" />
-                <span className="block h-px bg-current/60" />
-                <span className="block h-px bg-current/60" />
-              </span>
-              {logo}
-              {search === "box" ? box : <span className="flex-1" />}
-              {icons}
-            </>,
-          )}
+        // The outer two never narrower than what they hold, as on the shop, so
+        // the menu takes what is left rather than sliding under them.
+        <div
+          className={`grid grid-cols-[minmax(max-content,1fr)_minmax(0,auto)_minmax(max-content,1fr)] items-center gap-4 px-4 py-3 ${frame}`}
+        >
+          <span className="flex">{logo}</span>
+          {nav(5, false, "justify-center")}
+          <span className="flex justify-end">{icons(true)}</span>
         </div>
       );
     }
-    // bar: the shop's name, search, the marks, and every department underneath.
+    if (layout === "compact") {
+      // The menu behind a button, as on a phone.
+      return (
+        <div className={`flex items-center gap-3 px-4 py-3 ${frame}`}>
+          <ListIcon size={16} weight={weight} aria-hidden data-mark="menu" />
+          {logo}
+          <span className="flex-1" />
+          {icons(true)}
+        </div>
+      );
+    }
+    // Classic, and Minimal: the same row in small capitals.
     return (
-      <div>
-        {bar(
-          <>
-            {logo}
-            {search === "box" ? box : <span className="flex-1" />}
-            {icons}
-          </>,
-        )}
-        <div className="border-b border-current/10">{nav(false)}</div>
+      <div className={`flex items-center gap-4 px-4 py-3 ${frame}`}>
+        {logo}
+        {nav(5, layout === "minimal", "flex-1")}
+        {icons(true)}
       </div>
     );
   };
@@ -2949,23 +2975,33 @@ export function ShopChrome({
     case "checkout:after":
       return <p className="px-4 py-3 text-center text-[11px] text-current/55">{t("afterExample")}</p>;
 
-    // The arrangement is the whole header; search and the marks draw it too,
+    // The design is the whole header; the marks and the icons draw it too,
     // with the value they are showing, so a merchant sees the choice in place.
     case "header:layout":
       return headerDrawing({ layout: variant });
 
-    case "header:search":
-      return headerDrawing({ search: variant });
-
     case "header:sticky":
       return (
         <p className="px-4 py-3 text-center text-[12px] text-current/55">
-          {variant === "off" ? t("stickyOffExample") : t("stickyExample")}
+          {variant === "off"
+            ? t("stickyOffExample")
+            : variant === "always"
+              ? t("stickyAlwaysExample")
+              : t("stickyExample")}
         </p>
       );
 
     case "header:marks":
       return headerDrawing({ marks: variant });
+
+    case "header:icons":
+      return headerDrawing({ icons: variant });
+
+    case "header:words":
+      return headerDrawing({ words: variant });
+
+    case "header:cart":
+      return headerDrawing({ cart: variant });
 
     // The arrangement is the whole footer; every other footer place draws its
     // own part, from the same function, with the value it is showing.

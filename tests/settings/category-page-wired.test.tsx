@@ -76,9 +76,14 @@ const manifest: ThemeManifest = {
       at_most_one: true,
       required: true,
       settings: [
-        { id: "header_layout", type: "select", ...labels("header_layout"), options: ["bar", "masthead", "drawer"], default: "bar" },
-        { id: "search", type: "select", ...labels("search"), options: ["box", "icon"], default: "box" },
-        { id: "sticky", type: "boolean", ...labels("sticky"), default: true },
+        {
+          id: "header_layout",
+          type: "select",
+          ...labels("header_layout"),
+          options: ["classic", "centred", "split", "minimal", "compact"],
+          default: "classic",
+        },
+        { id: "sticky", type: "select", ...labels("sticky"), options: ["off", "always", "scroll_up"], default: "scroll_up" },
         { id: "show_account_links", type: "boolean", ...labels("show_account_links"), default: false },
       ],
     },
