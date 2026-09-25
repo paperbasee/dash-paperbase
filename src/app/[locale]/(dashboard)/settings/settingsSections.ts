@@ -7,6 +7,7 @@ import {
   BellRingingIcon, 
   AppStoreLogoIcon,
   TruckIcon,
+  GavelIcon,
 } from "@phosphor-icons/react";
 
 import {
@@ -18,7 +19,6 @@ import {
   Users,
   Globe,
   Megaphone,
-  FileText,
 } from "lucide-react";
 import { PROMOTION_TABS } from "./sections/promotions/promotionTabs";
 
@@ -145,7 +145,7 @@ export function resolveSettingsSection(
 /** Every settings section that exists, before any feature-flag filtering. */
 export const ALL_SECTIONS: SettingsSectionNavItem[] = [
   { id: "store", labelKey: "sectionStore", icon: StorefrontIcon },
-  { id: "policies", labelKey: "sectionPolicies", icon: FileText },
+  { id: "policies", labelKey: "sectionPolicies", icon: GavelIcon },
   { id: "customization", labelKey: "sectionCustomization", icon: Palette },
   { id: "promotions", labelKey: "sectionPromotions", icon: Megaphone },
   {
