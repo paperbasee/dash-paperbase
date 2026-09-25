@@ -2,6 +2,7 @@ import type { NextConfig } from "next";
 import createNextIntlPlugin from "next-intl/plugin";
 import { withSentryConfig } from "@sentry/nextjs/config";
 import { dashboardFrameSrc, previewOrigin } from "./src/lib/theme-editor/preview-origin";
+import { devMediaOrigin } from "./src/lib/dev-media-origin";
 
 const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 
@@ -36,6 +37,11 @@ const sentryIngest = (() => {
     return "";
   }
 })();
+
+// Local MinIO in development: pictures load from it and direct uploads PUT to
+// it. Empty in production, whose media is https (R2) and already allowed.
+const mediaOrigin = devMediaOrigin(isDev, process.env.NEXT_PUBLIC_MEDIA_BASE_URL);
+const withMedia = mediaOrigin ? ` ${mediaOrigin}` : "";
 
 const cspReportUri = apiOrigin
   ? `report-uri ${apiOrigin}/api/v1/csp-report/?app=dash`
@@ -78,10 +84,10 @@ const securityHeaders = [
       // Theme editor: the storefront preview host, only when NEXT_PUBLIC_STOREFRONT_PREVIEW_ORIGIN is set.
       dashboardFrameSrc(previewOrigin(process.env.NEXT_PUBLIC_STOREFRONT_PREVIEW_ORIGIN)),
       "style-src 'self' 'unsafe-inline'",
-      `img-src 'self' data: blob: https: ${apiOrigin}`,
+      `img-src 'self' data: blob: https: ${apiOrigin}${withMedia}`,
       "font-src 'self' data:",
       // Allow the backend API origin explicitly (http in dev, https in prod).
-      `connect-src 'self' ${apiOrigin} ${wsOrigin} https://challenges.cloudflare.com https://*.r2.cloudflarestorage.com ${sentryIngest}`,
+      `connect-src 'self' ${apiOrigin}${withMedia} ${wsOrigin} https://challenges.cloudflare.com https://*.r2.cloudflarestorage.com ${sentryIngest}`,
       "frame-ancestors 'none'",
       ...(cspReportUri ? [cspReportUri] : []),
     ].join("; "),
