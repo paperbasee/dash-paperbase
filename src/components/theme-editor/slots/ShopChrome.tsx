@@ -702,16 +702,21 @@ export function ShopChrome({
       ) : (
         <span className={wordClass}>{name}</span>
       );
-    const logo = brandMark("shrink-0 text-sm font-semibold tracking-[0.14em]");
-    const frame = "border-b border-border bg-shop-header text-shop-header-foreground";
+    // A long name as the shop draws it (2026-09-26): two lines at most, then
+    // "…", and never more than 40% of the header, so the menu and the icons
+    // keep their room. The header is the measure (`@container`), as the
+    // screen is the shop's.
+    const nameFits = "min-w-0 max-w-[40cqw] line-clamp-2 break-words";
+    const logo = brandMark(`${nameFits} text-sm font-semibold tracking-[0.14em]`);
+    const frame = "@container border-b border-border bg-shop-header text-shop-header-foreground";
 
     if (layout === "centred") {
       // Search, the name in the middle, the icons; the menu in its own row.
       return (
         <div className={frame}>
-          <div className="grid grid-cols-[minmax(max-content,1fr)_auto_minmax(max-content,1fr)] items-center gap-3 px-4 py-3.5">
+          <div className="grid grid-cols-[minmax(max-content,1fr)_minmax(0,auto)_minmax(max-content,1fr)] items-center gap-3 px-4 py-3.5">
             <span className="flex">{mark(MagnifyingGlassIcon, "search", t("headerWordSearch"), true)}</span>
-            {brandMark("text-base font-semibold tracking-[0.16em]")}
+            {brandMark(`${nameFits} text-center text-base font-semibold tracking-[0.16em]`)}
             <span className="flex justify-end">{icons(false)}</span>
           </div>
           <div className="flex justify-center border-t border-current/10 bg-current/[0.04] px-4 py-2">

@@ -354,6 +354,20 @@ describe("the shop's logo (2026-09-26)", () => {
     expect(html).toContain("GADZILLA");
   });
 
+  test("a long name is two lines at most, as on the shop (2026-09-26)", () => {
+    const long = { ...SHOP, name: "Gadzilla Electronics and Lifestyle" };
+    for (const layout of ["classic", "centred", "split", "minimal", "compact"]) {
+      const html = draw("layout", layout, { live: header({ header_layout: layout }), shop: long });
+      const word = html.match(/<span class="([^"]*)">GADZILLA ELECTRONICS AND LIFESTYLE</);
+      expect(word?.[1], layout).toContain("line-clamp-2");
+      expect(word?.[1], layout).toContain("max-w-[40cqw]");
+      expect(word?.[1], layout).not.toContain("shrink-0");
+      expect(html, layout).toContain("@container");
+    }
+    const centred = draw("layout", "centred", { live: header({ header_layout: "centred" }), shop: long });
+    expect(centred).toContain("grid-cols-[minmax(max-content,1fr)_minmax(0,auto)_minmax(max-content,1fr)]");
+  });
+
   test("the picture may be an SVG, and the field knows it", () => {
     const fields = fieldSpecs(
       [
