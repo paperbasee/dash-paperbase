@@ -84,17 +84,32 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-09-22-answer-the-question-once",
+    date: "2026-09-22",
+    version: "4.109.3",
+    tag: "new",
+    href: "/products",
+    title: {
+      en: "Answer a question once, not forty times",
+      bn: "একবার উত্তর দিন, চল্লিশ বার নয়",
+    },
+    body: {
+      en: "Every product now has a Questions & answers box on its page in your dashboard — write “does it come in XL” and your answer once, and it shows on that product in your shop. There is a second one for questions about the whole shop, like delivery outside Dhaka or exchanges, which you can put on your home page, a category or the blog. Shoppers tap a question to open the answer, and their browser's find-on-page still reaches the text inside; the editor draws the questions centred, as your shop does.",
+      bn: "প্রতিটি পণ্যের পাতায় এখন ড্যাশবোর্ডে “প্রশ্ন ও উত্তর” বক্স আছে — “XL সাইজ আছে কি” আর তার উত্তর একবার লিখে রাখলেই সেটি আপনার দোকানে ওই পণ্যের পাতায় দেখা যাবে। পুরো দোকান নিয়ে প্রশ্নের জন্য আলাদা একটি আছে — যেমন ঢাকার বাইরে ডেলিভারি বা বদলানোর নিয়ম — যা হোম পেজ, ক্যাটাগরি বা ব্লগে বসানো যায়। ক্রেতা প্রশ্নে চাপ দিলেই উত্তর খুলে যায়, আর ব্রাউজারের খোঁজার সুবিধাও ভেতরের লেখা পর্যন্ত পৌঁছায়; এডিটরও প্রশ্নগুলো আপনার দোকানের মতো মাঝখানে আঁকে।",
+    },
+  },
+  {
     id: "2026-09-22-put-a-video-on-your-shop",
     date: "2026-09-22",
-    version: "4.109.2",
+    version: "4.109.3",
     tag: "new",
     title: {
       en: "Put a video on your shop",
       bn: "দোকানে ভিডিও যোগ করুন",
     },
     body: {
-      en: "On Premium, your home page can open with a video instead of pictures: paste a link from YouTube, Facebook or Vimeo — any normal link works, including a Shorts or a share link. Shoppers see your cover picture and a round, solid play button, and nothing is loaded from YouTube until somebody presses it, so the page stays fast and no shopper is reported to anyone who never watched. Reels and other tall videos have a shape of their own so they are not squeezed into a wide box.",
-      bn: "প্রিমিয়ামে আপনার হোম পেজ ছবির বদলে একটি ভিডিও দিয়ে শুরু হতে পারে: ইউটিউব, ফেসবুক বা ভিমিও থেকে একটি লিংক বসান — শর্টস বা শেয়ার লিংকসহ সাধারণ যেকোনো লিংকই চলবে। ক্রেতারা আপনার কভার ছবি আর একটি গোল, ভরাট প্লে বোতাম দেখবেন, আর কেউ সেটি না চাপা পর্যন্ত ইউটিউব থেকে কিছুই লোড হয় না — তাই পাতা দ্রুত থাকে আর যে ক্রেতা ভিডিও দেখেননি তাঁর কথা কোথাও যায় না। রিলসের মতো লম্বা ভিডিওর জন্য আলাদা আকার আছে, তাই সেগুলো চওড়া বাক্সে চেপে বসে না।",
+      en: "On Premium, your home page can open with a video instead of pictures: paste a link from YouTube, Facebook or Vimeo — any normal link works, including a Shorts or a share link. Shoppers see your cover picture and a round, solid play button — and so does your editor — and nothing is loaded from YouTube until somebody presses it, so the page stays fast and no shopper is reported to anyone who never watched. Reels and other tall videos have a shape of their own so they are not squeezed into a wide box.",
+      bn: "প্রিমিয়ামে আপনার হোম পেজ ছবির বদলে একটি ভিডিও দিয়ে শুরু হতে পারে: ইউটিউব, ফেসবুক বা ভিমিও থেকে একটি লিংক বসান — শর্টস বা শেয়ার লিংকসহ সাধারণ যেকোনো লিংকই চলবে। ক্রেতারা আপনার কভার ছবি আর একটি গোল, ভরাট প্লে বোতাম দেখবেন — এডিটরেও তা-ই দেখায় —, আর কেউ সেটি না চাপা পর্যন্ত ইউটিউব থেকে কিছুই লোড হয় না — তাই পাতা দ্রুত থাকে আর যে ক্রেতা ভিডিও দেখেননি তাঁর কথা কোথাও যায় না। রিলসের মতো লম্বা ভিডিওর জন্য আলাদা আকার আছে, তাই সেগুলো চওড়া বাক্সে চেপে বসে না।",
     },
   },
   {
@@ -454,21 +469,6 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     body: {
       en: "When you add something to a page in Customization, the parts that come with Premium are listed too, marked “On the Premium plan”, so you can see what your shop could have. If your plan ever lapses, anything you already placed stays saved exactly as you left it — your shop simply stops showing it, and it comes back the day you are on Premium again.",
       bn: "কাস্টমাইজেশনে কোনো পাতায় কিছু যোগ করার সময় প্রিমিয়ামের সঙ্গে আসা অংশগুলোও তালিকায় থাকে, “প্রিমিয়াম প্ল্যানে পাওয়া যায়” লেখা সহ — তাই আপনার দোকানে আর কী কী থাকতে পারত তা দেখতে পাবেন। প্ল্যানের মেয়াদ শেষ হয়ে গেলেও আগে বসানো জিনিস যেমন ছিল তেমনই সেভ থাকে — দোকানে শুধু দেখানো বন্ধ হয়, আর আবার প্রিমিয়ামে ফিরলেই সেটি ফিরে আসে।",
-    },
-  },
-  {
-    id: "2026-09-22-answer-the-question-once",
-    date: "2026-09-22",
-    version: "4.41.0",
-    tag: "new",
-    href: "/products",
-    title: {
-      en: "Answer a question once, not forty times",
-      bn: "একবার উত্তর দিন, চল্লিশ বার নয়",
-    },
-    body: {
-      en: "Every product now has a Questions & answers box on its page in your dashboard — write “does it come in XL” and your answer once, and it shows on that product in your shop. There is a second one for questions about the whole shop, like delivery outside Dhaka or exchanges, which you can put on your home page, a category or the blog. Shoppers tap a question to open the answer, and their browser's find-on-page still reaches the text inside.",
-      bn: "প্রতিটি পণ্যের পাতায় এখন ড্যাশবোর্ডে “প্রশ্ন ও উত্তর” বক্স আছে — “XL সাইজ আছে কি” আর তার উত্তর একবার লিখে রাখলেই সেটি আপনার দোকানে ওই পণ্যের পাতায় দেখা যাবে। পুরো দোকান নিয়ে প্রশ্নের জন্য আলাদা একটি আছে — যেমন ঢাকার বাইরে ডেলিভারি বা বদলানোর নিয়ম — যা হোম পেজ, ক্যাটাগরি বা ব্লগে বসানো যায়। ক্রেতা প্রশ্নে চাপ দিলেই উত্তর খুলে যায়, আর ব্রাউজারের খোঁজার সুবিধাও ভেতরের লেখা পর্যন্ত পৌঁছায়।",
     },
   },
   {
