@@ -84,6 +84,21 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-09-22-header-and-footer-choices",
+    date: "2026-09-22",
+    version: "4.109.0",
+    tag: "new",
+    href: "/settings?tab=customization",
+    title: {
+      en: "Five header designs, your own menu, and your footer",
+      bn: "পাঁচটি হেডার ডিজাইন, আপনার নিজের মেনু, আর আপনার ফুটার",
+    },
+    body: {
+      en: "Choose one of five header designs — your name and menu on the left, your name centred with the menu in a row below, the menu in the middle of the page, a quieter small-capitals menu, or everything behind a menu button — with icons in a fine, regular or strong line, with or without their words, and a bag, basket or cart. Build its menu from your own pages, categories and links, in your order — a category opens its subcategories, and one link can be in your brand colour — keep the header on screen always, only while shoppers scroll back up, or not at all, and add account and wishlist beside the cart. Arrange your footer in columns, with your shop on one side, centred, or as a single short line, and choose what it shows: your address and phone or only your email, your social links as names or round marks, the ways you take payment, and your policy pages beside the year.",
+      bn: "পাঁচটি হেডার ডিজাইনের একটি বেছে নিন — বাঁয়ে নাম ও মেনু, মাঝখানে নাম আর নিচের সারিতে মেনু, পাতার মাঝখানে মেনু, ছোট বড়-হাতের অক্ষরে শান্ত একটি মেনু, নয়তো সবকিছু একটি মেনু বোতামের পেছনে — আইকন সরু, সাধারণ বা মোটা রেখায়, লেখাসহ বা ছাড়া, আর ব্যাগ, ঝুড়ি নাকি কার্ট। আপনার নিজের পাতা, ক্যাটাগরি ও লিংক দিয়ে আপনার ক্রমে মেনু বানান — ক্যাটাগরির ভেতরের ক্যাটাগরিগুলো খোলে, আর একটি লিংক আপনার ব্র্যান্ডের রঙে রাখা যায় — হেডার সবসময় স্ক্রিনে রাখুন, শুধু ক্রেতা উপরে স্ক্রল করলে দেখান, নয়তো একেবারেই না রাখুন, আর কার্টের পাশে অ্যাকাউন্ট ও উইশলিস্ট যোগ করুন। ফুটার সাজান কলামে, একপাশে দোকান রেখে, মাঝখানে, নয়তো ছোট এক লাইনে, আর ঠিক করুন কী দেখাবে: ঠিকানা ও ফোন নাকি শুধু ইমেইল, সোশ্যাল লিংক নামে বা গোল চিহ্নে, আপনি যেভাবে টাকা নেন, আর সালের পাশে নীতিমালার পেজগুলো।",
+    },
+  },
+  {
     id: "2026-09-22-one-announcement-bar",
     date: "2026-09-22",
     version: "4.108.0",
@@ -96,21 +111,6 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     body: {
       en: "Your top bar holds up to three messages — taking turns on a computer and moving along one line on a phone — each with its own link, the words to tap and a small icon, and a message with a link but no words to tap makes the whole bar take shoppers there. Switch on Track order and Help to show them at the left of the bar on a computer and at the bottom of the menu on a phone. Links now open in your shopper's own language, and All products opens your page of every product.",
       bn: "আপনার টপ বারে তিনটি পর্যন্ত বার্তা রাখা যায় — কম্পিউটারে পালা করে, ফোনে এক লাইনে চলমান — প্রতিটির নিজস্ব লিংক, চাপ দেওয়ার লেখা আর ছোট একটি আইকন; আর লিংক আছে কিন্তু চাপ দেওয়ার লেখা নেই এমন বার্তায় পুরো বারটিই ক্রেতাকে সেখানে নিয়ে যায়। অর্ডার ট্র্যাক ও সাহায্য চালু করলে কম্পিউটারে বারের বাঁ পাশে আর ফোনে মেনুর নিচে সেগুলো দেখায়। লিংক এখন ক্রেতার নিজের ভাষায় খোলে, আর সব পণ্য খোলে আপনার সব পণ্যের পাতা।",
-    },
-  },
-  {
-    id: "2026-09-22-header-and-footer-choices",
-    date: "2026-09-22",
-    version: "4.106.0",
-    tag: "new",
-    href: "/settings?tab=customization",
-    title: {
-      en: "Five header designs, and your footer",
-      bn: "পাঁচটি হেডার ডিজাইন, আর আপনার ফুটার",
-    },
-    body: {
-      en: "Choose one of five header designs — your name and menu on the left, your name centred with the menu in a row below, the menu in the middle of the page, a quieter small-capitals menu, or everything behind a menu button — and choose how its icons are drawn: a fine, regular or strong line, with or without their words, and a bag, basket or cart. Keep the header on screen always, only while shoppers scroll back up, or not at all, and add account and wishlist beside the cart. Arrange your footer in columns, with your shop on one side, centred, or as a single short line, and choose what it shows: your address and phone or only your email, your social links as names or round marks, the ways you take payment, and your policy pages beside the year.",
-      bn: "পাঁচটি হেডার ডিজাইনের একটি বেছে নিন — বাঁয়ে নাম ও মেনু, মাঝখানে নাম আর নিচের সারিতে মেনু, পাতার মাঝখানে মেনু, ছোট বড়-হাতের অক্ষরে শান্ত একটি মেনু, নয়তো সবকিছু একটি মেনু বোতামের পেছনে — আর ঠিক করুন আইকন কেমন আঁকা হবে: সরু, সাধারণ বা মোটা রেখায়, লেখাসহ বা ছাড়া, আর ব্যাগ, ঝুড়ি নাকি কার্ট। হেডার সবসময় স্ক্রিনে রাখুন, শুধু ক্রেতা উপরে স্ক্রল করলে দেখান, নয়তো একেবারেই না রাখুন, আর কার্টের পাশে অ্যাকাউন্ট ও উইশলিস্ট যোগ করুন। ফুটার সাজান কলামে, একপাশে দোকান রেখে, মাঝখানে, নয়তো ছোট এক লাইনে, আর ঠিক করুন কী দেখাবে: ঠিকানা ও ফোন নাকি শুধু ইমেইল, সোশ্যাল লিংক নামে বা গোল চিহ্নে, আপনি যেভাবে টাকা নেন, আর সালের পাশে নীতিমালার পেজগুলো।",
     },
   },
   {
