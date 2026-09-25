@@ -84,6 +84,21 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-09-22-home-page-rows",
+    date: "2026-09-22",
+    version: "4.104.1",
+    tag: "new",
+    href: "/settings?tab=customization",
+    title: {
+      en: "New rows for your home page",
+      bn: "হোম পেজের নতুন সারি",
+    },
+    body: {
+      en: "Your home page shows three categories you tick, each with everything inside it, instead of a row for every category you have — and a button under them opens every product you sell on a page of its own. You can also show a row of products you choose, your best sellers and your newest, the last two filling themselves and naming themselves when you leave their title empty; every row's title is centred, in capitals, with its link underneath. Further down, add your brands, your newest good reviews on Premium, your three newest blog posts, a button that opens WhatsApp to your number, and questions you answer once — each kept up to date from your shop.",
+      bn: "হোম পেজে এখন আপনার প্রতিটি ক্যাটাগরির সারির বদলে আপনার টিক করা তিনটি ক্যাটাগরি, ভেতরের সব পণ্যসহ — আর নিচের একটি বোতাম আপনার সব পণ্য নিয়ে আলাদা পাতা খোলে। আপনার বেছে নেওয়া পণ্য, সবচেয়ে বেশি বিক্রি হওয়া পণ্য আর নতুন পণ্যের সারিও দেখাতে পারেন, শেষের দুটি নিজেই ভরে যায় আর শিরোনাম খালি রাখলে নিজের নামটিই দেখায়; প্রতিটি সারির শিরোনাম মাঝখানে, বড় হাতের অক্ষরে, নিচে তার লিংক। আরও নিচে যোগ করুন আপনার ব্র্যান্ড, প্রিমিয়ামে আপনার সর্বশেষ ভালো রিভিউ, ব্লগের নতুন তিনটি পোস্ট, আপনার নম্বরে হোয়াটসঅ্যাপ খোলার একটি বোতাম, আর একবার উত্তর দেওয়া প্রশ্নগুলো — সবই আপনার দোকান থেকে নিজে নিজে হালনাগাদ থাকে।",
+    },
+  },
+  {
     id: "2026-09-22-colours-cards-and-corners",
     date: "2026-09-22",
     version: "4.104.0",
@@ -187,21 +202,6 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     body: {
       en: "Arrange your header as a bar with every category under it, with your name centred over five of them, or with the categories behind a menu button as on a phone — and show search as a box or a small mark, keep the header on screen as shoppers scroll, and add account and wishlist beside the cart. Arrange your footer in columns, with your shop on one side, centred, or as a single short line, and choose what it shows: your address and phone or only your email, your social links as names or round marks, the ways you take payment, and your policy pages beside the year.",
       bn: "হেডার সাজান নিচে সব ক্যাটাগরিসহ একটি বার হিসেবে, পাঁচটি ক্যাটাগরির উপরে মাঝখানে নাম রেখে, নয়তো ফোনের মতো একটি মেনু বোতামের পেছনে ক্যাটাগরি রেখে — আর সার্চ দেখান বক্সে বা ছোট চিহ্নে, ক্রেতা স্ক্রল করলেও হেডার স্ক্রিনে রাখুন, আর কার্টের পাশে অ্যাকাউন্ট ও উইশলিস্ট যোগ করুন। ফুটার সাজান কলামে, একপাশে দোকান রেখে, মাঝখানে, নয়তো ছোট এক লাইনে, আর ঠিক করুন কী দেখাবে: ঠিকানা ও ফোন নাকি শুধু ইমেইল, সোশ্যাল লিংক নামে বা গোল চিহ্নে, আপনি যেভাবে টাকা নেন, আর সালের পাশে নীতিমালার পেজগুলো।",
-    },
-  },
-  {
-    id: "2026-09-22-home-page-rows",
-    date: "2026-09-22",
-    version: "4.95.0",
-    tag: "new",
-    href: "/settings?tab=customization",
-    title: {
-      en: "New rows for your home page",
-      bn: "হোম পেজের নতুন সারি",
-    },
-    body: {
-      en: "Your home page shows three categories you tick, each with everything inside it, instead of a row for every category you have — and a button under them opens every product you sell on a page of its own. You can also show a row of products you choose, your best sellers and your newest, the last two filling themselves. Further down, add your brands, your newest good reviews on Premium, your three newest blog posts, a button that opens WhatsApp to your number, and questions you answer once — each kept up to date from your shop.",
-      bn: "হোম পেজে এখন আপনার প্রতিটি ক্যাটাগরির সারির বদলে আপনার টিক করা তিনটি ক্যাটাগরি, ভেতরের সব পণ্যসহ — আর নিচের একটি বোতাম আপনার সব পণ্য নিয়ে আলাদা পাতা খোলে। আপনার বেছে নেওয়া পণ্য, সবচেয়ে বেশি বিক্রি হওয়া পণ্য আর নতুন পণ্যের সারিও দেখাতে পারেন, শেষের দুটি নিজেই ভরে যায়। আরও নিচে যোগ করুন আপনার ব্র্যান্ড, প্রিমিয়ামে আপনার সর্বশেষ ভালো রিভিউ, ব্লগের নতুন তিনটি পোস্ট, আপনার নম্বরে হোয়াটসঅ্যাপ খোলার একটি বোতাম, আর একবার উত্তর দেওয়া প্রশ্নগুলো — সবই আপনার দোকান থেকে নিজে নিজে হালনাগাদ থাকে।",
     },
   },
   {
