@@ -84,6 +84,21 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-09-22-theme-editor-and-live-preview",
+    date: "2026-09-22",
+    version: "4.118.5",
+    tag: "new",
+    title: {
+      en: "Design your store",
+      bn: "নিজের মতো স্টোর সাজান",
+    },
+    body: {
+      en: "In Settings → Customization, open the editor to see your real store as your shoppers will — on a phone or a computer, in your own fonts and colours — and click any part of it to change it in a calm panel beside it, where every part of the page is also listed with your colours, corners and product cards, and where you can always upload a new picture however many you have placed. The cart, checkout, wishlist and account pages are filled with a sample of your own products so you can see them full, nothing in that sample is saved, and a refresh keeps you on the page you were working on. What you change stays a draft your shoppers can't see until you press Save to store, and customizing your store is part of the Premium plan.",
+      bn: "সেটিংস → কাস্টমাইজেশন থেকে এডিটর খুললে আপনার আসল স্টোরটি দেখবেন, ঠিক যেমন ক্রেতারা দেখবেন — ফোনে বা কম্পিউটারে, আপনার নিজের ফন্ট ও রঙে — আর যেকোনো অংশে ক্লিক করে পাশের একটি শান্ত প্যানেলে তা বদলান, যেখানে পাতার প্রতিটি অংশের তালিকা আর আপনার রং, কোণ ও পণ্যের কার্ডও থাকে, আর যত ছবিই রাখুন, নতুন ছবি সবসময় আপলোড করতে পারবেন। কার্ট, চেকআউট, উইশলিস্ট আর অ্যাকাউন্ট পাতা আপনার নিজের পণ্যের একটি নমুনা দিয়ে ভরা থাকে, যাতে পুরো পাতাটি দেখতে পান, সেই নমুনার কিছুই সেভ হয় না, আর পাতা রিফ্রেশ করলেও আপনি যে পাতায় কাজ করছিলেন সেখানেই থাকেন। যা বদলান তা ড্রাফট হয়ে থাকে, ক্রেতারা দেখেন না, স্টোরে সংরক্ষণ বাটনে চাপলেই তা স্টোরে যায়; স্টোর সাজানো প্রিমিয়াম প্ল্যানের অংশ।",
+    },
+    href: "/settings?tab=customization",
+  },
+  {
     id: "2026-09-22-customer-reviews",
     date: "2026-09-22",
     version: "4.118.4",
@@ -112,21 +127,6 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
       en: "Your home page shows three categories you tick, each with everything inside it, instead of a row for every category you have — and a button under them opens every product you sell on a page of its own. You can also show a row of products you choose, your best sellers right under it and your newest, the last two filling themselves and naming themselves when you leave their title empty; every row's title is centred, in capitals, with its link underneath, and each row — and the top of your three categories — can open with your own picture, a few words and a button, which a switch hides and keeps. Further down, add your brands, your newest good reviews on Premium — cards that slide on by themselves, or one large quotation that takes turns, both through your ten newest and both pausing under the pointer — your three newest blog posts, a button that opens WhatsApp to your number, and questions you answer once, each under its own title and kept up to date from your shop; the WhatsApp button and your promotion's now stand out on your brand colour instead of melting into it.",
       bn: "হোম পেজে এখন আপনার প্রতিটি ক্যাটাগরির সারির বদলে আপনার টিক করা তিনটি ক্যাটাগরি, ভেতরের সব পণ্যসহ — আর নিচের একটি বোতাম আপনার সব পণ্য নিয়ে আলাদা পাতা খোলে। আপনার বেছে নেওয়া পণ্য, তার ঠিক নিচে সবচেয়ে বেশি বিক্রি হওয়া পণ্য আর নতুন পণ্যের সারিও দেখাতে পারেন, শেষের দুটি নিজেই ভরে যায় আর শিরোনাম খালি রাখলে নিজের নামটিই দেখায়; প্রতিটি সারির শিরোনাম মাঝখানে, বড় হাতের অক্ষরে, নিচে তার লিংক, আর প্রতিটি সারি — আর আপনার তিনটি ক্যাটাগরির উপরের অংশ — আপনার নিজের ছবি, কিছু লেখা আর একটি বোতাম দিয়ে শুরু হতে পারে, যা একটি সুইচে লুকানো যায় আর রেখে দেওয়া হয়। আরও নিচে যোগ করুন আপনার ব্র্যান্ড, প্রিমিয়ামে আপনার সর্বশেষ ভালো রিভিউ — নিজে নিজে সরে যাওয়া কার্ডে, নয়তো একটি বড় উদ্ধৃতিতে যা একটির পর একটি দেখায়, দুটিই আপনার সর্বশেষ দশটি রিভিউ থেকে আর পয়েন্টার রাখলে থেমে যায় —, ব্লগের নতুন তিনটি পোস্ট, আপনার নম্বরে হোয়াটসঅ্যাপ খোলার একটি বোতাম, আর একবার উত্তর দেওয়া প্রশ্নগুলো, প্রতিটি নিজের শিরোনামের নিচে আর আপনার দোকান থেকে নিজে নিজে হালনাগাদ; হোয়াটসঅ্যাপ বোতাম আর আপনার প্রোমোশনের বোতাম এখন ব্র্যান্ডের রঙে মিশে না গিয়ে তার ওপর স্পষ্ট দেখা যায়।",
     },
-  },
-  {
-    id: "2026-09-22-theme-editor-and-live-preview",
-    date: "2026-09-22",
-    version: "4.118.1",
-    tag: "new",
-    title: {
-      en: "Design your store",
-      bn: "নিজের মতো স্টোর সাজান",
-    },
-    body: {
-      en: "In Settings → Customization, open the editor to see your real store as your shoppers will — on a phone or a computer, in your own fonts and colours — and click any part of it to change it in a calm panel beside it, where every part of the page is also listed with your colours, corners and product cards, and where you can always upload a new picture however many you have placed. The cart, checkout, wishlist and account pages are filled with a sample of your own products so you can see them full, and nothing in that sample is saved. What you change stays a draft your shoppers can't see until you press Save to store, and customizing your store is part of the Premium plan.",
-      bn: "সেটিংস → কাস্টমাইজেশন থেকে এডিটর খুললে আপনার আসল স্টোরটি দেখবেন, ঠিক যেমন ক্রেতারা দেখবেন — ফোনে বা কম্পিউটারে, আপনার নিজের ফন্ট ও রঙে — আর যেকোনো অংশে ক্লিক করে পাশের একটি শান্ত প্যানেলে তা বদলান, যেখানে পাতার প্রতিটি অংশের তালিকা আর আপনার রং, কোণ ও পণ্যের কার্ডও থাকে, আর যত ছবিই রাখুন, নতুন ছবি সবসময় আপলোড করতে পারবেন। কার্ট, চেকআউট, উইশলিস্ট আর অ্যাকাউন্ট পাতা আপনার নিজের পণ্যের একটি নমুনা দিয়ে ভরা থাকে, যাতে পুরো পাতাটি দেখতে পান, আর সেই নমুনার কিছুই সেভ হয় না। যা বদলান তা ড্রাফট হয়ে থাকে, ক্রেতারা দেখেন না, স্টোরে সংরক্ষণ বাটনে চাপলেই তা স্টোরে যায়; স্টোর সাজানো প্রিমিয়াম প্ল্যানের অংশ।",
-    },
-    href: "/settings?tab=customization",
   },
   {
     id: "2026-09-22-header-and-footer-choices",
