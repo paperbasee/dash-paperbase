@@ -258,6 +258,59 @@ describe("saving and refreshing", () => {
   });
 });
 
+describe("a page that keeps showing another version (2026-09-26)", () => {
+  /*
+    The shop's logs: the preview's home page reloaded two or three times a second for eight
+    minutes. The draft had changed without this editor saving it -- a change on the server -- so
+    every reload drew the same other version, every `ready` asked for another refresh, and the
+    refresh was never going to change the answer.
+  */
+  test("is refreshed once, then believed", () => {
+    let step = play(shown(), { type: "message", message: { type: "navigated", path: "/en" } });
+    // The page reloads (a navigation, a picked page) and shows a version saved elsewhere.
+    step = play(step.state, ready({ version: "v9" }));
+    expect(step.effects).toEqual([{ type: "refresh" }]);
+    // The refresh draws the same: believed, and nothing more is asked of the page.
+    step = play(step.state, msg({ type: "refreshed", version: "v9" }), ready({ version: "v9" }));
+    expect(step.effects).toEqual([]);
+    expect(step.state).toMatchObject({ phase: "shown", savedVersion: "v9", wait: null });
+    // The next page is compared with the truth, and matches.
+    step = play(step.state, ready({ version: "v9", path: "/en/blog" }));
+    expect(step.effects).toEqual([]);
+  });
+
+  test("never reloads more than once, however many times it says so", () => {
+    let state = play(shown(), ready({ version: "v9" })).state;
+    let refreshes = 0;
+    for (let i = 0; i < 20; i += 1) {
+      const step = play(state, ready({ version: "v9" }));
+      refreshes += step.effects.filter((effect) => effect.type === "refresh").length;
+      state = step.state;
+    }
+    expect(refreshes).toBe(0);
+  });
+
+  test("a page that reports no version is shown, not reloaded for ever", () => {
+    let state = play(shown(), ready({ version: "" })).state;
+    let refreshes = 0;
+    for (let i = 0; i < 5; i += 1) {
+      const step = play(state, ready({ version: "" }));
+      refreshes += step.effects.filter((effect) => effect.type === "refresh").length;
+      state = step.state;
+    }
+    expect(refreshes).toBe(0);
+    expect(state.phase).toBe("shown");
+    // No version is not believed as one: the next save is still compared with what it saved.
+    expect(state.savedVersion).toBe("v1");
+  });
+
+  test("a save of its own is still refreshed for", () => {
+    const believed = play(shown(), ready({ version: "v9" }), ready({ version: "v9" })).state;
+    const step = play(believed, { type: "saved", version: "v10" });
+    expect(step.effects).toEqual([{ type: "refresh" }]);
+  });
+});
+
 describe("recovery", () => {
   test("silence after a refresh: same pass, then a new pass, then unavailable", () => {
     let state = play(shown(), { type: "saved", version: "v2" }).state;

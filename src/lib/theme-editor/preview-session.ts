@@ -106,6 +106,12 @@ export type PreviewState = {
   wantedPath: string | null;
   /** The preview version of the latest saved draft. */
   savedVersion: string;
+  /**
+   * The version a refresh was last asked for. A page that still shows another one after it is
+   * believed: it is drawn from what is saved, and asking again only reloads it -- which, before
+   * 2026-09-26, it did two or three times a second for as long as the two disagreed.
+   */
+  refreshedFor: string | null;
   /** A `refreshed` arrived since the last refresh was sent: the frame is alive. */
   heard: boolean;
   wait: { id: number; ms: number } | null;
@@ -147,6 +153,7 @@ export function initPreviewState(storePublicId: string, savedVersion: string): P
     path: null,
     wantedPath: null,
     savedVersion,
+    refreshedFor: null,
     heard: false,
     wait: null,
     waits: 0,
@@ -194,7 +201,19 @@ function onReady(state: PreviewState, message: Extract<PreviewMessage, { type: "
   // A page the editor asked for keeps its own address (a product may redirect to its category path).
   const shown: PreviewState = { ...next, rung: 0, wantedPath: state.phase === "loading" ? state.wantedPath : message.path };
   if (state.savedVersion && message.version !== state.savedVersion) {
-    return waiting({ ...shown, heard: false }, "refreshing", PREVIEW_REFRESH_WAIT_MS, [{ type: "refresh" }]);
+    // Once per version: the page may simply be older than the save.
+    if (state.refreshedFor !== state.savedVersion) {
+      return waiting(
+        { ...shown, heard: false, refreshedFor: state.savedVersion },
+        "refreshing",
+        PREVIEW_REFRESH_WAIT_MS,
+        [{ type: "refresh" }],
+      );
+    }
+    // Refreshed and still another version: the draft changed without this editor saving it --
+    // another tab, a change on the server -- and the page shows what is saved. Believe it, so
+    // the next page is compared with the truth rather than reloaded for ever.
+    return settled(shown, "shown", message.version ? { savedVersion: message.version } : {});
   }
   return settled(shown, "shown");
 }
@@ -243,7 +262,12 @@ export function previewTransition(state: PreviewState, event: PreviewEvent): Pre
     case "saved": {
       const next = { ...state, savedVersion: event.version };
       if (state.phase !== "shown" && state.phase !== "refreshing") return unchanged(next);
-      return waiting({ ...next, heard: false }, "refreshing", PREVIEW_REFRESH_WAIT_MS, [{ type: "refresh" }]);
+      return waiting(
+        { ...next, heard: false, refreshedFor: event.version },
+        "refreshing",
+        PREVIEW_REFRESH_WAIT_MS,
+        [{ type: "refresh" }],
+      );
     }
 
     case "show": {
