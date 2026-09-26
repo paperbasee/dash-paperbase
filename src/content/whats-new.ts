@@ -84,6 +84,21 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-09-22-customer-reviews",
+    date: "2026-09-22",
+    version: "4.118.4",
+    tag: "new",
+    href: "/reviews",
+    title: {
+      en: "Customers can review your products",
+      bn: "ক্রেতারা এখন আপনার পণ্যের রিভিউ দিতে পারবেন",
+    },
+    body: {
+      en: "A signed-in customer can give a product stars, a few words and up to two photos, and nothing appears on your shop until you approve it in the new Reviews tab — the sidebar shows how many are waiting, and each one reaches your notifications too. You can approve, reject, reply, delete, or add one yourself from a screenshot — which is marked, so shoppers can tell — and a customer who edits their own sends it back to you for approval. Anyone can read your reviews, signed in or not: as tall sliding cards beside each product and on Premium on your home page — customers' photos first, a review without one on your brand colour, each opening large with its words and your reply beside it — and on Premium on a page of their own that shoppers narrow by stars, category and product; everywhere, someone who actually received the item is marked a verified buyer.",
+      bn: "সাইন-ইন করা ক্রেতা পণ্যে স্টার, কয়েক লাইন লেখা আর সর্বোচ্চ দুটি ছবি দিতে পারবেন, আর নতুন রিভিউ ট্যাবে আপনি অনুমোদন না করা পর্যন্ত দোকানে কিছুই দেখা যাবে না — কতগুলো অপেক্ষায় আছে তা সাইডবারেই দেখা যায়, আর প্রতিটি আপনার নোটিফিকেশনেও আসে। অনুমোদন, বাতিল, উত্তর, মুছে ফেলা — সবই আপনার হাতে, আর স্ক্রিনশট থেকে নিজেও একটি যোগ করতে পারবেন, যেটি আলাদা করে চিহ্নিত থাকে; কোনো ক্রেতা নিজের রিভিউ বদলালে সেটি আবার আপনার অনুমোদনের জন্য ফিরে আসে। রিভিউ সবাই পড়তে পারবেন, সাইন-ইন করা থাকুক বা না থাকুক: প্রতিটি পণ্যের পাশে আর প্রিমিয়ামে হোম পেজে লম্বা চলমান কার্ডে — ক্রেতার তোলা ছবি আগে, ছবি না থাকলে আপনার ব্র্যান্ডের রঙে লেখা, আর চাপলেই বড় হয়ে খোলে পাশে পুরো লেখা ও আপনার উত্তরসহ — আর প্রিমিয়ামে আলাদা একটি পেজে, যেখানে ক্রেতারা তারা, ক্যাটাগরি ও পণ্য দিয়ে বাছাই করেন, আর যিনি সত্যিই পণ্যটি পেয়েছেন তাঁকে যাচাই করা ক্রেতা হিসেবে দেখানো হয়।",
+    },
+  },
+  {
     id: "2026-09-22-home-page-rows",
     date: "2026-09-22",
     version: "4.118.3",
@@ -94,8 +109,8 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
       bn: "হোম পেজের নতুন সারি",
     },
     body: {
-      en: "Your home page shows three categories you tick, each with everything inside it, instead of a row for every category you have — and a button under them opens every product you sell on a page of its own. You can also show a row of products you choose, your best sellers right under it and your newest, the last two filling themselves and naming themselves when you leave their title empty; every row's title is centred, in capitals, with its link underneath, and each row — and the top of your three categories — can open with your own picture, a few words and a button, which a switch hides and keeps. Further down, add your brands, your newest good reviews on Premium — cards that slide on by themselves three at a time, or one large quotation that takes turns, both through your ten newest and both pausing under the pointer — your three newest blog posts, a button that opens WhatsApp to your number, and questions you answer once, each under its own title and kept up to date from your shop; the WhatsApp button and your promotion's now stand out on your brand colour instead of melting into it.",
-      bn: "হোম পেজে এখন আপনার প্রতিটি ক্যাটাগরির সারির বদলে আপনার টিক করা তিনটি ক্যাটাগরি, ভেতরের সব পণ্যসহ — আর নিচের একটি বোতাম আপনার সব পণ্য নিয়ে আলাদা পাতা খোলে। আপনার বেছে নেওয়া পণ্য, তার ঠিক নিচে সবচেয়ে বেশি বিক্রি হওয়া পণ্য আর নতুন পণ্যের সারিও দেখাতে পারেন, শেষের দুটি নিজেই ভরে যায় আর শিরোনাম খালি রাখলে নিজের নামটিই দেখায়; প্রতিটি সারির শিরোনাম মাঝখানে, বড় হাতের অক্ষরে, নিচে তার লিংক, আর প্রতিটি সারি — আর আপনার তিনটি ক্যাটাগরির উপরের অংশ — আপনার নিজের ছবি, কিছু লেখা আর একটি বোতাম দিয়ে শুরু হতে পারে, যা একটি সুইচে লুকানো যায় আর রেখে দেওয়া হয়। আরও নিচে যোগ করুন আপনার ব্র্যান্ড, প্রিমিয়ামে আপনার সর্বশেষ ভালো রিভিউ — একসাথে তিনটি করে নিজে নিজে সরে যাওয়া কার্ডে, নয়তো একটি বড় উদ্ধৃতিতে যা একটির পর একটি দেখায়, দুটিই আপনার সর্বশেষ দশটি রিভিউ থেকে আর পয়েন্টার রাখলে থেমে যায় —, ব্লগের নতুন তিনটি পোস্ট, আপনার নম্বরে হোয়াটসঅ্যাপ খোলার একটি বোতাম, আর একবার উত্তর দেওয়া প্রশ্নগুলো, প্রতিটি নিজের শিরোনামের নিচে আর আপনার দোকান থেকে নিজে নিজে হালনাগাদ; হোয়াটসঅ্যাপ বোতাম আর আপনার প্রোমোশনের বোতাম এখন ব্র্যান্ডের রঙে মিশে না গিয়ে তার ওপর স্পষ্ট দেখা যায়।",
+      en: "Your home page shows three categories you tick, each with everything inside it, instead of a row for every category you have — and a button under them opens every product you sell on a page of its own. You can also show a row of products you choose, your best sellers right under it and your newest, the last two filling themselves and naming themselves when you leave their title empty; every row's title is centred, in capitals, with its link underneath, and each row — and the top of your three categories — can open with your own picture, a few words and a button, which a switch hides and keeps. Further down, add your brands, your newest good reviews on Premium — cards that slide on by themselves, or one large quotation that takes turns, both through your ten newest and both pausing under the pointer — your three newest blog posts, a button that opens WhatsApp to your number, and questions you answer once, each under its own title and kept up to date from your shop; the WhatsApp button and your promotion's now stand out on your brand colour instead of melting into it.",
+      bn: "হোম পেজে এখন আপনার প্রতিটি ক্যাটাগরির সারির বদলে আপনার টিক করা তিনটি ক্যাটাগরি, ভেতরের সব পণ্যসহ — আর নিচের একটি বোতাম আপনার সব পণ্য নিয়ে আলাদা পাতা খোলে। আপনার বেছে নেওয়া পণ্য, তার ঠিক নিচে সবচেয়ে বেশি বিক্রি হওয়া পণ্য আর নতুন পণ্যের সারিও দেখাতে পারেন, শেষের দুটি নিজেই ভরে যায় আর শিরোনাম খালি রাখলে নিজের নামটিই দেখায়; প্রতিটি সারির শিরোনাম মাঝখানে, বড় হাতের অক্ষরে, নিচে তার লিংক, আর প্রতিটি সারি — আর আপনার তিনটি ক্যাটাগরির উপরের অংশ — আপনার নিজের ছবি, কিছু লেখা আর একটি বোতাম দিয়ে শুরু হতে পারে, যা একটি সুইচে লুকানো যায় আর রেখে দেওয়া হয়। আরও নিচে যোগ করুন আপনার ব্র্যান্ড, প্রিমিয়ামে আপনার সর্বশেষ ভালো রিভিউ — নিজে নিজে সরে যাওয়া কার্ডে, নয়তো একটি বড় উদ্ধৃতিতে যা একটির পর একটি দেখায়, দুটিই আপনার সর্বশেষ দশটি রিভিউ থেকে আর পয়েন্টার রাখলে থেমে যায় —, ব্লগের নতুন তিনটি পোস্ট, আপনার নম্বরে হোয়াটসঅ্যাপ খোলার একটি বোতাম, আর একবার উত্তর দেওয়া প্রশ্নগুলো, প্রতিটি নিজের শিরোনামের নিচে আর আপনার দোকান থেকে নিজে নিজে হালনাগাদ; হোয়াটসঅ্যাপ বোতাম আর আপনার প্রোমোশনের বোতাম এখন ব্র্যান্ডের রঙে মিশে না গিয়ে তার ওপর স্পষ্ট দেখা যায়।",
     },
   },
   {
@@ -156,21 +171,6 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     body: {
       en: "Pick one of six premium palettes — Porcelain, Sage, Clay, Rosé, Navy or Emerald — and your whole shop is drawn in it, from the page and the header to the Add to cart button; every shop starts on Porcelain. Choose square, soft or rounded corners for everything your shop draws a box around, and Classic or Shelf product cards, which moved out of Settings where they changed your shop the moment you clicked. All three sit in Customization under Style, and reach shoppers when you press Save to store; the typefaces beside them are shown faded, as a preview of what is coming, until they can be saved too.",
       bn: "ছয়টি প্রিমিয়াম প্যালেটের একটি বেছে নিন — পোর্সেলিন, সেজ সবুজ, পোড়ামাটি, গোলাপি, নেভি নীল বা পান্না সবুজ — পাতা আর হেডার থেকে কার্টে যোগের বোতাম পর্যন্ত পুরো দোকান সেই রঙে সাজবে; প্রতিটি দোকান শুরু হয় পোর্সেলিনে। দোকানে যেখানে যেখানে বাক্স আঁকা হয় সবখানের কোণা চোকো, হালকা গোল নাকি গোল হবে, আর ক্ল্যাসিক না শেলফ প্রোডাক্ট কার্ড — এই পছন্দটিও সেটিংস থেকে এসেছে, যেখানে চাপ দেওয়ামাত্রই দোকান বদলে যেত। তিনটিই কাস্টমাইজেশনের স্টাইল অংশে, আর স্টোরে সংরক্ষণ চাপলেই ক্রেতাদের কাছে যাবে; পাশের ফন্টগুলো আসছে তার আভাস হিসেবে ঝাপসা দেখায়, যতক্ষণ না সেগুলোও সংরক্ষণ করা যায়।",
-    },
-  },
-  {
-    id: "2026-09-22-customer-reviews",
-    date: "2026-09-22",
-    version: "4.111.0",
-    tag: "new",
-    href: "/reviews",
-    title: {
-      en: "Customers can review your products",
-      bn: "ক্রেতারা এখন আপনার পণ্যের রিভিউ দিতে পারবেন",
-    },
-    body: {
-      en: "A signed-in customer can give a product stars, a few words and up to two photos, and nothing appears on your shop until you approve it in the new Reviews tab — the sidebar shows how many are waiting, and each one reaches your notifications too. You can approve, reject, reply, delete, or add one yourself from a screenshot — which is marked, so shoppers can tell. Anyone can read your reviews signed in or not — beside each product, and on Premium on a page of their own that shoppers narrow by stars, category and product, linked from your home page and product pages — someone who actually received the item is marked a verified buyer, and a customer who edits their own sends it back to you for approval.",
-      bn: "সাইন-ইন করা ক্রেতা পণ্যে স্টার, কয়েক লাইন লেখা আর সর্বোচ্চ দুটি ছবি দিতে পারবেন, আর নতুন রিভিউ ট্যাবে আপনি অনুমোদন না করা পর্যন্ত দোকানে কিছুই দেখা যাবে না — কতগুলো অপেক্ষায় আছে তা সাইডবারেই দেখা যায়, আর প্রতিটি আপনার নোটিফিকেশনেও আসে। অনুমোদন, বাতিল, উত্তর, মুছে ফেলা — সবই আপনার হাতে, আর স্ক্রিনশট থেকে নিজেও একটি যোগ করতে পারবেন, যেটি আলাদা করে চিহ্নিত থাকে। রিভিউ সবাই পড়তে পারবেন — প্রতিটি পণ্যের পাশে, আর প্রিমিয়ামে আলাদা একটি পেজে, যেখানে ক্রেতারা তারা, ক্যাটাগরি ও পণ্য দিয়ে বাছাই করেন আর যার লিংক থাকে হোম পেজ ও পণ্যের পেজে —, যিনি সত্যিই পণ্যটি পেয়েছেন তাঁকে যাচাই করা ক্রেতা হিসেবে দেখানো হয়, আর কোনো ক্রেতা নিজের রিভিউ বদলালে সেটি আবার আপনার অনুমোদনের জন্য ফিরে আসে।",
     },
   },
   {
