@@ -1,12 +1,13 @@
 "use client";
 
 import { useLocale, useTranslations } from "next-intl";
+import { HeartIcon, PlusIcon } from "@phosphor-icons/react";
 
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { KitBadge, KitChoice, KitGroup, KitNote, KitPanel } from "../kit";
 import { CAPTION, HELP } from "../kit/styles";
-import { paletteName, type ShopPalette } from "@/lib/theme-editor/palettes";
+import { paletteName, type PaletteTokens, type ShopPalette } from "@/lib/theme-editor/palettes";
 import {
   CARD_STYLES,
   CORNERS,
@@ -100,37 +101,56 @@ function CornerMark({ corner }: { corner: Corner }) {
 }
 
 /**
- * A product card, drawn small.
+ * A product card, drawn small -- the shop's own card, part for part (owner, 2026-09-26: "make the
+ * product cards skeleton look exactly like they are in real product card"). The square picture in
+ * its bordered frame, the wishlist heart at its top left, and under it the name and then the larger
+ * price, centred -- `shop-paperbase/themes/storefront/snippets/card.liquid`. What the style adds is
+ * the whole difference: Classic's round add button on the picture, Shelf's Order now across the
+ * foot of the card.
  *
- * The difference between the two is what a shopper meets first -- a quiet name
- * and an add mark in the corner, or the price and a button that orders -- so the
- * preview draws that rather than naming it.
+ * In the chosen palette's own colours and at the chosen corners, so the tile is the card the shop
+ * will draw. Until the palettes arrive, the dashboard's own.
  */
-function CardMark({ style, corner }: { style: CardStyle; corner: number }) {
+function CardMark({ style, corner, tokens }: { style: CardStyle; corner: number; tokens?: PaletteTokens }) {
   const shelf = style.key === "shelf";
+  const tone = (role: string, fallback: string) => tokens?.[role] ?? fallback;
+  const card = tone("card", "hsl(var(--card))");
+  const ink = tone("foreground", "hsl(var(--foreground))");
+  // Both cards in the same room, each at its own height -- Classic is shorter, as it is in the
+  // shop -- so the two tiles' names line up under them.
   return (
-    <span className="flex flex-col gap-1">
-      <span className="relative block h-10 bg-background/70" style={{ borderRadius: corner }}>
-        {shelf ? null : (
+    <span className="flex h-[7.5rem] items-start justify-center">
+      <span
+        className="flex w-20 flex-col items-center gap-1 p-1 pb-1.5"
+        style={{ backgroundColor: card, borderRadius: corner }}
+      >
+        <span
+          className="relative block aspect-square w-full border"
+          style={{ borderColor: tone("border", "hsl(var(--border))"), borderRadius: corner }}
+        >
+          <HeartIcon className="absolute left-1 top-1 size-2.5" style={{ color: ink }} />
+          {shelf ? null : (
+            <span
+              className="absolute bottom-1 right-1 grid size-3.5 place-items-center rounded-full"
+              style={{
+                backgroundColor: tone("accent", "hsl(var(--primary))"),
+                color: tone("accent_foreground", "hsl(var(--primary-foreground))"),
+              }}
+            >
+              <PlusIcon className="size-2" weight="bold" />
+            </span>
+          )}
+        </span>
+        {/* The name, then the price -- larger and darker, as the card sets it. */}
+        <span className="mt-0.5 block h-1 w-3/4 rounded-full opacity-30" style={{ backgroundColor: ink }} />
+        <span className="block h-1.5 w-2/5 rounded-full opacity-70" style={{ backgroundColor: ink }} />
+        {shelf ? (
           <span
-            className="absolute bottom-1 right-1 grid size-4 place-items-center bg-foreground/15 text-[10px] leading-none"
-            style={{ borderRadius: Math.min(corner, 6) }}
-          >
-            +
-          </span>
-        )}
+            className="mt-0.5 block h-3 w-full"
+            style={{ backgroundColor: tone("primary", "hsl(var(--primary))"), borderRadius: Math.min(corner, 6) }}
+          />
+        ) : null}
       </span>
-      {shelf ? (
-        <>
-          <span className="block h-1.5 w-1/2 rounded-full bg-foreground/35" />
-          <span className="block h-3.5 w-full bg-foreground/20" style={{ borderRadius: Math.min(corner, 6) }} />
-        </>
-      ) : (
-        <>
-          <span className="block h-1.5 w-3/4 rounded-full bg-foreground/20" />
-          <span className="block h-1.5 w-1/3 rounded-full bg-foreground/15" />
-        </>
-      )}
     </span>
   );
 }
@@ -166,6 +186,8 @@ export function StylePanel({
   const locale = useLocale();
   const current = FACES.find((f) => f.key === face) ?? FACES[0];
   const radius = (CORNERS.find((c) => c.key === corner) ?? CORNERS[0]).radius;
+  // The card drawings wear the chosen palette, as the shop's cards will.
+  const chosenTokens = palettes?.find((item) => item.key === palette)?.tokens;
 
   return (
     <KitPanel title={tKit("styleTitle")} hint={tKit("styleHint")} onClose={onClose} className="h-full">
@@ -213,7 +235,7 @@ export function StylePanel({
             value: item.key,
             label: t(item.label),
             note: t(item.note),
-            mark: <CardMark style={item} corner={radius} />,
+            mark: <CardMark style={item} corner={radius} tokens={chosenTokens} />,
           }))}
         />
       </KitGroup>

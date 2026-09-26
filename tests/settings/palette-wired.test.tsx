@@ -146,3 +146,44 @@ describe("the typefaces, not wired yet (2026-09-26)", () => {
     expect(html).toContain("Bengali faces");
   });
 });
+
+describe("the product card choices (2026-09-26)", () => {
+  /*
+    Owner: "make the product cards skeleton look exactly like they are in real product card". Each
+    tile is the shop's card (`snippets/card.liquid`) drawn small: the picture's frame with the
+    heart, the name and the price centred, and what the style adds -- in the chosen palette.
+  */
+  const brand = "#0E5A42";
+  const inked = {
+    key: "ink",
+    name: "Ink",
+    name_bn: "কালি",
+    tokens: { card: "#F2EFE9", border: "#E6E1D8", foreground: "#161514", primary: brand, accent: brand, accent_foreground: "#FFFFFF" },
+  } as ShopPalette;
+  const tiles = (cardStyle: string) => {
+    const html = panel({ palettes: [inked], palette: "ink", cardStyle });
+    const group = html.slice(html.indexOf('aria-label="Product cards"'));
+    const buttons = group.split("</button>");
+    return { classic: buttons[0], shelf: buttons[1] };
+  };
+
+  test("both are drawn in the chosen palette's card, with its heart", () => {
+    const { classic, shelf } = tiles("classic");
+    for (const tile of [classic, shelf]) {
+      expect(tile.toLowerCase()).toContain("background-color:#f2efe9");
+      expect(tile).toContain("<svg");
+    }
+  });
+
+  test("Classic carries the round add button in the brand colour; Shelf does not", () => {
+    const { classic, shelf } = tiles("classic");
+    expect(classic).toMatch(/rounded-full"[^>]*style="background-color:#0E5A42;color:#FFFFFF"/i);
+    expect(shelf).not.toMatch(/rounded-full"[^>]*style="background-color:#0E5A42/i);
+  });
+
+  test("Shelf ends in the Order now button in the brand colour; Classic does not", () => {
+    const { classic, shelf } = tiles("shelf");
+    expect(shelf).toMatch(/h-3 w-full"[^>]*style="background-color:#0E5A42/i);
+    expect(classic).not.toContain("h-3 w-full");
+  });
+});
