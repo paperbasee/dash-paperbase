@@ -84,6 +84,21 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-09-22-colours-cards-and-corners",
+    date: "2026-09-22",
+    version: "4.118.8",
+    tag: "new",
+    href: "/settings?tab=customization",
+    title: {
+      en: "Your colours, cards and corners, in the editor",
+      bn: "রং, কার্ড আর কোণা, এখন এডিটরে",
+    },
+    body: {
+      en: "Pick one of six premium palettes — Porcelain, Sage, Clay, Rosé, Navy or Emerald — and your whole shop is drawn in it, from the page and the header to the Add to cart button; every shop starts on Porcelain. Choose square, soft or rounded corners for everything your shop draws a box around, and Classic or Shelf product cards — each drawn as the card your shop will show, in your colours — which moved out of Settings where they changed your shop the moment you clicked. All three sit in Customization under Style, and reach shoppers when you press Save to store; the typefaces beside them are shown faded, as a preview of what is coming, until they can be saved too.",
+      bn: "ছয়টি প্রিমিয়াম প্যালেটের একটি বেছে নিন — পোর্সেলিন, সেজ সবুজ, পোড়ামাটি, গোলাপি, নেভি নীল বা পান্না সবুজ — পাতা আর হেডার থেকে কার্টে যোগের বোতাম পর্যন্ত পুরো দোকান সেই রঙে সাজবে; প্রতিটি দোকান শুরু হয় পোর্সেলিনে। দোকানে যেখানে যেখানে বাক্স আঁকা হয় সবখানের কোণা চোকো, হালকা গোল নাকি গোল হবে, আর ক্ল্যাসিক না শেলফ প্রোডাক্ট কার্ড — প্রতিটি আপনার রঙে ঠিক দোকানের কার্ডের মতো আঁকা; এই পছন্দটিও সেটিংস থেকে এসেছে, যেখানে চাপ দেওয়ামাত্রই দোকান বদলে যেত। তিনটিই কাস্টমাইজেশনের স্টাইল অংশে, আর স্টোরে সংরক্ষণ চাপলেই ক্রেতাদের কাছে যাবে; পাশের ফন্টগুলো আসছে তার আভাস হিসেবে ঝাপসা দেখায়, যতক্ষণ না সেগুলোও সংরক্ষণ করা যায়।",
+    },
+  },
+  {
     id: "2026-09-22-home-page-rows",
     date: "2026-09-22",
     version: "4.118.7",
@@ -156,21 +171,6 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     body: {
       en: "Show how many things are saved beside the title or just the word, lay them out as a grid of cards or as a compact list that fits more on a screen, and say something inviting when nothing is saved yet — which is the version of the page most people meet. You can also decide whether a saved thing can be bought straight from the list or only opened, which is the one choice here that changes what the page is for — and on your shop the heart now fills red with a little burst when a shopper saves something, and breaks in two when they take it back.",
       bn: "শিরোনামের পাশে কয়টি সংরক্ষিত আছে দেখাবেন নাকি শুধু শব্দটি, পণ্যগুলো কার্ডের গ্রিডে নাকি ছোট তালিকায় — যাতে একসাথে বেশি দেখা যায় — আর কিছু সংরক্ষিত না থাকলে আমন্ত্রণমূলক কিছু বলা, যেটি বেশিরভাগ মানুষ দেখেন। সংরক্ষিত পণ্যটি তালিকা থেকেই কেনা যাবে নাকি শুধু খোলা যাবে, সেটিও ঠিক করতে পারেন — এই পাতার একমাত্র সিদ্ধান্ত যা পাতাটির উদ্দেশ্যই বদলে দেয় — আর আপনার দোকানে ক্রেতা কিছু সংরক্ষণ করলে হার্টটি ছোট্ট একটি ঝলকে লাল হয়ে ভরে ওঠে, আর ফিরিয়ে নিলে দুই টুকরো হয়ে ভেঙে যায়।",
-    },
-  },
-  {
-    id: "2026-09-22-colours-cards-and-corners",
-    date: "2026-09-22",
-    version: "4.113.1",
-    tag: "new",
-    href: "/settings?tab=customization",
-    title: {
-      en: "Your colours, cards and corners, in the editor",
-      bn: "রং, কার্ড আর কোণা, এখন এডিটরে",
-    },
-    body: {
-      en: "Pick one of six premium palettes — Porcelain, Sage, Clay, Rosé, Navy or Emerald — and your whole shop is drawn in it, from the page and the header to the Add to cart button; every shop starts on Porcelain. Choose square, soft or rounded corners for everything your shop draws a box around, and Classic or Shelf product cards, which moved out of Settings where they changed your shop the moment you clicked. All three sit in Customization under Style, and reach shoppers when you press Save to store; the typefaces beside them are shown faded, as a preview of what is coming, until they can be saved too.",
-      bn: "ছয়টি প্রিমিয়াম প্যালেটের একটি বেছে নিন — পোর্সেলিন, সেজ সবুজ, পোড়ামাটি, গোলাপি, নেভি নীল বা পান্না সবুজ — পাতা আর হেডার থেকে কার্টে যোগের বোতাম পর্যন্ত পুরো দোকান সেই রঙে সাজবে; প্রতিটি দোকান শুরু হয় পোর্সেলিনে। দোকানে যেখানে যেখানে বাক্স আঁকা হয় সবখানের কোণা চোকো, হালকা গোল নাকি গোল হবে, আর ক্ল্যাসিক না শেলফ প্রোডাক্ট কার্ড — এই পছন্দটিও সেটিংস থেকে এসেছে, যেখানে চাপ দেওয়ামাত্রই দোকান বদলে যেত। তিনটিই কাস্টমাইজেশনের স্টাইল অংশে, আর স্টোরে সংরক্ষণ চাপলেই ক্রেতাদের কাছে যাবে; পাশের ফন্টগুলো আসছে তার আভাস হিসেবে ঝাপসা দেখায়, যতক্ষণ না সেগুলোও সংরক্ষণ করা যায়।",
     },
   },
   {
