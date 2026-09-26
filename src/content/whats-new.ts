@@ -86,7 +86,7 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
     id: "2026-09-22-colours-cards-and-corners",
     date: "2026-09-22",
-    version: "4.118.8",
+    version: "4.118.9",
     tag: "new",
     href: "/settings?tab=customization",
     title: {
