@@ -117,8 +117,6 @@ export default function useSettingsPageController() {
     setAddress: store.setAddress,
     language: store.language,
     setLanguage: store.setLanguage,
-    socialLinks: store.socialLinks,
-    setSocialLink: store.setSocialLink,
     previewUrl: store.previewUrl,
     currentLogoUrl: store.currentLogoUrl,
     clearLogo: store.clearLogo,

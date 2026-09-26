@@ -1,3 +1,5 @@
+import type { SignupPlatform } from "@/lib/storeSocialLinks";
+
 /**
  * The slots each page offers, and what may go in each one.
  *
@@ -46,6 +48,8 @@ export type SlotOption = {
   shape: OptionShape;
   /** Shown with its badge before a merchant pays for it. */
   premium?: boolean;
+  /** A platform's own logo on the tile, in place of the shape: the Sign-up band's choices. */
+  platform?: SignupPlatform;
 };
 
 export type Slot = {
@@ -268,11 +272,20 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
       ],
     },
     {
+      /*
+        Where the band's button goes (owner, 2026-09-26: "instead of WhatsApp, we can make it
+        universal"). WhatsApp first: a band saved before the choice existed carries no platform,
+        and reads as the first answer that fits -- the WhatsApp it always was.
+      */
       key: "signup",
       label: "signup",
       initial: "off",
       options: [
-        { value: "whatsapp", label: "signupWhatsapp", note: "signupWhatsappNote", shape: "line" },
+        { value: "whatsapp", label: "signupWhatsapp", note: "signupWhatsappNote", shape: "line", platform: "whatsapp" },
+        { value: "messenger", label: "signupMessenger", note: "signupMessengerNote", shape: "line", platform: "messenger" },
+        { value: "facebook", label: "signupFacebook", note: "signupFacebookNote", shape: "line", platform: "facebook" },
+        { value: "instagram", label: "signupInstagram", note: "signupInstagramNote", shape: "line", platform: "instagram" },
+        { value: "tiktok", label: "signupTiktok", note: "signupTiktokNote", shape: "line", platform: "tiktok" },
         { value: "off", label: "off", shape: "blank" },
       ],
     },

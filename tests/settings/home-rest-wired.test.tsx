@@ -37,8 +37,15 @@ const manifest: ThemeManifest = {
     },
     latest_posts: { ...labels("From the blog"), settings: [heading] },
     whatsapp: {
-      ...labels("WhatsApp"),
+      ...labels("Sign-up"),
       settings: [
+        {
+          id: "platform",
+          type: "select",
+          ...labels("Where the button goes"),
+          options: ["whatsapp", "messenger", "facebook", "instagram", "tiktok"],
+          default: "whatsapp",
+        },
         heading,
         { id: "body", type: "textarea", ...labels("Line"), default: "" },
         { id: "button_label", type: "text", ...labels("Button"), default: "" },
@@ -119,9 +126,30 @@ describe("the rest of the home page is wired", () => {
     expect(wiringFor("home", "hero")!.sections.video).toBe("video");
   });
 
-  test("the sign-up is WhatsApp or nothing", () => {
+  test("the sign-up goes to the platform chosen, or nowhere (2026-09-26)", () => {
     const signup = SLOTS.home.find((one) => one.key === "signup")!;
-    expect(signup.options!.map((one) => one.value)).toEqual(["whatsapp", "off"]);
+    expect(signup.options!.map((one) => one.value)).toEqual([
+      "whatsapp",
+      "messenger",
+      "facebook",
+      "instagram",
+      "tiktok",
+      "off",
+    ]);
+    // Each platform's tile is its own logo.
+    for (const option of signup.options!.filter((one) => one.value !== "off")) {
+      expect(option.platform, option.value).toBe(option.value);
+    }
+  });
+
+  test("a platform is the band's setting, and a band saved before it reads as WhatsApp", () => {
+    const state = pick(editor(), "signup", "instagram");
+    expect(sectionOfType(state.document, place("signup"), "whatsapp")!.settings.platform).toBe("instagram");
+    expect(slotValueFor(state.document, place("signup"))).toBe("instagram");
+
+    const older = pick(editor(), "signup", "whatsapp");
+    delete sectionOfType(older.document, place("signup"), "whatsapp")!.settings.platform;
+    expect(slotValueFor(older.document, place("signup"))).toBe("whatsapp");
   });
 
   test("a page without them reads as off", () => {

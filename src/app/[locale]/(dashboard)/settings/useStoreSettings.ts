@@ -8,11 +8,6 @@ import { defaultBranding } from "@/context/BrandingContext";
 import type { SettingsMessage } from "./useAccountSettings";
 import { notify } from "@/notifications";
 import { parseValidation, storeUpdateSchema } from "@/lib/validation";
-import {
-  emptySocialLinks,
-  mergeSocialLinksFromApi,
-  type StoreSocialLinkKey,
-} from "@/lib/storeSocialLinks";
 import { queryClient } from "@/components/QueryProvider";
 import { brandingQueryKey } from "@/lib/query-keys";
 import { storefrontIntegrationAvailable } from "./storefrontIntegration";
@@ -38,7 +33,6 @@ export function useStoreSettings({ onSaveSuccess }: UseStoreSettingsOptions = {}
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
   const [language, setLanguage] = useState<"en" | "bn">("en");
-  const [socialLinks, setSocialLinks] = useState(emptySocialLinks);
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [clearLogo, setClearLogo] = useState(false);
   const [currentLogoUrl, setCurrentLogoUrl] = useState<string | null>(null);
@@ -57,7 +51,6 @@ export function useStoreSettings({ onSaveSuccess }: UseStoreSettingsOptions = {}
     phone?: string | null;
     address?: string | null;
     logo_url?: string | null;
-    social_links?: Record<string, string> | null;
     language?: string | null;
   }) {
     if (branding.admin_name) setStoreName(branding.admin_name);
@@ -67,7 +60,6 @@ export function useStoreSettings({ onSaveSuccess }: UseStoreSettingsOptions = {}
     setAddress(branding.address ?? "");
     setLanguage(branding.language === "bn" ? "bn" : "en");
     setCurrentLogoUrl(resolveLogoUrl(branding.logo_url ?? null));
-    setSocialLinks(mergeSocialLinksFromApi(branding.social_links ?? undefined));
   }
 
   function syncStoreIntegrationFromSettings(row: {
@@ -79,10 +71,6 @@ export function useStoreSettings({ onSaveSuccess }: UseStoreSettingsOptions = {}
     if (!available) return;
     setStorefrontUrl((row.storefront_url ?? "").trim());
     setRevalidateSecret(row.revalidate_secret ?? "");
-  }
-
-  function setSocialLink(key: StoreSocialLinkKey, value: string) {
-    setSocialLinks((prev) => ({ ...prev, [key]: value }));
   }
 
   const previewUrl = logoFile ? URL.createObjectURL(logoFile) : currentLogoUrl;
@@ -132,7 +120,6 @@ export function useStoreSettings({ onSaveSuccess }: UseStoreSettingsOptions = {}
 
       if (logoFile) formData.append("logo", logoFile);
       if (clearLogo) formData.append("clear_logo", "true");
-      formData.append("social_links", JSON.stringify(socialLinks));
 
       await api.patch("admin/branding/", formData);
       // Only PATCH integration fields the API gave us; otherwise we'd send
@@ -197,8 +184,6 @@ export function useStoreSettings({ onSaveSuccess }: UseStoreSettingsOptions = {}
     setPhone,
     address,
     setAddress,
-    socialLinks,
-    setSocialLink,
     language,
     setLanguage,
     logoFile,

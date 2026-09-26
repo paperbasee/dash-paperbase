@@ -13,7 +13,12 @@
  * consequence to know: a pending choice lives in the screen, so it does not
  * survive a reload the way a draft does.
  *
- * **There is exactly one so far.** The checkout's form -- short or long -- is
+ * **Two so far.** The shop's social links (2026-09-26) are the other: typed in the footer's Social
+ * links place (`SocialLinksFields`) beside the marks they draw, saved on `admin/branding/` where
+ * Settings used to write them, and no longer offered there. They are four boxes rather than a
+ * choice, so `SlotEditor` holds them itself (`pendingLinks`) instead of through this list.
+ *
+ * The checkout's form -- short or long -- is
  * `StorefrontCheckoutSettings.customer_form_variant`, which Settings ->
  * Checkout wrote from long before this screen was drawn. Copying it into the
  * theme document would have meant two rows for one fact, and the first merchant

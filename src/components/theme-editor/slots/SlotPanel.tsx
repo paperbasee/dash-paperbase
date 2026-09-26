@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Pencil } from "lucide-react";
 
@@ -40,6 +40,7 @@ import { PicturePicker } from "../PicturePicker";
 import { ChoicePicker } from "../ChoicePicker";
 import { ProductPicker } from "../ProductPicker";
 import { SettingField } from "../SettingField";
+import { SocialMark } from "../SocialMark";
 
 /** What the merchant is being asked for, over the panel: a link, a picture, a product. */
 type Asked =
@@ -82,6 +83,7 @@ export function SlotPanel({
   onMoveBlock,
   onPictureUrl,
   onClose,
+  children,
 }: {
   slot: Slot;
   /** The page that owns this place, for the settings other places decide. */
@@ -116,6 +118,12 @@ export function SlotPanel({
   /** A picture just uploaded, and where it is: so its field shows it before a save. */
   onPictureUrl?: (key: string, url: string) => void;
   onClose: () => void;
+  /**
+   * What only this place has, under its settings: the footer's Social links place holds the
+   * shop's links (a shop setting, not the theme's), and the Sign-up place says when the platform
+   * it goes to has none. The editor decides which; the panel just draws it.
+   */
+  children?: ReactNode;
 }) {
   const t = useTranslations("themeEditor.slots");
   const tEditor = useTranslations("themeEditor");
@@ -324,8 +332,13 @@ export function SlotPanel({
                 value: option.value,
                 label: t(option.label),
                 note: option.note ? t(option.note) : undefined,
-                // Five header designs are shapes to compare; two answers are words.
-                mark: options.length > 3 ? <KitShape shape={option.shape} /> : undefined,
+                // A platform is its own logo; five header designs are shapes to compare; two
+                // answers are words.
+                mark: option.platform ? (
+                  <SocialMark platform={option.platform} />
+                ) : options.length > 3 ? (
+                  <KitShape shape={option.shape} />
+                ) : undefined,
                 // When every shape is paid, that is said once below, not on each.
                 badge: option.premium && !allPaid ? <KitBadge>{t("premium")}</KitBadge> : undefined,
                 disabled: locked,
@@ -390,6 +403,8 @@ export function SlotPanel({
             />
           </div>
         ) : null}
+
+        {children}
       </KitPanel>
 
       <EditorSheet

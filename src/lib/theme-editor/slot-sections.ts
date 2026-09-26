@@ -230,7 +230,18 @@ export const WIRED_SLOTS: Partial<Record<SlotPageKey, Record<string, WiredSlot>>
       off: "off",
     },
     posts: { page: "templates.home", sections: { three: "latest_posts" }, off: "off" },
-    signup: { page: "templates.home", sections: { whatsapp: "whatsapp" }, off: "off" },
+    // One section, `whatsapp` since before it went anywhere else; the platform is its setting.
+    signup: {
+      page: "templates.home",
+      sections: {
+        whatsapp: { type: "whatsapp", settings: { platform: "whatsapp" } },
+        messenger: { type: "whatsapp", settings: { platform: "messenger" } },
+        facebook: { type: "whatsapp", settings: { platform: "facebook" } },
+        instagram: { type: "whatsapp", settings: { platform: "instagram" } },
+        tiktok: { type: "whatsapp", settings: { platform: "tiktok" } },
+      },
+      off: "off",
+    },
     faq: { page: "templates.home", sections: { on: "faq" }, off: "off", blocks: "question" },
   },
   /*

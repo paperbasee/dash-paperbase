@@ -10,11 +10,6 @@ import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
-import {
-  InputGroup,
-  InputGroupAddon,
-  InputGroupInput,
-} from "@/components/ui/input-group";
 import { useEnterNavigation } from "@/hooks/useEnterNavigation";
 import { useConfirm } from "@/context/ConfirmDialogContext";
 import { usePermissions } from "@/context/PermissionsContext";
@@ -23,11 +18,6 @@ import {
   settingsInvertedButtonClassName,
   settingsSectionSurfaceClassName,
 } from "../SettingsSectionBody";
-import SocialLinkGlyph from "./SocialLinkGlyph";
-import {
-  STORE_SOCIAL_LINK_KEYS,
-  type StoreSocialLinkKey,
-} from "@/lib/storeSocialLinks";
 
 type SettingsMessage = { type: "success" | "error"; text: string } | null;
 
@@ -56,8 +46,6 @@ export default function StoreInfoSection({
   phone,
   address,
   language,
-  socialLinks,
-  onSocialLinkChange,
   onStoreNameChange,
   onStoreTypeChange,
   onContactEmailChange,
@@ -86,8 +74,6 @@ export default function StoreInfoSection({
   phone: string;
   address: string;
   language: "en" | "bn";
-  socialLinks: Record<StoreSocialLinkKey, string>;
-  onSocialLinkChange: (key: StoreSocialLinkKey, value: string) => void;
   onStoreNameChange: Dispatch<SetStateAction<string>>;
   onStoreTypeChange: Dispatch<SetStateAction<string>>;
   onContactEmailChange: Dispatch<SetStateAction<string>>;
@@ -478,50 +464,6 @@ export default function StoreInfoSection({
             </div>
           </div>
         )}
-
-        <div className="rounded-card border border-border/80 bg-muted/20 p-3 sm:p-4">
-          <div className="mb-3 space-y-1">
-            <h3 className="text-sm font-semibold tracking-tight text-foreground sm:text-base">
-              {t("store.socialHeading")}
-            </h3>
-            <p className="text-xs leading-snug text-muted-foreground sm:text-sm sm:leading-relaxed">
-              {t("store.socialSubtitle")}
-            </p>
-          </div>
-          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-4">
-            {STORE_SOCIAL_LINK_KEYS.map((key) => {
-              const label = t(`store.socialLabels.${key}` as never);
-              return (
-                <InputGroup key={key} className="h-9 min-w-0 bg-background shadow-sm">
-                  <InputGroupAddon
-                    align="inline-start"
-                    className="w-[7.25rem] shrink-0 justify-start gap-2 border-r border-border/80 py-0 pl-2.5 pr-2"
-                    title={label}
-                  >
-                    <span className="text-muted-foreground">
-                      <SocialLinkGlyph platform={key} />
-                    </span>
-                    <span className="min-w-0 truncate text-xs font-medium text-foreground">
-                      {label}
-                    </span>
-                  </InputGroupAddon>
-                  <InputGroupInput
-                    id={`social_${key}`}
-                    type={key === "whatsapp" ? "text" : "url"}
-                    inputMode={key === "whatsapp" ? "tel" : "url"}
-                    autoComplete="off"
-                    value={socialLinks[key]}
-                    onChange={(e) => onSocialLinkChange(key, e.target.value)}
-                    placeholder={key === "whatsapp" ? "Enter WhatsApp number or URL" : `Enter ${key} URL`}
-                    aria-label={label}
-                    className="min-w-0 text-xs sm:text-sm"
-                    onKeyDown={handleKeyDown}
-                  />
-                </InputGroup>
-              );
-            })}
-          </div>
-        </div>
 
         {storeMessage?.type === "error" && (
           <p className="text-sm text-destructive" role="alert">
