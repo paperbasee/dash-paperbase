@@ -116,41 +116,39 @@ function CardMark({ style, corner, tokens }: { style: CardStyle; corner: number;
   const tone = (role: string, fallback: string) => tokens?.[role] ?? fallback;
   const card = tone("card", "hsl(var(--card))");
   const ink = tone("foreground", "hsl(var(--foreground))");
-  // Both cards in the same room, each at its own height -- Classic is shorter, as it is in the
-  // shop -- so the two tiles' names line up under them.
+  // Both cards the same size (owner, 2026-09-26: "both card skeleton must be in same size"): the
+  // height Shelf needs for its button, and Classic keeps that room as card below its price.
   return (
-    <span className="flex h-[7.5rem] items-start justify-center">
+    <span
+      className="mx-auto flex h-[7.5rem] w-20 flex-col items-center gap-1 p-1 pb-1.5"
+      style={{ backgroundColor: card, borderRadius: corner }}
+    >
       <span
-        className="flex w-20 flex-col items-center gap-1 p-1 pb-1.5"
-        style={{ backgroundColor: card, borderRadius: corner }}
+        className="relative block aspect-square w-full border"
+        style={{ borderColor: tone("border", "hsl(var(--border))"), borderRadius: corner }}
       >
-        <span
-          className="relative block aspect-square w-full border"
-          style={{ borderColor: tone("border", "hsl(var(--border))"), borderRadius: corner }}
-        >
-          <HeartIcon className="absolute left-1 top-1 size-2.5" style={{ color: ink }} />
-          {shelf ? null : (
-            <span
-              className="absolute bottom-1 right-1 grid size-3.5 place-items-center rounded-full"
-              style={{
-                backgroundColor: tone("accent", "hsl(var(--primary))"),
-                color: tone("accent_foreground", "hsl(var(--primary-foreground))"),
-              }}
-            >
-              <PlusIcon className="size-2" weight="bold" />
-            </span>
-          )}
-        </span>
-        {/* The name, then the price -- larger and darker, as the card sets it. */}
-        <span className="mt-0.5 block h-1 w-3/4 rounded-full opacity-30" style={{ backgroundColor: ink }} />
-        <span className="block h-1.5 w-2/5 rounded-full opacity-70" style={{ backgroundColor: ink }} />
-        {shelf ? (
+        <HeartIcon className="absolute left-1 top-1 size-2.5" style={{ color: ink }} />
+        {shelf ? null : (
           <span
-            className="mt-0.5 block h-3 w-full"
-            style={{ backgroundColor: tone("primary", "hsl(var(--primary))"), borderRadius: Math.min(corner, 6) }}
-          />
-        ) : null}
+            className="absolute bottom-1 right-1 grid size-3.5 place-items-center rounded-full"
+            style={{
+              backgroundColor: tone("accent", "hsl(var(--primary))"),
+              color: tone("accent_foreground", "hsl(var(--primary-foreground))"),
+            }}
+          >
+            <PlusIcon className="size-2" weight="bold" />
+          </span>
+        )}
       </span>
+      {/* The name, then the price -- larger and darker, as the card sets it. */}
+      <span className="mt-0.5 block h-1 w-3/4 rounded-full opacity-30" style={{ backgroundColor: ink }} />
+      <span className="block h-1.5 w-2/5 rounded-full opacity-70" style={{ backgroundColor: ink }} />
+      {shelf ? (
+        <span
+          className="mt-auto block h-3 w-full"
+          style={{ backgroundColor: tone("primary", "hsl(var(--primary))"), borderRadius: Math.min(corner, 6) }}
+        />
+      ) : null}
     </span>
   );
 }
