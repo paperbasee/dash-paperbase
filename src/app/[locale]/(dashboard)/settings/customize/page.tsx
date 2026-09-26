@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Loader2 } from "lucide-react";
 
@@ -9,6 +10,7 @@ import { useThemeEditorQuery } from "@/hooks/useThemesQuery";
 import { useRouter } from "@/i18n/navigation";
 import { CUSTOMIZATION_HREF } from "@/lib/theme-editor/access";
 import { themeErrorMessageKey } from "@/lib/theme-editor/api";
+import { pageFromSearch } from "@/lib/theme-editor/editor-url";
 import { previewOrigin } from "@/lib/theme-editor/preview-origin";
 import { notify } from "@/notifications";
 
@@ -40,6 +42,7 @@ export default function ThemeEditorPage() {
   const tCommon = useTranslations("common");
   const t = useTranslations("themeEditor");
   const router = useRouter();
+  const searchParams = useSearchParams();
   const editor = useThemeEditorQuery({ enabled: true });
 
   const status = (editor.error as { status?: unknown } | null)?.status;
@@ -62,7 +65,16 @@ export default function ThemeEditorPage() {
     );
   }
 
-  if (editor.data) return <SlotEditor loaded={editor.data} origin={PREVIEW_ORIGIN} />;
+  // The page the address names -- `?page=checkout` -- so a refresh opens where the merchant was.
+  if (editor.data) {
+    return (
+      <SlotEditor
+        loaded={editor.data}
+        origin={PREVIEW_ORIGIN}
+        initialPage={pageFromSearch(searchParams.toString())}
+      />
+    );
+  }
 
   return (
     <div className="flex flex-1 flex-col items-center justify-center gap-4 p-6 text-center">

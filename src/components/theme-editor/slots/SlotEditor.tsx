@@ -27,6 +27,7 @@ import {
   type EditorPorts,
 } from "@/lib/theme-editor/editor-actions";
 import { editorReducer, initEditorState } from "@/lib/theme-editor/editor-reducer";
+import { searchWithPage } from "@/lib/theme-editor/editor-url";
 import { pathLocale, previewTarget, templateForPath } from "@/lib/theme-editor/preview-paths";
 import {
   markForPlace,
@@ -111,7 +112,16 @@ const placeId = (ref: PlaceRef) => `${ref.page}:${ref.key}`;
  *                     draws; Save to store puts it on the shop. There is no version to go back to
  *   premium in view   a paid option shows its badge, so a merchant sees what the tier adds
  */
-export function SlotEditor({ loaded, origin }: { loaded: ThemeEditorState; origin: string }) {
+export function SlotEditor({
+  loaded,
+  origin,
+  initialPage = "home",
+}: {
+  loaded: ThemeEditorState;
+  origin: string;
+  /** The page the address names (`?page=`), so a refresh opens the editor where it was. */
+  initialPage?: SlotPageKey;
+}) {
   const t = useTranslations("themeEditor.slots");
   const tEditor = useTranslations("themeEditor");
   const tc = useTranslations("settings.customization");
@@ -121,7 +131,7 @@ export function SlotEditor({ loaded, origin }: { loaded: ThemeEditorState; origi
   const qc = useQueryClient();
 
   const [state, dispatch] = useReducer(editorReducer, loaded, (value) => initEditorState(value));
-  const [page, setPage] = useState<SlotPageKey>("home");
+  const [page, setPage] = useState<SlotPageKey>(initialPage);
   const [device, setDevice] = useState<"desktop" | "mobile">("desktop");
   /*
     The place whose settings are open, by the page that owns it. Nothing when
@@ -313,6 +323,16 @@ export function SlotEditor({ loaded, origin }: { loaded: ThemeEditorState; origi
     setPage(next);
     setOpen(null);
   }
+
+  /*
+    The page in the address (owner, 2026-09-26: a refresh on the checkout went back to the home
+    page). Written however the page changed -- the picker, or the shop's own link followed in
+    Browse -- and replaced rather than pushed: Back leaves the editor, as it always has.
+  */
+  useEffect(() => {
+    const next = searchWithPage(window.location.search, page);
+    if (next !== window.location.search) window.history.replaceState(null, "", next);
+  }, [page]);
 
   /**
    * Open a place: its settings replace whatever the panel held, and the shop
