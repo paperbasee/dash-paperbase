@@ -183,7 +183,7 @@ export default function NewOrderPage() {
                   />
                 </FormField>
 
-                <FormField label={tPages("orderNewEmail")} required error={fieldErrors.email}>
+                <FormField label={tPages("orderNewEmail")} error={fieldErrors.email}>
                   <Input
                     id="order-email"
                     type="email"
