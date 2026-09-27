@@ -16,8 +16,16 @@ import {
   periodFromParams,
   periodParams,
 } from "@/app/[locale]/(dashboard)/analytics/_lib/period";
-import type { DistrictsReport } from "@/app/[locale]/(dashboard)/analytics/_lib/types";
-import { busiestHours, worthKnowing } from "@/app/[locale]/(dashboard)/analytics/_lib/insights";
+import type { DistrictRow, DistrictsReport, SourceRow } from "@/app/[locale]/(dashboard)/analytics/_lib/types";
+import {
+  bestDay,
+  busiestHours,
+  changeOf,
+  metricPoints,
+  placeNotes,
+  topSource,
+  worthKnowing,
+} from "@/app/[locale]/(dashboard)/analytics/_lib/insights";
 import bn from "../../messages/bn.json";
 import en from "../../messages/en.json";
 
@@ -110,6 +118,56 @@ describe("what the page works out itself", () => {
   });
 });
 
+describe("the Overview's story", () => {
+  const series = {
+    data: [
+      { date: "2026-09-21", sales: "4000.00", orders: 2, visitors: 50 },
+      { date: "2026-09-22", sales: "9000.00", orders: 3, visitors: 0 },
+    ],
+    comparison: [
+      { date: "2026-09-14", sales: "5000.00", orders: 1, visitors: 40 },
+      { date: "2026-09-15", sales: "6000.00", orders: 2, visitors: 20 },
+    ],
+  };
+
+  test("each number's line, beside the compared day in the same place", () => {
+    expect(metricPoints(series, "sales")).toEqual([
+      { date: "2026-09-21", current: 4000, previous: 5000, previousDate: "2026-09-14" },
+      { date: "2026-09-22", current: 9000, previous: 6000, previousDate: "2026-09-15" },
+    ]);
+    // Confirmed orders per hundred visitors, as the card counts them; no visitors, no rate.
+    expect(metricPoints(series, "conversion").map((point) => [point.current, point.previous])).toEqual([[4, 2.5], [0, 10]]);
+  });
+
+  test("how far a number moved: a percentage, or a rate's points", () => {
+    expect(changeOf(9000, 6000, "percent")).toBe(50);
+    expect(changeOf(3.9, 3.7, "points")).toBe(0.2);
+    expect(changeOf(5, 0, "percent")).toBeNull();
+    expect(changeOf(5, null, "points")).toBeNull();
+  });
+
+  test("the best day, and what the same day before sold", () => {
+    expect(bestDay(series)).toEqual({ date: "2026-09-22", sales: 9000, was: series.comparison[1] });
+    expect(bestDay({ data: [{ date: "2026-09-21", sales: "0.00", orders: 0 }], comparison: [] })).toBeNull();
+  });
+
+  test("the source that brought the most sales -- never one the API could not name", () => {
+    const source = (name: string, orders: number, sales: string) =>
+      ({ source: name, visitors: 10, paid_visitors: 0, orders, sales, conversion: 0 }) as SourceRow;
+    expect(topSource([source("(not tracked)", 9, "9000"), source("tiktok", 2, "800"), source("facebook", 3, "1200")])?.source).toBe("facebook");
+    expect(topSource([source("google", 0, "0")])).toBeNull();
+  });
+
+  test("the district that ordered most, and the one delivered least often", () => {
+    const row = (key: string, orders: number, finished: number, delivered: number) =>
+      ({ key, name: key, name_bn: key, division: "dhaka", orders, sales: "0", parcels_finished: finished, delivered_rate: delivered, returned_rate: 100 - delivered }) as DistrictRow;
+    const notes = placeNotes([row("gazipur", 4, 4, 75), row("dhaka", 9, 8, 90), row("bogura", 1, 2, 50), row("sylhet", 2, 3, 100)]);
+    expect(notes?.most.key).toBe("dhaka");
+    expect(notes?.lowest?.key).toBe("gazipur");
+    expect(placeNotes([row("dhaka", 0, 0, 0)])).toBeNull();
+  });
+});
+
 describe("every word the page uses, in both languages", () => {
   const root = path.resolve(__dirname, "../../src/app/[locale]/(dashboard)/analytics");
   const files = (dir: string): string[] =>
@@ -131,8 +189,8 @@ describe("every word the page uses, in both languages", () => {
   });
 
   test("every word looked up by name is there", () => {
-    const period = new Set(["today", "yesterday", "month", "custom", "lastDays", "days", "compareToggle", "vsYesterday",
-      "vsLastMonth", "vsPreviousDays", "vsLastYear", "pickTitle", "pickHint", "pickApply"]);
+    const period = new Set(["custom", "days", "vsYesterday", "vsLastMonth", "vsPreviousDays", "vsLastYear", "compareWith",
+      "againstDays", "againstYesterday", "againstLastMonth", "againstLastYear", "pickTitle", "pickHint", "pickApply"]);
     const missing = [...text.matchAll(/\bt(?:\.rich)?\("([a-zA-Z0-9_.]+)"/g)]
       .map((m) => m[1])
       .map((key) => (period.has(key) ? `period.${key}` : key === "label" ? "sections.label" : key))

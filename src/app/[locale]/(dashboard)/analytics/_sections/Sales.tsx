@@ -2,39 +2,45 @@
 
 import { useTranslations } from "next-intl";
 
-import { BarList, Empty, Panel, StatCard, StatGrid, TrendChart, shareOf } from "../_components/kit";
+import { ChartLegend, Empty, ListPanel, Panel, Stat, StatStrip, TrendChart, shareOf } from "../_components/kit";
 import { useAnalyticsView } from "../_lib/context";
+import { busiestHours, pairUp } from "../_lib/insights";
 import { paymentName } from "../_lib/names";
-import { busiestHours } from "../_lib/insights";
 import type { SalesReport } from "../_lib/types";
 
 export function Sales({ report }: { report: SalesReport }) {
   const t = useTranslations("analyticsPage");
   const { format } = useAnalyticsView();
-  const { cards, made_of: madeOf } = report;
+  const { cards, made_of: madeOf, period } = report;
   const peak = busiestHours(report.hours);
   const tallest = Math.max(...report.hours, 0);
+  const money = (value: number | string) => format.money(value);
+  const mostSold = Math.max(...report.coupons.map((row) => Number(row.sales)), 0);
 
   return (
-    <div className="flex flex-col gap-3">
-      <StatGrid>
-        <StatCard label={t("cards.sales")} hint={t("cards.salesHint")} value={format.money(cards.sales.value)} card={cards.sales} />
-        <StatCard label={t("cards.averageOrder")} value={format.money(cards.average_order.value)} card={cards.average_order} />
-        <StatCard
+    <div className="flex flex-col gap-4 sm:gap-5">
+      <StatStrip count={4}>
+        <Stat label={t("cards.sales")} hint={t("cards.salesHint")} card={cards.sales} show={money} />
+        <Stat label={t("cards.averageOrder")} card={cards.average_order} show={money} />
+        <Stat
           label={t("cards.itemsPerOrder")}
-          value={format.decimal(Number(cards.items_per_order.value))}
           card={cards.items_per_order}
+          show={(value) => format.decimal(Number(value))}
           plain={(n) => format.decimal(n)}
         />
-        <StatCard
-          label={t("cards.discounts")}
-          hint={t("cards.discountsHint")}
-          value={format.money(cards.discounts.value)}
-          card={cards.discounts}
-        />
-      </StatGrid>
+        <Stat label={t("cards.discounts")} hint={t("cards.discountsHint")} card={cards.discounts} show={money} />
+      </StatStrip>
 
-      <div className="grid gap-3 lg:grid-cols-2">
+      <Panel title={t("chart.sales", { by: period.start_date === period.end_date ? "hour" : "day" })} aside={<ChartLegend period={period} />}>
+        <TrendChart
+          points={pairUp(report.series, (point) => Number(point.sales))}
+          period={period}
+          show={(n) => format.money(n)}
+          axis={format.moneyCompact}
+        />
+      </Panel>
+
+      <div className="grid gap-4 lg:grid-cols-2">
         <Panel title={t("sales.madeOfTitle")} note={t("sales.madeOfNote")}>
           <dl className="flex flex-col divide-y divide-border text-sm">
             <Line label={t("sales.fullPrice")} note={t("sales.fullPriceNote")} value={format.money(madeOf.full_price)} />
@@ -48,31 +54,20 @@ export function Sales({ report }: { report: SalesReport }) {
           </dl>
         </Panel>
 
-        <Panel title={t("sales.byDay")}>
-          <TrendChart
-            data={report.series.data}
-            comparison={report.series.comparison}
-            value={(point) => Number(point.sales)}
-            hourly={report.period.start_date === report.period.end_date}
-            show={(n) => format.money(n)}
-            labels={{ current: t("thesePeriod"), previous: t("comparedPeriod") }}
-          />
-        </Panel>
-
         <Panel title={t("sales.hoursTitle")} note={t("sales.hoursNote")}>
           {tallest ? (
             <>
-              <div className="flex h-28 items-end gap-[3px]" aria-hidden>
+              <div className="flex h-32 items-end gap-[3px]" aria-hidden>
                 {report.hours.map((orders, hour) => (
                   <div
                     key={hour}
                     title={`${format.hourOfDay(hour)}: ${format.count(orders)}`}
-                    className={`flex-1 rounded-t-[2px] ${peak && (hour === peak[0] || hour === (peak[0] + 1) % 24) ? "bg-primary" : "bg-primary/30"}`}
+                    className={`flex-1 rounded-t-[2px] ${peak && (hour === peak[0] || hour === (peak[0] + 1) % 24) ? "bg-[hsl(var(--accent-blue))]" : "bg-[hsl(var(--accent-blue)/0.3)]"}`}
                     style={{ height: `${Math.max(2, shareOf(orders, tallest))}%` }}
                   />
                 ))}
               </div>
-              <div className="flex justify-between text-[11px] text-muted-foreground">
+              <div className="flex justify-between text-xs text-muted-foreground">
                 <span>{format.hourOfDay(0)}</span>
                 <span>{format.hourOfDay(12)}</span>
                 <span>{format.hourOfDay(23)}</span>
@@ -92,43 +87,44 @@ export function Sales({ report }: { report: SalesReport }) {
           )}
         </Panel>
 
-        <Panel title={t("sales.paymentsTitle")}>
-          <BarList
-            rows={report.payments.map((row) => ({
-              key: row.method,
-              label: paymentName(row.method, t),
-              detail: t("sales.paymentDetail", { orders: format.count(row.orders), share: format.percent(row.share) }),
-              value: format.money(row.sales),
-              share: row.share,
-            }))}
-          />
-        </Panel>
+        <ListPanel
+          tabs={[
+            {
+              key: "payments",
+              label: t("sales.paymentsTitle"),
+              columns: [{ label: t("columns.orders") }, { label: t("columns.share"), wide: true }, { label: t("columns.sales") }],
+              rows: report.payments.map((row) => ({
+                key: row.method,
+                label: paymentName(row.method, t),
+                values: [format.count(row.orders), format.percent(row.share), format.money(row.sales)],
+                share: row.share,
+              })),
+            },
+          ]}
+        />
 
-        <Panel title={t("sales.codesTitle")} className="lg:col-span-2">
-          {report.coupons.length ? (
-            <ul className="flex flex-col divide-y divide-border">
-              {report.coupons.map((row) => (
-                <li key={row.code} className="flex items-center justify-between gap-3 py-2.5 first:pt-0 last:pb-0">
-                  <div className="flex min-w-0 flex-col">
-                    <span className="font-mono text-sm font-semibold text-foreground">{row.code}</span>
-                    <span className="text-xs text-muted-foreground">
-                      {t("orderCount", { n: format.count(row.orders) })}
-                      {row.kind && row.value !== null
-                        ? ` · ${row.kind === "percent" ? t("sales.percentOff", { n: format.decimal(Number(row.value)) }) : t("sales.amountOff", { amount: format.money(row.value) })}`
-                        : ""}
-                    </span>
-                  </div>
-                  <div className="flex shrink-0 flex-col items-end">
-                    <span className="text-sm font-semibold text-foreground tabular-nums">{format.money(row.sales)}</span>
-                    <span className="text-xs text-muted-foreground">{t("sales.given", { amount: format.money(row.given) })}</span>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <Empty>{t("sales.noCodes")}</Empty>
-          )}
-        </Panel>
+        <ListPanel
+          tabs={[
+            {
+              key: "codes",
+              label: t("sales.codesTitle"),
+              columns: [{ label: t("columns.orders") }, { label: t("columns.given"), wide: true }, { label: t("columns.sales") }],
+              empty: t("sales.noCodes"),
+              rows: report.coupons.map((row) => ({
+                key: row.code,
+                label: <span className="font-mono font-semibold">{row.code}</span>,
+                detail:
+                  row.kind && row.value !== null
+                    ? row.kind === "percent"
+                      ? t("sales.percentOff", { n: format.decimal(Number(row.value)) })
+                      : t("sales.amountOff", { amount: format.money(row.value) })
+                    : undefined,
+                values: [format.count(row.orders), `−${format.money(row.given)}`, format.money(row.sales)],
+                share: shareOf(Number(row.sales), mostSold),
+              })),
+            },
+          ]}
+        />
       </div>
     </div>
   );

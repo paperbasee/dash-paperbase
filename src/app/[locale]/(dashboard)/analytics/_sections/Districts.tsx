@@ -5,7 +5,7 @@ import { useLocale, useTranslations } from "next-intl";
 
 import { cn } from "@/lib/utils";
 
-import { Empty, Panel, shareOf } from "../_components/kit";
+import { ListPanel, Panel, shareOf } from "../_components/kit";
 import { useAnalyticsView } from "../_lib/context";
 import { worthKnowing } from "../_lib/insights";
 import type { DistrictsReport } from "../_lib/types";
@@ -13,6 +13,9 @@ import type { DistrictsReport } from "../_lib/types";
 type Measure = "orders" | "sales" | "delivered";
 /** Districts listed before the rest are summed into one line. */
 const LISTED = 10;
+/** A district returning this share of its parcels is worth a second look. */
+const MANY_RETURNS = 20;
+
 export function Districts({ report }: { report: DistrictsReport }) {
   const t = useTranslations("analyticsPage");
   const locale = useLocale();
@@ -31,10 +34,11 @@ export function Districts({ report }: { report: DistrictsReport }) {
   const districts = report.districts.filter((row) => !division || row.division === division);
   const listed = districts.slice(0, LISTED);
   const rest = districts.slice(LISTED);
+  const mostOrders = Math.max(...listed.map((row) => row.orders), 0);
   const note = worthKnowing(report);
 
   return (
-    <div className="grid gap-3 lg:grid-cols-2">
+    <div className="grid items-start gap-4 lg:grid-cols-2">
       <Panel title={t("districts.divisionsTitle")} note={t("districts.divisionsNote")}>
         <div className="inline-flex self-start rounded-ui border border-border bg-muted/70 p-0.5 text-xs">
           {(["orders", "sales", "delivered"] as Measure[]).map((option) => (
@@ -44,7 +48,7 @@ export function Districts({ report }: { report: DistrictsReport }) {
               aria-pressed={measure === option}
               onClick={() => setMeasure(option)}
               className={cn(
-                "rounded-ui px-2.5 py-1 font-medium",
+                "rounded-ui px-3 py-1.5 font-medium",
                 measure === option ? "bg-card text-foreground shadow-xs" : "text-muted-foreground",
               )}
             >
@@ -52,7 +56,7 @@ export function Districts({ report }: { report: DistrictsReport }) {
             </button>
           ))}
         </div>
-        <ul className="flex flex-col gap-2">
+        <ul className="flex flex-col">
           {report.divisions.map((row) => (
             <li key={row.key}>
               <button
@@ -60,17 +64,17 @@ export function Districts({ report }: { report: DistrictsReport }) {
                 aria-pressed={division === row.key}
                 onClick={() => setDivision(division === row.key ? null : row.key)}
                 className={cn(
-                  "flex w-full flex-col gap-1 rounded-ui px-1.5 py-1 text-left",
-                  division === row.key ? "bg-muted" : "hover:bg-muted/60",
+                  "relative flex min-h-10 w-full items-center justify-between gap-3 rounded-ui px-2.5 text-left text-[13px]",
+                  division === row.key ? "ring-1 ring-inset ring-foreground/25" : "hover:bg-muted/60",
                 )}
               >
-                <span className="flex w-full justify-between gap-3 text-sm">
-                  <span className="font-medium text-foreground">{named(row)}</span>
-                  <span className="font-semibold text-foreground tabular-nums">{shown(row)}</span>
-                </span>
-                <span className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
-                  <span className="block h-full rounded-full bg-primary" style={{ width: `${shareOf(value(row), most)}%` }} />
-                </span>
+                <span
+                  aria-hidden
+                  className="absolute inset-y-1 left-0 rounded-ui bg-blue-500/10 dark:bg-blue-400/15"
+                  style={{ width: `${shareOf(value(row), most)}%` }}
+                />
+                <span className="relative text-foreground">{named(row)}</span>
+                <span className="relative font-semibold text-foreground tabular-nums">{shown(row)}</span>
               </button>
             </li>
           ))}
@@ -78,55 +82,68 @@ export function Districts({ report }: { report: DistrictsReport }) {
         <p className="text-[11px] text-muted-foreground">{t("districts.tapDivision")}</p>
       </Panel>
 
-      <div className="flex flex-col gap-3">
-        <Panel
-          title={division ? named(report.divisions.find((row) => row.key === division)!) : t("districts.listTitle")}
+      <div className="flex flex-col gap-4">
+        <ListPanel
+          key={division ?? "all"}
           note={t("districts.listNote")}
+          tabs={[
+            {
+              key: "districts",
+              label: division ? named(report.divisions.find((row) => row.key === division)!) : t("districts.listTitle"),
+              columns: [
+                { label: t("columns.orders") },
+                { label: t("columns.sales"), wide: true },
+                { label: t("columns.delivered") },
+                { label: t("columns.returned"), wide: true },
+              ],
+              rows: [
+                ...listed.map((row) => ({
+                  key: row.key,
+                  label: named(row),
+                  values: [
+                    format.count(row.orders),
+                    format.money(row.sales),
+                    format.percent(row.delivered_rate),
+                    <span key="returned" className={row.returned_rate >= MANY_RETURNS ? "text-rose-700 dark:text-rose-400" : undefined}>
+                      {format.percent(row.returned_rate)}
+                    </span>,
+                  ],
+                  share: shareOf(row.orders, mostOrders),
+                })),
+                ...(rest.length
+                  ? [
+                      {
+                        key: "rest",
+                        label: t("districts.otherDistricts", { n: format.count(rest.length) }),
+                        values: [
+                          format.count(rest.reduce((sum, row) => sum + row.orders, 0)),
+                          format.money(rest.reduce((sum, row) => sum + Number(row.sales), 0)),
+                          "—",
+                          "—",
+                        ],
+                        share: 0,
+                      },
+                    ]
+                  : []),
+              ],
+            },
+          ]}
         >
-          {listed.length ? (
-            <ul className="flex flex-col divide-y divide-border">
-              {listed.map((row) => (
-                <li key={row.key} className="flex items-center justify-between gap-3 py-2.5 first:pt-0 last:pb-0">
-                  <div className="flex min-w-0 flex-col">
-                    <span className="truncate text-sm font-medium text-foreground">{named(row)}</span>
-                    <span className="text-xs text-muted-foreground">
-                      {named(report.divisions.find((d) => d.key === row.division) ?? { name: row.division, name_bn: row.division })} ·{" "}
-                      {format.money(row.sales)} · {t("districts.deliveredRate", { rate: format.percent(row.delivered_rate) })}
-                    </span>
-                  </div>
-                  <div className="flex shrink-0 flex-col items-end">
-                    <span className="text-sm font-semibold text-foreground tabular-nums">{t("orderCount", { n: format.count(row.orders) })}</span>
-                    <span className={cn("text-xs", row.returned_rate >= 20 ? "font-medium text-rose-700 dark:text-rose-400" : "text-muted-foreground")}>
-                      {t("districts.returnedRate", { rate: format.percent(row.returned_rate) })}
-                    </span>
-                  </div>
-                </li>
-              ))}
-              {rest.length ? (
-                <li className="flex items-center justify-between gap-3 py-2.5 last:pb-0">
-                  <span className="text-sm font-medium text-foreground">{t("districts.otherDistricts", { n: format.count(rest.length) })}</span>
-                  <span className="text-sm font-semibold text-foreground tabular-nums">
-                    {t("orderCount", { n: format.count(rest.reduce((sum, row) => sum + row.orders, 0)) })}
-                  </span>
-                </li>
-              ) : null}
-            </ul>
-          ) : (
-            <Empty />
-          )}
           {!division && report.not_recognised.orders ? (
             <div className="flex items-center justify-between gap-3 rounded-ui bg-muted px-2.5 py-2">
               <div className="flex flex-col">
-                <span className="text-sm font-medium text-foreground">{t("districts.notRecognised")}</span>
+                <span className="text-[13px] font-medium text-foreground">{t("districts.notRecognised")}</span>
                 <span className="text-xs text-muted-foreground">{t("districts.notRecognisedNote")}</span>
               </div>
               <div className="flex shrink-0 flex-col items-end">
-                <span className="text-sm font-semibold text-foreground tabular-nums">{t("orderCount", { n: format.count(report.not_recognised.orders) })}</span>
+                <span className="text-[13px] font-semibold text-foreground tabular-nums">
+                  {t("orderCount", { n: format.count(report.not_recognised.orders) })}
+                </span>
                 <span className="text-xs text-muted-foreground">{format.money(report.not_recognised.sales)}</span>
               </div>
             </div>
           ) : null}
-        </Panel>
+        </ListPanel>
 
         {note ? (
           <Panel title={t("districts.worthKnowing")}>
@@ -151,4 +168,3 @@ export function Districts({ report }: { report: DistrictsReport }) {
     </div>
   );
 }
-

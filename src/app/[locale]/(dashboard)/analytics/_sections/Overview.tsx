@@ -1,123 +1,502 @@
 "use client";
 
-import { ChevronRight } from "lucide-react";
+import { type ReactNode, useState } from "react";
+import { MapPin, TrendingUp, TriangleAlert, Users } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 
-import { BarList, Empty, Panel, StatCard, StatGrid, TrendChart, Upgrade, shareOf } from "../_components/kit";
-import { useAnalyticsView } from "../_lib/context";
-import { sourceName } from "../_lib/names";
-import { useLive } from "../_lib/queries";
-import type { OverviewReport } from "../_lib/types";
+import { cn } from "@/lib/utils";
 
+import {
+  CARD,
+  Change,
+  ChartLegend,
+  type Column,
+  ListPanel,
+  type More,
+  MoreLink,
+  StatLabel,
+  TrendChart,
+  Upgrade,
+  shareOf,
+} from "../_components/kit";
+import { useAnalyticsView } from "../_lib/context";
+import { type Metric, bestDay, changeOf, metricPoints, placeNotes, topSource } from "../_lib/insights";
+import { pageName, sourceName } from "../_lib/names";
+import { dayCount } from "../_lib/period";
+import type { Card, OverviewReport, SectionKey } from "../_lib/types";
+
+/** How many rows each list shows before its own section. */
+const ROWS = 5;
+
+const PARCEL_ROWS = ["delivered", "partial", "returned", "in_transit", "not_dispatched", "unknown"] as const;
+
+/**
+ * The Overview, story first: the days in one sentence, the four numbers (each
+ * opens its line on the chart), what moved them, what needs a look -- then the
+ * details, each a glimpse of its own section.
+ */
 export function Overview({ report }: { report: OverviewReport }) {
   const t = useTranslations("analyticsPage");
-  const { format, full } = useAnalyticsView();
-  const { cards, steps } = report;
+  const { full } = useAnalyticsView();
 
   return (
-    <div className="flex flex-col gap-3">
-      {full ? <LiveStrip /> : null}
-      <StatGrid>
-        <StatCard label={t("cards.sales")} hint={t("cards.salesHint")} value={format.money(cards.sales.value)} card={cards.sales} />
-        <StatCard label={t("cards.orders")} hint={t("cards.ordersHint")} value={format.count(Number(cards.orders.value))} card={cards.orders} />
-        {cards.visitors && cards.conversion ? (
-          <>
-            <StatCard
-              label={t("cards.visitors")}
-              hint={t("cards.visitorsHint")}
-              value={format.count(Number(cards.visitors.value))}
-              card={cards.visitors}
-            />
-            <StatCard
-              label={t("cards.conversion")}
-              hint={t("cards.conversionHint")}
-              value={format.percent(Number(cards.conversion.value))}
-              card={cards.conversion}
-            />
-          </>
-        ) : null}
-      </StatGrid>
-
-      <Panel title={t("overview.stepsTitle")} note={t("overview.stepsNote")}>
-        <div className="flex items-stretch gap-1">
-          <Step tone="placed" label={t("overview.placed")} stage={steps.placed} />
-          <ChevronRight className="size-4 shrink-0 self-center text-muted-foreground" aria-hidden />
-          <Step tone="confirmed" label={t("overview.confirmed")} stage={steps.confirmed} />
-          <ChevronRight className="size-4 shrink-0 self-center text-muted-foreground" aria-hidden />
-          <Step tone="delivered" label={t("overview.delivered")} stage={steps.delivered} />
+    <div className="flex flex-col gap-4 sm:gap-5">
+      <Story report={report} />
+      <WhatMovedIt report={report} />
+      <NeedsALook report={report} />
+      <section className="flex flex-col gap-3">
+        <h2 className="pt-1 text-[15px] font-semibold text-foreground">{t("overview.details")}</h2>
+        <div className="grid gap-4 lg:grid-cols-2">
+          {full ? (
+            <>
+              <Sources report={report} />
+              <Places report={report} />
+              <ProductsList report={report} />
+              <Journey report={report} />
+            </>
+          ) : null}
+          <Stand report={report} />
+          {full ? <DeliveryList report={report} /> : <Upgrade title={t("upgradeOverview")} />}
         </div>
-        <div className="flex flex-col gap-1 text-xs text-muted-foreground">
-          <span>
-            <strong className="font-semibold text-amber-800 dark:text-amber-400">{t("orderCount", { n: format.count(steps.not_confirmed) })}</strong>{" "}
-            {t("overview.notConfirmed")}
-          </span>
-          <span>
-            <strong className="font-semibold text-amber-800 dark:text-amber-400">{t("orderCount", { n: format.count(steps.not_delivered) })}</strong>{" "}
-            {t("overview.notDelivered")}
-          </span>
-        </div>
-      </Panel>
+      </section>
+    </div>
+  );
+}
 
-      <Panel title={t("overview.salesByDay")}>
+type Shown = {
+  key: Metric;
+  label: string;
+  hint: string;
+  card: Card<number | string>;
+  show: (value: number | string) => string;
+  axis: (n: number) => string;
+  unit: "percent" | "points";
+};
+
+function Story({ report }: { report: OverviewReport }) {
+  const t = useTranslations("analyticsPage");
+  const { format } = useAnalyticsView();
+  const { cards, period } = report;
+  const [metric, setMetric] = useState<Metric>("sales");
+  const count = (value: number | string) => format.count(Number(value));
+  const metrics: Shown[] = [
+    { key: "sales" as const, label: t("cards.sales"), hint: t("cards.salesHint"), card: cards.sales, show: (v: number | string) => format.money(v), axis: format.moneyCompact, unit: "percent" as const },
+    { key: "orders" as const, label: t("cards.orders"), hint: t("cards.ordersHint"), card: cards.orders, show: count, axis: format.compact, unit: "percent" as const },
+    ...(cards.visitors && cards.conversion
+      ? [
+          { key: "visitors" as const, label: t("cards.visitors"), hint: t("cards.visitorsHint"), card: cards.visitors, show: count, axis: format.compact, unit: "percent" as const },
+          {
+            key: "conversion" as const,
+            label: t("cards.conversion"),
+            hint: t("cards.conversionHint"),
+            card: cards.conversion,
+            show: (v: number | string) => format.percent(Number(v)),
+            axis: (n: number) => format.percent(n),
+            unit: "points" as const,
+          },
+        ]
+      : []),
+  ];
+  const shown = metrics.find((each) => each.key === metric) ?? metrics[0];
+  const by = period.start_date === period.end_date ? "hour" : "day";
+
+  return (
+    <section className={cn(CARD, "flex flex-col overflow-hidden")}>
+      <div className="flex flex-col gap-2.5 p-4 sm:px-6 sm:py-6 lg:px-8 lg:py-7">
+        <p className="text-xs font-medium text-muted-foreground">
+          {t("overview.story.when", {
+            days: format.days(period.start_date, period.end_date),
+            before: format.days(period.compare_start_date, period.compare_end_date),
+          })}
+        </p>
+        <Headline report={report} />
+      </div>
+      <div
+        role="tablist"
+        aria-label={t("overview.story.numbers")}
+        className={cn("grid grid-cols-2 border-t border-border", metrics.length === 4 && "lg:grid-cols-4")}
+      >
+        {metrics.map((each, index) => (
+          <MetricTab
+            key={each.key}
+            metric={each}
+            active={each.key === shown.key}
+            index={index}
+            count={metrics.length}
+            onSelect={() => setMetric(each.key)}
+          />
+        ))}
+      </div>
+      <div role="tabpanel" className="flex flex-col gap-3 px-4 pb-4 pt-4 sm:px-6 sm:pb-5 sm:pt-5 lg:px-8">
+        <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1.5">
+          <h2 className="text-sm font-semibold text-foreground">
+            {shown.key === "sales"
+              ? t("chart.sales", { by })
+              : shown.key === "orders"
+                ? t("chart.orders", { by })
+                : shown.key === "visitors"
+                  ? t("chart.visitors", { by })
+                  : t("chart.conversion", { by })}
+          </h2>
+          <ChartLegend period={period} />
+        </div>
         <TrendChart
-          data={report.series.data}
-          comparison={report.series.comparison}
-          value={(point) => Number(point.sales)}
-          hourly={report.period.start_date === report.period.end_date}
-          show={(n) => format.money(n)}
-          labels={{ current: t("thesePeriod"), previous: t("comparedPeriod") }}
+          points={metricPoints(report.series, shown.key)}
+          period={period}
+          show={(n) => shown.show(n)}
+          axis={shown.axis}
+          unit={shown.unit}
         />
-      </Panel>
-
-      {full ? (
-        <div className="grid gap-3 lg:grid-cols-2">
-          {report.journey ? <Journey journey={report.journey} /> : null}
-          <Panel title={t("overview.sourcesTitle")} more={{ section: "traffic", label: t("sections.traffic") }}>
-            <BarList
-              rows={(report.sources ?? []).map((row) => ({
-                key: row.source,
-                label: sourceName(row.source, t),
-                detail: t("overview.sourceDetail", { orders: format.count(row.orders), visitors: format.count(row.visitors) }),
-                value: format.money(row.sales),
-                share: shareOf(Number(row.sales), Math.max(...(report.sources ?? []).map((r) => Number(r.sales)), 0)),
-              }))}
-            />
-          </Panel>
-          <TopDistricts report={report} />
-          <DeliverySummary report={report} />
-          <BestSellers report={report} />
-        </div>
-      ) : (
-        <Upgrade title={t("upgradeOverview")} />
-      )}
-    </div>
+      </div>
+    </section>
   );
 }
 
-const TONES = {
-  placed: { box: "bg-muted", dot: "bg-muted-foreground" },
-  confirmed: { box: "bg-blue-50 outline outline-[1.5px] outline-blue-600 dark:bg-blue-950/40", dot: "bg-blue-600" },
-  delivered: { box: "bg-muted", dot: "bg-emerald-600" },
-} as const;
-
-function Step({ tone, label, stage }: { tone: keyof typeof TONES; label: string; stage: { orders: number; sales: string } }) {
-  const t = useTranslations("analyticsPage");
-  const { format } = useAnalyticsView();
+/** One of the headline numbers; choosing it puts its line on the chart. */
+function MetricTab({
+  metric,
+  active,
+  index,
+  count,
+  onSelect,
+}: {
+  metric: Shown;
+  active: boolean;
+  index: number;
+  count: number;
+  onSelect: () => void;
+}) {
+  // Hairlines between the numbers: two to a row on a phone, all four in one on a computer.
+  const right = cn(index % 2 === 0 && "border-r", count === 4 && index === 1 && "lg:border-r");
+  const bottom = active ? (count === 4 && index < 2 ? "lg:border-b-transparent" : "border-b-transparent") : "";
   return (
-    <div className={`flex min-w-0 flex-1 flex-col gap-0.5 rounded-ui p-2.5 ${TONES[tone].box}`}>
-      <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-foreground">
-        <span className={`size-2 rounded-[2px] ${TONES[tone].dot}`} aria-hidden />
-        {label}
+    <div
+      className={cn(
+        "relative flex min-w-0 flex-col gap-1 border-b border-border px-4 py-3.5 sm:px-5 sm:py-4 lg:px-6",
+        right,
+        bottom,
+        active ? "bg-card shadow-[inset_0_2px_0_hsl(var(--accent-blue))]" : "bg-muted/50 hover:bg-muted",
+      )}
+    >
+      <button
+        type="button"
+        role="tab"
+        aria-selected={active}
+        aria-label={metric.label}
+        onClick={onSelect}
+        className="absolute inset-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
+      />
+      <span className="pointer-events-none relative flex">
+        <span className="pointer-events-auto flex min-w-0">
+          <StatLabel label={metric.label} hint={metric.hint} strong={active} />
+        </span>
       </span>
-      <span className="truncate text-base font-semibold text-foreground tabular-nums">{format.money(stage.sales)}</span>
-      <span className="text-[11px] text-muted-foreground">{t("orderCount", { n: format.count(stage.orders) })}</span>
+      <span className="pointer-events-none relative truncate text-xl font-semibold tracking-tight text-foreground tabular-nums sm:text-2xl">
+        {metric.card.value === null ? "—" : metric.show(metric.card.value)}
+      </span>
+      <div className="pointer-events-none relative">
+        <Change card={metric.card} show={metric.show} />
+      </div>
     </div>
   );
 }
 
-function Journey({ journey }: { journey: NonNullable<OverviewReport["journey"]> }) {
+/** The days in one sentence: what the shop made, and how that compares. */
+function Headline({ report }: { report: OverviewReport }) {
+  const t = useTranslations("analyticsPage");
+  const { format, compare } = useAnalyticsView();
+  const { cards, period } = report;
+  const orders = Number(cards.orders.value ?? 0);
+  const className = "max-w-3xl text-balance text-xl font-semibold leading-snug tracking-tight text-foreground sm:text-[26px] lg:text-[28px]";
+  if (!orders) return <p className={className}>{t("overview.story.none")}</p>;
+
+  const days = dayCount(period.start_date, period.end_date);
+  const before =
+    compare === "year"
+      ? t("overview.story.lastYear")
+      : days === 1
+        ? t("overview.story.dayBefore")
+        : period.preset === "month"
+          ? t("overview.story.lastMonth")
+          : t("overview.story.daysBefore", { n: format.count(days) });
+  const words = { sales: format.money(cards.sales.value), orders: format.count(orders), count: orders, before };
+  const change = cards.sales.change;
+  const up = (chunks: ReactNode) => <span className="text-emerald-700 dark:text-emerald-400">{chunks}</span>;
+  const down = (chunks: ReactNode) => <span className="text-rose-700 dark:text-rose-400">{chunks}</span>;
+
+  return (
+    <p className={className}>
+      {change === null
+        ? t("overview.story.plain", words)
+        : change > 0
+          ? t.rich("overview.story.up", { ...words, change: format.percent(change), up })
+          : change < 0
+            ? t.rich("overview.story.down", { ...words, change: format.percent(-change), down })
+            : t("overview.story.same", words)}
+    </p>
+  );
+}
+
+type Note = { key: string; section: SectionKey; icon: typeof Users; text: ReactNode };
+
+/** What the numbers say moved them -- only what they actually show. */
+function WhatMovedIt({ report }: { report: OverviewReport }) {
+  const t = useTranslations("analyticsPage");
+  const locale = useLocale();
+  const { format } = useAnalyticsView();
+  const b = (chunks: ReactNode) => <strong className="font-semibold text-foreground">{chunks}</strong>;
+  const notes: Note[] = [];
+
+  const source = report.sources ? topSource(report.sources) : null;
+  if (source) {
+    notes.push({
+      key: "source",
+      section: "traffic",
+      icon: Users,
+      text: t.rich("overview.moved.source", {
+        source: sourceName(source.source, t),
+        orders: format.count(source.orders),
+        total: format.count(Number(report.cards.orders.value ?? 0)),
+        sales: format.money(source.sales),
+        b,
+      }),
+    });
+  }
+
+  const best = bestDay(report.series);
+  if (best) {
+    const sales = format.money(best.sales);
+    const hourly = report.period.start_date === report.period.end_date;
+    const was = best.was ? Number(best.was.sales) : 0;
+    const change = best.was && was ? changeOf(best.sales, was, "percent") : null;
+    const words = { day: format.dayName(best.date), sales, b };
+    notes.push({
+      key: "day",
+      section: "sales",
+      icon: TrendingUp,
+      text: hourly
+        ? t.rich("overview.moved.bestHour", { hour: format.hour(best.date), sales, b })
+        : change && best.was
+          ? change > 0
+            ? t.rich("overview.moved.bestDayUp", { ...words, change: format.percent(change), before: format.dayName(best.was.date) })
+            : t.rich("overview.moved.bestDayDown", { ...words, change: format.percent(-change), before: format.dayName(best.was.date) })
+          : t.rich("overview.moved.bestDay", words),
+    });
+  }
+
+  const places = report.districts ? placeNotes(report.districts) : null;
+  if (places) {
+    const named = (row: { name: string; name_bn: string }) => (locale === "bn" ? row.name_bn : row.name);
+    notes.push({
+      key: "places",
+      section: "districts",
+      icon: MapPin,
+      text: (
+        <>
+          {t.rich("overview.moved.placesMost", {
+            district: named(places.most),
+            orders: t("orderCount", { n: format.count(places.most.orders) }),
+            b,
+          })}
+          {places.lowest ? " " : null}
+          {places.lowest
+            ? t.rich("overview.moved.placesLowest", {
+                district: named(places.lowest),
+                rate: format.percent(places.lowest.delivered_rate),
+                b,
+              })
+            : null}
+        </>
+      ),
+    });
+  }
+
+  if (!notes.length) return null;
+  return (
+    <section className="flex flex-col gap-3">
+      <h2 className="text-[15px] font-semibold text-foreground">{t("overview.moved.title")}</h2>
+      <div className={cn("grid gap-3 sm:gap-4", notes.length === 3 ? "md:grid-cols-3" : notes.length === 2 && "md:grid-cols-2")}>
+        {notes.map((note) => (
+          <article key={note.key} className={cn(CARD, "flex flex-col gap-3 p-4 sm:p-5")}>
+            <span className="flex items-center gap-2.5 text-xs font-medium text-muted-foreground">
+              <span className="grid size-8 place-items-center rounded-ui bg-blue-500/10 text-blue-600 dark:bg-blue-400/15 dark:text-blue-400">
+                <note.icon className="size-4" aria-hidden />
+              </span>
+              {t(`sections.${note.section}`)}
+            </span>
+            <p className="flex-1 text-[15px] leading-relaxed text-foreground/80">{note.text}</p>
+            <MoreLink more={{ section: note.section, label: t("overview.moved.open", { section: t(`sections.${note.section}`) }) }} />
+          </article>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+/** Orders that are stuck: placed and never confirmed, or confirmed and not delivered yet. */
+function NeedsALook({ report }: { report: OverviewReport }) {
+  const t = useTranslations("analyticsPage");
+  const { format, full } = useAnalyticsView();
+  const { steps } = report;
+  const b = (chunks: ReactNode) => <strong className="font-semibold text-amber-800 dark:text-amber-400">{chunks}</strong>;
+  const orders: More = { href: "/orders", label: t("overview.look.openOrders") };
+  const rows: { key: string; text: ReactNode; more: More }[] = [];
+  if (steps.not_confirmed) {
+    rows.push({
+      key: "notConfirmed",
+      text: t.rich("overview.look.notConfirmed", { orders: t("orderCount", { n: format.count(steps.not_confirmed) }), b }),
+      more: orders,
+    });
+  }
+  if (steps.not_delivered) {
+    rows.push({
+      key: "notDelivered",
+      text: t.rich("overview.look.notDelivered", { orders: t("orderCount", { n: format.count(steps.not_delivered) }), b }),
+      more: full ? { section: "delivery", label: t("overview.look.openDelivery") } : orders,
+    });
+  }
+  if (!rows.length) return null;
+
+  return (
+    <section className="flex flex-col rounded-card border border-amber-200 bg-amber-50 px-4 pb-1 pt-3.5 sm:px-6 dark:border-amber-900/60 dark:bg-amber-950/30">
+      <h2 className="pb-2.5 text-[15px] font-semibold text-foreground">{t("overview.look.title")}</h2>
+      {rows.map((row) => (
+        <div
+          key={row.key}
+          className="flex flex-col items-start gap-2 border-t border-amber-200 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4 dark:border-amber-900/60"
+        >
+          <p className="flex items-start gap-2.5 text-sm leading-relaxed text-foreground/80">
+            <TriangleAlert className="mt-0.5 size-4 shrink-0 text-amber-600 dark:text-amber-400" aria-hidden />
+            <span>{row.text}</span>
+          </p>
+          <MoreLink more={row.more} />
+        </div>
+      ))}
+    </section>
+  );
+}
+
+function Sources({ report }: { report: OverviewReport }) {
   const t = useTranslations("analyticsPage");
   const { format } = useAnalyticsView();
+  const sources = (report.sources ?? []).slice(0, ROWS);
+  const campaigns = report.campaigns ?? [];
+  const landing = report.landing ?? [];
+  const bought: Column[] = [{ label: t("columns.visitors"), wide: true }, { label: t("columns.orders") }, { label: t("columns.sales") }];
+  const most = (rows: { visitors: number }[]) => Math.max(...rows.map((row) => row.visitors), 0);
+  return (
+    <ListPanel
+      more={{ section: "traffic", label: t("sections.traffic") }}
+      tabs={[
+        {
+          key: "sources",
+          label: t("overview.lists.sources"),
+          columns: bought,
+          rows: sources.map((row) => ({
+            key: row.source,
+            label: sourceName(row.source, t),
+            values: [format.count(row.visitors), format.count(row.orders), format.money(row.sales)],
+            share: shareOf(row.visitors, most(sources)),
+          })),
+        },
+        {
+          key: "campaigns",
+          label: t("overview.lists.campaigns"),
+          columns: bought,
+          empty: t("traffic.noCampaigns"),
+          rows: campaigns.map((row) => ({
+            key: row.campaign,
+            label: row.campaign,
+            values: [format.count(row.visitors), format.count(row.orders), format.money(row.sales)],
+            share: shareOf(row.visitors, most(campaigns)),
+          })),
+        },
+        {
+          key: "landing",
+          label: t("overview.lists.landing"),
+          columns: [{ label: t("columns.visitors") }, { label: t("columns.stayOn"), wide: true }, { label: t("columns.buy") }],
+          rows: landing.map((row) => ({
+            key: row.path,
+            label: pageName(row, t),
+            values: [format.count(row.visitors), format.percent(row.engaged_rate), format.percent(row.conversion)],
+            share: shareOf(row.visitors, most(landing)),
+          })),
+        },
+      ]}
+    />
+  );
+}
+
+function Places({ report }: { report: OverviewReport }) {
+  const t = useTranslations("analyticsPage");
+  const locale = useLocale();
+  const { format } = useAnalyticsView();
+  const named = (row: { name: string; name_bn: string }) => (locale === "bn" ? row.name_bn : row.name);
+  const districts = (report.districts ?? []).slice(0, ROWS);
+  const divisions = (report.divisions ?? []).filter((row) => row.orders).sort((a, b) => b.orders - a.orders);
+  const columns: Column[] = [{ label: t("columns.orders") }, { label: t("columns.sales") }, { label: t("columns.delivered"), wide: true }];
+  const rows = (list: { key: string; name: string; name_bn: string; orders: number; sales: string; delivered_rate: number }[]) => {
+    const most = Math.max(...list.map((row) => row.orders), 0);
+    return list.map((row) => ({
+      key: row.key,
+      label: named(row),
+      values: [format.count(row.orders), format.money(row.sales), format.percent(row.delivered_rate)],
+      share: shareOf(row.orders, most),
+    }));
+  };
+  return (
+    <ListPanel
+      more={{ section: "districts", label: t("sections.districts") }}
+      tabs={[
+        { key: "districts", label: t("overview.lists.districts"), columns, rows: rows(districts) },
+        { key: "divisions", label: t("overview.lists.divisions"), columns, rows: rows(divisions) },
+      ]}
+    />
+  );
+}
+
+function ProductsList({ report }: { report: OverviewReport }) {
+  const t = useTranslations("analyticsPage");
+  const { format } = useAnalyticsView();
+  const products = report.best_sellers ?? [];
+  const categories = report.categories ?? [];
+  const most = Math.max(...products.map((row) => Number(row.revenue)), 0);
+  return (
+    <ListPanel
+      more={{ section: "products", label: t("sections.products") }}
+      tabs={[
+        {
+          key: "products",
+          label: t("overview.lists.products"),
+          columns: [{ label: t("columns.views"), wide: true }, { label: t("columns.sold") }, { label: t("columns.sales") }],
+          rows: products.map((row) => ({
+            key: row.product_id,
+            label: row.product_name,
+            values: [format.count(row.views), format.count(row.units), format.money(row.revenue)],
+            share: shareOf(Number(row.revenue), most),
+          })),
+        },
+        {
+          key: "categories",
+          label: t("overview.lists.categories"),
+          columns: [{ label: t("columns.share") }, { label: t("columns.sales") }],
+          rows: categories.map((row) => ({
+            key: row.category || "none",
+            label: row.category || t("products.noCategory"),
+            values: [format.percent(row.share), format.money(row.sales)],
+            share: row.share,
+          })),
+        },
+      ]}
+    />
+  );
+}
+
+function Journey({ report }: { report: OverviewReport }) {
+  const t = useTranslations("analyticsPage");
+  const { format } = useAnalyticsView();
+  const journey = report.journey;
+  if (!journey) return null;
   const steps = [
     { key: "visitors", n: journey.visitors, of: null },
     { key: "viewed_product", n: journey.viewed_product, of: journey.visitors },
@@ -127,129 +506,85 @@ function Journey({ journey }: { journey: NonNullable<OverviewReport["journey"]> 
     { key: "confirmed", n: journey.confirmed, of: journey.placed },
   ] as const;
   return (
-    <Panel title={t("overview.journeyTitle")} note={t("overview.journeyNote")}>
-      {journey.visitors ? (
-        <ol className="flex flex-col gap-2.5">
-          {steps.map((step) => (
-            <li key={step.key} className="flex flex-col gap-1">
-              <div className="flex items-baseline justify-between gap-2 text-sm">
-                <span className="font-medium text-foreground">{t(`overview.journey.${step.key}`)}</span>
-                <span className="font-semibold text-foreground tabular-nums">{format.count(step.n)}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="h-2 flex-1 overflow-hidden rounded-full bg-muted">
-                  <div className="h-full rounded-full bg-primary" style={{ width: `${Math.min(100, shareOf(step.n, journey.visitors))}%` }} />
-                </div>
-                <span className="w-24 shrink-0 text-right text-[11px] text-muted-foreground">
-                  {step.of === null ? format.percent(100) : step.of ? format.percent(shareOf(step.n, step.of)) : "—"}
-                </span>
-              </div>
-            </li>
-          ))}
-        </ol>
-      ) : (
-        <Empty>{t("overview.journeyEmpty")}</Empty>
-      )}
-      <p className="text-[11px] text-muted-foreground">{t("overview.journeyFootnote")}</p>
-    </Panel>
+    <ListPanel
+      note={t("overview.journeyNote")}
+      footnote={journey.visitors ? t("overview.journeyFootnote") : undefined}
+      tabs={[
+        {
+          key: "journey",
+          label: t("overview.journeyTitle"),
+          columns: [{ label: t("columns.ofStepBefore"), wide: true, width: "w-28 sm:w-32" }, { label: t("columns.shoppers") }],
+          empty: t("overview.journeyEmpty"),
+          rows: journey.visitors
+            ? steps.map((step) => ({
+                key: step.key,
+                label: t(`overview.journey.${step.key}`),
+                values: [step.of === null ? format.percent(100) : step.of ? format.percent(shareOf(step.n, step.of)) : "—", format.count(step.n)],
+                share: Math.min(100, shareOf(step.n, journey.visitors)),
+              }))
+            : [],
+        },
+      ]}
+    />
   );
 }
 
-function TopDistricts({ report }: { report: OverviewReport }) {
+function Stand({ report }: { report: OverviewReport }) {
   const t = useTranslations("analyticsPage");
-  const locale = useLocale();
   const { format } = useAnalyticsView();
-  const rows = report.districts ?? [];
-  const most = Math.max(...rows.map((row) => Number(row.sales)), 0);
+  const { steps } = report;
+  const placed = Number(steps.placed.sales);
+  const stages = [
+    { key: "placed", label: t("overview.placed"), stage: steps.placed },
+    { key: "confirmed", label: t("overview.confirmed"), stage: steps.confirmed },
+    { key: "delivered", label: t("overview.delivered"), stage: steps.delivered },
+  ];
   return (
-    <Panel title={t("overview.districtsTitle")} more={{ section: "districts", label: t("sections.districts") }}>
-      <BarList
-        rows={rows.map((row) => ({
-          key: row.key,
-          label: locale === "bn" ? row.name_bn : row.name,
-          detail: t("orderCount", { n: format.count(row.orders) }),
-          value: format.money(row.sales),
-          share: shareOf(Number(row.sales), most),
-        }))}
-      />
-    </Panel>
+    <ListPanel
+      note={t("overview.stepsNote")}
+      more={{ href: "/orders", label: t("overview.look.openOrders") }}
+      tabs={[
+        {
+          key: "stand",
+          label: t("overview.stepsTitle"),
+          columns: [{ label: t("columns.orders") }, { label: t("columns.sales") }],
+          rows: steps.placed.orders
+            ? stages.map((row) => ({
+                key: row.key,
+                label: row.label,
+                values: [format.count(row.stage.orders), format.money(row.stage.sales)],
+                share: shareOf(Number(row.stage.sales), placed),
+              }))
+            : [],
+        },
+      ]}
+    />
   );
 }
 
-function DeliverySummary({ report }: { report: OverviewReport }) {
+function DeliveryList({ report }: { report: OverviewReport }) {
   const t = useTranslations("analyticsPage");
   const { format } = useAnalyticsView();
   const parcels = report.parcels;
   if (!parcels) return null;
-  const items = [
-    { key: "delivered", n: parcels.delivered },
-    { key: "partial", n: parcels.partial },
-    { key: "returned", n: parcels.returned },
-    { key: "in_transit", n: parcels.in_transit },
-  ] as const;
+  const sent = PARCEL_ROWS.reduce((sum, key) => sum + parcels[key], 0);
   return (
-    <Panel title={t("overview.deliveryTitle")} more={{ section: "delivery", label: t("sections.delivery") }}>
-      <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-        {items.map((item) => (
-          <div key={item.key} className="flex flex-col rounded-ui bg-muted p-2.5">
-            <span className="text-lg font-semibold text-foreground tabular-nums">{format.count(item.n)}</span>
-            <span className="text-[11px] text-muted-foreground">{t(`parcels.${item.key}`)}</span>
-          </div>
-        ))}
-      </div>
-    </Panel>
-  );
-}
-
-function BestSellers({ report }: { report: OverviewReport }) {
-  const t = useTranslations("analyticsPage");
-  const { format } = useAnalyticsView();
-  const rows = report.best_sellers ?? [];
-  return (
-    <Panel title={t("overview.bestSellersTitle")} more={{ section: "products", label: t("sections.products") }}>
-      {rows.length ? (
-        <ul className="flex flex-col divide-y divide-border">
-          {rows.map((row) => (
-            <li key={row.product_id} className="flex items-center justify-between gap-3 py-2 first:pt-0 last:pb-0">
-              <div className="flex min-w-0 flex-col">
-                <span className="truncate text-sm font-medium text-foreground">{row.product_name}</span>
-                <span className="text-xs text-muted-foreground">
-                  {t("overview.soldViews", { sold: format.count(row.units), views: format.count(row.views) })}
-                </span>
-              </div>
-              <span className="shrink-0 text-sm font-semibold text-foreground tabular-nums">{format.money(row.revenue)}</span>
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <Empty />
-      )}
-    </Panel>
-  );
-}
-
-function LiveStrip() {
-  const t = useTranslations("analyticsPage");
-  const { format, goTo } = useAnalyticsView();
-  const live = useLive(true);
-  if (!live.data) return null;
-  return (
-    <button
-      type="button"
-      onClick={() => goTo("live")}
-      className="flex items-center justify-between gap-2.5 rounded-card border border-border bg-card px-3.5 py-3 text-left"
-    >
-      <span className="inline-flex items-center gap-2.5 text-[13px] text-foreground">
-        <span className="size-[9px] shrink-0 rounded-full bg-emerald-600 shadow-[0_0_0_4px_rgba(5,150,105,0.18)]" aria-hidden />
-        <span>
-          {t.rich("overview.liveStrip", {
-            visitors: format.count(live.data.right_now),
-            orders: format.count(live.data.orders_last_hour),
-            strong: (chunks) => <strong className="font-semibold">{chunks}</strong>,
-          })}
-        </span>
-      </span>
-      <ChevronRight className="size-4 shrink-0 text-muted-foreground" aria-hidden />
-    </button>
+    <ListPanel
+      note={t("delivery.parcelsNote", { n: format.count(sent) })}
+      more={{ section: "delivery", label: t("sections.delivery") }}
+      tabs={[
+        {
+          key: "delivery",
+          label: t("overview.deliveryTitle"),
+          columns: [{ label: t("columns.share") }, { label: t("columns.parcels") }],
+          rows: PARCEL_ROWS.filter((key) => parcels[key]).map((key) => ({
+            key,
+            label: t(`overview.parcels.${key}`),
+            values: [format.percent(shareOf(parcels[key], sent)), format.count(parcels[key])],
+            share: shareOf(parcels[key], sent),
+          })),
+        },
+      ]}
+    />
   );
 }

@@ -8,11 +8,19 @@ import type { DateRange } from "react-day-picker";
 
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 import { addCalendarDaysYmd, todayYmdInBD } from "@/utils/time";
 
 import { useAnalyticsView } from "../_lib/context";
-import { MAX_DAYS, PRESETS, type Period, type Preset, dayCount, periodDays } from "../_lib/period";
+import { MAX_DAYS, PRESETS, type Period, dayCount, periodDays } from "../_lib/period";
 
 const Calendar = dynamic(() => import("@/components/ui/calendar").then((mod) => mod.Calendar), {
   ssr: false,
@@ -28,70 +36,27 @@ function toYmd(date: Date): string {
 }
 
 /**
- * Which days the page shows, and what they are compared with: a button naming
- * the days (it opens the calendar), the comparison, and the quick choices.
+ * Which days the page shows: the quick choices, and Custom, which opens the
+ * calendar (and names the days once chosen).
  */
-export function PeriodBar({ period, onChange }: { period: Period; onChange: (next: Period) => void }) {
+export function PeriodChips({ period, onChange }: { period: Period; onChange: (next: Period) => void }) {
   const t = useTranslations("analyticsPage.period");
   const { format } = useAnalyticsView();
   const [picking, setPicking] = useState(false);
   const today = todayYmdInBD();
   const { start, end } = periodDays(period, today);
-  const days = dayCount(start, end);
-
-  const name =
-    period.preset === "custom"
-      ? t("custom")
-      : period.preset === "7" || period.preset === "30"
-        ? t("lastDays", { n: format.count(Number(period.preset)) })
-        : t(period.preset);
-  const against =
-    period.compare === "year"
-      ? t("vsLastYear")
-      : period.preset === "today"
-        ? t("vsYesterday")
-        : period.preset === "month"
-          ? t("vsLastMonth")
-          : t("vsPreviousDays", { n: format.count(days) });
-
-  const choose = (preset: Preset) => onChange({ preset, compare: period.compare });
 
   return (
-    <div className="flex flex-col gap-2.5">
-      <div className="flex gap-2">
-        <button
-          type="button"
-          onClick={() => setPicking(true)}
-          className="flex h-11 min-w-0 flex-1 items-center gap-2.5 rounded-ui border border-border bg-card px-3 text-left"
-        >
-          <CalendarDays className="size-[18px] shrink-0 text-foreground" aria-hidden />
-          <span className="flex min-w-0 flex-1 flex-col">
-            <span className="truncate text-[13px] font-semibold text-foreground">{name}</span>
-            <span className="truncate text-[11px] text-muted-foreground">{format.days(start, end)}</span>
-          </span>
-          <ChevronDown className="size-4 shrink-0 text-muted-foreground" aria-hidden />
-        </button>
-        <button
-          type="button"
-          aria-label={t("compareToggle")}
-          aria-pressed={period.compare === "year"}
-          onClick={() => onChange({ ...period, compare: period.compare === "year" ? "previous" : "year" })}
-          className="flex h-11 shrink-0 items-center gap-1.5 rounded-ui border border-border bg-card px-3 text-xs font-medium text-foreground"
-        >
-          <ArrowLeftRight className="size-4" aria-hidden />
-          <span className="max-w-32 truncate">{against}</span>
-        </button>
-      </div>
-      <div className="-mx-4 flex gap-1.5 overflow-x-auto px-4 pb-0.5 sm:mx-0 sm:px-0">
-        {PRESETS.map((preset) => (
-          <Chip key={preset} active={period.preset === preset} onClick={() => choose(preset)}>
-            {preset === "7" || preset === "30" ? t("days", { n: format.count(Number(preset)) }) : t(preset)}
-          </Chip>
-        ))}
-        <Chip active={period.preset === "custom"} onClick={() => setPicking(true)}>
-          {t("custom")}
+    <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-0.5 sm:mx-0 sm:flex-wrap sm:px-0">
+      {PRESETS.map((preset) => (
+        <Chip key={preset} active={period.preset === preset} onClick={() => onChange({ preset, compare: period.compare })}>
+          {preset === "7" || preset === "30" ? t("days", { n: format.count(Number(preset)) }) : t(preset)}
         </Chip>
-      </div>
+      ))}
+      <Chip active={period.preset === "custom"} onClick={() => setPicking(true)}>
+        <CalendarDays className="size-4" aria-hidden />
+        {period.preset === "custom" ? format.days(start, end) : t("custom")}
+      </Chip>
       <PickDays
         open={picking}
         onOpenChange={setPicking}
@@ -107,6 +72,45 @@ export function PeriodBar({ period, onChange }: { period: Period; onChange: (nex
   );
 }
 
+/** What the days are compared with: the days just before, or the same days a year before. */
+export function CompareMenu({ period, onChange }: { period: Period; onChange: (next: Period) => void }) {
+  const t = useTranslations("analyticsPage.period");
+  const { format } = useAnalyticsView();
+  const { start, end } = periodDays(period, todayYmdInBD());
+  const n = format.count(dayCount(start, end));
+  const [shown, before] =
+    period.preset === "today"
+      ? [t("vsYesterday"), t("againstYesterday")]
+      : period.preset === "month"
+        ? [t("vsLastMonth"), t("againstLastMonth")]
+        : [t("vsPreviousDays", { n }), t("againstDays", { n })];
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button
+          type="button"
+          className="flex h-11 w-full items-center justify-center gap-2 rounded-button border border-border bg-card px-3 text-[13px] font-medium text-foreground shadow-[0_1px_2px_rgba(15,23,42,0.05)] hover:bg-muted sm:h-9 sm:w-auto"
+        >
+          <ArrowLeftRight className="size-4 text-muted-foreground" aria-hidden />
+          {period.compare === "year" ? t("vsLastYear") : shown}
+          <ChevronDown className="size-4 text-muted-foreground" aria-hidden />
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="min-w-56">
+        <DropdownMenuLabel>{t("compareWith")}</DropdownMenuLabel>
+        <DropdownMenuRadioGroup
+          value={period.compare}
+          onValueChange={(value) => onChange({ ...period, compare: value === "year" ? "year" : "previous" })}
+        >
+          <DropdownMenuRadioItem value="previous">{before}</DropdownMenuRadioItem>
+          <DropdownMenuRadioItem value="year">{t("againstLastYear")}</DropdownMenuRadioItem>
+        </DropdownMenuRadioGroup>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+
 function Chip({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) {
   return (
     <button
@@ -114,7 +118,7 @@ function Chip({ active, onClick, children }: { active: boolean; onClick: () => v
       aria-pressed={active}
       onClick={onClick}
       className={cn(
-        "h-8 shrink-0 whitespace-nowrap rounded-full border px-3 text-xs font-medium transition-colors",
+        "inline-flex h-10 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border px-3.5 text-[13px] font-medium transition-colors sm:h-9",
         active ? "border-foreground bg-foreground text-background" : "border-border bg-card text-foreground hover:bg-muted",
       )}
     >

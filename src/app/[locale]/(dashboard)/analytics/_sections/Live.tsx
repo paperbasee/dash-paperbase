@@ -4,7 +4,7 @@ import { useLocale, useTranslations } from "next-intl";
 
 import { formatOrderStatusLabel } from "@/lib/orders/order-statuses";
 
-import { BarList, Empty, Panel, shareOf } from "../_components/kit";
+import { Empty, ListPanel, Panel, shareOf } from "../_components/kit";
 import { useAnalyticsView } from "../_lib/context";
 import { pageName, sourceName } from "../_lib/names";
 import type { LiveReport } from "../_lib/types";
@@ -22,10 +22,10 @@ export function Live({ report }: { report: LiveReport }) {
   };
 
   return (
-    <div className="grid gap-3 lg:grid-cols-2">
+    <div className="grid gap-4 lg:grid-cols-2">
       <Panel title={t("live.title")} note={t("live.note")} className="lg:col-span-2">
         <div className="flex items-end gap-3">
-          <span className="inline-flex items-center gap-2 text-4xl font-semibold text-foreground tabular-nums">
+          <span className="inline-flex items-center gap-2.5 text-4xl font-semibold tracking-tight text-foreground tabular-nums">
             <span className="size-2.5 rounded-full bg-emerald-600 shadow-[0_0_0_5px_rgba(5,150,105,0.18)]" aria-hidden />
             {format.count(report.right_now)}
           </span>
@@ -43,29 +43,39 @@ export function Live({ report }: { report: LiveReport }) {
         <p className="text-[11px] text-muted-foreground">{t("live.minutesNote")}</p>
       </Panel>
 
-      <Panel title={t("live.pagesTitle")}>
-        <BarList
-          empty={t("live.nobody")}
-          rows={report.pages.map((row) => ({
-            key: row.path,
-            label: pageName(row, t),
-            value: format.count(row.visitors),
-            share: shareOf(row.visitors, report.right_now),
-          }))}
-        />
-      </Panel>
+      <ListPanel
+        tabs={[
+          {
+            key: "pages",
+            label: t("live.pagesTitle"),
+            columns: [{ label: t("columns.visitors") }],
+            empty: t("live.nobody"),
+            rows: report.pages.map((row) => ({
+              key: row.path,
+              label: pageName(row, t),
+              values: [format.count(row.visitors)],
+              share: shareOf(row.visitors, report.right_now),
+            })),
+          },
+        ]}
+      />
 
-      <Panel title={t("live.sourcesTitle")}>
-        <BarList
-          empty={t("live.nobody")}
-          rows={report.sources.map((row) => ({
-            key: row.source,
-            label: sourceName(row.source, t),
-            value: format.count(row.visitors),
-            share: shareOf(row.visitors, report.right_now),
-          }))}
-        />
-      </Panel>
+      <ListPanel
+        tabs={[
+          {
+            key: "sources",
+            label: t("live.sourcesTitle"),
+            columns: [{ label: t("columns.visitors") }],
+            empty: t("live.nobody"),
+            rows: report.sources.map((row) => ({
+              key: row.source,
+              label: sourceName(row.source, t),
+              values: [format.count(row.visitors)],
+              share: shareOf(row.visitors, report.right_now),
+            })),
+          },
+        ]}
+      />
 
       <Panel title={t("live.ordersTitle")} note={t("live.ordersNote", { n: format.count(report.orders_last_hour) })} className="lg:col-span-2">
         {report.latest_orders.length ? (

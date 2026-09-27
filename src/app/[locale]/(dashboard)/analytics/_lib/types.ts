@@ -34,8 +34,12 @@ export type PeriodInfo = {
 
 export type Report = { period: PeriodInfo; cached_at: number; cache_ttl_seconds: number };
 
-export type SalesPoint = { date: string; sales: string; orders: number };
+/** A day (or an hour) of confirmed sales -- with its visitors on a plan that sees them. */
+export type SalesPoint = { date: string; sales: string; orders: number; visitors?: number };
 export type Series<P> = { data: P[]; comparison: P[] };
+
+/** A day (or an hour) on a chart: these days' number, and the compared days' at the same place. */
+export type ChartPoint = { date: string; current: number; previous: number | null; previousDate: string | null };
 
 export type Stage = { orders: number; sales: string };
 
@@ -47,6 +51,22 @@ export type SourceRow = {
   sales: string;
   conversion: number;
 };
+
+export type CampaignRow = {
+  campaign: string;
+  source: string;
+  channel: string;
+  visitors: number;
+  orders: number;
+  sales: string;
+  conversion: number;
+};
+
+export type LandingRow = { path: string; kind: string; name: string; visitors: number; engaged_rate: number; conversion: number };
+
+export type DivisionRow = { key: string; name: string; name_bn: string; orders: number; sales: string; delivered_rate: number };
+
+export type CategoryRow = { category: string; sales: string; share: number };
 
 export type DistrictRow = {
   key: string;
@@ -101,10 +121,15 @@ export type OverviewReport = Report & {
     placed: number;
     confirmed: number;
   };
+  /** Every source and district; the page lists the first few. */
   sources?: SourceRow[];
+  campaigns?: CampaignRow[];
+  landing?: LandingRow[];
   districts?: DistrictRow[];
+  divisions?: DivisionRow[];
   parcels?: Parcels;
   best_sellers?: ProductRow[];
+  categories?: CategoryRow[];
 };
 
 export type SalesReport = Report & {
@@ -136,16 +161,8 @@ export type TrafficReport = Report & {
   };
   series: Series<{ date: string; visitors: number }>;
   sources: SourceRow[];
-  campaigns: {
-    campaign: string;
-    source: string;
-    channel: string;
-    visitors: number;
-    orders: number;
-    sales: string;
-    conversion: number;
-  }[];
-  landing: { path: string; kind: string; name: string; visitors: number; engaged_rate: number; conversion: number }[];
+  campaigns: CampaignRow[];
+  landing: LandingRow[];
   devices: { device: string; visitors: number; share: number; conversion: number }[];
   visitor_mix: { new: number; returning: number };
   searches: { query: string; searches: number; results: number | null; bought: number }[];
@@ -153,7 +170,7 @@ export type TrafficReport = Report & {
 
 export type ProductsReport = Report & {
   data: ProductRow[];
-  categories: { category: string; sales: string; share: number }[];
+  categories: CategoryRow[];
   needs_a_look: {
     kind: "looked_not_bought" | "came_back" | "sold_out";
     product_id: string;
@@ -167,7 +184,7 @@ export type ProductsReport = Report & {
 };
 
 export type DistrictsReport = Report & {
-  divisions: { key: string; name: string; name_bn: string; orders: number; sales: string; delivered_rate: number }[];
+  divisions: DivisionRow[];
   districts: DistrictRow[];
   not_recognised: { orders: number; sales: string };
 };
