@@ -502,6 +502,9 @@ export interface Customer {
 export interface AbandonedCheckoutItem {
   name: string;
   variant: string;
+  /** What the New order form starts from when the row is converted. */
+  product_public_id: string;
+  variant_public_id: string | null;
   quantity: number;
   unit_price: string;
 }

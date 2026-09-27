@@ -21,6 +21,7 @@ export default function NewOrderPage() {
   const { currencySymbol } = useBranding();
   const {
     saving,
+    fromAbandoned,
     fieldErrors,
     form,
     updateForm,
@@ -73,6 +74,13 @@ export default function NewOrderPage() {
             <p className="mt-1 text-sm text-muted-foreground md:hidden">
               {tPages("orderNewSubtitle")}
             </p>
+            {fromAbandoned ? (
+              <p className="mt-1 text-sm text-muted-foreground">
+                {tPages("orderNewFromAbandoned", {
+                  who: fromAbandoned.name || fromAbandoned.phone,
+                })}
+              </p>
+            ) : null}
           </div>
         </div>
         <div className="flex items-center gap-2">

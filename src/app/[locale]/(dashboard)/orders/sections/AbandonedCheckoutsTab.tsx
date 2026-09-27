@@ -10,6 +10,7 @@
 // leaves on its own.
 
 import { useEffect, useMemo, useState } from "react";
+import { DeferredNavLink } from "@/components/navigation/DeferredNavLink";
 import { useLocale, useTranslations } from "next-intl";
 import { toLocaleDigits } from "@/lib/locale-digits";
 import { numberTextClass } from "@/lib/number-font";
@@ -76,6 +77,9 @@ export function AbandonedCheckoutsTab() {
               <th className="th">{tPages("abandonedColItems")}</th>
               <th className="th">{tPages("abandonedColValue")}</th>
               <th className="th">{tPages("abandonedColWhen")}</th>
+              <th className="th">
+                <span className="sr-only">{tPages("abandonedConvert")}</span>
+              </th>
             </tr>
           </thead>
           <tbody className="divide-y divide-border/60">
@@ -126,6 +130,17 @@ export function AbandonedCheckoutsTab() {
                   <span className="whitespace-nowrap">
                     {formatDashboardDateTime(row.updated_at, locale)}
                   </span>
+                </td>
+                <td className="px-4 py-3 text-right">
+                  {/* They said yes on the phone: the New order form, started
+                      from this row. Saving it takes the row off this list. */}
+                  <DeferredNavLink
+                    href={`/orders/new?abandoned=${row.id}`}
+                    onClick={(e) => e.stopPropagation()}
+                    className="inline-flex whitespace-nowrap rounded-card bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground transition hover:bg-primary/90"
+                  >
+                    {tPages("abandonedConvert")}
+                  </DeferredNavLink>
                 </td>
               </tr>
             ))}

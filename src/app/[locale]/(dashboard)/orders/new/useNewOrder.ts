@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState, useRef, useMemo, type FormEvent } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
+import { useSearchParams } from "next/navigation";
 import { useRouter } from "@/i18n/navigation";
 import { useDeferredNavigate } from "@/hooks/useDeferredNavigate";
 import { useShippingMethodsQuery } from "@/hooks/useShippingMethodsQuery";
@@ -11,11 +12,13 @@ import { useOrderEditorVariants } from "@/hooks/useOrderEditorVariants";
 import api from "@/lib/api";
 import { notify } from "@/notifications";
 import type {
+  AbandonedCheckout,
   Product,
   PaginatedResponse,
   OrderPricingPreview,
 } from "@/types";
 import { joinVillageThanaDistrict } from "@/lib/orders/shipping-address-parts";
+import { orderFromAbandoned } from "@/lib/orders/order-from-abandoned";
 import {
   createOrderEditorVariantsFailureReporter,
   ensureOrderEditorVariants,
@@ -28,6 +31,7 @@ import {
 } from "@/lib/orders/order-pricing-preview";
 import { buildOrderCreateSchema, parseValidation } from "@/lib/validation";
 import {
+  abandonedCheckoutsQueryKeyRoot,
   dashboardAnalyticsQueryKeyRoot,
   navCountsQueryKey,
   ordersListQueryKeyRoot,
@@ -62,6 +66,8 @@ export function useNewOrder() {
 
   const invalidateAfterOrderCreate = useCallback(() => {
     void queryClient.invalidateQueries({ queryKey: ordersListQueryKeyRoot });
+    // A converted abandoned checkout leaves that list with this order.
+    void queryClient.invalidateQueries({ queryKey: abandonedCheckoutsQueryKeyRoot });
     void queryClient.invalidateQueries({ queryKey: navCountsQueryKey });
     void queryClient.invalidateQueries({ queryKey: dashboardAnalyticsQueryKeyRoot });
     // The order took stock: the next editor must not show the old available quantities.
@@ -101,6 +107,41 @@ export function useNewOrder() {
   const [items, setItems] = useState<OrderItemRow[]>([]);
   const nextKey = useRef(0);
 
+  /**
+   * Converting an abandoned checkout (owner, 2026-09-27): the merchant rang
+   * the shopper, who said yes. `?abandoned=<id>` starts this form from that
+   * row -- their details and their basket -- and its id goes with the order,
+   * so the API takes the row off the Abandoned list in the same save.
+   */
+  const searchParams = useSearchParams();
+  const abandonedParam = searchParams.get("abandoned");
+  const [fromAbandoned, setFromAbandoned] = useState<AbandonedCheckout | null>(null);
+  useEffect(() => {
+    const id = Number(abandonedParam);
+    if (!abandonedParam || !Number.isInteger(id) || id <= 0) return;
+    let cancelled = false;
+    api
+      .get<AbandonedCheckout>(`admin/abandoned-checkouts/${id}/`)
+      .then(({ data }) => {
+        if (cancelled) return;
+        const start = orderFromAbandoned(data);
+        setForm((prev) => ({ ...prev, ...start.form }));
+        setItems(start.items.map((item) => ({ ...item, key: nextKey.current++ })));
+        setFromAbandoned(data);
+      })
+      .catch((err: unknown) => {
+        if (cancelled) return;
+        notify.error(err, {
+          title: t("orderNewFromAbandonedFailedTitle"),
+          fallbackMessage: t("orderNewFromAbandonedFailed"),
+        });
+      });
+    return () => {
+      cancelled = true;
+    };
+    // Once per address: the row is read when the form opens, not on every render.
+  }, [abandonedParam]);
+
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<Product[]>([]);
   const [searching, setSearching] = useState(false);
@@ -130,6 +171,16 @@ export function useNewOrder() {
   const methodsQuery = useShippingMethodsQuery();
   const shippingZones = zonesQuery.data ?? [];
   const shippingMethods = methodsQuery.data ?? [];
+
+  // The shop's default delivery area, as its checkout starts on it
+  // (Settings > Shipping). Only while nothing has been chosen.
+  const defaultZoneId = shippingZones.find((z) => z.is_default && z.is_active)?.public_id ?? "";
+  useEffect(() => {
+    if (!defaultZoneId) return;
+    setForm((prev) =>
+      prev.shipping_zone_public_id ? prev : { ...prev, shipping_zone_public_id: defaultZoneId },
+    );
+  }, [defaultZoneId]);
   const [pricingPreview, setPricingPreview] = useState<OrderPricingPreview | null>(null);
   const [pricingPreviewFailed, setPricingPreviewFailed] = useState(false);
 
@@ -368,6 +419,7 @@ export function useNewOrder() {
           quantity: item.quantity,
           unit_price: item.unit_price,
         })),
+        ...(fromAbandoned ? { abandoned_checkout_id: fromAbandoned.id } : {}),
       };
       await api.post("admin/orders/", payload);
       invalidateAfterOrderCreate();
@@ -423,6 +475,7 @@ export function useNewOrder() {
 
   return {
     saving,
+    fromAbandoned,
     error,
     fieldErrors,
     form,
