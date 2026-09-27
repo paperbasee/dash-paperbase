@@ -5,6 +5,7 @@ import { useLocale, useTranslations } from "next-intl";
 
 import { cn } from "@/lib/utils";
 
+import { DivisionMap } from "../_components/DivisionMap";
 import { ListPanel, Panel, shareOf } from "../_components/kit";
 import { useAnalyticsView } from "../_lib/context";
 import { worthKnowing } from "../_lib/insights";
@@ -56,6 +57,15 @@ export function Districts({ report }: { report: DistrictsReport }) {
             </button>
           ))}
         </div>
+        <DivisionMap
+          divisions={report.divisions}
+          value={value}
+          shown={shown}
+          named={named}
+          rate={measure === "delivered"}
+          selected={division}
+          onSelect={setDivision}
+        />
         <ul className="flex flex-col">
           {report.divisions.map((row) => (
             <li key={row.key}>
@@ -79,7 +89,6 @@ export function Districts({ report }: { report: DistrictsReport }) {
             </li>
           ))}
         </ul>
-        <p className="text-[11px] text-muted-foreground">{t("districts.tapDivision")}</p>
       </Panel>
 
       <div className="flex flex-col gap-4">

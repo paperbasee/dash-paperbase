@@ -148,7 +148,16 @@ const reports = {
   } satisfies ProductsReport,
   districts: {
     ...base,
-    divisions: overview.divisions!,
+    divisions: [
+      { key: "dhaka", name: "Dhaka", name_bn: "ঢাকা", orders: 73, sales: "159600.00", delivered_rate: 90 },
+      { key: "chattogram", name: "Chattogram", name_bn: "চট্টগ্রাম", orders: 30, sales: "62100.00", delivered_rate: 84 },
+      { key: "rajshahi", name: "Rajshahi", name_bn: "রাজশাহী", orders: 0, sales: "0.00", delivered_rate: 0 },
+      { key: "khulna", name: "Khulna", name_bn: "খুলনা", orders: 0, sales: "0.00", delivered_rate: 0 },
+      { key: "barishal", name: "Barishal", name_bn: "বরিশাল", orders: 0, sales: "0.00", delivered_rate: 0 },
+      { key: "sylhet", name: "Sylhet", name_bn: "সিলেট", orders: 4, sales: "7800.00", delivered_rate: 75 },
+      { key: "rangpur", name: "Rangpur", name_bn: "রংপুর", orders: 0, sales: "0.00", delivered_rate: 0 },
+      { key: "mymensingh", name: "Mymensingh", name_bn: "ময়মনসিংহ", orders: 0, sales: "0.00", delivered_rate: 0 },
+    ],
     districts,
     not_recognised: { orders: 3, sales: "4200.00" },
   } satisfies DistrictsReport,
@@ -240,5 +249,21 @@ describe("the Overview reads as a story", () => {
 
   test("in Bangla, with Bangla digits", () => {
     expect(text(draw("bn", <Overview report={reports.overview} />))).toContain("আপনি ১৮৬টি কনফার্ম অর্ডার থেকে ৳৩৮৪,২৫০ আয় করেছেন");
+  });
+});
+
+describe("the Districts map", () => {
+  const html = draw("bn", <Districts report={reports.districts} />);
+
+  test("all eight divisions on their borders, named in the page's language", () => {
+    expect(html.match(/<path d="M/g)?.length).toBe(8);
+    expect(text(html)).toContain("ময়মনসিংহ");
+    expect(text(html)).toContain("মানচিত্র: geoBoundaries");
+  });
+
+  test("the division with the most is the darkest; one with no orders is left grey", () => {
+    const fills = [...html.matchAll(/<path d="M[^"]*" fill="([^"]+)"/g)].map((match) => match[1]);
+    expect(fills).toContain("hsl(var(--accent-blue) / 0.900)");
+    expect(fills.filter((fill) => fill === "hsl(var(--muted-foreground) / 0.14)").length).toBe(5);
   });
 });

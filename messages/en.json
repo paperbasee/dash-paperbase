@@ -330,7 +330,7 @@
         "sales": "Sales",
         "delivered": "Delivered"
       },
-      "tapDivision": "Tap a division to see its districts.",
+      "tapDivision": "Tap a division on the map or in the list to see its districts.",
       "listTitle": "Districts",
       "listNote": "Sorted by orders",
       "otherDistricts": "Other {n} districts",
@@ -338,7 +338,15 @@
       "notRecognisedNote": "A district typed that is not on the list",
       "worthKnowing": "Worth knowing",
       "topShare": "{places} bring {share} of your sales.",
-      "mostReturns": "Returns are highest in {places}. Asking for the delivery charge in advance there may help."
+      "mostReturns": "Returns are highest in {places}. Asking for the delivery charge in advance there may help.",
+      "mapTitle": "Bangladesh's divisions on a map: the darker, the more",
+      "mapCredit": "Map: geoBoundaries",
+      "scale": {
+        "less": "Less",
+        "more": "More",
+        "lower": "Lower",
+        "higher": "Higher"
+      }
     },
     "delivery": {
       "days": "{n} days",

@@ -16,6 +16,7 @@ import {
   periodFromParams,
   periodParams,
 } from "@/app/[locale]/(dashboard)/analytics/_lib/period";
+import { DIVISION_SHAPES, MAP_BOX } from "@/app/[locale]/(dashboard)/analytics/_lib/bangladesh-map";
 import type { DistrictRow, DistrictsReport, SourceRow } from "@/app/[locale]/(dashboard)/analytics/_lib/types";
 import {
   bestDay,
@@ -165,6 +166,20 @@ describe("the Overview's story", () => {
     expect(notes?.most.key).toBe("dhaka");
     expect(notes?.lowest?.key).toBe("gazipur");
     expect(placeNotes([row("dhaka", 0, 0, 0)])).toBeNull();
+  });
+});
+
+describe("the division map", () => {
+  test("one shape for each of the API's eight divisions, its name inside the box", () => {
+    // api-paperbase engine/apps/orders/districts.py, DIVISIONS
+    expect(Object.keys(DIVISION_SHAPES).sort()).toEqual(
+      ["barishal", "chattogram", "dhaka", "khulna", "mymensingh", "rajshahi", "rangpur", "sylhet"],
+    );
+    for (const shape of Object.values(DIVISION_SHAPES)) {
+      expect(shape.path).toMatch(/^M[\d.]+ [\d.]+l.*z$/);
+      const [x, y] = shape.label;
+      expect(x > 0 && x < MAP_BOX.width && y > 0 && y < MAP_BOX.height).toBe(true);
+    }
   });
 });
 
