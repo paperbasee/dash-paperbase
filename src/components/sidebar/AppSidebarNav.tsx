@@ -274,7 +274,7 @@ export default function AppSidebarNav({
                */
               <NavRowEnd
                 before={
-                  token === "analytics" && !hasFeature("advanced_analytics") ? (
+                  token === "analytics" && !hasFeature("advanced_analytics") && !hasFeature("basic_analytics") ? (
                     <Lock className="size-3.5 shrink-0 text-muted-foreground" />
                   ) : null
                 }

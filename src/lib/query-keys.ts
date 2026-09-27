@@ -31,39 +31,14 @@ export function dashboardAnalyticsQueryKey(filters: {
   return [...dashboardAnalyticsQueryKeyRoot, filters] as const;
 }
 
-export const advancedAnalyticsQueryKeyRoot = ["analytics", "advanced"] as const;
+/** The analytics page: one report per section, for the days asked. */
+export const analyticsQueryKeyRoot = ["analytics", "sections"] as const;
 
-export function analyticsOverviewQueryKey(range: string) {
-  return [...advancedAnalyticsQueryKeyRoot, "overview", range] as const;
+export function analyticsSectionQueryKey(section: string, periodQuery: string) {
+  return [...analyticsQueryKeyRoot, section, periodQuery] as const;
 }
 
-export function analyticsPageviewsQueryKey(range: string) {
-  return [...advancedAnalyticsQueryKeyRoot, "pageviews", range] as const;
-}
-
-export function analyticsRevenueQueryKey(range: string) {
-  return [...advancedAnalyticsQueryKeyRoot, "revenue", range] as const;
-}
-
-export function analyticsPagesQueryKey(range: string) {
-  return [...advancedAnalyticsQueryKeyRoot, "pages", range] as const;
-}
-
-export function analyticsProductsQueryKey(range: string) {
-  return [...advancedAnalyticsQueryKeyRoot, "products", range] as const;
-}
-
-export function analyticsParcelsQueryKey(range: string) {
-  return [...advancedAnalyticsQueryKeyRoot, "parcels", range] as const;
-}
-
-export function analyticsDevicesQueryKey(range: string) {
-  return [...advancedAnalyticsQueryKeyRoot, "devices", range] as const;
-}
-
-export function analyticsUtmQueryKey(range: string, dimension: string) {
-  return [...advancedAnalyticsQueryKeyRoot, "utm", range, dimension] as const;
-}
+export const analyticsLiveQueryKey = [...analyticsQueryKeyRoot, "live"] as const;
 
 export const couponsQueryKey = ["coupons"] as const;
 
