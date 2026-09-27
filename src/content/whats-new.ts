@@ -90,7 +90,7 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
     id: "2026-09-27-delivery-outside-dhaka-charged-again",
     date: "2026-09-27",
-    version: "4.119.1",
+    version: "4.119.2",
     tag: "fixed",
     href: "/settings?tab=shipping",
     title: {
@@ -105,7 +105,7 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
     id: "2026-09-27-a-default-delivery-area",
     date: "2026-09-27",
-    version: "4.119.1",
+    version: "4.119.2",
     tag: "new",
     href: "/settings?tab=shipping",
     title: {
@@ -120,7 +120,7 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
     id: "2026-09-27-turn-the-cart-off",
     date: "2026-09-27",
-    version: "4.119.1",
+    version: "4.119.2",
     tag: "new",
     href: "/settings?tab=apps",
     title: {
@@ -135,7 +135,7 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
     id: "2026-09-27-your-shop-in-your-language",
     date: "2026-09-27",
-    version: "4.119.1",
+    version: "4.119.2",
     tag: "fixed",
     title: {
       en: "Your shop opens in the language you chose",
@@ -149,7 +149,7 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
     id: "2026-09-27-convert-an-abandoned-checkout",
     date: "2026-09-27",
-    version: "4.119.1",
+    version: "4.119.2",
     tag: "new",
     href: "/orders/abandoned",
     title: {
@@ -157,14 +157,14 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
       bn: "অসম্পূর্ণ চেকআউটকে অর্ডারে রূপান্তর করুন",
     },
     body: {
-      en: "Called a shopper who didn't finish checkout and they said yes? Press Convert to order on their row: the new order form opens with their details and basket filled in. Save it, and the row leaves the list.",
-      bn: "যে ক্রেতা চেকআউট শেষ করেননি তাঁকে ফোন করলেন, আর তিনি রাজি হলেন? তাঁর সারিতে “অর্ডারে রূপান্তর” চাপুন: নতুন অর্ডারের ফর্ম তাঁর তথ্য আর পণ্যসহ খুলে যাবে। সেভ করলে সারিটি তালিকা থেকে সরে যাবে।",
+      en: "Called a shopper who didn't finish checkout and they said yes? Press Convert to order on their row: the new order form opens with their details and basket filled in, and the row leaves the list when you save. That form also no longer marks Email as required, since an order never needed one.",
+      bn: "যে ক্রেতা চেকআউট শেষ করেননি তাঁকে ফোন করলেন, আর তিনি রাজি হলেন? তাঁর সারিতে “অর্ডারে রূপান্তর” চাপুন: নতুন অর্ডারের ফর্ম তাঁর তথ্য আর পণ্যসহ খুলে যাবে, আর সেভ করলে সারিটি তালিকা থেকে সরে যাবে। ওই ফর্মে ইমেইল আর বাধ্যতামূলক দেখায় না, কারণ অর্ডারের জন্য এটি কখনো লাগত না।",
     },
   },
   {
     id: "2026-09-27-closed-while-a-plan-is-unpaid",
     date: "2026-09-27",
-    version: "4.119.1",
+    version: "4.119.2",
     tag: "improved",
     title: {
       en: "A shop closes while its plan is unpaid",
