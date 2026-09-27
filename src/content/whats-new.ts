@@ -88,6 +88,20 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-09-27-plans-lose-the-request-limit",
+    date: "2026-09-27",
+    version: "4.120.0",
+    tag: "improved",
+    title: {
+      en: "Plans list only what applies to your shop",
+      bn: "প্ল্যানে শুধু আপনার দোকানের জন্য প্রযোজ্য বিষয়",
+    },
+    body: {
+      en: "Plans no longer show “storefront requests per minute”. It was a limit of the old storefront, which is gone, so it no longer means anything for your shop.",
+      bn: "প্ল্যানে আর “প্রতি মিনিটে স্টোরফ্রন্ট রিকোয়েস্ট” দেখানো হয় না। এটি পুরোনো স্টোরফ্রন্টের একটি সীমা ছিল, যা এখন আর নেই, তাই আপনার দোকানের জন্য এর আর কোনো মানে নেই।",
+    },
+  },
+  {
     id: "2026-09-27-more-shoppers-in-abandoned-checkouts",
     date: "2026-09-27",
     version: "4.119.4",
@@ -516,21 +530,6 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     body: {
       en: "The Cart page in your editor is real now: a \"Continue shopping\" link beside the title or not, the items as cards or as a table, the total line by line or as one number, and an empty cart that says one line or invites the shopper somewhere. The items fill their own column with a picture on every line, and everything owed sits in one panel beside them — the discount code box inside it, behind a link if you would rather, with the ways they can pay underneath. You can also add a row of things to buy alongside, repeat your home-page promises or write a line of your own, show what the shopper looked at earlier, and put a Cart · Checkout · Done bar at the top.",
       bn: "এডিটরের কার্ট পেজটি এখন সত্যিকারের: শিরোনামের পাশে “আরও কিনুন” থাকবে কি না, পণ্যগুলো কার্ড হিসেবে নাকি টেবিলে, মোট ধাপে ধাপে নাকি একটিই সংখ্যা, আর কার্ট খালি থাকলে এক লাইন নাকি আমন্ত্রণ। পণ্যগুলো নিজের কলামে বসে, প্রতিটি লাইনে ছবিসহ, আর ক্রেতার দেয় সবকিছু পাশে একটি প্যানেলে — ডিসকাউন্ট কোডের ঘর সেটির ভিতরেই, চাইলে লিংকের পিছনে, নিচে টাকা দেওয়ার উপায়গুলো। সাথে কেনার মতো পণ্যের সারিও দিতে পারেন, হোম পেজের প্রতিশ্রুতি বা নিজের এক লাইন, ক্রেতা আগে যা দেখেছেন তা, আর উপরে “কার্ট · চেকআউট · সম্পন্ন” বার।",
-    },
-  },
-  {
-    id: "2026-09-22-category-pages-are-yours",
-    date: "2026-09-22",
-    version: "4.71.0",
-    tag: "new",
-    href: "/settings?tab=customization",
-    title: {
-      en: "Design your category pages",
-      bn: "ক্যাটাগরি পেজ নিজের মতো সাজান",
-    },
-    body: {
-      en: "The Category page in your editor is real now: the path back up, three shapes for the heading, the product count, two, three or four across, and what an empty category says. Shoppers can sort it — newest, price, name — and narrow it by the brands, sizes and colours that category actually has, either from a panel that slides in over the page or a rail beside the grid. A long category can end in numbered pages or a Load more button that keeps the shopper where they are.",
-      bn: "এডিটরের ক্যাটাগরি পেজটি এখন সত্যিকারের: উপরে ফেরার পথ, শিরোনামের তিন রকম চেহারা, পণ্যের সংখ্যা, সারিতে দুই-তিন-চারটি, আর ক্যাটাগরি খালি থাকলে কী লেখা থাকবে। ক্রেতারা সাজিয়ে নিতে পারেন — নতুন, দাম, নাম — আর ওই ক্যাটাগরিতে সত্যিই আছে এমন ব্র্যান্ড, মাপ ও রঙ দিয়ে ছেঁকে নিতে পারেন, পাশ থেকে ভেসে ওঠা প্যানেলে নয়তো গ্রিডের পাশের সারিতে। লম্বা ক্যাটাগরি শেষ হতে পারে নম্বর দেওয়া পাতায়, নয়তো “আরও দেখুন” বোতামে যা ক্রেতাকে যেখানে আছেন সেখানেই রাখে।",
     },
   },
 ];
