@@ -106,6 +106,14 @@ const overview: OverviewReport = {
   parcels,
   best_sellers: [product],
   categories: [{ category: "Men", sales: "300000.00", share: 78 }],
+  notes: {
+    top_source: { source: "facebook", orders: 98, sales: "205300.00" },
+    best_day: { date: "2026-09-27", sales: "66200", was_date: "2026-09-20", was_sales: "59100" },
+    places: {
+      most: { key: "dhaka", name: "Dhaka", name_bn: "ঢাকা", orders: 64 },
+      lowest: { key: "cumilla", name: "Cumilla", name_bn: "কুমিল্লা", delivered_rate: 80 },
+    },
+  },
 };
 
 const reports = {
@@ -224,7 +232,13 @@ describe.each(["en", "bn"] as const)("every section, in %s", (locale) => {
   });
 
   test("a Basic plan's Overview: the core sales, and the rest locked", () => {
-    const basic: OverviewReport = { ...base, cards: { sales: overview.cards.sales, orders: overview.cards.orders }, steps: overview.steps, series };
+    const basic: OverviewReport = {
+      ...base,
+      cards: { sales: overview.cards.sales, orders: overview.cards.orders },
+      steps: overview.steps,
+      series,
+      notes: { top_source: null, best_day: overview.notes.best_day, places: null },
+    };
     expect(draw(locale, <Overview report={basic} />, false).length).toBeGreaterThan(500);
   });
 });

@@ -2,7 +2,7 @@
  * The notes the analytics page works out itself from a report -- only what
  * the numbers actually show.
  */
-import type { ChartPoint, DistrictRow, DistrictsReport, SalesPoint, Series, SourceRow } from "./types";
+import type { ChartPoint, DistrictsReport, SalesPoint, Series } from "./types";
 
 /** Share of a whole, 0-100, for a bar. */
 export function shareOf(part: number, whole: number): number {
@@ -70,37 +70,4 @@ const METRIC_VALUE: Record<Metric, (point: SalesPoint) => number> = {
 
 export function metricPoints(series: Series<SalesPoint>, metric: Metric): ChartPoint[] {
   return pairUp(series, METRIC_VALUE[metric]);
-}
-
-/** The day (or hour) that sold the most, and what the same place in the compared days sold. */
-export function bestDay(series: Series<SalesPoint>): { date: string; sales: number; was: SalesPoint | null } | null {
-  let best: number | null = null;
-  series.data.forEach((point, index) => {
-    if (Number(point.sales) > 0 && (best === null || Number(point.sales) > Number(series.data[best].sales))) best = index;
-  });
-  if (best === null) return null;
-  return { date: series.data[best].date, sales: Number(series.data[best].sales), was: series.comparison[best] ?? null };
-}
-
-/** What the API could not name has no story to tell. */
-const UNNAMED = new Set(["(not tracked)", "(not set)"]);
-
-/** The source that brought the most sales. */
-export function topSource(sources: SourceRow[]): SourceRow | null {
-  return (
-    sources
-      .filter((row) => row.orders > 0 && !UNNAMED.has(row.source))
-      .sort((a, b) => Number(b.sales) - Number(a.sales) || b.orders - a.orders)[0] ?? null
-  );
-}
-
-/** The district that ordered the most, and the one whose parcels were delivered least often. */
-export function placeNotes(districts: DistrictRow[]): { most: DistrictRow; lowest: DistrictRow | null } | null {
-  const most = [...districts].sort((a, b) => b.orders - a.orders || Number(b.sales) - Number(a.sales))[0];
-  if (!most?.orders) return null;
-  const lowest =
-    districts
-      .filter((row) => row.parcels_finished >= RETURNS_FROM && row.delivered_rate < 100)
-      .sort((a, b) => a.delivered_rate - b.delivered_rate || b.parcels_finished - a.parcels_finished)[0] ?? null;
-  return { most, lowest };
 }

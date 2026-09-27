@@ -90,7 +90,7 @@ export function CompareMenu({ period, onChange }: { period: Period; onChange: (n
       <DropdownMenuTrigger asChild>
         <button
           type="button"
-          className="flex h-11 w-full items-center justify-center gap-2 rounded-button border border-border bg-card px-3 text-[13px] font-medium text-foreground shadow-[0_1px_2px_rgba(15,23,42,0.05)] hover:bg-muted sm:h-9 sm:w-auto"
+          className="flex h-11 min-w-0 flex-1 items-center justify-center gap-2 rounded-button border border-border bg-card px-3 text-[13px] font-medium text-foreground shadow-[0_1px_2px_rgba(15,23,42,0.05)] hover:bg-muted sm:h-9 sm:flex-none"
         >
           <ArrowLeftRight className="size-4 text-muted-foreground" aria-hidden />
           {period.compare === "year" ? t("vsLastYear") : shown}

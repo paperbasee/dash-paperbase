@@ -460,6 +460,17 @@
       "spent": "Spent",
       "given": "Given",
       "fromAds": "From ads"
+    },
+    "download": {
+      "button": "Download",
+      "preparing": "Preparing…",
+      "label": "Excel file · {days}",
+      "thisSection": "This section",
+      "allSections": "All sections",
+      "everySection": "Every section, one file",
+      "coreSections": "Overview and Sales, one file",
+      "note": "In English, like your dashboard. Numbers stay numbers, so you can sort and add them up.",
+      "failed": "The file could not be made. Try again."
     }
   },
   "pages": {

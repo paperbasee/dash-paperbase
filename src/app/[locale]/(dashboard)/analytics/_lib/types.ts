@@ -130,6 +130,16 @@ export type OverviewReport = Report & {
   parcels?: Parcels;
   best_sellers?: ProductRow[];
   categories?: CategoryRow[];
+  /** What moved the numbers (api-paperbase analytics/story.py); a note with nothing to say is null. */
+  notes: OverviewNotes;
+};
+
+type Place = { key: string; name: string; name_bn: string };
+
+export type OverviewNotes = {
+  top_source: { source: string; orders: number; sales: string } | null;
+  best_day: { date: string; sales: string; was_date: string | null; was_sales: string | null } | null;
+  places: { most: Place & { orders: number }; lowest: (Place & { delivered_rate: number }) | null } | null;
 };
 
 export type SalesReport = Report & {

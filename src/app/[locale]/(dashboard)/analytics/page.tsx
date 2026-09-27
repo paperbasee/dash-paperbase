@@ -13,6 +13,7 @@ import { useRouter } from "@/i18n/navigation";
 
 import { AnalyticsUpgradeWall } from "./_components/AnalyticsUpgradeWall";
 import { CARD, Upgrade } from "./_components/kit";
+import { DownloadMenu } from "./_components/DownloadMenu";
 import { CompareMenu, PeriodChips } from "./_components/PeriodControls";
 import { CORE_SECTIONS, SECTIONS, SectionTabs } from "./_components/SectionTabs";
 import { AnalyticsProvider } from "./_lib/context";
@@ -98,7 +99,12 @@ export default function AnalyticsPage() {
               {section === "live" ? t("liveEvery") : <UpdatedLine period={period} at={updatedAt} />}
             </p>
           </div>
-          {section === "live" ? null : <CompareMenu period={period} onChange={(next) => show({ period: next })} />}
+          {section === "live" ? null : (
+            <div className="flex gap-2">
+              <CompareMenu period={period} onChange={(next) => show({ period: next })} />
+              <DownloadMenu period={period} section={section} open={open} />
+            </div>
+          )}
         </header>
 
         {section === "live" ? null : <PeriodChips period={period} onChange={(next) => show({ period: next })} />}

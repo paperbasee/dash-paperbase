@@ -20,7 +20,7 @@ import {
   shareOf,
 } from "../_components/kit";
 import { useAnalyticsView } from "../_lib/context";
-import { type Metric, bestDay, changeOf, metricPoints, placeNotes, topSource } from "../_lib/insights";
+import { type Metric, changeOf, metricPoints } from "../_lib/insights";
 import { pageName, sourceName } from "../_lib/names";
 import { dayCount } from "../_lib/period";
 import type { Card, OverviewReport, SectionKey } from "../_lib/types";
@@ -239,15 +239,16 @@ function Headline({ report }: { report: OverviewReport }) {
 
 type Note = { key: string; section: SectionKey; icon: typeof Users; text: ReactNode };
 
-/** What the numbers say moved them -- only what they actually show. */
+/** What moved the numbers, as the API found it (analytics/story.py). */
 function WhatMovedIt({ report }: { report: OverviewReport }) {
   const t = useTranslations("analyticsPage");
   const locale = useLocale();
   const { format } = useAnalyticsView();
   const b = (chunks: ReactNode) => <strong className="font-semibold text-foreground">{chunks}</strong>;
+  const named = (row: { name: string; name_bn: string }) => (locale === "bn" ? row.name_bn : row.name);
+  const { top_source: source, best_day: best, places } = report.notes;
   const notes: Note[] = [];
 
-  const source = report.sources ? topSource(report.sources) : null;
   if (source) {
     notes.push({
       key: "source",
@@ -263,12 +264,11 @@ function WhatMovedIt({ report }: { report: OverviewReport }) {
     });
   }
 
-  const best = bestDay(report.series);
   if (best) {
     const sales = format.money(best.sales);
     const hourly = report.period.start_date === report.period.end_date;
-    const was = best.was ? Number(best.was.sales) : 0;
-    const change = best.was && was ? changeOf(best.sales, was, "percent") : null;
+    const was = Number(best.was_sales ?? 0);
+    const change = best.was_date && was ? changeOf(Number(best.sales), was, "percent") : null;
     const words = { day: format.dayName(best.date), sales, b };
     notes.push({
       key: "day",
@@ -276,17 +276,15 @@ function WhatMovedIt({ report }: { report: OverviewReport }) {
       icon: TrendingUp,
       text: hourly
         ? t.rich("overview.moved.bestHour", { hour: format.hour(best.date), sales, b })
-        : change && best.was
+        : change && best.was_date
           ? change > 0
-            ? t.rich("overview.moved.bestDayUp", { ...words, change: format.percent(change), before: format.dayName(best.was.date) })
-            : t.rich("overview.moved.bestDayDown", { ...words, change: format.percent(-change), before: format.dayName(best.was.date) })
+            ? t.rich("overview.moved.bestDayUp", { ...words, change: format.percent(change), before: format.dayName(best.was_date) })
+            : t.rich("overview.moved.bestDayDown", { ...words, change: format.percent(-change), before: format.dayName(best.was_date) })
           : t.rich("overview.moved.bestDay", words),
     });
   }
 
-  const places = report.districts ? placeNotes(report.districts) : null;
   if (places) {
-    const named = (row: { name: string; name_bn: string }) => (locale === "bn" ? row.name_bn : row.name);
     notes.push({
       key: "places",
       section: "districts",

@@ -17,16 +17,9 @@ import {
   periodParams,
 } from "@/app/[locale]/(dashboard)/analytics/_lib/period";
 import { DIVISION_SHAPES, MAP_BOX } from "@/app/[locale]/(dashboard)/analytics/_lib/bangladesh-map";
-import type { DistrictRow, DistrictsReport, SourceRow } from "@/app/[locale]/(dashboard)/analytics/_lib/types";
-import {
-  bestDay,
-  busiestHours,
-  changeOf,
-  metricPoints,
-  placeNotes,
-  topSource,
-  worthKnowing,
-} from "@/app/[locale]/(dashboard)/analytics/_lib/insights";
+import type { DistrictsReport } from "@/app/[locale]/(dashboard)/analytics/_lib/types";
+import { fileNameFrom } from "@/app/[locale]/(dashboard)/analytics/_lib/download";
+import { busiestHours, changeOf, metricPoints, worthKnowing } from "@/app/[locale]/(dashboard)/analytics/_lib/insights";
 import bn from "../../messages/bn.json";
 import en from "../../messages/en.json";
 
@@ -147,25 +140,11 @@ describe("the Overview's story", () => {
     expect(changeOf(5, null, "points")).toBeNull();
   });
 
-  test("the best day, and what the same day before sold", () => {
-    expect(bestDay(series)).toEqual({ date: "2026-09-22", sales: 9000, was: series.comparison[1] });
-    expect(bestDay({ data: [{ date: "2026-09-21", sales: "0.00", orders: 0 }], comparison: [] })).toBeNull();
-  });
-
-  test("the source that brought the most sales -- never one the API could not name", () => {
-    const source = (name: string, orders: number, sales: string) =>
-      ({ source: name, visitors: 10, paid_visitors: 0, orders, sales, conversion: 0 }) as SourceRow;
-    expect(topSource([source("(not tracked)", 9, "9000"), source("tiktok", 2, "800"), source("facebook", 3, "1200")])?.source).toBe("facebook");
-    expect(topSource([source("google", 0, "0")])).toBeNull();
-  });
-
-  test("the district that ordered most, and the one delivered least often", () => {
-    const row = (key: string, orders: number, finished: number, delivered: number) =>
-      ({ key, name: key, name_bn: key, division: "dhaka", orders, sales: "0", parcels_finished: finished, delivered_rate: delivered, returned_rate: 100 - delivered }) as DistrictRow;
-    const notes = placeNotes([row("gazipur", 4, 4, 75), row("dhaka", 9, 8, 90), row("bogura", 1, 2, 50), row("sylhet", 2, 3, 100)]);
-    expect(notes?.most.key).toBe("dhaka");
-    expect(notes?.lowest?.key).toBe("gazipur");
-    expect(placeNotes([row("dhaka", 0, 0, 0)])).toBeNull();
+  test("a downloaded file keeps the name the API gives it", () => {
+    expect(fileNameFrom('attachment; filename="gadzilla-analytics-2026-09-21-to-2026-09-27.xlsx"', "x.xlsx")).toBe(
+      "gadzilla-analytics-2026-09-21-to-2026-09-27.xlsx",
+    );
+    expect(fileNameFrom(undefined, "analytics.xlsx")).toBe("analytics.xlsx");
   });
 });
 
