@@ -90,7 +90,7 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
     id: "2026-09-27-more-shoppers-in-abandoned-checkouts",
     date: "2026-09-27",
-    version: "4.119.3",
+    version: "4.119.4",
     tag: "improved",
     href: "/orders/abandoned",
     title: {
@@ -98,14 +98,14 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
       bn: "অসম্পূর্ণ চেকআউটে আরও বেশি ক্রেতা আসবেন",
     },
     body: {
-      en: "A shopper who typed their phone number and then locked their phone, switched apps or closed the page was sometimes missed. They are now listed too, so you can call them.",
-      bn: "যে ক্রেতা ফোন নম্বর লিখে তারপর ফোন লক করতেন, অন্য অ্যাপে যেতেন বা পেজ বন্ধ করতেন, তাঁরা কখনো কখনো বাদ পড়ে যেতেন। এখন তাঁরাও তালিকায় আসবেন, তাই আপনি তাঁদের ফোন করতে পারবেন।",
+      en: "A shopper who typed their phone number and then locked their phone, switched apps or closed the page was sometimes missed. They are now listed too, so you can call them, and a shopper who did buy is never listed there by mistake.",
+      bn: "যে ক্রেতা ফোন নম্বর লিখে তারপর ফোন লক করতেন, অন্য অ্যাপে যেতেন বা পেজ বন্ধ করতেন, তাঁরা কখনো কখনো বাদ পড়ে যেতেন। এখন তাঁরাও তালিকায় আসবেন, তাই আপনি তাঁদের ফোন করতে পারবেন, আর যিনি কিনেছেন তিনি ভুল করে সেখানে আসবেন না।",
     },
   },
   {
     id: "2026-09-27-delivery-outside-dhaka-charged-again",
     date: "2026-09-27",
-    version: "4.119.3",
+    version: "4.119.4",
     tag: "fixed",
     href: "/settings?tab=shipping",
     title: {
@@ -120,7 +120,7 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
     id: "2026-09-27-a-default-delivery-area",
     date: "2026-09-27",
-    version: "4.119.3",
+    version: "4.119.4",
     tag: "new",
     href: "/settings?tab=shipping",
     title: {
@@ -135,7 +135,7 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
     id: "2026-09-27-turn-the-cart-off",
     date: "2026-09-27",
-    version: "4.119.3",
+    version: "4.119.4",
     tag: "new",
     href: "/settings?tab=apps",
     title: {
@@ -150,7 +150,7 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
     id: "2026-09-27-your-shop-in-your-language",
     date: "2026-09-27",
-    version: "4.119.3",
+    version: "4.119.4",
     tag: "fixed",
     title: {
       en: "Your shop opens in the language you chose",
@@ -164,7 +164,7 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
     id: "2026-09-27-convert-an-abandoned-checkout",
     date: "2026-09-27",
-    version: "4.119.3",
+    version: "4.119.4",
     tag: "new",
     href: "/orders/abandoned",
     title: {
@@ -179,7 +179,7 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
     id: "2026-09-27-closed-while-a-plan-is-unpaid",
     date: "2026-09-27",
-    version: "4.119.3",
+    version: "4.119.4",
     tag: "improved",
     title: {
       en: "A shop closes while its plan is unpaid",
