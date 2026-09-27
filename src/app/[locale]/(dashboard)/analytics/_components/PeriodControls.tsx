@@ -47,7 +47,7 @@ export function PeriodChips({ period, onChange }: { period: Period; onChange: (n
   const { start, end } = periodDays(period, today);
 
   return (
-    <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-0.5 sm:mx-0 sm:flex-wrap sm:px-0">
+    <div className="scrollbar-hide flex gap-2 overflow-x-auto sm:flex-wrap">
       {PRESETS.map((preset) => (
         <Chip key={preset} active={period.preset === preset} onClick={() => onChange({ preset, compare: period.compare })}>
           {preset === "7" || preset === "30" ? t("days", { n: format.count(Number(preset)) }) : t(preset)}
