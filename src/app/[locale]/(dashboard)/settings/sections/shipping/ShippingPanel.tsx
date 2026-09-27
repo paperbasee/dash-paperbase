@@ -336,6 +336,16 @@ export default function ShippingPanel() {
       }
       invalidateShippingQueries();
     } catch (e) {
+      // An area that orders were delivered to is kept, and the API says how
+      // many (409 `zone_in_use`, 2026-09-27): say it in the merchant's language.
+      const refused = normalizeError(e);
+      const orders = Number((refused.raw as { orders?: unknown } | undefined)?.orders);
+      if (refused.code === "zone_in_use" && Number.isFinite(orders)) {
+        notify.error(tPages("shippingZoneInUse", { count: orders }), {
+          title: tPages("shippingZoneInUseTitle"),
+        });
+        return;
+      }
       notify.error(e, {
         title: tPages("toastTitleShippingSettingsNotSaved"),
         fallbackMessage: tPages("toastDescShippingSettingsNotSaved"),

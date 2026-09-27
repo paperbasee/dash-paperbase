@@ -803,6 +803,8 @@
     "shippingZoneDefaultBadge": "ডিফল্ট",
     "shippingZoneMakeDefault": "ডিফল্ট করুন",
     "shippingZoneNoPrice": "এখানে এখনও কোনো ডেলিভারি চার্জ নেই: যে ক্রেতারা এই এলাকা বেছে নেবেন তাঁরা ডেলিভারির জন্য কিছুই দেবেন না। নিচে এর জন্য একটি রেট যোগ করুন।",
+    "shippingZoneInUseTitle": "এই এলাকাটি মোছা যাবে না",
+    "shippingZoneInUse": "{count}টি অর্ডার এই ডেলিভারি এলাকা ব্যবহার করছে, তাই এটি রাখা হয়েছে। ক্রেতাদের আর না দেখাতে “সক্রিয়” থেকে টিক তুলে দিন।",
     "shippingMethodsEmpty": "এখনও কোনো পদ্ধতি নেই।",
     "shippingRatesEmpty": "এখনও কোনো রেট নেই।",
     "shippingMethodMeta": "ধরন: {type} · ক্রম: {order} · জোন: {zones}",

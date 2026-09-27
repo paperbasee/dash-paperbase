@@ -803,6 +803,8 @@
     "shippingZoneDefaultBadge": "Default",
     "shippingZoneMakeDefault": "Make default",
     "shippingZoneNoPrice": "No delivery price here yet: shoppers who pick this area pay nothing for delivery. Add a rate for it below.",
+    "shippingZoneInUseTitle": "This area can't be deleted",
+    "shippingZoneInUse": "{count, plural, one {# order uses} other {# orders use}} this delivery area, so it is kept. Untick Active to stop offering it to shoppers.",
     "shippingMethodsEmpty": "No methods yet.",
     "shippingRatesEmpty": "No rates yet.",
     "shippingMethodMeta": "type: {type} · order: {order} · zones: {zones}",
