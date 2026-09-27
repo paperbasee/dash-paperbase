@@ -46,6 +46,10 @@
  * then, and it is deliberately ONE date so that shipping day is one edit rather than
  * twenty: change every `2026-09-22` above the first released entry to the real day.
  *
+ * **SHIPPED 2026-09-26 in dash 4.118.9, without the restamp** -- it was missed on the
+ * day, and a shipped id is never renamed, so that batch keeps `2026-09-22`. Every
+ * entry after it carries the day it reaches merchants, like any other.
+ *
  * How to tell them apart: production has had nothing newer than **4.7.1**, so any
  * entry above that version is held. As of 2026-09-22 that is the WHOLE list —
  * every released entry has now aged off the 30-entry cap, the last of them
@@ -83,6 +87,35 @@ export interface WhatsNewEntry {
 export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
+  {
+    id: "2026-09-27-shelf-cards-for-every-shop",
+    date: "2026-09-27",
+    version: "4.118.10",
+    tag: "improved",
+    href: "/settings?tab=customization",
+    title: {
+      en: "Shelf product cards for every shop",
+      bn: "সব দোকানে শেলফ প্রোডাক্ট কার্ড",
+    },
+    body: {
+      en: "Every product card now shows its price and an Order now button, so shoppers can buy straight from the card. Prefer the quieter Classic cards? Choose them in Customization under Style and press Save to store.",
+      bn: "প্রতিটি প্রোডাক্ট কার্ডে এখন দাম আর একটি এখনই অর্ডার করুন বোতাম থাকে, তাই ক্রেতারা কার্ড থেকেই কিনতে পারেন। শান্ত ক্ল্যাসিক কার্ড পছন্দ? কাস্টমাইজেশনের স্টাইল অংশে সেটি বেছে স্টোরে সংরক্ষণ চাপুন।",
+    },
+  },
+  {
+    id: "2026-09-27-product-main-picture",
+    date: "2026-09-27",
+    version: "4.118.9",
+    tag: "fixed",
+    title: {
+      en: "Product pages show the main picture again",
+      bn: "প্রোডাক্ট পেজে মূল ছবি আবার দেখা যাচ্ছে",
+    },
+    body: {
+      en: "Every product page shows its main picture first, then the extra ones. For a day after the new shop went live, a product with only a main picture showed an empty frame on its page.",
+      bn: "প্রতিটি প্রোডাক্ট পেজে এখন আগে মূল ছবি, তারপর বাকি ছবিগুলো দেখায়। নতুন দোকান চালু হওয়ার পর এক দিন, যে প্রোডাক্টের শুধু মূল ছবি ছিল তার পেজে ছবির জায়গা খালি দেখাচ্ছিল।",
+    },
+  },
   {
     id: "2026-09-22-colours-cards-and-corners",
     date: "2026-09-22",
@@ -498,35 +531,6 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     body: {
       en: "On Premium, a promotion band with a heading, a message and a button can be given a start and an end in Bangladesh time, and it appears and disappears by itself — no waking up at midnight to take a sale down. Switch on the countdown and shoppers see the time left ticking. It vanishes the second it ends, even for someone already sitting on the page.",
       bn: "প্রিমিয়াম প্ল্যানে শিরোনাম, বার্তা আর বোতামসহ প্রোমোশন ব্যান্ডে বাংলাদেশ সময় অনুযায়ী শুরু আর শেষের সময় দেওয়া যায় — সেটি নিজে থেকেই আসবে আর চলে যাবে, সেল বন্ধ করতে মাঝরাতে জেগে থাকতে হবে না। কাউন্টডাউন চালু করলে ক্রেতারা বাকি সময় কমতে দেখবেন। শেষ হওয়ার সঙ্গে সঙ্গেই এটি চলে যায় — যিনি আগে থেকেই পাতায় আছেন তাঁর কাছেও।",
-    },
-  },
-  {
-    id: "2026-09-22-a-block-of-text-anywhere",
-    date: "2026-09-22",
-    version: "4.39.0",
-    tag: "fixed",
-    title: {
-      en: "The Text section works now",
-      bn: "লেখার সেকশনটি এখন কাজ করে",
-    },
-    body: {
-      en: "Text has been on the list of sections you can add since customization opened, and adding it left that part of the page blank. It now draws the heading and the words you typed, keeping your line breaks, and it can go on the home page, a category, a product or the blog.",
-      bn: "কাস্টমাইজেশন চালু হওয়ার পর থেকেই যোগ করার তালিকায় লেখা সেকশনটি ছিল, কিন্তু যোগ করলে পাতার ওই অংশ ফাঁকা থেকে যেত। এখন আপনার শিরোনাম আর লেখা ঠিকঠাক দেখাবে, লাইন ভাঙাও অক্ষত থাকবে — আর এটি হোম পেজ, ক্যাটাগরি, পণ্য বা ব্লগ যেকোনো জায়গায় বসানো যাবে।",
-    },
-  },
-  {
-    id: "2026-09-22-brands-are-records",
-    date: "2026-09-22",
-    version: "4.38.0",
-    tag: "new",
-    href: "/brands",
-    title: {
-      en: "Your brands get a page of their own",
-      bn: "আপনার ব্র্যান্ডের জন্য আলাদা পাতা",
-    },
-    body: {
-      en: "Brands now have their own tab with a logo and a description, and each one gets a page in your shop with a link in the footer. On a product you pick a brand from the list instead of typing it, so Bata, bata and BATA can no longer be three brands — the ones you already had were merged, keeping the spelling you used most. A shop that sells only its own goods can leave the tab empty and nothing about it changes.",
-      bn: "ব্র্যান্ডের জন্য এখন আলাদা ট্যাব আছে, যেখানে লোগো আর বিবরণ দেওয়া যায়, আর প্রতিটি ব্র্যান্ড আপনার দোকানে নিজের পাতা পায় — ফুটারে তার লিংকও থাকে। পণ্যের পাতায় এখন ব্র্যান্ডের নাম টাইপ না করে তালিকা থেকে বেছে নিতে হয়, তাই Bata, bata আর BATA আর আলাদা তিনটি ব্র্যান্ড থাকতে পারে না — আগের নামগুলো এক করে দেওয়া হয়েছে, আর আপনি যে বানানটি সবচেয়ে বেশি লিখেছেন সেটিই রাখা হয়েছে। যে দোকান শুধু নিজের পণ্য বিক্রি করে, সে ট্যাবটি খালি রাখতে পারে — কিছুই বদলাবে না।",
     },
   },
 ];
