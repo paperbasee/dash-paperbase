@@ -90,7 +90,7 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
     id: "2026-09-27-delivery-outside-dhaka-charged-again",
     date: "2026-09-27",
-    version: "4.119.0",
+    version: "4.119.1",
     tag: "fixed",
     href: "/settings?tab=shipping",
     title: {
@@ -105,7 +105,7 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
     id: "2026-09-27-a-default-delivery-area",
     date: "2026-09-27",
-    version: "4.119.0",
+    version: "4.119.1",
     tag: "new",
     href: "/settings?tab=shipping",
     title: {
@@ -113,14 +113,14 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
       bn: "একটি ডিফল্ট ডেলিভারি এলাকা বেছে নিন",
     },
     body: {
-      en: "In Settings, Shipping, mark one area as the default: checkout starts on it, so shoppers see the delivery charge at once and can still pick another. An area with no delivery price now says so there.",
-      bn: "সেটিংস > শিপিং-এ একটি এলাকাকে ডিফল্ট করুন: চেকআউট সেটি দিয়েই শুরু হবে, তাই ক্রেতারা সাথে সাথে ডেলিভারি চার্জ দেখবেন, চাইলে অন্য এলাকাও বেছে নিতে পারবেন। কোনো এলাকার ডেলিভারি চার্জ না থাকলে সেখানেই তা দেখানো হয়।",
+      en: "In Settings, Shipping, mark one area as the default: checkout starts on it, so shoppers see the delivery charge at once and can still pick another. An area with no delivery price now says so there, and deleting an area your orders used now tells you why it is kept.",
+      bn: "সেটিংস > শিপিং-এ একটি এলাকাকে ডিফল্ট করুন: চেকআউট সেটি দিয়েই শুরু হবে, তাই ক্রেতারা সাথে সাথে ডেলিভারি চার্জ দেখবেন, চাইলে অন্য এলাকাও বেছে নিতে পারবেন। কোনো এলাকার ডেলিভারি চার্জ না থাকলে সেখানেই তা দেখানো হয়, আর আপনার অর্ডারে ব্যবহৃত কোনো এলাকা মুছতে গেলে কেন সেটি রাখা হলো তা জানানো হয়।",
     },
   },
   {
     id: "2026-09-27-turn-the-cart-off",
     date: "2026-09-27",
-    version: "4.119.0",
+    version: "4.119.1",
     tag: "new",
     href: "/settings?tab=apps",
     title: {
@@ -135,7 +135,7 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
     id: "2026-09-27-your-shop-in-your-language",
     date: "2026-09-27",
-    version: "4.119.0",
+    version: "4.119.1",
     tag: "fixed",
     title: {
       en: "Your shop opens in the language you chose",
@@ -149,7 +149,7 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
     id: "2026-09-27-convert-an-abandoned-checkout",
     date: "2026-09-27",
-    version: "4.119.0",
+    version: "4.119.1",
     tag: "new",
     href: "/orders/abandoned",
     title: {
@@ -164,7 +164,7 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
     id: "2026-09-27-closed-while-a-plan-is-unpaid",
     date: "2026-09-27",
-    version: "4.119.0",
+    version: "4.119.1",
     tag: "improved",
     title: {
       en: "A shop closes while its plan is unpaid",
