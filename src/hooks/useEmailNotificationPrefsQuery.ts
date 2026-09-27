@@ -10,8 +10,6 @@ export type EmailNotificationPrefsSettings = Pick<
   StoreSettingsCurrent,
   | "email_notify_owner_on_order_received"
   | "email_customer_on_order_confirmed"
-  | "storefront_url"
-  | "revalidate_secret"
 >;
 
 export async function fetchEmailNotificationPrefs(): Promise<EmailNotificationPrefsSettings> {

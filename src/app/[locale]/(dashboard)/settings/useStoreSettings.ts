@@ -2,7 +2,6 @@
 
 import { useState, useRef, type FormEvent } from "react";
 import { useTranslations } from "next-intl";
-import { isApiHttpError } from "@/lib/api-client";
 import api from "@/lib/api";
 import { defaultBranding } from "@/context/BrandingContext";
 import type { SettingsMessage } from "./useAccountSettings";
@@ -10,7 +9,6 @@ import { notify } from "@/notifications";
 import { parseValidation, storeUpdateSchema } from "@/lib/validation";
 import { queryClient } from "@/components/QueryProvider";
 import { brandingQueryKey } from "@/lib/query-keys";
-import { storefrontIntegrationAvailable } from "./storefrontIntegration";
 
 function resolveLogoUrl(url: string | null): string | null {
   if (!url) return null;
@@ -38,10 +36,6 @@ export function useStoreSettings({ onSaveSuccess }: UseStoreSettingsOptions = {}
   const [currentLogoUrl, setCurrentLogoUrl] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<SettingsMessage>(null);
-  const [storefrontUrl, setStorefrontUrl] = useState("");
-  const [revalidateSecret, setRevalidateSecret] = useState("");
-  // Off until store settings load and actually include the integration keys.
-  const [storefrontIntegrationEnabled, setStorefrontIntegrationEnabled] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   function syncFromBranding(branding: {
@@ -62,17 +56,6 @@ export function useStoreSettings({ onSaveSuccess }: UseStoreSettingsOptions = {}
     setCurrentLogoUrl(resolveLogoUrl(branding.logo_url ?? null));
   }
 
-  function syncStoreIntegrationFromSettings(row: {
-    storefront_url?: string | null;
-    revalidate_secret?: string | null;
-  }) {
-    const available = storefrontIntegrationAvailable(row);
-    setStorefrontIntegrationEnabled(available);
-    if (!available) return;
-    setStorefrontUrl((row.storefront_url ?? "").trim());
-    setRevalidateSecret(row.revalidate_secret ?? "");
-  }
-
   const previewUrl = logoFile ? URL.createObjectURL(logoFile) : currentLogoUrl;
 
   async function handleSubmit(e: FormEvent) {
@@ -80,7 +63,6 @@ export function useStoreSettings({ onSaveSuccess }: UseStoreSettingsOptions = {}
     setSaving(true);
     setMessage(null);
 
-    let storeSettingsPatchErrorHandled = false;
     try {
       const validation = parseValidation(storeUpdateSchema, {
         storeName,
@@ -122,40 +104,6 @@ export function useStoreSettings({ onSaveSuccess }: UseStoreSettingsOptions = {}
       if (clearLogo) formData.append("clear_logo", "true");
 
       await api.patch("admin/branding/", formData);
-      // Only PATCH integration fields the API gave us; otherwise we'd send
-      // unloaded "" state (blanking them) or keys host routing ignores.
-      if (storefrontIntegrationEnabled) {
-        const normalizedUrl = storefrontUrl.trim()
-          ? storefrontUrl.trim().startsWith("http://") || storefrontUrl.trim().startsWith("https://")
-            ? storefrontUrl.trim()
-            : `https://${storefrontUrl.trim()}`
-          : "";
-        try {
-          await api.patch("store/settings/current/", {
-            storefront_url: normalizedUrl,
-            revalidate_secret: revalidateSecret,
-          });
-        } catch (err: unknown) {
-          storeSettingsPatchErrorHandled = true;
-          const patchData = isApiHttpError(err)
-            ? (err.response?.data as Record<string, unknown> | undefined)
-            : undefined;
-          if (patchData?.storefront_url) {
-            const raw = patchData.storefront_url;
-            const extracted =
-              Array.isArray(raw) && raw.length > 0 && typeof raw[0] === "string"
-                ? raw[0]
-                : null;
-            setMessage({
-              type: "error",
-              text: extracted ?? t("store.saveFailed"),
-            });
-          } else {
-            setMessage({ type: "error", text: t("store.saveFailed") });
-          }
-          throw err;
-        }
-      }
       await queryClient.invalidateQueries({ queryKey: brandingQueryKey });
       onSaveSuccess?.();
 
@@ -165,9 +113,7 @@ export function useStoreSettings({ onSaveSuccess }: UseStoreSettingsOptions = {}
 
       notify.success(t("store.saved"));
     } catch {
-      if (!storeSettingsPatchErrorHandled) {
-        setMessage({ type: "error", text: t("store.saveFailed") });
-      }
+      setMessage({ type: "error", text: t("store.saveFailed") });
     } finally {
       setSaving(false);
     }
@@ -197,12 +143,5 @@ export function useStoreSettings({ onSaveSuccess }: UseStoreSettingsOptions = {}
     message,
     syncFromBranding,
     handleSubmit,
-
-    storefrontUrl,
-    setStorefrontUrl,
-    revalidateSecret,
-    setRevalidateSecret,
-    storefrontIntegrationEnabled,
-    syncStoreIntegrationFromSettings,
   };
 }

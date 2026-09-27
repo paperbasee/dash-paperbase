@@ -13,8 +13,6 @@ export type StoreSettingsCurrent = {
   email_notify_owner_on_order_received: boolean;
   email_customer_on_order_confirmed: boolean;
   public_api_enabled?: boolean;
-  storefront_url?: string | null;
-  revalidate_secret?: string | null;
   autopilot_enabled?: boolean;
   autopilot_min_success_ratio?: number;
   autopilot_min_total_parcels?: number;

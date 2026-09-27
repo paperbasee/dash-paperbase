@@ -95,11 +95,6 @@ export default function SettingsPage() {
     emailPrefsSaving,
     handleAccountSubmit,
     handleStoreSubmit,
-    storefrontUrl,
-    setStorefrontUrl,
-    revalidateSecret,
-    setRevalidateSecret,
-    storefrontIntegrationEnabled,
   } = controller;
 
 
@@ -199,11 +194,6 @@ export default function SettingsPage() {
             storeSaving={storeSaving}
             storeMessage={storeMessage}
             onSubmit={handleStoreSubmit}
-            showStorefrontIntegration={storefrontIntegrationEnabled}
-            storefrontUrl={storefrontUrl}
-            onStorefrontUrlChange={setStorefrontUrl}
-            revalidateSecret={revalidateSecret}
-            onRevalidateSecretChange={setRevalidateSecret}
           />
 
           {activeSection === "store" && (

@@ -62,8 +62,6 @@ export default function useSettingsPageController() {
       emailMeOnOrderReceived: storeSettings.email_notify_owner_on_order_received,
       emailCustomerOnOrderConfirmed: storeSettings.email_customer_on_order_confirmed,
     });
-    store.syncStoreIntegrationFromSettings(storeSettings);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [storeSettings]);
 
   const updateEmailNotificationPref = useCallback(
@@ -127,12 +125,6 @@ export default function useSettingsPageController() {
     storeSaving: store.saving,
     storeMessage: store.message,
     handleStoreSubmit: store.handleSubmit,
-
-    storefrontUrl: store.storefrontUrl,
-    setStorefrontUrl: store.setStorefrontUrl,
-    revalidateSecret: store.revalidateSecret,
-    setRevalidateSecret: store.setRevalidateSecret,
-    storefrontIntegrationEnabled: store.storefrontIntegrationEnabled,
 
     dynamicFieldsMessage,
     setDynamicFieldsMessage,
