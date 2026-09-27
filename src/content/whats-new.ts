@@ -88,6 +88,36 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-09-27-shoppers-message-you-from-contact",
+    date: "2026-09-27",
+    version: "4.121.0",
+    tag: "new",
+    href: "/support-tickets",
+    title: {
+      en: "Shoppers can message you from Contact",
+      bn: "ক্রেতারা যোগাযোগ পেজ থেকে বার্তা পাঠাতে পারবেন",
+    },
+    body: {
+      en: "Your shop's Contact page now has your details on one side and a message form on the other. Each message lands in Support tickets and is emailed to you. Turn Support tickets off in Settings, Apps, and the page shows just your details.",
+      bn: "আপনার দোকানের যোগাযোগ পেজে এখন এক পাশে আপনার তথ্য আর অন্য পাশে বার্তা পাঠানোর ফর্ম। প্রতিটি বার্তা সাপোর্ট টিকেটে আসে এবং আপনাকে ইমেইল করা হয়। সেটিংস > অ্যাপস-এ সাপোর্ট টিকেট বন্ধ করলে পেজে শুধু আপনার তথ্য দেখাবে।",
+    },
+  },
+  {
+    id: "2026-09-27-your-popup-shows-again",
+    date: "2026-09-27",
+    version: "4.121.0",
+    tag: "fixed",
+    href: "/settings?tab=promotions",
+    title: {
+      en: "Your pop-up shows in your shop again",
+      bn: "আপনার পপ-আপ আবার দোকানে দেখাচ্ছে",
+    },
+    body: {
+      en: "The pop-up you set up in Settings, Promotions was not showing in the new shop. It shows again, after your delay and as often as you chose. Every picture you added can now be swiped through.",
+      bn: "সেটিংস > প্রমোশনস-এ তৈরি করা পপ-আপ নতুন দোকানে দেখাচ্ছিল না। এখন আবার দেখাচ্ছে, আপনার ঠিক করা সময় পরে এবং আপনি যতবার চেয়েছেন ততবার। আপনার যোগ করা সব ছবি এখন সোয়াইপ করে দেখা যায়।",
+    },
+  },
+  {
     id: "2026-09-27-plans-lose-the-request-limit",
     date: "2026-09-27",
     version: "4.120.0",
@@ -500,36 +530,6 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     body: {
       en: "Give your blog its own name and opening line, let readers narrow the posts by typing or by tag, and choose how the featured posts, the rest and each card look — with the date or how many times a post has been read underneath, and every read counts now. On each post, choose where its picture goes, whether the writer's name sits beside the date, how wide the words run, and whether readers see its tags, the posts before and after it, and three more to read. You can also add a few words of your own under the posts, and posts written as plain text now keep their paragraphs.",
       bn: "ব্লগকে নিজের নাম আর প্রথম লাইন দিন, পাঠক যেন লিখে বা ট্যাগ বেছে পোস্টগুলো ছেঁকে নিতে পারেন, আর বাছাই করা পোস্ট, বাকি পোস্ট ও প্রতিটি কার্ড কেমন দেখাবে তা ঠিক করুন — নিচে তারিখ, নয়তো পোস্টটি কতবার পড়া হয়েছে; এখন প্রতিবার পড়াই গোনা হয়। প্রতিটি পোস্টে ছবি কোথায় বসবে, তারিখের পাশে লেখকের নাম থাকবে কি না, লেখা কতটা চওড়া হবে, আর পাঠক ট্যাগ, আগের ও পরের পোস্ট এবং পড়ার মতো আরও তিনটি পোস্ট দেখবেন কি না — ঠিক করুন। পোস্টের নিচে নিজের কিছু কথাও যোগ করতে পারেন, আর সাধারণ লেখায় লেখা পোস্টে এখন অনুচ্ছেদগুলো ঠিক থাকে।",
-    },
-  },
-  {
-    id: "2026-09-22-checkout-page-shell",
-    date: "2026-09-22",
-    version: "4.86.0",
-    tag: "new",
-    href: "/settings?tab=customization",
-    title: {
-      en: "Design your checkout page",
-      bn: "চেকআউট পেজ নিজের মতো সাজান",
-    },
-    body: {
-      en: "The Checkout page in your editor is real now: keep the full header or strip it to your shop's name, end the page with your policy links, the whole footer or nothing, and set the order beside the form with the discount code box, the ways to pay, a Cart · Checkout · Done bar and your promises. The short or long customer form is chosen there too, where you can see it — it moved from Settings → Checkout, is saved when you press Save to store, and the short form is now really short: name, phone, district and area. You can also write a line of your own to be read in the second before someone pays.",
-      bn: "এডিটরের চেকআউট পেজটি এখন সত্যিকারের: পুরো হেডার রাখুন নাকি শুধু দোকানের নাম, পেজের শেষে নীতিমালার লিংক, পুরো ফুটার নাকি কিছুই না, আর অর্ডারটি ফর্মের পাশে — সাথে ডিসকাউন্ট কোডের ঘর, টাকা দেওয়ার উপায়, “কার্ট · চেকআউট · সম্পন্ন” বার আর আপনার প্রতিশ্রুতিগুলো। ক্রেতার ছোট নাকি বড় ফর্ম — সেটিও এখন সেখানেই, দেখতে দেখতে ঠিক করা যায়: সেটিংস → চেকআউট থেকে সরে এসেছে, “স্টোরে সংরক্ষণ” চাপলে সংরক্ষিত হয়, আর ছোট ফর্মটি এখন সত্যিই ছোট — নাম, ফোন, জেলা ও থানা। টাকা দেওয়ার ঠিক আগের মুহূর্তে পড়ার জন্য নিজের এক লাইনও লিখতে পারেন।",
-    },
-  },
-  {
-    id: "2026-09-22-cart-page-choices",
-    date: "2026-09-22",
-    version: "4.80.0",
-    tag: "new",
-    href: "/settings?tab=customization",
-    title: {
-      en: "Design your cart page",
-      bn: "কার্ট পেজ নিজের মতো সাজান",
-    },
-    body: {
-      en: "The Cart page in your editor is real now: a \"Continue shopping\" link beside the title or not, the items as cards or as a table, the total line by line or as one number, and an empty cart that says one line or invites the shopper somewhere. The items fill their own column with a picture on every line, and everything owed sits in one panel beside them — the discount code box inside it, behind a link if you would rather, with the ways they can pay underneath. You can also add a row of things to buy alongside, repeat your home-page promises or write a line of your own, show what the shopper looked at earlier, and put a Cart · Checkout · Done bar at the top.",
-      bn: "এডিটরের কার্ট পেজটি এখন সত্যিকারের: শিরোনামের পাশে “আরও কিনুন” থাকবে কি না, পণ্যগুলো কার্ড হিসেবে নাকি টেবিলে, মোট ধাপে ধাপে নাকি একটিই সংখ্যা, আর কার্ট খালি থাকলে এক লাইন নাকি আমন্ত্রণ। পণ্যগুলো নিজের কলামে বসে, প্রতিটি লাইনে ছবিসহ, আর ক্রেতার দেয় সবকিছু পাশে একটি প্যানেলে — ডিসকাউন্ট কোডের ঘর সেটির ভিতরেই, চাইলে লিংকের পিছনে, নিচে টাকা দেওয়ার উপায়গুলো। সাথে কেনার মতো পণ্যের সারিও দিতে পারেন, হোম পেজের প্রতিশ্রুতি বা নিজের এক লাইন, ক্রেতা আগে যা দেখেছেন তা, আর উপরে “কার্ট · চেকআউট · সম্পন্ন” বার।",
     },
   },
 ];
