@@ -88,6 +88,51 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-09-27-where-visitors-come-from",
+    date: "2026-09-27",
+    version: "4.122.0",
+    tag: "new",
+    href: "/analytics",
+    title: {
+      en: "See where your visitors come from",
+      bn: "দেখুন আপনার ভিজিটর কোথা থেকে আসছেন",
+    },
+    body: {
+      en: "Visits to your shop are counted again, whether or not you use a Facebook or TikTok pixel. Analytics shows where each visit came from, such as Facebook, Facebook ads or Google, with the orders and sales it brought.",
+      bn: "আপনার দোকানের ভিজিট আবার গোনা হচ্ছে, ফেসবুক বা টিকটক পিক্সেল থাকুক বা না থাকুক। অ্যানালিটিক্সে দেখা যায় প্রতিটি ভিজিট কোথা থেকে এসেছে, যেমন ফেসবুক, ফেসবুক বিজ্ঞাপন বা গুগল, আর সেখান থেকে কত অর্ডার ও বিক্রি এসেছে।",
+    },
+  },
+  {
+    id: "2026-09-27-districts-from-a-list",
+    date: "2026-09-27",
+    version: "4.122.0",
+    tag: "new",
+    href: "/orders/new",
+    title: {
+      en: "Districts are picked from a list",
+      bn: "জেলা এখন তালিকা থেকে বেছে নেওয়া হয়",
+    },
+    body: {
+      en: "At checkout, shoppers now choose their district from Bangladesh's 64, in your shop's language, so couriers always get a correct name. New order and order edit use the same list, and you can search it in English or Bangla.",
+      bn: "চেকআউটে ক্রেতারা এখন বাংলাদেশের ৬৪টি জেলা থেকে নিজের জেলা বেছে নেন, আপনার দোকানের ভাষায়, তাই কুরিয়ার সবসময় সঠিক নাম পায়। নতুন অর্ডার আর অর্ডার এডিটেও একই তালিকা, ইংরেজি বা বাংলায় খুঁজে নেওয়া যায়।",
+    },
+  },
+  {
+    id: "2026-09-27-analytics-sales-match-your-orders",
+    date: "2026-09-27",
+    version: "4.122.0",
+    tag: "fixed",
+    href: "/analytics",
+    title: {
+      en: "Analytics sales now match your orders",
+      bn: "অ্যানালিটিক্সের বিক্রি এখন আপনার অর্ডারের সাথে মেলে",
+    },
+    body: {
+      en: "Sales, orders and parcels in Analytics are now counted from your orders themselves, by Bangladesh days. Sales are the products in confirmed orders after sale prices and coupons, delivery charges are shown apart, and a cancelled order no longer takes money off a later week.",
+      bn: "অ্যানালিটিক্সে বিক্রি, অর্ডার আর পার্সেল এখন সরাসরি আপনার অর্ডার থেকে, বাংলাদেশের দিন ধরে গোনা হয়। বিক্রি মানে কনফার্ম করা অর্ডারের পণ্য, ছাড় আর কুপনের পরে; ডেলিভারি চার্জ আলাদা দেখানো হয়, আর বাতিল অর্ডার পরের কোনো সপ্তাহের হিসাব থেকে টাকা কাটে না।",
+    },
+  },
+  {
     id: "2026-09-27-shoppers-message-you-from-contact",
     date: "2026-09-27",
     version: "4.121.0",
@@ -484,52 +529,6 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     body: {
       en: "An order paid in advance by bKash or Nagad said Payment pending both before and after the customer sent the money. Now it says Payment submitted, in blue, once they have sent it and typed in the transaction ID, so you can see at a glance which orders are waiting for you to check. When you verify it, it says Confirmed as before — and the Verify payment card now says whether the money was sent by bKash or Nagad, so you check the right app.",
       bn: "বিকাশ বা নগদে আগে পেমেন্টের অর্ডার ক্রেতা টাকা পাঠানোর আগে ও পরে — দুই সময়েই “পেমেন্ট মুলতুবি” দেখাত। এখন ক্রেতা টাকা পাঠিয়ে ট্রানজেকশন আইডি দিলে নীল রঙে “পেমেন্ট জমা হয়েছে” দেখায়, তাই কোন অর্ডারগুলো আপনার যাচাইয়ের অপেক্ষায় আছে তা এক নজরেই বোঝা যায়। পেমেন্ট যাচাই করলে আগের মতোই “নিশ্চিত” দেখাবে — আর যাচাইয়ের কার্ডে এখন লেখা থাকে টাকা বিকাশে নাকি নগদে পাঠানো হয়েছে, যাতে আপনি সঠিক অ্যাপে মিলিয়ে দেখতে পারেন।",
-    },
-  },
-
-  {
-    id: "2026-09-22-product-page-choices",
-    date: "2026-09-22",
-    version: "4.99.0",
-    tag: "new",
-    href: "/settings?tab=customization",
-    title: {
-      en: "Design your product pages",
-      bn: "পণ্যের পেজ নিজের মতো সাজান",
-    },
-    body: {
-      en: "Under Product in your editor, every choice is real now: show the path back up or hide it, pick how the pictures look — a frame with thumbnails, a column, or just one — and switch reviews (the full band or just the score), \"You may also like\", product questions and the recently-viewed strip on or off. The buying column now ends in fold-out rows with icons: Product details with its specifications inside, your Shipping details and Exchange policy written once for every product, and rows of your own such as Wash & Care — a row with nothing written is not shown. On a phone, a bar with the price and the button follows the shopper down the page, and the product code shows once, right under the product's name.",
-      bn: "এডিটরের পণ্য অংশে প্রতিটি পছন্দ এখন সত্যিকারের: উপরে ফেরার পথ দেখাবেন কি না; ছবি কেমন দেখাবে — থাম্বনেইলসহ একটি ছবি, ছবির কলাম, নাকি শুধু একটি; আর রিভিউ (পুরো ব্যান্ড বা শুধু স্কোর), “এগুলোও ভালো লাগতে পারে”, পণ্যের প্রশ্ন ও “সম্প্রতি দেখা” চালু বা বন্ধ করা যায়। কেনার অংশ এখন আইকনসহ ভাঁজ করা সারিতে শেষ হয়: স্পেসিফিকেশনসহ পণ্যের বিবরণ, একবার লিখে দেওয়া আপনার শিপিং তথ্য ও এক্সচেঞ্জ নীতি, আর ধোয়া ও যত্নের মতো আপনার নিজের সারি — লেখা না থাকলে সারিটি দেখানো হয় না। ফোনে পণ্যের পাতায় দাম আর বোতামসহ একটি বার ক্রেতার সাথে নিচে নামে, আর পণ্যের কোড একবারই দেখায় — পণ্যের নামের ঠিক নিচে।",
-    },
-  },
-  {
-    id: "2026-09-22-search-page-choices",
-    date: "2026-09-22",
-    version: "4.98.0",
-    tag: "new",
-    href: "/settings?tab=customization",
-    title: {
-      en: "A better search, and a page you design",
-      bn: "আরও ভালো সার্চ, আর নিজের মতো সার্চ পেজ",
-    },
-    body: {
-      en: "Choose whether the results heading says how many were found, whether matching categories sit above the products, and how many products go across. A long answer can now reach past the first 48 with a Load more button or numbered pages, a search that finds nothing can offer your categories as a way on, and an empty search box can show your best sellers instead of a line of help. Search itself got better too: the search box opens a full-screen search that answers as a shopper types, and half a word, a plural or a misspelling now finds what they meant — “shrit” shows your shirts, and says so.",
-      bn: "ফলাফলের শিরোনামে কয়টি পাওয়া গেল তা দেখাবেন কি না, পণ্যের উপরে মিলে যাওয়া ক্যাটাগরি থাকবে কি না, আর একসারিতে কয়টি পণ্য — ঠিক করুন। লম্বা উত্তরে এখন প্রথম ৪৮টির পরেও যাওয়া যায় “আরও দেখুন” বোতাম বা নম্বর দেওয়া পাতায়, কিছু না মিললে আপনার ক্যাটাগরিগুলো এগোনোর পথ হিসেবে দেখানো যায়, আর খালি সার্চ বক্সে সাহায্যের লাইনের বদলে আপনার সবচেয়ে বেশি বিক্রি হওয়া পণ্য দেখানো যায়। সার্চ নিজেও ভালো হয়েছে: সার্চ বক্সে চাপলে পুরো স্ক্রিন জুড়ে সার্চ খোলে, ক্রেতা লিখতে লিখতেই ফলাফল চলে আসে, আর অর্ধেক শব্দ, বহুবচন বা ভুল বানানে লিখলেও এখন তাঁরা যা খুঁজছেন তা পাওয়া যায় — “শারি” লিখলে শাড়ি দেখায়, আর তা জানিয়েও দেয়।",
-    },
-  },
-  {
-    id: "2026-09-22-blog-choices",
-    date: "2026-09-22",
-    version: "4.94.0",
-    tag: "new",
-    href: "/settings?tab=customization",
-    title: {
-      en: "Design your blog and its posts",
-      bn: "ব্লগ আর তার পোস্ট সাজান",
-    },
-    body: {
-      en: "Give your blog its own name and opening line, let readers narrow the posts by typing or by tag, and choose how the featured posts, the rest and each card look — with the date or how many times a post has been read underneath, and every read counts now. On each post, choose where its picture goes, whether the writer's name sits beside the date, how wide the words run, and whether readers see its tags, the posts before and after it, and three more to read. You can also add a few words of your own under the posts, and posts written as plain text now keep their paragraphs.",
-      bn: "ব্লগকে নিজের নাম আর প্রথম লাইন দিন, পাঠক যেন লিখে বা ট্যাগ বেছে পোস্টগুলো ছেঁকে নিতে পারেন, আর বাছাই করা পোস্ট, বাকি পোস্ট ও প্রতিটি কার্ড কেমন দেখাবে তা ঠিক করুন — নিচে তারিখ, নয়তো পোস্টটি কতবার পড়া হয়েছে; এখন প্রতিবার পড়াই গোনা হয়। প্রতিটি পোস্টে ছবি কোথায় বসবে, তারিখের পাশে লেখকের নাম থাকবে কি না, লেখা কতটা চওড়া হবে, আর পাঠক ট্যাগ, আগের ও পরের পোস্ট এবং পড়ার মতো আরও তিনটি পোস্ট দেখবেন কি না — ঠিক করুন। পোস্টের নিচে নিজের কিছু কথাও যোগ করতে পারেন, আর সাধারণ লেখায় লেখা পোস্টে এখন অনুচ্ছেদগুলো ঠিক থাকে।",
     },
   },
 ];
