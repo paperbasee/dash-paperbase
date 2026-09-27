@@ -22,5 +22,6 @@ export function metricAllZero(o: OverviewData | null): boolean {
     o.delivered.value,
     o.returned.value,
   ];
-  return vals.every((n) => !n);
+  // Revenue arrives as text ("0.00"), which is truthy: compare numbers.
+  return vals.every((n) => !Number(n));
 }

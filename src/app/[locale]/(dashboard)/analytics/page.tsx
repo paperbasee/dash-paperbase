@@ -38,6 +38,7 @@ export default function AnalyticsPage() {
   const locale = useLocale();
   const queryClient = useQueryClient();
   const tCommon = useTranslations("common");
+  const tAnalytics = useTranslations("analyticsPage");
   const { currencySymbol } = useBranding();
   const [range, setRange] = useState<RangeOption>("30");
   const [deltaMode, setDeltaMode] = useState<DeltaMode>("mom");
@@ -143,7 +144,7 @@ export default function AnalyticsPage() {
     return (
       <div className="rounded-card border border-card-border bg-card p-10 text-center">
         <p className="text-sm text-muted-foreground">
-          No analytics data yet. Make sure the Paperbase tracker is installed on your storefront.
+          {tAnalytics("empty")}
         </p>
       </div>
     );

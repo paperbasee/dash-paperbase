@@ -8,6 +8,8 @@ export const PARCEL_SLICE_COLORS: Record<string, string> = {
   delivered: "#22c55e",
   returned: "#f43f5e",
   in_transit: "hsl(var(--accent-blue))",
+  partial: "#f59e0b",
+  not_dispatched: "#cbd5e1",
   unknown: "#94a3b8",
 };
 

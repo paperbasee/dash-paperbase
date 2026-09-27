@@ -117,10 +117,10 @@
       "sessions": "Distinct visits to your store; one session can include multiple pageviews.",
       "bounce_rate": "Share of sessions that viewed only one page before leaving.",
       "avg_session_duration": "Average time visitors spent per session on your store.",
-      "revenue": "Total sales revenue recorded in the selected period.",
-      "orders": "Number of completed orders in the selected period.",
-      "aov": "Average order value — mean revenue per completed order.",
-      "return_rate": "Percentage of delivered parcels that were returned."
+      "revenue": "Products sold in confirmed orders placed in this period, after sale prices and coupons. Delivery charges are not included.",
+      "orders": "Confirmed orders placed in this period.",
+      "aov": "Average confirmed sales per confirmed order.",
+      "return_rate": "Returned parcels, out of the parcels whose delivery has finished (delivered, partly delivered or returned)."
     },
     "deviceBreakdown": {
       "title": "Device breakdown",
@@ -143,7 +143,9 @@
         "delivered": "Delivered",
         "returned": "Returned",
         "in_transit": "In transit",
-        "unknown": "Unknown"
+        "unknown": "Unknown",
+        "partial": "Partly delivered",
+        "not_dispatched": "Not sent yet"
       },
       "ofParcels": "of {count} parcels",
       "parcelsShort": "parcels",
@@ -152,7 +154,13 @@
       "leadingDescription": "{status} makes up {percent}% of tracked parcel outcomes in this period.",
       "returnRateLabel": "Return rate",
       "returnRateDescription": "Returned parcels as a share of deliveries—useful for courier and product quality checks."
-    }
+    },
+    "delta": {
+      "vsPrevious": "vs previous period",
+      "vsLastYear": "vs last year",
+      "points": "pts"
+    },
+    "empty": "No sales or visits in this period yet."
   },
   "pages": {
     "goBack": "Go back",

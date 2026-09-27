@@ -15,8 +15,10 @@ export function ParcelStatusCard({ parcelsData }: { parcelsData: ParcelsData | n
     const s = parcelsData?.summary;
     return [
       { name: "Delivered", key: "delivered", value: s?.delivered ?? 0 },
+      { name: "Partly delivered", key: "partial", value: s?.partial ?? 0 },
       { name: "Returned", key: "returned", value: s?.returned ?? 0 },
       { name: "In transit", key: "in_transit", value: s?.in_transit ?? 0 },
+      { name: "Not sent yet", key: "not_dispatched", value: s?.not_dispatched ?? 0 },
       { name: "Unknown", key: "unknown", value: s?.unknown ?? 0 },
     ];
   }, [parcelsData]);
@@ -36,14 +38,7 @@ export function ParcelStatusCard({ parcelsData }: { parcelsData: ParcelsData | n
     return { total, sorted, top, topPct };
   }, [parcelPie]);
 
-  const parcelSliceLabel = (key: string) =>
-    key === "returned"
-      ? tParcel("names.returned")
-      : key === "in_transit"
-        ? tParcel("names.in_transit")
-        : key === "unknown"
-          ? tParcel("names.unknown")
-          : tParcel("names.delivered");
+  const parcelSliceLabel = (key: string) => tParcel(`names.${key}`);
 
   return (
     <div className="rounded-xl border border-border/80 bg-card p-5 shadow-[0_4px_24px_-6px_rgba(15,23,42,0.08)] lg:col-span-2 dark:border-border dark:shadow-none">

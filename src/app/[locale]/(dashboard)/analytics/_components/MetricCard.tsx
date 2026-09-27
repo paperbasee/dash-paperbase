@@ -6,16 +6,34 @@ import type { AnalyticsMetricKey, DeltaMode } from "./types";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useLocale, useTranslations } from "next-intl";
 
-function DeltaBadge({ value, label }: { value: number | null; label: string }) {
+function DeltaBadge({
+  value,
+  label,
+  unit,
+  lowerIsBetter,
+}: {
+  value: number | null;
+  label: string;
+  unit: string;
+  lowerIsBetter: boolean;
+}) {
   if (value === null || Number.isNaN(value)) {
     return <div className="mt-2 text-xs text-muted-foreground">— {label}</div>;
   }
   const up = value >= 0;
-  const cls = up ? "text-emerald-700 dark:text-emerald-300" : "text-rose-700 dark:text-rose-300";
+  // A bounce or return rate going up is bad news, whatever the arrow says.
+  const good = value === 0 ? null : lowerIsBetter ? !up : up;
+  const cls =
+    good === null
+      ? "text-muted-foreground"
+      : good
+        ? "text-emerald-700 dark:text-emerald-300"
+        : "text-rose-700 dark:text-rose-300";
   const arrow = up ? "↑" : "↓";
   return (
     <div className={`mt-2 text-xs ${cls}`}>
-      {arrow} {Math.abs(value).toFixed(1)}% {label}
+      {arrow} {Math.abs(value).toFixed(1)}
+      {unit} {label}
     </div>
   );
 }
@@ -28,6 +46,8 @@ export function MetricCard({
   deltaMode,
   icon: Icon,
   metricKey,
+  unit,
+  lowerIsBetter = false,
 }: {
   title: string;
   value: string;
@@ -36,11 +56,17 @@ export function MetricCard({
   deltaMode: DeltaMode;
   icon?: ComponentType<{ className?: string }>;
   metricKey: AnalyticsMetricKey;
+  /** "points" for a rate: the change is shown in percentage points. */
+  unit?: "points";
+  /** A rate where going up is bad (bounce, returns). */
+  lowerIsBetter?: boolean;
 }) {
   const locale = useLocale();
   const tMetrics = useTranslations("analyticsPage.metrics");
+  const tDelta = useTranslations("analyticsPage.delta");
   const deltaValue = deltaMode === "mom" ? mom : yoy;
-  const deltaLabel = deltaMode === "mom" ? "vs prev period" : "vs last year";
+  const deltaLabel = deltaMode === "mom" ? tDelta("vsPrevious") : tDelta("vsLastYear");
+  const deltaUnit = unit === "points" ? ` ${tDelta("points")}` : "%";
   return (
     <Tooltip delayDuration={200}>
       <TooltipTrigger asChild>
@@ -54,7 +80,7 @@ export function MetricCard({
                 <span className="min-w-0 truncate">{title}</span>
               </div>
               <div className="mt-2 text-2xl font-semibold text-foreground">{value}</div>
-              <DeltaBadge value={deltaValue} label={deltaLabel} />
+              <DeltaBadge value={deltaValue} label={deltaLabel} unit={deltaUnit} lowerIsBetter={lowerIsBetter} />
             </div>
             {Icon ? (
               <div className="p-2 text-muted-foreground">

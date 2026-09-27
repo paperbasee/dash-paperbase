@@ -2,6 +2,8 @@ export type MetricWithDelta = {
   value: number;
   mom: number | null;
   yoy: number | null;
+  /** "points": `mom`/`yoy` are percentage points, not a percent change. */
+  unit?: "points";
 };
 
 export type OverviewData = {
@@ -51,7 +53,14 @@ export type ProductRow = {
   conversion_rate: number;
 };
 export type ParcelsData = {
-  summary: { delivered: number; returned: number; in_transit: number; unknown: number };
+  summary: {
+    not_dispatched: number;
+    in_transit: number;
+    delivered: number;
+    partial: number;
+    returned: number;
+    unknown: number;
+  };
   daily: { date: string; delivered: number; returned: number }[];
   return_rate: number;
 };

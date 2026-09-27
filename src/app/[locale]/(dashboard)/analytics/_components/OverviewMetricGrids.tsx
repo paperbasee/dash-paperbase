@@ -46,6 +46,8 @@ export function OverviewMetricGrids({
           value={`${(overview?.bounce_rate.value ?? 0).toFixed(1)}%`}
           mom={overview?.bounce_rate.mom ?? null}
           yoy={overview?.bounce_rate.yoy ?? null}
+          unit={overview?.bounce_rate.unit}
+          lowerIsBetter
           deltaMode={deltaMode}
           icon={Percent}
         />
@@ -63,7 +65,7 @@ export function OverviewMetricGrids({
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <MetricCard
           metricKey="revenue"
-          title="Revenue"
+          title="Confirmed sales"
           value={`${currencySymbol}${Number(overview?.revenue.value ?? 0).toLocaleString()}`}
           mom={overview?.revenue.mom ?? null}
           yoy={overview?.revenue.yoy ?? null}
@@ -94,6 +96,8 @@ export function OverviewMetricGrids({
           value={`${(overview?.return_rate.value ?? 0).toFixed(1)}%`}
           mom={overview?.return_rate.mom ?? null}
           yoy={overview?.return_rate.yoy ?? null}
+          unit={overview?.return_rate.unit}
+          lowerIsBetter
           deltaMode={deltaMode}
           icon={KeyReturnIcon}
         />
