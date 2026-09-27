@@ -68,13 +68,19 @@ export type DevicesData = { data: { device: string; sessions: number }[] };
 
 export type PieSlice = { name: string; key: string; value: number };
 
+/** What the traffic report groups visits by (API: analytics/views.py TRAFFIC_DIMENSIONS). */
+export type TrafficDimension = "channel" | "source" | "medium" | "campaign";
+
 export type UTMRow = {
   value: string;
   sessions: number;
+  /** Visits in which an order was placed. */
   converted: number;
-  revenue: string;
   conversion_rate: number;
   mom: number | null;
+  /** Confirmed orders placed in these visits, and their sales (the orders table). */
+  orders: number;
+  sales: string;
 };
 
 export type UTMData = {

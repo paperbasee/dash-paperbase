@@ -114,9 +114,9 @@
   "analyticsPage": {
     "metrics": {
       "pageviews": "Total times pages on your store were loaded in the selected period.",
-      "sessions": "Distinct visits to your store; one session can include multiple pageviews.",
-      "bounce_rate": "Share of sessions that viewed only one page before leaving.",
-      "avg_session_duration": "Average time visitors spent per session on your store.",
+      "sessions": "Visits to your store. A visit ends after 30 minutes with nothing happening.",
+      "bounce_rate": "Share of visits that did not engage: under 10 seconds on screen, one page and no order.",
+      "avg_session_duration": "Average time a visit's pages were on screen.",
       "revenue": "Products sold in confirmed orders placed in this period, after sale prices and coupons. Delivery charges are not included.",
       "orders": "Confirmed orders placed in this period.",
       "aov": "Average confirmed sales per confirmed order.",
@@ -160,7 +160,39 @@
       "vsLastYear": "vs last year",
       "points": "pts"
     },
-    "empty": "No sales or visits in this period yet."
+    "empty": "No sales or visits in this period yet.",
+    "traffic": {
+      "title": "Where visitors come from",
+      "dimensions": {
+        "channel": "Channel",
+        "source": "Source",
+        "medium": "Medium",
+        "campaign": "Campaign"
+      },
+      "overTime": "Visits by {dimension}, over time",
+      "columns": {
+        "sessions": "Visits",
+        "change": "Change",
+        "orders": "Orders",
+        "sales": "Sales",
+        "conversion": "Visits with an order"
+      },
+      "empty": "No visits for this period yet.",
+      "other": "Other",
+      "direct": "Direct",
+      "notTracked": "Not tracked",
+      "notSet": "Not known",
+      "channels": {
+        "direct": "Direct",
+        "organic_social": "Social media",
+        "paid_social": "Social media ads",
+        "organic_search": "Search",
+        "paid_search": "Search ads",
+        "email": "Email",
+        "referral": "Other websites",
+        "other_campaign": "Other campaigns"
+      }
+    }
   },
   "pages": {
     "goBack": "Go back",
@@ -1092,8 +1124,8 @@
     "toastDescCustomerProfileUnavailable": "This customer's record could not be loaded from the server.",
     "toastTitleAnalyticsFailedToLoad": "Analytics failed to load",
     "toastDescAnalyticsFailedToLoad": "Charts and KPIs could not be refreshed for the selected date range.",
-    "toastTitleUtmBreakdownUnavailable": "UTM breakdown unavailable",
-    "toastDescUtmBreakdownUnavailable": "Campaign attribution data failed to load for the selected period.",
+    "toastTitleUtmBreakdownUnavailable": "Traffic sources unavailable",
+    "toastDescUtmBreakdownUnavailable": "Where visitors came from could not be loaded for this period.",
     "toastTitleBlogPostsUnavailable": "Blog posts unavailable",
     "toastDescBlogPostsUnavailable": "The post list could not be loaded with the current filters applied.",
     "toastTitleTagsUnavailable": "Tags unavailable",

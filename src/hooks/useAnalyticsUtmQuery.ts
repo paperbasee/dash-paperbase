@@ -3,12 +3,12 @@
 import { useQuery } from "@tanstack/react-query";
 import api from "@/lib/api";
 import { analyticsUtmQueryKey } from "@/lib/query-keys";
-import type { UTMData } from "@/app/[locale]/(dashboard)/analytics/_components/types";
+import type { TrafficDimension, UTMData } from "@/app/[locale]/(dashboard)/analytics/_components/types";
 import type { AnalyticsQueryOptions } from "@/hooks/useAnalyticsOverviewQuery";
 
 export async function fetchAnalyticsUtm(
   range: string,
-  dimension: string
+  dimension: TrafficDimension
 ): Promise<UTMData> {
   const { data } = await api.get<UTMData>(
     `admin/analytics/utm/?range=${range}&dimension=${dimension}`
@@ -18,7 +18,7 @@ export async function fetchAnalyticsUtm(
 
 export function useAnalyticsUtmQuery(
   range: string,
-  dimension: "source" | "medium" | "campaign",
+  dimension: TrafficDimension,
   options?: AnalyticsQueryOptions
 ) {
   return useQuery({

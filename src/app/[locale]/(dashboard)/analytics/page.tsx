@@ -31,7 +31,7 @@ import { TopPagesTable } from "./_components/TopPagesTable";
 import { TopProductsTable } from "./_components/TopProductsTable";
 import { TrafficAcquisitionSection } from "./_components/TrafficAcquisitionSection";
 import { metricAllZero } from "./_components/format";
-import type { DeltaMode, RangeOption } from "./_components/types";
+import type { DeltaMode, RangeOption, TrafficDimension } from "./_components/types";
 
 export default function AnalyticsPage() {
   const router = useRouter();
@@ -42,7 +42,7 @@ export default function AnalyticsPage() {
   const { currencySymbol } = useBranding();
   const [range, setRange] = useState<RangeOption>("30");
   const [deltaMode, setDeltaMode] = useState<DeltaMode>("mom");
-  const [utmDimension, setUtmDimension] = useState<"source" | "medium" | "campaign">("source");
+  const [utmDimension, setUtmDimension] = useState<TrafficDimension>("channel");
   const { hasFeature, loading: featuresLoading } = useFeatures();
   const hasAdvancedAnalytics = hasFeature("advanced_analytics");
 
