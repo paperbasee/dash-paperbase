@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useReducer, useRef, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useMemo, useReducer, useRef, useState, type ReactNode } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Monitor, SlidersHorizontal, Smartphone, X } from "lucide-react";
 
@@ -63,7 +63,7 @@ import {
   slotValueFor,
   wiringFor,
 } from "@/lib/theme-editor/slot-sections";
-import { storeSettingFor, storeSettingValue } from "@/lib/theme-editor/store-setting-slots";
+import { choicesFromShop, storeSettingFor, storeSettingValue } from "@/lib/theme-editor/store-setting-slots";
 import { useCheckoutSettingsQuery } from "@/hooks/useCheckoutSettingsQuery";
 import {
   brandingQueryKey,
@@ -216,21 +216,25 @@ export function SlotEditor({
   }));
 
   /*
-    The one setting in this editor that is NOT the theme's: which form the
-    checkout asks a shopper to fill in. It is a shop setting, shared with
-    Settings -> Checkout, so it is read from there and written straight back --
+    The settings in this editor that are NOT the theme's: which form the
+    checkout asks a shopper to fill in, and how it asks for the district.
+    They are shop settings, so the tiles start from what the shop has --
     see `lib/theme-editor/store-setting-slots.ts`.
   */
   const checkoutSettings = useCheckoutSettingsQuery();
-  const formVariant = checkoutSettings.data?.customer_form_variant;
-  useEffect(() => {
-    if (!formVariant) return;
+  const shopChoices = useMemo(() => choicesFromShop(checkoutSettings.data), [checkoutSettings.data]);
+  const takeShopChoices = useCallback(() => {
     setChoices((all) =>
-      all.checkout.form === formVariant
-        ? all
-        : { ...all, checkout: { ...all.checkout, form: formVariant } },
+      shopChoices.reduce(
+        (next, { page, key, value }) =>
+          next[page][key] === value ? next : { ...next, [page]: { ...next[page], [key]: value } },
+        all,
+      ),
     );
-  }, [formVariant]);
+  }, [shopChoices]);
+  useEffect(() => {
+    takeShopChoices();
+  }, [takeShopChoices]);
   /*
     Shop settings chosen here and not yet written.
 
@@ -528,9 +532,7 @@ export function SlotEditor({
   const startedOver = () => {
     setPendingStore({});
     setPendingLinks({});
-    if (formVariant) {
-      setChoices((all) => ({ ...all, checkout: { ...all.checkout, form: formVariant } }));
-    }
+    takeShopChoices();
     answered();
   };
 

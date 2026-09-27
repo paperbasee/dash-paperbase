@@ -30,15 +30,22 @@
  * should not have to leave the page they are designing to decide how many boxes
  * it has.
  *
+ * The checkout's district -- typed, or picked from the list --
+ * (`StorefrontCheckoutSettings.district_input`, 2026-09-27) joined it the same
+ * way: the order itself is held to that choice, so it belongs to the shop, and
+ * it is chosen beside the district it changes.
+ *
  * A place listed here must SAY in its hint when it is saved. It looks like every
  * other tile and it is not one, and the difference only shows on the day
  * something goes wrong with one half and not the other.
  */
+import type { CheckoutSettings } from "@/hooks/useCheckoutSettingsQuery";
+
 import type { SlotPageKey } from "./slot-catalogue";
 
 export type StoreSettingSlot = {
   /** The field on `store/checkout-settings/` this place writes. */
-  setting: "customer_form_variant";
+  setting: "customer_form_variant" | "district_input";
   /** What the API calls each of the place's values, where the names differ. */
   values?: Record<string, string>;
 };
@@ -49,7 +56,10 @@ export const STORE_SETTING_SLOTS: Partial<
   // The editor's two variants are spelled exactly as the API spells them, so
   // no mapping is needed -- and keeping them that way is worth more than the
   // mapping would be.
-  checkout: { form: { setting: "customer_form_variant" } },
+  checkout: {
+    form: { setting: "customer_form_variant" },
+    district: { setting: "district_input" },
+  },
 };
 
 export function storeSettingFor(page: SlotPageKey, key: string): StoreSettingSlot | undefined {
@@ -59,4 +69,23 @@ export function storeSettingFor(page: SlotPageKey, key: string): StoreSettingSlo
 /** What this place's value is called on the wire. */
 export function storeSettingValue(slot: StoreSettingSlot, value: string): string {
   return slot.values?.[value] ?? value;
+}
+
+/**
+ * Each shop-setting place's choice as the shop has it now -- what the tiles show until the
+ * merchant picks otherwise, and what they go back to when a pending choice is given up.
+ */
+export function choicesFromShop(settings: CheckoutSettings | undefined): {
+  page: SlotPageKey;
+  key: string;
+  value: string;
+}[] {
+  if (!settings) return [];
+  return Object.entries(STORE_SETTING_SLOTS).flatMap(([page, places]) =>
+    Object.entries(places ?? {}).map(([key, slot]) => {
+      const wire = String(settings[slot.setting]);
+      const value = Object.entries(slot.values ?? {}).find(([, sent]) => sent === wire)?.[0] ?? wire;
+      return { page: page as SlotPageKey, key, value };
+    }),
+  );
 }

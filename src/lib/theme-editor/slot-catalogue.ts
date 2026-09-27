@@ -1229,6 +1229,19 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
         { value: "minimal", label: "formMinimal", note: "formMinimalNote", shape: "line" },
       ],
     },
+    {
+      /* How shoppers give their district (owner, 2026-09-27): typed, as every
+         shop has, or picked from Bangladesh's 64 with a search box. A shop
+         setting like the form above, and the order is held to it. */
+      key: "district",
+      label: "checkoutDistrict",
+      hint: "checkoutDistrictHint",
+      initial: "text",
+      options: [
+        { value: "text", label: "districtText", note: "districtTextNote", shape: "line" },
+        { value: "list", label: "districtList", note: "districtListNote", shape: "block" },
+      ],
+    },
     /**
      * The last thing a shopper reads before they pay.
      *

@@ -136,9 +136,24 @@ describe("the checkout page is wired", () => {
     expect(storeSettingFor("checkout", "form")?.setting).toBe("customer_form_variant");
   });
 
+  test("nor is the district: how it is asked for holds the order too", () => {
+    /*
+      `StorefrontCheckoutSettings.district_input` (2026-09-27): typed, or
+      picked from the 64. The API refuses an order whose district is not on
+      the list when the shop chose the list, so it is the shop's, not the
+      theme's -- a theme saying "list" while the order took anything would be
+      two answers to one question.
+    */
+    expect(wiringFor("checkout", "district")).toBeFalsy();
+    expect(storeSettingFor("checkout", "district")?.setting).toBe("district_input");
+    const place = SLOTS.checkout.find((slot) => slot.key === "district");
+    expect(place?.initial).toBe("text");
+    expect(place?.options?.map((option) => option.value)).toEqual(["text", "list"]);
+  });
+
   test("and every other place on this page writes the document, not the shop", () => {
     for (const slot of SLOTS.checkout) {
-      if (slot.key === "form" || slot.inheritedFrom) continue;
+      if (slot.key === "form" || slot.key === "district" || slot.inheritedFrom) continue;
       expect(storeSettingFor("checkout", slot.key), slot.key).toBeUndefined();
     }
   });
@@ -149,10 +164,12 @@ describe("the checkout page is wired", () => {
       2026-09-24, until the owner said no: this editor has ONE save, and a tile
       that wrote itself was a second one nobody asked for.
     */
-    const slot = SLOTS.checkout.find((one) => one.key === "form")!;
-    const hint = (en.themeEditor.slots as Record<string, string>)[slot.hint!];
-    expect(hint).toContain("Save to store");
-    expect(hint).not.toContain("straight away");
+    for (const key of ["form", "district"]) {
+      const slot = SLOTS.checkout.find((one) => one.key === key)!;
+      const hint = (en.themeEditor.slots as Record<string, string>)[slot.hint!];
+      expect(hint, key).toContain("Save to store");
+      expect(hint, key).not.toContain("straight away");
+    }
   });
 
   test("and the editor holds it until then rather than writing on the click", () => {
