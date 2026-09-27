@@ -144,7 +144,7 @@ export interface Order {
 }
 
 /**
- * Admin product list/detail (`/api/v1/admin/products/`). Storefront shapes differ — see `StorefrontProductListItem` in `./storefront-api`.
+ * Admin product list/detail (`/api/v1/admin/products/`).
  */
 export interface Product {
   public_id: string;
@@ -676,22 +676,6 @@ export interface MarketingIntegration {
   created_at: string;
   updated_at: string;
 }
-
-export interface StoreAPIKey {
-  public_id: string;
-  name: string;
-  key_prefix: string;
-  key_type?: "public" | "secret";
-  created_at: string;
-  revoked_at: string | null;
-}
-
-export type {
-  StorefrontCategory,
-  StorefrontOrderItem,
-  StorefrontProductDetail,
-  StorefrontProductListItem,
-} from "./storefront-api";
 
 /**
  * A discount code, as the dashboard reads it.

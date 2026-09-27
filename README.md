@@ -1,16 +1,16 @@
 # dash-paperbase
 
-Merchant dashboard for [Paperbase](https://github.com/paper-base): a [Next.js](https://nextjs.org) app (App Router) that talks to the Paperbase **API backend** (Django REST). This README focuses on how the dashboard connects to that backend and where the **BaaS-style** storefront contract lives.
+Merchant dashboard for [Paperbase](https://github.com/paper-base): a [Next.js](https://nextjs.org) app (App Router) that talks to the Paperbase **API backend** (Django REST). This README focuses on how the dashboard connects to that backend.
 
-## Backend (BaaS) overview
+## Backend overview
 
 | Layer | Role |
 | ----- | ---- |
 | **Paperbase API** | Django REST API: auth, stores, catalog, orders, shipping, analytics, etc. |
 | **This app (dashboard)** | Authenticated operators: JWT access/refresh tokens, `Authorization: Bearer <access>` on API calls via `src/lib/api.ts`. |
-| **Storefront / headless clients** | Read-mostly public API under `/api/v1/` using **publishable** API keys (`ak_pk_...`). Secret keys (`ak_sk_...`) are rejected. |
+| **The shop** (`shop-paperbase`) | Django + Liquid. It imports the API's `engine` and reads the database itself, so it calls no API and needs no key. |
 
-The dashboard and the storefront use the **same API origin**; they differ by **credential type** (user JWT vs publishable key) and which routes each client is allowed to call.
+The dashboard is the API's only client. The public storefront API and its publishable keys went on 2026-09-27, with the Next storefront that used them.
 
 ### Environment
 
@@ -23,14 +23,6 @@ NEXT_PUBLIC_API_URL=http://localhost:8000
 ```
 
 Production builds should set `NEXT_PUBLIC_API_URL` to your deployed API origin (for example `https://api.example.com`).
-
-### Storefront API contract (BaaS)
-
-For **public** storefront integrations (catalog, checkout, support tickets, etc.), the full contract—base URL `{BACKEND_ORIGIN}/api/v1/`, headers, allowed methods, `public_id` rules, and endpoint list—is documented in:
-
-**[`docs/STOREFRONT_API_FRONTEND_PROMPT.md`](./docs/STOREFRONT_API_FRONTEND_PROMPT.md)**
-
-Use that document as the single source of truth for headless/front-end clients. The dashboard implementation does not replace that spec for storefront work.
 
 ### Security and CSP
 

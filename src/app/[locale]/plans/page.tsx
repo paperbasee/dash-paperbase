@@ -32,7 +32,6 @@ const OPTION_LABELS: Record<string, string> = {
   order_email_notifications: "order email notifications",
   fraud_check: "fraud check",
   max_products: "max products",
-  storefront_requests_per_minute: "storefront requests per minute",
 };
 
 export default function PlansPage() {
@@ -227,12 +226,6 @@ export default function PlansPage() {
                   if (typeof maxProducts === "number") {
                     optionLines.push(`${OPTION_LABELS.max_products}: ${maxProducts}`);
                   }
-                  const requestsPerMinute = selected.features?.limits?.storefront_requests_per_minute;
-                  if (typeof requestsPerMinute === "number") {
-                    optionLines.push(
-                      `${OPTION_LABELS.storefront_requests_per_minute}: ${requestsPerMinute}`
-                    );
-                  }
                 } else if (selectedName === "premium") {
                   featuresLeadLine = t("premiumIncludesEssential");
                   if (selected.features?.features?.fraud_check) {
@@ -247,12 +240,6 @@ export default function PlansPage() {
                   const maxProducts = selected.features?.limits?.max_products;
                   if (typeof maxProducts === "number") {
                     optionLines.push(`${OPTION_LABELS.max_products}: ${maxProducts}`);
-                  }
-                  const requestsPerMinute = selected.features?.limits?.storefront_requests_per_minute;
-                  if (typeof requestsPerMinute === "number") {
-                    optionLines.push(
-                      `${OPTION_LABELS.storefront_requests_per_minute}: ${requestsPerMinute}`
-                    );
                   }
                 } else {
                   optionLines.push(

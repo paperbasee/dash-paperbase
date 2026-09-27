@@ -12,7 +12,6 @@ export type StoreSettingsCurrent = {
   extra_field_schema?: unknown;
   email_notify_owner_on_order_received: boolean;
   email_customer_on_order_confirmed: boolean;
-  public_api_enabled?: boolean;
   autopilot_enabled?: boolean;
   autopilot_min_success_ratio?: number;
   autopilot_min_total_parcels?: number;

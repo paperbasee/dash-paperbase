@@ -55,15 +55,8 @@ export type ThemeCurrent = {
   theme_key: string;
   has_draft: boolean;
   draft_theme: string | null;
-  /** Sent back as expected_draft_revision, so a draft changed elsewhere is a 409. */
-  draft_revision: number;
   published_at: string | null;
   published_by_name: string;
-  /**
-   * Themes this shop has already worked on. Opening one of these gives the merchant
-   * back what they had; every other theme starts from its defaults.
-   */
-  started_themes: string[];
   /**
    * Whether the LIVE theme draws the shop's product-card style.
    *
@@ -194,7 +187,7 @@ export type ThemeDocument = {
   templates: Record<string, ThemeSectionList>;
 };
 
-/** What editor/, editor/select/ and editor/discard/ answer. */
+/** What editor/ and editor/discard/ answer. */
 export type ThemeEditorState = {
   theme_key: string;
   /** Whether the theme being edited is the one shoppers see. */

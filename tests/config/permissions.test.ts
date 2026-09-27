@@ -143,12 +143,10 @@ describe("removed api_keys group", () => {
   test("no api_keys.* permission is offered anywhere in the editor", () => {
     // The dashboard's Settings → Networking section was removed during the
     // host-routing pivot: merchants no longer manage storefront publishable
-    // keys by hand. The *server* catalog still defines api_keys.view /
-    // api_keys.manage (it must, for existing role rows), so the only thing
-    // stopping the role editor from rendering dead checkboxes for a section
-    // that no longer exists is this file. If someone "re-syncs" the mirror by
-    // copying catalog.py wholesale, api_keys comes back — this test is the
-    // trip-wire for that.
+    // keys by hand. The keys themselves went on 2026-09-27, and the server
+    // catalog dropped api_keys.view / api_keys.manage with them (rbac 0011).
+    // This stays as the trip-wire against the group coming back into the
+    // mirror by hand.
     const offending = ALL_PERMISSION_KEYS.filter((k) => k.startsWith("api_keys."));
     expect(offending).toEqual([]);
     expect(PERMISSION_GROUPS.some((g) => g.id === "api_keys")).toBe(false);
@@ -222,13 +220,12 @@ describe("expandPermissionKeys", () => {
 
   test("preserves keys it does not recognise instead of dropping them", () => {
     // CURRENT BEHAVIOUR, asserted deliberately (see notes). The function does
-    // no validation: a role row that still carries a server-side key this UI
-    // no longer renders (e.g. api_keys.view on a legacy role) survives a save
-    // from the editor rather than being silently revoked. The server is the
-    // validator — `validate_keys` rejects genuinely unknown keys.
-    expect([...expandPermissionKeys(["api_keys.manage"])].sort()).toEqual([
-      "api_keys.manage",
-      "api_keys.view",
+    // no validation: a role row that carries a key this UI does not render
+    // survives a save from the editor rather than being silently revoked. The
+    // server is the validator — `validate_keys` rejects genuinely unknown keys.
+    expect([...expandPermissionKeys(["retired.manage"])].sort()).toEqual([
+      "retired.manage",
+      "retired.view",
     ]);
   });
 
@@ -383,15 +380,15 @@ describe.skipIf(api === null || api.keys.size === 0)(
       expect(unknown).toEqual([]);
     });
 
-    test("the only API keys the UI withholds are the retired api_keys.*", () => {
+    test("the UI withholds no API permission", () => {
       // Reverse direction: an API permission with no checkbox is a capability
-      // merchants can never grant. api_keys.* is the one deliberate omission
-      // (the Networking section is gone); anything else appearing here means
+      // merchants can never grant. api_keys.* was the one deliberate omission
+      // until the API dropped it on 2026-09-27; anything appearing here means
       // the API grew a permission and this mirror was never updated.
       const withheld = [...api!.keys]
         .filter((k) => !ALL_PERMISSION_KEYS.includes(k))
         .sort();
-      expect(withheld).toEqual(["api_keys.manage", "api_keys.view"]);
+      expect(withheld).toEqual([]);
     });
 
     test("UI expansion matches the API's declared requires-closure for every key", () => {
@@ -418,7 +415,7 @@ describe.skipIf(api === null || api.keys.size === 0)(
 
     test("UI group order follows the API's documented render order", () => {
       // catalog.py: "Ordered: the role editor renders groups in this order."
-      // The UI list must be a subsequence of it (api_keys is skipped).
+      // The UI list must be a subsequence of it.
       const apiOrder = api!.groupIds;
       const uiOrder = PERMISSION_GROUPS.map((g) => g.id);
       let cursor = 0;
