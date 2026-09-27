@@ -6,6 +6,10 @@
  * editor waits for Save to store. Owner, 2026-09-23: "move the product card
  * functionality to the theme editor, not in the outside."
  */
+import fs from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+
 import { describe, expect, test } from "vitest";
 
 import type { ThemeDocument, ThemeEditorState, ThemeManifest } from "@/lib/theme-editor/api";
@@ -41,7 +45,7 @@ const manifest: ThemeManifest = {
         classic: { en: "Classic", bn: "ক্ল্যাসিক" },
         shelf: { en: "Shelf", bn: "শেলফ" },
       },
-      default: "classic",
+      default: "shelf",
     },
   ],
   sections: {
@@ -90,6 +94,21 @@ describe("choosing the card style in the editor", () => {
   test("the panel offers exactly what the theme does", () => {
     const offered = manifest.settings.find((one) => one.id === "card_style")!.options;
     expect(CARD_STYLES.map((one) => one.key)).toEqual(offered);
+  });
+
+  test("a design that says nothing is Shelf, as the theme and the shop both draw it", () => {
+    // Owner, 2026-09-27: "every shop will use shelf product card by default".
+    const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
+    const editorSource = fs.readFileSync(
+      path.join(root, "src/components/theme-editor/slots/SlotEditor.tsx"),
+      "utf8",
+    );
+    expect(editorSource).toMatch(/state\.document\.settings\.card_style\s*:\s*"shelf";/);
+    const theme = path.resolve(root, "../api-paperbase/engine/apps/theming/themes/storefront.json");
+    if (fs.existsSync(theme)) {
+      const settings: { id: string; default?: unknown }[] = JSON.parse(fs.readFileSync(theme, "utf8")).settings;
+      expect(settings.find((one) => one.id === "card_style")?.default).toBe("shelf");
+    }
   });
 
   test("it is a theme setting, so no page has to be picked first", () => {
