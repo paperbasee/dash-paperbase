@@ -88,6 +88,94 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-09-27-delivery-outside-dhaka-charged-again",
+    date: "2026-09-27",
+    version: "4.119.0",
+    tag: "fixed",
+    href: "/settings?tab=shipping",
+    title: {
+      en: "Delivery outside Dhaka is charged again",
+      bn: "ঢাকার বাইরের ডেলিভারি চার্জ আবার নেওয়া হচ্ছে",
+    },
+    body: {
+      en: "A shopper who chose Inside Dhaka and then switched to Outside Dhaka was charged nothing for delivery. Checkout now always charges the price you set for the area they chose.",
+      bn: "যে ক্রেতা প্রথমে ঢাকার ভেতর বেছে নিয়ে পরে ঢাকার বাইরে বদলাতেন, তাঁর কাছ থেকে কোনো ডেলিভারি চার্জ নেওয়া হতো না। এখন চেকআউট সবসময় ক্রেতার বেছে নেওয়া এলাকার জন্য আপনার ঠিক করা চার্জই নেয়।",
+    },
+  },
+  {
+    id: "2026-09-27-a-default-delivery-area",
+    date: "2026-09-27",
+    version: "4.119.0",
+    tag: "new",
+    href: "/settings?tab=shipping",
+    title: {
+      en: "Pick a default delivery area",
+      bn: "একটি ডিফল্ট ডেলিভারি এলাকা বেছে নিন",
+    },
+    body: {
+      en: "In Settings, Shipping, mark one area as the default: checkout starts on it, so shoppers see the delivery charge at once and can still pick another. An area with no delivery price now says so there.",
+      bn: "সেটিংস > শিপিং-এ একটি এলাকাকে ডিফল্ট করুন: চেকআউট সেটি দিয়েই শুরু হবে, তাই ক্রেতারা সাথে সাথে ডেলিভারি চার্জ দেখবেন, চাইলে অন্য এলাকাও বেছে নিতে পারবেন। কোনো এলাকার ডেলিভারি চার্জ না থাকলে সেখানেই তা দেখানো হয়।",
+    },
+  },
+  {
+    id: "2026-09-27-turn-the-cart-off",
+    date: "2026-09-27",
+    version: "4.119.0",
+    tag: "new",
+    href: "/settings?tab=apps",
+    title: {
+      en: "Turn the cart off for a shorter checkout",
+      bn: "ছোট চেকআউটের জন্য কার্ট বন্ধ করুন",
+    },
+    body: {
+      en: "In Settings, Apps, you can now turn the Cart off. Your shop then has no cart button, icon or page: shoppers press Order Now and go straight to checkout with that one product.",
+      bn: "সেটিংস > অ্যাপস-এ এখন কার্ট বন্ধ করতে পারবেন। তখন আপনার দোকানে কোনো কার্ট বাটন, আইকন বা পেজ থাকবে না: ক্রেতারা “এখনই অর্ডার করুন” চাপলে সেই একটি পণ্য নিয়ে সরাসরি চেকআউটে যাবেন।",
+    },
+  },
+  {
+    id: "2026-09-27-your-shop-in-your-language",
+    date: "2026-09-27",
+    version: "4.119.0",
+    tag: "fixed",
+    title: {
+      en: "Your shop opens in the language you chose",
+      bn: "আপনার দোকান আপনার বেছে নেওয়া ভাষায় খোলে",
+    },
+    body: {
+      en: "A shop set to Bangla opened in English on most phones, order form and buttons included. It now opens in your shop's language on every phone, and links in English open in Bangla too.",
+      bn: "বাংলায় সেট করা দোকান বেশিরভাগ ফোনে ইংরেজিতে খুলত, অর্ডার ফর্ম আর বাটনসহ। এখন সব ফোনে আপনার দোকান আপনার বেছে নেওয়া ভাষাতেই খোলে, আর ইংরেজি লিংকও বাংলায় খোলে।",
+    },
+  },
+  {
+    id: "2026-09-27-convert-an-abandoned-checkout",
+    date: "2026-09-27",
+    version: "4.119.0",
+    tag: "new",
+    href: "/orders/abandoned",
+    title: {
+      en: "Turn an abandoned checkout into an order",
+      bn: "অসম্পূর্ণ চেকআউটকে অর্ডারে রূপান্তর করুন",
+    },
+    body: {
+      en: "Called a shopper who didn't finish checkout and they said yes? Press Convert to order on their row: the new order form opens with their details and basket filled in. Save it, and the row leaves the list.",
+      bn: "যে ক্রেতা চেকআউট শেষ করেননি তাঁকে ফোন করলেন, আর তিনি রাজি হলেন? তাঁর সারিতে “অর্ডারে রূপান্তর” চাপুন: নতুন অর্ডারের ফর্ম তাঁর তথ্য আর পণ্যসহ খুলে যাবে। সেভ করলে সারিটি তালিকা থেকে সরে যাবে।",
+    },
+  },
+  {
+    id: "2026-09-27-closed-while-a-plan-is-unpaid",
+    date: "2026-09-27",
+    version: "4.119.0",
+    tag: "improved",
+    title: {
+      en: "A shop closes while its plan is unpaid",
+      bn: "প্ল্যানের মেয়াদ শেষ হলে দোকান বন্ধ থাকে",
+    },
+    body: {
+      en: "When a plan runs out, the shop shows a closed page in its own colours until the plan is renewed, as it did before the new storefront. Your products, orders and settings are kept.",
+      bn: "প্ল্যানের মেয়াদ শেষ হলে, নবায়ন না করা পর্যন্ত দোকানে নিজের রঙে একটি বন্ধ পেজ দেখায়, নতুন স্টোরফ্রন্টের আগে যেমন হতো। আপনার পণ্য, অর্ডার আর সেটিংস রাখা থাকে।",
+    },
+  },
+  {
     id: "2026-09-27-old-storefront-cleared-away",
     date: "2026-09-27",
     version: "4.118.11",
@@ -443,94 +531,6 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     body: {
       en: "A promotion was a coloured band with words on it. Now it comes three ways — words on a band, a picture beside them, or a picture behind them with your words over it — and you can add a small line above the headline, like “Limited time”. The countdown, the start and end times and everything else stay exactly where they were.",
       bn: "আগে প্রোমোশন ছিল শুধু রঙিন ব্যান্ডে কিছু লেখা। এখন তিনভাবে দেখানো যায় — ব্যান্ডে শুধু লেখা, লেখার পাশে ছবি, কিংবা লেখার পেছনে ছবি — আর শিরোনামের উপরে ছোট একটি লাইনও দেওয়া যায়, যেমন “সীমিত সময়”। কাউন্টডাউন, শুরু-শেষের সময় আর বাকি সবকিছু আগের জায়গাতেই আছে।",
-    },
-  },
-  {
-    id: "2026-09-22-promises-on-your-home-page",
-    date: "2026-09-22",
-    version: "4.57.0",
-    tag: "new",
-    href: "/settings?tab=customization",
-    title: {
-      en: "Tell shoppers what you promise",
-      bn: "ক্রেতাকে জানান আপনি কী কথা দিচ্ছেন",
-    },
-    body: {
-      en: "Under your categories you can now show up to four promises — cash on delivery, easy returns, help every day — ticked from a list of sixteen. They are written in each shopper's own language, English or Bangla, so you never write them twice. The same four appear on every product page, where the old fixed wording used to sit.",
-      bn: "ক্যাটাগরির নিচে এখন চারটি পর্যন্ত প্রতিশ্রুতি দেখানো যাবে — ক্যাশ অন ডেলিভারি, সহজ রিটার্ন, প্রতিদিন সহায়তা — ষোলোটির তালিকা থেকে টিক করে। প্রতিটি ক্রেতা নিজের ভাষায় সেগুলো পড়বেন, ইংরেজি হোক বা বাংলা, তাই দুবার লিখতে হবে না। একই চারটি প্রতিটি প্রোডাক্ট পাতায়ও দেখা যাবে, যেখানে আগে বাঁধা লেখা ছিল।",
-    },
-  },
-  {
-    id: "2026-09-22-customers-can-create-an-account",
-    date: "2026-09-22",
-    version: "4.47.0",
-    tag: "improved",
-    title: {
-      en: "A proper sign-up for your customers",
-      bn: "ক্রেতাদের জন্য পূর্ণাঙ্গ সাইন-আপ",
-    },
-    body: {
-      en: "Your shop now has a Create account page that asks for a first name, last name, phone number and email, so every customer in your Accounts list has a real name and number instead of just an address. Anyone signing in with an address you have never seen is asked the same three things before their account is made, so no nameless rows can appear. There is still no password to remember — they get a link by email as before.",
-      bn: "আপনার দোকানে এখন একটি \"অ্যাকাউন্ট তৈরি করুন\" পাতা আছে, যেখানে নামের প্রথম ও শেষ অংশ, ফোন নম্বর আর ইমেইল চাওয়া হয় — ফলে অ্যাকাউন্ট তালিকায় প্রত্যেক ক্রেতার আসল নাম ও নম্বর থাকবে, শুধু ঠিকানা নয়। আপনার কাছে আগে কখনো আসেনি এমন ঠিকানা দিয়ে কেউ সাইন ইন করলে অ্যাকাউন্ট তৈরির আগে তাঁকেও একই তিনটি তথ্য জিজ্ঞাসা করা হয়, তাই নামহীন কোনো সারি আর আসবে না। আগের মতোই কোনো পাসওয়ার্ড মনে রাখতে হয় না — ইমেইলে লিংক চলে যায়।",
-    },
-  },
-  {
-    id: "2026-09-22-customer-figures-are-counted",
-    date: "2026-09-22",
-    version: "4.46.0",
-    tag: "fixed",
-    href: "/customers",
-    title: {
-      en: "Repeat customer filter shows the right people",
-      bn: "রিপিট কাস্টমার ফিল্টার এখন সঠিক তালিকা দেখায়",
-    },
-    body: {
-      en: "Filtering your customers by repeat buyers read a saved note that slowly went out of date, so it could show the wrong people while every figure beside it was right. Orders and spending are now counted fresh every time you look, so nothing can drift again. A parcel that came back no longer counts as money that customer spent, and someone who orders from a new address now has that address on their record.",
-      bn: "রিপিট কাস্টমার দিয়ে ফিল্টার করলে আগে একটি পুরোনো হয়ে যাওয়া হিসাব পড়া হতো, ফলে পাশের সব সংখ্যা ঠিক থাকলেও ভুল মানুষ তালিকায় আসতে পারত। এখন অর্ডার আর খরচ প্রতিবার নতুন করে গোনা হয়, তাই আর কোনো হিসাব পুরোনো হবে না। ফেরত আসা পার্সেল আর ক্রেতার খরচ হিসেবে গোনা হয় না, আর কেউ নতুন ঠিকানা থেকে অর্ডার করলে তাঁর রেকর্ডে সেই নতুন ঠিকানাই থাকে।",
-    },
-  },
-  {
-    id: "2026-09-22-order-status-everywhere",
-    date: "2026-09-22",
-    version: "4.45.0",
-    tag: "improved",
-    title: {
-      en: "Customers can see where their order is",
-      bn: "ক্রেতারা তাঁদের অর্ডার কোথায় আছে দেখতে পাবেন",
-    },
-    body: {
-      en: "On a customer's account page every order now shows where it has got to, which it did not show at all before — a cancelled order looked the same as a delivered one. On the order-tracking page they can now tell a confirmed order from one you have not looked at yet, instead of both saying the same thing.",
-      bn: "ক্রেতার অ্যাকাউন্ট পাতায় প্রতিটি অর্ডার এখন কোন অবস্থায় আছে তা দেখায় — আগে এটি একেবারেই দেখাত না, বাতিল হওয়া অর্ডার আর ডেলিভারি হওয়া অর্ডার একরকম দেখাত। অর্ডার ট্র্যাকিং পাতায় এখন নিশ্চিত করা অর্ডার আর আপনি এখনো দেখেননি এমন অর্ডারের পার্থক্য বোঝা যায়, আগে দুটোই একই কথা বলত।",
-    },
-  },
-  {
-    id: "2026-09-22-whatsapp-link-in-the-footer-works",
-    date: "2026-09-22",
-    version: "4.43.0",
-    tag: "fixed",
-    href: "/settings",
-    title: {
-      en: "Your WhatsApp link in the footer works now",
-      bn: "ফুটারের হোয়াটসঅ্যাপ লিংক এখন কাজ করে",
-    },
-    body: {
-      en: "The WhatsApp box in Settings asks for a number or a link, but if you gave it a number the footer link went nowhere — it landed on a “page not found” on your own shop. Give it a number in any form you like now, with or without the dashes or the 880, and the link opens a chat with you.",
-      bn: "সেটিংসের হোয়াটসঅ্যাপ ঘরে নম্বর বা লিংক — যেকোনোটি দেওয়া যায়, কিন্তু নম্বর দিলে ফুটারের লিংকটি কোথাও যেত না, আপনার নিজের দোকানেই “পেজ পাওয়া যায়নি” দেখাত। এখন যেভাবেই নম্বর লিখুন — ড্যাশসহ বা ছাড়া, ৮৮০ সহ বা ছাড়া — লিংকে চাপ দিলে আপনার সঙ্গেই চ্যাট খুলবে।",
-    },
-  },
-  {
-    id: "2026-09-22-premium-parts-are-labelled",
-    date: "2026-09-22",
-    version: "4.42.0",
-    tag: "improved",
-    href: "/settings?tab=customization",
-    title: {
-      en: "Premium parts are shown, not hidden",
-      bn: "প্রিমিয়ামের অংশগুলো লুকানো নয়, দেখানো হয়",
-    },
-    body: {
-      en: "When you add something to a page in Customization, the parts that come with Premium are listed too, marked “On the Premium plan”, so you can see what your shop could have. If your plan ever lapses, anything you already placed stays saved exactly as you left it — your shop simply stops showing it, and it comes back the day you are on Premium again.",
-      bn: "কাস্টমাইজেশনে কোনো পাতায় কিছু যোগ করার সময় প্রিমিয়ামের সঙ্গে আসা অংশগুলোও তালিকায় থাকে, “প্রিমিয়াম প্ল্যানে পাওয়া যায়” লেখা সহ — তাই আপনার দোকানে আর কী কী থাকতে পারত তা দেখতে পাবেন। প্ল্যানের মেয়াদ শেষ হয়ে গেলেও আগে বসানো জিনিস যেমন ছিল তেমনই সেভ থাকে — দোকানে শুধু দেখানো বন্ধ হয়, আর আবার প্রিমিয়ামে ফিরলেই সেটি ফিরে আসে।",
     },
   },
 ];
