@@ -147,8 +147,8 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     },
   },
   {
-    id: "2026-09-27-where-visitors-come-from",
-    date: "2026-09-27",
+    id: "2026-09-28-where-visitors-come-from",
+    date: "2026-09-28",
     version: "4.122.0",
     tag: "new",
     href: "/analytics",
@@ -162,8 +162,8 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     },
   },
   {
-    id: "2026-09-27-how-shoppers-give-their-district",
-    date: "2026-09-27",
+    id: "2026-09-28-how-shoppers-give-their-district",
+    date: "2026-09-28",
     version: "4.122.0",
     tag: "new",
     href: "/settings?tab=customization",
@@ -177,8 +177,8 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     },
   },
   {
-    id: "2026-09-27-analytics-sales-match-your-orders",
-    date: "2026-09-27",
+    id: "2026-09-28-analytics-sales-match-your-orders",
+    date: "2026-09-28",
     version: "4.122.0",
     tag: "fixed",
     href: "/analytics",
