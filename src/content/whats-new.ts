@@ -88,6 +88,21 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-09-28-download-your-analytics",
+    date: "2026-09-28",
+    version: "4.124.0",
+    tag: "new",
+    href: "/analytics",
+    title: {
+      en: "Download your analytics as an Excel file",
+      bn: "অ্যানালিটিক্স Excel ফাইলে ডাউনলোড করুন",
+    },
+    body: {
+      en: "The Download button on the Analytics page makes an Excel file of the section you are on, or of every section, for the days you picked, in English or Bangla. The numbers stay numbers, so you can sort and add them up. Top customers now show their full phone number on the page; the file hides part of it.",
+      bn: "অ্যানালিটিক্স পেজের ডাউনলোড বাটন আপনার বেছে নেওয়া দিনগুলোর জন্য এই অংশের, বা সব অংশের একটি Excel ফাইল তৈরি করে, ইংরেজি বা বাংলায়। সংখ্যাগুলো সংখ্যাই থাকে, তাই সাজানো আর যোগ করা যায়। শীর্ষ কাস্টমারদের পুরো ফোন নম্বর এখন পেজে দেখা যায়; ফাইলে এর কিছু অংশ লুকানো থাকে।",
+    },
+  },
+  {
     id: "2026-09-28-a-new-analytics-page",
     date: "2026-09-28",
     version: "4.123.0",
@@ -513,21 +528,6 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     body: {
       en: "On Premium, your home page can open with a video instead of pictures: paste a link from YouTube, Facebook or Vimeo — any normal link works, including a Shorts or a share link. Shoppers see your cover picture and a round, solid play button — and so does your editor — and nothing is loaded from YouTube until somebody presses it, so the page stays fast and no shopper is reported to anyone who never watched. Reels and other tall videos have a shape of their own so they are not squeezed into a wide box.",
       bn: "প্রিমিয়ামে আপনার হোম পেজ ছবির বদলে একটি ভিডিও দিয়ে শুরু হতে পারে: ইউটিউব, ফেসবুক বা ভিমিও থেকে একটি লিংক বসান — শর্টস বা শেয়ার লিংকসহ সাধারণ যেকোনো লিংকই চলবে। ক্রেতারা আপনার কভার ছবি আর একটি গোল, ভরাট প্লে বোতাম দেখবেন — এডিটরেও তা-ই দেখায় —, আর কেউ সেটি না চাপা পর্যন্ত ইউটিউব থেকে কিছুই লোড হয় না — তাই পাতা দ্রুত থাকে আর যে ক্রেতা ভিডিও দেখেননি তাঁর কথা কোথাও যায় না। রিলসের মতো লম্বা ভিডিওর জন্য আলাদা আকার আছে, তাই সেগুলো চওড়া বাক্সে চেপে বসে না।",
-    },
-  },
-  {
-    id: "2026-09-22-one-announcement-bar",
-    date: "2026-09-22",
-    version: "4.108.0",
-    tag: "improved",
-    href: "/settings?tab=customization",
-    title: {
-      en: "Up to three messages in your top bar",
-      bn: "টপ বারে তিনটি পর্যন্ত বার্তা",
-    },
-    body: {
-      en: "Your top bar holds up to three messages — taking turns on a computer and moving along one line on a phone — each with its own link, the words to tap and a small icon, and a message with a link but no words to tap makes the whole bar take shoppers there. Switch on Track order and Help to show them at the left of the bar on a computer and at the bottom of the menu on a phone. Links now open in your shopper's own language, and All products opens your page of every product.",
-      bn: "আপনার টপ বারে তিনটি পর্যন্ত বার্তা রাখা যায় — কম্পিউটারে পালা করে, ফোনে এক লাইনে চলমান — প্রতিটির নিজস্ব লিংক, চাপ দেওয়ার লেখা আর ছোট একটি আইকন; আর লিংক আছে কিন্তু চাপ দেওয়ার লেখা নেই এমন বার্তায় পুরো বারটিই ক্রেতাকে সেখানে নিয়ে যায়। অর্ডার ট্র্যাক ও সাহায্য চালু করলে কম্পিউটারে বারের বাঁ পাশে আর ফোনে মেনুর নিচে সেগুলো দেখায়। লিংক এখন ক্রেতার নিজের ভাষায় খোলে, আর সব পণ্য খোলে আপনার সব পণ্যের পাতা।",
     },
   },
 ];
