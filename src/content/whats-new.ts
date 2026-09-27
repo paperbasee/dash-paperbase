@@ -88,6 +88,65 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-09-28-a-new-analytics-page",
+    date: "2026-09-28",
+    version: "4.123.0",
+    tag: "new",
+    href: "/analytics",
+    title: {
+      en: "A new Analytics page",
+      bn: "নতুন অ্যানালিটিক্স পেজ",
+    },
+    body: {
+      en: "Pick any days and compare them with the days before or the same days last year. The Overview tells you in one sentence how you did, what moved it and which orders need a look, and each part has its own tab: Sales, Traffic, Products, Districts, Delivery, Customers and Live. On the Basic plan, Overview and Sales are open.",
+      bn: "যেকোনো দিন বেছে নিন, আর তুলনা করুন আগের দিনগুলোর সাথে বা গত বছরের একই দিনগুলোর সাথে। সারসংক্ষেপ এক বাক্যে জানায় কেমন গেল, কী পার্থক্য গড়েছে আর কোন অর্ডার একবার দেখা দরকার; প্রতিটি অংশের নিজের ট্যাব আছে: বিক্রি, ভিজিটর, পণ্য, জেলা, ডেলিভারি, কাস্টমার আর লাইভ। বেসিক প্ল্যানে সারসংক্ষেপ আর বিক্রি খোলা থাকে।",
+    },
+  },
+  {
+    id: "2026-09-28-your-orders-on-a-map",
+    date: "2026-09-28",
+    version: "4.123.0",
+    tag: "new",
+    href: "/analytics",
+    title: {
+      en: "Your orders on a map of Bangladesh",
+      bn: "বাংলাদেশের মানচিত্রে আপনার অর্ডার",
+    },
+    body: {
+      en: "The Districts tab shows the eight divisions on a map, darker where you get more orders, sales or deliveries. Tap a division to see its districts.",
+      bn: "জেলা ট্যাবে মানচিত্রে আটটি বিভাগ দেখা যায়; যেখানে অর্ডার, বিক্রি বা ডেলিভারি বেশি, সেখানে রং গাঢ়। কোনো বিভাগে চাপলে তার জেলাগুলো দেখাবে।",
+    },
+  },
+  {
+    id: "2026-09-28-what-shoppers-search-for",
+    date: "2026-09-28",
+    version: "4.123.0",
+    tag: "new",
+    href: "/analytics",
+    title: {
+      en: "See what shoppers search for",
+      bn: "দেখুন ক্রেতারা কী খোঁজেন",
+    },
+    body: {
+      en: "Searches on your shop are now counted. The Traffic tab lists what shoppers searched for, how many of them bought, and the searches that found nothing, so you know what to add.",
+      bn: "আপনার দোকানে সার্চ এখন গোনা হয়। ভিজিটর ট্যাবে দেখা যায় ক্রেতারা কী খুঁজেছেন, তাঁদের কতজন কিনেছেন, আর কোন সার্চে কিছুই পাওয়া যায়নি, যাতে বুঝতে পারেন কী যোগ করবেন।",
+    },
+  },
+  {
+    id: "2026-09-28-the-dashboard-opens-lighter",
+    date: "2026-09-28",
+    version: "4.123.0",
+    tag: "improved",
+    title: {
+      en: "The dashboard opens a little lighter",
+      bn: "ড্যাশবোর্ড একটু হালকা হয়ে খোলে",
+    },
+    body: {
+      en: "Fonts now load only when a page needs them, so English pages no longer download the Bangla font.",
+      bn: "ফন্ট এখন শুধু দরকার হলেই আসে, তাই ইংরেজি পেজে আর বাংলা ফন্ট নামাতে হয় না।",
+    },
+  },
+  {
     id: "2026-09-27-where-visitors-come-from",
     date: "2026-09-27",
     version: "4.122.0",
@@ -469,66 +528,6 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     body: {
       en: "Your top bar holds up to three messages — taking turns on a computer and moving along one line on a phone — each with its own link, the words to tap and a small icon, and a message with a link but no words to tap makes the whole bar take shoppers there. Switch on Track order and Help to show them at the left of the bar on a computer and at the bottom of the menu on a phone. Links now open in your shopper's own language, and All products opens your page of every product.",
       bn: "আপনার টপ বারে তিনটি পর্যন্ত বার্তা রাখা যায় — কম্পিউটারে পালা করে, ফোনে এক লাইনে চলমান — প্রতিটির নিজস্ব লিংক, চাপ দেওয়ার লেখা আর ছোট একটি আইকন; আর লিংক আছে কিন্তু চাপ দেওয়ার লেখা নেই এমন বার্তায় পুরো বারটিই ক্রেতাকে সেখানে নিয়ে যায়। অর্ডার ট্র্যাক ও সাহায্য চালু করলে কম্পিউটারে বারের বাঁ পাশে আর ফোনে মেনুর নিচে সেগুলো দেখায়। লিংক এখন ক্রেতার নিজের ভাষায় খোলে, আর সব পণ্য খোলে আপনার সব পণ্যের পাতা।",
-    },
-  },
-  {
-    id: "2026-09-22-account-page-choices",
-    date: "2026-09-22",
-    version: "4.105.0",
-    tag: "new",
-    href: "/settings?tab=customization",
-    title: {
-      en: "A more personal account page for your customers",
-      bn: "ক্রেতাদের জন্য আরও ব্যক্তিগত অ্যাকাউন্ট পেজ",
-    },
-    body: {
-      en: "The page now opens on a welcome card: the customer's own picture, how you reach them, how long they have been a member, how many orders, reviews and saved things they have, and their newest order. Greet them by name, by the plain word, or leave the card out; list their orders as a list or as cards with pictures; and send an empty account to your shop rather than to nothing. They also see every review they have written, including the ones waiting for you or turned down, theirs to change or delete — on to begin with, so a review never looks lost.",
-      bn: "পেজটি এখন একটি স্বাগত কার্ড দিয়ে শুরু হয়: ক্রেতার নিজের ছবি, তাঁর সঙ্গে যোগাযোগের উপায়, কতদিন ধরে সদস্য, কতগুলো অর্ডার, রিভিউ ও সেভ করা জিনিস আছে, আর সর্বশেষ অর্ডার। নাম ধরে, শুধু শব্দটি দিয়ে স্বাগত জানান, নাকি কার্ডটিই বাদ দিন; অর্ডার তালিকা হিসেবে নাকি ছবিসহ কার্ড হিসেবে দেখান; আর খালি অ্যাকাউন্ট থেকে শূন্যতার বদলে দোকানে পাঠান। তাঁরা নিজেদের লেখা সব রিভিউও দেখেন, আপনার অপেক্ষায় থাকা বা ফিরিয়ে দেওয়াগুলোসহ, নিজেরাই বদলাতে বা মুছতে পারেন — শুরু থেকেই চালু, যাতে কোনো রিভিউ হারিয়ে গেছে মনে না হয়।",
-    },
-  },
-  {
-    id: "2026-09-22-integrations-cards",
-    date: "2026-09-22",
-    version: "4.103.0",
-    tag: "improved",
-    href: "/settings?tab=integrations",
-    title: {
-      en: "Integrations get a new look",
-      bn: "ইন্টিগ্রেশনের নতুন চেহারা",
-    },
-    body: {
-      en: "Settings → Integrations now shows a card for each service — Meta, TikTok and Steadfast — with one switch that turns the whole service off or on, after a warning. A card opens a pop-up listing every pixel or account with its own switch, where you can edit a pixel, and Disconnect now keeps its settings and only forgets its keys — Remove is what deletes. Google Analytics and more couriers are listed as coming soon, and the Steadfast setup steps are now in Bangla too.",
-      bn: "সেটিংস → ইন্টিগ্রেশনে এখন প্রতিটি সেবার — Meta, TikTok ও স্টেডফাস্ট — আলাদা কার্ড আছে, যার একটি সুইচ সতর্কবার্তার পর পুরো সেবাটি বন্ধ বা চালু করে। কার্ডে চাপ দিলে একটি পপ-আপে প্রতিটি পিক্সেল বা অ্যাকাউন্ট তার নিজের সুইচসহ দেখা যায়, সেখানে পিক্সেল সম্পাদনা করা যায়, আর বিচ্ছিন্ন করলে এখন সেটিংস রাখা থাকে, শুধু কী ভুলে যাওয়া হয় — মুছে ফেলে “মুছে ফেলুন”। Google Analytics ও আরও কুরিয়ার “শিগগিরই আসছে” হিসেবে দেখানো আছে, আর স্টেডফাস্ট সেটআপের ধাপগুলো এখন বাংলাতেও।",
-    },
-  },
-  {
-    id: "2026-09-22-when-a-sale-counts",
-    date: "2026-09-22",
-    version: "4.101.0",
-    tag: "new",
-    href: "/settings?tab=integrations",
-    title: {
-      en: "Choose when a sale counts for your ads",
-      bn: "বিজ্ঞাপনে কখন বিক্রি গোনা হবে, আপনিই ঠিক করুন",
-    },
-    body: {
-      en: "In Settings → Integrations you can now choose when a cash on delivery order counts as a sale on Meta and TikTok: as soon as it is placed, or only once you confirm it, so fake and refused orders stop teaching your ads the wrong buyers. bKash and Nagad orders always count when the customer submits the payment. The four event switches on each connection — Purchase, Initiate checkout, Add to cart and View content — now really turn those events on and off, and all four start switched on.",
-      bn: "সেটিংস → ইন্টিগ্রেশনে এখন ঠিক করতে পারবেন ক্যাশ অন ডেলিভারি অর্ডার Meta ও TikTok-এ কখন বিক্রি হিসেবে গোনা হবে: অর্ডার দেওয়ার সাথে সাথে, নাকি আপনি নিশ্চিত করলে — যাতে ভুয়া ও ফেরত হওয়া অর্ডার আপনার বিজ্ঞাপনকে ভুল ক্রেতা খুঁজতে না শেখায়। বিকাশ ও নগদ অর্ডার সবসময় ক্রেতা পেমেন্ট জমা দিলে গোনা হয়। প্রতিটি কানেকশনের চারটি ইভেন্ট সুইচ — ক্রয়, চেকআউট শুরু, কার্টে যোগ করা আর কনটেন্ট দেখা — এখন সত্যিই সেই ইভেন্টগুলো চালু ও বন্ধ করে, আর চারটিই চালু অবস্থায় শুরু হয়।",
-    },
-  },
-  {
-    id: "2026-09-22-payment-submitted-in-orders",
-    date: "2026-09-22",
-    version: "4.99.2",
-    tag: "improved",
-    href: "/orders",
-    title: {
-      en: "See which payments are waiting for you",
-      bn: "কোন পেমেন্ট আপনার যাচাইয়ের অপেক্ষায়, দেখুন",
-    },
-    body: {
-      en: "An order paid in advance by bKash or Nagad said Payment pending both before and after the customer sent the money. Now it says Payment submitted, in blue, once they have sent it and typed in the transaction ID, so you can see at a glance which orders are waiting for you to check. When you verify it, it says Confirmed as before — and the Verify payment card now says whether the money was sent by bKash or Nagad, so you check the right app.",
-      bn: "বিকাশ বা নগদে আগে পেমেন্টের অর্ডার ক্রেতা টাকা পাঠানোর আগে ও পরে — দুই সময়েই “পেমেন্ট মুলতুবি” দেখাত। এখন ক্রেতা টাকা পাঠিয়ে ট্রানজেকশন আইডি দিলে নীল রঙে “পেমেন্ট জমা হয়েছে” দেখায়, তাই কোন অর্ডারগুলো আপনার যাচাইয়ের অপেক্ষায় আছে তা এক নজরেই বোঝা যায়। পেমেন্ট যাচাই করলে আগের মতোই “নিশ্চিত” দেখাবে — আর যাচাইয়ের কার্ডে এখন লেখা থাকে টাকা বিকাশে নাকি নগদে পাঠানো হয়েছে, যাতে আপনি সঠিক অ্যাপে মিলিয়ে দেখতে পারেন।",
     },
   },
 ];
