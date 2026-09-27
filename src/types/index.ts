@@ -612,6 +612,8 @@ export interface ShippingZone {
   public_id: string;
   name: string;
   is_active: boolean;
+  /** The area the shop's checkout starts on; at most one per shop. */
+  is_default?: boolean;
   created_at: string;
   updated_at: string;
 }

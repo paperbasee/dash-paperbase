@@ -18,6 +18,7 @@ import type {
   ShippingZone,
 } from "@/types";
 import { useEnterNavigation } from "@/hooks/useEnterNavigation";
+import { pricedZoneIds } from "@/lib/shipping/priced-zones";
 import { useShippingZonesQuery } from "@/hooks/useShippingZonesQuery";
 import { useShippingMethodsQuery } from "@/hooks/useShippingMethodsQuery";
 import { useShippingRatesQuery } from "@/hooks/useShippingRatesQuery";
@@ -33,6 +34,8 @@ const multiSelectClass =
 type ZoneForm = {
   name: string;
   is_active: boolean;
+  /** The area the shop's checkout starts on; at most one per shop (API moves it). */
+  is_default: boolean;
 };
 
 type MethodForm = {
@@ -56,6 +59,7 @@ type RateForm = {
 const emptyZone: ZoneForm = {
   name: "",
   is_active: true,
+  is_default: false,
 };
 
 const emptyMethod: MethodForm = {
@@ -163,6 +167,20 @@ export default function ShippingPanel() {
     zones.forEach((x) => m.set(x.public_id, x));
     return m;
   }, [zones]);
+  // An area with no price is charged nothing at checkout; the list says so.
+  const pricedZones = useMemo(() => pricedZoneIds(methods, rates), [methods, rates]);
+
+  async function makeDefaultZone(z: ShippingZone) {
+    try {
+      await api.patch(`admin/shipping-zones/${z.public_id}/`, { is_default: true });
+      invalidateShippingQueries();
+    } catch (e) {
+      notify.error(e, {
+        title: tPages("toastTitleShippingSettingsNotSaved"),
+        fallbackMessage: tPages("toastDescShippingSettingsNotSaved"),
+      });
+    }
+  }
 
   function openNewZone() {
     setEditingZone("new");
@@ -173,6 +191,7 @@ export default function ShippingPanel() {
     setZoneForm({
       name: z.name,
       is_active: z.is_active,
+      is_default: Boolean(z.is_default),
     });
   }
 
@@ -215,6 +234,7 @@ export default function ShippingPanel() {
     const payload = {
       name: zoneForm.name.trim(),
       is_active: zoneForm.is_active,
+      is_default: zoneForm.is_default,
     };
     try {
       if (editingZone === "new") {
@@ -366,6 +386,23 @@ export default function ShippingPanel() {
               />
               {tCommon("active")}
             </label>
+            <label className="flex items-start gap-2 text-sm">
+              <input
+                type="checkbox"
+                className="form-checkbox mt-0.5"
+                checked={zoneForm.is_default}
+                onChange={(e) =>
+                  setZoneForm((f) => ({ ...f, is_default: e.target.checked }))
+                }
+                onKeyDown={handleKeyDown}
+              />
+              <span>
+                <span className="block">{tPages("shippingZoneDefaultLabel")}</span>
+                <span className="block text-xs text-muted-foreground">
+                  {tPages("shippingZoneDefaultHint")}
+                </span>
+              </span>
+            </label>
             <div className="flex gap-2">
               <Button
                 type="submit"
@@ -404,12 +441,25 @@ export default function ShippingPanel() {
                     <span className="text-xs text-muted-foreground">
                       {z.is_active ? tCommon("active") : tCommon("inactive")}
                     </span>
+                    {z.is_default ? (
+                      <span className="ml-2 rounded-tooltip bg-primary/15 px-2 py-0.5 text-xs font-medium text-primary">
+                        {tPages("shippingZoneDefaultBadge")}
+                      </span>
+                    ) : null}
                   </div>
                   <div className="text-xs text-muted-foreground">
                     {z.public_id}
                   </div>
+                  {z.is_active && !pricedZones.has(z.public_id) ? (
+                    <p className="mt-1 text-xs text-amber-700 dark:text-amber-400">{tPages("shippingZoneNoPrice")}</p>
+                  ) : null}
                 </div>
-                <div className="shrink-0 text-right text-sm">
+                <div className="flex shrink-0 flex-col items-end gap-1 text-right text-sm">
+                  {!z.is_default && z.is_active ? (
+                    <ClickableText onClick={() => makeDefaultZone(z)} className="text-sm">
+                      {tPages("shippingZoneMakeDefault")}
+                    </ClickableText>
+                  ) : null}
                   <ClickableText
                     variant="destructive"
                     onClick={() => del("zones", z.public_id)}
