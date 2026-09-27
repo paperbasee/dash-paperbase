@@ -108,7 +108,8 @@
     "groupSales": "Sales",
     "groupShoppers": "Shoppers",
     "coupons": "Discount codes",
-    "order_lookup": "Order tracking"
+    "order_lookup": "Order tracking",
+    "cart": "Cart"
   },
   "analyticsPage": {
     "metrics": {
@@ -1881,6 +1882,10 @@
         "order_lookup": {
           "label": "Order tracking",
           "description": "Let a shopper find their order with its number and the phone they ordered with — no account needed. Useful when your checkout does not ask for an email."
+        },
+        "cart": {
+          "label": "Cart",
+          "description": "Let shoppers put several products in a cart before checking out. Turn it off and every product is bought on its own with Order Now: no cart button, no cart icon, no cart page."
         }
       }
     },

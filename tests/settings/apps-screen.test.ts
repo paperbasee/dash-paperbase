@@ -56,9 +56,20 @@ describe("Settings → Apps", () => {
       "analytics",
       "support_tickets",
       "blog",
+      // A way of buying in the shop, with no page of its own (2026-09-27).
+      "cart",
       "wishlist",
       "coupons",
       "order_lookup",
     ]);
+  });
+});
+
+describe("the cart switch", () => {
+  it("is on for a shop that never touched it, like the shop reads it", async () => {
+    const { OPTIONAL_APP_IDS, OPT_IN_APP_IDS, APP_CONFIG } = await import("@/config/apps");
+    expect(OPTIONAL_APP_IDS).toContain("cart");
+    expect(OPT_IN_APP_IDS as readonly string[]).not.toContain("cart");
+    expect(APP_CONFIG.cart.href).toBeNull();
   });
 });

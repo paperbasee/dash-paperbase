@@ -17,6 +17,7 @@ import {
   Trash,
   Heart as HeartIcon,
   Search,
+  ShoppingCart,
   Award,
   Star,
   Phone as PhoneIcon,
@@ -227,6 +228,19 @@ export const APP_CONFIG: Record<string, AppConfig> = {
     countKey: null,
     parentId: null,
   },
+  cart: {
+    id: "cart",
+    label: "Cart",
+    icon: ShoppingCart,
+    description: "Let shoppers collect several products before checkout. Off, each product is bought on its own with Order Now",
+    essential: false,
+    // No dashboard page: it is a way of buying in the SHOP. Off, the shop draws
+    // no cart button, no cart icon and no cart page, and Order Now buys only
+    // the product it is on (owner, 2026-09-27).
+    href: null,
+    countKey: null,
+    parentId: null,
+  },
   order_lookup: {
     id: "order_lookup",
     label: "Order tracking",
@@ -290,6 +304,10 @@ export const OPTIONAL_APP_IDS = [
   "analytics",
   "support_tickets",
   "blog",
+  // On until switched off: every shop had a cart before the switch existed
+  // (2026-09-27), and the shop reads a missing flag as on too
+  // (shop-paperbase storefront/cart.py `enabled`).
+  "cart",
 ] as const;
 
 /** Collapsible “Catalog” group in the sidebar (Products + related). */
