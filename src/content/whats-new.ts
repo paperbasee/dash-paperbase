@@ -103,18 +103,18 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     },
   },
   {
-    id: "2026-09-27-districts-from-a-list",
+    id: "2026-09-27-how-shoppers-give-their-district",
     date: "2026-09-27",
     version: "4.122.0",
     tag: "new",
-    href: "/orders/new",
+    href: "/settings?tab=customization",
     title: {
-      en: "Districts are picked from a list",
-      bn: "জেলা এখন তালিকা থেকে বেছে নেওয়া হয়",
+      en: "Choose how shoppers give their district",
+      bn: "ক্রেতারা কীভাবে জেলা দেবেন, আপনি ঠিক করুন",
     },
     body: {
-      en: "At checkout, shoppers now choose their district from Bangladesh's 64, in your shop's language, so couriers always get a correct name. New order and order edit use the same list, and you can search it in English or Bangla.",
-      bn: "চেকআউটে ক্রেতারা এখন বাংলাদেশের ৬৪টি জেলা থেকে নিজের জেলা বেছে নেন, আপনার দোকানের ভাষায়, তাই কুরিয়ার সবসময় সঠিক নাম পায়। নতুন অর্ডার আর অর্ডার এডিটেও একই তালিকা, ইংরেজি বা বাংলায় খুঁজে নেওয়া যায়।",
+      en: "On the checkout page of your theme editor, choose whether shoppers type their district or search and pick it from Bangladesh's 64, in your shop's language. Picked from the list, couriers always get a correct name. New order and order edit use the same list, searchable in English or Bangla.",
+      bn: "থিম এডিটরের চেকআউট পেজে ঠিক করুন, ক্রেতারা জেলা লিখে দেবেন নাকি বাংলাদেশের ৬৪টি জেলা থেকে খুঁজে বেছে নেবেন, আপনার দোকানের ভাষায়। তালিকা থেকে বেছে নিলে কুরিয়ার সবসময় সঠিক নাম পায়। নতুন অর্ডার আর অর্ডার এডিটে একই তালিকা, ইংরেজি বা বাংলায় খোঁজা যায়।",
     },
   },
   {
