@@ -88,6 +88,20 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-09-27-old-storefront-cleared-away",
+    date: "2026-09-27",
+    version: "4.118.11",
+    tag: "improved",
+    title: {
+      en: "The old storefront's leftovers, cleared away",
+      bn: "পুরোনো স্টোরফ্রন্টের অবশিষ্ট অংশ সরানো হলো",
+    },
+    body: {
+      en: "The last pieces of the old storefront are gone from the platform, including a hidden settings block for a storefront address and secret that no shop used any more. Nothing changes in your dashboard or your shop.",
+      bn: "পুরোনো স্টোরফ্রন্টের শেষ অংশগুলো প্ল্যাটফর্ম থেকে সরানো হয়েছে, এর মধ্যে ছিল স্টোরফ্রন্টের ঠিকানা আর গোপন কোডের একটি লুকানো সেটিংস অংশ, যা আর কোনো দোকান ব্যবহার করত না। আপনার ড্যাশবোর্ড বা দোকানে কিছুই বদলায়নি।",
+    },
+  },
+  {
     id: "2026-09-27-shelf-cards-for-every-shop",
     date: "2026-09-27",
     version: "4.118.10",
@@ -517,20 +531,6 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     body: {
       en: "When you add something to a page in Customization, the parts that come with Premium are listed too, marked “On the Premium plan”, so you can see what your shop could have. If your plan ever lapses, anything you already placed stays saved exactly as you left it — your shop simply stops showing it, and it comes back the day you are on Premium again.",
       bn: "কাস্টমাইজেশনে কোনো পাতায় কিছু যোগ করার সময় প্রিমিয়ামের সঙ্গে আসা অংশগুলোও তালিকায় থাকে, “প্রিমিয়াম প্ল্যানে পাওয়া যায়” লেখা সহ — তাই আপনার দোকানে আর কী কী থাকতে পারত তা দেখতে পাবেন। প্ল্যানের মেয়াদ শেষ হয়ে গেলেও আগে বসানো জিনিস যেমন ছিল তেমনই সেভ থাকে — দোকানে শুধু দেখানো বন্ধ হয়, আর আবার প্রিমিয়ামে ফিরলেই সেটি ফিরে আসে।",
-    },
-  },
-  {
-    id: "2026-09-22-promotions-that-start-and-stop",
-    date: "2026-09-22",
-    version: "4.40.0",
-    tag: "new",
-    title: {
-      en: "Promotions that start and stop on their own",
-      bn: "নিজে থেকেই শুরু আর শেষ হওয়া প্রোমোশন",
-    },
-    body: {
-      en: "On Premium, a promotion band with a heading, a message and a button can be given a start and an end in Bangladesh time, and it appears and disappears by itself — no waking up at midnight to take a sale down. Switch on the countdown and shoppers see the time left ticking. It vanishes the second it ends, even for someone already sitting on the page.",
-      bn: "প্রিমিয়াম প্ল্যানে শিরোনাম, বার্তা আর বোতামসহ প্রোমোশন ব্যান্ডে বাংলাদেশ সময় অনুযায়ী শুরু আর শেষের সময় দেওয়া যায় — সেটি নিজে থেকেই আসবে আর চলে যাবে, সেল বন্ধ করতে মাঝরাতে জেগে থাকতে হবে না। কাউন্টডাউন চালু করলে ক্রেতারা বাকি সময় কমতে দেখবেন। শেষ হওয়ার সঙ্গে সঙ্গেই এটি চলে যায় — যিনি আগে থেকেই পাতায় আছেন তাঁর কাছেও।",
     },
   },
 ];
