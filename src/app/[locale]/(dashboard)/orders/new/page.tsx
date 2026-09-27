@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { FormField } from "@/components/ui/form-field";
+import { DistrictPicker } from "@/components/orders/DistrictPicker";
 import { numberTextClass } from "@/lib/number-font";
 import { cn } from "@/lib/utils";
 import { useNewOrder } from "./useNewOrder";
@@ -239,16 +240,11 @@ export default function NewOrderPage() {
                     htmlFor="order-district"
                     error={fieldErrors.district}
                   >
-                    <Input
+                    <DistrictPicker
                       id="order-district"
-                      type="text"
-                      required
                       value={form.district}
-                      onChange={(e) => updateForm({ district: e.target.value })}
-                      placeholder={tPages("orderFormDistrictPlaceholder")}
-                      aria-invalid={!!fieldErrors.district}
-                      className={cn(fieldErrors.district && "border-destructive")}
-                      onKeyDown={handleKeyDown}
+                      onChange={(district) => updateForm({ district })}
+                      invalid={!!fieldErrors.district}
                     />
                   </FormField>
                 </div>

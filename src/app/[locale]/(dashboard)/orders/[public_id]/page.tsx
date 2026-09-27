@@ -47,6 +47,7 @@ import type {
 import { Button } from "@/components/ui/button";
 import { ClickableText } from "@/components/ui/clickable-text";
 import { Input } from "@/components/ui/input";
+import { DistrictPicker } from "@/components/orders/DistrictPicker";
 import { Select } from "@/components/ui/select";
 import {
   Card,
@@ -1306,16 +1307,17 @@ export default function OrderDetailPage() {
                     />
                   </div>
                   <div>
-                    <label className="mb-1 block text-xs font-medium text-muted-foreground">
+                    <label
+                      htmlFor="order-edit-district"
+                      className="mb-1 block text-xs font-medium text-muted-foreground"
+                    >
                       {tPages("orderFormDistrict")}
                       <span className="ml-0.5 text-destructive">*</span>
                     </label>
-                    <Input
+                    <DistrictPicker
+                      id="order-edit-district"
                       value={form.district}
-                      onChange={(e) =>
-                        setForm({ ...form, district: e.target.value })
-                      }
-                      onKeyDown={handleKeyDown}
+                      onChange={(district) => setForm({ ...form, district })}
                     />
                   </div>
                 </div>

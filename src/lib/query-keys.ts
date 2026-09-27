@@ -214,6 +214,8 @@ export function trashQueryKey(page: number) {
 
 export const couriersQueryKey = ["couriers"] as const;
 
+export const districtsQueryKey = ["districts"] as const;
+
 export const checkoutSettingsQueryKey = ["checkout-settings"] as const;
 
 
