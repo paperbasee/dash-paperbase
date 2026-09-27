@@ -88,9 +88,24 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-09-27-more-shoppers-in-abandoned-checkouts",
+    date: "2026-09-27",
+    version: "4.119.3",
+    tag: "improved",
+    href: "/orders/abandoned",
+    title: {
+      en: "More shoppers reach Abandoned checkouts",
+      bn: "অসম্পূর্ণ চেকআউটে আরও বেশি ক্রেতা আসবেন",
+    },
+    body: {
+      en: "A shopper who typed their phone number and then locked their phone, switched apps or closed the page was sometimes missed. They are now listed too, so you can call them.",
+      bn: "যে ক্রেতা ফোন নম্বর লিখে তারপর ফোন লক করতেন, অন্য অ্যাপে যেতেন বা পেজ বন্ধ করতেন, তাঁরা কখনো কখনো বাদ পড়ে যেতেন। এখন তাঁরাও তালিকায় আসবেন, তাই আপনি তাঁদের ফোন করতে পারবেন।",
+    },
+  },
+  {
     id: "2026-09-27-delivery-outside-dhaka-charged-again",
     date: "2026-09-27",
-    version: "4.119.2",
+    version: "4.119.3",
     tag: "fixed",
     href: "/settings?tab=shipping",
     title: {
@@ -105,7 +120,7 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
     id: "2026-09-27-a-default-delivery-area",
     date: "2026-09-27",
-    version: "4.119.2",
+    version: "4.119.3",
     tag: "new",
     href: "/settings?tab=shipping",
     title: {
@@ -120,7 +135,7 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
     id: "2026-09-27-turn-the-cart-off",
     date: "2026-09-27",
-    version: "4.119.2",
+    version: "4.119.3",
     tag: "new",
     href: "/settings?tab=apps",
     title: {
@@ -135,7 +150,7 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
     id: "2026-09-27-your-shop-in-your-language",
     date: "2026-09-27",
-    version: "4.119.2",
+    version: "4.119.3",
     tag: "fixed",
     title: {
       en: "Your shop opens in the language you chose",
@@ -149,7 +164,7 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
     id: "2026-09-27-convert-an-abandoned-checkout",
     date: "2026-09-27",
-    version: "4.119.2",
+    version: "4.119.3",
     tag: "new",
     href: "/orders/abandoned",
     title: {
@@ -164,7 +179,7 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
     id: "2026-09-27-closed-while-a-plan-is-unpaid",
     date: "2026-09-27",
-    version: "4.119.2",
+    version: "4.119.3",
     tag: "improved",
     title: {
       en: "A shop closes while its plan is unpaid",
@@ -516,21 +531,6 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     body: {
       en: "The Category page in your editor is real now: the path back up, three shapes for the heading, the product count, two, three or four across, and what an empty category says. Shoppers can sort it — newest, price, name — and narrow it by the brands, sizes and colours that category actually has, either from a panel that slides in over the page or a rail beside the grid. A long category can end in numbered pages or a Load more button that keeps the shopper where they are.",
       bn: "এডিটরের ক্যাটাগরি পেজটি এখন সত্যিকারের: উপরে ফেরার পথ, শিরোনামের তিন রকম চেহারা, পণ্যের সংখ্যা, সারিতে দুই-তিন-চারটি, আর ক্যাটাগরি খালি থাকলে কী লেখা থাকবে। ক্রেতারা সাজিয়ে নিতে পারেন — নতুন, দাম, নাম — আর ওই ক্যাটাগরিতে সত্যিই আছে এমন ব্র্যান্ড, মাপ ও রঙ দিয়ে ছেঁকে নিতে পারেন, পাশ থেকে ভেসে ওঠা প্যানেলে নয়তো গ্রিডের পাশের সারিতে। লম্বা ক্যাটাগরি শেষ হতে পারে নম্বর দেওয়া পাতায়, নয়তো “আরও দেখুন” বোতামে যা ক্রেতাকে যেখানে আছেন সেখানেই রাখে।",
-    },
-  },
-  {
-    id: "2026-09-22-a-promotion-with-a-picture",
-    date: "2026-09-22",
-    version: "4.62.0",
-    tag: "improved",
-    href: "/settings?tab=customization",
-    title: {
-      en: "Your promotion can carry a picture",
-      bn: "প্রোমোশনে এখন ছবি দেওয়া যাবে",
-    },
-    body: {
-      en: "A promotion was a coloured band with words on it. Now it comes three ways — words on a band, a picture beside them, or a picture behind them with your words over it — and you can add a small line above the headline, like “Limited time”. The countdown, the start and end times and everything else stay exactly where they were.",
-      bn: "আগে প্রোমোশন ছিল শুধু রঙিন ব্যান্ডে কিছু লেখা। এখন তিনভাবে দেখানো যায় — ব্যান্ডে শুধু লেখা, লেখার পাশে ছবি, কিংবা লেখার পেছনে ছবি — আর শিরোনামের উপরে ছোট একটি লাইনও দেওয়া যায়, যেমন “সীমিত সময়”। কাউন্টডাউন, শুরু-শেষের সময় আর বাকি সবকিছু আগের জায়গাতেই আছে।",
     },
   },
 ];
