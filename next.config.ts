@@ -118,6 +118,11 @@ const nextConfig: NextConfig = {
   env: {
     NEXT_PUBLIC_BUILD_ID: BUILD_ID,
   },
+  // No early "Link: rel=preload" headers. The stylesheet is the first thing in
+  // every page's <head>, so the header wins nothing -- and on the dashboard,
+  // whose first screen waits for the sign-in, the browser reported the
+  // preloaded stylesheet as unused.
+  reactMaxHeadersLength: 0,
   experimental: {
     optimizePackageImports: [
       "lucide-react",

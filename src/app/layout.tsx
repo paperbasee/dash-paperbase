@@ -8,10 +8,19 @@ import "./globals.css";
 import { isTurnstileDisabled } from "@/lib/turnstile-env";
 import { CORE_THEME_COOKIE_KEY } from "@/lib/theme";
 
+/**
+ * The dashboard's own faces are not preloaded. Its first screen draws no text
+ * until the sign-in is checked, so a preload always lands before anything uses
+ * it and the browser warns that it went unused. Without the preload the files
+ * are fetched with the first text and kept in the browser's cache after that;
+ * the Bangla face is fetched only where Bangla text is drawn (its
+ * unicode-range), which spares every English page the download.
+ */
 const poppins = Poppins({
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
   display: "swap",
+  preload: false,
 });
 
 /**
@@ -60,6 +69,7 @@ const notoSansBengali = Noto_Sans_Bengali({
   weight: ["400", "500", "600", "700"],
   variable: "--font-noto-sans-bengali",
   display: "swap",
+  preload: false,
 });
 
 export const metadata: Metadata = {
