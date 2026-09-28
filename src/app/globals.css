@@ -739,14 +739,6 @@ input.font-numbers-date-value::placeholder {
     transform: scale(1.6);
   }
 }
-@keyframes pb-sheen {
-  from {
-    left: -50%;
-  }
-  to {
-    left: 120%;
-  }
-}
 @keyframes pb-live {
   50% {
     box-shadow: 0 0 0 6px transparent;
@@ -849,21 +841,6 @@ input.font-numbers-date-value::placeholder {
     border: 2px solid currentColor;
     opacity: 0;
     animation: pb-ring 1.4s 0.2s cubic-bezier(0.2, 0.8, 0.2, 1) 2;
-  }
-  .pb-sheen {
-    position: relative;
-    overflow: hidden;
-  }
-  .pb-sheen::after {
-    content: "";
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    width: 40%;
-    left: -50%;
-    background: linear-gradient(100deg, transparent, rgb(255 255 255 / 0.5), transparent);
-    animation: pb-sheen 1.6s ease-in-out infinite;
-    pointer-events: none;
   }
   .pb-live-dot {
     box-shadow: 0 0 0 3px hsl(var(--accent-green) / 0.2);

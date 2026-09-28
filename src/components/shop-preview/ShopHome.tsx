@@ -51,7 +51,16 @@ type Props = {
   /** The owner's number, once the contact step is reached. */
   contact: string | null;
   facebook: boolean;
+  /** While setup's last saves land: whether the header, and the rest of the page, are in yet. */
+  built?: { header: boolean; page: boolean };
 };
+
+/**
+ * A part of the page not built yet, while setup finishes (owner's pick, 2026-09-29: "the shop
+ * builds itself"): blurred and faded, sharpening as its step lands.
+ */
+export const UNBUILT = "blur-[5px] grayscale opacity-40";
+const BUILDS = "transition-[filter,opacity] duration-700 ease-out";
 
 /** The theme's `.band`: the page's content column. */
 function Band({ phone, className, children }: { phone: boolean; className?: string; children: ReactNode }) {
@@ -185,7 +194,7 @@ function ProductBand({
   );
 }
 
-export function ShopHome({ kind, name, phone, contact, facebook }: Props) {
+export function ShopHome({ kind, name, phone, contact, facebook, built }: Props) {
   const t = useTranslations("shopPreview");
   const locale = useLocale();
   const nav = [1, 2, 3, 4, 5].map((i) => t(`kinds.${kind}.nav${i}`));
@@ -199,7 +208,12 @@ export function ShopHome({ kind, name, phone, contact, facebook }: Props) {
   return (
     <div>
       {/* ---- Header -------------------------------------------------------------------- */}
-      <header className="border-b border-[var(--sw-border)] bg-[var(--sw-header)] text-[var(--sw-header-fg)] transition-colors duration-500">
+      <header
+        className={cn(
+          "border-b border-[var(--sw-border)] bg-[var(--sw-header)] text-[var(--sw-header-fg)]",
+          built ? cn(BUILDS, !built.header && UNBUILT) : "transition-colors duration-500"
+        )}
+      >
         {phone ? (
           <div className="flex h-14 items-center gap-3 px-4">
             <ListIcon className="size-6 shrink-0" />
@@ -235,6 +249,8 @@ export function ShopHome({ kind, name, phone, contact, facebook }: Props) {
         )}
       </header>
 
+      {/* Everything under the header: the last part to come in while setup finishes. */}
+      <div className={built ? cn(BUILDS, !built.page && UNBUILT) : undefined}>
       {/* ---- Pictures (banner_slider) -------------------------------------------------- */}
       <div className={cn("relative overflow-hidden bg-[var(--sw-muted)]", phone ? "h-[460px]" : "h-[540px]")}>
         <Photo key={kind} src={heroPhoto(kind)} className="pb-drift absolute inset-0" />
@@ -527,6 +543,7 @@ export function ShopHome({ kind, name, phone, contact, facebook }: Props) {
           © {digits(String(year))} {name}. {t("rights")}
         </p>
       </footer>
+      </div>
     </div>
   );
 }

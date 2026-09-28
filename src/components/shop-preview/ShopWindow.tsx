@@ -5,7 +5,7 @@ import { SocialMark } from "@/components/SocialMark";
 import type { PaletteTokens } from "@/lib/theme-editor/palettes";
 import { cn } from "@/lib/utils";
 
-import { ShopHome } from "./ShopHome";
+import { ShopHome, UNBUILT } from "./ShopHome";
 import type { ShopKind } from "./samples";
 
 /** The width a computer's page is drawn at -- a real laptop's; `ScaleToFit` shrinks it to fit. */
@@ -67,6 +67,7 @@ function lookVars(tokens: PaletteTokens | null | undefined): CSSProperties {
 export function BrowserFrame({
   hostname,
   hostnameFlashKey,
+  addressIn = true,
   device = "computer",
   fill = false,
   className,
@@ -75,6 +76,8 @@ export function BrowserFrame({
   hostname: string;
   /** Changing it flashes the address bar green: a new address was just given. */
   hostnameFlashKey?: string | number;
+  /** False while setup finishes and the address is not open yet: it types itself in when it is. */
+  addressIn?: boolean;
   device?: ShopDevice;
   fill?: boolean;
   className?: string;
@@ -118,8 +121,18 @@ export function BrowserFrame({
             hostnameFlashKey !== undefined && "pb-flash"
           )}
         >
-          <Lock className="size-3.5 shrink-0 text-[#15803d]" aria-hidden />
-          <span className="truncate">{hostname}</span>
+          <Lock
+            className={cn("size-3.5 shrink-0 transition-colors duration-500", addressIn ? "text-[#15803d]" : "text-[#94a3b8]")}
+            aria-hidden
+          />
+          <span
+            className={cn(
+              "truncate transition-[max-width] duration-700 ease-[steps(18)]",
+              addressIn ? "max-w-[40ch]" : "max-w-0"
+            )}
+          >
+            {hostname}
+          </span>
         </span>
         {phone ? null : <span className="w-[52px]" aria-hidden />}
       </div>
@@ -145,6 +158,7 @@ export function ShopWindow({
   hostnameFlashKey,
   device = "computer",
   fill = false,
+  building,
   className,
 }: {
   name: string;
@@ -159,12 +173,26 @@ export function ShopWindow({
   hostnameFlashKey?: string | number;
   device?: ShopDevice;
   fill?: boolean;
+  /**
+   * While setup finishes: how many of its last saves have landed (0 to 3). The shop builds itself
+   * as they do -- the phone bar with the first, the address and header with the second, the rest
+   * of the page with the third. Left out, the shop is whole.
+   */
+  building?: number;
   className?: string;
 }) {
   const phone = device === "phone";
+  const built = building === undefined ? undefined : { header: building >= 2, page: building >= 3 };
 
   return (
-    <BrowserFrame hostname={hostname} hostnameFlashKey={hostnameFlashKey} device={device} fill={fill} className={className}>
+    <BrowserFrame
+      hostname={hostname}
+      hostnameFlashKey={hostnameFlashKey}
+      addressIn={building === undefined || building >= 2}
+      device={device}
+      fill={fill}
+      className={className}
+    >
       <div
         className="absolute inset-0 bg-[var(--sw-bg)] text-[var(--sw-fg)] transition-colors duration-500"
         style={lookVars(tokens)}
@@ -172,17 +200,20 @@ export function ShopWindow({
         <div className="scrollbar-hide h-full overflow-y-auto overscroll-contain">
           <div
             className={cn(
-              "bg-[var(--sw-brand)] text-center text-[var(--sw-brand-fg)] transition-colors duration-500",
+              "bg-[var(--sw-brand)] text-center text-[var(--sw-brand-fg)]",
+              building === undefined
+                ? "transition-colors duration-500"
+                : cn("transition-[filter,opacity] duration-700 ease-out", building < 1 && UNBUILT),
               phone ? "px-4 py-2 text-[11px]" : "py-2.5 text-[13px]"
             )}
           >
             {announcement}
           </div>
-          <ShopHome kind={kind} name={name} phone={phone} contact={contact} facebook={facebook} />
+          <ShopHome kind={kind} name={name} phone={phone} contact={contact} facebook={facebook} built={built} />
         </div>
 
         {/* Over the page, not in it: it stays in the corner as the page scrolls, as the shop's does. */}
-        {whatsapp ? (
+        {whatsapp && (building === undefined || building >= 3) ? (
           <span
             className={cn(
               "pb-pop absolute flex items-center justify-center rounded-full bg-[#25d366] text-white shadow-[0_8px_20px_-6px_rgb(0_0_0/0.35)]",

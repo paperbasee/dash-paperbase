@@ -17,8 +17,8 @@ import { PreviewPanel, SETUP_COLUMNS, SetupPreview } from "./SetupShell";
 import { TickMark } from "./steps";
 import type { FinishTick, SetupState } from "./useSetup";
 
-/** The last saves, each ticked as it lands, and a line filling as they do. */
-function FinishSteps({ setup, onDark = false }: { setup: SetupState; onDark?: boolean }) {
+/** The last saves, each ticked as it lands, and a line filling as they do: a phone's, with no panel. */
+function FinishSteps({ setup }: { setup: SetupState }) {
   const t = useTranslations("auth.onboarding");
   const lines: { key: FinishTick; words: string }[] = [
     { key: "contact", words: t("tickContact") },
@@ -39,20 +39,18 @@ function FinishSteps({ setup, onDark = false }: { setup: SetupState; onDark?: bo
               key={line.key}
               className={cn(
                 "flex items-center gap-3 text-[13.5px] transition-colors duration-300",
-                state === "done"
-                  ? onDark ? "text-white" : "text-foreground"
-                  : onDark ? "text-white/55" : "text-muted-foreground"
+                state === "done" ? "text-foreground" : "text-muted-foreground"
               )}
             >
-              <TickMark state={setup.error && state === "now" ? "fail" : state} onDark={onDark} />
+              <TickMark state={setup.error && state === "now" ? "fail" : state} />
               <span className="truncate">{line.words}</span>
             </li>
           );
         })}
       </ul>
-      <div className={cn("mt-5 h-[3px] overflow-hidden rounded-full", onDark ? "bg-white/10" : "bg-border")}>
+      <div className="mt-5 h-[3px] overflow-hidden rounded-full bg-border">
         <div
-          className={cn("h-full transition-[width] duration-700 ease-out", onDark ? "bg-white" : "bg-foreground")}
+          className="h-full bg-foreground transition-[width] duration-700 ease-out"
           style={{ width: `${(done / lines.length) * 100}%` }}
         />
       </div>
@@ -218,6 +216,20 @@ export function FinishScreen({ setup }: { setup: SetupState }) {
     setCelebrating(true);
     window.setTimeout(() => setCelebrating(false), 2800);
   };
+  // The shop builds itself as the last saves land (owner's pick of three, 2026-09-29).
+  const stage = (["contact", "address", "dashboard"] as const).filter((key) => setup.ticks[key] === "done").length;
+  const working = (["contact", "address", "dashboard"] as const).find((key) => setup.ticks[key] === "now");
+  const caption = setup.error
+    ? t("finishFailed")
+    : working === "contact"
+      ? t("tickContact")
+      : working === "address"
+        ? setup.shownHostname
+          ? t("tickAddress", { hostname: setup.shownHostname })
+          : t("openingShop")
+        : working === "dashboard"
+          ? t("tickDashboard")
+          : t("readyTitle", { name });
   const tokens = setup.paletteTokens;
   const confettiColors = useMemo(
     () => [tokens?.primary ?? "#0f172a", "#f5c451", "#ffffff", tokens?.muted ?? "#e7e5e0", tokens?.accent ?? "#0f172a"],
@@ -317,9 +329,25 @@ export function FinishScreen({ setup }: { setup: SetupState }) {
               ) : null}
             </>
           ) : (
-            <div className="absolute inset-0 flex items-center justify-center bg-[#141414]/55 p-10 backdrop-blur-[3px]">
-              <div className="pb-rise w-full max-w-[24rem] rounded-card bg-[#141414]/85 px-7 py-6 ring-1 ring-white/10">
-                <FinishSteps setup={setup} onDark />
+            // One line at the foot while the shop builds itself: the save under way, and how far.
+            <div className="pointer-events-none absolute inset-x-0 bottom-7 flex justify-center px-10">
+              <div
+                role="status"
+                aria-live="polite"
+                className="pb-rise flex items-center gap-3 rounded-full bg-[#141414]/85 py-2.5 pl-4 pr-5 text-[13px] text-white shadow-[0_16px_40px_-12px_rgb(0_0_0/0.6)] ring-1 ring-white/10 backdrop-blur"
+              >
+                {setup.error ? (
+                  <span className="size-2 rounded-full bg-destructive" aria-hidden />
+                ) : (
+                  <span className="size-3 animate-spin rounded-full border-[1.5px] border-white/20 border-t-white" aria-hidden />
+                )}
+                <span key={caption} className="pb-rise">{caption}</span>
+                <span className="h-[3px] w-16 overflow-hidden rounded-full bg-white/15" aria-hidden>
+                  <span
+                    className="block h-full rounded-full bg-white transition-[width] duration-700 ease-out"
+                    style={{ width: `${(stage / 3) * 100}%` }}
+                  />
+                </span>
               </div>
             </div>
           )
@@ -329,7 +357,7 @@ export function FinishScreen({ setup }: { setup: SetupState }) {
           live ? (
             <LiveShop setup={setup} device={device} onShown={launch} />
           ) : (
-            <SetupPreview setup={setup} device={device} fill className={setup.error ? undefined : "pb-sheen"} />
+            <SetupPreview setup={setup} device={device} fill building={stage} />
           )
         }
       </PreviewPanel>

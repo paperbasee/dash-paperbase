@@ -32,24 +32,15 @@ function Spinner({ className }: { className?: string }) {
 }
 
 /** A round tick that pops in; a spinning ring while working; an empty ring before. */
-function TickMark({
-  state,
-  tone = "ok",
-  onDark = false,
-}: {
-  state: "todo" | "now" | "done" | "fail";
-  tone?: "ok" | "ink";
-  /** On the shop's dark panel, whatever the dashboard's own theme. */
-  onDark?: boolean;
-}) {
+function TickMark({ state, tone = "ok" }: { state: "todo" | "now" | "done" | "fail"; tone?: "ok" | "ink" }) {
   return (
     <span
       className={cn(
         "flex size-5 shrink-0 items-center justify-center rounded-full border-[1.5px] text-white transition-all duration-300",
-        state === "todo" && (onDark ? "border-white/20" : "border-border"),
-        state === "now" && (onDark ? "animate-spin border-white/20 border-t-white" : "animate-spin border-border border-t-foreground"),
+        state === "todo" && "border-border",
+        state === "now" && "animate-spin border-border border-t-foreground",
         state === "done" && cn("pb-pop", tone === "ok" ? "border-[hsl(var(--accent-green))] bg-[hsl(var(--accent-green))]" : "border-foreground bg-foreground text-background"),
-        state === "fail" && (onDark ? "border-dashed border-white/30" : "border-dashed border-border-hover")
+        state === "fail" && "border-dashed border-border-hover"
       )}
       aria-hidden
     >

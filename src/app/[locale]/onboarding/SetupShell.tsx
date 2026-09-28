@@ -40,11 +40,14 @@ export function SetupPreview({
   setup,
   device,
   fill,
+  building,
   className,
 }: {
   setup: SetupState;
   device?: ShopDevice;
   fill?: boolean;
+  /** While setup finishes: how many of its last saves have landed (ShopWindow's `building`). */
+  building?: number;
   className?: string;
 }) {
   const t = useTranslations("shopPreview");
@@ -61,6 +64,7 @@ export function SetupPreview({
       className={className}
       device={device}
       fill={fill}
+      building={building}
       name={setup.shopName.trim() || t("yourShop")}
       hostname={setup.shownHostname || "…"}
       hostnameFlashKey={setup.shownHostname || undefined}
