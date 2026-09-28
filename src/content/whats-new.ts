@@ -90,7 +90,7 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
     id: "2026-09-29-a-new-sign-in-and-setup",
     date: "2026-09-29",
-    version: "4.133.2",
+    version: "4.133.3",
     tag: "new",
     title: {
       en: "A new sign in, in English and Bangla",
@@ -104,15 +104,15 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
     id: "2026-09-29-your-setup-guide",
     date: "2026-09-29",
-    version: "4.133.2",
+    version: "4.133.3",
     tag: "new",
     title: {
       en: "A setup guide on your home page",
       bn: "হোম পেজে সেট-আপ গাইড",
     },
     body: {
-      en: "Your home page shows what your shop still needs before its first real order: a product, delivery charges, and a courier. Each step ticks itself when it's done, and you can hide the guide any time.",
-      bn: "আপনার হোম পেজ দেখায় প্রথম অর্ডারের আগে দোকানের আর কী লাগবে: একটি পণ্য, ডেলিভারি চার্জ আর একটি কুরিয়ার। প্রতিটি ধাপ শেষ হলে নিজেই টিক পড়ে, আর যেকোনো সময় গাইডটি লুকাতে পারবেন।",
+      en: "Your home page shows what your shop still needs before its first real order: a product, delivery charges, and a courier. Each step ticks itself when it's done, and you can skip the guide any time.",
+      bn: "আপনার হোম পেজ দেখায় প্রথম অর্ডারের আগে দোকানের আর কী লাগবে: একটি পণ্য, ডেলিভারি চার্জ আর একটি কুরিয়ার। প্রতিটি ধাপ শেষ হলে নিজেই টিক পড়ে, আর যেকোনো সময় গাইডটি বাদ দিতে পারবেন।",
     },
   },
   {
