@@ -1,17 +1,17 @@
 import {
-  Banknote,
-  ChevronDown,
-  Heart,
-  Menu,
-  Play,
-  Plus,
-  RotateCcw,
-  Search,
-  ShoppingBag,
-  Star,
-  Truck,
-  User,
-} from "lucide-react";
+  ArrowUUpLeftIcon,
+  BagIcon,
+  CaretDownIcon,
+  HeartIcon,
+  ListIcon,
+  MagnifyingGlassIcon,
+  MapPinIcon,
+  MoneyIcon,
+  PlayIcon,
+  PlusIcon,
+  StarIcon,
+  UserIcon,
+} from "@phosphor-icons/react";
 import { useLocale, useTranslations } from "next-intl";
 import type { ReactNode } from "react";
 
@@ -40,6 +40,8 @@ import {
  * the theme's real type and spacing, and shrunk to where it sits, so it reads as a real site
  * (owner, 2026-09-28: "much smaller, like a real shop of mine with every section turned on").
  * Colours are the palette's (`--sw-*`, set by ShopWindow); words are the shop's own defaults.
+ * Icons are the shop's: Phosphor, regular weight, the same release the theme vendors
+ * (snippets/icon.liquid) -- the Bag for the cart, the shop's default (owner, 2026-09-28).
  */
 
 type Props = {
@@ -82,7 +84,7 @@ function ProductCard({ kind, n, phone }: { kind: ShopKind; n: SampleProduct; pho
       <div className="relative aspect-[4/5] overflow-hidden bg-[var(--sw-muted)]">
         <Photo src={productPhoto(kind, n)} />
         <span className="absolute left-2.5 top-2.5 flex size-8 items-center justify-center rounded-full bg-white/85 text-[#111]">
-          <Heart className="size-4" strokeWidth={1.75} />
+          <HeartIcon className="size-[18px]" />
         </span>
       </div>
       <div className={cn("flex flex-1 flex-col gap-1.5", phone ? "p-2.5" : "p-3")}>
@@ -200,32 +202,32 @@ export function ShopHome({ kind, name, phone, contact, facebook }: Props) {
       <header className="border-b border-[var(--sw-border)] bg-[var(--sw-header)] text-[var(--sw-header-fg)] transition-colors duration-500">
         {phone ? (
           <div className="flex h-14 items-center gap-3 px-4">
-            <Menu className="size-5 shrink-0" strokeWidth={1.75} />
+            <ListIcon className="size-6 shrink-0" />
             <span className="min-w-0 flex-1 truncate text-center text-[17px] font-semibold uppercase tracking-[0.12em]">
               {name}
             </span>
-            <Search className="size-5 shrink-0" strokeWidth={1.75} />
-            <ShoppingBag className="size-5 shrink-0" strokeWidth={1.75} />
+            <MagnifyingGlassIcon className="size-[22px] shrink-0" />
+            <BagIcon className="size-[22px] shrink-0" />
           </div>
         ) : (
           <>
             <div className="grid h-[76px] grid-cols-[1fr_auto_1fr] items-center px-14">
               <span className="flex items-center gap-2 text-[13px] opacity-80">
-                <Search className="size-5" strokeWidth={1.75} />
+                <MagnifyingGlassIcon className="size-[22px]" />
                 {t("search")}
               </span>
               <span className="max-w-[520px] truncate text-[24px] font-semibold uppercase tracking-[0.14em]">{name}</span>
               <span className="flex items-center justify-end gap-5">
-                <User className="size-5" strokeWidth={1.75} />
-                <Heart className="size-5" strokeWidth={1.75} />
-                <ShoppingBag className="size-5" strokeWidth={1.75} />
+                <UserIcon className="size-[22px]" />
+                <HeartIcon className="size-[22px]" />
+                <BagIcon className="size-[22px]" />
               </span>
             </div>
             <nav className="flex h-12 items-center justify-center gap-10 border-t border-[var(--sw-border)] text-[13px] uppercase tracking-[0.06em]">
               {nav.map((item) => (
                 <span key={item} className="flex items-center gap-1">
                   {item}
-                  <ChevronDown className="size-3.5 opacity-60" />
+                  <CaretDownIcon className="size-3 opacity-70" />
                 </span>
               ))}
             </nav>
@@ -289,12 +291,12 @@ export function ShopHome({ kind, name, phone, contact, facebook }: Props) {
       <Band phone={phone}>
         <div className="grid grid-cols-3 gap-3 text-center">
           {[
-            { Icon: Truck, words: t("promiseDelivery") },
-            { Icon: Banknote, words: t("promiseCod") },
-            { Icon: RotateCcw, words: t("promiseReturns") },
+            { Icon: MapPinIcon, words: t("promiseDelivery") },
+            { Icon: MoneyIcon, words: t("promiseCod") },
+            { Icon: ArrowUUpLeftIcon, words: t("promiseReturns") },
           ].map(({ Icon, words }) => (
             <span key={words} className="flex flex-col items-center gap-2">
-              <Icon className={phone ? "size-5" : "size-6"} strokeWidth={1.5} />
+              <Icon className={cn("text-[var(--sw-accent)] transition-colors duration-500", phone ? "size-[22px]" : "size-[26px]")} />
               <span className={phone ? "text-[11px]" : "text-[13px]"}>{words}</span>
             </span>
           ))}
@@ -351,7 +353,7 @@ export function ShopHome({ kind, name, phone, contact, facebook }: Props) {
               phone ? "size-12" : "size-[72px]"
             )}
           >
-            <Play className={cn("ml-1 fill-current", phone ? "size-5" : "size-7")} />
+            <PlayIcon weight="fill" className={cn("translate-x-px", phone ? "size-6" : "size-8")} />
           </span>
         </div>
       </Band>
@@ -391,7 +393,7 @@ export function ShopHome({ kind, name, phone, contact, facebook }: Props) {
               )}
             >
               {question}
-              <Plus className="size-4 shrink-0" strokeWidth={1.75} />
+              <PlusIcon className="size-4 shrink-0" />
             </div>
           ))}
         </div>
@@ -427,7 +429,7 @@ export function ShopHome({ kind, name, phone, contact, facebook }: Props) {
               <div className={phone ? "p-2.5" : "p-4"}>
                 <span className="flex gap-0.5 text-[#f59e0b]">
                   {[0, 1, 2, 3, 4].map((s) => (
-                    <Star key={s} className={cn("fill-current", phone ? "size-3" : "size-3.5")} />
+                    <StarIcon key={s} weight="fill" className={phone ? "size-3" : "size-3.5"} />
                   ))}
                 </span>
                 <p className={cn("mt-2 line-clamp-2 leading-snug", phone ? "text-[12px]" : "text-[14px]")}>
