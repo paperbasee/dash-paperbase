@@ -37,6 +37,10 @@ export function SetupGuideCard({
   const locale = useLocale();
   const done = guide.steps.filter((step) => step.done).length;
   const total = guide.steps.length;
+  // Creating the shop is always behind the owner here: setup did it.
+  const isDone = (step: SetupGuide["steps"][number]) => step.done || step.key === "shop";
+  // What is left comes first; what is done goes to the foot, greyed (owner, 2026-09-29).
+  const steps = [...guide.steps.filter((step) => !isDone(step)), ...guide.steps.filter(isDone)];
 
   return (
     <section className={cn("overflow-hidden rounded-card border border-border-subtle bg-card", className)}>
@@ -65,32 +69,27 @@ export function SetupGuideCard({
         />
       </div>
       <ol>
-        {guide.steps.map(({ key, done: stepDone }) => {
+        {steps.map((step) => {
+          const { key } = step;
+          const stepDone = step.done || key === "shop";
           const mark = (
             <span
               className={cn(
                 "flex size-5 shrink-0 items-center justify-center rounded-full",
-                stepDone
-                  ? "bg-[hsl(var(--accent-green))] text-white"
-                  : "border-[1.5px] border-dashed border-muted-foreground/40"
+                stepDone ? "bg-muted-foreground/45 text-card" : "border-[1.5px] border-dashed border-muted-foreground/40"
               )}
             >
-              {stepDone ? <Check className="size-3" aria-hidden /> : null}
+              {stepDone ? <Check className="size-3" strokeWidth={3} aria-hidden /> : null}
             </span>
           );
-          if (stepDone || key === "shop") {
+          if (step.done || key === "shop") {
             return (
               <li
                 key={key}
-                className="flex items-center gap-3 border-t border-border-subtle px-4 py-3 text-sm text-muted-foreground sm:px-5"
+                className="flex items-center gap-3 border-t border-border-subtle px-4 py-3 text-sm text-muted-foreground/70 sm:px-5"
               >
                 {mark}
-                {/* Crossed out through the middle of the small letters: the words' box is trimmed
-                    to them (`text-box`), where the font's own strike line sat off-centre
-                    (owner, 2026-09-29). */}
-                <span className="relative inline-block [text-box:trim-both_ex_alphabetic] after:absolute after:inset-x-0 after:top-1/2 after:h-px after:-translate-y-1/2 after:bg-muted-foreground/60">
-                  {t(key)}
-                </span>
+                {t(key)}
               </li>
             );
           }
