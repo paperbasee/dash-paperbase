@@ -40,7 +40,7 @@ import { PicturePicker } from "../PicturePicker";
 import { ChoicePicker } from "../ChoicePicker";
 import { ProductPicker } from "../ProductPicker";
 import { SettingField } from "../SettingField";
-import { SocialMark } from "../SocialMark";
+import { SocialMark } from "@/components/SocialMark";
 
 /** What the merchant is being asked for, over the panel: a link, a picture, a product. */
 type Asked =
@@ -119,9 +119,10 @@ export function SlotPanel({
   onPictureUrl?: (key: string, url: string) => void;
   onClose: () => void;
   /**
-   * What only this place has, under its settings: the footer's Social links place holds the
-   * shop's links (a shop setting, not the theme's), and the Sign-up place says when the platform
-   * it goes to has none. The editor decides which; the panel just draws it.
+   * What only this place has, under its settings: the footer's Social links place and the Sign-up
+   * place say where the shop's accounts are typed (Settings -> Store Info -> Identity), and the
+   * Sign-up place when the account it goes to is missing. The editor decides which; the panel
+   * just draws it.
    */
   children?: ReactNode;
 }) {

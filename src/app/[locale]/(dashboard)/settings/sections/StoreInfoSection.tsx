@@ -9,6 +9,8 @@ import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { useEnterNavigation } from "@/hooks/useEnterNavigation";
 import { usePermissions } from "@/context/PermissionsContext";
+import type { SocialAccount } from "@/lib/storeSocialLinks";
+import { IdentityAccounts, type AccountProblem } from "./IdentityAccounts";
 import {
   SettingsSectionBody,
   settingsInvertedButtonClassName,
@@ -37,6 +39,9 @@ export default function StoreInfoSection({
   onPhoneChange,
   onAddressChange,
   onLanguageChange,
+  accounts,
+  onAccountsChange,
+  accountProblem,
   storeSaving,
   storeMessage,
   onSubmit,
@@ -60,6 +65,10 @@ export default function StoreInfoSection({
   onPhoneChange: Dispatch<SetStateAction<string>>;
   onAddressChange: Dispatch<SetStateAction<string>>;
   onLanguageChange: Dispatch<SetStateAction<"en" | "bn">>;
+  /** Identity's social accounts (the one place they are typed), in the merchant's order. */
+  accounts: SocialAccount[];
+  onAccountsChange: (next: SocialAccount[]) => void;
+  accountProblem: AccountProblem | null;
   storeSaving: boolean;
   storeMessage: SettingsMessage;
   onSubmit: (e: FormEvent) => void;
@@ -170,50 +179,6 @@ export default function StoreInfoSection({
           </div>
 
           <div className="flex flex-col gap-2">
-            <label htmlFor="store_contact_email" className="text-sm font-medium leading-normal text-foreground">
-              {t("store.contactEmail")}
-            </label>
-            <Input
-              id="store_contact_email"
-              type="email"
-              value={contactEmail}
-              onChange={(e) => onContactEmailChange(e.target.value)}
-              placeholder={t("store.contactEmailPlaceholder")}
-              className="w-full"
-              onKeyDown={handleKeyDown}
-            />
-          </div>
-
-          <div className="flex flex-col gap-2">
-            <label htmlFor="store_phone" className="text-sm font-medium leading-normal text-foreground">
-              {t("store.phone")}
-            </label>
-            <Input
-              id="store_phone"
-              type="tel"
-              value={phone}
-              onChange={(e) => onPhoneChange(e.target.value)}
-              placeholder={t("store.phonePlaceholder")}
-              className="w-full"
-              onKeyDown={handleKeyDown}
-            />
-          </div>
-
-          <div className="flex flex-col gap-2 md:col-span-2">
-            <label htmlFor="store_address" className="text-sm font-medium leading-normal text-foreground">
-              {t("store.address")}
-            </label>
-            <Input
-              id="store_address"
-              value={address}
-              onChange={(e) => onAddressChange(e.target.value)}
-              placeholder={t("store.addressPlaceholder")}
-              className="w-full"
-              onKeyDown={handleKeyDown}
-            />
-          </div>
-
-          <div className="flex flex-col gap-2">
             <label htmlFor="store_language" className="text-sm font-medium leading-normal text-foreground">
               {t("store.language")}
             </label>
@@ -226,6 +191,64 @@ export default function StoreInfoSection({
               <option value="bn">{t("store.languageOptions.bn")}</option>
             </Select>
           </div>
+        </div>
+
+        {/*
+          Identity (owner, 2026-09-29): how customers reach the shop, and the ONE place any of it
+          is typed. The shop's footer, its Contact page and the home page's Sign-up button read it;
+          the theme editor only chooses how they show it.
+        */}
+        <div className="space-y-4 border-t border-border pt-6">
+          <div className="space-y-1">
+            <h3 className="text-base font-medium text-foreground">{t("identity.title")}</h3>
+            <p className="text-sm text-muted-foreground">{t("identity.subtitle")}</p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="flex flex-col gap-2">
+              <label htmlFor="store_phone" className="text-sm font-medium leading-normal text-foreground">
+                {t("store.phone")}
+              </label>
+              <Input
+                id="store_phone"
+                type="tel"
+                value={phone}
+                onChange={(e) => onPhoneChange(e.target.value)}
+                placeholder={t("store.phonePlaceholder")}
+                className="w-full"
+                onKeyDown={handleKeyDown}
+              />
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <label htmlFor="store_contact_email" className="text-sm font-medium leading-normal text-foreground">
+                {t("store.contactEmail")}
+              </label>
+              <Input
+                id="store_contact_email"
+                type="email"
+                value={contactEmail}
+                onChange={(e) => onContactEmailChange(e.target.value)}
+                placeholder={t("store.contactEmailPlaceholder")}
+                className="w-full"
+                onKeyDown={handleKeyDown}
+              />
+            </div>
+
+            <div className="flex flex-col gap-2 md:col-span-2">
+              <label htmlFor="store_address" className="text-sm font-medium leading-normal text-foreground">
+                {t("store.address")}
+              </label>
+              <Input
+                id="store_address"
+                value={address}
+                onChange={(e) => onAddressChange(e.target.value)}
+                placeholder={t("store.addressPlaceholder")}
+                className="w-full"
+                onKeyDown={handleKeyDown}
+              />
+            </div>
+          </div>
+          <IdentityAccounts accounts={accounts} onChange={onAccountsChange} problem={accountProblem} />
         </div>
 
         {storeMessage?.type === "error" && (

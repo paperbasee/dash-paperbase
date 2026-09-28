@@ -30,10 +30,11 @@ import { editorReducer, initEditorState } from "@/lib/theme-editor/editor-reduce
 import { searchWithPage } from "@/lib/theme-editor/editor-url";
 import { useBrandingQuery } from "@/hooks/useBrandingQuery";
 import {
-  hasLinkFor,
-  mergeSocialLinksFromApi,
-  SIGNUP_PLATFORMS,
-  type StoreSocialLinkKey,
+  accountFor,
+  accountsFromApi,
+  availableTargets,
+  IDENTITY_HREF,
+  SIGNUP_TARGETS,
 } from "@/lib/storeSocialLinks";
 import { pathLocale, previewTarget, templateForPath } from "@/lib/theme-editor/preview-paths";
 import {
@@ -51,7 +52,7 @@ import type { PreviewMessage, PreviewState } from "@/lib/theme-editor/preview-se
 import { usePreviewExamplesQuery, useThemeImagesQuery } from "@/hooks/useThemesQuery";
 import { useCategoriesQuery } from "@/hooks/useCategoriesQuery";
 import { useProductsQuery } from "@/hooks/useProductsQuery";
-import { initialChoices, PAGE_NOTES, SLOT_PAGES, SLOTS, type SlotPageKey } from "@/lib/theme-editor/slot-catalogue";
+import { initialChoices, PAGE_NOTES, SLOT_PAGES, SLOTS, type Slot, type SlotPageKey } from "@/lib/theme-editor/slot-catalogue";
 import {
   addBlockEdits,
   blockSettingEdits,
@@ -83,7 +84,6 @@ import { SHEET_TOP } from "../kit/styles";
 import { useMediaQuery } from "../useMediaQuery";
 import { PagePlaces, type PlaceRow } from "./PagePlaces";
 import { SlotPanel } from "./SlotPanel";
-import { SocialLinksFields } from "./SocialLinksFields";
 import { StylePanel } from "./StylePanel";
 
 /** The preview's two widths: a phone's, and the whole column. */
@@ -245,13 +245,12 @@ export function SlotEditor({
   */
   const [pendingStore, setPendingStore] = useState<Record<string, string>>({});
   /*
-    The shop's social links, typed in the footer's Social links place since 2026-09-26 (Settings
-    until then) and saved where they always were. Like the checkout's form they wait for Save to
-    store: `pendingLinks` is what was typed and not yet saved, over what the shop has.
+    The shop's social accounts, READ here and typed only in Settings -> Store Info -> Identity
+    (owner, 2026-09-29: "the identity in the store info tab will be the source of truth"). The
+    footer's and the Sign-up band's places choose how to show them, never what they are.
   */
   const branding = useBrandingQuery();
-  const [pendingLinks, setPendingLinks] = useState<Partial<Record<StoreSocialLinkKey, string>>>({});
-  const links = { ...mergeSocialLinksFromApi(branding.data?.social_links), ...pendingLinks };
+  const accounts = accountsFromApi(branding.data?.social_links);
 
   /*
     The shop, in the middle. The frame follows the page picker, and the picker
@@ -470,12 +469,6 @@ export function SlotEditor({
    * again, and the merchant is told which half did not land.
    */
   async function saveShopSettings(): Promise<boolean> {
-    const checkout = await saveCheckoutSettings();
-    const social = await saveSocialLinks();
-    return checkout && social;
-  }
-
-  async function saveCheckoutSettings(): Promise<boolean> {
     const patch = pendingStore;
     if (!Object.keys(patch).length) return true;
     try {
@@ -487,24 +480,6 @@ export function SlotEditor({
       return false;
     } finally {
       void qc.invalidateQueries({ queryKey: checkoutSettingsQueryKey });
-    }
-  }
-
-  /**
-   * All four links, always: the API keeps only what it is sent under `social_links`, so a box left
-   * out of the save would be emptied. Only when one was typed in.
-   */
-  async function saveSocialLinks(): Promise<boolean> {
-    if (!Object.keys(pendingLinks).length) return true;
-    try {
-      await api.patch("admin/branding/", { social_links: links });
-      setPendingLinks({});
-      return true;
-    } catch {
-      notify.warning(tEditor("socialLinksFailed"), { title: tc("heading") });
-      return false;
-    } finally {
-      void qc.invalidateQueries({ queryKey: brandingQueryKey });
     }
   }
 
@@ -531,7 +506,6 @@ export function SlotEditor({
    */
   const startedOver = () => {
     setPendingStore({});
-    setPendingLinks({});
     takeShopChoices();
     answered();
   };
@@ -548,40 +522,67 @@ export function SlotEditor({
   const closePlace = () => openPlace(null, { scroll: false });
 
   /**
-   * What a place has of its own, under its settings. The footer's Social links place holds the
-   * shop's links; the Sign-up place says when the platform it goes to has none -- the band is
-   * hidden on the shop then -- and takes the merchant to the box.
+   * What a place has of its own, under its settings. The footer's Social links place and the
+   * Sign-up place show the shop's accounts, which are typed in Settings -> Store Info -> Identity
+   * and nowhere here: each says so, with the way there -- in a new tab, so this draft stays open.
+   * The Sign-up place also says when the account it goes to is missing: the band is hidden then.
    */
   function placeExtras(ref: PlaceRef): ReactNode {
+    const toIdentity = (
+      <a
+        href={`/${locale}${IDENTITY_HREF}`}
+        target="_blank"
+        rel="noopener"
+        className="font-medium text-foreground underline underline-offset-2"
+      >
+        {t("identityLink")}
+      </a>
+    );
     if (ref.page === "footer" && ref.key === "social") {
       return (
-        <SocialLinksFields
-          values={links}
-          onChange={(key, value) => setPendingLinks((typed) => ({ ...typed, [key]: value }))}
-        />
+        <KitNote>
+          {accounts.length ? t("socialFromIdentity") : t("socialNoneYet")} {toIdentity}
+        </KitNote>
       );
     }
     if (ref.page === "home" && ref.key === "signup") {
       const wiring = wiringFor(ref.page, ref.key);
       const chosen = wiring ? slotValueFor(state.document, wiring) : "off";
-      const platform = SIGNUP_PLATFORMS.find((one) => one === chosen);
-      if (!platform || hasLinkFor(platform, links)) return null;
-      // The platform by the name its tile has.
-      const tile = SLOTS.home.find((slot) => slot.key === "signup")?.options?.find((one) => one.value === platform);
+      const target = SIGNUP_TARGETS.find((one) => one === chosen);
+      if (!availableTargets(accounts).length) {
+        return (
+          <KitNote role="status">
+            {t("signupNoAccounts")} {toIdentity}
+          </KitNote>
+        );
+      }
+      if (!target || accountFor(target, accounts)) return null;
+      // The target by the name its tile has.
+      const tile = SLOTS.home.find((slot) => slot.key === "signup")?.options?.find((one) => one.value === target);
       return (
         <KitNote role="status">
-          {platform === "messenger" ? t("signupNoFacebook") : t("signupNoLink", { platform: tile ? t(tile.label) : platform })}{" "}
-          <button
-            type="button"
-            onClick={() => openPlace({ page: "footer", key: "social" }, { scroll: true })}
-            className="font-medium text-foreground underline underline-offset-2"
-          >
-            {t("signupAddLink")}
-          </button>
+          {target === "messenger" ? t("signupNoFacebook") : t("signupNoAccount", { platform: tile ? t(tile.label) : target })}{" "}
+          {toIdentity}
         </KitNote>
       );
     }
     return null;
+  }
+
+  /**
+   * The Sign-up place offers only where this shop has an account, and whatever the band is set to
+   * now -- so a choice made before an account was removed stays visible, with its note, until it
+   * is changed.
+   */
+  function shownSlot(slot: Slot, ref: PlaceRef): Slot {
+    if (ref.page !== "home" || ref.key !== "signup") return slot;
+    const wiring = wiringFor(ref.page, ref.key);
+    const chosen = wiring ? slotValueFor(state.document, wiring) : "off";
+    const offered = new Set<string>(availableTargets(accounts));
+    return {
+      ...slot,
+      options: (slot.options ?? []).filter((one) => one.value === "off" || one.value === chosen || offered.has(one.value)),
+    };
   }
 
   const stylePanel = (
@@ -645,7 +646,7 @@ export function SlotEditor({
          decide are looked up where those neighbours live. */
       <SlotPanel
         key={placeId(open)}
-        slot={openSlot}
+        slot={shownSlot(openSlot, open)}
         page={open.page}
         wiring={openWiring}
         manifest={state.manifest}

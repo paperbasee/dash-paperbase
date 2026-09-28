@@ -76,6 +76,9 @@ export default function SettingsPage() {
     setAddress,
     language,
     setLanguage,
+    accounts,
+    setAccounts,
+    accountProblem,
     previewUrl,
     currentLogoUrl,
     clearLogo,
@@ -191,18 +194,22 @@ export default function SettingsPage() {
             onPhoneChange={setPhone}
             onAddressChange={setAddress}
             onLanguageChange={setLanguage}
+            accounts={accounts}
+            onAccountsChange={setAccounts}
+            accountProblem={accountProblem}
             storeSaving={storeSaving}
             storeMessage={storeMessage}
             onSubmit={handleStoreSubmit}
           />
 
-          {activeSection === "store" && (
+          <PoliciesSection hidden={activeSection !== "policies"} />
+
+          {/* The invoice's terms and conditions sit with the shop's other policies (owner, 2026-09-29). */}
+          {activeSection === "policies" && (
             <div className="mt-6">
               <InvoiceSettingsPanel />
             </div>
           )}
-
-          <PoliciesSection hidden={activeSection !== "policies"} />
 
           <CustomizationSection hidden={activeSection !== "customization"} />
 

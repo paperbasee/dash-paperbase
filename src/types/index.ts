@@ -1,13 +1,4 @@
-/** Social profile URLs for storefront; keys align with `GET/PATCH admin/branding/` `social_links`. */
-export type BrandingSocialLinks = Partial<
-  Record<
-    | "facebook"
-    | "instagram"
-    | "whatsapp"
-    | "tiktok",
-    string
-  >
->;
+import type { SocialAccount } from "@/lib/storeSocialLinks";
 
 export interface Branding {
   public_id: string;
@@ -21,7 +12,8 @@ export interface Branding {
   phone: string;
   address: string;
   language?: "en" | "bn";
-  social_links?: BrandingSocialLinks;
+  /** Settings -> Store Info -> Identity's accounts, in the merchant's order (`lib/storeSocialLinks`). */
+  social_links?: SocialAccount[];
   brand_showcase?: Array<{
     public_id: string;
     name: string;

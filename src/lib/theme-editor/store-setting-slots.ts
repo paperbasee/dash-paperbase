@@ -13,10 +13,9 @@
  * consequence to know: a pending choice lives in the screen, so it does not
  * survive a reload the way a draft does.
  *
- * **Two so far.** The shop's social links (2026-09-26) are the other: typed in the footer's Social
- * links place (`SocialLinksFields`) beside the marks they draw, saved on `admin/branding/` where
- * Settings used to write them, and no longer offered there. They are four boxes rather than a
- * choice, so `SlotEditor` holds them itself (`pendingLinks`) instead of through this list.
+ * The shop's social accounts are NOT one of these: they are typed only in Settings -> Store Info
+ * -> Identity (2026-09-29), and the editor's places read them (`SlotEditor.placeExtras`). From
+ * 2026-09-26 to then they were typed in the footer's Social links place and saved from here.
  *
  * The checkout's form -- short or long -- is
  * `StorefrontCheckoutSettings.customer_form_variant`, which Settings ->

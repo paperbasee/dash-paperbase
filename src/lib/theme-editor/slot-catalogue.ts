@@ -1,4 +1,4 @@
-import type { SignupPlatform } from "@/lib/storeSocialLinks";
+import type { SignupTarget } from "@/lib/storeSocialLinks";
 
 /**
  * The slots each page offers, and what may go in each one.
@@ -49,7 +49,7 @@ export type SlotOption = {
   /** Shown with its badge before a merchant pays for it. */
   premium?: boolean;
   /** A platform's own logo on the tile, in place of the shape: the Sign-up band's choices. */
-  platform?: SignupPlatform;
+  platform?: SignupTarget;
 };
 
 export type Slot = {
@@ -274,8 +274,10 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
     {
       /*
         Where the band's button goes (owner, 2026-09-26: "instead of WhatsApp, we can make it
-        universal"). WhatsApp first: a band saved before the choice existed carries no platform,
-        and reads as the first answer that fits -- the WhatsApp it always was.
+        universal"): any account in Settings -> Store Info -> Identity, or Messenger for the
+        Facebook page (2026-09-29). The editor offers only the ones this shop has
+        (`SlotEditor.shownSlot`). WhatsApp first: a band saved before the choice existed carries
+        no platform, and reads as the first answer that fits -- the WhatsApp it always was.
       */
       key: "signup",
       label: "signup",
@@ -286,6 +288,13 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
         { value: "facebook", label: "signupFacebook", note: "signupFacebookNote", shape: "line", platform: "facebook" },
         { value: "instagram", label: "signupInstagram", note: "signupInstagramNote", shape: "line", platform: "instagram" },
         { value: "tiktok", label: "signupTiktok", note: "signupTiktokNote", shape: "line", platform: "tiktok" },
+        { value: "youtube", label: "signupYoutube", note: "signupYoutubeNote", shape: "line", platform: "youtube" },
+        { value: "telegram", label: "signupTelegram", note: "signupTelegramNote", shape: "line", platform: "telegram" },
+        { value: "x", label: "signupX", note: "signupXNote", shape: "line", platform: "x" },
+        { value: "linkedin", label: "signupLinkedin", note: "signupLinkedinNote", shape: "line", platform: "linkedin" },
+        { value: "pinterest", label: "signupPinterest", note: "signupPinterestNote", shape: "line", platform: "pinterest" },
+        { value: "threads", label: "signupThreads", note: "signupThreadsNote", shape: "line", platform: "threads" },
+        { value: "snapchat", label: "signupSnapchat", note: "signupSnapchatNote", shape: "line", platform: "snapchat" },
         { value: "off", label: "off", shape: "blank" },
       ],
     },

@@ -8,7 +8,6 @@ import {
   type ReactNode,
 } from "react";
 import type { Branding } from "@/types";
-import { emptySocialLinks } from "@/lib/storeSocialLinks";
 import { useBrandingQuery } from "@/hooks/useBrandingQuery";
 
 interface BrandingState {
@@ -36,7 +35,7 @@ const defaultBranding: Branding = {
   phone: "",
   address: "",
   language: "en",
-  social_links: emptySocialLinks(),
+  social_links: [],
 };
 
 const BrandingContext = createContext<BrandingState | undefined>(undefined);

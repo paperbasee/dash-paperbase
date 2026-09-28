@@ -3,6 +3,14 @@
 import { useState, useRef, type FormEvent } from "react";
 import { useTranslations } from "next-intl";
 import api from "@/lib/api";
+import { isApiHttpError } from "@/lib/api-client";
+import {
+  accountsFromApi,
+  accountsToSave,
+  SOCIAL_PLATFORMS,
+  type SocialAccount,
+} from "@/lib/storeSocialLinks";
+import type { AccountProblem } from "./sections/IdentityAccounts";
 import { defaultBranding } from "@/context/BrandingContext";
 import type { SettingsMessage } from "./useAccountSettings";
 import { notify } from "@/notifications";
@@ -31,6 +39,9 @@ export function useStoreSettings({ onSaveSuccess }: UseStoreSettingsOptions = {}
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
   const [language, setLanguage] = useState<"en" | "bn">("en");
+  /** Identity's social accounts, in the merchant's order: the one place they are typed. */
+  const [accounts, setAccounts] = useState<SocialAccount[]>([]);
+  const [accountProblem, setAccountProblem] = useState<AccountProblem | null>(null);
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [clearLogo, setClearLogo] = useState(false);
   const [currentLogoUrl, setCurrentLogoUrl] = useState<string | null>(null);
@@ -46,6 +57,7 @@ export function useStoreSettings({ onSaveSuccess }: UseStoreSettingsOptions = {}
     address?: string | null;
     logo_url?: string | null;
     language?: string | null;
+    social_links?: unknown;
   }) {
     if (branding.admin_name) setStoreName(branding.admin_name);
     setStoreType(branding.store_type ?? "");
@@ -53,6 +65,7 @@ export function useStoreSettings({ onSaveSuccess }: UseStoreSettingsOptions = {}
     setPhone(branding.phone ?? "");
     setAddress(branding.address ?? "");
     setLanguage(branding.language === "bn" ? "bn" : "en");
+    setAccounts(accountsFromApi(branding.social_links));
     setCurrentLogoUrl(resolveLogoUrl(branding.logo_url ?? null));
   }
 
@@ -62,6 +75,7 @@ export function useStoreSettings({ onSaveSuccess }: UseStoreSettingsOptions = {}
     e.preventDefault();
     setSaving(true);
     setMessage(null);
+    setAccountProblem(null);
 
     try {
       const validation = parseValidation(storeUpdateSchema, {
@@ -99,6 +113,8 @@ export function useStoreSettings({ onSaveSuccess }: UseStoreSettingsOptions = {}
       formData.append("phone", validation.data.phone.slice(0, 50));
       formData.append("address", validation.data.address);
       formData.append("language", validation.data.language);
+      // Every account, every save, as a list: the API keeps what it is sent, in this order.
+      formData.append("social_links", JSON.stringify(accountsToSave(accounts)));
 
       if (logoFile) formData.append("logo", logoFile);
       if (clearLogo) formData.append("clear_logo", "true");
@@ -112,11 +128,27 @@ export function useStoreSettings({ onSaveSuccess }: UseStoreSettingsOptions = {}
       if (fileInputRef.current) fileInputRef.current.value = "";
 
       notify.success(t("store.saved"));
-    } catch {
-      setMessage({ type: "error", text: t("store.saveFailed") });
+    } catch (error) {
+      setMessage({ type: "error", text: saveProblem(error) });
     } finally {
       setSaving(false);
     }
+  }
+
+  /**
+   * What a refused save says. An account the API could not read is marked on its own row
+   * (`social_links.parse_accounts` names it); anything else is said once, under the form.
+   */
+  function saveProblem(error: unknown): string {
+    const data = isApiHttpError(error) && error.status === 400 ? (error.data as { code?: unknown; platform?: unknown }) : null;
+    const code = typeof data?.code === "string" ? data.code : "";
+    const platform = SOCIAL_PLATFORMS.find((one) => one === data?.platform);
+    if (platform && code === "social_account_unreadable") {
+      setAccountProblem({ platform });
+      return t("identity.checkAccounts");
+    }
+    if (code === "social_links_invalid") return t("identity.reload");
+    return t("store.saveFailed");
   }
 
   return {
@@ -132,6 +164,9 @@ export function useStoreSettings({ onSaveSuccess }: UseStoreSettingsOptions = {}
     setAddress,
     language,
     setLanguage,
+    accounts,
+    setAccounts,
+    accountProblem,
     logoFile,
     setLogoFile,
     clearLogo,

@@ -23,7 +23,7 @@ const MAX_LEN = 8000;
 type Message = { type: "success" | "error"; text: string } | null;
 
 export default function InvoiceSettingsPanel() {
-  const ts = useTranslations("settings.store");
+  const ts = useTranslations("settings.invoiceTerms");
   const queryClient = useQueryClient();
   const { data, isLoading } = useStoreSettingsCurrentQuery();
   const { has } = usePermissions();
@@ -51,10 +51,10 @@ export default function InvoiceSettingsPanel() {
     setMessage(null);
     try {
       await api.patch("store/settings/current/", { invoice_terms: terms });
-      setMessage({ type: "success", text: ts("invoiceTermsSaved") });
+      setMessage({ type: "success", text: ts("saved") });
       void queryClient.invalidateQueries({ queryKey: storeSettingsCurrentQueryKey });
     } catch (err) {
-      let text = ts("invoiceTermsError");
+      let text = ts("error");
       if (isApiHttpError(err)) {
         const d = err.response?.data as Record<string, unknown> | undefined;
         const v = d?.invoice_terms ?? d?.detail;
@@ -70,25 +70,25 @@ export default function InvoiceSettingsPanel() {
   return (
     <section className={settingsSectionSurfaceClassName}>
       <div className="space-y-1">
-        <h2 className="text-lg font-medium text-foreground">{ts("invoiceTermsHeading")}</h2>
-        <p className="text-sm text-muted-foreground">{ts("invoiceTermsDescription")}</p>
+        <h2 className="text-lg font-medium text-foreground">{ts("heading")}</h2>
+        <p className="text-sm text-muted-foreground">{ts("description")}</p>
       </div>
 
       <div className="mt-4 space-y-2">
         <label htmlFor="invoice_terms" className="text-sm font-medium text-foreground">
-          {ts("invoiceTermsLabel")}
+          {ts("label")}
         </label>
         <Textarea
           id="invoice_terms"
           rows={6}
           value={terms}
           disabled={isLoading || saving || !canManage}
-          placeholder={ts("invoiceTermsPlaceholder")}
+          placeholder={ts("placeholder")}
           onChange={(e) => setTerms(e.target.value)}
           aria-invalid={tooLong || undefined}
         />
         <div className="flex items-center justify-between gap-4">
-          <p className="text-xs text-muted-foreground">{ts("invoiceTermsHint")}</p>
+          <p className="text-xs text-muted-foreground">{ts("hint")}</p>
           <p className={tooLong ? "text-xs text-destructive" : "text-xs text-muted-foreground"}>
             {terms.length}/{MAX_LEN}
           </p>
@@ -116,7 +116,7 @@ export default function InvoiceSettingsPanel() {
             onClick={() => void handleSave()}
           >
             {saving && <Loader2 className="size-4 animate-spin" />}
-            {ts("invoiceTermsSave")}
+            {ts("save")}
           </Button>
         )}
       </div>

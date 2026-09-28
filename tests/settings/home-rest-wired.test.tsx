@@ -11,6 +11,7 @@ import { describe, expect, test } from "vitest";
 
 import type { ThemeDocument, ThemeEditorState, ThemeManifest, ThemeSection } from "@/lib/theme-editor/api";
 import { editorReducer, initEditorState, type EditorState } from "@/lib/theme-editor/editor-reducer";
+import { SIGNUP_TARGETS } from "@/lib/storeSocialLinks";
 import { SLOTS } from "@/lib/theme-editor/slot-catalogue";
 import { choiceEdits, sectionOfType, slotValueFor, wiringFor } from "@/lib/theme-editor/slot-sections";
 
@@ -126,16 +127,9 @@ describe("the rest of the home page is wired", () => {
     expect(wiringFor("home", "hero")!.sections.video).toBe("video");
   });
 
-  test("the sign-up goes to the platform chosen, or nowhere (2026-09-26)", () => {
+  test("the sign-up goes to the account chosen, or nowhere (2026-09-26; every platform since 2026-09-29)", () => {
     const signup = SLOTS.home.find((one) => one.key === "signup")!;
-    expect(signup.options!.map((one) => one.value)).toEqual([
-      "whatsapp",
-      "messenger",
-      "facebook",
-      "instagram",
-      "tiktok",
-      "off",
-    ]);
+    expect(signup.options!.map((one) => one.value)).toEqual([...SIGNUP_TARGETS, "off"]);
     // Each platform's tile is its own logo.
     for (const option of signup.options!.filter((one) => one.value !== "off")) {
       expect(option.platform, option.value).toBe(option.value);
