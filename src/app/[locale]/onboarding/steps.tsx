@@ -77,6 +77,7 @@ export function SellStep({ setup, className }: { setup: SetupState; className?: 
               type="button"
               role="radio"
               aria-checked={on}
+              aria-label={tKinds(`${kind}.name`)}
               onClick={() => setup.setKind(kind)}
               className={cn(
                 "relative flex flex-col items-start gap-2.5 rounded-card border p-3 text-left transition-[border-color,background-color,box-shadow] duration-150 sm:flex-row sm:items-center sm:gap-3 sm:p-3.5",
@@ -330,7 +331,7 @@ export function AddressStep({ setup, className }: { setup: SetupState; className
       </div>
       <button
         type="button"
-        onClick={() => setup.go("look", "forward")}
+        onClick={() => setup.go("look")}
         className="text-[13px] text-muted-foreground underline decoration-border underline-offset-4 hover:text-foreground"
       >
         {t("skipAddress")}

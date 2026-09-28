@@ -48,8 +48,8 @@ function SetupFlow() {
   const next: Record<string, () => void> = {
     sell: () => void setup.continueFromSell(),
     name: () => void setup.continueFromName(),
-    address: () => setup.go("look", "forward"),
-    look: () => setup.go("contact", "forward"),
+    address: () => setup.go("look"),
+    look: () => setup.go("contact"),
     contact: () => void setup.finish(),
   };
   // The shop is made on the name step: from the address on, going back cannot un-make it,

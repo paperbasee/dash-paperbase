@@ -72,6 +72,49 @@ export type DomainCheck = {
 
 export type FinishTick = "contact" | "look" | "address" | "dashboard";
 
+/** The step a `?step=` names, when it names one. */
+function stepFrom(value: string | null): SetupStep | null {
+  return (SETUP_STEPS as readonly string[]).includes(value ?? "") ? (value as SetupStep) : null;
+}
+
+/**
+ * What the owner has answered but setup has not saved yet, kept in this tab so a reload does not
+ * lose it (2026-09-28): before the shop is made, what it sells and its name; after, the look and
+ * how shoppers reach it. Only ever a convenience -- the shop itself is the record -- so a tab
+ * that cannot store anything simply starts those answers again.
+ */
+type Draft = {
+  user: string;
+  kind?: ShopKind | null;
+  shopName?: string;
+  ownerFirst?: string;
+  ownerLast?: string;
+  palette?: string | null;
+  phone?: string;
+  whatsapp?: boolean;
+  facebook?: string;
+};
+
+const DRAFT_KEY = "pb_setup_draft_v1";
+
+function readDraft(user: string): Draft | null {
+  try {
+    const draft = JSON.parse(sessionStorage.getItem(DRAFT_KEY) ?? "null") as Draft | null;
+    return draft && draft.user === user ? draft : null;
+  } catch {
+    return null;
+  }
+}
+
+function writeDraft(draft: Draft | null) {
+  try {
+    if (draft) sessionStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
+    else sessionStorage.removeItem(DRAFT_KEY);
+  } catch {
+    /* storage unavailable (private mode) -- the answers just are not kept */
+  }
+}
+
 function hostnameOf(url: string | undefined | null): string {
   if (!url) return "";
   try {
@@ -102,8 +145,21 @@ export function useSetup() {
   const { isAuthenticated, isLoading: authLoading, authHydrated, logout } = useAuth();
 
   const [ready, setReady] = useState(false);
-  const [phase, setPhase] = useState<SetupPhase>("sell");
+  const [user, setUser] = useState("");
+  // The step is the page's address (`?step=look`), so a reload stays on it and the browser's
+  // Back goes back a step. "finishing" and "ready" are not steps: they are what Finish shows.
+  const urlStep = stepFrom(searchParams.get("step"));
+  const [endPhase, setEndPhase] = useState<"finishing" | "ready" | null>(null);
+  // Which way the step moved, worked out as the address changes -- by a button or by the
+  // browser's own Back and Forward alike -- so the new step slides in from the right side.
+  const [shownStep, setShownStep] = useState<SetupStep | null>(urlStep);
   const [direction, setDirection] = useState<"forward" | "back">("forward");
+  if (urlStep !== shownStep) {
+    setShownStep(urlStep);
+    if (urlStep && shownStep) {
+      setDirection(SETUP_STEPS.indexOf(urlStep) < SETUP_STEPS.indexOf(shownStep) ? "back" : "forward");
+    }
+  }
   const [error, setError] = useState<"network" | "failed" | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -157,18 +213,27 @@ export function useSetup() {
       try {
         const me = await fetchMeForRouting();
         if (cancelled) return;
-        setOwnerFirst(me.first_name ?? "");
-        setOwnerLast(me.last_name ?? "");
+        const draft = readDraft(me.public_id ?? "");
+        setUser(me.public_id ?? "");
+        setOwnerFirst(draft?.ownerFirst || me.first_name || "");
+        setOwnerLast(draft?.ownerLast || me.last_name || "");
         setAskOwnerName(!(me.first_name ?? "").trim() || !(me.last_name ?? "").trim());
+        if (draft) {
+          setPalette(draft.palette ?? null);
+          setPhone(draft.phone ?? "");
+          setWhatsapp(draft.whatsapp ?? true);
+          setFacebook(draft.facebook ?? "");
+          setKind(draft.kind ?? null);
+          setShopName(draft.shopName ?? "");
+        }
         if (setupUnfinished(me) && me.store) {
-          // Made on an earlier visit: carry on from the step after the name.
+          // Made on an earlier visit: what it sells and its name are the shop's own now.
           const madeAs = kindFromStoreType(me.store.store_type);
           setStoreId(me.store.public_id);
           setShopName(me.store.name);
           setSavedName(me.store.name);
           setKind(madeAs);
           setSavedKind(madeAs);
-          setPhase("address");
           const { data } = await api.get<{ storefront_url?: string }>("store/");
           if (!cancelled) {
             setStoreHostname(hostnameOf(data.storefront_url));
@@ -216,6 +281,33 @@ export function useSetup() {
     return () => window.clearTimeout(timer);
   }, [shopName, storeId]);
 
+  /** The step shown: Finish's own screens, else the address's step, else where setup starts. */
+  const phase: SetupPhase = endPhase ?? urlStep ?? (storeId ? "address" : "sell");
+
+  const stepHref = useCallback(
+    (step: SetupStep) => ({
+      pathname: "/onboarding" as const,
+      query: { step, ...(isAddMode ? { add: "1" } : {}) },
+    }),
+    [isAddMode]
+  );
+
+  // An address with no step, or one setup cannot be on yet -- a later step before the shop is
+  // made, the name before what it sells -- is put right, without adding to the history.
+  useEffect(() => {
+    if (!ready || endPhase) return;
+    const earliest: SetupStep = storeId ? "address" : kind ? "name" : "sell";
+    const reachable: readonly SetupStep[] = storeId ? SETUP_STEPS : kind ? ["sell", "name"] : ["sell"];
+    if (!urlStep) router.replace(stepHref(storeId ? "address" : "sell"));
+    else if (!reachable.includes(urlStep)) router.replace(stepHref(earliest));
+  }, [ready, endPhase, urlStep, storeId, kind, router, stepHref]);
+
+  // The answers not saved yet, kept in this tab (Draft).
+  useEffect(() => {
+    if (!ready || !user || endPhase === "ready") return;
+    writeDraft({ user, kind, shopName, ownerFirst, ownerLast, palette, phone, whatsapp, facebook });
+  }, [ready, user, endPhase, kind, shopName, ownerFirst, ownerLast, palette, phone, whatsapp, facebook]);
+
   // ---- a domain made on an earlier visit comes back with its records --------------------------
   useEffect(() => {
     if (phase !== "address" || !storeId || !DOMAINS_ENABLED || domain) return;
@@ -231,16 +323,23 @@ export function useSetup() {
   }, [phase, storeId, domain]);
 
   // ---- moving between steps ------------------------------------------------------------------
-  const go = useCallback((next: SetupPhase, dir: "forward" | "back") => {
-    setDirection(dir);
-    setError(null);
-    setPhase(next);
-    if (typeof window !== "undefined") window.scrollTo({ top: 0 });
-  }, []);
+  const go = useCallback(
+    (next: SetupPhase) => {
+      setError(null);
+      if (next === "finishing" || next === "ready") {
+        setEndPhase(next);
+        return;
+      }
+      setEndPhase(null);
+      if (next !== urlStep) router.push(stepHref(next));
+      if (typeof window !== "undefined") window.scrollTo({ top: 0 });
+    },
+    [router, stepHref, urlStep]
+  );
 
   const back = useCallback(() => {
     const i = SETUP_STEPS.indexOf(phase as SetupStep);
-    if (i > 0) go(SETUP_STEPS[i - 1], "back");
+    if (i > 0) go(SETUP_STEPS[i - 1]);
   }, [phase, go]);
 
   /** The Look step starts on the palette suggested for the kind, until the owner picks one. */
@@ -274,7 +373,7 @@ export function useSetup() {
         setBusy(false);
       }
     }
-    go("name", "forward");
+    go("name");
   }
 
   async function continueFromName() {
@@ -299,7 +398,7 @@ export function useSetup() {
       } else {
         await makeShop(name);
       }
-      go("address", "forward");
+      go("address");
     } catch (err) {
       if (errorCode(err) === "name_needs_letters") setNameCheck({ state: "needs_letters" });
       else fail(err);
@@ -387,7 +486,7 @@ export function useSetup() {
     setContactError(null);
     setError(null);
     setTicks({ contact: "now", look: "todo", address: "todo", dashboard: "todo" });
-    go("finishing", "forward");
+    go("finishing");
     try {
       // How shoppers reach the shop: Identity is the one place it is kept (admin/branding/).
       await atLeast(
@@ -410,12 +509,13 @@ export function useSetup() {
       const [nextGuide] = await atLeast(Promise.all([fetchSetupGuide(), fetchMeForRouting()]));
       setGuide(nextGuide);
       setTicks((t) => ({ ...t, dashboard: "done" }));
+      writeDraft(null); // all saved: nothing left to keep for a reload
       await new Promise((resolve) => setTimeout(resolve, 450));
-      go("ready", "forward");
+      go("ready");
     } catch (err) {
       if (errorCode(err)?.startsWith("social_account")) {
         setContactError("facebook");
-        go("contact", "back");
+        go("contact");
         return;
       }
       fail(err);

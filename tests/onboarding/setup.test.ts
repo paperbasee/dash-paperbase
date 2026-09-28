@@ -164,6 +164,19 @@ describe("setup", () => {
     );
   });
 
+  test("each step is the page's address, so a reload stays on it and Back goes back a step", () => {
+    expect(hook).toContain('const urlStep = stepFrom(searchParams.get("step"));');
+    expect(hook).toContain("if (next !== urlStep) router.push(stepHref(next));");
+    // A step setup cannot be on yet is put right without adding to the history.
+    expect(hook).toContain("else if (!reachable.includes(urlStep)) router.replace(stepHref(earliest));");
+  });
+
+  test("answers not saved yet survive a reload, and go once setup is done", () => {
+    expect(hook).toContain('const DRAFT_KEY = "pb_setup_draft_v1";');
+    expect(hook).toContain("return draft && draft.user === user ? draft : null;");
+    expect(hook).toContain("writeDraft(null); // all saved");
+  });
+
   test("offers a domain the owner has only where the Domains settings are on", () => {
     expect(hook).toContain('export const DOMAINS_ENABLED = process.env.NEXT_PUBLIC_DOMAINS_ENABLED === "1";');
     expect(read("src/app/[locale]/onboarding/steps.tsx")).toContain("{DOMAINS_ENABLED ? (");
