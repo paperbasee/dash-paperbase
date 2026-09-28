@@ -15,7 +15,14 @@ const LOCALES: readonly AppLocale[] = ["en", "bn"];
  * and setup. Remembered the way the sidebar's switch remembers it, and the page's query (a
  * `next` return path, an email link's token) is kept.
  */
-export function AuthLanguageSwitch({ className }: { className?: string }) {
+export function AuthLanguageSwitch({
+  className,
+  onPhoto = false,
+}: {
+  className?: string;
+  /** Drawn over the sign-in photos (a phone's top corner): light on dark, whatever the theme. */
+  onPhoto?: boolean;
+}) {
   const locale = useLocale();
   const t = useTranslations("language");
   const router = useRouter();
@@ -38,7 +45,11 @@ export function AuthLanguageSwitch({ className }: { className?: string }) {
     <div
       role="group"
       aria-label={t("toggleAria")}
-      className={cn("flex gap-0.5 overflow-hidden rounded-ui border border-border-subtle p-0.5 text-xs", className)}
+      className={cn(
+        "flex gap-0.5 overflow-hidden rounded-ui border p-0.5 text-xs",
+        onPhoto ? "border-white/20 bg-black/35 backdrop-blur-md" : "border-border-subtle",
+        className
+      )}
     >
       {LOCALES.map((option) => (
         <button
@@ -49,8 +60,12 @@ export function AuthLanguageSwitch({ className }: { className?: string }) {
           className={cn(
             "rounded-xs px-2.5 py-1 transition-colors",
             locale === option
-              ? "bg-foreground font-medium text-background"
-              : "text-muted-foreground hover:text-foreground"
+              ? onPhoto
+                ? "bg-white font-medium text-[#0f172a]"
+                : "bg-foreground font-medium text-background"
+              : onPhoto
+                ? "text-white/75 hover:text-white"
+                : "text-muted-foreground hover:text-foreground"
           )}
         >
           {option === "en" ? t("switchToEnglish") : t("switchToBengali")}

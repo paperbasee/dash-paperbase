@@ -131,6 +131,7 @@ export function AuthFrame({ children }: { children: ReactNode }) {
           </div>
         </aside>
 
+        <AuthLanguageSwitch onPhoto className="absolute right-4 top-4 z-20 lg:hidden" />
         <div className="relative z-10 flex min-h-dvh flex-col justify-end lg:order-1 lg:min-h-0 lg:items-center lg:justify-center lg:px-12 lg:py-10">
           {/* A phone's line over the moving photos, just above the sheet. */}
           <p className="pb-rise px-6 pb-5 text-[1.875rem] leading-[1.05] text-white [text-shadow:0_2px_18px_rgb(0_0_0/0.65)] [font-family:var(--font-instrument-serif),var(--font-noto-sans-bengali),serif] sm:mx-auto sm:w-[26rem] sm:px-0 lg:hidden">
@@ -161,8 +162,9 @@ export function AuthFrame({ children }: { children: ReactNode }) {
               {choosing ? <AgreeLine /> : null}
             </main>
             <footer className="mt-6 flex items-center justify-between gap-3 text-xs text-muted-foreground lg:mt-10">
-              <span className="hidden lg:inline">© {new Date().getFullYear()} Paperbase</span>
-              <AuthLanguageSwitch className="ml-auto" />
+              <span>© {new Date().getFullYear()} Paperbase</span>
+              {/* A phone has it in the top corner, over the photos. */}
+              <AuthLanguageSwitch className="hidden lg:flex" />
             </footer>
           </div>
         </div>
