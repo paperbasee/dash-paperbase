@@ -4,7 +4,7 @@ import { ArrowLeft } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Suspense } from "react";
 
-import { AuthError } from "@/components/auth/AuthSplitShell";
+import { AuthError } from "@/components/auth/AuthParts";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 

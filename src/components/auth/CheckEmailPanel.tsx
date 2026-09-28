@@ -7,7 +7,7 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthContext";
 
-import { AuthHeading } from "./AuthSplitShell";
+import { AuthHeading } from "./AuthParts";
 
 /** Seconds before the link may be sent again; the API throttles on its own too. */
 const RESEND_AFTER = 30;

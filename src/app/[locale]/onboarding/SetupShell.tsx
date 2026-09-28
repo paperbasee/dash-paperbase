@@ -5,7 +5,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { useState, type ReactNode } from "react";
 
 import { AuthLanguageSwitch } from "@/components/auth/AuthLanguageSwitch";
-import { PaperbaseBrand } from "@/components/auth/AuthSplitShell";
+import { PaperbaseBrand } from "@/components/auth/AuthParts";
 import { ScaleToFit } from "@/components/shop-preview/ScaleToFit";
 import { SHOP_WINDOW_WIDTH, ShopWindow } from "@/components/shop-preview/ShopWindow";
 import { heroPhoto } from "@/components/shop-preview/samples";

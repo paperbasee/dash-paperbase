@@ -5,7 +5,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 
 import { AuthLanguageSwitch } from "@/components/auth/AuthLanguageSwitch";
-import { PaperbaseBrand } from "@/components/auth/AuthSplitShell";
+import { PaperbaseBrand } from "@/components/auth/AuthParts";
 import { SetupGuideCard } from "@/components/setup-guide/SetupGuideCard";
 import { ScaleToFit } from "@/components/shop-preview/ScaleToFit";
 import { SHOP_WINDOW_WIDTH } from "@/components/shop-preview/ShopWindow";

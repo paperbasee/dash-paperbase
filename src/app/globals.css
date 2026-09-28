@@ -752,6 +752,22 @@ input.font-numbers-date-value::placeholder {
     box-shadow: 0 0 0 6px transparent;
   }
 }
+@keyframes pb-wall-up {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(-50%);
+  }
+}
+@keyframes pb-wall-down {
+  from {
+    transform: translateY(-50%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
 @keyframes pb-flash {
   from {
     background-color: hsl(var(--accent-green) / 0.22);
@@ -839,6 +855,13 @@ input.font-numbers-date-value::placeholder {
   }
   .pb-flash {
     animation: pb-flash 1s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  /* The sign-in wall's columns (ShopWall): each travels half its length, which is one copy. */
+  .pb-wall-up {
+    animation: pb-wall-up 70s linear infinite;
+  }
+  .pb-wall-down {
+    animation: pb-wall-down 70s linear infinite;
   }
 }
 

@@ -1794,8 +1794,6 @@
       "email": "Email",
       "emailPlaceholder": "you@example.com",
       "sendLink": "Email me a sign-in link",
-      "newHere": "New to Paperbase?",
-      "createAccount": "Create an account",
       "emailRequired": "Enter your email to get a sign-in link.",
       "passkeyFailed": "We couldn't sign you in with a passkey. Try the email link, or a device that has your passkey.",
       "accountCheckFailed": "We couldn't check your account. Try again.",
@@ -1811,8 +1809,6 @@
       "email": "Email",
       "emailPlaceholder": "you@example.com",
       "create": "Create account",
-      "haveAccount": "Already have an account?",
-      "signIn": "Sign in",
       "nameRequired": "Enter your first and last name.",
       "emailRequired": "Enter your email address.",
       "failed": "We couldn't create your account. Try again."
@@ -1958,27 +1954,19 @@
       "failedOffer": "We couldn't create your passkey. Try again, or skip for now.",
       "finishFailed": "Something went wrong finishing your passkey. Try again."
     },
-    "showcase": {
-      "signinTitle": "Everything your shop needs, in one place",
-      "signinBody": "Orders, couriers, and your own website.",
-      "signupTitle": "Your shop, live today",
-      "signupBody": "A website, orders, and couriers, ready to go.",
-      "todaysSales": "Today's sales",
+    "tabs": {
+      "label": "Sign in or create an account",
+      "signIn": "Sign in",
+      "createAccount": "Create account"
+    },
+    "wall": {
+      "title": "Every shop starts with a single sign-in.",
+      "body": "Orders, couriers and your own website, in one place.",
       "newOrder": "New order #{number}",
-      "cod": "COD",
-      "courierBooked": "Parcel booked with Steadfast",
-      "passkeyTitle": "Signs in with a passkey",
-      "passkeyBody": "Face, fingerprint, or PIN",
-      "stepsTitle": "Your shop in 3 steps",
-      "step1": "Create your account",
-      "step2": "Set up your shop",
-      "step3": "Take your first order",
-      "order1Name": "Nusrat J.",
-      "order1City": "Dhaka",
-      "order2Name": "Rafi A.",
-      "order2City": "Chattogram",
-      "order3Name": "Sadia K.",
-      "order3City": "Sylhet"
+      "todaysSales": "Today's sales",
+      "salesUp": "▲ 18% on yesterday",
+      "parcelBooked": "Parcel booked",
+      "parcelWhere": "Steadfast · Sylhet"
     },
     "unreachable": "We couldn't reach the server. Try again."
   },

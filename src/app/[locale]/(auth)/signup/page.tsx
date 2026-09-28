@@ -1,28 +1,21 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { Sparkles } from "lucide-react";
-import { Link } from "@/i18n/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { AuthPhotoStrip } from "@/components/auth/AuthPhotoStrip";
-import { AuthError, AuthHeading, AuthSplitShell } from "@/components/auth/AuthSplitShell";
+import { useHideAuthTabs } from "@/components/auth/AuthFrame";
+import { AuthError, AuthHeading } from "@/components/auth/AuthParts";
 import { CheckEmailPanel } from "@/components/auth/CheckEmailPanel";
 import { TurnstileWidget } from "@/components/auth/TurnstileWidget";
 import { useMinDelayLoading } from "@/hooks/useMinDelayLoading";
-import { getSafeNextPath, withNext } from "@/lib/safe-next";
 import { isTurnstileDisabled } from "@/lib/turnstile-env";
 import { isNetworkError } from "@/lib/network-error";
 
 export default function SignupPage() {
   const t = useTranslations("auth.signup");
   const tAuth = useTranslations("auth");
-  const tShowcase = useTranslations("auth.showcase");
-  const searchParams = useSearchParams();
-  const nextPath = getSafeNextPath(searchParams.get("next"));
   const { signup } = useAuth();
 
   const [email, setEmail] = useState("");
@@ -31,6 +24,7 @@ export default function SignupPage() {
   const [error, setError] = useState("");
   const [sent, setSent] = useState(false);
   const { loading, runWithLoading } = useMinDelayLoading();
+  useHideAuthTabs(sent);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -72,35 +66,13 @@ export default function SignupPage() {
     }
   }
 
-  const footer = sent ? null : (
-    <>
-      {t("haveAccount")}{" "}
-      <Link
-        href={withNext("/login", nextPath)}
-        className="font-medium text-foreground underline decoration-border underline-offset-4 hover:decoration-foreground"
-      >
-        {t("signIn")}
-      </Link>
-    </>
-  );
-
   return (
-    <AuthSplitShell showcase="signup" footer={footer}>
+    <>
       {sent ? (
         <CheckEmailPanel email={email.trim()} variant="signup" onBack={() => setSent(false)} />
       ) : (
         <form onSubmit={handleSubmit} className="pb-stagger space-y-6" aria-busy={loading} noValidate>
           <AuthHeading title={t("title")} body={t("subtitle")} />
-          <AuthPhotoStrip
-            note={
-              <>
-                <span className="flex size-[26px] shrink-0 items-center justify-center rounded-full bg-[#0f172a] text-white">
-                  <Sparkles className="size-3.5" aria-hidden />
-                </span>
-                <span className="min-w-0 flex-1 truncate font-medium">{tShowcase("signupTitle")}</span>
-              </>
-            }
-          />
           {error ? <AuthError>{error}</AuthError> : null}
 
           <div className="space-y-4">
@@ -160,6 +132,6 @@ export default function SignupPage() {
           </div>
         </form>
       )}
-    </AuthSplitShell>
+    </>
   );
 }

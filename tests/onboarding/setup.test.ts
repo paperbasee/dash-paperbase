@@ -64,9 +64,30 @@ describe("the sample shop", () => {
   });
 });
 
+describe("the shop wall behind sign in and sign up", () => {
+  test("sign in, sign up and the email-link pages share one frame, so the wall never restarts between them", () => {
+    expect(read("src/app/[locale]/(auth)/layout.tsx")).toContain("<AuthFrame>{children}</AuthFrame>");
+    for (const page of ["login", "signup", "auth/passkey", "auth/verify-email"]) {
+      expect(fs.existsSync(path.join(ROOT, "src/app/[locale]/(auth)", page, "page.tsx")), page).toBe(true);
+    }
+  });
+
+  test("the columns drift up and down, each once round a copy of itself", () => {
+    const wall = read("src/components/auth/ShopWall.tsx");
+    expect(wall).toContain("{[...tiles, ...tiles].map(");
+    const css = read("src/app/globals.css");
+    expect(css).toContain("@keyframes pb-wall-up {\n  from {\n    transform: translateY(0);\n  }\n  to {\n    transform: translateY(-50%);");
+  });
+
+  test("the tabs step aside once the email is sent", () => {
+    expect(read("src/app/[locale]/(auth)/login/page.tsx")).toContain("useHideAuthTabs(linkSent);");
+    expect(read("src/app/[locale]/(auth)/signup/page.tsx")).toContain("useHideAuthTabs(sent);");
+  });
+});
+
 describe("the words, in both languages", () => {
   test("sign in, sign up, setup and the sample shop say everything in Bangla too", () => {
-    for (const ns of ["login", "signup", "checkEmail", "passkey", "showcase", "onboarding"] as const) {
+    for (const ns of ["login", "signup", "checkEmail", "passkey", "tabs", "wall", "onboarding"] as const) {
       expect(keys(bn.auth[ns]).sort(), ns).toEqual(keys(en.auth[ns]).sort());
     }
     expect(keys(bn.shopPreview).sort()).toEqual(keys(en.shopPreview).sort());
@@ -75,9 +96,11 @@ describe("the words, in both languages", () => {
 
   test("the pages hold no English of their own", () => {
     for (const file of [
-      "src/app/[locale]/login/page.tsx",
-      "src/app/[locale]/signup/page.tsx",
-      "src/app/[locale]/auth/passkey/page.tsx",
+      "src/app/[locale]/(auth)/login/page.tsx",
+      "src/app/[locale]/(auth)/signup/page.tsx",
+      "src/app/[locale]/(auth)/auth/passkey/page.tsx",
+      "src/components/auth/AuthFrame.tsx",
+      "src/components/auth/ShopWall.tsx",
     ]) {
       const source = read(file);
       expect(source, file).toContain("useTranslations(");

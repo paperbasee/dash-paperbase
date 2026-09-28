@@ -7,7 +7,7 @@ import { Fingerprint } from "lucide-react";
 import { Link, useRouter } from "@/i18n/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
-import { AuthError, AuthHeading, AuthSplitShell } from "@/components/auth/AuthSplitShell";
+import { AuthError, AuthHeading } from "@/components/auth/AuthParts";
 import { resolvePostAuthRoute } from "@/lib/subscription-access";
 import { isNetworkError } from "@/lib/network-error";
 import {
@@ -160,31 +160,31 @@ export default function MagicLinkPasskeyPage() {
 
   if (phase === "verifying") {
     return (
-      <AuthSplitShell showcase="signup">
+      <>
         <div className="pb-stagger space-y-6" aria-busy>
           <AuthHeading title={t("verifyingTitle")} body={t("verifyingBody")} />
           <div className="size-8 animate-spin rounded-full border-2 border-muted border-t-foreground" />
         </div>
-      </AuthSplitShell>
+      </>
     );
   }
 
   if (phase === "error") {
     return (
-      <AuthSplitShell showcase="signup">
+      <>
         <div className="pb-stagger space-y-6">
           <AuthHeading title={t("errorTitle")} body={error} />
           <Button variant="outline" asChild className="h-11 w-full">
             <Link href="/login">{t("backToSignIn")}</Link>
           </Button>
         </div>
-      </AuthSplitShell>
+      </>
     );
   }
 
   if (phase === "offer") {
     return (
-      <AuthSplitShell showcase="signin">
+      <>
         <div className="pb-stagger space-y-6">
           <PasskeyMark />
           <AuthHeading title={t("offerTitle")} body={t("offerBody")} />
@@ -210,12 +210,12 @@ export default function MagicLinkPasskeyPage() {
             </Button>
           </div>
         </div>
-      </AuthSplitShell>
+      </>
     );
   }
 
   return (
-    <AuthSplitShell showcase="signup">
+    <>
       <div className="pb-stagger space-y-6">
         <PasskeyMark />
         <AuthHeading title={t("enrollTitle")} body={t("enrollBody", { email })} />
@@ -230,7 +230,7 @@ export default function MagicLinkPasskeyPage() {
           {t("create")}
         </Button>
       </div>
-    </AuthSplitShell>
+    </>
   );
 }
 

@@ -4,28 +4,22 @@ import { useEffect, useState, type FormEvent } from "react";
 import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Fingerprint, Mail } from "lucide-react";
-import { Link, useRouter } from "@/i18n/navigation";
+import { useRouter } from "@/i18n/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { AuthPhotoStrip } from "@/components/auth/AuthPhotoStrip";
-import {
-  AuthDivider,
-  AuthError,
-  AuthHeading,
-  AuthSplitShell,
-} from "@/components/auth/AuthSplitShell";
+import { useHideAuthTabs } from "@/components/auth/AuthFrame";
+import { AuthDivider, AuthError, AuthHeading } from "@/components/auth/AuthParts";
 import { CheckEmailPanel } from "@/components/auth/CheckEmailPanel";
 import { useMinDelayLoading } from "@/hooks/useMinDelayLoading";
 import { resolvePostAuthRoute } from "@/lib/subscription-access";
-import { getSafeNextPath, withNext } from "@/lib/safe-next";
+import { getSafeNextPath } from "@/lib/safe-next";
 import { isNetworkError } from "@/lib/network-error";
 import { browserSupportsWebAuthn, isPasskeyCancellation } from "@/lib/passkeys";
 
 export default function LoginPage() {
   const t = useTranslations("auth.login");
   const tAuth = useTranslations("auth");
-  const tShowcase = useTranslations("auth.showcase");
   const router = useRouter();
   const searchParams = useSearchParams();
   const nextPath = getSafeNextPath(searchParams.get("next"));
@@ -37,6 +31,7 @@ export default function LoginPage() {
   const [linkSent, setLinkSent] = useState(false);
   const [linkLoading, setLinkLoading] = useState(false);
   const { loading, runWithLoading } = useMinDelayLoading();
+  useHideAuthTabs(linkSent);
 
   useEffect(() => {
     setSupportsPasskeys(browserSupportsWebAuthn());
@@ -88,40 +83,13 @@ export default function LoginPage() {
     }
   }
 
-  const footer = linkSent ? null : (
-    <>
-      {t("newHere")}{" "}
-      <Link
-        href={withNext("/signup", nextPath)}
-        className="font-medium text-foreground underline decoration-border underline-offset-4 hover:decoration-foreground"
-      >
-        {t("createAccount")}
-      </Link>
-    </>
-  );
-
   return (
-    <AuthSplitShell showcase="signin" footer={footer}>
+    <>
       {linkSent ? (
         <CheckEmailPanel email={email.trim()} variant="signin" onBack={() => setLinkSent(false)} />
       ) : (
         <div className="pb-stagger space-y-6" aria-busy={loading}>
           <AuthHeading title={t("title")} body={t("subtitle")} />
-          <AuthPhotoStrip
-            note={
-              <>
-                <span className="flex size-[26px] shrink-0 items-center justify-center rounded-full bg-[#ece6da] text-[10px] font-semibold text-[#6b5d45]">
-                  NJ
-                </span>
-                <span className="min-w-0 flex-1 truncate font-medium">
-                  {tShowcase("newOrder", { number: 1042 })}
-                </span>
-                <span className="rounded-xs bg-[#0f172a] px-1.5 py-0.5 text-[9.5px] font-semibold text-white">
-                  {tShowcase("cod")}
-                </span>
-              </>
-            }
-          />
           {error ? <AuthError>{error}</AuthError> : null}
 
           <div className="space-y-5">
@@ -168,6 +136,6 @@ export default function LoginPage() {
           </div>
         </div>
       )}
-    </AuthSplitShell>
+    </>
   );
 }
