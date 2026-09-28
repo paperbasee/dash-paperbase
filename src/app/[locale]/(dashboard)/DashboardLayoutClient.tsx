@@ -48,6 +48,16 @@ function getBackendHealthUrl(): string {
   }
 }
 
+/**
+ * The notices across the top of the dashboard (trial, plan waiting, inactive, refused): one row,
+ * its words centred on their capital letters (`text-box` trim) rather than on the font's own
+ * line box, whose height each browser reads from the font differently -- the trial notice sat a
+ * pixel high on the owner's screen (2026-09-29).
+ */
+const NOTICE_ROW =
+  "mx-auto flex min-h-[26px] w-full max-w-[88rem] flex-wrap items-center justify-center gap-x-2 gap-y-1 px-2 py-2 text-center md:gap-x-3 md:px-4";
+const NOTICE_TEXT = "text-center text-[11px] leading-snug [text-box:trim-both_cap_alphabetic] sm:text-xs";
+
 export default function DashboardLayoutClient({
   children,
 }: {
@@ -262,9 +272,9 @@ export default function DashboardLayoutClient({
                     role="status"
                     className="border-b border-border bg-amber-50 dark:bg-amber-950"
                   >
-                    <div className="mx-auto flex w-full max-w-[88rem] flex-wrap items-center justify-center gap-x-2 gap-y-1 px-2 py-1 text-center md:gap-x-3 md:px-4 md:py-1">
+                    <div className={NOTICE_ROW}>
                       <div className="flex max-w-3xl flex-wrap items-center justify-center gap-1 sm:gap-1.5">
-                        <p className="text-center text-[11px] leading-snug text-amber-900 sm:text-xs dark:text-amber-100">
+                        <p className={cn(NOTICE_TEXT, "text-amber-900 dark:text-amber-100")}>
                           {tDashboardLayout("pendingReviewBannerText")}
                         </p>
                       </div>
@@ -286,8 +296,8 @@ export default function DashboardLayoutClient({
                   role="status"
                   className="border-b border-border bg-primary/10"
                 >
-                  <div className="mx-auto flex w-full max-w-[88rem] flex-wrap items-center justify-center gap-x-2 gap-y-1 px-2 py-1 text-center md:gap-x-3 md:px-4 md:py-1">
-                    <p className="text-center text-[11px] leading-snug text-foreground sm:text-xs">
+                  <div className={NOTICE_ROW}>
+                    <p className={cn(NOTICE_TEXT, "text-foreground")}>
                       {tDashboardLayout("trialBannerText", {
                         days: subscription?.days_remaining ?? 0,
                       })}{" "}
@@ -306,9 +316,9 @@ export default function DashboardLayoutClient({
                   role="status"
                   className="border-b border-border bg-amber-50 dark:bg-amber-950"
                 >
-                  <div className="mx-auto flex w-full max-w-[88rem] flex-wrap items-center justify-center gap-x-2 gap-y-1 px-2 py-1 text-center md:gap-x-3 md:px-4 md:py-1">
+                  <div className={NOTICE_ROW}>
                     <div className="flex max-w-3xl flex-wrap items-center justify-center gap-1 sm:gap-1.5">
-                      <p className="text-center text-[11px] leading-snug text-amber-900 sm:text-xs dark:text-amber-100">
+                      <p className={cn(NOTICE_TEXT, "text-amber-900 dark:text-amber-100")}>
                         {tDashboardLayout("inactivePlanBannerText")}{" "}
                         <DeferredNavLink
                           href="/plans"
@@ -326,9 +336,9 @@ export default function DashboardLayoutClient({
                   role="status"
                   className="border-b border-border bg-orange-50 dark:bg-orange-950"
                 >
-                  <div className="mx-auto flex w-full max-w-[88rem] flex-wrap items-center justify-center gap-x-2 gap-y-1 px-2 py-1 text-center md:gap-x-3 md:px-4 md:py-1">
+                  <div className={NOTICE_ROW}>
                     <div className="flex max-w-3xl flex-wrap items-center justify-center gap-1 sm:gap-1.5">
-                      <p className="text-center text-[11px] leading-snug text-orange-900 sm:text-xs dark:text-orange-100">
+                      <p className={cn(NOTICE_TEXT, "text-orange-900 dark:text-orange-100")}>
                         {tDashboardLayout("rejectedPlanBannerText")}{" "}
                         <DeferredNavLink
                           href="/plans"
