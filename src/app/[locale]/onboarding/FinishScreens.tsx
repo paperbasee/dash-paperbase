@@ -5,7 +5,6 @@ import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 
 import { AuthLanguageSwitch } from "@/components/auth/AuthLanguageSwitch";
-import { PaperbaseBrand } from "@/components/auth/AuthParts";
 import { SetupGuideCard } from "@/components/setup-guide/SetupGuideCard";
 import { ScaleToFit } from "@/components/shop-preview/ScaleToFit";
 import { SHOP_WINDOW_WIDTH } from "@/components/shop-preview/ShopWindow";
@@ -14,7 +13,7 @@ import { Link } from "@/i18n/navigation";
 import { paletteName } from "@/lib/theme-editor/palettes";
 import { cn } from "@/lib/utils";
 
-import { SetupPreview } from "./SetupShell";
+import { PreviewPanel, SetupPreview } from "./SetupShell";
 import { TickMark } from "./steps";
 import type { FinishTick, SetupState } from "./useSetup";
 
@@ -111,10 +110,10 @@ export function ReadyScreen({ setup }: { setup: SetupState }) {
   const url = setup.liveUrl;
 
   return (
-    <div className="pb-motion grid min-h-dvh bg-background lg:grid-cols-[minmax(26rem,33rem)_minmax(0,1fr)]">
+    <div className="pb-motion grid min-h-dvh bg-background lg:grid-cols-[minmax(26rem,33rem)_minmax(0,1fr)] lg:gap-3 lg:p-3">
       <div className="flex min-w-0 flex-col px-5 py-5 sm:px-12 sm:py-7">
-        <header className="flex items-center justify-between">
-          <PaperbaseBrand />
+        {/* On a computer English / বাংলা sits in the shop panel's corner. */}
+        <header className="flex justify-end lg:hidden">
           <AuthLanguageSwitch />
         </header>
         <div className="pb-stagger flex flex-1 flex-col justify-center gap-5 py-10">
@@ -154,17 +153,16 @@ export function ReadyScreen({ setup }: { setup: SetupState }) {
           </Button>
         </div>
       </div>
-      <aside className="sticky top-0 hidden h-dvh min-w-0 flex-col border-l border-border-subtle bg-muted/50 lg:flex">
-        <span className="ml-auto mr-6 mt-5 flex items-center gap-1.5 rounded-xs bg-[hsl(var(--accent-green)/0.12)] px-2.5 py-1 text-xs font-medium text-[hsl(var(--accent-green))]">
-          <span className="pb-live-dot size-[7px] rounded-full bg-[hsl(var(--accent-green))]" />
-          {t("liveNow")}
-        </span>
-        <div className="min-h-0 flex-1 px-6 pb-6 pt-3 xl:px-8">
-          <ScaleToFit width={SHOP_WINDOW_WIDTH} mode="contain" maxScale={1.7}>
-            <SetupPreview setup={setup} />
-          </ScaleToFit>
-        </div>
-      </aside>
+      <PreviewPanel
+        badge={
+          <span className="flex items-center gap-1.5 rounded-xs bg-[hsl(var(--accent-green)/0.16)] px-2.5 py-1 text-xs font-medium text-[hsl(var(--accent-green))]">
+            <span className="pb-live-dot size-[7px] rounded-full bg-[hsl(var(--accent-green))]" />
+            {t("liveNow")}
+          </span>
+        }
+      >
+        <SetupPreview setup={setup} />
+      </PreviewPanel>
     </div>
   );
 }
