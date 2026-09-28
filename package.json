@@ -60,6 +60,7 @@
   },
   "allowScripts": {
     "@parcel/watcher": true,
+    "@sentry/cli": true,
     "@swc/core": true
   }
 }
