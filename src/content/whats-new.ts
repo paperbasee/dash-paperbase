@@ -88,9 +88,39 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-09-29-send-to-courier-says-why",
+    date: "2026-09-29",
+    version: "4.129.0",
+    tag: "fixed",
+    href: "/orders",
+    title: {
+      en: "Send to courier says why it didn't go",
+      bn: "কুরিয়ারে না গেলে কারণ জানায়",
+    },
+    body: {
+      en: "When an order doesn't reach the courier, a note now says so with the reason, such as a phone number the courier won't take or courier keys that need checking. The button used to go back to Send without a word.",
+      bn: "কোনো অর্ডার কুরিয়ারে না গেলে এখন একটি বার্তা তা কারণসহ জানায়, যেমন কুরিয়ার যে ফোন নম্বর নেয় না বা যে কুরিয়ার কী আবার দেখা দরকার। আগে বোতামটি কিছু না বলেই আবার Send হয়ে যেত।",
+    },
+  },
+  {
+    id: "2026-09-29-deleting-a-category-with-products",
+    date: "2026-09-29",
+    version: "4.129.0",
+    tag: "fixed",
+    href: "/categories",
+    title: {
+      en: "Deleting a category that still has products",
+      bn: "পণ্য থাকা ক্যাটাগরি মুছতে গেলে",
+    },
+    body: {
+      en: "It now tells you how many products to move to another category first, as a note rather than an error. And the category keeps its picture: a delete that was refused used to remove it.",
+      bn: "এখন জানায় আগে কতগুলো পণ্য অন্য ক্যাটাগরিতে সরাতে হবে, সমস্যা হিসেবে নয়, একটি বার্তা হিসেবে। আর ক্যাটাগরির ছবিও থেকে যায়: আগে মুছতে না পারলেও ছবিটি মুছে যেত।",
+    },
+  },
+  {
     id: "2026-09-29-small-clean-notes",
     date: "2026-09-29",
-    version: "4.128.1",
+    version: "4.129.0",
     tag: "improved",
     title: {
       en: "Small, clean notes after you do something",
@@ -484,35 +514,6 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     body: {
       en: "The last pieces of the old storefront are gone from the platform, including a hidden settings block for a storefront address and secret that no shop used any more. Nothing changes in your dashboard or your shop.",
       bn: "পুরোনো স্টোরফ্রন্টের শেষ অংশগুলো প্ল্যাটফর্ম থেকে সরানো হয়েছে, এর মধ্যে ছিল স্টোরফ্রন্টের ঠিকানা আর গোপন কোডের একটি লুকানো সেটিংস অংশ, যা আর কোনো দোকান ব্যবহার করত না। আপনার ড্যাশবোর্ড বা দোকানে কিছুই বদলায়নি।",
-    },
-  },
-  {
-    id: "2026-09-27-shelf-cards-for-every-shop",
-    date: "2026-09-27",
-    version: "4.118.10",
-    tag: "improved",
-    href: "/settings?tab=customization",
-    title: {
-      en: "Shelf product cards for every shop",
-      bn: "সব দোকানে শেলফ প্রোডাক্ট কার্ড",
-    },
-    body: {
-      en: "Every product card now shows its price and an Order now button, so shoppers can buy straight from the card. Prefer the quieter Classic cards? Choose them in Customization under Style and press Save to store.",
-      bn: "প্রতিটি প্রোডাক্ট কার্ডে এখন দাম আর একটি এখনই অর্ডার করুন বোতাম থাকে, তাই ক্রেতারা কার্ড থেকেই কিনতে পারেন। শান্ত ক্ল্যাসিক কার্ড পছন্দ? কাস্টমাইজেশনের স্টাইল অংশে সেটি বেছে স্টোরে সংরক্ষণ চাপুন।",
-    },
-  },
-  {
-    id: "2026-09-27-product-main-picture",
-    date: "2026-09-27",
-    version: "4.118.9",
-    tag: "fixed",
-    title: {
-      en: "Product pages show the main picture again",
-      bn: "প্রোডাক্ট পেজে মূল ছবি আবার দেখা যাচ্ছে",
-    },
-    body: {
-      en: "Every product page shows its main picture first, then the extra ones. For a day after the new shop went live, a product with only a main picture showed an empty frame on its page.",
-      bn: "প্রতিটি প্রোডাক্ট পেজে এখন আগে মূল ছবি, তারপর বাকি ছবিগুলো দেখায়। নতুন দোকান চালু হওয়ার পর এক দিন, যে প্রোডাক্টের শুধু মূল ছবি ছিল তার পেজে ছবির জায়গা খালি দেখাচ্ছিল।",
     },
   },
   {
