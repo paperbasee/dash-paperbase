@@ -88,6 +88,20 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-09-29-small-clean-notes",
+    date: "2026-09-29",
+    version: "4.128.0",
+    tag: "improved",
+    title: {
+      en: "Small, clean notes after you do something",
+      bn: "কিছু করার পরে ছোট, পরিষ্কার বার্তা",
+    },
+    body: {
+      en: "The note that pops up after you save or delete something is now a small card with an icon, at the bottom of the page you're working on. Done notes go after 3 seconds and errors after 8, and × closes any of them.",
+      bn: "কিছু সেভ বা মুছে ফেলার পরে যে বার্তা আসে, তা এখন আইকনসহ একটি ছোট কার্ড, আপনি যে পেজে কাজ করছেন তার নিচে। কাজ হয়ে যাওয়ার বার্তা ৩ সেকেন্ডে আর সমস্যার বার্তা ৮ সেকেন্ডে চলে যায়, আর × চাপলে যেকোনোটি বন্ধ হয়।",
+    },
+  },
+  {
     id: "2026-09-29-a-checkout-warning-shoppers-notice",
     date: "2026-09-29",
     version: "4.127.0",
@@ -499,21 +513,6 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     body: {
       en: "Every product page shows its main picture first, then the extra ones. For a day after the new shop went live, a product with only a main picture showed an empty frame on its page.",
       bn: "প্রতিটি প্রোডাক্ট পেজে এখন আগে মূল ছবি, তারপর বাকি ছবিগুলো দেখায়। নতুন দোকান চালু হওয়ার পর এক দিন, যে প্রোডাক্টের শুধু মূল ছবি ছিল তার পেজে ছবির জায়গা খালি দেখাচ্ছিল।",
-    },
-  },
-  {
-    id: "2026-09-22-colours-cards-and-corners",
-    date: "2026-09-22",
-    version: "4.118.9",
-    tag: "new",
-    href: "/settings?tab=customization",
-    title: {
-      en: "Your colours, cards and corners, in the editor",
-      bn: "রং, কার্ড আর কোণা, এখন এডিটরে",
-    },
-    body: {
-      en: "Pick one of six premium palettes — Porcelain, Sage, Clay, Rosé, Navy or Emerald — and your whole shop is drawn in it, from the page and the header to the Add to cart button; every shop starts on Porcelain. Choose square, soft or rounded corners for everything your shop draws a box around, and Classic or Shelf product cards — each drawn as the card your shop will show, in your colours — which moved out of Settings where they changed your shop the moment you clicked. All three sit in Customization under Style, and reach shoppers when you press Save to store; the typefaces beside them are shown faded, as a preview of what is coming, until they can be saved too.",
-      bn: "ছয়টি প্রিমিয়াম প্যালেটের একটি বেছে নিন — পোর্সেলিন, সেজ সবুজ, পোড়ামাটি, গোলাপি, নেভি নীল বা পান্না সবুজ — পাতা আর হেডার থেকে কার্টে যোগের বোতাম পর্যন্ত পুরো দোকান সেই রঙে সাজবে; প্রতিটি দোকান শুরু হয় পোর্সেলিনে। দোকানে যেখানে যেখানে বাক্স আঁকা হয় সবখানের কোণা চোকো, হালকা গোল নাকি গোল হবে, আর ক্ল্যাসিক না শেলফ প্রোডাক্ট কার্ড — প্রতিটি আপনার রঙে ঠিক দোকানের কার্ডের মতো আঁকা; এই পছন্দটিও সেটিংস থেকে এসেছে, যেখানে চাপ দেওয়ামাত্রই দোকান বদলে যেত। তিনটিই কাস্টমাইজেশনের স্টাইল অংশে, আর স্টোরে সংরক্ষণ চাপলেই ক্রেতাদের কাছে যাবে; পাশের ফন্টগুলো আসছে তার আভাস হিসেবে ঝাপসা দেখায়, যতক্ষণ না সেগুলোও সংরক্ষণ করা যায়।",
     },
   },
   {
