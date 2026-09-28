@@ -147,7 +147,13 @@ export function NameStep({ setup, className }: { setup: SetupState; className?: 
                 {hostname.slice(hostname.indexOf("."))}
               </span>
             ) : (
-              <span className="text-muted-foreground">{t("addressPending")}</span>
+              <span className="text-muted-foreground">
+                {check.state === "none"
+                  ? t("addressNone")
+                  : check.state === "failed"
+                    ? t("addressCheckFailed")
+                    : t("addressPending")}
+              </span>
             )}
             {check.state === "checking" && !setup.storeMade ? (
               <span className="ml-auto flex shrink-0 items-center gap-1.5 text-xs text-muted-foreground">
@@ -273,9 +279,10 @@ export function AddressStep({ setup, className }: { setup: SetupState; className
 
   return (
     <div className={cn("space-y-6", className)}>
+      {/* "Ready now" only when there is one: the option below says so when there is none. */}
       <AuthHeading
         title={t("addressTitle")}
-        body={DOMAINS_ENABLED ? t("addressBody") : t("addressBodyFreeOnly")}
+        body={DOMAINS_ENABLED ? t("addressBody") : free ? t("addressBodyFreeOnly") : undefined}
       />
       <div className="space-y-3" role="radiogroup" aria-label={t("addressTitle")}>
         <Option on={setup.addressMode === "free"} onPick={() => setup.setAddressMode("free")}>
@@ -295,7 +302,7 @@ export function AddressStep({ setup, className }: { setup: SetupState; className
               </div>
             </>
           ) : (
-            <p className="mt-1 text-[12.5px] text-muted-foreground">{t("freeAddressPending")}</p>
+            <p className="mt-1 text-[12.5px] text-muted-foreground">{t("freeAddressNone")}</p>
           )}
         </Option>
 

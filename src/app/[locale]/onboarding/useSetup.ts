@@ -59,10 +59,17 @@ type CreatedStore = {
   refresh: string;
 };
 
+/**
+ * The address a typed name would get. `none`: the platform gives new shops no address of their
+ * own (the API's empty answer); `failed`: the check could not be made -- each said as it is,
+ * never left looking like a wait (owner, 2026-09-28: "make the box honest").
+ */
 export type NameCheck =
   | { state: "idle" }
   | { state: "checking" }
   | { state: "ok"; hostname: string }
+  | { state: "none" }
+  | { state: "failed" }
   | { state: "needs_letters" };
 
 export type DomainCheck = {
@@ -273,9 +280,9 @@ export function useSetup() {
     const timer = window.setTimeout(() => {
       api
         .get<{ hostname: string }>("store/address-preview/", { params: { name } })
-        .then(({ data }) => setNameCheck({ state: "ok", hostname: data.hostname }))
+        .then(({ data }) => setNameCheck(data.hostname ? { state: "ok", hostname: data.hostname } : { state: "none" }))
         .catch((err: unknown) =>
-          setNameCheck(errorCode(err) === "name_needs_letters" ? { state: "needs_letters" } : { state: "idle" })
+          setNameCheck(errorCode(err) === "name_needs_letters" ? { state: "needs_letters" } : { state: "failed" })
         );
     }, 400);
     return () => window.clearTimeout(timer);
