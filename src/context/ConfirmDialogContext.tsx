@@ -36,6 +36,8 @@ export type ConfirmDialogOptions = {
 type QueueEntry = {
   options: ConfirmDialogOptions;
   resolve: (result: boolean) => void;
+  /** What had focus when it was asked -- the Delete button, usually -- to go back to on close. */
+  opener: HTMLElement | null;
 };
 
 type ConfirmFn = (options: ConfirmDialogOptions) => Promise<boolean>;
@@ -106,7 +108,8 @@ export function ConfirmDialogProvider({ children }: { children: ReactNode }) {
   const confirm = useCallback(
     (options: ConfirmDialogOptions) =>
       new Promise<boolean>((resolve) => {
-        const item: QueueEntry = { options, resolve };
+        const active = typeof document === "undefined" ? null : document.activeElement;
+        const item: QueueEntry = { options, resolve, opener: active instanceof HTMLElement ? active : null };
         if (!openRef.current) {
           openRef.current = true;
           attachEntry(item);
@@ -174,6 +177,7 @@ export function ConfirmDialogProvider({ children }: { children: ReactNode }) {
           typedValueLabel={entry.options.typedValueLabel}
           variant={entry.options.variant ?? "default"}
           isConfirmLoading={confirmLoading}
+          returnFocusTo={entry.opener}
           onCancel={handleCancel}
           onConfirm={() => void handleConfirm()}
         />

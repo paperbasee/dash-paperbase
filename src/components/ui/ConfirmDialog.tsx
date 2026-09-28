@@ -29,6 +29,11 @@ export type ConfirmDialogProps = {
   requireTypedValue?: string;
   /** Label above that input. Callers pass a localized string. */
   typedValueLabel?: string;
+  /**
+   * Where focus goes back to on close. This dialog has no trigger of its own -- it is asked for
+   * from code -- so without it focus was dropped on the page instead of the button that asked.
+   */
+  returnFocusTo?: HTMLElement | null;
   onCancel: () => void;
   onConfirm: () => void;
 };
@@ -44,6 +49,7 @@ export function ConfirmDialog({
   isConfirmLoading = false,
   requireTypedValue,
   typedValueLabel,
+  returnFocusTo,
   onCancel,
   onConfirm,
 }: ConfirmDialogProps) {
@@ -79,6 +85,11 @@ export function ConfirmDialog({
         }}
         onEscapeKeyDown={(e) => {
           if (busy) e.preventDefault();
+        }}
+        onCloseAutoFocus={(e) => {
+          if (!returnFocusTo?.isConnected) return;
+          e.preventDefault();
+          returnFocusTo.focus({ preventScroll: true });
         }}
       >
         <div className="flex flex-col items-center gap-2.5 px-5 pb-3.5 pt-6 text-center sm:gap-3 sm:px-8 sm:pb-4 sm:pt-9">

@@ -59,7 +59,13 @@ function DialogContent({
         onOpenAutoFocus={(event) => {
           onOpenAutoFocus?.(event)
           if (!event.defaultPrevented) {
+            // No field is focused for the merchant when the dialog opens -- but
+            // focus still has to come INTO it. Left on the button behind, it sits
+            // in the page Radix hides from assistive technology, and Chrome
+            // refuses that: "Blocked aria-hidden on an element because its
+            // descendant retained focus" (2026-09-29). The dialog itself takes it.
             event.preventDefault()
+            ;(event.target as HTMLElement | null)?.focus({ preventScroll: true })
           }
         }}
         className={cn(
