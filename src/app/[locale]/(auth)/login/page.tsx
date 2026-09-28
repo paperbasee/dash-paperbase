@@ -127,7 +127,7 @@ export default function LoginPage() {
                   inputMode="email"
                 />
               </div>
-              <Button type="submit" variant="outline" loading={linkLoading} className="h-11 w-full">
+              <Button type="submit" loading={linkLoading} className="h-11 w-full">
                 <Mail className="size-[18px]" aria-hidden />
                 {t("sendLink")}
               </Button>
