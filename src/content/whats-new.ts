@@ -88,6 +88,51 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-09-29-your-own-words-after-a-cash-on-delivery-order",
+    date: "2026-09-29",
+    version: "4.126.0",
+    tag: "new",
+    href: "/settings?tab=customization",
+    title: {
+      en: "Your own words after a cash-on-delivery order",
+      bn: "ক্যাশ অন ডেলিভারি অর্ডারের পরে আপনার নিজের কথা",
+    },
+    body: {
+      en: "Order success is now a page in Customization. After a cash-on-delivery order, its top can show the courier animation, as it does today, or your own words, like a thank-you or when you will call. The heading and the order under it stay as they are.",
+      bn: "অর্ডার সফল এখন কাস্টমাইজেশনের একটি পেজ। ক্যাশ অন ডেলিভারি অর্ডারের পরে এর উপরে কুরিয়ারের অ্যানিমেশন দেখাতে পারেন, যেমন এখন দেখায়, অথবা আপনার নিজের কথা, যেমন একটি ধন্যবাদ বা কখন ফোন করবেন। শিরোনাম আর তার নিচের অর্ডার যেমন আছে তেমনই থাকে।",
+    },
+  },
+  {
+    id: "2026-09-29-shoppers-on-phones-find-the-checkout-form",
+    date: "2026-09-29",
+    version: "4.126.0",
+    tag: "new",
+    href: "/settings?tab=customization",
+    title: {
+      en: "Shoppers on phones find the checkout form",
+      bn: "ফোনে ক্রেতারা চেকআউট ফর্ম খুঁজে পান",
+    },
+    body: {
+      en: "On a phone the order comes first and the form is below it. If a shopper is still on their order after 5 seconds, a small arrow at the bottom shows the way down, and a tap takes them to the form. You can turn it off or change the seconds in Customization, on the Checkout page.",
+      bn: "ফোনে আগে অর্ডার আসে, ফর্ম তার নিচে। ৫ সেকেন্ড পরেও ক্রেতা অর্ডারেই থাকলে নিচে একটি ছোট তীর পথ দেখায়, আর তাতে চাপ দিলে ফর্মে নিয়ে যায়। কাস্টমাইজেশনের চেকআউট পেজে এটি বন্ধ করতে বা সেকেন্ড বদলাতে পারেন।",
+    },
+  },
+  {
+    id: "2026-09-29-analytics-counts-shoppers-who-stay",
+    date: "2026-09-29",
+    version: "4.126.0",
+    tag: "fixed",
+    href: "/analytics",
+    title: {
+      en: "Analytics now counts shoppers who stay",
+      bn: "অ্যানালিটিক্স এখন থেকে যাওয়া ক্রেতাদের গোনে",
+    },
+    body: {
+      en: "A visit where a shopper spent 10 seconds on a page was not being counted, so Engaged visits and Stay on read lower than they should. From today's visits on they are counted. Earlier days stay as they were.",
+      bn: "যে ভিজিটে ক্রেতা একটি পেজে ১০ সেকেন্ড ছিলেন, তা গোনা হচ্ছিল না, তাই আগ্রহী ভিজিট আর থেকেছেন যতটা হওয়া উচিত তার চেয়ে কম দেখাত। আজকের ভিজিট থেকে এগুলো গোনা হয়। আগের দিনগুলো যেমন ছিল তেমনই থাকবে।",
+    },
+  },
+  {
     id: "2026-09-29-your-contact-and-social-accounts-in-one-place",
     date: "2026-09-29",
     version: "4.125.0",
@@ -484,51 +529,6 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     body: {
       en: "Choose one of five header designs — your name and menu on the left, your name centred with the menu in a row below, the menu in the middle of the page, a quieter small-capitals menu, or everything behind a menu button — with your own logo in place of your name, small, medium or large and sharpest as an SVG (without one, a long name sits on two lines at most), and icons in a fine, regular or strong line, with or without their words, and a bag, basket or cart. Build its menu from your own pages, categories and links, in your order — a category opens its subcategories, one link can be in your brand colour, whatever does not fit waits under More, a category with nothing in it stays out, and a link you have not filled in yet leaves your categories in place — keep the header on screen always, only while shoppers scroll back up, or not at all, and add account and wishlist beside the cart, and a button of your own after it — like “Order on WhatsApp”. Write your policies in Settings → Policies and build your footer's columns yourself — up to four, each a title and six links to your pages, categories, policies or the web — with your shop on one side, centred, or as a single short line, and choose what it shows: your address and phone or only your email, your social links as names or round marks, the ways you take payment, and beside the year every policy you have written, with the footer resting at the bottom of the screen even on a short page.",
       bn: "পাঁচটি হেডার ডিজাইনের একটি বেছে নিন — বাঁয়ে নাম ও মেনু, মাঝখানে নাম আর নিচের সারিতে মেনু, পাতার মাঝখানে মেনু, ছোট বড়-হাতের অক্ষরে শান্ত একটি মেনু, নয়তো সবকিছু একটি মেনু বোতামের পেছনে — নামের জায়গায় আপনার নিজের লোগো, ছোট, মাঝারি বা বড়, SVG হলে সবচেয়ে ঝকঝকে (লোগো না থাকলে লম্বা নাম সর্বোচ্চ দুই লাইনে বসে), আর আইকন সরু, সাধারণ বা মোটা রেখায়, লেখাসহ বা ছাড়া, আর ব্যাগ, ঝুড়ি নাকি কার্ট। আপনার নিজের পাতা, ক্যাটাগরি ও লিংক দিয়ে আপনার ক্রমে মেনু বানান — ক্যাটাগরির ভেতরের ক্যাটাগরিগুলো খোলে, একটি লিংক আপনার ব্র্যান্ডের রঙে রাখা যায়, যা জায়গায় ধরে না তা থাকে “আরও”-র ভেতরে, যে ক্যাটাগরিতে কিছু নেই সেটি মেনুতে আসে না, আর যে লিংক এখনো পূরণ করেননি তাতে আপনার ক্যাটাগরিগুলো আগের মতোই থাকে — হেডার সবসময় স্ক্রিনে রাখুন, শুধু ক্রেতা উপরে স্ক্রল করলে দেখান, নয়তো একেবারেই না রাখুন, আর কার্টের পাশে অ্যাকাউন্ট ও উইশলিস্ট যোগ করুন, আর তার পরে আপনার নিজের একটি বোতাম — যেমন “হোয়াটসঅ্যাপে অর্ডার করুন”। সেটিংস → নীতিমালায় আপনার নীতিগুলো লিখুন আর ফুটারের কলামগুলো নিজেই বানান — চারটি পর্যন্ত, প্রতিটিতে একটি শিরোনাম আর আপনার পাতা, ক্যাটাগরি, নীতি বা ওয়েবের ছয়টি লিংক — একপাশে দোকান রেখে, মাঝখানে, নয়তো ছোট এক লাইনে, আর ঠিক করুন কী দেখাবে: ঠিকানা ও ফোন নাকি শুধু ইমেইল, সোশ্যাল লিংক নামে বা গোল চিহ্নে, আপনি যেভাবে টাকা নেন, আর সালের পাশে আপনার লেখা প্রতিটি নীতি, আর ছোট পেজেও ফুটার থাকে স্ক্রিনের একেবারে নিচে।",
-    },
-  },
-  {
-    id: "2026-09-22-wishlist-page-choices",
-    date: "2026-09-22",
-    version: "4.113.2",
-    tag: "new",
-    href: "/settings?tab=customization",
-    title: {
-      en: "Design your wishlist page",
-      bn: "উইশলিস্ট পেজ সাজান",
-    },
-    body: {
-      en: "Show how many things are saved beside the title or just the word, lay them out as a grid of cards or as a compact list that fits more on a screen, and say something inviting when nothing is saved yet — which is the version of the page most people meet. You can also decide whether a saved thing can be bought straight from the list or only opened, which is the one choice here that changes what the page is for — and on your shop the heart now fills red with a little burst when a shopper saves something, and breaks in two when they take it back.",
-      bn: "শিরোনামের পাশে কয়টি সংরক্ষিত আছে দেখাবেন নাকি শুধু শব্দটি, পণ্যগুলো কার্ডের গ্রিডে নাকি ছোট তালিকায় — যাতে একসাথে বেশি দেখা যায় — আর কিছু সংরক্ষিত না থাকলে আমন্ত্রণমূলক কিছু বলা, যেটি বেশিরভাগ মানুষ দেখেন। সংরক্ষিত পণ্যটি তালিকা থেকেই কেনা যাবে নাকি শুধু খোলা যাবে, সেটিও ঠিক করতে পারেন — এই পাতার একমাত্র সিদ্ধান্ত যা পাতাটির উদ্দেশ্যই বদলে দেয় — আর আপনার দোকানে ক্রেতা কিছু সংরক্ষণ করলে হার্টটি ছোট্ট একটি ঝলকে লাল হয়ে ভরে ওঠে, আর ফিরিয়ে নিলে দুই টুকরো হয়ে ভেঙে যায়।",
-    },
-  },
-  {
-    id: "2026-09-22-hero-pictures-in-customization",
-    date: "2026-09-22",
-    version: "4.110.0",
-    tag: "improved",
-    href: "/settings?tab=customization",
-    title: {
-      en: "Your home page pictures are yours again",
-      bn: "হোম পেজের ছবিগুলো আবার আপনার হাতে",
-    },
-    body: {
-      en: "Changing them meant asking us: the Banners screen had gone and nothing replaced it. They are in Customization now — click the big picture on your home page and you can add up to five, order them, choose where a tap goes, and set how long each one stays; they wait while a shopper points at them, and the dots under them now show which one is up. Your shop shows exactly the pictures it showed yesterday, and pictures placed in Customization that had stopped loading, keeping Customization from opening, show again with nothing you arranged changed.",
-      bn: "এগুলো বদলাতে আমাদের বলতে হতো: ব্যানার পাতাটি উঠে গিয়েছিল আর তার বদলে কিছু আসেনি। এখন সেগুলো কাস্টমাইজেশনে — হোম পেজের বড় ছবিতে চাপ দিলে পাঁচটি পর্যন্ত ছবি যোগ করা যাবে, ক্রম বদলানো যাবে, চাপ দিলে কোথায় যাবে তা ঠিক করা যাবে, আর প্রতিটি ছবি কত সময় থাকবে তাও; ক্রেতা ছবির ওপর মাউস রাখলে সেগুলো অপেক্ষা করে, আর নিচের বিন্দুগুলো এখন দেখায় কোনটি চলছে। গতকাল যে ছবিগুলো ছিল ঠিক সেগুলোই দেখাচ্ছে, আর কাস্টমাইজেশনে বসানো যে ছবিগুলো লোড হওয়া বন্ধ হয়ে গিয়েছিল — যার ফলে কাস্টমাইজেশনও খুলত না — সেগুলো আবার দেখা যাচ্ছে, আপনার সাজানো কিছুই না বদলে।",
-    },
-  },
-  {
-    id: "2026-09-22-answer-the-question-once",
-    date: "2026-09-22",
-    version: "4.109.3",
-    tag: "new",
-    href: "/products",
-    title: {
-      en: "Answer a question once, not forty times",
-      bn: "একবার উত্তর দিন, চল্লিশ বার নয়",
-    },
-    body: {
-      en: "Every product now has a Questions & answers box on its page in your dashboard — write “does it come in XL” and your answer once, and it shows on that product in your shop. There is a second one for questions about the whole shop, like delivery outside Dhaka or exchanges, which you can put on your home page, a category or the blog. Shoppers tap a question to open the answer, and their browser's find-on-page still reaches the text inside; the editor draws the questions centred, as your shop does.",
-      bn: "প্রতিটি পণ্যের পাতায় এখন ড্যাশবোর্ডে “প্রশ্ন ও উত্তর” বক্স আছে — “XL সাইজ আছে কি” আর তার উত্তর একবার লিখে রাখলেই সেটি আপনার দোকানে ওই পণ্যের পাতায় দেখা যাবে। পুরো দোকান নিয়ে প্রশ্নের জন্য আলাদা একটি আছে — যেমন ঢাকার বাইরে ডেলিভারি বা বদলানোর নিয়ম — যা হোম পেজ, ক্যাটাগরি বা ব্লগে বসানো যায়। ক্রেতা প্রশ্নে চাপ দিলেই উত্তর খুলে যায়, আর ব্রাউজারের খোঁজার সুবিধাও ভেতরের লেখা পর্যন্ত পৌঁছায়; এডিটরও প্রশ্নগুলো আপনার দোকানের মতো মাঝখানে আঁকে।",
     },
   },
 ];
