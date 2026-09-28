@@ -10,15 +10,16 @@ import { getSafeNextPath, withNext } from "@/lib/safe-next";
 import { cn } from "@/lib/utils";
 
 import { AuthLanguageSwitch } from "./AuthLanguageSwitch";
-import { AuthHeading, PaperbaseBrand } from "./AuthParts";
+import { AuthHeading } from "./AuthParts";
 import { ShopWall } from "./ShopWall";
 
 /**
  * Sign in, sign up and the pages an email link opens (the owner's designs, 2026-09-28).
  *
- * - Computer: on the left one centred column -- the brand, the form, and the foot (© and the
- *   language) under it, all on one edge; on the right a dark panel holding the moving wall of
- *   shop photos (ShopWall) with one line in a tall serif at its foot.
+ * - Computer: on the left the form, centred, its heading naming Paperbase, and at the foot of
+ *   the screen © and "Need help?" on the form's own edges; on the right a dark panel holding the
+ *   moving wall of shop photos (ShopWall) with one line in a tall serif at its foot, and the
+ *   language switch in its top corner.
  * - Phone: the wall fills the screen, moving, its line just above the form, which is a sheet
  *   along the bottom -- the owner kept this from the first version ("keep the mobile section as
  *   it was").
@@ -96,7 +97,7 @@ function AgreeLine() {
   );
 }
 
-/** "Need help? Talk to us": beside the brand on a phone, beside © at the foot on a computer. */
+/** "Need help? Talk to us", beside © at the foot. */
 function HelpLine({ className }: { className?: string }) {
   const t = useTranslations("auth");
   return (
@@ -138,14 +139,8 @@ export function AuthFrame({ children }: { children: ReactNode }) {
           <p className="pb-rise px-6 pb-5 text-[1.875rem] leading-[1.05] text-white [text-shadow:0_2px_18px_rgb(0_0_0/0.65)] [font-family:var(--font-instrument-serif),var(--font-noto-sans-bengali),serif] sm:mx-auto sm:w-[26rem] sm:px-0 lg:hidden">
             {t("wall.title")}
           </p>
-          {/* On a computer the brand, the form and the foot are one column, centred in the half. */}
+          {/* On a computer the form and its foot are one column, centred in the half. */}
           <div className="pb-rise rounded-t-card bg-background px-6 pb-7 pt-6 shadow-[0_-20px_60px_-20px_rgb(0_0_0/0.5)] sm:mx-auto sm:mb-8 sm:w-[26rem] sm:rounded-card sm:px-8 lg:m-0 lg:w-full lg:max-w-[23rem] lg:rounded-none lg:bg-transparent lg:p-0 lg:shadow-none lg:[animation:none]">
-            {/* A phone's sheet opens with the brand and "Need help?"; a computer has neither here --
-                its heading says Paperbase, and "Need help?" is at the foot (owner, 2026-09-28). */}
-            <div className="mb-5 flex items-center justify-between gap-3 lg:hidden">
-              <PaperbaseBrand />
-              <HelpLine />
-            </div>
             <main className="w-full">
               {tab && !tabsHidden ? (
                 <div className="flex flex-col">
@@ -155,7 +150,7 @@ export function AuthFrame({ children }: { children: ReactNode }) {
                     body={t(`${heading}.subtitle`)}
                     className="pb-rise order-2 lg:order-1"
                   />
-                  {/* On a phone the tabs come first, right under the brand. */}
+                  {/* On a phone the tabs come first, at the top of the sheet. */}
                   <AuthTabs active={tab} className="order-1 mb-5 lg:order-2 lg:mb-0 lg:mt-7" />
                 </div>
               ) : null}
@@ -164,11 +159,11 @@ export function AuthFrame({ children }: { children: ReactNode }) {
               </div>
               {choosing ? <AgreeLine /> : null}
             </main>
-            {/* © at the sheet's foot on a phone; on a computer the foot of the screen, with
-                "Need help?", on the form's own edges (owner, 2026-09-28). */}
+            {/* No brand: the heading says Paperbase. © and "Need help?" are the foot -- the sheet's
+                on a phone, the screen's on a computer, on the form's own edges (owner, 2026-09-28). */}
             <footer className="mt-6 flex items-center justify-between gap-3 text-xs text-muted-foreground lg:absolute lg:bottom-10 lg:left-1/2 lg:mt-0 lg:w-full lg:max-w-[23rem] lg:-translate-x-1/2">
               <span>© {new Date().getFullYear()} Paperbase</span>
-              <HelpLine className="hidden lg:inline" />
+              <HelpLine />
             </footer>
           </div>
         </div>
