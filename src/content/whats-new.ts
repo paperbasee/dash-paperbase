@@ -88,9 +88,23 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-09-29-sign-in-with-a-code",
+    date: "2026-09-29",
+    version: "4.136.0",
+    tag: "new",
+    title: {
+      en: "Sign in with a code from your email",
+      bn: "ইমেইলের কোড দিয়ে সাইন ইন",
+    },
+    body: {
+      en: "Every sign-in email now has a 6-digit code as well as the link. Opened the email on your phone? Type the code on the computer you're signing in on, and you're in.",
+      bn: "প্রতিটি সাইন-ইন ইমেইলে এখন লিংকের সাথে ৬ অঙ্কের একটি কোডও থাকে। ইমেইলটি ফোনে খুলেছেন? যে কম্পিউটারে সাইন ইন করছেন সেখানে কোডটি লিখলেই হয়ে যাবে।",
+    },
+  },
+  {
     id: "2026-09-29-a-new-sign-in-and-setup",
     date: "2026-09-29",
-    version: "4.135.3",
+    version: "4.136.0",
     tag: "new",
     title: {
       en: "A new sign in, in English and Bangla",
@@ -104,7 +118,7 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
     id: "2026-09-29-your-setup-guide",
     date: "2026-09-29",
-    version: "4.135.3",
+    version: "4.136.0",
     tag: "new",
     title: {
       en: "A setup guide on your home page",
@@ -499,20 +513,6 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     body: {
       en: "In Settings, Apps, you can now turn the Cart off. Your shop then has no cart button, icon or page: shoppers press Order Now and go straight to checkout with that one product.",
       bn: "সেটিংস > অ্যাপস-এ এখন কার্ট বন্ধ করতে পারবেন। তখন আপনার দোকানে কোনো কার্ট বাটন, আইকন বা পেজ থাকবে না: ক্রেতারা “এখনই অর্ডার করুন” চাপলে সেই একটি পণ্য নিয়ে সরাসরি চেকআউটে যাবেন।",
-    },
-  },
-  {
-    id: "2026-09-27-your-shop-in-your-language",
-    date: "2026-09-27",
-    version: "4.119.4",
-    tag: "fixed",
-    title: {
-      en: "Your shop opens in the language you chose",
-      bn: "আপনার দোকান আপনার বেছে নেওয়া ভাষায় খোলে",
-    },
-    body: {
-      en: "A shop set to Bangla opened in English on most phones, order form and buttons included. It now opens in your shop's language on every phone, and links in English open in Bangla too.",
-      bn: "বাংলায় সেট করা দোকান বেশিরভাগ ফোনে ইংরেজিতে খুলত, অর্ডার ফর্ম আর বাটনসহ। এখন সব ফোনে আপনার দোকান আপনার বেছে নেওয়া ভাষাতেই খোলে, আর ইংরেজি লিংকও বাংলায় খোলে।",
     },
   },
   {
