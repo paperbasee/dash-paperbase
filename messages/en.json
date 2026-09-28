@@ -3660,7 +3660,6 @@
     "kinds": {
       "clothing": {
         "name": "Clothing",
-        "mark": "Cl",
         "examples": "Shirts, sarees, panjabi",
         "nav1": "New in",
         "nav2": "Women",
@@ -3673,7 +3672,6 @@
       },
       "beauty": {
         "name": "Beauty",
-        "mark": "Be",
         "examples": "Skincare, makeup, hair",
         "nav1": "Skincare",
         "nav2": "Makeup",
@@ -3686,7 +3684,6 @@
       },
       "electronics": {
         "name": "Electronics",
-        "mark": "El",
         "examples": "Gadgets and accessories",
         "nav1": "Audio",
         "nav2": "Watches",
@@ -3699,7 +3696,6 @@
       },
       "food": {
         "name": "Food",
-        "mark": "Fo",
         "examples": "Home-made and packaged",
         "nav1": "Honey",
         "nav2": "Pickles",
@@ -3712,7 +3708,6 @@
       },
       "home": {
         "name": "Home",
-        "mark": "Ho",
         "examples": "Decor, kitchen, lighting",
         "nav1": "Decor",
         "nav2": "Living",
@@ -3725,7 +3720,6 @@
       },
       "other": {
         "name": "Something else",
-        "mark": "✦",
         "examples": "Gifts, crafts, and more",
         "nav1": "Gifts",
         "nav2": "Candles",

@@ -6,7 +6,7 @@ import { useEffect, useState, type ReactNode } from "react";
 
 import { AuthHeading } from "@/components/auth/AuthParts";
 import { SocialMark } from "@/components/SocialMark";
-import { SHOP_KINDS, SUGGESTED_PALETTE, heroPhoto } from "@/components/shop-preview/samples";
+import { KIND_ICONS, SHOP_KINDS, SUGGESTED_PALETTE, heroPhoto } from "@/components/shop-preview/samples";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { paletteName } from "@/lib/theme-editor/palettes";
@@ -61,6 +61,7 @@ export function SellStep({ setup, className }: { setup: SetupState; className?: 
       <AuthHeading title={t("sellTitle")} body={t("sellBody")} />
       <div className="grid grid-cols-2 gap-2.5" role="radiogroup" aria-label={t("sellTitle")}>
         {SHOP_KINDS.map((kind) => {
+          const Icon = KIND_ICONS[kind];
           const on = setup.kind === kind;
           return (
             <button
@@ -77,15 +78,13 @@ export function SellStep({ setup, className }: { setup: SetupState; className?: 
                   : "border-border-subtle hover:border-border-hover"
               )}
             >
-              {/* The kind's first letters in the headings' serif (owner's design, 2026-09-28). */}
               <span
-                aria-hidden
                 className={cn(
-                  "flex size-10 shrink-0 items-center justify-center rounded-ui text-[1.25rem] leading-none transition-colors duration-200 [font-family:var(--font-instrument-serif),var(--font-noto-sans-bengali),serif]",
+                  "flex size-10 shrink-0 items-center justify-center rounded-ui transition-colors duration-200",
                   on ? "bg-foreground text-background" : "bg-muted text-foreground/80"
                 )}
               >
-                {tKinds(`${kind}.mark`)}
+                <Icon className="size-5" strokeWidth={1.75} aria-hidden />
               </span>
               <span className="min-w-0">
                 <span className="block text-sm font-medium text-foreground">{tKinds(`${kind}.name`)}</span>
