@@ -9,8 +9,6 @@ import { cn } from "@/lib/utils";
  * of real type and real boxes shrinks like an image instead of re-flowing.
  *
  * - `width`: the box takes its container's width, and its height follows the scaled content.
- * - `contain`: the box fills its container, which must have a height, and the content is scaled
- *   to fit inside both ways and centred.
  * - `fill`: the box fills its container, which must have a height; the content is scaled to its
  *   width, from the top, and drawn exactly as tall as the box -- a child with `h-full` fills it.
  */
@@ -22,7 +20,7 @@ export function ScaleToFit({
   children,
 }: {
   width: number;
-  mode?: "width" | "contain" | "fill";
+  mode?: "width" | "fill";
   maxScale?: number;
   className?: string;
   children: ReactNode;
@@ -44,11 +42,7 @@ export function ScaleToFit({
       }
       const natural = inner.offsetHeight;
       if (!natural) return;
-      const byWidth = outer.clientWidth / width;
-      const scale = Math.min(
-        maxScale,
-        mode === "contain" ? Math.min(byWidth, outer.clientHeight / natural) : byWidth
-      );
+      const scale = Math.min(maxScale, outer.clientWidth / width);
       setFit({ scale, height: natural * scale });
     };
     measure();
@@ -61,7 +55,7 @@ export function ScaleToFit({
   return (
     <div
       ref={outerRef}
-      className={cn("relative w-full", mode !== "width" && "h-full", mode === "fill" && "overflow-hidden", className)}
+      className={cn("relative w-full", mode === "fill" && "h-full overflow-hidden", className)}
       style={mode === "width" && fit ? { height: fit.height } : undefined}
     >
       <div
@@ -71,9 +65,9 @@ export function ScaleToFit({
           width,
           height: mode === "fill" && fit ? fit.height : undefined,
           marginLeft: -width / 2,
-          top: mode === "contain" ? "50%" : 0,
-          transformOrigin: mode === "contain" ? "center center" : "top center",
-          transform: `${mode === "contain" ? "translateY(-50%) " : ""}scale(${fit?.scale ?? 1})`,
+          top: 0,
+          transformOrigin: "top center",
+          transform: `scale(${fit?.scale ?? 1})`,
           visibility: fit ? "visible" : "hidden",
         }}
       >

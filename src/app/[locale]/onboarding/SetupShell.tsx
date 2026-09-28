@@ -67,7 +67,9 @@ export function SetupPreview({
       kind={setup.kind ?? "clothing"}
       tokens={setup.paletteTokens}
       announcement={announcement}
+      contact={phone}
       whatsapp={reached("contact") && setup.whatsapp}
+      facebook={reached("contact") && Boolean(setup.facebook.trim())}
     />
   );
 }
@@ -110,7 +112,7 @@ export function PreviewPanel({ setup, badge }: { setup: SetupState; badge: React
           key={device}
           width={phone ? SHOP_PHONE_WIDTH : SHOP_WINDOW_WIDTH}
           mode="fill"
-          maxScale={phone ? 1.1 : 2}
+          maxScale={phone ? 0.9 : 1}
         >
           <SetupPreview setup={setup} device={device} fill className="pb-rise" />
         </ScaleToFit>
@@ -219,8 +221,9 @@ export function SetupShell({
       <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
         <SheetContent side="bottom" className="rounded-t-card bg-muted px-3 pb-6 pt-4 lg:hidden">
           <SheetTitle className="px-2 text-sm">{t("livePreview")}</SheetTitle>
-          <ScaleToFit width={SHOP_WINDOW_WIDTH}>
-            <SetupPreview setup={setup} />
+          {/* On a phone, the shop as a phone shows it. */}
+          <ScaleToFit width={SHOP_PHONE_WIDTH}>
+            <SetupPreview setup={setup} device="phone" />
           </ScaleToFit>
         </SheetContent>
       </Sheet>
