@@ -72,6 +72,9 @@ function Note({ note }: { note: 0 | 1 | 2 }) {
 const SHADES = {
   center: "bg-[radial-gradient(60%_70%_at_50%_50%,rgb(13_14_17/0.35),rgb(13_14_17/0.88)_75%)]",
   panel: "bg-[linear-gradient(to_top,rgb(14_14_14/0.94),rgb(14_14_14/0.5)_50%,rgb(14_14_14/0.6))]",
+  // The whole screen behind the sheet on a phone, the panel beside the form on a computer.
+  responsive:
+    "bg-[radial-gradient(60%_70%_at_50%_50%,rgb(13_14_17/0.35),rgb(13_14_17/0.88)_75%)] lg:bg-[linear-gradient(to_top,rgb(14_14_14/0.94),rgb(14_14_14/0.5)_50%,rgb(14_14_14/0.6))]",
 } as const;
 
 export function ShopWall({ className, shade = "center" }: { className?: string; shade?: keyof typeof SHADES }) {

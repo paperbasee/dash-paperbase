@@ -1968,6 +1968,9 @@
       "parcelBooked": "Parcel booked",
       "parcelWhere": "Steadfast · Sylhet"
     },
+    "agree": "By continuing, you agree to Paperbase's <terms>Terms</terms> and <privacy>Privacy Policy</privacy>.",
+    "needHelp": "Need help?",
+    "talkToUs": "Talk to us",
     "unreachable": "We couldn't reach the server. Try again."
   },
   "settings": {

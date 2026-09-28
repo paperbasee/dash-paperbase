@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 
 import { Link, usePathname } from "@/i18n/navigation";
+import { PLATFORM_LINKS } from "@/lib/platform-links";
 import { getSafeNextPath, withNext } from "@/lib/safe-next";
 import { cn } from "@/lib/utils";
 
@@ -13,11 +14,15 @@ import { AuthHeading, PaperbaseBrand } from "./AuthParts";
 import { ShopWall } from "./ShopWall";
 
 /**
- * Sign in, sign up and the pages an email link opens (the owner's design, 2026-09-28): the form on
- * the left, and on the right a dark panel holding the moving wall of shop photos (ShopWall) with
- * one line in a tall serif at its foot. A phone gets the panel as a band across the top, the form
- * under it. It is the (auth) route group's layout, so moving between Sign in and Create account
- * keeps the wall moving and slides the tab across, instead of starting the page again.
+ * Sign in, sign up and the pages an email link opens (the owner's designs, 2026-09-28).
+ *
+ * - Computer: the form centred on the left, and on the right a dark panel holding the moving
+ *   wall of shop photos (ShopWall) with one line in a tall serif at its foot.
+ * - Phone: the wall fills the screen, moving, and the form is a sheet along the bottom -- the
+ *   owner kept this from the first version ("keep the mobile section as it was").
+ *
+ * It is the (auth) route group's layout, so moving between Sign in and Create account keeps the
+ * wall moving and slides the tab across, instead of starting the page again.
  */
 
 const HideTabs = createContext<(hidden: boolean) => void>(() => undefined);
@@ -61,6 +66,47 @@ function AuthTabs({ active, className }: { active: "signin" | "signup"; classNam
   );
 }
 
+const LINK = "font-medium text-foreground underline decoration-border underline-offset-4 hover:decoration-foreground";
+
+/** "By continuing you agree to ..." -- only where Paperbase has terms and a privacy policy to show. */
+function AgreeLine() {
+  const t = useTranslations("auth");
+  if (!PLATFORM_LINKS.terms || !PLATFORM_LINKS.privacy) return null;
+  const link = (href: string) => (chunks: ReactNode) => (
+    <a href={href} target="_blank" rel="noopener noreferrer" className={LINK}>
+      {chunks}
+    </a>
+  );
+  return (
+    <p className="mt-5 text-xs leading-relaxed text-muted-foreground">
+      {t.rich("agree", { terms: link(PLATFORM_LINKS.terms), privacy: link(PLATFORM_LINKS.privacy) })}
+    </p>
+  );
+}
+
+/** The foot's left side: © on a computer, and "Need help? Talk to us" where there is somewhere to ask. */
+function FootLine() {
+  const t = useTranslations("auth");
+  return (
+    <span className="flex flex-wrap items-center gap-x-1.5">
+      <span className="hidden lg:inline">© {new Date().getFullYear()} Paperbase</span>
+      {PLATFORM_LINKS.help ? (
+        <>
+          <span className="hidden lg:inline" aria-hidden>
+            ·
+          </span>
+          <span>
+            {t("needHelp")}{" "}
+            <a href={PLATFORM_LINKS.help} target="_blank" rel="noopener noreferrer" className={LINK}>
+              {t("talkToUs")}
+            </a>
+          </span>
+        </>
+      ) : null}
+    </span>
+  );
+}
+
 export function AuthFrame({ children }: { children: ReactNode }) {
   const t = useTranslations("auth");
   const pathname = usePathname();
@@ -73,43 +119,45 @@ export function AuthFrame({ children }: { children: ReactNode }) {
 
   return (
     <HideTabs.Provider value={setTabsHidden}>
-      <div className="pb-motion flex min-h-dvh flex-col bg-background lg:grid lg:grid-cols-[minmax(27rem,1fr)_minmax(0,1.35fr)] lg:gap-3 lg:p-3">
-        <aside className="relative h-60 shrink-0 overflow-hidden bg-[#141414] sm:h-72 lg:order-2 lg:h-auto lg:rounded-card dark:ring-1 dark:ring-white/[0.06]">
-          <ShopWall shade="panel" />
-          <PaperbaseBrand className="absolute left-5 top-5 z-10 text-white sm:left-8 lg:hidden [&_img]:invert" />
-          <div className="absolute inset-x-5 bottom-5 z-10 text-white sm:inset-x-8 sm:bottom-7 lg:inset-x-14 lg:bottom-12">
-            <p className="pb-rise max-w-[34rem] text-[1.75rem] leading-[1.05] [font-family:var(--font-instrument-serif),var(--font-noto-sans-bengali),serif] sm:text-[2.25rem] lg:text-[3.25rem] lg:leading-[1.02]">
+      <div className="pb-motion relative min-h-dvh overflow-hidden bg-[#0d0e11] lg:grid lg:grid-cols-[minmax(27rem,1fr)_minmax(0,1.35fr)] lg:gap-3 lg:bg-background lg:p-3">
+        <aside className="absolute inset-0 overflow-hidden lg:relative lg:order-2 lg:rounded-card lg:bg-[#141414] dark:lg:ring-1 dark:lg:ring-white/[0.06]">
+          <ShopWall shade="responsive" />
+          <div className="absolute inset-x-14 bottom-12 z-10 hidden text-white lg:block">
+            <p className="pb-rise max-w-[34rem] text-[3.25rem] leading-[1.02] [font-family:var(--font-instrument-serif),var(--font-noto-sans-bengali),serif]">
               {t("wall.title")}
             </p>
-            <p className="pb-rise mt-3 hidden text-[15px] text-white/70 lg:block" style={{ animationDelay: "120ms" }}>
+            <p className="pb-rise mt-3 text-[15px] text-white/70" style={{ animationDelay: "120ms" }}>
               {t("wall.body")}
             </p>
           </div>
         </aside>
 
-        <div className="flex flex-1 flex-col px-5 pb-5 pt-6 sm:px-10 lg:order-1 lg:px-[4.5rem] lg:py-10 xl:px-24">
-          <PaperbaseBrand className="hidden lg:flex" />
-          <main className="mx-auto flex w-full max-w-[23rem] flex-1 flex-col lg:mx-0 lg:justify-center lg:py-12">
-            {tab && !tabsHidden ? (
-              <div className="flex flex-col">
-                <AuthHeading
-                  key={heading}
-                  title={t(`${heading}.title`)}
-                  body={t(`${heading}.subtitle`)}
-                  className="pb-rise order-2 lg:order-1"
-                />
-                {/* On a phone the tabs come first, right under the photos (the owner's design). */}
-                <AuthTabs active={tab} className="order-1 mb-5 lg:order-2 lg:mb-0 lg:mt-7" />
+        <div className="relative z-10 flex min-h-dvh flex-col justify-end lg:order-1 lg:min-h-0">
+          <div className="pb-rise rounded-t-card bg-background px-6 pb-7 pt-6 shadow-[0_-20px_60px_-20px_rgb(0_0_0/0.5)] sm:mx-auto sm:mb-8 sm:w-[26rem] sm:rounded-card sm:px-8 lg:mx-0 lg:mb-0 lg:flex lg:w-auto lg:flex-1 lg:flex-col lg:rounded-none lg:bg-transparent lg:px-[4.5rem] lg:py-10 lg:shadow-none lg:[animation:none] xl:px-24">
+            <PaperbaseBrand className="mb-5 lg:mb-0" />
+            <main className="w-full lg:mx-auto lg:flex lg:max-w-[23rem] lg:flex-1 lg:flex-col lg:justify-center lg:py-12">
+              {tab && !tabsHidden ? (
+                <div className="flex flex-col">
+                  <AuthHeading
+                    key={heading}
+                    title={t(`${heading}.title`)}
+                    body={t(`${heading}.subtitle`)}
+                    className="pb-rise order-2 lg:order-1"
+                  />
+                  {/* On a phone the tabs come first, right under the brand. */}
+                  <AuthTabs active={tab} className="order-1 mb-5 lg:order-2 lg:mb-0 lg:mt-7" />
+                </div>
+              ) : null}
+              <div key={pathname} className={choosing ? "mt-6" : undefined}>
+                {children}
               </div>
-            ) : null}
-            <div key={pathname} className={choosing ? "mt-6" : undefined}>
-              {children}
-            </div>
-          </main>
-          <footer className="mt-8 flex items-center justify-between text-xs text-muted-foreground">
-            <span>© {new Date().getFullYear()} Paperbase</span>
-            <AuthLanguageSwitch />
-          </footer>
+              {choosing ? <AgreeLine /> : null}
+            </main>
+            <footer className="mt-6 flex items-center justify-between gap-3 text-xs text-muted-foreground">
+              <FootLine />
+              <AuthLanguageSwitch />
+            </footer>
+          </div>
         </div>
       </div>
     </HideTabs.Provider>

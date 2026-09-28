@@ -79,6 +79,16 @@ describe("the shop wall behind sign in and sign up", () => {
     expect(css).toContain("@keyframes pb-wall-up {\n  from {\n    transform: translateY(0);\n  }\n  to {\n    transform: translateY(-50%);");
   });
 
+  test("help, terms and privacy link only to addresses the deployment sets, never to made-up pages", () => {
+    const links = read("src/lib/platform-links.ts");
+    for (const name of ["NEXT_PUBLIC_SUPPORT_URL", "NEXT_PUBLIC_TERMS_URL", "NEXT_PUBLIC_PRIVACY_URL"]) {
+      expect(links, name).toContain(`process.env.${name}`);
+    }
+    const frame = read("src/components/auth/AuthFrame.tsx");
+    expect(frame).toContain("if (!PLATFORM_LINKS.terms || !PLATFORM_LINKS.privacy) return null;");
+    expect(frame).not.toMatch(/href="https?:\/\//);
+  });
+
   test("the tabs step aside once the email is sent", () => {
     expect(read("src/app/[locale]/(auth)/login/page.tsx")).toContain("useHideAuthTabs(linkSent);");
     expect(read("src/app/[locale]/(auth)/signup/page.tsx")).toContain("useHideAuthTabs(sent);");
