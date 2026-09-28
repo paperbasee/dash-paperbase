@@ -4,23 +4,15 @@ import { Check, CircleCheck, Cloud, Copy, Globe, Lock, RefreshCw } from "lucide-
 import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useState, type ReactNode } from "react";
 
+import { AuthHeading } from "@/components/auth/AuthParts";
 import { SocialMark } from "@/components/SocialMark";
-import { KIND_ICONS, SHOP_KINDS, SUGGESTED_PALETTE, heroPhoto } from "@/components/shop-preview/samples";
+import { SHOP_KINDS, SUGGESTED_PALETTE, heroPhoto } from "@/components/shop-preview/samples";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { toLocaleDigits } from "@/lib/locale-digits";
 import { paletteName } from "@/lib/theme-editor/palettes";
 import { cn } from "@/lib/utils";
 
-import { StepHeading } from "./SetupShell";
 import { DOMAINS_ENABLED, type SetupState } from "./useSetup";
-
-/** "Step 2 of 5", in the reader's digits. */
-function useStepKicker(step: number): string {
-  const t = useTranslations("auth.onboarding");
-  const locale = useLocale();
-  return toLocaleDigits(t("stepOf", { current: step, total: 5 }), locale);
-}
 
 function FieldError({ children }: { children: ReactNode }) {
   return (
@@ -66,10 +58,9 @@ export function SellStep({ setup, className }: { setup: SetupState; className?: 
   const tKinds = useTranslations("shopPreview.kinds");
   return (
     <div className={cn("space-y-7", className)}>
-      <StepHeading kicker={t("sellKicker")} title={t("sellTitle")} body={t("sellBody")} />
+      <AuthHeading title={t("sellTitle")} body={t("sellBody")} />
       <div className="grid grid-cols-2 gap-2.5" role="radiogroup" aria-label={t("sellTitle")}>
         {SHOP_KINDS.map((kind) => {
-          const Icon = KIND_ICONS[kind];
           const on = setup.kind === kind;
           return (
             <button
@@ -80,19 +71,21 @@ export function SellStep({ setup, className }: { setup: SetupState; className?: 
               aria-label={tKinds(`${kind}.name`)}
               onClick={() => setup.setKind(kind)}
               className={cn(
-                "relative flex flex-col items-start gap-2.5 rounded-card border p-3 text-left transition-[border-color,background-color,box-shadow] duration-150 sm:flex-row sm:items-center sm:gap-3 sm:p-3.5",
+                "relative flex flex-col items-start gap-2.5 rounded-card border bg-card p-3 text-left transition-[border-color,background-color,box-shadow] duration-150 sm:flex-row sm:items-center sm:gap-3.5 sm:p-4",
                 on
                   ? "border-foreground shadow-[inset_0_0_0_1px_hsl(var(--foreground))]"
-                  : "border-border-subtle hover:border-border-hover hover:bg-muted/40"
+                  : "border-border-subtle hover:border-border-hover"
               )}
             >
+              {/* The kind's first letters in the headings' serif (owner's design, 2026-09-28). */}
               <span
+                aria-hidden
                 className={cn(
-                  "flex size-10 shrink-0 items-center justify-center rounded-ui transition-colors duration-200",
+                  "flex size-10 shrink-0 items-center justify-center rounded-ui text-[1.25rem] leading-none transition-colors duration-200 [font-family:var(--font-instrument-serif),var(--font-noto-sans-bengali),serif]",
                   on ? "bg-foreground text-background" : "bg-muted text-foreground/80"
                 )}
               >
-                <Icon className="size-5" strokeWidth={1.75} aria-hidden />
+                {tKinds(`${kind}.mark`)}
               </span>
               <span className="min-w-0">
                 <span className="block text-sm font-medium text-foreground">{tKinds(`${kind}.name`)}</span>
@@ -120,13 +113,12 @@ export function SellStep({ setup, className }: { setup: SetupState; className?: 
 
 export function NameStep({ setup, className }: { setup: SetupState; className?: string }) {
   const t = useTranslations("auth.onboarding");
-  const kicker = useStepKicker(2);
   const check = setup.nameCheck;
   const hostname = setup.storeMade ? setup.storeHostname : check.state === "ok" ? check.hostname : "";
 
   return (
     <div className={cn("space-y-7", className)}>
-      <StepHeading kicker={kicker} title={t("nameTitle")} body={t("nameBody")} />
+      <AuthHeading title={t("nameTitle")} body={t("nameBody")} />
       <div>
         <label htmlFor="shop_name" className="field-label">
           {t("nameLabel")}
@@ -274,7 +266,6 @@ function Option({
 
 export function AddressStep({ setup, className }: { setup: SetupState; className?: string }) {
   const t = useTranslations("auth.onboarding");
-  const kicker = useStepKicker(3);
   const free = setup.storeHostname;
   const example = free ? `${free.split(".")[0]}.com` : "yourshop.com";
   const check = setup.domainCheck;
@@ -283,8 +274,7 @@ export function AddressStep({ setup, className }: { setup: SetupState; className
 
   return (
     <div className={cn("space-y-6", className)}>
-      <StepHeading
-        kicker={kicker}
+      <AuthHeading
         title={t("addressTitle")}
         body={DOMAINS_ENABLED ? t("addressBody") : t("addressBodyFreeOnly")}
       />
@@ -478,12 +468,11 @@ function OwnDomain({
 
 export function LookStep({ setup, className }: { setup: SetupState; className?: string }) {
   const t = useTranslations("auth.onboarding");
-  const kicker = useStepKicker(4);
   const locale = useLocale();
   const suggested = SUGGESTED_PALETTE[setup.kind ?? "clothing"];
   return (
     <div className={cn("space-y-7", className)}>
-      <StepHeading kicker={kicker} title={t("lookTitle")} body={t("lookBody")} />
+      <AuthHeading title={t("lookTitle")} body={t("lookBody")} />
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3" role="radiogroup" aria-label={t("lookTitle")}>
         {setup.palettes.map((palette) => {
           const on = setup.chosenPalette === palette.key;
@@ -500,7 +489,13 @@ export function LookStep({ setup, className }: { setup: SetupState; className?: 
                 on ? "border-foreground shadow-[inset_0_0_0_1px_hsl(var(--foreground))]" : "border-border-subtle hover:border-border-hover"
               )}
             >
-              <span className="block overflow-hidden rounded-xs border" style={{ background: tk.background, borderColor: tk.border }}>
+              <span className="relative block overflow-hidden rounded-xs border" style={{ background: tk.background, borderColor: tk.border }}>
+                {/* On the picture, not beside the name: a narrow column never cuts the name. */}
+                {palette.key === suggested ? (
+                  <span className="absolute right-1 top-1 z-10 rounded-full bg-white/95 px-1.5 py-px text-[9.5px] font-medium text-[#0f172a] shadow-[0_1px_2px_rgb(0_0_0/0.15)]">
+                    {t("suggested")}
+                  </span>
+                ) : null}
                 <span className="flex h-3.5 items-center border-b px-1.5" style={{ background: tk.header, borderColor: tk.border }}>
                   <i className="h-[3px] w-6 rounded-full opacity-80" style={{ background: tk.header_foreground }} />
                 </span>
@@ -516,12 +511,7 @@ export function LookStep({ setup, className }: { setup: SetupState; className?: 
               </span>
               <span className="mt-2 flex items-center justify-between gap-1 px-0.5 text-[12.5px] font-medium text-foreground">
                 <span className="truncate">{paletteName(palette, locale)}</span>
-                <span className="flex shrink-0 items-center gap-1">
-                  {palette.key === suggested ? (
-                    <span className="text-[10.5px] font-normal text-muted-foreground">{t("suggested")}</span>
-                  ) : null}
-                  {on ? <CircleCheck className="pb-pop size-4" aria-hidden /> : null}
-                </span>
+                {on ? <CircleCheck className="pb-pop size-4 shrink-0" aria-hidden /> : null}
               </span>
             </button>
           );
@@ -535,10 +525,9 @@ export function LookStep({ setup, className }: { setup: SetupState; className?: 
 
 export function ContactStep({ setup, className }: { setup: SetupState; className?: string }) {
   const t = useTranslations("auth.onboarding");
-  const kicker = useStepKicker(5);
   return (
     <div className={cn("space-y-6", className)}>
-      <StepHeading kicker={kicker} title={t("contactTitle")} body={t("contactBody")} />
+      <AuthHeading title={t("contactTitle")} body={t("contactBody")} />
       <div>
         <label htmlFor="shop_phone" className="field-label">
           {t("phone")}

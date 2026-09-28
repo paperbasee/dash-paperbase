@@ -5,6 +5,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 
 import { AuthLanguageSwitch } from "@/components/auth/AuthLanguageSwitch";
+import { AuthHeading, PaperbaseWordmark } from "@/components/auth/AuthParts";
 import { SetupGuideCard } from "@/components/setup-guide/SetupGuideCard";
 import { ScaleToFit } from "@/components/shop-preview/ScaleToFit";
 import { SHOP_WINDOW_WIDTH } from "@/components/shop-preview/ShopWindow";
@@ -13,7 +14,7 @@ import { Link } from "@/i18n/navigation";
 import { paletteName } from "@/lib/theme-editor/palettes";
 import { cn } from "@/lib/utils";
 
-import { PreviewPanel, SetupPreview } from "./SetupShell";
+import { PreviewPanel, SETUP_COLUMNS, SetupPreview } from "./SetupShell";
 import { TickMark } from "./steps";
 import type { FinishTick, SetupState } from "./useSetup";
 
@@ -41,7 +42,10 @@ export function FinishingScreen({ setup }: { setup: SetupState }) {
           </div>
         </ScaleToFit>
       </div>
-      <h1 className="pb-rise mt-9 text-center text-[1.375rem] font-semibold tracking-[-0.02em] text-foreground" style={{ animationDelay: "120ms" }}>
+      <h1
+        className="pb-rise mt-9 text-center text-[2rem] font-normal leading-[1.05] tracking-[-0.01em] text-foreground [font-family:var(--font-instrument-serif),var(--font-noto-sans-bengali),serif]"
+        style={{ animationDelay: "120ms" }}
+      >
         {t("finishingTitle", { name: setup.shopName.trim() })}
       </h1>
       <ul className="mt-5 w-full max-w-[20rem] space-y-2.5" aria-live="polite">
@@ -110,10 +114,10 @@ export function ReadyScreen({ setup }: { setup: SetupState }) {
   const url = setup.liveUrl;
 
   return (
-    <div className="pb-motion grid min-h-dvh bg-background lg:grid-cols-[minmax(26rem,33rem)_minmax(0,1fr)] lg:gap-3 lg:p-3">
-      <div className="flex min-w-0 flex-col px-5 py-5 sm:px-12 sm:py-7">
-        {/* On a computer English / বাংলা sits in the shop panel's corner. */}
-        <header className="flex justify-end lg:hidden">
+    <div className={cn("pb-motion min-h-dvh bg-background", SETUP_COLUMNS)}>
+      <div className="flex min-h-dvh min-w-0 flex-col px-5 py-5 sm:px-12 sm:py-8 lg:min-h-[calc(100dvh-1.5rem)] lg:px-10 lg:py-10 xl:px-14">
+        <header className="flex items-center justify-between gap-3">
+          <PaperbaseWordmark />
           <AuthLanguageSwitch />
         </header>
         <div className="pb-stagger flex flex-1 flex-col justify-center gap-5 py-10">
@@ -122,12 +126,7 @@ export function ReadyScreen({ setup }: { setup: SetupState }) {
               <Check className="size-6" strokeWidth={2.4} aria-hidden />
             </span>
           </span>
-          <div>
-            <h1 className="text-[1.75rem] font-semibold leading-tight tracking-[-0.025em] text-foreground sm:text-[1.875rem]">
-              {t("readyTitle", { name: setup.shopName.trim() })}
-            </h1>
-            <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{t("readyBody")}</p>
-          </div>
+          <AuthHeading title={t("readyTitle", { name: setup.shopName.trim() })} body={t("readyBody")} />
           {url ? (
             <div className="flex items-center gap-2 rounded-ui border border-border-subtle py-1.5 pl-3.5 pr-1.5 text-[13.5px]">
               <span className="pb-live-dot size-2 shrink-0 rounded-full bg-[hsl(var(--accent-green))]" />
@@ -154,15 +153,14 @@ export function ReadyScreen({ setup }: { setup: SetupState }) {
         </div>
       </div>
       <PreviewPanel
+        setup={setup}
         badge={
           <span className="flex items-center gap-1.5 rounded-xs bg-[hsl(var(--accent-green)/0.16)] px-2.5 py-1 text-xs font-medium text-[hsl(var(--accent-green))]">
             <span className="pb-live-dot size-[7px] rounded-full bg-[hsl(var(--accent-green))]" />
             {t("liveNow")}
           </span>
         }
-      >
-        <SetupPreview setup={setup} />
-      </PreviewPanel>
+      />
     </div>
   );
 }

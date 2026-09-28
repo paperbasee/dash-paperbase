@@ -11,6 +11,8 @@ import { cn } from "@/lib/utils";
  * - `width`: the box takes its container's width, and its height follows the scaled content.
  * - `contain`: the box fills its container, which must have a height, and the content is scaled
  *   to fit inside both ways and centred.
+ * - `fill`: the box fills its container, which must have a height; the content is scaled to its
+ *   width, from the top, and drawn exactly as tall as the box -- a child with `h-full` fills it.
  */
 export function ScaleToFit({
   width,
@@ -20,13 +22,14 @@ export function ScaleToFit({
   children,
 }: {
   width: number;
-  mode?: "width" | "contain";
+  mode?: "width" | "contain" | "fill";
   maxScale?: number;
   className?: string;
   children: ReactNode;
 }) {
   const outerRef = useRef<HTMLDivElement>(null);
   const innerRef = useRef<HTMLDivElement>(null);
+  // `height`: the box's own height in `width` mode; the content's drawn height in `fill` mode.
   const [fit, setFit] = useState<{ scale: number; height: number } | null>(null);
 
   useLayoutEffect(() => {
@@ -34,6 +37,11 @@ export function ScaleToFit({
     const inner = innerRef.current;
     if (!outer || !inner) return;
     const measure = () => {
+      if (mode === "fill") {
+        const scale = Math.min(maxScale, outer.clientWidth / width);
+        if (scale > 0) setFit({ scale, height: outer.clientHeight / scale });
+        return;
+      }
       const natural = inner.offsetHeight;
       if (!natural) return;
       const byWidth = outer.clientWidth / width;
@@ -53,7 +61,7 @@ export function ScaleToFit({
   return (
     <div
       ref={outerRef}
-      className={cn("relative w-full", mode === "contain" && "h-full", className)}
+      className={cn("relative w-full", mode !== "width" && "h-full", mode === "fill" && "overflow-hidden", className)}
       style={mode === "width" && fit ? { height: fit.height } : undefined}
     >
       <div
@@ -61,6 +69,7 @@ export function ScaleToFit({
         className="absolute left-1/2"
         style={{
           width,
+          height: mode === "fill" && fit ? fit.height : undefined,
           marginLeft: -width / 2,
           top: mode === "contain" ? "50%" : 0,
           transformOrigin: mode === "contain" ? "center center" : "top center",

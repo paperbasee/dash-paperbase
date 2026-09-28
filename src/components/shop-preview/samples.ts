@@ -8,21 +8,9 @@
  * are only ever drawn here -- the shop itself starts empty.
  */
 
-import type { LucideIcon } from "lucide-react";
-import { Armchair, Gift, Headphones, Shirt, Soup, Sparkles } from "lucide-react";
-
 export const SHOP_KINDS = ["clothing", "beauty", "electronics", "food", "home", "other"] as const;
 
 export type ShopKind = (typeof SHOP_KINDS)[number];
-
-export const KIND_ICONS: Record<ShopKind, LucideIcon> = {
-  clothing: Shirt,
-  beauty: Sparkles,
-  electronics: Headphones,
-  food: Soup,
-  home: Armchair,
-  other: Gift,
-};
 
 /**
  * What setup saves as the shop's type: the kind's English name, which is what Settings > Store

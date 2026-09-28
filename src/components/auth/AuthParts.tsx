@@ -2,14 +2,19 @@ import type { ReactNode } from "react";
 
 import { cn } from "@/lib/utils";
 
-/** Paperbase's mark and name, as every page before the dashboard shows it. */
-export function PaperbaseBrand({ className, compact = false }: { className?: string; compact?: boolean }) {
+/**
+ * "Paperbase" in the sign-in headings' serif: the name alone, no mark (owner, 2026-09-28 --
+ * "don't use the Paperbase logo, just the same Paperbase text as the sign up").
+ */
+export function PaperbaseWordmark({ className }: { className?: string }) {
   return (
-    <span className={cn("flex items-center gap-2 text-[15px] font-semibold tracking-[-0.01em] text-foreground", className)}>
-      {/* eslint-disable-next-line @next/next/no-img-element -- the site's own mark */}
-      <img src="/favicon.svg" alt="" className="size-6 dark:invert" />
-      {/* `compact`: the mark alone on a phone, where the bar is shared with more. */}
-      <span className={compact ? "hidden sm:inline" : undefined}>Paperbase</span>
+    <span
+      className={cn(
+        "text-[1.625rem] leading-none tracking-[-0.01em] text-foreground [font-family:var(--font-instrument-serif),serif]",
+        className
+      )}
+    >
+      Paperbase
     </span>
   );
 }

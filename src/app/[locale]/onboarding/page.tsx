@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, ArrowRight } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Suspense } from "react";
 
@@ -63,20 +63,23 @@ function SetupFlow() {
           <ArrowLeft className="size-4" aria-hidden />
           {t("back")}
         </Button>
-      ) : (
-        <span />
-      )}
+      ) : null}
       <Button
         type="submit"
         form="setup-step"
         loading={setup.busy && setup.phase !== "address"}
         className="h-11 min-w-[9.5rem] flex-1 sm:flex-none"
       >
-        {setup.phase === "name" && setup.busy && !setup.storeMade
-          ? t("creating")
-          : setup.phase === "contact"
-            ? t("finish")
-            : t("continue")}
+        {setup.phase === "name" && setup.busy && !setup.storeMade ? (
+          t("creating")
+        ) : setup.phase === "contact" ? (
+          t("finish")
+        ) : (
+          <>
+            {t("continue")}
+            <ArrowRight className="size-4" aria-hidden />
+          </>
+        )}
       </Button>
     </>
   );
