@@ -88,6 +88,51 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-09-29-a-checkout-warning-shoppers-notice",
+    date: "2026-09-29",
+    version: "4.127.0",
+    tag: "improved",
+    href: "/settings?tab=customization",
+    title: {
+      en: "A checkout warning shoppers notice",
+      bn: "চেকআউটে এমন সতর্কতা যা ক্রেতার চোখে পড়ে",
+    },
+    body: {
+      en: "The warning box above the order button is amber now, and its border glows gently so shoppers see it before they order. Its words sit in the centre, and you can move them to the left or right, for the plain line too. Find it in Customization, on the Checkout page.",
+      bn: "অর্ডার বোতামের উপরের সতর্কতার বাক্স এখন কমলা-হলুদ, আর এর বর্ডার আস্তে আস্তে জ্বলে ওঠে, যাতে ক্রেতা অর্ডারের আগেই দেখেন। এর লেখা মাঝখানে বসে, আর আপনি বাঁয়ে বা ডানে সরাতে পারেন, সাধারণ লাইনের জন্যও। কাস্টমাইজেশনের চেকআউট পেজে পাবেন।",
+    },
+  },
+  {
+    id: "2026-09-29-choose-where-the-words-sit-on-product-cards",
+    date: "2026-09-29",
+    version: "4.127.0",
+    tag: "new",
+    href: "/settings?tab=customization",
+    title: {
+      en: "Choose where the words sit on product cards",
+      bn: "প্রোডাক্ট কার্ডে লেখা কোথায় বসবে বেছে নিন",
+    },
+    body: {
+      en: "A product's name and price can sit on the left, in the centre or on the right, on every card in your shop. Choose it in Customization, under Style. Cards stay centred until you change it.",
+      bn: "প্রোডাক্টের নাম আর দাম আপনার দোকানের প্রতিটি কার্ডে বাঁয়ে, মাঝখানে বা ডানে বসতে পারে। কাস্টমাইজেশনের স্টাইলে বেছে নিন। না বদলানো পর্যন্ত কার্ড মাঝখানেই থাকে।",
+    },
+  },
+  {
+    id: "2026-09-29-make-your-thank-you-stand-out",
+    date: "2026-09-29",
+    version: "4.127.0",
+    tag: "improved",
+    href: "/settings?tab=customization",
+    title: {
+      en: "Make your thank-you stand out",
+      bn: "আপনার ধন্যবাদ বার্তা আরও চোখে পড়ুক",
+    },
+    body: {
+      en: "Your own words on the Order success page can now be bold, larger, and on a coloured background: soft grey, your main colour, the warning colour or green. Every colour keeps the words easy to read.",
+      bn: "অর্ডার সফল পেজে আপনার নিজের কথা এখন মোটা অক্ষরে, আরও বড় করে, আর রঙিন পটভূমিতে দেখাতে পারেন: হালকা ধূসর, আপনার মূল রং, সতর্কতার রং বা সবুজ। প্রতিটি রঙেই লেখা সহজে পড়া যায়।",
+    },
+  },
+  {
     id: "2026-09-29-your-own-words-after-a-cash-on-delivery-order",
     date: "2026-09-29",
     version: "4.126.0",
@@ -472,21 +517,6 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     },
   },
   {
-    id: "2026-09-22-home-page-rows",
-    date: "2026-09-22",
-    version: "4.118.7",
-    tag: "new",
-    href: "/settings?tab=customization",
-    title: {
-      en: "New rows for your home page",
-      bn: "হোম পেজের নতুন সারি",
-    },
-    body: {
-      en: "Your home page shows three categories you tick, each with everything inside it, instead of a row for every category you have — and a button under them opens every product you sell on a page of its own. You can also show a row of products you choose, your best sellers right under it and your newest, the last two filling themselves and naming themselves when you leave their title empty; every row's title is centred, in capitals, with its link underneath, and each row — and the top of your three categories — can open with your own picture, a few words and a button, which a switch hides and keeps. Further down, add your brands, your newest good reviews on Premium — cards that slide on by themselves, or one large quotation that takes turns, both through your ten newest and both pausing under the pointer — your three newest blog posts, a Sign-up band that opens your WhatsApp, Messenger, Facebook, Instagram or TikTok — whichever you choose, over a picture of your own if you like — and questions you answer once, each under its own title and kept up to date from your shop; the Sign-up button and your promotion's now stand out on your brand colour instead of melting into it.",
-      bn: "হোম পেজে এখন আপনার প্রতিটি ক্যাটাগরির সারির বদলে আপনার টিক করা তিনটি ক্যাটাগরি, ভেতরের সব পণ্যসহ — আর নিচের একটি বোতাম আপনার সব পণ্য নিয়ে আলাদা পাতা খোলে। আপনার বেছে নেওয়া পণ্য, তার ঠিক নিচে সবচেয়ে বেশি বিক্রি হওয়া পণ্য আর নতুন পণ্যের সারিও দেখাতে পারেন, শেষের দুটি নিজেই ভরে যায় আর শিরোনাম খালি রাখলে নিজের নামটিই দেখায়; প্রতিটি সারির শিরোনাম মাঝখানে, বড় হাতের অক্ষরে, নিচে তার লিংক, আর প্রতিটি সারি — আর আপনার তিনটি ক্যাটাগরির উপরের অংশ — আপনার নিজের ছবি, কিছু লেখা আর একটি বোতাম দিয়ে শুরু হতে পারে, যা একটি সুইচে লুকানো যায় আর রেখে দেওয়া হয়। আরও নিচে যোগ করুন আপনার ব্র্যান্ড, প্রিমিয়ামে আপনার সর্বশেষ ভালো রিভিউ — নিজে নিজে সরে যাওয়া কার্ডে, নয়তো একটি বড় উদ্ধৃতিতে যা একটির পর একটি দেখায়, দুটিই আপনার সর্বশেষ দশটি রিভিউ থেকে আর পয়েন্টার রাখলে থেমে যায় —, ব্লগের নতুন তিনটি পোস্ট, আপনার হোয়াটসঅ্যাপ, মেসেঞ্জার, ফেসবুক, ইনস্টাগ্রাম বা টিকটক খোলার একটি সাইন-আপ অংশ — যেটি আপনি বেছে নেন, চাইলে আপনার নিজের ছবির ওপর — আর একবার উত্তর দেওয়া প্রশ্নগুলো, প্রতিটি নিজের শিরোনামের নিচে আর আপনার দোকান থেকে নিজে নিজে হালনাগাদ; সাইন-আপ বোতাম আর আপনার প্রোমোশনের বোতাম এখন ব্র্যান্ডের রঙে মিশে না গিয়ে তার ওপর স্পষ্ট দেখা যায়।",
-    },
-  },
-  {
     id: "2026-09-22-theme-editor-and-live-preview",
     date: "2026-09-22",
     version: "4.118.6",
@@ -500,35 +530,5 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
       bn: "সেটিংস → কাস্টমাইজেশন থেকে এডিটর খুললে আপনার আসল স্টোরটি দেখবেন, ঠিক যেমন ক্রেতারা দেখবেন — ফোনে বা কম্পিউটারে, আপনার নিজের ফন্ট ও রঙে — আর যেকোনো অংশে ক্লিক করে পাশের একটি শান্ত প্যানেলে তা বদলান, যেখানে পাতার প্রতিটি অংশের তালিকা আর আপনার রং, কোণ ও পণ্যের কার্ডও থাকে, আর যত ছবিই রাখুন, নতুন ছবি সবসময় আপলোড করতে পারবেন। কার্ট, চেকআউট, উইশলিস্ট আর অ্যাকাউন্ট পাতা আপনার নিজের পণ্যের একটি নমুনা দিয়ে ভরা থাকে, যাতে পুরো পাতাটি দেখতে পান, সেই নমুনার কিছুই সেভ হয় না, আর পাতা রিফ্রেশ করলেও আপনি যে পাতায় কাজ করছিলেন সেখানেই থাকেন। যা বদলান — সেটিংস থেকে এখানে ফুটারের সোশ্যাল লিংকে সরে আসা আপনার সোশ্যাল লিংকসহ — তা ক্রেতারা দেখেন না, স্টোরে সংরক্ষণ বাটনে চাপলেই তা স্টোরে যায়; স্টোর সাজানো প্রিমিয়াম প্ল্যানের অংশ।",
     },
     href: "/settings?tab=customization",
-  },
-  {
-    id: "2026-09-22-customer-reviews",
-    date: "2026-09-22",
-    version: "4.118.4",
-    tag: "new",
-    href: "/reviews",
-    title: {
-      en: "Customers can review your products",
-      bn: "ক্রেতারা এখন আপনার পণ্যের রিভিউ দিতে পারবেন",
-    },
-    body: {
-      en: "A signed-in customer can give a product stars, a few words and up to two photos, and nothing appears on your shop until you approve it in the new Reviews tab — the sidebar shows how many are waiting, and each one reaches your notifications too. You can approve, reject, reply, delete, or add one yourself from a screenshot — which is marked, so shoppers can tell — and a customer who edits their own sends it back to you for approval. Anyone can read your reviews, signed in or not: as tall sliding cards beside each product and on Premium on your home page — customers' photos first, a review without one on your brand colour, each opening large with its words and your reply beside it — and on Premium on a page of their own that shoppers narrow by stars, category and product; everywhere, someone who actually received the item is marked a verified buyer.",
-      bn: "সাইন-ইন করা ক্রেতা পণ্যে স্টার, কয়েক লাইন লেখা আর সর্বোচ্চ দুটি ছবি দিতে পারবেন, আর নতুন রিভিউ ট্যাবে আপনি অনুমোদন না করা পর্যন্ত দোকানে কিছুই দেখা যাবে না — কতগুলো অপেক্ষায় আছে তা সাইডবারেই দেখা যায়, আর প্রতিটি আপনার নোটিফিকেশনেও আসে। অনুমোদন, বাতিল, উত্তর, মুছে ফেলা — সবই আপনার হাতে, আর স্ক্রিনশট থেকে নিজেও একটি যোগ করতে পারবেন, যেটি আলাদা করে চিহ্নিত থাকে; কোনো ক্রেতা নিজের রিভিউ বদলালে সেটি আবার আপনার অনুমোদনের জন্য ফিরে আসে। রিভিউ সবাই পড়তে পারবেন, সাইন-ইন করা থাকুক বা না থাকুক: প্রতিটি পণ্যের পাশে আর প্রিমিয়ামে হোম পেজে লম্বা চলমান কার্ডে — ক্রেতার তোলা ছবি আগে, ছবি না থাকলে আপনার ব্র্যান্ডের রঙে লেখা, আর চাপলেই বড় হয়ে খোলে পাশে পুরো লেখা ও আপনার উত্তরসহ — আর প্রিমিয়ামে আলাদা একটি পেজে, যেখানে ক্রেতারা তারা, ক্যাটাগরি ও পণ্য দিয়ে বাছাই করেন, আর যিনি সত্যিই পণ্যটি পেয়েছেন তাঁকে যাচাই করা ক্রেতা হিসেবে দেখানো হয়।",
-    },
-  },
-  {
-    id: "2026-09-22-header-and-footer-choices",
-    date: "2026-09-22",
-    version: "4.116.1",
-    tag: "new",
-    href: "/settings?tab=customization",
-    title: {
-      en: "Header designs, your own menu and footer, and policies",
-      bn: "পাঁচটি হেডার ডিজাইন, আপনার নিজের মেনু ও ফুটার, আর আপনার নীতিমালা",
-    },
-    body: {
-      en: "Choose one of five header designs — your name and menu on the left, your name centred with the menu in a row below, the menu in the middle of the page, a quieter small-capitals menu, or everything behind a menu button — with your own logo in place of your name, small, medium or large and sharpest as an SVG (without one, a long name sits on two lines at most), and icons in a fine, regular or strong line, with or without their words, and a bag, basket or cart. Build its menu from your own pages, categories and links, in your order — a category opens its subcategories, one link can be in your brand colour, whatever does not fit waits under More, a category with nothing in it stays out, and a link you have not filled in yet leaves your categories in place — keep the header on screen always, only while shoppers scroll back up, or not at all, and add account and wishlist beside the cart, and a button of your own after it — like “Order on WhatsApp”. Write your policies in Settings → Policies and build your footer's columns yourself — up to four, each a title and six links to your pages, categories, policies or the web — with your shop on one side, centred, or as a single short line, and choose what it shows: your address and phone or only your email, your social links as names or round marks, the ways you take payment, and beside the year every policy you have written, with the footer resting at the bottom of the screen even on a short page.",
-      bn: "পাঁচটি হেডার ডিজাইনের একটি বেছে নিন — বাঁয়ে নাম ও মেনু, মাঝখানে নাম আর নিচের সারিতে মেনু, পাতার মাঝখানে মেনু, ছোট বড়-হাতের অক্ষরে শান্ত একটি মেনু, নয়তো সবকিছু একটি মেনু বোতামের পেছনে — নামের জায়গায় আপনার নিজের লোগো, ছোট, মাঝারি বা বড়, SVG হলে সবচেয়ে ঝকঝকে (লোগো না থাকলে লম্বা নাম সর্বোচ্চ দুই লাইনে বসে), আর আইকন সরু, সাধারণ বা মোটা রেখায়, লেখাসহ বা ছাড়া, আর ব্যাগ, ঝুড়ি নাকি কার্ট। আপনার নিজের পাতা, ক্যাটাগরি ও লিংক দিয়ে আপনার ক্রমে মেনু বানান — ক্যাটাগরির ভেতরের ক্যাটাগরিগুলো খোলে, একটি লিংক আপনার ব্র্যান্ডের রঙে রাখা যায়, যা জায়গায় ধরে না তা থাকে “আরও”-র ভেতরে, যে ক্যাটাগরিতে কিছু নেই সেটি মেনুতে আসে না, আর যে লিংক এখনো পূরণ করেননি তাতে আপনার ক্যাটাগরিগুলো আগের মতোই থাকে — হেডার সবসময় স্ক্রিনে রাখুন, শুধু ক্রেতা উপরে স্ক্রল করলে দেখান, নয়তো একেবারেই না রাখুন, আর কার্টের পাশে অ্যাকাউন্ট ও উইশলিস্ট যোগ করুন, আর তার পরে আপনার নিজের একটি বোতাম — যেমন “হোয়াটসঅ্যাপে অর্ডার করুন”। সেটিংস → নীতিমালায় আপনার নীতিগুলো লিখুন আর ফুটারের কলামগুলো নিজেই বানান — চারটি পর্যন্ত, প্রতিটিতে একটি শিরোনাম আর আপনার পাতা, ক্যাটাগরি, নীতি বা ওয়েবের ছয়টি লিংক — একপাশে দোকান রেখে, মাঝখানে, নয়তো ছোট এক লাইনে, আর ঠিক করুন কী দেখাবে: ঠিকানা ও ফোন নাকি শুধু ইমেইল, সোশ্যাল লিংক নামে বা গোল চিহ্নে, আপনি যেভাবে টাকা নেন, আর সালের পাশে আপনার লেখা প্রতিটি নীতি, আর ছোট পেজেও ফুটার থাকে স্ক্রিনের একেবারে নিচে।",
-    },
   },
 ];
