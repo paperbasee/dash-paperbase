@@ -1,10 +1,11 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Check, ChevronRight, X } from "lucide-react";
+import { Check, ChevronRight } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 
 import { useAuth } from "@/context/AuthContext";
+import { useConfirm } from "@/context/ConfirmDialogContext";
 import { Link } from "@/i18n/navigation";
 import { toLocaleDigits } from "@/lib/locale-digits";
 import { setupGuideQueryKey } from "@/lib/query-keys";
@@ -18,18 +19,18 @@ import { cn } from "@/lib/utils";
 
 /**
  * The setup guide (owner, 2026-09-28): the last screen of setup, and the top of the home page
- * until every step is done or the owner hides it. Shopify-like -- one card, a progress line, and
+ * until every step is done or the owner skips it. Shopify-like -- one card, a progress line, and
  * each step a way straight to where it is done.
  */
 export function SetupGuideCard({
   guide,
-  onHide,
-  hiding = false,
+  onSkip,
+  skipping = false,
   className,
 }: {
   guide: SetupGuide;
-  onHide?: () => void;
-  hiding?: boolean;
+  onSkip?: () => void;
+  skipping?: boolean;
   className?: string;
 }) {
   const t = useTranslations("dashboard.setupGuide");
@@ -46,16 +47,14 @@ export function SetupGuideCard({
             {toLocaleDigits(t("progress", { done, total }), locale)}
           </p>
         </div>
-        {onHide ? (
+        {onSkip ? (
           <button
             type="button"
-            onClick={onHide}
-            disabled={hiding}
-            aria-label={t("hideAria")}
-            className="flex items-center gap-1 rounded-ui px-2 py-1 text-xs text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:opacity-50"
+            onClick={onSkip}
+            disabled={skipping}
+            className="shrink-0 rounded-ui px-2 py-1 text-xs text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:opacity-50"
           >
-            <X className="size-3.5" aria-hidden />
-            {t("hide")}
+            {t("skip")}
           </button>
         ) : null}
       </header>
@@ -83,10 +82,15 @@ export function SetupGuideCard({
             return (
               <li
                 key={key}
-                className="flex items-center gap-3 border-t border-border-subtle px-4 py-3 text-sm text-muted-foreground line-through decoration-border sm:px-5"
+                className="flex items-center gap-3 border-t border-border-subtle px-4 py-3 text-sm text-muted-foreground sm:px-5"
               >
                 {mark}
-                {t(key)}
+                {/* Crossed out through the middle of the small letters: the words' box is trimmed
+                    to them (`text-box`), where the font's own strike line sat off-centre
+                    (owner, 2026-09-29). */}
+                <span className="relative inline-block [text-box:trim-both_ex_alphabetic] after:absolute after:inset-x-0 after:top-1/2 after:h-px after:-translate-y-1/2 after:bg-muted-foreground/60">
+                  {t(key)}
+                </span>
               </li>
             );
           }
@@ -114,8 +118,10 @@ export function SetupGuideCard({
   );
 }
 
-/** The guide at the top of the home page: the owner's, until it is done or hidden. */
+/** The guide at the top of the home page: the owner's, until it is done or skipped. */
 export function HomeSetupGuide() {
+  const t = useTranslations("dashboard.setupGuide");
+  const confirm = useConfirm();
   const { meProfile, meProfileStatus } = useAuth();
   const isOwner = meProfileStatus === "ready" && meProfile?.store?.role === "Owner";
   const queryClient = useQueryClient();
@@ -130,13 +136,12 @@ export function HomeSetupGuide() {
     onSuccess: (guide) => queryClient.setQueryData(setupGuideQueryKey, guide),
   });
 
+  // Skipping takes the guide off the home page for good, so it is asked first (owner, 2026-09-29).
+  async function skip() {
+    const ok = await confirm({ title: t("skipTitle"), message: t("skipMessage"), confirmText: t("skip") });
+    if (ok) hide.mutate();
+  }
+
   if (!isOwner || !data?.show) return null;
-  return (
-    <SetupGuideCard
-      guide={data}
-      onHide={() => hide.mutate()}
-      hiding={hide.isPending}
-      className="pb-rise"
-    />
-  );
+  return <SetupGuideCard guide={data} onSkip={() => void skip()} skipping={hide.isPending} className="pb-rise" />;
 }

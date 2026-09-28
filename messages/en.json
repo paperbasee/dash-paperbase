@@ -1771,8 +1771,9 @@
     "setupGuide": {
       "title": "Your setup guide",
       "progress": "{done} of {total} done",
-      "hide": "Hide",
-      "hideAria": "Hide the setup guide",
+      "skip": "Skip setup",
+      "skipTitle": "Skip the setup guide?",
+      "skipMessage": "It will leave your home page. You can still do each step from its own page in the dashboard.",
       "shop": "Create your shop",
       "product": "Add your first product",
       "productBody": "Shoppers can buy as soon as one is in.",
