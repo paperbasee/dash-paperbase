@@ -96,11 +96,11 @@ function AgreeLine() {
   );
 }
 
-/** "Need help? Talk to us", level with the brand (owner, 2026-09-28: not at the foot). */
-function HelpLine() {
+/** "Need help? Talk to us": beside the brand on a phone, beside © at the foot on a computer. */
+function HelpLine({ className }: { className?: string }) {
   const t = useTranslations("auth");
   return (
-    <span className="text-xs text-muted-foreground">
+    <span className={cn("text-xs text-muted-foreground", className)}>
       {t("needHelp")} <MaybeLink href={PLATFORM_LINKS.help}>{t("talkToUs")}</MaybeLink>
     </span>
   );
@@ -140,11 +140,9 @@ export function AuthFrame({ children }: { children: ReactNode }) {
           </p>
           {/* On a computer the brand, the form and the foot are one column, centred in the half. */}
           <div className="pb-rise rounded-t-card bg-background px-6 pb-7 pt-6 shadow-[0_-20px_60px_-20px_rgb(0_0_0/0.5)] sm:mx-auto sm:mb-8 sm:w-[26rem] sm:rounded-card sm:px-8 lg:m-0 lg:w-full lg:max-w-[23rem] lg:rounded-none lg:bg-transparent lg:p-0 lg:shadow-none lg:[animation:none]">
-            {/* The brand and "Need help?": the sheet's first row on a phone; on a computer the
-                foot of the screen, on the form's own edges (owner, 2026-09-28). */}
-            <div className="mb-5 flex items-center justify-between gap-3 lg:absolute lg:bottom-10 lg:left-1/2 lg:mb-0 lg:w-full lg:max-w-[23rem] lg:-translate-x-1/2">
+            <div className="mb-5 flex items-center justify-between gap-3 lg:mb-10">
               <PaperbaseBrand />
-              <HelpLine />
+              <HelpLine className="lg:hidden" />
             </div>
             <main className="w-full">
               {tab && !tabsHidden ? (
@@ -164,7 +162,12 @@ export function AuthFrame({ children }: { children: ReactNode }) {
               </div>
               {choosing ? <AgreeLine /> : null}
             </main>
-            <footer className="mt-6 text-xs text-muted-foreground lg:mt-10">© {new Date().getFullYear()} Paperbase</footer>
+            {/* © at the sheet's foot on a phone; on a computer the foot of the screen, with
+                "Need help?", on the form's own edges (owner, 2026-09-28). */}
+            <footer className="mt-6 flex items-center justify-between gap-3 text-xs text-muted-foreground lg:absolute lg:bottom-10 lg:left-1/2 lg:mt-0 lg:w-full lg:max-w-[23rem] lg:-translate-x-1/2">
+              <span>© {new Date().getFullYear()} Paperbase</span>
+              <HelpLine className="hidden lg:inline" />
+            </footer>
           </div>
         </div>
       </div>
