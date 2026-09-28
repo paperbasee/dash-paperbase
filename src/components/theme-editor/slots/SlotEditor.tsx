@@ -74,6 +74,7 @@ import {
 } from "@/lib/query-keys";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { chosenPalette, fetchPalettes } from "@/lib/theme-editor/palettes";
+import { useToastAreaLeft, useToastAvoid } from "@/components/notifications/useToastArea";
 import { ConflictDialog } from "../ConflictDialog";
 import { PreviewPane } from "../PreviewPane";
 import { SaveStatus } from "../SaveStatus";
@@ -727,6 +728,17 @@ export function SlotEditor({
   /** On a narrower screen the sheet shows only when something asked for it. */
   const sheetOpen = !wide && (placePanel !== null || sheet);
 
+  /*
+    The pop-up notes centre over the shop preview, not the whole screen (owner, 2026-09-29):
+    this screen has no sidebar, and its settings panel along the right is not where the work
+    is. On a narrower screen the panel is a sheet from the bottom, and the notes rise above it.
+  */
+  const panelRef = useRef<HTMLElement>(null);
+  const sheetRef = useRef<HTMLDivElement>(null);
+  useToastAreaLeft("0px");
+  useToastAvoid(panelRef, "right", wide);
+  useToastAvoid(sheetRef, "bottom", sheetOpen);
+
   // What the line over the preview says: the place under the pointer, else what this page is.
   const hoveredSlot = hovered ? SLOTS[hovered.page].find((one) => one.key === hovered.key) : null;
   const status = hoveredSlot && selecting ? (
@@ -874,6 +886,7 @@ export function SlotEditor({
 
         {wide ? (
           <aside
+            ref={panelRef}
             aria-label={tKit("panelLabel")}
             className="flex w-[380px] shrink-0 flex-col border-l border-border bg-background xl:w-[400px]"
           >
@@ -884,6 +897,7 @@ export function SlotEditor({
 
       {sheetOpen ? (
         <div
+          ref={sheetRef}
           role="dialog"
           aria-label={tKit("panelLabel")}
           onKeyDown={(event) => {

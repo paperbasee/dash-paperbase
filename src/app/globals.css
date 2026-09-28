@@ -635,3 +635,19 @@ input.font-numbers-date-value::placeholder {
     background-color: var(--system-banner-sidebar-dismiss-hover-bg);
   }
 }
+/*
+ * The pop-up notes, centred in the area being worked in (owner, 2026-09-29): the page beside the
+ * sidebar, or the shop preview beside the theme editor's settings panel -- never the whole window.
+ * `--toast-area-left` / `--toast-area-right` name what to leave out; a page that sets neither
+ * leaves out the sidebar (`--dashboard-main-left-inset`, 0 on a phone and when there is none).
+ *
+ * Outside every layer, and one step more specific than the library's own rule: sonner injects its
+ * stylesheet while the page runs, unlayered, so a layered rule here would lose whatever it said.
+ * Phones keep the library's full-width placement (its breakpoint is 600px).
+ */
+@media (min-width: 601px) {
+  html [data-sonner-toaster][data-x-position="center"] {
+    --toast-left: var(--toast-area-left, var(--dashboard-main-left-inset, 0px));
+    left: calc(var(--toast-left) + (100% - var(--toast-left) - var(--toast-area-right, 0px)) / 2);
+  }
+}

@@ -95,9 +95,10 @@ describe("notification and confirm copy", () => {
     for (const rel of SOURCES) {
       for (const key of usedCommonKeys(fs.readFileSync(path.join(ROOT, rel), "utf8"))) used.add(key);
     }
-    // The toast's five bar labels, its screen-reader name, Close, the two dialog buttons and
-    // the two dialog fallbacks, the unknown error, the rate limit pair, Loading.
-    expect(used.size).toBeGreaterThanOrEqual(14);
+    // The toasts' screen-reader name, Close, the two dialog buttons and the two dialog
+    // fallbacks, the unknown error, the rate limit pair, Loading. (The five labels of the
+    // toast's coloured bar went with the bar, 2026-09-29: its icon names the kind.)
+    expect(used.size).toBeGreaterThanOrEqual(10);
     expect([...used].filter((k) => !enCommon[k]?.trim())).toEqual([]);
     expect([...used].filter((k) => !bnCommon[k]?.trim())).toEqual([]);
     // A Bangla value copied from English is English on screen.

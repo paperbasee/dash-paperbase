@@ -114,12 +114,14 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
 
   const makeId = () => `${Date.now()}-${Math.random().toString(16).slice(2)}`;
 
+  // How long each kind stays (owner, 2026-09-29): good news is read at a glance and goes; an
+  // error stays long enough to read its reason -- it stayed until closed, and they piled up.
   const defaultDurationMsByVariant: Record<ToastVariant, number> = {
-    success: 4000,
-    info: 5000,
+    success: 3000,
+    info: 4000,
     warning: 6000,
-    error: Number.POSITIVE_INFINITY,
-    default: 5000,
+    error: 8000,
+    default: 4000,
   };
 
   const showToast = useCallback(
@@ -169,7 +171,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
       const text = resolveMessage(message);
       const id = options?.id ?? makeId();
       // No default title. It used to be the English word for the kind ("Success", "Warning"),
-      // which the toast already prints in its coloured bar — in the merchant's language.
+      // which the toast's icon already says, in no language at all.
       const resolvedTitle = options?.title ? resolveMessage(options.title) : undefined;
       const inferredIconName = inferToastIconName({
         variant: kind,
