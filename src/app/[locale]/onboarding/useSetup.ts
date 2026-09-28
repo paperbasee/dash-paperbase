@@ -569,6 +569,8 @@ export function useSetup() {
     },
     nameCheck,
     storeMade: storeId !== null,
+    /** The shop's public id, once it is made. */
+    storeId,
     askOwnerName,
     ownerFirst,
     setOwnerFirst,

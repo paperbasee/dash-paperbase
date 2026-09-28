@@ -8,7 +8,7 @@ import { AuthError } from "@/components/auth/AuthParts";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-import { FinishingScreen, ReadyScreen } from "./FinishScreens";
+import { FinishScreen } from "./FinishScreens";
 import { SetupShell } from "./SetupShell";
 import { AddressStep, ContactStep, LookStep, NameStep, SellStep } from "./steps";
 import { useSetup, type SetupState } from "./useSetup";
@@ -42,8 +42,7 @@ function SetupFlow() {
   const setup = useSetup();
 
   if (!setup.ready) return <SetupLoading />;
-  if (setup.phase === "finishing") return <FinishingScreen setup={setup} />;
-  if (setup.phase === "ready") return <ReadyScreen setup={setup} />;
+  if (setup.phase === "finishing" || setup.phase === "ready") return <FinishScreen setup={setup} />;
 
   const next: Record<string, () => void> = {
     sell: () => void setup.continueFromSell(),

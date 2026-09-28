@@ -1,5 +1,5 @@
 import { Lock } from "lucide-react";
-import type { CSSProperties } from "react";
+import type { CSSProperties, ReactNode } from "react";
 
 import { SocialMark } from "@/components/SocialMark";
 import type { PaletteTokens } from "@/lib/theme-editor/palettes";
@@ -58,42 +58,28 @@ function lookVars(tokens: PaletteTokens | null | undefined): CSSProperties {
 }
 
 /**
- * The owner's shop in a browser window: the sample home page (ShopHome) in their name, address,
- * colours and contact, a screen of it at a time, scrolling inside like a browser. Colours change
- * by transition, so a new palette washes over it.
+ * A browser window, a computer's or a phone's, with the shop's address in its bar and a page in
+ * it: the drawn sample (ShopWindow) or the real shop in a frame (setup's last screen).
  *
- * - `device`: a computer's page or a phone's.
  * - `fill`: the window takes its box's height -- setup's panel, where it runs off the panel's foot
  *   (owner, 2026-09-28: "no empty space in the live preview"). Otherwise it is a screen tall.
  */
-export function ShopWindow({
-  name,
+export function BrowserFrame({
   hostname,
-  kind,
-  tokens,
-  announcement,
-  contact = null,
-  whatsapp = false,
-  facebook = false,
   hostnameFlashKey,
   device = "computer",
   fill = false,
   className,
+  children,
 }: {
-  name: string;
   hostname: string;
-  kind: ShopKind;
-  tokens?: PaletteTokens | null;
-  announcement: string;
-  /** The owner's number, once they have given it: shown in the shop's footer. */
-  contact?: string | null;
-  whatsapp?: boolean;
-  facebook?: boolean;
   /** Changing it flashes the address bar green: a new address was just given. */
   hostnameFlashKey?: string | number;
   device?: ShopDevice;
   fill?: boolean;
   className?: string;
+  /** The page: it fills the window under the bar. */
+  children: ReactNode;
 }) {
   const phone = device === "phone";
 
@@ -137,9 +123,50 @@ export function ShopWindow({
         </span>
         {phone ? null : <span className="w-[52px]" aria-hidden />}
       </div>
+      <div className="relative min-h-0 flex-1">{children}</div>
+    </div>
+  );
+}
 
+/**
+ * The owner's shop drawn in a browser window: the sample home page (ShopHome) in their name,
+ * address, colours and contact, a screen of it at a time, scrolling inside like a browser.
+ * Colours change by transition, so a new palette washes over it.
+ */
+export function ShopWindow({
+  name,
+  hostname,
+  kind,
+  tokens,
+  announcement,
+  contact = null,
+  whatsapp = false,
+  facebook = false,
+  hostnameFlashKey,
+  device = "computer",
+  fill = false,
+  className,
+}: {
+  name: string;
+  hostname: string;
+  kind: ShopKind;
+  tokens?: PaletteTokens | null;
+  announcement: string;
+  /** The owner's number, once they have given it: shown in the shop's footer. */
+  contact?: string | null;
+  whatsapp?: boolean;
+  facebook?: boolean;
+  hostnameFlashKey?: string | number;
+  device?: ShopDevice;
+  fill?: boolean;
+  className?: string;
+}) {
+  const phone = device === "phone";
+
+  return (
+    <BrowserFrame hostname={hostname} hostnameFlashKey={hostnameFlashKey} device={device} fill={fill} className={className}>
       <div
-        className="relative min-h-0 flex-1 bg-[var(--sw-bg)] text-[var(--sw-fg)] transition-colors duration-500"
+        className="absolute inset-0 bg-[var(--sw-bg)] text-[var(--sw-fg)] transition-colors duration-500"
         style={lookVars(tokens)}
       >
         <div className="scrollbar-hide h-full overflow-y-auto overscroll-contain">
@@ -167,6 +194,6 @@ export function ShopWindow({
           </span>
         ) : null}
       </div>
-    </div>
+    </BrowserFrame>
   );
 }

@@ -79,8 +79,23 @@ export function SetupPreview({
  * panel the sign-in pages show their photos in. The shop fills the panel's width and runs off its
  * foot, scrolling inside like a browser, with nothing empty around it (owner, 2026-09-28); it can
  * be seen as a computer shows it or as a phone does.
+ *
+ * `children` draws the shop for the screen chosen; `overlay` lies over it (setup's last saves
+ * while they run, a note once the shop is live). `keepFrame` keeps one page across Desktop and
+ * Mobile -- the real shop's frame, which a new page would have to open again -- where the drawn
+ * one rises in anew.
  */
-export function PreviewPanel({ setup, badge }: { setup: SetupState; badge: ReactNode }) {
+export function PreviewPanel({
+  badge,
+  overlay,
+  keepFrame = false,
+  children,
+}: {
+  badge: ReactNode;
+  overlay?: ReactNode;
+  keepFrame?: boolean;
+  children: (device: ShopDevice) => ReactNode;
+}) {
   const t = useTranslations("auth.onboarding");
   const [device, setDevice] = useState<ShopDevice>("computer");
   const phone = device === "phone";
@@ -106,16 +121,16 @@ export function PreviewPanel({ setup, badge }: { setup: SetupState; badge: React
           ))}
         </div>
       </div>
-      <div className="min-h-0 flex-1 px-10 pt-9">
-        {/* A new screen rises in, as a new step does. */}
+      <div className="relative min-h-0 flex-1 px-10 pt-9">
         <ScaleToFit
-          key={device}
+          key={keepFrame ? undefined : device}
           width={phone ? SHOP_PHONE_WIDTH : SHOP_WINDOW_WIDTH}
           mode="fill"
           maxScale={phone ? 0.9 : 1}
         >
-          <SetupPreview setup={setup} device={device} fill className="pb-rise" />
+          {children(device)}
         </ScaleToFit>
+        {overlay}
       </div>
     </aside>
   );
@@ -196,14 +211,16 @@ export function SetupShell({
       </div>
 
       <PreviewPanel
-        setup={setup}
         badge={
           <span className="flex items-center gap-2 text-xs text-white/60">
             <span className="pb-live-dot size-[7px] rounded-full bg-[hsl(var(--accent-green))]" />
             {t("livePreviewNote")}
           </span>
         }
-      />
+      >
+        {/* A new screen rises in, as a new step does. */}
+        {(device) => <SetupPreview setup={setup} device={device} fill className="pb-rise" />}
+      </PreviewPanel>
 
       <button
         type="button"
