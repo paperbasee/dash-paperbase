@@ -14,14 +14,17 @@ export function PaperbaseBrand({ className, compact = false }: { className?: str
   );
 }
 
-/** The heading every sign-in card opens with. */
-export function AuthHeading({ title, body }: { title: string; body?: ReactNode }) {
+/**
+ * The heading every sign-in page opens with: a tall, narrow serif (Instrument Serif, the owner's
+ * design of 2026-09-28), with Bangla falling back to the dashboard's Bangla face.
+ */
+export function AuthHeading({ title, body, className }: { title: string; body?: ReactNode; className?: string }) {
   return (
-    <div>
-      <h1 className="text-[1.5rem] font-semibold leading-tight tracking-[-0.025em] text-foreground sm:text-[1.625rem]">
+    <div className={className}>
+      <h1 className="text-[2.25rem] font-normal leading-[1.05] tracking-[-0.01em] text-foreground [font-family:var(--font-instrument-serif),var(--font-noto-sans-bengali),serif] sm:text-[2.75rem]">
         {title}
       </h1>
-      {body ? <p className="mt-1.5 text-[13.5px] leading-relaxed text-muted-foreground">{body}</p> : null}
+      {body ? <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{body}</p> : null}
     </div>
   );
 }

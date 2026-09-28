@@ -38,7 +38,7 @@ export function AuthLanguageSwitch({ className }: { className?: string }) {
     <div
       role="group"
       aria-label={t("toggleAria")}
-      className={cn("flex overflow-hidden rounded-ui border border-border-subtle text-xs", className)}
+      className={cn("flex gap-0.5 overflow-hidden rounded-ui border border-border-subtle p-0.5 text-xs", className)}
     >
       {LOCALES.map((option) => (
         <button
@@ -47,9 +47,9 @@ export function AuthLanguageSwitch({ className }: { className?: string }) {
           onClick={() => choose(option)}
           aria-pressed={locale === option}
           className={cn(
-            "px-2.5 py-1 transition-colors",
+            "rounded-xs px-2.5 py-1 transition-colors",
             locale === option
-              ? "bg-muted font-medium text-foreground"
+              ? "bg-foreground font-medium text-background"
               : "text-muted-foreground hover:text-foreground"
           )}
         >

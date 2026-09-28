@@ -9,7 +9,7 @@ import { useAuth } from "@/context/AuthContext";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useHideAuthTabs } from "@/components/auth/AuthFrame";
-import { AuthDivider, AuthError, AuthHeading } from "@/components/auth/AuthParts";
+import { AuthDivider, AuthError } from "@/components/auth/AuthParts";
 import { CheckEmailPanel } from "@/components/auth/CheckEmailPanel";
 import { useMinDelayLoading } from "@/hooks/useMinDelayLoading";
 import { resolvePostAuthRoute } from "@/lib/subscription-access";
@@ -89,7 +89,6 @@ export default function LoginPage() {
         <CheckEmailPanel email={email.trim()} variant="signin" onBack={() => setLinkSent(false)} />
       ) : (
         <div className="pb-stagger space-y-6" aria-busy={loading}>
-          <AuthHeading title={t("title")} body={t("subtitle")} />
           {error ? <AuthError>{error}</AuthError> : null}
 
           <div className="space-y-5">

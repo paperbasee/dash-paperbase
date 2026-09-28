@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import type { Metadata } from "next";
 import { cookies, headers } from "next/headers";
 import Script from "next/script";
-import { Archivo, Cinzel, Noto_Sans_Bengali, Playfair_Display, Poppins } from "next/font/google";
+import { Archivo, Cinzel, Instrument_Serif, Noto_Sans_Bengali, Playfair_Display, Poppins } from "next/font/google";
 import { getLocale } from "next-intl/server";
 import "./globals.css";
 import { isTurnstileDisabled } from "@/lib/turnstile-env";
@@ -63,6 +63,18 @@ const cinzel = Cinzel({
 // is refused with "Font loaders must be called and assigned to a const in the
 // module scope", which reads like the opposite of what is wrong.
 const shopFaces = [archivo, playfairDisplay, cinzel];
+
+/**
+ * The sign-in pages' headings (owner's design, 2026-09-28): a tall, narrow serif. Fetched only
+ * on the pages that set it, like the faces above.
+ */
+const instrumentSerif = Instrument_Serif({
+  subsets: ["latin"],
+  weight: "400",
+  variable: "--font-instrument-serif",
+  display: "swap",
+  preload: false,
+});
 
 const notoSansBengali = Noto_Sans_Bengali({
   subsets: ["bengali"],
@@ -151,7 +163,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
       lang={locale}
       suppressHydrationWarning
       className={[isDark ? "dark" : undefined, poppins.className, notoSansBengali.variable,
-        ...shopFaces.map((face) => face.variable)]
+        instrumentSerif.variable, ...shopFaces.map((face) => face.variable)]
         .filter(Boolean)
         .join(" ")}
       data-theme={dataTheme}

@@ -1788,7 +1788,7 @@
     "login": {
       "title": "Welcome back",
       "subtitle": "Sign in to run your shop.",
-      "passkey": "Sign in with a passkey",
+      "passkey": "Continue with a passkey",
       "noPasskeys": "This device can't use passkeys. Use the email link below.",
       "orEmail": "or use your email",
       "email": "Email",
@@ -1800,15 +1800,15 @@
       "failed": "Something went wrong. Try again."
     },
     "signup": {
-      "title": "Start your shop",
-      "subtitle": "Free to set up. No password to remember.",
+      "title": "Open your shop",
+      "subtitle": "Set up Paperbase in under two minutes.",
       "firstName": "First name",
       "lastName": "Last name",
       "firstNamePlaceholder": "Nusrat",
       "lastNamePlaceholder": "Jahan",
       "email": "Email",
       "emailPlaceholder": "you@example.com",
-      "create": "Create account",
+      "create": "Email me a link to get started",
       "nameRequired": "Enter your first and last name.",
       "emailRequired": "Enter your email address.",
       "failed": "We couldn't create your account. Try again."

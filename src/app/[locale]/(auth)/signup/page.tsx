@@ -2,11 +2,12 @@
 
 import { useState, type FormEvent } from "react";
 import { useTranslations } from "next-intl";
+import { Mail } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useHideAuthTabs } from "@/components/auth/AuthFrame";
-import { AuthError, AuthHeading } from "@/components/auth/AuthParts";
+import { AuthError } from "@/components/auth/AuthParts";
 import { CheckEmailPanel } from "@/components/auth/CheckEmailPanel";
 import { TurnstileWidget } from "@/components/auth/TurnstileWidget";
 import { useMinDelayLoading } from "@/hooks/useMinDelayLoading";
@@ -72,7 +73,6 @@ export default function SignupPage() {
         <CheckEmailPanel email={email.trim()} variant="signup" onBack={() => setSent(false)} />
       ) : (
         <form onSubmit={handleSubmit} className="pb-stagger space-y-6" aria-busy={loading} noValidate>
-          <AuthHeading title={t("title")} body={t("subtitle")} />
           {error ? <AuthError>{error}</AuthError> : null}
 
           <div className="space-y-4">
@@ -127,6 +127,7 @@ export default function SignupPage() {
             <TurnstileWidget />
 
             <Button type="submit" loading={loading} className="h-11 w-full">
+              <Mail className="size-[18px]" aria-hidden />
               {t("create")}
             </Button>
           </div>

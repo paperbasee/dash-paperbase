@@ -65,7 +65,16 @@ function Note({ note }: { note: 0 | 1 | 2 }) {
   );
 }
 
-export function ShopWall({ className }: { className?: string }) {
+/**
+ * `shade`: how the wall is dimmed. The panel beside the form (the owner's design, 2026-09-28) is
+ * darkest at its foot, where its words sit.
+ */
+const SHADES = {
+  center: "bg-[radial-gradient(60%_70%_at_50%_50%,rgb(13_14_17/0.35),rgb(13_14_17/0.88)_75%)]",
+  panel: "bg-[linear-gradient(to_top,rgb(14_14_14/0.94),rgb(14_14_14/0.5)_50%,rgb(14_14_14/0.6))]",
+} as const;
+
+export function ShopWall({ className, shade = "center" }: { className?: string; shade?: keyof typeof SHADES }) {
   return (
     <div aria-hidden className={cn("pointer-events-none absolute inset-0 overflow-hidden", className)}>
       <div className="absolute -inset-x-[18%] -inset-y-[30%] flex -rotate-[9deg] gap-4 max-sm:-inset-x-[40%] max-sm:gap-2.5">
@@ -101,8 +110,7 @@ export function ShopWall({ className }: { className?: string }) {
           );
         })}
       </div>
-      {/* Dimmer at the edges than behind the card, so the card is what the eye lands on. */}
-      <div className="absolute inset-0 bg-[radial-gradient(60%_70%_at_50%_50%,rgb(13_14_17/0.35),rgb(13_14_17/0.88)_75%)]" />
+      <div className={cn("absolute inset-0", SHADES[shade])} />
     </div>
   );
 }
