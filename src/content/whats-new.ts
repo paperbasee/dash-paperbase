@@ -88,6 +88,21 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-09-29-your-contact-and-social-accounts-in-one-place",
+    date: "2026-09-29",
+    version: "4.125.0",
+    tag: "new",
+    href: "/settings?tab=store",
+    title: {
+      en: "Your contact and social accounts, in one place",
+      bn: "যোগাযোগ আর সোশ্যাল অ্যাকাউন্ট, এক জায়গায়",
+    },
+    body: {
+      en: "Settings > Store Info now has an Identity section for your phone, email, address and social accounts, from WhatsApp and Facebook to YouTube, Telegram, X, LinkedIn, Pinterest, Threads and Snapchat, in the order you like. Your footer, contact page and home page sign-up button all use them, and the sign-up button can open any of them. Your invoice terms and conditions moved to Settings > Policies.",
+      bn: "সেটিংস > স্টোর তথ্যে এখন পরিচিতি অংশ আছে, আপনার ফোন, ইমেইল, ঠিকানা আর সোশ্যাল অ্যাকাউন্টের জন্য, হোয়াটসঅ্যাপ আর ফেসবুক থেকে ইউটিউব, টেলিগ্রাম, এক্স, লিংকডইন, পিন্টারেস্ট, থ্রেডস ও স্ন্যাপচ্যাট পর্যন্ত, আপনার পছন্দের ক্রমে। আপনার ফুটার, যোগাযোগ পাতা আর হোম পেজের সাইন-আপ বোতাম এগুলোই ব্যবহার করে, আর সাইন-আপ বোতাম এর যেকোনোটি খুলতে পারে। ইনভয়েসের শর্তাবলী এখন সেটিংস > নীতিমালায়।",
+    },
+  },
+  {
     id: "2026-09-28-download-your-analytics",
     date: "2026-09-28",
     version: "4.124.0",
@@ -514,20 +529,6 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     body: {
       en: "Every product now has a Questions & answers box on its page in your dashboard — write “does it come in XL” and your answer once, and it shows on that product in your shop. There is a second one for questions about the whole shop, like delivery outside Dhaka or exchanges, which you can put on your home page, a category or the blog. Shoppers tap a question to open the answer, and their browser's find-on-page still reaches the text inside; the editor draws the questions centred, as your shop does.",
       bn: "প্রতিটি পণ্যের পাতায় এখন ড্যাশবোর্ডে “প্রশ্ন ও উত্তর” বক্স আছে — “XL সাইজ আছে কি” আর তার উত্তর একবার লিখে রাখলেই সেটি আপনার দোকানে ওই পণ্যের পাতায় দেখা যাবে। পুরো দোকান নিয়ে প্রশ্নের জন্য আলাদা একটি আছে — যেমন ঢাকার বাইরে ডেলিভারি বা বদলানোর নিয়ম — যা হোম পেজ, ক্যাটাগরি বা ব্লগে বসানো যায়। ক্রেতা প্রশ্নে চাপ দিলেই উত্তর খুলে যায়, আর ব্রাউজারের খোঁজার সুবিধাও ভেতরের লেখা পর্যন্ত পৌঁছায়; এডিটরও প্রশ্নগুলো আপনার দোকানের মতো মাঝখানে আঁকে।",
-    },
-  },
-  {
-    id: "2026-09-22-put-a-video-on-your-shop",
-    date: "2026-09-22",
-    version: "4.109.3",
-    tag: "new",
-    title: {
-      en: "Put a video on your shop",
-      bn: "দোকানে ভিডিও যোগ করুন",
-    },
-    body: {
-      en: "On Premium, your home page can open with a video instead of pictures: paste a link from YouTube, Facebook or Vimeo — any normal link works, including a Shorts or a share link. Shoppers see your cover picture and a round, solid play button — and so does your editor — and nothing is loaded from YouTube until somebody presses it, so the page stays fast and no shopper is reported to anyone who never watched. Reels and other tall videos have a shape of their own so they are not squeezed into a wide box.",
-      bn: "প্রিমিয়ামে আপনার হোম পেজ ছবির বদলে একটি ভিডিও দিয়ে শুরু হতে পারে: ইউটিউব, ফেসবুক বা ভিমিও থেকে একটি লিংক বসান — শর্টস বা শেয়ার লিংকসহ সাধারণ যেকোনো লিংকই চলবে। ক্রেতারা আপনার কভার ছবি আর একটি গোল, ভরাট প্লে বোতাম দেখবেন — এডিটরেও তা-ই দেখায় —, আর কেউ সেটি না চাপা পর্যন্ত ইউটিউব থেকে কিছুই লোড হয় না — তাই পাতা দ্রুত থাকে আর যে ক্রেতা ভিডিও দেখেননি তাঁর কথা কোথাও যায় না। রিলসের মতো লম্বা ভিডিওর জন্য আলাদা আকার আছে, তাই সেগুলো চওড়া বাক্সে চেপে বসে না।",
     },
   },
 ];
