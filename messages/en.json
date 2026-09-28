@@ -1786,7 +1786,7 @@
     "turnstileHumanPrompt": "Let us verify you are a human",
     "turnstileRequired": "Please complete the verification challenge before continuing.",
     "login": {
-      "title": "Welcome back",
+      "title": "Welcome back to Paperbase",
       "subtitle": "Sign in to run your shop.",
       "passkey": "Continue with a passkey",
       "noPasskeys": "This device can't use passkeys. Use the email link below.",
