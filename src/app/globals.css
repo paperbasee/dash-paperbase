@@ -773,6 +773,22 @@ input.font-numbers-date-value::placeholder {
     background-color: hsl(var(--accent-green) / 0.22);
   }
 }
+/* Setup's launch (FinishScreens' Confetti): up and out from one point, then down and gone. Each
+   piece carries its own path in --dx, --rise, --dy and --rot. */
+@keyframes pb-confetti {
+  0% {
+    transform: translate3d(0, 0, 0) rotate(0deg);
+    opacity: 1;
+  }
+  30% {
+    transform: translate3d(calc(var(--dx) * 0.45), var(--rise), 0) rotate(calc(var(--rot) * 0.35));
+    opacity: 1;
+  }
+  100% {
+    transform: translate3d(var(--dx), var(--dy), 0) rotate(var(--rot));
+    opacity: 0;
+  }
+}
 
 @layer components {
   .pb-rise {
@@ -856,6 +872,9 @@ input.font-numbers-date-value::placeholder {
   .pb-flash {
     animation: pb-flash 1s cubic-bezier(0.2, 0.8, 0.2, 1);
   }
+  .pb-confetti {
+    animation: pb-confetti var(--dur, 1.6s) cubic-bezier(0.25, 0.7, 0.4, 1) var(--delay, 0s) both;
+  }
   /* The sign-in wall's columns (ShopWall): each travels half its length, which is one copy. */
   .pb-wall-up {
     animation: pb-wall-up 70s linear infinite;
@@ -875,5 +894,9 @@ input.font-numbers-date-value::placeholder {
   }
   .pb-motion .pb-draw {
     stroke-dashoffset: 0;
+  }
+  /* Stopped, confetti would hang in the air: it is not drawn at all. */
+  .pb-motion .pb-confetti {
+    display: none;
   }
 }

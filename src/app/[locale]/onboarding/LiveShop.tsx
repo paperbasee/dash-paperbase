@@ -2,6 +2,7 @@
 
 import { Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { useEffect, useRef } from "react";
 
 import { BrowserFrame, type ShopDevice } from "@/components/shop-preview/ShopWindow";
 import { PREVIEW_FRAME_NAME, usePreviewSession } from "@/components/theme-editor/usePreviewSession";
@@ -21,9 +22,35 @@ const PREVIEW_ORIGIN = previewOrigin(process.env.NEXT_PUBLIC_STOREFRONT_PREVIEW_
  * With no preview host configured, or before the shop has an id, the drawing stands in: it is
  * the only picture there is.
  */
-export function LiveShop({ setup, device }: { setup: SetupState; device: ShopDevice }) {
+export function LiveShop({
+  setup,
+  device,
+  onShown,
+}: {
+  setup: SetupState;
+  device: ShopDevice;
+  /** Once the shop is on screen: the real one drawn, or the drawing standing in. */
+  onShown?: () => void;
+}) {
+  const framed = Boolean(PREVIEW_ORIGIN && setup.storeId);
+  const onShownRef = useRef(onShown);
+  useEffect(() => {
+    onShownRef.current = onShown;
+  });
+  useEffect(() => {
+    if (!framed) onShownRef.current?.();
+  }, [framed]);
+
   if (!PREVIEW_ORIGIN || !setup.storeId) return <SetupPreview setup={setup} device={device} fill />;
-  return <LiveShopFrame origin={PREVIEW_ORIGIN} storePublicId={setup.storeId} hostname={setup.shownHostname} device={device} />;
+  return (
+    <LiveShopFrame
+      origin={PREVIEW_ORIGIN}
+      storePublicId={setup.storeId}
+      hostname={setup.shownHostname}
+      device={device}
+      onShown={onShown}
+    />
+  );
 }
 
 function LiveShopFrame({
@@ -31,11 +58,13 @@ function LiveShopFrame({
   storePublicId,
   hostname,
   device,
+  onShown,
 }: {
   origin: string;
   storePublicId: string;
   hostname: string;
   device: ShopDevice;
+  onShown?: () => void;
 }) {
   const t = useTranslations("auth.onboarding");
   // No version to wait for: setup has just published, so the draft the preview draws is the shop.
@@ -44,6 +73,13 @@ function LiveShopFrame({
   const { phase } = state;
   const opening = !state.hasShown && (phase === "minting" || phase === "entering" || phase === "loading");
   const failed = phase === "unavailable" || phase === "stopped" || phase === "otherStore";
+  const onShownRef = useRef(onShown);
+  useEffect(() => {
+    onShownRef.current = onShown;
+  });
+  useEffect(() => {
+    if (state.hasShown) onShownRef.current?.();
+  }, [state.hasShown]);
 
   return (
     // One frame whatever the screen: Desktop and Mobile only change its width, since a new frame

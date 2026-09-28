@@ -225,6 +225,8 @@ export function useSetup() {
     dashboard: "todo",
   });
   const [guide, setGuide] = useState<SetupGuide | null>(null);
+  // Finish ran in this visit: the end is the launch, not a reload of it.
+  const [justFinished, setJustFinished] = useState(false);
 
   // ---- where to start ------------------------------------------------------------------------
   useEffect(() => {
@@ -575,6 +577,7 @@ export function useSetup() {
       const [nextGuide] = await atLeast(Promise.all([fetchSetupGuide(), fetchMeForRouting()]));
       setGuide(nextGuide);
       setTicks((t) => ({ ...t, dashboard: "done" }));
+      setJustFinished(true);
       await new Promise((resolve) => setTimeout(resolve, 450));
       go("ready");
     } catch (err) {
@@ -672,6 +675,7 @@ export function useSetup() {
     // finishing, ready
     ticks,
     guide,
+    justFinished,
     // the preview
     shownHostname,
     liveUrl,

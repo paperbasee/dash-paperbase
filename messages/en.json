@@ -1912,8 +1912,11 @@
       "openingShop": "Opening your shop…",
       "shopDidNotOpen": "Your shop didn't open here.",
       "liveShopTitle": "Your shop",
-      "emptyShopNote": "Your shop is empty for now. Add your first product and this page fills up.",
-      "addProduct": "Add a product"
+      "shareShop": "Share your shop",
+      "shareOnWhatsApp": "Share on WhatsApp",
+      "shareOnFacebook": "Share on Facebook",
+      "copyLink": "Copy link",
+      "shareText": "Visit my new shop: {url}"
     },
     "verifyEmail": {
       "verifying": "Verifying your email…",

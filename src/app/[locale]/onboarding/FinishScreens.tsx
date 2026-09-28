@@ -1,15 +1,15 @@
 "use client";
 
-import { ArrowRight, Check, Copy, ExternalLink, PackagePlus } from "lucide-react";
+import { ArrowRight, Check, Copy, ExternalLink, Link2 } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 
 import { AuthLanguageSwitch } from "@/components/auth/AuthLanguageSwitch";
 import { AuthHeading, PaperbaseWordmark } from "@/components/auth/AuthParts";
+import { SocialMark } from "@/components/SocialMark";
 import { SetupGuideCard } from "@/components/setup-guide/SetupGuideCard";
 import { Button } from "@/components/ui/button";
 import { Link } from "@/i18n/navigation";
-import { SETUP_GUIDE_HREF } from "@/lib/setup-guide";
 import { cn } from "@/lib/utils";
 
 import { LiveShop } from "./LiveShop";
@@ -60,18 +60,24 @@ function FinishSteps({ setup, onDark = false }: { setup: SetupState; onDark?: bo
   );
 }
 
-function CopyLink({ url }: { url: string }) {
-  const t = useTranslations("auth.onboarding");
+/** Copies `url`, and says so for a moment. */
+function useCopy(url: string) {
   const [copied, setCopied] = useState(false);
   useEffect(() => {
     if (!copied) return;
     const timer = window.setTimeout(() => setCopied(false), 1600);
     return () => window.clearTimeout(timer);
   }, [copied]);
+  return { copied, copy: () => void navigator.clipboard?.writeText(url).then(() => setCopied(true)) };
+}
+
+function CopyLink({ url }: { url: string }) {
+  const t = useTranslations("auth.onboarding");
+  const { copied, copy } = useCopy(url);
   return (
     <button
       type="button"
-      onClick={() => void navigator.clipboard?.writeText(url).then(() => setCopied(true))}
+      onClick={copy}
       className={cn(
         "flex h-8 items-center gap-1.5 rounded-ui border px-2.5 text-xs transition-colors",
         copied
@@ -82,6 +88,111 @@ function CopyLink({ url }: { url: string }) {
       {copied ? <Check className="size-3.5" aria-hidden /> : <Copy className="size-3.5" aria-hidden />}
       {copied ? t("copied") : t("copy")}
     </button>
+  );
+}
+
+/**
+ * "Share your shop" (owner, 2026-09-29): the first thing a new shop is shown to -- a WhatsApp
+ * chat, a Facebook post, a copied link. On the shop's dark panel, or under the link on a phone.
+ */
+function ShareBar({ url, onDark = false, className }: { url: string; onDark?: boolean; className?: string }) {
+  const t = useTranslations("auth.onboarding");
+  const { copied, copy } = useCopy(url);
+  const round = cn(
+    "flex size-9 items-center justify-center rounded-full transition-colors",
+    onDark ? "bg-white/10 text-white hover:bg-white/20" : "bg-muted text-foreground hover:bg-muted/70"
+  );
+  return (
+    <div
+      className={cn(
+        "flex items-center gap-1.5 rounded-full py-1.5 pl-5 pr-1.5",
+        onDark
+          ? "bg-[#141414]/90 text-white shadow-[0_18px_40px_-16px_rgb(0_0_0/0.6)] ring-1 ring-white/10 backdrop-blur"
+          : "border border-border-subtle bg-card text-foreground",
+        className
+      )}
+    >
+      <span className="mr-2 text-[13px] font-medium">{t("shareShop")}</span>
+      <a
+        href={`https://wa.me/?text=${encodeURIComponent(t("shareText", { url }))}`}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label={t("shareOnWhatsApp")}
+        title={t("shareOnWhatsApp")}
+        className={round}
+      >
+        <SocialMark platform="whatsapp" className="size-[18px]" />
+      </a>
+      <a
+        href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label={t("shareOnFacebook")}
+        title={t("shareOnFacebook")}
+        className={round}
+      >
+        <SocialMark platform="facebook" className="size-[18px]" />
+      </a>
+      <button
+        type="button"
+        onClick={copy}
+        className={cn(round, "w-auto gap-1.5 px-3.5 text-xs font-medium", copied && "text-[hsl(var(--accent-green))]")}
+      >
+        {copied ? <Check className="size-3.5" aria-hidden /> : <Link2 className="size-3.5" aria-hidden />}
+        {copied ? t("copied") : t("copyLink")}
+      </button>
+    </div>
+  );
+}
+
+/**
+ * The launch (owner, 2026-09-29): a burst of confetti in the shop's own colours, once, as the real
+ * shop appears after Finish. CSS only (`.pb-confetti`); not drawn at all for a device that asks
+ * for less motion. The pieces' paths come from their index, so they are the same every time.
+ */
+function Confetti({ colors }: { colors: string[] }) {
+  const pieces = useMemo(
+    () =>
+      Array.from({ length: 56 }, (_, i) => {
+        const r = (salt: number) => {
+          const x = Math.sin((i + 1) * salt) * 10000;
+          return x - Math.floor(x);
+        };
+        const round = r(2.21) > 0.72;
+        const width = 6 + Math.round(r(3.31) * 5);
+        return {
+          width,
+          height: round ? width : 10 + Math.round(r(5.53) * 6),
+          round,
+          style: {
+            "--dx": `${Math.round((r(12.9898) - 0.5) * 900)}px`,
+            "--rise": `${Math.round(-60 - r(78.233) * 170)}px`,
+            "--dy": `${Math.round(380 + r(39.3467) * 420)}px`,
+            "--rot": `${Math.round((r(93.9898) - 0.5) * 1440)}deg`,
+            "--delay": `${(r(11.13) * 0.25).toFixed(2)}s`,
+            "--dur": `${(1.3 + r(7.77) * 0.7).toFixed(2)}s`,
+          } as CSSProperties,
+          color: colors[i % colors.length],
+        };
+      }),
+    [colors]
+  );
+  return (
+    <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
+      {pieces.map((piece, i) => (
+        <span
+          key={i}
+          className="pb-confetti absolute left-1/2 top-[16%]"
+          style={{
+            ...piece.style,
+            width: piece.width,
+            height: piece.height,
+            borderRadius: piece.round ? 9999 : 2,
+            background: piece.color,
+          }}
+        />
+      ))}
+    </div>
   );
 }
 
@@ -97,7 +208,21 @@ export function FinishScreen({ setup }: { setup: SetupState }) {
   const live = setup.phase === "ready";
   const url = setup.liveUrl;
   const name = setup.shopName.trim();
-  const hasProduct = setup.guide?.steps.some((step) => step.key === "product" && step.done) ?? true;
+  // The launch plays once, as the real shop first appears after this visit's Finish -- not on a
+  // reload of the end.
+  const [celebrating, setCelebrating] = useState(false);
+  const celebrated = useRef(false);
+  const launch = () => {
+    if (!setup.justFinished || celebrated.current) return;
+    celebrated.current = true;
+    setCelebrating(true);
+    window.setTimeout(() => setCelebrating(false), 2800);
+  };
+  const tokens = setup.paletteTokens;
+  const confettiColors = useMemo(
+    () => [tokens?.primary ?? "#0f172a", "#f5c451", "#ffffff", tokens?.muted ?? "#e7e5e0", tokens?.accent ?? "#0f172a"],
+    [tokens]
+  );
 
   return (
     <div className={cn("pb-motion min-h-dvh bg-background", SETUP_COLUMNS)}>
@@ -130,6 +255,8 @@ export function FinishScreen({ setup }: { setup: SetupState }) {
                 </a>
               </div>
             ) : null}
+            {/* On a phone there is no panel: sharing sits under the link. */}
+            {url ? <ShareBar url={url} className="self-start lg:hidden" /> : null}
             {setup.guide ? <SetupGuideCard guide={setup.guide} /> : null}
             <Button asChild className="h-11 w-full">
               <Link href="/">
@@ -181,21 +308,14 @@ export function FinishScreen({ setup }: { setup: SetupState }) {
         }
         overlay={
           live ? (
-            hasProduct ? null : (
-              // Over the shop, not in it: the frame underneath stays the shopper's page.
-              <div className="pointer-events-none absolute inset-x-0 bottom-7 flex justify-center px-10">
-                <div className="pb-rise pointer-events-auto flex max-w-[36rem] items-center gap-4 rounded-card bg-[#141414]/90 py-3.5 pl-4 pr-3.5 text-white shadow-[0_18px_40px_-16px_rgb(0_0_0/0.6)] ring-1 ring-white/10 backdrop-blur">
-                  <PackagePlus className="size-5 shrink-0 text-white/70" aria-hidden />
-                  <p className="min-w-0 flex-1 text-[13px] leading-snug text-white/85">{t("emptyShopNote")}</p>
-                  <Link
-                    href={SETUP_GUIDE_HREF.product}
-                    className="shrink-0 rounded-ui bg-white px-3.5 py-2 text-xs font-medium text-[#0f172a] transition-colors hover:bg-white/90"
-                  >
-                    {t("addProduct")}
-                  </Link>
+            <>
+              {celebrating ? <Confetti colors={confettiColors} /> : null}
+              {url ? (
+                <div className="pointer-events-none absolute inset-x-0 bottom-7 flex justify-center px-10">
+                  <ShareBar url={url} onDark className="pb-rise pointer-events-auto" />
                 </div>
-              </div>
-            )
+              ) : null}
+            </>
           ) : (
             <div className="absolute inset-0 flex items-center justify-center bg-[#141414]/55 p-10 backdrop-blur-[3px]">
               <div className="pb-rise w-full max-w-[24rem] rounded-card bg-[#141414]/85 px-7 py-6 ring-1 ring-white/10">
@@ -207,7 +327,7 @@ export function FinishScreen({ setup }: { setup: SetupState }) {
       >
         {(device) =>
           live ? (
-            <LiveShop setup={setup} device={device} />
+            <LiveShop setup={setup} device={device} onShown={launch} />
           ) : (
             <SetupPreview setup={setup} device={device} fill className={setup.error ? undefined : "pb-sheen"} />
           )

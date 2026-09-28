@@ -1912,8 +1912,11 @@
       "openingShop": "আপনার দোকান খোলা হচ্ছে…",
       "shopDidNotOpen": "আপনার দোকান এখানে খোলা গেল না।",
       "liveShopTitle": "আপনার দোকান",
-      "emptyShopNote": "আপনার দোকান এখন ফাঁকা। প্রথম পণ্যটি যোগ করলেই এই পাতা ভরে উঠবে।",
-      "addProduct": "পণ্য যোগ করুন"
+      "shareShop": "দোকানটি শেয়ার করুন",
+      "shareOnWhatsApp": "হোয়াটসঅ্যাপে শেয়ার করুন",
+      "shareOnFacebook": "ফেসবুকে শেয়ার করুন",
+      "copyLink": "লিংক কপি করুন",
+      "shareText": "আমার নতুন দোকান ঘুরে দেখুন: {url}"
     },
     "verifyEmail": {
       "verifying": "ইমেইল যাচাই হচ্ছে…",
