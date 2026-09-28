@@ -666,6 +666,13 @@ export default function OrdersPage() {
             if (!data.courier_dispatch_pending) {
               settled = true;
               dropFromPending(publicId);
+              // The send ended without a parcel: say so, and why -- the order keeps the reason
+              // (2026-09-29). The button used to go back to Send with nothing said.
+              if (!data.sent_to_courier) {
+                notify.error(data.courier_dispatch_error || tPages("ordersSendToCourierErrorFallback"), {
+                  title: tPages("toastTitleCourierSendFailed", { number: data.order_number }),
+                });
+              }
               return;
             }
           } catch {
@@ -691,7 +698,7 @@ export default function OrdersPage() {
       courierPollsInFlightRef.current.add(publicId);
       void pollOrder(publicId);
     }
-  }, [pendingCourierDispatchIds, patchOrdersList]);
+  }, [pendingCourierDispatchIds, patchOrdersList, tPages]);
 
   const toggleSelect = (id: string) => {
     setGlobalSelectActive(false);

@@ -1611,7 +1611,11 @@
     "couponDeleteConfirm": "Delete {code}? Orders that already used it keep their discount.",
     "couponEdit": "Edit",
     "couponSaveChanges": "Save changes",
-    "mostWishedForScope": "Counts customers who were signed in when they saved. A shopper who saves without signing in keeps that list in their own browser until they do, so it is not counted here."
+    "mostWishedForScope": "Counts customers who were signed in when they saved. A shopper who saves without signing in keeps that list in their own browser until they do, so it is not counted here.",
+    "categoriesNotEmpty": "Move the {count, plural, one {# product} other {# products}} in {name} to another category first, then delete it.",
+    "categoriesNotEmptyTitle": "{name} still has products",
+    "categoriesNotEmptyUnknown": "Move this category's products to another category first, then delete it.",
+    "toastTitleCourierSendFailed": "Order {number} wasn't sent to the courier"
   },
   "sidebar": {
     "expandSidebar": "Expand sidebar",

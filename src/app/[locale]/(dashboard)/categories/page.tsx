@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { ChevronDown, ChevronRight, Undo2 } from "lucide-react";
 import api from "@/lib/api";
+import { isApiHttpError } from "@/lib/api-client";
 import { ClickableTableRow } from "@/components/ui/clickable-table-row";
 import { ClickableText } from "@/components/ui/clickable-text";
 import { Button } from "@/components/ui/button";
@@ -157,6 +158,24 @@ function CategoryTreeRows({
       })}
     </>
   );
+}
+
+/** The category with this id, anywhere in the tree. */
+function findCategory(nodes: AdminCategoryTreeNode[], publicId: string): AdminCategoryTreeNode | null {
+  for (const node of nodes) {
+    if (node.public_id === publicId) return node;
+    const found = findCategory(node.children ?? [], publicId);
+    if (found) return found;
+  }
+  return null;
+}
+
+/**
+ * Products in a category and in every subcategory under it. A delete takes the subcategories with
+ * it, and a product anywhere in them stops it: `Product.category` is PROTECT in the API.
+ */
+function productsInBranch(node: AdminCategoryTreeNode): number {
+  return (node.product_count ?? 0) + (node.children ?? []).reduce((sum, child) => sum + productsInBranch(child), 0);
 }
 
 export default function CategoriesPage() {
@@ -364,6 +383,21 @@ export default function CategoriesPage() {
   }
 
   async function deleteCategory(publicId: string) {
+    /*
+      A category with products in it cannot be deleted, and that is a rule, not a failure (owner,
+      2026-09-29: "this is not a error"). So it is said as a notice, before asking anything --
+      where the products are and what to do -- rather than a delete the API refuses in red.
+    */
+    const node = findCategory(tree, publicId);
+    const notEmptyTitle = node ? { key: "pages.categoriesNotEmptyTitle", values: { name: node.name } } : undefined;
+    const inBranch = node ? productsInBranch(node) : 0;
+    if (node && inBranch > 0) {
+      notify.warning(
+        { key: "pages.categoriesNotEmpty", values: { count: inBranch, name: node.name } },
+        { title: notEmptyTitle, iconName: "warning" },
+      );
+      return;
+    }
     const ok = await confirm({
       title: tPages("confirmDialogTitleDeleteCategory"),
       message: tPages("categoriesConfirmDelete"),
@@ -376,6 +410,14 @@ export default function CategoriesPage() {
       await api.delete(`admin/categories/${publicId}/`);
       invalidateCategoryCaches();
     } catch (err) {
+      // The same rule, met on the server: products added since this page counted them, or in a
+      // subcategory this member cannot see.
+      const code = isApiHttpError(err) && err.status === 400 ? (err.data as { code?: unknown } | null)?.code : null;
+      if (code === "category_not_empty") {
+        notify.warning({ key: "pages.categoriesNotEmptyUnknown" }, { title: notEmptyTitle, iconName: "warning" });
+        invalidateCategoryCaches();
+        return;
+      }
       notify.error(err, {
         title: tPages("toastTitleCategoryChangeFailed"),
         fallbackMessage: tPages("toastDescCategoryChangeFailed"),

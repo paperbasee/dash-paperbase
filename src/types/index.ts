@@ -114,6 +114,8 @@ export interface Order {
   courier_consignment_id?: string;
   sent_to_courier?: boolean;
   courier_dispatch_pending?: boolean;
+  /** Why the last courier send failed; empty while one runs or once one succeeds. */
+  courier_dispatch_error?: string;
   dispatched_by_autopilot?: boolean;
   customer_confirmation_sent_at?: string | null;
   delivery_status:
