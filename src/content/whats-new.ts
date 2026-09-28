@@ -90,21 +90,21 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
     id: "2026-09-29-a-new-sign-in-and-setup",
     date: "2026-09-29",
-    version: "4.132.16",
+    version: "4.132.17",
     tag: "new",
     title: {
       en: "A new sign in, in English and Bangla",
       bn: "নতুন সাইন-ইন, ইংরেজি ও বাংলায়",
     },
     body: {
-      en: "Signing in and signing up have a fresh look, and both now read in Bangla too. New shops are set up in five short questions, beside a live preview of the shop, and can connect their own domain on the way.",
-      bn: "সাইন ইন ও অ্যাকাউন্ট খোলার পাতা এখন নতুন চেহারায়, আর দুটোই বাংলাতেও পড়া যায়। নতুন দোকান এখন পাঁচটি ছোট প্রশ্নে সাজানো যায়, পাশে দোকানের লাইভ প্রিভিউ দেখে, আর সাথেই নিজের ডোমেইনও যুক্ত করা যায়।",
+      en: "Signing in and signing up have a fresh look, and both now read in Bangla too. New shops are set up in five short questions, beside a live preview of the shop as a computer or a phone shows it, and can connect their own domain on the way.",
+      bn: "সাইন ইন ও অ্যাকাউন্ট খোলার পাতা এখন নতুন চেহারায়, আর দুটোই বাংলাতেও পড়া যায়। নতুন দোকান এখন পাঁচটি ছোট প্রশ্নে সাজানো যায়, পাশে দোকানের লাইভ প্রিভিউ দেখে (কম্পিউটারে বা মোবাইলে যেমন দেখাবে), আর সাথেই নিজের ডোমেইনও যুক্ত করা যায়।",
     },
   },
   {
     id: "2026-09-29-your-setup-guide",
     date: "2026-09-29",
-    version: "4.132.16",
+    version: "4.132.17",
     tag: "new",
     title: {
       en: "A setup guide on your home page",
