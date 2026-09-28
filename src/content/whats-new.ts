@@ -88,6 +88,20 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-09-29-sign-in-catches-a-mistyped-email",
+    date: "2026-09-29",
+    version: "4.137.0",
+    tag: "improved",
+    title: {
+      en: "Sign in catches a mistyped email",
+      bn: "সাইন ইন ভুল লেখা ইমেইল ধরে ফেলে",
+    },
+    body: {
+      en: "Typed gmial.com or gmail.con by mistake? Sign in and sign up now ask \"Did you mean …@gmail.com?\", and one tap fixes it, so your sign-in email reaches an inbox you can open.",
+      bn: "ভুল করে gmial.com বা gmail.con লিখেছেন? সাইন ইন ও অ্যাকাউন্ট খোলার পাতা এখন জিজ্ঞেস করে \"আপনি কি …@gmail.com লিখতে চেয়েছিলেন?\", আর এক ট্যাপে ঠিক হয়ে যায়, তাই সাইন-ইন ইমেইল আপনার খোলা যায় এমন ইনবক্সেই পৌঁছায়।",
+    },
+  },
+  {
     id: "2026-09-29-sign-in-with-a-code",
     date: "2026-09-29",
     version: "4.136.0",
@@ -498,21 +512,6 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     body: {
       en: "In Settings, Shipping, mark one area as the default: checkout starts on it, so shoppers see the delivery charge at once and can still pick another. An area with no delivery price now says so there, and deleting an area your orders used now tells you why it is kept.",
       bn: "সেটিংস > শিপিং-এ একটি এলাকাকে ডিফল্ট করুন: চেকআউট সেটি দিয়েই শুরু হবে, তাই ক্রেতারা সাথে সাথে ডেলিভারি চার্জ দেখবেন, চাইলে অন্য এলাকাও বেছে নিতে পারবেন। কোনো এলাকার ডেলিভারি চার্জ না থাকলে সেখানেই তা দেখানো হয়, আর আপনার অর্ডারে ব্যবহৃত কোনো এলাকা মুছতে গেলে কেন সেটি রাখা হলো তা জানানো হয়।",
-    },
-  },
-  {
-    id: "2026-09-27-turn-the-cart-off",
-    date: "2026-09-27",
-    version: "4.119.4",
-    tag: "new",
-    href: "/settings?tab=apps",
-    title: {
-      en: "Turn the cart off for a shorter checkout",
-      bn: "ছোট চেকআউটের জন্য কার্ট বন্ধ করুন",
-    },
-    body: {
-      en: "In Settings, Apps, you can now turn the Cart off. Your shop then has no cart button, icon or page: shoppers press Order Now and go straight to checkout with that one product.",
-      bn: "সেটিংস > অ্যাপস-এ এখন কার্ট বন্ধ করতে পারবেন। তখন আপনার দোকানে কোনো কার্ট বাটন, আইকন বা পেজ থাকবে না: ক্রেতারা “এখনই অর্ডার করুন” চাপলে সেই একটি পণ্য নিয়ে সরাসরি চেকআউটে যাবেন।",
     },
   },
   {
