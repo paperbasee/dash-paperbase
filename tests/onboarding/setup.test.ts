@@ -79,13 +79,14 @@ describe("the shop wall behind sign in and sign up", () => {
     expect(css).toContain("@keyframes pb-wall-up {\n  from {\n    transform: translateY(0);\n  }\n  to {\n    transform: translateY(-50%);");
   });
 
-  test("help, terms and privacy link only to addresses the deployment sets, never to made-up pages", () => {
+  test("help, terms and privacy link only to addresses the deployment sets -- plain words until then", () => {
     const links = read("src/lib/platform-links.ts");
     for (const name of ["NEXT_PUBLIC_SUPPORT_URL", "NEXT_PUBLIC_TERMS_URL", "NEXT_PUBLIC_PRIVACY_URL"]) {
       expect(links, name).toContain(`process.env.${name}`);
     }
     const frame = read("src/components/auth/AuthFrame.tsx");
-    expect(frame).toContain("if (!PLATFORM_LINKS.terms || !PLATFORM_LINKS.privacy) return null;");
+    // Plain words until an address is set: never a link to nowhere.
+    expect(frame).toContain('if (!href) return <span className="font-medium text-foreground">{children}</span>;');
     expect(frame).not.toMatch(/href="https?:\/\//);
   });
 

@@ -70,41 +70,38 @@ function AuthTabs({ active, className }: { active: "signin" | "signup"; classNam
 
 const LINK = "font-medium text-foreground underline decoration-border underline-offset-4 hover:decoration-foreground";
 
-/** "By continuing you agree to ..." -- only where Paperbase has terms and a privacy policy to show. */
-function AgreeLine() {
-  const t = useTranslations("auth");
-  if (!PLATFORM_LINKS.terms || !PLATFORM_LINKS.privacy) return null;
-  const link = (href: string) => (chunks: ReactNode) => (
+/**
+ * Words that become a link once Paperbase has the page (lib/platform-links.ts) -- plain words
+ * until then (owner, 2026-09-28: "for now just text"), never a link to nowhere.
+ */
+function MaybeLink({ href, children }: { href: string; children: ReactNode }) {
+  if (!href) return <span className="font-medium text-foreground">{children}</span>;
+  return (
     <a href={href} target="_blank" rel="noopener noreferrer" className={LINK}>
-      {chunks}
+      {children}
     </a>
   );
+}
+
+/** "By continuing, you agree to Paperbase's Terms and Privacy Policy." */
+function AgreeLine() {
+  const t = useTranslations("auth");
   return (
     <p className="mt-5 text-xs leading-relaxed text-muted-foreground">
-      {t.rich("agree", { terms: link(PLATFORM_LINKS.terms), privacy: link(PLATFORM_LINKS.privacy) })}
+      {t.rich("agree", {
+        terms: (chunks) => <MaybeLink href={PLATFORM_LINKS.terms}>{chunks}</MaybeLink>,
+        privacy: (chunks) => <MaybeLink href={PLATFORM_LINKS.privacy}>{chunks}</MaybeLink>,
+      })}
     </p>
   );
 }
 
-/** The foot's left side: © on a computer, and "Need help? Talk to us" where there is somewhere to ask. */
-function FootLine() {
+/** "Need help? Talk to us", level with the brand (owner, 2026-09-28: not at the foot). */
+function HelpLine() {
   const t = useTranslations("auth");
   return (
-    <span className="flex flex-wrap items-center gap-x-1.5">
-      <span className="hidden lg:inline">© {new Date().getFullYear()} Paperbase</span>
-      {PLATFORM_LINKS.help ? (
-        <>
-          <span className="hidden lg:inline" aria-hidden>
-            ·
-          </span>
-          <span>
-            {t("needHelp")}{" "}
-            <a href={PLATFORM_LINKS.help} target="_blank" rel="noopener noreferrer" className={LINK}>
-              {t("talkToUs")}
-            </a>
-          </span>
-        </>
-      ) : null}
+    <span className="text-xs text-muted-foreground">
+      {t("needHelp")} <MaybeLink href={PLATFORM_LINKS.help}>{t("talkToUs")}</MaybeLink>
     </span>
   );
 }
@@ -141,7 +138,10 @@ export function AuthFrame({ children }: { children: ReactNode }) {
           </p>
           {/* On a computer the brand, the form and the foot are one column, centred in the half. */}
           <div className="pb-rise rounded-t-card bg-background px-6 pb-7 pt-6 shadow-[0_-20px_60px_-20px_rgb(0_0_0/0.5)] sm:mx-auto sm:mb-8 sm:w-[26rem] sm:rounded-card sm:px-8 lg:m-0 lg:w-full lg:max-w-[23rem] lg:rounded-none lg:bg-transparent lg:p-0 lg:shadow-none lg:[animation:none]">
-            <PaperbaseBrand className="mb-5 lg:mb-10" />
+            <div className="mb-5 flex items-center justify-between gap-3 lg:mb-10">
+              <PaperbaseBrand />
+              <HelpLine />
+            </div>
             <main className="w-full">
               {tab && !tabsHidden ? (
                 <div className="flex flex-col">
@@ -161,8 +161,8 @@ export function AuthFrame({ children }: { children: ReactNode }) {
               {choosing ? <AgreeLine /> : null}
             </main>
             <footer className="mt-6 flex items-center justify-between gap-3 text-xs text-muted-foreground lg:mt-10">
-              <FootLine />
-              <AuthLanguageSwitch />
+              <span className="hidden lg:inline">© {new Date().getFullYear()} Paperbase</span>
+              <AuthLanguageSwitch className="ml-auto" />
             </footer>
           </div>
         </div>
