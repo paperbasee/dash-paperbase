@@ -100,7 +100,7 @@ const MISSING_NOTE = {
  * Pages the preview fills from a sample of the shop's own products, because a merchant looking
  * at their draft has nothing in a cart (shop-paperbase `storefront/preview_samples.py`).
  */
-const SAMPLE_PAGES: readonly SlotPageKey[] = ["cart", "checkout", "wishlist", "account"];
+const SAMPLE_PAGES: readonly SlotPageKey[] = ["cart", "checkout", "success", "wishlist", "account"];
 
 const placeId = (ref: PlaceRef) => `${ref.page}:${ref.key}`;
 
@@ -211,6 +211,7 @@ export function SlotEditor({
     article: initialChoices("article"),
     cart: initialChoices("cart"),
     checkout: initialChoices("checkout"),
+    success: initialChoices("success"),
     header: initialChoices("header"),
     footer: initialChoices("footer"),
   }));

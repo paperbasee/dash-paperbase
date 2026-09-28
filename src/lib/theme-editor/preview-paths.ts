@@ -4,10 +4,11 @@ import type { PageKey } from "./document-ops";
 /*
  * Which page template a preview address draws, and an address that shows each template.
  *
- * Home, search, the blog list, the reviews page, the cart, the checkout, the wishlist and the
- * account page always exist -- the last four drawn in the preview from a sample of the shop's own
- * products, since a merchant looking at their draft has nothing in a cart (shop-paperbase
- * `storefront/preview_samples.py`, 2026-09-26). A category, a product and a blog post need one of
+ * Home, search, the blog list, the reviews page, the cart, the checkout, the order success page,
+ * the wishlist and the account page always exist -- the last five drawn in the preview from a
+ * sample of the shop's own products, since a merchant looking at their draft has nothing in a cart
+ * and has placed no order (shop-paperbase `storefront/preview_samples.py`, 2026-09-26; the receipt
+ * at `/success/sample` since 2026-09-29, a 404 anywhere but the preview). A category, a product and a blog post need one of
  * the shop's own, so the editor asks the dashboard API for one of each when it opens: the first
  * active category (one with products if there is one), the newest active product, and the newest
  * published post. Owner, Admin and Manager, the only members who can open the editor, can read all
@@ -59,6 +60,8 @@ export function templateForPath(path: string): PageKey | null {
   if (first === "search" && !second) return "templates.search";
   if (first === "blog" && !second) return "templates.blog";
   if (first === "blog" && second && rest.length === 0) return "templates.blog_article";
+  // A receipt: the preview's sample, or an order placed while browsing the draft.
+  if (first === "success" && second && rest.length === 0) return "templates.success";
   // One address each, nothing under it: /checkout/payment and /account/sign-in are other pages.
   if (second === undefined && first && SINGLE_PAGES[first]) return SINGLE_PAGES[first];
   return null;
@@ -98,6 +101,8 @@ export function previewTarget(page: PageKey, examples: PreviewExamples, locale: 
       return at("/cart");
     case "templates.checkout":
       return at("/checkout");
+    case "templates.success":
+      return at("/success/sample");
     default:
       return null;
   }

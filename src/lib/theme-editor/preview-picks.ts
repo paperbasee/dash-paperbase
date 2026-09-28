@@ -153,6 +153,7 @@ export const TEMPLATE_PAGES: Record<string, SlotPageKey> = {
   "templates.account": "account",
   "templates.cart": "cart",
   "templates.checkout": "checkout",
+  "templates.success": "success",
 };
 
 /** The template an editor page previews. */

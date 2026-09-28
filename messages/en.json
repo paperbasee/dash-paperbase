@@ -3475,7 +3475,17 @@
       "signupThreads": "Threads",
       "signupThreadsNote": "A button that opens your Threads",
       "signupSnapchat": "Snapchat",
-      "signupSnapchatNote": "A button that opens your Snapchat"
+      "signupSnapchatNote": "A button that opens your Snapchat",
+      "success": "Order success",
+      "checkoutHint": "The way down to the form, on phones",
+      "checkoutHintHint": "On a phone the order comes first and the form under it. A shopper still on their order after the seconds below sees a small arrow at the bottom, and a tap on it takes them to the form. Nothing moves on its own.",
+      "checkoutHintOnNote": "A small arrow at the bottom",
+      "successTop": "The top, for cash on delivery",
+      "successTopHint": "What a shopper sees above the heading after a cash-on-delivery order. The heading and the order stay as they are, and an order paid in advance keeps its own words.",
+      "successCourier": "The courier",
+      "successCourierNote": "Riding off with the parcel",
+      "successWords": "Your own words",
+      "successWordsNote": "A thank-you, or when you will call"
     },
     "chosenCount": "{count, number} of {max, number} chosen",
     "chooseTitle": "Choose what to show",

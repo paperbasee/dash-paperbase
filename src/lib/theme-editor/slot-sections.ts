@@ -743,6 +743,35 @@ export const WIRED_SLOTS: Partial<Record<SlotPageKey, Record<string, WiredSlot>>
       },
       fields: ["trust_text"],
     },
+    /*
+      2026-09-29: the arrow down to the form, on a phone. ON first -- the theme's default, the
+      owner's "on by default" -- and the seconds a shopper stays on their order before it shows
+      are this place's own field.
+    */
+    hint: {
+      page: "templates.checkout",
+      sections: {
+        on: { type: "checkout", settings: { hint: true } },
+        off: { type: "checkout", settings: { hint: false } },
+      },
+      fields: ["hint_after"],
+    },
+  },
+  /*
+    The receipt, 2026-09-29: `theming/0044` gives every document the page. Its one place is the
+    top of a cash-on-delivery receipt, the courier FIRST -- the theme's default and what every
+    shop drew before -- and the merchant's words are its field: nothing written is the courier,
+    so the top is never blank.
+  */
+  success: {
+    top: {
+      page: "templates.success",
+      sections: {
+        courier: { type: "success", settings: { top: "courier" } },
+        words: { type: "success", settings: { top: "words" } },
+      },
+      fields: ["top_text"],
+    },
   },
   /*
     The category page, 2026-09-23. The shop's widest page: most people arrive on

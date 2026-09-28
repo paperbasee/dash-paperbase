@@ -32,6 +32,7 @@ export type SlotPageKey =
   | "account"
   | "cart"
   | "checkout"
+  | "success"
   | "header"
   | "footer";
 
@@ -98,6 +99,7 @@ export const SLOT_PAGES: readonly SlotPageKey[] = [
   "account",
   "cart",
   "checkout",
+  "success",
 ] as const;
 
 /**
@@ -1288,6 +1290,23 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
         { value: "none", label: "nothing", shape: "blank" },
       ],
     },
+    /**
+     * The arrow down to the form, on a phone (owner, 2026-09-29). There the order comes first and
+     * the form under it, and a shopper can read their order and never find the boxes: one still on
+     * their order after the merchant's seconds sees a small arrow at the foot of the screen, and a
+     * tap takes them to the form. Nothing moves on its own. On for every shop; the seconds are this
+     * place's field.
+     */
+    {
+      key: "hint",
+      label: "checkoutHint",
+      hint: "checkoutHintHint",
+      initial: "on",
+      options: [
+        { value: "on", label: "on", note: "checkoutHintOnNote", shape: "line" },
+        { value: "off", label: "off", shape: "blank" },
+      ],
+    },
     {
       key: "footerStyle",
       label: "checkoutFooter",
@@ -1298,6 +1317,29 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
         { value: "none", label: "nothing", shape: "blank" },
       ],
     },
+  ],
+
+  /**
+   * The receipt a shopper lands on after placing an order (owner, 2026-09-29: "bring the order
+   * success page under the theme editor"). One place is the merchant's: the top of a
+   * cash-on-delivery receipt -- the courier riding off, or their own words in its place. The
+   * heading and the order under it stay as they are, and an order paid in advance keeps what it
+   * draws. It wears the shop's own header and footer, as every page but the checkout does.
+   */
+  success: [
+    { key: "notice", label: "notice", inheritedFrom: { page: "header", key: "notice" } },
+    { key: "header", label: "header", inheritedFrom: { page: "header", key: "layout" } },
+    {
+      key: "top",
+      label: "successTop",
+      hint: "successTopHint",
+      initial: "courier",
+      options: [
+        { value: "courier", label: "successCourier", note: "successCourierNote", shape: "block" },
+        { value: "words", label: "successWords", note: "successWordsNote", shape: "line" },
+      ],
+    },
+    { key: "footer", label: "footer", inheritedFrom: { page: "footer", key: "layout" } },
   ],
 
   header: [
