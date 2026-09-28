@@ -176,6 +176,21 @@ export async function requestMagicLink(
   });
 }
 
+/**
+ * The six-digit code from the same email as the link (API 1.87.0): typed with the address it went
+ * to, it does exactly what the link does -- for an owner who opened the email on their phone.
+ */
+export async function verifyMagicCode(email: string, code: string): Promise<MagicLinkVerifyResult> {
+  const result = await apiClient.post<MagicLinkVerifyResult>(`${BASE_URL}/auth/magic/verify-code/`, {
+    email: email.trim().toLowerCase(),
+    code,
+  });
+  if (result.action === "signed_in") {
+    storeAuthTokens(result.access, result.refresh);
+  }
+  return result;
+}
+
 export async function verifyMagicLink(
   token: string
 ): Promise<MagicLinkVerifyResult> {

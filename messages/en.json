@@ -1940,8 +1940,8 @@
     },
     "checkEmail": {
       "title": "Check your email",
-      "signinBody": "If an account uses {email}, we've sent it a sign-in link. Open it on this device.",
-      "signupBody": "We sent a link to {email}. Open it to confirm your email and create your passkey.",
+      "signinBody": "If an account uses {email}, we've sent it a sign-in link and a 6-digit code.",
+      "signupBody": "We sent a link and a 6-digit code to {email}. Open the link, or type the code below.",
       "openGmail": "Open Gmail",
       "openOutlook": "Open Outlook",
       "noEmail": "No email? Check your spam folder, or",
@@ -1949,7 +1949,13 @@
       "resend": "send it again",
       "resent": "Sent again.",
       "wrongEmail": "Wrong email?",
-      "goBack": "Go back"
+      "goBack": "Go back",
+      "orCode": "or type the code from the email",
+      "codeLabel": "6-digit code",
+      "checking": "Checking the code…",
+      "codeWrong": "That code isn't right. Check the email and try again.",
+      "codeLocked": "Too many tries. Send yourself a new code.",
+      "codeUnreachable": "Couldn't check the code just now. Try again."
     },
     "passkey": {
       "verifyingTitle": "Checking your link",

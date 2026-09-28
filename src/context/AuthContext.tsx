@@ -14,6 +14,7 @@ import {
   passkeyLogin as authPasskeyLogin,
   enrollPasskey as authEnrollPasskey,
   requestMagicLink as authRequestMagicLink,
+  verifyMagicCode as authVerifyMagicCode,
   verifyMagicLink as authVerifyMagicLink,
   logout as authLogout,
   type AuthTokens,
@@ -65,6 +66,7 @@ interface AuthState {
     purpose: MagicLinkPurpose
   ) => Promise<{ message: string }>;
   verifyMagicLink: (token: string) => Promise<MagicLinkVerifyResult>;
+  verifyMagicCode: (email: string, code: string) => Promise<MagicLinkVerifyResult>;
   logout: () => void;
 }
 
@@ -316,6 +318,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     []
   );
 
+  const verifyMagicCode = useCallback(async (email: string, code: string) => {
+    const result = await authVerifyMagicCode(email, code);
+    if (result.action === "signed_in") {
+      setIsAuthenticated(true);
+      clearPendingVerificationEmail();
+    }
+    return result;
+  }, []);
+
   const verifyMagicLink = useCallback(async (token: string) => {
     const result = await authVerifyMagicLink(token);
     if (result.action === "signed_in") {
@@ -348,6 +359,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         enrollPasskey,
         requestMagicLink,
         verifyMagicLink,
+        verifyMagicCode,
         logout,
       }}
     >
