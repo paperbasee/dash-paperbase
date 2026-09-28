@@ -70,7 +70,9 @@
     "toastRateLimitTitle": "একটু ধীরে",
     "toastRateLimitBody": "অনেকবার চেষ্টা হয়েছে। {seconds, number} সেকেন্ড অপেক্ষা করে আবার চেষ্টা করুন।",
     "confirmPromptTitle": "নিশ্চিত করুন",
-    "confirmPromptMessage": "আপনি চালিয়ে যেতে চান কি না নিশ্চিত করুন।"
+    "confirmPromptMessage": "আপনি চালিয়ে যেতে চান কি না নিশ্চিত করুন।",
+    "showMore": "আরও দেখুন",
+    "showLess": "কম দেখুন"
   },
   "nav": {
     "home": "হোম",

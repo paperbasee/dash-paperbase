@@ -148,19 +148,19 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
         persistent
           ? Number.POSITIVE_INFINITY
           : (durationMs ?? defaultDurationMsByVariant[variant] ?? DEFAULT_DURATION_MS);
-      toast.custom(
-        () => (
-          <Toast
-            variant={variant}
-            title={title}
-            message={message}
-            action={action}
-            iconName={iconName}
-            onClose={() => toast.dismiss(id)}
-          />
-        ),
-        { id, duration },
+      const render = () => (
+        <Toast
+          variant={variant}
+          title={title}
+          message={message}
+          action={action}
+          iconName={iconName}
+          onClose={() => toast.dismiss(id)}
+          // Whoever opened the details is reading them: the note stays until it is closed.
+          onExpand={() => toast.custom(render, { id, duration: Number.POSITIVE_INFINITY })}
+        />
       );
+      toast.custom(render, { id, duration });
       return id;
     },
     [DEFAULT_DURATION_MS],

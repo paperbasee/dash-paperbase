@@ -1,6 +1,7 @@
 "use client";
 
 import { CircleAlert, CircleCheck, Info, Trash2, TriangleAlert, Undo2, X } from "lucide-react";
+import { useLayoutEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 
@@ -28,6 +29,8 @@ type ToastProps = {
   action?: ToastAction;
   iconName?: ToastIconName;
   onClose?: () => void;
+  /** The details were opened: keep the note until it is closed. */
+  onExpand?: () => void;
 };
 
 /**
@@ -55,17 +58,35 @@ const ICON_BY_VARIANT: Record<ToastVariant, ToastIconName> = {
 
 /**
  * The note that pops up after something is done (owner, 2026-09-29: "small and minimal and clean
- * professional like shopify uses and other big tech uses"): a small card with an icon, the words,
- * an action where the caller offers one, and a close mark.
+ * professional like shopify uses and other big tech uses"): a small card with an icon, one line of
+ * words, an action where the caller offers one, and a close mark.
+ *
+ * **One line, always** (the owner, the same day). What does not fit -- a reason under a title, or a
+ * sentence longer than the card -- waits behind "Show more", which opens the whole of it; the note
+ * then stays until it is closed (`onExpand`), since whoever opened it is reading.
  *
  * It replaced a card with a coloured bar naming the kind, a large circled icon and a footer with a
- * Close button -- three rows of chrome around one line of news. Where it appears, and for how long,
- * is `NotificationViewport`'s and `NotificationProvider`'s business.
+ * Close button -- three rows of chrome around one line of news. Its corners are the cards' own.
+ * Where it appears, and for how long, is `NotificationViewport`'s and `NotificationProvider`'s
+ * business.
  */
-export function Toast({ variant, message, title, action, iconName, onClose }: ToastProps) {
+export function Toast({ variant, message, title, action, iconName, onClose, onExpand }: ToastProps) {
   const tCommon = useTranslations("common");
   const { Icon, tone } = ICONS[iconName ?? ICON_BY_VARIANT[variant]];
   const failed = variant === "error" || iconName === "error" || iconName === "server-error";
+
+  // The line is the title where there is one, else the message; the message under a title is more.
+  const headline = title ?? message;
+  const detail = title ? message : undefined;
+  const [expanded, setExpanded] = useState(false);
+  // A single sentence may still be longer than one line; only the browser can say, once drawn.
+  const lineRef = useRef<HTMLParagraphElement>(null);
+  const [cut, setCut] = useState(false);
+  useLayoutEffect(() => {
+    const line = lineRef.current;
+    if (line && !expanded) setCut(line.scrollWidth > line.clientWidth + 1);
+  }, [headline, expanded]);
+  const more = Boolean(detail) || cut;
 
   return (
     <div
@@ -73,23 +94,51 @@ export function Toast({ variant, message, title, action, iconName, onClose }: To
       role={failed ? "alert" : "status"}
       aria-live={failed ? "assertive" : "polite"}
       className={cn(
-        "pointer-events-auto flex w-full items-start gap-3 rounded-popover border border-border-subtle",
+        "pointer-events-auto flex w-full gap-3 rounded-card border border-border-subtle",
         "bg-popover px-3.5 py-3 text-popover-foreground [box-shadow:var(--shadow-popover)]",
+        expanded ? "items-start" : "items-center",
       )}
     >
-      <Icon aria-hidden="true" className={cn("mt-px size-[18px] shrink-0", tone)} strokeWidth={1.75} />
+      <Icon
+        aria-hidden="true"
+        className={cn("size-[18px] shrink-0", expanded && "mt-px", tone)}
+        strokeWidth={1.75}
+      />
 
       <div className="min-w-0 flex-1">
-        {title ? <p className="text-sm font-medium leading-5">{title}</p> : null}
         <p
+          ref={lineRef}
           className={cn(
-            "whitespace-pre-line leading-5",
-            title ? "mt-0.5 text-[13px] text-muted-foreground" : "text-sm",
+            "text-sm leading-5",
+            detail && "font-medium",
+            expanded ? "whitespace-pre-line break-words" : "truncate",
           )}
         >
-          {message}
+          {headline}
         </p>
+        {expanded && detail ? (
+          <p className="mt-0.5 whitespace-pre-line break-words text-[13px] leading-5 text-muted-foreground">{detail}</p>
+        ) : null}
+        {expanded ? (
+          <button type="button" onClick={() => setExpanded(false)} className={cn(LINK_BUTTON, "mt-1 px-0")}>
+            {tCommon("showLess")}
+          </button>
+        ) : null}
       </div>
+
+      {more && !expanded ? (
+        <button
+          type="button"
+          aria-expanded={false}
+          onClick={() => {
+            setExpanded(true);
+            onExpand?.();
+          }}
+          className={cn(LINK_BUTTON, "shrink-0 text-muted-foreground hover:text-foreground")}
+        >
+          {tCommon("showMore")}
+        </button>
+      ) : null}
 
       {/* Only where there is something to do -- Undo, View. */}
       {action ? (
@@ -99,7 +148,7 @@ export function Toast({ variant, message, title, action, iconName, onClose }: To
             action.onClick();
             onClose?.();
           }}
-          className="shrink-0 rounded-button px-1 text-[13px] font-medium leading-5 text-primary underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          className={cn(LINK_BUTTON, "shrink-0 text-primary")}
         >
           {action.label}
         </button>
@@ -116,3 +165,7 @@ export function Toast({ variant, message, title, action, iconName, onClose }: To
     </div>
   );
 }
+
+/** A button that reads as a word: Show more, Undo. */
+const LINK_BUTTON =
+  "rounded-button px-1 text-[13px] font-medium leading-5 underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";

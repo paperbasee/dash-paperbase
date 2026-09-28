@@ -70,7 +70,9 @@
     "toastRateLimitTitle": "Slow down",
     "toastRateLimitBody": "Too many attempts. Please wait {seconds, number} seconds, then try again.",
     "confirmPromptTitle": "Please confirm",
-    "confirmPromptMessage": "Please confirm that you want to continue."
+    "confirmPromptMessage": "Please confirm that you want to continue.",
+    "showMore": "Show more",
+    "showLess": "Show less"
   },
   "nav": {
     "home": "Home",

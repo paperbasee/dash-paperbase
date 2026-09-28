@@ -12,6 +12,7 @@ import { NextIntlClientProvider } from "next-intl";
 import { describe, expect, test } from "vitest";
 
 import { Toast } from "@/components/notifications/Toast";
+import bn from "../../messages/bn.json";
 import en from "../../messages/en.json";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
@@ -54,10 +55,31 @@ describe("one note", () => {
     expect(html.match(/<button/g)).toHaveLength(2);
   });
 
-  test("a title, when given, above a softer line", () => {
+  test("one line: a title's reason waits behind Show more", () => {
     const html = note({ variant: "error", title: "Couldn't save the product", message: "The name is already used." });
-    expect(html.indexOf("Couldn&#x27;t save the product")).toBeLessThan(html.indexOf("The name is already used."));
-    expect(html).toContain("text-muted-foreground");
+    expect(html).toContain("Couldn&#x27;t save the product");
+    expect(html).not.toContain("The name is already used.");
+    expect(html).toContain(`>${en.common.showMore}<`);
+    expect(html).toContain("truncate");
+  });
+
+  test("Show more opens it and keeps the note until it is closed", () => {
+    const toast = read("src/components/notifications/Toast.tsx");
+    expect(toast).toContain("setExpanded(true);\n            onExpand?.();");
+    expect(toast).toContain("line.scrollWidth > line.clientWidth");
+    const provider = read("src/notifications/NotificationProvider.tsx");
+    expect(provider).toContain("onExpand={() => toast.custom(render, { id, duration: Number.POSITIVE_INFINITY })}");
+  });
+
+  test("the cards' own corners", () => {
+    expect(note()).toContain("rounded-card");
+    expect(note()).not.toContain("rounded-popover");
+  });
+
+  test("Show more and Show less in both languages", () => {
+    expect(en.common.showMore && en.common.showLess).toBeTruthy();
+    expect(bn.common.showMore && bn.common.showLess).toBeTruthy();
+    expect(bn.common.showMore).not.toBe(en.common.showMore);
   });
 });
 

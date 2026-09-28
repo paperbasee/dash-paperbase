@@ -54,7 +54,7 @@ export function NotificationViewport() {
       mobileOffset={{ bottom: `calc(${LIFT} + 12px)`, left: "12px", right: "12px" }}
       // Read out by a screen reader, so it belongs in the merchant's language too.
       containerAriaLabel={tCommon("toastRegionLabel")}
-      style={{ zIndex: 70, "--width": "22rem" } as CSSProperties}
+      style={{ zIndex: 70, "--width": "24rem" } as CSSProperties}
       toastOptions={{
         unstyled: true,
         classNames: {
