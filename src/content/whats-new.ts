@@ -90,7 +90,7 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
     id: "2026-09-29-a-new-sign-in-and-setup",
     date: "2026-09-29",
-    version: "4.132.11",
+    version: "4.132.12",
     tag: "new",
     title: {
       en: "A new sign in, in English and Bangla",
@@ -104,7 +104,7 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
     id: "2026-09-29-your-setup-guide",
     date: "2026-09-29",
-    version: "4.132.11",
+    version: "4.132.12",
     tag: "new",
     title: {
       en: "A setup guide on your home page",
