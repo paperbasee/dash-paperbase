@@ -90,15 +90,15 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
     id: "2026-09-29-small-clean-notes",
     date: "2026-09-29",
-    version: "4.128.0",
+    version: "4.128.1",
     tag: "improved",
     title: {
       en: "Small, clean notes after you do something",
       bn: "কিছু করার পরে ছোট, পরিষ্কার বার্তা",
     },
     body: {
-      en: "The note that pops up after you save or delete something is now a small card with an icon, at the bottom of the page you're working on. Done notes go after 3 seconds and errors after 8, and × closes any of them.",
-      bn: "কিছু সেভ বা মুছে ফেলার পরে যে বার্তা আসে, তা এখন আইকনসহ একটি ছোট কার্ড, আপনি যে পেজে কাজ করছেন তার নিচে। কাজ হয়ে যাওয়ার বার্তা ৩ সেকেন্ডে আর সমস্যার বার্তা ৮ সেকেন্ডে চলে যায়, আর × চাপলে যেকোনোটি বন্ধ হয়।",
+      en: "The note that pops up after you save or delete something is now one small line with an icon, at the bottom of the page you're working on. Show more opens an error's details, done notes go after 3 seconds and errors after 8, and × closes any of them.",
+      bn: "কিছু সেভ বা মুছে ফেলার পরে যে বার্তা আসে, তা এখন আইকনসহ এক লাইনের ছোট বার্তা, আপনি যে পেজে কাজ করছেন তার নিচে। “আরও দেখুন” চাপলে সমস্যার বিস্তারিত খোলে, কাজ হয়ে যাওয়ার বার্তা ৩ সেকেন্ডে আর সমস্যার বার্তা ৮ সেকেন্ডে চলে যায়, আর × চাপলে যেকোনোটি বন্ধ হয়।",
     },
   },
   {
