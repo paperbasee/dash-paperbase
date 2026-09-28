@@ -1,7 +1,7 @@
 "use client";
 
 import { ArrowRight, Check, Copy, ExternalLink, PackagePlus } from "lucide-react";
-import { useLocale, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 
 import { AuthLanguageSwitch } from "@/components/auth/AuthLanguageSwitch";
@@ -10,7 +10,6 @@ import { SetupGuideCard } from "@/components/setup-guide/SetupGuideCard";
 import { Button } from "@/components/ui/button";
 import { Link } from "@/i18n/navigation";
 import { SETUP_GUIDE_HREF } from "@/lib/setup-guide";
-import { paletteName } from "@/lib/theme-editor/palettes";
 import { cn } from "@/lib/utils";
 
 import { LiveShop } from "./LiveShop";
@@ -21,11 +20,8 @@ import type { FinishTick, SetupState } from "./useSetup";
 /** The last saves, each ticked as it lands, and a line filling as they do. */
 function FinishSteps({ setup, onDark = false }: { setup: SetupState; onDark?: boolean }) {
   const t = useTranslations("auth.onboarding");
-  const locale = useLocale();
-  const palette = setup.palettes.find((one) => one.key === setup.chosenPalette);
   const lines: { key: FinishTick; words: string }[] = [
     { key: "contact", words: t("tickContact") },
-    { key: "look", words: t("tickLook", { palette: palette ? paletteName(palette, locale) : "" }) },
     ...(setup.shownHostname
       ? [{ key: "address" as const, words: t("tickAddress", { hostname: setup.shownHostname }) }]
       : []),

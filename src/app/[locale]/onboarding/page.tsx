@@ -48,7 +48,7 @@ function SetupFlow() {
     sell: () => void setup.continueFromSell(),
     name: () => void setup.continueFromName(),
     address: () => setup.go("look"),
-    look: () => setup.go("contact"),
+    look: () => void setup.continueFromLook(),
     contact: () => void setup.finish(),
   };
   // The shop is made on the name step: from the address on, going back cannot un-make it,

@@ -167,10 +167,14 @@ describe("where an owner goes after signing in", () => {
 describe("setup", () => {
   const hook = read("src/app/[locale]/onboarding/useSetup.ts");
 
-  test("makes the shop on the name step, and finishes it last", () => {
+  test("makes the shop on the name step, saves each step on its own button, and finishes last", () => {
     expect(hook).toContain('api.post<CreatedStore>("store/", {');
-    expect(hook).toContain('api.post("store/setup/finish/", { palette: chosenPalette })');
-    expect(hook.indexOf('saveBranding({ phone: mobile, social_links: accounts })')).toBeLessThan(
+    // The look goes live on its own Continue, not at the end (owner, 2026-09-29).
+    expect(hook).toContain('await api.post("store/setup/look/", { palette: chosenPalette });');
+    expect(read("src/app/[locale]/onboarding/page.tsx")).toContain("look: () => void setup.continueFromLook(),");
+    // Finish saves how shoppers reach the shop, then only says setup is done.
+    expect(hook).toContain('await atLeast(api.post("store/setup/finish/"));');
+    expect(hook.indexOf("saveBranding({ phone: mobile, social_links: accounts })")).toBeLessThan(
       hook.indexOf('api.post("store/setup/finish/"')
     );
   });
@@ -182,10 +186,21 @@ describe("setup", () => {
     expect(hook).toContain("else if (!reachable.includes(urlStep)) router.replace(stepHref(earliest));");
   });
 
-  test("answers not saved yet survive a reload, and go once setup is done", () => {
+  test("once the shop exists it is the record of every answer; the tab keeps only what came before it", () => {
+    expect(hook).toContain('api.get<SetupAnswers>("store/setup/")');
     expect(hook).toContain('const DRAFT_KEY = "pb_setup_draft_v1";');
     expect(hook).toContain("return draft && draft.user === user ? draft : null;");
-    expect(hook).toContain("writeDraft(null); // all saved");
+    expect(hook).toContain("writeDraft(null); // the shop is the record now");
+    const draftType = hook.slice(hook.indexOf("type Draft = {"), hook.indexOf("};", hook.indexOf("type Draft = {")));
+    for (const later of ["palette", "phone", "whatsapp", "facebook"]) expect(draftType).not.toContain(later);
+  });
+
+  test("the end has its own address, and a reload of it stays there", () => {
+    expect(hook).toContain('query: { step: "done"');
+    const layout = read("src/app/[locale]/onboarding/layout.tsx");
+    expect(layout).toContain("!isAddMode && !arrivedAtDone");
+    // Read on arrival only: the gate must not run again when Finish moves the address there.
+    expect(layout).toContain('const [arrivedAtDone] = useState(() => searchParams.get("step") === "done");');
   });
 
   test("offers a domain the owner has only where the Domains settings are on", () => {

@@ -1898,7 +1898,6 @@
       "finish": "Finish setup",
       "finishingTitle": "Setting up {name}…",
       "finishingBody": "Saving your answers and opening your shop. It only takes a moment.",
-      "tickLook": "Applying the {palette} look",
       "tickContact": "Saving how shoppers reach you",
       "tickAddress": "Opening {hostname}",
       "tickDashboard": "Getting your dashboard ready",

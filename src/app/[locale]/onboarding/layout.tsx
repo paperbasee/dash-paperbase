@@ -26,6 +26,9 @@ export default function OnboardingLayout({ children }: { children: React.ReactNo
   const router = useRouter();
   const searchParams = useSearchParams();
   const isAddMode = searchParams.get("add") === "1";
+  // Read on arrival only: Finish moves the address to `?step=done` itself, and the gate must not
+  // run again then -- it would swap setup out for the wait while the last saves are landing.
+  const [arrivedAtDone] = useState(() => searchParams.get("step") === "done");
   const { isAuthenticated, isLoading: authLoading, authHydrated } = useAuth();
   const [subGate, setSubGate] = useState<SubGate>("idle");
 
@@ -44,7 +47,8 @@ export default function OnboardingLayout({ children }: { children: React.ReactNo
       try {
         const me = await fetchMeForRouting();
         if (cancelled) return;
-        if (me.active_store_public_id && !setupUnfinished(me) && !isAddMode) {
+        // Setup's end (`?step=done`) stays on a reload: only "Go to dashboard" leaves it.
+        if (me.active_store_public_id && !setupUnfinished(me) && !isAddMode && !arrivedAtDone) {
           router.replace("/");
           return;
         }
@@ -57,7 +61,7 @@ export default function OnboardingLayout({ children }: { children: React.ReactNo
     return () => {
       cancelled = true;
     };
-  }, [isAuthenticated, authLoading, isAddMode, router]);
+  }, [isAuthenticated, authLoading, isAddMode, arrivedAtDone, router]);
 
   if (!authHydrated || authLoading) return <Waiting />;
   if (isAuthenticated && (subGate === "idle" || subGate === "pending")) return <Waiting />;

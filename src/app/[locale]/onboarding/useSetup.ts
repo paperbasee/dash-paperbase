@@ -43,6 +43,14 @@ import { clearPendingVerificationEmail } from "@/lib/verification-state";
  * then "finishing" (the last saves, ticked as they land) and "ready". The shop exists from the
  * name step on, so an owner who leaves is brought back to the address step (auth/me/
  * `store.setup_finished`), and every step after it edits the shop that exists.
+ *
+ * **Every step saves on its own button** (owner, 2026-09-29, "like Shopify"): the look on
+ * Continue (store/setup/look/), the phone and accounts on Finish (Identity), and coming back --
+ * any tab, any device -- reads every answer from the shop (GET store/setup/). Only what is
+ * answered before the shop exists waits in the tab, until the name step makes it.
+ *
+ * **The end has its own address**, `?step=done`: Finish moves there, and a reload of it shows
+ * the shop live again -- only "Go to dashboard" leaves it (owner, 2026-09-29).
  */
 
 export const SETUP_STEPS = ["sell", "name", "address", "look", "contact"] as const;
@@ -77,7 +85,18 @@ export type DomainCheck = {
   result: StoreDomainVerifyResponse | null;
 };
 
-export type FinishTick = "contact" | "look" | "address" | "dashboard";
+export type FinishTick = "contact" | "address" | "dashboard";
+
+/** What setup has saved, as GET store/setup/ reads it from the shop. */
+type SetupAnswers = {
+  kind: string;
+  name: string;
+  palette: string | null;
+  phone: string;
+  whatsapp: boolean;
+  facebook: string;
+  finished: boolean;
+};
 
 /** The step a `?step=` names, when it names one. */
 function stepFrom(value: string | null): SetupStep | null {
@@ -85,10 +104,9 @@ function stepFrom(value: string | null): SetupStep | null {
 }
 
 /**
- * What the owner has answered but setup has not saved yet, kept in this tab so a reload does not
- * lose it (2026-09-28): before the shop is made, what it sells and its name; after, the look and
- * how shoppers reach it. Only ever a convenience -- the shop itself is the record -- so a tab
- * that cannot store anything simply starts those answers again.
+ * What the owner answers before the shop exists -- what it sells, its name -- kept in this tab so
+ * a reload on the name step does not lose it. Once the name step makes the shop, the shop is the
+ * record of every answer and this is cleared.
  */
 type Draft = {
   user: string;
@@ -96,10 +114,6 @@ type Draft = {
   shopName?: string;
   ownerFirst?: string;
   ownerLast?: string;
-  palette?: string | null;
-  phone?: string;
-  whatsapp?: boolean;
-  facebook?: string;
 };
 
 const DRAFT_KEY = "pb_setup_draft_v1";
@@ -156,6 +170,9 @@ export function useSetup() {
   // The step is the page's address (`?step=look`), so a reload stays on it and the browser's
   // Back goes back a step. "finishing" and "ready" are not steps: they are what Finish shows.
   const urlStep = stepFrom(searchParams.get("step"));
+  // Whether the page was opened at setup's end: read on arrival only, since Finish moves the
+  // address there itself and where to start must not be worked out again mid-finish.
+  const [arrivedAtDone] = useState(() => searchParams.get("step") === "done");
   const [endPhase, setEndPhase] = useState<"finishing" | "ready" | null>(null);
   // Which way the step moved, worked out as the address changes -- by a button or by the
   // browser's own Back and Forward alike -- so the new step slides in from the right side.
@@ -194,6 +211,8 @@ export function useSetup() {
 
   const [palettes, setPalettes] = useState<ShopPalette[]>([]);
   const [palette, setPalette] = useState<string | null>(null);
+  // The palette the shop has now: the look step saves only a change.
+  const [savedPalette, setSavedPalette] = useState<string | null>(null);
 
   const [phone, setPhone] = useState("");
   const [whatsapp, setWhatsapp] = useState(true);
@@ -202,7 +221,6 @@ export function useSetup() {
 
   const [ticks, setTicks] = useState<Record<FinishTick, "todo" | "now" | "done">>({
     contact: "todo",
-    look: "todo",
     address: "todo",
     dashboard: "todo",
   });
@@ -220,35 +238,53 @@ export function useSetup() {
       try {
         const me = await fetchMeForRouting();
         if (cancelled) return;
-        const draft = readDraft(me.public_id ?? "");
         setUser(me.public_id ?? "");
-        setOwnerFirst(draft?.ownerFirst || me.first_name || "");
-        setOwnerLast(draft?.ownerLast || me.last_name || "");
+        setOwnerFirst(me.first_name || "");
+        setOwnerLast(me.last_name || "");
         setAskOwnerName(!(me.first_name ?? "").trim() || !(me.last_name ?? "").trim());
-        if (draft) {
-          setPalette(draft.palette ?? null);
-          setPhone(draft.phone ?? "");
-          setWhatsapp(draft.whatsapp ?? true);
-          setFacebook(draft.facebook ?? "");
-          setKind(draft.kind ?? null);
-          setShopName(draft.shopName ?? "");
-        }
-        if (setupUnfinished(me) && me.store) {
-          // Made on an earlier visit: what it sells and its name are the shop's own now.
-          const madeAs = kindFromStoreType(me.store.store_type);
+        const finished = Boolean(me.store) && !setupUnfinished(me);
+        if (me.store && (!finished || arrivedAtDone)) {
+          // The shop exists: every answer is the shop's own, wherever it was given.
+          const [{ data: saved }, { data: shop }] = await Promise.all([
+            api.get<SetupAnswers>("store/setup/"),
+            api.get<{ storefront_url?: string }>("store/"),
+          ]);
+          if (cancelled) return;
+          const madeAs = kindFromStoreType(saved.kind);
           setStoreId(me.store.public_id);
-          setShopName(me.store.name);
-          setSavedName(me.store.name);
           setKind(madeAs);
           setSavedKind(madeAs);
-          const { data } = await api.get<{ storefront_url?: string }>("store/");
-          if (!cancelled) {
-            setStoreHostname(hostnameOf(data.storefront_url));
-            setStoreUrl(data.storefront_url ?? "");
+          setShopName(saved.name);
+          setSavedName(saved.name);
+          setPalette(saved.palette);
+          setSavedPalette(saved.palette);
+          // The box sits after +880: the number without its leading 0.
+          setPhone(saved.phone.replace(/^0/, ""));
+          if (saved.phone) setWhatsapp(saved.whatsapp);
+          setFacebook(saved.facebook);
+          setStoreHostname(hostnameOf(shop.storefront_url));
+          setStoreUrl(shop.storefront_url ?? "");
+          writeDraft(null);
+          if (finished) {
+            // Setup is done and the address is its end: the shop, live, again.
+            const nextGuide = await fetchSetupGuide();
+            if (cancelled) return;
+            setGuide(nextGuide);
+            setEndPhase("ready");
           }
         } else if (me.active_store_public_id && !isAddMode) {
           router.replace("/");
           return;
+        }
+        if (!me.store) {
+          // No shop yet: what was answered before it, in this tab.
+          const draft = readDraft(me.public_id ?? "");
+          if (draft) {
+            setKind(draft.kind ?? null);
+            setShopName(draft.shopName ?? "");
+            if (draft.ownerFirst) setOwnerFirst(draft.ownerFirst);
+            if (draft.ownerLast) setOwnerLast(draft.ownerLast);
+          }
         }
         if (!cancelled) setReady(true);
       } catch {
@@ -258,7 +294,7 @@ export function useSetup() {
     return () => {
       cancelled = true;
     };
-  }, [authHydrated, authLoading, isAuthenticated, isAddMode, router]);
+  }, [authHydrated, authLoading, isAuthenticated, isAddMode, arrivedAtDone, router]);
 
   // The palettes' colours are the API's (theming/presets/), for the preview and the Look step.
   useEffect(() => {
@@ -309,15 +345,15 @@ export function useSetup() {
     else if (!reachable.includes(urlStep)) router.replace(stepHref(earliest));
   }, [ready, endPhase, urlStep, storeId, kind, router, stepHref]);
 
-  // The answers not saved yet, kept in this tab (Draft).
+  // What is answered before the shop exists, kept in this tab until the name step makes it (Draft).
   useEffect(() => {
-    if (!ready || !user || endPhase === "ready") return;
-    writeDraft({ user, kind, shopName, ownerFirst, ownerLast, palette, phone, whatsapp, facebook });
-  }, [ready, user, endPhase, kind, shopName, ownerFirst, ownerLast, palette, phone, whatsapp, facebook]);
+    if (!ready || !user || storeId) return;
+    writeDraft({ user, kind, shopName, ownerFirst, ownerLast });
+  }, [ready, user, storeId, kind, shopName, ownerFirst, ownerLast]);
 
   // ---- a domain made on an earlier visit comes back with its records --------------------------
   useEffect(() => {
-    if (phase !== "address" || !storeId || !DOMAINS_ENABLED || domain) return;
+    if ((phase !== "address" && phase !== "ready") || !storeId || !DOMAINS_ENABLED || domain) return;
     fetchDomains()
       .then((rows) => {
         const own = rows.find((row) => row.kind === "custom");
@@ -441,6 +477,7 @@ export function useSetup() {
     setStoreId(data.public_id);
     setSavedName(name);
     setSavedKind(kind);
+    writeDraft(null); // the shop is the record now
     setStoreHostname(hostnameOf(data.storefront_url));
     setStoreUrl(data.storefront_url ?? "");
   }
@@ -489,6 +526,23 @@ export function useSetup() {
 
   const domainLive = domain?.status === "active";
 
+  // ---- the look -------------------------------------------------------------------------------
+  /** The look step's Continue: the palette goes live now, not at the end. */
+  async function continueFromLook() {
+    setBusy(true);
+    try {
+      if (chosenPalette !== savedPalette) {
+        await api.post("store/setup/look/", { palette: chosenPalette });
+        setSavedPalette(chosenPalette);
+      }
+      go("contact");
+    } catch (err) {
+      fail(err);
+    } finally {
+      setBusy(false);
+    }
+  }
+
   // ---- the last saves --------------------------------------------------------------------------
   async function finish() {
     const mobile = normalizeBdMobile(phone);
@@ -498,7 +552,7 @@ export function useSetup() {
     }
     setContactError(null);
     setError(null);
-    setTicks({ contact: "now", look: "todo", address: "todo", dashboard: "todo" });
+    setTicks({ contact: "now", address: "todo", dashboard: "todo" });
     go("finishing");
     try {
       // How shoppers reach the shop: Identity is the one place it is kept (admin/branding/).
@@ -513,16 +567,14 @@ export function useSetup() {
           await saveBranding({ phone: mobile, social_links: accounts });
         })()
       );
-      setTicks((t) => ({ ...t, contact: "done", look: "now" }));
-      await atLeast(api.post("store/setup/finish/", { palette: chosenPalette }));
-      setTicks((t) => ({ ...t, look: "done", address: "now" }));
-      await atLeast(Promise.resolve());
+      setTicks((t) => ({ ...t, contact: "done", address: "now" }));
+      // Every other answer was saved on its own step: this only says setup is done.
+      await atLeast(api.post("store/setup/finish/"));
       setTicks((t) => ({ ...t, address: "done", dashboard: "now" }));
       invalidateMeRoutingCache();
       const [nextGuide] = await atLeast(Promise.all([fetchSetupGuide(), fetchMeForRouting()]));
       setGuide(nextGuide);
       setTicks((t) => ({ ...t, dashboard: "done" }));
-      writeDraft(null); // all saved: nothing left to keep for a reload
       await new Promise((resolve) => setTimeout(resolve, 450));
       go("ready");
     } catch (err) {
@@ -600,6 +652,7 @@ export function useSetup() {
     palettes,
     chosenPalette,
     setPalette,
+    continueFromLook,
     paletteTokens,
     // contact
     phone,
