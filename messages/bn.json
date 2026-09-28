@@ -3485,7 +3485,12 @@
       "successCourier": "কুরিয়ার",
       "successCourierNote": "পার্সেল নিয়ে রওনা দিচ্ছে",
       "successWords": "আপনার নিজের কথা",
-      "successWordsNote": "একটি ধন্যবাদ, বা কখন ফোন করবেন"
+      "successWordsNote": "একটি ধন্যবাদ, বা কখন ফোন করবেন",
+      "cardAlign": "প্রোডাক্ট কার্ডের লেখা",
+      "cardAlignNote": "আপনার দোকানের প্রতিটি কার্ডে নাম আর দাম কোথায় বসবে।",
+      "cardAlignLeft": "বাঁয়ে",
+      "cardAlignCenter": "মাঝখানে",
+      "cardAlignRight": "ডানে"
     },
     "chosenCount": "{max, number} টির মধ্যে {count, number} টি বাছা হয়েছে",
     "chooseTitle": "কী কী দেখাবেন বেছে নিন",

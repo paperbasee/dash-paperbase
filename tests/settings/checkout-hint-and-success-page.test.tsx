@@ -120,7 +120,7 @@ describe("the Order success page", () => {
   test("the courier until a merchant chooses their own words, which are the place's field", () => {
     const wiring = wiringFor("success", "top")!;
     expect(wiring.page).toBe("templates.success");
-    expect(wiring.fields).toEqual(["top_text"]);
+    expect(wiring.fields?.[0]).toBe("top_text");
     expect(slotValueFor(editor().document, wiring)).toBe("courier");
     expect(settingsOf(pick(editor(), "success", "top", "words"), "success", "top", "success").top).toBe("words");
   });

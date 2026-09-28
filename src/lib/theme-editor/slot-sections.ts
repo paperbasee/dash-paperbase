@@ -714,7 +714,8 @@ export const WIRED_SLOTS: Partial<Record<SlotPageKey, Record<string, WiredSlot>>
         note: { type: "checkout", settings: { before_pay: "note" } },
         warning: { type: "checkout", settings: { before_pay: "warning" } },
       },
-      fields: ["before_pay_text"],
+      /* Where the words sit (2026-09-29): left, centre or right, for both shapes. */
+      fields: ["before_pay_text", "before_pay_align"],
     },
     /*
       One line under the button, saying what happens after it is pressed. The
@@ -770,7 +771,8 @@ export const WIRED_SLOTS: Partial<Record<SlotPageKey, Record<string, WiredSlot>>
         courier: { type: "success", settings: { top: "courier" } },
         words: { type: "success", settings: { top: "words" } },
       },
-      fields: ["top_text"],
+      /* And how they look (2026-09-29): bold, their size, the shop's colour behind them. */
+      fields: ["top_text", "top_bold", "top_size", "top_background"],
     },
   },
   /*

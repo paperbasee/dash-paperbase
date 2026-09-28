@@ -195,6 +195,9 @@ export function SlotEditor({
     typeof state.document.settings?.card_style === "string"
       ? state.document.settings.card_style
       : "shelf";
+  // Where a card's words sit (2026-09-29): the document too, centred where it says nothing.
+  const cardAlign =
+    typeof state.document.settings?.card_align === "string" ? state.document.settings.card_align : "center";
   // One whole-theme action at a time (Save, answering a clash).
   const [busy, setBusy] = useState(false);
   // The clash waiting for an answer, and where the draft stands so it can be saved over.
@@ -597,6 +600,8 @@ export function SlotEditor({
       onCorner={(key) => dispatch({ type: "setThemeSetting", setting: "corner_style", value: key })}
       cardStyle={cardStyle}
       onCardStyle={(key) => dispatch({ type: "setThemeSetting", setting: "card_style", value: key })}
+      cardAlign={cardAlign}
+      onCardAlign={(key) => dispatch({ type: "setThemeSetting", setting: "card_align", value: key })}
       onClose={wide ? undefined : () => setSheet(false)}
     />
   );

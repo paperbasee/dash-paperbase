@@ -137,3 +137,20 @@ export const CARD_STYLES: CardStyle[] = [
   { key: "classic", label: "cardClassic", note: "cardClassicNote" },
   { key: "shelf", label: "cardShelf", note: "cardShelfNote" },
 ];
+
+/**
+ * Where a product card's words sit (owner, 2026-09-29): the name, the price and the old price on
+ * the left, in the middle or on the right -- chosen once, for every card in the shop. The keys are
+ * the theme's `card_align` values; centred is its default and what every card has drawn.
+ */
+export type CardAlign = {
+  key: "left" | "center" | "right";
+  /** `themeEditor.slots.*` key. */
+  label: string;
+};
+
+export const CARD_ALIGNS: CardAlign[] = [
+  { key: "left", label: "cardAlignLeft" },
+  { key: "center", label: "cardAlignCenter" },
+  { key: "right", label: "cardAlignRight" },
+];

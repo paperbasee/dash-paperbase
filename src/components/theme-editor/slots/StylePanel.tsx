@@ -9,13 +9,22 @@ import { KitBadge, KitChoice, KitGroup, KitNote, KitPanel } from "../kit";
 import { CAPTION, HELP } from "../kit/styles";
 import { paletteName, type PaletteTokens, type ShopPalette } from "@/lib/theme-editor/palettes";
 import {
+  CARD_ALIGNS,
   CARD_STYLES,
   CORNERS,
   FACES,
+  type CardAlign,
   type CardStyle,
   type Corner,
   type Face,
 } from "./style-catalogue";
+
+/** Where a card's words sit, as flex alignment: the drawings below line up the way the shop will. */
+const ALIGN_ITEMS: Record<CardAlign["key"], string> = {
+  left: "items-start",
+  center: "items-center",
+  right: "items-end",
+};
 
 /**
  * Which face each specimen is set in.
@@ -111,7 +120,17 @@ function CornerMark({ corner }: { corner: Corner }) {
  * In the chosen palette's own colours and at the chosen corners, so the tile is the card the shop
  * will draw. Until the palettes arrive, the dashboard's own.
  */
-function CardMark({ style, corner, tokens }: { style: CardStyle; corner: number; tokens?: PaletteTokens }) {
+function CardMark({
+  style,
+  corner,
+  align,
+  tokens,
+}: {
+  style: CardStyle;
+  corner: number;
+  align: CardAlign["key"];
+  tokens?: PaletteTokens;
+}) {
   const shelf = style.key === "shelf";
   const tone = (role: string, fallback: string) => tokens?.[role] ?? fallback;
   const card = tone("card", "hsl(var(--card))");
@@ -120,7 +139,7 @@ function CardMark({ style, corner, tokens }: { style: CardStyle; corner: number;
   // height Shelf needs for its button, and Classic keeps that room as card below its price.
   return (
     <span
-      className="mx-auto flex h-[7.5rem] w-20 flex-col items-center gap-1 p-1 pb-1.5"
+      className={cn("mx-auto flex h-[7.5rem] w-20 flex-col gap-1 p-1 pb-1.5", ALIGN_ITEMS[align])}
       style={{ backgroundColor: card, borderRadius: corner }}
     >
       <span
@@ -140,7 +159,7 @@ function CardMark({ style, corner, tokens }: { style: CardStyle; corner: number;
           </span>
         )}
       </span>
-      {/* The name, then the price -- larger and darker, as the card sets it. */}
+      {/* The name, then the price -- larger and darker, as the card sets it, where the shop puts them. */}
       <span className="mt-0.5 block h-1 w-3/4 rounded-full opacity-30" style={{ backgroundColor: ink }} />
       <span className="block h-1.5 w-2/5 rounded-full opacity-70" style={{ backgroundColor: ink }} />
       {shelf ? (
@@ -149,6 +168,16 @@ function CardMark({ style, corner, tokens }: { style: CardStyle; corner: number;
           style={{ backgroundColor: tone("primary", "hsl(var(--primary))"), borderRadius: Math.min(corner, 6) }}
         />
       ) : null}
+    </span>
+  );
+}
+
+/** A card's name and price, lined up one way: the tile for each answer to "where the words sit". */
+function AlignMark({ align }: { align: CardAlign["key"] }) {
+  return (
+    <span className={cn("flex h-9 w-full flex-col justify-center gap-1 px-2", ALIGN_ITEMS[align])}>
+      <span className="block h-1 w-3/4 rounded-full bg-foreground/30" />
+      <span className="block h-1.5 w-2/5 rounded-full bg-foreground/60" />
     </span>
   );
 }
@@ -163,6 +192,8 @@ export function StylePanel({
   onCorner,
   cardStyle,
   onCardStyle,
+  cardAlign,
+  onCardAlign,
   onClose,
 }: {
   /** The six, from the API; undefined while they load. */
@@ -176,6 +207,9 @@ export function StylePanel({
   onCorner: (key: string) => void;
   cardStyle: string;
   onCardStyle: (key: string) => void;
+  /** Where a card's words sit: left, center or right. */
+  cardAlign: string;
+  onCardAlign: (key: string) => void;
   /** Where Style is a sheet over the page (a narrower screen), the way back to the page. */
   onClose?: () => void;
 }) {
@@ -184,6 +218,7 @@ export function StylePanel({
   const locale = useLocale();
   const current = FACES.find((f) => f.key === face) ?? FACES[0];
   const radius = (CORNERS.find((c) => c.key === corner) ?? CORNERS[0]).radius;
+  const align = (CARD_ALIGNS.find((a) => a.key === cardAlign) ?? CARD_ALIGNS[1]).key;
   // The card drawings wear the chosen palette, as the shop's cards will.
   const chosenTokens = palettes?.find((item) => item.key === palette)?.tokens;
 
@@ -233,8 +268,19 @@ export function StylePanel({
             value: item.key,
             label: t(item.label),
             note: t(item.note),
-            mark: <CardMark style={item} corner={radius} tokens={chosenTokens} />,
+            mark: <CardMark style={item} corner={radius} align={align} tokens={chosenTokens} />,
           }))}
+        />
+      </KitGroup>
+
+      <KitGroup title={t("cardAlign")}>
+        <KitChoice
+          label={t("cardAlign")}
+          value={align}
+          onChange={onCardAlign}
+          help={t("cardAlignNote")}
+          columns={3}
+          options={CARD_ALIGNS.map((item) => ({ value: item.key, label: t(item.label), mark: <AlignMark align={item.key} /> }))}
         />
       </KitGroup>
 

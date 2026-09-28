@@ -46,6 +46,8 @@ function panel(props: Partial<Parameters<typeof StylePanel>[0]>, locale: "en" | 
         onCorner={noop}
         cardStyle="classic"
         onCardStyle={noop}
+        cardAlign="center"
+        onCardAlign={noop}
         {...props}
       />
     </NextIntlClientProvider>,

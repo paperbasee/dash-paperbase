@@ -3485,7 +3485,12 @@
       "successCourier": "The courier",
       "successCourierNote": "Riding off with the parcel",
       "successWords": "Your own words",
-      "successWordsNote": "A thank-you, or when you will call"
+      "successWordsNote": "A thank-you, or when you will call",
+      "cardAlign": "Words on product cards",
+      "cardAlignNote": "Where the name and price sit on every card in your shop.",
+      "cardAlignLeft": "Left",
+      "cardAlignCenter": "Centre",
+      "cardAlignRight": "Right"
     },
     "chosenCount": "{count, number} of {max, number} chosen",
     "chooseTitle": "Choose what to show",
