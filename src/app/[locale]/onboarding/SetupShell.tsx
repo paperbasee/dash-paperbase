@@ -85,30 +85,45 @@ export function SetupPreview({
  * be seen as a computer shows it or as a phone does.
  *
  * `children` draws the shop for the screen chosen; `overlay` lies over it (setup's last saves
- * while they run, a note once the shop is live). `keepFrame` keeps one page across Desktop and
- * Mobile -- the real shop's frame, which a new page would have to open again -- where the drawn
- * one rises in anew.
+ * while they run, the share bar and the launch once the shop is live). `keepFrame` keeps one page
+ * across Desktop and Mobile -- the real shop's frame, which a new page would have to open again --
+ * where the drawn one rises in anew.
+ *
+ * `compact`: a phone's panel, stacked in the page rather than beside it (setup's end on a phone,
+ * owner 2026-09-29) -- the shop as a phone shows it, with no screen to choose.
  */
 export function PreviewPanel({
   badge,
   overlay,
   keepFrame = false,
+  compact = false,
   children,
 }: {
   badge: ReactNode;
   overlay?: ReactNode;
   keepFrame?: boolean;
+  compact?: boolean;
   children: (device: ShopDevice) => ReactNode;
 }) {
   const t = useTranslations("auth.onboarding");
-  const [device, setDevice] = useState<ShopDevice>("computer");
+  const [chosen, setDevice] = useState<ShopDevice>("computer");
+  const device: ShopDevice = compact ? "phone" : chosen;
   const phone = device === "phone";
 
   return (
-    <aside className="sticky top-3 hidden h-[calc(100dvh-1.5rem)] min-w-0 flex-col self-start overflow-hidden rounded-card bg-[#141414] lg:flex dark:ring-1 dark:ring-white/[0.06]">
-      <div className="flex items-center justify-between gap-3 px-7 pt-6">
+    <aside
+      className={cn(
+        "min-w-0 flex-col overflow-hidden rounded-card bg-[#141414] dark:ring-1 dark:ring-white/[0.06]",
+        compact ? "relative flex h-[54svh] min-h-[400px]" : "sticky top-3 hidden h-[calc(100dvh-1.5rem)] self-start lg:flex"
+      )}
+    >
+      <div className={cn("flex items-center justify-between gap-3", compact ? "px-5 pt-4" : "px-7 pt-6")}>
         {badge}
-        <div role="group" aria-label={t("previewOn")} className="flex gap-0.5 rounded-ui bg-white/[0.05] p-0.5 text-xs">
+        <div
+          role="group"
+          aria-label={t("previewOn")}
+          className={cn("flex gap-0.5 rounded-ui bg-white/[0.05] p-0.5 text-xs", compact && "hidden")}
+        >
           {(["computer", "phone"] as const).map((one) => (
             <button
               key={one}
@@ -125,7 +140,7 @@ export function PreviewPanel({
           ))}
         </div>
       </div>
-      <div className="relative min-h-0 flex-1 px-10 pt-9">
+      <div className={cn("relative min-h-0 flex-1", compact ? "px-6 pt-4" : "px-10 pt-9")}>
         <ScaleToFit
           key={keepFrame ? undefined : device}
           width={phone ? SHOP_PHONE_WIDTH : SHOP_WINDOW_WIDTH}

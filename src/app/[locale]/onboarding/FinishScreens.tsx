@@ -8,55 +8,14 @@ import { AuthLanguageSwitch } from "@/components/auth/AuthLanguageSwitch";
 import { AuthHeading, PaperbaseWordmark } from "@/components/auth/AuthParts";
 import { SocialMark } from "@/components/SocialMark";
 import { SetupGuideCard } from "@/components/setup-guide/SetupGuideCard";
+import { useMediaQuery } from "@/components/theme-editor/useMediaQuery";
 import { Button } from "@/components/ui/button";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 
 import { LiveShop } from "./LiveShop";
 import { PreviewPanel, SETUP_COLUMNS, SetupPreview } from "./SetupShell";
-import { TickMark } from "./steps";
-import type { FinishTick, SetupState } from "./useSetup";
-
-/** The last saves, each ticked as it lands, and a line filling as they do: a phone's, with no panel. */
-function FinishSteps({ setup }: { setup: SetupState }) {
-  const t = useTranslations("auth.onboarding");
-  const lines: { key: FinishTick; words: string }[] = [
-    { key: "contact", words: t("tickContact") },
-    ...(setup.shownHostname
-      ? [{ key: "address" as const, words: t("tickAddress", { hostname: setup.shownHostname }) }]
-      : []),
-    { key: "dashboard", words: t("tickDashboard") },
-  ];
-  const done = lines.filter((line) => setup.ticks[line.key] === "done").length;
-
-  return (
-    <div>
-      <ul className="space-y-3" aria-live="polite">
-        {lines.map((line) => {
-          const state = setup.ticks[line.key];
-          return (
-            <li
-              key={line.key}
-              className={cn(
-                "flex items-center gap-3 text-[13.5px] transition-colors duration-300",
-                state === "done" ? "text-foreground" : "text-muted-foreground"
-              )}
-            >
-              <TickMark state={setup.error && state === "now" ? "fail" : state} />
-              <span className="truncate">{line.words}</span>
-            </li>
-          );
-        })}
-      </ul>
-      <div className="mt-5 h-[3px] overflow-hidden rounded-full bg-border">
-        <div
-          className="h-full bg-foreground transition-[width] duration-700 ease-out"
-          style={{ width: `${(done / lines.length) * 100}%` }}
-        />
-      </div>
-    </div>
-  );
-}
+import type { SetupState } from "./useSetup";
 
 /** Copies `url`, and says so for a moment. */
 function useCopy(url: string) {
@@ -93,7 +52,18 @@ function CopyLink({ url }: { url: string }) {
  * "Share your shop" (owner, 2026-09-29): the first thing a new shop is shown to -- a WhatsApp
  * chat, a Facebook post, a copied link. On the shop's dark panel, or under the link on a phone.
  */
-function ShareBar({ url, onDark = false, className }: { url: string; onDark?: boolean; className?: string }) {
+function ShareBar({
+  url,
+  onDark = false,
+  compact = false,
+  className,
+}: {
+  url: string;
+  onDark?: boolean;
+  /** A phone's panel: the buttons alone, the words said by their labels. */
+  compact?: boolean;
+  className?: string;
+}) {
   const t = useTranslations("auth.onboarding");
   const { copied, copy } = useCopy(url);
   const round = cn(
@@ -103,14 +73,15 @@ function ShareBar({ url, onDark = false, className }: { url: string; onDark?: bo
   return (
     <div
       className={cn(
-        "flex items-center gap-1.5 rounded-full py-1.5 pl-5 pr-1.5",
+        "flex items-center gap-1.5 rounded-full py-1.5 pr-1.5",
+        compact ? "pl-1.5" : "pl-5",
         onDark
           ? "bg-[#141414]/90 text-white shadow-[0_18px_40px_-16px_rgb(0_0_0/0.6)] ring-1 ring-white/10 backdrop-blur"
           : "border border-border-subtle bg-card text-foreground",
         className
       )}
     >
-      <span className="mr-2 text-[13px] font-medium">{t("shareShop")}</span>
+      <span className={cn("mr-2 text-[13px] font-medium", compact && "sr-only")}>{t("shareShop")}</span>
       <a
         href={`https://wa.me/?text=${encodeURIComponent(t("shareText", { url }))}`}
         target="_blank"
@@ -206,6 +177,8 @@ export function FinishScreen({ setup }: { setup: SetupState }) {
   const live = setup.phase === "ready";
   const url = setup.liveUrl;
   const name = setup.shopName.trim();
+  // A computer shows the shop beside the words; a phone stacks it under the name, above them.
+  const wide = useMediaQuery("(min-width: 1024px)");
   // The launch plays once, as the real shop first appears after this visit's Finish -- not on a
   // reload of the end.
   const [celebrating, setCelebrating] = useState(false);
@@ -236,6 +209,82 @@ export function FinishScreen({ setup }: { setup: SetupState }) {
     [tokens]
   );
 
+  // One panel, never two -- the real shop's frame holds a preview pass.
+  const panel = (
+    <PreviewPanel
+      compact={!wide}
+      keepFrame={live}
+      badge={
+        live ? (
+          <span className="flex items-center gap-1.5 rounded-xs bg-[hsl(var(--accent-green)/0.16)] px-2.5 py-1 text-xs font-medium text-[hsl(var(--accent-green))]">
+            <span className="pb-live-dot size-[7px] rounded-full bg-[hsl(var(--accent-green))]" />
+            {t("liveNow")}
+          </span>
+        ) : (
+          <span className="flex items-center gap-2 text-xs text-white/60">
+            <span className="size-3 animate-spin rounded-full border-[1.5px] border-white/20 border-t-white" aria-hidden />
+            {t("settingUp")}
+          </span>
+        )
+      }
+      overlay={
+        live ? (
+          <>
+            {celebrating ? <Confetti colors={confettiColors} /> : null}
+            {url ? (
+              <div
+                className={cn(
+                  "pointer-events-none absolute inset-x-0 flex justify-center",
+                  wide ? "bottom-7 px-10" : "bottom-4 px-3"
+                )}
+              >
+                <ShareBar url={url} onDark compact={!wide} className="pb-rise pointer-events-auto" />
+              </div>
+            ) : null}
+          </>
+        ) : (
+          // One line at the foot while the shop builds itself: the save under way, and how far.
+          <div
+            className={cn(
+              "pointer-events-none absolute inset-x-0 flex justify-center",
+              wide ? "bottom-7 px-10" : "bottom-4 px-3"
+            )}
+          >
+            <div
+              role="status"
+              aria-live="polite"
+              className={cn(
+                "pb-rise flex min-w-0 max-w-full items-center rounded-full bg-[#141414]/85 py-2.5 text-white shadow-[0_16px_40px_-12px_rgb(0_0_0/0.6)] ring-1 ring-white/10 backdrop-blur",
+                wide ? "gap-3 pl-4 pr-5 text-[13px]" : "gap-2.5 pl-3.5 pr-4 text-[12px]"
+              )}
+            >
+              {setup.error ? (
+                <span className="size-2 rounded-full bg-destructive" aria-hidden />
+              ) : (
+                <span className="size-3 animate-spin rounded-full border-[1.5px] border-white/20 border-t-white" aria-hidden />
+              )}
+              <span key={caption} className="pb-rise min-w-0 truncate">{caption}</span>
+              <span className={cn("h-[3px] shrink-0 overflow-hidden rounded-full bg-white/15", wide ? "w-16" : "w-10")} aria-hidden>
+                <span
+                  className="block h-full rounded-full bg-white transition-[width] duration-700 ease-out"
+                  style={{ width: `${(stage / 3) * 100}%` }}
+                />
+              </span>
+            </div>
+          </div>
+        )
+      }
+    >
+      {(device) =>
+        live ? (
+          <LiveShop setup={setup} device={device} onShown={launch} />
+        ) : (
+          <SetupPreview setup={setup} device={device} fill building={stage} />
+        )
+      }
+    </PreviewPanel>
+  );
+
   return (
     <div className={cn("pb-motion min-h-dvh bg-background", SETUP_COLUMNS)}>
       <div className="flex min-h-dvh min-w-0 flex-col px-5 py-5 sm:px-12 sm:py-8 lg:min-h-[calc(100dvh-1.5rem)] lg:px-10 lg:py-10 xl:px-14">
@@ -243,8 +292,10 @@ export function FinishScreen({ setup }: { setup: SetupState }) {
           <PaperbaseWordmark />
           <AuthLanguageSwitch />
         </header>
+        {/* On a phone the shop comes first, under the name. */}
+        {wide ? null : <div className="mt-5">{panel}</div>}
         {live ? (
-          <div key="live" className="pb-stagger flex flex-1 flex-col justify-center gap-5 py-10">
+          <div key="live" className="pb-stagger flex flex-1 flex-col gap-5 py-8 lg:justify-center lg:py-10">
             <span className="pb-pop pb-ring inline-flex self-start rounded-full text-foreground">
               <span className="flex size-[52px] items-center justify-center rounded-full bg-foreground text-background">
                 <Check className="size-6" strokeWidth={2.4} aria-hidden />
@@ -267,8 +318,6 @@ export function FinishScreen({ setup }: { setup: SetupState }) {
                 </a>
               </div>
             ) : null}
-            {/* On a phone there is no panel: sharing sits under the link. */}
-            {url ? <ShareBar url={url} className="self-start lg:hidden" /> : null}
             {setup.guide ? <SetupGuideCard guide={setup.guide} /> : null}
             <Button asChild className="h-11 w-full">
               <Link href="/">
@@ -278,7 +327,7 @@ export function FinishScreen({ setup }: { setup: SetupState }) {
             </Button>
           </div>
         ) : (
-          <div key="finishing" className="pb-stagger flex flex-1 flex-col justify-center gap-6 py-10">
+          <div key="finishing" className="pb-stagger flex flex-1 flex-col gap-6 py-8 lg:justify-center lg:py-10">
             <span
               className={cn(
                 "inline-flex size-[52px] self-start rounded-full border-[3px]",
@@ -287,10 +336,6 @@ export function FinishScreen({ setup }: { setup: SetupState }) {
               aria-hidden
             />
             <AuthHeading title={t("finishingTitle", { name })} body={t("finishingBody")} />
-            {/* On a phone there is no panel: the steps tick here. */}
-            <div className="lg:hidden">
-              <FinishSteps setup={setup} />
-            </div>
             {setup.error ? (
               <div className="pb-rise flex flex-col items-start gap-3">
                 <p className="text-sm text-destructive">{t("finishFailed")}</p>
@@ -303,64 +348,7 @@ export function FinishScreen({ setup }: { setup: SetupState }) {
         )}
       </div>
 
-      <PreviewPanel
-        keepFrame={live}
-        badge={
-          live ? (
-            <span className="flex items-center gap-1.5 rounded-xs bg-[hsl(var(--accent-green)/0.16)] px-2.5 py-1 text-xs font-medium text-[hsl(var(--accent-green))]">
-              <span className="pb-live-dot size-[7px] rounded-full bg-[hsl(var(--accent-green))]" />
-              {t("liveNow")}
-            </span>
-          ) : (
-            <span className="flex items-center gap-2 text-xs text-white/60">
-              <span className="size-3 animate-spin rounded-full border-[1.5px] border-white/20 border-t-white" aria-hidden />
-              {t("settingUp")}
-            </span>
-          )
-        }
-        overlay={
-          live ? (
-            <>
-              {celebrating ? <Confetti colors={confettiColors} /> : null}
-              {url ? (
-                <div className="pointer-events-none absolute inset-x-0 bottom-7 flex justify-center px-10">
-                  <ShareBar url={url} onDark className="pb-rise pointer-events-auto" />
-                </div>
-              ) : null}
-            </>
-          ) : (
-            // One line at the foot while the shop builds itself: the save under way, and how far.
-            <div className="pointer-events-none absolute inset-x-0 bottom-7 flex justify-center px-10">
-              <div
-                role="status"
-                aria-live="polite"
-                className="pb-rise flex items-center gap-3 rounded-full bg-[#141414]/85 py-2.5 pl-4 pr-5 text-[13px] text-white shadow-[0_16px_40px_-12px_rgb(0_0_0/0.6)] ring-1 ring-white/10 backdrop-blur"
-              >
-                {setup.error ? (
-                  <span className="size-2 rounded-full bg-destructive" aria-hidden />
-                ) : (
-                  <span className="size-3 animate-spin rounded-full border-[1.5px] border-white/20 border-t-white" aria-hidden />
-                )}
-                <span key={caption} className="pb-rise">{caption}</span>
-                <span className="h-[3px] w-16 overflow-hidden rounded-full bg-white/15" aria-hidden>
-                  <span
-                    className="block h-full rounded-full bg-white transition-[width] duration-700 ease-out"
-                    style={{ width: `${(stage / 3) * 100}%` }}
-                  />
-                </span>
-              </div>
-            </div>
-          )
-        }
-      >
-        {(device) =>
-          live ? (
-            <LiveShop setup={setup} device={device} onShown={launch} />
-          ) : (
-            <SetupPreview setup={setup} device={device} fill building={stage} />
-          )
-        }
-      </PreviewPanel>
+      {wide ? panel : null}
     </div>
   );
 }

@@ -49,7 +49,6 @@ function TickMark({ state, tone = "ok" }: { state: "todo" | "now" | "done" | "fa
   );
 }
 
-export { TickMark };
 
 // ---- 1. What will you sell? --------------------------------------------------------------------
 
