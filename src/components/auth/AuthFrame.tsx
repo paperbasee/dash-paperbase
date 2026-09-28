@@ -135,10 +135,21 @@ export function AuthFrame({ children }: { children: ReactNode }) {
         {/* The top-right corner, over the photos, on a phone and a computer alike (owner, 2026-09-28). */}
         <AuthLanguageSwitch onPhoto className="absolute right-4 top-4 z-20 lg:right-7 lg:top-7" />
         <div className="relative z-10 flex min-h-dvh flex-col justify-end lg:order-1 lg:min-h-0 lg:items-center lg:justify-center lg:px-12 lg:py-10">
-          {/* A phone's line over the moving photos, just above the sheet. */}
-          <p className="pb-rise px-6 pb-5 text-[1.875rem] leading-[1.05] text-white [text-shadow:0_2px_18px_rgb(0_0_0/0.65)] [font-family:var(--font-instrument-serif),var(--font-noto-sans-bengali),serif] sm:mx-auto sm:w-[26rem] sm:px-0 lg:hidden">
-            {t("wall.title")}
-          </p>
+          {/* A phone's words over the moving photos, just above the sheet -- the line and the small
+              one under it on a dark fade, as on a computer (owner, 2026-09-28). The fade reaches up
+              past the words without taking room, and runs into the sheet's top edge. */}
+          <div className="relative px-6 pb-5 text-white [text-shadow:0_2px_18px_rgb(0_0_0/0.65)] sm:mx-auto sm:w-[26rem] sm:px-0 lg:hidden">
+            <span
+              aria-hidden
+              className="pointer-events-none absolute inset-x-0 -top-28 bottom-0 -z-10 bg-[linear-gradient(to_top,rgb(13_14_17/0.94),rgb(13_14_17/0.6)_55%,transparent)] sm:hidden"
+            />
+            <p className="pb-rise text-[1.875rem] leading-[1.05] [font-family:var(--font-instrument-serif),var(--font-noto-sans-bengali),serif]">
+              {t("wall.title")}
+            </p>
+            <p className="pb-rise mt-2 text-[13px] text-white/75" style={{ animationDelay: "120ms" }}>
+              {t("wall.body")}
+            </p>
+          </div>
           {/* On a computer the form and its foot are one column, centred in the half. */}
           <div className="pb-rise rounded-t-card bg-background px-6 pb-7 pt-6 shadow-[0_-20px_60px_-20px_rgb(0_0_0/0.5)] sm:mx-auto sm:mb-8 sm:w-[26rem] sm:rounded-card sm:px-8 lg:m-0 lg:w-full lg:max-w-[23rem] lg:rounded-none lg:bg-transparent lg:p-0 lg:shadow-none lg:[animation:none]">
             <main className="w-full">
