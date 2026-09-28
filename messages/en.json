@@ -1800,7 +1800,7 @@
       "failed": "Something went wrong. Try again."
     },
     "signup": {
-      "title": "Open your shop",
+      "title": "Open your shop in Paperbase",
       "subtitle": "Set up Paperbase in under two minutes.",
       "firstName": "First name",
       "lastName": "Last name",
