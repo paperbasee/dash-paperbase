@@ -335,13 +335,19 @@ export function useSetup() {
       setError(null);
       if (next === "finishing" || next === "ready") {
         setEndPhase(next);
+        // Past the last question, the address says so (owner, 2026-09-29): `?step=done` is no
+        // step, and a reload of it opens the dashboard once setup has finished (the layout's
+        // rule) -- or, if Finish did not get through, the first step still open.
+        if (next === "finishing") {
+          router.replace({ pathname: "/onboarding", query: { step: "done", ...(isAddMode ? { add: "1" } : {}) } });
+        }
         return;
       }
       setEndPhase(null);
       if (next !== urlStep) router.push(stepHref(next));
       if (typeof window !== "undefined") window.scrollTo({ top: 0 });
     },
-    [router, stepHref, urlStep]
+    [router, stepHref, urlStep, isAddMode]
   );
 
   const back = useCallback(() => {
