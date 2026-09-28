@@ -88,6 +88,34 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-09-29-a-new-sign-in-and-setup",
+    date: "2026-09-29",
+    version: "4.131.0",
+    tag: "new",
+    title: {
+      en: "A new sign in, in English and Bangla",
+      bn: "নতুন সাইন-ইন, ইংরেজি ও বাংলায়",
+    },
+    body: {
+      en: "Signing in and signing up have a fresh look, and both now read in Bangla too. New shops are set up in five short questions, beside a live preview of the shop, and can connect their own domain on the way.",
+      bn: "সাইন ইন ও অ্যাকাউন্ট খোলার পাতা এখন নতুন চেহারায়, আর দুটোই বাংলাতেও পড়া যায়। নতুন দোকান এখন পাঁচটি ছোট প্রশ্নে সাজানো যায়, পাশে দোকানের লাইভ প্রিভিউ দেখে, আর সাথেই নিজের ডোমেইনও যুক্ত করা যায়।",
+    },
+  },
+  {
+    id: "2026-09-29-your-setup-guide",
+    date: "2026-09-29",
+    version: "4.131.0",
+    tag: "new",
+    title: {
+      en: "A setup guide on your home page",
+      bn: "হোম পেজে সেট-আপ গাইড",
+    },
+    body: {
+      en: "Your home page shows what your shop still needs before its first real order: a product, delivery charges, and a courier. Each step ticks itself when it's done, and you can hide the guide any time.",
+      bn: "আপনার হোম পেজ দেখায় প্রথম অর্ডারের আগে দোকানের আর কী লাগবে: একটি পণ্য, ডেলিভারি চার্জ আর একটি কুরিয়ার। প্রতিটি ধাপ শেষ হলে নিজেই টিক পড়ে, আর যেকোনো সময় গাইডটি লুকাতে পারবেন।",
+    },
+  },
+  {
     id: "2026-09-29-customers-count-matches-your-orders",
     date: "2026-09-29",
     version: "4.130.0",
@@ -485,35 +513,6 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     body: {
       en: "A shop set to Bangla opened in English on most phones, order form and buttons included. It now opens in your shop's language on every phone, and links in English open in Bangla too.",
       bn: "বাংলায় সেট করা দোকান বেশিরভাগ ফোনে ইংরেজিতে খুলত, অর্ডার ফর্ম আর বাটনসহ। এখন সব ফোনে আপনার দোকান আপনার বেছে নেওয়া ভাষাতেই খোলে, আর ইংরেজি লিংকও বাংলায় খোলে।",
-    },
-  },
-  {
-    id: "2026-09-27-convert-an-abandoned-checkout",
-    date: "2026-09-27",
-    version: "4.119.4",
-    tag: "new",
-    href: "/orders/abandoned",
-    title: {
-      en: "Turn an abandoned checkout into an order",
-      bn: "অসম্পূর্ণ চেকআউটকে অর্ডারে রূপান্তর করুন",
-    },
-    body: {
-      en: "Called a shopper who didn't finish checkout and they said yes? Press Convert to order on their row: the new order form opens with their details and basket filled in, and the row leaves the list when you save. That form also no longer marks Email as required, since an order never needed one.",
-      bn: "যে ক্রেতা চেকআউট শেষ করেননি তাঁকে ফোন করলেন, আর তিনি রাজি হলেন? তাঁর সারিতে “অর্ডারে রূপান্তর” চাপুন: নতুন অর্ডারের ফর্ম তাঁর তথ্য আর পণ্যসহ খুলে যাবে, আর সেভ করলে সারিটি তালিকা থেকে সরে যাবে। ওই ফর্মে ইমেইল আর বাধ্যতামূলক দেখায় না, কারণ অর্ডারের জন্য এটি কখনো লাগত না।",
-    },
-  },
-  {
-    id: "2026-09-27-closed-while-a-plan-is-unpaid",
-    date: "2026-09-27",
-    version: "4.119.4",
-    tag: "improved",
-    title: {
-      en: "A shop closes while its plan is unpaid",
-      bn: "প্ল্যানের মেয়াদ শেষ হলে দোকান বন্ধ থাকে",
-    },
-    body: {
-      en: "When a plan runs out, the shop shows a closed page in its own colours until the plan is renewed, as it did before the new storefront. Your products, orders and settings are kept.",
-      bn: "প্ল্যানের মেয়াদ শেষ হলে, নবায়ন না করা পর্যন্ত দোকানে নিজের রঙে একটি বন্ধ পেজ দেখায়, নতুন স্টোরফ্রন্টের আগে যেমন হতো। আপনার পণ্য, অর্ডার আর সেটিংস রাখা থাকে।",
     },
   },
   {
