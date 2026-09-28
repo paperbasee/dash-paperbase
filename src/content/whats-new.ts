@@ -88,9 +88,23 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-09-29-customers-count-matches-your-orders",
+    date: "2026-09-29",
+    version: "4.130.0",
+    tag: "fixed",
+    title: {
+      en: "Your Customers count now matches your orders",
+      bn: "গ্রাহকের সংখ্যা এখন অর্ডারের সাথে মেলে",
+    },
+    body: {
+      en: "The Customers card on your home page now counts the different people who ordered in those days, leaving out cancelled orders just as the Orders card does. It used to count every new shopper, so it could show more customers than orders.",
+      bn: "হোম পেজের গ্রাহক কার্ড এখন সেই সময়ে যাঁরা অর্ডার করেছেন তাঁদের গোনে, বাতিল অর্ডার বাদ দিয়ে, ঠিক অর্ডার কার্ডের মতো। আগে প্রত্যেক নতুন ক্রেতাকে গুনত, তাই কখনো অর্ডারের চেয়ে বেশি গ্রাহক দেখাত।",
+    },
+  },
+  {
     id: "2026-09-29-send-to-courier-says-why",
     date: "2026-09-29",
-    version: "4.129.0",
+    version: "4.130.0",
     tag: "fixed",
     href: "/orders",
     title: {
@@ -105,7 +119,7 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
     id: "2026-09-29-deleting-a-category-with-products",
     date: "2026-09-29",
-    version: "4.129.0",
+    version: "4.130.0",
     tag: "fixed",
     href: "/categories",
     title: {
@@ -120,7 +134,7 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
     id: "2026-09-29-small-clean-notes",
     date: "2026-09-29",
-    version: "4.129.0",
+    version: "4.130.0",
     tag: "improved",
     title: {
       en: "Small, clean notes after you do something",
@@ -500,20 +514,6 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     body: {
       en: "When a plan runs out, the shop shows a closed page in its own colours until the plan is renewed, as it did before the new storefront. Your products, orders and settings are kept.",
       bn: "প্ল্যানের মেয়াদ শেষ হলে, নবায়ন না করা পর্যন্ত দোকানে নিজের রঙে একটি বন্ধ পেজ দেখায়, নতুন স্টোরফ্রন্টের আগে যেমন হতো। আপনার পণ্য, অর্ডার আর সেটিংস রাখা থাকে।",
-    },
-  },
-  {
-    id: "2026-09-27-old-storefront-cleared-away",
-    date: "2026-09-27",
-    version: "4.118.11",
-    tag: "improved",
-    title: {
-      en: "The old storefront's leftovers, cleared away",
-      bn: "পুরোনো স্টোরফ্রন্টের অবশিষ্ট অংশ সরানো হলো",
-    },
-    body: {
-      en: "The last pieces of the old storefront are gone from the platform, including a hidden settings block for a storefront address and secret that no shop used any more. Nothing changes in your dashboard or your shop.",
-      bn: "পুরোনো স্টোরফ্রন্টের শেষ অংশগুলো প্ল্যাটফর্ম থেকে সরানো হয়েছে, এর মধ্যে ছিল স্টোরফ্রন্টের ঠিকানা আর গোপন কোডের একটি লুকানো সেটিংস অংশ, যা আর কোনো দোকান ব্যবহার করত না। আপনার ড্যাশবোর্ড বা দোকানে কিছুই বদলায়নি।",
     },
   },
   {
