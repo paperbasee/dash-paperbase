@@ -1,13 +1,16 @@
 "use client";
 
-import { useRef, useState, type FormEvent } from "react";
+import { useState, type FormEvent } from "react";
 import { useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { Sparkles } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { AuthPageShell } from "@/components/auth/AuthPageShell";
-import { MailSentIllustration } from "@/components/auth/MailSentIllustration";
+import { AuthPhotoStrip } from "@/components/auth/AuthPhotoStrip";
+import { AuthError, AuthHeading, AuthSplitShell } from "@/components/auth/AuthSplitShell";
+import { CheckEmailPanel } from "@/components/auth/CheckEmailPanel";
 import { TurnstileWidget } from "@/components/auth/TurnstileWidget";
 import { useMinDelayLoading } from "@/hooks/useMinDelayLoading";
 import { getSafeNextPath, withNext } from "@/lib/safe-next";
@@ -15,7 +18,9 @@ import { isTurnstileDisabled } from "@/lib/turnstile-env";
 import { isNetworkError } from "@/lib/network-error";
 
 export default function SignupPage() {
-  const formRef = useRef<HTMLFormElement>(null);
+  const t = useTranslations("auth.signup");
+  const tAuth = useTranslations("auth");
+  const tShowcase = useTranslations("auth.showcase");
   const searchParams = useSearchParams();
   const nextPath = getSafeNextPath(searchParams.get("next"));
   const { signup } = useAuth();
@@ -30,8 +35,13 @@ export default function SignupPage() {
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setError("");
+    // Setup never asks again: the shop's owner name is the account's (POST /store/).
+    if (!firstName.trim() || !lastName.trim()) {
+      setError(t("nameRequired"));
+      return;
+    }
     if (!email.trim()) {
-      setError("Enter your email address.");
+      setError(t("emailRequired"));
       return;
     }
     const formEl = e.currentTarget;
@@ -39,18 +49,18 @@ export default function SignupPage() {
     const turnstileToken =
       (new FormData(formEl).get("cf-turnstile-response") as string | null)?.trim() ?? "";
     if (!isTurnstileDisabled() && !turnstileToken) {
-      setError("Please complete the verification challenge.");
+      setError(tAuth("turnstileRequired"));
       return;
     }
 
     try {
       await runWithLoading(async () => {
-        await signup(email, firstName, lastName, turnstileToken);
+        await signup(email, firstName.trim(), lastName.trim(), turnstileToken);
         setSent(true);
       });
     } catch (err: unknown) {
       if (isNetworkError(err)) {
-        setError("We couldn't reach the server. Please try again.");
+        setError(tAuth("unreachable"));
         return;
       }
       const res =
@@ -58,112 +68,98 @@ export default function SignupPage() {
           ? (err as { response?: { status?: number; data?: { email?: unknown; detail?: unknown } } }).response
           : undefined;
       const emailErr = Array.isArray(res?.data?.email) ? res?.data?.email[0] : res?.data?.email;
-      if (typeof emailErr === "string") {
-        setError(emailErr);
-        return;
-      }
-      setError("We couldn't create your account. Please try again.");
+      setError(typeof emailErr === "string" ? emailErr : t("failed"));
     }
   }
 
-  if (sent) {
-    return (
-      <AuthPageShell containerClassName="space-y-8">
-        <div className="mx-auto w-11/12 max-w-sm space-y-3 text-center sm:w-full">
-          <MailSentIllustration className="-mt-1" />
-          <h1 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
-            Check your email
-          </h1>
-          <p className="mx-auto max-w-[34ch] text-sm leading-relaxed text-muted-foreground">
-            We&apos;ve sent a link to{" "}
-            <span className="font-medium text-foreground">{email}</span>. Open it to
-            confirm your email and create your passkey — no password needed.
-          </p>
-        </div>
-      </AuthPageShell>
-    );
-  }
+  const footer = sent ? null : (
+    <>
+      {t("haveAccount")}{" "}
+      <Link
+        href={withNext("/login", nextPath)}
+        className="font-medium text-foreground underline decoration-border underline-offset-4 hover:decoration-foreground"
+      >
+        {t("signIn")}
+      </Link>
+    </>
+  );
 
   return (
-    <AuthPageShell
-      headline="Create your account"
-      description="No password — you'll sign in with a passkey."
-      containerClassName="space-y-8 sm:space-y-10"
-    >
-      <form
-        ref={formRef}
-        onSubmit={handleSubmit}
-        className="mx-auto w-11/12 max-w-sm space-y-6 sm:w-full"
-        aria-busy={loading}
-      >
-        {error && (
-          <div className="rounded-ui border border-destructive/20 bg-destructive/10 px-3 py-2 text-center text-sm text-destructive">
-            {error}
-          </div>
-        )}
-
-        <div className="grid grid-cols-2 gap-3">
-          <div className="form-field">
-            <label htmlFor="first_name" className="field-label">
-              First name
-            </label>
-            <Input
-              id="first_name"
-              size="lg"
-              value={firstName}
-              onChange={(e) => setFirstName(e.target.value)}
-              placeholder="Jane"
-              autoComplete="given-name"
-            />
-          </div>
-          <div className="form-field">
-            <label htmlFor="last_name" className="field-label">
-              Last name
-            </label>
-            <Input
-              id="last_name"
-              size="lg"
-              value={lastName}
-              onChange={(e) => setLastName(e.target.value)}
-              placeholder="Doe"
-              autoComplete="family-name"
-            />
-          </div>
-        </div>
-
-        <div className="form-field">
-          <label htmlFor="email" className="field-label">
-            Email
-          </label>
-          <Input
-            id="email"
-            type="email"
-            required
-            size="lg"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="you@example.com"
-            autoComplete="email"
-            inputMode="email"
+    <AuthSplitShell showcase="signup" footer={footer}>
+      {sent ? (
+        <CheckEmailPanel email={email.trim()} variant="signup" onBack={() => setSent(false)} />
+      ) : (
+        <form onSubmit={handleSubmit} className="pb-stagger space-y-6" aria-busy={loading} noValidate>
+          <AuthHeading title={t("title")} body={t("subtitle")} />
+          <AuthPhotoStrip
+            note={
+              <>
+                <span className="flex size-[26px] shrink-0 items-center justify-center rounded-full bg-[#0f172a] text-white">
+                  <Sparkles className="size-3.5" aria-hidden />
+                </span>
+                <span className="min-w-0 flex-1 truncate font-medium">{tShowcase("signupTitle")}</span>
+              </>
+            }
           />
-        </div>
+          {error ? <AuthError>{error}</AuthError> : null}
 
-        <TurnstileWidget />
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-3">
+              <div className="form-field">
+                <label htmlFor="first_name" className="field-label">
+                  {t("firstName")}
+                </label>
+                <Input
+                  id="first_name"
+                  size="lg"
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                  placeholder={t("firstNamePlaceholder")}
+                  autoComplete="given-name"
+                  required
+                />
+              </div>
+              <div className="form-field">
+                <label htmlFor="last_name" className="field-label">
+                  {t("lastName")}
+                </label>
+                <Input
+                  id="last_name"
+                  size="lg"
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
+                  placeholder={t("lastNamePlaceholder")}
+                  autoComplete="family-name"
+                  required
+                />
+              </div>
+            </div>
 
-        <Button type="submit" loading={loading} className="w-full">
-          Continue
-        </Button>
-      </form>
+            <div className="form-field">
+              <label htmlFor="email" className="field-label">
+                {t("email")}
+              </label>
+              <Input
+                id="email"
+                type="email"
+                required
+                size="lg"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder={t("emailPlaceholder")}
+                autoComplete="email"
+                inputMode="email"
+              />
+            </div>
 
-      <p className="text-center text-sm text-muted-foreground">
-        Already have an account?{" "}
-        <Link
-          href={withNext("/login", nextPath)}
-          className="font-medium text-foreground underline-offset-4 hover:underline"
-        >
-          Sign in
-        </Link>
-      </p>
-    </AuthPageShell>
+            <TurnstileWidget />
+
+            <Button type="submit" loading={loading} className="h-11 w-full">
+              {t("create")}
+            </Button>
+          </div>
+        </form>
+      )}
+    </AuthSplitShell>
   );
 }

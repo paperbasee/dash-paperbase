@@ -2,11 +2,12 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { Fingerprint } from "lucide-react";
 import { Link, useRouter } from "@/i18n/navigation";
-import { KeyRound } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
-import { AuthPageShell } from "@/components/auth/AuthPageShell";
+import { AuthError, AuthHeading, AuthSplitShell } from "@/components/auth/AuthSplitShell";
 import { resolvePostAuthRoute } from "@/lib/subscription-access";
 import { isNetworkError } from "@/lib/network-error";
 import {
@@ -39,6 +40,8 @@ function rememberOfferDismissed(): void {
 }
 
 export default function MagicLinkPasskeyPage() {
+  const t = useTranslations("auth.passkey");
+  const tAuth = useTranslations("auth");
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get("token") ?? "";
@@ -61,7 +64,7 @@ export default function MagicLinkPasskeyPage() {
     verifiedRef.current = true;
     if (!token) {
       setPhase("error");
-      setError("This link is missing its token.");
+      setError(t("missingToken"));
       return;
     }
     void (async () => {
@@ -89,19 +92,15 @@ export default function MagicLinkPasskeyPage() {
           err && typeof err === "object" && "response" in err
             ? (err as { response?: { data?: { detail?: unknown } } }).response
             : undefined;
-        setError(
-          typeof res?.data?.detail === "string"
-            ? res.data.detail
-            : "This link is invalid or has expired."
-        );
+        setError(typeof res?.data?.detail === "string" ? res.data.detail : t("invalid"));
       }
     })();
-  }, [token, verifyMagicLink, goToDashboard]);
+  }, [token, verifyMagicLink, goToDashboard, t]);
 
   async function handleEnroll() {
     setError("");
     if (!browserSupportsWebAuthn()) {
-      setError("This device doesn't support passkeys. Open the link on a device that does.");
+      setError(t("noSupport"));
       return;
     }
     setEnrolling(true);
@@ -110,18 +109,18 @@ export default function MagicLinkPasskeyPage() {
       if (result.tokens) {
         await goToDashboard();
       } else {
-        setError("Something went wrong finishing your passkey. Please try again.");
+        setError(t("finishFailed"));
       }
     } catch (err: unknown) {
       if (isPasskeyCancellation(err)) {
-        setError("Passkey setup was cancelled. Try again to finish.");
+        setError(t("cancelled"));
         return;
       }
       if (isNetworkError(err)) {
-        setError("We couldn't reach the server. Please try again.");
+        setError(tAuth("unreachable"));
         return;
       }
-      setError("We couldn't create your passkey. Please try again.");
+      setError(t("failed"));
     } finally {
       setEnrolling(false);
     }
@@ -141,14 +140,14 @@ export default function MagicLinkPasskeyPage() {
       await goToDashboard();
     } catch (err: unknown) {
       if (isPasskeyCancellation(err)) {
-        setError("Passkey setup was cancelled. Try again, or skip for now.");
+        setError(t("cancelledOffer"));
         return;
       }
       if (isNetworkError(err)) {
-        setError("We couldn't reach the server. Please try again.");
+        setError(tAuth("unreachable"));
         return;
       }
-      setError("We couldn't create your passkey. Try again, or skip for now.");
+      setError(t("failedOffer"));
     } finally {
       setEnrolling(false);
     }
@@ -161,99 +160,87 @@ export default function MagicLinkPasskeyPage() {
 
   if (phase === "verifying") {
     return (
-      <AuthPageShell headline="Verifying your link" description="One moment…">
-        <div className="mx-auto w-11/12 max-w-sm text-center sm:w-full" aria-busy>
-          <div className="mx-auto h-8 w-8 animate-spin rounded-full border-2 border-muted border-t-foreground" />
+      <AuthSplitShell showcase="signup">
+        <div className="pb-stagger space-y-6" aria-busy>
+          <AuthHeading title={t("verifyingTitle")} body={t("verifyingBody")} />
+          <div className="size-8 animate-spin rounded-full border-2 border-muted border-t-foreground" />
         </div>
-      </AuthPageShell>
+      </AuthSplitShell>
     );
   }
 
   if (phase === "error") {
     return (
-      <AuthPageShell headline="Link problem" description={error}>
-        <div className="mx-auto w-11/12 max-w-sm space-y-4 text-center sm:w-full">
-          <Link
-            href="/login"
-            className="font-medium text-foreground underline-offset-4 hover:underline"
-          >
-            Back to sign in
-          </Link>
+      <AuthSplitShell showcase="signup">
+        <div className="pb-stagger space-y-6">
+          <AuthHeading title={t("errorTitle")} body={error} />
+          <Button variant="outline" asChild className="h-11 w-full">
+            <Link href="/login">{t("backToSignIn")}</Link>
+          </Button>
         </div>
-      </AuthPageShell>
+      </AuthSplitShell>
     );
   }
 
   if (phase === "offer") {
     return (
-      <AuthPageShell
-        headline="Add a passkey to this device"
-        description="Sign in faster next time — no email link needed."
-        containerClassName="space-y-8"
-      >
-        <div className="mx-auto w-11/12 max-w-sm space-y-6 text-center sm:w-full">
-          {error && (
-            <div className="rounded-ui border border-destructive/20 bg-destructive/10 px-3 py-2 text-sm text-destructive">
-              {error}
-            </div>
-          )}
-          <p className="text-sm leading-relaxed text-muted-foreground">
-            You&apos;re signed in. Set up a passkey on this device (Touch ID, Face ID,
-            Windows Hello, or a security key) so next time you can sign in here
-            instantly instead of waiting for an email link.
-          </p>
+      <AuthSplitShell showcase="signin">
+        <div className="pb-stagger space-y-6">
+          <PasskeyMark />
+          <AuthHeading title={t("offerTitle")} body={t("offerBody")} />
+          {error ? <AuthError>{error}</AuthError> : null}
           <div className="space-y-3">
             <Button
               type="button"
               loading={enrolling}
               onClick={() => void handleOfferEnroll()}
-              className="w-full gap-2"
+              className="h-11 w-full"
             >
-              <KeyRound size={16} />
-              Create a passkey
+              <Fingerprint className="size-[18px]" aria-hidden />
+              {t("create")}
             </Button>
-            <button
+            <Button
               type="button"
+              variant="ghost"
               onClick={handleSkip}
               disabled={enrolling}
-              className="w-full text-sm font-medium text-muted-foreground underline-offset-4 hover:text-foreground hover:underline disabled:opacity-50"
+              className="h-11 w-full text-muted-foreground"
             >
-              Not now
-            </button>
+              {t("notNow")}
+            </Button>
           </div>
         </div>
-      </AuthPageShell>
+      </AuthSplitShell>
     );
   }
 
   return (
-    <AuthPageShell
-      headline="Create your passkey"
-      description="Finish setting up passwordless sign-in."
-      containerClassName="space-y-8"
-    >
-      <div className="mx-auto w-11/12 max-w-sm space-y-6 text-center sm:w-full">
-        {error && (
-          <div className="rounded-ui border border-destructive/20 bg-destructive/10 px-3 py-2 text-sm text-destructive">
-            {error}
-          </div>
-        )}
-        <p className="text-sm leading-relaxed text-muted-foreground">
-          You&apos;re signing in as{" "}
-          <span className="font-medium text-foreground">{email}</span>. Create a
-          passkey now — your device (Touch ID, Windows Hello, or a security key)
-          becomes your sign-in. No password to remember.
-        </p>
+    <AuthSplitShell showcase="signup">
+      <div className="pb-stagger space-y-6">
+        <PasskeyMark />
+        <AuthHeading title={t("enrollTitle")} body={t("enrollBody", { email })} />
+        {error ? <AuthError>{error}</AuthError> : null}
         <Button
           type="button"
           loading={enrolling}
           onClick={() => void handleEnroll()}
-          className="w-full gap-2"
+          className="h-11 w-full"
         >
-          <KeyRound size={16} />
-          Create a passkey
+          <Fingerprint className="size-[18px]" aria-hidden />
+          {t("create")}
         </Button>
       </div>
-    </AuthPageShell>
+    </AuthSplitShell>
+  );
+}
+
+/** The fingerprint, with a ring that goes out from it twice. */
+function PasskeyMark() {
+  return (
+    <span className="pb-pop pb-ring inline-flex rounded-full text-foreground">
+      <span className="flex size-14 items-center justify-center rounded-full bg-foreground text-background">
+        <Fingerprint className="size-7" strokeWidth={1.6} aria-hidden />
+      </span>
+    </span>
   );
 }

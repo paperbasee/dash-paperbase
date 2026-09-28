@@ -1,0 +1,142 @@
+"use client";
+
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Check, ChevronRight, X } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
+
+import { useAuth } from "@/context/AuthContext";
+import { Link } from "@/i18n/navigation";
+import { toLocaleDigits } from "@/lib/locale-digits";
+import { setupGuideQueryKey } from "@/lib/query-keys";
+import {
+  SETUP_GUIDE_HREF,
+  fetchSetupGuide,
+  hideSetupGuide,
+  type SetupGuide,
+} from "@/lib/setup-guide";
+import { cn } from "@/lib/utils";
+
+/**
+ * The setup guide (owner, 2026-09-28): the last screen of setup, and the top of the home page
+ * until every step is done or the owner hides it. Shopify-like -- one card, a progress line, and
+ * each step a way straight to where it is done.
+ */
+export function SetupGuideCard({
+  guide,
+  onHide,
+  hiding = false,
+  className,
+}: {
+  guide: SetupGuide;
+  onHide?: () => void;
+  hiding?: boolean;
+  className?: string;
+}) {
+  const t = useTranslations("dashboard.setupGuide");
+  const locale = useLocale();
+  const done = guide.steps.filter((step) => step.done).length;
+  const total = guide.steps.length;
+
+  return (
+    <section className={cn("overflow-hidden rounded-card border border-border-subtle bg-card", className)}>
+      <header className="flex items-center justify-between gap-3 px-4 py-3.5 sm:px-5">
+        <div className="min-w-0">
+          <h2 className="text-sm font-semibold text-foreground">{t("title")}</h2>
+          <p className="mt-0.5 text-xs text-muted-foreground">
+            {toLocaleDigits(t("progress", { done, total }), locale)}
+          </p>
+        </div>
+        {onHide ? (
+          <button
+            type="button"
+            onClick={onHide}
+            disabled={hiding}
+            aria-label={t("hideAria")}
+            className="flex items-center gap-1 rounded-ui px-2 py-1 text-xs text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:opacity-50"
+          >
+            <X className="size-3.5" aria-hidden />
+            {t("hide")}
+          </button>
+        ) : null}
+      </header>
+      <div className="h-[3px] bg-muted">
+        <div
+          className="h-full bg-[hsl(var(--accent-green))] transition-[width] duration-1000 ease-out"
+          style={{ width: `${(done / total) * 100}%` }}
+        />
+      </div>
+      <ol>
+        {guide.steps.map(({ key, done: stepDone }) => {
+          const mark = (
+            <span
+              className={cn(
+                "flex size-5 shrink-0 items-center justify-center rounded-full",
+                stepDone
+                  ? "bg-[hsl(var(--accent-green))] text-white"
+                  : "border-[1.5px] border-dashed border-muted-foreground/40"
+              )}
+            >
+              {stepDone ? <Check className="size-3" aria-hidden /> : null}
+            </span>
+          );
+          if (stepDone || key === "shop") {
+            return (
+              <li
+                key={key}
+                className="flex items-center gap-3 border-t border-border-subtle px-4 py-3 text-sm text-muted-foreground line-through decoration-border sm:px-5"
+              >
+                {mark}
+                {t(key)}
+              </li>
+            );
+          }
+          return (
+            <li key={key} className="border-t border-border-subtle">
+              <Link
+                href={SETUP_GUIDE_HREF[key]}
+                className="group flex items-center gap-3 px-4 py-3 transition-colors hover:bg-muted/50 sm:px-5"
+              >
+                {mark}
+                <span className="min-w-0 flex-1">
+                  <span className="block text-sm font-medium text-foreground">{t(key)}</span>
+                  <span className="block truncate text-xs text-muted-foreground">{t(`${key}Body`)}</span>
+                </span>
+                <ChevronRight
+                  className="size-4 text-muted-foreground transition-transform group-hover:translate-x-0.5"
+                  aria-hidden
+                />
+              </Link>
+            </li>
+          );
+        })}
+      </ol>
+    </section>
+  );
+}
+
+/** The guide at the top of the home page: the owner's, until it is done or hidden. */
+export function HomeSetupGuide() {
+  const { meProfile, meProfileStatus } = useAuth();
+  const isOwner = meProfileStatus === "ready" && meProfile?.store?.role === "Owner";
+  const queryClient = useQueryClient();
+  const { data } = useQuery({
+    queryKey: setupGuideQueryKey,
+    queryFn: fetchSetupGuide,
+    enabled: isOwner,
+    staleTime: 60_000,
+  });
+  const hide = useMutation({
+    mutationFn: hideSetupGuide,
+    onSuccess: (guide) => queryClient.setQueryData(setupGuideQueryKey, guide),
+  });
+
+  if (!isOwner || !data?.show) return null;
+  return (
+    <SetupGuideCard
+      guide={data}
+      onHide={() => hide.mutate()}
+      hiding={hide.isPending}
+      className="pb-rise"
+    />
+  );
+}

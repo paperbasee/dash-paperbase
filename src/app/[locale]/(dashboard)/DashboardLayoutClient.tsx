@@ -25,7 +25,7 @@ import {
   hasVisitedPlans,
   shouldOfferInitialPlanSelection,
 } from "@/lib/plans-onboarding";
-import { subscriptionIsPaidPeriod } from "@/lib/subscription-access";
+import { setupUnfinished, subscriptionIsPaidPeriod } from "@/lib/subscription-access";
 import { resolveSubscriptionUIStateFromMe } from "@/lib/subscription-ui-state";
 import SubscriptionAccessBlock from "@/components/auth/SubscriptionAccessBlock";
 import PaymentSubmittedAwaitingBanner from "@/components/auth/PaymentSubmittedAwaitingBanner";
@@ -81,7 +81,7 @@ export default function DashboardLayoutClient({
     meProfileStatus === "ready" && meProfile
       ? resolveSubscriptionUIStateFromMe(meProfile)
       : null;
-  /** Must match `resolvePostAuthPath` in subscription-access.ts (avoid / ↔ /onboarding / create-store loops). */
+  /** Must match `resolvePostAuthPath` in subscription-access.ts (avoid / ↔ /onboarding loops). */
   const hasStoreContext =
     meProfileStatus === "ready" &&
     Boolean(
@@ -175,6 +175,14 @@ export default function DashboardLayoutClient({
     if (!shouldRedirectToOnboarding) return;
     router.replace("/onboarding");
   }, [shouldRedirectToOnboarding, router]);
+
+  // Setup makes the shop half-way through it (2026-09-28); an owner who left before the last
+  // step finishes it before anything else.
+  const setupPending = meReady && meProfile !== null && setupUnfinished(meProfile);
+  useEffect(() => {
+    if (!setupPending) return;
+    router.replace("/onboarding");
+  }, [setupPending, router]);
 
   useEffect(() => {
     if (meProfileStatus !== "error" || !isNetworkError(meProfileError)) return;

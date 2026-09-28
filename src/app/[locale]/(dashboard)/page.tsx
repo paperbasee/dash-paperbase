@@ -7,6 +7,7 @@ import DashboardKpiCard from "@/components/dashboard/DashboardKpiCard";
 import DashboardActivityTimeline from "@/components/dashboard/DashboardActivityTimeline";
 import DashboardComingSoonCard from "@/components/dashboard/DashboardComingSoonCard";
 import DashboardStatusFooter from "@/components/dashboard/DashboardStatusFooter";
+import { HomeSetupGuide } from "@/components/setup-guide/SetupGuideCard";
 import type { DateRangeValue } from "@/components/DateRangeFilter";
 import { useDashboardAnalyticsQuery } from "@/hooks/useDashboardAnalyticsQuery";
 import { useNavCounts } from "@/hooks/useNavCounts";
@@ -129,6 +130,8 @@ export default function DashboardPage() {
         range={range}
         onRangeChange={handleRangeChange}
       />
+
+      <HomeSetupGuide />
 
       {(error || analyticsNetworkError) && (
         <div className="rounded-card border border-destructive/30 bg-destructive/5 px-4 py-2 text-sm text-destructive">

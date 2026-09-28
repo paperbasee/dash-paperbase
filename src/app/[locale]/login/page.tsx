@@ -2,13 +2,20 @@
 
 import { useEffect, useState, type FormEvent } from "react";
 import { useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { Fingerprint, Mail } from "lucide-react";
 import { Link, useRouter } from "@/i18n/navigation";
-import { KeyRound, Mail } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { AuthPageShell } from "@/components/auth/AuthPageShell";
-import { MailSentIllustration } from "@/components/auth/MailSentIllustration";
+import { AuthPhotoStrip } from "@/components/auth/AuthPhotoStrip";
+import {
+  AuthDivider,
+  AuthError,
+  AuthHeading,
+  AuthSplitShell,
+} from "@/components/auth/AuthSplitShell";
+import { CheckEmailPanel } from "@/components/auth/CheckEmailPanel";
 import { useMinDelayLoading } from "@/hooks/useMinDelayLoading";
 import { resolvePostAuthRoute } from "@/lib/subscription-access";
 import { getSafeNextPath, withNext } from "@/lib/safe-next";
@@ -16,6 +23,9 @@ import { isNetworkError } from "@/lib/network-error";
 import { browserSupportsWebAuthn, isPasskeyCancellation } from "@/lib/passkeys";
 
 export default function LoginPage() {
+  const t = useTranslations("auth.login");
+  const tAuth = useTranslations("auth");
+  const tShowcase = useTranslations("auth.showcase");
   const router = useRouter();
   const searchParams = useSearchParams();
   const nextPath = getSafeNextPath(searchParams.get("next"));
@@ -41,11 +51,7 @@ export default function LoginPage() {
     if (next.ok) {
       router.push(next.path);
     } else {
-      setError(
-        next.kind === "network_error"
-          ? "We couldn't reach the server. Please try again."
-          : "We couldn't verify your subscription. Please try again."
-      );
+      setError(next.kind === "network_error" ? tAuth("unreachable") : t("accountCheckFailed"));
     }
   }
 
@@ -60,13 +66,7 @@ export default function LoginPage() {
       });
     } catch (err: unknown) {
       if (isPasskeyCancellation(err)) return; // user dismissed the prompt
-      if (isNetworkError(err)) {
-        setError("We couldn't reach the server. Please try again.");
-        return;
-      }
-      setError(
-        "We couldn't sign you in with a passkey. Try the email link below, or sign in from a device that has your passkey."
-      );
+      setError(isNetworkError(err) ? tAuth("unreachable") : t("passkeyFailed"));
     }
   }
 
@@ -74,7 +74,7 @@ export default function LoginPage() {
     e.preventDefault();
     setError("");
     if (!email.trim()) {
-      setError("Enter your email to receive a sign-in link.");
+      setError(t("emailRequired"));
       return;
     }
     setLinkLoading(true);
@@ -82,102 +82,92 @@ export default function LoginPage() {
       await requestMagicLink(email, "login");
       setLinkSent(true);
     } catch (err: unknown) {
-      setError(
-        isNetworkError(err)
-          ? "We couldn't reach the server. Please try again."
-          : "Something went wrong. Please try again."
-      );
+      setError(isNetworkError(err) ? tAuth("unreachable") : t("failed"));
     } finally {
       setLinkLoading(false);
     }
   }
 
-  if (linkSent) {
-    return (
-      <AuthPageShell containerClassName="space-y-8">
-        <div className="mx-auto w-11/12 max-w-sm space-y-3 text-center sm:w-full">
-          <MailSentIllustration className="-mt-1" />
-          <h1 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
-            Check your email
-          </h1>
-          <p className="mx-auto max-w-[34ch] text-sm leading-relaxed text-muted-foreground">
-            If an account can use it, we&apos;ve sent a one-time sign-in link to{" "}
-            <span className="font-medium text-foreground">{email}</span>.
-          </p>
-        </div>
-      </AuthPageShell>
-    );
-  }
+  const footer = linkSent ? null : (
+    <>
+      {t("newHere")}{" "}
+      <Link
+        href={withNext("/signup", nextPath)}
+        className="font-medium text-foreground underline decoration-border underline-offset-4 hover:decoration-foreground"
+      >
+        {t("createAccount")}
+      </Link>
+    </>
+  );
 
   return (
-    <AuthPageShell
-      headline="Welcome back"
-      description="Sign in to your Paperbase dashboard."
-      containerClassName="space-y-8 sm:space-y-10"
-    >
-      <div className="mx-auto w-11/12 max-w-sm space-y-6 sm:w-full" aria-busy={loading}>
-        {error && (
-          <div className="rounded-ui border border-destructive/20 bg-destructive/10 px-3 py-2 text-center text-sm text-destructive">
-            {error}
+    <AuthSplitShell showcase="signin" footer={footer}>
+      {linkSent ? (
+        <CheckEmailPanel email={email.trim()} variant="signin" onBack={() => setLinkSent(false)} />
+      ) : (
+        <div className="pb-stagger space-y-6" aria-busy={loading}>
+          <AuthHeading title={t("title")} body={t("subtitle")} />
+          <AuthPhotoStrip
+            note={
+              <>
+                <span className="flex size-[26px] shrink-0 items-center justify-center rounded-full bg-[#ece6da] text-[10px] font-semibold text-[#6b5d45]">
+                  NJ
+                </span>
+                <span className="min-w-0 flex-1 truncate font-medium">
+                  {tShowcase("newOrder", { number: 1042 })}
+                </span>
+                <span className="rounded-xs bg-[#0f172a] px-1.5 py-0.5 text-[9.5px] font-semibold text-white">
+                  {tShowcase("cod")}
+                </span>
+              </>
+            }
+          />
+          {error ? <AuthError>{error}</AuthError> : null}
+
+          <div className="space-y-5">
+            {supportsPasskeys ? (
+              <Button
+                type="button"
+                loading={loading}
+                onClick={() => void handlePasskeyLogin()}
+                className="h-11 w-full"
+              >
+                <Fingerprint className="size-[18px]" aria-hidden />
+                {t("passkey")}
+              </Button>
+            ) : (
+              <p className="rounded-ui border border-border bg-muted/40 px-3 py-2 text-center text-sm text-muted-foreground">
+                {t("noPasskeys")}
+              </p>
+            )}
+
+            <AuthDivider>{t("orEmail")}</AuthDivider>
+
+            {/* The fallback: a sign-in link, by email */}
+            <form onSubmit={handleMagicLink} className="space-y-3">
+              <div className="form-field">
+                <label htmlFor="email" className="field-label">
+                  {t("email")}
+                </label>
+                <Input
+                  id="email"
+                  type="email"
+                  size="lg"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder={t("emailPlaceholder")}
+                  autoComplete="username webauthn"
+                  inputMode="email"
+                />
+              </div>
+              <Button type="submit" variant="outline" loading={linkLoading} className="h-11 w-full">
+                <Mail className="size-[18px]" aria-hidden />
+                {t("sendLink")}
+              </Button>
+            </form>
           </div>
-        )}
-
-        {/* Primary: passkey — no email needed */}
-        {supportsPasskeys ? (
-          <Button
-            type="button"
-            loading={loading}
-            onClick={() => void handlePasskeyLogin()}
-            className="w-full gap-2"
-          >
-            <KeyRound size={16} />
-            Sign in with a passkey
-          </Button>
-        ) : (
-          <p className="rounded-ui border border-border bg-muted/40 px-3 py-2 text-center text-sm text-muted-foreground">
-            This device doesn&apos;t support passkeys. Use the email sign-in link below.
-          </p>
-        )}
-
-        <div className="flex items-center gap-3 text-xs text-muted-foreground">
-          <span className="h-px flex-1 bg-border" />
-          or
-          <span className="h-px flex-1 bg-border" />
         </div>
-
-        {/* Fallback: email magic-link — email is entered here */}
-        <form onSubmit={handleMagicLink} className="space-y-4">
-          <div className="form-field">
-            <label htmlFor="email" className="field-label">
-              Email
-            </label>
-            <Input
-              id="email"
-              type="email"
-              size="lg"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="you@example.com"
-              autoComplete="username webauthn"
-              inputMode="email"
-            />
-          </div>
-          <Button type="submit" variant="outline" loading={linkLoading} className="w-full gap-2">
-            <Mail size={16} />
-            Email me a sign-in link
-          </Button>
-        </form>
-      </div>
-
-      <p className="text-center text-sm text-muted-foreground">
-        New to Paperbase?{" "}
-        <Link
-          href={withNext("/signup", nextPath)}
-          className="font-medium text-foreground underline-offset-4 hover:underline"
-        >
-          Create an account
-        </Link>
-      </p>
-    </AuthPageShell>
+      )}
+    </AuthSplitShell>
   );
 }

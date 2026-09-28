@@ -222,3 +222,6 @@ export const themeEditorExamplesQueryKey = ["themeEditor", "examples"] as const;
 /** The saved versions the editor's History sheet lists; read again each time it opens. */
 /** The pictures this shop has already placed, for the editor's picture picker. */
 export const themeEditorImagesQueryKey = ["themeEditor", "images"] as const;
+
+/** The home page's setup guide (GET store/setup-guide/), the owner's only. */
+export const setupGuideQueryKey = ["store", "setup-guide"] as const;

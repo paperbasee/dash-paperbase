@@ -651,3 +651,206 @@ input.font-numbers-date-value::placeholder {
     left: calc(var(--toast-left) + (100% - var(--toast-left) - var(--toast-area-right, 0px)) / 2);
   }
 }
+
+/*
+ * Sign in, sign up and setup (owner, 2026-09-28). The motion is CSS only -- no animation library
+ * in the bundle -- and none of it runs for someone whose device asks for less motion: every page
+ * that moves wears `.pb-motion`.
+ */
+@keyframes pb-rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes pb-in-right {
+  from {
+    opacity: 0;
+    transform: translateX(18px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes pb-in-left {
+  from {
+    opacity: 0;
+    transform: translateX(-18px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes pb-pop {
+  0% {
+    transform: scale(0.92);
+  }
+  55% {
+    transform: scale(1.03);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+@keyframes pb-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+@keyframes pb-float-low {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(7px);
+  }
+}
+@keyframes pb-drift {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1.08);
+  }
+}
+@keyframes pb-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes pb-ring {
+  0% {
+    opacity: 0.5;
+    transform: scale(0.8);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.6);
+  }
+}
+@keyframes pb-sheen {
+  from {
+    left: -50%;
+  }
+  to {
+    left: 120%;
+  }
+}
+@keyframes pb-live {
+  50% {
+    box-shadow: 0 0 0 6px transparent;
+  }
+}
+@keyframes pb-flash {
+  from {
+    background-color: hsl(var(--accent-green) / 0.22);
+  }
+}
+
+@layer components {
+  .pb-rise {
+    animation: pb-rise 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  }
+  .pb-stagger > * {
+    animation: pb-rise 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  }
+  .pb-stagger.pb-forward > * {
+    animation-name: pb-in-right;
+  }
+  .pb-stagger.pb-back > * {
+    animation-name: pb-in-left;
+  }
+  .pb-stagger > :nth-child(2) {
+    animation-delay: 50ms;
+  }
+  .pb-stagger > :nth-child(3) {
+    animation-delay: 100ms;
+  }
+  .pb-stagger > :nth-child(4) {
+    animation-delay: 150ms;
+  }
+  .pb-stagger > :nth-child(5) {
+    animation-delay: 200ms;
+  }
+  .pb-stagger > :nth-child(6) {
+    animation-delay: 250ms;
+  }
+  .pb-stagger > :nth-child(n + 7) {
+    animation-delay: 300ms;
+  }
+  .pb-pop {
+    animation: pb-pop 0.35s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  }
+  .pb-float {
+    animation: pb-float 7s ease-in-out infinite;
+  }
+  .pb-float-low {
+    animation: pb-float-low 8s ease-in-out infinite;
+  }
+  .pb-drift {
+    animation: pb-drift 14s ease-in-out infinite alternate;
+  }
+  .pb-draw {
+    stroke-dasharray: 400;
+    stroke-dashoffset: 400;
+    animation: pb-draw 2.2s 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  }
+  .pb-ring {
+    position: relative;
+  }
+  .pb-ring::before {
+    content: "";
+    position: absolute;
+    inset: -8px;
+    border-radius: 9999px;
+    border: 2px solid currentColor;
+    opacity: 0;
+    animation: pb-ring 1.4s 0.2s cubic-bezier(0.2, 0.8, 0.2, 1) 2;
+  }
+  .pb-sheen {
+    position: relative;
+    overflow: hidden;
+  }
+  .pb-sheen::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 40%;
+    left: -50%;
+    background: linear-gradient(100deg, transparent, rgb(255 255 255 / 0.5), transparent);
+    animation: pb-sheen 1.6s ease-in-out infinite;
+    pointer-events: none;
+  }
+  .pb-live-dot {
+    box-shadow: 0 0 0 3px hsl(var(--accent-green) / 0.2);
+    animation: pb-live 2s ease infinite;
+  }
+  .pb-flash {
+    animation: pb-flash 1s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pb-motion,
+  .pb-motion *,
+  .pb-motion *::before,
+  .pb-motion *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+  .pb-motion .pb-draw {
+    stroke-dashoffset: 0;
+  }
+}

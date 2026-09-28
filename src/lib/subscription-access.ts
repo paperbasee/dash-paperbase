@@ -36,6 +36,8 @@ export interface MeForRouting {
   public_id?: string;
   /** Logged-in user's own identity (distinct from the store owner's branding). */
   email?: string;
+  first_name?: string;
+  last_name?: string;
   full_name?: string;
   is_moderator?: boolean;
   is_superuser?: boolean;
@@ -51,7 +53,16 @@ export interface MeForRouting {
     public_id: string;
     name: string;
     role: string;
+    /** Owners only: false while setup is unfinished (the shop is made half-way through it). */
+    setup_finished?: boolean;
+    /** Owners only: what setup's first step saved, so setup can pick up where it stopped. */
+    store_type?: string;
   } | null;
+}
+
+/** An owner whose shop was made by setup, and who has not finished it yet. */
+export function setupUnfinished(me: MeForRouting): boolean {
+  return me.store?.role === "Owner" && me.store.setup_finished === false;
 }
 
 /** True when the user has a subscription row other than NONE/REJECTED (banners, onboarding eligibility). */
@@ -78,17 +89,17 @@ export async function fetchMeForRouting(): Promise<MeForRouting> {
   return ensureMeProfile();
 }
 
-export type PostAuthPath = "/" | "/onboarding" | "/onboarding/create-store";
+export type PostAuthPath = "/" | "/onboarding";
 
 /**
- * Where to send the user after login / 2FA, using server truth from auth/me/.
+ * Where to send the user after login / 2FA, using server truth from auth/me/: setup for a user
+ * with no shop, or an owner who has not finished setting theirs up; the dashboard otherwise.
  * Subscription status does not gate routing; inactive plans are surfaced in-dashboard only.
  */
 export function resolvePostAuthPath(me: MeForRouting): PostAuthPath {
-  if (me.active_store_public_id) {
+  if (me.active_store_public_id && !setupUnfinished(me)) {
     return "/";
   }
-  /** Dashboard is never gated by subscription; pending payment is surfaced in-app only. */
   return "/onboarding";
 }
 
