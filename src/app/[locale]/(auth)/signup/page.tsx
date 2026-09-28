@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { useHideAuthTabs } from "@/components/auth/AuthFrame";
 import { AuthError } from "@/components/auth/AuthParts";
 import { CheckEmailPanel } from "@/components/auth/CheckEmailPanel";
+import { EmailTypoHint, useEmailTypo } from "@/components/auth/EmailTypoHint";
 import { TurnstileWidget } from "@/components/auth/TurnstileWidget";
 import { useMinDelayLoading } from "@/hooks/useMinDelayLoading";
 import { isTurnstileDisabled } from "@/lib/turnstile-env";
@@ -20,6 +21,7 @@ export default function SignupPage() {
   const { signup } = useAuth();
 
   const [email, setEmail] = useState("");
+  const typo = useEmailTypo(email, setEmail);
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [error, setError] = useState("");
@@ -39,6 +41,7 @@ export default function SignupPage() {
       setError(t("emailRequired"));
       return;
     }
+    if (typo.hold()) return;
     const formEl = e.currentTarget;
     if (!(formEl instanceof HTMLFormElement)) return;
     const turnstileToken =
@@ -118,10 +121,12 @@ export default function SignupPage() {
                 size="lg"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                onBlur={typo.reveal}
                 placeholder={t("emailPlaceholder")}
                 autoComplete="email"
                 inputMode="email"
               />
+              <EmailTypoHint typo={typo} />
             </div>
 
             <TurnstileWidget />

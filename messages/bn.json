@@ -1994,7 +1994,10 @@
     "agree": "এগিয়ে গেলে আপনি Paperbase-এর <terms>শর্তাবলি</terms> ও <privacy>গোপনীয়তা নীতি</privacy> মেনে নিচ্ছেন।",
     "needHelp": "সাহায্য দরকার?",
     "talkToUs": "আমাদের সাথে কথা বলুন",
-    "unreachable": "সার্ভারে পৌঁছানো গেল না। আবার চেষ্টা করুন।"
+    "unreachable": "সার্ভারে পৌঁছানো গেল না। আবার চেষ্টা করুন।",
+    "didYouMean": "আপনি কি <fix>{email}</fix> লিখতে চেয়েছিলেন?",
+    "useSuggestion": "এটি নিন",
+    "keepTyped": "যা লিখেছি সেটিই থাকুক"
   },
   "settings": {
     "title": "সেটিংস",

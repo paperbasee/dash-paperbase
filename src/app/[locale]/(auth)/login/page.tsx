@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { useHideAuthTabs } from "@/components/auth/AuthFrame";
 import { AuthDivider, AuthError } from "@/components/auth/AuthParts";
 import { CheckEmailPanel } from "@/components/auth/CheckEmailPanel";
+import { EmailTypoHint, useEmailTypo } from "@/components/auth/EmailTypoHint";
 import { useMinDelayLoading } from "@/hooks/useMinDelayLoading";
 import { resolvePostAuthRoute } from "@/lib/subscription-access";
 import { getSafeNextPath } from "@/lib/safe-next";
@@ -26,6 +27,7 @@ export default function LoginPage() {
   const { signInWithPasskey, requestMagicLink } = useAuth();
 
   const [email, setEmail] = useState("");
+  const typo = useEmailTypo(email, setEmail);
   const [error, setError] = useState("");
   const [supportsPasskeys, setSupportsPasskeys] = useState(true);
   const [linkSent, setLinkSent] = useState(false);
@@ -72,6 +74,7 @@ export default function LoginPage() {
       setError(t("emailRequired"));
       return;
     }
+    if (typo.hold()) return;
     setLinkLoading(true);
     try {
       await requestMagicLink(email, "login");
@@ -122,10 +125,12 @@ export default function LoginPage() {
                   size="lg"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
+                  onBlur={typo.reveal}
                   placeholder={t("emailPlaceholder")}
                   autoComplete="username webauthn"
                   inputMode="email"
                 />
+                <EmailTypoHint typo={typo} />
               </div>
               <Button type="submit" loading={linkLoading} className="h-11 w-full">
                 <Mail className="size-[18px]" aria-hidden />

@@ -1994,7 +1994,10 @@
     "agree": "By continuing, you agree to Paperbase's <terms>Terms</terms> and <privacy>Privacy Policy</privacy>.",
     "needHelp": "Need help?",
     "talkToUs": "Talk to us",
-    "unreachable": "We couldn't reach the server. Try again."
+    "unreachable": "We couldn't reach the server. Try again.",
+    "didYouMean": "Did you mean <fix>{email}</fix>?",
+    "useSuggestion": "Use this",
+    "keepTyped": "Keep what I typed"
   },
   "settings": {
     "title": "Settings",
