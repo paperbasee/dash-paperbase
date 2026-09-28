@@ -16,10 +16,12 @@ import { ShopWall } from "./ShopWall";
 /**
  * Sign in, sign up and the pages an email link opens (the owner's designs, 2026-09-28).
  *
- * - Computer: the form centred on the left, and on the right a dark panel holding the moving
- *   wall of shop photos (ShopWall) with one line in a tall serif at its foot.
- * - Phone: the wall fills the screen, moving, and the form is a sheet along the bottom -- the
- *   owner kept this from the first version ("keep the mobile section as it was").
+ * - Computer: on the left one centred column -- the brand, the form, and the foot (© and the
+ *   language) under it, all on one edge; on the right a dark panel holding the moving wall of
+ *   shop photos (ShopWall) with one line in a tall serif at its foot.
+ * - Phone: the wall fills the screen, moving, its line just above the form, which is a sheet
+ *   along the bottom -- the owner kept this from the first version ("keep the mobile section as
+ *   it was").
  *
  * It is the (auth) route group's layout, so moving between Sign in and Create account keeps the
  * wall moving and slides the tab across, instead of starting the page again.
@@ -132,10 +134,15 @@ export function AuthFrame({ children }: { children: ReactNode }) {
           </div>
         </aside>
 
-        <div className="relative z-10 flex min-h-dvh flex-col justify-end lg:order-1 lg:min-h-0">
-          <div className="pb-rise rounded-t-card bg-background px-6 pb-7 pt-6 shadow-[0_-20px_60px_-20px_rgb(0_0_0/0.5)] sm:mx-auto sm:mb-8 sm:w-[26rem] sm:rounded-card sm:px-8 lg:mx-0 lg:mb-0 lg:flex lg:w-auto lg:flex-1 lg:flex-col lg:rounded-none lg:bg-transparent lg:px-[4.5rem] lg:py-10 lg:shadow-none lg:[animation:none] xl:px-24">
-            <PaperbaseBrand className="mb-5 lg:mb-0" />
-            <main className="w-full lg:mx-auto lg:flex lg:max-w-[23rem] lg:flex-1 lg:flex-col lg:justify-center lg:py-12">
+        <div className="relative z-10 flex min-h-dvh flex-col justify-end lg:order-1 lg:min-h-0 lg:items-center lg:justify-center lg:px-12 lg:py-10">
+          {/* A phone's line over the moving photos, just above the sheet. */}
+          <p className="pb-rise px-6 pb-5 text-[1.875rem] leading-[1.05] text-white [text-shadow:0_2px_18px_rgb(0_0_0/0.65)] [font-family:var(--font-instrument-serif),var(--font-noto-sans-bengali),serif] sm:mx-auto sm:w-[26rem] sm:px-0 lg:hidden">
+            {t("wall.title")}
+          </p>
+          {/* On a computer the brand, the form and the foot are one column, centred in the half. */}
+          <div className="pb-rise rounded-t-card bg-background px-6 pb-7 pt-6 shadow-[0_-20px_60px_-20px_rgb(0_0_0/0.5)] sm:mx-auto sm:mb-8 sm:w-[26rem] sm:rounded-card sm:px-8 lg:m-0 lg:w-full lg:max-w-[23rem] lg:rounded-none lg:bg-transparent lg:p-0 lg:shadow-none lg:[animation:none]">
+            <PaperbaseBrand className="mb-5 lg:mb-10" />
+            <main className="w-full">
               {tab && !tabsHidden ? (
                 <div className="flex flex-col">
                   <AuthHeading
@@ -153,7 +160,7 @@ export function AuthFrame({ children }: { children: ReactNode }) {
               </div>
               {choosing ? <AgreeLine /> : null}
             </main>
-            <footer className="mt-6 flex items-center justify-between gap-3 text-xs text-muted-foreground">
+            <footer className="mt-6 flex items-center justify-between gap-3 text-xs text-muted-foreground lg:mt-10">
               <FootLine />
               <AuthLanguageSwitch />
             </footer>
