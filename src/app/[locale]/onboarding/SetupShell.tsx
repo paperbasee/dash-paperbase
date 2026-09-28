@@ -123,12 +123,13 @@ export function SetupShell({
         </div>
 
         <aside className="sticky top-16 hidden h-[calc(100dvh-4rem)] min-w-0 flex-col border-l border-border-subtle bg-muted/50 lg:flex">
-          <span className="flex items-center gap-2 px-6 pt-5 text-xs text-muted-foreground">
+          <span className="flex items-center gap-2 px-6 pt-4 text-xs text-muted-foreground">
             <span className="pb-live-dot size-[7px] rounded-full bg-[hsl(var(--accent-green))]" />
             {t("livePreview")}
           </span>
-          <div className="min-h-0 flex-1 px-10 pb-10 pt-4">
-            <ScaleToFit width={SHOP_WINDOW_WIDTH} mode="contain">
+          {/* Grows past its drawn size to fill the side (owner, 2026-09-28: "too much empty space"). */}
+          <div className="min-h-0 flex-1 px-6 pb-6 pt-3 xl:px-8">
+            <ScaleToFit width={SHOP_WINDOW_WIDTH} mode="contain" maxScale={1.7}>
               <div className="pb-rise" style={{ animationDelay: "150ms" }}>
                 <SetupPreview setup={setup} />
               </div>

@@ -159,8 +159,8 @@ export function ReadyScreen({ setup }: { setup: SetupState }) {
           <span className="pb-live-dot size-[7px] rounded-full bg-[hsl(var(--accent-green))]" />
           {t("liveNow")}
         </span>
-        <div className="min-h-0 flex-1 px-10 pb-10 pt-4">
-          <ScaleToFit width={SHOP_WINDOW_WIDTH} mode="contain">
+        <div className="min-h-0 flex-1 px-6 pb-6 pt-3 xl:px-8">
+          <ScaleToFit width={SHOP_WINDOW_WIDTH} mode="contain" maxScale={1.7}>
             <SetupPreview setup={setup} />
           </ScaleToFit>
         </div>
