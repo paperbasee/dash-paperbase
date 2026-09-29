@@ -88,6 +88,20 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-09-29-order-work-kept-apart",
+    date: "2026-09-29",
+    version: "4.143.0",
+    tag: "improved",
+    title: {
+      en: "Order work kept apart from saved pages",
+      bn: "অর্ডারের কাজ এখন সেভ করা পাতা থেকে আলাদা",
+    },
+    body: {
+      en: "The copies of your shop's pages we keep so it opens fast now live apart from your order work. However many we keep, they can no longer crowd out orders, emails or courier sends being processed.",
+      bn: "আপনার দোকান দ্রুত খোলার জন্য আমরা পাতার যে কপি রাখি, সেগুলো এখন আপনার অর্ডারের কাজ থেকে আলাদা জায়গায় থাকে। যত কপিই রাখা হোক, সেগুলো আর অর্ডার, ইমেইল বা কুরিয়ারে পাঠানোর কাজে বাধা দিতে পারে না।",
+    },
+  },
+  {
     id: "2026-09-29-see-who-is-signed-in",
     date: "2026-09-29",
     version: "4.142.0",
@@ -495,21 +509,6 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     body: {
       en: "Sales, orders and parcels in Analytics are now counted from your orders themselves, by Bangladesh days. Sales are the products in confirmed orders after sale prices and coupons, delivery charges are shown apart, and a cancelled order no longer takes money off a later week.",
       bn: "অ্যানালিটিক্সে বিক্রি, অর্ডার আর পার্সেল এখন সরাসরি আপনার অর্ডার থেকে, বাংলাদেশের দিন ধরে গোনা হয়। বিক্রি মানে কনফার্ম করা অর্ডারের পণ্য, ছাড় আর কুপনের পরে; ডেলিভারি চার্জ আলাদা দেখানো হয়, আর বাতিল অর্ডার পরের কোনো সপ্তাহের হিসাব থেকে টাকা কাটে না।",
-    },
-  },
-  {
-    id: "2026-09-27-shoppers-message-you-from-contact",
-    date: "2026-09-27",
-    version: "4.121.0",
-    tag: "new",
-    href: "/support-tickets",
-    title: {
-      en: "Shoppers can message you from Contact",
-      bn: "ক্রেতারা যোগাযোগ পেজ থেকে বার্তা পাঠাতে পারবেন",
-    },
-    body: {
-      en: "Your shop's Contact page now has your details on one side and a message form on the other. Each message lands in Support tickets and is emailed to you. Turn Support tickets off in Settings, Apps, and the page shows just your details.",
-      bn: "আপনার দোকানের যোগাযোগ পেজে এখন এক পাশে আপনার তথ্য আর অন্য পাশে বার্তা পাঠানোর ফর্ম। প্রতিটি বার্তা সাপোর্ট টিকেটে আসে এবং আপনাকে ইমেইল করা হয়। সেটিংস > অ্যাপস-এ সাপোর্ট টিকেট বন্ধ করলে পেজে শুধু আপনার তথ্য দেখাবে।",
     },
   },
   {
