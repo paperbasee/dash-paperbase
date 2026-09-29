@@ -1812,7 +1812,9 @@
       "create": "Email me a link to get started",
       "nameRequired": "Enter your first and last name.",
       "emailRequired": "Enter your email address.",
-      "failed": "We couldn't create your account. Try again."
+      "failed": "We couldn't create your account. Try again.",
+      "trialFree": "Free for {days, plural, one {# day} other {# days}}",
+      "trialNoPayment": "No payment to start"
     },
     "onboarding": {
       "stepOf": "Step {current} of {total}",

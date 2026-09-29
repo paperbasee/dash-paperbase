@@ -225,3 +225,6 @@ export const themeEditorImagesQueryKey = ["themeEditor", "images"] as const;
 
 /** The home page's setup guide (GET store/setup-guide/), the owner's only. */
 export const setupGuideQueryKey = ["store", "setup-guide"] as const;
+
+/** A new shop's free trial in days (GET billing/trial/), for the sign-up page. */
+export const trialOfferQueryKey = ["billing", "trial"] as const;

@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import { useTranslations } from "next-intl";
-import { Mail } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { useLocale, useTranslations } from "next-intl";
+import { Check, Mail } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -14,6 +15,9 @@ import { TurnstileWidget } from "@/components/auth/TurnstileWidget";
 import { useMinDelayLoading } from "@/hooks/useMinDelayLoading";
 import { isTurnstileDisabled } from "@/lib/turnstile-env";
 import { isNetworkError } from "@/lib/network-error";
+import { toLocaleDigits } from "@/lib/locale-digits";
+import { trialOfferQueryKey } from "@/lib/query-keys";
+import { fetchTrialDays } from "@/lib/trial";
 
 export default function SignupPage() {
   const t = useTranslations("auth.signup");
@@ -135,9 +139,41 @@ export default function SignupPage() {
               <Mail className="size-[18px]" aria-hidden />
               {t("create")}
             </Button>
+            <TrialPromise />
           </div>
         </form>
       )}
     </>
+  );
+}
+
+/**
+ * "Free for 7 days · No payment to start" under Create account (owner, 2026-09-29): the trial the
+ * API says a new shop gets -- never a number written here -- and nothing when there is none.
+ */
+function TrialPromise() {
+  const t = useTranslations("auth.signup");
+  const locale = useLocale();
+  const { data: days, isPending } = useQuery({
+    queryKey: trialOfferQueryKey,
+    queryFn: fetchTrialDays,
+    staleTime: 30 * 60_000,
+  });
+  // Its line is held while it is asked, so the page does not move when it comes.
+  if (isPending) return <div className="h-4" aria-hidden />;
+  if (!days) return null;
+  const item = "flex items-center gap-1.5";
+  const tick = <Check className="size-3.5 text-[hsl(var(--accent-green))]" strokeWidth={2.5} aria-hidden />;
+  return (
+    <ul className="pb-rise flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
+      <li className={item}>
+        {tick}
+        {toLocaleDigits(t("trialFree", { days }), locale)}
+      </li>
+      <li className={item}>
+        {tick}
+        {t("trialNoPayment")}
+      </li>
+    </ul>
   );
 }
