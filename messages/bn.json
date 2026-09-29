@@ -2836,6 +2836,56 @@
       "save": "ইনভয়েস শর্তাবলী সংরক্ষণ করুন",
       "saved": "ইনভয়েস শর্তাবলী সংরক্ষিত হয়েছে।",
       "error": "ইনভয়েস শর্তাবলী সংরক্ষণ করা যায়নি। আবার চেষ্টা করুন।"
+    },
+    "sectionSessions": "সেশন",
+    "sessions": {
+      "activeTitle": "চালু সেশন",
+      "activeSubtitle": "এই মুহূর্তে আপনার দোকানে যারা সাইন ইন করা আছেন: প্রতিটি ডিভাইসে আপনি, আপনার টিম, আর ভিজিটে থাকা Paperbase সাপোর্ট।",
+      "endOthers": "অন্য সব সেশন শেষ করুন",
+      "endOthersTitle": "অন্য সব সেশন শেষ করবেন?",
+      "endOthersMessage": "{count}টি সেশন এখনই সাইন আউট হবে। এই ডিভাইস সাইন ইন থাকবে।",
+      "end": "সেশন শেষ করুন",
+      "endTitle": "এই সেশন শেষ করবেন?",
+      "endMessage": "{name} {device}-এ এখনই সাইন আউট হবেন।",
+      "endSupportMessage": "Paperbase সাপোর্টের ভিজিট এখনই শেষ হবে।",
+      "thisDevice": "এই ডিভাইস",
+      "supportVisit": "সাপোর্ট ভিজিট",
+      "signedInWith": "{when}-এ {method} দিয়ে সাইন ইন",
+      "activeNow": "এখন সক্রিয়",
+      "lastActive": "সর্বশেষ সক্রিয় {when}",
+      "unknownDevice": "অজানা ডিভাইস",
+      "noPlace": "অজানা জায়গা",
+      "theOwner": "মালিক",
+      "loadFailed": "সেশন লোড হয়নি। আবার চেষ্টা করতে পেজটি রিফ্রেশ করুন।",
+      "historyTitle": "লগইন ইতিহাস",
+      "historySubtitle": "গত ৯০ দিনে আপনার দোকানে প্রতিটি সাইন-ইন।",
+      "historyEmpty": "এখনো কোনো সাইন-ইন নেই।",
+      "previous": "আগের",
+      "next": "পরের",
+      "pageOf": "{pages}টির মধ্যে {page} নম্বর পাতা",
+      "ipCredit": "IP লোকেশন: DB-IP",
+      "col": {
+        "when": "কখন",
+        "who": "কে",
+        "how": "কীভাবে",
+        "from": "কোথা থেকে",
+        "device": "ডিভাইস",
+        "status": "অবস্থা"
+      },
+      "method": {
+        "passkey": "পাসকি",
+        "email_link": "ইমেইল লিংক",
+        "email_code": "ইমেইল কোড",
+        "support": "Paperbase সাপোর্ট",
+        "earlier": "আগের সাইন-ইন"
+      },
+      "status": {
+        "active": "চালু",
+        "signedOut": "সাইন আউট",
+        "endedBy": "{name} শেষ করেছেন",
+        "visitEnded": "ভিজিট শেষ",
+        "expired": "মেয়াদ শেষ"
+      }
     }
   },
   "themeEditor": {
@@ -3903,6 +3953,7 @@
     "badge": "সাপোর্ট মোড",
     "inShop": "আপনি Paperbase সাপোর্ট হিসেবে {store}-এ আছেন",
     "minutesLeft": "আর {count} মিনিট",
-    "end": "সেশন শেষ করুন"
+    "end": "সেশন শেষ করুন",
+    "readOnly": "সাপোর্ট মোডে শুধু দেখা যাবে: এটি দোকানের মালিকের।"
   }
 }

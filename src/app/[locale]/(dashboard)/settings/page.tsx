@@ -21,6 +21,7 @@ import IntegrationsSection from "./sections/IntegrationsSection";
 import DomainsSection from "./sections/DomainsSection";
 import NotificationsSection from "./sections/NotificationsSection";
 import SecuritySection from "./sections/SecuritySection";
+import SessionsSection from "./sections/SessionsSection";
 import TeamSection from "./sections/team/TeamSection";
 import BillingSection from "./sections/BillingSection";
 import CustomizationSection from "./sections/CustomizationSection";
@@ -244,6 +245,8 @@ export default function SettingsPage() {
           <TeamSection hidden={activeSection !== "team"} />
 
           <SecuritySection hidden={activeSection !== "security"} />
+
+          <SessionsSection hidden={activeSection !== "sessions"} />
 
           <BillingSection hidden={activeSection !== "billing"} />
         </main>

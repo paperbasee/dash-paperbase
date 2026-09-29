@@ -3,7 +3,7 @@
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { AuthPageShell } from "@/components/auth/AuthPageShell";
-import { logout } from "@/lib/auth";
+import { signOut } from "@/lib/auth";
 
 type Variant = "inactive" | "verifyFailed" | "serverUnreachable";
 
@@ -47,7 +47,7 @@ export default function SubscriptionAccessBlock({ variant }: { variant: Variant 
             {isServerUnreachable ? tCommon("retry") : tCommon("reload")}
           </Button>
         )}
-        <Button type="button" variant="outline" className="w-full" onClick={() => logout()}>
+        <Button type="button" variant="outline" className="w-full" onClick={() => signOut()}>
           {tCommon("signOut")}
         </Button>
       </div>

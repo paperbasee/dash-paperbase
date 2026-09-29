@@ -17,6 +17,8 @@ import {
   verifyMagicCode as authVerifyMagicCode,
   verifyMagicLink as authVerifyMagicLink,
   logout as authLogout,
+  signInOf,
+  signOut as authSignOut,
   type AuthTokens,
   type SignupResponse,
   type MagicLinkPurpose,
@@ -68,6 +70,8 @@ interface AuthState {
   verifyMagicLink: (token: string) => Promise<MagicLinkVerifyResult>;
   verifyMagicCode: (email: string, code: string) => Promise<MagicLinkVerifyResult>;
   logout: () => void;
+  /** The Sign out a person presses: the API ends this sign-in too (lib/auth signOut). */
+  signOut: () => void;
 }
 
 const AuthContext = createContext<AuthState | undefined>(undefined);
@@ -234,6 +238,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return;
       }
 
+      // Another tab signed in as someone else, or into another sign-in (a support visit entered in
+      // this browser): this tab follows it rather than showing the old account with the new token.
+      // The hourly renewal keeps the user and the session, and changes nothing here.
+      if (e.key === "access_token" && e.oldValue && e.newValue) {
+        const before = signInOf(e.oldValue);
+        const after = signInOf(e.newValue);
+        if (before && after && (before.user !== after.user || (before.sid && after.sid && before.sid !== after.sid))) {
+          window.location.reload();
+          return;
+        }
+      }
+
       if (e.key === ME_PROFILE_STORAGE_KEY && isAuthenticatedRef.current) {
         const now = Date.now();
         if (now - lastProfileStorageEventAt.current < 400) return;
@@ -342,6 +358,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setIsAuthenticated(false);
   }, []);
 
+  const signOut = useCallback(() => {
+    setIsLoggingOut(true);
+    authSignOut();
+    setIsAuthenticated(false);
+  }, []);
+
   return (
     <AuthContext.Provider
       value={{
@@ -361,6 +383,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         verifyMagicLink,
         verifyMagicCode,
         logout,
+        signOut,
       }}
     >
       {children}

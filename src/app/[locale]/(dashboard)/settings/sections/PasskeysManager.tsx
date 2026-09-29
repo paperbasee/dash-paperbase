@@ -10,6 +10,7 @@ import {
   deletePasskey,
   type PasskeyInfo,
 } from "@/lib/auth";
+import { SupportReadOnly } from "@/components/support/SupportReadOnly";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
@@ -92,6 +93,7 @@ export default function PasskeysManager() {
   }
 
   return (
+    <SupportReadOnly>
     <div className="rounded-card border border-border bg-background p-6 space-y-5">
       <div className="flex items-start justify-between gap-4">
         <div className="space-y-1">
@@ -205,5 +207,6 @@ export default function PasskeysManager() {
         </ul>
       )}
     </div>
+    </SupportReadOnly>
   );
 }

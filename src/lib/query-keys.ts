@@ -228,3 +228,9 @@ export const setupGuideQueryKey = ["store", "setup-guide"] as const;
 
 /** A new shop's free trial in days (GET billing/trial/), for the sign-up page. */
 export const trialOfferQueryKey = ["billing", "trial"] as const;
+
+/** The owner's Sessions tab: live sign-ins, and one page of sign-in history. */
+export const activeSessionsQueryKey = ["sessions", "active"] as const;
+export function sessionHistoryQueryKey(page: number) {
+  return ["sessions", "history", page] as const;
+}

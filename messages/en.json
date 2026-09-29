@@ -2836,6 +2836,56 @@
       "save": "Save invoice terms",
       "saved": "Invoice terms saved.",
       "error": "Could not save invoice terms. Please try again."
+    },
+    "sectionSessions": "Sessions",
+    "sessions": {
+      "activeTitle": "Active sessions",
+      "activeSubtitle": "Everyone signed in to your shop right now: you on each device, your team, and Paperbase support on a visit.",
+      "endOthers": "End all other sessions",
+      "endOthersTitle": "End all other sessions?",
+      "endOthersMessage": "{count, plural, one {# session} other {# sessions}} will be signed out now. This device stays signed in.",
+      "end": "End session",
+      "endTitle": "End this session?",
+      "endMessage": "{name} will be signed out on {device} right away.",
+      "endSupportMessage": "Paperbase support's visit ends right away.",
+      "thisDevice": "This device",
+      "supportVisit": "Support visit",
+      "signedInWith": "Signed in {when} with {method}",
+      "activeNow": "Active now",
+      "lastActive": "Last active {when}",
+      "unknownDevice": "Unknown device",
+      "noPlace": "Unknown place",
+      "theOwner": "the owner",
+      "loadFailed": "Sessions didn't load. Refresh the page to try again.",
+      "historyTitle": "Login history",
+      "historySubtitle": "Every sign-in to your shop in the last 90 days.",
+      "historyEmpty": "No sign-ins yet.",
+      "previous": "Previous",
+      "next": "Next",
+      "pageOf": "Page {page} of {pages}",
+      "ipCredit": "IP location by DB-IP",
+      "col": {
+        "when": "When",
+        "who": "Who",
+        "how": "How",
+        "from": "From",
+        "device": "Device",
+        "status": "Status"
+      },
+      "method": {
+        "passkey": "Passkey",
+        "email_link": "Email link",
+        "email_code": "Email code",
+        "support": "Paperbase support",
+        "earlier": "Earlier sign-in"
+      },
+      "status": {
+        "active": "Active",
+        "signedOut": "Signed out",
+        "endedBy": "Ended by {name}",
+        "visitEnded": "Visit ended",
+        "expired": "Expired"
+      }
     }
   },
   "themeEditor": {
@@ -3903,6 +3953,7 @@
     "badge": "Support mode",
     "inShop": "You're in {store} as Paperbase support",
     "minutesLeft": "{count, plural, one {# min left} other {# min left}}",
-    "end": "End session"
+    "end": "End session",
+    "readOnly": "Read-only in support mode: this belongs to the shop's owner."
   }
 }

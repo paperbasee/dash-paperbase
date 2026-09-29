@@ -19,6 +19,7 @@ import {
   Users,
   Globe,
   Megaphone,
+  MonitorSmartphone,
 } from "lucide-react";
 import { PROMOTION_TABS } from "./sections/promotions/promotionTabs";
 
@@ -40,6 +41,7 @@ export type SettingsSection =
   | "notifications"
   | "team"
   | "security"
+  | "sessions"
   | "billing";
 
 export type SettingsSectionLabelKey =
@@ -55,6 +57,7 @@ export type SettingsSectionLabelKey =
   | "sectionNotifications"
   | "sectionAccount"
   | "sectionSecurity"
+  | "sectionSessions"
   | "sectionBilling";
 
 /** Nav row: translated label key or literal label (checkout/team; English-only for now). */
@@ -103,6 +106,15 @@ export const SECTION_OWNER_ONLY: Partial<Record<SettingsSection, boolean>> = {
 };
 
 /**
+ * Sections for the shop's owner alone (owner, 2026-09-29): not a platform superuser, and not
+ * Paperbase support signed in as the owner. Sessions shows who else is in the shop and lets
+ * them out -- the API refuses everyone else too.
+ */
+export const SECTION_OWNER_ALONE: Partial<Record<SettingsSection, boolean>> = {
+  sessions: true,
+};
+
+/**
  * Sections that hold apps (ids from config/apps.ts). Such a section shows only when
  * at least one of its apps is enabled for the store AND viewable by the user's role
  * — the same rule the sidebar applies to an app's link. Essential apps such as
@@ -119,11 +131,14 @@ export type SettingsSectionAccess = {
   isOwner: boolean;
   isSuperuser: boolean;
   canShowApp: (appId: string) => boolean;
+  /** Paperbase support is in the dashboard ("Sign in as this shop"), signed in as the owner. */
+  inSupportMode?: boolean;
 };
 
 /** True if the user may see a section: owner gate, then app gate, then permission gate. */
 export function isSectionVisible(id: SettingsSection, access: SettingsSectionAccess): boolean {
   if (SECTION_OWNER_ONLY[id] && !(access.isOwner || access.isSuperuser)) return false;
+  if (SECTION_OWNER_ALONE[id] && !(access.isOwner && !access.inSupportMode)) return false;
   const apps = SECTION_APPS[id];
   if (apps && !apps.some((appId) => access.canShowApp(appId))) return false;
   return sectionMatchesPermission(SECTION_PERMISSION[id], access.has);
@@ -162,6 +177,7 @@ export const ALL_SECTIONS: SettingsSectionNavItem[] = [
   { id: "team", displayLabel: "Team", icon: Users },
   { id: "account", labelKey: "sectionAccount", icon: User },
   { id: "security", labelKey: "sectionSecurity", icon: Shield },
+  { id: "sessions", labelKey: "sectionSessions", icon: MonitorSmartphone },
   { id: "billing", labelKey: "sectionBilling", icon: CreditCard },
 ];
 

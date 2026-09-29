@@ -70,15 +70,16 @@ function visibleIdsFor(
   opts: {
     isOwner?: boolean;
     isSuperuser?: boolean;
+    inSupportMode?: boolean;
     sections?: SettingsSectionNavItem[];
     canShowApp?: (appId: string) => boolean;
   } = {},
 ): SettingsSection[] {
-  const { isOwner = false, isSuperuser = false } = opts;
+  const { isOwner = false, isSuperuser = false, inSupportMode = false } = opts;
   const canShowApp =
     opts.canShowApp ?? ((appId: string) => isOwner || isSuperuser || has(APP_VIEW_PERMISSION[appId]));
   return (opts.sections ?? SECTIONS)
-    .filter((row) => isSectionVisible(row.id, { has, isOwner, isSuperuser, canShowApp }))
+    .filter((row) => isSectionVisible(row.id, { has, isOwner, isSuperuser, canShowApp, inSupportMode }))
     .map((row) => row.id);
 }
 
@@ -272,6 +273,14 @@ describe("role-shaped visibility (the maps as consumers apply them)", () => {
   it("shows a permissionless staff member only the ungated sections", () => {
     // account has no requirement; security is ungated but owner-only.
     expect(visibleIdsFor(grants().has).sort()).toEqual(["account"]);
+  });
+
+  it("keeps Sessions the owner's alone: not a superuser, not support signed in as the owner", () => {
+    const everything = { has: () => true };
+    expect(visibleIdsFor(everything.has, { isOwner: true })).toContain("sessions");
+    expect(visibleIdsFor(everything.has, { isSuperuser: true })).not.toContain("sessions");
+    expect(visibleIdsFor(everything.has)).not.toContain("sessions");
+    expect(visibleIdsFor(everything.has, { isOwner: true, inSupportMode: true })).not.toContain("sessions");
   });
 
   it("keeps owner-only sections away from a non-owner who somehow holds every key", () => {

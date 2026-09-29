@@ -10,6 +10,7 @@ import api from "@/lib/api";
 import { numberTextClass } from "@/lib/number-font";
 import { cn } from "@/lib/utils";
 import { markPlansVisited } from "@/lib/plans-onboarding";
+import { SupportReadOnly } from "@/components/support/SupportReadOnly";
 
 interface Plan {
   public_id: string;
@@ -161,8 +162,9 @@ export default function PlansPage() {
           <p className="text-center text-sm text-muted-foreground">{t("empty")}</p>
         )}
 
+        {/* Choosing and paying for the plan is the owner's: Paperbase support sees it, greyed. */}
         {pageState === "ready" && plans.length > 0 && (
-          <>
+          <SupportReadOnly centered>
             {selectError && (
               <div className="mb-6 rounded-card border border-red-500/30 bg-red-500/10 px-4 py-3 text-center text-sm text-red-200">
                 {selectError}
@@ -328,7 +330,7 @@ export default function PlansPage() {
                 );
               })}
             </div>
-          </>
+          </SupportReadOnly>
         )}
 
         {/* Back home link */}

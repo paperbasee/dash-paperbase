@@ -166,7 +166,7 @@ export function useSetup() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const isAddMode = searchParams.get("add") === "1";
-  const { isAuthenticated, isLoading: authLoading, authHydrated, logout } = useAuth();
+  const { isAuthenticated, isLoading: authLoading, authHydrated, signOut } = useAuth();
 
   const [ready, setReady] = useState(false);
   const [user, setUser] = useState("");
@@ -635,7 +635,8 @@ export function useSetup() {
     stepError,
     back,
     go,
-    logout,
+    /** Setup's Sign out: a press, so the API ends the sign-in too. */
+    logout: signOut,
     // sell
     kind,
     setKind: (next: ShopKind) => {

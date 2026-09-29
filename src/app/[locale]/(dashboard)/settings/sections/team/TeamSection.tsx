@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Layers, Shield, Trash2, UserPlus } from "lucide-react";
 
+import { SupportReadOnly } from "@/components/support/SupportReadOnly";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
@@ -79,6 +80,7 @@ export default function TeamSection({ hidden }: { hidden: boolean }) {
           <p className="text-sm text-muted-foreground">{t("subtitle")}</p>
         </div>
 
+
         <div className="flex gap-1 rounded-md bg-muted p-0.5 w-fit">
           {(["members", "roles"] as Tab[]).map((tabId) => (
             <button
@@ -97,6 +99,9 @@ export default function TeamSection({ hidden }: { hidden: boolean }) {
           ))}
         </div>
 
+        {/* Who else can get in stays the owner's: support can look at both tabs, change nothing. */}
+        <SupportReadOnly>
+
         {tab === "members" ? (
           <MembersTab
             membersQuery={membersQuery}
@@ -112,6 +117,7 @@ export default function TeamSection({ hidden }: { hidden: boolean }) {
             isOwner={isOwner}
           />
         )}
+        </SupportReadOnly>
       </SettingsSectionBody>
     </div>
   );

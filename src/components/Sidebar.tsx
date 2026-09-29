@@ -131,7 +131,7 @@ function SidebarContent({
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { logout, isAuthenticated, meProfile, meProfileStatus } = useAuth();
+  const { signOut, isAuthenticated, meProfile, meProfileStatus } = useAuth();
   const { branding, navCounts, features, inventoryStatus } = useSidebarData();
   const { data: brandingData, isLoading: isBrandingLoading } = branding;
   const { counts, formatCount } = navCounts;
@@ -771,7 +771,7 @@ function SidebarContent({
             <div className="p-2">
               <DropdownMenuItem
                 onSelect={() => {
-                  logout();
+                  signOut();
                 }}
                 className={cn(
                   "cursor-pointer justify-between gap-3 text-[15px] font-medium",

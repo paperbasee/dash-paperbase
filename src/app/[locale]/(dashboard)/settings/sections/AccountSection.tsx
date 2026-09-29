@@ -4,6 +4,7 @@ import { useRef, type Dispatch, type FormEvent, type SetStateAction } from "reac
 import { useTranslations } from "next-intl";
 import { Loader2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { SupportReadOnly } from "@/components/support/SupportReadOnly";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useEnterNavigation } from "@/hooks/useEnterNavigation";
@@ -78,6 +79,7 @@ export default function AccountSection({
           )}
 
           {canEditOwnerIdentity && (
+          <SupportReadOnly>
           <form ref={formRef} onSubmit={onSubmit} className="w-full space-y-6">
           <div className="space-y-1">
             <h2 className="text-lg font-medium text-foreground">{t("account.heading")}</h2>
@@ -148,6 +150,7 @@ export default function AccountSection({
             {t("account.saveButton")}
           </Button>
           </form>
+          </SupportReadOnly>
           )}
         </SettingsSectionBody>
       ) : null}

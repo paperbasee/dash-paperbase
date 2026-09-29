@@ -237,8 +237,8 @@ export async function deletePasskey(publicId: string): Promise<void> {
 // Session
 // ---------------------------------------------------------------------------
 
-/** Everything this browser holds for the account signed in: its data, profile, edits and tokens. */
-function forgetThisSignIn() {
+/** What this browser keeps of the account signed in, other than its tokens: data, profile, edits. */
+function forgetSignedInData() {
   if (typeof window !== "undefined") {
     void (async () => {
       const { queryClient } = await import("@/components/QueryProvider");
@@ -250,15 +250,59 @@ function forgetThisSignIn() {
   clearMeProfileCache();
   // Theme edits kept on this device belong to the member signing out.
   clearAllUnsentCopies(localStorage);
+}
+
+/** Everything this browser holds for the account signed in: its data, profile, edits and tokens. */
+function forgetThisSignIn() {
+  forgetSignedInData();
   localStorage.removeItem("access_token");
   localStorage.removeItem("refresh_token");
   localStorage.removeItem(LAST_ROTATED_AT_KEY);
   clearAuthSessionCookie();
 }
 
+/**
+ * Who a token signs in, and which sign-in -- its user and its session (`sid`) -- so a tab can
+ * tell another tab's new sign-in from the hourly renewal of the same one. Null if unreadable.
+ */
+export function signInOf(token: string | null): { user: string; sid: string } | null {
+  if (!token) return null;
+  try {
+    const payload = JSON.parse(atob(token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/"))) as {
+      user_public_id?: unknown;
+      sid?: unknown;
+    };
+    return { user: String(payload.user_public_id ?? ""), sid: typeof payload.sid === "string" ? payload.sid : "" };
+  } catch {
+    return null;
+  }
+}
+
+/** Leave for the sign-in page, forgetting this browser's sign-in -- the API is not told (see signOut). */
 export function logout() {
   window.location.replace("/login");
   forgetThisSignIn();
+}
+
+/**
+ * The person pressed Sign out: the API ends this browser's sign-in, so it leaves the owner's
+ * Sessions list at once, then the browser forgets it.
+ *
+ * Only for that press. The automatic sign-outs -- another tab signed out, a sign-in that ran
+ * out -- use `logout` alone: they react to tokens already changed, and the token in storage by
+ * then may be a new sign-in's (a support visit just entered in another tab), which they must not
+ * end (2026-09-29).
+ */
+export function signOut() {
+  const access = localStorage.getItem("access_token");
+  if (access) {
+    void fetch(`${BASE_URL}/auth/logout/`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${access}` },
+      keepalive: true,
+    }).catch(() => undefined);
+  }
+  logout();
 }
 
 // ---------------------------------------------------------------------------
@@ -276,7 +320,9 @@ export async function enterSupportSession(ticket: string): Promise<SupportSessio
     `${BASE_URL}/auth/support/enter/`,
     { ticket }
   );
-  forgetThisSignIn();
+  // Replaced in one step, never emptied first: another tab that saw no sign-in for a moment would
+  // sign itself out and take the new one with it.
+  forgetSignedInData();
   storeAuthTokens(result.access, result.refresh);
   return result.support_session;
 }
