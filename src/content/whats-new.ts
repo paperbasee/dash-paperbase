@@ -88,6 +88,20 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-09-29-setup-fits-where-you-already-sell",
+    date: "2026-09-29",
+    version: "4.139.0",
+    tag: "new",
+    title: {
+      en: "Setup fits where you already sell",
+      bn: "যেখানে বিক্রি করেন, সেট-আপ সেভাবেই",
+    },
+    body: {
+      en: "New shops are asked where they sell now: Facebook, Instagram, TikTok or a shop in person. Your setup guide then adds the steps that fit, like your Facebook Pixel or your shop's address.",
+      bn: "নতুন দোকানকে জিজ্ঞেস করা হয় এখন কোথায় বিক্রি করেন: Facebook, Instagram, TikTok নাকি সরাসরি দোকানে। এরপর সেট-আপ গাইডে মানানসই ধাপ যোগ হয়, যেমন Facebook Pixel বা দোকানের ঠিকানা।",
+    },
+  },
+  {
     id: "2026-09-29-sign-up-shows-the-free-trial",
     date: "2026-09-29",
     version: "4.138.0",
@@ -496,21 +510,6 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     body: {
       en: "A shopper who typed their phone number and then locked their phone, switched apps or closed the page was sometimes missed. They are now listed too, so you can call them, and a shopper who did buy is never listed there by mistake.",
       bn: "যে ক্রেতা ফোন নম্বর লিখে তারপর ফোন লক করতেন, অন্য অ্যাপে যেতেন বা পেজ বন্ধ করতেন, তাঁরা কখনো কখনো বাদ পড়ে যেতেন। এখন তাঁরাও তালিকায় আসবেন, তাই আপনি তাঁদের ফোন করতে পারবেন, আর যিনি কিনেছেন তিনি ভুল করে সেখানে আসবেন না।",
-    },
-  },
-  {
-    id: "2026-09-27-delivery-outside-dhaka-charged-again",
-    date: "2026-09-27",
-    version: "4.119.4",
-    tag: "fixed",
-    href: "/settings?tab=shipping",
-    title: {
-      en: "Delivery outside Dhaka is charged again",
-      bn: "ঢাকার বাইরের ডেলিভারি চার্জ আবার নেওয়া হচ্ছে",
-    },
-    body: {
-      en: "A shopper who chose Inside Dhaka and then switched to Outside Dhaka was charged nothing for delivery. Checkout now always charges the price you set for the area they chose.",
-      bn: "যে ক্রেতা প্রথমে ঢাকার ভেতর বেছে নিয়ে পরে ঢাকার বাইরে বদলাতেন, তাঁর কাছ থেকে কোনো ডেলিভারি চার্জ নেওয়া হতো না। এখন চেকআউট সবসময় ক্রেতার বেছে নেওয়া এলাকার জন্য আপনার ঠিক করা চার্জই নেয়।",
     },
   },
   {
