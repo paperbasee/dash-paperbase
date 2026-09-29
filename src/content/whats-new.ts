@@ -88,6 +88,20 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-09-29-search-is-quicker-and-understands-more",
+    date: "2026-09-29",
+    version: "4.148.0",
+    tag: "improved",
+    title: {
+      en: "Search is quicker and understands more",
+      bn: "সার্চ এখন আরও দ্রুত, আরও বেশি বোঝে",
+    },
+    body: {
+      en: "The dashboard's search answers faster. It finds a phone number however it's written (+880 or 01), an order with or without #, and a product even when you skip its dash or spaces, like “tshirt” for “T-Shirt”.",
+      bn: "ড্যাশবোর্ডের সার্চ এখন আরও দ্রুত উত্তর দেয়। ফোন নম্বর যেভাবেই লিখুন (+880 বা 01) খুঁজে পায়, অর্ডার নম্বর # দিয়ে বা ছাড়া, আর প্রোডাক্টের নামে ড্যাশ বা স্পেস বাদ দিলেও পায়, যেমন “tshirt” লিখলে “T-Shirt”।",
+    },
+  },
+  {
     id: "2026-09-29-paperbase-history-in-fraud-check",
     date: "2026-09-29",
     version: "4.147.0",
@@ -490,21 +504,6 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     body: {
       en: "The Download button on the Analytics page makes an Excel file of the section you are on, or of every section, for the days you picked, in English or Bangla. The numbers stay numbers, so you can sort and add them up. Top customers now show their full phone number on the page; the file hides part of it.",
       bn: "অ্যানালিটিক্স পেজের ডাউনলোড বাটন আপনার বেছে নেওয়া দিনগুলোর জন্য এই অংশের, বা সব অংশের একটি Excel ফাইল তৈরি করে, ইংরেজি বা বাংলায়। সংখ্যাগুলো সংখ্যাই থাকে, তাই সাজানো আর যোগ করা যায়। শীর্ষ কাস্টমারদের পুরো ফোন নম্বর এখন পেজে দেখা যায়; ফাইলে এর কিছু অংশ লুকানো থাকে।",
-    },
-  },
-  {
-    id: "2026-09-28-a-new-analytics-page",
-    date: "2026-09-28",
-    version: "4.123.0",
-    tag: "new",
-    href: "/analytics",
-    title: {
-      en: "A new Analytics page",
-      bn: "নতুন অ্যানালিটিক্স পেজ",
-    },
-    body: {
-      en: "Pick any days and compare them with the days before or the same days last year. The Overview tells you in one sentence how you did, what moved it and which orders need a look, and each part has its own tab: Sales, Traffic, Products, Districts, Delivery, Customers and Live. On the Basic plan, Overview and Sales are open.",
-      bn: "যেকোনো দিন বেছে নিন, আর তুলনা করুন আগের দিনগুলোর সাথে বা গত বছরের একই দিনগুলোর সাথে। সারসংক্ষেপ এক বাক্যে জানায় কেমন গেল, কী পার্থক্য গড়েছে আর কোন অর্ডার একবার দেখা দরকার; প্রতিটি অংশের নিজের ট্যাব আছে: বিক্রি, ভিজিটর, পণ্য, জেলা, ডেলিভারি, কাস্টমার আর লাইভ। বেসিক প্ল্যানে সারসংক্ষেপ আর বিক্রি খোলা থাকে।",
     },
   },
   {
