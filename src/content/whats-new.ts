@@ -88,6 +88,21 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-09-29-see-who-is-signed-in",
+    date: "2026-09-29",
+    version: "4.142.0",
+    tag: "new",
+    href: "/settings?tab=sessions",
+    title: {
+      en: "See who is signed in to your shop",
+      bn: "দেখুন কে আপনার দোকানে সাইন ইন করা",
+    },
+    body: {
+      en: "Settings, Sessions shows everyone signed in right now: you on each device, your team, and Paperbase support on a visit, with where and on what. End any of them with one tap, and look back over every sign-in of the last 90 days. Only you, the owner, can see it.",
+      bn: "সেটিংস > সেশনে দেখুন এই মুহূর্তে কে কে সাইন ইন করা: প্রতিটি ডিভাইসে আপনি, আপনার টিম, আর ভিজিটে থাকা Paperbase সাপোর্ট, কোথা থেকে আর কোন ডিভাইসে। এক ট্যাপে যেকোনোটি শেষ করুন, আর গত ৯০ দিনের প্রতিটি সাইন-ইন দেখুন। এটি শুধু আপনি, মালিক, দেখতে পান।",
+    },
+  },
+  {
     id: "2026-09-29-support-can-help-inside-your-dashboard",
     date: "2026-09-29",
     version: "4.141.0",
@@ -495,21 +510,6 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     body: {
       en: "Your shop's Contact page now has your details on one side and a message form on the other. Each message lands in Support tickets and is emailed to you. Turn Support tickets off in Settings, Apps, and the page shows just your details.",
       bn: "আপনার দোকানের যোগাযোগ পেজে এখন এক পাশে আপনার তথ্য আর অন্য পাশে বার্তা পাঠানোর ফর্ম। প্রতিটি বার্তা সাপোর্ট টিকেটে আসে এবং আপনাকে ইমেইল করা হয়। সেটিংস > অ্যাপস-এ সাপোর্ট টিকেট বন্ধ করলে পেজে শুধু আপনার তথ্য দেখাবে।",
-    },
-  },
-  {
-    id: "2026-09-27-your-popup-shows-again",
-    date: "2026-09-27",
-    version: "4.121.0",
-    tag: "fixed",
-    href: "/settings?tab=promotions",
-    title: {
-      en: "Your pop-up shows in your shop again",
-      bn: "আপনার পপ-আপ আবার দোকানে দেখাচ্ছে",
-    },
-    body: {
-      en: "The pop-up you set up in Settings, Promotions was not showing in the new shop. It shows again, after your delay and as often as you chose. Every picture you added can now be swiped through.",
-      bn: "সেটিংস > প্রমোশনস-এ তৈরি করা পপ-আপ নতুন দোকানে দেখাচ্ছিল না। এখন আবার দেখাচ্ছে, আপনার ঠিক করা সময় পরে এবং আপনি যতবার চেয়েছেন ততবার। আপনার যোগ করা সব ছবি এখন সোয়াইপ করে দেখা যায়।",
     },
   },
   {
