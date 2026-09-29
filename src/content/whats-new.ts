@@ -88,6 +88,20 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-09-29-quick-right-after-you-save",
+    date: "2026-09-29",
+    version: "4.146.0",
+    tag: "improved",
+    title: {
+      en: "Your shop stays quick right after you save",
+      bn: "সেভ করার ঠিক পরেও দোকান দ্রুত থাকে",
+    },
+    body: {
+      en: "Saving a change refreshes your shop's pages. Now each page is rebuilt once, and shoppers arriving at that same moment all get it, so your shop stays quick even when you save during a busy hour.",
+      bn: "কোনো পরিবর্তন সেভ করলে দোকানের পাতাগুলো নতুন করে তৈরি হয়। এখন প্রতিটি পাতা একবারই তৈরি হয়, আর ঠিক সেই সময়ে আসা সব ক্রেতা সেটিই পান, তাই ব্যস্ত সময়ে সেভ করলেও আপনার দোকান দ্রুত থাকে।",
+    },
+  },
+  {
     id: "2026-09-29-timed-sections-on-time",
     date: "2026-09-29",
     version: "4.145.0",
@@ -492,21 +506,6 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     body: {
       en: "Fonts now load only when a page needs them, so English pages no longer download the Bangla font.",
       bn: "ফন্ট এখন শুধু দরকার হলেই আসে, তাই ইংরেজি পেজে আর বাংলা ফন্ট নামাতে হয় না।",
-    },
-  },
-  {
-    id: "2026-09-28-where-visitors-come-from",
-    date: "2026-09-28",
-    version: "4.122.0",
-    tag: "new",
-    href: "/analytics",
-    title: {
-      en: "See where your visitors come from",
-      bn: "দেখুন আপনার ভিজিটর কোথা থেকে আসছেন",
-    },
-    body: {
-      en: "Visits to your shop are counted again, whether or not you use a Facebook or TikTok pixel. Analytics shows where each visit came from, such as Facebook, Facebook ads or Google, with the orders and sales it brought.",
-      bn: "আপনার দোকানের ভিজিট আবার গোনা হচ্ছে, ফেসবুক বা টিকটক পিক্সেল থাকুক বা না থাকুক। অ্যানালিটিক্সে দেখা যায় প্রতিটি ভিজিট কোথা থেকে এসেছে, যেমন ফেসবুক, ফেসবুক বিজ্ঞাপন বা গুগল, আর সেখান থেকে কত অর্ডার ও বিক্রি এসেছে।",
     },
   },
   {
