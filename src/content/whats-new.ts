@@ -88,6 +88,20 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-09-29-search-finds-pages-and-settings",
+    date: "2026-09-29",
+    version: "4.149.0",
+    tag: "new",
+    title: {
+      en: "Search finds pages and settings too",
+      bn: "সার্চে এখন পেজ আর সেটিংসও পাওয়া যায়",
+    },
+    body: {
+      en: "Type what you're looking for, like “steadfast”, “delivery charge”, “logo” or “add product”, and search takes you straight to the right page, settings section or action, in English or Bangla. You only see what your role lets you open.",
+      bn: "যা খুঁজছেন লিখুন, যেমন “steadfast”, “ডেলিভারি চার্জ”, “লোগো” বা “add product”, সার্চ আপনাকে সরাসরি সঠিক পেজ, সেটিংস অংশ বা কাজে নিয়ে যাবে, ইংরেজি বা বাংলায়। আপনার রোলে যা খোলার অনুমতি আছে, শুধু সেটুকুই দেখবেন।",
+    },
+  },
+  {
     id: "2026-09-29-search-is-quicker-and-understands-more",
     date: "2026-09-29",
     version: "4.148.0",
@@ -489,21 +503,6 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     body: {
       en: "Settings > Store Info now has an Identity section for your phone, email, address and social accounts, from WhatsApp and Facebook to YouTube, Telegram, X, LinkedIn, Pinterest, Threads and Snapchat, in the order you like. Your footer, contact page and home page sign-up button all use them, and the sign-up button can open any of them. Your invoice terms and conditions moved to Settings > Policies.",
       bn: "সেটিংস > স্টোর তথ্যে এখন পরিচিতি অংশ আছে, আপনার ফোন, ইমেইল, ঠিকানা আর সোশ্যাল অ্যাকাউন্টের জন্য, হোয়াটসঅ্যাপ আর ফেসবুক থেকে ইউটিউব, টেলিগ্রাম, এক্স, লিংকডইন, পিন্টারেস্ট, থ্রেডস ও স্ন্যাপচ্যাট পর্যন্ত, আপনার পছন্দের ক্রমে। আপনার ফুটার, যোগাযোগ পাতা আর হোম পেজের সাইন-আপ বোতাম এগুলোই ব্যবহার করে, আর সাইন-আপ বোতাম এর যেকোনোটি খুলতে পারে। ইনভয়েসের শর্তাবলী এখন সেটিংস > নীতিমালায়।",
-    },
-  },
-  {
-    id: "2026-09-28-download-your-analytics",
-    date: "2026-09-28",
-    version: "4.124.0",
-    tag: "new",
-    href: "/analytics",
-    title: {
-      en: "Download your analytics as an Excel file",
-      bn: "অ্যানালিটিক্স Excel ফাইলে ডাউনলোড করুন",
-    },
-    body: {
-      en: "The Download button on the Analytics page makes an Excel file of the section you are on, or of every section, for the days you picked, in English or Bangla. The numbers stay numbers, so you can sort and add them up. Top customers now show their full phone number on the page; the file hides part of it.",
-      bn: "অ্যানালিটিক্স পেজের ডাউনলোড বাটন আপনার বেছে নেওয়া দিনগুলোর জন্য এই অংশের, বা সব অংশের একটি Excel ফাইল তৈরি করে, ইংরেজি বা বাংলায়। সংখ্যাগুলো সংখ্যাই থাকে, তাই সাজানো আর যোগ করা যায়। শীর্ষ কাস্টমারদের পুরো ফোন নম্বর এখন পেজে দেখা যায়; ফাইলে এর কিছু অংশ লুকানো থাকে।",
     },
   },
   {
