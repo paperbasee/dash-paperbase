@@ -614,15 +614,17 @@ export function useSetup() {
     [palettes, chosenPalette]
   );
 
+  /** A domain the owner has is serving the shop -- connected, not merely started. */
+  const usingOwnDomain = addressMode === "own" && domainLive && Boolean(domain);
+
   /** The address the preview's bar shows: a connected domain, the shop's own, or the one it will get. */
   const shownHostname =
-    (addressMode === "own" && domainLive && domain?.hostname) ||
+    (usingOwnDomain && domain?.hostname) ||
     storeHostname ||
     (nameCheck.state === "ok" ? nameCheck.hostname : "");
 
   /** Where "Open" takes the owner once the shop is live: their domain, or the shop's own address. */
-  const liveUrl =
-    addressMode === "own" && domainLive && domain ? storefrontUrlFor(domain.hostname) : storeUrl;
+  const liveUrl = usingOwnDomain && domain ? storefrontUrlFor(domain.hostname) : storeUrl;
 
   return {
     ready,
@@ -669,6 +671,7 @@ export function useSetup() {
     domainError,
     domainCheck,
     domainLive,
+    usingOwnDomain,
     connectOwnDomain,
     checkOwnDomain,
     pickAnotherDomain,

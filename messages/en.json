@@ -1890,7 +1890,7 @@
       "checkAgainIn": "Check again in {seconds}s",
       "useAnotherDomain": "Use a different domain",
       "domainFailed": "We couldn't connect that domain. Check it and try again.",
-      "skipAddress": "Skip for now. I'll do it in Settings.",
+      "skipAddress": "Connect my domain later, in Settings",
       "lookTitle": "Pick a look",
       "lookBody": "Six ready palettes. Change any part later in the theme editor.",
       "suggested": "Suggested",
@@ -1935,7 +1935,9 @@
         "tiktok": "TikTok",
         "in_person": "A shop in person",
         "starting": "Just starting"
-      }
+      },
+      "ownDomainLater": "Want your own domain, like {example}? <link>Connect it any time in Settings</link>.",
+      "ownDomainPending": "{domain} isn't connected yet, so your free address is the one that's live. <link>Finish it in Settings</link>."
     },
     "verifyEmail": {
       "verifying": "Verifying your email…",

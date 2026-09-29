@@ -373,13 +373,21 @@ export function AddressStep({ setup, className }: { setup: SetupState; className
           </Option>
         ) : null}
       </div>
-      <button
-        type="button"
-        onClick={() => setup.go("look")}
-        className="text-[13px] text-muted-foreground underline decoration-border underline-offset-4 hover:text-foreground"
-      >
-        {t("skipAddress")}
-      </button>
+      {/* Only for a domain the owner has (owner, 2026-09-29): "skip" under both read as having no
+          address at all, when the free one is live whatever is picked here. Later means the free
+          address now. */}
+      {DOMAINS_ENABLED && setup.addressMode === "own" && !setup.domainLive ? (
+        <button
+          type="button"
+          onClick={() => {
+            setup.setAddressMode("free");
+            setup.go("look");
+          }}
+          className="text-[13px] text-muted-foreground underline decoration-border underline-offset-4 hover:text-foreground"
+        >
+          {t("skipAddress")}
+        </button>
+      ) : null}
     </div>
   );
 }

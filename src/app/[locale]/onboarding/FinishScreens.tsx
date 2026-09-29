@@ -2,7 +2,7 @@
 
 import { ArrowRight, Check, Copy, ExternalLink, Link2 } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
+import { useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react";
 
 import { AuthLanguageSwitch } from "@/components/auth/AuthLanguageSwitch";
 import { AuthHeading, PaperbaseWordmark } from "@/components/auth/AuthParts";
@@ -15,7 +15,7 @@ import { cn } from "@/lib/utils";
 
 import { LiveShop } from "./LiveShop";
 import { PreviewPanel, SETUP_COLUMNS, SetupPreview } from "./SetupShell";
-import type { SetupState } from "./useSetup";
+import { DOMAINS_ENABLED, type SetupState } from "./useSetup";
 
 /** Copies `url`, and says so for a moment. */
 function useCopy(url: string) {
@@ -111,6 +111,29 @@ function ShareBar({
         {copied ? t("copied") : t("copyLink")}
       </button>
     </div>
+  );
+}
+
+/**
+ * Under the live link while the shop is on its free address (owner, 2026-09-29): a domain of the
+ * owner's own comes later, in Settings > Domains -- or, when one was started, is still to finish.
+ */
+function OwnDomainLater({ setup }: { setup: SetupState }) {
+  const t = useTranslations("auth.onboarding");
+  const started = setup.domain?.hostname;
+  const example = `${(setup.storeHostname || "yourshop").split(".")[0]}.com`;
+  const link = (chunks: ReactNode) => (
+    <Link
+      href="/settings?tab=domains"
+      className="font-medium text-foreground underline decoration-border underline-offset-4 transition-colors hover:decoration-foreground"
+    >
+      {chunks}
+    </Link>
+  );
+  return (
+    <p className="-mt-2 text-[13px] leading-relaxed text-muted-foreground">
+      {started ? t.rich("ownDomainPending", { domain: started, link }) : t.rich("ownDomainLater", { example, link })}
+    </p>
   );
 }
 
@@ -318,6 +341,7 @@ export function FinishScreen({ setup }: { setup: SetupState }) {
                 </a>
               </div>
             ) : null}
+            {DOMAINS_ENABLED && url && !setup.usingOwnDomain ? <OwnDomainLater setup={setup} /> : null}
             {setup.guide ? <SetupGuideCard guide={setup.guide} /> : null}
             <Button asChild className="h-11 w-full">
               <Link href="/">
