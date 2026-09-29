@@ -25,6 +25,7 @@ import {
 } from "@/lib/domains/api";
 import { normalizeBdMobile } from "@/lib/bd-mobile";
 import { isNetworkError } from "@/lib/network-error";
+import { readSellsOn, sameSellsOn, toggleSellsOn, type SellsOn } from "@/lib/sells-on";
 import { fetchSetupGuide, type SetupGuide } from "@/lib/setup-guide";
 import { accountsFromApi } from "@/lib/storeSocialLinks";
 import { fetchMeForRouting, invalidateMeRoutingCache, setupUnfinished } from "@/lib/subscription-access";
@@ -90,6 +91,7 @@ export type FinishTick = "contact" | "address" | "dashboard";
 /** What setup has saved, as GET store/setup/ reads it from the shop. */
 type SetupAnswers = {
   kind: string;
+  sells_on: unknown;
   name: string;
   palette: string | null;
   phone: string;
@@ -111,6 +113,7 @@ function stepFrom(value: string | null): SetupStep | null {
 type Draft = {
   user: string;
   kind?: ShopKind | null;
+  sellsOn?: SellsOn[];
   shopName?: string;
   ownerFirst?: string;
   ownerLast?: string;
@@ -193,6 +196,9 @@ export function useSetup() {
   const [askOwnerName, setAskOwnerName] = useState(false);
 
   const [kind, setKind] = useState<ShopKind | null>(null);
+  // "Where do you sell now?": optional, any places or "just starting" (lib/sells-on).
+  const [sellsOn, setSellsOn] = useState<SellsOn[]>([]);
+  const [savedSellsOn, setSavedSellsOn] = useState<SellsOn[]>([]);
   const [shopName, setShopName] = useState("");
   const [nameCheck, setNameCheck] = useState<NameCheck>({ state: "idle" });
 
@@ -256,6 +262,8 @@ export function useSetup() {
           setStoreId(me.store.public_id);
           setKind(madeAs);
           setSavedKind(madeAs);
+          setSellsOn(readSellsOn(saved.sells_on));
+          setSavedSellsOn(readSellsOn(saved.sells_on));
           setShopName(saved.name);
           setSavedName(saved.name);
           setPalette(saved.palette);
@@ -283,6 +291,7 @@ export function useSetup() {
           const draft = readDraft(me.public_id ?? "");
           if (draft) {
             setKind(draft.kind ?? null);
+            setSellsOn(readSellsOn(draft.sellsOn));
             setShopName(draft.shopName ?? "");
             if (draft.ownerFirst) setOwnerFirst(draft.ownerFirst);
             if (draft.ownerLast) setOwnerLast(draft.ownerLast);
@@ -350,8 +359,8 @@ export function useSetup() {
   // What is answered before the shop exists, kept in this tab until the name step makes it (Draft).
   useEffect(() => {
     if (!ready || !user || storeId) return;
-    writeDraft({ user, kind, shopName, ownerFirst, ownerLast });
-  }, [ready, user, storeId, kind, shopName, ownerFirst, ownerLast]);
+    writeDraft({ user, kind, sellsOn, shopName, ownerFirst, ownerLast });
+  }, [ready, user, storeId, kind, sellsOn, shopName, ownerFirst, ownerLast]);
 
   // ---- a domain made on an earlier visit comes back with its records --------------------------
   useEffect(() => {
@@ -412,11 +421,19 @@ export function useSetup() {
       return;
     }
     setStepError(null);
-    if (storeId && kind !== savedKind) {
+    const kindChanged = kind !== savedKind;
+    const sellsOnChanged = !sameSellsOn(sellsOn, savedSellsOn);
+    if (storeId && (kindChanged || sellsOnChanged)) {
       setBusy(true);
       try {
-        await saveBranding({ store_type: STORE_TYPE_BY_KIND[kind] });
-        setSavedKind(kind);
+        if (kindChanged) {
+          await saveBranding({ store_type: STORE_TYPE_BY_KIND[kind] });
+          setSavedKind(kind);
+        }
+        if (sellsOnChanged) {
+          await api.post("store/setup/sells-on/", { sells_on: sellsOn });
+          setSavedSellsOn(sellsOn);
+        }
       } catch (err) {
         fail(err);
         return;
@@ -467,6 +484,7 @@ export function useSetup() {
     const { data } = await api.post<CreatedStore>("store/", {
       name,
       store_type: STORE_TYPE_BY_KIND[kind ?? "other"],
+      sells_on: sellsOn,
       ...(askOwnerName ? { owner_first_name: ownerFirst.trim(), owner_last_name: ownerLast.trim() } : {}),
       modules_enabled,
     });
@@ -479,6 +497,7 @@ export function useSetup() {
     setStoreId(data.public_id);
     setSavedName(name);
     setSavedKind(kind);
+    setSavedSellsOn(sellsOn);
     writeDraft(null); // the shop is the record now
     setStoreHostname(hostnameOf(data.storefront_url));
     setStoreUrl(data.storefront_url ?? "");
@@ -621,6 +640,8 @@ export function useSetup() {
       setKind(next);
       setStepError(null);
     },
+    sellsOn,
+    toggleSellsOn: (key: SellsOn) => setSellsOn((current) => toggleSellsOn(current, key)),
     continueFromSell,
     // name
     shopName,

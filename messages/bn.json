@@ -1780,7 +1780,15 @@
       "delivery": "ডেলিভারি চার্জ ঠিক করুন",
       "deliveryBody": "এলাকা অনুযায়ী ক্রেতারা ডেলিভারির জন্য কত দেবেন।",
       "courier": "কুরিয়ার যুক্ত করুন",
-      "courierBody": "এক ট্যাপে Steadfast-এ পার্সেল পাঠান।"
+      "courierBody": "এক ট্যাপে Steadfast-এ পার্সেল পাঠান।",
+      "facebook_pixel": "Facebook Pixel যুক্ত করুন",
+      "facebook_pixelBody": "কোন Facebook বিজ্ঞাপন থেকে অর্ডার আসে দেখুন।",
+      "instagram": "Instagram যুক্ত করুন",
+      "instagramBody": "ক্রেতারা আপনার দোকান থেকেই আপনাকে ফলো করবেন।",
+      "tiktok_pixel": "TikTok Pixel যুক্ত করুন",
+      "tiktok_pixelBody": "কোন TikTok বিজ্ঞাপন থেকে অর্ডার আসে দেখুন।",
+      "address": "দোকানের ঠিকানা দিন",
+      "addressBody": "ক্রেতারা দেখবেন আপনাকে কোথায় পাবেন।"
     }
   },
   "auth": {
@@ -1918,7 +1926,16 @@
       "shareOnWhatsApp": "হোয়াটসঅ্যাপে শেয়ার করুন",
       "shareOnFacebook": "ফেসবুকে শেয়ার করুন",
       "copyLink": "লিংক কপি করুন",
-      "shareText": "আমার নতুন দোকান ঘুরে দেখুন: {url}"
+      "shareText": "আমার নতুন দোকান ঘুরে দেখুন: {url}",
+      "sellsOnTitle": "এখন কোথায় বিক্রি করেন?",
+      "sellsOnHint": "যতগুলো মেলে, বা বাদ দিন",
+      "sellsOn": {
+        "facebook": "Facebook পেজ",
+        "instagram": "Instagram",
+        "tiktok": "TikTok",
+        "in_person": "সরাসরি দোকানে",
+        "starting": "সবে শুরু করছি"
+      }
     },
     "verifyEmail": {
       "verifying": "ইমেইল যাচাই হচ্ছে…",

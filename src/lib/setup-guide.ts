@@ -5,7 +5,17 @@ import api from "@/lib/api";
  * read from the shop by the API (`engine/apps/stores/setup.py`), never ticked here.
  */
 
-export const SETUP_GUIDE_STEPS = ["shop", "product", "delivery", "courier"] as const;
+export const SETUP_GUIDE_STEPS = [
+  "shop",
+  "product",
+  "delivery",
+  "courier",
+  // Added by setup's "Where do you sell now?" (stores.setup.CHANNEL_STEPS), one for each place.
+  "facebook_pixel",
+  "instagram",
+  "tiktok_pixel",
+  "address",
+] as const;
 
 export type SetupGuideStepKey = (typeof SETUP_GUIDE_STEPS)[number];
 
@@ -20,6 +30,10 @@ export const SETUP_GUIDE_HREF: Record<Exclude<SetupGuideStepKey, "shop">, string
   product: "/products/new",
   delivery: "/shipping",
   courier: "/settings?tab=integrations",
+  facebook_pixel: "/settings?tab=integrations",
+  instagram: "/settings?tab=store",
+  tiktok_pixel: "/settings?tab=integrations",
+  address: "/settings?tab=store",
 };
 
 export async function fetchSetupGuide(): Promise<SetupGuide> {

@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, CircleCheck, Cloud, Copy, Globe, Lock, RefreshCw } from "lucide-react";
+import { Check, CircleCheck, Cloud, Copy, Globe, Lock, RefreshCw, Sprout, Store } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useState, type ReactNode } from "react";
 
@@ -9,6 +9,7 @@ import { SocialMark } from "@/components/SocialMark";
 import { KIND_ICONS, SHOP_KINDS, SUGGESTED_PALETTE, heroPhoto } from "@/components/shop-preview/samples";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { SELLS_ON, type SellsOn } from "@/lib/sells-on";
 import { paletteName } from "@/lib/theme-editor/palettes";
 import { cn } from "@/lib/utils";
 
@@ -103,7 +104,55 @@ export function SellStep({ setup, className }: { setup: SetupState; className?: 
         })}
       </div>
       {setup.stepError === "sell" ? <FieldError>{t("sellRequired")}</FieldError> : null}
+      <SellsOnQuestion setup={setup} />
     </div>
+  );
+}
+
+const SELLS_ON_MARKS: Record<SellsOn, ReactNode> = {
+  facebook: <SocialMark platform="facebook" className="size-4" />,
+  instagram: <SocialMark platform="instagram" className="size-4" />,
+  tiktok: <SocialMark platform="tiktok" className="size-4" />,
+  in_person: <Store className="size-4" strokeWidth={1.75} aria-hidden />,
+  starting: <Sprout className="size-4" strokeWidth={1.75} aria-hidden />,
+};
+
+/**
+ * "Where do you sell now?" under what it sells (owner, 2026-09-29): any places, or just starting.
+ * Optional; each place adds its own step to the setup guide.
+ */
+function SellsOnQuestion({ setup }: { setup: SetupState }) {
+  const t = useTranslations("auth.onboarding");
+  return (
+    <fieldset>
+      <legend className="field-label flex w-full items-baseline justify-between gap-3">
+        {t("sellsOnTitle")}
+        <span className="text-xs font-normal text-muted-foreground">{t("sellsOnHint")}</span>
+      </legend>
+      <div className="mt-3 flex flex-wrap gap-2">
+        {SELLS_ON.map((key) => {
+          const on = setup.sellsOn.includes(key);
+          return (
+            <button
+              key={key}
+              type="button"
+              role="checkbox"
+              aria-checked={on}
+              onClick={() => setup.toggleSellsOn(key)}
+              className={cn(
+                "flex h-9 items-center gap-1.5 rounded-full border px-3 text-[13px] font-medium transition-[border-color,background-color,color] duration-150",
+                on
+                  ? "border-foreground bg-foreground text-background"
+                  : "border-border-subtle bg-card text-foreground/80 hover:border-border-hover hover:text-foreground"
+              )}
+            >
+              {SELLS_ON_MARKS[key]}
+              {t(`sellsOn.${key}`)}
+            </button>
+          );
+        })}
+      </div>
+    </fieldset>
   );
 }
 

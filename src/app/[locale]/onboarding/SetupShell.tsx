@@ -220,7 +220,8 @@ export function SetupShell({
         </header>
 
         <div className="flex flex-1 flex-col px-5 pt-9 sm:px-12 sm:pt-12 lg:px-10 lg:pt-14 xl:px-14">
-          <div className="flex-1">{children}</div>
+          {/* On a phone, room at the end for the floating "Preview your shop", so no answer ends under it. */}
+          <div className="flex-1 pb-12 lg:pb-0">{children}</div>
           <div className="sticky bottom-0 -mx-5 mt-8 flex items-center gap-3 bg-gradient-to-b from-transparent to-background to-25% px-5 pb-5 pt-6 sm:-mx-12 sm:px-12 lg:static lg:mx-0 lg:bg-none lg:px-0 lg:pb-10">
             <AuthLanguageSwitch className="hidden xl:flex" />
             {/* Back on the left and the next step on the right; the first step's button alone keeps right. */}

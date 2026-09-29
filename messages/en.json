@@ -1780,7 +1780,15 @@
       "delivery": "Set delivery charges",
       "deliveryBody": "What shoppers pay for delivery, by area.",
       "courier": "Connect a courier",
-      "courierBody": "Send parcels to Steadfast in one tap."
+      "courierBody": "Send parcels to Steadfast in one tap.",
+      "facebook_pixel": "Add your Facebook Pixel",
+      "facebook_pixelBody": "See which Facebook ads bring you orders.",
+      "instagram": "Link your Instagram",
+      "instagramBody": "Shoppers follow you from your shop.",
+      "tiktok_pixel": "Add your TikTok Pixel",
+      "tiktok_pixelBody": "See which TikTok ads bring you orders.",
+      "address": "Add your shop's address",
+      "addressBody": "Shoppers see where to find you."
     }
   },
   "auth": {
@@ -1918,7 +1926,16 @@
       "shareOnWhatsApp": "Share on WhatsApp",
       "shareOnFacebook": "Share on Facebook",
       "copyLink": "Copy link",
-      "shareText": "Visit my new shop: {url}"
+      "shareText": "Visit my new shop: {url}",
+      "sellsOnTitle": "Where do you sell now?",
+      "sellsOnHint": "Pick any, or skip",
+      "sellsOn": {
+        "facebook": "Facebook page",
+        "instagram": "Instagram",
+        "tiktok": "TikTok",
+        "in_person": "A shop in person",
+        "starting": "Just starting"
+      }
     },
     "verifyEmail": {
       "verifying": "Verifying your email…",
