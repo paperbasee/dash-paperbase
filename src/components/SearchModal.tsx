@@ -10,6 +10,10 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
+import { useCanShowApp } from "@/hooks/useCanShowApp";
+import { usePermissions } from "@/context/PermissionsContext";
+import { useVisibleSettingsSections } from "@/app/[locale]/(dashboard)/settings/useVisibleSettingsSections";
+import { findPlaces, placeLabel, visiblePlaces, type SearchPlace } from "@/lib/search/places";
 import api from "@/lib/api";
 
 interface SearchModalProps {
@@ -37,11 +41,38 @@ const EMPTY_RESULTS: SearchResponse = {
   tickets: [],
 };
 
+/** Pages, settings and actions shown at most, above what the server finds. */
+const PLACES_SHOWN = 6;
+const ACTIONS_SHOWN = 3;
+
+/** The dashboard's own places this person may open (lib/search/places.ts), found as they type. */
+function usePlaceMatches(query: string): { places: SearchPlace[]; actions: SearchPlace[]; labelOf: (p: SearchPlace) => string } {
+  const t = useTranslations();
+  const canShowApp = useCanShowApp();
+  const { has } = usePermissions();
+  const sections = useVisibleSettingsSections();
+  const visible = useMemo(
+    () => visiblePlaces({ canShowApp, has, settingsSections: new Set(sections.map((row) => row.id)) }),
+    [canShowApp, has, sections],
+  );
+  const labelOf = useMemo(() => (place: SearchPlace) => placeLabel(place, (key) => t(key)), [t]);
+  return useMemo(
+    () => ({
+      places: findPlaces(query, visible.filter((p) => p.group === "places"), labelOf, PLACES_SHOWN),
+      actions: findPlaces(query, visible.filter((p) => p.group === "actions"), labelOf, ACTIONS_SHOWN),
+      labelOf,
+    }),
+    [query, visible, labelOf],
+  );
+}
+
 export function SearchModal({ open, onOpenChange }: SearchModalProps) {
   const tCommon = useTranslations("common");
   const tSidebar = useTranslations("sidebar");
-  const navigate = useDeferredNavigate();
   const [query, setQuery] = useState("");
+  const placeMatches = usePlaceMatches(query);
+  const hasPlaces = placeMatches.places.length > 0 || placeMatches.actions.length > 0;
+  const navigate = useDeferredNavigate();
   const debouncedQuery = useDebouncedValue(query, 300);
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState<SearchResponse>(EMPTY_RESULTS);
@@ -182,109 +213,151 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
               <div className="flex min-h-[220px] items-center justify-center text-sm text-muted-foreground">
                 {tSidebar("searchStartHint")}
               </div>
-            ) : loading ? (
-              <div className="flex min-h-[220px] items-center justify-center gap-2 text-sm text-muted-foreground">
-                <Loader2 className="size-4 animate-spin" />
-                {tCommon("loading")}
-              </div>
-            ) : error ? (
-              <div className="flex min-h-[220px] items-center justify-center text-sm text-destructive">
-                {error}
-              </div>
-            ) : !hasAnyResults ? (
-              <div className="flex min-h-[220px] items-center justify-center text-sm text-muted-foreground">
-                {tSidebar("searchNoResults")}
-              </div>
             ) : (
               <div className="space-y-4 pb-2">
-                {results.products.length > 0 && (
-                  <div>
-                    <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                      {tSidebar("searchProducts")}
-                    </p>
-                    <div className="space-y-1">
-                      {results.products.map((item) => (
-                        <button
-                          key={item.public_id}
-                          type="button"
-                          onClick={() => goTo(`/products/${item.public_id}`)}
-                          className="w-full rounded-xs border border-transparent px-3 py-2 text-left transition hover:border-border hover:bg-muted/50"
-                        >
-                          <p className="truncate text-sm font-medium text-foreground">{item.title}</p>
-                          {item.subtitle ? (
-                            <p className="truncate text-xs text-muted-foreground">{item.subtitle}</p>
-                          ) : null}
-                        </button>
-                      ))}
+                {(
+                  [
+                    ["searchPlaces", placeMatches.places],
+                    ["searchActions", placeMatches.actions],
+                  ] as const
+                ).map(([titleKey, matches]) =>
+                  matches.length > 0 ? (
+                    <div key={titleKey}>
+                      <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                        {tSidebar(titleKey)}
+                      </p>
+                      <div className="space-y-1">
+                        {matches.map((place) => (
+                          <button
+                            key={place.id}
+                            type="button"
+                            onClick={() => goTo(place.href)}
+                            className="w-full rounded-xs border border-transparent px-3 py-2 text-left transition hover:border-border hover:bg-muted/50"
+                          >
+                            <p className="truncate text-sm font-medium text-foreground">{placeMatches.labelOf(place)}</p>
+                          </button>
+                        ))}
+                      </div>
                     </div>
-                  </div>
+                  ) : null
                 )}
-                {results.orders.length > 0 && (
-                  <div>
-                    <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                      {tSidebar("searchOrders")}
-                    </p>
-                    <div className="space-y-1">
-                      {results.orders.map((item) => (
-                        <button
-                          key={item.public_id}
-                          type="button"
-                          onClick={() => goTo(`/orders/${item.public_id}`)}
-                          className="w-full rounded-xs border border-transparent px-3 py-2 text-left transition hover:border-border hover:bg-muted/50"
-                        >
-                          <p className="truncate text-sm font-medium text-foreground">{item.title}</p>
-                          {item.subtitle ? (
-                            <p className="truncate text-xs text-muted-foreground">{item.subtitle}</p>
-                          ) : null}
-                        </button>
-                      ))}
-                    </div>
+                {loading ? (
+                  <div
+                    className={cn(
+                      "flex items-center justify-center gap-2 text-sm text-muted-foreground",
+                      hasPlaces ? "py-4" : "min-h-[220px]"
+                    )}
+                  >
+                    <Loader2 className="size-4 animate-spin" />
+                    {tCommon("loading")}
                   </div>
-                )}
-                {results.customers.length > 0 && (
-                  <div>
-                    <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                      {tSidebar("searchCustomers")}
-                    </p>
-                    <div className="space-y-1">
-                      {results.customers.map((item) => (
-                        <button
-                          key={item.public_id}
-                          type="button"
-                          onClick={() => goTo(`/customers/${item.public_id}`)}
-                          className="w-full rounded-xs border border-transparent px-3 py-2 text-left transition hover:border-border hover:bg-muted/50"
-                        >
-                          <p className="truncate text-sm font-medium text-foreground">{item.title}</p>
-                          {item.subtitle ? (
-                            <p className="truncate text-xs text-muted-foreground">{item.subtitle}</p>
-                          ) : null}
-                        </button>
-                      ))}
-                    </div>
+                ) : error ? (
+                  <div
+                    className={cn(
+                      "flex items-center justify-center text-sm text-destructive",
+                      hasPlaces ? "py-4" : "min-h-[220px]"
+                    )}
+                  >
+                    {error}
                   </div>
-                )}
-                {results.tickets.length > 0 && (
-                  <div>
-                    <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                      {tSidebar("searchTickets")}
-                    </p>
-                    <div className="space-y-1">
-                      {results.tickets.map((item) => (
-                        <button
-                          key={item.public_id}
-                          type="button"
-                          onClick={() => goTo(`/support-tickets/${item.public_id}`)}
-                          className="w-full rounded-xs border border-transparent px-3 py-2 text-left transition hover:border-border hover:bg-muted/50"
-                        >
-                          <p className="truncate text-sm font-medium text-foreground">{item.title}</p>
-                          {item.subtitle ? (
-                            <p className="truncate text-xs text-muted-foreground">{item.subtitle}</p>
-                          ) : null}
-                        </button>
-                      ))}
-                    </div>
+                ) : !hasAnyResults && !hasPlaces ? (
+                  <div className="flex min-h-[220px] items-center justify-center text-sm text-muted-foreground">
+                    {tSidebar("searchNoResults")}
                   </div>
-                )}
+                ) : null}
+                {/* What the server found -- not while it is still looking, nor after it failed. */}
+                {!loading && !error ? (
+                  <>
+                    {results.products.length > 0 && (
+                      <div>
+                        <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                          {tSidebar("searchProducts")}
+                        </p>
+                        <div className="space-y-1">
+                          {results.products.map((item) => (
+                            <button
+                              key={item.public_id}
+                              type="button"
+                              onClick={() => goTo(`/products/${item.public_id}`)}
+                              className="w-full rounded-xs border border-transparent px-3 py-2 text-left transition hover:border-border hover:bg-muted/50"
+                            >
+                              <p className="truncate text-sm font-medium text-foreground">{item.title}</p>
+                              {item.subtitle ? (
+                                <p className="truncate text-xs text-muted-foreground">{item.subtitle}</p>
+                              ) : null}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    {results.orders.length > 0 && (
+                      <div>
+                        <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                          {tSidebar("searchOrders")}
+                        </p>
+                        <div className="space-y-1">
+                          {results.orders.map((item) => (
+                            <button
+                              key={item.public_id}
+                              type="button"
+                              onClick={() => goTo(`/orders/${item.public_id}`)}
+                              className="w-full rounded-xs border border-transparent px-3 py-2 text-left transition hover:border-border hover:bg-muted/50"
+                            >
+                              <p className="truncate text-sm font-medium text-foreground">{item.title}</p>
+                              {item.subtitle ? (
+                                <p className="truncate text-xs text-muted-foreground">{item.subtitle}</p>
+                              ) : null}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    {results.customers.length > 0 && (
+                      <div>
+                        <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                          {tSidebar("searchCustomers")}
+                        </p>
+                        <div className="space-y-1">
+                          {results.customers.map((item) => (
+                            <button
+                              key={item.public_id}
+                              type="button"
+                              onClick={() => goTo(`/customers/${item.public_id}`)}
+                              className="w-full rounded-xs border border-transparent px-3 py-2 text-left transition hover:border-border hover:bg-muted/50"
+                            >
+                              <p className="truncate text-sm font-medium text-foreground">{item.title}</p>
+                              {item.subtitle ? (
+                                <p className="truncate text-xs text-muted-foreground">{item.subtitle}</p>
+                              ) : null}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    {results.tickets.length > 0 && (
+                      <div>
+                        <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                          {tSidebar("searchTickets")}
+                        </p>
+                        <div className="space-y-1">
+                          {results.tickets.map((item) => (
+                            <button
+                              key={item.public_id}
+                              type="button"
+                              onClick={() => goTo(`/support-tickets/${item.public_id}`)}
+                              className="w-full rounded-xs border border-transparent px-3 py-2 text-left transition hover:border-border hover:bg-muted/50"
+                            >
+                              <p className="truncate text-sm font-medium text-foreground">{item.title}</p>
+                              {item.subtitle ? (
+                                <p className="truncate text-xs text-muted-foreground">{item.subtitle}</p>
+                              ) : null}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </>
+                ) : null}
               </div>
             )}
           </div>

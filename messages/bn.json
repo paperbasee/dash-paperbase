@@ -1631,7 +1631,7 @@
     "searchTickets": "টিকিট",
     "searchNoResults": "কোনো ফলাফল পাওয়া যায়নি।",
     "searchLoadError": "সার্চ ফলাফল লোড করা যায়নি।",
-    "searchStartHint": "পণ্য, অর্ডার, গ্রাহক ও টিকিট খুঁজতে টাইপ করুন।",
+    "searchStartHint": "পেজ, সেটিংস, পণ্য, অর্ডার, গ্রাহক ও টিকিট খুঁজতে টাইপ করুন।",
     "userMenu": "ব্যবহারকারী মেনু",
     "setInSettings": "সেটিংসে সেট করুন",
     "stores": "স্টোর",
@@ -1648,7 +1648,11 @@
     "dark": "ডার্ক",
     "system": "সিস্টেম",
     "logOut": "লগ আউট",
-    "twoFaSwitchPrompt": "স্টোর বদলাতে আপনার ২এফএ কোড লিখুন:"
+    "twoFaSwitchPrompt": "স্টোর বদলাতে আপনার ২এফএ কোড লিখুন:",
+    "searchPlaces": "পেজ ও সেটিংস",
+    "searchActions": "কাজ",
+    "searchThemeEditor": "থিম এডিটর",
+    "searchActionEditDesign": "দোকানের ডিজাইন বদলান"
   },
   "whatsNew": {
     "menuLabel": "নতুন কী আছে",
