@@ -88,6 +88,20 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-09-29-sign-up-shows-the-free-trial",
+    date: "2026-09-29",
+    version: "4.138.0",
+    tag: "improved",
+    title: {
+      en: "Sign up shows the free trial up front",
+      bn: "অ্যাকাউন্ট খোলার পাতায় ফ্রি ট্রায়াল",
+    },
+    body: {
+      en: "Right under Create account, new shop owners now see how many days their free trial lasts, and that nothing is paid to start.",
+      bn: "\"অ্যাকাউন্ট খুলুন\"-এর ঠিক নিচে নতুন দোকান মালিকেরা এখন দেখেন ফ্রি ট্রায়াল কত দিনের, আর শুরু করতে কোনো পেমেন্ট লাগে না।",
+    },
+  },
+  {
     id: "2026-09-29-sign-in-catches-a-mistyped-email",
     date: "2026-09-29",
     version: "4.137.0",
@@ -497,21 +511,6 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     body: {
       en: "A shopper who chose Inside Dhaka and then switched to Outside Dhaka was charged nothing for delivery. Checkout now always charges the price you set for the area they chose.",
       bn: "যে ক্রেতা প্রথমে ঢাকার ভেতর বেছে নিয়ে পরে ঢাকার বাইরে বদলাতেন, তাঁর কাছ থেকে কোনো ডেলিভারি চার্জ নেওয়া হতো না। এখন চেকআউট সবসময় ক্রেতার বেছে নেওয়া এলাকার জন্য আপনার ঠিক করা চার্জই নেয়।",
-    },
-  },
-  {
-    id: "2026-09-27-a-default-delivery-area",
-    date: "2026-09-27",
-    version: "4.119.4",
-    tag: "new",
-    href: "/settings?tab=shipping",
-    title: {
-      en: "Pick a default delivery area",
-      bn: "একটি ডিফল্ট ডেলিভারি এলাকা বেছে নিন",
-    },
-    body: {
-      en: "In Settings, Shipping, mark one area as the default: checkout starts on it, so shoppers see the delivery charge at once and can still pick another. An area with no delivery price now says so there, and deleting an area your orders used now tells you why it is kept.",
-      bn: "সেটিংস > শিপিং-এ একটি এলাকাকে ডিফল্ট করুন: চেকআউট সেটি দিয়েই শুরু হবে, তাই ক্রেতারা সাথে সাথে ডেলিভারি চার্জ দেখবেন, চাইলে অন্য এলাকাও বেছে নিতে পারবেন। কোনো এলাকার ডেলিভারি চার্জ না থাকলে সেখানেই তা দেখানো হয়, আর আপনার অর্ডারে ব্যবহৃত কোনো এলাকা মুছতে গেলে কেন সেটি রাখা হলো তা জানানো হয়।",
     },
   },
   {
