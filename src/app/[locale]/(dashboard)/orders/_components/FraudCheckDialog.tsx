@@ -15,6 +15,7 @@ import {
 import { cn } from "@/lib/utils";
 
 import { CourierLogo, normalizeCourierKey } from "./CourierItem";
+import type { PhoneHistory } from "./types";
 
 type Summary = {
   total: number | null;
@@ -259,7 +260,36 @@ export type FraudCheckDialogProps = {
   loading: boolean;
   errorText?: string | null;
   warningText?: string | null;
+  /** How this number's parcels went in every shop on Paperbase; null before an answer. */
+  history?: PhoneHistory | null;
 };
+
+/**
+ * Paperbase's own history for the number: counts from every shop, never which shop.
+ * The courier rows above are that courier's word; this is what Paperbase itself saw.
+ */
+export function HistoryPanel({ history }: { history: PhoneHistory }) {
+  const t = useTranslations("fraudCheck");
+  const empty = history.delivered === 0 && history.returned === 0 && history.wrong_number_shops === 0;
+  return (
+    <div className="rounded-card border border-border bg-card px-3 py-2">
+      <div className="text-xs font-semibold text-foreground">{t("historyTitle")}</div>
+      <div className="text-xs text-muted-foreground">{t("historyHint")}</div>
+      {empty ? (
+        <div className="mt-2 text-sm text-muted-foreground">{t("historyEmpty")}</div>
+      ) : (
+        <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-3">
+          <Tile label={t("historyDelivered")} value={String(history.delivered)} tone="success" />
+          <Tile label={t("historyReturned")} value={String(history.returned)} tone="danger" />
+          <Tile
+            label={t("historyWrongNumber")}
+            value={t("historyShops", { count: history.wrong_number_shops })}
+          />
+        </div>
+      )}
+    </div>
+  );
+}
 
 export function FraudCheckDialog({
   open,
@@ -269,8 +299,10 @@ export function FraudCheckDialog({
   loading,
   errorText,
   warningText,
+  history,
 }: FraudCheckDialogProps) {
   const tCommon = useTranslations("common");
+  const t = useTranslations("fraudCheck");
   const summary = useMemo(() => parseSummary(response), [response]);
   const couriers = useMemo(() => parseCouriers(response), [response]);
 
@@ -289,10 +321,8 @@ export function FraudCheckDialog({
           {tCommon("close")}
         </DialogClose>
         <DialogHeader className="pr-14">
-          <DialogTitle>Fraud Check</DialogTitle>
-          <DialogDescription>
-            {phone ? `Phone: ${phone}` : "Phone: —"}
-          </DialogDescription>
+          <DialogTitle>{t("title")}</DialogTitle>
+          <DialogDescription>{t("phone", { phone: phone || "—" })}</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-3 p-3 sm:p-4">
@@ -318,21 +348,21 @@ export function FraudCheckDialog({
             <>
               <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
                 <Tile
-                  label="Total Parcels"
+                  label={t("totalParcels")}
                   value={summary.total === null ? "—" : String(summary.total)}
                 />
                 <Tile
-                  label="Success"
+                  label={t("success")}
                   value={summary.success === null ? "—" : String(summary.success)}
                   tone="success"
                 />
                 <Tile
-                  label="Cancelled"
+                  label={t("cancelled")}
                   value={summary.cancelled === null ? "—" : String(summary.cancelled)}
                   tone="danger"
                 />
                 <Tile
-                  label="Success Ratio"
+                  label={t("successRatio")}
                   value={
                     summary.successRatioPct === null
                       ? "—"
@@ -345,17 +375,17 @@ export function FraudCheckDialog({
                 <div className="overflow-x-auto md:overflow-x-hidden">
                   <div className="min-w-[680px] md:min-w-0">
                     <div className="grid grid-cols-12 gap-0 border-b border-border bg-muted/40 px-2 py-1 text-[11px] font-semibold text-muted-foreground">
-                      <div className="col-span-2">Logo</div>
-                      <div className="col-span-3">Courier</div>
-                      <div className="col-span-2">Total</div>
-                      <div className="col-span-2">Success</div>
-                      <div className="col-span-2">Cancelled</div>
-                      <div className="col-span-1 text-left">Ratio</div>
+                      <div className="col-span-2">{t("colLogo")}</div>
+                      <div className="col-span-3">{t("colCourier")}</div>
+                      <div className="col-span-2">{t("colTotal")}</div>
+                      <div className="col-span-2">{t("colSuccess")}</div>
+                      <div className="col-span-2">{t("colCancelled")}</div>
+                      <div className="col-span-1 text-left">{t("colRatio")}</div>
                     </div>
 
                     {couriers.length === 0 ? (
                       <div className="px-4 py-6 text-sm text-muted-foreground">
-                        No courier breakdown available.
+                        {t("noCouriers")}
                       </div>
                     ) : (
                       <div className="divide-y divide-border">
@@ -407,6 +437,8 @@ export function FraudCheckDialog({
                   </div>
                 </div>
               </div>
+
+              {history ? <HistoryPanel history={history} /> : null}
             </>
           )}
         </div>

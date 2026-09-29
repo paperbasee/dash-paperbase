@@ -3955,5 +3955,27 @@
     "minutesLeft": "আর {count} মিনিট",
     "end": "সেশন শেষ করুন",
     "readOnly": "সাপোর্ট মোডে শুধু দেখা যাবে: এটি দোকানের মালিকের।"
+  },
+  "fraudCheck": {
+    "title": "ফ্রড চেক",
+    "phone": "ফোন: {phone}",
+    "totalParcels": "মোট পার্সেল",
+    "success": "সফল",
+    "cancelled": "বাতিল",
+    "successRatio": "সফলতার হার",
+    "colLogo": "লোগো",
+    "colCourier": "কুরিয়ার",
+    "colTotal": "মোট",
+    "colSuccess": "সফল",
+    "colCancelled": "বাতিল",
+    "colRatio": "হার",
+    "noCouriers": "কুরিয়ারভিত্তিক হিসাব পাওয়া যায়নি।",
+    "historyTitle": "Paperbase-এর হিসাব",
+    "historyHint": "Paperbase-এর সব দোকানে এই নম্বরের পার্সেলগুলোর কী হয়েছে।",
+    "historyDelivered": "ডেলিভার হয়েছে",
+    "historyReturned": "ফেরত এসেছে",
+    "historyWrongNumber": "ভুল নম্বর বলেছে",
+    "historyShops": "{count}টি দোকান",
+    "historyEmpty": "Paperbase-এ এই নম্বরে এখনো কোনো পার্সেল যায়নি।"
   }
 }

@@ -3955,5 +3955,27 @@
     "minutesLeft": "{count, plural, one {# min left} other {# min left}}",
     "end": "End session",
     "readOnly": "Read-only in support mode: this belongs to the shop's owner."
+  },
+  "fraudCheck": {
+    "title": "Fraud Check",
+    "phone": "Phone: {phone}",
+    "totalParcels": "Total Parcels",
+    "success": "Success",
+    "cancelled": "Cancelled",
+    "successRatio": "Success Ratio",
+    "colLogo": "Logo",
+    "colCourier": "Courier",
+    "colTotal": "Total",
+    "colSuccess": "Success",
+    "colCancelled": "Cancelled",
+    "colRatio": "Ratio",
+    "noCouriers": "No courier breakdown available.",
+    "historyTitle": "Paperbase history",
+    "historyHint": "How this number's parcels went in every shop on Paperbase.",
+    "historyDelivered": "Delivered",
+    "historyReturned": "Returned",
+    "historyWrongNumber": "Marked wrong number",
+    "historyShops": "{count, plural, one {# shop} other {# shops}}",
+    "historyEmpty": "No parcels to this number on Paperbase yet."
   }
 }

@@ -1610,6 +1610,12 @@ export default function OrdersPage() {
                     ?.response ?? null
                 : null
             }
+            history={
+              fraudDialogOrderId && fraudByOrderId[fraudDialogOrderId]?.kind === "ready"
+                ? (fraudByOrderId[fraudDialogOrderId] as { kind: "ready"; data: FraudCheckApiOk }).data
+                    ?.history ?? null
+                : null
+            }
             warningText={
               fraudDialogOrderId &&
               fraudByOrderId[fraudDialogOrderId]?.kind === "ready" &&
