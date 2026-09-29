@@ -237,7 +237,8 @@ export async function deletePasskey(publicId: string): Promise<void> {
 // Session
 // ---------------------------------------------------------------------------
 
-export function logout() {
+/** Everything this browser holds for the account signed in: its data, profile, edits and tokens. */
+function forgetThisSignIn() {
   if (typeof window !== "undefined") {
     void (async () => {
       const { queryClient } = await import("@/components/QueryProvider");
@@ -246,7 +247,6 @@ export function logout() {
       await idbPersister.removeClient();
     })();
   }
-  window.location.replace("/login");
   clearMeProfileCache();
   // Theme edits kept on this device belong to the member signing out.
   clearAllUnsentCopies(localStorage);
@@ -254,6 +254,37 @@ export function logout() {
   localStorage.removeItem("refresh_token");
   localStorage.removeItem(LAST_ROTATED_AT_KEY);
   clearAuthSessionCookie();
+}
+
+export function logout() {
+  window.location.replace("/login");
+  forgetThisSignIn();
+}
+
+// ---------------------------------------------------------------------------
+// Paperbase support inside a shop's dashboard ("Sign in as this shop" in Django admin).
+// ---------------------------------------------------------------------------
+
+export type SupportSessionInfo = { public_id: string; store_name: string; expires_at: string };
+
+/**
+ * The admin's one-time ticket for a support session's tokens (POST auth/support/enter/). Whatever
+ * this browser held for another sign-in goes first, as a sign-out would clear it.
+ */
+export async function enterSupportSession(ticket: string): Promise<SupportSessionInfo> {
+  const result = await apiClient.post<AuthTokens & { support_session: SupportSessionInfo }>(
+    `${BASE_URL}/auth/support/enter/`,
+    { ticket }
+  );
+  forgetThisSignIn();
+  storeAuthTokens(result.access, result.refresh);
+  return result.support_session;
+}
+
+/** A support session ended: sign out, onto a page that says so rather than the sign-in page. */
+export function leaveSupportSession() {
+  window.location.replace("/auth/support?ended=1");
+  forgetThisSignIn();
 }
 
 export function getAccessToken(): string | null {

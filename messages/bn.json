@@ -1615,7 +1615,9 @@
     "categoriesNotEmpty": "{name}-এর {count, number}টি পণ্য আগে অন্য ক্যাটাগরিতে সরান, তারপর মুছুন।",
     "categoriesNotEmptyTitle": "{name}-এ এখনও পণ্য আছে",
     "categoriesNotEmptyUnknown": "এই ক্যাটাগরির পণ্যগুলো আগে অন্য ক্যাটাগরিতে সরান, তারপর মুছুন।",
-    "toastTitleCourierSendFailed": "অর্ডার {number} কুরিয়ারে পাঠানো যায়নি"
+    "toastTitleCourierSendFailed": "অর্ডার {number} কুরিয়ারে পাঠানো যায়নি",
+    "activitiesBySupport": "Paperbase সাপোর্টের করা",
+    "activitiesEntitySupportSession": "সাপোর্ট ভিজিট"
   },
   "sidebar": {
     "expandSidebar": "সাইডবার প্রসারিত করুন",
@@ -2018,7 +2020,16 @@
     "unreachable": "সার্ভারে পৌঁছানো গেল না। আবার চেষ্টা করুন।",
     "didYouMean": "আপনি কি <fix>{email}</fix> লিখতে চেয়েছিলেন?",
     "useSuggestion": "এটি নিন",
-    "keepTyped": "যা লিখেছি সেটিই থাকুক"
+    "keepTyped": "যা লিখেছি সেটিই থাকুক",
+    "support": {
+      "enteringTitle": "সাপোর্ট হিসেবে দোকান খোলা হচ্ছে",
+      "enteringBody": "এক মুহূর্তে ড্যাশবোর্ড সাপোর্ট মোডে খুলবে।",
+      "failedTitle": "এই লিংকে দোকান খোলেনি",
+      "failed": "অ্যাডমিনে দোকানের পাতা থেকে নতুন একটি খুলুন।",
+      "missing": "এই লিংকে কোনো টিকেট নেই। অ্যাডমিনে দোকানের পাতা থেকে নতুন একটি খুলুন।",
+      "endedTitle": "সাপোর্ট সেশন শেষ হয়েছে",
+      "endedBody": "আপনি দোকানের ড্যাশবোর্ড থেকে বেরিয়ে এসেছেন। মালিক তাঁর অ্যাক্টিভিটিতে এই ভিজিট দেখতে পাবেন। এই ট্যাবটি বন্ধ করতে পারেন।"
+    }
   },
   "settings": {
     "title": "সেটিংস",
@@ -3887,5 +3898,11 @@
         "post3": "হাতে তৈরি উপায়ে উপহার মোড়ানো"
       }
     }
+  },
+  "supportMode": {
+    "badge": "সাপোর্ট মোড",
+    "inShop": "আপনি Paperbase সাপোর্ট হিসেবে {store}-এ আছেন",
+    "minutesLeft": "আর {count} মিনিট",
+    "end": "সেশন শেষ করুন"
   }
 }

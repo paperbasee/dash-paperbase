@@ -42,6 +42,8 @@ export interface MeForRouting {
   is_moderator?: boolean;
   is_superuser?: boolean;
   active_store_public_id: string | null;
+  /** Paperbase support's visit this dashboard is in ("Sign in as this shop"); null for the owner's own sign-in. */
+  support_session?: { public_id: string; store_name: string; expires_at: string } | null;
   /**
    * Latest subscription row by server `updated_at` (REJECTED / PENDING_REVIEW only).
    * Distinct from `subscription.subscription_status` (candidate row / calendar).

@@ -1615,7 +1615,9 @@
     "categoriesNotEmpty": "Move the {count, plural, one {# product} other {# products}} in {name} to another category first, then delete it.",
     "categoriesNotEmptyTitle": "{name} still has products",
     "categoriesNotEmptyUnknown": "Move this category's products to another category first, then delete it.",
-    "toastTitleCourierSendFailed": "Order {number} wasn't sent to the courier"
+    "toastTitleCourierSendFailed": "Order {number} wasn't sent to the courier",
+    "activitiesBySupport": "by Paperbase support",
+    "activitiesEntitySupportSession": "Support visits"
   },
   "sidebar": {
     "expandSidebar": "Expand sidebar",
@@ -2018,7 +2020,16 @@
     "unreachable": "We couldn't reach the server. Try again.",
     "didYouMean": "Did you mean <fix>{email}</fix>?",
     "useSuggestion": "Use this",
-    "keepTyped": "Keep what I typed"
+    "keepTyped": "Keep what I typed",
+    "support": {
+      "enteringTitle": "Opening the shop as support",
+      "enteringBody": "The dashboard opens in support mode in a moment.",
+      "failedTitle": "This link didn't open the shop",
+      "failed": "Open a new one from the shop's page in the admin.",
+      "missing": "This link has no ticket. Open a new one from the shop's page in the admin.",
+      "endedTitle": "Support session ended",
+      "endedBody": "You've left the shop's dashboard. Its owner can see the visit in their Activities. You can close this tab."
+    }
   },
   "settings": {
     "title": "Settings",
@@ -3887,5 +3898,11 @@
         "post3": "Wrapping a gift the handmade way"
       }
     }
+  },
+  "supportMode": {
+    "badge": "Support mode",
+    "inShop": "You're in {store} as Paperbase support",
+    "minutesLeft": "{count, plural, one {# min left} other {# min left}}",
+    "end": "End session"
   }
 }

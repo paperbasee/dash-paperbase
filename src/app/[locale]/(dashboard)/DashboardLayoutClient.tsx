@@ -21,6 +21,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { isNetworkError } from "@/lib/network-error";
 import { logout } from "@/lib/auth";
+import { SUPPORT_STRIP_HEIGHT, SupportStrip } from "@/components/support/SupportStrip";
 import {
   hasVisitedPlans,
   shouldOfferInitialPlanSelection,
@@ -112,11 +113,12 @@ export default function DashboardLayoutClient({
   const isPendingReviewWithPaymentBanner =
     subscriptionUiState === "pending_review" &&
     meProfile?.latest_payment_status === "PENDING_REVIEW";
-  const subscriptionBannerOffset = showTopBannerStrip
-    ? isPendingReviewWithPaymentBanner
-      ? "30px"
-      : "24px"
-    : "0px";
+  // Paperbase support's visit ("Sign in as this shop"): its strip sits above everything.
+  const supportSession = meProfile?.support_session ?? null;
+  const subscriptionBannerOffset = `${
+    (supportSession ? SUPPORT_STRIP_HEIGHT : 0) +
+    (showTopBannerStrip ? (isPendingReviewWithPaymentBanner ? 30 : 24) : 0)
+  }px`;
 
   const normalizedPlan = (subscription?.plan ?? "").toLowerCase();
   const isEligiblePlan =
@@ -256,12 +258,16 @@ export default function DashboardLayoutClient({
       <SearchModalProvider shortcut={!isThemeEditor}>
       <WhatsNewProvider>
         {isThemeEditor ? (
-          <div className="fixed inset-0 flex h-dvh flex-col bg-background">{children}</div>
+          <div className="fixed inset-0 flex h-dvh flex-col bg-background">
+            {supportSession ? <SupportStrip session={supportSession} /> : null}
+            <div className="relative flex min-h-0 flex-1 flex-col">{children}</div>
+          </div>
         ) : (
         <div className="md:flex md:h-screen md:flex-col md:overflow-hidden">
-          {showTopBannerStrip && subscriptionUiState ? (
+          {supportSession || (showTopBannerStrip && subscriptionUiState) ? (
             <div className="z-[60] flex flex-col md:shrink-0">
-              {subscriptionUiState === "pending_review" ? (
+              {supportSession ? <SupportStrip session={supportSession} /> : null}
+              {showTopBannerStrip && subscriptionUiState === "pending_review" ? (
                 meProfile?.latest_payment_status === "PENDING_REVIEW" ? (
                   <PaymentSubmittedAwaitingBanner
                     endDate={subscription?.end_date ?? null}
@@ -282,7 +288,7 @@ export default function DashboardLayoutClient({
                   </div>
                 )
               ) : null}
-              {subscriptionUiState === "grace" || subscriptionUiState === "expired" ? (
+              {showTopBannerStrip && (subscriptionUiState === "grace" || subscriptionUiState === "expired") ? (
                 <SubscriptionExpirationBanner
                   variant={subscriptionUiState}
                   planPublicId={subscription?.plan_public_id ?? null}
@@ -291,7 +297,7 @@ export default function DashboardLayoutClient({
                   moderatorNotice={isModerator}
                 />
               ) : null}
-              {subscriptionUiState === "trial" ? (
+              {showTopBannerStrip && subscriptionUiState === "trial" ? (
                 <div
                   role="status"
                   className="border-b border-border bg-primary/10"
@@ -311,7 +317,7 @@ export default function DashboardLayoutClient({
                   </div>
                 </div>
               ) : null}
-              {subscriptionUiState === "inactive" ? (
+              {showTopBannerStrip && subscriptionUiState === "inactive" ? (
                 <div
                   role="status"
                   className="border-b border-border bg-amber-50 dark:bg-amber-950"
@@ -331,7 +337,7 @@ export default function DashboardLayoutClient({
                   </div>
                 </div>
               ) : null}
-              {subscriptionUiState === "rejected" ? (
+              {showTopBannerStrip && subscriptionUiState === "rejected" ? (
                 <div
                   role="status"
                   className="border-b border-border bg-orange-50 dark:bg-orange-950"

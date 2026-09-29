@@ -77,6 +77,7 @@ export default function ActivitiesPage() {
         { value: "banner", label: tPages("activitiesEntityBanner") },
         { value: "notification", label: tPages("activitiesEntityNotification") },
         { value: "support_ticket", label: tPages("activitiesEntitySupportTicket") },
+        { value: "support_session", label: tPages("activitiesEntitySupportSession") },
         { value: "courier", label: tPages("activitiesEntityCourier") },
         {
           value: "marketing_integration",
@@ -211,7 +212,17 @@ export default function ActivitiesPage() {
                         </div>
                         <div className="font-medium text-foreground">
                           {formatActivityHeader(item.summary, item.entity_type, item.action)}
-                          {item.actor ? ` by ${item.actor.full_name || item.actor.email}` : ""}
+                          {/* A change Paperbase support made, signed in as the owner ("Sign in as this
+                              shop"): said so. The visit's own lines already say who. */}
+                          {item.metadata?.support === true && item.entity_type !== "support_session" ? (
+                            <span className="ml-2 inline-flex items-center rounded-full bg-amber-100 px-2 py-px align-middle text-[11px] font-medium text-amber-900 dark:bg-amber-950 dark:text-amber-200">
+                              {tPages("activitiesBySupport")}
+                            </span>
+                          ) : item.actor ? (
+                            ` by ${item.actor.full_name || item.actor.email}`
+                          ) : (
+                            ""
+                          )}
                         </div>
                         <div className="mt-1 text-muted-foreground">
                           {formatActivityText(item.entity_type)}
