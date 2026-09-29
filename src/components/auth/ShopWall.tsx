@@ -72,9 +72,13 @@ function Note({ note }: { note: 0 | 1 | 2 }) {
 const SHADES = {
   center: "bg-[radial-gradient(60%_70%_at_50%_50%,rgb(13_14_17/0.35),rgb(13_14_17/0.88)_75%)]",
   panel: "bg-[linear-gradient(to_top,rgb(14_14_14/0.94),rgb(14_14_14/0.5)_50%,rgb(14_14_14/0.6))]",
-  // The whole screen behind the sheet on a phone, the panel beside the form on a computer.
+  // The whole screen behind the sheet on a phone, the panel beside the form on a computer, lit
+  // in the middle on a tablet, where the card floats over the wall. On a phone the photos show
+  // above the words, so it is light at the top and darkens down toward the words and the sheet
+  // (a real phone, 2026-09-29: the centre-lit shade left the only photos on screen, along the
+  // top, nearly black).
   responsive:
-    "bg-[radial-gradient(60%_70%_at_50%_50%,rgb(13_14_17/0.35),rgb(13_14_17/0.88)_75%)] lg:bg-[linear-gradient(to_top,rgb(14_14_14/0.94),rgb(14_14_14/0.5)_50%,rgb(14_14_14/0.6))]",
+    "bg-[radial-gradient(60%_70%_at_50%_50%,rgb(13_14_17/0.35),rgb(13_14_17/0.88)_75%)] max-sm:bg-[linear-gradient(to_bottom,rgb(13_14_17/0.18),rgb(13_14_17/0.4)_35%,rgb(13_14_17/0.88)_70%)] lg:bg-[linear-gradient(to_top,rgb(14_14_14/0.94),rgb(14_14_14/0.5)_50%,rgb(14_14_14/0.6))]",
 } as const;
 
 export function ShopWall({ className, shade = "center" }: { className?: string; shade?: keyof typeof SHADES }) {

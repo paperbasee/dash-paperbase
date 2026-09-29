@@ -22,7 +22,9 @@ import { ShopWall } from "./ShopWall";
  *   language switch in its top corner.
  * - Phone: the wall fills the screen, moving, its line just above the form, which is a sheet
  *   along the bottom -- the owner kept this from the first version ("keep the mobile section as
- *   it was").
+ *   it was"). The photos always keep the top of the screen (about a third, at least 9rem): on a
+ *   real phone, with the browser's own bars, the line and the sheet otherwise filled it and left
+ *   the photos a dark strip under the language switch (2026-09-29). A short screen scrolls.
  *
  * It is the (auth) route group's layout, so moving between Sign in and Create account keeps the
  * wall moving and slides the tab across, instead of starting the page again.
@@ -134,7 +136,7 @@ export function AuthFrame({ children }: { children: ReactNode }) {
 
         {/* The top-right corner, over the photos, on a phone and a computer alike (owner, 2026-09-28). */}
         <AuthLanguageSwitch onPhoto className="absolute right-4 top-4 z-20 lg:right-7 lg:top-7" />
-        <div className="relative z-10 flex min-h-dvh flex-col justify-end lg:order-1 lg:min-h-0 lg:items-center lg:justify-center lg:px-12 lg:py-10">
+        <div className="relative z-10 flex min-h-dvh flex-col justify-end pt-[max(9rem,32dvh)] lg:order-1 lg:min-h-0 lg:items-center lg:justify-center lg:px-12 lg:py-10">
           {/* A phone's words over the moving photos, just above the sheet -- the line and the small
               one under it on a dark fade, as on a computer (owner, 2026-09-28). The fade reaches up
               past the words without taking room, and runs into the sheet's top edge. */}
