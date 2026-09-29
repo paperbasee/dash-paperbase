@@ -88,6 +88,20 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-09-29-search-follows-each-members-access",
+    date: "2026-09-29",
+    version: "4.146.2",
+    tag: "fixed",
+    title: {
+      en: "Search follows each team member's access",
+      bn: "সার্চ এখন প্রত্যেক টিম মেম্বারের অনুমতি মেনে চলে",
+    },
+    body: {
+      en: "The dashboard's search now shows each team member only the products, orders, customers and support tickets their role and categories let them open. It also keeps up with you while you type.",
+      bn: "ড্যাশবোর্ডের সার্চ এখন প্রত্যেক টিম মেম্বারকে শুধু সেই প্রোডাক্ট, অর্ডার, কাস্টমার আর সাপোর্ট টিকিট দেখায়, যেগুলো তাঁর রোল আর ক্যাটাগরি অনুযায়ী খোলার অনুমতি আছে। টাইপ করার সময়ও এখন সার্চ থেমে যায় না।",
+    },
+  },
+  {
     id: "2026-09-29-sign-in-photos-on-phones",
     date: "2026-09-29",
     version: "4.146.1",
@@ -491,21 +505,6 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     body: {
       en: "The Districts tab shows the eight divisions on a map, darker where you get more orders, sales or deliveries. Tap a division to see its districts.",
       bn: "জেলা ট্যাবে মানচিত্রে আটটি বিভাগ দেখা যায়; যেখানে অর্ডার, বিক্রি বা ডেলিভারি বেশি, সেখানে রং গাঢ়। কোনো বিভাগে চাপলে তার জেলাগুলো দেখাবে।",
-    },
-  },
-  {
-    id: "2026-09-28-what-shoppers-search-for",
-    date: "2026-09-28",
-    version: "4.123.0",
-    tag: "new",
-    href: "/analytics",
-    title: {
-      en: "See what shoppers search for",
-      bn: "দেখুন ক্রেতারা কী খোঁজেন",
-    },
-    body: {
-      en: "Searches on your shop are now counted. The Traffic tab lists what shoppers searched for, how many of them bought, and the searches that found nothing, so you know what to add.",
-      bn: "আপনার দোকানে সার্চ এখন গোনা হয়। ভিজিটর ট্যাবে দেখা যায় ক্রেতারা কী খুঁজেছেন, তাঁদের কতজন কিনেছেন, আর কোন সার্চে কিছুই পাওয়া যায়নি, যাতে বুঝতে পারেন কী যোগ করবেন।",
     },
   },
   {
