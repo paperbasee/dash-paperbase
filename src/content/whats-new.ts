@@ -88,6 +88,21 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-09-29-support-can-help-inside-your-dashboard",
+    date: "2026-09-29",
+    version: "4.141.0",
+    tag: "new",
+    href: "/activities",
+    title: {
+      en: "Our support team can help inside your dashboard",
+      bn: "আমাদের সাপোর্ট টিম আপনার ড্যাশবোর্ডেই সাহায্য করতে পারে",
+    },
+    body: {
+      en: "When you ask Paperbase for help, our team can open your dashboard for up to an hour to fix things with you. Every visit shows in Activities, every change they make is marked, and your account, passkeys, payments and team stay yours alone.",
+      bn: "Paperbase-এর কাছে সাহায্য চাইলে আমাদের টিম সর্বোচ্চ এক ঘণ্টার জন্য আপনার ড্যাশবোর্ড খুলে সমস্যা ঠিক করে দিতে পারে। প্রতিটি ভিজিট অ্যাক্টিভিটিতে দেখা যায়, তাদের করা প্রতিটি পরিবর্তন চিহ্নিত থাকে, আর আপনার অ্যাকাউন্ট, পাসকি, পেমেন্ট ও টিম শুধু আপনারই থাকে।",
+    },
+  },
+  {
     id: "2026-09-29-setup-is-clear-about-your-web-address",
     date: "2026-09-29",
     version: "4.140.0",
@@ -495,20 +510,6 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     body: {
       en: "The pop-up you set up in Settings, Promotions was not showing in the new shop. It shows again, after your delay and as often as you chose. Every picture you added can now be swiped through.",
       bn: "সেটিংস > প্রমোশনস-এ তৈরি করা পপ-আপ নতুন দোকানে দেখাচ্ছিল না। এখন আবার দেখাচ্ছে, আপনার ঠিক করা সময় পরে এবং আপনি যতবার চেয়েছেন ততবার। আপনার যোগ করা সব ছবি এখন সোয়াইপ করে দেখা যায়।",
-    },
-  },
-  {
-    id: "2026-09-27-plans-lose-the-request-limit",
-    date: "2026-09-27",
-    version: "4.120.0",
-    tag: "improved",
-    title: {
-      en: "Plans list only what applies to your shop",
-      bn: "প্ল্যানে শুধু আপনার দোকানের জন্য প্রযোজ্য বিষয়",
-    },
-    body: {
-      en: "Plans no longer show “storefront requests per minute”. It was a limit of the old storefront, which is gone, so it no longer means anything for your shop.",
-      bn: "প্ল্যানে আর “প্রতি মিনিটে স্টোরফ্রন্ট রিকোয়েস্ট” দেখানো হয় না। এটি পুরোনো স্টোরফ্রন্টের একটি সীমা ছিল, যা এখন আর নেই, তাই আপনার দোকানের জন্য এর আর কোনো মানে নেই।",
     },
   },
   {
