@@ -29,6 +29,7 @@ import {
   useSaveCoupon,
 } from "@/hooks/useCouponsQuery";
 import type { Coupon, CouponWrite } from "@/types";
+import { useOpenFromAddress } from "@/hooks/useOpenFromAddress";
 
 const BLANK: CouponWrite = { code: "", kind: "fixed", value: "" };
 
@@ -51,6 +52,14 @@ export default function CouponsPage() {
   const [editing, setEditing] = useState<string | null>(null);
 
   const coupons = useMemo(() => data ?? [], [data]);
+
+  // A search result names the code to open (`?open=`): in the form for someone who may change
+  // it, as the list's own Edit is; the list alone for the rest.
+  useOpenFromAddress(!isLoading, (publicId) => {
+    const coupon = coupons.find((row) => row.public_id === publicId);
+    if (coupon && canManage) startEdit(coupon);
+    return Boolean(coupon);
+  });
 
   useEffect(() => {
     if (!isError || !error) return;

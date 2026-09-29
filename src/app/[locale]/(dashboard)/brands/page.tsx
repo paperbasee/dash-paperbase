@@ -17,6 +17,7 @@ import { notify } from "@/notifications";
 import { buildPublicMediaUrlFromKey, uploadFile } from "@/hooks/usePresignedUpload";
 import { brandsQueryKey } from "@/lib/query-keys";
 import { useBrandsQuery } from "@/hooks/useBrandsQuery";
+import { useOpenFromAddress } from "@/hooks/useOpenFromAddress";
 
 type FormMode = "closed" | "new" | "edit";
 
@@ -54,6 +55,13 @@ export default function BrandsPage() {
 
   const { data, isLoading, isError, error } = useBrandsQuery();
   const brands = data ?? [];
+
+  // A search result names the brand to open (`?open=`).
+  useOpenFromAddress(!isLoading, (publicId) => {
+    const brand = brands.find((row) => row.public_id === publicId);
+    if (brand) openEdit(brand);
+    return Boolean(brand);
+  });
 
   // Only this key: no nav badge counts brands, and the product form reads the
   // same cache, so one invalidation keeps both screens honest.

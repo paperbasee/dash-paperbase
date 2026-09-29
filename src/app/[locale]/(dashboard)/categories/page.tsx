@@ -25,6 +25,7 @@ import { buildPublicMediaUrlFromKey, uploadFile } from "@/hooks/usePresignedUplo
 import { Loader2, CheckCircle2, AlertCircle } from "lucide-react";
 import { categoriesQueryKey, navCountsQueryKey } from "@/lib/query-keys";
 import { useCategoriesQuery } from "@/hooks/useCategoriesQuery";
+import { useOpenFromAddress } from "@/hooks/useOpenFromAddress";
 
 type FormMode = "closed" | "new_root" | "new_child" | "edit";
 
@@ -192,6 +193,13 @@ export default function CategoriesPage() {
 
   const { data, isLoading, isError, error } = useCategoriesQuery();
   const tree = data ?? [];
+
+  // A search result names the category to open (`?open=`), anywhere in the tree.
+  useOpenFromAddress(!isLoading, (publicId) => {
+    const node = findCategoryNode(tree, publicId);
+    if (node) openEdit(node);
+    return Boolean(node);
+  });
   const loading = isLoading;
 
   useEffect(() => {

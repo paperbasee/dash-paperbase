@@ -3,10 +3,12 @@
 import { useCallback, useEffect, useState, type FormEvent } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
+import { useSearchParams } from "next/navigation";
 import { useRouter } from "@/i18n/navigation";
 import { Star, Undo2 } from "lucide-react";
 
 import api from "@/lib/api";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -19,10 +21,16 @@ import { useBrandsQuery } from "@/hooks/useBrandsQuery";
 import type { AdminReview } from "@/types";
 import { Stars } from "@/components/reviews/Stars";
 import { AddReviewForm } from "@/components/reviews/AddReviewForm";
+import { useOpenFromAddress } from "@/hooks/useOpenFromAddress";
 
 type Status = AdminReview["status"];
 
 const TABS: Status[] = ["pending", "published", "rejected"];
+
+/** The tab the address names (`?tab=`, a search result's), else Pending. */
+function tabFrom(value: string | null): Status {
+  return TABS.find((tab) => tab === value) ?? "pending";
+}
 
 /**
  * What shoppers said, waiting for the merchant's word.
@@ -44,11 +52,25 @@ export default function ReviewsPage() {
   const confirm = useConfirm();
   const queryClient = useQueryClient();
 
-  const [tab, setTab] = useState<Status>("pending");
+  const searchParams = useSearchParams();
+  const [tab, setTab] = useState<Status>(() => tabFrom(searchParams.get("tab")));
+  // The review a search result named: shown in its tab, scrolled to and marked.
+  const [marked, setMarked] = useState<string | null>(null);
   const [adding, setAdding] = useState(false);
   const [busy, setBusy] = useState<string | null>(null);
 
   const { data: reviews = [], isLoading, isError, error } = useReviewsQuery(tab);
+
+  useOpenFromAddress(!isLoading, (publicId) => {
+    const found = reviews.some((review) => review.public_id === publicId);
+    if (found) {
+      setMarked(publicId);
+      requestAnimationFrame(() =>
+        document.getElementById(`review-${publicId}`)?.scrollIntoView({ block: "center" })
+      );
+    }
+    return found;
+  });
   const { data: counts } = useReviewCountsQuery();
   // Warms the product picker the Add form uses, so opening it is not a wait.
   useBrandsQuery();
@@ -181,6 +203,7 @@ export default function ReviewsPage() {
             <ReviewCard
               key={review.public_id}
               review={review}
+              marked={marked === review.public_id}
               busy={busy === review.public_id}
               onModerate={moderate}
               onDelete={remove}
@@ -195,12 +218,15 @@ export default function ReviewsPage() {
 
 function ReviewCard({
   review,
+  marked = false,
   busy,
   onModerate,
   onDelete,
   onReplied,
 }: {
   review: AdminReview;
+  /** The one a search result opened. */
+  marked?: boolean;
   busy: boolean;
   onModerate: (review: AdminReview, status: Status) => void;
   onDelete: (review: AdminReview) => void;
@@ -230,7 +256,13 @@ function ReviewCard({
   }
 
   return (
-    <li className="rounded-card border border-card-border bg-card p-4">
+    <li
+      id={`review-${review.public_id}`}
+      className={cn(
+        "rounded-card border border-card-border bg-card p-4 transition-shadow",
+        marked && "ring-2 ring-primary/60"
+      )}
+    >
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">

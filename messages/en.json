@@ -1631,7 +1631,7 @@
     "searchTickets": "Tickets",
     "searchNoResults": "No results found.",
     "searchLoadError": "Failed to load search results.",
-    "searchStartHint": "Type to search pages, settings, products, orders, customers and tickets.",
+    "searchStartHint": "Type to search pages, settings, products, orders, customers and more.",
     "userMenu": "User menu",
     "setInSettings": "Set in Settings",
     "stores": "Stores",
@@ -1652,7 +1652,11 @@
     "searchPlaces": "Pages & settings",
     "searchActions": "Actions",
     "searchThemeEditor": "Theme editor",
-    "searchActionEditDesign": "Edit your shop's design"
+    "searchActionEditDesign": "Edit your shop's design",
+    "searchTeam": "Team",
+    "searchRecent": "Recent searches",
+    "searchClearRecent": "Clear",
+    "searchKeysHint": "↑ ↓ to move · Enter to open · Esc to close"
   },
   "whatsNew": {
     "menuLabel": "What's new",

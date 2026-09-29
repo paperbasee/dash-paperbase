@@ -1631,7 +1631,7 @@
     "searchTickets": "টিকিট",
     "searchNoResults": "কোনো ফলাফল পাওয়া যায়নি।",
     "searchLoadError": "সার্চ ফলাফল লোড করা যায়নি।",
-    "searchStartHint": "পেজ, সেটিংস, পণ্য, অর্ডার, গ্রাহক ও টিকিট খুঁজতে টাইপ করুন।",
+    "searchStartHint": "পেজ, সেটিংস, পণ্য, অর্ডার, গ্রাহক এবং আরও অনেক কিছু খুঁজতে টাইপ করুন।",
     "userMenu": "ব্যবহারকারী মেনু",
     "setInSettings": "সেটিংসে সেট করুন",
     "stores": "স্টোর",
@@ -1652,7 +1652,11 @@
     "searchPlaces": "পেজ ও সেটিংস",
     "searchActions": "কাজ",
     "searchThemeEditor": "থিম এডিটর",
-    "searchActionEditDesign": "দোকানের ডিজাইন বদলান"
+    "searchActionEditDesign": "দোকানের ডিজাইন বদলান",
+    "searchTeam": "টিম",
+    "searchRecent": "সাম্প্রতিক খোঁজ",
+    "searchClearRecent": "মুছুন",
+    "searchKeysHint": "↑ ↓ দিয়ে সরান · Enter দিয়ে খুলুন · Esc দিয়ে বন্ধ করুন"
   },
   "whatsNew": {
     "menuLabel": "নতুন কী আছে",
