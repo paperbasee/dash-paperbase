@@ -88,6 +88,20 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-09-29-timed-sections-on-time",
+    date: "2026-09-29",
+    version: "4.145.0",
+    tag: "improved",
+    title: {
+      en: "Timed sections start right on time",
+      bn: "সময় ঠিক করা সেকশন ঠিক সময়েই শুরু হয়",
+    },
+    body: {
+      en: "A section you schedule in the editor now appears the second it starts and goes the second it ends; it used to be up to a minute late. Your shop also keeps more of its pages ready, so it opens faster for your shoppers.",
+      bn: "এডিটরে যে সেকশনের সময় ঠিক করেন, সেটি এখন শুরুর সেকেন্ডেই দেখা যায় আর শেষের সেকেন্ডেই সরে যায়; আগে এক মিনিট পর্যন্ত দেরি হতো। আপনার দোকান এখন আরও বেশি পাতা তৈরি রাখে, তাই ক্রেতাদের জন্য আরও দ্রুত খোলে।",
+    },
+  },
+  {
     id: "2026-09-29-edits-show-at-once",
     date: "2026-09-29",
     version: "4.144.0",
@@ -493,21 +507,6 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     body: {
       en: "Visits to your shop are counted again, whether or not you use a Facebook or TikTok pixel. Analytics shows where each visit came from, such as Facebook, Facebook ads or Google, with the orders and sales it brought.",
       bn: "আপনার দোকানের ভিজিট আবার গোনা হচ্ছে, ফেসবুক বা টিকটক পিক্সেল থাকুক বা না থাকুক। অ্যানালিটিক্সে দেখা যায় প্রতিটি ভিজিট কোথা থেকে এসেছে, যেমন ফেসবুক, ফেসবুক বিজ্ঞাপন বা গুগল, আর সেখান থেকে কত অর্ডার ও বিক্রি এসেছে।",
-    },
-  },
-  {
-    id: "2026-09-28-how-shoppers-give-their-district",
-    date: "2026-09-28",
-    version: "4.122.0",
-    tag: "new",
-    href: "/settings?tab=customization",
-    title: {
-      en: "Choose how shoppers give their district",
-      bn: "ক্রেতারা কীভাবে জেলা দেবেন, আপনি ঠিক করুন",
-    },
-    body: {
-      en: "On the checkout page of your theme editor, choose whether shoppers type their district or search and pick it from Bangladesh's 64, in your shop's language. Picked from the list, couriers always get a correct name. New order and order edit use the same list, searchable in English or Bangla.",
-      bn: "থিম এডিটরের চেকআউট পেজে ঠিক করুন, ক্রেতারা জেলা লিখে দেবেন নাকি বাংলাদেশের ৬৪টি জেলা থেকে খুঁজে বেছে নেবেন, আপনার দোকানের ভাষায়। তালিকা থেকে বেছে নিলে কুরিয়ার সবসময় সঠিক নাম পায়। নতুন অর্ডার আর অর্ডার এডিটে একই তালিকা, ইংরেজি বা বাংলায় খোঁজা যায়।",
     },
   },
   {
