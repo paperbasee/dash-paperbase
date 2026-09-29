@@ -88,6 +88,21 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-09-29-paperbase-history-in-fraud-check",
+    date: "2026-09-29",
+    version: "4.147.0",
+    tag: "new",
+    title: {
+      en: "See how a customer's parcels went across Paperbase",
+      bn: "Paperbase জুড়ে ক্রেতার পার্সেলের হিসাব দেখুন",
+    },
+    body: {
+      en: "The fraud check now shows how a phone number's parcels went in every shop on Paperbase: how many were delivered, how many came back, and how many shops found it a wrong number. You see only the counts, never which shops.",
+      bn: "ফ্রড চেক এখন দেখায় Paperbase-এর সব দোকানে একটি ফোন নম্বরের পার্সেলগুলোর কী হয়েছে: কতগুলো ডেলিভার হয়েছে, কতগুলো ফেরত এসেছে, আর কয়টি দোকান একে ভুল নম্বর বলেছে। আপনি শুধু সংখ্যা দেখবেন, কোন দোকান তা কখনো নয়।",
+    },
+    href: "/orders",
+  },
+  {
     id: "2026-09-29-search-follows-each-members-access",
     date: "2026-09-29",
     version: "4.146.2",
@@ -490,21 +505,6 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     body: {
       en: "Pick any days and compare them with the days before or the same days last year. The Overview tells you in one sentence how you did, what moved it and which orders need a look, and each part has its own tab: Sales, Traffic, Products, Districts, Delivery, Customers and Live. On the Basic plan, Overview and Sales are open.",
       bn: "যেকোনো দিন বেছে নিন, আর তুলনা করুন আগের দিনগুলোর সাথে বা গত বছরের একই দিনগুলোর সাথে। সারসংক্ষেপ এক বাক্যে জানায় কেমন গেল, কী পার্থক্য গড়েছে আর কোন অর্ডার একবার দেখা দরকার; প্রতিটি অংশের নিজের ট্যাব আছে: বিক্রি, ভিজিটর, পণ্য, জেলা, ডেলিভারি, কাস্টমার আর লাইভ। বেসিক প্ল্যানে সারসংক্ষেপ আর বিক্রি খোলা থাকে।",
-    },
-  },
-  {
-    id: "2026-09-28-your-orders-on-a-map",
-    date: "2026-09-28",
-    version: "4.123.0",
-    tag: "new",
-    href: "/analytics",
-    title: {
-      en: "Your orders on a map of Bangladesh",
-      bn: "বাংলাদেশের মানচিত্রে আপনার অর্ডার",
-    },
-    body: {
-      en: "The Districts tab shows the eight divisions on a map, darker where you get more orders, sales or deliveries. Tap a division to see its districts.",
-      bn: "জেলা ট্যাবে মানচিত্রে আটটি বিভাগ দেখা যায়; যেখানে অর্ডার, বিক্রি বা ডেলিভারি বেশি, সেখানে রং গাঢ়। কোনো বিভাগে চাপলে তার জেলাগুলো দেখাবে।",
     },
   },
   {
