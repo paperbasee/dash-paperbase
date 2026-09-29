@@ -88,6 +88,20 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-09-29-sign-in-photos-on-phones",
+    date: "2026-09-29",
+    version: "4.146.1",
+    tag: "fixed",
+    title: {
+      en: "The sign-in page looks right on phones",
+      bn: "ফোনে সাইন-ইন পেজ ঠিকঠাক দেখায়",
+    },
+    body: {
+      en: "On a phone, the shop photos behind sign in and sign up now show clearly at the top of the screen, and the language switch no longer covers the heading.",
+      bn: "ফোনে সাইন ইন আর অ্যাকাউন্ট খোলার পেজের পেছনের দোকানের ছবিগুলো এখন স্ক্রিনের ওপরে পরিষ্কার দেখা যায়, আর ভাষা বদলানোর বোতাম আর শিরোনাম ঢেকে দেয় না।",
+    },
+  },
+  {
     id: "2026-09-29-quick-right-after-you-save",
     date: "2026-09-29",
     version: "4.146.0",
@@ -492,20 +506,6 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     body: {
       en: "Searches on your shop are now counted. The Traffic tab lists what shoppers searched for, how many of them bought, and the searches that found nothing, so you know what to add.",
       bn: "আপনার দোকানে সার্চ এখন গোনা হয়। ভিজিটর ট্যাবে দেখা যায় ক্রেতারা কী খুঁজেছেন, তাঁদের কতজন কিনেছেন, আর কোন সার্চে কিছুই পাওয়া যায়নি, যাতে বুঝতে পারেন কী যোগ করবেন।",
-    },
-  },
-  {
-    id: "2026-09-28-the-dashboard-opens-lighter",
-    date: "2026-09-28",
-    version: "4.123.0",
-    tag: "improved",
-    title: {
-      en: "The dashboard opens a little lighter",
-      bn: "ড্যাশবোর্ড একটু হালকা হয়ে খোলে",
-    },
-    body: {
-      en: "Fonts now load only when a page needs them, so English pages no longer download the Bangla font.",
-      bn: "ফন্ট এখন শুধু দরকার হলেই আসে, তাই ইংরেজি পেজে আর বাংলা ফন্ট নামাতে হয় না।",
     },
   },
   {
