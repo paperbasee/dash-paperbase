@@ -88,6 +88,20 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-09-29-edits-show-at-once",
+    date: "2026-09-29",
+    version: "4.144.0",
+    tag: "improved",
+    title: {
+      en: "Your edits show in your shop at once",
+      bn: "আপনার পরিবর্তন সঙ্গে সঙ্গে দোকানে দেখা যায়",
+    },
+    body: {
+      en: "A new price, picture, category, delivery charge or shop detail now shows in your shop the moment you save it; some used to take up to five minutes. And if part of our system slows down, your shop keeps selling, just a little slower.",
+      bn: "নতুন দাম, ছবি, ক্যাটাগরি, ডেলিভারি চার্জ বা দোকানের তথ্য এখন সেভ করার সঙ্গে সঙ্গেই আপনার দোকানে দেখা যায়; আগে কিছু পরিবর্তন দেখাতে পাঁচ মিনিট পর্যন্ত লাগত। আর আমাদের সিস্টেমের কোনো অংশ ধীর হয়ে গেলেও আপনার দোকানে বিক্রি চলতে থাকে, শুধু একটু ধীরে।",
+    },
+  },
+  {
     id: "2026-09-29-order-work-kept-apart",
     date: "2026-09-29",
     version: "4.143.0",
@@ -494,21 +508,6 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     body: {
       en: "On the checkout page of your theme editor, choose whether shoppers type their district or search and pick it from Bangladesh's 64, in your shop's language. Picked from the list, couriers always get a correct name. New order and order edit use the same list, searchable in English or Bangla.",
       bn: "থিম এডিটরের চেকআউট পেজে ঠিক করুন, ক্রেতারা জেলা লিখে দেবেন নাকি বাংলাদেশের ৬৪টি জেলা থেকে খুঁজে বেছে নেবেন, আপনার দোকানের ভাষায়। তালিকা থেকে বেছে নিলে কুরিয়ার সবসময় সঠিক নাম পায়। নতুন অর্ডার আর অর্ডার এডিটে একই তালিকা, ইংরেজি বা বাংলায় খোঁজা যায়।",
-    },
-  },
-  {
-    id: "2026-09-28-analytics-sales-match-your-orders",
-    date: "2026-09-28",
-    version: "4.122.0",
-    tag: "fixed",
-    href: "/analytics",
-    title: {
-      en: "Analytics sales now match your orders",
-      bn: "অ্যানালিটিক্সের বিক্রি এখন আপনার অর্ডারের সাথে মেলে",
-    },
-    body: {
-      en: "Sales, orders and parcels in Analytics are now counted from your orders themselves, by Bangladesh days. Sales are the products in confirmed orders after sale prices and coupons, delivery charges are shown apart, and a cancelled order no longer takes money off a later week.",
-      bn: "অ্যানালিটিক্সে বিক্রি, অর্ডার আর পার্সেল এখন সরাসরি আপনার অর্ডার থেকে, বাংলাদেশের দিন ধরে গোনা হয়। বিক্রি মানে কনফার্ম করা অর্ডারের পণ্য, ছাড় আর কুপনের পরে; ডেলিভারি চার্জ আলাদা দেখানো হয়, আর বাতিল অর্ডার পরের কোনো সপ্তাহের হিসাব থেকে টাকা কাটে না।",
     },
   },
   {
