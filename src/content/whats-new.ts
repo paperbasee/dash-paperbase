@@ -88,6 +88,20 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-09-29-setup-is-clear-about-your-web-address",
+    date: "2026-09-29",
+    version: "4.140.0",
+    tag: "improved",
+    title: {
+      en: "Setup is clear about your web address",
+      bn: "সেট-আপে ওয়েব ঠিকানা নিয়ে কোনো বিভ্রান্তি নেই",
+    },
+    body: {
+      en: "Your shop is live on its free Paperbase address as soon as setup ends. Connecting a domain you own can wait: setup now says so, and its last screen shows where to connect one in Settings.",
+      bn: "সেট-আপ শেষ হতেই আপনার দোকান ফ্রি Paperbase ঠিকানায় চালু হয়ে যায়। নিজের ডোমেইন পরে যুক্ত করলেও চলে: সেট-আপ এখন সেটা স্পষ্ট বলে, আর শেষ পাতায় দেখায় সেটিংসে কোথায় যুক্ত করবেন।",
+    },
+  },
+  {
     id: "2026-09-29-setup-fits-where-you-already-sell",
     date: "2026-09-29",
     version: "4.139.0",
@@ -495,21 +509,6 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     body: {
       en: "Plans no longer show “storefront requests per minute”. It was a limit of the old storefront, which is gone, so it no longer means anything for your shop.",
       bn: "প্ল্যানে আর “প্রতি মিনিটে স্টোরফ্রন্ট রিকোয়েস্ট” দেখানো হয় না। এটি পুরোনো স্টোরফ্রন্টের একটি সীমা ছিল, যা এখন আর নেই, তাই আপনার দোকানের জন্য এর আর কোনো মানে নেই।",
-    },
-  },
-  {
-    id: "2026-09-27-more-shoppers-in-abandoned-checkouts",
-    date: "2026-09-27",
-    version: "4.119.4",
-    tag: "improved",
-    href: "/orders/abandoned",
-    title: {
-      en: "More shoppers reach Abandoned checkouts",
-      bn: "অসম্পূর্ণ চেকআউটে আরও বেশি ক্রেতা আসবেন",
-    },
-    body: {
-      en: "A shopper who typed their phone number and then locked their phone, switched apps or closed the page was sometimes missed. They are now listed too, so you can call them, and a shopper who did buy is never listed there by mistake.",
-      bn: "যে ক্রেতা ফোন নম্বর লিখে তারপর ফোন লক করতেন, অন্য অ্যাপে যেতেন বা পেজ বন্ধ করতেন, তাঁরা কখনো কখনো বাদ পড়ে যেতেন। এখন তাঁরাও তালিকায় আসবেন, তাই আপনি তাঁদের ফোন করতে পারবেন, আর যিনি কিনেছেন তিনি ভুল করে সেখানে আসবেন না।",
     },
   },
   {
