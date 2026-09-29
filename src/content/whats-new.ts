@@ -93,40 +93,12 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     version: "4.150.0",
     tag: "new",
     title: {
-      en: "A new search box",
-      bn: "নতুন সার্চ বক্স",
+      en: "A new, smarter search",
+      bn: "নতুন, আরও স্মার্ট সার্চ",
     },
     body: {
-      en: "Search now also finds categories, brands, discount codes, blog posts, reviews and team members. Move through the results with the arrow keys and press Enter to open one, and your recent searches wait for you when you open it again.",
-      bn: "সার্চে এখন ক্যাটাগরি, ব্র্যান্ড, ডিসকাউন্ট কোড, ব্লগ পোস্ট, রিভিউ আর টিম মেম্বারও পাওয়া যায়। অ্যারো কী দিয়ে ফলাফলগুলোর মধ্যে যান, Enter চাপলেই খুলবে, আর আবার খুললে আপনার সাম্প্রতিক খোঁজগুলো সেখানেই থাকবে।",
-    },
-  },
-  {
-    id: "2026-09-29-search-finds-pages-and-settings",
-    date: "2026-09-29",
-    version: "4.149.0",
-    tag: "new",
-    title: {
-      en: "Search finds pages and settings too",
-      bn: "সার্চে এখন পেজ আর সেটিংসও পাওয়া যায়",
-    },
-    body: {
-      en: "Type what you're looking for, like “steadfast”, “delivery charge”, “logo” or “add product”, and search takes you straight to the right page, settings section or action, in English or Bangla. You only see what your role lets you open.",
-      bn: "যা খুঁজছেন লিখুন, যেমন “steadfast”, “ডেলিভারি চার্জ”, “লোগো” বা “add product”, সার্চ আপনাকে সরাসরি সঠিক পেজ, সেটিংস অংশ বা কাজে নিয়ে যাবে, ইংরেজি বা বাংলায়। আপনার রোলে যা খোলার অনুমতি আছে, শুধু সেটুকুই দেখবেন।",
-    },
-  },
-  {
-    id: "2026-09-29-search-is-quicker-and-understands-more",
-    date: "2026-09-29",
-    version: "4.148.0",
-    tag: "improved",
-    title: {
-      en: "Search is quicker and understands more",
-      bn: "সার্চ এখন আরও দ্রুত, আরও বেশি বোঝে",
-    },
-    body: {
-      en: "The dashboard's search answers faster. It finds a phone number however it's written (+880 or 01), an order with or without #, and a product even when you skip its dash or spaces, like “tshirt” for “T-Shirt”.",
-      bn: "ড্যাশবোর্ডের সার্চ এখন আরও দ্রুত উত্তর দেয়। ফোন নম্বর যেভাবেই লিখুন (+880 বা 01) খুঁজে পায়, অর্ডার নম্বর # দিয়ে বা ছাড়া, আর প্রোডাক্টের নামে ড্যাশ বা স্পেস বাদ দিলেও পায়, যেমন “tshirt” লিখলে “T-Shirt”।",
+      en: "Search now finds pages, settings and actions like “add product”, plus categories, brands, discount codes, blog posts, reviews and team members, and answers faster. It finds a phone however it's written and a product without its dash (“tshirt”). Use the arrow keys and Enter; your recent searches wait for you.",
+      bn: "সার্চে এখন পেজ, সেটিংস আর “add product”-এর মতো কাজ, সাথে ক্যাটাগরি, ব্র্যান্ড, ডিসকাউন্ট কোড, ব্লগ পোস্ট, রিভিউ ও টিম মেম্বারও পাওয়া যায়, আর উত্তর আসে আরও দ্রুত। ফোন নম্বর যেভাবেই লিখুন খুঁজে পায়, প্রোডাক্টের নাম ড্যাশ ছাড়া লিখলেও (“tshirt”)। অ্যারো কী আর Enter ব্যবহার করুন; আপনার সাম্প্রতিক খোঁজগুলো সেখানেই থাকবে।",
     },
   },
   {
@@ -502,6 +474,36 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     body: {
       en: "A visit where a shopper spent 10 seconds on a page was not being counted, so Engaged visits and Stay on read lower than they should. From today's visits on they are counted. Earlier days stay as they were.",
       bn: "যে ভিজিটে ক্রেতা একটি পেজে ১০ সেকেন্ড ছিলেন, তা গোনা হচ্ছিল না, তাই আগ্রহী ভিজিট আর থেকেছেন যতটা হওয়া উচিত তার চেয়ে কম দেখাত। আজকের ভিজিট থেকে এগুলো গোনা হয়। আগের দিনগুলো যেমন ছিল তেমনই থাকবে।",
+    },
+  },
+  {
+    id: "2026-09-29-your-contact-and-social-accounts-in-one-place",
+    date: "2026-09-29",
+    version: "4.125.0",
+    tag: "new",
+    href: "/settings?tab=store",
+    title: {
+      en: "Your contact and social accounts, in one place",
+      bn: "যোগাযোগ আর সোশ্যাল অ্যাকাউন্ট, এক জায়গায়",
+    },
+    body: {
+      en: "Settings > Store Info now has an Identity section for your phone, email, address and social accounts, from WhatsApp and Facebook to YouTube, Telegram, X, LinkedIn, Pinterest, Threads and Snapchat, in the order you like. Your footer, contact page and home page sign-up button all use them, and the sign-up button can open any of them. Your invoice terms and conditions moved to Settings > Policies.",
+      bn: "সেটিংস > স্টোর তথ্যে এখন পরিচিতি অংশ আছে, আপনার ফোন, ইমেইল, ঠিকানা আর সোশ্যাল অ্যাকাউন্টের জন্য, হোয়াটসঅ্যাপ আর ফেসবুক থেকে ইউটিউব, টেলিগ্রাম, এক্স, লিংকডইন, পিন্টারেস্ট, থ্রেডস ও স্ন্যাপচ্যাট পর্যন্ত, আপনার পছন্দের ক্রমে। আপনার ফুটার, যোগাযোগ পাতা আর হোম পেজের সাইন-আপ বোতাম এগুলোই ব্যবহার করে, আর সাইন-আপ বোতাম এর যেকোনোটি খুলতে পারে। ইনভয়েসের শর্তাবলী এখন সেটিংস > নীতিমালায়।",
+    },
+  },
+  {
+    id: "2026-09-28-download-your-analytics",
+    date: "2026-09-28",
+    version: "4.124.0",
+    tag: "new",
+    href: "/analytics",
+    title: {
+      en: "Download your analytics as an Excel file",
+      bn: "অ্যানালিটিক্স Excel ফাইলে ডাউনলোড করুন",
+    },
+    body: {
+      en: "The Download button on the Analytics page makes an Excel file of the section you are on, or of every section, for the days you picked, in English or Bangla. The numbers stay numbers, so you can sort and add them up. Top customers now show their full phone number on the page; the file hides part of it.",
+      bn: "অ্যানালিটিক্স পেজের ডাউনলোড বাটন আপনার বেছে নেওয়া দিনগুলোর জন্য এই অংশের, বা সব অংশের একটি Excel ফাইল তৈরি করে, ইংরেজি বা বাংলায়। সংখ্যাগুলো সংখ্যাই থাকে, তাই সাজানো আর যোগ করা যায়। শীর্ষ কাস্টমারদের পুরো ফোন নম্বর এখন পেজে দেখা যায়; ফাইলে এর কিছু অংশ লুকানো থাকে।",
     },
   },
   {
