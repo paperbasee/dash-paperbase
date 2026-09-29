@@ -88,6 +88,20 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-09-29-a-new-search-box",
+    date: "2026-09-29",
+    version: "4.150.0",
+    tag: "new",
+    title: {
+      en: "A new search box",
+      bn: "নতুন সার্চ বক্স",
+    },
+    body: {
+      en: "Search now also finds categories, brands, discount codes, blog posts, reviews and team members. Move through the results with the arrow keys and press Enter to open one, and your recent searches wait for you when you open it again.",
+      bn: "সার্চে এখন ক্যাটাগরি, ব্র্যান্ড, ডিসকাউন্ট কোড, ব্লগ পোস্ট, রিভিউ আর টিম মেম্বারও পাওয়া যায়। অ্যারো কী দিয়ে ফলাফলগুলোর মধ্যে যান, Enter চাপলেই খুলবে, আর আবার খুললে আপনার সাম্প্রতিক খোঁজগুলো সেখানেই থাকবে।",
+    },
+  },
+  {
     id: "2026-09-29-search-finds-pages-and-settings",
     date: "2026-09-29",
     version: "4.149.0",
@@ -488,21 +502,6 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     body: {
       en: "A visit where a shopper spent 10 seconds on a page was not being counted, so Engaged visits and Stay on read lower than they should. From today's visits on they are counted. Earlier days stay as they were.",
       bn: "যে ভিজিটে ক্রেতা একটি পেজে ১০ সেকেন্ড ছিলেন, তা গোনা হচ্ছিল না, তাই আগ্রহী ভিজিট আর থেকেছেন যতটা হওয়া উচিত তার চেয়ে কম দেখাত। আজকের ভিজিট থেকে এগুলো গোনা হয়। আগের দিনগুলো যেমন ছিল তেমনই থাকবে।",
-    },
-  },
-  {
-    id: "2026-09-29-your-contact-and-social-accounts-in-one-place",
-    date: "2026-09-29",
-    version: "4.125.0",
-    tag: "new",
-    href: "/settings?tab=store",
-    title: {
-      en: "Your contact and social accounts, in one place",
-      bn: "যোগাযোগ আর সোশ্যাল অ্যাকাউন্ট, এক জায়গায়",
-    },
-    body: {
-      en: "Settings > Store Info now has an Identity section for your phone, email, address and social accounts, from WhatsApp and Facebook to YouTube, Telegram, X, LinkedIn, Pinterest, Threads and Snapchat, in the order you like. Your footer, contact page and home page sign-up button all use them, and the sign-up button can open any of them. Your invoice terms and conditions moved to Settings > Policies.",
-      bn: "সেটিংস > স্টোর তথ্যে এখন পরিচিতি অংশ আছে, আপনার ফোন, ইমেইল, ঠিকানা আর সোশ্যাল অ্যাকাউন্টের জন্য, হোয়াটসঅ্যাপ আর ফেসবুক থেকে ইউটিউব, টেলিগ্রাম, এক্স, লিংকডইন, পিন্টারেস্ট, থ্রেডস ও স্ন্যাপচ্যাট পর্যন্ত, আপনার পছন্দের ক্রমে। আপনার ফুটার, যোগাযোগ পাতা আর হোম পেজের সাইন-আপ বোতাম এগুলোই ব্যবহার করে, আর সাইন-আপ বোতাম এর যেকোনোটি খুলতে পারে। ইনভয়েসের শর্তাবলী এখন সেটিংস > নীতিমালায়।",
     },
   },
   {
