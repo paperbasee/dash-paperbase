@@ -3984,6 +3984,7 @@
     "historyReturned": "Returned",
     "historyWrongNumber": "Marked wrong number",
     "historyShops": "{count, plural, one {# shop} other {# shops}}",
-    "historyEmpty": "No parcels to this number on Paperbase yet."
+    "historyEmpty": "No parcels to this number on Paperbase yet.",
+    "reportsTitle": "{count, plural, one {# report from other merchants} other {# reports from other merchants}}"
   }
 }

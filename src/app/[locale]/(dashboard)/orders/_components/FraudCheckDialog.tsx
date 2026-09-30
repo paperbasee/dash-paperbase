@@ -2,7 +2,7 @@
 
 import { useMemo } from "react";
 import { AlertTriangle, Loader2 } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 
 import {
   Dialog,
@@ -252,6 +252,59 @@ function Tile({ label, value, tone = "neutral" }: TileProps) {
   );
 }
 
+/** A fraud report another merchant filed, as the provider passes it on: what, by which courier, when. */
+export type FraudReport = { details: string; courier: string; reportedAt: string };
+
+/** The provider's reports (engine/apps/fraud_check/bdcourier_client.py), or none. */
+export function parseReports(response: unknown): FraudReport[] {
+  if (!response || typeof response !== "object") return [];
+  const raw = (response as Record<string, unknown>).reports;
+  if (!Array.isArray(raw)) return [];
+  return raw
+    .map((item) => {
+      if (!item || typeof item !== "object") return null;
+      const r = item as Record<string, unknown>;
+      const details = typeof r.details === "string" ? r.details.trim() : "";
+      if (!details) return null;
+      return {
+        details,
+        courier: typeof r.courier === "string" ? r.courier : "",
+        reportedAt: typeof r.reported_at === "string" ? r.reported_at : "",
+      };
+    })
+    .filter((r): r is FraudReport => r !== null);
+}
+
+/** What other merchants reported about this number, through the provider. */
+export function ReportsPanel({ reports }: { reports: FraudReport[] }) {
+  const t = useTranslations("fraudCheck");
+  const locale = useLocale();
+  const day = (iso: string) => {
+    const when = new Date(iso);
+    return Number.isNaN(when.getTime())
+      ? ""
+      : when.toLocaleDateString(locale === "bn" ? "bn-BD" : "en-GB", { day: "numeric", month: "short", year: "numeric" });
+  };
+  return (
+    <div className="rounded-card border border-red-600/30 bg-red-950/5 px-3 py-2">
+      <div className="text-xs font-semibold text-red-700">{t("reportsTitle", { count: reports.length })}</div>
+      <ul className="mt-2 space-y-1.5">
+        {reports.map((report, index) => (
+          <li key={index} className="text-sm text-foreground">
+            <span>{report.details}</span>
+            {report.courier || report.reportedAt ? (
+              <span className="text-xs text-muted-foreground">
+                {" · "}
+                {[report.courier, day(report.reportedAt)].filter(Boolean).join(" · ")}
+              </span>
+            ) : null}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
 export type FraudCheckDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -305,6 +358,7 @@ export function FraudCheckDialog({
   const t = useTranslations("fraudCheck");
   const summary = useMemo(() => parseSummary(response), [response]);
   const couriers = useMemo(() => parseCouriers(response), [response]);
+  const reports = useMemo(() => parseReports(response), [response]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -438,6 +492,7 @@ export function FraudCheckDialog({
                 </div>
               </div>
 
+              {reports.length > 0 ? <ReportsPanel reports={reports} /> : null}
               {history ? <HistoryPanel history={history} /> : null}
             </>
           )}

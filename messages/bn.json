@@ -3984,6 +3984,7 @@
     "historyReturned": "ফেরত এসেছে",
     "historyWrongNumber": "ভুল নম্বর বলেছে",
     "historyShops": "{count}টি দোকান",
-    "historyEmpty": "Paperbase-এ এই নম্বরে এখনো কোনো পার্সেল যায়নি।"
+    "historyEmpty": "Paperbase-এ এই নম্বরে এখনো কোনো পার্সেল যায়নি।",
+    "reportsTitle": "অন্য মার্চেন্টদের {count}টি রিপোর্ট"
   }
 }
