@@ -28,7 +28,7 @@ describe("the badge", () => {
     expect(html).toContain("Good buyer: 25 parcels, 96% delivered");
     expect(html).toContain("emerald");
     // The ring's arc is that share of the way round.
-    const around = 2 * Math.PI * 18.5;
+    const around = 2 * Math.PI * 20.5;
     expect(html).toContain(`stroke-dasharray="${((96.4 / 100) * around).toString()} ${around.toString()}"`);
   });
 

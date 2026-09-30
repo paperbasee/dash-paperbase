@@ -47,7 +47,7 @@ export function isFraudRiskLevel(value: unknown): value is FraudRiskLevel {
   return value === "safe" || value === "caution" || value === "new" || value === "risky";
 }
 
-const SIZE = 40;
+const SIZE = 44;
 const STROKE = 3;
 const RADIUS = (SIZE - STROKE) / 2;
 const AROUND = 2 * Math.PI * RADIUS;
@@ -56,7 +56,7 @@ const AROUND = 2 * Math.PI * RADIUS;
 function Ring({ level, share }: { level: FraudRiskLevel; share: number | null }) {
   const filled = share === null ? 0 : Math.max(0, Math.min(100, share));
   return (
-    <span className="relative inline-flex size-10 shrink-0 items-center justify-center" aria-hidden>
+    <span className="relative inline-flex size-11 shrink-0 items-center justify-center" aria-hidden>
       <svg viewBox={`0 0 ${SIZE} ${SIZE}`} className="absolute inset-0 size-full -rotate-90">
         <circle
           cx={SIZE / 2}
