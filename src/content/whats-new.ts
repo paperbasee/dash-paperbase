@@ -88,6 +88,21 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-09-29-a-fuller-fraud-check",
+    date: "2026-09-29",
+    version: "4.151.0",
+    tag: "new",
+    title: {
+      en: "A fuller fraud check",
+      bn: "আরও পূর্ণাঙ্গ ফ্রড চেক",
+    },
+    body: {
+      en: "The fraud check now shows a customer's parcels at every courier (Pathao, Steadfast, RedX, Paperfly, CarryBee and more), fraud reports from other merchants, and how their parcels went in every shop on Paperbase. You see counts, never which shops.",
+      bn: "ফ্রড চেক এখন দেখায় সব কুরিয়ারে (পাঠাও, স্টেডফাস্ট, রেডএক্স, পেপারফ্লাই, ক্যারিবি ও আরও) ক্রেতার পার্সেলের হিসাব, অন্য মার্চেন্টদের ফ্রড রিপোর্ট, আর Paperbase-এর সব দোকানে তাঁর পার্সেলগুলোর কী হয়েছে। আপনি শুধু সংখ্যা দেখবেন, কোন দোকান তা কখনো নয়।",
+    },
+    href: "/orders",
+  },
+  {
     id: "2026-09-29-a-new-search-box",
     date: "2026-09-29",
     version: "4.150.0",
@@ -100,21 +115,6 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
       en: "Search now finds pages, settings and actions like “add product”, plus categories, brands, discount codes, blog posts, reviews and team members, and answers faster. It finds a phone however it's written and a product without its dash (“tshirt”). Use the arrow keys and Enter; your recent searches wait for you.",
       bn: "সার্চে এখন পেজ, সেটিংস আর “add product”-এর মতো কাজ, সাথে ক্যাটাগরি, ব্র্যান্ড, ডিসকাউন্ট কোড, ব্লগ পোস্ট, রিভিউ ও টিম মেম্বারও পাওয়া যায়, আর উত্তর আসে আরও দ্রুত। ফোন নম্বর যেভাবেই লিখুন খুঁজে পায়, প্রোডাক্টের নাম ড্যাশ ছাড়া লিখলেও (“tshirt”)। অ্যারো কী আর Enter ব্যবহার করুন; আপনার সাম্প্রতিক খোঁজগুলো সেখানেই থাকবে।",
     },
-  },
-  {
-    id: "2026-09-29-paperbase-history-in-fraud-check",
-    date: "2026-09-29",
-    version: "4.147.0",
-    tag: "new",
-    title: {
-      en: "See how a customer's parcels went across Paperbase",
-      bn: "Paperbase জুড়ে ক্রেতার পার্সেলের হিসাব দেখুন",
-    },
-    body: {
-      en: "The fraud check now shows how a phone number's parcels went in every shop on Paperbase: how many were delivered, how many came back, and how many shops found it a wrong number. You see only the counts, never which shops.",
-      bn: "ফ্রড চেক এখন দেখায় Paperbase-এর সব দোকানে একটি ফোন নম্বরের পার্সেলগুলোর কী হয়েছে: কতগুলো ডেলিভার হয়েছে, কতগুলো ফেরত এসেছে, আর কয়টি দোকান একে ভুল নম্বর বলেছে। আপনি শুধু সংখ্যা দেখবেন, কোন দোকান তা কখনো নয়।",
-    },
-    href: "/orders",
   },
   {
     id: "2026-09-29-search-follows-each-members-access",
