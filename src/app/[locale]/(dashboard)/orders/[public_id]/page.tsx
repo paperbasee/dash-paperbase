@@ -80,6 +80,7 @@ import { notify, normalizeError } from "@/notifications";
 import { cn } from "@/lib/utils";
 import { useEnterNavigation } from "@/hooks/useEnterNavigation";
 import { useConfirm } from "@/context/ConfirmDialogContext";
+import { FraudBadge, isFraudRiskLevel } from "../_components/FraudBadge";
 
 type EditForm = {
   shipping_name: string;
@@ -1338,8 +1339,15 @@ export default function OrderDetailPage() {
                     <p className="text-sm text-muted-foreground">
                       {order.email || "—"}
                     </p>
-                    <p className="text-sm text-muted-foreground">
-                      {order.phone || "—"}
+                    <p className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+                      <span>{order.phone || "—"}</span>
+                      {isFraudRiskLevel(order.fraud_risk) ? (
+                        <FraudBadge
+                          level={order.fraud_risk}
+                          successRatio={order.fraud_success_ratio}
+                          totalParcels={order.fraud_total_parcels}
+                        />
+                      ) : null}
                     </p>
                   </div>
                 </div>

@@ -127,6 +127,11 @@ export interface Order {
     | "unknown";
   delivery_status_updated_at: string | null;
   last_tracking_message: string;
+  /** The fraud check's colour, kept when the order was checked; "" never checked. */
+  fraud_risk?: "safe" | "caution" | "new" | "risky" | "";
+  fraud_success_ratio?: number | null;
+  fraud_total_parcels?: number | null;
+  fraud_checked_at?: string | null;
   items?: OrderItem[];
   items_count?: number;
   has_unavailable_products?: boolean;

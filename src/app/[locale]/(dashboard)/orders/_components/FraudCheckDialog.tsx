@@ -15,7 +15,7 @@ import {
 import { cn } from "@/lib/utils";
 
 import { CourierLogo, normalizeCourierKey } from "./CourierItem";
-import type { PhoneHistory } from "./types";
+import type { FraudRisk, PhoneHistory } from "./types";
 
 type Summary = {
   total: number | null;
@@ -305,6 +305,32 @@ export function ReportsPanel({ reports }: { reports: FraudReport[] }) {
   );
 }
 
+const ADVICE_TONE: Record<FraudRisk["level"], string> = {
+  safe: "border-emerald-600/30 bg-emerald-500/10 text-emerald-800 dark:text-emerald-300",
+  caution: "border-amber-600/30 bg-amber-500/10 text-amber-800 dark:text-amber-300",
+  new: "border-amber-600/30 bg-amber-500/10 text-amber-800 dark:text-amber-300",
+  risky: "border-red-600/30 bg-red-500/10 text-red-800 dark:text-red-300",
+};
+
+const ADVICE_KEYS: Record<FraudRisk["level"], { name: string; advice: string }> = {
+  safe: { name: "riskSafe", advice: "adviceSafe" },
+  caution: { name: "riskCaution", advice: "adviceCaution" },
+  new: { name: "riskNew", advice: "adviceNew" },
+  risky: { name: "riskRisky", advice: "adviceRisky" },
+};
+
+/** What the colour means for this order, in plain words, above the numbers. */
+export function AdvicePanel({ risk }: { risk: FraudRisk }) {
+  const t = useTranslations("fraudCheck");
+  const keys = ADVICE_KEYS[risk.level];
+  return (
+    <div className={cn("rounded-card border px-3 py-2", ADVICE_TONE[risk.level])}>
+      <div className="text-sm font-semibold">{t(keys.name)}</div>
+      <div className="text-sm">{t(keys.advice)}</div>
+    </div>
+  );
+}
+
 export type FraudCheckDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -315,6 +341,8 @@ export type FraudCheckDialogProps = {
   warningText?: string | null;
   /** How this number's parcels went in every shop on Paperbase; null before an answer. */
   history?: PhoneHistory | null;
+  /** The colour the check came to (risk.py); null when nothing could be said. */
+  risk?: FraudRisk | null;
 };
 
 /**
@@ -353,6 +381,7 @@ export function FraudCheckDialog({
   errorText,
   warningText,
   history,
+  risk,
 }: FraudCheckDialogProps) {
   const tCommon = useTranslations("common");
   const t = useTranslations("fraudCheck");
@@ -400,6 +429,7 @@ export function FraudCheckDialog({
             </div>
           ) : (
             <>
+              {risk ? <AdvicePanel risk={risk} /> : null}
               <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
                 <Tile
                   label={t("totalParcels")}

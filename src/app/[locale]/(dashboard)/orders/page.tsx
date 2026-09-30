@@ -65,6 +65,7 @@ import { OrderPreviewTriggerButton } from "@/components/orders/order-preview";
 import { FraudCheckButton } from "./_components/FraudCheckButton";
 import { AutopilotStatusPill } from "./_components/AutopilotStatusPill";
 import type { FraudCheckApiOk, FraudCheckState } from "./_components/types";
+import { FraudBadge, isFraudRiskLevel } from "./_components/FraudBadge";
 import { useFeatures } from "@/hooks/useFeatures";
 import { useNavCounts } from "@/hooks/useNavCounts";
 import { usePermissions } from "@/context/PermissionsContext";
@@ -1005,11 +1006,28 @@ export default function OrdersPage() {
     try {
       const { data } = await api.post<FraudCheckApiOk>("fraud-check/", {
         phone: order.phone,
+        // The order keeps the colour the check comes to (its badge in this list).
+        order: order.public_id,
       });
       setFraudByOrderId((prev) => ({
         ...prev,
         [key]: { kind: "ready", data },
       }));
+      const found = data.risk;
+      if (found) {
+        patchOrdersList((results) =>
+          results.map((row) =>
+            row.public_id === order.public_id
+              ? {
+                  ...row,
+                  fraud_risk: found.level,
+                  fraud_success_ratio: found.success_ratio,
+                  fraud_total_parcels: found.total_parcels,
+                }
+              : row
+          )
+        );
+      }
     } catch (err: unknown) {
       const normalized = normalizeError(err, "Failed to run fraud check.");
       const status = (() => {
@@ -1385,7 +1403,15 @@ export default function OrdersPage() {
                           {order.phone || "—"}
                         </td>
                         <td className="px-4 py-3 whitespace-nowrap">
-                          {canRunFraudCheck ? (
+                          {canRunFraudCheck && canFraudCheck && isFraudRiskLevel(order.fraud_risk) ? (
+                            // Checked already (on arrival, or by hand): its colour, which opens the details.
+                            <FraudBadge
+                              level={order.fraud_risk}
+                              successRatio={order.fraud_success_ratio}
+                              totalParcels={order.fraud_total_parcels}
+                              onClick={() => handleFraudCheck(order)}
+                            />
+                          ) : canRunFraudCheck ? (
                             <FraudCheckButton
                               loading={fraud.kind === "loading"}
                               disabled={!order.phone}
@@ -1614,6 +1640,12 @@ export default function OrdersPage() {
               fraudDialogOrderId && fraudByOrderId[fraudDialogOrderId]?.kind === "ready"
                 ? (fraudByOrderId[fraudDialogOrderId] as { kind: "ready"; data: FraudCheckApiOk }).data
                     ?.history ?? null
+                : null
+            }
+            risk={
+              fraudDialogOrderId && fraudByOrderId[fraudDialogOrderId]?.kind === "ready"
+                ? (fraudByOrderId[fraudDialogOrderId] as { kind: "ready"; data: FraudCheckApiOk }).data
+                    ?.risk ?? null
                 : null
             }
             warningText={
