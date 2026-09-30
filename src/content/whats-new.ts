@@ -88,17 +88,17 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
-    id: "2026-09-29-a-fuller-fraud-check",
+    id: "2026-09-29-a-fraud-colour-on-every-order",
     date: "2026-09-29",
-    version: "4.151.0",
+    version: "4.152.0",
     tag: "new",
     title: {
-      en: "A fuller fraud check",
-      bn: "আরও পূর্ণাঙ্গ ফ্রড চেক",
+      en: "A fraud colour on every order",
+      bn: "প্রতিটি অর্ডারে ফ্রড রঙ",
     },
     body: {
-      en: "The fraud check now shows a customer's parcels at every courier (Pathao, Steadfast, RedX, Paperfly, CarryBee and more), fraud reports from other merchants, and how their parcels went in every shop on Paperbase. You see counts, never which shops.",
-      bn: "ফ্রড চেক এখন দেখায় সব কুরিয়ারে (পাঠাও, স্টেডফাস্ট, রেডএক্স, পেপারফ্লাই, ক্যারিবি ও আরও) ক্রেতার পার্সেলের হিসাব, অন্য মার্চেন্টদের ফ্রড রিপোর্ট, আর Paperbase-এর সব দোকানে তাঁর পার্সেলগুলোর কী হয়েছে। আপনি শুধু সংখ্যা দেখবেন, কোন দোকান তা কখনো নয়।",
+      en: "Every order now shows a colour: green for a good buyer, yellow to be careful, red for risky, with the share of parcels delivered. The fraud check shows the customer's parcels at every courier, reports from other merchants and their history across Paperbase, and tells you what to do.",
+      bn: "প্রতিটি অর্ডারে এখন একটি রঙ দেখায়: ভালো ক্রেতার জন্য সবুজ, সাবধান হওয়ার জন্য হলুদ, ঝুঁকিপূর্ণ হলে লাল, সাথে কত শতাংশ পার্সেল ডেলিভার হয়েছে। ফ্রড চেকে সব কুরিয়ারে ক্রেতার পার্সেল, অন্য মার্চেন্টদের রিপোর্ট আর Paperbase জুড়ে তাঁর হিসাব দেখা যায়, আর কী করবেন তাও বলে দেয়।",
     },
     href: "/orders",
   },
