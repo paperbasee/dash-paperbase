@@ -88,6 +88,21 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-09-30-courier-logos-easy-to-see",
+    date: "2026-09-30",
+    version: "4.153.2",
+    tag: "fixed",
+    title: {
+      en: "Courier logos are easy to see",
+      bn: "কুরিয়ারের লোগো এখন সহজে দেখা যায়",
+    },
+    body: {
+      en: "In the fraud check, each courier now shows as its logo on a white tile, so dark logos like SteadFast's show clearly in dark mode too.",
+      bn: "ফ্রড চেকে এখন প্রতিটি কুরিয়ার তার লোগো দিয়ে সাদা ঘরে দেখায়, তাই SteadFast-এর মতো গাঢ় লোগোও ডার্ক মোডে পরিষ্কার দেখা যায়।",
+    },
+    href: "/orders",
+  },
+  {
     id: "2026-09-30-a-fraud-colour-on-every-order",
     date: "2026-09-30",
     version: "4.153.0",
@@ -504,20 +519,5 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
       en: "Settings > Store Info now has an Identity section for your phone, email, address and social accounts, from WhatsApp and Facebook to YouTube, Telegram, X, LinkedIn, Pinterest, Threads and Snapchat, in the order you like. Your footer, contact page and home page sign-up button all use them, and the sign-up button can open any of them. Your invoice terms and conditions moved to Settings > Policies.",
       bn: "সেটিংস > স্টোর তথ্যে এখন পরিচিতি অংশ আছে, আপনার ফোন, ইমেইল, ঠিকানা আর সোশ্যাল অ্যাকাউন্টের জন্য, হোয়াটসঅ্যাপ আর ফেসবুক থেকে ইউটিউব, টেলিগ্রাম, এক্স, লিংকডইন, পিন্টারেস্ট, থ্রেডস ও স্ন্যাপচ্যাট পর্যন্ত, আপনার পছন্দের ক্রমে। আপনার ফুটার, যোগাযোগ পাতা আর হোম পেজের সাইন-আপ বোতাম এগুলোই ব্যবহার করে, আর সাইন-আপ বোতাম এর যেকোনোটি খুলতে পারে। ইনভয়েসের শর্তাবলী এখন সেটিংস > নীতিমালায়।",
     },
-  },
-  {
-    id: "2026-09-22-theme-editor-and-live-preview",
-    date: "2026-09-22",
-    version: "4.118.6",
-    tag: "new",
-    title: {
-      en: "Design your store",
-      bn: "নিজের মতো স্টোর সাজান",
-    },
-    body: {
-      en: "In Settings → Customization, open the editor to see your real store as your shoppers will — on a phone or a computer, in your own fonts and colours — and click any part of it to change it in a calm panel beside it, where every part of the page is also listed with your colours, corners and product cards, and where you can always upload a new picture however many you have placed. The cart, checkout, wishlist and account pages are filled with a sample of your own products so you can see them full, nothing in that sample is saved, and a refresh keeps you on the page you were working on. What you change — your social links too, which moved here from Settings to the footer's Social links — stays hidden from your shoppers until you press Save to store, and customizing your store is part of the Premium plan.",
-      bn: "সেটিংস → কাস্টমাইজেশন থেকে এডিটর খুললে আপনার আসল স্টোরটি দেখবেন, ঠিক যেমন ক্রেতারা দেখবেন — ফোনে বা কম্পিউটারে, আপনার নিজের ফন্ট ও রঙে — আর যেকোনো অংশে ক্লিক করে পাশের একটি শান্ত প্যানেলে তা বদলান, যেখানে পাতার প্রতিটি অংশের তালিকা আর আপনার রং, কোণ ও পণ্যের কার্ডও থাকে, আর যত ছবিই রাখুন, নতুন ছবি সবসময় আপলোড করতে পারবেন। কার্ট, চেকআউট, উইশলিস্ট আর অ্যাকাউন্ট পাতা আপনার নিজের পণ্যের একটি নমুনা দিয়ে ভরা থাকে, যাতে পুরো পাতাটি দেখতে পান, সেই নমুনার কিছুই সেভ হয় না, আর পাতা রিফ্রেশ করলেও আপনি যে পাতায় কাজ করছিলেন সেখানেই থাকেন। যা বদলান — সেটিংস থেকে এখানে ফুটারের সোশ্যাল লিংকে সরে আসা আপনার সোশ্যাল লিংকসহ — তা ক্রেতারা দেখেন না, স্টোরে সংরক্ষণ বাটনে চাপলেই তা স্টোরে যায়; স্টোর সাজানো প্রিমিয়াম প্ল্যানের অংশ।",
-    },
-    href: "/settings?tab=customization",
   },
 ];

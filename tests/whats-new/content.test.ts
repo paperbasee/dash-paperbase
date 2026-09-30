@@ -137,13 +137,4 @@ describe("what's new content", () => {
     }
   });
 
-  it("announces the theme editor once, linking to Customization", () => {
-    const themeNotes = WHATS_NEW_ENTRIES.filter((e) =>
-      e.id.endsWith("-theme-editor-and-live-preview"),
-    );
-    expect(themeNotes).toHaveLength(1);
-    expect(themeNotes[0]?.tag).toBe("new");
-    expect(themeNotes[0]?.href).toBe("/settings?tab=customization");
-  });
-
 });
