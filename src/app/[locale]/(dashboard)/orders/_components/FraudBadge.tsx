@@ -80,9 +80,9 @@ function Ring({ level, share }: { level: FraudRiskLevel; share: number | null })
           />
         ) : null}
       </svg>
-      <span className="flex items-baseline text-[11px] font-semibold tabular-nums tracking-tight text-foreground">
-        {share === null ? "–" : Math.round(filled)}
-        {share === null ? null : <span className="text-[7px] font-medium text-muted-foreground">%</span>}
+      {/* The % the same size as the number (owner, 2026-09-30: a smaller one "looks small"). */}
+      <span className="text-[11px] font-semibold tabular-nums tracking-tight text-foreground">
+        {share === null ? "–" : `${Math.round(filled)}%`}
       </span>
     </span>
   );

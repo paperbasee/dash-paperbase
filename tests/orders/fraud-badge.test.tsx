@@ -22,7 +22,7 @@ function render(node: React.ReactNode, locale: "en" | "bn" = "en") {
 describe("the badge", () => {
   test("a ring filled to the share delivered, with what it means and the parcels beside it", () => {
     const html = render(<FraudBadge level="safe" successRatio={96.4} totalParcels={25} />);
-    expect(html).toMatch(/>96<span[^>]*>%<\/span>/);
+    expect(html).toContain(">96%<");
     expect(html).toContain(">Good buyer<");
     expect(html).toContain(">25 parcels<");
     expect(html).toContain("Good buyer: 25 parcels, 96% delivered");
@@ -42,7 +42,7 @@ describe("the badge", () => {
     expect(html).toContain(">New buyer<");
     expect(html).toContain(">No parcels yet<");
     expect(html).toContain("No parcels on record yet");
-    expect(html).not.toContain(">%<");
+    expect(html).not.toContain("%<");
   });
 
   test("with a way to open the details it is a button; without, it only tells", () => {
