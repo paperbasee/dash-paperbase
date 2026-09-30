@@ -3997,6 +3997,11 @@
     "adviceNew": "No parcels on record yet. You may want to call to confirm.",
     "adviceRisky": "Many of this customer's parcels came back. Call first, or hold this order.",
     "riskParcelsShort": "{count, plural, one {# parcel} other {# parcels}}",
-    "riskNoParcelsShort": "No parcels yet"
+    "riskNoParcelsShort": "No parcels yet",
+    "checkedAgo": "Checked {when}",
+    "checkAgain": "Check again",
+    "checkingAgain": "Checking…",
+    "checkAgainFailed": "Could not check again right now. This is the report kept from before.",
+    "checkAgainLimit": "Today's checks are used up. This is the report kept from before."
   }
 }

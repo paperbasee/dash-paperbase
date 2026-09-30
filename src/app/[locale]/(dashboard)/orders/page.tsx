@@ -65,6 +65,7 @@ import { OrderPreviewTriggerButton } from "@/components/orders/order-preview";
 import { FraudCheckButton } from "./_components/FraudCheckButton";
 import { AutopilotStatusPill } from "./_components/AutopilotStatusPill";
 import type { FraudCheckApiOk, FraudCheckState } from "./_components/types";
+import { errorStatus, loadFraudCheck } from "./_components/fraudCheckApi";
 import { FraudBadge, isFraudRiskLevel } from "./_components/FraudBadge";
 import { useFeatures } from "@/hooks/useFeatures";
 import { useNavCounts } from "@/hooks/useNavCounts";
@@ -220,6 +221,7 @@ export default function OrdersPage() {
   const tNav = useTranslations("nav");
   const tPages = useTranslations("pages");
   const tCommon = useTranslations("common");
+  const tFraud = useTranslations("fraudCheck");
   const { currencySymbol } = useBranding();
   const queryClient = useQueryClient();
   const confirm = useConfirm();
@@ -991,24 +993,33 @@ export default function OrdersPage() {
     (orders.length > 0 && selectedIds.size === orders.length);
   const someSelected = globalSelectActive || selectedIds.size > 0;
 
-  async function handleFraudCheck(order: Order) {
+  async function handleFraudCheck(order: Order, { fresh = false }: { fresh?: boolean } = {}) {
     const key = order.public_id;
     const existing = fraudByOrderId[key];
-    if (existing?.kind === "ready") {
+    if (!fresh && existing?.kind === "ready") {
       setFraudDialogOrderId(key);
       return;
     }
-    if (existing?.kind === "loading") return;
+    if (existing?.kind === "loading" || (existing?.kind === "ready" && existing.refreshing)) return;
+    // A "Check again" keeps the report on screen until the new answer comes.
+    const kept = fresh && existing?.kind === "ready" && existing.data.status === "success" ? existing : null;
 
-    setFraudByOrderId((prev) => ({ ...prev, [key]: { kind: "loading" } }));
+    setFraudByOrderId((prev) => ({
+      ...prev,
+      [key]: kept ? { ...kept, refreshing: true, refreshError: undefined } : { kind: "loading" },
+    }));
     setFraudDialogOrderId(key);
 
     try {
-      const { data } = await api.post<FraudCheckApiOk>("fraud-check/", {
-        phone: order.phone,
-        // The order keeps the colour the check comes to (its badge in this list).
-        order: order.public_id,
-      });
+      const data = await loadFraudCheck(api, order, { fresh, canCheck: canRunFraudCheck });
+      if (kept && data.status !== "success") {
+        // No new answer: the order keeps the report it had, and so does this screen.
+        setFraudByOrderId((prev) => ({
+          ...prev,
+          [key]: { ...kept, refreshing: false, refreshError: tFraud("checkAgainFailed") },
+        }));
+        return;
+      }
       setFraudByOrderId((prev) => ({
         ...prev,
         [key]: { kind: "ready", data },
@@ -1023,27 +1034,38 @@ export default function OrdersPage() {
                   fraud_risk: found.level,
                   fraud_success_ratio: found.success_ratio,
                   fraud_total_parcels: found.total_parcels,
+                  fraud_report: row.fraud_report || data.status === "success",
                 }
               : row
           )
         );
       }
     } catch (err: unknown) {
+      const status = errorStatus(err);
+      if (kept) {
+        setFraudByOrderId((prev) => ({
+          ...prev,
+          [key]: {
+            ...kept,
+            refreshing: false,
+            refreshError: tFraud(status === 429 ? "checkAgainLimit" : "checkAgainFailed"),
+          },
+        }));
+        return;
+      }
       const normalized = normalizeError(err, "Failed to run fraud check.");
-      const status = (() => {
-        if (!err || typeof err !== "object") return undefined;
-        if (!("response" in err)) return undefined;
-        const resp = (err as Record<string, unknown>).response;
-        if (!resp || typeof resp !== "object") return undefined;
-        const s = (resp as Record<string, unknown>).status;
-        return typeof s === "number" ? s : undefined;
-      })();
       setFraudByOrderId((prev) => ({
         ...prev,
         [key]: { kind: "error", message: normalized.message, status },
       }));
     }
   }
+
+  const fraudState = fraudDialogOrderId ? fraudByOrderId[fraudDialogOrderId] : undefined;
+  const fraudReady = fraudState?.kind === "ready" ? fraudState : null;
+  const fraudDialogOrder = fraudDialogOrderId
+    ? orders.find((o) => o.public_id === fraudDialogOrderId)
+    : undefined;
 
   return (
     <div className="space-y-6">
@@ -1403,13 +1425,16 @@ export default function OrdersPage() {
                           {order.phone || "—"}
                         </td>
                         <td className="px-4 py-3 whitespace-nowrap">
-                          {canRunFraudCheck && canFraudCheck && isFraudRiskLevel(order.fraud_risk) ? (
-                            // Checked already (on arrival, or by hand): its colour, which opens the details.
+                          {canFraudCheck && isFraudRiskLevel(order.fraud_risk) ? (
+                            // Checked already (on arrival, or by hand): its colour, which opens the
+                            // kept report -- for anyone who sees orders, since it costs nothing.
                             <FraudBadge
                               level={order.fraud_risk}
                               successRatio={order.fraud_success_ratio}
                               totalParcels={order.fraud_total_parcels}
-                              onClick={() => handleFraudCheck(order)}
+                              onClick={
+                                order.fraud_report || canRunFraudCheck ? () => handleFraudCheck(order) : undefined
+                              }
                             />
                           ) : canRunFraudCheck ? (
                             <FraudCheckButton
@@ -1620,59 +1645,29 @@ export default function OrdersPage() {
             onOpenChange={(open) => {
               if (!open) setFraudDialogOrderId(null);
             }}
-            phone={
-              fraudDialogOrderId
-                ? orders.find((o) => o.public_id === fraudDialogOrderId)?.phone
-                : null
-            }
-            loading={
-              fraudDialogOrderId
-                ? (fraudByOrderId[fraudDialogOrderId]?.kind ?? "idle") === "loading"
-                : false
-            }
-            response={
-              fraudDialogOrderId && fraudByOrderId[fraudDialogOrderId]?.kind === "ready"
-                ? (fraudByOrderId[fraudDialogOrderId] as { kind: "ready"; data: FraudCheckApiOk }).data
-                    ?.response ?? null
-                : null
-            }
-            history={
-              fraudDialogOrderId && fraudByOrderId[fraudDialogOrderId]?.kind === "ready"
-                ? (fraudByOrderId[fraudDialogOrderId] as { kind: "ready"; data: FraudCheckApiOk }).data
-                    ?.history ?? null
-                : null
-            }
-            risk={
-              fraudDialogOrderId && fraudByOrderId[fraudDialogOrderId]?.kind === "ready"
-                ? (fraudByOrderId[fraudDialogOrderId] as { kind: "ready"; data: FraudCheckApiOk }).data
-                    ?.risk ?? null
-                : null
+            phone={fraudDialogOrder?.phone ?? null}
+            loading={fraudState?.kind === "loading"}
+            response={fraudReady?.data.response ?? null}
+            history={fraudReady?.data.history ?? null}
+            risk={fraudReady?.data.risk ?? null}
+            checkedAt={fraudReady?.data.checked_at ?? null}
+            checkingAgain={Boolean(fraudReady?.refreshing)}
+            onCheckAgain={
+              fraudReady && fraudDialogOrder && canRunFraudCheck && canFraudCheck
+                ? () => handleFraudCheck(fraudDialogOrder, { fresh: true })
+                : undefined
             }
             warningText={
-              fraudDialogOrderId &&
-              fraudByOrderId[fraudDialogOrderId]?.kind === "ready" &&
-              fraudStatus(
-                (fraudByOrderId[fraudDialogOrderId] as { kind: "ready"; data: FraudCheckApiOk }).data
-              ) === "limit_exceeded"
-                ? fraudDetail(
-                    (fraudByOrderId[fraudDialogOrderId] as { kind: "ready"; data: FraudCheckApiOk })
-                      .data
-                  ) ?? "Limit exceeded."
-                : null
+              fraudReady?.refreshError ??
+              (fraudReady && fraudStatus(fraudReady.data) === "limit_exceeded"
+                ? fraudDetail(fraudReady.data) ?? "Limit exceeded."
+                : null)
             }
             errorText={
-              fraudDialogOrderId && fraudByOrderId[fraudDialogOrderId]?.kind === "error"
-                ? (fraudByOrderId[fraudDialogOrderId] as { kind: "error"; message: string }).message
-                : fraudDialogOrderId &&
-                    fraudByOrderId[fraudDialogOrderId]?.kind === "ready" &&
-                    fraudStatus(
-                      (fraudByOrderId[fraudDialogOrderId] as { kind: "ready"; data: FraudCheckApiOk })
-                        .data
-                    ) === "error"
-                  ? fraudDetail(
-                      (fraudByOrderId[fraudDialogOrderId] as { kind: "ready"; data: FraudCheckApiOk })
-                        .data
-                    ) ?? "Fraud check failed."
+              fraudState?.kind === "error"
+                ? fraudState.message
+                : fraudReady && fraudStatus(fraudReady.data) === "error"
+                  ? fraudDetail(fraudReady.data) ?? "Fraud check failed."
                   : null
             }
           />

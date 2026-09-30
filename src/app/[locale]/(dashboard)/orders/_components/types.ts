@@ -19,6 +19,8 @@ export type FraudCheckApiOk = {
   cached?: boolean;
   status?: string;
   log_id?: number | null;
+  /** When the provider was asked for this answer (a kept report's own time). */
+  checked_at?: string | null;
   response?: unknown;
   history?: PhoneHistory | null;
   /** None when nothing could be said (the provider failed and Paperbase knows no parcels). */
@@ -28,6 +30,13 @@ export type FraudCheckApiOk = {
 export type FraudCheckState =
   | { kind: "idle" }
   | { kind: "loading" }
-  | { kind: "ready"; data: FraudCheckApiOk }
+  | {
+      kind: "ready";
+      data: FraudCheckApiOk;
+      /** A "Check again" is under way; `data` stays shown until it answers. */
+      refreshing?: boolean;
+      /** Why the last "Check again" got no new answer (`data` is the report kept before). */
+      refreshError?: string;
+    }
   | { kind: "error"; message: string; status?: number };
 

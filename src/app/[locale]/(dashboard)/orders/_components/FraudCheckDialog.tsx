@@ -1,8 +1,8 @@
 "use client";
 
 import { useMemo } from "react";
-import { AlertTriangle, Loader2 } from "lucide-react";
-import { useLocale, useTranslations } from "next-intl";
+import { AlertTriangle, Clock, Loader2, RefreshCw } from "lucide-react";
+import { useFormatter, useLocale, useNow, useTranslations } from "next-intl";
 
 import {
   Dialog,
@@ -12,6 +12,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 import { CourierLogo, normalizeCourierKey } from "./CourierItem";
@@ -343,7 +344,50 @@ export type FraudCheckDialogProps = {
   history?: PhoneHistory | null;
   /** The colour the check came to (risk.py); null when nothing could be said. */
   risk?: FraudRisk | null;
+  /** When the provider was asked for this answer: a kept report can be days old. */
+  checkedAt?: string | null;
+  /** Ask the provider again whatever is kept ("Check again"); left out when not allowed. */
+  onCheckAgain?: () => void;
+  /** A "Check again" is under way: the answer shown stays until the new one comes. */
+  checkingAgain?: boolean;
 };
+
+/**
+ * When the answer shown was asked for (an order's report is kept from when it arrived, owner
+ * 2026-09-30), and a way to ask again: it spends a check of the plan, so only on a click.
+ */
+export function CheckedBar({
+  checkedAt,
+  onCheckAgain,
+  checkingAgain = false,
+}: Pick<FraudCheckDialogProps, "checkedAt" | "onCheckAgain" | "checkingAgain">) {
+  const t = useTranslations("fraudCheck");
+  const format = useFormatter();
+  const now = useNow({ updateInterval: 60_000 });
+  const at = checkedAt ? new Date(checkedAt) : null;
+  const known = at !== null && !Number.isNaN(at.getTime());
+  if (!known && !onCheckAgain) return null;
+  return (
+    <div className="flex items-center justify-between gap-3">
+      <span className="inline-flex min-w-0 items-center gap-1.5 text-xs text-muted-foreground">
+        {known ? (
+          <>
+            <Clock className="size-3.5 shrink-0" aria-hidden />
+            <time dateTime={at.toISOString()} title={format.dateTime(at, { dateStyle: "medium", timeStyle: "short" })}>
+              {t("checkedAgo", { when: format.relativeTime(at, now) })}
+            </time>
+          </>
+        ) : null}
+      </span>
+      {onCheckAgain ? (
+        <Button type="button" variant="outline" size="sm" onClick={onCheckAgain} disabled={checkingAgain}>
+          <RefreshCw className={cn("size-3.5", checkingAgain && "animate-spin")} aria-hidden />
+          {checkingAgain ? t("checkingAgain") : t("checkAgain")}
+        </Button>
+      ) : null}
+    </div>
+  );
+}
 
 /**
  * Paperbase's own history for the number: counts from every shop, never which shop.
@@ -382,6 +426,9 @@ export function FraudCheckDialog({
   warningText,
   history,
   risk,
+  checkedAt,
+  onCheckAgain,
+  checkingAgain,
 }: FraudCheckDialogProps) {
   const tCommon = useTranslations("common");
   const t = useTranslations("fraudCheck");
@@ -409,6 +456,10 @@ export function FraudCheckDialog({
         </DialogHeader>
 
         <div className="space-y-3 p-3 sm:p-4">
+          {loading ? null : (
+            <CheckedBar checkedAt={checkedAt} onCheckAgain={onCheckAgain} checkingAgain={checkingAgain} />
+          )}
+
           {warningText ? (
             <div className="flex items-start gap-2 rounded-ui border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">
               <AlertTriangle className="mt-0.5 size-4 shrink-0" />

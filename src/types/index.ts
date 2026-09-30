@@ -132,6 +132,8 @@ export interface Order {
   fraud_success_ratio?: number | null;
   fraud_total_parcels?: number | null;
   fraud_checked_at?: string | null;
+  /** A fraud report is kept with the order: its check opens it at once. */
+  fraud_report?: boolean;
   items?: OrderItem[];
   items_count?: number;
   has_unavailable_products?: boolean;
