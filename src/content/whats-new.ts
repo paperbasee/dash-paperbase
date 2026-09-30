@@ -88,6 +88,20 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-09-29-shop-steady-while-it-updates",
+    date: "2026-09-29",
+    version: "4.152.2",
+    tag: "fixed",
+    title: {
+      en: "Your shop stays steady while it updates",
+      bn: "আপডেটের সময়ও আপনার দোকান স্থির থাকে",
+    },
+    body: {
+      en: "We fixed a rare error that could appear when your shop restarts its internal workers, such as during an update.",
+      bn: "আপনার দোকান যখন ভেতরের কাজগুলো নতুন করে চালু করে, যেমন আপডেটের সময়, তখন মাঝে মাঝে যে একটি ত্রুটি দেখা দিত তা ঠিক করা হয়েছে।",
+    },
+  },
+  {
     id: "2026-09-29-a-fraud-colour-on-every-order",
     date: "2026-09-29",
     version: "4.152.0",
@@ -489,21 +503,6 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     body: {
       en: "Settings > Store Info now has an Identity section for your phone, email, address and social accounts, from WhatsApp and Facebook to YouTube, Telegram, X, LinkedIn, Pinterest, Threads and Snapchat, in the order you like. Your footer, contact page and home page sign-up button all use them, and the sign-up button can open any of them. Your invoice terms and conditions moved to Settings > Policies.",
       bn: "সেটিংস > স্টোর তথ্যে এখন পরিচিতি অংশ আছে, আপনার ফোন, ইমেইল, ঠিকানা আর সোশ্যাল অ্যাকাউন্টের জন্য, হোয়াটসঅ্যাপ আর ফেসবুক থেকে ইউটিউব, টেলিগ্রাম, এক্স, লিংকডইন, পিন্টারেস্ট, থ্রেডস ও স্ন্যাপচ্যাট পর্যন্ত, আপনার পছন্দের ক্রমে। আপনার ফুটার, যোগাযোগ পাতা আর হোম পেজের সাইন-আপ বোতাম এগুলোই ব্যবহার করে, আর সাইন-আপ বোতাম এর যেকোনোটি খুলতে পারে। ইনভয়েসের শর্তাবলী এখন সেটিংস > নীতিমালায়।",
-    },
-  },
-  {
-    id: "2026-09-28-download-your-analytics",
-    date: "2026-09-28",
-    version: "4.124.0",
-    tag: "new",
-    href: "/analytics",
-    title: {
-      en: "Download your analytics as an Excel file",
-      bn: "অ্যানালিটিক্স Excel ফাইলে ডাউনলোড করুন",
-    },
-    body: {
-      en: "The Download button on the Analytics page makes an Excel file of the section you are on, or of every section, for the days you picked, in English or Bangla. The numbers stay numbers, so you can sort and add them up. Top customers now show their full phone number on the page; the file hides part of it.",
-      bn: "অ্যানালিটিক্স পেজের ডাউনলোড বাটন আপনার বেছে নেওয়া দিনগুলোর জন্য এই অংশের, বা সব অংশের একটি Excel ফাইল তৈরি করে, ইংরেজি বা বাংলায়। সংখ্যাগুলো সংখ্যাই থাকে, তাই সাজানো আর যোগ করা যায়। শীর্ষ কাস্টমারদের পুরো ফোন নম্বর এখন পেজে দেখা যায়; ফাইলে এর কিছু অংশ লুকানো থাকে।",
     },
   },
   {
