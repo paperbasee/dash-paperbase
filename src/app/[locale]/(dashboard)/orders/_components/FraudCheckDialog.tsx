@@ -508,14 +508,15 @@ export function FraudCheckDialog({
 
               <div className="rounded-card border border-border bg-card">
                 <div className="overflow-x-auto md:overflow-x-hidden">
-                  <div className="min-w-[680px] md:min-w-0">
+                  <div className="min-w-[520px] md:min-w-0">
+                    {/* The courier is its logo alone (owner, 2026-09-30: "remove the courier name,
+                        only show the logos"); its name stays for hover and screen readers. */}
                     <div className="grid grid-cols-12 gap-0 border-b border-border bg-muted/40 px-2 py-1 text-[11px] font-semibold text-muted-foreground">
-                      <div className="col-span-2">{t("colLogo")}</div>
-                      <div className="col-span-3">{t("colCourier")}</div>
+                      <div className="col-span-4">{t("colCourier")}</div>
                       <div className="col-span-2">{t("colTotal")}</div>
                       <div className="col-span-2">{t("colSuccess")}</div>
                       <div className="col-span-2">{t("colCancelled")}</div>
-                      <div className="col-span-1 text-left">{t("colRatio")}</div>
+                      <div className="col-span-2 text-left">{t("colRatio")}</div>
                     </div>
 
                     {couriers.length === 0 ? (
@@ -531,19 +532,14 @@ export function FraudCheckDialog({
                           return (
                             <div
                               key={key || c.name}
-                              className="grid grid-cols-12 items-center gap-0 px-2 py-0.5 text-[13px] leading-none"
+                              className="grid grid-cols-12 items-center gap-0 px-2 py-1 text-[13px] leading-none"
                             >
-                              <div className="col-span-2">
+                              <div className="col-span-4">
                                 <CourierLogo
                                   name={c.name}
                                   logoUrl={c.logoUrl}
-                                  sizeClassName="size-10"
+                                  sizeClassName="h-9 w-24"
                                 />
-                              </div>
-                              <div className="col-span-3 min-w-0 pr-3">
-                                <div className="truncate font-medium text-foreground">
-                                  {c.name}
-                                </div>
                               </div>
                               <div className="col-span-2 text-foreground">
                                 {c.total === null ? "—" : c.total}
@@ -554,7 +550,7 @@ export function FraudCheckDialog({
                               <div className="col-span-2 text-red-600">
                                 {c.cancelled === null ? "—" : c.cancelled}
                               </div>
-                              <div className="col-span-1 flex items-center justify-start gap-3">
+                              <div className="col-span-2 flex items-center justify-start gap-3">
                                 <span
                                   className={cn(
                                     "min-w-[48px] text-left text-[13px] font-semibold",

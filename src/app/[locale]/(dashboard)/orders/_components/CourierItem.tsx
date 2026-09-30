@@ -106,6 +106,12 @@ export type CourierLogoProps = {
   sizeClassName?: string;
 };
 
+/**
+ * A courier's logo on a white tile, in both themes (owner, 2026-09-30: "add white background for
+ * dark courier logos"): the logos are drawn for white -- SteadFast's dark lettering vanished on
+ * the dark theme -- and one tile for all keeps them alike instead of singling some out. Wide,
+ * as the logos are.
+ */
 export function CourierLogo({
   name,
   logoUrl,
@@ -134,35 +140,22 @@ export function CourierLogo({
   return (
     <div
       className={cn(
-        "flex shrink-0 items-center justify-center overflow-hidden rounded-ui bg-transparent",
-        sizeClassName || "size-24",
+        "flex shrink-0 items-center justify-center overflow-hidden rounded-ui bg-white px-2 py-1.5 ring-1 ring-black/5 dark:ring-white/10",
+        sizeClassName || "h-10 w-24",
         className
       )}
       aria-label={name}
+      title={name}
     >
       {!src ? (
-        <span className="text-xs font-semibold text-muted-foreground">
-          {initials(name)}
-        </span>
+        <span className="text-xs font-semibold text-neutral-500">{initials(name)}</span>
       ) : (
         <Image
           src={src}
           alt={name}
-          width={88}
-          height={88}
-          className={cn(
-            "object-contain",
-            // Keep proportional even when container size changes in table rows
-            sizeClassName?.includes("size-12")
-              ? "h-10 w-10"
-              : sizeClassName?.includes("size-14")
-                ? "h-12 w-12"
-                : sizeClassName?.includes("size-16")
-                  ? "h-14 w-14"
-                  : sizeClassName?.includes("size-20")
-                    ? "h-18 w-18"
-                    : "h-20 w-20"
-          )}
+          width={120}
+          height={40}
+          className="h-full w-full object-contain"
           draggable={false}
           onDragStart={(e) => e.preventDefault()}
           onError={() => {

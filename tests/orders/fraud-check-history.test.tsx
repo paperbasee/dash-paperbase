@@ -6,6 +6,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { NextIntlClientProvider } from "next-intl";
 import { describe, expect, test } from "vitest";
 
+import { CourierLogo } from "@/app/[locale]/(dashboard)/orders/_components/CourierItem";
 import {
   HistoryPanel,
   ReportsPanel,
@@ -85,4 +86,15 @@ describe("reports from other merchants (BD Courier)", () => {
     );
     expect(bnHtml).toContain("অন্য মার্চেন্টদের");
   });
+});
+
+test("courier logos sit on a white tile in both themes, wide as the logos are", () => {
+  // Drawn for white: SteadFast's dark lettering vanished on the dark theme (owner, 2026-09-30).
+  const html = renderToStaticMarkup(<CourierLogo name="SteadFast" />);
+  expect(html).toContain("bg-white");
+  expect(html).toContain("w-24");
+  expect(html).toContain("steadfast-logo.png");
+  expect(html).toContain('title="SteadFast"'); // the name, now the column shows the logo alone
+  // With no logo at all, the initials stay readable on the white tile.
+  expect(renderToStaticMarkup(<CourierLogo name="Nobody Known" />)).not.toContain("text-muted-foreground");
 });
