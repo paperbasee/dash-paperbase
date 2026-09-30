@@ -88,8 +88,8 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
-    id: "2026-09-29-a-fraud-colour-on-every-order",
-    date: "2026-09-29",
+    id: "2026-09-30-a-fraud-colour-on-every-order",
+    date: "2026-09-30",
     version: "4.153.0",
     tag: "new",
     title: {
@@ -103,8 +103,8 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     href: "/orders",
   },
   {
-    id: "2026-09-29-shop-steady-while-it-updates",
-    date: "2026-09-29",
+    id: "2026-09-30-shop-steady-while-it-updates",
+    date: "2026-09-30",
     version: "4.152.2",
     tag: "fixed",
     title: {
@@ -117,8 +117,8 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     },
   },
   {
-    id: "2026-09-29-a-new-search-box",
-    date: "2026-09-29",
+    id: "2026-09-30-a-new-search-box",
+    date: "2026-09-30",
     version: "4.150.0",
     tag: "new",
     title: {
