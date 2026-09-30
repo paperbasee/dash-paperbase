@@ -47,17 +47,30 @@ export function isFraudRiskLevel(value: unknown): value is FraudRiskLevel {
   return value === "safe" || value === "caution" || value === "new" || value === "risky";
 }
 
-const SIZE = 44;
+const SIZE = 40;
 const STROKE = 3;
 const RADIUS = (SIZE - STROKE) / 2;
 const AROUND = 2 * Math.PI * RADIUS;
 
-/** The share delivered, as a ring filled that far round; a new customer's is an empty ring. */
+/**
+ * The share delivered, as a ring filled that far round over a soft wash of its colour, with the
+ * number alone inside -- no "%", which crowded it in the dashboard's font (owner, 2026-09-30:
+ * "remove the % and show the number only ... the design must be polished"); the words beside it
+ * and the tooltip say what it counts. A new customer's ring is empty and dashed.
+ */
 function Ring({ level, share }: { level: FraudRiskLevel; share: number | null }) {
   const filled = share === null ? 0 : Math.max(0, Math.min(100, share));
   return (
-    <span className="relative inline-flex size-11 shrink-0 items-center justify-center" aria-hidden>
+    <span className="relative inline-flex size-10 shrink-0 items-center justify-center" aria-hidden>
       <svg viewBox={`0 0 ${SIZE} ${SIZE}`} className="absolute inset-0 size-full -rotate-90">
+        {share !== null ? (
+          <circle
+            cx={SIZE / 2}
+            cy={SIZE / 2}
+            r={RADIUS - STROKE / 2}
+            className={cn("fill-current opacity-15", RING[level])}
+          />
+        ) : null}
         <circle
           cx={SIZE / 2}
           cy={SIZE / 2}
@@ -80,9 +93,8 @@ function Ring({ level, share }: { level: FraudRiskLevel; share: number | null })
           />
         ) : null}
       </svg>
-      {/* The % the same size as the number (owner, 2026-09-30: a smaller one "looks small"). */}
-      <span className="text-[11px] font-semibold tabular-nums tracking-tight text-foreground">
-        {share === null ? "–" : `${Math.round(filled)}%`}
+      <span className="relative text-[13px] font-semibold leading-none tabular-nums tracking-tight text-foreground">
+        {share === null ? "–" : Math.round(filled)}
       </span>
     </span>
   );
@@ -120,7 +132,7 @@ export function FraudBadge({
     </>
   );
   const classes = cn(
-    "inline-flex items-center gap-2.5 rounded-ui py-1 pl-1 pr-3 whitespace-nowrap",
+    "inline-flex items-center gap-3 rounded-ui py-1 pl-1 pr-3 whitespace-nowrap",
     onClick &&
       "cursor-pointer transition-colors hover:bg-muted/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
     className

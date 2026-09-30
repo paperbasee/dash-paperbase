@@ -22,13 +22,13 @@ function render(node: React.ReactNode, locale: "en" | "bn" = "en") {
 describe("the badge", () => {
   test("a ring filled to the share delivered, with what it means and the parcels beside it", () => {
     const html = render(<FraudBadge level="safe" successRatio={96.4} totalParcels={25} />);
-    expect(html).toContain(">96%<");
+    expect(html).toContain(">96<");  // the number alone: the words say what it counts
     expect(html).toContain(">Good buyer<");
     expect(html).toContain(">25 parcels<");
     expect(html).toContain("Good buyer: 25 parcels, 96% delivered");
     expect(html).toContain("emerald");
     // The ring's arc is that share of the way round.
-    const around = 2 * Math.PI * 20.5;
+    const around = 2 * Math.PI * 18.5;
     expect(html).toContain(`stroke-dasharray="${((96.4 / 100) * around).toString()} ${around.toString()}"`);
   });
 
