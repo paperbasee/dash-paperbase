@@ -88,6 +88,21 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-09-29-a-fraud-colour-on-every-order",
+    date: "2026-09-29",
+    version: "4.153.0",
+    tag: "new",
+    title: {
+      en: "A fraud colour on every order",
+      bn: "প্রতিটি অর্ডারে ফ্রড রঙ",
+    },
+    body: {
+      en: "Every new order is checked on its own and shows a colour: green for a good buyer, yellow to be careful, red for risky, with the share of parcels delivered. Click it and the report opens at once: the customer's parcels at every courier, reports from other merchants, their history across Paperbase, what to do, and when it was checked. Use “Check again” for a fresh one.",
+      bn: "প্রতিটি নতুন অর্ডার নিজে থেকেই যাচাই হয় আর একটি রঙ দেখায়: ভালো ক্রেতার জন্য সবুজ, সাবধান হওয়ার জন্য হলুদ, ঝুঁকিপূর্ণ হলে লাল, সাথে কত শতাংশ পার্সেল ডেলিভার হয়েছে। ক্লিক করলেই রিপোর্ট সাথে সাথে খোলে: সব কুরিয়ারে ক্রেতার পার্সেল, অন্য মার্চেন্টদের রিপোর্ট, Paperbase জুড়ে তাঁর হিসাব, কী করবেন, আর কখন যাচাই হয়েছিল। নতুন করে দেখতে “আবার যাচাই করুন” চাপুন।",
+    },
+    href: "/orders",
+  },
+  {
     id: "2026-09-29-shop-steady-while-it-updates",
     date: "2026-09-29",
     version: "4.152.2",
@@ -100,21 +115,6 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
       en: "We fixed a rare error that could appear when your shop restarts its internal workers, such as during an update.",
       bn: "আপনার দোকান যখন ভেতরের কাজগুলো নতুন করে চালু করে, যেমন আপডেটের সময়, তখন মাঝে মাঝে যে একটি ত্রুটি দেখা দিত তা ঠিক করা হয়েছে।",
     },
-  },
-  {
-    id: "2026-09-29-a-fraud-colour-on-every-order",
-    date: "2026-09-29",
-    version: "4.152.0",
-    tag: "new",
-    title: {
-      en: "A fraud colour on every order",
-      bn: "প্রতিটি অর্ডারে ফ্রড রঙ",
-    },
-    body: {
-      en: "Every order now shows a colour: green for a good buyer, yellow to be careful, red for risky, with the share of parcels delivered. The fraud check shows the customer's parcels at every courier, reports from other merchants and their history across Paperbase, and tells you what to do.",
-      bn: "প্রতিটি অর্ডারে এখন একটি রঙ দেখায়: ভালো ক্রেতার জন্য সবুজ, সাবধান হওয়ার জন্য হলুদ, ঝুঁকিপূর্ণ হলে লাল, সাথে কত শতাংশ পার্সেল ডেলিভার হয়েছে। ফ্রড চেকে সব কুরিয়ারে ক্রেতার পার্সেল, অন্য মার্চেন্টদের রিপোর্ট আর Paperbase জুড়ে তাঁর হিসাব দেখা যায়, আর কী করবেন তাও বলে দেয়।",
-    },
-    href: "/orders",
   },
   {
     id: "2026-09-29-a-new-search-box",
