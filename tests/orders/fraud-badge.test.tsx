@@ -20,11 +20,16 @@ function render(node: React.ReactNode, locale: "en" | "bn" = "en") {
 }
 
 describe("the badge", () => {
-  test("shows the share delivered, and says what it means", () => {
+  test("a ring filled to the share delivered, with what it means and the parcels beside it", () => {
     const html = render(<FraudBadge level="safe" successRatio={96.4} totalParcels={25} />);
-    expect(html).toContain(">96%<");
+    expect(html).toMatch(/>96<span[^>]*>%<\/span>/);
+    expect(html).toContain(">Good buyer<");
+    expect(html).toContain(">25 parcels<");
     expect(html).toContain("Good buyer: 25 parcels, 96% delivered");
     expect(html).toContain("emerald");
+    // The ring's arc is that share of the way round.
+    const around = 2 * Math.PI * 18.5;
+    expect(html).toContain(`stroke-dasharray="${((96.4 / 100) * around).toString()} ${around.toString()}"`);
   });
 
   test("red for risky, yellow for caution", () => {
@@ -32,10 +37,12 @@ describe("the badge", () => {
     expect(render(<FraudBadge level="caution" successRatio={70} totalParcels={10} />)).toContain("amber");
   });
 
-  test("a new customer says so, not a number", () => {
+  test("a new customer says so, with an empty ring and no number", () => {
     const html = render(<FraudBadge level="new" successRatio={null} totalParcels={0} />);
     expect(html).toContain(">New buyer<");
+    expect(html).toContain(">No parcels yet<");
     expect(html).toContain("No parcels on record yet");
+    expect(html).not.toContain(">%<");
   });
 
   test("with a way to open the details it is a button; without, it only tells", () => {

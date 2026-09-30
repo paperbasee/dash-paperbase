@@ -3995,6 +3995,8 @@
     "adviceSafe": "Most of this customer's parcels were delivered. You can send this order.",
     "adviceCaution": "Some of this customer's parcels came back. Call to confirm before sending.",
     "adviceNew": "No parcels on record yet. You may want to call to confirm.",
-    "adviceRisky": "Many of this customer's parcels came back. Call first, or hold this order."
+    "adviceRisky": "Many of this customer's parcels came back. Call first, or hold this order.",
+    "riskParcelsShort": "{count, plural, one {# parcel} other {# parcels}}",
+    "riskNoParcelsShort": "No parcels yet"
   }
 }
