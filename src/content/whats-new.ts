@@ -88,6 +88,21 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-10-02-a-welcoming-team-invite",
+    date: "2026-10-02",
+    version: "4.155.0",
+    tag: "improved",
+    title: {
+      en: "A welcoming page for your team invites",
+      bn: "টিমের আমন্ত্রণের জন্য নতুন পেজ",
+    },
+    body: {
+      en: "When you invite someone to your team, the page they open now shows your shop's logo, who invited them and what their role can do. New members type their own name, so your team list shows names, not just emails.",
+      bn: "আপনি টিমে কাউকে আমন্ত্রণ জানালে, তারা যে পেজটি খোলেন তাতে এখন আপনার দোকানের লোগো, কে আমন্ত্রণ জানিয়েছেন আর তাদের ভূমিকায় কী করা যায় তা দেখায়। নতুন সদস্যরা নিজের নাম লেখেন, তাই আপনার টিমের তালিকায় শুধু ইমেইল নয়, নামও দেখায়।",
+    },
+    href: "/settings?tab=team",
+  },
+  {
     id: "2026-10-01-status-notice",
     date: "2026-10-01",
     version: "4.154.0",
@@ -502,21 +517,6 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     body: {
       en: "On a phone the order comes first and the form is below it. If a shopper is still on their order after 5 seconds, a small arrow at the bottom shows the way down, and a tap takes them to the form. You can turn it off or change the seconds in Customization, on the Checkout page.",
       bn: "ফোনে আগে অর্ডার আসে, ফর্ম তার নিচে। ৫ সেকেন্ড পরেও ক্রেতা অর্ডারেই থাকলে নিচে একটি ছোট তীর পথ দেখায়, আর তাতে চাপ দিলে ফর্মে নিয়ে যায়। কাস্টমাইজেশনের চেকআউট পেজে এটি বন্ধ করতে বা সেকেন্ড বদলাতে পারেন।",
-    },
-  },
-  {
-    id: "2026-09-29-analytics-counts-shoppers-who-stay",
-    date: "2026-09-29",
-    version: "4.126.0",
-    tag: "fixed",
-    href: "/analytics",
-    title: {
-      en: "Analytics now counts shoppers who stay",
-      bn: "অ্যানালিটিক্স এখন থেকে যাওয়া ক্রেতাদের গোনে",
-    },
-    body: {
-      en: "A visit where a shopper spent 10 seconds on a page was not being counted, so Engaged visits and Stay on read lower than they should. From today's visits on they are counted. Earlier days stay as they were.",
-      bn: "যে ভিজিটে ক্রেতা একটি পেজে ১০ সেকেন্ড ছিলেন, তা গোনা হচ্ছিল না, তাই আগ্রহী ভিজিট আর থেকেছেন যতটা হওয়া উচিত তার চেয়ে কম দেখাত। আজকের ভিজিট থেকে এগুলো গোনা হয়। আগের দিনগুলো যেমন ছিল তেমনই থাকবে।",
     },
   },
 ];
