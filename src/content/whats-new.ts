@@ -88,6 +88,21 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-10-02-three-fixed-roles-admin-manager-staff",
+    date: "2026-10-02",
+    version: "4.157.0",
+    tag: "new",
+    title: {
+      en: "Three fixed roles: Admin, Manager and Staff",
+      bn: "তিনটি নির্দিষ্ট রোল: অ্যাডমিন, ম্যানেজার ও স্টাফ",
+    },
+    body: {
+      en: "Everyone on your team now has one of three roles, and what each can do is the same in every shop: see it in Settings > Team > Roles. The Viewer role and edited roles are gone; anyone who had one is paused until you choose their role, in one click. Each role now sees only what it can change, so Managers no longer see the shop's settings, and only Staff can be limited to some categories.",
+      bn: "আপনার টিমের সবার এখন তিনটি রোলের একটি থাকে, আর কোন রোল কী করতে পারে তা সব শপে একই: সেটিংস > টিম > রোলে দেখুন। ভিউয়ার রোল আর বদলানো রোলগুলো আর নেই; যাদের এমন রোল ছিল তারা থামানো থাকবেন যতক্ষণ না আপনি এক ক্লিকে তাদের রোল বেছে দেন। প্রতিটি রোল এখন শুধু সেটুকুই দেখে যা সে বদলাতে পারে, তাই ম্যানেজাররা আর শপের সেটিংস দেখেন না, আর শুধু স্টাফদেরই কিছু ক্যাটাগরিতে সীমিত রাখা যায়।",
+    },
+    href: "/settings?tab=team",
+  },
+  {
     id: "2026-10-02-a-slimmer-sidebar-scrollbar",
     date: "2026-10-02",
     version: "4.156.1",
@@ -500,21 +515,6 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     body: {
       en: "The warning box above the order button is amber now, and its border glows gently so shoppers see it before they order. Its words sit in the centre, and you can move them to the left or right, for the plain line too. Find it in Customization, on the Checkout page.",
       bn: "অর্ডার বোতামের উপরের সতর্কতার বাক্স এখন কমলা-হলুদ, আর এর বর্ডার আস্তে আস্তে জ্বলে ওঠে, যাতে ক্রেতা অর্ডারের আগেই দেখেন। এর লেখা মাঝখানে বসে, আর আপনি বাঁয়ে বা ডানে সরাতে পারেন, সাধারণ লাইনের জন্যও। কাস্টমাইজেশনের চেকআউট পেজে পাবেন।",
-    },
-  },
-  {
-    id: "2026-09-29-choose-where-the-words-sit-on-product-cards",
-    date: "2026-09-29",
-    version: "4.127.0",
-    tag: "new",
-    href: "/settings?tab=customization",
-    title: {
-      en: "Choose where the words sit on product cards",
-      bn: "প্রোডাক্ট কার্ডে লেখা কোথায় বসবে বেছে নিন",
-    },
-    body: {
-      en: "A product's name and price can sit on the left, in the centre or on the right, on every card in your shop. Choose it in Customization, under Style. Cards stay centred until you change it.",
-      bn: "প্রোডাক্টের নাম আর দাম আপনার দোকানের প্রতিটি কার্ডে বাঁয়ে, মাঝখানে বা ডানে বসতে পারে। কাস্টমাইজেশনের স্টাইলে বেছে নিন। না বদলানো পর্যন্ত কার্ড মাঝখানেই থাকে।",
     },
   },
 ];
