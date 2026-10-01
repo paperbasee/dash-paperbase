@@ -13,7 +13,7 @@ import UserAvatar from "@/components/UserAvatar";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { notify } from "@/notifications";
 import { cn } from "@/lib/utils";
-import { usePermissions } from "@/context/PermissionsContext";
+import { useMayChangeOwnerPower } from "@/hooks/useOwnerPower";
 import {
   Dialog,
   DialogContent,
@@ -55,10 +55,11 @@ const NO_ROLE = "—";
 
 export default function TeamSection({ hidden }: { hidden: boolean }) {
   const t = useTranslations("settings.team");
-  const { has, isOwner, permissions } = usePermissions();
-  const canManageMembers = has("team.invite");
-  const canManageRoles = has("team.manage_roles");
-  const grantableKeys = isOwner ? null : permissions;
+  // The team is the owner's alone (config/owner-powers.ts "team"): this tab shows only to them,
+  // and Paperbase support, signed in as the owner, reads it and changes nothing.
+  const canManage = useMayChangeOwnerPower()("team");
+  const canManageMembers = canManage;
+  const canManageRoles = canManage;
 
   const [tab, setTab] = useState<Tab>("members");
 
@@ -68,9 +69,7 @@ export default function TeamSection({ hidden }: { hidden: boolean }) {
 
   if (hidden) return null;
 
-  const assignableRoles = (rolesQuery.data ?? []).filter(
-    (r) => grantableKeys === null || r.permissions.every((k) => grantableKeys.has(k))
-  );
+  const assignableRoles = rolesQuery.data ?? [];
 
   return (
     <div className={settingsSectionSurfaceClassName}>
@@ -113,8 +112,6 @@ export default function TeamSection({ hidden }: { hidden: boolean }) {
           <RolesTab
             rolesQuery={rolesQuery}
             canManage={canManageRoles}
-            grantableKeys={grantableKeys}
-            isOwner={isOwner}
           />
         )}
         </SupportReadOnly>
@@ -463,13 +460,9 @@ function MemberRow({
 function RolesTab({
   rolesQuery,
   canManage,
-  grantableKeys,
-  isOwner,
 }: {
   rolesQuery: ReturnType<typeof useTeamRoles>;
   canManage: boolean;
-  grantableKeys: Set<string> | null;
-  isOwner: boolean;
 }) {
   const t = useTranslations("settings.team");
   const tCommon = useTranslations("common");
@@ -552,8 +545,6 @@ function RolesTab({
         open={editorOpen}
         onOpenChange={setEditorOpen}
         role={editingRole}
-        grantableKeys={grantableKeys}
-        isOwner={isOwner}
         canManage={canManage}
       />
 

@@ -19,7 +19,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { formatDashboardDateTime } from "@/lib/datetime-display";
 import { cn } from "@/lib/utils";
 import { useConfirm } from "@/context/ConfirmDialogContext";
-import { usePermissions } from "@/context/PermissionsContext";
+import { useMayChangeOwnerPower } from "@/hooks/useOwnerPower";
 import { notify } from "@/notifications";
 import {
   SettingsSectionBody,
@@ -231,9 +231,9 @@ export default function DomainsSection({ hidden }: { hidden: boolean }) {
   const locale = useLocale();
   const t = useTranslations("settings");
   const confirm = useConfirm();
-  const { has } = usePermissions();
-
-  const canManage = has("domains.manage");
+  // The shop's web address is the owner's alone (config/owner-powers.ts "domains"); Paperbase
+  // support reads it and changes nothing.
+  const canManage = useMayChangeOwnerPower()("domains");
 
   const [newHostname, setNewHostname] = useState("");
   // Records are OPEN by default: a merchant returning the next day should not find

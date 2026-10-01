@@ -12,14 +12,14 @@ import {
 
 /** Settings sections this user can open; shared by the page, its mobile nav and the sidebar. */
 export function useVisibleSettingsSections(): SettingsSectionNavItem[] {
-  const { has, isOwner, isSuperuser } = usePermissions();
+  const { has, isOwner, isSuperuser, isUnknown } = usePermissions();
   const canShowApp = useCanShowApp();
   const inSupportMode = useSupportMode();
   return useMemo(
     () =>
       SECTIONS.filter((row) =>
-        isSectionVisible(row.id, { has, isOwner, isSuperuser, canShowApp, inSupportMode })
+        isSectionVisible(row.id, { has, isOwner, isSuperuser, canShowApp, inSupportMode, isUnknown })
       ),
-    [has, isOwner, isSuperuser, canShowApp, inSupportMode]
+    [has, isOwner, isSuperuser, canShowApp, inSupportMode, isUnknown]
   );
 }

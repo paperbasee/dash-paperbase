@@ -8,7 +8,8 @@ import {
   ALL_SECTIONS,
   SECTIONS,
   SECTION_APPS,
-  SECTION_OWNER_ONLY,
+  SECTION_OWNER_PART,
+  SECTION_OWNER_POWER,
   SECTION_PERMISSION,
   isSectionVisible,
   resolveSettingsSection,
@@ -17,6 +18,7 @@ import {
   type SettingsSectionNavItem,
 } from "@/app/[locale]/(dashboard)/settings/settingsSections";
 import { APP_CONFIG } from "@/config/apps";
+import { OWNER_POWERS } from "@/config/owner-powers";
 import { ALL_PERMISSION_KEYS, APP_VIEW_PERMISSION } from "@/config/permissions";
 
 /**
@@ -117,8 +119,8 @@ describe("sectionMatchesPermission", () => {
   });
 
   it("treats an array requirement as ANY-of, not all-of", () => {
-    // Pinned explicitly: Integrations bundles marketing + couriers and relies on
-    // any-of. If this ever flips to all-of, a courier-only role loses the tab.
+    // Pinned explicitly: a section that bundles two areas relies on any-of. If this ever
+    // flips to all-of, a role holding one of them loses the tab.
     const required = ["integrations.view", "couriers.view"];
     expect(sectionMatchesPermission(required, grants("integrations.view").has)).toBe(true);
     expect(sectionMatchesPermission(required, grants("couriers.view").has)).toBe(true);
@@ -214,11 +216,12 @@ describe("permission map ↔ SECTIONS consistency", () => {
     expect(orphans).toEqual([]);
   });
 
-  it("has no orphaned SECTION_OWNER_ONLY keys", () => {
-    const orphans = Object.keys(SECTION_OWNER_ONLY).filter(
-      (id) => !CATALOG_IDS.includes(id as SettingsSection),
-    );
-    expect(orphans).toEqual([]);
+  it("has no orphaned owner-power sections, and names only real owner powers", () => {
+    for (const map of [SECTION_OWNER_POWER, SECTION_OWNER_PART]) {
+      const orphans = Object.keys(map).filter((id) => !CATALOG_IDS.includes(id as SettingsSection));
+      expect(orphans).toEqual([]);
+      for (const power of Object.values(map)) expect(OWNER_POWERS).toContain(power);
+    }
   });
 
   it("declares only permission keys that exist in the RBAC catalog mirror", () => {
@@ -260,11 +263,9 @@ describe("permission map ↔ SECTIONS consistency", () => {
     }
   });
 
-  it("marks owner-only sections with a literal true (a false value is a silent no-op)", () => {
-    for (const [id, value] of Object.entries(SECTION_OWNER_ONLY)) {
-      // The consumers guard with `if (SECTION_OWNER_ONLY[row.id] && ...)`, so a
-      // `false` entry reads as "owner only" but behaves as "open".
-      expect(value, `SECTION_OWNER_ONLY["${id}"] must be true or absent`).toBe(true);
+  it("never also gates an owner's section on a permission (it would read as a choice)", () => {
+    for (const id of Object.keys(SECTION_OWNER_POWER)) {
+      expect(SECTION_PERMISSION[id as SettingsSection], `section "${id}"`).toBeUndefined();
     }
   });
 });
@@ -290,9 +291,24 @@ describe("role-shaped visibility (the maps as consumers apply them)", () => {
     expect(visibleIdsFor(superRole.has, { isSuperuser: true })).toContain("security");
   });
 
-  it("shows Integrations to a courier-only role and nothing else it cannot load", () => {
-    // The concrete any-of case that motivated the array form.
-    expect(visibleIdsFor(grants("couriers.view").has).sort()).toEqual(["account", "integrations"]);
+  it("shows Integrations to whoever may open either part: the pixels or the courier accounts", () => {
+    expect(visibleIdsFor(grants("integrations.view").has).sort()).toEqual(["account", "integrations"]);
+    expect(visibleIdsFor(grants().has, { isOwner: true })).toContain("integrations");
+    expect(visibleIdsFor(grants("settings.view").has)).not.toContain("integrations");
+  });
+
+  it("keeps the owner's powers from every role, whatever it holds", () => {
+    const everything = { has: () => true };
+    const member = visibleIdsFor(everything.has);
+    for (const id of Object.keys(SECTION_OWNER_POWER)) expect(member).not.toContain(id);
+    const owner = visibleIdsFor(everything.has, { isOwner: true, sections: ALL_SECTIONS });
+    for (const id of Object.keys(SECTION_OWNER_POWER)) expect(owner).toContain(id);
+  });
+
+  it("shows Payments to the owner, and to Paperbase support to read", () => {
+    expect(visibleIdsFor(grants().has, { isOwner: true })).toContain("payments");
+    expect(visibleIdsFor(grants().has, { isOwner: true, inSupportMode: true })).toContain("payments");
+    expect(visibleIdsFor(grants("settings.manage").has)).not.toContain("payments");
   });
 
   it("does not leak Team or Billing to a role holding only settings.view", () => {
@@ -354,9 +370,9 @@ describe("REGRESSION: the Networking / API keys section stays removed", () => {
     expect(SECTION_IDS).not.toContain("networking" as SettingsSection);
   });
 
-  it("has no 'networking' key in SECTION_PERMISSION or SECTION_OWNER_ONLY", () => {
+  it("has no 'networking' key in SECTION_PERMISSION or SECTION_OWNER_POWER", () => {
     expect(Object.keys(SECTION_PERMISSION)).not.toContain("networking");
-    expect(Object.keys(SECTION_OWNER_ONLY)).not.toContain("networking");
+    expect(Object.keys(SECTION_OWNER_POWER)).not.toContain("networking");
   });
 
   it("references no api_keys.* permission anywhere in the maps", () => {
@@ -382,20 +398,14 @@ describe("REGRESSION: 'domains' survives as host routing's settings surface", ()
     expect(domains && "labelKey" in domains && domains.labelKey).toBe("sectionDomains");
   });
 
-  it("gates domains on domains.view and not on owner-only", () => {
-    expect(SECTION_PERMISSION.domains).toBe("domains.view");
-    expect(SECTION_OWNER_ONLY.domains).toBeUndefined();
+  it("is one of the owner's powers (owner, 2026-10-02), not a permission", () => {
+    expect(SECTION_OWNER_POWER.domains).toBe("domains");
+    expect(SECTION_PERMISSION.domains).toBeUndefined();
   });
 
-  it("shows domains to a staff role holding only domains.view", () => {
-    expect(sectionMatchesPermission(SECTION_PERMISSION.domains, grants("domains.view").has)).toBe(true);
-    expect(
-      visibleIdsFor(grants("domains.view").has, { sections: ALL_SECTIONS }),
-    ).toContain("domains");
-    // ...and hides it from a role without that key.
-    expect(
-      visibleIdsFor(grants("settings.manage").has, { sections: ALL_SECTIONS }),
-    ).not.toContain("domains");
+  it("shows domains to the owner and to no role", () => {
+    expect(visibleIdsFor(grants().has, { isOwner: true, sections: ALL_SECTIONS })).toContain("domains");
+    expect(visibleIdsFor(() => true, { sections: ALL_SECTIONS })).not.toContain("domains");
   });
 });
 

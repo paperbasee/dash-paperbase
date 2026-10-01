@@ -41,15 +41,12 @@ function GroupRow({
   group,
   selected,
   disabled,
-  grantable,
   unavailable,
   onChange,
 }: {
   group: PermissionGroup;
   selected: Set<string>;
   disabled: boolean;
-  /** Keys the editor is allowed to grant (their own effective permissions). */
-  grantable: Set<string> | null;
   /** Keys this role can never hold; shown switched off and never saved. */
   unavailable: ReadonlySet<string>;
   onChange: (next: Set<string>) => void;
@@ -62,12 +59,8 @@ function GroupRow({
     .filter((p) => unavailable.has(p.key))
     .map((p) => t(p.labelKey));
 
-  // A group is ungrantable if the editor lacks even its view key.
-  const groupGrantable =
-    grantable === null || grantable.has(group.permissions[0].key);
-
   return (
-    <div className={cn("rounded-md border border-border", !groupGrantable && "opacity-50")}>
+    <div className="rounded-md border border-border">
       <div className="flex items-center justify-between gap-3 px-3 py-2.5">
         <div className="flex min-w-0 items-center gap-2">
           {hasAdvanced ? (
@@ -97,7 +90,7 @@ function GroupRow({
               <button
                 key={lvl.id}
                 type="button"
-                disabled={disabled || !groupGrantable}
+                disabled={disabled}
                 onClick={() => onChange(applyLevel(group, lvl.id, selected, unavailable))}
                 className={cn(
                   "rounded px-2.5 py-1 text-xs font-medium transition-colors disabled:cursor-not-allowed",
@@ -128,8 +121,7 @@ function GroupRow({
           {group.permissions.map((perm, idx) => {
             const isView = idx === 0;
             const checked = selected.has(perm.key);
-            const keyGrantable =
-              !unavailable.has(perm.key) && (grantable === null || grantable.has(perm.key));
+            const keyGrantable = !unavailable.has(perm.key);
             return (
               <label
                 key={perm.key}
@@ -171,18 +163,13 @@ export function RoleEditorDialog({
   open,
   onOpenChange,
   role,
-  grantableKeys,
-  isOwner,
   canManage,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   /** The role to edit. */
   role: TeamRole | null;
-  /** Editor's own effective permission keys (null = owner/all-access). */
-  grantableKeys: Set<string> | null;
-  isOwner: boolean;
-  /** Whether the viewer can edit roles (team.manage_roles). */
+  /** Whether the viewer can edit roles: the owner (config/owner-powers.ts "team"). */
   canManage: boolean;
 }) {
   const t = useTranslations("settings.team");
@@ -212,7 +199,6 @@ export function RoleEditorDialog({
     setSelected(new Set(role?.permissions ?? []));
   }
 
-  const grantable = isOwner ? null : grantableKeys;
   // `?? []`: a roles list persisted before the API sent this field has none.
   const unavailablePermissions = role?.unavailable_permissions;
   const unavailable = useMemo(
@@ -310,7 +296,6 @@ export function RoleEditorDialog({
                   group={group}
                   selected={selected}
                   disabled={readOnly || saving}
-                  grantable={grantable}
                   unavailable={unavailable}
                   onChange={setSelected}
                 />

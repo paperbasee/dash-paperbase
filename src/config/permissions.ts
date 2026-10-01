@@ -139,14 +139,6 @@ export const PERMISSION_GROUPS: PermissionGroup[] = [
     ],
   },
   {
-    id: "couriers",
-    labelKey: "groupCouriers",
-    permissions: [
-      { key: "couriers.view", labelKey: "permCouriersView" },
-      { key: "couriers.manage", labelKey: "permCouriersManage" },
-    ],
-  },
-  {
     id: "trash",
     labelKey: "groupTrash",
     permissions: [
@@ -160,14 +152,6 @@ export const PERMISSION_GROUPS: PermissionGroup[] = [
     permissions: [
       { key: "theming.view", labelKey: "permThemingView" },
       { key: "theming.manage", labelKey: "permThemingManage" },
-    ],
-  },
-  {
-    id: "domains",
-    labelKey: "groupDomains",
-    permissions: [
-      { key: "domains.view", labelKey: "permDomainsView" },
-      { key: "domains.manage", labelKey: "permDomainsManage" },
     ],
   },
   {
@@ -190,23 +174,6 @@ export const PERMISSION_GROUPS: PermissionGroup[] = [
     id: "activity",
     labelKey: "groupActivity",
     permissions: [{ key: "activity.view", labelKey: "permActivityView" }],
-  },
-  {
-    id: "team",
-    labelKey: "groupTeam",
-    permissions: [
-      { key: "team.view", labelKey: "permTeamView" },
-      { key: "team.invite", labelKey: "permTeamInvite" },
-      { key: "team.manage_roles", labelKey: "permTeamManageRoles" },
-    ],
-  },
-  {
-    id: "billing",
-    labelKey: "groupBilling",
-    permissions: [
-      { key: "billing.view", labelKey: "permBillingView" },
-      { key: "billing.manage", labelKey: "permBillingManage" },
-    ],
   },
 ];
 

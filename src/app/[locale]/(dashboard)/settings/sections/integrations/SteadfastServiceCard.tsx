@@ -22,7 +22,7 @@ import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { useEnterNavigation } from "@/hooks/useEnterNavigation";
 import { useConfirm } from "@/context/ConfirmDialogContext";
-import { usePermissions } from "@/context/PermissionsContext";
+import { useMayChangeOwnerPower } from "@/hooks/useOwnerPower";
 import { notify } from "@/notifications";
 import { cn } from "@/lib/utils";
 import {
@@ -70,7 +70,8 @@ export default function SteadfastServiceCard({ panelHidden }: { panelHidden: boo
   const tI = useTranslations("settings.integrations");
   const confirm = useConfirm();
   const queryClient = useQueryClient();
-  const canManage = usePermissions().has("couriers.manage");
+  // The owner's alone (config/owner-powers.ts "couriers"); support reads it, changes nothing.
+  const canManage = useMayChangeOwnerPower()("couriers");
   const { data: accounts = [], isLoading } = useCouriersQuery({ enabled: !panelHidden });
   const state = serviceState(accounts);
   const service = tI("services.steadfast");

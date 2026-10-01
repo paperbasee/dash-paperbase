@@ -4,8 +4,11 @@ import { useEffect, type ReactNode } from "react";
 import { useTranslations } from "next-intl";
 import { SettingsSectionBody, settingsSectionSurfaceClassName } from "../SettingsSectionBody";
 import { cn } from "@/lib/utils";
+import { SupportReadOnly } from "@/components/support/SupportReadOnly";
+import { usePermissions } from "@/context/PermissionsContext";
 import { useCouriersQuery } from "@/hooks/useCouriersQuery";
 import { useMarketingIntegrationsQuery } from "@/hooks/useMarketingIntegrationsQuery";
+import { useOwnerPower } from "@/hooks/useOwnerPower";
 import { notify } from "@/notifications";
 import {
   AD_SERVICES,
@@ -34,13 +37,19 @@ const GRID = "grid min-w-0 grid-cols-1 gap-3 @min-[36rem]:grid-cols-2 @min-[54re
  * Settings > Integrations (owner, 2026-09-25): a card per service, the
  * Paperbase mark and the service's logo joined by arrows. A card opens its
  * service's pop-up, which lists that service's connections.
+ *
+ * The courier accounts are the owner's alone (config/owner-powers.ts "couriers"): cash-on-delivery
+ * money is collected into them, so they show only to the owner -- the ads to whoever may see them.
  */
 export default function IntegrationsSection({ hidden }: { hidden: boolean }) {
   const t = useTranslations("settings.integrations");
 
+  const showAds = usePermissions().has("integrations.view");
+  const showCouriers = useOwnerPower()("couriers");
+
   // Both queries feed several cards; a failure is reported once, here.
-  const marketing = useMarketingIntegrationsQuery({ enabled: !hidden });
-  const couriers = useCouriersQuery({ enabled: !hidden });
+  const marketing = useMarketingIntegrationsQuery({ enabled: !hidden && showAds });
+  const couriers = useCouriersQuery({ enabled: !hidden && showCouriers });
   useEffect(() => {
     const error = marketing.error ?? couriers.error;
     if (!error) return;
@@ -73,23 +82,29 @@ export default function IntegrationsSection({ hidden }: { hidden: boolean }) {
         </div>
 
         <div className="@container flex min-w-0 flex-col gap-6">
-          <Group title={t("sectionAds")}>
-            <div className={GRID}>
-              {AD_SERVICES.map((provider) => (
-                <PixelServiceCard key={provider} provider={provider} panelHidden={hidden} />
-              ))}
-              {AD_SERVICES_COMING_SOON.map(comingSoon)}
-            </div>
-            {/* One choice for Meta and TikTok together, so it sits under both. */}
-            <PurchaseTimingBlock panelHidden={hidden} />
-          </Group>
+          {showAds ? (
+            <Group title={t("sectionAds")}>
+              <div className={GRID}>
+                {AD_SERVICES.map((provider) => (
+                  <PixelServiceCard key={provider} provider={provider} panelHidden={hidden} />
+                ))}
+                {AD_SERVICES_COMING_SOON.map(comingSoon)}
+              </div>
+              {/* One choice for Meta and TikTok together, so it sits under both. */}
+              <PurchaseTimingBlock panelHidden={hidden} />
+            </Group>
+          ) : null}
 
-          <Group title={t("sectionDelivery")}>
-            <div className={GRID}>
-              <SteadfastServiceCard panelHidden={hidden} />
-              {DELIVERY_SERVICES_COMING_SOON.map(comingSoon)}
-            </div>
-          </Group>
+          {showCouriers ? (
+            <Group title={t("sectionDelivery")}>
+              <SupportReadOnly>
+                <div className={GRID}>
+                  <SteadfastServiceCard panelHidden={hidden} />
+                  {DELIVERY_SERVICES_COMING_SOON.map(comingSoon)}
+                </div>
+              </SupportReadOnly>
+            </Group>
+          ) : null}
         </div>
       </SettingsSectionBody>
     </section>

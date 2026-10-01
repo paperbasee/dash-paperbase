@@ -192,6 +192,8 @@ export const couriersQueryKey = ["couriers"] as const;
 export const districtsQueryKey = ["districts"] as const;
 
 export const checkoutSettingsQueryKey = ["checkout-settings"] as const;
+/** Settings > Payments: the shop's bKash and Nagad numbers (owner only). */
+export const paymentNumbersQueryKey = ["payment-numbers"] as const;
 
 
 export const domainsQueryKey = ["domains"] as const;

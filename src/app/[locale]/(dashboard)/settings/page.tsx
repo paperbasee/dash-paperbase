@@ -20,6 +20,7 @@ import AppsSection from "./sections/AppsSection";
 import IntegrationsSection from "./sections/IntegrationsSection";
 import DomainsSection from "./sections/DomainsSection";
 import NotificationsSection from "./sections/NotificationsSection";
+import PaymentsSection from "./sections/PaymentsSection";
 import SecuritySection from "./sections/SecuritySection";
 import SessionsSection from "./sections/SessionsSection";
 import TeamSection from "./sections/team/TeamSection";
@@ -217,6 +218,8 @@ export default function SettingsPage() {
           <PromotionsSection hidden={activeSection !== "promotions"} />
 
           <CheckoutSettingsSection hidden={activeSection !== "checkout"} />
+
+          <PaymentsSection hidden={activeSection !== "payments"} />
 
           <ShippingSection hidden={activeSection !== "shipping"} />
 

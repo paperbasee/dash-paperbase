@@ -20,7 +20,11 @@ import {
   Globe,
   Megaphone,
   MonitorSmartphone,
+  Wallet,
 } from "lucide-react";
+
+import { holdsOwnerPower, type OwnerPower } from "@/config/owner-powers";
+
 import { PROMOTION_TABS } from "./sections/promotions/promotionTabs";
 
 /** Lucide or Phosphor SVG icon used in settings nav (sidebar + in-page tabs). */
@@ -34,6 +38,7 @@ export type SettingsSection =
   | "promotions"
   | "checkout"
   | "shipping"
+  | "payments"
   | "eav"
   | "apps"
   | "integrations"
@@ -49,6 +54,7 @@ export type SettingsSectionLabelKey =
   | "sectionPolicies"
   | "sectionCustomization"
   | "sectionPromotions"
+  | "sectionPayments"
   | "sectionShipping"
   | "sectionEav"
   | "sectionApps"
@@ -74,8 +80,7 @@ export type SettingsSectionNavItem =
  *
  * The key mirrors what the section's backend GET requires, so a role that can't
  * load a section never sees its nav row (fixes "shown but 403s" for staff). A
- * single string requires that key; an array requires ANY of the keys — used by
- * Integrations, which bundles marketing (integrations.*) + couriers (couriers.*).
+ * single string requires that key; an array requires ANY of the keys.
  */
 export const SECTION_PERMISSION: Partial<Record<SettingsSection, string | string[]>> = {
   store: "settings.view",
@@ -84,11 +89,8 @@ export const SECTION_PERMISSION: Partial<Record<SettingsSection, string | string
   checkout: "settings.view",
   eav: "products.view",
   apps: "settings.view",
-  integrations: ["integrations.view", "couriers.view"],
-  domains: "domains.view",
+  integrations: "integrations.view",
   notifications: "settings.manage",
-  team: "team.view",
-  billing: "billing.view",
 };
 
 /** True if `has` satisfies a section's requirement (any-of for arrays; none = open). */
@@ -100,18 +102,25 @@ export function sectionMatchesPermission(
   return (Array.isArray(required) ? required : [required]).some((k) => has(k));
 }
 
-/** Sections only the store owner (or platform superuser) may see. */
-export const SECTION_OWNER_ONLY: Partial<Record<SettingsSection, boolean>> = {
-  security: true,
+/**
+ * Sections that are one of the owner's powers (config/owner-powers.ts): hidden from every team
+ * member, Admin included, whatever their role holds.
+ */
+export const SECTION_OWNER_POWER: Partial<Record<SettingsSection, OwnerPower>> = {
+  payments: "payments",
+  domains: "domains",
+  team: "team",
+  security: "security",
+  sessions: "sessions",
+  billing: "billing",
 };
 
 /**
- * Sections for the shop's owner alone (owner, 2026-09-29): not a platform superuser, and not
- * Paperbase support signed in as the owner. Sessions shows who else is in the shop and lets
- * them out -- the API refuses everyone else too.
+ * Sections holding one owner power beside parts a role may open: shown to whoever may open
+ * either. Integrations: marketing pixels (integrations.view) and the courier accounts (owner).
  */
-export const SECTION_OWNER_ALONE: Partial<Record<SettingsSection, boolean>> = {
-  sessions: true,
+export const SECTION_OWNER_PART: Partial<Record<SettingsSection, OwnerPower>> = {
+  integrations: "couriers",
 };
 
 /**
@@ -133,14 +142,18 @@ export type SettingsSectionAccess = {
   canShowApp: (appId: string) => boolean;
   /** Paperbase support is in the dashboard ("Sign in as this shop"), signed in as the owner. */
   inSupportMode?: boolean;
+  /** The permissions aren't known yet: nothing is hidden meanwhile. */
+  isUnknown?: boolean;
 };
 
-/** True if the user may see a section: owner gate, then app gate, then permission gate. */
+/** True if the user may see a section: owner powers, then app gate, then permission gate. */
 export function isSectionVisible(id: SettingsSection, access: SettingsSectionAccess): boolean {
-  if (SECTION_OWNER_ONLY[id] && !(access.isOwner || access.isSuperuser)) return false;
-  if (SECTION_OWNER_ALONE[id] && !(access.isOwner && !access.inSupportMode)) return false;
+  const power = SECTION_OWNER_POWER[id];
+  if (power) return holdsOwnerPower(power, access);
   const apps = SECTION_APPS[id];
   if (apps && !apps.some((appId) => access.canShowApp(appId))) return false;
+  const part = SECTION_OWNER_PART[id];
+  if (part && holdsOwnerPower(part, access)) return true;
   return sectionMatchesPermission(SECTION_PERMISSION[id], access.has);
 }
 
@@ -169,6 +182,7 @@ export const ALL_SECTIONS: SettingsSectionNavItem[] = [
     icon: ShoppingCartIcon,
   },
   { id: "shipping", labelKey: "sectionShipping", icon: TruckIcon },
+  { id: "payments", labelKey: "sectionPayments", icon: Wallet },
   { id: "eav", labelKey: "sectionEav", icon: Layers },
   { id: "apps", labelKey: "sectionApps", icon: AppStoreLogoIcon },
   { id: "integrations", labelKey: "sectionIntegrations", icon: PlugsIcon },

@@ -103,7 +103,8 @@ describe("team copy — the permission catalogue names real messages", () => {
   ]);
 
   it("covers the whole catalogue (guards against an empty sweep)", () => {
-    expect(labelKeys.length).toBeGreaterThan(60);
+    // 59 since the owner's powers left the catalogue (2026-10-02: domains, couriers, team, billing).
+    expect(labelKeys.length).toBeGreaterThan(50);
   });
 
   it("every labelKey exists in English", () => {

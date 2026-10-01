@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils";
  * What stays the owner's while Paperbase support is in the dashboard (owner, 2026-09-29): shown,
  * greyed, and closed to changes -- a disabled fieldset turns off every field and button inside,
  * and links go quiet -- under one line that says why. The API refuses these changes regardless
- * (support_sessions.BLOCKED_ROUTES); this is so nobody has to try to find out.
+ * (support_sessions.blocked: the owner's account, and the owner's powers); this is so nobody has to try to find out.
  *
  * For the owner themselves it is nothing at all.
  */

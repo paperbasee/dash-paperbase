@@ -56,7 +56,7 @@ function DeviceMark({ row }: { row: SignInSessionRow }) {
 /**
  * Settings > Sessions (owner, 2026-09-29): who is signed in to the shop right now -- the owner on
  * each device, their team, Paperbase support on a visit -- with a way to sign any of them out, and
- * every sign-in of the last 90 days. The owner's alone (settingsSections.SECTION_OWNER_ALONE).
+ * every sign-in of the last 90 days. The owner's alone (config/owner-powers.ts "sessions").
  */
 export default function SessionsSection({ hidden }: { hidden: boolean }) {
   const t = useTranslations("settings.sessions");
