@@ -88,6 +88,20 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-10-02-a-slimmer-sidebar-scrollbar",
+    date: "2026-10-02",
+    version: "4.156.1",
+    tag: "improved",
+    title: {
+      en: "A slimmer scrollbar in the sidebar",
+      bn: "সাইডবারে আরও সরু স্ক্রলবার",
+    },
+    body: {
+      en: "The scrollbar in the sidebar, in the main menu and in Settings, is now a thin line that stays out of the way.",
+      bn: "সাইডবারের স্ক্রলবার, মূল মেনু আর সেটিংস দুই জায়গাতেই, এখন একটি সরু রেখা, যা চোখে লাগে না।",
+    },
+  },
+  {
     id: "2026-10-02-payments-your-own-bkash-and-nagad-numbers",
     date: "2026-10-02",
     version: "4.156.0",
@@ -501,21 +515,6 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     body: {
       en: "A product's name and price can sit on the left, in the centre or on the right, on every card in your shop. Choose it in Customization, under Style. Cards stay centred until you change it.",
       bn: "প্রোডাক্টের নাম আর দাম আপনার দোকানের প্রতিটি কার্ডে বাঁয়ে, মাঝখানে বা ডানে বসতে পারে। কাস্টমাইজেশনের স্টাইলে বেছে নিন। না বদলানো পর্যন্ত কার্ড মাঝখানেই থাকে।",
-    },
-  },
-  {
-    id: "2026-09-29-make-your-thank-you-stand-out",
-    date: "2026-09-29",
-    version: "4.127.0",
-    tag: "improved",
-    href: "/settings?tab=customization",
-    title: {
-      en: "Make your thank-you stand out",
-      bn: "আপনার ধন্যবাদ বার্তা আরও চোখে পড়ুক",
-    },
-    body: {
-      en: "Your own words on the Order success page can now be bold, larger, and on a coloured background: soft grey, your main colour, the warning colour or green. Every colour keeps the words easy to read.",
-      bn: "অর্ডার সফল পেজে আপনার নিজের কথা এখন মোটা অক্ষরে, আরও বড় করে, আর রঙিন পটভূমিতে দেখাতে পারেন: হালকা ধূসর, আপনার মূল রং, সতর্কতার রং বা সবুজ। প্রতিটি রঙেই লেখা সহজে পড়া যায়।",
     },
   },
 ];
