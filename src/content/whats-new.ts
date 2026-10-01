@@ -88,6 +88,21 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-10-02-payments-your-own-bkash-and-nagad-numbers",
+    date: "2026-10-02",
+    version: "4.156.0",
+    tag: "new",
+    title: {
+      en: "Payments: your own bKash and Nagad numbers",
+      bn: "পেমেন্ট: আপনার নিজের বিকাশ ও নগদ নম্বর",
+    },
+    body: {
+      en: "Settings has a new Payments tab, for you alone as the shop's owner: set a bKash number and a Nagad number, each on its own. Shoppers paying before delivery see the number of the wallet they pick, and we email you whenever one changes. Domains, courier accounts and your team are now yours alone too: your team members don't see them.",
+      bn: "সেটিংসে নতুন পেমেন্ট ট্যাব আছে, শুধু আপনার জন্য, দোকানের মালিক হিসেবে: আলাদা করে একটি বিকাশ নম্বর ও একটি নগদ নম্বর দিন। ডেলিভারির আগে টাকা দেওয়া ক্রেতারা যে ওয়ালেট বেছে নেন তার নম্বর দেখেন, আর কোনো নম্বর বদলালে আমরা আপনাকে ইমেইল করি। ডোমেইন, কুরিয়ার অ্যাকাউন্ট আর আপনার টিমও এখন শুধু আপনার: টিমের সদস্যরা এগুলো দেখেন না।",
+    },
+    href: "/settings?tab=payments",
+  },
+  {
     id: "2026-10-02-everyone-greeted-by-their-own-name",
     date: "2026-10-02",
     version: "4.155.1",
@@ -501,21 +516,6 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     body: {
       en: "Your own words on the Order success page can now be bold, larger, and on a coloured background: soft grey, your main colour, the warning colour or green. Every colour keeps the words easy to read.",
       bn: "অর্ডার সফল পেজে আপনার নিজের কথা এখন মোটা অক্ষরে, আরও বড় করে, আর রঙিন পটভূমিতে দেখাতে পারেন: হালকা ধূসর, আপনার মূল রং, সতর্কতার রং বা সবুজ। প্রতিটি রঙেই লেখা সহজে পড়া যায়।",
-    },
-  },
-  {
-    id: "2026-09-29-your-own-words-after-a-cash-on-delivery-order",
-    date: "2026-09-29",
-    version: "4.126.0",
-    tag: "new",
-    href: "/settings?tab=customization",
-    title: {
-      en: "Your own words after a cash-on-delivery order",
-      bn: "ক্যাশ অন ডেলিভারি অর্ডারের পরে আপনার নিজের কথা",
-    },
-    body: {
-      en: "Order success is now a page in Customization. After a cash-on-delivery order, its top can show the courier animation, as it does today, or your own words, like a thank-you or when you will call. The heading and the order under it stay as they are.",
-      bn: "অর্ডার সফল এখন কাস্টমাইজেশনের একটি পেজ। ক্যাশ অন ডেলিভারি অর্ডারের পরে এর উপরে কুরিয়ারের অ্যানিমেশন দেখাতে পারেন, যেমন এখন দেখায়, অথবা আপনার নিজের কথা, যেমন একটি ধন্যবাদ বা কখন ফোন করবেন। শিরোনাম আর তার নিচের অর্ডার যেমন আছে তেমনই থাকে।",
     },
   },
 ];
