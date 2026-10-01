@@ -1,44 +1,51 @@
 import api from "@/lib/api";
+import type { RoleSlug } from "@/config/permissions";
 
-export interface TeamRole {
-  public_id: string;
+/** One of the three fixed roles, as the API names it (rbac.serializers.role_brief). */
+export interface RoleBrief {
+  slug: RoleSlug;
   name: string;
-  slug: string;
   description: string;
-  color: string;
-  is_system: boolean;
+}
+
+/** A role card on Settings → Team: what the role holds, and who holds it. */
+export interface TeamRole extends RoleBrief {
   permissions: string[];
-  /** Keys this role can never hold (e.g. theming.manage outside Admin and Manager). */
-  unavailable_permissions: string[];
+  /** Whether the owner may limit this role to some categories (Staff only). */
+  category_limits: boolean;
   member_count: number;
   pending_invite_count: number;
-  created_at: string;
-  updated_at: string;
 }
 
 export interface TeamMember {
   public_id: string;
   user: { public_id: string; email: string; full_name: string };
-  role: { public_id: string; name: string; slug: string; is_system: boolean } | null;
+  /** Null for the owner, and for a member paused at the switch to fixed roles until one is chosen. */
+  role: RoleBrief | null;
   is_owner: boolean;
   is_active: boolean;
   created_at: string;
   /** Department scoping: categories this member is limited to (empty = all). */
   allowed_category_public_ids: string[];
-  /** Whether this member may be category-limited at all (owner/admin never are). */
+  /** Whether this member may be category-limited at all (Staff only). */
   scopeable: boolean;
 }
 
 export interface TeamInvite {
   public_id: string;
   email: string;
-  role: { public_id: string; name: string; slug: string; is_system: boolean } | null;
+  role: RoleBrief | null;
   status: "pending" | "accepted" | "revoked" | "expired";
   invited_by_name: string;
   expires_at: string;
   accepted_at: string | null;
   revoked_at: string | null;
   created_at: string;
+}
+
+/** A member the switch to fixed roles could not place: no role, no access, until the owner picks one. */
+export function isPaused(member: TeamMember): boolean {
+  return !member.is_owner && member.role === null;
 }
 
 /** DRF list endpoints may paginate; normalize to a plain array. */
@@ -65,49 +72,8 @@ export async function fetchInvites(): Promise<TeamInvite[]> {
   return unwrapList<TeamInvite>(data);
 }
 
-export interface RoleWritePayload {
-  name?: string;
-  description?: string;
-  color?: string;
-  permissions?: string[];
-  clone_from?: string;
-}
-
-export async function createRole(payload: RoleWritePayload): Promise<TeamRole> {
-  const { data } = await api.post<TeamRole>("admin/team/roles/", payload);
-  return data;
-}
-
-export async function updateRole(
-  publicId: string,
-  payload: RoleWritePayload
-): Promise<TeamRole> {
-  const { data } = await api.patch<TeamRole>(
-    `admin/team/roles/${publicId}/`,
-    payload
-  );
-  return data;
-}
-
-export async function deleteRole(
-  publicId: string,
-  reassignTo?: string
-): Promise<void> {
-  // DELETE carries no body through the axios-compat client, so reassignment
-  // travels as a query param (the backend reads query first, then body).
-  await api.delete(`admin/team/roles/${publicId}/`, {
-    params: reassignTo ? { reassign_to: reassignTo } : undefined,
-  });
-}
-
-export async function inviteMember(
-  email: string,
-  rolePublicId: string
-): Promise<TeamInvite> {
-  const { data } = await api.post<TeamInvite>("admin/team/invites/", {
-    email,
-    role_public_id: rolePublicId,
-  });
+export async function inviteMember(email: string, role: RoleSlug): Promise<TeamInvite> {
+  const { data } = await api.post<TeamInvite>("admin/team/invites/", { email, role });
   return data;
 }
 
@@ -117,11 +83,11 @@ export async function revokeInvite(publicId: string): Promise<void> {
 
 export async function changeMemberRole(
   membershipPublicId: string,
-  rolePublicId: string
+  role: RoleSlug
 ): Promise<TeamMember> {
   const { data } = await api.post<TeamMember>(
     `admin/team/members/${membershipPublicId}/set-role/`,
-    { role_public_id: rolePublicId }
+    { role }
   );
   return data;
 }

@@ -67,6 +67,7 @@ import { useFilters } from "@/hooks/useFilters";
 import { useConfirm } from "@/context/ConfirmDialogContext";
 import { notify } from "@/notifications";
 import { useAdminDeleteCapabilities } from "@/hooks/useAdminDeleteCapabilities";
+import { usePermissions } from "@/context/PermissionsContext";
 import { useNavCounts } from "@/hooks/useNavCounts";
 import { numberTextClass } from "@/lib/number-font";
 import { cn } from "@/lib/utils";
@@ -135,6 +136,10 @@ export default function ProductsPage() {
   const setScrollContainer = useHorizontalWheelScroll<HTMLDivElement>();
   const { canDeleteProducts, isSuperuser: deleteIsSuperuser } =
     useAdminDeleteCapabilities();
+  // Staff see the products to sell from and change none of them (roles plan, owner 2026-10-02).
+  const { has } = usePermissions();
+  const canAddProducts = has("products.create");
+  const canEditProducts = has("products.edit");
 
   const listParams = useMemo(() => {
     const params: Record<string, string> = {};
@@ -281,6 +286,7 @@ export default function ProductsPage() {
   ]);
 
   const canReorder = useMemo(() => {
+    if (!canEditProducts) return false;
     if (!filters.category) return false;
     if (filters.search || filters.status) return false;
     if (filters.prepayment_type) return false;
@@ -288,7 +294,7 @@ export default function ProductsPage() {
     const ord = filters.ordering;
     if (ord && ord !== "display_order") return false;
     return reorderCategoryPublicId(products) !== null;
-  }, [filters, products]);
+  }, [canEditProducts, filters, products]);
 
   const handleDragEnd = useCallback(
     async (event: DragEndEvent) => {
@@ -504,12 +510,14 @@ export default function ProductsPage() {
                   })}
             </button>
           )}
-          <DeferredNavLink
-            href="/products/new"
-            className="rounded-card bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90"
-          >
-            {tPages("addProduct")}
-          </DeferredNavLink>
+          {canAddProducts && (
+            <DeferredNavLink
+              href="/products/new"
+              className="rounded-card bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90"
+            >
+              {tPages("addProduct")}
+            </DeferredNavLink>
+          )}
         </div>
       </div>
 

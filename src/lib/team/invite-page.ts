@@ -15,7 +15,8 @@ export type InviteRefusal = "" | "already_member" | "email_mismatch" | "unverifi
 export interface InvitePreview {
   status: InviteStatus;
   store: { name: string; logo_url: string | null };
-  role: { name: string; description: string };
+  /** The fixed role ("" slug for an invite the switch to fixed roles cancelled). */
+  role: { slug: string; name: string; description: string };
   inviter: { name: string; avatar_seed: string } | null;
   email_masked: string;
   expires_at: string;
@@ -60,7 +61,7 @@ export function parseInvitePreview(raw: unknown): InvitePreview | null {
   return {
     status,
     store: { name: text(raw.store.name), logo_url: text(raw.store.logo_url) || null },
-    role: { name: text(raw.role.name), description: text(raw.role.description) },
+    role: { slug: text(raw.role.slug), name: text(raw.role.name), description: text(raw.role.description) },
     inviter,
     email_masked: text(raw.email_masked),
     expires_at: text(raw.expires_at),

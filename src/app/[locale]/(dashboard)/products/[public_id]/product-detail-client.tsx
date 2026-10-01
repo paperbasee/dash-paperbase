@@ -36,6 +36,7 @@ import { useConfirm } from "@/context/ConfirmDialogContext";
 import { notify } from "@/notifications";
 import { scheduleSlugSuggestion } from "@/lib/products/slug-suggestion";
 import { useAdminDeleteCapabilities } from "@/hooks/useAdminDeleteCapabilities";
+import { usePermissions } from "@/context/PermissionsContext";
 import { numberTextClass } from "@/lib/number-font";
 import { cn } from "@/lib/utils";
 import { buildPublicMediaUrlFromKey, uploadFile } from "@/hooks/usePresignedUpload";
@@ -117,6 +118,7 @@ export default function ProductDetailClient() {
   const [error, setError] = useState("");
   const { canDeleteProducts: canDeleteProduct, isSuperuser: deleteIsSuperuser } =
     useAdminDeleteCapabilities();
+  const canEditProduct = usePermissions().has("products.edit");
   const confirm = useConfirm();
   const queryClient = useQueryClient();
   const [deleting, setDeleting] = useState(false);
@@ -579,7 +581,7 @@ export default function ProductDetailClient() {
               {tPages("productDetailDeleteProduct")}
             </Button>
           )}
-          {!isEditMode && (
+          {!isEditMode && canEditProduct && (
             <Button type="button" className="gap-2" asChild>
               <DeferredNavLink href={`/products/${publicId}/edit`}>
                 {tPages("productEditProductButton")}

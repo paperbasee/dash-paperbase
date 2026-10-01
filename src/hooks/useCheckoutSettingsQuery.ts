@@ -45,9 +45,11 @@ export async function fetchCheckoutSettings(): Promise<CheckoutSettings> {
   return parseCheckoutSettings(data);
 }
 
-export function useCheckoutSettingsQuery() {
+/** `enabled`: false while the screen asking is not shown, so a hidden tab reads nothing. */
+export function useCheckoutSettingsQuery(enabled = true) {
   return useQuery({
     queryKey: checkoutSettingsQueryKey,
     queryFn: fetchCheckoutSettings,
+    enabled,
   });
 }

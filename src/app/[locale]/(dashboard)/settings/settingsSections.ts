@@ -76,20 +76,20 @@ export type SettingsSectionNavItem =
   | { id: "checkout" | "team"; displayLabel: string; icon: SettingsSectionIcon };
 
 /**
- * Sections gated by RBAC permission key(s); absent = visible to any staff.
+ * Sections gated by a permission key; absent = visible to any member.
  *
- * The key mirrors what the section's backend GET requires, so a role that can't
- * load a section never sees its nav row (fixes "shown but 403s" for staff). A
- * single string requires that key; an array requires ANY of the keys.
+ * A role sees a section only when it can change it (roles plan, owner 2026-10-02):
+ * a Manager reads the checkout settings for the theme editor but is never shown
+ * the Checkout tab. A single string requires that key; an array requires ANY.
  */
 export const SECTION_PERMISSION: Partial<Record<SettingsSection, string | string[]>> = {
-  store: "settings.view",
-  policies: "settings.view",
-  customization: "theming.view",
-  checkout: "settings.view",
-  eav: "products.view",
-  apps: "settings.view",
-  integrations: "integrations.view",
+  store: "settings.manage",
+  policies: "settings.manage",
+  customization: "theming.manage",
+  checkout: "settings.manage",
+  eav: "products.edit",
+  apps: "settings.manage",
+  integrations: "integrations.manage",
   notifications: "settings.manage",
 };
 
@@ -117,7 +117,7 @@ export const SECTION_OWNER_POWER: Partial<Record<SettingsSection, OwnerPower>> =
 
 /**
  * Sections holding one owner power beside parts a role may open: shown to whoever may open
- * either. Integrations: marketing pixels (integrations.view) and the courier accounts (owner).
+ * either. Integrations: marketing pixels (integrations.manage) and the courier accounts (owner).
  */
 export const SECTION_OWNER_PART: Partial<Record<SettingsSection, OwnerPower>> = {
   integrations: "couriers",

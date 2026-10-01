@@ -53,7 +53,7 @@ export default function CheckoutSettingsSection({
   hidden: boolean;
 }) {
   const queryClient = useQueryClient();
-  const { data, isLoading: loading, isError, error } = useCheckoutSettingsQuery();
+  const { data, isLoading: loading, isError, error } = useCheckoutSettingsQuery(!hidden);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<SettingsMessage>(null);
   // The cooldown is edited as text so a merchant can clear the box mid-edit

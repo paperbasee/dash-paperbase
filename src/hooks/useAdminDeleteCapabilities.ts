@@ -12,7 +12,10 @@ export function useAdminDeleteCapabilities() {
   return {
     canDeleteProducts: has("products.delete"),
     canViewTrash: has("trash.view"),
-    canManageTrash: has("trash.manage"),
+    // Bringing something back and deleting it for good are separate (owner, 2026-10-02):
+    // Managers restore, only Admins delete forever.
+    canRestoreTrash: has("trash.restore"),
+    canPurgeTrash: has("trash.purge"),
     isSuperuser,
     loading,
   };

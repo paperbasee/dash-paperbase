@@ -13,6 +13,8 @@ import { SearchModalProvider } from "@/context/SearchModalContext";
 import { WhatsNewProvider } from "@/context/WhatsNewContext";
 import { NavigationLoadingProvider } from "@/context/NavigationLoadingContext";
 import { DeferredNavLink } from "@/components/navigation/DeferredNavLink";
+import { PageAccessGate } from "@/components/navigation/PageAccessGate";
+import { usePermissions } from "@/context/PermissionsContext";
 import Sidebar, { SidebarContent } from "@/components/Sidebar";
 import MobileNavBar from "@/components/MobileNavBar";
 import SystemNotificationBanner from "@/components/system/SystemNotificationBanner";
@@ -265,7 +267,9 @@ export default function DashboardLayoutClient({
         {isThemeEditor ? (
           <div className="fixed inset-0 flex h-dvh flex-col bg-background">
             {supportSession ? <SupportStrip session={supportSession} /> : null}
-            <div className="relative flex min-h-0 flex-1 flex-col">{children}</div>
+            <div className="relative flex min-h-0 flex-1 flex-col">
+              <PageAccessGate>{children}</PageAccessGate>
+            </div>
           </div>
         ) : (
         <div className="md:flex md:h-screen md:flex-col md:overflow-hidden">
@@ -396,20 +400,14 @@ export default function DashboardLayoutClient({
               <div className="sticky top-[var(--subscription-banner-offset,0px)] z-30 hidden h-[var(--header-height)] shrink-0 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 md:static md:block md:shrink-0">
                 <div className={cn(contentContainerClass, "flex h-full items-center justify-end")}>
                   <div className="flex items-center">
-                    <DeferredNavLink
-                      href="/activities"
-                      aria-label={tDashboard("activitiesAria")}
-                      className="inline-flex size-9 shrink-0 items-center justify-center rounded-md text-muted-foreground transition hover:bg-accent hover:text-foreground"
-                    >
-                      <History className="size-5" />
-                    </DeferredNavLink>
+                    <ActivitiesLink label={tDashboard("activitiesAria")} />
                   </div>
                 </div>
               </div>
 
               <main className="py-4 md:min-h-0 md:flex-1 md:overflow-y-auto md:pt-6 pb-8 md:pb-10">
                 <div className={contentContainerClass}>
-                  {children}
+                  <PageAccessGate>{children}</PageAccessGate>
                 </div>
               </main>
             </div>
@@ -442,5 +440,20 @@ export default function DashboardLayoutClient({
       </EnabledAppsProvider>
       </PermissionsProvider>
     </BrandingProvider>
+  );
+}
+
+/** The header's way to Activities, for whoever reads the activity log (Admin, Manager, the owner). */
+function ActivitiesLink({ label }: { label: string }) {
+  const { has } = usePermissions();
+  if (!has("activity.view")) return null;
+  return (
+    <DeferredNavLink
+      href="/activities"
+      aria-label={label}
+      className="inline-flex size-9 shrink-0 items-center justify-center rounded-md text-muted-foreground transition hover:bg-accent hover:text-foreground"
+    >
+      <History className="size-5" />
+    </DeferredNavLink>
   );
 }

@@ -17,6 +17,7 @@ import { signOut, storeAuthTokens } from "@/lib/auth";
 import { isNetworkError } from "@/lib/network-error";
 import { browserSupportsWebAuthn, isPasskeyCancellation } from "@/lib/passkeys";
 import { withNext } from "@/lib/safe-next";
+import { ROLE_MESSAGES, isRoleSlug } from "@/config/permissions";
 import { inviteDay, inviteScreen, parseInvitePreview, type InvitePreview } from "@/lib/team/invite-page";
 
 /** The steps of the page: what the API said (`ready`), then the new person's name, then in. */
@@ -84,6 +85,7 @@ function Screen({
 export default function TeamInvitePage() {
   const t = useTranslations("teamInvite");
   const tAuth = useTranslations("auth");
+  const tTeam = useTranslations("settings.team");
   const locale = useLocale();
   const token = useSearchParams().get("token") ?? "";
   const { enrollPasskey } = useAuth();
@@ -241,7 +243,14 @@ export default function TeamInvitePage() {
     );
   }
 
-  const { store, role, inviter } = preview;
+  const { store, inviter } = preview;
+  // One of the three fixed roles, named in the reader's language; the API's words otherwise.
+  const role = isRoleSlug(preview.role.slug)
+    ? {
+        name: tTeam(ROLE_MESSAGES[preview.role.slug].name),
+        description: tTeam(ROLE_MESSAGES[preview.role.slug].summary),
+      }
+    : preview.role;
   const shop = store.name;
 
   if (phase === "joined") {

@@ -1,20 +1,18 @@
 /**
  * Copy integrity for Settings → Team & roles.
  *
- * The role editor is the one screen where a merchant decides who in their shop
- * can refund money, export the customer list or delete products. It used to be
- * English-only while the rest of the dashboard was bilingual, so the people
- * most likely to be handed a limited role — staff, not owners — read the least
- * of it.
+ * The role cards are where a merchant reads who in their shop may download the
+ * orders, delete customers or change the shop's settings, before inviting
+ * someone. The people most likely to be handed a limited role -- staff, not
+ * owners -- read Bangla as often as English.
  *
  * Two failures are invisible until a merchant hits them, so they are pinned
  * here instead:
  *
  *   1. next-intl answers a key it cannot find with the key itself, so a name
- *      missing from bn.json reaches a Bangla reader as "permOrdersRefund".
- *   2. `src/config/permissions.ts` no longer carries words, only key names. A
- *      permission added there without its two messages renders as its key on a
- *      checkbox a merchant is about to tick.
+ *      missing from bn.json reaches a Bangla reader as "areaOrdersExport".
+ *   2. `src/config/permissions.ts` carries only message names. A role or a card
+ *      line added there without its two messages renders as its key.
  */
 
 import fs from "node:fs";
@@ -25,11 +23,11 @@ import { describe, expect, it } from "vitest";
 
 import en from "../../messages/en.json";
 import bn from "../../messages/bn.json";
-import { PERMISSION_GROUPS } from "@/config/permissions";
+import { ROLE_AREAS, ROLE_MESSAGES } from "@/config/permissions";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const TEAM_DIR = path.join(ROOT, "src/app/[locale]/(dashboard)/settings/sections/team");
-const COMPONENTS = ["TeamSection.tsx", "RoleEditorDialog.tsx", "MemberCategoryScopeDialog.tsx"];
+const COMPONENTS = ["TeamSection.tsx", "MemberCategoryScopeDialog.tsx"];
 const SOURCES = COMPONENTS.map((file) => fs.readFileSync(path.join(TEAM_DIR, file), "utf8"));
 const ALL_SOURCE = SOURCES.join("\n");
 
@@ -95,16 +93,16 @@ describe("team copy — English and Bengali stay in step", () => {
   });
 });
 
-describe("team copy — the permission catalogue names real messages", () => {
-  /** Every group and permission name the role editor renders with t(labelKey). */
-  const labelKeys = PERMISSION_GROUPS.flatMap((g) => [
-    g.labelKey,
-    ...g.permissions.map((p) => p.labelKey),
-  ]);
+describe("team copy — the role cards name real messages", () => {
+  /** Every role name, summary and card line the Roles tab renders with t(key). */
+  const labelKeys = [
+    ...Object.values(ROLE_MESSAGES).flatMap((role) => [role.name, role.summary]),
+    ...ROLE_AREAS.map((area) => area.labelKey),
+  ];
 
-  it("covers the whole catalogue (guards against an empty sweep)", () => {
-    // 59 since the owner's powers left the catalogue (2026-10-02: domains, couriers, team, billing).
-    expect(labelKeys.length).toBeGreaterThan(50);
+  it("covers every role and card line (guards against an empty sweep)", () => {
+    expect(labelKeys.length).toBe(3 * 2 + ROLE_AREAS.length);
+    expect(ROLE_AREAS.length).toBeGreaterThan(10);
   });
 
   it("every labelKey exists in English", () => {
@@ -115,7 +113,7 @@ describe("team copy — the permission catalogue names real messages", () => {
     expect(labelKeys.filter((k) => !(k in bnTeam)).sort()).toEqual([]);
   });
 
-  it("no catalogue name is left in English", () => {
+  it("no role word is left in English", () => {
     const english = labelKeys.filter((k) => enTeam[k] === bnTeam[k]);
     expect(english).toEqual([]);
   });

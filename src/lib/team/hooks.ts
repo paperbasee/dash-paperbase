@@ -8,10 +8,9 @@ import {
   teamRolesQueryKey,
   myPermissionsQueryKey,
 } from "@/lib/query-keys";
+import type { RoleSlug } from "@/config/permissions";
 import {
   changeMemberRole,
-  createRole,
-  deleteRole,
   fetchInvites,
   fetchMembers,
   fetchRoles,
@@ -20,8 +19,6 @@ import {
   revokeInvite,
   setMemberActive,
   setMemberCategories,
-  updateRole,
-  type RoleWritePayload,
 } from "@/lib/team/api";
 
 const TEAM_STALE_MS = 60 * 1000;
@@ -64,37 +61,10 @@ function useInvalidateTeam() {
   };
 }
 
-export function useCreateRole() {
-  const invalidate = useInvalidateTeam();
-  return useMutation({
-    mutationFn: (payload: RoleWritePayload) => createRole(payload),
-    onSuccess: invalidate,
-  });
-}
-
-export function useUpdateRole() {
-  const invalidate = useInvalidateTeam();
-  return useMutation({
-    mutationFn: ({ publicId, payload }: { publicId: string; payload: RoleWritePayload }) =>
-      updateRole(publicId, payload),
-    onSuccess: invalidate,
-  });
-}
-
-export function useDeleteRole() {
-  const invalidate = useInvalidateTeam();
-  return useMutation({
-    mutationFn: ({ publicId, reassignTo }: { publicId: string; reassignTo?: string }) =>
-      deleteRole(publicId, reassignTo),
-    onSuccess: invalidate,
-  });
-}
-
 export function useInviteMember() {
   const invalidate = useInvalidateTeam();
   return useMutation({
-    mutationFn: ({ email, rolePublicId }: { email: string; rolePublicId: string }) =>
-      inviteMember(email, rolePublicId),
+    mutationFn: ({ email, role }: { email: string; role: RoleSlug }) => inviteMember(email, role),
     onSuccess: invalidate,
   });
 }
@@ -110,13 +80,8 @@ export function useRevokeInvite() {
 export function useChangeMemberRole() {
   const invalidate = useInvalidateTeam();
   return useMutation({
-    mutationFn: ({
-      membershipPublicId,
-      rolePublicId,
-    }: {
-      membershipPublicId: string;
-      rolePublicId: string;
-    }) => changeMemberRole(membershipPublicId, rolePublicId),
+    mutationFn: ({ membershipPublicId, role }: { membershipPublicId: string; role: RoleSlug }) =>
+      changeMemberRole(membershipPublicId, role),
     onSuccess: invalidate,
   });
 }

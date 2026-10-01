@@ -5,7 +5,7 @@ import { inviteDay, inviteScreen, parseInvitePreview, type InvitePreview } from 
 const answer = (over: Record<string, unknown> = {}) => ({
   status: "pending",
   store: { name: "GADZILLA", logo_url: null },
-  role: { name: "Manager", description: "Runs day-to-day operations." },
+  role: { slug: "manager", name: "Manager", description: "Runs day-to-day operations." },
   inviter: { name: "Mushfikur Rahman", avatar_seed: "usr_1" },
   email_masked: "k•••@g•••.com",
   expires_at: "2026-10-08T18:04:11Z",

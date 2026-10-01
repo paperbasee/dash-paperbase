@@ -68,7 +68,7 @@ export default function PoliciesSection({ hidden }: { hidden: boolean }) {
   const canManage = has("settings.manage");
   const confirm = useConfirm();
   const queryClient = useQueryClient();
-  const policies = usePoliciesQuery();
+  const policies = usePoliciesQuery(!hidden);
   const [draft, setDraft] = useState<Draft | null>(null);
   const [errors, setErrors] = useState<Errors>({});
   const [saving, setSaving] = useState(false);

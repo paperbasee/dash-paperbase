@@ -10,7 +10,7 @@ import {
   resolveSettingsSection,
 } from "@/app/[locale]/(dashboard)/settings/settingsSections";
 import { ALWAYS_ON_EXTRA_APP_IDS, APP_CONFIG, APPS_SCREEN_SWITCHABLE_IDS } from "@/config/apps";
-import { APP_VIEW_PERMISSION } from "@/config/permissions";
+import { APP_PAGE_PERMISSION } from "@/config/permissions";
 
 /**
  * Banners, Pop-up and CTA used to be sidebar links, then tabs in Settings →
@@ -25,7 +25,7 @@ import { APP_VIEW_PERMISSION } from "@/config/permissions";
 /** Access for a staff role with every app enabled, holding only the listed permission keys. */
 function staff(granted: string[]) {
   const has = (key: string) => granted.includes(key);
-  const canShowApp = (appId: string) => has(APP_VIEW_PERMISSION[appId]);
+  const canShowApp = (appId: string) => has(APP_PAGE_PERMISSION[appId]);
   return { has, isOwner: false, isSuperuser: false, canShowApp };
 }
 
@@ -56,7 +56,7 @@ describe("Promotions section visibility", () => {
   });
 
   it("lets a pop-up-only staff member reach the pop-up without any settings permission", () => {
-    const access = staff(["popups.view"]);
+    const access = staff(["popups.view", "popups.manage"]);
     const visible = SECTIONS.filter((row) => isSectionVisible(row.id, access));
     expect(visible.map((row) => row.id)).toEqual(["promotions", "account"]);
     // Plain /settings and the default "store" tab both land them on Promotions.
@@ -96,7 +96,7 @@ describe("the CTA is gone", () => {
   });
 
   it("has no view permission of its own", () => {
-    expect(APP_VIEW_PERMISSION).not.toHaveProperty("cta");
+    expect(APP_PAGE_PERMISSION).not.toHaveProperty("cta");
   });
 
   it("leaves no promotions tab pointing at it", () => {

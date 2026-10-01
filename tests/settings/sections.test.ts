@@ -19,7 +19,7 @@ import {
 } from "@/app/[locale]/(dashboard)/settings/settingsSections";
 import { APP_CONFIG } from "@/config/apps";
 import { OWNER_POWERS } from "@/config/owner-powers";
-import { ALL_PERMISSION_KEYS, APP_VIEW_PERMISSION } from "@/config/permissions";
+import { ALL_PERMISSION_KEYS, APP_PAGE_PERMISSION } from "@/config/permissions";
 
 /**
  * settingsSections is the single source of truth for which settings tabs a
@@ -65,7 +65,7 @@ function grants(...keys: string[]) {
  * SettingsSidebarNav.tsx share (useVisibleSettingsSections), so role-shaped
  * expectations below exercise the real maps rather than a hand-written allow
  * list. Unless a test says otherwise every optional app is enabled and app
- * access follows APP_VIEW_PERMISSION, as PermissionsContext.canViewApp does.
+ * access follows APP_PAGE_PERMISSION, as PermissionsContext.canViewApp does.
  */
 function visibleIdsFor(
   has: (key: string) => boolean,
@@ -79,7 +79,7 @@ function visibleIdsFor(
 ): SettingsSection[] {
   const { isOwner = false, isSuperuser = false, inSupportMode = false } = opts;
   const canShowApp =
-    opts.canShowApp ?? ((appId: string) => isOwner || isSuperuser || has(APP_VIEW_PERMISSION[appId]));
+    opts.canShowApp ?? ((appId: string) => isOwner || isSuperuser || has(APP_PAGE_PERMISSION[appId]));
   return (opts.sections ?? SECTIONS)
     .filter((row) => isSectionVisible(row.id, { has, isOwner, isSuperuser, canShowApp, inSupportMode }))
     .map((row) => row.id);
@@ -258,7 +258,7 @@ describe("permission map ↔ SECTIONS consistency", () => {
       expect(apps!.length, `section "${id}" lists no apps`).toBeGreaterThan(0);
       for (const appId of apps!) {
         expect(APP_CONFIG[appId], `section "${id}" -> unknown app "${appId}"`).toBeDefined();
-        expect(APP_VIEW_PERMISSION[appId], `section "${id}" -> app "${appId}" has no view key`).toBeDefined();
+        expect(APP_PAGE_PERMISSION[appId], `section "${id}" -> app "${appId}" has no view key`).toBeDefined();
       }
     }
   });
@@ -292,9 +292,12 @@ describe("role-shaped visibility (the maps as consumers apply them)", () => {
   });
 
   it("shows Integrations to whoever may open either part: the pixels or the courier accounts", () => {
-    expect(visibleIdsFor(grants("integrations.view").has).sort()).toEqual(["account", "integrations"]);
+    expect(visibleIdsFor(grants("integrations.view", "integrations.manage").has).sort()).toEqual([
+      "account",
+      "integrations",
+    ]);
     expect(visibleIdsFor(grants().has, { isOwner: true })).toContain("integrations");
-    expect(visibleIdsFor(grants("settings.view").has)).not.toContain("integrations");
+    expect(visibleIdsFor(grants("integrations.view").has)).not.toContain("integrations");
   });
 
   it("keeps the owner's powers from every role, whatever it holds", () => {
@@ -311,17 +314,22 @@ describe("role-shaped visibility (the maps as consumers apply them)", () => {
     expect(visibleIdsFor(grants("settings.manage").has)).not.toContain("payments");
   });
 
-  it("does not leak Team or Billing to a role holding only settings.view", () => {
-    const visible = visibleIdsFor(grants("settings.view").has);
+  it("shows no settings tab to a role that only reads them (a Manager, for the theme editor)", () => {
+    const reader = visibleIdsFor(grants("settings.view").has);
+    for (const id of ["store", "policies", "checkout", "apps", "notifications"]) {
+      expect(reader).not.toContain(id);
+    }
+  });
+
+  it("does not leak Team or Billing to a role holding settings.manage", () => {
+    const visible = visibleIdsFor(grants("settings.view", "settings.manage").has);
     expect(visible).toContain("store");
     expect(visible).toContain("checkout");
     expect(visible).toContain("apps");
+    expect(visible).toContain("notifications");
     expect(visible).not.toContain("team");
     expect(visible).not.toContain("billing");
     expect(visible).not.toContain("domains");
-    // notifications is gated on settings.manage, not settings.view — the panel
-    // itself re-checks settings.manage, so the nav row must agree.
-    expect(visible).not.toContain("notifications");
   });
 
   it("shows every section to the owner", () => {
@@ -441,11 +449,12 @@ describe("domains section is gated until the platform can serve custom domains",
 });
 
 describe("Policies (2026-09-25)", () => {
-  it("is a section after Store Info, behind the permission its API asks for", () => {
+  it("is a section after Store Info, shown to whoever can change the policies", () => {
     const ids = ALL_SECTIONS.map((row) => row.id);
     expect(ids.indexOf("policies")).toBe(ids.indexOf("store") + 1);
-    // admin/policies/ reads under settings.view and writes under settings.manage.
-    expect(SECTION_PERMISSION.policies).toBe("settings.view");
+    // admin/policies/ reads under settings.view (the theme editor's links too) and writes under
+    // settings.manage; a role sees the tab only when it can change it.
+    expect(SECTION_PERMISSION.policies).toBe("settings.manage");
   });
 
   it("is named in both languages", () => {

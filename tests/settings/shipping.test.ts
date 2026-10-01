@@ -8,7 +8,7 @@ import {
   resolveSettingsSection,
 } from "@/app/[locale]/(dashboard)/settings/settingsSections";
 import { APP_CONFIG, ESSENTIAL_APP_IDS, MAIN_NAV_APP_IDS } from "@/config/apps";
-import { APP_VIEW_PERMISSION } from "@/config/permissions";
+import { APP_PAGE_PERMISSION } from "@/config/permissions";
 
 /**
  * Shipping used to be a sidebar link. It now lives in Settings → Shipping, and must
@@ -19,7 +19,7 @@ import { APP_VIEW_PERMISSION } from "@/config/permissions";
 /** Access for a staff role with every app enabled, holding only the listed permission keys. */
 function staff(granted: string[]) {
   const has = (key: string) => granted.includes(key);
-  const canShowApp = (appId: string) => has(APP_VIEW_PERMISSION[appId]);
+  const canShowApp = (appId: string) => has(APP_PAGE_PERMISSION[appId]);
   return { has, isOwner: false, isSuperuser: false, canShowApp };
 }
 
@@ -48,12 +48,14 @@ describe("Shipping section", () => {
     ).toBe(true);
   });
 
-  it("is hidden from a role without shipping.view, even with settings.view", () => {
-    expect(isSectionVisible("shipping", staff(["settings.view"]))).toBe(false);
+  it("is hidden from a role that only reads shipping (the order form's read)", () => {
+    // Managers and Staff read the zones and methods to take an order; changing them is the
+    // Admin's, and a role sees only what it can change.
+    expect(isSectionVisible("shipping", staff(["settings.view", "shipping.view"]))).toBe(false);
   });
 
   it("lets a shipping-only staff member reach Shipping without any settings permission", () => {
-    const access = staff(["shipping.view"]);
+    const access = staff(["shipping.view", "shipping.manage"]);
     const visible = SECTIONS.filter((row) => isSectionVisible(row.id, access));
     expect(visible.map((row) => row.id)).toEqual(["shipping", "account"]);
     // Plain /settings and the default "store" tab both land them on Shipping.

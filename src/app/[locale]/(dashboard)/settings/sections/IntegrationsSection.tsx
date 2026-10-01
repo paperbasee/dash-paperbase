@@ -44,7 +44,7 @@ const GRID = "grid min-w-0 grid-cols-1 gap-3 @min-[36rem]:grid-cols-2 @min-[54re
 export default function IntegrationsSection({ hidden }: { hidden: boolean }) {
   const t = useTranslations("settings.integrations");
 
-  const showAds = usePermissions().has("integrations.view");
+  const showAds = usePermissions().has("integrations.manage");
   const showCouriers = useOwnerPower()("couriers");
 
   // Both queries feed several cards; a failure is reported once, here.

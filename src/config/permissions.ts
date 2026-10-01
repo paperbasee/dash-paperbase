@@ -1,219 +1,140 @@
 /**
- * Client mirror of the server RBAC catalog (engine/apps/rbac/catalog.py).
+ * Client mirror of the API's permission list and its three fixed roles
+ * (api-paperbase engine/apps/rbac/catalog.py; roles plan, owner 2026-10-02).
  *
- * This is a UX layer only: it hides sidebar items and disables buttons the
- * user can't use. The server re-checks every request regardless, so a stale
- * or wrong mapping here can never grant access — at worst it hides something
- * a user is actually allowed to use (fixed by syncing this file).
+ * This is a UX layer only: it hides pages and buttons a member can't use. The
+ * server re-checks every request regardless, so a stale mapping here can never
+ * grant access -- at worst it hides something a member may use.
  *
- * Permission groups match the catalog GROUPS; the dash app ids in
- * `config/apps.ts` map onto a group's `.view` key via APP_VIEW_PERMISSION.
- *
- * Every name a merchant reads is a message key under `settings.team`, not a
- * word: the role editor renders it with `t(labelKey)`, so this file stays a
- * pure mirror of the API catalogue in one language-free place.
+ * **A page shows to whoever can change it** (`APP_PAGE_PERMISSION`), apart from
+ * the lists and reports nobody changes and the product list Staff sell from.
+ * The roles themselves are fixed: what each holds comes from the API
+ * (`/admin/me/permissions/`, `/admin/team/roles/`), never from this file.
  */
 
-/** Grouped catalog for the role editor: one row per group, presets + advanced. */
-export interface PermissionDef {
-  key: string;
-  /** Names this permission under `settings.team`. */
-  labelKey: string;
-}
-
-export interface PermissionGroup {
-  id: string;
-  /** Names this group under `settings.team`. */
-  labelKey: string;
-  /** Ordered permissions; the first (…\.view) is the group's "view" gate. */
-  permissions: PermissionDef[];
-}
-
-export const PERMISSION_GROUPS: PermissionGroup[] = [
-  {
-    id: "orders",
-    labelKey: "groupOrders",
-    permissions: [
-      { key: "orders.view", labelKey: "permOrdersView" },
-      { key: "orders.edit", labelKey: "permOrdersEdit" },
-      { key: "orders.refund", labelKey: "permOrdersRefund" },
-      { key: "orders.cancel", labelKey: "permOrdersCancel" },
-      { key: "orders.export", labelKey: "permOrdersExport" },
-    ],
-  },
-  {
-    id: "products",
-    labelKey: "groupProducts",
-    permissions: [
-      { key: "products.view", labelKey: "permProductsView" },
-      { key: "products.create", labelKey: "permProductsCreate" },
-      { key: "products.edit", labelKey: "permProductsEdit" },
-      { key: "products.delete", labelKey: "permProductsDelete" },
-    ],
-  },
-  {
-    id: "categories",
-    labelKey: "groupCategories",
-    permissions: [
-      { key: "categories.view", labelKey: "permCategoriesView" },
-      { key: "categories.manage", labelKey: "permCategoriesManage" },
-    ],
-  },
-  {
-    id: "inventory",
-    labelKey: "groupInventory",
-    permissions: [
-      { key: "inventory.view", labelKey: "permInventoryView" },
-      { key: "inventory.adjust", labelKey: "permInventoryAdjust" },
-    ],
-  },
-  {
-    id: "customers",
-    labelKey: "groupCustomers",
-    permissions: [
-      { key: "customers.view", labelKey: "permCustomersView" },
-      { key: "customers.edit", labelKey: "permCustomersEdit" },
-      { key: "customers.export", labelKey: "permCustomersExport" },
-      { key: "customers.delete", labelKey: "permCustomersDelete" },
-    ],
-  },
-  {
-    id: "analytics",
-    labelKey: "groupAnalytics",
-    permissions: [{ key: "analytics.view", labelKey: "permAnalyticsView" }],
-  },
-  {
-    id: "support",
-    labelKey: "groupSupport",
-    permissions: [
-      { key: "support.view", labelKey: "permSupportView" },
-      { key: "support.manage", labelKey: "permSupportManage" },
-    ],
-  },
-  {
-    id: "popups",
-    labelKey: "groupPopups",
-    permissions: [
-      { key: "popups.view", labelKey: "permPopupsView" },
-      { key: "popups.manage", labelKey: "permPopupsManage" },
-    ],
-  },
-  {
-    id: "coupons",
-    labelKey: "groupCoupons",
-    permissions: [
-      { key: "coupons.view", labelKey: "permCouponsView" },
-      { key: "coupons.manage", labelKey: "permCouponsManage" },
-    ],
-  },
-  {
-    id: "brands",
-    labelKey: "groupBrands",
-    permissions: [
-      { key: "brands.view", labelKey: "permBrandsView" },
-      { key: "brands.manage", labelKey: "permBrandsManage" },
-    ],
-  },
-  {
-    id: "reviews",
-    labelKey: "groupReviews",
-    permissions: [
-      { key: "reviews.view", labelKey: "permReviewsView" },
-      { key: "reviews.manage", labelKey: "permReviewsManage" },
-    ],
-  },
-  {
-    id: "blogs",
-    labelKey: "groupBlogs",
-    permissions: [
-      { key: "blogs.view", labelKey: "permBlogsView" },
-      { key: "blogs.manage", labelKey: "permBlogsManage" },
-    ],
-  },
-  {
-    id: "shipping",
-    labelKey: "groupShipping",
-    permissions: [
-      { key: "shipping.view", labelKey: "permShippingView" },
-      { key: "shipping.manage", labelKey: "permShippingManage" },
-    ],
-  },
-  {
-    id: "trash",
-    labelKey: "groupTrash",
-    permissions: [
-      { key: "trash.view", labelKey: "permTrashView" },
-      { key: "trash.manage", labelKey: "permTrashManage" },
-    ],
-  },
-  {
-    id: "theming",
-    labelKey: "groupTheming",
-    permissions: [
-      { key: "theming.view", labelKey: "permThemingView" },
-      { key: "theming.manage", labelKey: "permThemingManage" },
-    ],
-  },
-  {
-    id: "settings",
-    labelKey: "groupSettings",
-    permissions: [
-      { key: "settings.view", labelKey: "permSettingsView" },
-      { key: "settings.manage", labelKey: "permSettingsManage" },
-    ],
-  },
-  {
-    id: "integrations",
-    labelKey: "groupIntegrations",
-    permissions: [
-      { key: "integrations.view", labelKey: "permIntegrationsView" },
-      { key: "integrations.manage", labelKey: "permIntegrationsManage" },
-    ],
-  },
-  {
-    id: "activity",
-    labelKey: "groupActivity",
-    permissions: [{ key: "activity.view", labelKey: "permActivityView" }],
-  },
+/** Every permission key the API knows, in its order (tests/config/permissions.test.ts checks it). */
+export const ALL_PERMISSION_KEYS: readonly string[] = [
+  "orders.view",
+  "orders.edit",
+  "orders.export",
+  "products.view",
+  "products.create",
+  "products.edit",
+  "products.delete",
+  "categories.view",
+  "categories.manage",
+  "inventory.view",
+  "inventory.adjust",
+  "customers.view",
+  "customers.edit",
+  "customers.delete",
+  "analytics.view",
+  "support.view",
+  "support.manage",
+  "popups.view",
+  "popups.manage",
+  "coupons.view",
+  "coupons.manage",
+  "brands.view",
+  "brands.manage",
+  "reviews.view",
+  "reviews.manage",
+  "blogs.view",
+  "blogs.manage",
+  "shipping.view",
+  "shipping.manage",
+  "trash.view",
+  "trash.restore",
+  "trash.purge",
+  "theming.view",
+  "theming.manage",
+  "settings.view",
+  "settings.manage",
+  "integrations.view",
+  "integrations.manage",
+  "activity.view",
 ];
 
-export const ALL_PERMISSION_KEYS: string[] = PERMISSION_GROUPS.flatMap((g) =>
-  g.permissions.map((p) => p.key)
-);
+/** The three fixed roles, in the API's order. Nobody edits them or makes their own. */
+export const ROLE_SLUGS = ["admin", "manager", "staff"] as const;
+export type RoleSlug = (typeof ROLE_SLUGS)[number];
 
-/**
- * Server-side requires-closure, mirrored so the editor auto-checks implied
- * permissions: every non-view key implies its group's `.view`.
- */
-export function expandPermissionKeys(keys: Iterable<string>): Set<string> {
-  const out = new Set<string>();
-  for (const key of keys) {
-    out.add(key);
-    const group = key.split(".", 1)[0];
-    out.add(`${group}.view`);
-  }
-  return out;
+export function isRoleSlug(value: unknown): value is RoleSlug {
+  return typeof value === "string" && (ROLE_SLUGS as readonly string[]).includes(value);
 }
 
+/** Each role's name and one-line summary, as message names under `settings.team`. */
+export const ROLE_MESSAGES: Record<RoleSlug, { name: string; summary: string }> = {
+  admin: { name: "roleAdmin", summary: "roleAdminSummary" },
+  manager: { name: "roleManager", summary: "roleManagerSummary" },
+  staff: { name: "roleStaff", summary: "roleStaffSummary" },
+};
+
 /**
- * dash app id (config/apps.ts) → permission key that gates its sidebar item.
- * Apps absent here are not permission-gated (e.g. always-visible tooling).
+ * dash app id (config/apps.ts) → the key that shows its page: the one that
+ * changes it, apart from the lists and reports nobody changes (orders,
+ * abandoned checkouts, accounts, analytics, Most wished-for) and the product
+ * list Staff sell from, which they see read-only.
+ * Apps absent here are not permission-gated.
  */
-export const APP_VIEW_PERMISSION: Record<string, string> = {
+export const APP_PAGE_PERMISSION: Record<string, string> = {
   analytics: "analytics.view",
   products: "products.view",
   orders: "orders.view",
+  abandoned_checkouts: "orders.view",
   customers: "customers.view",
-  categories: "categories.view",
-  brands: "brands.view",
-  reviews: "reviews.view",
-  support_tickets: "support.view",
-  variants: "products.view",
-  product_attributes: "products.view",
-  inventory: "inventory.view",
-  trash: "trash.view",
-  popup: "popups.view",
-  coupons: "coupons.view",
-  blog: "blogs.view",
-  shipping: "shipping.view",
+  accounts: "customers.view",
+  wishlist: "analytics.view",
+  categories: "categories.manage",
+  brands: "brands.manage",
+  reviews: "reviews.manage",
+  support_tickets: "support.manage",
+  variants: "products.edit",
+  product_attributes: "products.edit",
+  inventory: "inventory.adjust",
+  trash: "trash.restore",
+  popup: "popups.manage",
+  coupons: "coupons.manage",
+  blog: "blogs.manage",
+  shipping: "shipping.manage",
 };
+
+/**
+ * What a role card on Settings → Team says a role can and can't do: one line
+ * per area, ticked when the role holds the area's key -- read from the API's
+ * own list of the role's keys, so a card can never promise what the API
+ * refuses. `unlessHolding`: a line left out when the role holds a wider one
+ * ("see the products" says nothing more to a role that changes them).
+ * Every `labelKey` names a message under `settings.team`.
+ */
+export interface RoleArea {
+  labelKey: string;
+  key: string;
+  unlessHolding?: string;
+}
+
+export const ROLE_AREAS: readonly RoleArea[] = [
+  { labelKey: "areaOrders", key: "orders.edit" },
+  { labelKey: "areaOrdersExport", key: "orders.export" },
+  { labelKey: "areaCustomers", key: "customers.edit" },
+  { labelKey: "areaCustomersDelete", key: "customers.delete" },
+  { labelKey: "areaCatalog", key: "products.edit" },
+  { labelKey: "areaCatalogSee", key: "products.view", unlessHolding: "products.edit" },
+  { labelKey: "areaStock", key: "inventory.adjust" },
+  { labelKey: "areaMarketing", key: "coupons.manage" },
+  { labelKey: "areaSupport", key: "support.manage" },
+  { labelKey: "areaReports", key: "analytics.view" },
+  { labelKey: "areaTrashRestore", key: "trash.restore" },
+  { labelKey: "areaTrashPurge", key: "trash.purge" },
+  { labelKey: "areaDesign", key: "theming.manage" },
+  { labelKey: "areaSettings", key: "settings.manage" },
+];
+
+/** A role's card lines: each area it can, then each it can't, in `ROLE_AREAS` order. */
+export function roleAreas(held: ReadonlySet<string>): { can: RoleArea[]; cannot: RoleArea[] } {
+  const shown = ROLE_AREAS.filter((area) => !(area.unlessHolding && held.has(area.unlessHolding)));
+  return {
+    can: shown.filter((area) => held.has(area.key)),
+    cannot: shown.filter((area) => !held.has(area.key) && !area.unlessHolding),
+  };
+}

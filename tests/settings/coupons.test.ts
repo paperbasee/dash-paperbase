@@ -6,7 +6,7 @@ import {
   MAIN_NAV_APP_IDS,
   OPT_IN_APP_IDS,
 } from "@/config/apps";
-import { APP_VIEW_PERMISSION, PERMISSION_GROUPS } from "@/config/permissions";
+import { ALL_PERMISSION_KEYS, APP_PAGE_PERMISSION } from "@/config/permissions";
 import en from "../../messages/en.json";
 import bn from "../../messages/bn.json";
 
@@ -29,9 +29,9 @@ describe("discount codes", () => {
   });
 
   it("are gated on their own permission, not on promotions", () => {
-    expect(APP_VIEW_PERMISSION.coupons).toBe("coupons.view");
-    const group = PERMISSION_GROUPS.find((g) => g.id === "coupons");
-    expect(group?.permissions.map((p) => p.key)).toEqual([
+    // Shown to whoever writes them: a role sees a page only when it can change it.
+    expect(APP_PAGE_PERMISSION.coupons).toBe("coupons.manage");
+    expect(ALL_PERMISSION_KEYS.filter((key) => key.startsWith("coupons."))).toEqual([
       "coupons.view",
       "coupons.manage",
     ]);
@@ -44,9 +44,6 @@ describe("discount codes", () => {
     expect(keys.length).toBeGreaterThan(10);
     for (const key of keys) {
       expect(bnPages[key], `pages.${key} has no Bangla`).toBeTruthy();
-    }
-    for (const key of ["groupCoupons", "permCouponsView", "permCouponsManage"]) {
-      expect((bn.settings.team as Record<string, string>)[key], key).toBeTruthy();
     }
     expect(bn.nav.coupons).toBeTruthy();
     expect(bn.settings.apps.items.coupons?.label).toBeTruthy();

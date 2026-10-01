@@ -11,13 +11,14 @@ import { useQuery } from "@tanstack/react-query";
 
 import api from "@/lib/api";
 import { myPermissionsQueryKey } from "@/lib/query-keys";
-import { APP_VIEW_PERMISSION } from "@/config/permissions";
+import { APP_PAGE_PERMISSION } from "@/config/permissions";
 
 export interface MyPermissionsResponse {
   store_public_id: string;
   is_owner: boolean;
   is_superuser: boolean;
-  role: { public_id: string; name: string; slug: string } | null;
+  /** Their fixed role; null for the owner (outside the roles) and a member with none. */
+  role: { slug: string; name: string; description: string } | null;
   permissions: string[];
 }
 
@@ -81,7 +82,7 @@ export function PermissionsProvider({ children }: { children: ReactNode }) {
   const canViewApp = useCallback(
     (appId: string): boolean => {
       if (allAccess || unknown) return true;
-      const key = APP_VIEW_PERMISSION[appId];
+      const key = APP_PAGE_PERMISSION[appId];
       if (!key) return true; // not permission-gated
       return permissions.has(key);
     },

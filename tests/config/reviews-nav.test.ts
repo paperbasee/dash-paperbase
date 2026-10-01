@@ -3,7 +3,7 @@
  *
  * The nav config is data, and data that is wrong here fails quietly: an app
  * missing from `CATALOG_SUB_APP_IDS` simply never appears in the sidebar, and
- * one missing from `APP_VIEW_PERMISSION` is visible to a member who may not
+ * one missing from `APP_PAGE_PERMISSION` is visible to a member who may not
  * open it. Neither throws, so neither is noticed.
  */
 
@@ -15,7 +15,7 @@ import {
   CATALOG_SUB_APP_IDS,
   OPT_IN_APP_IDS,
 } from "@/config/apps";
-import { APP_VIEW_PERMISSION, PERMISSION_GROUPS } from "@/config/permissions";
+import { ALL_PERMISSION_KEYS, APP_PAGE_PERMISSION } from "@/config/permissions";
 
 describe("the Reviews tab", () => {
   test("exists, and points at its own page", () => {
@@ -44,8 +44,8 @@ describe("the Reviews tab", () => {
   test("is gated on its own permission, not the catalogue's", () => {
     // A merchant may want somebody answering reviews who has no business
     // editing prices -- and, far more so, the other way round.
-    expect(APP_VIEW_PERMISSION.reviews).toBe("reviews.view");
-    expect(APP_VIEW_PERMISSION.reviews).not.toBe(APP_VIEW_PERMISSION.products);
+    expect(APP_PAGE_PERMISSION.reviews).toBe("reviews.manage");
+    expect(APP_PAGE_PERMISSION.reviews).not.toBe(APP_PAGE_PERMISSION.products);
   });
 
   test("has no switch, and is not offered as one", () => {
@@ -60,9 +60,8 @@ describe("the Reviews tab", () => {
     expect(OPT_IN_APP_IDS as readonly string[]).not.toContain("reviews");
   });
 
-  test("offers both permission keys, in the group the API renders", () => {
-    const group = PERMISSION_GROUPS.find((g) => g.id === "reviews");
-    expect(group?.permissions.map((p) => p.key)).toEqual([
+  test("has both permission keys, as the API declares them", () => {
+    expect(ALL_PERMISSION_KEYS.filter((key) => key.startsWith("reviews."))).toEqual([
       "reviews.view",
       "reviews.manage",
     ]);

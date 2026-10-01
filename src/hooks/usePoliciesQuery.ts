@@ -40,6 +40,7 @@ export async function fetchPolicies(): Promise<Policy[]> {
   return Array.isArray(data) ? data : (data.results ?? []);
 }
 
-export function usePoliciesQuery() {
-  return useQuery({ queryKey: policiesQueryKey, queryFn: fetchPolicies });
+/** `enabled`: false while the screen asking is not shown, so a hidden tab reads nothing. */
+export function usePoliciesQuery(enabled = true) {
+  return useQuery({ queryKey: policiesQueryKey, queryFn: fetchPolicies, enabled });
 }

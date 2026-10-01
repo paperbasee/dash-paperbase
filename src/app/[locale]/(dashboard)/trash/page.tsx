@@ -41,7 +41,7 @@ export default function TrashPage() {
   const numClass = numberTextClass(locale);
   const tPages = useTranslations("pages");
   const tNav = useTranslations("nav");
-  const { canViewTrash, canManageTrash, loading: capsLoading } =
+  const { canViewTrash, canRestoreTrash, canPurgeTrash, loading: capsLoading } =
     useAdminDeleteCapabilities();
   const confirm = useConfirm();
   const queryClient = useQueryClient();
@@ -326,7 +326,7 @@ export default function TrashPage() {
             <h1 className="text-2xl font-medium text-foreground">{tNav("trash")}</h1>
           </div>
         </div>
-        {canManageTrash && someSelected && (
+        {canRestoreTrash && someSelected && (
           <div className="flex flex-wrap items-center gap-2">
             <button
               type="button"
@@ -339,17 +339,19 @@ export default function TrashPage() {
                 count: toLocaleDigits(String(selectedPublicIds.size), locale),
               })}
             </button>
-            <button
-              type="button"
-              onClick={handleDeleteSelected}
-              disabled={bulkBusy || busyPublicId !== null}
-              className="inline-flex shrink-0 items-center gap-2 rounded-card bg-destructive px-4 py-2 text-sm font-semibold text-destructive-foreground transition hover:bg-destructive/90 disabled:opacity-50"
-            >
-              {bulkDeleting && <Loader2 className="size-4 animate-spin" />}
-              {tPages("deleteSelectedPermanent", {
-                count: toLocaleDigits(String(selectedPublicIds.size), locale),
-              })}
-            </button>
+            {canPurgeTrash && (
+              <button
+                type="button"
+                onClick={handleDeleteSelected}
+                disabled={bulkBusy || busyPublicId !== null}
+                className="inline-flex shrink-0 items-center gap-2 rounded-card bg-destructive px-4 py-2 text-sm font-semibold text-destructive-foreground transition hover:bg-destructive/90 disabled:opacity-50"
+              >
+                {bulkDeleting && <Loader2 className="size-4 animate-spin" />}
+                {tPages("deleteSelectedPermanent", {
+                  count: toLocaleDigits(String(selectedPublicIds.size), locale),
+                })}
+              </button>
+            )}
           </div>
         )}
       </div>
@@ -428,7 +430,7 @@ export default function TrashPage() {
                         {formatDashboardDateTime(row.expires_at, locale)}
                       </td>
                       <td className="whitespace-nowrap px-3 py-3 text-right align-middle">
-                        {canManageTrash ? (
+                        {canRestoreTrash ? (
                           <div className="flex flex-nowrap items-center justify-end gap-2">
                             <Button
                               type="button"
@@ -441,21 +443,23 @@ export default function TrashPage() {
                               <Undo2 className="mr-1 size-3.5 shrink-0" />
                               {tPages("trashRestore")}
                             </Button>
-                            <Button
-                              type="button"
-                              variant="destructive"
-                              size="sm"
-                              className="shrink-0 whitespace-nowrap"
-                              disabled={busy || bulkBusy}
-                              onClick={() => handlePermanentDelete(row)}
-                            >
-                              {busy ? (
-                                <Loader2 className="mr-1 size-3.5 shrink-0 animate-spin" />
-                              ) : (
-                                <Trash className="mr-1 size-3.5 shrink-0" />
-                              )}
-                              {tPages("trashPermanentDelete")}
-                            </Button>
+                            {canPurgeTrash && (
+                              <Button
+                                type="button"
+                                variant="destructive"
+                                size="sm"
+                                className="shrink-0 whitespace-nowrap"
+                                disabled={busy || bulkBusy}
+                                onClick={() => handlePermanentDelete(row)}
+                              >
+                                {busy ? (
+                                  <Loader2 className="mr-1 size-3.5 shrink-0 animate-spin" />
+                                ) : (
+                                  <Trash className="mr-1 size-3.5 shrink-0" />
+                                )}
+                                {tPages("trashPermanentDelete")}
+                              </Button>
+                            )}
                           </div>
                         ) : null}
                       </td>
