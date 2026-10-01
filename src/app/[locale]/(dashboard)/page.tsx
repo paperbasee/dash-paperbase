@@ -12,10 +12,11 @@ import type { DateRangeValue } from "@/components/DateRangeFilter";
 import { useDashboardAnalyticsQuery } from "@/hooks/useDashboardAnalyticsQuery";
 import { useNavCounts } from "@/hooks/useNavCounts";
 import { useApiLatency } from "@/hooks/useApiLatency";
-import { useBrandingQuery } from "@/hooks/useBrandingQuery";
+import { useAuth } from "@/context/AuthContext";
 import { useDashboardRefresh } from "@/context/DashboardRefreshContext";
 import { resolvePreset } from "@/lib/date-range-presets";
 import { computeTrend } from "@/lib/dashboard/compute-trend";
+import { greetingName, updatedAgo } from "@/lib/dashboard/greeting";
 import {
   loadDashboardRange,
   saveDashboardRange,
@@ -24,20 +25,10 @@ import { getPreviousDateRange } from "@/lib/dashboard/previous-date-range";
 import { toLocaleDigits } from "@/lib/locale-digits";
 import { normalizeDateRange } from "@/lib/validation";
 
-function formatLastUpdated(lastRefreshedAt: Date | null, now: number): string | null {
-  if (!lastRefreshedAt) return null;
-  const seconds = Math.floor((now - lastRefreshedAt.getTime()) / 1000);
-  if (seconds < 30) return "just now";
-  const minutes = Math.floor(seconds / 60);
-  if (minutes < 60) return `${minutes}m ago`;
-  const hours = Math.floor(minutes / 60);
-  return `${hours}h ago`;
-}
-
 export default function DashboardPage() {
   const locale = useLocale();
   const t = useTranslations("dashboard");
-  const { data: branding } = useBrandingQuery();
+  const { meProfile, meProfileStatus } = useAuth();
   const { lastRefreshedAt } = useDashboardRefresh();
   const today = useMemo(() => new Date(), []);
   const [now, setNow] = useState(() => Date.now());
@@ -66,8 +57,8 @@ export default function DashboardPage() {
 
   const previousRange = useMemo(() => getPreviousDateRange(range), [range]);
 
-  const accountName =
-    branding?.owner_name?.trim() || branding?.admin_name?.trim() || "there";
+  // The person signed in, by their own first name -- never the shop owner's -- once it is known.
+  const name = meProfileStatus === "ready" ? greetingName(meProfile) : "";
 
   const greeting = useMemo(() => {
     const hourLocal = new Date().getHours();
@@ -113,7 +104,14 @@ export default function DashboardPage() {
     return computeTrend(current, previous);
   };
 
-  const lastUpdatedLabel = formatLastUpdated(lastRefreshedAt, now);
+  const ago = updatedAgo(lastRefreshedAt, now);
+  const lastUpdatedLabel = !ago
+    ? null
+    : ago.unit === "now"
+      ? t("heroUpdatedJustNow")
+      : t(ago.unit === "minutes" ? "heroUpdatedMinutesAgo" : "heroUpdatedHoursAgo", {
+          count: toLocaleDigits(String(ago.count), locale),
+        });
   const apiHealthy = !analyticsNetworkError && !navCountsError && !error;
 
   useEffect(() => {
@@ -125,7 +123,7 @@ export default function DashboardPage() {
     <div className="flex flex-col gap-6 pb-2">
       <DashboardHero
         greeting={greeting}
-        accountName={accountName}
+        name={name}
         lastUpdatedLabel={lastUpdatedLabel}
         range={range}
         onRangeChange={handleRangeChange}

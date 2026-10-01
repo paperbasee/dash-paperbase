@@ -8,7 +8,8 @@ import DashboardRefreshControl from "@/components/DashboardRefreshControl";
 
 interface DashboardHeroProps {
   greeting: string;
-  accountName: string;
+  /** The person's own first name; empty, and the greeting goes without one. */
+  name: string;
   lastUpdatedLabel: string | null;
   range: DateRangeValue;
   onRangeChange: (value: DateRangeValue) => void;
@@ -16,7 +17,7 @@ interface DashboardHeroProps {
 
 export default function DashboardHero({
   greeting,
-  accountName,
+  name,
   lastUpdatedLabel,
   range,
   onRangeChange,
@@ -35,7 +36,7 @@ export default function DashboardHero({
     <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
       <div className="min-w-0">
         <h1 className="text-[1.65rem] font-medium leading-tight tracking-tight text-foreground sm:text-[1.85rem]">
-          {t("title", { greeting, name: accountName })}
+          {name ? t("title", { greeting, name }) : t("titleNoName", { greeting })}
         </h1>
         <p className="mt-1 font-numbers text-xs text-muted-foreground sm:text-sm">
           {metaParts.join(" · ")}

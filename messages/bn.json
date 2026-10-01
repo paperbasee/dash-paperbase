@@ -1714,6 +1714,7 @@
   },
   "dashboard": {
     "title": "{greeting}, {name} 👋",
+    "titleNoName": "{greeting} 👋",
     "greetingMorning": "সুপ্রভাত",
     "greetingAfternoon": "শুভ অপরাহ্ন",
     "greetingEvening": "শুভ সন্ধ্যা",
@@ -1743,6 +1744,9 @@
     "heroMetaOverview": "স্টোর ওভারভিউ",
     "heroMetaLastUpdated": "সর্বশেষ আপডেট: {when}",
     "heroMetaLastUpdatedUnknown": "সর্বশেষ আপডেট: —",
+    "heroUpdatedJustNow": "এইমাত্র",
+    "heroUpdatedMinutesAgo": "{count} মিনিট আগে",
+    "heroUpdatedHoursAgo": "{count} ঘণ্টা আগে",
     "configure": "কনফিগার",
     "export": "এক্সপোর্ট",
     "activityTimeline": "অ্যাক্টিভিটি টাইমলাইন",
