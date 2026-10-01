@@ -22,6 +22,8 @@ import { cn } from "@/lib/utils";
 import { isNetworkError } from "@/lib/network-error";
 import { logout } from "@/lib/auth";
 import { SUPPORT_STRIP_HEIGHT, SupportStrip } from "@/components/support/SupportStrip";
+import { STATUS_NOTICE_HEIGHT, StatusNoticeBar } from "@/components/status/StatusNoticeBar";
+import { useStatusNotice } from "@/hooks/useStatusNotice";
 import {
   hasVisitedPlans,
   shouldOfferInitialPlanSelection,
@@ -115,8 +117,11 @@ export default function DashboardLayoutClient({
     meProfile?.latest_payment_status === "PENDING_REVIEW";
   // Paperbase support's visit ("Sign in as this shop"): its strip sits above everything.
   const supportSession = meProfile?.support_session ?? null;
+  // What Paperbase's status page says now (an incident, maintenance): under support's strip.
+  const statusNotice = useStatusNotice(!isThemeEditor);
   const subscriptionBannerOffset = `${
     (supportSession ? SUPPORT_STRIP_HEIGHT : 0) +
+    (statusNotice.notice ? STATUS_NOTICE_HEIGHT : 0) +
     (showTopBannerStrip ? (isPendingReviewWithPaymentBanner ? 30 : 24) : 0)
   }px`;
 
@@ -264,9 +269,12 @@ export default function DashboardLayoutClient({
           </div>
         ) : (
         <div className="md:flex md:h-screen md:flex-col md:overflow-hidden">
-          {supportSession || (showTopBannerStrip && subscriptionUiState) ? (
+          {supportSession || statusNotice.notice || (showTopBannerStrip && subscriptionUiState) ? (
             <div className="z-[60] flex flex-col md:shrink-0">
               {supportSession ? <SupportStrip session={supportSession} /> : null}
+              {statusNotice.notice ? (
+                <StatusNoticeBar notice={statusNotice.notice} onDismiss={statusNotice.dismiss} />
+              ) : null}
               {showTopBannerStrip && subscriptionUiState === "pending_review" ? (
                 meProfile?.latest_payment_status === "PENDING_REVIEW" ? (
                   <PaymentSubmittedAwaitingBanner

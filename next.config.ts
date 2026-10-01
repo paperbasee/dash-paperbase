@@ -43,6 +43,11 @@ const sentryIngest = (() => {
 const mediaOrigin = devMediaOrigin(isDev, process.env.NEXT_PUBLIC_MEDIA_BASE_URL);
 const withMedia = mediaOrigin ? ` ${mediaOrigin}` : "";
 
+// Paperbase's status page: the dashboard reads its summary for the notice across the top.
+const statusOrigin = process.env.NEXT_PUBLIC_STATUS_URL
+  ? ` ${new URL(process.env.NEXT_PUBLIC_STATUS_URL).origin}`
+  : "";
+
 const cspReportUri = apiOrigin
   ? `report-uri ${apiOrigin}/api/v1/csp-report/?app=dash`
   : "";
@@ -87,7 +92,7 @@ const securityHeaders = [
       `img-src 'self' data: blob: https: ${apiOrigin}${withMedia}`,
       "font-src 'self' data:",
       // Allow the backend API origin explicitly (http in dev, https in prod).
-      `connect-src 'self' ${apiOrigin}${withMedia} ${wsOrigin} https://challenges.cloudflare.com https://*.r2.cloudflarestorage.com ${sentryIngest}`,
+      `connect-src 'self' ${apiOrigin}${withMedia}${statusOrigin} ${wsOrigin} https://challenges.cloudflare.com https://*.r2.cloudflarestorage.com ${sentryIngest}`,
       "frame-ancestors 'none'",
       ...(cspReportUri ? [cspReportUri] : []),
     ].join("; "),

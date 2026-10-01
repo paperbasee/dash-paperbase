@@ -3964,6 +3964,18 @@
     "end": "End session",
     "readOnly": "Read-only in support mode: this belongs to the shop's owner."
   },
+  "statusNotice": {
+    "investigating": "Investigating",
+    "identified": "Identified",
+    "monitoring": "Monitoring",
+    "maintenanceNow": "Maintenance in progress: {title}, until {until}.",
+    "maintenanceSoon": "Maintenance {when}: {title}.",
+    "today": "today at {time}",
+    "tomorrow": "tomorrow at {time}",
+    "details": "Details",
+    "more": "+{count} more",
+    "hide": "Hide this notice"
+  },
   "fraudCheck": {
     "title": "Fraud Check",
     "phone": "Phone: {phone}",

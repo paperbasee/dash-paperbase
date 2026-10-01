@@ -3964,6 +3964,18 @@
     "end": "সেশন শেষ করুন",
     "readOnly": "সাপোর্ট মোডে শুধু দেখা যাবে: এটি দোকানের মালিকের।"
   },
+  "statusNotice": {
+    "investigating": "খতিয়ে দেখা হচ্ছে",
+    "identified": "কারণ পাওয়া গেছে",
+    "monitoring": "নজর রাখা হচ্ছে",
+    "maintenanceNow": "রক্ষণাবেক্ষণ চলছে: {title}, {until} পর্যন্ত।",
+    "maintenanceSoon": "রক্ষণাবেক্ষণ {when}: {title}।",
+    "today": "আজ {time}",
+    "tomorrow": "আগামীকাল {time}",
+    "details": "বিস্তারিত",
+    "more": "আরও {count}টি",
+    "hide": "এই নোটিশটি লুকান"
+  },
   "fraudCheck": {
     "title": "ফ্রড চেক",
     "phone": "ফোন: {phone}",
