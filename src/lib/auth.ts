@@ -278,9 +278,12 @@ export function signInOf(token: string | null): { user: string; sid: string } | 
   }
 }
 
-/** Leave for the sign-in page, forgetting this browser's sign-in -- the API is not told (see signOut). */
-export function logout() {
-  window.location.replace("/login");
+/**
+ * Leave for the sign-in page -- or `to`, a page that carries on signed out, such as the team
+ * invite -- forgetting this browser's sign-in. The API is not told (see signOut).
+ */
+export function logout(to = "/login") {
+  window.location.replace(to);
   forgetThisSignIn();
 }
 
@@ -293,7 +296,7 @@ export function logout() {
  * then may be a new sign-in's (a support visit just entered in another tab), which they must not
  * end (2026-09-29).
  */
-export function signOut() {
+export function signOut(to = "/login") {
   const access = localStorage.getItem("access_token");
   if (access) {
     void fetch(`${BASE_URL}/auth/logout/`, {
@@ -302,7 +305,7 @@ export function signOut() {
       keepalive: true,
     }).catch(() => undefined);
   }
-  logout();
+  logout(to);
 }
 
 // ---------------------------------------------------------------------------

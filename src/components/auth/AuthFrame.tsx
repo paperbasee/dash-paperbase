@@ -118,6 +118,8 @@ export function AuthFrame({ children }: { children: ReactNode }) {
   // they change in place; a page past choosing ("Check your email") has its own heading.
   const choosing = tab !== null && !tabsHidden;
   const heading = tab === "signup" ? "signup" : "login";
+  // The line over the photos: a team invite welcomes the person instead (owner, 2026-10-02).
+  const wall = pathname === "/team/invite" ? "inviteWall" : "wall";
 
   return (
     <HideTabs.Provider value={setTabsHidden}>
@@ -126,10 +128,10 @@ export function AuthFrame({ children }: { children: ReactNode }) {
           <ShopWall shade="responsive" />
           <div className="absolute inset-x-14 bottom-12 z-10 hidden text-white lg:block">
             <p className="pb-rise max-w-[34rem] text-[3.25rem] leading-[1.02] [font-family:var(--font-instrument-serif),var(--font-noto-sans-bengali),serif]">
-              {t("wall.title")}
+              {t(`${wall}.title`)}
             </p>
             <p className="pb-rise mt-3 text-[15px] text-white/70" style={{ animationDelay: "120ms" }}>
-              {t("wall.body")}
+              {t(`${wall}.body`)}
             </p>
           </div>
         </aside>
@@ -146,10 +148,10 @@ export function AuthFrame({ children }: { children: ReactNode }) {
               className="pointer-events-none absolute inset-x-0 -top-28 bottom-0 -z-10 bg-[linear-gradient(to_top,rgb(13_14_17/0.94),rgb(13_14_17/0.6)_55%,transparent)] sm:hidden"
             />
             <p className="pb-rise text-[1.875rem] leading-[1.05] [font-family:var(--font-instrument-serif),var(--font-noto-sans-bengali),serif]">
-              {t("wall.title")}
+              {t(`${wall}.title`)}
             </p>
             <p className="pb-rise mt-2 text-[13px] text-white/75" style={{ animationDelay: "120ms" }}>
-              {t("wall.body")}
+              {t(`${wall}.body`)}
             </p>
           </div>
           {/* On a computer the form and its foot are one column, centred in the half. */}
