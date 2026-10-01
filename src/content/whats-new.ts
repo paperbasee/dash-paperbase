@@ -88,6 +88,21 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-10-02-you-hear-when-someone-downloads-your-orders",
+    date: "2026-10-02",
+    version: "4.158.0",
+    tag: "new",
+    title: {
+      en: "You hear when someone downloads your orders",
+      bn: "কেউ আপনার অর্ডার ডাউনলোড করলে আপনি জানতে পারবেন",
+    },
+    body: {
+      en: "Every download of your orders is now a line in Activities. When someone on your team downloads them, we also email you who it was and how many orders, since the file holds your shoppers' names, phone numbers and addresses. Your own downloads send no email.",
+      bn: "আপনার অর্ডারের প্রতিটি ডাউনলোড এখন কার্যকলাপে একটি লাইন হিসেবে থাকে। টিমের কেউ অর্ডার ডাউনলোড করলে কে করেছেন আর কতগুলো অর্ডার, তা আমরা আপনাকে ইমেইলেও জানাই, কারণ ফাইলে আপনার ক্রেতাদের নাম, ফোন নম্বর আর ঠিকানা থাকে। আপনি নিজে ডাউনলোড করলে কোনো ইমেইল যায় না।",
+    },
+    href: "/activities",
+  },
+  {
     id: "2026-10-02-three-fixed-roles-admin-manager-staff",
     date: "2026-10-02",
     version: "4.157.0",
@@ -500,21 +515,6 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     body: {
       en: "The note that pops up after you save or delete something is now one small line with an icon, at the bottom of the page you're working on. Show more opens an error's details, done notes go after 3 seconds and errors after 8, and × closes any of them.",
       bn: "কিছু সেভ বা মুছে ফেলার পরে যে বার্তা আসে, তা এখন আইকনসহ এক লাইনের ছোট বার্তা, আপনি যে পেজে কাজ করছেন তার নিচে। “আরও দেখুন” চাপলে সমস্যার বিস্তারিত খোলে, কাজ হয়ে যাওয়ার বার্তা ৩ সেকেন্ডে আর সমস্যার বার্তা ৮ সেকেন্ডে চলে যায়, আর × চাপলে যেকোনোটি বন্ধ হয়।",
-    },
-  },
-  {
-    id: "2026-09-29-a-checkout-warning-shoppers-notice",
-    date: "2026-09-29",
-    version: "4.127.0",
-    tag: "improved",
-    href: "/settings?tab=customization",
-    title: {
-      en: "A checkout warning shoppers notice",
-      bn: "চেকআউটে এমন সতর্কতা যা ক্রেতার চোখে পড়ে",
-    },
-    body: {
-      en: "The warning box above the order button is amber now, and its border glows gently so shoppers see it before they order. Its words sit in the centre, and you can move them to the left or right, for the plain line too. Find it in Customization, on the Checkout page.",
-      bn: "অর্ডার বোতামের উপরের সতর্কতার বাক্স এখন কমলা-হলুদ, আর এর বর্ডার আস্তে আস্তে জ্বলে ওঠে, যাতে ক্রেতা অর্ডারের আগেই দেখেন। এর লেখা মাঝখানে বসে, আর আপনি বাঁয়ে বা ডানে সরাতে পারেন, সাধারণ লাইনের জন্যও। কাস্টমাইজেশনের চেকআউট পেজে পাবেন।",
     },
   },
 ];
