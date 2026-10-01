@@ -760,9 +760,11 @@ export default function OrdersPage() {
         download_url: null,
         expires_at: null,
       });
-      notify.success(tPages("toastDescCsvExportQueued"), {
-        title: tPages("toastTitleCsvExportQueued"),
-      });
+      // A download by anyone but the owner is emailed to the owner (roles plan step 3): say so.
+      notify.success(
+        tPages(isOwner ? "toastDescCsvExportQueued" : "toastDescCsvExportQueuedOwnerTold"),
+        { title: tPages("toastTitleCsvExportQueued") },
+      );
     } catch (err) {
       notify.error(err, {
         title: tPages("toastTitleExportCouldntStart"),

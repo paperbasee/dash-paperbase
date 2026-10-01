@@ -1617,7 +1617,8 @@
     "categoriesNotEmptyUnknown": "Move this category's products to another category first, then delete it.",
     "toastTitleCourierSendFailed": "Order {number} wasn't sent to the courier",
     "activitiesBySupport": "by Paperbase support",
-    "activitiesEntitySupportSession": "Support visits"
+    "activitiesEntitySupportSession": "Support visits",
+    "toastDescCsvExportQueuedOwnerTold": "Your export is building in the background. The shop's owner gets an email saying you downloaded the orders."
   },
   "sidebar": {
     "expandSidebar": "Expand sidebar",

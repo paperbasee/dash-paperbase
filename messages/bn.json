@@ -1617,7 +1617,8 @@
     "categoriesNotEmptyUnknown": "এই ক্যাটাগরির পণ্যগুলো আগে অন্য ক্যাটাগরিতে সরান, তারপর মুছুন।",
     "toastTitleCourierSendFailed": "অর্ডার {number} কুরিয়ারে পাঠানো যায়নি",
     "activitiesBySupport": "Paperbase সাপোর্টের করা",
-    "activitiesEntitySupportSession": "সাপোর্ট ভিজিট"
+    "activitiesEntitySupportSession": "সাপোর্ট ভিজিট",
+    "toastDescCsvExportQueuedOwnerTold": "আপনার এক্সপোর্ট ব্যাকগ্রাউন্ডে তৈরি হচ্ছে। আপনি অর্ডার ডাউনলোড করেছেন জানিয়ে শপের মালিক একটি ইমেইল পাবেন।"
   },
   "sidebar": {
     "expandSidebar": "সাইডবার প্রসারিত করুন",
