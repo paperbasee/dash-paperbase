@@ -459,6 +459,26 @@ input.font-numbers-date-value::placeholder {
   background-color: hsl(var(--scrollbar-thumb-hover));
 }
 
+/*
+ * A slimmer bar than the default, for a narrow column that scrolls (the sidebar, main menu and
+ * Settings; owner, 2026-10-02). Chrome and Safari draw 4px from the webkit rules, which they only honour while
+ * `scrollbar-width` and `scrollbar-color` are left `auto`; Firefox has no such rules and keeps
+ * its own thinnest, `thin`.
+ */
+.scrollbar-slim {
+  scrollbar-width: thin;
+}
+@supports selector(::-webkit-scrollbar) {
+  .scrollbar-slim {
+    scrollbar-width: auto;
+    scrollbar-color: auto;
+  }
+  .scrollbar-slim::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+}
+
 .scrollbar-hide {
   scrollbar-width: none;
   -ms-overflow-style: none;

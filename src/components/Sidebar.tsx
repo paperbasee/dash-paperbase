@@ -485,7 +485,7 @@ function SidebarContent({
       {/* Navigation */}
       <nav
         className={cn(
-          "min-h-0 flex-1 space-y-0.5 overflow-y-auto pb-6",
+          "scrollbar-slim min-h-0 flex-1 space-y-0.5 overflow-y-auto pb-6",
           collapsed ? "px-2 pt-2" : "px-4"
         )}
       >
