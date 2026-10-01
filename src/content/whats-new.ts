@@ -88,6 +88,20 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-10-02-everyone-greeted-by-their-own-name",
+    date: "2026-10-02",
+    version: "4.155.1",
+    tag: "fixed",
+    title: {
+      en: "Everyone is greeted by their own name",
+      bn: "সবাইকে তাদের নিজের নামে শুভেচ্ছা",
+    },
+    body: {
+      en: "The home page now says hello to each person by their first name. Before, your team members saw your name instead of theirs. \"Last updated\" now shows in Bangla too.",
+      bn: "হোম পেজ এখন প্রত্যেককে তাদের নামের প্রথম অংশ দিয়ে শুভেচ্ছা জানায়। আগে আপনার টিমের সদস্যরা নিজেদের নামের বদলে আপনার নাম দেখতেন। \"সর্বশেষ আপডেট\" এখন বাংলাতেও দেখায়।",
+    },
+  },
+  {
     id: "2026-10-02-a-welcoming-team-invite",
     date: "2026-10-02",
     version: "4.155.0",
@@ -502,21 +516,6 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     body: {
       en: "Order success is now a page in Customization. After a cash-on-delivery order, its top can show the courier animation, as it does today, or your own words, like a thank-you or when you will call. The heading and the order under it stay as they are.",
       bn: "অর্ডার সফল এখন কাস্টমাইজেশনের একটি পেজ। ক্যাশ অন ডেলিভারি অর্ডারের পরে এর উপরে কুরিয়ারের অ্যানিমেশন দেখাতে পারেন, যেমন এখন দেখায়, অথবা আপনার নিজের কথা, যেমন একটি ধন্যবাদ বা কখন ফোন করবেন। শিরোনাম আর তার নিচের অর্ডার যেমন আছে তেমনই থাকে।",
-    },
-  },
-  {
-    id: "2026-09-29-shoppers-on-phones-find-the-checkout-form",
-    date: "2026-09-29",
-    version: "4.126.0",
-    tag: "new",
-    href: "/settings?tab=customization",
-    title: {
-      en: "Shoppers on phones find the checkout form",
-      bn: "ফোনে ক্রেতারা চেকআউট ফর্ম খুঁজে পান",
-    },
-    body: {
-      en: "On a phone the order comes first and the form is below it. If a shopper is still on their order after 5 seconds, a small arrow at the bottom shows the way down, and a tap takes them to the form. You can turn it off or change the seconds in Customization, on the Checkout page.",
-      bn: "ফোনে আগে অর্ডার আসে, ফর্ম তার নিচে। ৫ সেকেন্ড পরেও ক্রেতা অর্ডারেই থাকলে নিচে একটি ছোট তীর পথ দেখায়, আর তাতে চাপ দিলে ফর্মে নিয়ে যায়। কাস্টমাইজেশনের চেকআউট পেজে এটি বন্ধ করতে বা সেকেন্ড বদলাতে পারেন।",
     },
   },
 ];
