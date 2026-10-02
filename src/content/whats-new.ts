@@ -88,6 +88,21 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-10-02-new-team-members-give-their-full-name",
+    date: "2026-10-02",
+    version: "4.158.1",
+    tag: "improved",
+    title: {
+      en: "New team members give their full name",
+      bn: "টিমের নতুন সদস্যরা পুরো নাম দেন",
+    },
+    body: {
+      en: "When someone joins your team from an invite, they now enter both a first and a last name, so your team list shows everyone's full name.",
+      bn: "আমন্ত্রণ থেকে কেউ আপনার টিমে যোগ দিলে এখন তাকে নামের প্রথম ও শেষ অংশ দুটোই লিখতে হয়, তাই আপনার টিমের তালিকায় সবার পুরো নাম দেখা যায়।",
+    },
+    href: "/settings?tab=team",
+  },
+  {
     id: "2026-10-02-you-hear-when-someone-downloads-your-orders",
     date: "2026-10-02",
     version: "4.158.0",
@@ -501,20 +516,6 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     body: {
       en: "It now tells you how many products to move to another category first, as a note rather than an error. And the category keeps its picture: a delete that was refused used to remove it.",
       bn: "এখন জানায় আগে কতগুলো পণ্য অন্য ক্যাটাগরিতে সরাতে হবে, সমস্যা হিসেবে নয়, একটি বার্তা হিসেবে। আর ক্যাটাগরির ছবিও থেকে যায়: আগে মুছতে না পারলেও ছবিটি মুছে যেত।",
-    },
-  },
-  {
-    id: "2026-09-29-small-clean-notes",
-    date: "2026-09-29",
-    version: "4.130.0",
-    tag: "improved",
-    title: {
-      en: "Small, clean notes after you do something",
-      bn: "কিছু করার পরে ছোট, পরিষ্কার বার্তা",
-    },
-    body: {
-      en: "The note that pops up after you save or delete something is now one small line with an icon, at the bottom of the page you're working on. Show more opens an error's details, done notes go after 3 seconds and errors after 8, and × closes any of them.",
-      bn: "কিছু সেভ বা মুছে ফেলার পরে যে বার্তা আসে, তা এখন আইকনসহ এক লাইনের ছোট বার্তা, আপনি যে পেজে কাজ করছেন তার নিচে। “আরও দেখুন” চাপলে সমস্যার বিস্তারিত খোলে, কাজ হয়ে যাওয়ার বার্তা ৩ সেকেন্ডে আর সমস্যার বার্তা ৮ সেকেন্ডে চলে যায়, আর × চাপলে যেকোনোটি বন্ধ হয়।",
     },
   },
 ];
