@@ -88,6 +88,21 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-10-02-a-clearer-look-at-premium-analytics",
+    date: "2026-10-02",
+    version: "4.159.0",
+    tag: "improved",
+    title: {
+      en: "A clearer look at Premium analytics",
+      bn: "প্রিমিয়াম অ্যানালিটিক্স এখন আরও পরিষ্কারভাবে দেখা যায়",
+    },
+    body: {
+      en: "On the Essential plan, each Premium part of Analytics now shows what it answers, three things you'd see in it and a preview of its layout, with a crown on its tab. Overview and Sales stay on your plan.",
+      bn: "এসেনশিয়াল প্ল্যানে অ্যানালিটিক্সের প্রতিটি প্রিমিয়াম অংশ এখন দেখায় সেটি কী জানায়, সেখানে কোন তিনটি জিনিস দেখবেন আর তার নকশার একটি ঝলক, আর তার ট্যাবে থাকে একটি মুকুট। সারসংক্ষেপ আর বিক্রি আপনার প্ল্যানেই থাকছে।",
+    },
+    href: "/analytics?section=traffic",
+  },
+  {
     id: "2026-10-02-new-team-members-give-their-full-name",
     date: "2026-10-02",
     version: "4.158.1",
@@ -501,21 +516,6 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     body: {
       en: "When an order doesn't reach the courier, a note now says so with the reason, such as a phone number the courier won't take or courier keys that need checking. The button used to go back to Send without a word.",
       bn: "কোনো অর্ডার কুরিয়ারে না গেলে এখন একটি বার্তা তা কারণসহ জানায়, যেমন কুরিয়ার যে ফোন নম্বর নেয় না বা যে কুরিয়ার কী আবার দেখা দরকার। আগে বোতামটি কিছু না বলেই আবার Send হয়ে যেত।",
-    },
-  },
-  {
-    id: "2026-09-29-deleting-a-category-with-products",
-    date: "2026-09-29",
-    version: "4.130.0",
-    tag: "fixed",
-    href: "/categories",
-    title: {
-      en: "Deleting a category that still has products",
-      bn: "পণ্য থাকা ক্যাটাগরি মুছতে গেলে",
-    },
-    body: {
-      en: "It now tells you how many products to move to another category first, as a note rather than an error. And the category keeps its picture: a delete that was refused used to remove it.",
-      bn: "এখন জানায় আগে কতগুলো পণ্য অন্য ক্যাটাগরিতে সরাতে হবে, সমস্যা হিসেবে নয়, একটি বার্তা হিসেবে। আর ক্যাটাগরির ছবিও থেকে যায়: আগে মুছতে না পারলেও ছবিটি মুছে যেত।",
     },
   },
 ];
