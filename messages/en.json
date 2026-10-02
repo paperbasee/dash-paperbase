@@ -119,8 +119,6 @@
     "nothingYet": "Nothing in these days yet.",
     "failed": "These numbers could not be loaded.",
     "retry": "Try again",
-    "upgradeBody": "Part of Premium: see your visitors, where they come from, your products, districts, delivery, customers and who is on your shop right now.",
-    "upgradeAction": "See plans",
     "upgradeOverview": "Visitors and the rest of your shop",
     "units": {
       "m": "m",
@@ -468,6 +466,54 @@
       "coreSections": "Overview and Sales, one file",
       "note": "In English, like your dashboard. Numbers stay numbers, so you can sort and add them up.",
       "failed": "The file could not be made. Try again."
+    },
+    "premium": {
+      "badge": "Premium",
+      "action": "Upgrade to Premium",
+      "keep": "Overview and Sales stay on your plan.",
+      "overview": "See your visitors and where they come from, plus your products, districts, delivery and customers.",
+      "traffic": {
+        "headline": "Know where your visitors come from",
+        "pitch": "Traffic shows every source, campaign and search, and the sales each one brought.",
+        "p1": "Visitors, visits and time on your shop",
+        "p2": "Sources and ad campaigns, with their sales",
+        "p3": "What shoppers search for on your shop"
+      },
+      "products": {
+        "headline": "See which products sell, and which don't",
+        "pitch": "Products shows your best sellers, what is seen but not bought, and what comes back.",
+        "p1": "Best sellers, and sales by category",
+        "p2": "Products that are seen but not bought",
+        "p3": "Returns, and what to restock"
+      },
+      "districts": {
+        "headline": "See your orders across Bangladesh",
+        "pitch": "Districts shows a map of your orders, every district's sales and where returns are highest.",
+        "p1": "A map of your orders by division",
+        "p2": "Every district, by orders, sales and deliveries",
+        "p3": "Where returns are highest"
+      },
+      "delivery": {
+        "headline": "Follow every parcel to the door",
+        "pitch": "Delivery shows each courier side by side, how long parcels take and where they come back.",
+        "p1": "Delivered, returned and on the way",
+        "p2": "Each courier, side by side",
+        "p3": "How many days delivery takes"
+      },
+      "customers": {
+        "headline": "Get to know your customers",
+        "pitch": "Customers shows who is new, who comes back, and who spends the most.",
+        "p1": "New and returning customers",
+        "p2": "Your top customers, by what they spend",
+        "p3": "Who comes back, month by month"
+      },
+      "live": {
+        "headline": "See who is on your shop right now",
+        "pitch": "Live shows the visitors on your shop, the pages they are on, and orders as they come in.",
+        "p1": "Visitors in the last 5 minutes",
+        "p2": "The pages they are on, and where they came from",
+        "p3": "The latest orders as they come in"
+      }
     }
   },
   "pages": {

@@ -1,7 +1,7 @@
 "use client";
 
 import { type ReactNode, useId, useState } from "react";
-import { ArrowDownRight, ArrowUpRight, ChevronRight, Lock } from "lucide-react";
+import { ArrowDownRight, ArrowUpRight, ChevronRight } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 
@@ -329,23 +329,6 @@ export function ListPanel({
 export function Empty({ children }: { children?: ReactNode }) {
   const t = useTranslations("analyticsPage");
   return <p className="py-6 text-center text-sm text-muted-foreground">{children ?? t("nothingYet")}</p>;
-}
-
-/** A Premium part of the page, on a Basic plan. */
-export function Upgrade({ title }: { title: string }) {
-  const t = useTranslations("analyticsPage");
-  return (
-    <section className="flex flex-col items-start gap-2 rounded-card border border-dashed border-border bg-card p-4 sm:p-5">
-      <span className="inline-flex items-center gap-2 text-sm font-semibold text-foreground">
-        <Lock className="size-4" aria-hidden />
-        {title}
-      </span>
-      <p className="text-sm text-muted-foreground">{t("upgradeBody")}</p>
-      <Link href="/plans" className={LINK}>
-        {t("upgradeAction")}
-      </Link>
-    </section>
-  );
 }
 
 const CURRENT = "hsl(var(--accent-blue))";

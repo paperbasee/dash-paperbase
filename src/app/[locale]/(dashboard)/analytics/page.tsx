@@ -12,7 +12,8 @@ import { useFeatures } from "@/hooks/useFeatures";
 import { useRouter } from "@/i18n/navigation";
 
 import { AnalyticsUpgradeWall } from "./_components/AnalyticsUpgradeWall";
-import { CARD, Upgrade } from "./_components/kit";
+import { CARD } from "./_components/kit";
+import { PremiumShowcase, type PremiumSection } from "./_components/PremiumShowcase";
 import { DownloadMenu } from "./_components/DownloadMenu";
 import { CompareMenu, PeriodChips } from "./_components/PeriodControls";
 import { CORE_SECTIONS, SECTIONS, SectionTabs } from "./_components/SectionTabs";
@@ -108,10 +109,14 @@ export default function AnalyticsPage() {
         </header>
 
         {section === "live" ? null : <PeriodChips period={period} onChange={(next) => show({ period: next })} />}
-        <SectionTabs current={section} onChange={(next) => show({ section: next })} />
+        <SectionTabs
+          current={section}
+          onChange={(next) => show({ section: next })}
+          locked={(tab) => !full && !CORE_SECTIONS.includes(tab)}
+        />
 
         {!open ? (
-          <Upgrade title={t(`sections.${section}`)} />
+          <PremiumShowcase section={section as PremiumSection} />
         ) : section === "live" ? (
           <LiveReport />
         ) : (

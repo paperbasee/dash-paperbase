@@ -4,14 +4,26 @@ import { useTranslations } from "next-intl";
 
 import { cn } from "@/lib/utils";
 
+import { PremiumMark } from "./PremiumMark";
+
 import type { SectionKey } from "../_lib/types";
 
 export const SECTIONS: SectionKey[] = ["overview", "sales", "traffic", "products", "districts", "delivery", "customers", "live"];
 /** What a Basic plan opens: the core sales. */
 export const CORE_SECTIONS: SectionKey[] = ["overview", "sales"];
 
-export function SectionTabs({ current, onChange }: { current: SectionKey; onChange: (section: SectionKey) => void }) {
+export function SectionTabs({
+  current,
+  onChange,
+  locked,
+}: {
+  current: SectionKey;
+  onChange: (section: SectionKey) => void;
+  /** A section this plan doesn't open: its tab carries Premium's crown. */
+  locked?: (section: SectionKey) => boolean;
+}) {
   const t = useTranslations("analyticsPage.sections");
+  const tPremium = useTranslations("analyticsPage");
   return (
     <nav
       aria-label={t("label")}
@@ -34,6 +46,7 @@ export function SectionTabs({ current, onChange }: { current: SectionKey; onChan
         >
           {section === "live" ? <span className="size-[7px] rounded-full bg-emerald-600" aria-hidden /> : null}
           {t(section)}
+          {locked?.(section) ? <PremiumMark label={tPremium("premium.badge")} /> : null}
         </button>
       ))}
     </nav>
