@@ -88,6 +88,36 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-10-02-a-new-plans-page",
+    date: "2026-10-02",
+    version: "4.161.0",
+    tag: "improved",
+    title: {
+      en: "A new Plans page",
+      bn: "নতুন প্ল্যান পেজ",
+    },
+    body: {
+      en: "See your plan marked, switch between monthly and yearly prices, and compare everything each plan includes side by side. Compare plans on a locked part of Analytics opens the comparison.",
+      bn: "আপনার প্ল্যান চিহ্নিত দেখুন, মাসিক আর বার্ষিক দামের মধ্যে বদলান, আর প্রতিটি প্ল্যানে কী কী আছে পাশাপাশি তুলনা করুন। অ্যানালিটিক্সের লক করা অংশে প্ল্যানগুলো তুলনা করুন চাপলে তুলনাটি খুলে যায়।",
+    },
+    href: "/plans",
+  },
+  {
+    id: "2026-10-02-team-changes-take-effect-at-once",
+    date: "2026-10-02",
+    version: "4.161.0",
+    tag: "improved",
+    title: {
+      en: "Team changes take effect at once",
+      bn: "টিমের পরিবর্তন এখন সঙ্গে সঙ্গে কাজ করে",
+    },
+    body: {
+      en: "When you change a team member's role or categories, or suspend or remove them, they're signed out of your shop right away on every device. They sign in again and see exactly what their new access allows. Ending a sign-in from Sessions now works at once too.",
+      bn: "কোনো টিম মেম্বারের রোল বা ক্যাটাগরি বদলালে, অথবা তাঁকে স্থগিত বা সরিয়ে দিলে, সব ডিভাইসে তিনি সঙ্গে সঙ্গে আপনার শপ থেকে সাইন আউট হয়ে যান। আবার সাইন ইন করলে তাঁর নতুন অ্যাক্সেস অনুযায়ী ঠিক ততটুকুই দেখবেন। সেশন থেকে কোনো সাইন-ইন শেষ করলেও এখন সঙ্গে সঙ্গে কাজ করে।",
+    },
+    href: "/settings?tab=team",
+  },
+  {
     id: "2026-10-02-a-clearer-look-at-premium-analytics",
     date: "2026-10-02",
     version: "4.160.0",
@@ -487,35 +517,6 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     body: {
       en: "Your home page shows what your shop still needs before its first real order: a product, delivery charges, and a courier. Each step ticks itself when it's done, and you can skip the guide any time.",
       bn: "আপনার হোম পেজ দেখায় প্রথম অর্ডারের আগে দোকানের আর কী লাগবে: একটি পণ্য, ডেলিভারি চার্জ আর একটি কুরিয়ার। প্রতিটি ধাপ শেষ হলে নিজেই টিক পড়ে, আর যেকোনো সময় গাইডটি বাদ দিতে পারবেন।",
-    },
-  },
-  {
-    id: "2026-09-29-customers-count-matches-your-orders",
-    date: "2026-09-29",
-    version: "4.130.0",
-    tag: "fixed",
-    title: {
-      en: "Your Customers count now matches your orders",
-      bn: "গ্রাহকের সংখ্যা এখন অর্ডারের সাথে মেলে",
-    },
-    body: {
-      en: "The Customers card on your home page now counts the different people who ordered in those days, leaving out cancelled orders just as the Orders card does. It used to count every new shopper, so it could show more customers than orders.",
-      bn: "হোম পেজের গ্রাহক কার্ড এখন সেই সময়ে যাঁরা অর্ডার করেছেন তাঁদের গোনে, বাতিল অর্ডার বাদ দিয়ে, ঠিক অর্ডার কার্ডের মতো। আগে প্রত্যেক নতুন ক্রেতাকে গুনত, তাই কখনো অর্ডারের চেয়ে বেশি গ্রাহক দেখাত।",
-    },
-  },
-  {
-    id: "2026-09-29-send-to-courier-says-why",
-    date: "2026-09-29",
-    version: "4.130.0",
-    tag: "fixed",
-    href: "/orders",
-    title: {
-      en: "Send to courier says why it didn't go",
-      bn: "কুরিয়ারে না গেলে কারণ জানায়",
-    },
-    body: {
-      en: "When an order doesn't reach the courier, a note now says so with the reason, such as a phone number the courier won't take or courier keys that need checking. The button used to go back to Send without a word.",
-      bn: "কোনো অর্ডার কুরিয়ারে না গেলে এখন একটি বার্তা তা কারণসহ জানায়, যেমন কুরিয়ার যে ফোন নম্বর নেয় না বা যে কুরিয়ার কী আবার দেখা দরকার। আগে বোতামটি কিছু না বলেই আবার Send হয়ে যেত।",
     },
   },
 ];

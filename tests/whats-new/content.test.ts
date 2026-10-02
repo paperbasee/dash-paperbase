@@ -100,7 +100,7 @@ describe("what's new content", () => {
     }
   });
 
-  it("every href is an internal dashboard path with a real page", () => {
+  it("every href is an internal path with a real page", () => {
     const sectionIds = new Set<string>(ALL_SECTIONS.map((s) => s.id));
     for (const entry of WHATS_NEW_ENTRIES) {
       if (entry.href === undefined) continue;
@@ -110,13 +110,12 @@ describe("what's new content", () => {
       expect(/^\/(en|bn)(\/|$)/.test(href), `${entry.id} must not carry a locale`).toBe(false);
 
       const [pathname, query] = href.split("?");
-      const dir = path.join(DASHBOARD_ROUTES, ...pathname.split("/").filter(Boolean));
-      expect(fs.existsSync(dir) && fs.statSync(dir).isDirectory(), `${entry.id}: ${dir}`).toBe(
-        true,
-      );
-      expect(fs.existsSync(path.join(dir, "page.tsx")), `${entry.id}: page.tsx in ${dir}`).toBe(
-        true,
-      );
+      // A dashboard page, or one of the app's own beside it (the Plans page has no sidebar).
+      const parts = pathname.split("/").filter(Boolean);
+      const dir = [DASHBOARD_ROUTES, path.dirname(DASHBOARD_ROUTES)]
+        .map((root) => path.join(root, ...parts))
+        .find((candidate) => fs.existsSync(path.join(candidate, "page.tsx")));
+      expect(dir, `${entry.id}: no page.tsx for ${pathname}`).toBeDefined();
 
       if (query) {
         const params = new URLSearchParams(query);
