@@ -3983,10 +3983,10 @@
     "createBody": "One account for every shop you work with. Then you'll join {shop} as {role}.",
     "email": "Email",
     "firstName": "First name",
-    "lastName": "Last name (optional)",
+    "lastName": "Last name",
     "firstNamePlaceholder": "Karim",
     "lastNamePlaceholder": "Hossain",
-    "nameRequired": "Enter your first name.",
+    "nameRequired": "Enter your first and last name.",
     "createPasskey": "Create passkey and join",
     "createHint": "Your passkey is your fingerprint, face or screen lock. You'll use it to sign in. No password.",
     "back": "Back to the invite",
@@ -4021,7 +4021,9 @@
     "tryAgain": "Try again",
     "joinedTitle": "You're on the team",
     "joinedBody": "Welcome to {shop}. You joined as {role}.",
-    "openShop": "Open {shop}"
+    "openShop": "Open {shop}",
+    "firstNameRequired": "Enter your first name.",
+    "lastNameRequired": "Enter your last name."
   },
   "pageAccess": {
     "title": "This page isn't part of your role",

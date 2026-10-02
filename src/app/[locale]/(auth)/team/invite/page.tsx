@@ -97,7 +97,8 @@ export default function TeamInvitePage() {
   const [supportsPasskeys, setSupportsPasskeys] = useState<boolean | null>(null);
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
-  const [nameError, setNameError] = useState("");
+  // Which of the two names is missing: both are required (owner, 2026-10-02).
+  const [missing, setMissing] = useState<{ first: boolean; last: boolean }>({ first: false, last: false });
   const [accountExists, setAccountExists] = useState(false);
   // The account is made once: a passkey cancelled half-way retries with the same ticket.
   const [ticket, setTicket] = useState("");
@@ -158,8 +159,9 @@ export default function TeamInvitePage() {
     setError("");
     setAccountExists(false);
     const first = firstName.trim();
-    if (!first) {
-      setNameError(t("nameRequired"));
+    const last = lastName.trim();
+    if (!first || !last) {
+      setMissing({ first: !first, last: !last });
       return;
     }
     setBusy(true);
@@ -169,7 +171,7 @@ export default function TeamInvitePage() {
         const { data } = await api.post<{ enrollment_ticket: string }>("team/invites/accept-new/", {
           token,
           first_name: first,
-          last_name: lastName.trim(),
+          last_name: last,
         });
         enrollment = data.enrollment_ticket;
         setTicket(enrollment);
@@ -181,8 +183,8 @@ export default function TeamInvitePage() {
         } else if (body && "email" in body) {
           setAccountExists(true);
           setError(t("accountExists"));
-        } else if (body && "first_name" in body) {
-          setNameError(t("nameRequired"));
+        } else if (body && ("first_name" in body || "last_name" in body)) {
+          setMissing({ first: "first_name" in body, last: "last_name" in body });
         } else {
           // The invite ended, was cancelled or used while the form was open.
           const now = await load();
@@ -302,11 +304,12 @@ export default function TeamInvitePage() {
                   value={firstName}
                   onChange={(e) => {
                     setFirstName(e.target.value);
-                    setNameError("");
+                    setMissing((now) => ({ ...now, first: false }));
                   }}
                   placeholder={t("firstNamePlaceholder")}
                   autoComplete="given-name"
-                  aria-invalid={nameError ? true : undefined}
+                  required
+                  aria-invalid={missing.first ? true : undefined}
                   disabled={Boolean(ticket)}
                   autoFocus
                 />
@@ -319,14 +322,23 @@ export default function TeamInvitePage() {
                   id="invite-last-name"
                   size="lg"
                   value={lastName}
-                  onChange={(e) => setLastName(e.target.value)}
+                  onChange={(e) => {
+                    setLastName(e.target.value);
+                    setMissing((now) => ({ ...now, last: false }));
+                  }}
                   placeholder={t("lastNamePlaceholder")}
                   autoComplete="family-name"
+                  required
+                  aria-invalid={missing.last ? true : undefined}
                   disabled={Boolean(ticket)}
                 />
               </div>
             </div>
-            {nameError ? <p className="-mt-2 text-xs text-destructive">{nameError}</p> : null}
+            {missing.first || missing.last ? (
+              <p className="-mt-2 text-xs text-destructive">
+                {t(missing.first && missing.last ? "nameRequired" : missing.first ? "firstNameRequired" : "lastNameRequired")}
+              </p>
+            ) : null}
             {error ? (
               <AuthError>
                 {error}
