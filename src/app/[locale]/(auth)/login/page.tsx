@@ -17,6 +17,7 @@ import { resolvePostAuthRoute } from "@/lib/subscription-access";
 import { getSafeNextPath } from "@/lib/safe-next";
 import { isNetworkError } from "@/lib/network-error";
 import { browserSupportsWebAuthn, isPasskeyCancellation } from "@/lib/passkeys";
+import { isSignInEndReason } from "@/lib/sign-in-ended";
 
 export default function LoginPage() {
   const t = useTranslations("auth.login");
@@ -24,6 +25,9 @@ export default function LoginPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const nextPath = getSafeNextPath(searchParams.get("next"));
+  // Signed out by the shop: a role or access change, or the owner's Sessions (lib/sign-in-ended).
+  const endedReason = searchParams.get("ended");
+  const ended = isSignInEndReason(endedReason) ? endedReason : null;
   const { signInWithPasskey, requestMagicLink } = useAuth();
 
   const [email, setEmail] = useState("");
@@ -93,6 +97,11 @@ export default function LoginPage() {
       ) : (
         <div className="pb-stagger space-y-6" aria-busy={loading}>
           {error ? <AuthError>{error}</AuthError> : null}
+          {ended && !error ? (
+            <p role="status" className="rounded-ui border border-border bg-muted/40 px-3 py-2.5 text-sm text-foreground">
+              {t(`ended.${ended}`)}
+            </p>
+          ) : null}
 
           <div className="space-y-5">
             {supportsPasskeys ? (

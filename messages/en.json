@@ -1825,7 +1825,13 @@
       "emailRequired": "Enter your email to get a sign-in link.",
       "passkeyFailed": "We couldn't sign you in with a passkey. Try the email link, or a device that has your passkey.",
       "accountCheckFailed": "We couldn't check your account. Try again.",
-      "failed": "Something went wrong. Try again."
+      "failed": "Something went wrong. Try again.",
+      "ended": {
+        "access_changed": "Your role or access in this shop changed. Sign in again to carry on.",
+        "access_ended": "You no longer have access to this shop. If that's a mistake, ask the shop owner.",
+        "ended": "This sign-in was ended from the shop's Sessions. Sign in again to carry on.",
+        "support_ended": "The support visit has ended."
+      }
     },
     "signup": {
       "title": "Open your shop in Paperbase",
@@ -2691,7 +2697,7 @@
       "ownerBadge": "Owner",
       "suspendedBadge": "Suspended",
       "ownerFullAccess": "Full access",
-      "memberRoleUpdated": "Role updated.",
+      "memberRoleUpdated": "Role updated. They're signed out of this shop and see it when they sign in again.",
       "scopeButtonTitle": "Limit this member to specific categories (departments)",
       "scopeAllCategories": "All categories",
       "scopeSomeCategories": "{count, plural, one {# category} other {# categories}}",
@@ -2713,8 +2719,8 @@
       "categoryLoading": "Loading categories…",
       "categoryEmpty": "No categories yet.",
       "categorySave": "Save access",
-      "categoryScopeCleared": "Full access — this member sees every category.",
-      "categoryScopeUpdated": "Category access updated.",
+      "categoryScopeCleared": "Full access — this member sees every category once they sign in again.",
+      "categoryScopeUpdated": "Category access updated. They're signed out of this shop and see it when they sign in again.",
       "roleAdmin": "Admin",
       "roleManager": "Manager",
       "roleStaff": "Staff",
@@ -2827,7 +2833,9 @@
         "signedOut": "Signed out",
         "endedBy": "Ended by {name}",
         "visitEnded": "Visit ended",
-        "expired": "Expired"
+        "expired": "Expired",
+        "accessChanged": "Role or access changed",
+        "accessEnded": "Suspended or removed"
       }
     },
     "payments": {

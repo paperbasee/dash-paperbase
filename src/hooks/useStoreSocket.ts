@@ -2,7 +2,8 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { getAccessToken } from "@/lib/auth";
+import { getAccessToken, logout, signInOf } from "@/lib/auth";
+import { pageAfterSignInEnded } from "@/lib/sign-in-ended";
 import { StoreSocketClient } from "@/lib/websocket/socket-client";
 import { createInvalidationCoalescer } from "@/lib/websocket/coalesce-query-invalidations";
 import { getQueryKeysToInvalidate } from "@/lib/websocket/socket-events";
@@ -72,7 +73,17 @@ export function useStoreSocket(
       onFlush: () => onAfterInvalidateRef.current?.(),
     });
 
+    // The sign-in this socket speaks for: when the API ends it (a role or category change, the
+    // owner's Sessions), this tab leaves for the sign-in page at once.
+    const socketSid = signInOf(token)?.sid ?? "";
+
     const removeHandler = client.onMessage((socketEvent) => {
+      const leaveFor = pageAfterSignInEnded(socketEvent, socketSid, signInOf(getAccessToken())?.sid ?? null);
+      if (leaveFor) {
+        client.disconnect();
+        logout(leaveFor);
+        return;
+      }
       const queryKeys = getQueryKeysToInvalidate(socketEvent.event);
       if (queryKeys.length > 0) {
         invalidationCoalescer.enqueue(queryKeys);

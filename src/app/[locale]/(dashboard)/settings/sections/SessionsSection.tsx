@@ -112,6 +112,8 @@ export default function SessionsSection({ hidden }: { hidden: boolean }) {
     if (row.end_reason === "signed_out") return { label: t("status.signedOut"), tone: "quiet" as const };
     if (row.end_reason === "ended") return { label: t("status.endedBy", { name: row.ended_by || t("theOwner") }), tone: "warn" as const };
     if (row.end_reason === "support_ended") return { label: t("status.visitEnded"), tone: "quiet" as const };
+    if (row.end_reason === "access_changed") return { label: t("status.accessChanged"), tone: "quiet" as const };
+    if (row.end_reason === "access_ended") return { label: t("status.accessEnded"), tone: "warn" as const };
     return { label: t("status.expired"), tone: "quiet" as const };
   }
 
