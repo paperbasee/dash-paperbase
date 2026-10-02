@@ -90,15 +90,15 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
     id: "2026-10-02-a-clearer-look-at-premium-analytics",
     date: "2026-10-02",
-    version: "4.159.0",
+    version: "4.160.0",
     tag: "improved",
     title: {
       en: "A clearer look at Premium analytics",
       bn: "প্রিমিয়াম অ্যানালিটিক্স এখন আরও পরিষ্কারভাবে দেখা যায়",
     },
     body: {
-      en: "On the Essential plan, each Premium part of Analytics now shows what it answers, three things you'd see in it and a preview of its layout, with a crown on its tab. Overview and Sales stay on your plan.",
-      bn: "এসেনশিয়াল প্ল্যানে অ্যানালিটিক্সের প্রতিটি প্রিমিয়াম অংশ এখন দেখায় সেটি কী জানায়, সেখানে কোন তিনটি জিনিস দেখবেন আর তার নকশার একটি ঝলক, আর তার ট্যাবে থাকে একটি মুকুট। সারসংক্ষেপ আর বিক্রি আপনার প্ল্যানেই থাকছে।",
+      en: "On the Essential plan, each Premium part of Analytics now shows its own layout with the numbers blurred, so you can see what it holds before you upgrade. Its tab has a small lock. Overview and Sales stay on your plan.",
+      bn: "এসেনশিয়াল প্ল্যানে অ্যানালিটিক্সের প্রতিটি প্রিমিয়াম অংশ এখন তার নিজের নকশা দেখায়, সংখ্যাগুলো ঝাপসা করে, যাতে আপগ্রেডের আগেই বুঝতে পারেন সেখানে কী আছে। তার ট্যাবে থাকে একটি ছোট তালা। সারসংক্ষেপ আর বিক্রি আপনার প্ল্যানেই থাকছে।",
     },
     href: "/analytics",
   },
