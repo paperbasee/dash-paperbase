@@ -1623,7 +1623,8 @@
     "toastTitleCourierSendFailed": "Order {number} wasn't sent to the courier",
     "activitiesBySupport": "by Paperbase support",
     "activitiesEntitySupportSession": "Support visits",
-    "toastDescCsvExportQueuedOwnerTold": "Your export is building in the background. The shop's owner gets an email saying you downloaded the orders."
+    "toastDescCsvExportQueuedOwnerTold": "Your export is building in the background. The shop's owner gets an email saying you downloaded the orders.",
+    "orderLineNotYours": "Outside your categories, so it stays as it is."
   },
   "sidebar": {
     "expandSidebar": "Expand sidebar",

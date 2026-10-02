@@ -44,6 +44,8 @@ export interface OrderItem {
   variant_snapshot?: string | null;
   status?: "active" | "deleted";
   is_unavailable?: boolean;
+  /** False for another department's line, which a Staff member limited to categories can't change. */
+  in_your_categories?: boolean;
   product_brand?: string;
   product_image: string | null;
   variant_public_id?: string | null;

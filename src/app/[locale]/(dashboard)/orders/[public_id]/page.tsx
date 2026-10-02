@@ -225,6 +225,7 @@ export default function OrderDetailPage() {
         product_image: item.product_image,
         status: item.status,
         is_unavailable: item.is_unavailable,
+        in_your_categories: item.in_your_categories,
         variant_public_id: item.variant_public_id ?? null,
         quantity: item.quantity,
         unit_price: String(item.unit_price),

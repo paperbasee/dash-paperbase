@@ -34,7 +34,7 @@ export type OrderLineProductCardProps = {
 
 function OrderLineProductCardInner({
   item,
-  editing,
+  editing: editingOrder,
   currencySymbol,
   edit,
   variants,
@@ -48,6 +48,10 @@ function OrderLineProductCardInner({
   const numClass = numberTextClass(locale);
   const tPages = useTranslations("pages");
   const tCommon = useTranslations("common");
+  // Another department's line, for a Staff member limited to categories: it stays as it is
+  // while they edit the order (the API refuses a change to it too).
+  const notYours = item.in_your_categories === false;
+  const editing = editingOrder && !notYours;
   const isUnavailable =
     item.is_unavailable === true || item.status === "deleted" || !item.product_public_id;
   const snapshotName = item.product_name_snapshot || item.product_name || "Product";
@@ -143,7 +147,12 @@ function OrderLineProductCardInner({
   }, [item, snapshotVariant, tPages]);
 
   return (
-    <div className="relative flex h-full min-h-0 min-w-0 flex-col rounded-card border border-border/80 bg-card p-4 shadow-sm">
+    <div
+      className={cn(
+        "relative flex h-full min-h-0 min-w-0 flex-col rounded-card border border-border/80 bg-card p-4 shadow-sm",
+        editingOrder && notYours && "bg-muted/40",
+      )}
+    >
       <div className="flex min-w-0 w-full flex-1 flex-col items-center gap-3">
         <div className="relative w-full shrink-0 aspect-square overflow-hidden rounded-card bg-muted">
           {editing && (
@@ -184,6 +193,9 @@ function OrderLineProductCardInner({
           </p>
           <p className="line-clamp-2 text-xs text-muted-foreground">{subtitle}</p>
           {isUnavailable ? <p className="text-xs font-medium text-destructive">Product data corrupted</p> : null}
+          {editingOrder && notYours ? (
+            <p className="text-xs text-muted-foreground">{tPages("orderLineNotYours")}</p>
+          ) : null}
         </div>
 
         <div className="mt-auto w-full min-w-0 space-y-2 border-t border-border/50 pt-3 text-sm">
