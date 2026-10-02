@@ -100,7 +100,7 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
       en: "On the Essential plan, each Premium part of Analytics now shows what it answers, three things you'd see in it and a preview of its layout, with a crown on its tab. Overview and Sales stay on your plan.",
       bn: "এসেনশিয়াল প্ল্যানে অ্যানালিটিক্সের প্রতিটি প্রিমিয়াম অংশ এখন দেখায় সেটি কী জানায়, সেখানে কোন তিনটি জিনিস দেখবেন আর তার নকশার একটি ঝলক, আর তার ট্যাবে থাকে একটি মুকুট। সারসংক্ষেপ আর বিক্রি আপনার প্ল্যানেই থাকছে।",
     },
-    href: "/analytics?section=traffic",
+    href: "/analytics",
   },
   {
     id: "2026-10-02-new-team-members-give-their-full-name",
