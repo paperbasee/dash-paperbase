@@ -1,40 +1,46 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { Check } from "lucide-react";
+import { Check, Minus } from "lucide-react";
 import { useRouter } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { getAccessToken } from "@/lib/auth";
 import api from "@/lib/api";
+import { toLocaleDigits } from "@/lib/locale-digits";
+import { ensureMeProfile } from "@/lib/me-profile-store";
 import { numberTextClass } from "@/lib/number-font";
 import { cn } from "@/lib/utils";
 import { markPlansVisited } from "@/lib/plans-onboarding";
+import {
+  cellOf,
+  comparison,
+  groupPlans,
+  planOn,
+  yearlySaving,
+  type BillingCycle,
+  type Plan,
+  type PlanGroup,
+} from "@/lib/plans-compare";
+import type { MeForRouting } from "@/lib/subscription-access";
 import { SupportReadOnly } from "@/components/support/SupportReadOnly";
 
-interface Plan {
-  public_id: string;
-  name: string;
-  price: string;
-  billing_cycle: "monthly" | "yearly";
-  features: {
-    limits?: Record<string, number>;
-    features?: Record<string, boolean>;
-  };
-  is_default: boolean;
+type PageState = "loading" | "ready" | "error";
+
+/** The shop's plan now: a paid or trial plan in force. A lapsed or unpaid one is not "current". */
+function currentPlanOf(me: MeForRouting | null): { id: string; trial: boolean } | null {
+  const sub = me?.subscription;
+  if (!sub?.plan_public_id) return null;
+  if (sub.subscription_status !== "ACTIVE" && sub.subscription_status !== "GRACE") return null;
+  return { id: sub.plan_public_id, trial: Boolean(sub.is_trial) };
 }
 
-type PageState = "loading" | "ready" | "error";
-type BillingCycle = "monthly" | "yearly";
-
-const OPTION_LABELS: Record<string, string> = {
-  basic_analytics: "basic analytics",
-  advanced_analytics: "advanced analytics",
-  order_email_notifications: "order email notifications",
-  fraud_check: "fraud check",
-  max_products: "max products",
-};
-
+/**
+ * Plans, the way Shopify shows them (owner, 2026-10-02): a card per plan with the shop's own
+ * marked, a monthly / yearly switch, then every plan's features side by side (#compare, where
+ * "Compare plans" on a locked analytics section lands). Paying is the owner's alone; a team
+ * member reads the same page without the buttons.
+ */
 export default function PlansPage() {
   const locale = useLocale();
   const numClass = numberTextClass(locale);
@@ -43,9 +49,10 @@ export default function PlansPage() {
 
   const [pageState, setPageState] = useState<PageState>("loading");
   const [plans, setPlans] = useState<Plan[]>([]);
+  const [me, setMe] = useState<MeForRouting | null>(null);
   const [selectingId, setSelectingId] = useState<string | null>(null);
   const [selectError, setSelectError] = useState<string | null>(null);
-  const [billingCycle, setBillingCycle] = useState<BillingCycle>("monthly");
+  const [cycle, setCycle] = useState<BillingCycle>("monthly");
 
   useEffect(() => {
     if (!getAccessToken()) {
@@ -53,287 +60,224 @@ export default function PlansPage() {
       return;
     }
     markPlansVisited();
-    api
-      .get<Plan[]>("billing/plans/")
-      .then(({ data }) => {
+    Promise.all([
+      api.get<Plan[]>("billing/plans/"),
+      ensureMeProfile().catch(() => null),
+    ])
+      .then(([{ data }, profile]) => {
         setPlans(data);
+        setMe(profile);
+        const current = data.find((plan) => plan.public_id === currentPlanOf(profile)?.id);
+        if (current) setCycle(current.billing_cycle);
         setPageState("ready");
       })
       .catch(() => setPageState("error"));
   }, [router]);
 
-  async function handleSelectPlan(plan: Plan) {
+  // "Compare plans" opens this page at the comparison, which is drawn only once the plans are in.
+  useEffect(() => {
+    if (pageState === "ready" && window.location.hash === "#compare") {
+      document.getElementById("compare")?.scrollIntoView({ block: "start" });
+    }
+  }, [pageState]);
+
+  async function select(plan: Plan) {
     setSelectingId(plan.public_id);
     setSelectError(null);
     try {
-      await api.post("billing/payment/initiate/", {
-        plan_public_id: plan.public_id,
-      });
+      await api.post("billing/payment/initiate/", { plan_public_id: plan.public_id });
       router.push("/checkout");
     } catch (err: unknown) {
-      let msg = t("initiateError");
-      if (
-        err &&
-        typeof err === "object" &&
-        "response" in err &&
-        err.response &&
-        typeof err.response === "object" &&
-        "data" in err.response
-      ) {
-        const data = (err.response as { data?: unknown }).data;
-        if (typeof data === "string") msg = data;
-        else if (
-          data &&
-          typeof data === "object" &&
-          "non_field_errors" in data &&
-          Array.isArray((data as Record<string, unknown>).non_field_errors)
-        ) {
-          msg = ((data as Record<string, unknown[]>).non_field_errors as string[])[0] ?? msg;
-        } else if (
-          data &&
-          typeof data === "object" &&
-          "detail" in data &&
-          typeof (data as Record<string, unknown>).detail === "string"
-        ) {
-          msg = (data as Record<string, string>).detail;
-        }
-      }
-      setSelectError(msg);
+      const detail =
+        err && typeof err === "object" && "message" in err && typeof err.message === "string" ? err.message : "";
+      setSelectError(detail && !detail.startsWith("HTTP ") ? detail : t("initiateError"));
     } finally {
       setSelectingId(null);
     }
   }
 
-  function formatPriceMonthlyEquivalent(plan: Plan) {
-    const price = parseFloat(plan.price);
-    return `${t("currency")} ${price.toLocaleString()}`;
-  }
-
-  function formatYearlyTotal(monthlyEquivalentPrice: string) {
-    const m = parseFloat(monthlyEquivalentPrice);
-    const total = m * 12;
-    return `${t("currency")} ${total.toLocaleString()}`;
-  }
-
-  const grouped = plans.reduce<Record<string, Partial<Record<BillingCycle, Plan>>>>(
-    (acc, p) => {
-      acc[p.name] = acc[p.name] ?? {};
-      acc[p.name][p.billing_cycle] = p;
-      return acc;
-    },
-    {}
+  const groups = groupPlans(plans);
+  const saving = yearlySaving(groups);
+  const hasYearly = groups.some((group) => group.yearly);
+  const current = currentPlanOf(me);
+  const currentGroup = groups.find(
+    (group) => group.monthly?.public_id === current?.id || group.yearly?.public_id === current?.id,
   );
-  const planGroups = Object.entries(grouped).map(([name, cycles]) => ({
-    name,
-    monthly: cycles.monthly ?? null,
-    yearly: cycles.yearly ?? null,
-  }));
-  const hasAnyYearly = plans.some((p) => p.billing_cycle === "yearly");
+  // A team member reads the plans; paying is the owner's (api: owner power "billing").
+  const mayPay = !me?.is_moderator;
+  const digits = (text: string) => toLocaleDigits(text, locale);
+  const taka = (value: number) => `৳${digits(new Intl.NumberFormat("en-US").format(Math.round(value)))}`;
 
-  const spinner = (
-    <div className="flex items-center justify-center py-16">
-      <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-    </div>
-  );
+  const shown = groups.map((group) => planOn(group, cycle));
+  const rows = comparison(shown);
 
   return (
-    <div className="min-h-screen bg-background px-4 py-12 text-foreground">
-      <div className="mx-auto flex max-w-6xl flex-col">
-        <div className="mb-10 text-center">
+    <div className="min-h-screen bg-background px-4 py-10 text-foreground sm:py-14">
+      <div className="mx-auto flex max-w-5xl flex-col">
+        <header className="mb-8 text-center sm:mb-10">
           <p className="mb-2 text-sm font-semibold tracking-wide text-foreground/70">Paperbase</p>
-          <h1 className="text-4xl font-semibold tracking-tight sm:text-6xl">{t("title")}</h1>
-          <p className="mx-auto mt-4 max-w-2xl text-sm text-muted-foreground sm:text-base">
-            {t("subtitle")}
+          <h1 className="text-3xl font-semibold tracking-tight sm:text-5xl">{t("title")}</h1>
+          <p className="mx-auto mt-3 max-w-xl text-sm text-muted-foreground sm:text-base">
+            {currentGroup
+              ? `${t(!mayPay ? "shopOnLine" : current?.trial ? "trialLine" : "currentLine", { plan: currentGroup.name })} ${t("paidBy")}`
+              : t("subtitle")}
           </p>
-        </div>
+        </header>
 
-        {/* Error loading */}
         {pageState === "error" && (
           <div className="rounded-card border border-destructive/30 bg-destructive/10 px-4 py-3 text-center text-sm text-destructive">
             {t("errorLoad")}
           </div>
         )}
 
-        {/* Loading */}
-        {pageState === "loading" && spinner}
+        {pageState === "loading" && (
+          <div className="flex items-center justify-center py-16">
+            <div className="size-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+          </div>
+        )}
 
-        {/* Plans grid */}
-        {pageState === "ready" && plans.length === 0 && (
+        {pageState === "ready" && groups.length === 0 && (
           <p className="text-center text-sm text-muted-foreground">{t("empty")}</p>
         )}
 
         {/* Choosing and paying for the plan is the owner's: Paperbase support sees it, greyed. */}
-        {pageState === "ready" && plans.length > 0 && (
+        {pageState === "ready" && groups.length > 0 && (
           <SupportReadOnly centered>
             {selectError && (
-              <div className="mb-6 rounded-card border border-red-500/30 bg-red-500/10 px-4 py-3 text-center text-sm text-red-200">
+              <div className="mb-6 rounded-card border border-destructive/30 bg-destructive/10 px-4 py-3 text-center text-sm text-destructive">
                 {selectError}
               </div>
             )}
 
-            <div className="mb-6 flex w-full justify-center">
-              <div className="inline-flex rounded-ui border border-border bg-card p-1 shadow-sm">
-                <button
-                  type="button"
-                  className={`rounded-ui px-4 py-2 text-sm font-medium transition-colors ${
-                    billingCycle === "monthly"
-                      ? "bg-primary text-primary-foreground"
-                      : "text-muted-foreground hover:text-foreground"
-                  }`}
-                  onClick={() => setBillingCycle("monthly")}
-                >
-                  {t("monthly")}
-                </button>
-                <button
-                  type="button"
-                  disabled={!hasAnyYearly}
-                  className={`rounded-ui px-4 py-2 text-sm font-medium transition-colors ${
-                    billingCycle === "yearly"
-                      ? "bg-primary text-primary-foreground"
-                      : hasAnyYearly
-                        ? "text-muted-foreground hover:text-foreground"
-                        : "cursor-not-allowed text-muted-foreground/50"
-                  }`}
-                  onClick={() => {
-                    if (!hasAnyYearly) return;
-                    setBillingCycle("yearly");
-                  }}
-                >
-                  {t("yearly")}
-                </button>
-              </div>
-            </div>
-
-            <div className="mx-auto grid w-full max-w-5xl justify-center justify-items-center gap-6 [grid-template-columns:repeat(auto-fit,minmax(18rem,20rem))]">
-              {planGroups.map((g) => {
-                const selected = (billingCycle === "yearly" ? g.yearly : g.monthly) ?? g.monthly ?? g.yearly;
-                if (!selected) return null;
-
-                const featureEntries = Object.entries(selected.features?.features ?? {}).filter(
-                  ([, v]) => v === true
-                );
-                const limitEntries = Object.entries(selected.features?.limits ?? {});
-                const isSelecting = selectingId === selected.public_id;
-                const showYearly = billingCycle === "yearly" && !!g.yearly;
-                const selectedName = selected.name.toLowerCase();
-
-                const optionLines: string[] = [];
-                let featuresLeadLine: string | null = null;
-
-                if (selectedName === "essential") {
-                  if (selected.features?.features?.basic_analytics) {
-                    optionLines.push(OPTION_LABELS.basic_analytics);
-                  }
-                  const maxProducts = selected.features?.limits?.max_products;
-                  if (typeof maxProducts === "number") {
-                    optionLines.push(`${OPTION_LABELS.max_products}: ${maxProducts}`);
-                  }
-                } else if (selectedName === "premium") {
-                  featuresLeadLine = t("premiumIncludesEssential");
-                  if (selected.features?.features?.fraud_check) {
-                    optionLines.push(OPTION_LABELS.fraud_check);
-                  }
-                  if (selected.features?.features?.advanced_analytics) {
-                    optionLines.push(OPTION_LABELS.advanced_analytics);
-                  }
-                  if (selected.features?.features?.order_email_notifications) {
-                    optionLines.push(OPTION_LABELS.order_email_notifications);
-                  }
-                  const maxProducts = selected.features?.limits?.max_products;
-                  if (typeof maxProducts === "number") {
-                    optionLines.push(`${OPTION_LABELS.max_products}: ${maxProducts}`);
-                  }
-                } else {
-                  optionLines.push(
-                    ...featureEntries.map(([key]) => OPTION_LABELS[key] ?? key.replace(/_/g, " "))
-                  );
-                  optionLines.push(
-                    ...limitEntries.map(([key, val]) => {
-                      const label = OPTION_LABELS[key] ?? key.replace(/_/g, " ");
-                      return `${label}: ${val}`;
-                    })
-                  );
-                }
-
-                return (
-                  <div
-                    key={`${g.name}-${selected.public_id}`}
-                    className={`flex w-full flex-col rounded-dialog bg-card p-6 text-card-foreground shadow-sm ring-1 ring-border ${
-                      selected.is_default ? "ring-2 ring-primary/50" : ""
-                    }`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <h2 className="text-base font-semibold">{selected.name}</h2>
-                      {selected.is_default && (
-                        <span className="rounded-tooltip bg-primary/10 px-2.5 py-1 text-xs font-semibold text-primary">
-                          Best offer
-                        </span>
+            {hasYearly ? (
+              <div className="mb-6 flex justify-center">
+                <div role="group" className="inline-flex rounded-ui border border-border bg-card p-1 shadow-xs">
+                  {(["monthly", "yearly"] as const).map((option) => (
+                    <button
+                      key={option}
+                      type="button"
+                      aria-pressed={cycle === option}
+                      onClick={() => setCycle(option)}
+                      className={cn(
+                        "inline-flex items-center gap-2 rounded-ui px-4 py-2 text-sm font-medium transition-colors",
+                        cycle === option ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground",
                       )}
-                    </div>
-
-                    <div className="mt-5 flex items-end gap-2">
-                      <p className={cn("text-4xl font-semibold tracking-tight", numClass)}>
-                        {formatPriceMonthlyEquivalent(selected)}
-                      </p>
-                      <p className="pb-1 text-sm text-muted-foreground">{t("perMonth")}</p>
-                    </div>
-
-                    {showYearly ? (
-                      <p className="mt-2 text-sm text-muted-foreground">
-                        {t("billedYearlyPrefix")}
-                        <span className={numClass}>{formatYearlyTotal(selected.price)}</span>
-                        {t("billedYearlySuffix")}
-                      </p>
-                    ) : (
-                      <p className="mt-2 text-sm text-muted-foreground">
-                        {t("billingCycleLabel")}: {t("monthly")}
-                      </p>
-                    )}
-
-                    {/* Features & limits */}
-                    <div className="mt-6 flex-1">
-                      {featuresLeadLine ? (
-                        <p className="text-sm font-medium leading-snug text-foreground">{featuresLeadLine}</p>
+                    >
+                      {t(option)}
+                      {option === "yearly" && saving ? (
+                        <span
+                          className={cn(
+                            "rounded-full px-2 py-0.5 text-xs font-semibold",
+                            cycle === "yearly"
+                              ? "bg-primary-foreground/15 text-primary-foreground"
+                              : "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400",
+                          )}
+                        >
+                          {t(saving.low === saving.high ? "save" : "saveUpTo", { percent: digits(String(saving.high)) })}
+                        </span>
                       ) : null}
-                      <p
-                        className={cn(
-                          "text-xs font-semibold uppercase tracking-wide text-muted-foreground",
-                          featuresLeadLine ? "mt-3" : ""
-                        )}
-                      >
-                        {t("featuresLabel")}
-                      </p>
-                      <ul className="mt-3 space-y-2">
-                        {optionLines.map((line) => (
-                          <li key={line} className="flex items-start gap-2 text-sm">
-                            <span className="mt-0.5 inline-flex size-4 shrink-0 items-center justify-center rounded-ui bg-foreground text-background">
-                              <Check className="size-2.5" strokeWidth={2.5} aria-hidden />
-                            </span>
-                            <span className="min-w-0 leading-snug">{line}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ) : null}
 
-                    {/* CTA */}
-                    <div className="mt-6">
-                      <Button
-                        className="w-full"
-                        loading={isSelecting}
-                        disabled={selectingId !== null}
-                        onClick={() => handleSelectPlan(selected)}
-                      >
-                        {t("selectPlan")}
-                      </Button>
-                    </div>
-                  </div>
-                );
-              })}
+            <div className="mx-auto grid w-full gap-4 sm:gap-6 [grid-template-columns:repeat(auto-fit,minmax(16rem,1fr))]">
+              {groups.map((group) => (
+                <PlanCard
+                  key={group.name}
+                  group={group}
+                  plan={planOn(group, cycle)!}
+                  isCurrent={group === currentGroup}
+                  currentId={current?.id ?? null}
+                  isTrial={Boolean(current?.trial)}
+                  mayPay={mayPay}
+                  busy={selectingId}
+                  onSelect={select}
+                  taka={taka}
+                  numClass={numClass}
+                />
+              ))}
             </div>
+            {!mayPay ? <p className="mt-4 text-center text-sm text-muted-foreground">{t("ownerOnly")}</p> : null}
           </SupportReadOnly>
         )}
 
-        {/* Back home link */}
+        {pageState === "ready" && rows.length > 0 && (
+          <section id="compare" aria-labelledby="compare-title" className="mt-12 scroll-mt-6 sm:mt-16">
+            <h2 id="compare-title" className="mb-4 text-xl font-semibold tracking-tight sm:text-2xl">
+              {t("compareTitle")}
+            </h2>
+            <div className="overflow-hidden rounded-card border border-border bg-card">
+              <table className="w-full table-fixed border-collapse text-sm">
+                <colgroup>
+                  <col />
+                  {groups.map((group) => (
+                    <col key={group.name} className="w-24 sm:w-40" />
+                  ))}
+                </colgroup>
+                <thead>
+                  <tr className="border-b border-border">
+                    <th scope="col" className="px-4 py-3 text-left font-medium text-muted-foreground sm:px-5">
+                      <span className="sr-only">{t("feature")}</span>
+                    </th>
+                    {groups.map((group) => (
+                      <th
+                        key={group.name}
+                        scope="col"
+                        className={cn("px-2 py-3 text-center font-semibold", group === currentGroup && "bg-muted/60")}
+                      >
+                        {group.name}
+                        {group === currentGroup ? (
+                          <span className="block text-xs font-normal text-muted-foreground">
+                            {t(current?.trial ? "trialBadge" : "currentBadge")}
+                          </span>
+                        ) : null}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {rows.map((block) => (
+                    <Fragment key={block.id}>
+                      <tr className="border-b border-border bg-muted/40">
+                        <th
+                          scope="colgroup"
+                          colSpan={groups.length + 1}
+                          className="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wide text-muted-foreground sm:px-5"
+                        >
+                          {t(`groups.${block.id}`)}
+                        </th>
+                      </tr>
+                      {block.rows.map((row) => (
+                        <tr key={row.id} className="border-b border-border last:border-b-0">
+                          <th scope="row" className="px-4 py-3 text-left font-normal text-foreground sm:px-5">
+                            {t(`rows.${row.id}`)}
+                          </th>
+                          {groups.map((group, i) => (
+                            <td
+                              key={group.name}
+                              className={cn("px-2 py-3 text-center", group === currentGroup && "bg-muted/60")}
+                            >
+                              <Cell
+                                value={cellOf(shown[i], row)}
+                                included={t("included")}
+                                notIncluded={t("notIncluded")}
+                                digits={digits}
+                                numClass={numClass}
+                              />
+                            </td>
+                          ))}
+                        </tr>
+                      ))}
+                    </Fragment>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </section>
+        )}
+
         <div className="mt-10 text-center">
           <Button
             variant="ghost"
@@ -346,5 +290,107 @@ export default function PlansPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+function PlanCard({
+  group,
+  plan,
+  isCurrent,
+  currentId,
+  isTrial,
+  mayPay,
+  busy,
+  onSelect,
+  taka,
+  numClass,
+}: {
+  group: PlanGroup;
+  plan: Plan;
+  isCurrent: boolean;
+  currentId: string | null;
+  isTrial: boolean;
+  mayPay: boolean;
+  busy: string | null;
+  onSelect: (plan: Plan) => void;
+  taka: (value: number) => string;
+  numClass: string;
+}) {
+  const t = useTranslations("plansPage");
+  const monthly = Number(plan.price);
+  const badge = isCurrent ? t(isTrial ? "trialBadge" : "currentBadge") : plan.is_default ? t("recommended") : null;
+  // Paying is by hand, each period: the plan the shop pays for now is renewed here, its other
+  // cycle switched to. A trial's plan is chosen like any other.
+  const action =
+    isCurrent && !isTrial
+      ? plan.public_id === currentId
+        ? t("renew", { plan: group.name })
+        : t(plan.billing_cycle === "yearly" ? "switchToYearly" : "switchToMonthly")
+      : t("select", { plan: group.name });
+
+  return (
+    <div
+      className={cn(
+        "flex flex-col rounded-dialog bg-card p-5 text-card-foreground shadow-sm ring-1 ring-border sm:p-6",
+        isCurrent ? "ring-2 ring-foreground/70" : plan.is_default && "ring-2 ring-primary/50",
+      )}
+    >
+      <div className="flex items-center justify-between gap-3">
+        <h2 className="text-base font-semibold">{group.name}</h2>
+        {badge ? (
+          <span
+            className={cn(
+              "rounded-full px-2.5 py-1 text-xs font-semibold",
+              isCurrent ? "bg-foreground text-background" : "bg-primary/10 text-primary",
+            )}
+          >
+            {badge}
+          </span>
+        ) : null}
+      </div>
+
+      <div className="mt-5 flex items-baseline gap-1.5">
+        <p className={cn("text-4xl font-semibold tracking-tight", numClass)}>{taka(monthly)}</p>
+        <p className="text-sm text-muted-foreground">{t("perMonth")}</p>
+      </div>
+      <p className="mt-1.5 text-sm text-muted-foreground">
+        {plan.billing_cycle === "yearly" ? t("billedYearly", { total: taka(monthly * 12) }) : t("billedMonthly")}
+      </p>
+
+      {mayPay ? (
+        <Button
+          className="mt-6 w-full"
+          variant={isCurrent ? "outline" : "default"}
+          loading={busy === plan.public_id}
+          disabled={busy !== null}
+          onClick={() => onSelect(plan)}
+        >
+          {action}
+        </Button>
+      ) : null}
+    </div>
+  );
+}
+
+function Cell({
+  value,
+  included,
+  notIncluded,
+  digits,
+  numClass,
+}: {
+  value: boolean | number | null;
+  included: string;
+  notIncluded: string;
+  digits: (text: string) => string;
+  numClass: string;
+}) {
+  if (typeof value === "number") {
+    return <span className={cn("font-medium", numClass)}>{digits(new Intl.NumberFormat("en-US").format(value))}</span>;
+  }
+  return value ? (
+    <Check className="mx-auto size-4 text-foreground" strokeWidth={2.5} aria-label={included} role="img" />
+  ) : (
+    <Minus className="mx-auto size-4 text-muted-foreground/60" aria-label={notIncluded} role="img" />
   );
 }

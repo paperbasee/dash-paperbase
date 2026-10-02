@@ -5,6 +5,7 @@ import { Lock } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/button";
+import { useOwnerPower } from "@/hooks/useOwnerPower";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 
@@ -53,24 +54,32 @@ export function LockedDelivery() {
   );
 }
 
+/** The plan is the owner's to change (owner power "billing"); a team member is shown the plans. */
+const COMPARE_HREF = "/plans#compare";
+
 function UpgradeBar({ section }: { section: string }) {
   const t = useTranslations("analyticsPage");
+  const mayUpgrade = useOwnerPower()("billing");
   return (
     <div className={cn(CARD, "flex flex-col gap-3 px-4 py-3.5 sm:flex-row sm:items-center sm:justify-between sm:px-5")}>
       <div className="flex min-w-0 items-start gap-3">
         <Lock className="mt-0.5 size-4 shrink-0 text-muted-foreground" aria-hidden />
         <div className="min-w-0">
           <h2 className="text-sm font-semibold text-foreground">{t("premium.locked", { section })}</h2>
-          <p className="text-[13px] text-muted-foreground">{t("premium.lockedLine")}</p>
+          <p className="text-[13px] text-muted-foreground">
+            {t(mayUpgrade ? "premium.lockedLine" : "premium.askOwnerLine")}
+          </p>
         </div>
       </div>
       <div className="flex shrink-0 gap-2">
-        <Button asChild variant="outline" size="sm">
-          <Link href="/plans">{t("premium.compare")}</Link>
+        <Button asChild variant={mayUpgrade ? "outline" : "default"} size="sm">
+          <Link href={COMPARE_HREF}>{t("premium.compare")}</Link>
         </Button>
-        <Button asChild size="sm">
-          <Link href="/plans">{t("premium.upgrade")}</Link>
-        </Button>
+        {mayUpgrade ? (
+          <Button asChild size="sm">
+            <Link href="/plans">{t("premium.upgrade")}</Link>
+          </Button>
+        ) : null}
       </div>
     </div>
   );
@@ -78,13 +87,14 @@ function UpgradeBar({ section }: { section: string }) {
 
 function PlanLink() {
   const t = useTranslations("analyticsPage");
+  const mayUpgrade = useOwnerPower()("billing");
   return (
     <Link
-      href="/plans"
+      href={mayUpgrade ? "/plans" : COMPARE_HREF}
       className="inline-flex shrink-0 items-center gap-1.5 rounded-ui text-[13px] font-medium text-blue-600 hover:underline dark:text-blue-400"
     >
       <Lock className="size-3.5" aria-hidden />
-      {t("premium.upgrade")}
+      {t(mayUpgrade ? "premium.upgrade" : "premium.compare")}
     </Link>
   );
 }

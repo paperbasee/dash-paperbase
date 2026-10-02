@@ -471,7 +471,8 @@
       "locked": "{section} is on the Premium plan",
       "lockedLine": "Upgrade to see your shop's numbers here.",
       "upgrade": "Upgrade plan",
-      "compare": "Compare plans"
+      "compare": "Compare plans",
+      "askOwnerLine": "Ask the shop owner to upgrade to see these numbers."
     }
   },
   "pages": {
@@ -3627,27 +3628,49 @@
     "backHome": "Back to home"
   },
   "plansPage": {
-    "title": "Choose a plan",
-    "subtitle": "Select the plan that works for your store. Payment is manual via bKash or Nagad.",
-    "selectPlan": "Select plan",
-    "loading": "Loading plans…",
-    "empty": "No plans are available right now. Please contact support.",
-    "errorLoad": "Failed to load plans. Please refresh the page.",
-    "priceLabel": "Price",
-    "billingCycleLabel": "Billing cycle",
-    "featuresLabel": "Features",
-    "limitsLabel": "Limits",
+    "title": "Choose your plan",
+    "subtitle": "Pick the plan for your shop. Paid by bKash or Nagad.",
+    "currentLine": "You're on {plan}.",
+    "trialLine": "You're on a free trial of {plan}.",
+    "shopOnLine": "This shop is on {plan}.",
+    "paidBy": "Paid by bKash or Nagad.",
     "monthly": "Monthly",
     "yearly": "Yearly",
-    "perMonth": "/ month",
-    "perYear": "/ year",
-    "currency": "BDT",
-    "billedYearlyPrefix": "Billed yearly (",
-    "billedYearlySuffix": " total)",
-    "initiating": "Redirecting…",
-    "initiateError": "Failed to initiate payment. Please try again.",
-    "backHome": "Back to home",
-    "premiumIncludesEssential": "Everything in Essential, plus:"
+    "save": "Save {percent}%",
+    "saveUpTo": "Save up to {percent}%",
+    "perMonth": "/month",
+    "billedYearly": "{total} billed yearly",
+    "billedMonthly": "Billed monthly",
+    "currentBadge": "Current plan",
+    "trialBadge": "Free trial",
+    "recommended": "Recommended",
+    "select": "Select {plan}",
+    "renew": "Renew {plan}",
+    "switchToYearly": "Switch to yearly",
+    "switchToMonthly": "Switch to monthly",
+    "ownerOnly": "Only the shop owner can change the plan.",
+    "compareTitle": "Compare plans",
+    "feature": "Feature",
+    "groups": {
+      "analytics": "Analytics",
+      "orders": "Orders",
+      "shop": "Your shop"
+    },
+    "rows": {
+      "overviewSales": "Overview and Sales",
+      "otherSections": "Traffic, Products, Districts, Delivery and Customers",
+      "live": "Live: who is on your shop now",
+      "fraudCheck": "Fraud check before you send a parcel",
+      "orderEmails": "An email for every new order",
+      "products": "Products you can add",
+      "premiumSections": "Premium sections in Customize"
+    },
+    "included": "Included",
+    "notIncluded": "Not included",
+    "empty": "No plans are available right now. Please contact support.",
+    "errorLoad": "We couldn't load the plans. Refresh the page to try again.",
+    "initiateError": "We couldn't start the payment. Try again.",
+    "backHome": "Back to home"
   },
   "checkoutPage": {
     "title": "Complete your payment",

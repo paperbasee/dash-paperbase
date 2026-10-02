@@ -32,6 +32,7 @@ import { Overview } from "@/app/[locale]/(dashboard)/analytics/_sections/Overvie
 import { Products } from "@/app/[locale]/(dashboard)/analytics/_sections/Products";
 import { Sales } from "@/app/[locale]/(dashboard)/analytics/_sections/Sales";
 import { Traffic } from "@/app/[locale]/(dashboard)/analytics/_sections/Traffic";
+import { LockedSection } from "@/app/[locale]/(dashboard)/analytics/_components/PremiumLock";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import bn from "../../messages/bn.json";
 import en from "../../messages/en.json";
@@ -45,6 +46,10 @@ vi.mock("@/i18n/navigation", () => ({
     </a>
   ),
 }));
+
+// Who is looking: the plan is the owner's to change (owner power "billing").
+const viewer = vi.hoisted(() => ({ isOwner: true }));
+vi.mock("@/hooks/useOwnerPower", () => ({ useOwnerPower: () => () => viewer.isOwner }));
 
 const period: PeriodInfo = {
   preset: "7",
@@ -240,6 +245,28 @@ describe.each(["en", "bn"] as const)("every section, in %s", (locale) => {
       notes: { top_source: null, best_day: overview.notes.best_day, places: null },
     };
     expect(draw(locale, <Overview report={basic} />, false).length).toBeGreaterThan(500);
+  });
+});
+
+describe("a Premium section on Essential", () => {
+  const locked = () => draw("en", <LockedSection section="traffic" title="Traffic" />, false);
+
+  test("the owner can compare the plans or upgrade", () => {
+    viewer.isOwner = true;
+    const html = locked();
+    expect(text(html)).toContain("Traffic is on the Premium plan");
+    expect(html).toContain('href="/plans#compare"');
+    expect(html).toContain('href="/plans"');
+    expect(text(html)).toContain("Upgrade plan");
+  });
+
+  test("a team member is sent to the owner, with the plans to read", () => {
+    viewer.isOwner = false;
+    const html = locked();
+    expect(text(html)).toContain("Ask the shop owner to upgrade to see these numbers.");
+    expect(html).toContain('href="/plans#compare"');
+    expect(text(html)).not.toContain("Upgrade plan");
+    viewer.isOwner = true;
   });
 });
 
