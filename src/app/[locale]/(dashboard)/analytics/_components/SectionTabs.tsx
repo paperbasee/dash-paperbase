@@ -4,7 +4,7 @@ import { useTranslations } from "next-intl";
 
 import { cn } from "@/lib/utils";
 
-import { PremiumMark } from "./PremiumMark";
+import { LockMark } from "./LockMark";
 
 import type { SectionKey } from "../_lib/types";
 
@@ -46,7 +46,7 @@ export function SectionTabs({
         >
           {section === "live" ? <span className="size-[7px] rounded-full bg-emerald-600" aria-hidden /> : null}
           {t(section)}
-          {locked?.(section) ? <PremiumMark label={tPremium("premium.badge")} /> : null}
+          {locked?.(section) ? <LockMark label={tPremium("premium.badge")} /> : null}
         </button>
       ))}
     </nav>

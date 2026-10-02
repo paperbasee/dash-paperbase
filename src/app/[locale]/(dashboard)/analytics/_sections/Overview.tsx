@@ -18,7 +18,7 @@ import {
   TrendChart,
   shareOf,
 } from "../_components/kit";
-import { PremiumStrip } from "../_components/PremiumShowcase";
+import { LockedDelivery } from "../_components/PremiumLock";
 import { useAnalyticsView } from "../_lib/context";
 import { type Metric, changeOf, metricPoints } from "../_lib/insights";
 import { pageName, sourceName } from "../_lib/names";
@@ -56,7 +56,7 @@ export function Overview({ report }: { report: OverviewReport }) {
             </>
           ) : null}
           <Stand report={report} />
-          {full ? <DeliveryList report={report} /> : <PremiumStrip title={t("upgradeOverview")} />}
+          {full ? <DeliveryList report={report} /> : <LockedDelivery />}
         </div>
       </section>
     </div>

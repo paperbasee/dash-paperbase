@@ -13,7 +13,7 @@ import { useRouter } from "@/i18n/navigation";
 
 import { AnalyticsUpgradeWall } from "./_components/AnalyticsUpgradeWall";
 import { CARD } from "./_components/kit";
-import { PremiumShowcase, type PremiumSection } from "./_components/PremiumShowcase";
+import { LockedSection, type PremiumSection } from "./_components/PremiumLock";
 import { DownloadMenu } from "./_components/DownloadMenu";
 import { CompareMenu, PeriodChips } from "./_components/PeriodControls";
 import { CORE_SECTIONS, SECTIONS, SectionTabs } from "./_components/SectionTabs";
@@ -116,7 +116,7 @@ export default function AnalyticsPage() {
         />
 
         {!open ? (
-          <PremiumShowcase section={section as PremiumSection} />
+          <LockedSection section={section as PremiumSection} title={t(`sections.${section}`)} />
         ) : section === "live" ? (
           <LiveReport />
         ) : (
