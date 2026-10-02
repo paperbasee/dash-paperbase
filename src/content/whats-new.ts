@@ -88,6 +88,21 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-10-02-category-limits-hold-everywhere",
+    date: "2026-10-02",
+    version: "4.162.0",
+    tag: "improved",
+    title: {
+      en: "Category limits now hold everywhere",
+      bn: "ক্যাটাগরি সীমা এখন সব জায়গায় কাজ করে",
+    },
+    body: {
+      en: "A Staff member limited to some categories now sees only their categories' numbers on the home page too, and the order list shows each order's full item count. On an order with items from other categories, they can work on the whole order but change only their own items.",
+      bn: "কিছু ক্যাটাগরিতে সীমিত কোনো স্টাফ এখন হোম পেজেও শুধু তাঁর ক্যাটাগরির সংখ্যা দেখেন, আর অর্ডার তালিকায় প্রতিটি অর্ডারের পুরো আইটেম সংখ্যা দেখায়। অন্য ক্যাটাগরির আইটেমসহ কোনো অর্ডারে তিনি পুরো অর্ডার নিয়ে কাজ করতে পারেন, কিন্তু বদলাতে পারেন শুধু নিজের আইটেমগুলো।",
+    },
+    href: "/settings?tab=team",
+  },
+  {
     id: "2026-10-02-a-new-plans-page",
     date: "2026-10-02",
     version: "4.161.0",
@@ -503,20 +518,6 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     body: {
       en: "Signing in and signing up have a fresh look, and both now read in Bangla too. New shops are set up in five short questions, beside a live preview of the whole home page, as a computer or a phone shows it, and can connect their own domain on the way. Each step saves as you answer it, so you can pick up where you left off on any device, and when setup finishes the real shop opens beside you.",
       bn: "সাইন ইন ও অ্যাকাউন্ট খোলার পাতা এখন নতুন চেহারায়, আর দুটোই বাংলাতেও পড়া যায়। নতুন দোকান এখন পাঁচটি ছোট প্রশ্নে সাজানো যায়, পাশে পুরো হোম পেজের লাইভ প্রিভিউ দেখে (কম্পিউটারে বা মোবাইলে যেমন দেখাবে), আর সাথেই নিজের ডোমেইনও যুক্ত করা যায়। প্রতিটি ধাপ উত্তর দেওয়ার সাথে সাথেই সংরক্ষণ হয়, তাই যেকোনো ডিভাইস থেকে যেখানে থেমেছিলেন সেখান থেকে শুরু করা যায়, আর সেট-আপ শেষ হলে পাশেই আসল দোকানটি খুলে যায়।",
-    },
-  },
-  {
-    id: "2026-09-29-your-setup-guide",
-    date: "2026-09-29",
-    version: "4.136.0",
-    tag: "new",
-    title: {
-      en: "A setup guide on your home page",
-      bn: "হোম পেজে সেট-আপ গাইড",
-    },
-    body: {
-      en: "Your home page shows what your shop still needs before its first real order: a product, delivery charges, and a courier. Each step ticks itself when it's done, and you can skip the guide any time.",
-      bn: "আপনার হোম পেজ দেখায় প্রথম অর্ডারের আগে দোকানের আর কী লাগবে: একটি পণ্য, ডেলিভারি চার্জ আর একটি কুরিয়ার। প্রতিটি ধাপ শেষ হলে নিজেই টিক পড়ে, আর যেকোনো সময় গাইডটি বাদ দিতে পারবেন।",
     },
   },
 ];
