@@ -88,6 +88,21 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-10-03-the-payment-page-in-bangla",
+    date: "2026-10-03",
+    version: "4.167.0",
+    tag: "new",
+    title: {
+      en: "The payment page in Bangla",
+      bn: "পেমেন্ট পেজ এখন বাংলায়",
+    },
+    body: {
+      en: "When you pay for your plan, the payment page now opens in Bangla, so the bKash and Nagad steps are easy to follow. Prefer English? Tap English at the top; this device remembers it, and your dashboard keeps its own language.",
+      bn: "প্ল্যানের টাকা দেওয়ার সময় পেমেন্ট পেজ এখন বাংলায় খোলে, যাতে বিকাশ ও নগদের ধাপগুলো সহজে বোঝা যায়। ইংরেজিতে দেখতে চান? উপরের English চাপুন; এই ডিভাইস সেটা মনে রাখবে, আর আপনার ড্যাশবোর্ড নিজের ভাষাতেই থাকবে।",
+    },
+    href: "/plans",
+  },
+  {
     id: "2026-10-03-clear-bkash-and-nagad-logos",
     date: "2026-10-03",
     version: "4.166.1",
@@ -506,20 +521,6 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     body: {
       en: "Right under Create account, new shop owners now see how many days their free trial lasts, and that nothing is paid to start.",
       bn: "\"অ্যাকাউন্ট খুলুন\"-এর ঠিক নিচে নতুন দোকান মালিকেরা এখন দেখেন ফ্রি ট্রায়াল কত দিনের, আর শুরু করতে কোনো পেমেন্ট লাগে না।",
-    },
-  },
-  {
-    id: "2026-09-29-sign-in-catches-a-mistyped-email",
-    date: "2026-09-29",
-    version: "4.137.0",
-    tag: "improved",
-    title: {
-      en: "Sign in catches a mistyped email",
-      bn: "সাইন ইন ভুল লেখা ইমেইল ধরে ফেলে",
-    },
-    body: {
-      en: "Typed gmial.com or gmail.con by mistake? Sign in and sign up now ask \"Did you mean …@gmail.com?\", and one tap fixes it, so your sign-in email reaches an inbox you can open.",
-      bn: "ভুল করে gmial.com বা gmail.con লিখেছেন? সাইন ইন ও অ্যাকাউন্ট খোলার পাতা এখন জিজ্ঞেস করে \"আপনি কি …@gmail.com লিখতে চেয়েছিলেন?\", আর এক ট্যাপে ঠিক হয়ে যায়, তাই সাইন-ইন ইমেইল আপনার খোলা যায় এমন ইনবক্সেই পৌঁছায়।",
     },
   },
 ];
