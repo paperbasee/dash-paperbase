@@ -3656,7 +3656,7 @@
     "planPeriodYear": "১ বছর",
     "invoiceLabel": "ইনভয়েস",
     "sendMoneyTitle": "Send Money দিয়ে পে করুন",
-    "sendMoneyBodyBkash": "বিকাশ অ্যাপ খুলে Send Money (Pay Bill নয়) বেছে উপরের ঠিক পরিমাণ নিচের নম্বরে পাঠান।",
+    "sendMoneyBodyBkash": "বিকাশ অ্যাপ খুলে Send Money বেছে উপরের ঠিক পরিমাণ নিচের নম্বরে পাঠান।",
     "sendMoneyBodyNagad": "নগদ অ্যাপ খুলে Send Money বেছে উপরের ঠিক পরিমাণ নিচের নম্বরে পাঠান।",
     "phoneNumberFieldLabel": "ফোন নম্বর",
     "phoneNumberPlaceholder": "যেমন 01XXXXXXXXX",
