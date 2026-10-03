@@ -2,12 +2,13 @@
 
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { useRouter } from "@/i18n/navigation";
 import { DeferredNavLink } from "@/components/navigation/DeferredNavLink";
 import { EmptyFolder } from "@/components/EmptyFolder";
-import { FunnelIcon, Undo2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { FilterBar } from "@/components/filters/FilterBar";
+import { FilterPills } from "@/components/filters/FilterPills";
+import { FilterToggle } from "@/components/filters/FilterToggle";
+import { PageHeader } from "@/components/page/PageHeader";
 import { FilterDropdown } from "@/components/filters/FilterDropdown";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { useFilters } from "@/hooks/useFilters";
@@ -21,10 +22,10 @@ import { useBlogTagsQuery } from "@/hooks/useBlogTagsQuery";
 import { BlogListCard } from "./_components/BlogListCard";
 
 export default function BlogListPage() {
-  const router = useRouter();
   const locale = useLocale();
   const tNav = useTranslations("nav");
   const tPages = useTranslations("pages");
+  const tHints = useTranslations("pageHints");
   const tCommon = useTranslations("common");
   const { filters, setFilter, clearFilters } = useFilters([
     "published_date",
@@ -95,82 +96,34 @@ export default function BlogListPage() {
     filters.search?.trim() || filters.tag?.trim() || filters.published_date?.trim(),
   );
 
-  useEffect(() => {
-    if (!filtersActive) setFiltersOpen(false);
-  }, [filters.published_date, filters.search, filters.tag]);
-
   // No posts at all: the folder below says so and holds the one "Write a post" button (owner, 2026-10-03).
   const noPostsYet = !loading && blogs.length === 0 && !filtersActive;
 
   return (
     <div className="min-w-0 space-y-6">
-      <div className="flex items-center justify-between gap-4 flex-wrap">
-        <div className="flex items-center gap-3">
-          <div className="rounded-card bg-muted/80 px-1 py-1 hidden md:block">
-            <button
-              type="button"
-              onClick={() => router.back()}
-              aria-label={tPages("goBack")}
-              className="flex items-center justify-center rounded-ui p-1 text-muted-foreground hover:bg-muted"
-            >
-              <Undo2 className="h-4 w-4" />
-            </button>
-          </div>
-          <h1 className="text-2xl font-medium leading-relaxed text-foreground">{tNav("blog")}</h1>
-        </div>
+      {/* With no posts at all there is nothing to filter, and the folder below holds the button. */}
+      <PageHeader title={tNav("blog")} hint={tHints("blog")}>
         {noPostsYet ? null : (
-          <DeferredNavLink
-            href="/blog/new"
-            className="shrink-0 rounded-card bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90"
-          >
-            {tNav("blogNew")}
-          </DeferredNavLink>
+          <>
+            <FilterToggle open={filtersOpen} active={filtersActive} onToggle={() => setFiltersOpen((v) => !v)} />
+            <DeferredNavLink
+              href="/blog/new"
+              className="shrink-0 rounded-card bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90"
+            >
+              {tNav("blogNew")}
+            </DeferredNavLink>
+          </>
         )}
-      </div>
-
-      <div className="flex items-start justify-between gap-3">
-        <div className="flex flex-1 items-center gap-2 flex-wrap min-w-0">
-          {publishedDatePillOptions.map((opt) => {
-            const active = (filters.published_date || "") === opt.value;
-            return (
-              <button
-                key={opt.value || "__all__"}
-                type="button"
-                onClick={() => setFilter("published_date", opt.value)}
-                aria-pressed={active}
-                className={[
-                  "h-9 rounded-ui border px-3 text-sm font-medium transition whitespace-nowrap",
-                  active
-                    ? "border-primary/40 bg-primary text-primary-foreground"
-                    : "border-border bg-card text-foreground hover:bg-muted",
-                ].join(" ")}
-              >
-                {opt.label}
-              </button>
-            );
-          })}
-        </div>
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          className="h-9 shrink-0 self-start px-3"
-          aria-label="Toggle filters"
-          aria-expanded={filtersOpen}
-          onClick={() => setFiltersOpen((v) => !v)}
-        >
-          <FunnelIcon className="size-4" aria-hidden />
-        </Button>
-      </div>
-
-      <p className="text-xs text-muted-foreground">
-        {loading
-          ? tCommon("loading")
-          : tPages("blogListCount", { count: blogs.length })}
-      </p>
+      </PageHeader>
 
       {filtersOpen ? (
         <FilterBar>
+          <FilterPills
+            label={tPages("filtersPublishedDate")}
+            options={publishedDatePillOptions}
+            value={filters.published_date || ""}
+            onChange={(value) => setFilter("published_date", value)}
+          />
           <FilterDropdown
             value={filters.tag}
             onChange={(value) => setFilter("tag", value)}
@@ -190,6 +143,7 @@ export default function BlogListPage() {
             onClick={() => {
               setSearchInput("");
               clearFilters();
+              setFiltersOpen(false);
             }}
             className="h-9 shrink-0 rounded-ui border border-border px-3 text-sm hover:bg-muted"
           >
@@ -197,6 +151,12 @@ export default function BlogListPage() {
           </button>
         </FilterBar>
       ) : null}
+
+      <p className="text-xs text-muted-foreground">
+        {loading
+          ? tCommon("loading")
+          : tPages("blogListCount", { count: blogs.length })}
+      </p>
 
       {noPostsYet ? (
         <EmptyFolder

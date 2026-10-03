@@ -3,12 +3,13 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useLocale, useTranslations } from "next-intl";
-import { useRouter } from "@/i18n/navigation";
-import { FunnelIcon, Undo2 } from "lucide-react";
 import { ClickableTableRow } from "@/components/ui/clickable-table-row";
 import { ClickableText } from "@/components/ui/clickable-text";
 import { Input } from "@/components/ui/input";
 import { FilterBar } from "@/components/filters/FilterBar";
+import { FilterPills } from "@/components/filters/FilterPills";
+import { FilterToggle } from "@/components/filters/FilterToggle";
+import { PageHeader } from "@/components/page/PageHeader";
 import { FilterDropdown } from "@/components/filters/FilterDropdown";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { useFilters } from "@/hooks/useFilters";
@@ -25,7 +26,6 @@ import type { SupportTicket, PaginatedResponse } from "@/types";
 import { formatDashboardDateTime } from "@/lib/datetime-display";
 import { useConfirm } from "@/context/ConfirmDialogContext";
 import { notify } from "@/notifications";
-import { Button } from "@/components/ui/button";
 import {
   navCountsQueryKey,
   supportTicketDetailQueryKey,
@@ -117,7 +117,7 @@ function InlineSelect({
 export default function SupportTicketsPage() {
   const locale = useLocale();
   const tPages = useTranslations("pages");
-  const router = useRouter();
+  const tHints = useTranslations("pageHints");
   const confirm = useConfirm();
   const queryClient = useQueryClient();
 
@@ -160,10 +160,6 @@ export default function SupportTicketsPage() {
   useEffect(() => {
     setSearchInput(filters.search || "");
   }, [filters.search]);
-
-  useEffect(() => {
-    if (!filtersActive) setFiltersOpen(false);
-  }, [filters.search, filters.status, filters.priority]);
 
   useEffect(() => {
     const next = debouncedSearch.trim();
@@ -301,70 +297,18 @@ export default function SupportTicketsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between gap-4 flex-wrap">
-        <div className="flex items-center gap-3">
-          <div className="rounded-card bg-muted/80 px-1 py-1 hidden md:block">
-            <button
-              type="button"
-              onClick={() => router.back()}
-              aria-label={tPages("goBack")}
-              className="flex items-center justify-center rounded-ui p-1 text-muted-foreground hover:bg-muted"
-            >
-              <Undo2 className="h-4 w-4" />
-            </button>
-          </div>
-          <h1 className="text-2xl font-medium leading-relaxed text-foreground">
-            {tPages("supportTicketsTitle")}
-          </h1>
-        </div>
-      </div>
-
-      <div className="flex items-start justify-between gap-3">
-        <div className="flex flex-1 items-center gap-2 flex-wrap min-w-0">
-          {priorityPillOptions.map((opt) => {
-            const active = (filters.priority || "") === opt.value;
-            return (
-              <button
-                key={opt.value || "__all__"}
-                type="button"
-                onClick={() => setFilter("priority", opt.value)}
-                aria-pressed={active}
-                className={[
-                  "h-9 rounded-ui border px-3 text-sm font-medium transition whitespace-nowrap",
-                  active
-                    ? "border-primary/40 bg-primary text-primary-foreground"
-                    : "border-border bg-card text-foreground hover:bg-muted",
-                ].join(" ")}
-              >
-                {opt.label}
-              </button>
-            );
-          })}
-        </div>
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          className="h-9 shrink-0 self-start px-3"
-          aria-label="Toggle filters"
-          aria-expanded={filtersOpen}
-          onClick={() => setFiltersOpen((v) => !v)}
-        >
-          <FunnelIcon className="size-4" aria-hidden />
-        </Button>
-      </div>
-
-      <p className="text-xs text-muted-foreground">
-        {loading
-          ? tCommon("loading")
-          : tPages("supportTicketsListCountWithTotal", {
-              pageCount: tickets.length,
-              totalCount: count,
-            })}
-      </p>
+      <PageHeader title={tPages("supportTicketsTitle")} hint={tHints("supportTickets")}>
+        <FilterToggle open={filtersOpen} active={filtersActive} onToggle={() => setFiltersOpen((v) => !v)} />
+      </PageHeader>
 
       {filtersOpen ? (
         <FilterBar>
+          <FilterPills
+            label={tPages("supportTicketsPriority")}
+            options={priorityPillOptions}
+            value={filters.priority || ""}
+            onChange={(value) => setFilter("priority", value)}
+          />
           <FilterDropdown
             value={filters.status}
             onChange={(value) => setFilter("status", value)}
@@ -382,6 +326,7 @@ export default function SupportTicketsPage() {
             onClick={() => {
               setSearchInput("");
               clearFilters();
+              setFiltersOpen(false);
             }}
             className="h-9 rounded-ui border border-border px-3 text-sm hover:bg-muted"
           >
@@ -389,6 +334,15 @@ export default function SupportTicketsPage() {
           </button>
         </FilterBar>
       ) : null}
+
+      <p className="text-xs text-muted-foreground">
+        {loading
+          ? tCommon("loading")
+          : tPages("supportTicketsListCountWithTotal", {
+              pageCount: tickets.length,
+              totalCount: count,
+            })}
+      </p>
 
       {!loading ? (
         <>

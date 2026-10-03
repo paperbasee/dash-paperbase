@@ -13,8 +13,8 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { FunnelIcon } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { FilterToggle } from "@/components/filters/FilterToggle";
+import { PageHeader } from "@/components/page/PageHeader";
 import { Input } from "@/components/ui/input";
 import { FilterBar } from "@/components/filters/FilterBar";
 import { FilterDropdown } from "@/components/filters/FilterDropdown";
@@ -41,6 +41,7 @@ export function AccountsTab() {
   const locale = useLocale();
   const numClass = numberTextClass(locale);
   const tPages = useTranslations("pages");
+  const tHints = useTranslations("pageHints");
   const tCommon = useTranslations("common");
   const { page, filters, setFilter, setPage, clearFilters } = useFilters([
     "joined_date",
@@ -85,9 +86,6 @@ export function AccountsTab() {
     [filters.joined_date, filters.search, filters.is_repeat_customer]
   );
 
-  useEffect(() => {
-    if (!filtersActive) setFiltersOpen(false);
-  }, [filtersActive]);
 
   useEffect(() => {
     const next = debouncedSearch.trim();
@@ -97,28 +95,9 @@ export function AccountsTab() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-end gap-3">
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          className="h-9 px-3"
-          aria-label={tPages("filtersToggleAria")}
-          aria-expanded={filtersOpen}
-          onClick={() => setFiltersOpen((v) => !v)}
-        >
-          <FunnelIcon className="size-4" aria-hidden />
-        </Button>
-      </div>
-
-      <p className="text-xs text-muted-foreground">
-        {isLoading
-          ? tCommon("loading")
-          : tPages("customerAccountsListCountWithTotal", {
-              pageCount: accounts.length,
-              totalCount: count,
-            })}
-      </p>
+      <PageHeader title={tPages("customersTabAccounts")} hint={tHints("accounts")}>
+        <FilterToggle open={filtersOpen} active={filtersActive} onToggle={() => setFiltersOpen((v) => !v)} />
+      </PageHeader>
 
       {filtersOpen ? (
         <FilterBar>
@@ -163,6 +142,7 @@ export function AccountsTab() {
             onClick={() => {
               setSearchInput("");
               clearFilters();
+              setFiltersOpen(false);
             }}
             className="h-9 rounded-ui border border-border px-3 text-sm hover:bg-muted"
           >
@@ -170,6 +150,15 @@ export function AccountsTab() {
           </button>
         </FilterBar>
       ) : null}
+
+      <p className="text-xs text-muted-foreground">
+        {isLoading
+          ? tCommon("loading")
+          : tPages("customerAccountsListCountWithTotal", {
+              pageCount: accounts.length,
+              totalCount: count,
+            })}
+      </p>
 
       {!isLoading && accounts.length === 0 && !isError ? (
         <div className="rounded-card border border-card-border bg-card py-12 text-center text-sm text-muted-foreground">

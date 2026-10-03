@@ -477,6 +477,7 @@
   },
   "pages": {
     "goBack": "Go back",
+    "aboutThisPage": "About this page",
     "deleting": "Deleting…",
     "deleteSelected": "Delete selected ({count})",
     "moveToTrashSelected": "Move to trash ({count})",
@@ -1251,7 +1252,6 @@
     "attributesDeleteValueAria": "Delete value {label}",
     "activitiesTitle": "Activities",
     "activitiesCountInParens": "({count})",
-    "activitiesSubtitle": "Admin actions across products, orders, support tickets, notifications and more.",
     "activitiesFilterTypeAria": "Filter by type",
     "activitiesFilterActionAria": "Filter by action",
     "activitiesEntityAll": "All types",
@@ -1549,6 +1549,7 @@
     "customerAccountsOnlySignedInOrders": "Counts orders placed while signed in. The same person may also appear under Customers, from orders placed without signing in.",
     "filtersSearchCustomerAccounts": "Search name, email",
     "filtersToggleAria": "Toggle filters",
+    "filtersToggleActiveAria": "Filters (some are on)",
     "toastTitleCustomerAccountsFailedToLoad": "Could not load accounts",
     "toastDescCustomerAccountsFailedToLoad": "Something went wrong while loading accounts. Please try again.",
     "customerAccountDetailsTitle": "Account details",
@@ -4081,5 +4082,15 @@
     "body": "You're on this shop's team as {role}, and this page isn't part of that role. The shop's owner can change your role in Settings > Team.",
     "bodyNoRole": "You don't have a role on this shop's team yet. The shop's owner can give you one in Settings > Team.",
     "home": "Go to Home"
+  },
+  "pageHints": {
+    "orders": "Every order your shop receives. Confirm it, send it to the courier and follow it until it is delivered. Tap an order to see or change it.",
+    "products": "Everything you sell. Add products, change their prices and photos, and switch one off to hide it from your shop. Stock is counted on the Inventory page.",
+    "inventory": "How many of each product and variant you have. Change the stock here when goods come in or go out.",
+    "blog": "Posts for your shop's blog: news, guides and stories about what you sell. A public post shows on your shop's blog.",
+    "supportTickets": "Messages shoppers send you from your shop's contact form. Answer each one and change its status as you go.",
+    "activities": "Admin actions across products, orders, support tickets, notifications and more.",
+    "customers": "Everyone who has ordered from your shop, by phone number, with how many orders they placed and how much they spent.",
+    "accounts": "Shoppers who made an account on your shop with their email. Their saved items and orders follow them to any device."
   }
 }

@@ -11,7 +11,6 @@ import {
   type ReactNode,
 } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { useRouter } from "@/i18n/navigation";
 import { DeferredNavLink } from "@/components/navigation/DeferredNavLink";
 import { toLocaleDigits } from "@/lib/locale-digits";
 import { cursorFromLink } from "@/lib/cursor-from-link";
@@ -32,7 +31,7 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { FunnelIcon, GripVertical, ImageIcon, LayoutGrid, List, Loader2, Undo2 } from "lucide-react";
+import { GripVertical, ImageIcon, LayoutGrid, List, Loader2 } from "lucide-react";
 import api from "@/lib/api";
 import { useBranding } from "@/context/BrandingContext";
 import type { Product, PaginatedResponse } from "@/types";
@@ -59,6 +58,9 @@ import { ClickableText } from "@/components/ui/clickable-text";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { FilterBar } from "@/components/filters/FilterBar";
+import { FilterPills } from "@/components/filters/FilterPills";
+import { FilterToggle } from "@/components/filters/FilterToggle";
+import { PageHeader } from "@/components/page/PageHeader";
 import { FilterDropdown } from "@/components/filters/FilterDropdown";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { useDeferredNavigate } from "@/hooks/useDeferredNavigate";
@@ -99,12 +101,12 @@ function saveViewMode(mode: ViewMode) {
 }
 
 export default function ProductsPage() {
-  const router = useRouter();
   const navigate = useDeferredNavigate();
   const locale = useLocale();
   const numClass = numberTextClass(locale);
   const tNav = useTranslations("nav");
   const tPages = useTranslations("pages");
+  const tHints = useTranslations("pageHints");
   const tCommon = useTranslations("common");
   const { currencySymbol } = useBranding();
   const queryClient = useQueryClient();
@@ -273,17 +275,6 @@ export default function ProductsPage() {
       (filters.price_max || "").trim() ||
       (filters.search || "").trim()
   );
-
-  useEffect(() => {
-    if (!filtersActive) setFiltersOpen(false);
-  }, [
-    filters.category,
-    filters.prepayment_type,
-    filters.price_max,
-    filters.price_min,
-    filters.search,
-    filters.status,
-  ]);
 
   const canReorder = useMemo(() => {
     if (!canEditProducts) return false;
@@ -477,23 +468,7 @@ export default function ProductsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between gap-4 flex-wrap">
-        <div className="flex items-center gap-3">
-          <div className="rounded-card bg-muted/80 px-1 py-1 hidden md:block">
-            <button
-              type="button"
-              onClick={() => router.back()}
-              aria-label={tPages("goBack")}
-              className="flex items-center justify-center rounded-ui p-1 text-muted-foreground hover:bg-muted"
-            >
-              <Undo2 className="h-4 w-4" />
-            </button>
-          </div>
-          <h1 className="text-2xl font-medium leading-relaxed text-foreground">
-            {tNav("products")}
-          </h1>
-        </div>
-        <div className="flex items-center gap-2">
+      <PageHeader title={tNav("products")} hint={tHints("products")}>
           {canDeleteProducts && someSelected && (
             <button
               onClick={() => void handleDeleteSelected()}
@@ -510,40 +485,6 @@ export default function ProductsPage() {
                   })}
             </button>
           )}
-          {canAddProducts && (
-            <DeferredNavLink
-              href="/products/new"
-              className="rounded-card bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90"
-            >
-              {tPages("addProduct")}
-            </DeferredNavLink>
-          )}
-        </div>
-      </div>
-
-      <div className="flex items-center justify-between gap-3">
-        <div className="flex items-center gap-2 flex-wrap min-w-0">
-          {sortPillOptions.map((opt) => {
-            const active = (filters.ordering || "") === opt.value;
-            return (
-              <button
-                key={opt.value || "__default__"}
-                type="button"
-                onClick={() => setFilter("ordering", opt.value)}
-                aria-pressed={active}
-                className={[
-                  "h-9 rounded-ui border px-3 text-sm font-medium transition whitespace-nowrap",
-                  active
-                    ? "border-primary/40 bg-primary text-primary-foreground"
-                    : "border-border bg-card text-foreground hover:bg-muted",
-                ].join(" ")}
-              >
-                {opt.label}
-              </button>
-            );
-          })}
-        </div>
-        <div className="flex items-center gap-2 shrink-0">
           <div className="flex min-h-0 items-center gap-1 rounded-ui border border-border bg-muted/70 p-1 text-sm shadow-xs">
             <button
               type="button"
@@ -580,33 +521,29 @@ export default function ProductsPage() {
               <LayoutGrid className="h-4 w-4" />
             </button>
           </div>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            className="h-9 px-3"
-            aria-label="Toggle filters"
-            aria-expanded={filtersOpen}
-            onClick={() => setFiltersOpen((v) => !v)}
-          >
-            <FunnelIcon className="size-4" aria-hidden />
-          </Button>
-        </div>
-      </div>
-
-      {!isLoading ? (
-        <p className="text-xs text-muted-foreground">
-          {totalProductsCount === null
-            ? tPages("productsListCountPageOnly", { pageCount: pageProductsCount })
-            : tPages("productsListCountWithTotal", {
-                pageCount: pageProductsCount,
-                totalCount: totalProductsCount,
-              })}
-        </p>
-      ) : null}
+          <FilterToggle
+            open={filtersOpen}
+            active={filtersActive || Boolean(filters.ordering)}
+            onToggle={() => setFiltersOpen((v) => !v)}
+          />
+          {canAddProducts && (
+            <DeferredNavLink
+              href="/products/new"
+              className="rounded-card bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90"
+            >
+              {tPages("addProduct")}
+            </DeferredNavLink>
+          )}
+      </PageHeader>
 
       {filtersOpen ? (
       <FilterBar>
+        <FilterPills
+          label={tPages("productsListSortPlaceholder")}
+          options={sortPillOptions}
+          value={filters.ordering || ""}
+          onChange={(value) => setFilter("ordering", value)}
+        />
         <FilterDropdown
           value={filters.status}
           onChange={(value) => setFilter("status", value)}
@@ -665,12 +602,24 @@ export default function ProductsPage() {
             setPriceMinInput("");
             setPriceMaxInput("");
             clearFilters();
+            setFiltersOpen(false);
           }}
           className="h-9 rounded-ui border border-border px-3 text-sm hover:bg-muted"
         >
           {tPages("filtersClear")}
         </button>
       </FilterBar>
+      ) : null}
+
+      {!isLoading ? (
+        <p className="text-xs text-muted-foreground">
+          {totalProductsCount === null
+            ? tPages("productsListCountPageOnly", { pageCount: pageProductsCount })
+            : tPages("productsListCountWithTotal", {
+                pageCount: pageProductsCount,
+                totalCount: totalProductsCount,
+              })}
+        </p>
       ) : null}
 
       {!isLoading && canReorder && (

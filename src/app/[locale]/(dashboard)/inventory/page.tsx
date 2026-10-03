@@ -3,11 +3,12 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useLocale, useTranslations } from "next-intl";
-import { useRouter } from "@/i18n/navigation";
-import { FunnelIcon, Undo2 } from "lucide-react";
 import { ClickableTableRow } from "@/components/ui/clickable-table-row";
 import { Input } from "@/components/ui/input";
 import { FilterBar } from "@/components/filters/FilterBar";
+import { FilterPills } from "@/components/filters/FilterPills";
+import { FilterToggle } from "@/components/filters/FilterToggle";
+import { PageHeader } from "@/components/page/PageHeader";
 import { FilterDropdown } from "@/components/filters/FilterDropdown";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { useFilters } from "@/hooks/useFilters";
@@ -29,10 +30,10 @@ import { Button } from "@/components/ui/button";
 
 export default function InventoryPage() {
   const queryClient = useQueryClient();
-  const router = useRouter();
   const locale = useLocale();
   const numClass = numberTextClass(locale);
   const tPages = useTranslations("pages");
+  const tHints = useTranslations("pageHints");
   const tCommon = useTranslations("common");
   const { has } = usePermissions();
   const canReconcile = has("inventory.adjust");
@@ -144,10 +145,6 @@ export default function InventoryPage() {
       (filters.type || "").trim(),
   );
 
-  useEffect(() => {
-    if (!filtersActive) setFiltersOpen(false);
-  }, [filters.search, filters.stock, filters.tracked, filters.type]);
-
   async function handleAdjust(publicId: string, change: number) {
     setAdjusting(publicId);
     try {
@@ -207,99 +204,31 @@ export default function InventoryPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between gap-4 flex-wrap">
-        <div className="flex items-center gap-3">
-          <div className="rounded-card bg-muted/80 px-1 py-1 hidden md:block">
-            <button
-              type="button"
-              onClick={() => router.back()}
-              aria-label={tPages("inventoryGoBackAria")}
-              className="flex items-center justify-center rounded-ui p-1 text-muted-foreground hover:bg-muted"
-            >
-              <Undo2 className="h-4 w-4" />
-            </button>
-          </div>
-          <h1 className="text-2xl font-medium leading-relaxed text-foreground">
-            {tPages("inventoryTitle")}
-          </h1>
-        </div>
-      </div>
-
-      <div className="flex items-start justify-between gap-3">
-        <div className="flex flex-1 items-center gap-2 flex-wrap min-w-0">
-          {stockPillOptions.map((opt) => {
-            const active = (filters.stock || "") === opt.value;
-            return (
-              <button
-                key={opt.value || "__all__"}
-                type="button"
-                onClick={() => setFilter("stock", opt.value)}
-                aria-pressed={active}
-                className={[
-                  "h-9 rounded-ui border px-3 text-sm font-medium transition whitespace-nowrap",
-                  active
-                    ? "border-primary/40 bg-primary text-primary-foreground"
-                    : "border-border bg-card text-foreground hover:bg-muted",
-                ].join(" ")}
-              >
-                {opt.label}
-              </button>
-            );
-          })}
-        </div>
-        <div className="flex items-start gap-2 shrink-0">
-          {canReconcile ? (
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              className="h-9 self-start px-3"
-              onClick={handleSync}
-              disabled={syncing}
-              title={tPages("inventorySyncHint")}
-            >
-              {syncing ? tPages("inventorySyncing") : tPages("inventorySync")}
-            </Button>
-          ) : null}
+      <PageHeader title={tPages("inventoryTitle")} hint={tHints("inventory")}>
+        {canReconcile ? (
           <Button
             type="button"
             variant="outline"
             size="sm"
-            className="h-9 self-start px-3"
-            aria-label="Toggle filters"
-            aria-expanded={filtersOpen}
-            onClick={() => setFiltersOpen((v) => !v)}
+            className="h-9 px-3"
+            onClick={handleSync}
+            disabled={syncing}
+            title={tPages("inventorySyncHint")}
           >
-            <FunnelIcon className="size-4" aria-hidden />
+            {syncing ? tPages("inventorySyncing") : tPages("inventorySync")}
           </Button>
-        </div>
-      </div>
-
-      <p className="text-xs text-muted-foreground flex flex-wrap items-baseline gap-x-1.5 gap-y-1">
-        {loading ? (
-          tCommon("loading")
-        ) : (
-          <>
-            <span className="min-w-0">
-              {tPages("inventoryListCountWithTotal", {
-                pageCount: inventory.length,
-                totalCount: count,
-              })}
-            </span>
-            {hasStockSummaryAlerts ? (
-              <>
-                <span className="shrink-0 text-muted-foreground" aria-hidden>
-                  ·
-                </span>
-                <span className="min-w-0">{stockSummaryAlertButtons}</span>
-              </>
-            ) : null}
-          </>
-        )}
-      </p>
+        ) : null}
+        <FilterToggle open={filtersOpen} active={filtersActive} onToggle={() => setFiltersOpen((v) => !v)} />
+      </PageHeader>
 
       {filtersOpen ? (
         <FilterBar>
+          <FilterPills
+            label={tPages("filtersStock")}
+            options={stockPillOptions}
+            value={filters.stock || ""}
+            onChange={(value) => setFilter("stock", value)}
+          />
           <Input
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
@@ -329,6 +258,7 @@ export default function InventoryPage() {
             onClick={() => {
               setSearchInput("");
               clearFilters();
+              setFiltersOpen(false);
             }}
             className="h-9 rounded-ui border border-border px-3 text-sm hover:bg-muted"
           >
@@ -336,6 +266,29 @@ export default function InventoryPage() {
           </button>
         </FilterBar>
       ) : null}
+
+      <p className="text-xs text-muted-foreground flex flex-wrap items-baseline gap-x-1.5 gap-y-1">
+        {loading ? (
+          tCommon("loading")
+        ) : (
+          <>
+            <span className="min-w-0">
+              {tPages("inventoryListCountWithTotal", {
+                pageCount: inventory.length,
+                totalCount: count,
+              })}
+            </span>
+            {hasStockSummaryAlerts ? (
+              <>
+                <span className="shrink-0 text-muted-foreground" aria-hidden>
+                  ·
+                </span>
+                <span className="min-w-0">{stockSummaryAlertButtons}</span>
+              </>
+            ) : null}
+          </>
+        )}
+      </p>
 
       {!loading && inventory.length === 0 ? (
         <div className="rounded-card border border-card-border bg-card py-12 text-center text-sm text-muted-foreground">

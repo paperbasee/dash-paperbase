@@ -2,6 +2,9 @@
 
 import { useMemo, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
+import { FilterBar } from "@/components/filters/FilterBar";
+import { FilterToggle } from "@/components/filters/FilterToggle";
+import { PageHeader } from "@/components/page/PageHeader";
 import { Select } from "@/components/ui/select";
 import { useActivities } from "@/hooks/useActivities";
 import { formatDashboardDateTimeWithSeconds } from "@/lib/datetime-display";
@@ -54,9 +57,12 @@ const formatActivityHeader = (summary: string, entityType: string, action: strin
 export default function ActivitiesPage() {
   const locale = useLocale();
   const tPages = useTranslations("pages");
+  const tHints = useTranslations("pageHints");
   const [page, setPage] = useState(1);
   const [entityType, setEntityType] = useState("");
   const [action, setAction] = useState("");
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const filtersActive = Boolean(entityType || action);
 
   const entityOptions = useMemo(
     () =>
@@ -129,49 +135,58 @@ export default function ActivitiesPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-start justify-between gap-4 flex-wrap">
-        <div>
-          <h1 className="text-2xl font-medium text-foreground">
+      <PageHeader
+        title={
+          <>
             {tPages("activitiesTitle")}
             {count > 0 ? ` ${tPages("activitiesCountInParens", { count })}` : ""}
-          </h1>
-          <p className="mt-1 text-sm text-muted-foreground md:hidden">
-            {tPages("activitiesSubtitle")}
-          </p>
-        </div>
-      </div>
+          </>
+        }
+        hint={tHints("activities")}
+      >
+        <FilterToggle open={filtersOpen} active={filtersActive} onToggle={() => setFiltersOpen((v) => !v)} />
+      </PageHeader>
 
-      <p className="hidden text-sm text-muted-foreground md:block">
-        {tPages("activitiesSubtitle")}
-      </p>
+      {filtersOpen ? (
+        <FilterBar className="flex-col items-stretch sm:flex-row sm:items-center">
+          <Select
+            value={entityType}
+            onChange={(e) => onChangeType(e.target.value)}
+            className="w-full min-w-0 sm:w-[280px]"
+            aria-label={tPages("activitiesFilterTypeAria")}
+          >
+            {entityOptions.map((opt) => (
+              <option key={opt.value} value={opt.value}>
+                {opt.label}
+              </option>
+            ))}
+          </Select>
 
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
-        <Select
-          value={entityType}
-          onChange={(e) => onChangeType(e.target.value)}
-          className="w-full min-w-0 sm:w-[280px]"
-          aria-label={tPages("activitiesFilterTypeAria")}
-        >
-          {entityOptions.map((opt) => (
-            <option key={opt.value} value={opt.value}>
-              {opt.label}
-            </option>
-          ))}
-        </Select>
-
-        <Select
-          value={action}
-          onChange={(e) => onChangeAction(e.target.value)}
-          className="w-full sm:w-[180px]"
-          aria-label={tPages("activitiesFilterActionAria")}
-        >
-          {actionOptions.map((opt) => (
-            <option key={opt.value} value={opt.value}>
-              {opt.label}
-            </option>
-          ))}
-        </Select>
-      </div>
+          <Select
+            value={action}
+            onChange={(e) => onChangeAction(e.target.value)}
+            className="w-full sm:w-[180px]"
+            aria-label={tPages("activitiesFilterActionAria")}
+          >
+            {actionOptions.map((opt) => (
+              <option key={opt.value} value={opt.value}>
+                {opt.label}
+              </option>
+            ))}
+          </Select>
+          <button
+            type="button"
+            onClick={() => {
+              onChangeType("");
+              onChangeAction("");
+              setFiltersOpen(false);
+            }}
+            className="h-9 rounded-ui border border-border px-3 text-sm hover:bg-muted"
+          >
+            {tPages("filtersClear")}
+          </button>
+        </FilterBar>
+      ) : null}
 
       {!loading && error ? (
         <p className="text-sm text-destructive">{error}</p>

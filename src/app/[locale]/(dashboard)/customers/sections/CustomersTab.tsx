@@ -9,8 +9,8 @@ import { useLocale, useTranslations } from "next-intl";
 import { ClickableTableRow } from "@/components/ui/clickable-table-row";
 import { toLocaleDigits } from "@/lib/locale-digits";
 import { digitsInNumberFont, numberTextClass } from "@/lib/number-font";
-import { FunnelIcon } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { FilterToggle } from "@/components/filters/FilterToggle";
+import { PageHeader } from "@/components/page/PageHeader";
 import { Input } from "@/components/ui/input";
 import { FilterBar } from "@/components/filters/FilterBar";
 import { FilterDropdown } from "@/components/filters/FilterDropdown";
@@ -34,6 +34,8 @@ export function CustomersTab() {
   const locale = useLocale();
   const numClass = numberTextClass(locale);
   const tPages = useTranslations("pages");
+  const tHints = useTranslations("pageHints");
+  const tNav = useTranslations("nav");
   const tCommon = useTranslations("common");
   const { page, filters, setFilter, setPage, clearFilters } = useFilters([
     "joined_date",
@@ -78,9 +80,6 @@ export function CustomersTab() {
     [filters.joined_date, filters.search, filters.is_repeat_customer]
   );
 
-  useEffect(() => {
-    if (!filtersActive) setFiltersOpen(false);
-  }, [filtersActive]);
 
   useEffect(() => {
     const next = debouncedSearch.trim();
@@ -92,28 +91,9 @@ export function CustomersTab() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-end gap-3">
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          className="h-9 px-3"
-          aria-label={tPages("filtersToggleAria")}
-          aria-expanded={filtersOpen}
-          onClick={() => setFiltersOpen((v) => !v)}
-        >
-          <FunnelIcon className="size-4" aria-hidden />
-        </Button>
-      </div>
-
-      <p className="text-xs text-muted-foreground">
-        {isLoading
-          ? tCommon("loading")
-          : tPages("customersListCountWithTotal", {
-              pageCount: pageCustomersCount,
-              totalCount: count,
-            })}
-      </p>
+      <PageHeader title={tNav("customers")} hint={tHints("customers")}>
+        <FilterToggle open={filtersOpen} active={filtersActive} onToggle={() => setFiltersOpen((v) => !v)} />
+      </PageHeader>
 
       {filtersOpen ? (
         <FilterBar>
@@ -161,6 +141,7 @@ export function CustomersTab() {
             onClick={() => {
               setSearchInput("");
               clearFilters();
+              setFiltersOpen(false);
             }}
             className="h-9 rounded-ui border border-border px-3 text-sm hover:bg-muted"
           >
@@ -168,6 +149,15 @@ export function CustomersTab() {
           </button>
         </FilterBar>
       ) : null}
+
+      <p className="text-xs text-muted-foreground">
+        {isLoading
+          ? tCommon("loading")
+          : tPages("customersListCountWithTotal", {
+              pageCount: pageCustomersCount,
+              totalCount: count,
+            })}
+      </p>
 
       {!isLoading && customers.length === 0 && !isError ? (
         <div className="rounded-card border border-card-border bg-card py-12 text-center text-sm text-muted-foreground">

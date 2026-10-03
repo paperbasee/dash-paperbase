@@ -18,12 +18,15 @@ import { toLocaleDigits } from "@/lib/locale-digits";
 import { cursorFromLink } from "@/lib/cursor-from-link";
 import { cn } from "@/lib/utils";
 import { digitsInNumberFont, numberTextClass } from "@/lib/number-font";
-import { Download, Loader2, FunnelIcon, RefreshCcw, Truck, Undo2 } from "lucide-react";
+import { Download, Loader2, RefreshCcw, Truck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ClickableTableRow } from "@/components/ui/clickable-table-row";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { FilterBar } from "@/components/filters/FilterBar";
+import { FilterPills } from "@/components/filters/FilterPills";
+import { FilterToggle } from "@/components/filters/FilterToggle";
+import { PageHeader } from "@/components/page/PageHeader";
 import { FilterDropdown } from "@/components/filters/FilterDropdown";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { useFilters } from "@/hooks/useFilters";
@@ -220,6 +223,7 @@ export default function OrdersPage() {
   const numClass = numberTextClass(locale);
   const tNav = useTranslations("nav");
   const tPages = useTranslations("pages");
+  const tHints = useTranslations("pageHints");
   const tCommon = useTranslations("common");
   const tFraud = useTranslations("fraudCheck");
   const { currencySymbol } = useBranding();
@@ -571,19 +575,6 @@ export default function OrdersPage() {
       (filters.category || "").trim() ||
       (filters.search || "").trim()
   );
-
-  useEffect(() => {
-    if (!filtersActive) setFiltersOpen(false);
-  }, [
-    filters.category,
-    filters.customer,
-    filters.date_range,
-    filters.delivery_status,
-    filters.flag,
-    filters.payment_status,
-    filters.search,
-    filters.status,
-  ]);
 
   const pageOrdersCount = orders.length;
   const totalOrdersCount = filtersActive
@@ -1071,23 +1062,7 @@ export default function OrdersPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between gap-4 flex-wrap">
-        <div className="flex items-center gap-3">
-          <div className="rounded-card bg-muted/80 px-1 py-1 hidden md:block">
-            <button
-              type="button"
-              onClick={() => router.back()}
-              aria-label={tPages("goBack")}
-              className="flex items-center justify-center rounded-ui p-1 text-muted-foreground hover:bg-muted"
-            >
-              <Undo2 className="h-4 w-4" />
-            </button>
-          </div>
-          <h1 className="text-2xl font-medium leading-relaxed text-foreground">
-            {tNav("orders")}
-          </h1>
-        </div>
-        <div className="flex items-center gap-2 flex-wrap justify-end">
+      <PageHeader title={tNav("orders")} hint={tHints("orders")}>
           <AutopilotStatusPill />
           {canExportOrders &&
           orders.length > 0 &&
@@ -1130,63 +1105,23 @@ export default function OrdersPage() {
               </button>
             </>
           )}
+          <FilterToggle open={filtersOpen} active={filtersActive} onToggle={() => setFiltersOpen((v) => !v)} />
           <DeferredNavLink
             href="/orders/new"
             className="rounded-card bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90"
           >
             {tPages("addOrder")}
           </DeferredNavLink>
-        </div>
-      </div>
-
-      <div className="flex items-center justify-between gap-3">
-        <div className="flex items-center gap-2 flex-wrap min-w-0">
-          {deliveryPillOptions.map((opt) => {
-            const active = (filters.delivery_status || "") === opt.value;
-            return (
-              <button
-                key={opt.value || "__all__"}
-                type="button"
-                onClick={() => setFilter("delivery_status", opt.value)}
-                aria-pressed={active}
-                className={[
-                  "h-9 rounded-ui border px-3 text-sm font-medium transition whitespace-nowrap",
-                  active
-                    ? "border-primary/40 bg-primary text-primary-foreground"
-                    : "border-border bg-card text-foreground hover:bg-muted",
-                ].join(" ")}
-              >
-                {opt.label}
-              </button>
-            );
-          })}
-        </div>
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          className="h-9 px-3"
-          aria-label="Toggle filters"
-          aria-expanded={filtersOpen}
-          onClick={() => setFiltersOpen((v) => !v)}
-        >
-          <FunnelIcon className="size-4" aria-hidden />
-        </Button>
-      </div>
-
-      {!isLoading ? (
-        <p className="text-xs text-muted-foreground">
-          {totalOrdersCount === null
-            ? tPages("ordersListCountPageOnly", { pageCount: pageOrdersCount })
-            : tPages("ordersListCountWithTotal", {
-                pageCount: pageOrdersCount,
-                totalCount: totalOrdersCount,
-              })}
-        </p>
-      ) : null}
+      </PageHeader>
 
       {filtersOpen ? (
         <FilterBar>
+          <FilterPills
+            label={tPages("filtersDeliveryStatus")}
+            options={deliveryPillOptions}
+            value={filters.delivery_status || ""}
+            onChange={(value) => setFilter("delivery_status", value)}
+          />
           <FilterDropdown
             value={filters.status}
             onChange={(value) => setFilter("status", value)}
@@ -1250,12 +1185,24 @@ export default function OrdersPage() {
             onClick={() => {
               setSearchInput("");
               clearFilters();
+              setFiltersOpen(false);
             }}
             className="h-9 rounded-ui border border-border px-3 text-sm hover:bg-muted"
           >
             {tPages("filtersClear")}
           </button>
         </FilterBar>
+      ) : null}
+
+      {!isLoading ? (
+        <p className="text-xs text-muted-foreground">
+          {totalOrdersCount === null
+            ? tPages("ordersListCountPageOnly", { pageCount: pageOrdersCount })
+            : tPages("ordersListCountWithTotal", {
+                pageCount: pageOrdersCount,
+                totalCount: totalOrdersCount,
+              })}
+        </p>
       ) : null}
 
       {globalSelectActive ? (
