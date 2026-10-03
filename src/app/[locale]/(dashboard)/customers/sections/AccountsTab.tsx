@@ -97,7 +97,7 @@ export function AccountsTab() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between gap-3">
+      <div className="flex items-center justify-end gap-3">
         <Button
           type="button"
           variant="outline"
