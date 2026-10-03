@@ -88,6 +88,21 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-10-04-analytics-is-part-of-premium",
+    date: "2026-10-04",
+    version: "4.170.0",
+    tag: "improved",
+    title: {
+      en: "Analytics is part of Premium",
+      bn: "অ্যানালিটিক্স এখন প্রিমিয়ামের অংশ",
+    },
+    body: {
+      en: "Analytics, with your sales, visitors, best sellers and more, is now on the Premium plan. On Essential, the Analytics page shows what Premium adds and how to upgrade.",
+      bn: "অ্যানালিটিক্স, মানে আপনার বিক্রি, ভিজিটর, সবচেয়ে বিক্রি হওয়া পণ্য আর আরও অনেক কিছু, এখন প্রিমিয়াম প্ল্যানে। এসেনশিয়ালে অ্যানালিটিক্স পেজ দেখায় প্রিমিয়ামে কী আছে আর কীভাবে আপগ্রেড করবেন।",
+    },
+    href: "/plans",
+  },
+  {
     id: "2026-10-04-a-shorter-bkash-step-in-bangla",
     date: "2026-10-04",
     version: "4.169.1",
@@ -508,21 +523,6 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     body: {
       en: "Settings, Sessions shows everyone signed in right now: you on each device, your team, and Paperbase support on a visit, with where and on what. End any of them with one tap, and look back over every sign-in of the last 90 days. Only you, the owner, can see it.",
       bn: "সেটিংস > সেশনে দেখুন এই মুহূর্তে কে কে সাইন ইন করা: প্রতিটি ডিভাইসে আপনি, আপনার টিম, আর ভিজিটে থাকা Paperbase সাপোর্ট, কোথা থেকে আর কোন ডিভাইসে। এক ট্যাপে যেকোনোটি শেষ করুন, আর গত ৯০ দিনের প্রতিটি সাইন-ইন দেখুন। এটি শুধু আপনি, মালিক, দেখতে পান।",
-    },
-  },
-  {
-    id: "2026-09-29-support-can-help-inside-your-dashboard",
-    date: "2026-09-29",
-    version: "4.141.0",
-    tag: "new",
-    href: "/activities",
-    title: {
-      en: "Our support team can help inside your dashboard",
-      bn: "আমাদের সাপোর্ট টিম আপনার ড্যাশবোর্ডেই সাহায্য করতে পারে",
-    },
-    body: {
-      en: "When you ask Paperbase for help, our team can open your dashboard for up to an hour to fix things with you. Every visit shows in Activities, every change they make is marked, and your account, passkeys, payments and team stay yours alone.",
-      bn: "Paperbase-এর কাছে সাহায্য চাইলে আমাদের টিম সর্বোচ্চ এক ঘণ্টার জন্য আপনার ড্যাশবোর্ড খুলে সমস্যা ঠিক করে দিতে পারে। প্রতিটি ভিজিট অ্যাক্টিভিটিতে দেখা যায়, তাদের করা প্রতিটি পরিবর্তন চিহ্নিত থাকে, আর আপনার অ্যাকাউন্ট, পাসকি, পেমেন্ট ও টিম শুধু আপনারই থাকে।",
     },
   },
 ];
