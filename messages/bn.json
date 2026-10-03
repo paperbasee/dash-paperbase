@@ -3687,7 +3687,10 @@
     "continueToCreateStore": "আপনার স্টোর তৈরি করুন",
     "signOut": "সাইন আউট",
     "noPendingPayment": "কোনো অপেক্ষমাণ পেমেন্ট নেই।",
-    "loadingPayment": "পেমেন্ট লোড হচ্ছে…"
+    "loadingPayment": "পেমেন্ট লোড হচ্ছে…",
+    "notSetUpTitle": "পেমেন্ট এখনো চালু হয়নি",
+    "notSetUpLine": "Paperbase এখনো পেমেন্টের জন্য কোনো বিকাশ বা নগদ নম্বর যোগ করেনি। সাপোর্টে যোগাযোগ করুন, অথবা পরে আবার চেষ্টা করুন।",
+    "contactSupport": "সাপোর্টে যোগাযোগ করুন"
   },
   "billingSuccess": {
     "title": "সাবস্ক্রিপশন সক্রিয় হয়েছে",

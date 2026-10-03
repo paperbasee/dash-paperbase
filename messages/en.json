@@ -3736,7 +3736,10 @@
     "continueToCreateStore": "Create your store",
     "signOut": "Sign out",
     "noPendingPayment": "No pending payment found.",
-    "loadingPayment": "Loading payment details…"
+    "loadingPayment": "Loading payment details…",
+    "notSetUpTitle": "Payment isn't set up yet",
+    "notSetUpLine": "Paperbase hasn't added a bKash or Nagad number to pay to yet. Please contact support, or try again later.",
+    "contactSupport": "Contact support"
   },
   "orderSuccess": {
     "title": "Order placed successfully",

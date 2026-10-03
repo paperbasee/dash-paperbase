@@ -13,7 +13,9 @@ import {
   CheckoutProviderPicker,
   type ManualPaymentProvider,
 } from "@/components/checkout/CheckoutManualPaymentViews";
+import { firstScreen } from "@/lib/checkout/first-screen";
 import { numberTextClass } from "@/lib/number-font";
+import { PLATFORM_LINKS } from "@/lib/platform-links";
 
 const CHECKOUT_PROVIDER_STORAGE_KEY = "paperbase_checkout_manual_provider_v1";
 
@@ -39,7 +41,7 @@ interface PaymentConfig {
   nagad_number: string;
 }
 
-type Screen = "loading" | "selectProvider" | "form" | "submitted" | "error";
+type Screen = "loading" | "selectProvider" | "form" | "submitted" | "error" | "notSetUp";
 
 export default function CheckoutPage() {
   const t = useTranslations("checkoutPage");
@@ -119,31 +121,15 @@ export default function CheckoutPage() {
         if (pendingRes.data.payment.transaction_id) {
           setScreen("submitted");
         } else {
-          const bk = Boolean(configRes.data.bkash_number?.trim());
-          const ng = Boolean(configRes.data.nagad_number?.trim());
-          if (bk && ng) {
-            let saved: string | null = null;
-            try {
-              saved = sessionStorage.getItem(CHECKOUT_PROVIDER_STORAGE_KEY);
-            } catch {
-              saved = null;
-            }
-            if (saved === "bkash" || saved === "nagad") {
-              setSelectedProvider(saved);
-              setScreen("form");
-            } else {
-              setScreen("selectProvider");
-            }
-          } else if (bk) {
-            setSelectedProvider("bkash");
-            setScreen("form");
-          } else if (ng) {
-            setSelectedProvider("nagad");
-            setScreen("form");
-          } else {
-            setSelectedProvider("bkash");
-            setScreen("form");
+          let picked: string | null = null;
+          try {
+            picked = sessionStorage.getItem(CHECKOUT_PROVIDER_STORAGE_KEY);
+          } catch {
+            picked = null;
           }
+          const first = firstScreen(configRes.data, picked);
+          if (first.screen === "form") setSelectedProvider(first.provider);
+          setScreen(first.screen);
         }
       } catch {
         if (!cancelled) setScreen("error");
@@ -248,6 +234,30 @@ export default function CheckoutPage() {
           <Button variant="outline" onClick={() => router.replace("/plans")}>
             {t("backToPlans")}
           </Button>
+        </div>
+      </div>
+    );
+  }
+
+  // --- No bKash or Nagad number to pay to yet (Django admin > Paperbase payment numbers) ---
+  if (screen === "notSetUp") {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-background via-background to-muted/30 px-4">
+        <div className="w-full max-w-sm space-y-3 text-center">
+          <h1 className="text-lg font-semibold text-foreground">{t("notSetUpTitle")}</h1>
+          <p className="text-sm text-muted-foreground">{t("notSetUpLine")}</p>
+          <div className="flex flex-col items-center gap-2 pt-3">
+            {PLATFORM_LINKS.help ? (
+              <Button asChild>
+                <a href={PLATFORM_LINKS.help} target="_blank" rel="noopener noreferrer">
+                  {t("contactSupport")}
+                </a>
+              </Button>
+            ) : null}
+            <Button variant="outline" onClick={() => router.replace("/plans")}>
+              {t("backToPlans")}
+            </Button>
+          </div>
         </div>
       </div>
     );
