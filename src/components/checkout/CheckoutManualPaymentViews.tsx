@@ -11,8 +11,44 @@ import { useEnterNavigation } from "@/hooks/useEnterNavigation";
 
 export type ManualPaymentProvider = "bkash" | "nagad";
 
-const BKASH_LOGO = "/assets/payment-provider/BKash-bKash2-Logo.wine.svg";
-const NAGAD_LOGO = "/assets/payment-provider/Nagad-Logo.wine.svg";
+/**
+ * Each provider's logo for the light and the dark theme. bKash's "Kash" letters are near-black, so
+ * the dark theme has its own copy with white letters; Nagad's red and orange read on both.
+ */
+const LOGOS: Record<ManualPaymentProvider, { light: string; dark: string }> = {
+  bkash: {
+    light: "/assets/payment-provider/BKash-bKash2-Logo.wine.svg",
+    dark: "/assets/payment-provider/BKash-bKash2-Logo.dark.svg",
+  },
+  nagad: {
+    light: "/assets/payment-provider/Nagad-Logo.wine.svg",
+    dark: "/assets/payment-provider/Nagad-Logo.wine.svg",
+  },
+};
+
+function ProviderLogo({
+  provider,
+  width,
+  height,
+  className,
+}: {
+  provider: ManualPaymentProvider;
+  width: number;
+  height: number;
+  className: string;
+}) {
+  const { light, dark } = LOGOS[provider];
+  const look = cn("w-auto select-none object-contain object-center [-webkit-user-drag:none]", className);
+  if (light === dark) {
+    return <Image src={light} alt="" width={width} height={height} draggable={false} className={look} />;
+  }
+  return (
+    <>
+      <Image src={light} alt="" width={width} height={height} draggable={false} className={cn(look, "dark:hidden")} />
+      <Image src={dark} alt="" width={width} height={height} draggable={false} className={cn(look, "hidden dark:block")} />
+    </>
+  );
+}
 
 interface Plan {
   name: string;
@@ -138,14 +174,7 @@ export function CheckoutProviderPicker({
                 "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               )}
             >
-              <Image
-                src={BKASH_LOGO}
-                alt=""
-                width={260}
-                height={72}
-                draggable={false}
-                className="h-[64px] w-auto max-w-[min(94%,320px)] select-none object-contain object-center [-webkit-user-drag:none] dark:brightness-110"
-              />
+              <ProviderLogo provider="bkash" width={238} height={100} className="h-14 max-w-[min(94%,320px)]" />
             </button>
           </div>
         )}
@@ -162,14 +191,7 @@ export function CheckoutProviderPicker({
                 "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               )}
             >
-              <Image
-                src={NAGAD_LOGO}
-                alt=""
-                width={280}
-                height={80}
-                draggable={false}
-                className="h-[68px] w-auto max-w-[min(94%,320px)] select-none object-contain object-center [-webkit-user-drag:none] dark:brightness-110"
-              />
+              <ProviderLogo provider="nagad" width={223} height={100} className="h-14 max-w-[min(94%,320px)]" />
             </button>
           </div>
         )}
@@ -224,20 +246,14 @@ export function CheckoutProviderPaymentCard({
 
   return (
     <div className="mx-auto w-full max-w-md overflow-hidden rounded-xs border border-border bg-card shadow-md">
-      {/* Brand header — match picker logo scale; compact padding limits vertical growth */}
+      {/* Brand header — compact padding limits vertical growth */}
       <div className="bg-card px-4 pt-3 pb-1.5">
         <div className="flex items-center justify-center">
-          <Image
-            src={provider === "bkash" ? BKASH_LOGO : NAGAD_LOGO}
-            alt=""
-            width={provider === "bkash" ? 280 : 300}
-            height={84}
-            draggable={false}
-            className={cn(
-              "w-auto max-w-[min(100%,340px)] select-none object-contain object-center [-webkit-user-drag:none]",
-              provider === "bkash" ? "h-[64px]" : "h-[68px]",
-              "dark:brightness-110"
-            )}
+          <ProviderLogo
+            provider={provider}
+            width={provider === "bkash" ? 238 : 223}
+            height={100}
+            className="h-12 max-w-[min(100%,340px)]"
           />
         </div>
         <div className="mt-2.5">
