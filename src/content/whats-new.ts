@@ -90,7 +90,7 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
     id: "2026-10-04-analytics-is-part-of-premium",
     date: "2026-10-04",
-    version: "4.170.2",
+    version: "4.170.3",
     tag: "improved",
     title: {
       en: "Analytics is part of Premium",
