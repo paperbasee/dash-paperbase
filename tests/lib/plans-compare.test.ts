@@ -1,6 +1,17 @@
 import { describe, expect, it } from "vitest";
 
-import { cellOf, comparison, COMPARE_GROUPS, groupPlans, planOn, yearlySaving, type Plan } from "@/lib/plans-compare";
+import {
+  cellOf,
+  comparison,
+  COMPARE_GROUPS,
+  groupDescription,
+  groupPlans,
+  groupSaving,
+  highlightedGroup,
+  planOn,
+  yearlySaving,
+  type Plan,
+} from "@/lib/plans-compare";
 
 const plan = (name: string, cycle: "monthly" | "yearly", price: string, features: Plan["features"]): Plan => ({
   public_id: `${name}-${cycle}`,
@@ -86,5 +97,33 @@ describe("comparison", () => {
       "products",
       "premiumSections",
     ]);
+  });
+});
+
+describe("the cards (owner, 2026-10-03)", () => {
+  it("the dark card is the plan marked Recommended, else the dearest", () => {
+    const groups = groupPlans(PLANS);
+    expect(highlightedGroup(groups)?.name).toBe("Premium");
+    const marked = groupPlans(PLANS.map((p) => (p.name === "Essential" && p.billing_cycle === "yearly" ? { ...p, is_default: true } : p)));
+    expect(highlightedGroup(marked)?.name).toBe("Essential");
+    expect(highlightedGroup([])).toBeNull();
+  });
+
+  it("a plan's line comes from either of its rows, in the page's language", () => {
+    const [essential] = groupPlans(
+      PLANS.map((p) => (p.name === "Essential" && p.billing_cycle === "monthly" ? { ...p, description_en: "For a new shop.", description_bn: "নতুন দোকানের জন্য।" } : p)),
+    );
+    expect(groupDescription(essential, "en")).toBe("For a new shop.");
+    expect(groupDescription(essential, "bn")).toBe("নতুন দোকানের জন্য।");
+    const [plain] = groupPlans(PLANS.map((p) => (p.name === "Essential" ? { ...p, description_en: "English only." } : p)));
+    expect(groupDescription(plain, "bn")).toBe("English only.");
+    expect(groupDescription(groupPlans(PLANS)[1], "en")).toBe("");
+  });
+
+  it("each plan's own yearly saving", () => {
+    const [essential, premium] = groupPlans(PLANS);
+    expect(groupSaving(essential)).toBe(17);
+    expect(groupSaving(premium)).toBe(17);
+    expect(groupSaving(groupPlans([plan("Solo", "monthly", "500.00", {})])[0])).toBeNull();
   });
 });

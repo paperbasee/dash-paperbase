@@ -3647,7 +3647,6 @@
     "monthly": "Monthly",
     "yearly": "Yearly",
     "save": "Save {percent}%",
-    "saveUpTo": "Save up to {percent}%",
     "perMonth": "/month",
     "billedYearly": "{total} billed yearly",
     "billedMonthly": "Billed monthly",
@@ -3659,13 +3658,6 @@
     "switchToYearly": "Switch to yearly",
     "switchToMonthly": "Switch to monthly",
     "ownerOnly": "Only the shop owner can change the plan.",
-    "compareTitle": "Compare plans",
-    "feature": "Feature",
-    "groups": {
-      "analytics": "Analytics",
-      "orders": "Orders",
-      "shop": "Your shop"
-    },
     "rows": {
       "overviewSales": "Overview and Sales",
       "otherSections": "Traffic, Products, Districts, Delivery and Customers",
@@ -3680,7 +3672,11 @@
     "empty": "No plans are available right now. Please contact support.",
     "errorLoad": "We couldn't load the plans. Refresh the page to try again.",
     "initiateError": "We couldn't start the payment. Try again.",
-    "backHome": "Back to home"
+    "backHome": "Back to home",
+    "cycle": "Billing cycle",
+    "cardRows": {
+      "products": "Up to {count} products"
+    }
   },
   "checkoutPage": {
     "title": "Complete your payment",

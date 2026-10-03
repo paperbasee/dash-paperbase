@@ -1,6 +1,6 @@
 /**
- * The Plans page's cards and comparison (owner chose "the Shopify way", 2026-10-02): each plan
- * once with its monthly and yearly prices, then every plan's features side by side. What a plan
+ * The Plans page's cards (owner chose "the Shopify way", 2026-10-02, and its look on 2026-10-03):
+ * each plan once with its monthly and yearly prices and every feature, ticked or crossed. What a plan
  * holds is read from the plan itself (billing/plans/: `features.features` switches and
  * `features.limits`), never from its name, so a plan the admin changes or adds compares itself.
  */
@@ -17,7 +17,11 @@ export interface Plan {
     limits?: Record<string, number>;
     features?: Record<string, boolean>;
   };
+  /** "Recommended" in Django admin: the page's dark card. */
   is_default: boolean;
+  /** The line under the price; a plan's monthly and yearly rows share it (either may hold it). */
+  description_en?: string;
+  description_bn?: string;
 }
 
 export interface PlanGroup {
@@ -43,12 +47,30 @@ export function planOn(group: PlanGroup, cycle: BillingCycle): Plan | null {
   return group[cycle] ?? group.monthly ?? group.yearly;
 }
 
+/** The plan shown as the dark card: the one marked "Recommended", else the dearest. */
+export function highlightedGroup(groups: PlanGroup[]): PlanGroup | null {
+  const marked = groups.find((group) => group.monthly?.is_default || group.yearly?.is_default);
+  return marked ?? groups[groups.length - 1] ?? null;
+}
+
+/** A plan's line in the page's language, from whichever of its rows holds one; English if no Bangla. */
+export function groupDescription(group: PlanGroup, locale: string): string {
+  const rows = [group.monthly, group.yearly].filter((plan): plan is Plan => plan !== null);
+  const pick = (field: "description_en" | "description_bn") =>
+    rows.map((plan) => (plan[field] ?? "").trim()).find(Boolean) ?? "";
+  return (locale === "bn" && pick("description_bn")) || pick("description_en");
+}
+
+/** What paying yearly saves on one plan, in whole percent; null without both prices or a saving. */
+export function groupSaving(group: PlanGroup): number | null {
+  if (!group.monthly || !group.yearly || Number(group.monthly.price) <= 0) return null;
+  const percent = Math.round((1 - Number(group.yearly.price) / Number(group.monthly.price)) * 100);
+  return percent > 0 ? percent : null;
+}
+
 /** What paying yearly saves, in whole percent, from the lowest to the highest across the plans. */
 export function yearlySaving(groups: PlanGroup[]): { low: number; high: number } | null {
-  const savings = groups
-    .filter((group) => group.monthly && group.yearly && Number(group.monthly.price) > 0)
-    .map((group) => Math.round((1 - Number(group.yearly!.price) / Number(group.monthly!.price)) * 100))
-    .filter((percent) => percent > 0);
+  const savings = groups.map(groupSaving).filter((percent): percent is number => percent !== null);
   if (!savings.length) return null;
   return { low: Math.min(...savings), high: Math.max(...savings) };
 }
@@ -62,8 +84,8 @@ export type CompareRow = {
 };
 
 /**
- * The comparison's rows, in the merchant's words (plansPage.groups / plansPage.rows). Only what a
- * plan really switches: `themes` is left out, as since the one-theme merge (2026-09-20) it locks
+ * Every card's lines, in this order and in the merchant's words (plansPage.rows; a limit's number
+ * in plansPage.cardRows). Only what a plan really switches: `themes` is left out, as since the one-theme merge (2026-09-20) it locks
  * nothing a merchant can reach (api billing/feature_gate.py).
  */
 export const COMPARE_GROUPS: { id: string; rows: CompareRow[] }[] = [

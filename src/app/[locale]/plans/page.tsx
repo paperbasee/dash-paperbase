@@ -1,8 +1,8 @@
 "use client";
 
-import { Fragment, useEffect, useState } from "react";
+import { type ReactNode, useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { Check, Minus } from "lucide-react";
+import { Check, X } from "lucide-react";
 import { useRouter } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { getAccessToken } from "@/lib/auth";
@@ -15,10 +15,13 @@ import { markPlansVisited } from "@/lib/plans-onboarding";
 import {
   cellOf,
   comparison,
+  groupDescription,
   groupPlans,
+  groupSaving,
+  highlightedGroup,
   planOn,
-  yearlySaving,
   type BillingCycle,
+  type CompareRow,
   type Plan,
   type PlanGroup,
 } from "@/lib/plans-compare";
@@ -36,10 +39,14 @@ function currentPlanOf(me: MeForRouting | null): { id: string; trial: boolean } 
 }
 
 /**
- * Plans, the way Shopify shows them (owner, 2026-10-02): a card per plan with the shop's own
- * marked, a monthly / yearly switch, then every plan's features side by side (#compare, where
- * "Compare plans" on a locked analytics section lands). Paying is the owner's alone; a team
- * member reads the same page without the buttons.
+ * Plans (owner, 2026-10-02; this look, 2026-10-03, from their reference): a card per plan -- its
+ * price, its line, every feature ticked or crossed -- with the recommended one dark, a tag in a
+ * cut corner (current plan, the yearly saving, recommended), and a yearly / monthly switch. The
+ * cards are the comparison: "Compare plans" on a locked analytics section lands here (#compare).
+ * Paying is the owner's alone; a team member reads the same page without the buttons.
+ *
+ * Rounder than the rest of the dashboard (whose corners are 3px) on purpose: the owner's
+ * reference, approved as a mockup, on a page that stands outside the dashboard's frame.
  */
 export default function PlansPage() {
   const locale = useLocale();
@@ -52,7 +59,7 @@ export default function PlansPage() {
   const [me, setMe] = useState<MeForRouting | null>(null);
   const [selectingId, setSelectingId] = useState<string | null>(null);
   const [selectError, setSelectError] = useState<string | null>(null);
-  const [cycle, setCycle] = useState<BillingCycle>("monthly");
+  const [cycle, setCycle] = useState<BillingCycle>("yearly");
 
   useEffect(() => {
     if (!getAccessToken()) {
@@ -60,21 +67,19 @@ export default function PlansPage() {
       return;
     }
     markPlansVisited();
-    Promise.all([
-      api.get<Plan[]>("billing/plans/"),
-      ensureMeProfile().catch(() => null),
-    ])
+    Promise.all([api.get<Plan[]>("billing/plans/"), ensureMeProfile().catch(() => null)])
       .then(([{ data }, profile]) => {
         setPlans(data);
         setMe(profile);
+        // The shop's own cycle; else yearly, where the saving shows, if any plan has one.
         const current = data.find((plan) => plan.public_id === currentPlanOf(profile)?.id);
-        if (current) setCycle(current.billing_cycle);
+        setCycle(current?.billing_cycle ?? (data.some((plan) => plan.billing_cycle === "yearly") ? "yearly" : "monthly"));
         setPageState("ready");
       })
       .catch(() => setPageState("error"));
   }, [router]);
 
-  // "Compare plans" opens this page at the comparison, which is drawn only once the plans are in.
+  // "Compare plans" opens this page at the cards, which are drawn only once the plans are in.
   useEffect(() => {
     if (pageState === "ready" && window.location.hash === "#compare") {
       document.getElementById("compare")?.scrollIntoView({ block: "start" });
@@ -97,31 +102,33 @@ export default function PlansPage() {
   }
 
   const groups = groupPlans(plans);
-  const saving = yearlySaving(groups);
   const hasYearly = groups.some((group) => group.yearly);
   const current = currentPlanOf(me);
   const currentGroup = groups.find(
     (group) => group.monthly?.public_id === current?.id || group.yearly?.public_id === current?.id,
   );
+  const highlighted = highlightedGroup(groups);
   // A team member reads the plans; paying is the owner's (api: owner power "billing").
   const mayPay = !me?.is_moderator;
   const digits = (text: string) => toLocaleDigits(text, locale);
   const taka = (value: number) => `৳${digits(new Intl.NumberFormat("en-US").format(Math.round(value)))}`;
-
-  const shown = groups.map((group) => planOn(group, cycle));
-  const rows = comparison(shown);
+  const rows = comparison(groups.map((group) => planOn(group, cycle))).flatMap((block) => block.rows);
+  const withLines = groups.some((group) => groupDescription(group, locale));
 
   return (
-    <div className="min-h-screen bg-background px-4 py-10 text-foreground sm:py-14">
+    <div className="min-h-screen bg-(--plans-page) px-4 py-10 text-foreground [--plans-page:#f3f3f2] sm:py-14 dark:[--plans-page:hsl(var(--background))]">
       <div className="mx-auto flex max-w-5xl flex-col">
-        <header className="mb-8 text-center sm:mb-10">
-          <p className="mb-2 text-sm font-semibold tracking-wide text-foreground/70">Paperbase</p>
-          <h1 className="text-3xl font-semibold tracking-tight sm:text-5xl">{t("title")}</h1>
-          <p className="mx-auto mt-3 max-w-xl text-sm text-muted-foreground sm:text-base">
-            {currentGroup
-              ? `${t(!mayPay ? "shopOnLine" : current?.trial ? "trialLine" : "currentLine", { plan: currentGroup.name })} ${t("paidBy")}`
-              : t("subtitle")}
-          </p>
+        <p className="text-[13px] font-semibold tracking-wide text-muted-foreground">Paperbase</p>
+        <header className="mb-7 mt-1.5 flex flex-wrap items-end justify-between gap-4">
+          <div className="min-w-0">
+            <h1 className="text-3xl font-medium tracking-tight sm:text-[40px] sm:leading-tight">{t("title")}</h1>
+            <p className="mt-1.5 text-sm text-muted-foreground">
+              {currentGroup
+                ? `${t(!mayPay ? "shopOnLine" : current?.trial ? "trialLine" : "currentLine", { plan: currentGroup.name })} ${t("paidBy")}`
+                : t("subtitle")}
+            </p>
+          </div>
+          {pageState === "ready" && hasYearly ? <CycleSwitch cycle={cycle} onChange={setCycle} /> : null}
         </header>
 
         {pageState === "error" && (
@@ -148,46 +155,21 @@ export default function PlansPage() {
                 {selectError}
               </div>
             )}
-
-            {hasYearly ? (
-              <div className="mb-6 flex justify-center">
-                <div role="group" className="inline-flex rounded-ui border border-border bg-card p-1 shadow-xs">
-                  {(["monthly", "yearly"] as const).map((option) => (
-                    <button
-                      key={option}
-                      type="button"
-                      aria-pressed={cycle === option}
-                      onClick={() => setCycle(option)}
-                      className={cn(
-                        "inline-flex items-center gap-2 rounded-ui px-4 py-2 text-sm font-medium transition-colors",
-                        cycle === option ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground",
-                      )}
-                    >
-                      {t(option)}
-                      {option === "yearly" && saving ? (
-                        <span
-                          className={cn(
-                            "rounded-full px-2 py-0.5 text-xs font-semibold",
-                            cycle === "yearly"
-                              ? "bg-primary-foreground/15 text-primary-foreground"
-                              : "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400",
-                          )}
-                        >
-                          {t(saving.low === saving.high ? "save" : "saveUpTo", { percent: digits(String(saving.high)) })}
-                        </span>
-                      ) : null}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            ) : null}
-
-            <div className="mx-auto grid w-full gap-4 sm:gap-6 [grid-template-columns:repeat(auto-fit,minmax(16rem,1fr))]">
+            <div
+              id="compare"
+              className={cn(
+                "grid scroll-mt-6 gap-5",
+                groups.length === 1 ? "mx-auto w-full max-w-md" : groups.length === 2 ? "md:grid-cols-2" : "lg:grid-cols-3",
+              )}
+            >
               {groups.map((group) => (
                 <PlanCard
                   key={group.name}
                   group={group}
                   plan={planOn(group, cycle)!}
+                  rows={rows}
+                  line={withLines ? groupDescription(group, locale) : null}
+                  dark={group === highlighted}
                   isCurrent={group === currentGroup}
                   currentId={current?.id ?? null}
                   isTrial={Boolean(current?.trial)}
@@ -195,90 +177,16 @@ export default function PlansPage() {
                   busy={selectingId}
                   onSelect={select}
                   taka={taka}
+                  digits={digits}
                   numClass={numClass}
                 />
               ))}
             </div>
-            {!mayPay ? <p className="mt-4 text-center text-sm text-muted-foreground">{t("ownerOnly")}</p> : null}
+            {!mayPay ? <p className="mt-5 text-center text-sm text-muted-foreground">{t("ownerOnly")}</p> : null}
           </SupportReadOnly>
         )}
 
-        {pageState === "ready" && rows.length > 0 && (
-          <section id="compare" aria-labelledby="compare-title" className="mt-12 scroll-mt-6 sm:mt-16">
-            <h2 id="compare-title" className="mb-4 text-xl font-semibold tracking-tight sm:text-2xl">
-              {t("compareTitle")}
-            </h2>
-            <div className="overflow-hidden rounded-card border border-border bg-card">
-              <table className="w-full table-fixed border-collapse text-sm">
-                <colgroup>
-                  <col />
-                  {groups.map((group) => (
-                    <col key={group.name} className="w-24 sm:w-40" />
-                  ))}
-                </colgroup>
-                <thead>
-                  <tr className="border-b border-border">
-                    <th scope="col" className="px-4 py-3 text-left font-medium text-muted-foreground sm:px-5">
-                      <span className="sr-only">{t("feature")}</span>
-                    </th>
-                    {groups.map((group) => (
-                      <th
-                        key={group.name}
-                        scope="col"
-                        className={cn("px-2 py-3 text-center font-semibold", group === currentGroup && "bg-muted/60")}
-                      >
-                        {group.name}
-                        {group === currentGroup ? (
-                          <span className="block text-xs font-normal text-muted-foreground">
-                            {t(current?.trial ? "trialBadge" : "currentBadge")}
-                          </span>
-                        ) : null}
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {rows.map((block) => (
-                    <Fragment key={block.id}>
-                      <tr className="border-b border-border bg-muted/40">
-                        <th
-                          scope="colgroup"
-                          colSpan={groups.length + 1}
-                          className="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wide text-muted-foreground sm:px-5"
-                        >
-                          {t(`groups.${block.id}`)}
-                        </th>
-                      </tr>
-                      {block.rows.map((row) => (
-                        <tr key={row.id} className="border-b border-border last:border-b-0">
-                          <th scope="row" className="px-4 py-3 text-left font-normal text-foreground sm:px-5">
-                            {t(`rows.${row.id}`)}
-                          </th>
-                          {groups.map((group, i) => (
-                            <td
-                              key={group.name}
-                              className={cn("px-2 py-3 text-center", group === currentGroup && "bg-muted/60")}
-                            >
-                              <Cell
-                                value={cellOf(shown[i], row)}
-                                included={t("included")}
-                                notIncluded={t("notIncluded")}
-                                digits={digits}
-                                numClass={numClass}
-                              />
-                            </td>
-                          ))}
-                        </tr>
-                      ))}
-                    </Fragment>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </section>
-        )}
-
-        <div className="mt-10 text-center">
+        <div className="mt-8 text-center">
           <Button
             variant="ghost"
             size="sm"
@@ -293,9 +201,52 @@ export default function PlansPage() {
   );
 }
 
+function CycleSwitch({ cycle, onChange }: { cycle: BillingCycle; onChange: (cycle: BillingCycle) => void }) {
+  const t = useTranslations("plansPage");
+  return (
+    <div role="group" aria-label={t("cycle")} className="inline-flex rounded-full bg-card p-1 shadow-xs ring-1 ring-border/60">
+      {(["yearly", "monthly"] as const).map((option) => (
+        <button
+          key={option}
+          type="button"
+          aria-pressed={cycle === option}
+          onClick={() => onChange(option)}
+          className={cn(
+            "rounded-full px-4 py-2 text-[13px] font-medium transition-colors",
+            cycle === option ? "bg-zinc-900 text-white dark:bg-zinc-50 dark:text-zinc-900" : "text-muted-foreground hover:text-foreground",
+          )}
+        >
+          {t(option)}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+/**
+ * The tag in a card's top-right corner, in a notch cut from the card in the page's own colour:
+ * the corner's two curves are drawn by the page colour's shadow round a transparent square.
+ */
+function Notch({ children }: { children: ReactNode }) {
+  return (
+    <div
+      className={cn(
+        "absolute right-0 top-0 z-10 rounded-bl-[18px] bg-(--plans-page) pb-2.5 pl-3.5",
+        "before:absolute before:-left-[18px] before:top-0 before:size-[18px] before:rounded-tr-[18px] before:shadow-[6px_-6px_0_6px_var(--plans-page)] before:content-['']",
+        "after:absolute after:-bottom-[18px] after:right-0 after:size-[18px] after:rounded-tr-[18px] after:shadow-[6px_-6px_0_6px_var(--plans-page)] after:content-['']",
+      )}
+    >
+      {children}
+    </div>
+  );
+}
+
 function PlanCard({
   group,
   plan,
+  rows,
+  line,
+  dark,
   isCurrent,
   currentId,
   isTrial,
@@ -303,10 +254,15 @@ function PlanCard({
   busy,
   onSelect,
   taka,
+  digits,
   numClass,
 }: {
   group: PlanGroup;
   plan: Plan;
+  rows: CompareRow[];
+  /** Null when no plan has a line: then none leaves room for one. */
+  line: string | null;
+  dark: boolean;
   isCurrent: boolean;
   currentId: string | null;
   isTrial: boolean;
@@ -314,53 +270,105 @@ function PlanCard({
   busy: string | null;
   onSelect: (plan: Plan) => void;
   taka: (value: number) => string;
+  digits: (text: string) => string;
   numClass: string;
 }) {
   const t = useTranslations("plansPage");
   const monthly = Number(plan.price);
-  const badge = isCurrent ? t(isTrial ? "trialBadge" : "currentBadge") : plan.is_default ? t("recommended") : null;
+  const yearly = plan.billing_cycle === "yearly";
+  const saving = groupSaving(group);
+  // The dark card shows what a month would cost without paying yearly, struck through.
+  const was = dark && yearly && saving && group.monthly ? Number(group.monthly.price) : null;
+
+  const tag = isCurrent ? (
+    <Tag dot="bg-amber-400">{t(isTrial ? "trialBadge" : "currentBadge")}</Tag>
+  ) : dark && yearly && saving ? (
+    <Tag dot="bg-zinc-900" className="bg-amber-300 text-zinc-900">
+      {t("save", { percent: digits(String(saving)) })}
+    </Tag>
+  ) : dark ? (
+    <Tag dot="bg-green-600">{t("recommended")}</Tag>
+  ) : null;
+
   // Paying is by hand, each period: the plan the shop pays for now is renewed here, its other
   // cycle switched to. A trial's plan is chosen like any other.
   const action =
     isCurrent && !isTrial
       ? plan.public_id === currentId
         ? t("renew", { plan: group.name })
-        : t(plan.billing_cycle === "yearly" ? "switchToYearly" : "switchToMonthly")
+        : t(yearly ? "switchToYearly" : "switchToMonthly")
       : t("select", { plan: group.name });
 
   return (
-    <div
+    <section
+      aria-label={group.name}
       className={cn(
-        "flex flex-col rounded-dialog bg-card p-5 text-card-foreground shadow-sm ring-1 ring-border sm:p-6",
-        isCurrent ? "ring-2 ring-foreground/70" : plan.is_default && "ring-2 ring-primary/50",
+        "relative flex flex-col overflow-hidden rounded-[26px] px-6 pb-7 pt-13 sm:px-8",
+        tag && "rounded-tr-none",
+        // No outline in dark mode: a ring runs straight across the notch. The recommended card is a
+        // shade lighter there instead, beside the cards' own surface.
+        dark
+          ? "bg-zinc-900 text-zinc-50 shadow-[0_24px_48px_-24px_rgba(0,0,0,0.45)] dark:bg-zinc-800"
+          : "bg-card text-card-foreground shadow-[0_1px_2px_rgba(0,0,0,0.04),0_12px_32px_-18px_rgba(0,0,0,0.18)]",
       )}
     >
-      <div className="flex items-center justify-between gap-3">
-        <h2 className="text-base font-semibold">{group.name}</h2>
-        {badge ? (
-          <span
-            className={cn(
-              "rounded-full px-2.5 py-1 text-xs font-semibold",
-              isCurrent ? "bg-foreground text-background" : "bg-primary/10 text-primary",
-            )}
-          >
-            {badge}
+      {tag ? <Notch>{tag}</Notch> : null}
+      <h2 className="text-center text-xl font-medium">{group.name}</h2>
+
+      <div className="mt-4 flex flex-wrap items-end justify-center gap-x-2.5 gap-y-1.5">
+        {was ? (
+          <span className={cn("text-[34px] leading-none text-zinc-400 line-through decoration-2", numClass)}>
+            {taka(was)}
           </span>
         ) : null}
+        <span className={cn("text-5xl font-medium leading-none tracking-tight", dark && "text-amber-300", numClass)}>
+          {taka(monthly)}
+        </span>
+        <span className={cn("basis-full pb-1 text-center text-xs leading-normal sm:basis-auto sm:text-left", dark ? "text-zinc-400" : "text-muted-foreground")}>
+          <span className={cn(dark && "font-medium text-amber-300")}>{t("perMonth")}</span>
+          <span className="sm:hidden"> · </span>
+          <br className="hidden sm:block" />
+          {yearly ? t("billedYearly", { total: taka(monthly * 12) }) : t("billedMonthly")}
+        </span>
       </div>
 
-      <div className="mt-5 flex items-baseline gap-1.5">
-        <p className={cn("text-4xl font-semibold tracking-tight", numClass)}>{taka(monthly)}</p>
-        <p className="text-sm text-muted-foreground">{t("perMonth")}</p>
-      </div>
-      <p className="mt-1.5 text-sm text-muted-foreground">
-        {plan.billing_cycle === "yearly" ? t("billedYearly", { total: taka(monthly * 12) }) : t("billedMonthly")}
-      </p>
+      {line !== null ? (
+        <p className={cn("mx-auto mt-4 min-h-[3.2em] max-w-[22rem] text-center text-[13px] leading-relaxed", dark ? "text-zinc-400" : "text-muted-foreground")}>
+          {line}
+        </p>
+      ) : null}
+
+      <hr className={cn("my-6 border-0 border-t-[1.5px] border-dashed", dark ? "border-zinc-700" : "border-border")} />
+
+      <ul className="flex flex-1 flex-col gap-3">
+        {rows.map((row) => {
+          const cell = cellOf(plan, row);
+          const has = cell === true || typeof cell === "number";
+          return (
+            <li key={row.id} className={cn("flex items-center gap-3 text-[13.5px]", !has && (dark ? "text-zinc-500" : "text-muted-foreground/80"))}>
+              {has ? (
+                <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-green-600 text-white">
+                  <Check className="size-3" strokeWidth={3} aria-label={t("included")} role="img" />
+                </span>
+              ) : (
+                <span className="flex size-5 shrink-0 items-center justify-center">
+                  <X className="size-3.5" aria-label={t("notIncluded")} role="img" />
+                </span>
+              )}
+              <span className="min-w-0">
+                {typeof cell === "number" ? t(`cardRows.${row.id}`, { count: digits(new Intl.NumberFormat("en-US").format(cell)) }) : t(`rows.${row.id}`)}
+              </span>
+            </li>
+          );
+        })}
+      </ul>
 
       {mayPay ? (
         <Button
-          className="mt-6 w-full"
-          variant={isCurrent ? "outline" : "default"}
+          className={cn(
+            "mt-7 h-11 self-center rounded-full px-7",
+            dark ? "bg-white text-zinc-900 hover:bg-zinc-100" : "bg-muted text-foreground hover:bg-muted/70",
+          )}
           loading={busy === plan.public_id}
           disabled={busy !== null}
           onClick={() => onSelect(plan)}
@@ -368,29 +376,15 @@ function PlanCard({
           {action}
         </Button>
       ) : null}
-    </div>
+    </section>
   );
 }
 
-function Cell({
-  value,
-  included,
-  notIncluded,
-  digits,
-  numClass,
-}: {
-  value: boolean | number | null;
-  included: string;
-  notIncluded: string;
-  digits: (text: string) => string;
-  numClass: string;
-}) {
-  if (typeof value === "number") {
-    return <span className={cn("font-medium", numClass)}>{digits(new Intl.NumberFormat("en-US").format(value))}</span>;
-  }
-  return value ? (
-    <Check className="mx-auto size-4 text-foreground" strokeWidth={2.5} aria-label={included} role="img" />
-  ) : (
-    <Minus className="mx-auto size-4 text-muted-foreground/60" aria-label={notIncluded} role="img" />
+function Tag({ dot, className, children }: { dot: string; className?: string; children: ReactNode }) {
+  return (
+    <span className={cn("inline-flex items-center gap-1.5 rounded-full bg-card px-3 py-1.5 text-xs font-medium text-foreground shadow-xs", className)}>
+      <span className={cn("size-1.5 rounded-full", dot)} aria-hidden />
+      {children}
+    </span>
   );
 }
