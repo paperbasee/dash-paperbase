@@ -88,6 +88,21 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-10-03-a-new-plans-page",
+    date: "2026-10-03",
+    version: "4.164.0",
+    tag: "improved",
+    title: {
+      en: "A new Plans page",
+      bn: "নতুন প্ল্যান পেজ",
+    },
+    body: {
+      en: "Each plan is a card with its price, who it is for and every feature, ticked or crossed. Your plan is marked, the recommended one stands out, and yearly prices show what you save.",
+      bn: "প্রতিটি প্ল্যান এখন একটি কার্ড: দাম, কাদের জন্য, আর প্রতিটি ফিচার টিক বা ক্রস দিয়ে। আপনার প্ল্যান চিহ্নিত থাকে, প্রস্তাবিত প্ল্যানটি আলাদা করে দেখা যায়, আর বার্ষিক দামে দেখায় কত সাশ্রয় হয়।",
+    },
+    href: "/plans",
+  },
+  {
     id: "2026-10-03-a-clearer-look-at-premium-analytics",
     date: "2026-10-03",
     version: "4.163.1",
@@ -116,21 +131,6 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
       bn: "কিছু ক্যাটাগরিতে সীমিত কোনো স্টাফ এখন হোম পেজেও শুধু তাঁর ক্যাটাগরির সংখ্যা দেখেন, আর অর্ডার তালিকায় প্রতিটি অর্ডারের পুরো আইটেম সংখ্যা দেখায়। অন্য ক্যাটাগরির আইটেমসহ কোনো অর্ডারে তিনি পুরো অর্ডার নিয়ে কাজ করতে পারেন, কিন্তু বদলাতে পারেন শুধু নিজের আইটেমগুলো।",
     },
     href: "/settings?tab=team",
-  },
-  {
-    id: "2026-10-02-a-new-plans-page",
-    date: "2026-10-02",
-    version: "4.161.0",
-    tag: "improved",
-    title: {
-      en: "A new Plans page",
-      bn: "নতুন প্ল্যান পেজ",
-    },
-    body: {
-      en: "See your plan marked, switch between monthly and yearly prices, and compare everything each plan includes side by side. Compare plans on a locked part of Analytics opens the comparison.",
-      bn: "আপনার প্ল্যান চিহ্নিত দেখুন, মাসিক আর বার্ষিক দামের মধ্যে বদলান, আর প্রতিটি প্ল্যানে কী কী আছে পাশাপাশি তুলনা করুন। অ্যানালিটিক্সের লক করা অংশে প্ল্যানগুলো তুলনা করুন চাপলে তুলনাটি খুলে যায়।",
-    },
-    href: "/plans",
   },
   {
     id: "2026-10-02-team-changes-take-effect-at-once",
