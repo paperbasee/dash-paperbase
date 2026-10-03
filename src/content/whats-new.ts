@@ -90,15 +90,15 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
     id: "2026-10-04-analytics-is-part-of-premium",
     date: "2026-10-04",
-    version: "4.170.0",
+    version: "4.170.1",
     tag: "improved",
     title: {
       en: "Analytics is part of Premium",
       bn: "অ্যানালিটিক্স এখন প্রিমিয়ামের অংশ",
     },
     body: {
-      en: "Analytics, with your sales, visitors, best sellers and more, is now on the Premium plan. On Essential, the Analytics page shows what Premium adds and how to upgrade.",
-      bn: "অ্যানালিটিক্স, মানে আপনার বিক্রি, ভিজিটর, সবচেয়ে বিক্রি হওয়া পণ্য আর আরও অনেক কিছু, এখন প্রিমিয়াম প্ল্যানে। এসেনশিয়ালে অ্যানালিটিক্স পেজ দেখায় প্রিমিয়ামে কী আছে আর কীভাবে আপগ্রেড করবেন।",
+      en: "Analytics, with your sales, visitors, best sellers and more, is now on the Premium plan. On Essential, the Analytics page shows what Premium adds and how to upgrade, and a gold star marks it in Settings, Apps.",
+      bn: "অ্যানালিটিক্স, মানে আপনার বিক্রি, ভিজিটর, সবচেয়ে বিক্রি হওয়া পণ্য আর আরও অনেক কিছু, এখন প্রিমিয়াম প্ল্যানে। এসেনশিয়ালে অ্যানালিটিক্স পেজ দেখায় প্রিমিয়ামে কী আছে আর কীভাবে আপগ্রেড করবেন, আর সেটিংসের অ্যাপে এর পাশে একটি সোনালি তারা থাকে।",
     },
     href: "/plans",
   },
