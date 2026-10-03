@@ -88,6 +88,21 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-10-03-clear-bkash-and-nagad-logos",
+    date: "2026-10-03",
+    version: "4.166.1",
+    tag: "fixed",
+    title: {
+      en: "Clear bKash and Nagad logos",
+      bn: "বিকাশ ও নগদের লোগো এখন পরিষ্কার",
+    },
+    body: {
+      en: "On the payment page, bKash's logo lost its letters on the dark theme. Both logos now read clearly on light and dark, and are drawn larger.",
+      bn: "পেমেন্ট পেজে ডার্ক থিমে বিকাশের লোগোর লেখা দেখা যাচ্ছিল না। এখন লাইট ও ডার্ক দুই থিমেই দুটি লোগো পরিষ্কার দেখা যায়, আর আকারেও একটু বড়।",
+    },
+    href: "/plans",
+  },
+  {
     id: "2026-10-03-a-clear-page-when-payment-is-not-ready",
     date: "2026-10-03",
     version: "4.166.0",
@@ -505,20 +520,6 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     body: {
       en: "Typed gmial.com or gmail.con by mistake? Sign in and sign up now ask \"Did you mean …@gmail.com?\", and one tap fixes it, so your sign-in email reaches an inbox you can open.",
       bn: "ভুল করে gmial.com বা gmail.con লিখেছেন? সাইন ইন ও অ্যাকাউন্ট খোলার পাতা এখন জিজ্ঞেস করে \"আপনি কি …@gmail.com লিখতে চেয়েছিলেন?\", আর এক ট্যাপে ঠিক হয়ে যায়, তাই সাইন-ইন ইমেইল আপনার খোলা যায় এমন ইনবক্সেই পৌঁছায়।",
-    },
-  },
-  {
-    id: "2026-09-29-sign-in-with-a-code",
-    date: "2026-09-29",
-    version: "4.136.0",
-    tag: "new",
-    title: {
-      en: "Sign in with a code from your email",
-      bn: "ইমেইলের কোড দিয়ে সাইন ইন",
-    },
-    body: {
-      en: "Every sign-in email now has a 6-digit code as well as the link. Opened the email on your phone? Type the code on the computer you're signing in on, and you're in.",
-      bn: "প্রতিটি সাইন-ইন ইমেইলে এখন লিংকের সাথে ৬ অঙ্কের একটি কোডও থাকে। ইমেইলটি ফোনে খুলেছেন? যে কম্পিউটারে সাইন ইন করছেন সেখানে কোডটি লিখলেই হয়ে যাবে।",
     },
   },
 ];
