@@ -468,11 +468,20 @@
     },
     "premium": {
       "badge": "Premium",
-      "locked": "{section} is on the Premium plan",
-      "lockedLine": "Upgrade to see your shop's numbers here.",
+      "unlockTitle": "Unlock Premium analytics",
+      "unlockOwner": "Upgrade to Premium to see your shop's numbers.",
+      "unlockMember": "Ask the shop owner to upgrade to Premium to see these numbers.",
       "upgrade": "Upgrade plan",
       "compare": "Compare plans",
-      "askOwnerLine": "Ask the shop owner to upgrade to see these numbers."
+      "lines": {
+        "traffic": "See where your visitors come from, which ads bring sales and what shoppers search for.",
+        "products": "See your best sellers, which categories sell and which products need a look.",
+        "districts": "See which districts order the most and where parcels come back.",
+        "delivery": "See how many parcels are delivered, how fast, and how each courier does.",
+        "customers": "See who buys again, your top customers and how many come back each month.",
+        "live": "See who is on your shop right now, what they look at and the latest orders.",
+        "overviewDelivery": "See how your parcels are doing: delivered, on the way and returned."
+      }
     }
   },
   "pages": {

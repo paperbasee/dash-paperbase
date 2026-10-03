@@ -18,7 +18,8 @@ import {
   TrendChart,
   shareOf,
 } from "../_components/kit";
-import { LockedDelivery } from "../_components/PremiumLock";
+import { Locked, UnlockCard } from "../_components/PremiumLock";
+import { SAMPLE_PARCELS } from "../_lib/samples";
 import { useAnalyticsView } from "../_lib/context";
 import { type Metric, changeOf, metricPoints } from "../_lib/insights";
 import { pageName, sourceName } from "../_lib/names";
@@ -56,7 +57,14 @@ export function Overview({ report }: { report: OverviewReport }) {
             </>
           ) : null}
           <Stand report={report} />
-          {full ? <DeliveryList report={report} /> : <LockedDelivery />}
+          {full ? (
+            <DeliveryList report={report} />
+          ) : (
+            // Premium: the real list, drawn from made-up parcels and blurred (PremiumLock).
+            <Locked compact card={<UnlockCard compact line={t("premium.lines.overviewDelivery")} />}>
+              <DeliveryList report={{ ...report, parcels: SAMPLE_PARCELS }} />
+            </Locked>
+          )}
         </div>
       </section>
     </div>

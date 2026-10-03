@@ -12,6 +12,12 @@ import type { LiveReport, SectionKey } from "./types";
 const REPORT_MS = 5 * 60_000;
 /** Live is asked for again this often. */
 const LIVE_MS = 10_000;
+/**
+ * Reports are never saved in the browser's storage (lib/queryPersister): they are asked for again
+ * every few minutes anyway, and a copy kept for days would outlive the plan or the role that
+ * showed it -- a shop gone back to Essential would still have its Premium numbers in DevTools.
+ */
+const NOT_SAVED = { persist: false } as const;
 
 export function useSection<T>(section: Exclude<SectionKey, "live">, period: Period, enabled: boolean) {
   const query = periodQuery(period);
@@ -23,6 +29,7 @@ export function useSection<T>(section: Exclude<SectionKey, "live">, period: Peri
     refetchInterval: REPORT_MS,
     // Changing the days keeps the last numbers on screen until the new ones arrive.
     placeholderData: keepPreviousData,
+    meta: NOT_SAVED,
   });
 }
 
@@ -33,5 +40,6 @@ export function useLive(enabled: boolean) {
     enabled,
     staleTime: 0,
     refetchInterval: LIVE_MS,
+    meta: NOT_SAVED,
   });
 }

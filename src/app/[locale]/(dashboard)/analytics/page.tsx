@@ -116,7 +116,7 @@ export default function AnalyticsPage() {
         />
 
         {!open ? (
-          <LockedSection section={section as PremiumSection} title={t(`sections.${section}`)} />
+          <LockedSection section={section as PremiumSection} period={period} />
         ) : section === "live" ? (
           <LiveReport />
         ) : (
