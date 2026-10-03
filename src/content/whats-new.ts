@@ -90,15 +90,15 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
     id: "2026-10-03-a-new-plans-page",
     date: "2026-10-03",
-    version: "4.164.0",
+    version: "4.165.0",
     tag: "improved",
     title: {
       en: "A new Plans page",
       bn: "নতুন প্ল্যান পেজ",
     },
     body: {
-      en: "Each plan is a card with its price, who it is for and every feature, ticked or crossed. Your plan is marked, the recommended one stands out, and yearly prices show what you save.",
-      bn: "প্রতিটি প্ল্যান এখন একটি কার্ড: দাম, কাদের জন্য, আর প্রতিটি ফিচার টিক বা ক্রস দিয়ে। আপনার প্ল্যান চিহ্নিত থাকে, প্রস্তাবিত প্ল্যানটি আলাদা করে দেখা যায়, আর বার্ষিক দামে দেখায় কত সাশ্রয় হয়।",
+      en: "Each plan is a card with its price, who it is for and what you get, so you can see at a glance what Premium adds. Your plan shows until when it is active, and yearly prices show what you save.",
+      bn: "প্রতিটি প্ল্যান এখন একটি কার্ড: দাম, কাদের জন্য আর কী কী পাবেন, তাই এক নজরেই দেখা যায় প্রিমিয়ামে বাড়তি কী আছে। আপনার প্ল্যান কবে পর্যন্ত চালু তা দেখায়, আর বার্ষিক দামে দেখায় কত সাশ্রয় হয়।",
     },
     href: "/plans",
   },
