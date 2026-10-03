@@ -30,6 +30,7 @@ import {
 } from "@/hooks/useCouponsQuery";
 import type { Coupon, CouponWrite } from "@/types";
 import { useOpenFromAddress } from "@/hooks/useOpenFromAddress";
+import { OPEN_NEW } from "@/lib/open-from-address";
 
 const BLANK: CouponWrite = { code: "", kind: "fixed", value: "" };
 
@@ -54,8 +55,13 @@ export default function CouponsPage() {
   const coupons = useMemo(() => data ?? [], [data]);
 
   // A search result names the code to open (`?open=`): in the form for someone who may change
-  // it, as the list's own Edit is; the list alone for the rest.
+  // it, as the list's own Edit is; the list alone for the rest. The sidebar's Add new menu asks
+  // for a blank form (`?open=new`).
   useOpenFromAddress(!isLoading, (publicId) => {
+    if (publicId === OPEN_NEW) {
+      if (canManage) startNew();
+      return canManage;
+    }
     const coupon = coupons.find((row) => row.public_id === publicId);
     if (coupon && canManage) startEdit(coupon);
     return Boolean(coupon);
@@ -78,6 +84,12 @@ export default function CouponsPage() {
       per_customer_limit: coupon.per_customer_limit,
       expires_at: coupon.expires_at,
     });
+  }
+
+  function startNew() {
+    setEditing(null);
+    setDraft(BLANK);
+    setOpen(true);
   }
 
   function cancel() {

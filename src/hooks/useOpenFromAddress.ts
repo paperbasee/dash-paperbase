@@ -4,14 +4,12 @@ import { useEffect, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 
 import { usePathname, useRouter } from "@/i18n/navigation";
-
-/** The address parameter naming the one thing a list page should open. */
-export const OPEN_PARAM = "open";
+import { OPEN_PARAM } from "@/lib/open-from-address";
 
 /**
  * A list page opening the one thing its address names -- `?open=<public id>` -- which is how a
  * search result reaches something with no page of its own: a category, a brand, a discount code, a
- * review (lib/search/results.ts `hrefFor`).
+ * review (lib/search/results.ts `hrefFor`); `?open=new` asks for the add form (lib/open-from-address).
  *
  * Once the list has loaded (`ready`), `openById` opens it and says whether it was there; either
  * way `open` then leaves the address, so a refresh or Back does not open it again. Anything else
@@ -25,7 +23,12 @@ export function useOpenFromAddress(ready: boolean, openById: (publicId: string) 
   const handled = useRef<string | null>(null);
 
   useEffect(() => {
-    if (!ready || !wanted || handled.current === wanted) return;
+    // Once the address no longer names it, the same thing may be asked for again (a second click).
+    if (!wanted) {
+      handled.current = null;
+      return;
+    }
+    if (!ready || handled.current === wanted) return;
     handled.current = wanted;
     openById(wanted);
     const query = Object.fromEntries([...searchParams.entries()].filter(([name]) => name !== OPEN_PARAM));

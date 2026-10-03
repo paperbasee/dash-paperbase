@@ -23,6 +23,7 @@ import { Stars } from "@/components/reviews/Stars";
 import { AddReviewForm } from "@/components/reviews/AddReviewForm";
 import { EmptyFolder } from "@/components/EmptyFolder";
 import { useOpenFromAddress } from "@/hooks/useOpenFromAddress";
+import { OPEN_NEW } from "@/lib/open-from-address";
 
 type Status = AdminReview["status"];
 
@@ -63,7 +64,13 @@ export default function ReviewsPage() {
 
   const { data: reviews = [], isLoading, isError, error } = useReviewsQuery(tab);
 
+  // A search result names the review to show (`?open=`); the sidebar's Add new menu asks for the
+  // add form (`?open=new`).
   useOpenFromAddress(!isLoading, (publicId) => {
+    if (publicId === OPEN_NEW) {
+      startAdding();
+      return true;
+    }
     const found = reviews.some((review) => review.public_id === publicId);
     if (found) {
       setMarked(publicId);
@@ -130,6 +137,11 @@ export default function ReviewsPage() {
     } finally {
       setBusy(null);
     }
+  }
+
+  function startAdding() {
+    setAdding(true);
+    requestAnimationFrame(() => addForm.current?.scrollIntoView({ behavior: "smooth", block: "start" }));
   }
 
   // An empty Waiting or Live tab: its folder holds the one "Add a review" button (owner, 2026-10-03).
@@ -211,10 +223,7 @@ export default function ReviewsPage() {
             folderAdds && !adding
               ? {
                   label: tPages("reviewsAdd"),
-                  onClick: () => {
-                    setAdding(true);
-                    requestAnimationFrame(() => addForm.current?.scrollIntoView({ behavior: "smooth", block: "start" }));
-                  },
+                  onClick: startAdding,
                 }
               : undefined
           }

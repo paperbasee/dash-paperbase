@@ -39,6 +39,7 @@ import {
 import { useAuth } from "@/context/AuthContext";
 import UserAvatar from "@/components/UserAvatar";
 import { useSearchModal } from "@/context/SearchModalContext";
+import { QuickCreateMenu } from "@/components/QuickCreateMenu";
 import { useWhatsNew } from "@/context/WhatsNewContext";
 import { useCanShowApp } from "@/hooks/useCanShowApp";
 import { useSidebarData } from "@/context/SidebarDataContext";
@@ -507,6 +508,14 @@ function SidebarContent({
             shouldPrefetchLinks={shouldPrefetchLinks}
             onNavigate={handleLinkClick}
             tNavLabel={tNav("navigation")}
+            // Add new: the quick ways to add something (config/quick-create.ts), under the label.
+            quickCreate={
+              <QuickCreateMenu
+                collapsed={collapsed}
+                onNavigate={handleLinkClick}
+                className={collapsed ? "flex justify-center pb-2" : "px-1 pb-3"}
+              />
+            }
             tCatalogLabel={tNav("catalog")}
             tMoreLabel={tNav("more")}
             tAppLabel={tNav}

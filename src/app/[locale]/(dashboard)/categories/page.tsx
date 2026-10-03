@@ -26,6 +26,7 @@ import { Loader2, CheckCircle2, AlertCircle } from "lucide-react";
 import { categoriesQueryKey, navCountsQueryKey } from "@/lib/query-keys";
 import { useCategoriesQuery } from "@/hooks/useCategoriesQuery";
 import { useOpenFromAddress } from "@/hooks/useOpenFromAddress";
+import { OPEN_NEW } from "@/lib/open-from-address";
 
 type FormMode = "closed" | "new_root" | "new_child" | "edit";
 
@@ -194,8 +195,13 @@ export default function CategoriesPage() {
   const { data, isLoading, isError, error } = useCategoriesQuery();
   const tree = data ?? [];
 
-  // A search result names the category to open (`?open=`), anywhere in the tree.
+  // A search result names the category to open (`?open=`), anywhere in the tree; the sidebar's
+  // Add new menu asks for a new top-level one (`?open=new`).
   useOpenFromAddress(!isLoading, (publicId) => {
+    if (publicId === OPEN_NEW) {
+      openNewRoot();
+      return true;
+    }
     const node = findCategoryNode(tree, publicId);
     if (node) openEdit(node);
     return Boolean(node);

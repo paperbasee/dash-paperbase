@@ -12,7 +12,7 @@ import {
 import { cn } from "@/lib/utils";
 import { isNavHrefActive } from "@/lib/navigation/nav-active";
 import { InventoryStatusDot } from "@/components/inventory/InventoryStatusDot";
-import type { ComponentType } from "react";
+import type { ComponentType, ReactNode } from "react";
 import type { NavCounts } from "@/config/apps";
 import { APP_CONFIG, NAV_GROUP_LABEL_KEYS } from "@/config/apps";
 import type { InventoryStatusLevel } from "@/lib/inventory-status";
@@ -55,6 +55,7 @@ export default function AppSidebarNav({
   shouldPrefetchLinks,
   onNavigate,
   tNavLabel,
+  quickCreate,
   tCatalogLabel,
   tMoreLabel,
   tAppLabel,
@@ -86,6 +87,8 @@ export default function AppSidebarNav({
   shouldPrefetchLinks: boolean;
   onNavigate: () => void;
   tNavLabel: string;
+  /** The Add new menu, drawn under the label (owner, 2026-10-04). */
+  quickCreate?: ReactNode;
   tCatalogLabel: string;
   tMoreLabel: string;
   tAppLabel: (id: string) => string;
@@ -146,6 +149,7 @@ export default function AppSidebarNav({
           {tNavLabel}
         </p>
       )}
+      {quickCreate}
 
       <DeferredNavLink
         href={homeHref}
