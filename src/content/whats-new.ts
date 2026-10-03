@@ -88,6 +88,21 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-10-04-a-shorter-bkash-step-in-bangla",
+    date: "2026-10-04",
+    version: "4.169.1",
+    tag: "improved",
+    title: {
+      en: "A shorter bKash step in Bangla",
+      bn: "বাংলায় বিকাশের ধাপ এখন আরও ছোট",
+    },
+    body: {
+      en: "On the payment page, the Bangla bKash instruction is now shorter and reads just like Nagad's.",
+      bn: "পেমেন্ট পেজে বাংলায় বিকাশের নির্দেশনা এখন আরও ছোট, নগদের নির্দেশনার মতোই।",
+    },
+    href: "/plans",
+  },
+  {
     id: "2026-10-04-add-new-from-the-sidebar",
     date: "2026-10-04",
     version: "4.169.0",
@@ -508,20 +523,6 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     body: {
       en: "When you ask Paperbase for help, our team can open your dashboard for up to an hour to fix things with you. Every visit shows in Activities, every change they make is marked, and your account, passkeys, payments and team stay yours alone.",
       bn: "Paperbase-এর কাছে সাহায্য চাইলে আমাদের টিম সর্বোচ্চ এক ঘণ্টার জন্য আপনার ড্যাশবোর্ড খুলে সমস্যা ঠিক করে দিতে পারে। প্রতিটি ভিজিট অ্যাক্টিভিটিতে দেখা যায়, তাদের করা প্রতিটি পরিবর্তন চিহ্নিত থাকে, আর আপনার অ্যাকাউন্ট, পাসকি, পেমেন্ট ও টিম শুধু আপনারই থাকে।",
-    },
-  },
-  {
-    id: "2026-09-29-setup-is-clear-about-your-web-address",
-    date: "2026-09-29",
-    version: "4.140.0",
-    tag: "improved",
-    title: {
-      en: "Setup is clear about your web address",
-      bn: "সেট-আপে ওয়েব ঠিকানা নিয়ে কোনো বিভ্রান্তি নেই",
-    },
-    body: {
-      en: "Your shop is live on its free Paperbase address as soon as setup ends. Connecting a domain you own can wait: setup now says so, and its last screen shows where to connect one in Settings.",
-      bn: "সেট-আপ শেষ হতেই আপনার দোকান ফ্রি Paperbase ঠিকানায় চালু হয়ে যায়। নিজের ডোমেইন পরে যুক্ত করলেও চলে: সেট-আপ এখন সেটা স্পষ্ট বলে, আর শেষ পাতায় দেখায় সেটিংসে কোথায় যুক্ত করবেন।",
     },
   },
 ];
