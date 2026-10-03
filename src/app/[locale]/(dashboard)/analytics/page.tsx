@@ -39,6 +39,7 @@ import { Overview } from "./_sections/Overview";
 import { Products } from "./_sections/Products";
 import { Sales } from "./_sections/Sales";
 import { Traffic } from "./_sections/Traffic";
+import { PageHint } from "@/components/page/PageHint";
 
 /**
  * The analytics page (redesigned 2026-09-28, phone first; the chosen look:
@@ -52,6 +53,7 @@ import { Traffic } from "./_sections/Traffic";
  */
 export default function AnalyticsPage() {
   const t = useTranslations("analyticsPage");
+  const tHints = useTranslations("pageHints");
   const locale = useLocale();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -95,7 +97,10 @@ export default function AnalyticsPage() {
         <header className="flex flex-col gap-3 pt-1 sm:flex-row sm:items-end sm:justify-between">
           <div className="flex min-w-0 flex-col gap-1">
             <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
-              <h1 className="text-[22px] font-semibold tracking-tight text-foreground sm:text-2xl">{t("title")}</h1>
+              <div className="flex items-center gap-1.5">
+                <h1 className="text-[22px] font-semibold tracking-tight text-foreground sm:text-2xl">{t("title")}</h1>
+                <PageHint>{tHints("analytics")}</PageHint>
+              </div>
               {section !== "live" ? <LivePill onOpen={() => show({ section: "live" })} /> : null}
             </div>
             <p className="text-xs text-muted-foreground sm:text-[13px]">

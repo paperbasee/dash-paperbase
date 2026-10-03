@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useLocale, useTranslations } from "next-intl";
-import { DeferredNavLink } from "@/components/navigation/DeferredNavLink";
+import { PageHeader } from "@/components/page/PageHeader";
 import { toLocaleDigits } from "@/lib/locale-digits";
 import { numberTextClass } from "@/lib/number-font";
 import { Loader2, Undo2, Trash } from "lucide-react";
@@ -40,6 +40,7 @@ export default function TrashPage() {
   const locale = useLocale();
   const numClass = numberTextClass(locale);
   const tPages = useTranslations("pages");
+  const tHints = useTranslations("pageHints");
   const tNav = useTranslations("nav");
   const { canViewTrash, canRestoreTrash, canPurgeTrash, loading: capsLoading } =
     useAdminDeleteCapabilities();
@@ -311,23 +312,9 @@ export default function TrashPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <div className="rounded-card bg-muted/80 px-1 py-1 hidden md:block">
-            <DeferredNavLink
-              href="/"
-              className="flex items-center justify-center rounded-ui p-1 text-muted-foreground hover:bg-muted"
-              aria-label={tPages("goBack")}
-            >
-              <Undo2 className="h-4 w-4" />
-            </DeferredNavLink>
-          </div>
-          <div>
-            <h1 className="text-2xl font-medium text-foreground">{tNav("trash")}</h1>
-          </div>
-        </div>
+      <PageHeader title={tNav("trash")} hint={tHints("trash")}>
         {canRestoreTrash && someSelected && (
-          <div className="flex flex-wrap items-center gap-2">
+          <>
             <button
               type="button"
               onClick={handleRestoreSelected}
@@ -352,13 +339,9 @@ export default function TrashPage() {
                 })}
               </button>
             )}
-          </div>
+          </>
         )}
-      </div>
-
-      <p className="text-sm leading-relaxed text-muted-foreground">
-        {tPages("trashSubtitle")}
-      </p>
+      </PageHeader>
 
       {!capsLoading && !canViewTrash ? (
         <p className="text-sm text-muted-foreground">{tPages("trashForbidden")}</p>

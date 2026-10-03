@@ -16,6 +16,7 @@ import { formatDashboardDateTime } from "@/lib/datetime-display";
 import { Button } from "@/components/ui/button";
 import { numberTextClass } from "@/lib/number-font";
 import { notify } from "@/notifications";
+import { PageHint } from "@/components/page/PageHint";
 
 function asCurrency(value: string | number) {
   const number = Number(value ?? "0");
@@ -27,6 +28,7 @@ export default function CustomerDetailPage() {
   const locale = useLocale();
   const numClass = numberTextClass(locale);
   const tPages = useTranslations("pages");
+  const tHints = useTranslations("pageHints");
   const tCommon = useTranslations("common");
   const router = useRouter();
   const navigate = useDeferredNavigate();
@@ -81,9 +83,12 @@ export default function CustomerDetailPage() {
             <Undo2 className="h-4 w-4" />
           </button>
         </div>
-        <h1 className="text-2xl font-medium leading-relaxed text-foreground">
-          {tPages("customerDetailsTitle")}
-        </h1>
+        <div className="flex min-w-0 items-center gap-1.5">
+          <h1 className="text-2xl font-medium leading-relaxed text-foreground">
+            {tPages("customerDetailsTitle")}
+          </h1>
+          <PageHint>{tHints("customerDetail")}</PageHint>
+        </div>
       </div>
 
       <section className="rounded-card border border-card-border bg-card p-6">

@@ -3,8 +3,7 @@
 import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
-import { useRouter } from "@/i18n/navigation";
-import { AlertCircle, CheckCircle2, Loader2, Undo2 } from "lucide-react";
+import { AlertCircle, CheckCircle2, Loader2 } from "lucide-react";
 import api from "@/lib/api";
 import { ClickableTableRow } from "@/components/ui/clickable-table-row";
 import { ClickableText } from "@/components/ui/clickable-text";
@@ -18,6 +17,7 @@ import { buildPublicMediaUrlFromKey, uploadFile } from "@/hooks/usePresignedUplo
 import { brandsQueryKey } from "@/lib/query-keys";
 import { useBrandsQuery } from "@/hooks/useBrandsQuery";
 import { useOpenFromAddress } from "@/hooks/useOpenFromAddress";
+import { PageHeader } from "@/components/page/PageHeader";
 
 type FormMode = "closed" | "new" | "edit";
 
@@ -47,8 +47,8 @@ function tempUploadId(): string {
  * that exist. That is what makes the feature optional without a switch.
  */
 export default function BrandsPage() {
-  const router = useRouter();
   const tPages = useTranslations("pages");
+  const tHints = useTranslations("pageHints");
   const tCommon = useTranslations("common");
   const confirm = useConfirm();
   const queryClient = useQueryClient();
@@ -207,42 +207,24 @@ export default function BrandsPage() {
 
   return (
     <div className="space-y-8">
-      <div className="flex items-center justify-between gap-4 flex-wrap">
-        <div className="flex items-center gap-3">
-          <div className="rounded-card bg-muted/80 px-1 py-1 hidden md:block">
-            <button
-              type="button"
-              onClick={() => router.back()}
-              aria-label={tPages("brandsGoBackAria")}
-              className="flex items-center justify-center rounded-ui p-1 text-muted-foreground hover:bg-muted"
-            >
-              <Undo2 className="h-4 w-4" />
-            </button>
-          </div>
-          <h1 className="text-2xl font-medium text-foreground">{tPages("brandsTitle")}</h1>
-        </div>
-
-        <div className="flex flex-wrap items-center justify-end gap-3">
+      <PageHeader title={tPages("brandsTitle")} hint={tHints("brands")}>
+        <button
+          type="button"
+          onClick={openNew}
+          className="rounded-card bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+        >
+          {tPages("brandsAdd")}
+        </button>
+        {mode !== "closed" ? (
           <button
             type="button"
-            onClick={openNew}
-            className="rounded-card bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+            onClick={closeForm}
+            className="rounded-card border border-border px-4 py-2 text-sm text-foreground hover:bg-muted"
           >
-            {tPages("brandsAdd")}
+            {tPages("brandsCancelForm")}
           </button>
-          {mode !== "closed" ? (
-            <button
-              type="button"
-              onClick={closeForm}
-              className="rounded-card border border-border px-4 py-2 text-sm text-foreground hover:bg-muted"
-            >
-              {tPages("brandsCancelForm")}
-            </button>
-          ) : null}
-        </div>
-      </div>
-
-      <p className="max-w-2xl text-sm text-muted-foreground">{tPages("brandsIntro")}</p>
+        ) : null}
+      </PageHeader>
 
       {mode !== "closed" ? (
         <form

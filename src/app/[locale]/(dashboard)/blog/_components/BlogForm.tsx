@@ -27,6 +27,7 @@ import {
   navCountsQueryKey,
 } from "@/lib/query-keys";
 import { useBlogTagsQuery } from "@/hooks/useBlogTagsQuery";
+import { PageHint } from "@/components/page/PageHint";
 
 interface BlogFormState {
   title: string;
@@ -105,6 +106,8 @@ export function BlogForm({
   );
 
   const tPages = useTranslations("pages");
+
+  const tHints = useTranslations("pageHints");
   const { fieldErrors, clearValidation } = useNotificationValidation("blog-form");
   const tempBlogUploadIdRef = useRef<string>(
     typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
@@ -370,9 +373,12 @@ export function BlogForm({
               <Undo2 className="h-4 w-4" />
             </button>
           </div>
-          <h1 className="text-2xl font-semibold tracking-tight text-foreground">
-            {mode === "new" ? "New blog post" : "Edit blog post"}
-          </h1>
+          <div className="flex min-w-0 items-center gap-1.5">
+            <h1 className="text-2xl font-semibold tracking-tight text-foreground">
+              {tPages(mode === "new" ? "blogFormNewTitle" : "blogFormEditTitle")}
+            </h1>
+            <PageHint>{tHints(mode === "new" ? "blogNew" : "blogEdit")}</PageHint>
+          </div>
         </div>
         <div className="flex w-full shrink-0 gap-2 sm:w-auto">
           {mode === "edit" && onDelete ? (

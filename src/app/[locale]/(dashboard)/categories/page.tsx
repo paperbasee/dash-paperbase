@@ -3,8 +3,7 @@
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
-import { useRouter } from "@/i18n/navigation";
-import { ChevronDown, ChevronRight, Undo2 } from "lucide-react";
+import { ChevronDown, ChevronRight } from "lucide-react";
 import api from "@/lib/api";
 import { isApiHttpError } from "@/lib/api-client";
 import { ClickableTableRow } from "@/components/ui/clickable-table-row";
@@ -25,6 +24,7 @@ import { buildPublicMediaUrlFromKey, uploadFile } from "@/hooks/usePresignedUplo
 import { Loader2, CheckCircle2, AlertCircle } from "lucide-react";
 import { categoriesQueryKey, navCountsQueryKey } from "@/lib/query-keys";
 import { useCategoriesQuery } from "@/hooks/useCategoriesQuery";
+import { PageHeader } from "@/components/page/PageHeader";
 import { useOpenFromAddress } from "@/hooks/useOpenFromAddress";
 import { OPEN_NEW } from "@/lib/open-from-address";
 
@@ -181,8 +181,8 @@ function productsInBranch(node: AdminCategoryTreeNode): number {
 }
 
 export default function CategoriesPage() {
-  const router = useRouter();
   const tPages = useTranslations("pages");
+  const tHints = useTranslations("pageHints");
   const tCommon = useTranslations("common");
   const confirm = useConfirm();
   const queryClient = useQueryClient();
@@ -450,43 +450,27 @@ export default function CategoriesPage() {
 
   return (
     <div className="space-y-8">
-      <div className="flex items-center justify-between gap-4 flex-wrap">
-        <div className="flex items-center gap-3">
-          <div className="rounded-card bg-muted/80 px-1 py-1 hidden md:block">
-            <button
-              type="button"
-              onClick={() => router.back()}
-              aria-label={tPages("categoriesGoBackAria")}
-              className="flex items-center justify-center rounded-ui p-1 text-muted-foreground hover:bg-muted"
-            >
-              <Undo2 className="h-4 w-4" />
-            </button>
-          </div>
-          <h1 className="text-2xl font-medium text-foreground">{tPages("categoriesTitle")}</h1>
-        </div>
-
-        <div className="flex flex-wrap items-center justify-end gap-3">
+      <PageHeader title={tPages("categoriesTitle")} hint={tHints("categories")}>
+        <button
+          type="button"
+          onClick={openNewRoot}
+          className="rounded-card bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+        >
+          {tPages("categoriesAddRoot")}
+        </button>
+        {mode !== "closed" ? (
           <button
             type="button"
-            onClick={openNewRoot}
-            className="rounded-card bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+            onClick={() => {
+              setMode("closed");
+              setEditingSlugPreview(null);
+            }}
+            className="rounded-card border border-border px-4 py-2 text-sm text-foreground hover:bg-muted"
           >
-            {tPages("categoriesAddRoot")}
+            {tPages("categoriesCancelForm")}
           </button>
-          {mode !== "closed" ? (
-            <button
-              type="button"
-              onClick={() => {
-                setMode("closed");
-                setEditingSlugPreview(null);
-              }}
-              className="rounded-card border border-border px-4 py-2 text-sm text-foreground hover:bg-muted"
-            >
-              {tPages("categoriesCancelForm")}
-            </button>
-          ) : null}
-        </div>
-      </div>
+        ) : null}
+      </PageHeader>
 
       {mode !== "closed" ? (
         <form

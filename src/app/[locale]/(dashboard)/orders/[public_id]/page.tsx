@@ -80,6 +80,7 @@ import { notify, normalizeError } from "@/notifications";
 import { cn } from "@/lib/utils";
 import { useEnterNavigation } from "@/hooks/useEnterNavigation";
 import { useConfirm } from "@/context/ConfirmDialogContext";
+import { PageHint } from "@/components/page/PageHint";
 
 type EditForm = {
   shipping_name: string;
@@ -99,6 +100,7 @@ export default function OrderDetailPage() {
   const locale = useLocale();
   const numClass = numberTextClass(locale);
   const tPages = useTranslations("pages");
+  const tHints = useTranslations("pageHints");
   const tNav = useTranslations("nav");
   const tCommon = useTranslations("common");
   const confirm = useConfirm();
@@ -668,14 +670,17 @@ export default function OrderDetailPage() {
                 <Undo2 className="h-4 w-4" />
               </button>
             </div>
-            <h1
-              className={cn(
-                "text-xl font-semibold tracking-tight text-foreground sm:text-2xl",
-                numClass
-              )}
-            >
-              #S-{order.order_number}
-            </h1>
+            <div className="flex min-w-0 items-center gap-1.5">
+              <h1
+                className={cn(
+                  "text-xl font-semibold tracking-tight text-foreground sm:text-2xl",
+                  numClass
+                )}
+              >
+                #S-{order.order_number}
+              </h1>
+              <PageHint>{tHints("orderDetail")}</PageHint>
+            </div>
           </div>
           <nav className="flex flex-wrap items-center gap-1 text-sm text-muted-foreground">
             <ClickableText

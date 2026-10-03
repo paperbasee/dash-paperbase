@@ -55,20 +55,6 @@ export function MostWishedForTab() {
 
   return (
     <div className="space-y-4">
-      <div className="space-y-1">
-        <p className="text-xs text-muted-foreground">
-          {tPages("mostWishedForIntro")}
-        </p>
-        {/* Said plainly, because the number is easy to read as the whole shop
-            and it is not. A shopper who saves without signing in keeps that
-            list in their own browser, so it never reaches this count -- and
-            that is a permanent property of the design, not a gap to be fixed
-            later. */}
-        <p className="text-xs text-muted-foreground/80">
-          {tPages("mostWishedForScope")}
-        </p>
-      </div>
-
       <div className="overflow-x-auto rounded-card border border-card-border bg-card">
         <table className="w-full text-left text-sm">
           <thead>

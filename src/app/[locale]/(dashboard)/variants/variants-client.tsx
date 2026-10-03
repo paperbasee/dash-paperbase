@@ -12,10 +12,11 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useLocale, useTranslations } from "next-intl";
 import { usePathname, useRouter } from "@/i18n/navigation";
 import { useSearchParams } from "next/navigation";
-import { Plus, Undo2 } from "lucide-react";
+import { Plus } from "lucide-react";
 import api from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { PageHeader } from "@/components/page/PageHeader";
 import { FilterBar } from "@/components/filters/FilterBar";
 import { ClickableTableRow } from "@/components/ui/clickable-table-row";
 import { ClickableText } from "@/components/ui/clickable-text";
@@ -89,6 +90,7 @@ export default function VariantsPageClient() {
   const locale = useLocale();
   const numClass = numberTextClass(locale);
   const tPages = useTranslations("pages");
+  const tHints = useTranslations("pageHints");
   const tCommon = useTranslations("common");
   const confirm = useConfirm();
   const queryClient = useQueryClient();
@@ -434,40 +436,16 @@ export default function VariantsPageClient() {
 
   return (
     <div className="flex flex-col gap-6">
-      <header className="flex flex-wrap items-start justify-between gap-4">
-        <div className="flex items-start gap-3">
-          <div className="rounded-card bg-muted/80 px-1 py-1 hidden md:block">
-            <button
-              type="button"
-              onClick={() => router.back()}
-              aria-label={tPages("goBack")}
-              className="flex items-center justify-center rounded-ui p-1 text-muted-foreground hover:bg-muted"
-            >
-              <Undo2 className="h-4 w-4" />
-            </button>
-          </div>
-          <div>
-            <h1 className="text-2xl font-medium tracking-tight text-foreground">
-              {tPages("variantsTitle")}
-            </h1>
-            <p className="mt-1 text-sm text-muted-foreground md:hidden">
-              {tPages("variantsSubtitleBefore")}{" "}
-              <ClickableText href="/product-attributes" className="underline-offset-2">
-                {tPages("variantsSubtitleLink")}
-              </ClickableText>
-              {tPages("variantsSubtitleAfter")}
-            </p>
-          </div>
-        </div>
-      </header>
-
-      <p className="hidden text-sm text-muted-foreground md:block">
-        {tPages("variantsSubtitleBefore")}{" "}
-        <ClickableText href="/product-attributes" className="underline-offset-2">
-          {tPages("variantsSubtitleLink")}
-        </ClickableText>
-        {tPages("variantsSubtitleAfter")}
-      </p>
+      <PageHeader
+        title={tPages("variantsTitle")}
+        hint={tHints.rich("variants", {
+          link: (chunks) => (
+            <ClickableText href="/product-attributes" className="underline-offset-2">
+              {chunks}
+            </ClickableText>
+          ),
+        })}
+      />
 
       {/* Inline error text moved to toasts (keep form states only). */}
 

@@ -36,11 +36,13 @@ import { useVisibleSettingsSections } from "./useVisibleSettingsSections";
 import { settingsInvertedButtonClassName } from "./SettingsSectionBody";
 import useSettingsPageController from "./useSettingsPageController";
 import { useDeferredNavigate } from "@/hooks/useDeferredNavigate";
+import { PageHint } from "@/components/page/PageHint";
 
 export default function SettingsPage() {
   const searchParams = useSearchParams();
   const navigate = useDeferredNavigate();
   const tSettings = useTranslations("settings");
+  const tHints = useTranslations("pageHints");
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
   // Worked out on every render rather than stored, so it follows the URL and also
@@ -116,13 +118,11 @@ export default function SettingsPage() {
       <div className="flex w-full flex-col gap-6">
         <header className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between md:hidden">
           <div className="flex items-center gap-3">
-            <div>
+            <div className="flex min-w-0 items-center gap-1.5">
               <h1 className="text-2xl font-semibold tracking-tight text-foreground">
                 {tSettings("title")}
               </h1>
-              <p className="mt-1 text-sm text-muted-foreground md:hidden">
-                {tSettings("subtitle")}
-              </p>
+              <PageHint>{tHints("settings")}</PageHint>
             </div>
           </div>
         </header>

@@ -4,13 +4,10 @@ import { useCallback, useEffect, useRef, useState, type FormEvent } from "react"
 import { useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
-import { useRouter } from "@/i18n/navigation";
-import { Star, Undo2 } from "lucide-react";
 
 import api from "@/lib/api";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { ClickableText } from "@/components/ui/clickable-text";
 import { useConfirm } from "@/context/ConfirmDialogContext";
@@ -22,6 +19,7 @@ import type { AdminReview } from "@/types";
 import { Stars } from "@/components/reviews/Stars";
 import { AddReviewForm } from "@/components/reviews/AddReviewForm";
 import { EmptyFolder } from "@/components/EmptyFolder";
+import { PageHeader } from "@/components/page/PageHeader";
 import { useOpenFromAddress } from "@/hooks/useOpenFromAddress";
 import { OPEN_NEW } from "@/lib/open-from-address";
 
@@ -48,8 +46,8 @@ function tabFrom(value: string | null): Status {
  * review.
  */
 export default function ReviewsPage() {
-  const router = useRouter();
   const tPages = useTranslations("pages");
+  const tHints = useTranslations("pageHints");
   const tCommon = useTranslations("common");
   const confirm = useConfirm();
   const queryClient = useQueryClient();
@@ -150,35 +148,17 @@ export default function ReviewsPage() {
 
   return (
     <div className="space-y-8">
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <div className="rounded-card bg-muted/80 px-1 py-1 hidden md:block">
-            <button
-              type="button"
-              onClick={() => router.back()}
-              aria-label={tPages("reviewsGoBackAria")}
-              className="flex items-center justify-center rounded-ui p-1 text-muted-foreground hover:bg-muted"
-            >
-              <Undo2 className="h-4 w-4" />
-            </button>
-          </div>
-          <h1 className="text-2xl font-medium text-foreground">{tPages("reviewsTitle")}</h1>
-        </div>
-
+      <PageHeader title={tPages("reviewsTitle")} hint={tHints("reviews")}>
         {adding || !folderAdds ? (
-          <div className="flex flex-wrap items-center justify-end gap-3">
-            <button
-              type="button"
-              onClick={() => setAdding((open) => !open)}
-              className="rounded-card bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
-            >
-              {adding ? tPages("reviewsCancelAdd") : tPages("reviewsAdd")}
-            </button>
-          </div>
+          <button
+            type="button"
+            onClick={() => setAdding((open) => !open)}
+            className="rounded-card bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+          >
+            {adding ? tPages("reviewsCancelAdd") : tPages("reviewsAdd")}
+          </button>
         ) : null}
-      </div>
-
-      <p className="max-w-2xl text-sm text-muted-foreground">{tPages("reviewsIntro")}</p>
+      </PageHeader>
 
       {adding ? (
         <div ref={addForm} className="scroll-mt-24">

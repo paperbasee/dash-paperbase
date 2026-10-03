@@ -13,11 +13,13 @@ import { numberTextClass } from "@/lib/number-font";
 import { cn } from "@/lib/utils";
 import { useNewOrder } from "./useNewOrder";
 import { useEnterNavigation } from "@/hooks/useEnterNavigation";
+import { PageHint } from "@/components/page/PageHint";
 
 export default function NewOrderPage() {
   const locale = useLocale();
   const numClass = numberTextClass(locale);
   const tPages = useTranslations("pages");
+  const tHints = useTranslations("pageHints");
   const tCommon = useTranslations("common");
   const { currencySymbol } = useBranding();
   const {
@@ -69,12 +71,12 @@ export default function NewOrderPage() {
             </button>
           </div>
           <div>
-            <h1 className="text-2xl font-semibold tracking-tight text-foreground">
-              {tPages("orderNewTitle")}
-            </h1>
-            <p className="mt-1 text-sm text-muted-foreground md:hidden">
-              {tPages("orderNewSubtitle")}
-            </p>
+            <div className="flex min-w-0 items-center gap-1.5">
+              <h1 className="text-2xl font-semibold tracking-tight text-foreground">
+                {tPages("orderNewTitle")}
+              </h1>
+              <PageHint>{tHints("orderNew")}</PageHint>
+            </div>
             {fromAbandoned ? (
               <p className="mt-1 text-sm text-muted-foreground">
                 {tPages("orderNewFromAbandoned", {
@@ -99,10 +101,6 @@ export default function NewOrderPage() {
           </Button>
         </div>
       </div>
-
-      <p className="hidden text-sm text-muted-foreground md:block">
-        {tPages("orderNewSubtitle")}
-      </p>
 
       {/* Inline error text moved to toasts (keep field highlights only). */}
 

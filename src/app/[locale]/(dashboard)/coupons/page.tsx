@@ -30,6 +30,7 @@ import {
 } from "@/hooks/useCouponsQuery";
 import type { Coupon, CouponWrite } from "@/types";
 import { useOpenFromAddress } from "@/hooks/useOpenFromAddress";
+import { PageHeader } from "@/components/page/PageHeader";
 import { OPEN_NEW } from "@/lib/open-from-address";
 
 const BLANK: CouponWrite = { code: "", kind: "fixed", value: "" };
@@ -38,6 +39,7 @@ export default function CouponsPage() {
   const locale = useLocale();
   const numClass = numberTextClass(locale);
   const t = useTranslations("pages");
+  const tHints = useTranslations("pageHints");
   const { has } = usePermissions();
   const canManage = has("coupons.manage");
 
@@ -117,24 +119,13 @@ export default function CouponsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-2xl font-medium leading-relaxed text-foreground">
-          {t("couponsTitle")}
-        </h1>
+      <PageHeader title={t("couponsTitle")} hint={tHints("coupons")}>
         {canManage ? (
-          <Button
-            type="button"
-            size="sm"
-            onClick={() => (open ? cancel() : setOpen(true))}
-          >
+          <Button type="button" size="sm" onClick={() => (open ? cancel() : setOpen(true))}>
             {open ? t("couponCancel") : t("couponNew")}
           </Button>
         ) : null}
-      </div>
-
-      <p className="max-w-prose text-sm text-muted-foreground">
-        {t("couponsIntro")}
-      </p>
+      </PageHeader>
 
       {open && canManage ? (
         <form

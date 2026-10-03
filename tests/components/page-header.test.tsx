@@ -3,6 +3,8 @@
  * filter button and its main button on the right; what the page is for lives in the ?, and the
  * filters stay inside the filter button, which wears a dot while one is on.
  */
+import { readdirSync, readFileSync, statSync } from "node:fs";
+import path from "node:path";
 import { renderToStaticMarkup } from "react-dom/server";
 import { NextIntlClientProvider } from "next-intl";
 import { describe, expect, it, vi } from "vitest";
@@ -39,6 +41,23 @@ describe("the page header", () => {
 
   it("says so in Bangla too", () => {
     expect(draw(<PageHeader title="অর্ডার" hint="…" />, "bn")).toContain(`aria-label="${bn.pages.aboutThisPage}"`);
+  });
+
+  it("every page asks only for words that exist", () => {
+    const files = (dir: string): string[] =>
+      readdirSync(dir).flatMap((name) => {
+        const full = path.join(dir, name);
+        return statSync(full).isDirectory() ? files(full) : full.endsWith(".tsx") ? [full] : [];
+      });
+    const asked = new Set<string>();
+    for (const file of files(path.resolve(__dirname, "../../src"))) {
+      for (const call of readFileSync(file, "utf8").matchAll(/tHints(?:\.rich)?\(([^)]*)\)/g)) {
+        // The words' names; not a value compared on the way (`mode === "new" ? "blogNew" : ...`).
+        for (const key of call[1].matchAll(/(?<!=== )"(\w+)"/g)) asked.add(key[1]);
+      }
+    }
+    expect(asked.size).toBeGreaterThan(25);
+    for (const key of asked) expect(en.pageHints, key).toHaveProperty(key);
   });
 
   it("every page's words are there in both languages", () => {

@@ -32,6 +32,7 @@ import { scheduleSlugSuggestion } from "@/lib/products/slug-suggestion";
 import { numberTextClass } from "@/lib/number-font";
 import { cn } from "@/lib/utils";
 import { buildPublicMediaUrlFromKey, uploadFile } from "@/hooks/usePresignedUpload";
+import { PageHint } from "@/components/page/PageHint";
 
 const MAX_IMAGES = MAX_PRODUCT_IMAGES;
 type UploadStatus = "idle" | "uploading" | "uploaded" | "error";
@@ -48,6 +49,7 @@ export default function NewProductPage() {
   const locale = useLocale();
   const numClass = numberTextClass(locale);
   const tPages = useTranslations("pages");
+  const tHints = useTranslations("pageHints");
   const tCommon = useTranslations("common");
   const { data: categoryTree = [] } = useCategoriesQuery();
   const [saving, setSaving] = useState(false);
@@ -278,9 +280,12 @@ export default function NewProductPage() {
               <Undo2 className="h-4 w-4" />
             </button>
           </div>
-          <h1 className="text-2xl font-semibold text-foreground tracking-tight">
-            {tPages("productNewTitle")}
-          </h1>
+          <div className="flex min-w-0 items-center gap-1.5">
+            <h1 className="text-2xl font-semibold text-foreground tracking-tight">
+              {tPages("productNewTitle")}
+            </h1>
+            <PageHint>{tHints("productNew")}</PageHint>
+          </div>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <Button

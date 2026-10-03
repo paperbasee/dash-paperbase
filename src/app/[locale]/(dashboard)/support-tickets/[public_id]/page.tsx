@@ -9,6 +9,7 @@ import { Undo2 } from "lucide-react";
 import { useSupportTicketDetailQuery } from "@/hooks/useSupportTicketDetailQuery";
 import { formatDashboardDateTime } from "@/lib/datetime-display";
 import { notify } from "@/notifications";
+import { PageHint } from "@/components/page/PageHint";
 
 function labelFromValue(value: string): string {
   if (!value) return "—";
@@ -21,6 +22,7 @@ function labelFromValue(value: string): string {
 export default function SupportTicketDetailPage() {
   const locale = useLocale();
   const tPages = useTranslations("pages");
+  const tHints = useTranslations("pageHints");
   const router = useRouter();
   const params = useParams<{ public_id: string }>();
   const publicId = params.public_id;
@@ -57,9 +59,12 @@ export default function SupportTicketDetailPage() {
             <Undo2 className="h-4 w-4" />
           </button>
         </div>
-        <h1 className="text-2xl font-medium text-foreground">
-          {tPages("supportTicketDetailTitle")}
-        </h1>
+        <div className="flex min-w-0 items-center gap-1.5">
+          <h1 className="text-2xl font-medium text-foreground">
+            {tPages("supportTicketDetailTitle")}
+          </h1>
+          <PageHint>{tHints("ticketDetail")}</PageHint>
+        </div>
       </div>
 
       {!loading && error ? (

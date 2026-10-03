@@ -2,8 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { useRouter } from "@/i18n/navigation";
-import { Plus, Undo2 } from "lucide-react";
+import { Plus } from "lucide-react";
 import api from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -17,9 +16,10 @@ import type {
   PaginatedResponse,
 } from "@/types";
 import { useConfirm } from "@/context/ConfirmDialogContext";
-import { notify, normalizeError } from "@/notifications";
+import { notify } from "@/notifications";
 import { numberTextClass } from "@/lib/number-font";
 import { cn } from "@/lib/utils";
+import { PageHeader } from "@/components/page/PageHeader";
 
 type AttrForm = { name: string; order: string };
 type ValueForm = { value: string; order: string };
@@ -28,10 +28,10 @@ const emptyAttr: AttrForm = { name: "", order: "0" };
 const emptyValue: ValueForm = { value: "", order: "0" };
 
 export default function ProductAttributesPage() {
-  const router = useRouter();
   const locale = useLocale();
   const numClass = numberTextClass(locale);
   const tPages = useTranslations("pages");
+  const tHints = useTranslations("pageHints");
   const tCommon = useTranslations("common");
   const confirm = useConfirm();
   const [attributes, setAttributes] = useState<ProductAttributeAdmin[]>([]);
@@ -199,44 +199,21 @@ export default function ProductAttributesPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <header className="flex flex-wrap items-start justify-between gap-4">
-        <div className="flex items-start gap-3">
-          <div className="rounded-card bg-muted/80 px-1 py-1 hidden md:block">
-            <button
-              type="button"
-              onClick={() => router.back()}
-              aria-label={tPages("goBack")}
-              className="flex items-center justify-center rounded-ui p-1 text-muted-foreground hover:bg-muted"
-            >
-              <Undo2 className="h-4 w-4" />
-            </button>
-          </div>
-          <div>
-          <h1 className="text-2xl font-medium tracking-tight text-foreground">
-            {tPages("attributesTitle")}
-          </h1>
-          <p className="mt-1 text-sm text-muted-foreground md:hidden">
-            {tPages("attributesSubtitleBefore")}{" "}
+      <PageHeader
+        title={tPages("attributesTitle")}
+        hint={tHints.rich("attributes", {
+          link: (chunks) => (
             <ClickableText href="/variants" className="underline-offset-2">
-              {tPages("attributesSubtitleLink")}
+              {chunks}
             </ClickableText>
-            {tPages("attributesSubtitleAfter")}
-          </p>
-          </div>
-        </div>
+          ),
+        })}
+      >
         <Button type="button" size="sm" onClick={openAttrNew} disabled={attrEditing !== null}>
           <Plus className="mr-2 size-4" />
           {tPages("attributesNewAttribute")}
         </Button>
-      </header>
-
-      <p className="hidden text-sm text-muted-foreground md:block">
-        {tPages("attributesSubtitleBefore")}{" "}
-        <ClickableText href="/variants" className="underline-offset-2">
-          {tPages("attributesSubtitleLink")}
-        </ClickableText>
-        {tPages("attributesSubtitleAfter")}
-      </p>
+      </PageHeader>
 
       {/* Inline error text moved to toasts (keep form states only). */}
 

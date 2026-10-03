@@ -64,10 +64,6 @@ export function AbandonedCheckoutsTab() {
 
   return (
     <div className="space-y-4">
-      <p className="text-xs text-muted-foreground">
-        {tPages("abandonedIntro")}
-      </p>
-
       <div className="overflow-x-auto rounded-card border border-card-border bg-card">
         <table className="w-full text-left text-sm">
           <thead>
