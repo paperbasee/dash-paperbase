@@ -1,14 +1,14 @@
 import { describe, expect, it } from "vitest";
 
 import {
-  cellOf,
-  comparison,
-  COMPARE_GROUPS,
+  cardAction,
+  cardLines,
   groupDescription,
   groupPlans,
   groupSaving,
   highlightedGroup,
   planOn,
+  PLAN_LINES,
   yearlySaving,
   type Plan,
 } from "@/lib/plans-compare";
@@ -66,37 +66,51 @@ describe("yearlySaving", () => {
   });
 });
 
-describe("comparison", () => {
+describe("what each card lists (owner, 2026-10-03: Shopify's way)", () => {
   const groups = groupPlans(PLANS);
-  const shown = groups.map((group) => planOn(group, "monthly"));
+  const ids = (index: number, cycle: "monthly" | "yearly" = "monthly") => cardLines(groups, index, cycle);
 
-  it("reads each answer from the plan, not its name", () => {
-    const row = (id: string) => COMPARE_GROUPS.flatMap((g) => g.rows).find((r) => r.id === id)!;
-    expect(shown.map((p) => cellOf(p, row("overviewSales")))).toEqual([true, true]);
-    expect(shown.map((p) => cellOf(p, row("fraudCheck")))).toEqual([false, true]);
-    expect(shown.map((p) => cellOf(p, row("products")))).toEqual([100, 500]);
+  it("the first plan says what you get: every plan's lines, its cap, what it switches on", () => {
+    expect(ids(0)).toEqual({
+      plus: null,
+      lines: [
+        { id: "shop" },
+        { id: "orders" },
+        { id: "products", count: 100 },
+        { id: "steadfast" },
+        { id: "team" },
+        { id: "extras" },
+        { id: "overviewSales" },
+      ],
+    });
   });
 
-  it("never offers the theme switch, which locks nothing any more", () => {
-    const keys = COMPARE_GROUPS.flatMap((g) => g.rows).map((r) => r.key);
-    expect(keys).not.toContain("themes");
+  it("each plan after says only what it adds to the one before", () => {
+    expect(ids(1, "yearly")).toEqual({
+      plus: "Essential",
+      lines: [
+        { id: "products", count: 500 },
+        { id: "allAnalytics" },
+        { id: "fraudCheck" },
+        { id: "orderEmails" },
+        { id: "premiumSections" },
+      ],
+    });
   });
 
-  it("drops a row no plan has, and a group left empty", () => {
-    const bare = comparison([plan("Bare", "monthly", "1.00", { features: { basic_analytics: true } })]);
-    expect(bare).toEqual([{ id: "analytics", rows: [COMPARE_GROUPS[0].rows[0]] }]);
+  it("all analytics stands in for Overview and Sales, and the theme switch is never offered", () => {
+    const lines = ids(1).lines.map((line) => line.id);
+    expect(lines).not.toContain("overviewSales");
+    expect(PLAN_LINES.map((line) => line.key)).not.toContain("themes");
   });
 
-  it("keeps every row the real plans have", () => {
-    expect(comparison(shown).flatMap((g) => g.rows).map((r) => r.id)).toEqual([
-      "overviewSales",
-      "otherSections",
-      "live",
-      "fraudCheck",
-      "orderEmails",
-      "products",
-      "premiumSections",
-    ]);
+  it("no cap set is no cap at all, and a plan adding nothing lists nothing", () => {
+    const capped = { limits: { max_products: 100 }, features: { basic_analytics: true } };
+    const open = { features: { basic_analytics: true } };
+    const pair = groupPlans([plan("Small", "monthly", "100.00", capped), plan("Big", "monthly", "200.00", open)]);
+    expect(cardLines(pair, 1, "monthly").lines).toEqual([{ id: "unlimitedProducts" }]);
+    const same = groupPlans([plan("A", "monthly", "100.00", capped), plan("B", "monthly", "200.00", capped)]);
+    expect(cardLines(same, 1, "monthly").lines).toEqual([]);
   });
 });
 
@@ -125,5 +139,26 @@ describe("the cards (owner, 2026-10-03)", () => {
     expect(groupSaving(essential)).toBe(17);
     expect(groupSaving(premium)).toBe(17);
     expect(groupSaving(groupPlans([plan("Solo", "monthly", "500.00", {})])[0])).toBeNull();
+  });
+});
+
+describe("a card's button (owner, 2026-10-03)", () => {
+  const [essential, premium] = groupPlans(PLANS);
+  const on = { id: essential.monthly!.public_id, trial: false, ended: false, endDate: "2026-11-01" };
+
+  it("none on the shop's own paid plan while it runs, on either cycle", () => {
+    expect(cardAction(on, essential.monthly!)).toBeNull();
+    expect(cardAction(on, essential.yearly!)).toBeNull();
+  });
+
+  it("renew, or the other cycle, once it has ended", () => {
+    const ended = { ...on, ended: true };
+    expect(cardAction(ended, essential.monthly!)).toBe("renew");
+    expect(cardAction(ended, essential.yearly!)).toBe("switchToYearly");
+  });
+
+  it("select on a trial's plan, on every other plan, and with no plan", () => {
+    expect(cardAction({ ...on, trial: true }, essential.monthly!)).toBe("select");
+    expect(cardAction(null, premium.monthly!)).toBe("select");
   });
 });

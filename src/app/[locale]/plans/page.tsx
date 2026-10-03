@@ -2,7 +2,7 @@
 
 import { type ReactNode, useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { Check, X } from "lucide-react";
+import { Check } from "lucide-react";
 import { useRouter } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { getAccessToken } from "@/lib/auth";
@@ -13,15 +13,16 @@ import { numberTextClass } from "@/lib/number-font";
 import { cn } from "@/lib/utils";
 import { markPlansVisited } from "@/lib/plans-onboarding";
 import {
-  cellOf,
-  comparison,
+  cardAction,
+  cardLines,
   groupDescription,
   groupPlans,
   groupSaving,
   highlightedGroup,
   planOn,
   type BillingCycle,
-  type CompareRow,
+  type CardLine,
+  type CurrentPlan,
   type Plan,
   type PlanGroup,
 } from "@/lib/plans-compare";
@@ -30,20 +31,29 @@ import { SupportReadOnly } from "@/components/support/SupportReadOnly";
 
 type PageState = "loading" | "ready" | "error";
 
-/** The shop's plan now: a paid or trial plan in force. A lapsed or unpaid one is not "current". */
-function currentPlanOf(me: MeForRouting | null): { id: string; trial: boolean } | null {
+/**
+ * The shop's plan now: paid or on trial and in force, or just ended and in its grace days. A lapsed
+ * or unpaid one is not "current".
+ */
+function currentPlanOf(me: MeForRouting | null): CurrentPlan | null {
   const sub = me?.subscription;
   if (!sub?.plan_public_id) return null;
   if (sub.subscription_status !== "ACTIVE" && sub.subscription_status !== "GRACE") return null;
-  return { id: sub.plan_public_id, trial: Boolean(sub.is_trial) };
+  return {
+    id: sub.plan_public_id,
+    trial: Boolean(sub.is_trial),
+    ended: sub.subscription_status === "GRACE",
+    endDate: sub.end_date ?? null,
+  };
 }
 
 /**
  * Plans (owner, 2026-10-02; this look, 2026-10-03, from their reference): a card per plan -- its
- * price, its line, every feature ticked or crossed -- with the recommended one dark, a tag in a
- * cut corner (current plan, the yearly saving, recommended), and a yearly / monthly switch. The
- * cards are the comparison: "Compare plans" on a locked analytics section lands here (#compare).
- * Paying is the owner's alone; a team member reads the same page without the buttons.
+ * price, its line, and what it gives (the first what you get, each after "Everything in ..., plus:")
+ * -- with the recommended one dark, a tag in a cut corner (current plan, the yearly saving,
+ * recommended), and a yearly / monthly switch. "Compare plans" on a locked analytics section
+ * lands on the cards (#compare). Paying is the owner's alone; a team member reads the same page
+ * without the buttons.
  *
  * Rounder than the rest of the dashboard (whose corners are 3px) on purpose: the owner's
  * reference, approved as a mockup, on a page that stands outside the dashboard's frame.
@@ -112,7 +122,6 @@ export default function PlansPage() {
   const mayPay = !me?.is_moderator;
   const digits = (text: string) => toLocaleDigits(text, locale);
   const taka = (value: number) => `৳${digits(new Intl.NumberFormat("en-US").format(Math.round(value)))}`;
-  const rows = comparison(groups.map((group) => planOn(group, cycle))).flatMap((block) => block.rows);
   const withLines = groups.some((group) => groupDescription(group, locale));
 
   return (
@@ -162,17 +171,15 @@ export default function PlansPage() {
                 groups.length === 1 ? "mx-auto w-full max-w-md" : groups.length === 2 ? "md:grid-cols-2" : "lg:grid-cols-3",
               )}
             >
-              {groups.map((group) => (
+              {groups.map((group, index) => (
                 <PlanCard
                   key={group.name}
                   group={group}
                   plan={planOn(group, cycle)!}
-                  rows={rows}
+                  list={cardLines(groups, index, cycle)}
                   line={withLines ? groupDescription(group, locale) : null}
                   dark={group === highlighted}
-                  isCurrent={group === currentGroup}
-                  currentId={current?.id ?? null}
-                  isTrial={Boolean(current?.trial)}
+                  current={group === currentGroup ? current : null}
                   mayPay={mayPay}
                   busy={selectingId}
                   onSelect={select}
@@ -244,12 +251,10 @@ function Notch({ children }: { children: ReactNode }) {
 function PlanCard({
   group,
   plan,
-  rows,
+  list,
   line,
   dark,
-  isCurrent,
-  currentId,
-  isTrial,
+  current,
   mayPay,
   busy,
   onSelect,
@@ -259,13 +264,12 @@ function PlanCard({
 }: {
   group: PlanGroup;
   plan: Plan;
-  rows: CompareRow[];
+  list: { plus: string | null; lines: CardLine[] };
   /** Null when no plan has a line: then none leaves room for one. */
   line: string | null;
   dark: boolean;
-  isCurrent: boolean;
-  currentId: string | null;
-  isTrial: boolean;
+  /** Set on the shop's own plan. */
+  current: CurrentPlan | null;
   mayPay: boolean;
   busy: string | null;
   onSelect: (plan: Plan) => void;
@@ -274,14 +278,15 @@ function PlanCard({
   numClass: string;
 }) {
   const t = useTranslations("plansPage");
+  const locale = useLocale();
   const monthly = Number(plan.price);
   const yearly = plan.billing_cycle === "yearly";
   const saving = groupSaving(group);
   // The dark card shows what a month would cost without paying yearly, struck through.
   const was = dark && yearly && saving && group.monthly ? Number(group.monthly.price) : null;
 
-  const tag = isCurrent ? (
-    <Tag dot="bg-amber-400">{t(isTrial ? "trialBadge" : "currentBadge")}</Tag>
+  const tag = current ? (
+    <Tag dot="bg-amber-400">{t(current.trial ? "trialBadge" : "currentBadge")}</Tag>
   ) : dark && yearly && saving ? (
     <Tag dot="bg-zinc-900" className="bg-amber-300 text-zinc-900">
       {t("save", { percent: digits(String(saving)) })}
@@ -290,14 +295,11 @@ function PlanCard({
     <Tag dot="bg-green-600">{t("recommended")}</Tag>
   ) : null;
 
-  // Paying is by hand, each period: the plan the shop pays for now is renewed here, its other
-  // cycle switched to. A trial's plan is chosen like any other.
-  const action =
-    isCurrent && !isTrial
-      ? plan.public_id === currentId
-        ? t("renew", { plan: group.name })
-        : t(yearly ? "switchToYearly" : "switchToMonthly")
-      : t("select", { plan: group.name });
+  // A paid plan in force has no button (lib/plans-compare cardAction): it shows until when instead.
+  const kind = cardAction(current, plan);
+  const paidAndOn = kind === null;
+  const action = kind === "renew" || kind === "select" ? t(kind, { plan: group.name }) : kind ? t(kind) : null;
+  const until = current?.endDate && !current.ended ? formatDay(current.endDate, locale) : null;
 
   return (
     <section
@@ -340,44 +342,71 @@ function PlanCard({
 
       <hr className={cn("my-6 border-0 border-t-[1.5px] border-dashed", dark ? "border-zinc-700" : "border-border")} />
 
+      {list.plus ? (
+        <p className={cn("mb-3 text-[13px] font-medium", dark ? "text-zinc-300" : "text-foreground")}>
+          {t("everythingIn", { plan: list.plus })}
+        </p>
+      ) : null}
       <ul className="flex flex-1 flex-col gap-3">
-        {rows.map((row) => {
-          const cell = cellOf(plan, row);
-          const has = cell === true || typeof cell === "number";
-          return (
-            <li key={row.id} className={cn("flex items-center gap-3 text-[13.5px]", !has && (dark ? "text-zinc-500" : "text-muted-foreground/80"))}>
-              {has ? (
-                <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-green-600 text-white">
-                  <Check className="size-3" strokeWidth={3} aria-label={t("included")} role="img" />
-                </span>
-              ) : (
-                <span className="flex size-5 shrink-0 items-center justify-center">
-                  <X className="size-3.5" aria-label={t("notIncluded")} role="img" />
-                </span>
-              )}
-              <span className="min-w-0">
-                {typeof cell === "number" ? t(`cardRows.${row.id}`, { count: digits(new Intl.NumberFormat("en-US").format(cell)) }) : t(`rows.${row.id}`)}
-              </span>
-            </li>
-          );
-        })}
+        {list.lines.map((item) => (
+          <li key={item.id} className="flex items-center gap-3 text-[13.5px]">
+            <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-green-600 text-white">
+              <Check className="size-3" strokeWidth={3} aria-hidden />
+            </span>
+            <span className="min-w-0">
+              {item.count === undefined
+                ? t(`lines.${item.id}`)
+                : t(`lines.${item.id}`, { count: digits(new Intl.NumberFormat("en-US").format(item.count)) })}
+            </span>
+          </li>
+        ))}
       </ul>
 
-      {mayPay ? (
-        <Button
+      {paidAndOn ? (
+        // Where the button would be: the plan in force, and until when.
+        <p
           className={cn(
-            "mt-7 h-11 self-center rounded-full px-7",
-            dark ? "bg-white text-zinc-900 hover:bg-zinc-100" : "bg-muted text-foreground hover:bg-muted/70",
+            "mt-7 inline-flex h-11 items-center self-center rounded-full border px-6 text-sm font-medium",
+            dark ? "border-zinc-700 text-zinc-300" : "border-border text-muted-foreground",
           )}
-          loading={busy === plan.public_id}
-          disabled={busy !== null}
-          onClick={() => onSelect(plan)}
         >
-          {action}
-        </Button>
-      ) : null}
+          {until ? t("activeUntil", { date: until }) : t("currentBadge")}
+        </p>
+      ) : (
+        <div className="mt-7 flex flex-col items-center gap-2">
+          {current?.trial && until ? (
+            <p className={cn("text-[13px]", dark ? "text-zinc-400" : "text-muted-foreground")}>
+              {t("trialUntil", { date: until })}
+            </p>
+          ) : null}
+          {mayPay && action ? (
+            <Button
+              className={cn(
+                "h-11 rounded-full px-7",
+                dark ? "bg-white text-zinc-900 hover:bg-zinc-100" : "bg-muted text-foreground hover:bg-muted/70",
+              )}
+              loading={busy === plan.public_id}
+              disabled={busy !== null}
+              onClick={() => onSelect(plan)}
+            >
+              {action}
+            </Button>
+          ) : null}
+        </div>
+      )}
     </section>
   );
+}
+
+/** "12 Nov 2026" in the page's language, from the API's date. */
+function formatDay(ymd: string, locale: string): string {
+  const [year, month, day] = ymd.slice(0, 10).split("-").map(Number);
+  return new Intl.DateTimeFormat(locale === "bn" ? "bn-BD" : "en-GB", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    timeZone: "UTC",
+  }).format(Date.UTC(year, month - 1, day));
 }
 
 function Tag({ dot, className, children }: { dot: string; className?: string; children: ReactNode }) {

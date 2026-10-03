@@ -1,8 +1,9 @@
 /**
  * The Plans page's cards (owner chose "the Shopify way", 2026-10-02, and its look on 2026-10-03):
- * each plan once with its monthly and yearly prices and every feature, ticked or crossed. What a plan
- * holds is read from the plan itself (billing/plans/: `features.features` switches and
- * `features.limits`), never from its name, so a plan the admin changes or adds compares itself.
+ * each plan once with its monthly and yearly prices, and what it gives -- the first what you get,
+ * each after it what it adds. What a plan switches is read from the plan itself (billing/plans/:
+ * `features.features` and `features.limits`), never from its name, so a plan the admin changes or
+ * adds describes itself.
  */
 
 export type BillingCycle = "monthly" | "yearly";
@@ -75,62 +76,90 @@ export function yearlySaving(groups: PlanGroup[]): { low: number; high: number }
   return { low: Math.min(...savings), high: Math.max(...savings) };
 }
 
-export type CompareRow = {
-  /** Its words: plansPage.rows.<id>. */
-  id: string;
-  /** A switch in `features.features`, or a number in `features.limits`. */
-  kind: "feature" | "limit";
-  key: string;
-};
+/** The shop's own plan, as the Plans page reads it. */
+export type CurrentPlan = { id: string; trial: boolean; ended: boolean; endDate: string | null };
 
 /**
- * Every card's lines, in this order and in the merchant's words (plansPage.rows; a limit's number
- * in plansPage.cardRows). Only what a plan really switches: `themes` is left out, as since the one-theme merge (2026-09-20) it locks
- * nothing a merchant can reach (api billing/feature_gate.py).
+ * A card's button (owner, 2026-10-03). The shop's own paid plan in force has none: paying is not by
+ * use, and paying again ends the plan that day (api billing activate_subscription), so the days
+ * left would be lost. Once it has ended (its grace days) it is renewed, or its other cycle taken.
+ * A trial's plan, and every other plan, is chosen like any other.
  */
-export const COMPARE_GROUPS: { id: string; rows: CompareRow[] }[] = [
-  {
-    id: "analytics",
-    rows: [
-      { id: "overviewSales", kind: "feature", key: "basic_analytics" },
-      { id: "otherSections", kind: "feature", key: "advanced_analytics" },
-      { id: "live", kind: "feature", key: "advanced_analytics" },
-    ],
-  },
-  {
-    id: "orders",
-    rows: [
-      { id: "fraudCheck", kind: "feature", key: "fraud_check" },
-      { id: "orderEmails", kind: "feature", key: "order_email_notifications" },
-    ],
-  },
-  {
-    id: "shop",
-    rows: [
-      { id: "products", kind: "limit", key: "max_products" },
-      { id: "premiumSections", kind: "feature", key: "premium_sections" },
-    ],
-  },
-];
-
-/** A plan's answer for a row: included or not, or the limit's number (null: none set). */
-export function cellOf(plan: Plan | null, row: CompareRow): boolean | number | null {
-  if (row.kind === "limit") {
-    const limit = plan?.features?.limits?.[row.key];
-    return typeof limit === "number" ? limit : null;
-  }
-  return plan?.features?.features?.[row.key] === true;
+export function cardAction(
+  current: CurrentPlan | null,
+  plan: Plan,
+): "renew" | "switchToYearly" | "switchToMonthly" | "select" | null {
+  if (!current || current.trial) return "select";
+  if (!current.ended) return null;
+  if (plan.public_id === current.id) return "renew";
+  return plan.billing_cycle === "yearly" ? "switchToYearly" : "switchToMonthly";
 }
 
-/** The groups and rows worth a line: a row no plan has says nothing. */
-export function comparison(plans: (Plan | null)[]): { id: string; rows: CompareRow[] }[] {
-  return COMPARE_GROUPS.map((group) => ({
-    id: group.id,
-    rows: group.rows.filter((row) =>
-      plans.some((plan) => {
-        const cell = cellOf(plan, row);
-        return cell === true || typeof cell === "number";
-      }),
-    ),
-  })).filter((group) => group.rows.length > 0);
+/** A switch in `features.features`, or a number in `features.limits`, that a plan may change. */
+export type PlanLine = { id: string; kind: "feature" | "limit"; key: string };
+
+/**
+ * What a plan may switch, in the order the cards list it (words: plansPage.lines.<id>). Only what a
+ * plan really switches: `themes` is left out, as since the one-theme merge (2026-09-20) it locks
+ * nothing a merchant can reach (api billing/feature_gate.py). All analytics takes in Overview and
+ * Sales, so a plan with both says the first only.
+ */
+export const PLAN_LINES: PlanLine[] = [
+  { id: "products", kind: "limit", key: "max_products" },
+  { id: "allAnalytics", kind: "feature", key: "advanced_analytics" },
+  { id: "overviewSales", kind: "feature", key: "basic_analytics" },
+  { id: "fraudCheck", kind: "feature", key: "fraud_check" },
+  { id: "orderEmails", kind: "feature", key: "order_email_notifications" },
+  { id: "premiumSections", kind: "feature", key: "premium_sections" },
+];
+
+/**
+ * What every plan has -- nothing a plan switches, so it is the same text on the first card
+ * (owner, 2026-10-03). Steadfast only: the one courier a shop can send to.
+ */
+export const EVERY_PLAN = ["shop", "orders", "steadfast", "team", "extras"] as const;
+
+/** One line of a card: its words (plansPage.lines.<id>), and a limit's number. */
+export type CardLine = { id: string; count?: number };
+
+/** A plan's product cap: a number, or null for none set -- no cap at all (api products/services.py). */
+function productCap(plan: Plan | null): number | null {
+  const cap = plan?.features?.limits?.max_products;
+  return typeof cap === "number" ? cap : null;
+}
+
+function productLine(plan: Plan | null): CardLine {
+  const cap = productCap(plan);
+  return cap === null ? { id: "unlimitedProducts" } : { id: "products", count: cap };
+}
+
+/** The switches a plan has on, in PLAN_LINES order; Overview and Sales go without saying beside all analytics. */
+function switchedOn(plan: Plan | null): string[] {
+  const on = PLAN_LINES.filter((line) => line.kind === "feature" && plan?.features?.features?.[line.key] === true).map(
+    (line) => line.id,
+  );
+  return on.includes("allAnalytics") ? on.filter((id) => id !== "overviewSales") : on;
+}
+
+/**
+ * A card's list, Shopify's way: the first plan says what you get -- what every plan has, its
+ * product cap, what it switches on -- and each plan after it says "Everything in <the plan before>,
+ * plus:" and only what it adds: a bigger cap, and the switches the one before lacks.
+ */
+export function cardLines(groups: PlanGroup[], index: number, cycle: BillingCycle): { plus: string | null; lines: CardLine[] } {
+  const plan = planOn(groups[index], cycle);
+  if (index === 0) {
+    const [shop, orders, ...rest] = EVERY_PLAN;
+    const features = switchedOn(plan).map((id) => ({ id }));
+    return { plus: null, lines: [{ id: shop }, { id: orders }, productLine(plan), ...rest.map((id) => ({ id })), ...features] };
+  }
+  const before = planOn(groups[index - 1], cycle);
+  const [cap, capBefore] = [productCap(plan), productCap(before)];
+  const moreProducts = capBefore !== null && (cap === null || cap > capBefore);
+  const had = new Set(switchedOn(before));
+  const added = switchedOn(plan).filter((id) => !had.has(id));
+  return {
+    plus: groups[index - 1].name,
+    lines: [...(moreProducts ? [productLine(plan)] : []), ...added.map((id) => ({ id }))],
+  };
 }

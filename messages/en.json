@@ -3658,25 +3658,28 @@
     "switchToYearly": "Switch to yearly",
     "switchToMonthly": "Switch to monthly",
     "ownerOnly": "Only the shop owner can change the plan.",
-    "rows": {
-      "overviewSales": "Overview and Sales",
-      "otherSections": "Traffic, Products, Districts, Delivery and Customers",
-      "live": "Live: who is on your shop now",
-      "fraudCheck": "Fraud check before you send a parcel",
-      "orderEmails": "An email for every new order",
-      "products": "Products you can add",
-      "premiumSections": "Premium sections in Customize"
-    },
-    "included": "Included",
-    "notIncluded": "Not included",
     "empty": "No plans are available right now. Please contact support.",
     "errorLoad": "We couldn't load the plans. Refresh the page to try again.",
     "initiateError": "We couldn't start the payment. Try again.",
     "backHome": "Back to home",
     "cycle": "Billing cycle",
-    "cardRows": {
-      "products": "Up to {count} products"
-    }
+    "lines": {
+      "shop": "Your own online shop, designed in Customize",
+      "orders": "Orders, customers and stock in one place",
+      "products": "Up to {count} products",
+      "unlimitedProducts": "Unlimited products",
+      "steadfast": "Send parcels to Steadfast from the order",
+      "team": "A team with roles: Admin, Manager and Staff",
+      "extras": "Coupons, reviews, blog and pop-ups",
+      "overviewSales": "Analytics: Overview and Sales",
+      "allAnalytics": "All analytics: Traffic, Products, Districts, Delivery, Customers and Live",
+      "fraudCheck": "Fraud check before you send a parcel",
+      "orderEmails": "An email for every new order",
+      "premiumSections": "Premium sections in Customize"
+    },
+    "everythingIn": "Everything in {plan}, plus:",
+    "activeUntil": "Active until {date}",
+    "trialUntil": "Free trial until {date}"
   },
   "checkoutPage": {
     "title": "Complete your payment",
