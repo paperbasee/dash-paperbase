@@ -136,7 +136,8 @@ export default function AppsSection({
       <Dialog open={PremiumCard !== null} onOpenChange={(open) => !open && setPremiumFor(null)}>
         <DialogContent
           showCloseButton={false}
-          className="max-w-sm overflow-visible rounded-none border-0 bg-transparent [box-shadow:none]"
+          // A phone keeps a margin either side, as every card on it does.
+          className="w-[calc(100%-2rem)] max-w-sm overflow-visible rounded-none border-0 bg-transparent [box-shadow:none]"
         >
           <DialogTitle className="sr-only">{t("apps.premium")}</DialogTitle>
           {PremiumCard ? <PremiumCard onBack={() => setPremiumFor(null)} /> : null}
