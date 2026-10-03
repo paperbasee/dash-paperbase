@@ -11,8 +11,8 @@ import { cn } from "@/lib/utils";
  * Analytics on a plan without it (owner, 2026-10-04, after a "premium feature" sheet the owner sent;
  * the dashboard's own corners, like every other card):
  * an open lock, what Premium shows, what else it brings, and the way there -- Upgrade for the
- * owner (owner power "billing"), "ask the owner" for a team member -- or back. Over the blurred
- * analytics page, and in Settings > Apps when Analytics is switched on without the plan.
+ * owner (owner power "billing"), "ask the owner" for a team member -- or back. In Settings > Apps,
+ * when Analytics is switched on without the plan (the page itself sends them to the plans).
  */
 export function AnalyticsPremiumCard({ onBack, className }: { onBack: () => void; className?: string }) {
   const t = useTranslations("analyticsPage.premium");

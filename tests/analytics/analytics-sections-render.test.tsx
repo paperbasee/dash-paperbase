@@ -32,8 +32,6 @@ import { Overview } from "@/app/[locale]/(dashboard)/analytics/_sections/Overvie
 import { Products } from "@/app/[locale]/(dashboard)/analytics/_sections/Products";
 import { Sales } from "@/app/[locale]/(dashboard)/analytics/_sections/Sales";
 import { Traffic } from "@/app/[locale]/(dashboard)/analytics/_sections/Traffic";
-import { AnalyticsLocked } from "@/app/[locale]/(dashboard)/analytics/_components/AnalyticsLocked";
-import { sampleTraffic } from "@/app/[locale]/(dashboard)/analytics/_lib/samples";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import bn from "../../messages/bn.json";
 import en from "../../messages/en.json";
@@ -46,16 +44,9 @@ vi.mock("@/i18n/navigation", () => ({
       {children}
     </a>
   ),
-  useRouter: () => ({ back: vi.fn(), push: vi.fn() }),
 }));
 
-// The report hooks: the locked page must never call them (no request for a report).
-const queries = vi.hoisted(() => ({ useSection: vi.fn(), useLive: vi.fn() }));
-vi.mock("@/app/[locale]/(dashboard)/analytics/_lib/queries", () => queries);
 
-// Who is looking: the plan is the owner's to change (owner power "billing").
-const viewer = vi.hoisted(() => ({ isOwner: true }));
-vi.mock("@/hooks/useOwnerPower", () => ({ useOwnerPower: () => () => viewer.isOwner }));
 
 const period: PeriodInfo = {
   preset: "7",
@@ -240,63 +231,6 @@ describe.each(["en", "bn"] as const)("every section, in %s", (locale) => {
     ["live", <Live key="l" report={live} />],
   ])("%s draws", (_, section) => {
     expect(draw(locale, section).length).toBeGreaterThan(500);
-  });
-});
-
-describe("the analytics page without the plan (owner, 2026-10-04: Premium only)", () => {
-  const week = { preset: "7", compare: "previous" } as const;
-  const locked = (locale: "en" | "bn" = "en") => draw(locale, <AnalyticsLocked period={week} />);
-
-  test("the real Overview, from samples, blurred and out of reach, under the Premium card", () => {
-    const html = locked();
-    expect(html).toContain('aria-hidden="true"');
-    expect(html).toMatch(/inert=""/);
-    expect(html).toContain("blur-[7px]");
-    expect(text(html)).toContain(en.analyticsPage.premium.title);
-    expect(text(html)).toContain(en.analyticsPage.premium.alsoTitle);
-  });
-
-  test("what is drawn is the sample's, never a shop's", () => {
-    expect(text(locked())).toContain("Product 1");
-  });
-
-  test("the chart's days are the days picked", () => {
-    const report = sampleTraffic({ preset: "custom", start: "2026-09-01", end: "2026-09-30", compare: "previous" });
-    expect(report.series.data.map((p) => p.date)).toEqual(
-      Array.from({ length: 30 }, (_, i) => `2026-09-${String(i + 1).padStart(2, "0")}`),
-    );
-    expect(report.period.compare_start_date).toBe("2026-08-02");
-    const today = sampleTraffic({ preset: "custom", start: "2026-09-01", end: "2026-09-01", compare: "previous" });
-    expect(today.series.data).toHaveLength(24);
-    expect(today.series.data[9].date).toBe("2026-09-01T09:00:00+06:00");
-  });
-
-  test("nothing asks the API for a report", () => {
-    queries.useSection.mockClear();
-    queries.useLive.mockClear();
-    locked();
-    locked("bn");
-    expect(queries.useSection).not.toHaveBeenCalled();
-    expect(queries.useLive).not.toHaveBeenCalled();
-  });
-
-  test("the owner can upgrade, or go back", () => {
-    viewer.isOwner = true;
-    const html = locked();
-    expect(html).toMatch(/<a href="\/plans"[^>]*>Upgrade<\/a>/);
-    expect(text(html)).toContain("Go back");
-  });
-
-  test("a team member is sent to the owner", () => {
-    viewer.isOwner = false;
-    const html = locked();
-    expect(text(html)).toContain(en.analyticsPage.premium.askOwner);
-    expect(html).not.toContain('href="/plans"');
-    viewer.isOwner = true;
-  });
-
-  test("in Bangla too", () => {
-    expect(text(locked("bn"))).toContain(bn.analyticsPage.premium.title);
   });
 });
 

@@ -7,11 +7,11 @@ import { useLocale, useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { planIncludesApp } from "@/config/apps";
 import { useBranding } from "@/context/BrandingContext";
 import { useFeatures } from "@/hooks/useFeatures";
 import { useRouter } from "@/i18n/navigation";
 
-import { AnalyticsLocked } from "./_components/AnalyticsLocked";
 import { CARD } from "./_components/kit";
 import { DownloadMenu } from "./_components/DownloadMenu";
 import { CompareMenu, PeriodChips } from "./_components/PeriodControls";
@@ -47,8 +47,8 @@ import { Traffic } from "./_sections/Traffic";
  * chosen, compared with the days before or a year before. The section and the
  * days live in the address bar.
  *
- * The whole page is Premium (owner, 2026-10-04): a plan without analytics sees
- * the Overview blurred, from made-up numbers, under the Premium card.
+ * The whole page is Premium (owner, 2026-10-04): a plan without analytics never
+ * sees it -- the address sends them to the plans, which say why.
  */
 export default function AnalyticsPage() {
   const t = useTranslations("analyticsPage");
@@ -56,8 +56,9 @@ export default function AnalyticsPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { currencySymbol } = useBranding();
-  const { hasFeature, loading } = useFeatures();
-  const premium = hasFeature("advanced_analytics");
+  const { features, loading } = useFeatures();
+  // Known not to be on the plan -- not merely unloaded or failed to load, which keeps the page.
+  const notOnPlan = !planIncludesApp("analytics", features);
 
   const period = periodFromParams(new URLSearchParams(searchParams.toString()));
   const asked = searchParams.get("section") as SectionKey | null;
@@ -81,17 +82,12 @@ export default function AnalyticsPage() {
     [format, period.compare, show],
   );
 
-  if (loading) return null;
-  if (!premium) {
-    return (
-      <AnalyticsProvider value={view}>
-        <div className="flex w-full flex-col gap-4 pb-10 sm:gap-5">
-          <h1 className="pt-1 text-[22px] font-semibold tracking-tight text-foreground sm:text-2xl">{t("title")}</h1>
-          <AnalyticsLocked period={period} />
-        </div>
-      </AnalyticsProvider>
-    );
-  }
+  useEffect(() => {
+    // Replaced, so Back does not return to an address that only sends them on again.
+    if (notOnPlan) router.replace("/plans?from=analytics");
+  }, [notOnPlan, router]);
+
+  if (loading || notOnPlan) return null;
 
   return (
     <AnalyticsProvider value={view}>

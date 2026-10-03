@@ -1,8 +1,9 @@
 "use client";
 
 import { type ReactNode, useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
-import { Check } from "lucide-react";
+import { Check, Star } from "lucide-react";
 import { useRouter } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { getAccessToken } from "@/lib/auth";
@@ -51,9 +52,9 @@ function currentPlanOf(me: MeForRouting | null): CurrentPlan | null {
  * Plans (owner, 2026-10-02; this look, 2026-10-03, from their reference): a card per plan -- its
  * price, its line, and what it gives (the first what you get, each after "Everything in ..., plus:")
  * -- with the recommended one dark, a tag in a cut corner (current plan, the yearly saving,
- * recommended), and a yearly / monthly switch. "Compare plans" on a locked analytics section
- * lands on the cards (#compare). Paying is the owner's alone; a team member reads the same page
- * without the buttons.
+ * recommended), and a yearly / monthly switch. A shop sent here from Analytics, which its plan
+ * does not include (`?from=analytics`), is told so at the top. Paying is the owner's alone; a team
+ * member reads the same page without the buttons.
  *
  * Rounder than the rest of the dashboard (whose corners are 3px) on purpose: the owner's
  * reference, approved as a mockup, on a page that stands outside the dashboard's frame.
@@ -63,6 +64,7 @@ export default function PlansPage() {
   const numClass = numberTextClass(locale);
   const t = useTranslations("plansPage");
   const router = useRouter();
+  const fromAnalytics = useSearchParams().get("from") === "analytics";
 
   const [pageState, setPageState] = useState<PageState>("loading");
   const [plans, setPlans] = useState<Plan[]>([]);
@@ -88,13 +90,6 @@ export default function PlansPage() {
       })
       .catch(() => setPageState("error"));
   }, [router]);
-
-  // "Compare plans" opens this page at the cards, which are drawn only once the plans are in.
-  useEffect(() => {
-    if (pageState === "ready" && window.location.hash === "#compare") {
-      document.getElementById("compare")?.scrollIntoView({ block: "start" });
-    }
-  }, [pageState]);
 
   async function select(plan: Plan) {
     setSelectingId(plan.public_id);
@@ -128,6 +123,12 @@ export default function PlansPage() {
     <div className="min-h-screen bg-(--plans-page) px-4 py-10 text-foreground [--plans-page:#f3f3f2] sm:py-14 dark:[--plans-page:hsl(var(--background))]">
       <div className="mx-auto flex max-w-5xl flex-col">
         <p className="text-[13px] font-semibold tracking-wide text-muted-foreground">Paperbase</p>
+        {fromAnalytics ? (
+          <p className="mt-3 inline-flex w-fit items-center gap-2 rounded-full bg-amber-100 px-3 py-1 text-[13px] font-medium text-amber-900 dark:bg-amber-400/15 dark:text-amber-200">
+            <Star className="size-3.5 shrink-0 fill-amber-400 text-amber-400 dark:fill-amber-300 dark:text-amber-300" aria-hidden />
+            {t("fromAnalytics")}
+          </p>
+        ) : null}
         <header className="mb-7 mt-1.5 flex flex-wrap items-end justify-between gap-4">
           <div className="min-w-0">
             <h1 className="text-3xl font-medium tracking-tight sm:text-[40px] sm:leading-tight">{t("title")}</h1>
@@ -165,9 +166,8 @@ export default function PlansPage() {
               </div>
             )}
             <div
-              id="compare"
               className={cn(
-                "grid scroll-mt-6 gap-5",
+                "grid gap-5",
                 groups.length === 1 ? "mx-auto w-full max-w-md" : groups.length === 2 ? "md:grid-cols-2" : "lg:grid-cols-3",
               )}
             >

@@ -3644,6 +3644,7 @@
   "plansPage": {
     "title": "Choose your plan",
     "subtitle": "Pick the plan for your shop. Paid by bKash or Nagad.",
+    "fromAnalytics": "Analytics is part of Premium",
     "currentLine": "You're on {plan}.",
     "trialLine": "You're on a free trial of {plan}.",
     "shopOnLine": "This shop is on {plan}.",
