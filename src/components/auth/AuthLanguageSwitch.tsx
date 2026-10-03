@@ -11,17 +11,24 @@ import { cn } from "@/lib/utils";
 const LOCALES: readonly AppLocale[] = ["en", "bn"];
 
 /**
- * English / বাংলা, for pages a person sees before the dashboard's own menu: sign in, sign up
- * and setup. Remembered the way the sidebar's switch remembers it, and the page's query (a
- * `next` return path, an email link's token) is kept.
+ * English / বাংলা, for pages a person sees outside the dashboard's own menu: sign in, sign up,
+ * setup and payment. Remembered the way the sidebar's switch remembers it, and the page's query
+ * (a `next` return path, an email link's token) is kept -- unless the page reads in its own
+ * language and takes the choice itself (`onChoose`).
  */
 export function AuthLanguageSwitch({
   className,
   onPhoto = false,
+  onChoose,
 }: {
   className?: string;
   /** Drawn over the sign-in photos (a phone's top corner): light on dark, whatever the theme. */
   onPhoto?: boolean;
+  /**
+   * For a page in its own language (the payment page): the choice goes here, and the dashboard's
+   * language -- the address, what the sidebar's switch remembers -- stays as it is.
+   */
+  onChoose?: (locale: AppLocale) => void;
 }) {
   const locale = useLocale();
   const t = useTranslations("language");
@@ -31,6 +38,10 @@ export function AuthLanguageSwitch({
 
   function choose(next: AppLocale) {
     if (next === locale) return;
+    if (onChoose) {
+      onChoose(next);
+      return;
+    }
     try {
       localStorage.setItem(CORE_LOCALE_STORAGE_KEY, next);
     } catch {
