@@ -90,15 +90,15 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
     id: "2026-10-04-a-friendlier-empty-trash",
     date: "2026-10-04",
-    version: "4.172.1",
+    version: "4.172.2",
     tag: "improved",
     title: {
       en: "A friendlier empty Trash",
       bn: "ফাঁকা ট্র্যাশ এখন আরও সুন্দর",
     },
     body: {
-      en: "An empty Trash now shows the same little folder as Blog and Reviews, and says what it is for: what you delete waits there for 15 days, so you can bring it back.",
-      bn: "ফাঁকা ট্র্যাশে এখন ব্লগ আর রিভিউয়ের মতো একই ছোট ফোল্ডার দেখা যায়, আর বলে এটি কিসের জন্য: যা মুছে ফেলেন তা ১৫ দিন সেখানে থাকে, যাতে ফিরিয়ে আনতে পারেন।",
+      en: "An empty Trash now shows a little bin whose lid lifts when you touch it, and says what it is for: what you delete waits there for 15 days, so you can bring it back.",
+      bn: "ফাঁকা ট্র্যাশে এখন একটি ছোট বিন দেখা যায়, ছুঁলেই যার ঢাকনা খুলে যায়, আর বলে এটি কিসের জন্য: যা মুছে ফেলেন তা ১৫ দিন সেখানে থাকে, যাতে ফিরিয়ে আনতে পারেন।",
     },
     href: "/trash",
   },
