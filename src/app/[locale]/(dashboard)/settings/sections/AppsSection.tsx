@@ -1,12 +1,13 @@
 "use client";
 
 import { useState, type ComponentType } from "react";
-import { Lock } from "lucide-react";
+import { Star } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { AnalyticsPremiumCard } from "@/components/premium/AnalyticsPremiumCard";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import {
   APP_CONFIG,
+  APP_PLAN_FEATURE,
   APPS_SCREEN_ALWAYS_ON_IDS,
   APPS_SCREEN_SWITCHABLE_IDS,
   planIncludesApp,
@@ -97,7 +98,17 @@ export default function AppsSection({
                 >
                   <Icon className="size-5 shrink-0 text-muted-foreground" />
                   <div className="min-w-0">
-                    <p className="font-medium text-foreground">{t(`apps.items.${id}.label` as never)}</p>
+                    <p className="flex items-center gap-1.5 font-medium text-foreground">
+                      {t(`apps.items.${id}.label` as never)}
+                      {/* A Premium app (owner, 2026-10-04): a gold star by its name, on every plan. */}
+                      {APP_PLAN_FEATURE[id] ? (
+                        <Star
+                          role="img"
+                          aria-label={t("apps.premium")}
+                          className="size-3.5 shrink-0 fill-amber-400 text-amber-400 dark:fill-amber-300 dark:text-amber-300"
+                        />
+                      ) : null}
+                    </p>
                     <p className="text-xs text-muted-foreground">{t(`apps.items.${id}.description` as never)}</p>
                   </div>
                   <label
@@ -110,16 +121,9 @@ export default function AppsSection({
                       disabled={!canManage}
                       className="form-checkbox"
                     />
-                    {included ? (
-                      <span className="whitespace-nowrap text-sm text-muted-foreground">
-                        {on ? t("apps.enabled") : t("apps.disabled")}
-                      </span>
-                    ) : (
-                      <span className="inline-flex items-center gap-1 whitespace-nowrap text-sm font-medium text-foreground">
-                        <Lock className="size-3.5" aria-hidden />
-                        {t("apps.premium")}
-                      </span>
-                    )}
+                    <span className="whitespace-nowrap text-sm text-muted-foreground">
+                      {on ? t("apps.enabled") : t("apps.disabled")}
+                    </span>
                   </label>
                 </div>
               );
