@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { DeferredNavLink } from "@/components/navigation/DeferredNavLink";
+import { EmptyFolder } from "@/components/EmptyFolder";
 import { FunnelIcon, Undo2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { FilterBar } from "@/components/filters/FilterBar";
@@ -98,6 +99,9 @@ export default function BlogListPage() {
     if (!filtersActive) setFiltersOpen(false);
   }, [filters.published_date, filters.search, filters.tag]);
 
+  // No posts at all: the folder below says so and holds the one "Write a post" button (owner, 2026-10-03).
+  const noPostsYet = !loading && blogs.length === 0 && !filtersActive;
+
   return (
     <div className="min-w-0 space-y-6">
       <div className="flex items-center justify-between gap-4 flex-wrap">
@@ -114,12 +118,14 @@ export default function BlogListPage() {
           </div>
           <h1 className="text-2xl font-medium leading-relaxed text-foreground">{tNav("blog")}</h1>
         </div>
-        <DeferredNavLink
-          href="/blog/new"
-          className="shrink-0 rounded-card bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90"
-        >
-          {tNav("blogNew")}
-        </DeferredNavLink>
+        {noPostsYet ? null : (
+          <DeferredNavLink
+            href="/blog/new"
+            className="shrink-0 rounded-card bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90"
+          >
+            {tNav("blogNew")}
+          </DeferredNavLink>
+        )}
       </div>
 
       <div className="flex items-start justify-between gap-3">
@@ -192,24 +198,26 @@ export default function BlogListPage() {
         </FilterBar>
       ) : null}
 
-      {!loading && blogs.length === 0 ? (
+      {noPostsYet ? (
+        <EmptyFolder
+          title={tPages("blogListEmpty")}
+          line={tPages("blogListEmptyLine")}
+          action={{ href: "/blog/new", label: tPages("blogListWrite") }}
+        />
+      ) : !loading && blogs.length === 0 ? (
         <Card className="flex flex-col items-center justify-center gap-3 py-12 text-center">
-          <p className="text-sm text-muted-foreground">
-            {filtersActive ? tPages("blogListNoMatches") : tPages("blogListEmpty")}
-          </p>
-          {filtersActive ? (
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => {
-                setSearchInput("");
-                clearFilters();
-              }}
-            >
-              {tPages("filtersClear")}
-            </Button>
-          ) : null}
+          <p className="text-sm text-muted-foreground">{tPages("blogListNoMatches")}</p>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              setSearchInput("");
+              clearFilters();
+            }}
+          >
+            {tPages("filtersClear")}
+          </Button>
         </Card>
       ) : !loading ? (
         <div className="rounded-card border border-card-border bg-card p-3">

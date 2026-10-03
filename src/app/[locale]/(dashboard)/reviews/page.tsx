@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
@@ -21,6 +21,7 @@ import { useBrandsQuery } from "@/hooks/useBrandsQuery";
 import type { AdminReview } from "@/types";
 import { Stars } from "@/components/reviews/Stars";
 import { AddReviewForm } from "@/components/reviews/AddReviewForm";
+import { EmptyFolder } from "@/components/EmptyFolder";
 import { useOpenFromAddress } from "@/hooks/useOpenFromAddress";
 
 type Status = AdminReview["status"];
@@ -57,6 +58,7 @@ export default function ReviewsPage() {
   // The review a search result named: shown in its tab, scrolled to and marked.
   const [marked, setMarked] = useState<string | null>(null);
   const [adding, setAdding] = useState(false);
+  const addForm = useRef<HTMLDivElement>(null);
   const [busy, setBusy] = useState<string | null>(null);
 
   const { data: reviews = [], isLoading, isError, error } = useReviewsQuery(tab);
@@ -130,6 +132,10 @@ export default function ReviewsPage() {
     }
   }
 
+  // An empty Waiting or Live tab: its folder holds the one "Add a review" button (owner, 2026-10-03).
+  // A review the shop adds goes live at once, so it is not offered among the hidden.
+  const folderAdds = !isLoading && reviews.length === 0 && tab !== "rejected";
+
   return (
     <div className="space-y-8">
       <div className="flex flex-wrap items-center justify-between gap-4">
@@ -147,27 +153,31 @@ export default function ReviewsPage() {
           <h1 className="text-2xl font-medium text-foreground">{tPages("reviewsTitle")}</h1>
         </div>
 
-        <div className="flex flex-wrap items-center justify-end gap-3">
-          <button
-            type="button"
-            onClick={() => setAdding((open) => !open)}
-            className="rounded-card bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
-          >
-            {adding ? tPages("reviewsCancelAdd") : tPages("reviewsAdd")}
-          </button>
-        </div>
+        {adding || !folderAdds ? (
+          <div className="flex flex-wrap items-center justify-end gap-3">
+            <button
+              type="button"
+              onClick={() => setAdding((open) => !open)}
+              className="rounded-card bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+            >
+              {adding ? tPages("reviewsCancelAdd") : tPages("reviewsAdd")}
+            </button>
+          </div>
+        ) : null}
       </div>
 
       <p className="max-w-2xl text-sm text-muted-foreground">{tPages("reviewsIntro")}</p>
 
       {adding ? (
-        <AddReviewForm
-          onDone={() => {
-            setAdding(false);
-            setTab("published");
-            refresh();
-          }}
-        />
+        <div ref={addForm} className="scroll-mt-24">
+          <AddReviewForm
+            onDone={() => {
+              setAdding(false);
+              setTab("published");
+              refresh();
+            }}
+          />
+        </div>
       ) : null}
 
       <div className="flex flex-wrap gap-2">
@@ -194,9 +204,21 @@ export default function ReviewsPage() {
       {isLoading ? (
         <p className="text-sm text-muted-foreground">{tCommon("loading")}</p>
       ) : reviews.length === 0 ? (
-        <p className="rounded-card border border-card-border bg-card px-4 py-8 text-center text-sm text-muted-foreground">
-          {tPages(`reviewsEmpty_${tab}` as never)}
-        </p>
+        <EmptyFolder
+          title={tPages(`reviewsEmptyTitle_${tab}` as never)}
+          line={tPages(`reviewsEmptyLine_${tab}` as never)}
+          action={
+            folderAdds && !adding
+              ? {
+                  label: tPages("reviewsAdd"),
+                  onClick: () => {
+                    setAdding(true);
+                    requestAnimationFrame(() => addForm.current?.scrollIntoView({ behavior: "smooth", block: "start" }));
+                  },
+                }
+              : undefined
+          }
+        />
       ) : (
         <ul className="space-y-3">
           {reviews.map((review) => (
