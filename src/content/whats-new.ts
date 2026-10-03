@@ -90,7 +90,7 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
     id: "2026-10-03-a-clearer-look-at-premium-analytics",
     date: "2026-10-03",
-    version: "4.163.0",
+    version: "4.163.1",
     tag: "improved",
     title: {
       en: "A clearer look at Premium analytics",
