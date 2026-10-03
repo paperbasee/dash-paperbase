@@ -88,6 +88,21 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-10-04-a-friendlier-empty-trash",
+    date: "2026-10-04",
+    version: "4.172.1",
+    tag: "improved",
+    title: {
+      en: "A friendlier empty Trash",
+      bn: "ফাঁকা ট্র্যাশ এখন আরও সুন্দর",
+    },
+    body: {
+      en: "An empty Trash now shows the same little folder as Blog and Reviews, and says what it is for: what you delete waits there for 15 days, so you can bring it back.",
+      bn: "ফাঁকা ট্র্যাশে এখন ব্লগ আর রিভিউয়ের মতো একই ছোট ফোল্ডার দেখা যায়, আর বলে এটি কিসের জন্য: যা মুছে ফেলেন তা ১৫ দিন সেখানে থাকে, যাতে ফিরিয়ে আনতে পারেন।",
+    },
+    href: "/trash",
+  },
+  {
     id: "2026-10-04-tidier-page-headers",
     date: "2026-10-04",
     version: "4.172.0",
@@ -509,20 +524,6 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     body: {
       en: "A new price, picture, category, delivery charge or shop detail now shows in your shop the moment you save it; some used to take up to five minutes. And if part of our system slows down, your shop keeps selling, just a little slower.",
       bn: "নতুন দাম, ছবি, ক্যাটাগরি, ডেলিভারি চার্জ বা দোকানের তথ্য এখন সেভ করার সঙ্গে সঙ্গেই আপনার দোকানে দেখা যায়; আগে কিছু পরিবর্তন দেখাতে পাঁচ মিনিট পর্যন্ত লাগত। আর আমাদের সিস্টেমের কোনো অংশ ধীর হয়ে গেলেও আপনার দোকানে বিক্রি চলতে থাকে, শুধু একটু ধীরে।",
-    },
-  },
-  {
-    id: "2026-09-29-order-work-kept-apart",
-    date: "2026-09-29",
-    version: "4.143.0",
-    tag: "improved",
-    title: {
-      en: "Order work kept apart from saved pages",
-      bn: "অর্ডারের কাজ এখন সেভ করা পাতা থেকে আলাদা",
-    },
-    body: {
-      en: "The copies of your shop's pages we keep so it opens fast now live apart from your order work. However many we keep, they can no longer crowd out orders, emails or courier sends being processed.",
-      bn: "আপনার দোকান দ্রুত খোলার জন্য আমরা পাতার যে কপি রাখি, সেগুলো এখন আপনার অর্ডারের কাজ থেকে আলাদা জায়গায় থাকে। যত কপিই রাখা হোক, সেগুলো আর অর্ডার, ইমেইল বা কুরিয়ারে পাঠানোর কাজে বাধা দিতে পারে না।",
     },
   },
 ];
