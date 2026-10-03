@@ -23,13 +23,12 @@ const plan = (name: string, cycle: "monthly" | "yearly", price: string, features
 });
 
 // The plans as the API has them (billing/plans/, ordered by price).
-const essential = { limits: { max_products: 100 }, features: { basic_analytics: true, order_email_notifications: false } };
+const essential = { limits: { max_products: 100 }, features: { order_email_notifications: false } };
 const premium = {
   limits: { max_products: 500 },
   features: {
     themes: true,
     fraud_check: true,
-    basic_analytics: true,
     premium_sections: true,
     advanced_analytics: true,
     order_email_notifications: true,
@@ -80,7 +79,6 @@ describe("what each card lists (owner, 2026-10-03: Shopify's way)", () => {
         { id: "steadfast" },
         { id: "team" },
         { id: "extras" },
-        { id: "overviewSales" },
       ],
     });
   });
@@ -90,7 +88,7 @@ describe("what each card lists (owner, 2026-10-03: Shopify's way)", () => {
       plus: "Essential",
       lines: [
         { id: "products", count: 500 },
-        { id: "allAnalytics" },
+        { id: "analytics" },
         { id: "fraudCheck" },
         { id: "orderEmails" },
         { id: "premiumSections" },
@@ -98,15 +96,16 @@ describe("what each card lists (owner, 2026-10-03: Shopify's way)", () => {
     });
   });
 
-  it("all analytics stands in for Overview and Sales, and the theme switch is never offered", () => {
-    const lines = ids(1).lines.map((line) => line.id);
-    expect(lines).not.toContain("overviewSales");
-    expect(PLAN_LINES.map((line) => line.key)).not.toContain("themes");
+  it("analytics is Premium's whole page, and neither the retired Overview-and-Sales switch nor themes is offered", () => {
+    expect(ids(0).lines.map((line) => line.id)).not.toContain("analytics");
+    const keys = PLAN_LINES.map((line) => line.key);
+    expect(keys).not.toContain("basic_analytics");
+    expect(keys).not.toContain("themes");
   });
 
   it("no cap set is no cap at all, and a plan adding nothing lists nothing", () => {
-    const capped = { limits: { max_products: 100 }, features: { basic_analytics: true } };
-    const open = { features: { basic_analytics: true } };
+    const capped = { limits: { max_products: 100 }, features: { order_email_notifications: false } };
+    const open = { features: { order_email_notifications: false } };
     const pair = groupPlans([plan("Small", "monthly", "100.00", capped), plan("Big", "monthly", "200.00", open)]);
     expect(cardLines(pair, 1, "monthly").lines).toEqual([{ id: "unlimitedProducts" }]);
     const same = groupPlans([plan("A", "monthly", "100.00", capped), plan("B", "monthly", "200.00", capped)]);

@@ -1,13 +1,27 @@
 "use client";
 
+import { useState, type ComponentType } from "react";
+import { Lock } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { AnalyticsPremiumCard } from "@/components/premium/AnalyticsPremiumCard";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import {
   APP_CONFIG,
   APPS_SCREEN_ALWAYS_ON_IDS,
   APPS_SCREEN_SWITCHABLE_IDS,
+  planIncludesApp,
 } from "@/config/apps";
 import { usePermissions } from "@/context/PermissionsContext";
+import { useFeatures } from "@/hooks/useFeatures";
 import { SettingsSectionBody, settingsSectionSurfaceClassName } from "../SettingsSectionBody";
+
+/**
+ * What switching on an app the plan doesn't include shows instead (APP_PLAN_FEATURE; owner,
+ * 2026-10-04): its Premium card.
+ */
+const PREMIUM_CARD: Record<string, ComponentType<{ onBack: () => void }>> = {
+  analytics: AnalyticsPremiumCard,
+};
 
 export default function AppsSection({
   hidden,
@@ -23,6 +37,9 @@ export default function AppsSection({
   // Enabling/disabling apps writes store settings — view-only roles can't toggle.
   const { has } = usePermissions();
   const canManage = has("settings.manage");
+  const { features } = useFeatures();
+  const [premiumFor, setPremiumFor] = useState<string | null>(null);
+  const PremiumCard = premiumFor ? PREMIUM_CARD[premiumFor] : null;
   return (
     <section
       id="panel-apps"
@@ -70,6 +87,9 @@ export default function AppsSection({
             {APPS_SCREEN_SWITCHABLE_IDS.map((id) => {
               const app = APP_CONFIG[id];
               const Icon = app.icon;
+              // Not on this plan: off, whatever was switched, and switching it on shows its card.
+              const included = planIncludesApp(id, features);
+              const on = included && enabledApps.isEnabled(id);
               return (
                 <div
                   key={id}
@@ -85,14 +105,21 @@ export default function AppsSection({
                   >
                     <input
                       type="checkbox"
-                      checked={enabledApps.isEnabled(id)}
-                      onChange={() => enabledApps.toggleApp(id)}
+                      checked={on}
+                      onChange={() => (included ? enabledApps.toggleApp(id) : setPremiumFor(id))}
                       disabled={!canManage}
                       className="form-checkbox"
                     />
-                    <span className="whitespace-nowrap text-sm text-muted-foreground">
-                      {enabledApps.isEnabled(id) ? t("apps.enabled") : t("apps.disabled")}
-                    </span>
+                    {included ? (
+                      <span className="whitespace-nowrap text-sm text-muted-foreground">
+                        {on ? t("apps.enabled") : t("apps.disabled")}
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 whitespace-nowrap text-sm font-medium text-foreground">
+                        <Lock className="size-3.5" aria-hidden />
+                        {t("apps.premium")}
+                      </span>
+                    )}
                   </label>
                 </div>
               );
@@ -101,6 +128,16 @@ export default function AppsSection({
         </div>
         </div>
       </SettingsSectionBody>
+
+      <Dialog open={PremiumCard !== null} onOpenChange={(open) => !open && setPremiumFor(null)}>
+        <DialogContent
+          showCloseButton={false}
+          className="max-w-sm overflow-visible rounded-none border-0 bg-transparent [box-shadow:none]"
+        >
+          <DialogTitle className="sr-only">{t("apps.premium")}</DialogTitle>
+          {PremiumCard ? <PremiumCard onBack={() => setPremiumFor(null)} /> : null}
+        </DialogContent>
+      </Dialog>
     </section>
   );
 }

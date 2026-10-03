@@ -133,10 +133,9 @@ function SidebarContent({
   const router = useRouter();
   const searchParams = useSearchParams();
   const { signOut, isAuthenticated, meProfile, meProfileStatus } = useAuth();
-  const { branding, navCounts, features, inventoryStatus } = useSidebarData();
+  const { branding, navCounts, inventoryStatus } = useSidebarData();
   const { data: brandingData, isLoading: isBrandingLoading } = branding;
   const { counts, formatCount } = navCounts;
-  const { hasFeature } = features;
   const { setOpen: setSearchOpen } = useSearchModal();
   const { hasUnread: whatsNewUnread, openPanel: openWhatsNew } = useWhatsNew();
   const canShowApp = useCanShowApp();
@@ -519,7 +518,6 @@ function SidebarContent({
             tCatalogLabel={tNav("catalog")}
             tMoreLabel={tNav("more")}
             tAppLabel={tNav}
-            hasFeature={hasFeature}
             counts={counts}
             formatCount={formatCount}
             numClass={numClass}

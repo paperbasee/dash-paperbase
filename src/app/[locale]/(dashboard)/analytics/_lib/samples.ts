@@ -10,6 +10,7 @@ import type {
   DistrictsReport,
   DivisionRow,
   LiveReport,
+  OverviewReport,
   Parcels,
   PeriodInfo,
   ProductRow,
@@ -19,9 +20,10 @@ import type {
 } from "./types";
 
 /**
- * The made-up numbers a Premium section is drawn with, blurred, on the Essential plan (owner,
- * 2026-10-03): the real section's own design, never the shop's data -- the API refuses those
- * reports on Essential, and the locked view asks for none. The same for every shop: plain names
+ * The made-up numbers the analytics page is drawn with, blurred, behind its Premium card on a plan
+ * without analytics (owner, 2026-10-03; the whole page since 2026-10-04): the real section's own
+ * design, never the shop's data -- the API refuses every report without the plan, and the locked
+ * view asks for none. The same for every shop: plain names
  * ("Product 1"), real places and couriers, and the days the merchant picked, so the chart's axis
  * matches the date buttons. Anyone who lifts the blur in DevTools finds only these.
  */
@@ -169,6 +171,49 @@ export function sampleTraffic(period: Period): TrafficReport {
     ],
     visitor_mix: { new: 3900, returning: 920 },
     searches: [1, 2, 3].map((n) => ({ query: `search ${n}`, searches: [34, 21, 14][n - 1], results: [12, 6, 0][n - 1], bought: [5, 2, 0][n - 1] })),
+  };
+}
+
+/** The Overview, from the same made-up shop as every other section. */
+export function sampleOverview(period: Period): OverviewReport {
+  const traffic = sampleTraffic(period);
+  const products = sampleProducts(period);
+  const top = traffic.series.data.length === 24 ? 3 : 24;
+  const sales = (orders: number) => String(orders * 2150);
+  return {
+    ...base(period),
+    cards: {
+      sales: card("402500", "351000", 14.7),
+      orders: card(187, 163, 14.7),
+      visitors: traffic.cards.visitors,
+      conversion: card(3.9, 3.7, 0.2, "points"),
+    },
+    steps: {
+      placed: { orders: 205, sales: sales(205) },
+      confirmed: { orders: 187, sales: sales(187) },
+      delivered: { orders: 150, sales: sales(150) },
+      not_confirmed: 18,
+      not_delivered: 37,
+    },
+    series: {
+      data: traffic.series.data.map(({ date, visitors }, i) => ({ date, sales: sales(wave(i, top)), orders: wave(i, top), visitors })),
+      comparison: traffic.series.comparison.map(({ date, visitors }, i) => ({
+        date,
+        sales: sales(wave(i + 3, top * 0.85)),
+        orders: wave(i + 3, top * 0.85),
+        visitors,
+      })),
+    },
+    journey: { visitors: 4820, viewed_product: 2900, added_to_cart: 640, started_checkout: 310, placed: 205, confirmed: 187 },
+    sources: traffic.sources,
+    campaigns: traffic.campaigns,
+    landing: traffic.landing,
+    districts: DISTRICTS,
+    divisions: DIVISIONS,
+    parcels: SAMPLE_PARCELS,
+    best_sellers: products.data,
+    categories: products.categories,
+    notes: { top_source: null, best_day: null, places: null },
   };
 }
 

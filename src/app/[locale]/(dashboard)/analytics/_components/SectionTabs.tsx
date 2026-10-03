@@ -4,26 +4,18 @@ import { useTranslations } from "next-intl";
 
 import { cn } from "@/lib/utils";
 
-import { LockMark } from "./LockMark";
-
 import type { SectionKey } from "../_lib/types";
 
 export const SECTIONS: SectionKey[] = ["overview", "sales", "traffic", "products", "districts", "delivery", "customers", "live"];
-/** What a Basic plan opens: the core sales. */
-export const CORE_SECTIONS: SectionKey[] = ["overview", "sales"];
 
 export function SectionTabs({
   current,
   onChange,
-  locked,
 }: {
   current: SectionKey;
   onChange: (section: SectionKey) => void;
-  /** A section this plan doesn't open: its tab carries Premium's crown. */
-  locked?: (section: SectionKey) => boolean;
 }) {
   const t = useTranslations("analyticsPage.sections");
-  const tPremium = useTranslations("analyticsPage");
   return (
     <nav
       aria-label={t("label")}
@@ -46,7 +38,6 @@ export function SectionTabs({
         >
           {section === "live" ? <span className="size-[7px] rounded-full bg-emerald-600" aria-hidden /> : null}
           {t(section)}
-          {locked?.(section) ? <LockMark label={tPremium("premium.badge")} /> : null}
         </button>
       ))}
     </nav>

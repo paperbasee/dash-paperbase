@@ -18,8 +18,6 @@ import {
   TrendChart,
   shareOf,
 } from "../_components/kit";
-import { Locked, UnlockCard } from "../_components/PremiumLock";
-import { SAMPLE_PARCELS } from "../_lib/samples";
 import { useAnalyticsView } from "../_lib/context";
 import { type Metric, changeOf, metricPoints } from "../_lib/insights";
 import { pageName, sourceName } from "../_lib/names";
@@ -38,7 +36,6 @@ const PARCEL_ROWS = ["delivered", "partial", "returned", "in_transit", "not_disp
  */
 export function Overview({ report }: { report: OverviewReport }) {
   const t = useTranslations("analyticsPage");
-  const { full } = useAnalyticsView();
 
   return (
     <div className="flex flex-col gap-4 sm:gap-5">
@@ -48,23 +45,12 @@ export function Overview({ report }: { report: OverviewReport }) {
       <section className="flex flex-col gap-3">
         <h2 className="pt-1 text-[15px] font-semibold text-foreground">{t("overview.details")}</h2>
         <div className="grid gap-4 lg:grid-cols-2">
-          {full ? (
-            <>
-              <Sources report={report} />
-              <Places report={report} />
-              <ProductsList report={report} />
-              <Journey report={report} />
-            </>
-          ) : null}
+          <Sources report={report} />
+          <Places report={report} />
+          <ProductsList report={report} />
+          <Journey report={report} />
           <Stand report={report} />
-          {full ? (
-            <DeliveryList report={report} />
-          ) : (
-            // Premium: the real list, drawn from made-up parcels and blurred (PremiumLock).
-            <Locked compact card={<UnlockCard compact line={t("premium.lines.overviewDelivery")} />}>
-              <DeliveryList report={{ ...report, parcels: SAMPLE_PARCELS }} />
-            </Locked>
-          )}
+          <DeliveryList report={report} />
         </div>
       </section>
     </div>
@@ -342,7 +328,7 @@ function WhatMovedIt({ report }: { report: OverviewReport }) {
 /** Orders that are stuck: placed and never confirmed, or confirmed and not delivered yet. */
 function NeedsALook({ report }: { report: OverviewReport }) {
   const t = useTranslations("analyticsPage");
-  const { format, full } = useAnalyticsView();
+  const { format } = useAnalyticsView();
   const { steps } = report;
   const b = (chunks: ReactNode) => <strong className="font-semibold text-amber-800 dark:text-amber-400">{chunks}</strong>;
   const orders: More = { href: "/orders", label: t("overview.look.openOrders") };
@@ -358,7 +344,7 @@ function NeedsALook({ report }: { report: OverviewReport }) {
     rows.push({
       key: "notDelivered",
       text: t.rich("overview.look.notDelivered", { orders: t("orderCount", { n: format.count(steps.not_delivered) }), b }),
-      more: full ? { section: "delivery", label: t("overview.look.openDelivery") } : orders,
+      more: { section: "delivery", label: t("overview.look.openDelivery") },
     });
   }
   if (!rows.length) return null;

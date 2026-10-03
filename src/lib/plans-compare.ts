@@ -101,13 +101,12 @@ export type PlanLine = { id: string; kind: "feature" | "limit"; key: string };
 /**
  * What a plan may switch, in the order the cards list it (words: plansPage.lines.<id>). Only what a
  * plan really switches: `themes` is left out, as since the one-theme merge (2026-09-20) it locks
- * nothing a merchant can reach (api billing/feature_gate.py). All analytics takes in Overview and
- * Sales, so a plan with both says the first only.
+ * nothing a merchant can reach (api billing/feature_gate.py). Analytics is one switch, the whole
+ * page (owner, 2026-10-04).
  */
 export const PLAN_LINES: PlanLine[] = [
   { id: "products", kind: "limit", key: "max_products" },
-  { id: "allAnalytics", kind: "feature", key: "advanced_analytics" },
-  { id: "overviewSales", kind: "feature", key: "basic_analytics" },
+  { id: "analytics", kind: "feature", key: "advanced_analytics" },
   { id: "fraudCheck", kind: "feature", key: "fraud_check" },
   { id: "orderEmails", kind: "feature", key: "order_email_notifications" },
   { id: "premiumSections", kind: "feature", key: "premium_sections" },
@@ -133,12 +132,11 @@ function productLine(plan: Plan | null): CardLine {
   return cap === null ? { id: "unlimitedProducts" } : { id: "products", count: cap };
 }
 
-/** The switches a plan has on, in PLAN_LINES order; Overview and Sales go without saying beside all analytics. */
+/** The switches a plan has on, in PLAN_LINES order. */
 function switchedOn(plan: Plan | null): string[] {
-  const on = PLAN_LINES.filter((line) => line.kind === "feature" && plan?.features?.features?.[line.key] === true).map(
+  return PLAN_LINES.filter((line) => line.kind === "feature" && plan?.features?.features?.[line.key] === true).map(
     (line) => line.id,
   );
-  return on.includes("allAnalytics") ? on.filter((id) => id !== "overviewSales") : on;
 }
 
 /**

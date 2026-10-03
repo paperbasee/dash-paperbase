@@ -10,8 +10,6 @@ import type { SectionKey } from "./types";
 export type AnalyticsView = {
   format: Format;
   compare: Compare;
-  /** Everything, or -- a Basic plan -- the core sales only. */
-  full: boolean;
   goTo: (section: SectionKey) => void;
 };
 

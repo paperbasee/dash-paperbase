@@ -28,16 +28,13 @@ import type { SectionKey } from "../_lib/types";
 export function DownloadMenu({
   period,
   section,
-  open,
 }: {
   period: Period;
   section: Exclude<SectionKey, "live">;
-  /** Whether the plan opens the section on screen. */
-  open: boolean;
 }) {
   const t = useTranslations("analyticsPage");
   const locale = useLocale();
-  const { format, full } = useAnalyticsView();
+  const { format } = useAnalyticsView();
   const [busy, setBusy] = useState(false);
   const { start, end } = periodDays(period);
 
@@ -72,11 +69,11 @@ export function DownloadMenu({
         <DropdownMenuLabel className="font-normal text-muted-foreground">
           {t("download.label", { days: format.days(start, end) })}
         </DropdownMenuLabel>
-        <DropdownMenuItem disabled={!open} onSelect={() => void download(section)} className="items-start gap-3 py-2.5">
+        <DropdownMenuItem onSelect={() => void download(section)} className="items-start gap-3 py-2.5">
           <Choice icon={FileSpreadsheet} title={t("download.thisSection")} note={t(`sections.${section}`)} />
         </DropdownMenuItem>
         <DropdownMenuItem onSelect={() => void download("all")} className="items-start gap-3 py-2.5">
-          <Choice icon={LayoutGrid} title={t("download.allSections")} note={full ? t("download.everySection") : t("download.coreSections")} />
+          <Choice icon={LayoutGrid} title={t("download.allSections")} note={t("download.everySection")} />
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <p className="px-2 pb-1.5 pt-1 text-[11px] leading-relaxed text-muted-foreground">{t("download.note")}</p>

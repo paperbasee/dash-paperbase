@@ -350,6 +350,22 @@ export const MORE_APP_IDS = ["support_tickets", "trash"] as const;
 export const OPT_IN_APP_IDS = ["wishlist", "coupons", "order_lookup"] as const;
 
 /**
+ * Apps a plan must include (owner, 2026-10-04: analytics is Premium only). On a plan without the
+ * feature the app is off whatever the shop switched -- out of the sidebar, its switch locked in
+ * Settings > Apps -- and comes back by itself on the upgrade.
+ */
+export const APP_PLAN_FEATURE: Readonly<Record<string, string>> = { analytics: "advanced_analytics" };
+
+/**
+ * Whether the shop's plan includes an app. Features not loaded yet (`null`) take nothing away, so
+ * a Premium shop's sidebar does not lose Analytics for a moment on every load.
+ */
+export function planIncludesApp(appId: string, features: Record<string, boolean> | null): boolean {
+  const key = APP_PLAN_FEATURE[appId];
+  return !key || features === null || features[key] === true;
+}
+
+/**
  * Always on, and not listed in Settings → Apps.
  *
  * `abandoned_checkouts` is here by the owner's decision on 2026-09-21: every

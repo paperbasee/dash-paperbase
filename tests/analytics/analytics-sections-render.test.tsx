@@ -32,7 +32,7 @@ import { Overview } from "@/app/[locale]/(dashboard)/analytics/_sections/Overvie
 import { Products } from "@/app/[locale]/(dashboard)/analytics/_sections/Products";
 import { Sales } from "@/app/[locale]/(dashboard)/analytics/_sections/Sales";
 import { Traffic } from "@/app/[locale]/(dashboard)/analytics/_sections/Traffic";
-import { LockedSection, type PremiumSection } from "@/app/[locale]/(dashboard)/analytics/_components/PremiumLock";
+import { AnalyticsLocked } from "@/app/[locale]/(dashboard)/analytics/_components/AnalyticsLocked";
 import { sampleTraffic } from "@/app/[locale]/(dashboard)/analytics/_lib/samples";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import bn from "../../messages/bn.json";
@@ -46,13 +46,12 @@ vi.mock("@/i18n/navigation", () => ({
       {children}
     </a>
   ),
+  useRouter: () => ({ back: vi.fn(), push: vi.fn() }),
 }));
 
-// The report hooks: a locked section must never call them (no request for a Premium report).
+// The report hooks: the locked page must never call them (no request for a report).
 const queries = vi.hoisted(() => ({ useSection: vi.fn(), useLive: vi.fn() }));
 vi.mock("@/app/[locale]/(dashboard)/analytics/_lib/queries", () => queries);
-
-const PREMIUM: PremiumSection[] = ["traffic", "products", "districts", "delivery", "customers", "live"];
 
 // Who is looking: the plan is the owner's to change (owner power "billing").
 const viewer = vi.hoisted(() => ({ isOwner: true }));
@@ -216,8 +215,8 @@ const live: LiveReport = {
   at: 1_790_520_000,
 };
 
-function draw(locale: "en" | "bn", section: ReactNode, full = true): string {
-  const view = { format: makeFormat(locale, "৳"), compare: "previous" as const, full, goTo: () => {} };
+function draw(locale: "en" | "bn", section: ReactNode): string {
+  const view = { format: makeFormat(locale, "৳"), compare: "previous" as const, goTo: () => {} };
   return renderToStaticMarkup(
     <NextIntlClientProvider locale={locale} messages={locale === "en" ? en : bn} timeZone="Asia/Dhaka" onError={(error) => { throw error; }}>
       <TooltipProvider>
@@ -242,37 +241,23 @@ describe.each(["en", "bn"] as const)("every section, in %s", (locale) => {
   ])("%s draws", (_, section) => {
     expect(draw(locale, section).length).toBeGreaterThan(500);
   });
-
-  test("a Basic plan's Overview: the core sales, and the rest locked", () => {
-    const basic: OverviewReport = {
-      ...base,
-      cards: { sales: overview.cards.sales, orders: overview.cards.orders },
-      steps: overview.steps,
-      series,
-      notes: { top_source: null, best_day: overview.notes.best_day, places: null },
-    };
-    expect(draw(locale, <Overview report={basic} />, false).length).toBeGreaterThan(500);
-  });
 });
 
-describe("a Premium section on Essential (owner, 2026-10-03)", () => {
+describe("the analytics page without the plan (owner, 2026-10-04: Premium only)", () => {
   const week = { preset: "7", compare: "previous" } as const;
-  const locked = (section: PremiumSection, locale: "en" | "bn" = "en") =>
-    draw(locale, <LockedSection section={section} period={week} />, false);
+  const locked = (locale: "en" | "bn" = "en") => draw(locale, <AnalyticsLocked period={week} />);
 
-  test.each(PREMIUM)("%s: the real section, from samples, blurred and out of reach", (section) => {
-    const html = locked(section);
+  test("the real Overview, from samples, blurred and out of reach, under the Premium card", () => {
+    const html = locked();
     expect(html).toContain('aria-hidden="true"');
     expect(html).toMatch(/inert=""/);
-    expect(html).toContain("blur-[6px]");
-    expect(text(html)).toContain("Unlock Premium analytics");
-    expect(text(html)).toContain(en.analyticsPage.premium.lines[section]);
+    expect(html).toContain("blur-[7px]");
+    expect(text(html)).toContain(en.analyticsPage.premium.title);
+    expect(text(html)).toContain(en.analyticsPage.premium.alsoTitle);
   });
 
   test("what is drawn is the sample's, never a shop's", () => {
-    expect(text(locked("products"))).toContain("Product 1");
-    expect(text(locked("traffic"))).toContain("Campaign 1");
-    expect(text(locked("customers"))).toContain("Customer 1");
+    expect(text(locked())).toContain("Product 1");
   });
 
   test("the chart's days are the days picked", () => {
@@ -286,41 +271,32 @@ describe("a Premium section on Essential (owner, 2026-10-03)", () => {
     expect(today.series.data[9].date).toBe("2026-09-01T09:00:00+06:00");
   });
 
-  test("nothing asks the API for a Premium report", () => {
+  test("nothing asks the API for a report", () => {
     queries.useSection.mockClear();
     queries.useLive.mockClear();
-    for (const section of PREMIUM) locked(section);
-    draw("en", <Overview report={{ ...reports.overview, parcels: undefined }} />, false);
+    locked();
+    locked("bn");
     expect(queries.useSection).not.toHaveBeenCalled();
     expect(queries.useLive).not.toHaveBeenCalled();
   });
 
-  test("the owner can upgrade or compare the plans", () => {
+  test("the owner can upgrade, or go back", () => {
     viewer.isOwner = true;
-    const html = locked("traffic");
-    expect(text(html)).toContain("Upgrade to Premium to see your shop");
-    expect(html).toContain('href="/plans"');
-    expect(html).toContain('href="/plans#compare"');
-    expect(text(html)).toContain("Upgrade plan");
+    const html = locked();
+    expect(html).toMatch(/<a href="\/plans"[^>]*>Upgrade<\/a>/);
+    expect(text(html)).toContain("Go back");
   });
 
-  test("a team member is sent to the owner, with the plans to read", () => {
+  test("a team member is sent to the owner", () => {
     viewer.isOwner = false;
-    const html = locked("traffic");
-    expect(text(html)).toContain("Ask the shop owner to upgrade to Premium to see these numbers.");
-    expect(html).toContain('href="/plans#compare"');
-    expect(text(html)).not.toContain("Upgrade plan");
+    const html = locked();
+    expect(text(html)).toContain(en.analyticsPage.premium.askOwner);
+    expect(html).not.toContain('href="/plans"');
     viewer.isOwner = true;
   });
 
   test("in Bangla too", () => {
-    expect(text(locked("districts", "bn"))).toContain(bn.analyticsPage.premium.unlockTitle);
-  });
-
-  test("the Overview's delivery list: the real list from sample parcels, blurred", () => {
-    const html = draw("en", <Overview report={{ ...reports.overview, parcels: undefined }} />, false);
-    expect(text(html)).toContain(en.analyticsPage.premium.lines.overviewDelivery);
-    expect(text(html)).toContain("Delivered");
+    expect(text(locked("bn"))).toContain(bn.analyticsPage.premium.title);
   });
 });
 

@@ -6,7 +6,6 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import {
   ChevronRight,
   LayoutGrid,
-  Lock,
   ListTodo,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -34,15 +33,12 @@ import type { InventoryStatusLevel } from "@/lib/inventory-status";
 function NavRowEnd({
   children,
   chevron,
-  before,
 }: {
   children?: React.ReactNode;
   chevron?: React.ReactNode;
-  before?: React.ReactNode;
 }) {
   return (
     <span className="flex shrink-0 items-center gap-1.5">
-      {before}
       <span className="flex h-5 min-w-5 items-center justify-center">{children}</span>
       {chevron ?? <span aria-hidden className="size-4 shrink-0" />}
     </span>
@@ -59,7 +55,6 @@ export default function AppSidebarNav({
   tCatalogLabel,
   tMoreLabel,
   tAppLabel,
-  hasFeature,
   counts,
   formatCount,
   numClass,
@@ -92,7 +87,6 @@ export default function AppSidebarNav({
   tCatalogLabel: string;
   tMoreLabel: string;
   tAppLabel: (id: string) => string;
-  hasFeature: (key: string) => boolean;
   counts: NavCounts | null;
   formatCount: (n: number) => string;
   numClass: string;
@@ -276,13 +270,7 @@ export default function AppSidebarNav({
                * obviously different. The spacer is what puts every number in
                * one column.
                */
-              <NavRowEnd
-                before={
-                  token === "analytics" && !hasFeature("advanced_analytics") && !hasFeature("basic_analytics") ? (
-                    <Lock className="size-3.5 shrink-0 text-muted-foreground" />
-                  ) : null
-                }
-              >
+              <NavRowEnd>
                 {token === "inventory" && (
                   <>
                     <InventoryStatusDot status={inventoryNavStatus} />

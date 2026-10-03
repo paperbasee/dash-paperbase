@@ -11,12 +11,11 @@ import { useBranding } from "@/context/BrandingContext";
 import { useFeatures } from "@/hooks/useFeatures";
 import { useRouter } from "@/i18n/navigation";
 
-import { AnalyticsUpgradeWall } from "./_components/AnalyticsUpgradeWall";
+import { AnalyticsLocked } from "./_components/AnalyticsLocked";
 import { CARD } from "./_components/kit";
-import { LockedSection, type PremiumSection } from "./_components/PremiumLock";
 import { DownloadMenu } from "./_components/DownloadMenu";
 import { CompareMenu, PeriodChips } from "./_components/PeriodControls";
-import { CORE_SECTIONS, SECTIONS, SectionTabs } from "./_components/SectionTabs";
+import { SECTIONS, SectionTabs } from "./_components/SectionTabs";
 import { AnalyticsProvider } from "./_lib/context";
 import { makeFormat } from "./_lib/format";
 import { type Period, periodDays, periodFromParams, periodParams } from "./_lib/period";
@@ -48,8 +47,8 @@ import { Traffic } from "./_sections/Traffic";
  * chosen, compared with the days before or a year before. The section and the
  * days live in the address bar.
  *
- * A Basic plan opens Overview and Sales -- the core sales -- and sees the
- * other sections locked; a plan with neither sees the upgrade wall.
+ * The whole page is Premium (owner, 2026-10-04): a plan without analytics sees
+ * the Overview blurred, from made-up numbers, under the Premium card.
  */
 export default function AnalyticsPage() {
   const t = useTranslations("analyticsPage");
@@ -58,8 +57,7 @@ export default function AnalyticsPage() {
   const searchParams = useSearchParams();
   const { currencySymbol } = useBranding();
   const { hasFeature, loading } = useFeatures();
-  const full = hasFeature("advanced_analytics");
-  const core = full || hasFeature("basic_analytics");
+  const premium = hasFeature("advanced_analytics");
 
   const period = periodFromParams(new URLSearchParams(searchParams.toString()));
   const asked = searchParams.get("section") as SectionKey | null;
@@ -79,13 +77,21 @@ export default function AnalyticsPage() {
   );
 
   const view = useMemo(
-    () => ({ format, compare: period.compare, full, goTo: (to: SectionKey) => show({ section: to }) }),
-    [format, period.compare, full, show],
+    () => ({ format, compare: period.compare, goTo: (to: SectionKey) => show({ section: to }) }),
+    [format, period.compare, show],
   );
 
   if (loading) return null;
-  if (!core) return <AnalyticsUpgradeWall />;
-  const open = full || CORE_SECTIONS.includes(section);
+  if (!premium) {
+    return (
+      <AnalyticsProvider value={view}>
+        <div className="flex w-full flex-col gap-4 pb-10 sm:gap-5">
+          <h1 className="pt-1 text-[22px] font-semibold tracking-tight text-foreground sm:text-2xl">{t("title")}</h1>
+          <AnalyticsLocked period={period} />
+        </div>
+      </AnalyticsProvider>
+    );
+  }
 
   return (
     <AnalyticsProvider value={view}>
@@ -94,7 +100,7 @@ export default function AnalyticsPage() {
           <div className="flex min-w-0 flex-col gap-1">
             <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
               <h1 className="text-[22px] font-semibold tracking-tight text-foreground sm:text-2xl">{t("title")}</h1>
-              {full && section !== "live" ? <LivePill onOpen={() => show({ section: "live" })} /> : null}
+              {section !== "live" ? <LivePill onOpen={() => show({ section: "live" })} /> : null}
             </div>
             <p className="text-xs text-muted-foreground sm:text-[13px]">
               {section === "live" ? t("liveEvery") : <UpdatedLine period={period} at={updatedAt} />}
@@ -103,21 +109,15 @@ export default function AnalyticsPage() {
           {section === "live" ? null : (
             <div className="flex gap-2">
               <CompareMenu period={period} onChange={(next) => show({ period: next })} />
-              <DownloadMenu period={period} section={section} open={open} />
+              <DownloadMenu period={period} section={section} />
             </div>
           )}
         </header>
 
         {section === "live" ? null : <PeriodChips period={period} onChange={(next) => show({ period: next })} />}
-        <SectionTabs
-          current={section}
-          onChange={(next) => show({ section: next })}
-          locked={(tab) => !full && !CORE_SECTIONS.includes(tab)}
-        />
+        <SectionTabs current={section} onChange={(next) => show({ section: next })} />
 
-        {!open ? (
-          <LockedSection section={section as PremiumSection} period={period} />
-        ) : section === "live" ? (
+        {section === "live" ? (
           <LiveReport />
         ) : (
           <SectionReport key={section} section={section} period={period} onLoaded={setUpdatedAt} />
