@@ -88,6 +88,21 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-10-03-a-friendlier-empty-blog-and-reviews",
+    date: "2026-10-03",
+    version: "4.168.0",
+    tag: "improved",
+    title: {
+      en: "A friendlier empty Blog and Reviews",
+      bn: "ফাঁকা ব্লগ ও রিভিউ এখন আরও সুন্দর",
+    },
+    body: {
+      en: "With no posts or reviews yet, Blog and Reviews now show a little folder that opens when you touch it, with one button to write your first post or add a review. On Customers and Accounts, the filter button now sits on the right, like every other list.",
+      bn: "এখনও কোনো পোস্ট বা রিভিউ না থাকলে ব্লগ ও রিভিউ পেজে এখন ছোট একটি ফোল্ডার দেখা যায়, ছুঁলেই খুলে যায়, আর সাথে থাকে প্রথম পোস্ট লেখা বা রিভিউ যোগ করার একটি বাটন। কাস্টমার ও অ্যাকাউন্ট পেজে ফিল্টার বাটন এখন অন্য সব তালিকার মতো ডান দিকে।",
+    },
+    href: "/blog",
+  },
+  {
     id: "2026-10-03-the-payment-page-in-bangla",
     date: "2026-10-03",
     version: "4.167.0",
@@ -507,20 +522,6 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     body: {
       en: "New shops are asked where they sell now: Facebook, Instagram, TikTok or a shop in person. Your setup guide then adds the steps that fit, like your Facebook Pixel or your shop's address.",
       bn: "নতুন দোকানকে জিজ্ঞেস করা হয় এখন কোথায় বিক্রি করেন: Facebook, Instagram, TikTok নাকি সরাসরি দোকানে। এরপর সেট-আপ গাইডে মানানসই ধাপ যোগ হয়, যেমন Facebook Pixel বা দোকানের ঠিকানা।",
-    },
-  },
-  {
-    id: "2026-09-29-sign-up-shows-the-free-trial",
-    date: "2026-09-29",
-    version: "4.138.0",
-    tag: "improved",
-    title: {
-      en: "Sign up shows the free trial up front",
-      bn: "অ্যাকাউন্ট খোলার পাতায় ফ্রি ট্রায়াল",
-    },
-    body: {
-      en: "Right under Create account, new shop owners now see how many days their free trial lasts, and that nothing is paid to start.",
-      bn: "\"অ্যাকাউন্ট খুলুন\"-এর ঠিক নিচে নতুন দোকান মালিকেরা এখন দেখেন ফ্রি ট্রায়াল কত দিনের, আর শুরু করতে কোনো পেমেন্ট লাগে না।",
     },
   },
 ];
