@@ -8,7 +8,8 @@ import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 
 /**
- * Analytics on a plan without it (owner, 2026-10-04, after a "premium feature" sheet the owner sent):
+ * Analytics on a plan without it (owner, 2026-10-04, after a "premium feature" sheet the owner sent;
+ * the dashboard's own corners, like every other card):
  * an open lock, what Premium shows, what else it brings, and the way there -- Upgrade for the
  * owner (owner power "billing"), "ask the owner" for a team member -- or back. Over the blurred
  * analytics page, and in Settings > Apps when Analytics is switched on without the plan.
@@ -20,7 +21,7 @@ export function AnalyticsPremiumCard({ onBack, className }: { onBack: () => void
   return (
     <div
       className={cn(
-        "w-full max-w-sm rounded-[28px] bg-muted p-6 text-center text-foreground shadow-2xl ring-1 ring-border sm:p-7",
+        "w-full max-w-sm rounded-card bg-muted p-6 text-center text-foreground shadow-2xl ring-1 ring-border sm:p-7",
         className,
       )}
     >
@@ -29,12 +30,12 @@ export function AnalyticsPremiumCard({ onBack, className }: { onBack: () => void
       <p className="mt-2 text-sm text-muted-foreground">{t("line")}</p>
 
       {/* What else Premium brings: three tiles in a fan, as the reference's faces were. */}
-      <div className="mt-5 flex items-center gap-3 rounded-2xl bg-card px-3.5 py-3 text-left ring-1 ring-border/60">
+      <div className="mt-5 flex items-center gap-3 rounded-card bg-card px-3.5 py-3 text-left ring-1 ring-border/60">
         <div className="flex shrink-0">
           {TILES.map(({ icon: Icon, tile, turn }, index) => (
             <span
               key={index}
-              className={cn("flex size-9 shrink-0 items-center justify-center rounded-xl shadow-sm ring-2 ring-card", tile, turn, index > 0 && "-ml-1")}
+              className={cn("flex size-9 shrink-0 items-center justify-center rounded-ui shadow-sm ring-2 ring-card", tile, turn, index > 0 && "-ml-1")}
             >
               <Icon className="size-4" aria-hidden />
             </span>
@@ -49,17 +50,17 @@ export function AnalyticsPremiumCard({ onBack, className }: { onBack: () => void
       {mayUpgrade ? (
         <Link
           href="/plans"
-          className="mt-6 flex h-12 w-full items-center justify-center rounded-full bg-linear-to-b from-zinc-700 to-zinc-950 text-[15px] font-semibold text-white shadow-[0_12px_24px_-10px_rgba(0,0,0,0.7)] transition hover:to-zinc-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 dark:from-white dark:to-zinc-200 dark:text-zinc-950"
+          className="mt-6 flex h-12 w-full items-center justify-center rounded-button bg-linear-to-b from-zinc-700 to-zinc-950 text-[15px] font-semibold text-white shadow-[0_12px_24px_-10px_rgba(0,0,0,0.7)] transition hover:to-zinc-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 dark:from-white dark:to-zinc-200 dark:text-zinc-950"
         >
           {t("upgrade")}
         </Link>
       ) : (
-        <p className="mt-6 rounded-2xl bg-card px-4 py-3 text-sm text-muted-foreground ring-1 ring-border/60">{t("askOwner")}</p>
+        <p className="mt-6 rounded-card bg-card px-4 py-3 text-sm text-muted-foreground ring-1 ring-border/60">{t("askOwner")}</p>
       )}
       <button
         type="button"
         onClick={onBack}
-        className="mt-3 h-9 rounded-full px-4 text-sm font-medium text-foreground/80 transition hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        className="mt-3 h-9 rounded-button px-4 text-sm font-medium text-foreground/80 transition hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       >
         {t("goBack")}
       </button>
