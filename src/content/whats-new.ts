@@ -88,6 +88,20 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-10-04-add-new-from-the-sidebar",
+    date: "2026-10-04",
+    version: "4.169.0",
+    tag: "new",
+    title: {
+      en: "Add new, from the sidebar",
+      bn: "সাইডবার থেকেই নতুন যোগ করুন",
+    },
+    body: {
+      en: "An Add new button in the sidebar opens a quick menu: a new order, product, category, discount code, blog post or review, from any page. It shows only what your role can add.",
+      bn: "সাইডবারের নতুন যোগ করুন বাটনে একটি ছোট মেনু খোলে: যেকোনো পেজ থেকে নতুন অর্ডার, পণ্য, ক্যাটাগরি, ডিসকাউন্ট কোড, ব্লগ পোস্ট বা রিভিউ। আপনার রোল যা যোগ করতে পারে, শুধু সেগুলোই দেখায়।",
+    },
+  },
+  {
     id: "2026-10-03-a-friendlier-empty-blog-and-reviews",
     date: "2026-10-03",
     version: "4.168.0",
@@ -508,20 +522,6 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     body: {
       en: "Your shop is live on its free Paperbase address as soon as setup ends. Connecting a domain you own can wait: setup now says so, and its last screen shows where to connect one in Settings.",
       bn: "সেট-আপ শেষ হতেই আপনার দোকান ফ্রি Paperbase ঠিকানায় চালু হয়ে যায়। নিজের ডোমেইন পরে যুক্ত করলেও চলে: সেট-আপ এখন সেটা স্পষ্ট বলে, আর শেষ পাতায় দেখায় সেটিংসে কোথায় যুক্ত করবেন।",
-    },
-  },
-  {
-    id: "2026-09-29-setup-fits-where-you-already-sell",
-    date: "2026-09-29",
-    version: "4.139.0",
-    tag: "new",
-    title: {
-      en: "Setup fits where you already sell",
-      bn: "যেখানে বিক্রি করেন, সেট-আপ সেভাবেই",
-    },
-    body: {
-      en: "New shops are asked where they sell now: Facebook, Instagram, TikTok or a shop in person. Your setup guide then adds the steps that fit, like your Facebook Pixel or your shop's address.",
-      bn: "নতুন দোকানকে জিজ্ঞেস করা হয় এখন কোথায় বিক্রি করেন: Facebook, Instagram, TikTok নাকি সরাসরি দোকানে। এরপর সেট-আপ গাইডে মানানসই ধাপ যোগ হয়, যেমন Facebook Pixel বা দোকানের ঠিকানা।",
     },
   },
 ];
