@@ -7,6 +7,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
 
 import { EmptyFolder } from "@/components/EmptyFolder";
+import { EmptyTrash } from "@/components/EmptyTrash";
 
 vi.mock("@/components/navigation/DeferredNavLink", () => ({
   DeferredNavLink: ({ href, className, children }: { href: string; className?: string; children: ReactNode }) => (
@@ -37,3 +38,16 @@ describe("EmptyFolder", () => {
     expect(button).toMatch(/<button type="button"[^>]*>.*Add a review/);
   });
 });
+
+describe("EmptyTrash", () => {
+  it("draws a bin, not a folder, with the same words and no button", () => {
+    const html = renderToStaticMarkup(<EmptyTrash title="Trash is empty" line="What you delete waits here." />);
+    expect(html).toContain('aria-hidden="true"');
+    expect(html).toContain('viewBox="0 0 200 224"');
+    expect(html).not.toContain('viewBox="0 0 235 121"');
+    expect(html).toContain("Trash is empty");
+    expect(html).toContain("What you delete waits here.");
+    expect(html).not.toContain("<button");
+  });
+});
+

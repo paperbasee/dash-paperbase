@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useLocale, useTranslations } from "next-intl";
-import { EmptyFolder } from "@/components/EmptyFolder";
+import { EmptyTrash } from "@/components/EmptyTrash";
 import { PageHeader } from "@/components/page/PageHeader";
 import { toLocaleDigits } from "@/lib/locale-digits";
 import { numberTextClass } from "@/lib/number-font";
@@ -349,7 +349,7 @@ export default function TrashPage() {
       ) : !loading && error ? (
         <p className="text-sm text-destructive">{error}</p>
       ) : !loading && rows.length === 0 ? (
-        <EmptyFolder title={tPages("trashEmpty")} line={tPages("trashEmptyLine")} />
+        <EmptyTrash title={tPages("trashEmpty")} line={tPages("trashEmptyLine")} />
       ) : !loading ? (
         <>
           <div className="overflow-x-auto rounded-card border border-card-border bg-card">
