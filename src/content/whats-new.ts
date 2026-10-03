@@ -88,6 +88,21 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-10-03-a-clear-page-when-payment-is-not-ready",
+    date: "2026-10-03",
+    version: "4.166.0",
+    tag: "fixed",
+    title: {
+      en: "A clear page when payment isn't ready",
+      bn: "পেমেন্ট তৈরি না থাকলে পরিষ্কার একটি পেজ",
+    },
+    body: {
+      en: "If there's no bKash or Nagad number to pay your plan to yet, the payment page now says so plainly, instead of showing a form with no number.",
+      bn: "প্ল্যানের টাকা পাঠানোর জন্য এখনো কোনো বিকাশ বা নগদ নম্বর না থাকলে, পেমেন্ট পেজ এখন নম্বর ছাড়া ফর্ম না দেখিয়ে সেটা সোজাসুজি জানায়।",
+    },
+    href: "/plans",
+  },
+  {
     id: "2026-10-03-a-new-plans-page",
     date: "2026-10-03",
     version: "4.165.0",
@@ -504,20 +519,6 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     body: {
       en: "Every sign-in email now has a 6-digit code as well as the link. Opened the email on your phone? Type the code on the computer you're signing in on, and you're in.",
       bn: "প্রতিটি সাইন-ইন ইমেইলে এখন লিংকের সাথে ৬ অঙ্কের একটি কোডও থাকে। ইমেইলটি ফোনে খুলেছেন? যে কম্পিউটারে সাইন ইন করছেন সেখানে কোডটি লিখলেই হয়ে যাবে।",
-    },
-  },
-  {
-    id: "2026-09-29-a-new-sign-in-and-setup",
-    date: "2026-09-29",
-    version: "4.136.0",
-    tag: "new",
-    title: {
-      en: "A new sign in, in English and Bangla",
-      bn: "নতুন সাইন-ইন, ইংরেজি ও বাংলায়",
-    },
-    body: {
-      en: "Signing in and signing up have a fresh look, and both now read in Bangla too. New shops are set up in five short questions, beside a live preview of the whole home page, as a computer or a phone shows it, and can connect their own domain on the way. Each step saves as you answer it, so you can pick up where you left off on any device, and when setup finishes the real shop opens beside you.",
-      bn: "সাইন ইন ও অ্যাকাউন্ট খোলার পাতা এখন নতুন চেহারায়, আর দুটোই বাংলাতেও পড়া যায়। নতুন দোকান এখন পাঁচটি ছোট প্রশ্নে সাজানো যায়, পাশে পুরো হোম পেজের লাইভ প্রিভিউ দেখে (কম্পিউটারে বা মোবাইলে যেমন দেখাবে), আর সাথেই নিজের ডোমেইনও যুক্ত করা যায়। প্রতিটি ধাপ উত্তর দেওয়ার সাথে সাথেই সংরক্ষণ হয়, তাই যেকোনো ডিভাইস থেকে যেখানে থেমেছিলেন সেখান থেকে শুরু করা যায়, আর সেট-আপ শেষ হলে পাশেই আসল দোকানটি খুলে যায়।",
     },
   },
 ];
