@@ -88,6 +88,21 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-10-04-tidier-page-headers",
+    date: "2026-10-04",
+    version: "4.172.0",
+    tag: "improved",
+    title: {
+      en: "Tidier pages, with a ? beside each title",
+      bn: "আরও গোছানো পেজ, প্রতিটি শিরোনামের পাশে একটি ?",
+    },
+    body: {
+      en: "Every page now has a small ? beside its title: point at it or tap it to see what the page is for. Filters stay inside the filter button until you open them, and a dot on it shows when one is on.",
+      bn: "এখন প্রতিটি পেজের শিরোনামের পাশে একটি ছোট ? আছে: পেজটি কিসের জন্য তা দেখতে এর ওপর মাউস রাখুন বা ট্যাপ করুন। ফিল্টারগুলো ফিল্টার বাটনের ভেতরেই থাকে, আর কোনো ফিল্টার চালু থাকলে বাটনে একটি বিন্দু দেখা যায়।",
+    },
+    href: "/orders",
+  },
+  {
     id: "2026-10-04-analytics-is-part-of-premium",
     date: "2026-10-04",
     version: "4.171.0",
@@ -508,21 +523,6 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     body: {
       en: "The copies of your shop's pages we keep so it opens fast now live apart from your order work. However many we keep, they can no longer crowd out orders, emails or courier sends being processed.",
       bn: "আপনার দোকান দ্রুত খোলার জন্য আমরা পাতার যে কপি রাখি, সেগুলো এখন আপনার অর্ডারের কাজ থেকে আলাদা জায়গায় থাকে। যত কপিই রাখা হোক, সেগুলো আর অর্ডার, ইমেইল বা কুরিয়ারে পাঠানোর কাজে বাধা দিতে পারে না।",
-    },
-  },
-  {
-    id: "2026-09-29-see-who-is-signed-in",
-    date: "2026-09-29",
-    version: "4.142.0",
-    tag: "new",
-    href: "/settings?tab=sessions",
-    title: {
-      en: "See who is signed in to your shop",
-      bn: "দেখুন কে আপনার দোকানে সাইন ইন করা",
-    },
-    body: {
-      en: "Settings, Sessions shows everyone signed in right now: you on each device, your team, and Paperbase support on a visit, with where and on what. End any of them with one tap, and look back over every sign-in of the last 90 days. Only you, the owner, can see it.",
-      bn: "সেটিংস > সেশনে দেখুন এই মুহূর্তে কে কে সাইন ইন করা: প্রতিটি ডিভাইসে আপনি, আপনার টিম, আর ভিজিটে থাকা Paperbase সাপোর্ট, কোথা থেকে আর কোন ডিভাইসে। এক ট্যাপে যেকোনোটি শেষ করুন, আর গত ৯০ দিনের প্রতিটি সাইন-ইন দেখুন। এটি শুধু আপনি, মালিক, দেখতে পান।",
     },
   },
 ];
