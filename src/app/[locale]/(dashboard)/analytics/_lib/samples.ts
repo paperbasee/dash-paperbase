@@ -236,7 +236,8 @@ export function sampleCustomers(period: Period): CustomersReport {
     returning: { customers: 30, per_order: "2600" },
     top: [1, 2, 3, 4, 5].map((n, i) => ({
       name: `Customer ${n}`,
-      phone: "01700000000",
+      // Each its own: the list tells its rows apart by phone.
+      phone: `0170000000${n}`,
       district: DISTRICTS[i].name,
       district_bn: DISTRICTS[i].name_bn,
       spent: String([12000, 9400, 7800, 6100, 5200][i]),
