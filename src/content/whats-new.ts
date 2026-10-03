@@ -88,6 +88,21 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-10-03-a-clearer-look-at-premium-analytics",
+    date: "2026-10-03",
+    version: "4.163.0",
+    tag: "improved",
+    title: {
+      en: "A clearer look at Premium analytics",
+      bn: "প্রিমিয়াম অ্যানালিটিক্স এখন আরও পরিষ্কারভাবে দেখা যায়",
+    },
+    body: {
+      en: "On the Essential plan, each Premium part of Analytics now shows its real layout, blurred, with a short note on what it tells you and a button to upgrade. Overview and Sales stay on your plan.",
+      bn: "এসেনশিয়াল প্ল্যানে অ্যানালিটিক্সের প্রতিটি প্রিমিয়াম অংশ এখন তার আসল নকশা ঝাপসা করে দেখায়, সাথে থাকে সেটি কী জানায় তার ছোট একটি লেখা আর আপগ্রেড করার বোতাম। সারসংক্ষেপ আর বিক্রি আপনার প্ল্যানেই থাকছে।",
+    },
+    href: "/analytics",
+  },
+  {
     id: "2026-10-02-category-limits-hold-everywhere",
     date: "2026-10-02",
     version: "4.162.0",
@@ -131,21 +146,6 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
       bn: "কোনো টিম মেম্বারের রোল বা ক্যাটাগরি বদলালে, অথবা তাঁকে স্থগিত বা সরিয়ে দিলে, সব ডিভাইসে তিনি সঙ্গে সঙ্গে আপনার শপ থেকে সাইন আউট হয়ে যান। আবার সাইন ইন করলে তাঁর নতুন অ্যাক্সেস অনুযায়ী ঠিক ততটুকুই দেখবেন। সেশন থেকে কোনো সাইন-ইন শেষ করলেও এখন সঙ্গে সঙ্গে কাজ করে।",
     },
     href: "/settings?tab=team",
-  },
-  {
-    id: "2026-10-02-a-clearer-look-at-premium-analytics",
-    date: "2026-10-02",
-    version: "4.160.0",
-    tag: "improved",
-    title: {
-      en: "A clearer look at Premium analytics",
-      bn: "প্রিমিয়াম অ্যানালিটিক্স এখন আরও পরিষ্কারভাবে দেখা যায়",
-    },
-    body: {
-      en: "On the Essential plan, each Premium part of Analytics now shows its own layout with the numbers blurred, so you can see what it holds before you upgrade. Its tab has a small lock. Overview and Sales stay on your plan.",
-      bn: "এসেনশিয়াল প্ল্যানে অ্যানালিটিক্সের প্রতিটি প্রিমিয়াম অংশ এখন তার নিজের নকশা দেখায়, সংখ্যাগুলো ঝাপসা করে, যাতে আপগ্রেডের আগেই বুঝতে পারেন সেখানে কী আছে। তার ট্যাবে থাকে একটি ছোট তালা। সারসংক্ষেপ আর বিক্রি আপনার প্ল্যানেই থাকছে।",
-    },
-    href: "/analytics",
   },
   {
     id: "2026-10-02-new-team-members-give-their-full-name",
