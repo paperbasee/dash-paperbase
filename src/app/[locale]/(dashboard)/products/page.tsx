@@ -801,10 +801,11 @@ export default function ProductsPage() {
 
                       <div className="aspect-square w-full overflow-hidden bg-muted">
                         {firstImage ? (
+                          // The whole photo, as the shop shows it -- never cropped to the square (owner, 2026-10-04).
                           <img
                             src={firstImage}
                             alt={product.name}
-                            className="h-full w-full object-cover"
+                            className="h-full w-full object-contain"
                           />
                         ) : (
                           <div className="flex h-full w-full items-center justify-center text-muted-foreground">
