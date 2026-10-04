@@ -88,6 +88,21 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-10-04-cleaner-page-tops-and-analytics-days",
+    date: "2026-10-04",
+    version: "4.173.0",
+    tag: "improved",
+    title: {
+      en: "Cleaner page tops, and Analytics days in the filter",
+      bn: "আরও পরিষ্কার পেজের ওপরের অংশ, আর অ্যানালিটিক্সের দিনগুলো ফিল্টারে",
+    },
+    body: {
+      en: "The pages in the menu no longer show a back arrow. On Analytics, the days you look at (Today, 7 days, This month, Custom...) are now inside the filter button; the comparison and Download stay where they were.",
+      bn: "মেনুর পেজগুলোতে আর পেছনে যাওয়ার তীর দেখা যায় না। অ্যানালিটিক্সে কোন দিনগুলো দেখবেন (আজ, ৭ দিন, এই মাস, নিজে বাছুন...) তা এখন ফিল্টার বাটনের ভেতরে; তুলনা আর ডাউনলোড আগের জায়গাতেই আছে।",
+    },
+    href: "/analytics",
+  },
+  {
     id: "2026-10-04-a-friendlier-empty-trash",
     date: "2026-10-04",
     version: "4.172.2",
