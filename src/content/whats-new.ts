@@ -88,6 +88,21 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-10-04-product-photos-whole-and-at-once",
+    date: "2026-10-04",
+    version: "4.173.2",
+    tag: "fixed",
+    title: {
+      en: "Product photos show whole, and at once",
+      bn: "পণ্যের ছবি এখন পুরোটা দেখা যায়, সাথে সাথেই",
+    },
+    body: {
+      en: "When you add or edit a product, its photos now show whole instead of zoomed in. And a photo you add or change shows on the product the moment you save, instead of minutes later.",
+      bn: "পণ্য যোগ বা এডিট করার সময় ছবিগুলো এখন বড় করে কাটা না হয়ে পুরোটা দেখা যায়। আর যে ছবি যোগ বা বদল করেন, তা সেভ করার সাথে সাথেই পণ্যে দেখা যায়, কয়েক মিনিট পরে নয়।",
+    },
+    href: "/products",
+  },
+  {
     id: "2026-10-04-cleaner-page-tops-and-analytics-days",
     date: "2026-10-04",
     version: "4.173.1",
@@ -511,20 +526,6 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     body: {
       en: "Saving a change refreshes your shop's pages. Now each page is rebuilt once, and shoppers arriving at that same moment all get it, so your shop stays quick even when you save during a busy hour.",
       bn: "কোনো পরিবর্তন সেভ করলে দোকানের পাতাগুলো নতুন করে তৈরি হয়। এখন প্রতিটি পাতা একবারই তৈরি হয়, আর ঠিক সেই সময়ে আসা সব ক্রেতা সেটিই পান, তাই ব্যস্ত সময়ে সেভ করলেও আপনার দোকান দ্রুত থাকে।",
-    },
-  },
-  {
-    id: "2026-09-29-timed-sections-on-time",
-    date: "2026-09-29",
-    version: "4.145.0",
-    tag: "improved",
-    title: {
-      en: "Timed sections start right on time",
-      bn: "সময় ঠিক করা সেকশন ঠিক সময়েই শুরু হয়",
-    },
-    body: {
-      en: "A section you schedule in the editor now appears the second it starts and goes the second it ends; it used to be up to a minute late. Your shop also keeps more of its pages ready, so it opens faster for your shoppers.",
-      bn: "এডিটরে যে সেকশনের সময় ঠিক করেন, সেটি এখন শুরুর সেকেন্ডেই দেখা যায় আর শেষের সেকেন্ডেই সরে যায়; আগে এক মিনিট পর্যন্ত দেরি হতো। আপনার দোকান এখন আরও বেশি পাতা তৈরি রাখে, তাই ক্রেতাদের জন্য আরও দ্রুত খোলে।",
     },
   },
 ];
