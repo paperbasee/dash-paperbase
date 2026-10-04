@@ -326,10 +326,10 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
     },
     {
       /**
-       * One slot, because the pictures and the buying column share a row: drawn
-       * as two they would say the page stacks them, which it does not. The
-       * pictures are a merchant's choice; the column is not, and the chooser
-       * says so rather than a lock on a slot that is half editable.
+       * The product's photos: how they are shown. The buying column beside them
+       * is not a choice, and since 2026-10-04 it is not part of this place
+       * either -- the shop marked both, so picking the photos outlined the
+       * column too (owner). A click on the column opens Product details.
        */
       key: "buy",
       label: "buy",
