@@ -88,6 +88,21 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-10-05-readable-web-addresses",
+    date: "2026-10-05",
+    version: "4.178.0",
+    tag: "improved",
+    title: {
+      en: "Readable web addresses for Bangla names",
+      bn: "বাংলা নামেও পড়ার মতো ওয়েব ঠিকানা",
+    },
+    body: {
+      en: "A product or category with a Bangla name now gets an address in English letters, like holud-suti-thri-pis, instead of a long code. Renaming keeps the address, you can change it yourself, and every old link keeps working.",
+      bn: "বাংলা নামের পণ্য বা ক্যাটাগরি এখন লম্বা কোডের বদলে ইংরেজি অক্ষরে ঠিকানা পায়, যেমন holud-suti-thri-pis। নাম বদলালেও ঠিকানা একই থাকে, চাইলে নিজে বদলাতে পারেন, আর পুরোনো সব লিংক কাজ করে।",
+    },
+    href: "/products",
+  },
+  {
     id: "2026-10-04-dashboard-in-bangla-everywhere",
     date: "2026-10-04",
     version: "4.177.0",
@@ -515,20 +530,5 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
       en: "If part of Paperbase is having trouble, or maintenance is planned for the next day, a short notice now appears at the top of your dashboard. Tap Details for the full story on status.paperbase.me, or hide it.",
       bn: "Paperbase-এর কোনো অংশে সমস্যা হলে, বা পরের দিনের মধ্যে রক্ষণাবেক্ষণ থাকলে, এখন ড্যাশবোর্ডের উপরে একটি ছোট নোটিশ দেখাবে। পুরো খবরের জন্য status.paperbase.me-তে \"বিস্তারিত\" চাপুন, অথবা নোটিশটি লুকিয়ে রাখুন।",
     },
-  },
-  {
-    id: "2026-09-30-courier-logos-easy-to-see",
-    date: "2026-09-30",
-    version: "4.153.2",
-    tag: "fixed",
-    title: {
-      en: "Courier logos are easy to see",
-      bn: "কুরিয়ারের লোগো এখন সহজে দেখা যায়",
-    },
-    body: {
-      en: "In the fraud check, each courier now shows as its logo on a white tile, so dark logos like SteadFast's show clearly in dark mode too.",
-      bn: "ফ্রড চেকে এখন প্রতিটি কুরিয়ার তার লোগো দিয়ে সাদা ঘরে দেখায়, তাই SteadFast-এর মতো গাঢ় লোগোও ডার্ক মোডে পরিষ্কার দেখা যায়।",
-    },
-    href: "/orders",
   },
 ];
