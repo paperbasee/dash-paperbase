@@ -88,6 +88,21 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-10-04-questions-beside-the-buy-button",
+    date: "2026-10-04",
+    version: "4.174.0",
+    tag: "improved",
+    title: {
+      en: "Product questions beside the buy button",
+      bn: "পণ্যের প্রশ্ন এখন কেনার বোতামের পাশে",
+    },
+    body: {
+      en: "The questions you write on a product now show right under its buy button, each on its own row; with more than six, they fold into one row. Reviews now come before \"You may also like\". In Customize, Questions is on by default.",
+      bn: "পণ্যে লেখা প্রশ্নগুলো এখন কেনার বোতামের ঠিক নিচে দেখা যায়, প্রতিটি আলাদা সারিতে; ছয়টির বেশি হলে একটি সারিতে সব। রিভিউ এখন \"এগুলোও দেখতে পারেন\"-এর আগে আসে। কাস্টমাইজে প্রশ্ন শুরু থেকেই চালু।",
+    },
+    href: "/settings/customize",
+  },
+  {
     id: "2026-10-04-editor-product-photos-alone",
     date: "2026-10-04",
     version: "4.173.4",
@@ -513,20 +528,6 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     body: {
       en: "The dashboard's search now shows each team member only the products, orders, customers and support tickets their role and categories let them open. It also keeps up with you while you type.",
       bn: "ড্যাশবোর্ডের সার্চ এখন প্রত্যেক টিম মেম্বারকে শুধু সেই প্রোডাক্ট, অর্ডার, কাস্টমার আর সাপোর্ট টিকিট দেখায়, যেগুলো তাঁর রোল আর ক্যাটাগরি অনুযায়ী খোলার অনুমতি আছে। টাইপ করার সময়ও এখন সার্চ থেমে যায় না।",
-    },
-  },
-  {
-    id: "2026-09-29-sign-in-photos-on-phones",
-    date: "2026-09-29",
-    version: "4.146.1",
-    tag: "fixed",
-    title: {
-      en: "The sign-in page looks right on phones",
-      bn: "ফোনে সাইন-ইন পেজ ঠিকঠাক দেখায়",
-    },
-    body: {
-      en: "On a phone, the shop photos behind sign in and sign up now show clearly at the top of the screen, and the language switch no longer covers the heading.",
-      bn: "ফোনে সাইন ইন আর অ্যাকাউন্ট খোলার পেজের পেছনের দোকানের ছবিগুলো এখন স্ক্রিনের ওপরে পরিষ্কার দেখা যায়, আর ভাষা বদলানোর বোতাম আর শিরোনাম ঢেকে দেয় না।",
     },
   },
 ];
