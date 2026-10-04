@@ -88,6 +88,21 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-10-04-editor-product-photos-alone",
+    date: "2026-10-04",
+    version: "4.173.4",
+    tag: "fixed",
+    title: {
+      en: "Picking the product photos picks just the photos",
+      bn: "পণ্যের ছবি বাছলে এখন শুধু ছবিই বাছা হয়",
+    },
+    body: {
+      en: "In Customize, on the product page, clicking the photos now outlines only the photos, and the place is called Product photos. Clicking the name or price beside them opens Product details.",
+      bn: "কাস্টমাইজে, পণ্যের পেজে ছবিতে ক্লিক করলে এখন শুধু ছবির চারপাশেই দাগ পড়ে, আর জায়গাটির নাম পণ্যের ছবি। পাশে নাম বা দামে ক্লিক করলে পণ্যের বিস্তারিত খোলে।",
+    },
+    href: "/settings/customize",
+  },
+  {
     id: "2026-10-04-product-photos-whole-and-at-once",
     date: "2026-10-04",
     version: "4.173.3",
@@ -512,20 +527,6 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     body: {
       en: "On a phone, the shop photos behind sign in and sign up now show clearly at the top of the screen, and the language switch no longer covers the heading.",
       bn: "ফোনে সাইন ইন আর অ্যাকাউন্ট খোলার পেজের পেছনের দোকানের ছবিগুলো এখন স্ক্রিনের ওপরে পরিষ্কার দেখা যায়, আর ভাষা বদলানোর বোতাম আর শিরোনাম ঢেকে দেয় না।",
-    },
-  },
-  {
-    id: "2026-09-29-quick-right-after-you-save",
-    date: "2026-09-29",
-    version: "4.146.0",
-    tag: "improved",
-    title: {
-      en: "Your shop stays quick right after you save",
-      bn: "সেভ করার ঠিক পরেও দোকান দ্রুত থাকে",
-    },
-    body: {
-      en: "Saving a change refreshes your shop's pages. Now each page is rebuilt once, and shoppers arriving at that same moment all get it, so your shop stays quick even when you save during a busy hour.",
-      bn: "কোনো পরিবর্তন সেভ করলে দোকানের পাতাগুলো নতুন করে তৈরি হয়। এখন প্রতিটি পাতা একবারই তৈরি হয়, আর ঠিক সেই সময়ে আসা সব ক্রেতা সেটিই পান, তাই ব্যস্ত সময়ে সেভ করলেও আপনার দোকান দ্রুত থাকে।",
     },
   },
 ];
