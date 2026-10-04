@@ -54,11 +54,13 @@ describe("which places are wired", () => {
   test("every place on every page is real", () => {
     // The whole point of the work that began on 2026-09-22: no choice in the
     // editor that changes nothing in the shop. Inherited places are read from
-    // their owner.
+    // their owner, and a place that holds one of the theme's own settings
+    // (Card photos, 2026-10-04) writes that.
     const drawings: string[] = [];
     for (const [page, slots] of Object.entries(SLOTS)) {
       for (const slot of slots) {
         const owner = slot.inheritedFrom ?? { page, key: slot.key };
+        if (slot.themeSetting) continue;
         if (!wiringFor(owner.page as SlotPageKey, owner.key) && !storeSettingFor(owner.page as SlotPageKey, owner.key)) {
           drawings.push(`${page}.${slot.key}`);
         }

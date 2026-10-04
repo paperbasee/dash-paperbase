@@ -74,6 +74,7 @@ import {
 } from "@/lib/query-keys";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { chosenPalette, fetchPalettes } from "@/lib/theme-editor/palettes";
+import { CARD_PHOTOS, followingNames, ticksIn, toggled } from "@/lib/theme-editor/card-photos";
 import { useToastAreaLeft, useToastAvoid } from "@/components/notifications/useToastArea";
 import { ConflictDialog } from "../ConflictDialog";
 import { PreviewPane } from "../PreviewPane";
@@ -83,6 +84,7 @@ import { usePreviewSession } from "../usePreviewSession";
 import { KitBadge, KitChoice, KitNote, KitPanel, KitShape, KitTabs } from "../kit";
 import { SHEET_TOP } from "../kit/styles";
 import { useMediaQuery } from "../useMediaQuery";
+import { CardPhotosPanel } from "./CardPhotosPanel";
 import { PagePlaces, type PlaceRow } from "./PagePlaces";
 import { SlotPanel } from "./SlotPanel";
 import { StylePanel } from "./StylePanel";
@@ -199,6 +201,8 @@ export function SlotEditor({
   // Where a card's words sit (2026-09-29): the document too, centred where it says nothing.
   const cardAlign =
     typeof state.document.settings?.card_align === "string" ? state.document.settings.card_align : "center";
+  // The categories whose cards follow their photo (2026-10-04): the document too, none where it says nothing.
+  const cardPhotos = ticksIn(state.document.settings);
   // One whole-theme action at a time (Save, answering a clash).
   const [busy, setBusy] = useState(false);
   // The clash waiting for an answer, and where the draft stands so it can be saved over.
@@ -610,6 +614,13 @@ export function SlotEditor({
   /** What a place is set to, in the merchant's words, for the list. */
   function valueOf(ref: PlaceRef): string {
     const slot = SLOTS[ref.page].find((one) => one.key === ref.key);
+    if (slot?.themeSetting === CARD_PHOTOS) {
+      // The categories that follow, by name: two, then how many more.
+      const names = followingNames(cardPhotos, categories.data ?? []);
+      if (!names.length) return t("catPhotosSquare");
+      if (names.length <= 2) return names.join(", ");
+      return t("catPhotosMore", { names: names.slice(0, 2).join(", "), count: names.length - 2 });
+    }
     if (!slot?.options?.length) return "";
     const wiring = wiringFor(ref.page, ref.key);
     const value = wiring ? slotValueFor(state.document, wiring) : choices[ref.page]?.[ref.key];
@@ -648,7 +659,23 @@ export function SlotEditor({
   );
 
   const placePanel =
-    open && openSlot && openWiring ? (
+    open && openSlot?.themeSetting === CARD_PHOTOS ? (
+      /* One of the theme's own settings, with a view of its own: written as the card style is. */
+      <CardPhotosPanel
+        key={placeId(open)}
+        tree={categories.data}
+        failed={categories.isError}
+        ticks={cardPhotos}
+        onToggle={(publicId) =>
+          dispatch({
+            type: "setThemeSetting",
+            setting: CARD_PHOTOS,
+            value: toggled(cardPhotos, categories.data ?? [], publicId),
+          })
+        }
+        onClose={closePlace}
+      />
+    ) : open && openSlot && openWiring ? (
       /* `page` is the one that OWNS the place, so the settings its neighbours
          decide are looked up where those neighbours live. */
       <SlotPanel

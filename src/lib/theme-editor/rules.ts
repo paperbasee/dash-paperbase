@@ -15,6 +15,8 @@ export const MAX_LONG_TEXT_LENGTH = 2000;
 export const MAX_URL_LENGTH = 500;
 /** An ISO-8601 instant with an offset; what is stored is the 20-character `...Z` form. */
 export const MAX_DATETIME_LENGTH = 40;
+/** The most categories a `category_ticks` setting names: the cards that follow their photo. */
+export const MAX_CATEGORY_TICKS = 500;
 
 export type RuleReason =
   /** The shop needs it: the last shown copy of a required section. */

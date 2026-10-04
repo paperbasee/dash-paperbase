@@ -178,7 +178,8 @@ describe("every place is a page of the document", () => {
       changes nothing, which is the complaint that started this work.
     */
     for (const slot of SLOTS.category) {
-      if (slot.inheritedFrom) continue;
+      // Card photos (2026-10-04) is the theme's own setting, not a section's.
+      if (slot.inheritedFrom || slot.themeSetting) continue;
       expect(wiringFor("category", slot.key), slot.key).not.toBeNull();
     }
   });

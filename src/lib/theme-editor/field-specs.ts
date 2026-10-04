@@ -38,6 +38,10 @@ export const FIELD_KINDS = [
   // list of the shop's own -- the home page's three -- never typed, which is
   // why no field draws one.
   "category",
+  // Categories ticked or unticked, as { public id: true or false }: the ones
+  // whose cards follow their photo (2026-10-04). A theme setting with a view of
+  // its own (slots/CardPhotosPanel.tsx), so no field draws one either.
+  "category_ticks",
 ] as const;
 
 export type FieldKind = (typeof FIELD_KINDS)[number];

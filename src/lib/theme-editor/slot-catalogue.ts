@@ -84,6 +84,12 @@ export type Slot = {
   options?: SlotOption[];
   /** The value that is in the slot to begin with. */
   initial?: string;
+  /**
+   * A place that holds one of the THEME's own settings rather than a section's, with a view
+   * of its own: the categories whose cards follow their photo (2026-10-04,
+   * `slots/CardPhotosPanel.tsx`). Written as the card style is, with `setThemeSetting`.
+   */
+  themeSetting?: "card_photos";
 };
 
 /** In the order a shopper meets them. */
@@ -505,6 +511,14 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
         { value: "two", label: "catGridTwo", note: "catGridTwoNote", shape: "block" },
       ],
     },
+    /*
+      Card photos (owner, 2026-10-04): the categories whose cards take each
+      photo's own shape -- tall clothes on a model or a hanger -- rather than a
+      square with blank strips beside it. A list of the shop's own categories to
+      tick, so no tiles; the theme's `card_photos` setting, so it is a draft
+      like every other look until Save to store.
+    */
+    { key: "photos", label: "catPhotos", hint: "catPhotosHint", themeSetting: "card_photos" },
     /*
       Getting to the rest. Numbered pages are the theme's default: a page of a
       shop is a cached document with an address, so `?page=2` is bookmarkable,
