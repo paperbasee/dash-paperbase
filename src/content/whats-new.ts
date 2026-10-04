@@ -88,8 +88,8 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
-    id: "2026-10-04-cards-that-follow-the-photo",
-    date: "2026-10-04",
+    id: "2026-10-05-cards-that-follow-the-photo",
+    date: "2026-10-05",
     version: "4.176.0",
     tag: "new",
     title: {
@@ -103,8 +103,8 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     href: "/settings/customize",
   },
   {
-    id: "2026-10-04-buying-area-whatsapp-quantity-share",
-    date: "2026-10-04",
+    id: "2026-10-05-buying-area-whatsapp-quantity-share",
+    date: "2026-10-05",
     version: "4.175.0",
     tag: "new",
     title: {
@@ -118,8 +118,8 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     href: "/settings/customize",
   },
   {
-    id: "2026-10-04-questions-beside-the-buy-button",
-    date: "2026-10-04",
+    id: "2026-10-05-questions-beside-the-buy-button",
+    date: "2026-10-05",
     version: "4.174.0",
     tag: "improved",
     title: {
@@ -133,8 +133,8 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     href: "/settings/customize",
   },
   {
-    id: "2026-10-04-editor-product-photos-alone",
-    date: "2026-10-04",
+    id: "2026-10-05-editor-product-photos-alone",
+    date: "2026-10-05",
     version: "4.173.4",
     tag: "fixed",
     title: {
@@ -148,8 +148,8 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     href: "/settings/customize",
   },
   {
-    id: "2026-10-04-product-photos-whole-and-at-once",
-    date: "2026-10-04",
+    id: "2026-10-05-product-photos-whole-and-at-once",
+    date: "2026-10-05",
     version: "4.173.3",
     tag: "fixed",
     title: {
@@ -163,8 +163,8 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     href: "/products",
   },
   {
-    id: "2026-10-04-cleaner-page-tops-and-analytics-days",
-    date: "2026-10-04",
+    id: "2026-10-05-cleaner-page-tops-and-analytics-days",
+    date: "2026-10-05",
     version: "4.173.1",
     tag: "improved",
     title: {
@@ -178,8 +178,8 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     href: "/analytics",
   },
   {
-    id: "2026-10-04-a-friendlier-empty-trash",
-    date: "2026-10-04",
+    id: "2026-10-05-a-friendlier-empty-trash",
+    date: "2026-10-05",
     version: "4.172.2",
     tag: "improved",
     title: {
@@ -193,8 +193,8 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     href: "/trash",
   },
   {
-    id: "2026-10-04-tidier-page-headers",
-    date: "2026-10-04",
+    id: "2026-10-05-tidier-page-headers",
+    date: "2026-10-05",
     version: "4.172.0",
     tag: "improved",
     title: {
@@ -208,8 +208,8 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     href: "/orders",
   },
   {
-    id: "2026-10-04-analytics-is-part-of-premium",
-    date: "2026-10-04",
+    id: "2026-10-05-analytics-is-part-of-premium",
+    date: "2026-10-05",
     version: "4.171.0",
     tag: "improved",
     title: {
@@ -223,8 +223,8 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     href: "/plans",
   },
   {
-    id: "2026-10-04-a-shorter-bkash-step-in-bangla",
-    date: "2026-10-04",
+    id: "2026-10-05-a-shorter-bkash-step-in-bangla",
+    date: "2026-10-05",
     version: "4.169.1",
     tag: "improved",
     title: {
@@ -238,8 +238,8 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     href: "/plans",
   },
   {
-    id: "2026-10-04-add-new-from-the-sidebar",
-    date: "2026-10-04",
+    id: "2026-10-05-add-new-from-the-sidebar",
+    date: "2026-10-05",
     version: "4.169.0",
     tag: "new",
     title: {
@@ -252,8 +252,8 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     },
   },
   {
-    id: "2026-10-03-a-friendlier-empty-blog-and-reviews",
-    date: "2026-10-03",
+    id: "2026-10-05-a-friendlier-empty-blog-and-reviews",
+    date: "2026-10-05",
     version: "4.168.0",
     tag: "improved",
     title: {
@@ -267,8 +267,8 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     href: "/blog",
   },
   {
-    id: "2026-10-03-the-payment-page-in-bangla",
-    date: "2026-10-03",
+    id: "2026-10-05-the-payment-page-in-bangla",
+    date: "2026-10-05",
     version: "4.167.0",
     tag: "new",
     title: {
@@ -282,8 +282,8 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     href: "/plans",
   },
   {
-    id: "2026-10-03-clear-bkash-and-nagad-logos",
-    date: "2026-10-03",
+    id: "2026-10-05-clear-bkash-and-nagad-logos",
+    date: "2026-10-05",
     version: "4.166.1",
     tag: "fixed",
     title: {
@@ -297,8 +297,8 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     href: "/plans",
   },
   {
-    id: "2026-10-03-a-clear-page-when-payment-is-not-ready",
-    date: "2026-10-03",
+    id: "2026-10-05-a-clear-page-when-payment-is-not-ready",
+    date: "2026-10-05",
     version: "4.166.0",
     tag: "fixed",
     title: {
@@ -312,8 +312,8 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     href: "/plans",
   },
   {
-    id: "2026-10-03-a-new-plans-page",
-    date: "2026-10-03",
+    id: "2026-10-05-a-new-plans-page",
+    date: "2026-10-05",
     version: "4.165.0",
     tag: "improved",
     title: {
@@ -327,8 +327,8 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     href: "/plans",
   },
   {
-    id: "2026-10-03-a-clearer-look-at-premium-analytics",
-    date: "2026-10-03",
+    id: "2026-10-05-a-clearer-look-at-premium-analytics",
+    date: "2026-10-05",
     version: "4.163.1",
     tag: "improved",
     title: {
@@ -342,8 +342,8 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     href: "/analytics",
   },
   {
-    id: "2026-10-02-category-limits-hold-everywhere",
-    date: "2026-10-02",
+    id: "2026-10-05-category-limits-hold-everywhere",
+    date: "2026-10-05",
     version: "4.162.0",
     tag: "improved",
     title: {
@@ -357,8 +357,8 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     href: "/settings?tab=team",
   },
   {
-    id: "2026-10-02-team-changes-take-effect-at-once",
-    date: "2026-10-02",
+    id: "2026-10-05-team-changes-take-effect-at-once",
+    date: "2026-10-05",
     version: "4.161.0",
     tag: "improved",
     title: {
@@ -372,8 +372,8 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     href: "/settings?tab=team",
   },
   {
-    id: "2026-10-02-new-team-members-give-their-full-name",
-    date: "2026-10-02",
+    id: "2026-10-05-new-team-members-give-their-full-name",
+    date: "2026-10-05",
     version: "4.158.1",
     tag: "improved",
     title: {
@@ -387,8 +387,8 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     href: "/settings?tab=team",
   },
   {
-    id: "2026-10-02-you-hear-when-someone-downloads-your-orders",
-    date: "2026-10-02",
+    id: "2026-10-05-you-hear-when-someone-downloads-your-orders",
+    date: "2026-10-05",
     version: "4.158.0",
     tag: "new",
     title: {
@@ -402,8 +402,8 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     href: "/activities",
   },
   {
-    id: "2026-10-02-three-fixed-roles-admin-manager-staff",
-    date: "2026-10-02",
+    id: "2026-10-05-three-fixed-roles-admin-manager-staff",
+    date: "2026-10-05",
     version: "4.157.0",
     tag: "new",
     title: {
@@ -417,8 +417,8 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     href: "/settings?tab=team",
   },
   {
-    id: "2026-10-02-a-slimmer-sidebar-scrollbar",
-    date: "2026-10-02",
+    id: "2026-10-05-a-slimmer-sidebar-scrollbar",
+    date: "2026-10-05",
     version: "4.156.1",
     tag: "improved",
     title: {
@@ -431,8 +431,8 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     },
   },
   {
-    id: "2026-10-02-payments-your-own-bkash-and-nagad-numbers",
-    date: "2026-10-02",
+    id: "2026-10-05-payments-your-own-bkash-and-nagad-numbers",
+    date: "2026-10-05",
     version: "4.156.0",
     tag: "new",
     title: {
@@ -446,8 +446,8 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     href: "/settings?tab=payments",
   },
   {
-    id: "2026-10-02-everyone-greeted-by-their-own-name",
-    date: "2026-10-02",
+    id: "2026-10-05-everyone-greeted-by-their-own-name",
+    date: "2026-10-05",
     version: "4.155.1",
     tag: "fixed",
     title: {
@@ -460,8 +460,8 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     },
   },
   {
-    id: "2026-10-02-a-welcoming-team-invite",
-    date: "2026-10-02",
+    id: "2026-10-05-a-welcoming-team-invite",
+    date: "2026-10-05",
     version: "4.155.0",
     tag: "improved",
     title: {
