@@ -88,6 +88,21 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-10-04-buying-area-whatsapp-quantity-share",
+    date: "2026-10-04",
+    version: "4.175.0",
+    tag: "new",
+    title: {
+      en: "A better buying area: quantity, Order on WhatsApp, and Share that works",
+      bn: "আরও ভালো কেনার অংশ: পরিমাণ, WhatsApp-এ অর্ডার, আর কাজের শেয়ার",
+    },
+    body: {
+      en: "On your product pages, shoppers can choose a quantity (never more than you have), order on WhatsApp with the product and their choice already typed, and see \"Only 3 left\" when stock is low. The buttons are ready to tap: pressed before a size is chosen, they show which choice is missing. Share now works on computers too. Turn each part on or off in Customize, under Buying area.",
+      bn: "আপনার পণ্যের পাতায় ক্রেতা এখন পরিমাণ বেছে নিতে পারেন (আপনার স্টকের বেশি নয়), পণ্য আর পছন্দ আগেই লেখা অবস্থায় WhatsApp-এ অর্ডার করতে পারেন, আর স্টক কম থাকলে দেখেন \"মাত্র ৩টি বাকি\"। বোতামগুলো সবসময় চাপার মতো: সাইজ না বেছে চাপলে দেখায় কোনটি বাছতে হবে। শেয়ার এখন কম্পিউটারেও কাজ করে। কাস্টমাইজে \"কেনার অংশ\" থেকে প্রতিটি চালু বা বন্ধ করুন।",
+    },
+    href: "/settings/customize",
+  },
+  {
     id: "2026-10-04-questions-beside-the-buy-button",
     date: "2026-10-04",
     version: "4.174.0",
@@ -97,8 +112,8 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
       bn: "পণ্যের প্রশ্ন এখন কেনার বোতামের পাশে",
     },
     body: {
-      en: "The questions you write on a product now show right under its buy button, each on its own row; with more than six, they fold into one row. Reviews now come before \"You may also like\". In Customize, Questions is on by default.",
-      bn: "পণ্যে লেখা প্রশ্নগুলো এখন কেনার বোতামের ঠিক নিচে দেখা যায়, প্রতিটি আলাদা সারিতে; ছয়টির বেশি হলে একটি সারিতে সব। রিভিউ এখন \"এগুলোও দেখতে পারেন\"-এর আগে আসে। কাস্টমাইজে প্রশ্ন শুরু থেকেই চালু।",
+      en: "The questions you write on a product now sit right under its buy button, in one \"Questions\" row that opens onto them all. Reviews now come before \"You may also like\". In Customize, Questions is on by default.",
+      bn: "পণ্যে লেখা প্রশ্নগুলো এখন কেনার বোতামের ঠিক নিচে, একটি \"প্রশ্ন ও উত্তর\" সারিতে, খুললে সব দেখা যায়। রিভিউ এখন \"এগুলোও দেখতে পারেন\"-এর আগে আসে। কাস্টমাইজে প্রশ্ন শুরু থেকেই চালু।",
     },
     href: "/settings/customize",
   },
@@ -514,20 +529,6 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     body: {
       en: "Search now finds pages, settings and actions like “add product”, plus categories, brands, discount codes, blog posts, reviews and team members, and answers faster. It finds a phone however it's written and a product without its dash (“tshirt”). Use the arrow keys and Enter; your recent searches wait for you.",
       bn: "সার্চে এখন পেজ, সেটিংস আর “add product”-এর মতো কাজ, সাথে ক্যাটাগরি, ব্র্যান্ড, ডিসকাউন্ট কোড, ব্লগ পোস্ট, রিভিউ ও টিম মেম্বারও পাওয়া যায়, আর উত্তর আসে আরও দ্রুত। ফোন নম্বর যেভাবেই লিখুন খুঁজে পায়, প্রোডাক্টের নাম ড্যাশ ছাড়া লিখলেও (“tshirt”)। অ্যারো কী আর Enter ব্যবহার করুন; আপনার সাম্প্রতিক খোঁজগুলো সেখানেই থাকবে।",
-    },
-  },
-  {
-    id: "2026-09-29-search-follows-each-members-access",
-    date: "2026-09-29",
-    version: "4.146.2",
-    tag: "fixed",
-    title: {
-      en: "Search follows each team member's access",
-      bn: "সার্চ এখন প্রত্যেক টিম মেম্বারের অনুমতি মেনে চলে",
-    },
-    body: {
-      en: "The dashboard's search now shows each team member only the products, orders, customers and support tickets their role and categories let them open. It also keeps up with you while you type.",
-      bn: "ড্যাশবোর্ডের সার্চ এখন প্রত্যেক টিম মেম্বারকে শুধু সেই প্রোডাক্ট, অর্ডার, কাস্টমার আর সাপোর্ট টিকিট দেখায়, যেগুলো তাঁর রোল আর ক্যাটাগরি অনুযায়ী খোলার অনুমতি আছে। টাইপ করার সময়ও এখন সার্চ থেমে যায় না।",
     },
   },
 ];
