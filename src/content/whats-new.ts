@@ -93,12 +93,12 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     version: "4.175.0",
     tag: "new",
     title: {
-      en: "A better buying area: quantity, Order on WhatsApp, and Share that works",
-      bn: "আরও ভালো কেনার অংশ: পরিমাণ, WhatsApp-এ অর্ডার, আর কাজের শেয়ার",
+      en: "Quantity, WhatsApp orders and Share on product pages",
+      bn: "পণ্যের পাতায় পরিমাণ, WhatsApp-এ অর্ডার আর শেয়ার",
     },
     body: {
-      en: "On your product pages, shoppers can choose a quantity (never more than you have), order on WhatsApp with the product and their choice already typed, and see \"Only 3 left\" when stock is low. The buttons are ready to tap: pressed before a size is chosen, they show which choice is missing. Share now works on computers too. Turn each part on or off in Customize, under Buying area.",
-      bn: "আপনার পণ্যের পাতায় ক্রেতা এখন পরিমাণ বেছে নিতে পারেন (আপনার স্টকের বেশি নয়), পণ্য আর পছন্দ আগেই লেখা অবস্থায় WhatsApp-এ অর্ডার করতে পারেন, আর স্টক কম থাকলে দেখেন \"মাত্র ৩টি বাকি\"। বোতামগুলো সবসময় চাপার মতো: সাইজ না বেছে চাপলে দেখায় কোনটি বাছতে হবে। শেয়ার এখন কম্পিউটারেও কাজ করে। কাস্টমাইজে \"কেনার অংশ\" থেকে প্রতিটি চালু বা বন্ধ করুন।",
+      en: "Shoppers can pick a quantity, never more than you have, and order on WhatsApp with their choice already typed. Pressed before a size is chosen, the buttons show which choice is missing, and Share now works on computers too. Turn each part on or off in Customize, under Buying area.",
+      bn: "ক্রেতা এখন পরিমাণ বেছে নিতে পারেন, আপনার স্টকের বেশি নয়, আর পছন্দ আগেই লেখা অবস্থায় WhatsApp-এ অর্ডার করতে পারেন। সাইজ না বেছে বোতাম চাপলে দেখায় কোনটি বাছতে হবে, আর শেয়ার এখন কম্পিউটারেও কাজ করে। কাস্টমাইজে \"কেনার অংশ\" থেকে প্রতিটি চালু বা বন্ধ করুন।",
     },
     href: "/settings/customize",
   },
