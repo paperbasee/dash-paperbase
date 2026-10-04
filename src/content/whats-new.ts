@@ -90,15 +90,15 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
     id: "2026-10-04-cleaner-page-tops-and-analytics-days",
     date: "2026-10-04",
-    version: "4.173.0",
+    version: "4.173.1",
     tag: "improved",
     title: {
       en: "Cleaner page tops, and Analytics days in the filter",
       bn: "আরও পরিষ্কার পেজের ওপরের অংশ, আর অ্যানালিটিক্সের দিনগুলো ফিল্টারে",
     },
     body: {
-      en: "The pages in the menu no longer show a back arrow. On Analytics, the days you look at (Today, 7 days, This month, Custom...) are now inside the filter button; the comparison and Download stay where they were.",
-      bn: "মেনুর পেজগুলোতে আর পেছনে যাওয়ার তীর দেখা যায় না। অ্যানালিটিক্সে কোন দিনগুলো দেখবেন (আজ, ৭ দিন, এই মাস, নিজে বাছুন...) তা এখন ফিল্টার বাটনের ভেতরে; তুলনা আর ডাউনলোড আগের জায়গাতেই আছে।",
+      en: "Pages no longer show a back arrow. On Analytics, the days you look at (Today, 7 days, This month, Custom...) are now inside the filter button, and the comparison and Download are small icons beside it: point at one to see its name.",
+      bn: "পেজগুলোতে আর পেছনে যাওয়ার তীর দেখা যায় না। অ্যানালিটিক্সে কোন দিনগুলো দেখবেন (আজ, ৭ দিন, এই মাস, নিজে বাছুন...) তা এখন ফিল্টার বাটনের ভেতরে, আর তুলনা ও ডাউনলোড এর পাশে ছোট আইকন: নাম দেখতে এর ওপর মাউস রাখুন।",
     },
     href: "/analytics",
   },
@@ -525,20 +525,6 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     body: {
       en: "A section you schedule in the editor now appears the second it starts and goes the second it ends; it used to be up to a minute late. Your shop also keeps more of its pages ready, so it opens faster for your shoppers.",
       bn: "এডিটরে যে সেকশনের সময় ঠিক করেন, সেটি এখন শুরুর সেকেন্ডেই দেখা যায় আর শেষের সেকেন্ডেই সরে যায়; আগে এক মিনিট পর্যন্ত দেরি হতো। আপনার দোকান এখন আরও বেশি পাতা তৈরি রাখে, তাই ক্রেতাদের জন্য আরও দ্রুত খোলে।",
-    },
-  },
-  {
-    id: "2026-09-29-edits-show-at-once",
-    date: "2026-09-29",
-    version: "4.144.0",
-    tag: "improved",
-    title: {
-      en: "Your edits show in your shop at once",
-      bn: "আপনার পরিবর্তন সঙ্গে সঙ্গে দোকানে দেখা যায়",
-    },
-    body: {
-      en: "A new price, picture, category, delivery charge or shop detail now shows in your shop the moment you save it; some used to take up to five minutes. And if part of our system slows down, your shop keeps selling, just a little slower.",
-      bn: "নতুন দাম, ছবি, ক্যাটাগরি, ডেলিভারি চার্জ বা দোকানের তথ্য এখন সেভ করার সঙ্গে সঙ্গেই আপনার দোকানে দেখা যায়; আগে কিছু পরিবর্তন দেখাতে পাঁচ মিনিট পর্যন্ত লাগত। আর আমাদের সিস্টেমের কোনো অংশ ধীর হয়ে গেলেও আপনার দোকানে বিক্রি চলতে থাকে, শুধু একটু ধীরে।",
     },
   },
 ];
