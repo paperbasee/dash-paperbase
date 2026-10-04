@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
+import { useMemo, useRef, useState, type FormEvent } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { useQueryClient } from "@tanstack/react-query";
 import { DeferredNavLink } from "@/components/navigation/DeferredNavLink";
@@ -24,11 +24,10 @@ import { MAX_PRODUCT_IMAGES } from "@/lib/product-media";
 import {
   parseValidation,
   productCreateSchema,
-  slugFromName,
   validateRequiredExtraFields,
 } from "@/lib/validation";
 import { notify } from "@/notifications";
-import { scheduleSlugSuggestion } from "@/lib/products/slug-suggestion";
+import { WebAddressField } from "@/components/products/WebAddressField";
 import { numberTextClass } from "@/lib/number-font";
 import { cn } from "@/lib/utils";
 import { buildPublicMediaUrlFromKey, uploadFile } from "@/hooks/usePresignedUpload";
@@ -50,6 +49,7 @@ export default function NewProductPage() {
   const locale = useLocale();
   const numClass = numberTextClass(locale);
   const tPages = useTranslations("pages");
+  const tAddress = useTranslations("webAddress");
   const tUpload = useTranslations("upload");
   const tHints = useTranslations("pageHints");
   const tCommon = useTranslations("common");
@@ -91,14 +91,12 @@ export default function NewProductPage() {
   const [imagePreviews, setImagePreviews] = useState<(string | null)[]>(
     () => Array(MAX_IMAGES).fill(null)
   );
-  const [resolvedSlug, setResolvedSlug] = useState("");
-  const [slugUsesFallback, setSlugUsesFallback] = useState(false);
-  const [slugChecking, setSlugChecking] = useState(false);
+  // The web address the merchant typed; null while it follows the name (WebAddressField).
+  const [addressInput, setAddressInput] = useState<string | null>(null);
   /** Which slot (0…MAX-1) is shown in the big preview; null = first filled or none. */
   const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(0);
   const [mainImageDragging, setMainImageDragging] = useState(false);
 
-  const baseSlug = slugFromName(form.name);
 
   const firstFilledIndex = imagePreviews.findIndex(Boolean);
   const bigPreviewUrl =
@@ -142,23 +140,6 @@ export default function NewProductPage() {
       setUploadStatus((prev) => prev.map((s, i) => (i === index ? "error" : s)));
     }
   }
-
-  useEffect(() => {
-    if (!baseSlug) {
-      setResolvedSlug("");
-      setSlugUsesFallback(false);
-      setSlugChecking(false);
-      return;
-    }
-    return scheduleSlugSuggestion({
-      baseSlug,
-      onChecking: setSlugChecking,
-      onResult: ({ slug, usesFallback }) => {
-        setResolvedSlug(slug);
-        setSlugUsesFallback(usesFallback);
-      },
-    });
-  }, [baseSlug]);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -206,6 +187,8 @@ export default function NewProductPage() {
 
     const formData = new FormData();
     formData.append("name", form.name);
+    // Sent only when the merchant typed one; otherwise the API makes it from the name.
+    if (addressInput?.trim()) formData.append("slug", addressInput.trim());
     // The brand's public_id, or nothing at all. A blank would be read as an
     // id, and there is no brand whose id is the empty string.
     if (form.brand) formData.append("brand", form.brand);
@@ -322,28 +305,16 @@ export default function NewProductPage() {
                   className={fieldControlClass}
                   onKeyDown={handleKeyDown}
                 />
-                <div className="mt-1.5 flex items-center gap-2">
-                  <p
-                    className="text-xs text-muted-foreground"
-                    aria-describedby={slugUsesFallback ? "slug-warning" : undefined}
-                  >
-                    {tPages("productSlugPrefix")}{" "}
-                    <span className="font-mono">{resolvedSlug || baseSlug || "—"}</span>
-                  </p>
-                  {slugChecking && (
-                    <span className="text-xs text-muted-foreground">
-                      {tPages("productSlugChecking")}
-                    </span>
-                  )}
-                </div>
-                {slugUsesFallback && baseSlug && (
-                  <p
-                    id="slug-warning"
-                    className="mt-1 inline-flex items-center rounded-ui border border-amber-200 bg-amber-50 px-2 py-1 text-xs text-amber-700 dark:border-amber-900/50 dark:bg-amber-950/20 dark:text-amber-300"
-                  >
-                    {tPages("productSlugFallbackWarning")}
-                  </p>
-                )}
+              </Field>
+              <Field label={tAddress("label")}>
+                <WebAddressField
+                  id="product-address"
+                  kind="product"
+                  name={form.name}
+                  saved={null}
+                  value={addressInput}
+                  onChange={setAddressInput}
+                />
               </Field>
               <Field label={tPages("productDescription")}>
                 <Textarea

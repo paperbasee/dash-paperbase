@@ -27,6 +27,7 @@ import { useCategoriesQuery } from "@/hooks/useCategoriesQuery";
 import { PageHeader } from "@/components/page/PageHeader";
 import { useOpenFromAddress } from "@/hooks/useOpenFromAddress";
 import { OPEN_NEW } from "@/lib/open-from-address";
+import { WebAddressField } from "@/components/products/WebAddressField";
 
 type FormMode = "closed" | "new_root" | "new_child" | "edit";
 
@@ -182,6 +183,7 @@ function productsInBranch(node: AdminCategoryTreeNode): number {
 
 export default function CategoriesPage() {
   const tPages = useTranslations("pages");
+  const tAddress = useTranslations("webAddress");
   const tUpload = useTranslations("upload");
   const tHints = useTranslations("pageHints");
   const tCommon = useTranslations("common");
@@ -227,8 +229,10 @@ export default function CategoriesPage() {
   const [mode, setMode] = useState<FormMode>("closed");
   const [editingPublicId, setEditingPublicId] = useState<string | null>(null);
   const [form, setForm] = useState<CatForm>(emptyForm);
-  /** Slug from API when editing (read-only; backend regenerates from name on save). */
+  /** The saved web address of the category being edited; null for a new one. */
   const [editingSlugPreview, setEditingSlugPreview] = useState<string | null>(null);
+  /** A web address the merchant typed; null while it follows the name or stays as saved. */
+  const [addressInput, setAddressInput] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imageKey, setImageKey] = useState<string | null>(null);
   const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
@@ -293,6 +297,7 @@ export default function CategoriesPage() {
         : `cat_${Date.now()}`;
     setEditingPublicId(null);
     setEditingSlugPreview(null);
+    setAddressInput(null);
     setForm({ ...emptyForm, parent: "" });
     setImageFile(null);
     setImageKey(null);
@@ -310,6 +315,7 @@ export default function CategoriesPage() {
         : `cat_${Date.now()}`;
     setEditingPublicId(null);
     setEditingSlugPreview(null);
+    setAddressInput(null);
     setForm({ ...emptyForm, parent: parentPublicId });
     setImageFile(null);
     setImageKey(null);
@@ -323,6 +329,7 @@ export default function CategoriesPage() {
     setMode("edit");
     setEditingPublicId(node.public_id);
     setEditingSlugPreview(node.slug);
+    setAddressInput(null);
     setForm({
       name: node.name,
       description: node.description,
@@ -368,6 +375,10 @@ export default function CategoriesPage() {
     setSaving(true);
     const fd = new FormData();
     fd.append("name", form.name);
+    // Only an address the merchant typed; the API makes one from the name otherwise, and keeps
+    // a moved one forwarding.
+    const typedAddress = addressInput?.trim() ?? "";
+    if (typedAddress && typedAddress !== editingSlugPreview) fd.append("slug", typedAddress);
     fd.append("description", form.description);
     fd.append("order", form.order);
     fd.append("is_active", String(form.is_active));
@@ -386,6 +397,7 @@ export default function CategoriesPage() {
       }
       setMode("closed");
       setEditingSlugPreview(null);
+      setAddressInput(null);
       invalidateCategoryCaches();
     } catch (err) {
       notify.error(err, {
@@ -465,6 +477,7 @@ export default function CategoriesPage() {
             onClick={() => {
               setMode("closed");
               setEditingSlugPreview(null);
+              setAddressInput(null);
             }}
             className="rounded-card border border-border px-4 py-2 text-sm text-foreground hover:bg-muted"
           >
@@ -489,15 +502,20 @@ export default function CategoriesPage() {
               className="max-w-xl"
               onKeyDown={handleKeyDown}
             />
-            {mode === "edit" && editingSlugPreview ? (
-              <p className="text-xs text-muted-foreground">
-                {tPages("categoriesSlugEditHint", { slug: editingSlugPreview })}
-              </p>
-            ) : (
-              <p className="text-xs text-muted-foreground">
-                {tPages("categoriesSlugAutoHint")}
-              </p>
-            )}
+          </div>
+          <div className="max-w-xl space-y-1">
+            <label htmlFor="category-address" className="text-xs font-medium text-muted-foreground">
+              {tAddress("label")}
+            </label>
+            <WebAddressField
+              id="category-address"
+              kind="category"
+              name={form.name}
+              saved={mode === "edit" ? editingSlugPreview ?? "" : null}
+              excludePublicId={mode === "edit" ? editingPublicId ?? undefined : undefined}
+              value={addressInput}
+              onChange={setAddressInput}
+            />
           </div>
           <Input
             placeholder={tPages("categoriesPlaceholderDescription")}

@@ -28,12 +28,11 @@ import { MAX_PRODUCT_IMAGES } from "@/lib/product-media";
 import {
   parseValidation,
   productUpdateSchema,
-  slugFromName,
   validateRequiredExtraFields,
 } from "@/lib/validation";
 import { useConfirm } from "@/context/ConfirmDialogContext";
 import { notify } from "@/notifications";
-import { scheduleSlugSuggestion } from "@/lib/products/slug-suggestion";
+import { WebAddressField } from "@/components/products/WebAddressField";
 import { useAdminDeleteCapabilities } from "@/hooks/useAdminDeleteCapabilities";
 import { usePermissions } from "@/context/PermissionsContext";
 import { numberTextClass } from "@/lib/number-font";
@@ -101,6 +100,7 @@ export default function ProductDetailClient() {
   const locale = useLocale();
   const numClass = numberTextClass(locale);
   const tPages = useTranslations("pages");
+  const tAddress = useTranslations("webAddress");
   const tUpload = useTranslations("upload");
   const tHints = useTranslations("pageHints");
   const tCommon = useTranslations("common");
@@ -160,9 +160,8 @@ export default function ProductDetailClient() {
   const [removedGalleryPublicIds, setRemovedGalleryPublicIds] = useState<string[]>([]);
   const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(0);
   const [mainImageDragging, setMainImageDragging] = useState(false);
-  const [resolvedSlug, setResolvedSlug] = useState("");
-  const [slugUsesFallback, setSlugUsesFallback] = useState(false);
-  const [slugChecking, setSlugChecking] = useState(false);
+  // A web address the merchant typed; null while it stays as saved (WebAddressField).
+  const [addressInput, setAddressInput] = useState<string | null>(null);
 
   const existingImageUrls = useMemo(() => {
     if (!product) return Array(MAX_IMAGES).fill(null) as (string | null)[];
@@ -204,7 +203,6 @@ export default function ProductDetailClient() {
   );
   const canAddMore = imagePreviews.filter(Boolean).length < MAX_IMAGES;
   const canAddToGallery = hasMainImage && canAddMore;
-  const baseSlug = slugFromName(form.name);
 
   useEffect(() => {
     setProduct(null);
@@ -225,6 +223,7 @@ export default function ProductDetailClient() {
   useEffect(() => {
     if (!productData) return;
     setProduct(productData);
+    setAddressInput(null);
     const catRef = productData.category ?? productData.category_public_id ?? "";
     setForm({
       name: productData.name,
@@ -298,30 +297,6 @@ export default function ProductDetailClient() {
       setUploadStatus((prev) => prev.map((s, i) => (i === index ? "error" : s)));
     }
   }
-
-  useEffect(() => {
-    if (!isEditMode) {
-      setResolvedSlug("");
-      setSlugUsesFallback(false);
-      setSlugChecking(false);
-      return;
-    }
-    if (!baseSlug) {
-      setResolvedSlug("");
-      setSlugUsesFallback(false);
-      setSlugChecking(false);
-      return;
-    }
-    return scheduleSlugSuggestion({
-      baseSlug,
-      excludePublicId: publicId,
-      onChecking: setSlugChecking,
-      onResult: ({ slug, usesFallback }) => {
-        setResolvedSlug(slug);
-        setSlugUsesFallback(usesFallback);
-      },
-    });
-  }, [isEditMode, baseSlug, publicId]);
 
   const clearSlot = useCallback((i: number) => {
     if (i === 0) {
@@ -420,6 +395,9 @@ export default function ProductDetailClient() {
 
     const formData = new FormData();
     formData.append("name", form.name);
+    // Only a new address the merchant typed; the API keeps the old one forwarding.
+    const typedAddress = addressInput?.trim() ?? "";
+    if (typedAddress && typedAddress !== product?.slug) formData.append("slug", typedAddress);
     // Always sent, blank included: blank is how a merchant takes the brand
     // back off a product, and the API reads an empty string here as null.
     formData.append("brand", form.brand);
@@ -615,28 +593,17 @@ export default function ProductDetailClient() {
                     className={fieldControlClass}
                     onKeyDown={handleKeyDown}
                   />
-                  <div className="mt-1.5 flex items-center gap-2">
-                    <p
-                      className="text-xs text-muted-foreground"
-                      aria-describedby={slugUsesFallback ? "slug-warning" : undefined}
-                    >
-                      {tPages("productSlugPrefix")}{" "}
-                      <span className="font-mono">{resolvedSlug || baseSlug || "—"}</span>
-                    </p>
-                    {slugChecking && (
-                      <span className="text-xs text-muted-foreground">
-                        {tPages("productSlugChecking")}
-                      </span>
-                    )}
-                  </div>
-                  {slugUsesFallback && baseSlug && (
-                    <p
-                      id="slug-warning"
-                      className="mt-1 inline-flex items-center rounded-ui border border-amber-200 bg-amber-50 px-2 py-1 text-xs text-amber-700 dark:border-amber-900/50 dark:bg-amber-950/20 dark:text-amber-300"
-                    >
-                      {tPages("productSlugFallbackWarning")}
-                    </p>
-                  )}
+                </Field>
+                <Field label={tAddress("label")}>
+                  <WebAddressField
+                    id="product-address"
+                    kind="product"
+                    name={form.name}
+                    saved={product?.slug ?? ""}
+                    excludePublicId={publicId}
+                    value={addressInput}
+                    onChange={setAddressInput}
+                  />
                 </Field>
                 <Field label={tPages("productDescription")}>
                   <Textarea
@@ -1070,8 +1037,8 @@ export default function ProductDetailClient() {
                   <p className="text-xs text-muted-foreground">{tPages("productNameLabel")}</p>
                   <p className="font-medium text-foreground">{product.name}</p>
                   <p className="mt-1 text-xs text-muted-foreground">
-                    {tPages("productSlugPrefix")}{" "}
-                    <span className="font-mono">{product.slug}</span>
+                    {tAddress("label")}:{" "}
+                    <span className="font-mono">/products/{product.slug}</span>
                   </p>
                 </div>
                 {product.description ? (

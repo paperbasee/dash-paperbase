@@ -2,15 +2,6 @@ import { z } from "zod";
 import type { ExtraFieldDefinition, ExtraFieldValues } from "@/types/extra-fields";
 import { defaultValidationMessages, type ValidationMessages } from "./messages";
 
-export function slugFromName(name: string): string {
-  if (!name.trim()) return "";
-  return name
-    .toLowerCase()
-    .trim()
-    .replace(/\s+/g, "-")
-    .replace(/[^a-z0-9-]/g, "");
-}
-
 export function buildProductCreateSchema(messages: ValidationMessages = defaultValidationMessages) {
   return z.object({
     name: z.string().trim().min(1, messages.productNameRequired),

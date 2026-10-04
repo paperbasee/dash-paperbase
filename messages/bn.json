@@ -879,9 +879,6 @@
     "productGeneralInformation": "সাধারণ তথ্য",
     "productNameLabel": "পণ্যের নাম",
     "productNamePlaceholder": "যেমন: ওয়্যারলেস ইয়ারবাডস প্রো",
-    "productSlugPrefix": "স্লাগ:",
-    "productSlugChecking": "যাচাই হচ্ছে…",
-    "productSlugFallbackWarning": "একই ধরনের স্লাগ আগে থেকেই আছে। SEO-র জন্য বিকল্প ব্যবহার করা হচ্ছে।",
     "productDescription": "বিবরণ",
     "productDescriptionPlaceholder": "আপনার পণ্য বর্ণনা করুন…",
     "productBrand": "ব্র্যান্ড",
@@ -944,8 +941,6 @@
     "categoriesNewSubcategory": "নতুন সাবক্যাটাগরি",
     "categoriesNewRoot": "নতুন রুট ক্যাটাগরি",
     "categoriesPlaceholderName": "নাম",
-    "categoriesSlugAutoHint": "সেভ করলে নাম থেকে URL স্লাগ স্বয়ংক্রিয়ভাবে তৈরি হয়।",
-    "categoriesSlugEditHint": "বর্তমান URL স্লাগ: {slug}। নাম বদলে সেভ করলে স্লাগ স্বয়ংক্রিয়ভাবে আপডেট হবে।",
     "categoriesPlaceholderDescription": "বিবরণ",
     "categoriesParentRoot": "রুট স্তর (প্যারেন্ট নেই)",
     "categoriesPlaceholderOrder": "ক্রম",
@@ -953,7 +948,7 @@
     "categoriesFreeDeliveryLabel": "এই ক্যাটাগরির সব পণ্যে ফ্রি ডেলিভারি",
     "categoriesTreeHeading": "ক্যাটাগরি ট্রি ({count}টি ক্যাটাগরি)",
     "categoriesColName": "নাম",
-    "categoriesColSlug": "স্লাগ",
+    "categoriesColSlug": "ওয়েব ঠিকানা",
     "categoriesColChildren": "শাখা",
     "categoriesColProducts": "পণ্য",
     "categoriesColOrder": "ক্রম",
@@ -4337,5 +4332,17 @@
     "yesNo": "হ্যাঁ / না",
     "select": "বেছে নিন...",
     "optional": "(ঐচ্ছিক)"
+  },
+  "webAddress": {
+    "label": "ওয়েব ঠিকানা",
+    "checking": "যাচাই হচ্ছে…",
+    "fromName": "নাম থেকে তৈরি। চাইলে বদলাতে পারেন।",
+    "keptOnRename": "নাম বদলালেও এই ঠিকানা একই থাকে, তাই শেয়ার করা লিংকগুলো কাজ করবে।",
+    "oldForwards": "পুরোনো ঠিকানাটিও ({old}) কাজ করবে, ক্রেতাদের এখানে নিয়ে আসবে।",
+    "savedAs": "সেভ হবে এভাবে: {address}",
+    "needsLetters": "ওয়েব ঠিকানায় অক্ষর বা সংখ্যা থাকতে হবে।",
+    "takenProduct": "অন্য একটি পণ্য এই ঠিকানা ব্যবহার করছে।",
+    "takenCategory": "অন্য একটি ক্যাটাগরি এই ঠিকানা ব্যবহার করছে।",
+    "useSuggested": "{address} নিন"
   }
 }

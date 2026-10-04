@@ -879,9 +879,6 @@
     "productGeneralInformation": "General Information",
     "productNameLabel": "Product name",
     "productNamePlaceholder": "e.g. Wireless Earbuds Pro",
-    "productSlugPrefix": "Slug:",
-    "productSlugChecking": "Checking…",
-    "productSlugFallbackWarning": "A similar slug already exists. Using an alternative for SEO.",
     "productDescription": "Description",
     "productDescriptionPlaceholder": "Describe your product…",
     "productBrand": "Brand",
@@ -944,8 +941,6 @@
     "categoriesNewSubcategory": "New subcategory",
     "categoriesNewRoot": "New root category",
     "categoriesPlaceholderName": "Name",
-    "categoriesSlugAutoHint": "The URL slug is created automatically from the name when you save.",
-    "categoriesSlugEditHint": "Current URL slug: {slug}. If you change the name and save, it updates automatically.",
     "categoriesPlaceholderDescription": "Description",
     "categoriesParentRoot": "Root level (no parent)",
     "categoriesPlaceholderOrder": "Order",
@@ -953,7 +948,7 @@
     "categoriesFreeDeliveryLabel": "Free delivery for every product in this category",
     "categoriesTreeHeading": "Category tree ({count} categories)",
     "categoriesColName": "Name",
-    "categoriesColSlug": "Slug",
+    "categoriesColSlug": "Web address",
     "categoriesColChildren": "Children",
     "categoriesColProducts": "Products",
     "categoriesColOrder": "Order",
@@ -4337,5 +4332,17 @@
     "yesNo": "Yes / No",
     "select": "Select...",
     "optional": "(Optional)"
+  },
+  "webAddress": {
+    "label": "Web address",
+    "checking": "Checking…",
+    "fromName": "Made from the name. You can change it.",
+    "keptOnRename": "Changing the name keeps this address, so links you've shared keep working.",
+    "oldForwards": "The old address ({old}) will keep working and bring shoppers here.",
+    "savedAs": "It will be saved as: {address}",
+    "needsLetters": "A web address needs letters or numbers.",
+    "takenProduct": "Another product already uses this address.",
+    "takenCategory": "Another category already uses this address.",
+    "useSuggested": "Use {address}"
   }
 }

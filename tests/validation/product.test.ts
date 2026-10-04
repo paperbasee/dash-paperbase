@@ -1,16 +1,11 @@
 import { describe, expect, it } from "vitest";
 import {
   productCreateSchema,
-  slugFromName,
   validateExtraFieldDefinitions,
   validateRequiredExtraFields,
 } from "@/lib/validation/product";
 
 describe("product validation", () => {
-  it("generates stable slug from name", () => {
-    expect(slugFromName("  Wireless Earbuds Pro!! ")).toBe("wireless-earbuds-pro");
-  });
-
   it("accepts valid product create payload", () => {
     const result = productCreateSchema.safeParse({
       name: "Product",
