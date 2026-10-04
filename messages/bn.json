@@ -3193,7 +3193,7 @@
       "product": "পণ্যের পেজ",
       "productFaq": "এই পণ্য নিয়ে প্রশ্ন",
       "productFaqOn": "কেনার বোতামের পাশে",
-      "productFaqOnNote": "প্রতিটি আলাদা সারি; ছয়টির বেশি হলে একটি সারি",
+      "productFaqOnNote": "একটি সারি, খুললে সব প্রশ্ন",
       "productReviews": "এই পণ্যের মতামত",
       "productReviewsCards": "চলমান কার্ড",
       "productReviewsCardsNote": "লম্বা কার্ড, ক্রেতার ছবি আগে — চাপলে বড় হয়ে পুরো লেখাসহ খোলে",
@@ -3609,7 +3609,9 @@
       "cardAlignNote": "আপনার দোকানের প্রতিটি কার্ডে নাম আর দাম কোথায় বসবে।",
       "cardAlignLeft": "বাঁয়ে",
       "cardAlignCenter": "মাঝখানে",
-      "cardAlignRight": "ডানে"
+      "cardAlignRight": "ডানে",
+      "buyingArea": "কেনার অংশ",
+      "buyingAreaHint": "ছবির পাশে নাম, দাম, অপশন আর বোতাম। এখানে ক্রেতা কী দেখবেন তা বেছে নিন।"
     },
     "chosenCount": "{max, number} টির মধ্যে {count, number} টি বাছা হয়েছে",
     "chooseTitle": "কী কী দেখাবেন বেছে নিন",

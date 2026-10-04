@@ -61,6 +61,12 @@ const manifest: ThemeManifest = {
         { id: "shipping_text", type: "textarea", ...labels("Shipping details"), default: "" },
         { id: "exchange_text", type: "textarea", ...labels("Exchange policy"), default: "" },
         { id: "show_questions", type: "boolean", ...labels("Questions about this product"), default: true },
+        { id: "show_code", type: "boolean", ...labels("Product code"), default: true },
+        { id: "show_quantity", type: "boolean", ...labels("Quantity"), default: true },
+        { id: "whatsapp_order", type: "boolean", ...labels("Order on WhatsApp"), default: true },
+        { id: "show_wishlist", type: "boolean", ...labels("Save for later"), default: true },
+        { id: "show_share", type: "boolean", ...labels("Share"), default: true },
+        choice("stock_count", ["off", "3", "5", "10"], "5"),
       ],
       blocks: {
         title: { ...labels("Product name"), settings: [] },
@@ -300,6 +306,34 @@ describe("the rows under the buying area", () => {
   test("turning related off keeps the section", () => {
     const after = pick(PAGE(), "related", "off");
     expect(sectionOfType(after.document, place("related"), "related_products")?.hidden).toBe(true);
+  });
+});
+
+describe("the buying area", () => {
+  /* Owner, 2026-10-04: the name, price, options and buttons beside the photos, as switches. */
+  test("is the buying column's switches, edited in its dialog", () => {
+    expect(sectionTypesOf(place("column"))).toEqual(["product_details"]);
+    expect(place("column").fields).toEqual([
+      "show_code",
+      "show_quantity",
+      "whatsapp_order",
+      "show_wishlist",
+      "show_share",
+      "stock_count",
+    ]);
+    expect(SLOTS.product.find((slot) => slot.key === "column")?.options ?? []).toEqual([]);
+  });
+
+  test("is listed right after the photos", () => {
+    const keys = SLOTS.product.map((slot) => slot.key);
+    expect(keys.indexOf("column")).toBe(keys.indexOf("buy") + 1);
+  });
+
+  test("its switches are its own, not the rows' or anybody else's", () => {
+    const rows = settingsClaimedElsewhere("product", "product_details", { page: "product", key: "details" });
+    for (const id of ["show_code", "show_quantity", "whatsapp_order", "show_wishlist", "show_share", "stock_count"]) {
+      expect(rows.has(id), id).toBe(true);
+    }
   });
 });
 

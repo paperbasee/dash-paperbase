@@ -278,6 +278,17 @@ export const WIRED_SLOTS: Partial<Record<SlotPageKey, Record<string, WiredSlot>>
       },
     },
     /*
+      The buying area beside the photos (owner, 2026-10-04): the name, price,
+      options and buttons -- what the shopper sees there, as switches. No tiles:
+      a merchant turns parts on and off in its dialog. The shop marks the name,
+      price, buttons and Share as this place, so a click on them opens it.
+    */
+    column: {
+      page: "templates.product",
+      sections: { column: "product_details" },
+      fields: ["show_code", "show_quantity", "whatsapp_order", "show_wishlist", "show_share", "stock_count"],
+    },
+    /*
       The column's fold-out rows (owner, 2026-09-25: "like this, with icons"):
       Product details -- the description, with the specifications inside it --
       then Shipping details and Exchange policy, the shop's words for every

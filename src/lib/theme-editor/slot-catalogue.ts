@@ -341,6 +341,12 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
       ],
     },
     /*
+      Beside the photos: the name, price, options and buttons (owner,
+      2026-10-04). No options -- what a merchant edits here is switches, in
+      the dialog.
+    */
+    { key: "column", label: "buyingArea", hint: "buyingAreaHint" },
+    /*
       The same four promises the home page shows, so a shopper is told the same
       thing wherever they are standing. Picked once, on the Home page -- two
       lists would be two answers to one question.

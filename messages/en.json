@@ -3193,7 +3193,7 @@
       "product": "Product page",
       "productFaq": "Questions about this product",
       "productFaqOn": "Beside the buy button",
-      "productFaqOnNote": "A row each; past six, one row that opens",
+      "productFaqOnNote": "One row that opens onto them all",
       "productReviews": "Reviews of this product",
       "productReviewsCards": "Cards that slide",
       "productReviewsCardsNote": "Tall cards, customers' photos first — each opens large with its words",
@@ -3609,7 +3609,9 @@
       "cardAlignNote": "Where the name and price sit on every card in your shop.",
       "cardAlignLeft": "Left",
       "cardAlignCenter": "Centre",
-      "cardAlignRight": "Right"
+      "cardAlignRight": "Right",
+      "buyingArea": "Buying area",
+      "buyingAreaHint": "The name, price, options and buttons beside the photos. Choose what shoppers see here."
     },
     "chosenCount": "{count, number} of {max, number} chosen",
     "chooseTitle": "Choose what to show",
