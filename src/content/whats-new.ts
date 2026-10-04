@@ -88,6 +88,21 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-10-04-cards-that-follow-the-photo",
+    date: "2026-10-04",
+    version: "4.176.0",
+    tag: "new",
+    title: {
+      en: "Product cards that follow the photo",
+      bn: "ছবির মাপে প্রোডাক্ট কার্ড",
+    },
+    body: {
+      en: "Tick a category in Customize, under Card photos, and its cards take each photo's own shape: no blank sides, nothing cut. The categories under it follow, and so does a home page row of it. Everywhere else, cards stay square.",
+      bn: "কাস্টমাইজে \"কার্ডের ছবি\" থেকে কোনো ক্যাটাগরিতে টিক দিন, তার কার্ডগুলো প্রতিটি ছবির নিজের মাপ নেবে: পাশে ফাঁকা থাকবে না, কিছু কাটাও পড়বে না। এর ভেতরের ক্যাটাগরি আর হোম পেজে এর সারিও তাই করবে। বাকি সব জায়গায় কার্ড চৌকোই থাকে।",
+    },
+    href: "/settings/customize",
+  },
+  {
     id: "2026-10-04-buying-area-whatsapp-quantity-share",
     date: "2026-10-04",
     version: "4.175.0",
@@ -515,20 +530,6 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     body: {
       en: "We fixed a rare error that could appear when your shop restarts its internal workers, such as during an update.",
       bn: "আপনার দোকান যখন ভেতরের কাজগুলো নতুন করে চালু করে, যেমন আপডেটের সময়, তখন মাঝে মাঝে যে একটি ত্রুটি দেখা দিত তা ঠিক করা হয়েছে।",
-    },
-  },
-  {
-    id: "2026-09-30-a-new-search-box",
-    date: "2026-09-30",
-    version: "4.150.0",
-    tag: "new",
-    title: {
-      en: "A new, smarter search",
-      bn: "নতুন, আরও স্মার্ট সার্চ",
-    },
-    body: {
-      en: "Search now finds pages, settings and actions like “add product”, plus categories, brands, discount codes, blog posts, reviews and team members, and answers faster. It finds a phone however it's written and a product without its dash (“tshirt”). Use the arrow keys and Enter; your recent searches wait for you.",
-      bn: "সার্চে এখন পেজ, সেটিংস আর “add product”-এর মতো কাজ, সাথে ক্যাটাগরি, ব্র্যান্ড, ডিসকাউন্ট কোড, ব্লগ পোস্ট, রিভিউ ও টিম মেম্বারও পাওয়া যায়, আর উত্তর আসে আরও দ্রুত। ফোন নম্বর যেভাবেই লিখুন খুঁজে পায়, প্রোডাক্টের নাম ড্যাশ ছাড়া লিখলেও (“tshirt”)। অ্যারো কী আর Enter ব্যবহার করুন; আপনার সাম্প্রতিক খোঁজগুলো সেখানেই থাকবে।",
     },
   },
 ];
