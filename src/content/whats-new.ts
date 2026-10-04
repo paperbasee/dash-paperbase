@@ -88,6 +88,20 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-10-04-security-updates",
+    date: "2026-10-04",
+    version: "4.176.4",
+    tag: "fixed",
+    title: {
+      en: "Security updates for the dashboard",
+      bn: "ড্যাশবোর্ডে নিরাপত্তা আপডেট",
+    },
+    body: {
+      en: "We updated the parts the dashboard is built on, closing known security issues. Nothing changes in how you use it.",
+      bn: "ড্যাশবোর্ড যেসব অংশ দিয়ে তৈরি, সেগুলো আপডেট করে জানা নিরাপত্তা সমস্যাগুলো বন্ধ করা হয়েছে। আপনার ব্যবহারে কিছুই বদলাবে না।",
+    },
+  },
+  {
     id: "2026-10-04-cards-that-follow-the-photo",
     date: "2026-10-04",
     version: "4.176.0",
@@ -517,19 +531,5 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
       bn: "প্রতিটি নতুন অর্ডার নিজে থেকেই যাচাই হয় আর একটি রঙ দেখায়: ভালো ক্রেতার জন্য সবুজ, সাবধান হওয়ার জন্য হলুদ, ঝুঁকিপূর্ণ হলে লাল, সাথে কত শতাংশ পার্সেল ডেলিভার হয়েছে। ক্লিক করলেই রিপোর্ট সাথে সাথে খোলে: সব কুরিয়ারে ক্রেতার পার্সেল, অন্য মার্চেন্টদের রিপোর্ট, Paperbase জুড়ে তাঁর হিসাব, কী করবেন, আর কখন যাচাই হয়েছিল। নতুন করে দেখতে “আবার যাচাই করুন” চাপুন।",
     },
     href: "/orders",
-  },
-  {
-    id: "2026-09-30-shop-steady-while-it-updates",
-    date: "2026-09-30",
-    version: "4.152.2",
-    tag: "fixed",
-    title: {
-      en: "Your shop stays steady while it updates",
-      bn: "আপডেটের সময়ও আপনার দোকান স্থির থাকে",
-    },
-    body: {
-      en: "We fixed a rare error that could appear when your shop restarts its internal workers, such as during an update.",
-      bn: "আপনার দোকান যখন ভেতরের কাজগুলো নতুন করে চালু করে, যেমন আপডেটের সময়, তখন মাঝে মাঝে যে একটি ত্রুটি দেখা দিত তা ঠিক করা হয়েছে।",
-    },
   },
 ];
