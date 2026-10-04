@@ -74,7 +74,7 @@ import {
 } from "@/lib/query-keys";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { chosenPalette, fetchPalettes } from "@/lib/theme-editor/palettes";
-import { CARD_PHOTOS, followingNames, ticksIn, toggled } from "@/lib/theme-editor/card-photos";
+import { CARD_PHOTOS, followingNames, pickedIn, toggled } from "@/lib/theme-editor/card-photos";
 import { useToastAreaLeft, useToastAvoid } from "@/components/notifications/useToastArea";
 import { ConflictDialog } from "../ConflictDialog";
 import { PreviewPane } from "../PreviewPane";
@@ -201,8 +201,8 @@ export function SlotEditor({
   // Where a card's words sit (2026-09-29): the document too, centred where it says nothing.
   const cardAlign =
     typeof state.document.settings?.card_align === "string" ? state.document.settings.card_align : "center";
-  // The categories whose cards follow their photo (2026-10-04): the document too, none where it says nothing.
-  const cardPhotos = ticksIn(state.document.settings);
+  // The main categories whose cards follow their photo (2026-10-04): the document too, none where it says nothing.
+  const cardPhotos = pickedIn(state.document.settings);
   // One whole-theme action at a time (Save, answering a clash).
   const [busy, setBusy] = useState(false);
   // The clash waiting for an answer, and where the draft stands so it can be saved over.
@@ -665,7 +665,7 @@ export function SlotEditor({
         key={placeId(open)}
         tree={categories.data}
         failed={categories.isError}
-        ticks={cardPhotos}
+        picked={cardPhotos}
         onToggle={(publicId) =>
           dispatch({
             type: "setThemeSetting",
