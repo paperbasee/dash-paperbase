@@ -90,15 +90,15 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
     id: "2026-10-04-product-photos-whole-and-at-once",
     date: "2026-10-04",
-    version: "4.173.2",
+    version: "4.173.3",
     tag: "fixed",
     title: {
       en: "Product photos show whole, and at once",
       bn: "পণ্যের ছবি এখন পুরোটা দেখা যায়, সাথে সাথেই",
     },
     body: {
-      en: "When you add or edit a product, its photos now show whole instead of zoomed in. And a photo you add or change shows on the product the moment you save, instead of minutes later.",
-      bn: "পণ্য যোগ বা এডিট করার সময় ছবিগুলো এখন বড় করে কাটা না হয়ে পুরোটা দেখা যায়। আর যে ছবি যোগ বা বদল করেন, তা সেভ করার সাথে সাথেই পণ্যে দেখা যায়, কয়েক মিনিট পরে নয়।",
+      en: "Product photos now show whole instead of zoomed in: when you add or edit a product, and in the Products grid. And a photo you add or change shows on the product the moment you save, instead of minutes later.",
+      bn: "পণ্যের ছবি এখন বড় করে কাটা না হয়ে পুরোটা দেখা যায়: পণ্য যোগ বা এডিট করার সময়, আর পণ্যের গ্রিডেও। আর যে ছবি যোগ বা বদল করেন, তা সেভ করার সাথে সাথেই পণ্যে দেখা যায়, কয়েক মিনিট পরে নয়।",
     },
     href: "/products",
   },
