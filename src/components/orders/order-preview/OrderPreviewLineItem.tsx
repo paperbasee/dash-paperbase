@@ -20,7 +20,7 @@ export function OrderPreviewLineItem({ item, currencySymbol }: OrderPreviewLineI
 
   const isUnavailable =
     item.is_unavailable === true || item.status === "deleted" || !item.product_public_id;
-  const name = item.product_name_snapshot || item.product_name || "Product";
+  const name = item.product_name_snapshot || item.product_name || tPages("orderLineProductFallback");
   const qty = item.quantity;
   const unitPrice = Number(item.unit_price_snapshot ?? item.unit_price ?? 0);
   const lineTotal = Number(item.line_total ?? unitPrice * qty);
@@ -65,7 +65,7 @@ export function OrderPreviewLineItem({ item, currencySymbol }: OrderPreviewLineI
           </p>
         ) : null}
         {isUnavailable ? (
-          <p className="text-xs font-medium text-destructive">Product data corrupted</p>
+          <p className="text-xs font-medium text-destructive">{tPages("orderProductsDataCorrupted", { count: 1 })}</p>
         ) : null}
         <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 text-xs">
           <span className={cn("text-muted-foreground", numClass)}>

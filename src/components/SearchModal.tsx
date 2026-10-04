@@ -237,7 +237,7 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
           aria-describedby={undefined}
           onEscapeKeyDown={() => handleOpenChange(false)}
         >
-          <Dialog.Title className="sr-only">Search</Dialog.Title>
+          <Dialog.Title className="sr-only">{tCommon("search")}</Dialog.Title>
 
           {/* Mobile: X on top row, search box full width on next row */}
           <div className="flex shrink-0 flex-col md:hidden">
@@ -245,7 +245,7 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
               <Button
                 variant="ghost"
                 size="icon"
-                aria-label="Close search"
+                aria-label={tCommon("closeSearch")}
                 onClick={() => handleOpenChange(false)}
                 className="text-muted-foreground hover:text-foreground"
               >

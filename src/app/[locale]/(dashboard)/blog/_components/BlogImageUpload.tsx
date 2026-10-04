@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ImageIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 
 interface BlogImageUploadProps {
@@ -22,6 +23,7 @@ export function BlogImageUpload({
   disabled,
 }: BlogImageUploadProps) {
   const inputRef = useRef<HTMLInputElement | null>(null);
+  const t = useTranslations("upload");
   const [isDragging, setIsDragging] = useState(false);
   const localPreview = useMemo(
     () => (value ? URL.createObjectURL(value) : null),
@@ -55,7 +57,7 @@ export function BlogImageUpload({
           <div className="relative h-full w-full overflow-hidden rounded-ui border border-border/70 bg-card">
             <img
               src={shownUrl}
-              alt="Featured image preview"
+              alt={t("previewAlt")}
               className="h-full w-full object-cover"
             />
           </div>
@@ -77,10 +79,11 @@ export function BlogImageUpload({
               <ImageIcon className="size-7" />
             </span>
             <span className="text-xs font-semibold text-foreground">
-              Drop your image here, or{" "}
-              <span className="text-primary underline underline-offset-2">browse</span>
+              {t.rich("drop", {
+                browse: (chunks) => <span className="text-primary underline underline-offset-2">{chunks}</span>,
+              })}
             </span>
-            <span className="text-[11px] text-muted-foreground">Supports: JPG, JPEG2000, PNG</span>
+            <span className="text-[11px] text-muted-foreground">{t("supports")}</span>
             <input
               ref={inputRef}
               type="file"
@@ -106,7 +109,7 @@ export function BlogImageUpload({
             disabled={disabled}
             className="h-10 w-full justify-center"
           >
-            Replace
+            {t("replace")}
           </Button>
           <Button
             type="button"
@@ -122,7 +125,7 @@ export function BlogImageUpload({
             disabled={disabled}
             className="h-10 w-full justify-center border-destructive/30 text-destructive/80 hover:bg-destructive/10 hover:text-destructive"
           >
-            Remove
+            {t("remove")}
           </Button>
           <input
             ref={inputRef}

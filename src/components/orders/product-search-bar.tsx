@@ -34,6 +34,7 @@ export function ProductSearchBar({
   const locale = useLocale();
   const numClass = numberTextClass(locale);
   const tPages = useTranslations("pages");
+  const tCommon = useTranslations("common");
   const [open, setOpen] = useState(false);
 
   const handleOpenChange = (nextOpen: boolean) => {
@@ -57,7 +58,7 @@ export function ProductSearchBar({
             type="button"
             className="h-10 rounded-card border border-border/70 bg-foreground px-5 text-background hover:bg-foreground/90"
           >
-            Add product
+            {tPages("orderProductSearchAdd")}
           </Button>
         </Dialog.Trigger>
 
@@ -86,7 +87,7 @@ export function ProductSearchBar({
                 <Button
                   variant="ghost"
                   size="icon"
-                  aria-label="Close search"
+                  aria-label={tCommon("closeSearch")}
                   onClick={() => handleOpenChange(false)}
                   className="text-muted-foreground hover:text-foreground"
                 >
@@ -155,7 +156,7 @@ export function ProductSearchBar({
                 </div>
               ) : (
                 <div className="flex min-h-[220px] items-center justify-center text-sm text-muted-foreground">
-                  No products found.
+                  {tPages("orderProductSearchEmpty")}
                 </div>
               )}
             </div>

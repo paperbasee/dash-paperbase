@@ -1,6 +1,7 @@
 "use client";
 
 import { Loader2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useDashboardRefresh } from "@/context/DashboardRefreshContext";
 import { cn } from "@/lib/utils";
 
@@ -14,6 +15,7 @@ export default function DashboardRefreshControl({
   compact = false,
   className,
 }: DashboardRefreshControlProps) {
+  const t = useTranslations("dashboard");
   const { isRefreshing, refresh } = useDashboardRefresh();
 
   return (
@@ -26,13 +28,13 @@ export default function DashboardRefreshControl({
         compact ? "h-9" : "h-10",
         className
       )}
-      aria-label="Refresh dashboard data"
+      aria-label={t("refreshAria")}
       aria-busy={isRefreshing}
     >
       {isRefreshing && (
         <Loader2 className="size-4 shrink-0 animate-spin" aria-hidden />
       )}
-      Refresh
+      {t("refresh")}
     </button>
   );
 }

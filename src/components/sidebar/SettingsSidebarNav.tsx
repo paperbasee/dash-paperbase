@@ -61,7 +61,7 @@ export default function SettingsSidebarNav({
       {visibleSections.map((row) => {
         const id = row.id;
         const Icon = row.icon;
-        const label = "labelKey" in row ? tSettings(row.labelKey) : row.displayLabel;
+        const label = tSettings(row.labelKey);
         const active = settingsActiveSection === id;
         const href = `/settings?tab=${encodeURIComponent(id)}`;
         return (

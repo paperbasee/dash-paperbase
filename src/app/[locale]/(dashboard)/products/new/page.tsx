@@ -50,6 +50,7 @@ export default function NewProductPage() {
   const locale = useLocale();
   const numClass = numberTextClass(locale);
   const tPages = useTranslations("pages");
+  const tUpload = useTranslations("upload");
   const tHints = useTranslations("pageHints");
   const tCommon = useTranslations("common");
   const { data: categoryTree = [] } = useCategoriesQuery();
@@ -136,7 +137,7 @@ export default function NewProductPage() {
       );
       setUploadStatus((prev) => prev.map((s, i) => (i === index ? "uploaded" : s)));
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Upload failed.";
+      const message = err instanceof Error ? err.message : tUpload("failed");
       setUploadErrors((prev) => prev.map((e, i) => (i === index ? message : e)));
       setUploadStatus((prev) => prev.map((s, i) => (i === index ? "error" : s)));
     }
@@ -193,8 +194,8 @@ export default function NewProductPage() {
 
     const hasIncompleteUpload = imageFiles.some((file, i) => Boolean(file) && !imageKeys[i]);
     if (hasIncompleteUpload || anyUploading) {
-      setError("Please complete image uploads before saving.");
-      notify.warning("Please complete image uploads before saving.", {
+      setError(tUpload("finishFirst"));
+      notify.warning(tUpload("finishFirst"), {
         title: tPages("toastTitleUploadsStillInProgress"),
       });
       return;
@@ -548,11 +549,12 @@ export default function NewProductPage() {
                       <ImageIcon className="size-6" />
                     </span>
                     <span className="text-sm font-semibold text-foreground">
-                      Drop your image here, or{" "}
-                      <span className="text-primary underline underline-offset-2">browse</span>
+                      {tUpload.rich("drop", {
+                        browse: (chunks) => <span className="text-primary underline underline-offset-2">{chunks}</span>,
+                      })}
                     </span>
                     <span className="text-xs text-muted-foreground">
-                      Supports: JPG, JPEG2000, PNG
+                      {tUpload("supports")}
                     </span>
                     <input
                       type="file"
@@ -697,10 +699,10 @@ export default function NewProductPage() {
               {(uploadStatus[selectedImageIndex ?? 0] !== "idle" || uploadErrors[selectedImageIndex ?? 0]) && (
                 <div className="px-3 text-xs text-muted-foreground">
                   {uploadStatus[selectedImageIndex ?? 0] === "uploading" && (
-                    <span className="inline-flex items-center gap-1"><Loader2 className="size-3 animate-spin" /> Uploading {uploadProgress[selectedImageIndex ?? 0]}%</span>
+                    <span className="inline-flex items-center gap-1"><Loader2 className="size-3 animate-spin" /> {tUpload("uploading", { percent: uploadProgress[selectedImageIndex ?? 0] })}</span>
                   )}
                   {uploadStatus[selectedImageIndex ?? 0] === "uploaded" && (
-                    <span className="inline-flex items-center gap-1"><Check className="size-3" /> Replace</span>
+                    <span className="inline-flex items-center gap-1"><Check className="size-3" /> {tUpload("replace")}</span>
                   )}
                   {uploadStatus[selectedImageIndex ?? 0] === "error" && (
                     <button
@@ -711,7 +713,7 @@ export default function NewProductPage() {
                         const file = imageFiles[idx];
                         if (file) void uploadSlotFile(idx, file);
                       }}
-                    ><AlertCircle className="size-3" /> Failed. Retry</button>
+                    ><AlertCircle className="size-3" /> {tUpload("retry")}</button>
                   )}
                   {uploadErrors[selectedImageIndex ?? 0] && (
                     <p className="mt-1 text-destructive">{uploadErrors[selectedImageIndex ?? 0]}</p>

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useQueryClient } from "@tanstack/react-query";
 import { isApiHttpError } from "@/lib/api-client";
 import { Loader2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import api from "@/lib/api";
 import {
@@ -25,26 +26,29 @@ import AutopilotSettingsPanel from "./AutopilotSettingsPanel";
 
 type SettingsMessage = { type: "success" | "error"; text: string } | null;
 
+type Translate = (key: string, values?: Record<string, string | number>) => string;
+
 /** "90" is hard to picture; "1 hour 30 minutes" is not. */
-function describeMinutes(total: number): string {
+function describeMinutes(total: number, t: Translate): string {
   const days = Math.floor(total / 1440);
   const hours = Math.floor((total % 1440) / 60);
   const minutes = total % 60;
   const parts: string[] = [];
-  if (days) parts.push(`${days} day${days === 1 ? "" : "s"}`);
-  if (hours) parts.push(`${hours} hour${hours === 1 ? "" : "s"}`);
-  if (minutes || parts.length === 0) parts.push(`${minutes} minute${minutes === 1 ? "" : "s"}`);
+  if (days) parts.push(t("days", { count: days }));
+  if (hours) parts.push(t("hours", { count: hours }));
+  if (minutes || parts.length === 0) parts.push(t("minutes", { count: minutes }));
   return parts.join(" ");
 }
 
-function errorMessage(err: unknown): string {
+/** The API's own reason when it gave one, else the page's words. */
+function errorMessage(err: unknown, t: Translate): string {
   if (isApiHttpError(err)) {
     const data = err.response?.data as { detail?: unknown } | undefined;
     const d = data?.detail;
     if (typeof d === "string" && d.trim()) return d;
     if (Array.isArray(d) && d.length && typeof d[0] === "string") return d[0];
   }
-  return "Something went wrong. Please try again.";
+  return t("somethingWrong");
 }
 
 export default function CheckoutSettingsSection({
@@ -52,6 +56,7 @@ export default function CheckoutSettingsSection({
 }: {
   hidden: boolean;
 }) {
+  const t = useTranslations("settings.checkout");
   const queryClient = useQueryClient();
   const { data, isLoading: loading, isError, error } = useCheckoutSettingsQuery(!hidden);
   const [saving, setSaving] = useState(false);
@@ -70,8 +75,8 @@ export default function CheckoutSettingsSection({
 
   useEffect(() => {
     if (!isError) return;
-    setMessage({ type: "error", text: errorMessage(error) });
-  }, [isError, error]);
+    setMessage({ type: "error", text: errorMessage(error, t) });
+  }, [isError, error, t]);
 
   /** null when the box does not hold a whole number of minutes inside the allowed range. */
   const parsedCooldown = (() => {
@@ -87,7 +92,7 @@ export default function CheckoutSettingsSection({
     if (cooldownDirty && parsedCooldown === null) {
       setMessage({
         type: "error",
-        text: `Enter a whole number of minutes between 0 and ${REPEAT_ORDER_COOLDOWN_MAX_MINUTES}.`,
+        text: t("cooldownInvalid", { max: REPEAT_ORDER_COOLDOWN_MAX_MINUTES }),
       });
       return;
     }
@@ -105,10 +110,10 @@ export default function CheckoutSettingsSection({
       const saved = parseCheckoutSettings(patchData);
       setLoadedCooldown(saved.repeat_order_cooldown_minutes);
       setCooldownInput(String(saved.repeat_order_cooldown_minutes));
-      setMessage({ type: "success", text: "Saved." });
+      setMessage({ type: "success", text: t("saved") });
       void queryClient.invalidateQueries({ queryKey: checkoutSettingsQueryKey });
     } catch (err) {
-      setMessage({ type: "error", text: errorMessage(err) });
+      setMessage({ type: "error", text: errorMessage(err, t) });
     } finally {
       setSaving(false);
     }
@@ -143,33 +148,25 @@ export default function CheckoutSettingsSection({
               was taken away.
             */}
             <div className="space-y-1">
-              <h2 className="text-lg font-medium text-foreground">
-                Customer Information Form
-              </h2>
+              <h2 className="text-lg font-medium text-foreground">{t("formTitle")}</h2>
               <p className="text-sm text-muted-foreground">
-                How much a customer fills in at checkout is now part of your checkout
-                page, in{" "}
-                <Link
-                  href="/settings?tab=customization"
-                  className="underline underline-offset-4 hover:text-foreground"
-                >
-                  Customization
-                </Link>
-                {" "}— open the editor and choose it on the Checkout page, where you can
-                see the form while you decide. It saves when you press Save to store,
-                like the rest of your design.
+                {t.rich("formMoved", {
+                  link: (chunks) => (
+                    <Link
+                      href="/settings?tab=customization"
+                      className="underline underline-offset-4 hover:text-foreground"
+                    >
+                      {chunks}
+                    </Link>
+                  ),
+                })}
               </p>
             </div>
 
             <div className="space-y-3 border-t border-border pt-6">
               <div className="space-y-1">
-                <h3 className="text-base font-medium text-foreground">
-                  Repeat orders from the same phone number
-                </h3>
-                <p className="text-sm text-muted-foreground">
-                  After an order, make that phone number wait before it can order again.
-                  Stops fake repeat orders on cash on delivery. Cancelled orders don&apos;t count.
-                </p>
+                <h3 className="text-base font-medium text-foreground">{t("cooldownTitle")}</h3>
+                <p className="text-sm text-muted-foreground">{t("cooldownBody")}</p>
               </div>
               <div
                 className={cn(
@@ -181,7 +178,7 @@ export default function CheckoutSettingsSection({
                   htmlFor="repeat_order_cooldown_minutes"
                   className="text-sm font-medium text-foreground"
                 >
-                  Wait time in minutes
+                  {t("cooldownLabel")}
                 </label>
                 <div className="flex items-center gap-3">
                   <input
@@ -197,11 +194,11 @@ export default function CheckoutSettingsSection({
                     className="h-9 w-32 rounded-xs border border-input-border bg-input-surface px-3 text-sm text-foreground focus-visible:border-ring focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/20"
                   />
                   <span className="text-sm text-muted-foreground">
-                    {parsedCooldown === 0 ? "Off" : parsedCooldown === null ? "" : `= ${describeMinutes(parsedCooldown)}`}
+                    {parsedCooldown === 0 ? t("cooldownOff") : parsedCooldown === null ? "" : `= ${describeMinutes(parsedCooldown, t)}`}
                   </span>
                 </div>
                 <p id="repeat_order_cooldown_hint" className="text-xs text-muted-foreground">
-                  0 turns this off. Longest allowed is 7 days (10080 minutes).
+                  {t("cooldownHint", { max: REPEAT_ORDER_COOLDOWN_MAX_MINUTES })}
                 </p>
               </div>
             </div>
@@ -226,7 +223,7 @@ export default function CheckoutSettingsSection({
               onClick={() => void handleSave()}
             >
               {saving && <Loader2 className="size-4 animate-spin" />}
-              Save changes
+              {t("save")}
             </Button>
 
             <AutopilotSettingsPanel />

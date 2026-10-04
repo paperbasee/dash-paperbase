@@ -163,38 +163,18 @@ describe("SECTIONS integrity", () => {
     const bn = loadSettingsMessages("bn");
 
     for (const row of SECTIONS) {
-      if ("labelKey" in row) {
-        for (const [locale, messages] of [
-          ["en", en],
-          ["bn", bn],
-        ] as const) {
-          const value = messages[row.labelKey];
-          expect(
-            typeof value === "string" && value.trim().length > 0,
-            `settings.${row.labelKey} missing from messages/${locale}.json (section "${row.id}")`,
-          ).toBe(true);
-          // A key echoed back as its own value means next-intl fell through.
-          expect(value).not.toBe(row.labelKey);
-        }
-      } else {
+      for (const [locale, messages] of [
+        ["en", en],
+        ["bn", bn],
+      ] as const) {
+        const value = messages[row.labelKey];
         expect(
-          typeof row.displayLabel === "string" && row.displayLabel.trim().length > 0,
-          `section "${row.id}" has an empty displayLabel`,
+          typeof value === "string" && value.trim().length > 0,
+          `settings.${row.labelKey} missing from messages/${locale}.json (section "${row.id}")`,
         ).toBe(true);
-        // A literal label must not be a translation key smuggled into the
-        // wrong field — that would render "sectionFoo" in the nav.
-        expect(row.displayLabel.startsWith("section")).toBe(false);
+        // A key echoed back as its own value means next-intl fell through.
+        expect(value).not.toBe(row.labelKey);
       }
-    }
-  });
-
-  it("gives exactly one label channel per section (never both, never neither)", () => {
-    for (const row of SECTIONS as SettingsSectionNavItem[]) {
-      const hasKey = "labelKey" in row;
-      const hasLiteral = "displayLabel" in row;
-      expect(hasKey !== hasLiteral, `section "${row.id}" label channels: ${hasKey}/${hasLiteral}`).toBe(
-        true,
-      );
     }
   });
 

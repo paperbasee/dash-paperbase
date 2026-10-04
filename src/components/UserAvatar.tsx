@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { getAvatarUrl } from "@/lib/avatar";
@@ -31,6 +32,7 @@ function getPlanRingClasses(plan?: string | null, urgentSubscriptionRing?: boole
 }
 
 export default function UserAvatar({ publicId, name, plan, urgentSubscriptionRing, className }: UserAvatarProps) {
+  const tCommon = useTranslations("common");
   const [imgFailed, setImgFailed] = useState(false);
   const ringClasses = getPlanRingClasses(plan, urgentSubscriptionRing);
 
@@ -38,7 +40,7 @@ export default function UserAvatar({ publicId, name, plan, urgentSubscriptionRin
     return (
       <img
         src={getAvatarUrl(publicId)}
-        alt={name || "User avatar"}
+        alt={name || tCommon("userAvatar")}
         onError={() => setImgFailed(true)}
         className={cn("size-8 shrink-0 rounded-full object-cover", ringClasses, className)}
       />
@@ -52,7 +54,7 @@ export default function UserAvatar({ publicId, name, plan, urgentSubscriptionRin
         ringClasses,
         className,
       )}
-      aria-label={name || "User avatar"}
+      aria-label={name || tCommon("userAvatar")}
     >
       {getInitial(name)}
     </span>

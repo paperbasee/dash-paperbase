@@ -24,22 +24,22 @@ const DELIVERY_STATUS_I18N_KEYS: Partial<Record<string, string>> = {
   unknown: "orderDeliveryStatusUnknown",
 };
 
-const DELIVERY_STATUS_FALLBACK_LABELS: Record<string, string> = {
-  not_dispatched: "Not Dispatched",
-  in_transit: "In Transit",
-  delivered: "Delivered",
-  partial_delivered: "Partial Delivered",
-  cancelled: "Delivery Failed",
-  unknown: "Unknown",
+/** The badge colour of each status; an unknown one looks like `unknown`. */
+export const DELIVERY_STATUS_TONE: Record<string, string> = {
+  not_dispatched: "bg-muted text-muted-foreground",
+  in_transit: "bg-blue-600/10 text-blue-700 dark:text-blue-300",
+  delivered: "bg-emerald-600/10 text-emerald-700 dark:text-emerald-300",
+  partial_delivered: "bg-amber-600/10 text-amber-700 dark:text-amber-300",
+  cancelled: "bg-rose-600/10 text-rose-700 dark:text-rose-300",
+  unknown: "bg-muted text-muted-foreground",
 };
 
+/** A status in the page's words (`pages` messages); a status the API adds later reads as unknown. */
 export function formatOrderDeliveryStatusLabel(
   status: string | null | undefined,
-  t?: (key: string) => string,
+  t: (key: string) => string,
 ): string {
   const value = (status || "").toLowerCase();
   if (!value) return "—";
-  const key = DELIVERY_STATUS_I18N_KEYS[value];
-  if (t && key) return t(key);
-  return DELIVERY_STATUS_FALLBACK_LABELS[value] || value.replace(/_/g, " ");
+  return t(DELIVERY_STATUS_I18N_KEYS[value] ?? "orderDeliveryStatusUnknown");
 }

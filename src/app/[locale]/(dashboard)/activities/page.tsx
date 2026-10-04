@@ -234,7 +234,7 @@ export default function ActivitiesPage() {
                               {tPages("activitiesBySupport")}
                             </span>
                           ) : item.actor ? (
-                            ` by ${item.actor.full_name || item.actor.email}`
+                            ` ${tPages("activitiesByActor", { name: item.actor.full_name || item.actor.email })}`
                           ) : (
                             ""
                           )}

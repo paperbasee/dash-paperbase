@@ -1,5 +1,6 @@
 import * as React from "react"
 import { XIcon } from "lucide-react"
+import { useTranslations } from "next-intl"
 import { Dialog as SheetPrimitive } from "radix-ui"
 
 import { cn } from "@/lib/utils"
@@ -53,6 +54,7 @@ function SheetContent({
   side?: "top" | "right" | "bottom" | "left"
   showCloseButton?: boolean
 }) {
+  const tCommon = useTranslations("common")
   return (
     <SheetPortal>
       <SheetOverlay />
@@ -89,7 +91,7 @@ function SheetContent({
         {showCloseButton && (
           <SheetPrimitive.Close className="absolute top-4 right-4 rounded-xs opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-secondary">
             <XIcon className="size-4" />
-            <span className="sr-only">Close</span>
+            <span className="sr-only">{tCommon("close")}</span>
           </SheetPrimitive.Close>
         )}
       </SheetPrimitive.Content>

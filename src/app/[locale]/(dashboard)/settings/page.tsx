@@ -106,11 +106,7 @@ export default function SettingsPage() {
 
 
   const activeSectionMeta = SECTIONS.find((s) => s.id === activeSection);
-  const activeLabel = activeSectionMeta
-    ? "labelKey" in activeSectionMeta
-      ? tSettings(activeSectionMeta.labelKey)
-      : activeSectionMeta.displayLabel
-    : tSettings("title");
+  const activeLabel = activeSectionMeta ? tSettings(activeSectionMeta.labelKey) : tSettings("title");
   const ActiveIcon = activeSectionMeta?.icon;
 
   return (

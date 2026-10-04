@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useLocale } from "next-intl";
 import { useExtraFieldsSchema } from "@/hooks/useExtraFieldsSchema";
 import type { ExtraFieldEntityType, ExtraFieldValues } from "@/types/extra-fields";
@@ -46,6 +47,7 @@ export function ExtraFieldsFormSection({
   onChange: (values: ExtraFieldValues) => void;
   errors?: Record<string, string>;
 }) {
+  const t = useTranslations("extraFields");
   const locale = useLocale();
   const numClass = numberTextClass(locale);
   const { schema } = useExtraFieldsSchema(entityType);
@@ -69,7 +71,7 @@ export function ExtraFieldsFormSection({
         return (
           <Field
             key={field.id}
-            label={field.name || "(unnamed)"}
+            label={field.name || t("unnamed")}
             required={field.required}
             error={error}
           >
@@ -108,7 +110,7 @@ export function ExtraFieldsFormSection({
                   className="form-checkbox"
                 />
                 <span className="text-sm text-muted-foreground">
-                  {field.defaultValue || "Yes / No"}
+                  {field.defaultValue || t("yesNo")}
                 </span>
               </label>
             )}
@@ -119,7 +121,7 @@ export function ExtraFieldsFormSection({
                 className={cn(fieldControlClass, error && "border-destructive")}
               >
                 <option value="">
-                  {field.required ? "Select..." : "(Optional)"}
+                  {field.required ? t("select") : t("optional")}
                 </option>
                 {(field.options ?? []).map((opt) => (
                   <option key={opt} value={opt}>

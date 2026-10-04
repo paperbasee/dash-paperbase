@@ -26,6 +26,12 @@ const MAX_POPUP_IMAGES = 3;
 
 type PopupShowFrequency = "session" | "daily" | "always";
 
+const SHOW_FREQUENCIES: readonly PopupShowFrequency[] = ["session", "daily", "always"];
+
+function isShowFrequency(value: unknown): value is PopupShowFrequency {
+  return SHOW_FREQUENCIES.includes(value as PopupShowFrequency);
+}
+
 type PopupForm = {
   title: string;
   description: string;
@@ -84,6 +90,8 @@ export default function PopupPanel() {
   const locale = useLocale();
   const tPages = useTranslations("pages");
   const tCommon = useTranslations("common");
+  const t = useTranslations("settings.popup");
+  const tUpload = useTranslations("upload");
 
   const confirm = useConfirm();
   const queryClient = useQueryClient();
@@ -234,7 +242,7 @@ export default function PopupPanel() {
 
       setSlotStatus((prev) => prev.map((s, i) => (i === index ? "uploaded" : s)));
     } catch (err) {
-      const msg = err instanceof Error ? err.message : "Upload failed.";
+      const msg = err instanceof Error ? err.message : tUpload("failed");
       setSlotStatus((prev) => prev.map((s, i) => (i === index ? "error" : s)));
       setSlotError((prev) => prev.map((e, i) => (i === index ? msg : e)));
     }
@@ -323,8 +331,8 @@ export default function PopupPanel() {
 
   async function handleDelete(publicId: string) {
     const ok = await confirm({
-      title: "Delete popup?",
-      message: "This popup and its images will be removed.",
+      title: t("deleteTitle"),
+      message: t("deleteMessage"),
       variant: "danger",
     });
     if (!ok) return;
@@ -354,7 +362,7 @@ export default function PopupPanel() {
             disabled={saving}
             className="rounded-card bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
           >
-            Add Popup
+            {t("add")}
           </Button>
         </div>
       ) : null}
@@ -366,45 +374,45 @@ export default function PopupPanel() {
           className="space-y-5 rounded-card border border-border bg-card p-6"
         >
           <h2 className="text-lg font-medium">
-            {editing === "new" ? "Create popup" : "Edit popup"}
+            {editing === "new" ? t("createTitle") : t("editTitle")}
           </h2>
 
           <div className="grid gap-4 sm:grid-cols-2">
           <div className="sm:col-span-2">
-            <label className="mb-1 block text-sm font-medium">Title</label>
+            <label className="mb-1 block text-sm font-medium">{t("fieldTitle")}</label>
             <Input
               type="text"
               value={form.title}
               onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
               className="text-sm"
-              placeholder="e.g. Limited time offer"
+              placeholder={t("fieldTitlePlaceholder")}
             />
           </div>
 
           <div className="sm:col-span-2">
-            <label className="mb-1 block text-sm font-medium">Description</label>
+            <label className="mb-1 block text-sm font-medium">{t("fieldDescription")}</label>
             <Textarea
               rows={3}
               value={form.description}
               onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
               className="text-sm"
-              placeholder="Your popup message"
+              placeholder={t("fieldDescriptionPlaceholder")}
             />
           </div>
 
           <div>
-            <label className="mb-1 block text-sm font-medium">Button text</label>
+            <label className="mb-1 block text-sm font-medium">{t("fieldButtonText")}</label>
             <Input
               type="text"
               value={form.button_text}
               onChange={(e) => setForm((f) => ({ ...f, button_text: e.target.value }))}
               className="text-sm"
-              placeholder="e.g. Shop now"
+              placeholder={t("fieldButtonTextPlaceholder")}
             />
           </div>
 
           <div>
-            <label className="mb-1 block text-sm font-medium">Button link</label>
+            <label className="mb-1 block text-sm font-medium">{t("fieldButtonLink")}</label>
             <Input
               type="url"
               value={form.button_link}
@@ -415,7 +423,7 @@ export default function PopupPanel() {
           </div>
 
           <div>
-            <label className="mb-1 block text-sm font-medium">Delay seconds</label>
+            <label className="mb-1 block text-sm font-medium">{t("fieldDelay")}</label>
             <Input
               type="number"
               min={0}
@@ -426,15 +434,15 @@ export default function PopupPanel() {
           </div>
 
           <div>
-            <label className="mb-1 block text-sm font-medium">Show frequency</label>
+            <label className="mb-1 block text-sm font-medium">{t("fieldFrequency")}</label>
             <Select
               value={form.show_frequency}
               onChange={(e) => setForm((f) => ({ ...f, show_frequency: e.target.value as PopupShowFrequency }))}
               className="text-sm"
             >
-              <option value="session">Once per session</option>
-              <option value="daily">Once per day</option>
-              <option value="always">Always</option>
+              <option value="session">{t("frequency.session")}</option>
+              <option value="daily">{t("frequency.daily")}</option>
+              <option value="always">{t("frequency.always")}</option>
             </Select>
           </div>
 
@@ -447,7 +455,7 @@ export default function PopupPanel() {
               onChange={(e) => setForm((f) => ({ ...f, show_on_all_pages: e.target.checked }))}
             />
             <label htmlFor="show_on_all_pages" className="text-sm">
-              Show on all pages
+              {t("fieldAllPages")}
             </label>
           </div>
 
@@ -460,15 +468,15 @@ export default function PopupPanel() {
               onChange={(e) => setForm((f) => ({ ...f, is_active: e.target.checked }))}
             />
             <label htmlFor="is_active" className="text-sm">
-              Enable popup
+              {t("fieldEnabled")}
             </label>
           </div>
           </div>
 
         <div className="space-y-2">
-          <label className="block text-sm font-medium">Images (max {MAX_POPUP_IMAGES})</label>
+          <label className="block text-sm font-medium">{t("images", { max: MAX_POPUP_IMAGES })}</label>
           <p className="text-xs text-muted-foreground">
-            Upload 1–3 images. The popup will show them in a carousel.
+            {t("imagesHint", { max: MAX_POPUP_IMAGES })}
           </p>
 
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 min-[520px]:grid-cols-3">
@@ -485,12 +493,12 @@ export default function PopupPanel() {
                 >
                   <div className="mb-2 flex items-center justify-between gap-2">
                     <span className="truncate text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-                      Slot {index + 1}
+                      {t("slot", { number: index + 1 })}
                     </span>
                     {(slot.kind === "remote" || slot.kind === "local") && (
                       <button
                         type="button"
-                        title="Remove"
+                        title={tUpload("remove")}
                         className="inline-flex h-7 min-w-7 shrink-0 items-center justify-center rounded-ui border border-border text-sm leading-none text-muted-foreground hover:border-destructive/50 hover:bg-destructive/10 hover:text-destructive"
                         onClick={() => {
                           if (slot.kind === "remote") removeRemoteImage(index, slot.publicId);
@@ -512,13 +520,15 @@ export default function PopupPanel() {
                           "flex h-full w-full cursor-pointer flex-col items-center justify-center gap-2 bg-card px-3 text-center",
                           !canAddInEmpty && "cursor-not-allowed opacity-60",
                         )}
-                        title={!canAddInEmpty ? "Only 3 slots supported" : undefined}
+                        title={!canAddInEmpty ? t("slotsFull", { max: MAX_POPUP_IMAGES }) : undefined}
                       >
                         <span className="inline-flex text-primary">
                           <ImageIcon className="size-7" />
                         </span>
                         <p className="text-[11px] font-semibold text-foreground">
-                          Drop your image here, or <span className="underline underline-offset-2">browse</span>
+                          {tUpload.rich("drop", {
+                            browse: (chunks) => <span className="underline underline-offset-2">{chunks}</span>,
+                          })}
                         </p>
                         <input
                           type="file"
@@ -537,12 +547,12 @@ export default function PopupPanel() {
 
                   <p className="mt-1 text-[11px] text-muted-foreground">
                     {slotStatus[index] === "uploading"
-                      ? `Uploading ${slotProgress[index]}%`
+                      ? tUpload("uploading", { percent: slotProgress[index] })
                       : slotStatus[index] === "error"
-                        ? slotError[index] ?? "Upload failed."
+                        ? slotError[index] ?? tUpload("failed")
                         : slot.kind === "empty"
-                          ? "Upload image"
-                          : "Replace"}
+                          ? tUpload("uploadImage")
+                          : tUpload("replace")}
                   </p>
                 </div>
               );
@@ -576,11 +586,11 @@ export default function PopupPanel() {
           <table className="w-full text-left text-sm">
           <thead>
             <tr className="border-b border-border bg-muted/40">
-              <th className="th">Preview</th>
-              <th className="th">Title</th>
-                <th className="th">Schedule</th>
-              <th className="th">Status</th>
-              <th className="th text-right">Actions</th>
+              <th className="th">{t("colPreview")}</th>
+              <th className="th">{t("colTitle")}</th>
+              <th className="th">{t("colSchedule")}</th>
+              <th className="th">{t("colStatus")}</th>
+              <th className="th text-right">{t("colActions")}</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-border/60">
@@ -589,7 +599,7 @@ export default function PopupPanel() {
                 aria-label={
                   popup.title?.trim()
                     ? popup.title
-                    : `Popup ${popup.public_id}`
+                    : t("rowAria", { id: popup.public_id })
                 }
                 onNavigate={() => openEdit(popup)}
               >
@@ -614,9 +624,9 @@ export default function PopupPanel() {
                 </td>
                   <td className="px-4 py-3 text-xs whitespace-nowrap text-muted-foreground">
                     <span>
-                      {popup.show_frequency || "—"}
+                      {isShowFrequency(popup.show_frequency) ? t(`frequency.${popup.show_frequency}`) : popup.show_frequency || "—"}
                       {" · "}
-                      {popup.delay_seconds != null ? `${popup.delay_seconds}s` : "—"}
+                      {popup.delay_seconds != null ? t("delayShort", { seconds: popup.delay_seconds }) : "—"}
                     </span>
                   </td>
                 <td className="px-4 py-3">
@@ -652,7 +662,7 @@ export default function PopupPanel() {
               <tr>
                   <td colSpan={5} className="px-4 py-8">
                   <div className="rounded-card border border-card-border bg-card py-12 text-center text-sm text-muted-foreground">
-                    This store has no popup yet.
+                    {t("empty")}
                   </div>
                 </td>
               </tr>

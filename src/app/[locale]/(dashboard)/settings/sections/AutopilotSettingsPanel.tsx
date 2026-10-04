@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Loader2, Lock } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import api from "@/lib/api";
 import { Button } from "@/components/ui/button";
@@ -17,7 +18,8 @@ import { settingsInvertedButtonClassName } from "../SettingsSectionBody";
 
 type Message = { type: "success" | "error"; text: string } | null;
 
-function errorMessage(err: unknown): string {
+/** The API's own reason when it gave one, else `fallback` (the page's words). */
+function errorMessage(err: unknown, fallback: string): string {
   if (isApiHttpError(err)) {
     const data = err.response?.data as Record<string, unknown> | undefined;
     if (data) {
@@ -34,7 +36,7 @@ function errorMessage(err: unknown): string {
       }
     }
   }
-  return "Something went wrong. Please try again.";
+  return fallback;
 }
 
 function toNumberOrZero(v: string | number | undefined): number {
@@ -44,6 +46,7 @@ function toNumberOrZero(v: string | number | undefined): number {
 }
 
 export default function AutopilotSettingsPanel() {
+  const t = useTranslations("autopilot");
   const queryClient = useQueryClient();
   const { data, isLoading } = useStoreSettingsCurrentQuery();
   const { hasFeature, loading: featuresLoading } = useFeatures();
@@ -88,10 +91,10 @@ export default function AutopilotSettingsPanel() {
         autopilot_min_total_parcels: Number(minParcels || 0),
         autopilot_max_order_value: Number(maxValue || 0),
       });
-      setMessage({ type: "success", text: "Saved." });
+      setMessage({ type: "success", text: t("saved") });
       void queryClient.invalidateQueries({ queryKey: storeSettingsCurrentQueryKey });
     } catch (err) {
-      setMessage({ type: "error", text: errorMessage(err) });
+      setMessage({ type: "error", text: errorMessage(err, t("somethingWrong")) });
     } finally {
       setSaving(false);
     }
@@ -105,18 +108,15 @@ export default function AutopilotSettingsPanel() {
     <div id="autopilot" className="w-full space-y-6 border-t border-border pt-8 scroll-mt-24">
       <div className="space-y-1">
         <div className="flex items-center gap-2">
-          <h2 className="text-lg font-medium text-foreground">Order Autopilot</h2>
+          <h2 className="text-lg font-medium text-foreground">{t("settingsTitle")}</h2>
           {locked && (
             <span className="inline-flex items-center gap-1 rounded-tooltip border border-border bg-muted/50 px-2 py-0.5 text-xs text-muted-foreground">
               <Lock className="size-3 shrink-0" aria-hidden />
-              Premium
+              {t("premium")}
             </span>
           )}
         </div>
-        <p className="text-sm text-muted-foreground">
-          Automatically fraud-check and dispatch confirmed orders when the customer&apos;s delivery
-          success ratio meets your threshold. Skipped orders stay in your queue for manual review.
-        </p>
+        <p className="text-sm text-muted-foreground">{t("settingsIntro")}</p>
       </div>
 
       {isLoading ? null : (
@@ -127,7 +127,7 @@ export default function AutopilotSettingsPanel() {
           )}
         >
           <label className="flex items-center justify-between gap-4 text-sm">
-            <span className="text-foreground">Enable autopilot</span>
+            <span className="text-foreground">{t("enableToggle")}</span>
             <input
               type="checkbox"
               className="form-checkbox"
@@ -139,7 +139,7 @@ export default function AutopilotSettingsPanel() {
 
           <div className="grid gap-4 sm:grid-cols-2">
             <label className="space-y-1 text-sm">
-              <span className="text-foreground">Minimum success ratio (%)</span>
+              <span className="text-foreground">{t("minRatio")}</span>
               <Input
                 type="number"
                 inputMode="numeric"
@@ -150,12 +150,12 @@ export default function AutopilotSettingsPanel() {
                 onChange={(e) => setRatio(e.target.value)}
               />
               <span className="block text-xs text-muted-foreground">
-                Only auto-dispatch if the fraud check reports at least this success rate.
+                {t("minRatioHint")}
               </span>
             </label>
 
             <label className="space-y-1 text-sm">
-              <span className="text-foreground">Minimum prior parcels</span>
+              <span className="text-foreground">{t("minParcels")}</span>
               <Input
                 type="number"
                 inputMode="numeric"
@@ -165,12 +165,12 @@ export default function AutopilotSettingsPanel() {
                 onChange={(e) => setMinParcels(e.target.value)}
               />
               <span className="block text-xs text-muted-foreground">
-                Skip customers with fewer than this many delivered parcels on record.
+                {t("minParcelsHint")}
               </span>
             </label>
 
             <label className="space-y-1 text-sm sm:col-span-2">
-              <span className="text-foreground">Max order value (0 = no cap)</span>
+              <span className="text-foreground">{t("maxValue")}</span>
               <Input
                 type="number"
                 inputMode="decimal"
@@ -181,7 +181,7 @@ export default function AutopilotSettingsPanel() {
                 onChange={(e) => setMaxValue(e.target.value)}
               />
               <span className="block text-xs text-muted-foreground">
-                Orders above this total are held for manual review.
+                {t("maxValueHint")}
               </span>
             </label>
           </div>
@@ -206,7 +206,7 @@ export default function AutopilotSettingsPanel() {
             onClick={() => void handleSave()}
           >
             {saving && <Loader2 className="size-4 animate-spin" />}
-            Save autopilot settings
+            {t("save")}
           </Button>
         </div>
       )}

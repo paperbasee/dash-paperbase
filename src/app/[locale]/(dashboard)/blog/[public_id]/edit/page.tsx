@@ -30,6 +30,7 @@ export default function EditBlogPage({
   }, [queryClient]);
 
   const tPages = useTranslations("pages");
+  const tBlog = useTranslations("blogForm");
   const { public_id } = use(params);
   const { data: blog, isLoading, isError, error } = useBlogDetailQuery(public_id);
   const [deleting, setDeleting] = useState(false);
@@ -57,8 +58,8 @@ export default function EditBlogPage({
 
   async function handleDelete() {
     const ok = await confirm({
-      title: "Delete blog post?",
-      message: `Delete "${currentBlog.title || "Untitled post"}"? This action cannot be undone.`,
+      title: tBlog("deletePostTitle"),
+      message: tBlog("deletePostMessage", { title: currentBlog.title || tBlog("untitled") }),
       variant: "danger",
     });
     if (!ok) return;

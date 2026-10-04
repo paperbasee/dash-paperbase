@@ -54,7 +54,7 @@ function OrderLineProductCardInner({
   const editing = editingOrder && !notYours;
   const isUnavailable =
     item.is_unavailable === true || item.status === "deleted" || !item.product_public_id;
-  const snapshotName = item.product_name_snapshot || item.product_name || "Product";
+  const snapshotName = item.product_name_snapshot || item.product_name || tPages("orderLineProductFallback");
   const snapshotVariant = item.variant_snapshot || null;
   const qtyShown = edit?.quantity ?? item.quantity;
   const snapshotUnit = Number(item.unit_price_snapshot ?? item.unit_price ?? 0);
@@ -192,7 +192,7 @@ function OrderLineProductCardInner({
             )}
           </p>
           <p className="line-clamp-2 text-xs text-muted-foreground">{subtitle}</p>
-          {isUnavailable ? <p className="text-xs font-medium text-destructive">Product data corrupted</p> : null}
+          {isUnavailable ? <p className="text-xs font-medium text-destructive">{tPages("orderProductsDataCorrupted", { count: 1 })}</p> : null}
           {editingOrder && notYours ? (
             <p className="text-xs text-muted-foreground">{tPages("orderLineNotYours")}</p>
           ) : null}

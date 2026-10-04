@@ -19,6 +19,12 @@ import {
 
 type SettingsMessage = { type: "success" | "error"; text: string } | null;
 
+const ROLE_KEYS = {
+  admin: "team.roleAdmin",
+  manager: "team.roleManager",
+  staff: "team.roleStaff",
+} as const;
+
 export default function AccountSection({
   hidden,
   isLoading,
@@ -42,7 +48,7 @@ export default function AccountSection({
   const formRef = useRef<HTMLFormElement>(null);
   const { handleKeyDown } = useEnterNavigation(() => formRef.current?.requestSubmit());
   const { meProfile } = useAuth();
-  const { isOwner, isSuperuser } = usePermissions();
+  const { isOwner, isSuperuser, role } = usePermissions();
   // "My Account" is visible to everyone (each user manages their own passkeys and
   // sees their own email/role below). Only the store-OWNER identity form is
   // owner-only, so staff never see or edit the owner's name/email.
@@ -50,10 +56,16 @@ export default function AccountSection({
   // The signed-in user's own identity (distinct from the store owner details
   // edited below) — so a moderator sees their own email and role, not the owner's.
   const myEmail = meProfile?.email?.trim() || "";
-  const myRole = meProfile?.store?.role?.trim() || "";
-  // Role-scoped, dynamic label: "Owner email" for the owner, "Moderator email"
-  // for staff, etc. (role names are merchant-defined and not localized).
-  const accountEmailLabel = myRole ? `${myRole} email` : t("account.heading");
+  // The signed-in person's place in this shop, in the page's words: the owner, or one of the
+  // three fixed roles (rbac.catalog.ROLES); a member paused at the switch to fixed roles has none.
+  const roleWord = isOwner
+    ? t("account.roleOwner")
+    : role?.slug && role.slug in ROLE_KEYS
+      ? t(ROLE_KEYS[role.slug as keyof typeof ROLE_KEYS])
+      : meProfile?.store
+        ? t("account.roleMember")
+        : "";
+  const accountEmailLabel = roleWord ? t("account.roleEmail", { role: roleWord }) : t("account.heading");
   return (
     <section
       id="panel-account"
@@ -73,7 +85,7 @@ export default function AccountSection({
                 <span className="truncate text-sm text-muted-foreground">
                   {maskEmail(myEmail)}
                 </span>
-                {myRole && <Badge variant="secondary">{myRole}</Badge>}
+                {roleWord && <Badge variant="secondary">{roleWord}</Badge>}
               </div>
             </div>
           )}

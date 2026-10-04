@@ -50,6 +50,7 @@ import {
   formatOrderDeliveryStatusLabel,
 } from "@/lib/orders/delivery-statuses";
 import { ORDER_FLAG_OPTIONS, formatOrderFlagLabel } from "@/lib/orders/order-flags";
+import { DeliveryStatusBadge } from "@/components/orders/DeliveryStatusBadge";
 import type { Order, PaginatedResponse } from "@/types";
 import { useConfirm } from "@/context/ConfirmDialogContext";
 import { notify, normalizeError } from "@/notifications";
@@ -100,47 +101,6 @@ function courierCell(order: Order): string {
   return c || "—";
 }
 
-function deliveryStatusBadge(order: Order) {
-  const s = order.delivery_status || "unknown";
-  const cfg: Record<
-    string,
-    { label: string; className: string }
-  > = {
-    not_dispatched: {
-      label: "Not Dispatched",
-      className: "bg-muted text-muted-foreground",
-    },
-    in_transit: {
-      label: "In Transit",
-      className: "bg-blue-600/10 text-blue-700 dark:text-blue-300",
-    },
-    delivered: {
-      label: "Delivered",
-      className: "bg-emerald-600/10 text-emerald-700 dark:text-emerald-300",
-    },
-    partial_delivered: {
-      label: "Partial Delivered",
-      className: "bg-amber-600/10 text-amber-700 dark:text-amber-300",
-    },
-    cancelled: {
-      label: "Delivery Failed",
-      className: "bg-rose-600/10 text-rose-700 dark:text-rose-300",
-    },
-    unknown: {
-      label: "Unknown",
-      className: "bg-muted text-muted-foreground",
-    },
-  };
-  const hit = cfg[s] || cfg.unknown;
-  return (
-    <span
-      className={`inline-flex items-center rounded-ui px-2 py-0.5 text-xs font-medium whitespace-nowrap ${hit.className}`}
-      aria-label={`Delivery status: ${hit.label}`}
-    >
-      {hit.label}
-    </span>
-  );
-}
 
 type BulkCourierResultRow = { public_id: string; ok: boolean; error: string | null };
 
@@ -226,6 +186,7 @@ export default function OrdersPage() {
   const tHints = useTranslations("pageHints");
   const tCommon = useTranslations("common");
   const tFraud = useTranslations("fraudCheck");
+  const tAutopilot = useTranslations("autopilot");
   const { currencySymbol } = useBranding();
   const queryClient = useQueryClient();
   const confirm = useConfirm();
@@ -369,7 +330,7 @@ export default function OrdersPage() {
   const canRunFraudCheck = hasPermission("orders.edit");
 
   const deliveryPillOptions: { value: string; label: string }[] = [
-    { value: "", label: "All" },
+    { value: "", label: tCommon("all") },
     ...ORDER_DELIVERY_STATUS_OPTIONS.map((s) => ({
       value: s,
       label: formatOrderDeliveryStatusLabel(s, (key) => tPages(key)),
@@ -1125,7 +1086,7 @@ export default function OrdersPage() {
           <FilterDropdown
             value={filters.status}
             onChange={(value) => setFilter("status", value)}
-            placeholder="Action"
+            placeholder={tPages("filtersAction")}
             options={ORDER_STATUS_OPTIONS.map((s) => ({
               value: s,
               label: formatOrderStatusLabel(s, (key) => tPages(key)),
@@ -1134,10 +1095,10 @@ export default function OrdersPage() {
           <FilterDropdown
             value={filters.flag}
             onChange={(value) => setFilter("flag", value)}
-            placeholder="Flag"
+            placeholder={tPages("filtersFlag")}
             options={ORDER_FLAG_OPTIONS.map((f) => ({
               value: f,
-              label: formatOrderFlagLabel(f),
+              label: formatOrderFlagLabel(f, (key) => tPages(key)),
             }))}
           />
           <FilterDropdown
@@ -1170,7 +1131,7 @@ export default function OrdersPage() {
           <FilterDropdown
             value={filters.category}
             onChange={(value) => setFilter("category", value)}
-            placeholder="Category"
+            placeholder={tPages("filtersCategory")}
             options={categoryOptions}
             className="min-w-[180px]"
           />
@@ -1290,10 +1251,10 @@ export default function OrdersPage() {
                   <th className="th">{tPages("ordersListColOrderNumber")}</th>
                   <th className="th">{tPages("ordersListColCustomer")}</th>
                   <th className="th">{tPages("ordersListColPhone")}</th>
-                  <th className="th">Fraud Check</th>
-                  <th className="th">Action</th>
-                  <th className="th">Flag</th>
-                  <th className="th">Delivery Status</th>
+                  <th className="th">{tPages("ordersListColFraudCheck")}</th>
+                  <th className="th">{tPages("ordersListColAction")}</th>
+                  <th className="th">{tPages("ordersListColFlag")}</th>
+                  <th className="th">{tPages("ordersListColDeliveryStatus")}</th>
                   <th className="th">{tPages("ordersListColTotal")}</th>
                   <th className="th">{tPages("ordersListColPayment")}</th>
                   <th className="th">{tPages("ordersListConsignmentId")}</th>
@@ -1359,10 +1320,10 @@ export default function OrdersPage() {
                             {isOwner && order.dispatched_by_autopilot && (
                               <span
                                 className="inline-flex items-center gap-1 text-[10px] font-medium leading-none text-muted-foreground"
-                                title="This order was confirmed and dispatched by autopilot"
+                                title={tAutopilot("dispatchedTitle")}
                               >
                                 <span className="size-1.5 rounded-full bg-emerald-500" aria-hidden />
-                                Autopilot
+                                {tAutopilot("label")}
                               </span>
                             )}
                           </div>
@@ -1404,9 +1365,7 @@ export default function OrdersPage() {
                                   tPages(key)
                                 )}{" "}
                                 •{" "}
-                                {(order.unavailable_products_count ?? 0) === 1
-                                  ? "Product data corrupted."
-                                  : `${order.unavailable_products_count} products data corrupted.`}
+                                {tPages("orderProductsDataCorrupted", { count: order.unavailable_products_count ?? 0 })}
                               </p>
                             ) : (
                               <Select
@@ -1455,9 +1414,7 @@ export default function OrdersPage() {
                                   tPages(key)
                                 )}{" "}
                                 •{" "}
-                                {(order.unavailable_products_count ?? 0) === 1
-                                  ? "Product data corrupted."
-                                  : `${order.unavailable_products_count} products data corrupted.`}
+                                {tPages("orderProductsDataCorrupted", { count: order.unavailable_products_count ?? 0 })}
                               </p>
                             ) : null}
                           </div>
@@ -1470,20 +1427,20 @@ export default function OrdersPage() {
                             onChange={(e) =>
                               handleRowFlagChange(order, e.target.value)
                             }
-                            aria-label={`Flag for order ${order.order_number}`}
+                            aria-label={tPages("ordersListFlagAria", { number: order.order_number })}
                           >
                             <option value="" style={themedOptionBaseStyle()}>
-                              {formatOrderFlagLabel(null)}
+                              {formatOrderFlagLabel(null, (key) => tPages(key))}
                             </option>
                             {ORDER_FLAG_OPTIONS.map((f) => (
                               <option key={f} value={f} style={flagOptionStyle(f)}>
-                                {formatOrderFlagLabel(f)}
+                                {formatOrderFlagLabel(f, (key) => tPages(key))}
                               </option>
                             ))}
                           </Select>
                         </td>
                         <td className="px-4 py-3 whitespace-nowrap">
-                          {deliveryStatusBadge(order)}
+                          {<DeliveryStatusBadge status={order.delivery_status} nowrap />}
                         </td>
                         <td
                           className={`px-4 py-3 whitespace-nowrap text-foreground ${numClass}`}
@@ -1531,14 +1488,14 @@ export default function OrdersPage() {
                                   e.stopPropagation();
                                   handleRetryCourierDispatch(order);
                                 }}
-                                title="This dispatch has been pending for more than 3 minutes. Click to retry."
+                                title={tPages("ordersListDispatchStuckTitle")}
                               >
                                 {retryingCourierId === order.public_id ? (
                                   <Loader2 className="size-3.5 shrink-0 animate-spin" />
                                 ) : (
                                   <RefreshCcw className="size-3.5 shrink-0" />
                                 )}
-                                Retry
+                                {tCommon("toastActionRetry")}
                               </Button>
                             ) : (
                               <span className="text-muted-foreground text-xs">
@@ -1609,14 +1566,14 @@ export default function OrdersPage() {
             warningText={
               fraudReady?.refreshError ??
               (fraudReady && fraudStatus(fraudReady.data) === "limit_exceeded"
-                ? fraudDetail(fraudReady.data) ?? "Limit exceeded."
+                ? fraudDetail(fraudReady.data) ?? tFraud("limitExceeded")
                 : null)
             }
             errorText={
               fraudState?.kind === "error"
                 ? fraudState.message
                 : fraudReady && fraudStatus(fraudReady.data) === "error"
-                  ? fraudDetail(fraudReady.data) ?? "Fraud check failed."
+                  ? fraudDetail(fraudReady.data) ?? tFraud("failed")
                   : null
             }
           />

@@ -1,6 +1,7 @@
 "use client";
 
 import { Sparkles } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import { DeferredNavLink } from "@/components/navigation/DeferredNavLink";
 import { cn } from "@/lib/utils";
@@ -11,6 +12,7 @@ import { usePermissions } from "@/context/PermissionsContext";
 const SETTINGS_HREF = "/settings?tab=checkout#autopilot";
 
 export function AutopilotStatusPill() {
+  const t = useTranslations("autopilot");
   const { hasFeature, loading: featuresLoading } = useFeatures();
   const { data, isLoading } = useStoreSettingsCurrentQuery();
   const { isOwner } = usePermissions();
@@ -28,14 +30,14 @@ export function AutopilotStatusPill() {
     return (
       <DeferredNavLink
         href={SETTINGS_HREF}
-        title={`Autopilot on — auto-dispatch when success ratio ≥ ${ratio}%`}
+        title={t("onTitle", { ratio })}
         className={cn(
           "inline-flex items-center gap-2 rounded-card border border-border bg-card px-4 py-2 text-sm font-medium text-foreground transition hover:bg-muted",
           "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
         )}
       >
         <span className="size-1.5 rounded-full bg-emerald-500" aria-hidden />
-        <span className="text-muted-foreground">Autopilot</span>
+        <span className="text-muted-foreground">{t("label")}</span>
         <span className="tabular-nums">{ratio}%</span>
       </DeferredNavLink>
     );
@@ -44,7 +46,7 @@ export function AutopilotStatusPill() {
   return (
     <DeferredNavLink
       href={SETTINGS_HREF}
-      title="Auto-dispatch trusted orders straight to your courier"
+      title={t("enableTitle")}
       className={cn(
         "group inline-flex items-center gap-2 rounded-card px-4 py-2 text-sm font-semibold text-white shadow-sm transition",
         "bg-gradient-to-r from-indigo-500 via-violet-500 to-fuchsia-500 hover:brightness-110",
@@ -52,7 +54,7 @@ export function AutopilotStatusPill() {
       )}
     >
       <Sparkles className="size-4 transition-transform group-hover:rotate-12" aria-hidden />
-      <span>Enable Autopilot</span>
+      <span>{t("enable")}</span>
     </DeferredNavLink>
   );
 }

@@ -2,6 +2,7 @@
 
 import { ShieldCheckIcon } from "@phosphor-icons/react";
 import { Lock } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
@@ -28,9 +29,10 @@ export function FraudCheckButton({
   onClick,
   className,
 }: FraudCheckButtonProps) {
+  const t = useTranslations("fraudCheck");
   const isDisabled = Boolean(disabled || loading || locked);
-  const label = locked ? "Premium Feature" : "Check";
-  const tooltip = locked ? "Available in Premium plan" : "Check fraud history";
+  const label = locked ? t("premiumButton") : t("button");
+  const tooltip = locked ? t("premiumTooltip") : t("buttonTooltip");
   return (
     <TooltipProvider delayDuration={300}>
       <Tooltip>

@@ -23,6 +23,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
+import { ApiTransportError } from "@/lib/api-client";
 import { extractRateLimitInfo } from "@/hooks/useRateLimitCooldown";
 import { normalizeError, UNKNOWN_ERROR_FALLBACK } from "./normalizeError";
 import { registerNotifyDispatcher } from "./notify";
@@ -252,6 +253,11 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
             },
           );
         }
+        // No answer from the server at all: the browser's own words ("Failed to fetch") are
+        // English and say nothing a merchant can act on.
+        if (error instanceof ApiTransportError) {
+          return pushToast("error", { key: "common.toastNetworkError" }, options);
+        }
         const fallbackText = options?.fallbackMessage
           ? resolveMessage(options.fallbackMessage)
           : unknownErrorText();
@@ -289,7 +295,8 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
                 variant: "error",
                 // No title: the toast's coloured bar names the kind in the merchant's
                 // language, where this said "Error" in English.
-                message: normalized.message,
+                message:
+                  error instanceof ApiTransportError ? t("common.toastNetworkError") : normalized.message,
                 persistent: options?.persistent,
               });
             }

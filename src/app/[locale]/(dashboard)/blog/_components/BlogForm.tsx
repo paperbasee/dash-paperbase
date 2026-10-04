@@ -104,6 +104,8 @@ export function BlogForm({
   );
 
   const tPages = useTranslations("pages");
+  const t = useTranslations("blogForm");
+  const tUpload = useTranslations("upload");
 
   const tHints = useTranslations("pageHints");
   const { fieldErrors, clearValidation } = useNotificationValidation("blog-form");
@@ -160,7 +162,7 @@ export function BlogForm({
       setRemoveRemoteImage(false);
     } catch (err) {
       setUploadStatus("error");
-      setUploadError(err instanceof Error ? err.message : "Upload failed.");
+      setUploadError(err instanceof Error ? err.message : tUpload("failed"));
     }
   }
 
@@ -173,7 +175,7 @@ export function BlogForm({
   }, [tagsIsError, tagsError, tPages]);
 
   const selectedTags = useMemo(
-    () => tags.filter((t) => form.tag_public_ids.includes(t.public_id)),
+    () => tags.filter((tag) => form.tag_public_ids.includes(tag.public_id)),
     [tags, form.tag_public_ids],
   );
 
@@ -204,15 +206,15 @@ export function BlogForm({
 
   async function deleteTag(tag: BlogTag) {
     const ok = await confirm({
-      title: "Delete tag?",
-      message: `Delete "${tag.name}" from all blog posts?`,
+      title: t("deleteTagTitle"),
+      message: t("deleteTagMessage", { name: tag.name }),
       variant: "danger",
     });
     if (!ok) return;
     try {
       await api.delete(`admin/blog-tags/${tag.public_id}/`);
       queryClient.setQueryData<BlogTag[]>(blogTagsQueryKey, (prev) =>
-        (prev ?? []).filter((t) => t.public_id !== tag.public_id),
+        (prev ?? []).filter((existing) => existing.public_id !== tag.public_id),
       );
       setForm((f) => ({
         ...f,
@@ -284,7 +286,7 @@ export function BlogForm({
             notify.warning(
               typeof first === "string" && first.trim()
                 ? first
-                : "Some fields could not be saved. See the messages under each field.",
+                : t("fieldsNotSaved"),
             );
             return null;
           }
@@ -306,13 +308,13 @@ export function BlogForm({
   async function handleSave(e?: FormEvent) {
     e?.preventDefault();
     if (!form.title.trim()) {
-      const message = "Title is required";
+      const message = t("titleRequired");
       notify.validation("blog-form", { title: message });
       notify.warning(message);
       return;
     }
     if (form.title.trim().length > BLOG_TITLE_MAX) {
-      const message = `Title must be ${BLOG_TITLE_MAX} characters or fewer`;
+      const message = t("titleTooLong", { max: BLOG_TITLE_MAX });
       notify.validation("blog-form", {
         title: message,
       });
@@ -320,19 +322,19 @@ export function BlogForm({
       return;
     }
     if (form.excerpt.length > BLOG_EXCERPT_MAX) {
-      const message = `Excerpt must be ${BLOG_EXCERPT_MAX} characters or fewer`;
+      const message = t("excerptTooLong", { max: BLOG_EXCERPT_MAX });
       notify.validation("blog-form", { excerpt: message });
       notify.warning(message);
       return;
     }
     if (form.meta_title.length > BLOG_TITLE_MAX) {
-      const message = `Meta title must be ${BLOG_TITLE_MAX} characters or fewer`;
+      const message = t("metaTitleTooLong", { max: BLOG_TITLE_MAX });
       notify.validation("blog-form", { meta_title: message });
       notify.warning(message);
       return;
     }
     if (form.meta_description.length > BLOG_META_DESC_MAX) {
-      const message = `Meta description must be ${BLOG_META_DESC_MAX} characters or fewer`;
+      const message = t("metaDescriptionTooLong", { max: BLOG_META_DESC_MAX });
       notify.validation("blog-form", { meta_description: message });
       notify.warning(message);
       return;
@@ -378,7 +380,7 @@ export function BlogForm({
               loading={deleteLoading}
               disabled={deleteLoading || saving || uploadStatus === "uploading"}
             >
-              Delete post
+              {t("deletePost")}
             </Button>
           ) : null}
           <Button
@@ -388,7 +390,7 @@ export function BlogForm({
             disabled={saving || uploadStatus === "uploading" || deleteLoading}
             className="flex-1 gap-2 sm:flex-none"
           >
-            Save post
+            {t("savePost")}
           </Button>
         </div>
       </div>
@@ -401,10 +403,10 @@ export function BlogForm({
         <div className="space-y-6 lg:col-span-2">
           <Card className="shadow-sm">
             <CardHeader>
-              <CardTitle className="text-base font-semibold">Content</CardTitle>
+              <CardTitle className="text-base font-semibold">{t("contentCard")}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <Field label="Title" required htmlFor="blog-title" error={fieldErrors.title}>
+              <Field label={t("title")} required htmlFor="blog-title" error={fieldErrors.title}>
                 <Input
                   id="blog-title"
                   required
@@ -416,20 +418,20 @@ export function BlogForm({
                   maxLength={BLOG_TITLE_MAX}
                   aria-invalid={!!fieldErrors.title}
                   className={cn(fieldErrors.title && "border-destructive")}
-                  placeholder="A compelling title for your post"
+                  placeholder={t("titlePlaceholder")}
                   onKeyDown={handleKeyDown}
                 />
                 {mode === "edit" && initialBlog?.slug && (
                   <p className="mt-1 text-xs text-muted-foreground">
-                    Slug: <span className="font-mono">{initialBlog.slug}</span>
+                    {t.rich("slug", { slug: () => <span className="font-mono">{initialBlog.slug}</span> })}
                   </p>
                 )}
               </Field>
               <Field
-                label="Excerpt"
+                label={t("excerpt")}
                 htmlFor="blog-excerpt"
                 error={fieldErrors.excerpt}
-                hint="Shown in blog listings and preview cards when set."
+                hint={t("excerptHint")}
               >
                 <Textarea
                   id="blog-excerpt"
@@ -445,7 +447,7 @@ export function BlogForm({
                     "[field-sizing:fixed] h-24 resize-none overflow-y-auto",
                     fieldErrors.excerpt && "border-destructive",
                   )}
-                  placeholder="Short summary shown in listings (optional)"
+                  placeholder={t("excerptPlaceholder")}
                 />
                 <p
                   className={cn(
@@ -455,11 +457,10 @@ export function BlogForm({
                       : "text-muted-foreground",
                   )}
                 >
-                  {form.excerpt.length} / {BLOG_EXCERPT_MAX} characters · {countWords(form.excerpt)}{" "}
-                  words
+                  {t("counter", { length: form.excerpt.length, max: BLOG_EXCERPT_MAX, words: countWords(form.excerpt) })}
                 </p>
               </Field>
-              <Field label="Body" htmlFor="blog-content" error={fieldErrors.content}>
+              <Field label={t("body")} htmlFor="blog-content" error={fieldErrors.content}>
                 <Textarea
                   id="blog-content"
                   rows={14}
@@ -473,26 +474,22 @@ export function BlogForm({
                     "[field-sizing:fixed] h-64 resize-none overflow-y-auto font-mono text-sm",
                     fieldErrors.content && "border-destructive",
                   )}
-                  placeholder="Plain text or HTML. Leave an empty line between paragraphs."
+                  placeholder={t("bodyPlaceholder")}
                 />
                 {/* It said "Markdown or HTML", and the shop has never read
                     Markdown: a merchant's `## Heading` reached shoppers as
                     two hashes. This is what the shop does with it. */}
-                <p className="mt-1 text-xs text-muted-foreground">
-                  Plain text: an empty line starts a new paragraph. HTML:
-                  headings, lists, quotes, links and pictures (by their web
-                  address) are kept; anything else is removed when you save.
-                </p>
+                <p className="mt-1 text-xs text-muted-foreground">{t("bodyHint")}</p>
               </Field>
             </CardContent>
           </Card>
 
           <Card className="shadow-sm">
             <CardHeader>
-              <CardTitle className="text-base font-semibold">SEO</CardTitle>
+              <CardTitle className="text-base font-semibold">{t("seoCard")}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <Field label="Meta title" htmlFor="blog-meta-title" error={fieldErrors.meta_title}>
+              <Field label={t("metaTitle")} htmlFor="blog-meta-title" error={fieldErrors.meta_title}>
                 <Input
                   id="blog-meta-title"
                   value={form.meta_title}
@@ -503,15 +500,15 @@ export function BlogForm({
                   maxLength={BLOG_TITLE_MAX}
                   aria-invalid={!!fieldErrors.meta_title}
                   className={cn(fieldErrors.meta_title && "border-destructive")}
-                  placeholder="Defaults to the post title"
+                  placeholder={t("metaTitlePlaceholder")}
                   onKeyDown={handleKeyDown}
                 />
               </Field>
               <Field
-                label="Meta description"
+                label={t("metaDescription")}
                 htmlFor="blog-meta-description"
                 error={fieldErrors.meta_description}
-                hint={`Up to ${BLOG_META_DESC_MAX} characters for search snippets.`}
+                hint={t("metaDescriptionHint", { max: BLOG_META_DESC_MAX })}
               >
                 <Textarea
                   id="blog-meta-description"
@@ -527,7 +524,7 @@ export function BlogForm({
                   maxLength={BLOG_META_DESC_MAX}
                   aria-invalid={!!fieldErrors.meta_description}
                   className={cn(fieldErrors.meta_description && "border-destructive")}
-                  placeholder="Shown in search engine result snippets"
+                  placeholder={t("metaDescriptionPlaceholder")}
                 />
                 <p
                   className={cn(
@@ -537,8 +534,11 @@ export function BlogForm({
                       : "text-muted-foreground",
                   )}
                 >
-                  {form.meta_description.length} / {BLOG_META_DESC_MAX} characters ·{" "}
-                  {countWords(form.meta_description)} words
+                  {t("counter", {
+                    length: form.meta_description.length,
+                    max: BLOG_META_DESC_MAX,
+                    words: countWords(form.meta_description),
+                  })}
                 </p>
               </Field>
             </CardContent>
@@ -548,9 +548,7 @@ export function BlogForm({
         <div className="space-y-6 lg:col-span-1">
           <Card className="shadow-sm">
             <CardHeader>
-              <CardTitle className="text-base font-semibold">
-                Featured image
-              </CardTitle>
+              <CardTitle className="text-base font-semibold">{t("featuredImage")}</CardTitle>
             </CardHeader>
             <CardContent>
               <BlogImageUpload
@@ -573,12 +571,12 @@ export function BlogForm({
               <div className="mt-2 text-xs">
                 {uploadStatus === "uploading" && (
                   <span className="inline-flex items-center gap-1 text-muted-foreground">
-                    <Loader2 className="size-3 animate-spin" /> Uploading {uploadProgress}%
+                    <Loader2 className="size-3 animate-spin" /> {tUpload("uploading", { percent: uploadProgress })}
                   </span>
                 )}
                 {uploadStatus === "uploaded" && (
                   <span className="inline-flex items-center gap-1 text-emerald-600">
-                    <CheckCircle2 className="size-3" /> Replace
+                    <CheckCircle2 className="size-3" /> {tUpload("replace")}
                   </span>
                 )}
                 {uploadStatus === "error" && (
@@ -589,7 +587,7 @@ export function BlogForm({
                       if (imageFile) void handleImageSelect(imageFile);
                     }}
                   >
-                    <AlertCircle className="size-3" /> Failed. Retry
+                    <AlertCircle className="size-3" /> {tUpload("retry")}
                   </button>
                 )}
                 {uploadError && <p className="mt-1 text-destructive">{uploadError}</p>}
@@ -599,9 +597,7 @@ export function BlogForm({
 
           <Card className="shadow-sm">
             <CardHeader>
-              <CardTitle className="text-base font-semibold">
-                Visibility
-              </CardTitle>
+              <CardTitle className="text-base font-semibold">{t("visibility")}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
               <label className="flex items-center gap-2 text-sm">
@@ -613,7 +609,7 @@ export function BlogForm({
                   }
                   onKeyDown={handleKeyDown}
                 />
-                Public (visible on storefront)
+                {t("public")}
               </label>
               <label className="flex items-center gap-2 text-sm">
                 <input
@@ -624,56 +620,56 @@ export function BlogForm({
                   }
                   onKeyDown={handleKeyDown}
                 />
-                Featured post
+                {t("featured")}
               </label>
             </CardContent>
           </Card>
 
           <Card className="shadow-sm">
             <CardHeader>
-              <CardTitle className="text-base font-semibold">Tags</CardTitle>
+              <CardTitle className="text-base font-semibold">{t("tags")}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
               <div className="flex flex-wrap gap-2">
-                {selectedTags.map((t) => (
+                {selectedTags.map((tag) => (
                   <button
                     type="button"
-                    key={t.public_id}
-                    onClick={() => toggleTag(t.public_id)}
+                    key={tag.public_id}
+                    onClick={() => toggleTag(tag.public_id)}
                     className="inline-flex items-center gap-1 rounded-ui border border-border bg-muted px-2 py-0.5 text-xs"
                   >
-                    {t.name}
+                    {tag.name}
                     <X className="size-3" />
                   </button>
                 ))}
                 {selectedTags.length === 0 && (
                   <span className="text-xs text-muted-foreground">
-                    No tags selected
+                    {t("noTagsSelected")}
                   </span>
                 )}
               </div>
               <div className="max-h-40 space-y-1 overflow-auto rounded-card border border-border p-2">
                 {tags.length === 0 && (
-                  <p className="text-xs text-muted-foreground">No tags yet.</p>
+                  <p className="text-xs text-muted-foreground">{t("noTags")}</p>
                 )}
-                {tags.map((t) => (
+                {tags.map((tag) => (
                   <div
-                    key={t.public_id}
+                    key={tag.public_id}
                     className="flex items-center justify-between gap-2 rounded-ui px-1 py-1"
                   >
                     <label className="flex items-center gap-2 text-sm">
                       <input
                         type="checkbox"
-                        checked={form.tag_public_ids.includes(t.public_id)}
-                        onChange={() => toggleTag(t.public_id)}
+                        checked={form.tag_public_ids.includes(tag.public_id)}
+                        onChange={() => toggleTag(tag.public_id)}
                         onKeyDown={handleKeyDown}
                       />
-                      {t.name}
+                      {tag.name}
                     </label>
                     <button
                       type="button"
-                      onClick={() => void deleteTag(t)}
-                      aria-label={`Delete tag ${t.name}`}
+                      onClick={() => void deleteTag(tag)}
+                      aria-label={t("deleteTagAria", { name: tag.name })}
                       className="inline-flex h-7 w-7 items-center justify-center rounded-ui text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
                     >
                       <Trash className="size-3.5" />
@@ -685,7 +681,7 @@ export function BlogForm({
                 <Input
                   value={newTagName}
                   onChange={(e) => setNewTagName(e.target.value)}
-                  placeholder="New tag"
+                  placeholder={t("newTag")}
                   onKeyDown={handleKeyDown}
                 />
                 <Button
@@ -695,7 +691,7 @@ export function BlogForm({
                   onClick={createTag}
                   disabled={!newTagName.trim()}
                 >
-                  Add
+                  {t("addTag")}
                 </Button>
               </div>
             </CardContent>
@@ -704,11 +700,11 @@ export function BlogForm({
           {mode === "edit" && initialBlog && (
             <Card className="shadow-sm">
               <CardHeader>
-                <CardTitle className="text-base font-semibold">Meta</CardTitle>
+                <CardTitle className="text-base font-semibold">{t("metaCard")}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-1 text-sm text-muted-foreground">
-                <p>Views: {initialBlog.views}</p>
-                {initialBlog.author_name && <p>Author: {initialBlog.author_name}</p>}
+                <p>{t("views", { count: initialBlog.views })}</p>
+                {initialBlog.author_name && <p>{t("author", { name: initialBlog.author_name })}</p>}
               </CardContent>
             </Card>
           )}

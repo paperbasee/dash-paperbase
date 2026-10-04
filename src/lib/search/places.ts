@@ -30,11 +30,8 @@ export interface PlaceAccess {
   settingsSections: ReadonlySet<string>;
 }
 
-/**
- * A name to show: message keys (from the root), then `text` -- the words a few Settings sections
- * are still named by (`displayLabel`) -- joined with " · ".
- */
-export type PlaceLabel = { keys: readonly string[]; text?: string };
+/** A name to show: message keys (from the root), joined with " · ". */
+export type PlaceLabel = { keys: readonly string[] };
 
 export interface SearchPlace {
   id: string;
@@ -126,10 +123,7 @@ export const SEARCH_PLACES: readonly SearchPlace[] = [
       id: `settings:${section.id}`,
       group: "places",
       href: `/settings?tab=${section.id}`,
-      label:
-        "labelKey" in section
-          ? { keys: ["common.settings", `settings.${section.labelKey}`] }
-          : { keys: ["common.settings"], text: section.displayLabel },
+      label: { keys: ["common.settings", `settings.${section.labelKey}`] },
       words: SETTINGS_WORDS[section.id] ?? [],
       shows: (a) => a.settingsSections.has(section.id),
     }),
@@ -201,7 +195,7 @@ function wordsOf(value: string): string[] {
 
 /** The name a person sees, in the dashboard's language. */
 export function placeLabel(place: SearchPlace, t: (key: string) => string): string {
-  return [...place.label.keys.map((key) => t(key)), ...(place.label.text ? [place.label.text] : [])].join(" · ");
+  return place.label.keys.map((key) => t(key)).join(" · ");
 }
 
 /**

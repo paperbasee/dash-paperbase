@@ -11,7 +11,8 @@ type InvoiceState =
   | { status: "idle" }
   | { status: "generating"; stage: InvoiceStage }
   | { status: "ready"; url: string }
-  | { status: "error"; message: string };
+  /** What went wrong, for the button to say in the page's words; `detail` is the server's own reason, when it gave one. */
+  | { status: "error"; reason: "timed_out" | "request_failed"; detail?: string };
 
 const POLL_INTERVAL_MS = 1500;
 const MAX_POLLS = 80;
@@ -57,10 +58,7 @@ export function useOrderInvoice(orderPublicId: string) {
             title: { key: "pages.toastTitleInvoiceTimedOut" },
             fallbackMessage: { key: "pages.toastDescInvoiceTimedOut" },
           });
-          setState({
-            status: "error",
-            message: "Invoice generation timed out. Please try again.",
-          });
+          setState({ status: "error", reason: "timed_out" });
           return;
         }
         try {
@@ -102,13 +100,8 @@ export function useOrderInvoice(orderPublicId: string) {
         title: { key: "pages.toastTitleInvoiceRequestFailed" },
         fallbackMessage: { key: "pages.toastDescInvoiceRequestFailed" },
       });
-      let message = "Failed to request invoice. Please try again.";
-      if (isApiHttpError(err)) {
-        message = err.message || message;
-      } else if (err instanceof Error && err.message) {
-        message = err.message;
-      }
-      setState({ status: "error", message });
+      const detail = isApiHttpError(err) || err instanceof Error ? err.message || undefined : undefined;
+      setState({ status: "error", reason: "request_failed", detail });
     }
   }, [orderPublicId, startPolling, openInvoiceInNewTabAndReset]);
 

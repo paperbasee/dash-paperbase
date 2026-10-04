@@ -27,7 +27,7 @@ export function SettingsSectionNav({
       {visibleSections.map((row) => {
         const { id, icon: Icon } = row;
         const label =
-          "labelKey" in row ? t(row.labelKey) : row.displayLabel;
+          t(row.labelKey);
         return (
           <button
             key={id}

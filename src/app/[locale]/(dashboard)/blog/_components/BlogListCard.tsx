@@ -45,22 +45,23 @@ export function BlogListCard({ blog, locale }: BlogListCardProps) {
   }, [queryClient]);
 
   const tPages = useTranslations("pages");
+  const t = useTranslations("blogForm");
   const [deleting, setDeleting] = useState(false);
   const readMins = estimateReadingMinutesFromHtml(blog.content);
   const dateStr = formatDashboardDateOptional(blogDisplayDateIso(blog), locale);
   const tagText = (blog.tags || [])
-    .map((t) => (t.name || "").trim())
+    .map((tag) => (tag.name || "").trim())
     .filter(Boolean)
     .slice(0, 3)
     .join(" • ");
-  const pillText = (tagText || "Untagged").toUpperCase();
+  const pillText = (tagText || t("untagged")).toUpperCase();
   const byline = blog.author_name?.trim() || "—";
 
   async function handleDelete() {
     if (deleting) return;
     const ok = await confirm({
-      title: "Delete blog post?",
-      message: `Delete "${blog.title || "Untitled post"}"? This action cannot be undone.`,
+      title: t("deletePostTitle"),
+      message: t("deletePostMessage", { title: blog.title || t("untitled") }),
       variant: "danger",
     });
     if (!ok) return;
@@ -95,12 +96,12 @@ export function BlogListCard({ blog, locale }: BlogListCardProps) {
             {blog.featured_image_url ? (
               <img
                 src={blog.featured_image_url}
-                alt={blog.title || "Blog cover"}
+                alt={blog.title || t("coverAlt")}
                 className="h-full w-full max-w-full object-cover"
               />
             ) : (
               <div className="flex h-full w-full items-center justify-center bg-muted">
-                <span className="text-xs text-muted-foreground">No cover image</span>
+                <span className="text-xs text-muted-foreground">{t("noCover")}</span>
               </div>
             )}
             <button
@@ -110,7 +111,7 @@ export function BlogListCard({ blog, locale }: BlogListCardProps) {
                 e.stopPropagation();
                 void handleDelete();
               }}
-              aria-label={`Delete blog ${blog.title || blog.public_id}`}
+              aria-label={t("deletePostAria", { title: blog.title || blog.public_id })}
               disabled={deleting}
               className="absolute top-2 right-2 inline-flex h-8 w-8 items-center justify-center rounded-ui bg-black/60 text-white opacity-0 transition-opacity hover:bg-black/70 group-hover:opacity-100 disabled:cursor-not-allowed disabled:opacity-60"
             >
@@ -129,15 +130,15 @@ export function BlogListCard({ blog, locale }: BlogListCardProps) {
           </span>
 
           <h2 className="line-clamp-3 min-h-[4rem] text-base font-bold leading-snug tracking-tight text-foreground">
-            {blog.title || "Untitled post"}
+            {blog.title || t("untitled")}
           </h2>
 
           <div className="mt-auto border-t border-border/50 pt-3 text-xs text-muted-foreground">
             <div className="flex flex-wrap items-baseline justify-between gap-x-2 gap-y-1">
               <span className="min-w-0 leading-relaxed">
-                By {byline}
+                {t("byline", { name: byline })}
                 <span className="text-border"> | </span>
-                {readMins} min read
+                {t("readMinutes", { count: readMins })}
               </span>
               {dateStr ? (
                 <time

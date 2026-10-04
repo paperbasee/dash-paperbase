@@ -51,6 +51,8 @@ export type SettingsSection =
 
 export type SettingsSectionLabelKey =
   | "sectionStore"
+  | "sectionCheckout"
+  | "sectionTeam"
   | "sectionPolicies"
   | "sectionCustomization"
   | "sectionPromotions"
@@ -67,13 +69,11 @@ export type SettingsSectionLabelKey =
   | "sectionBilling";
 
 /** Nav row: translated label key or literal label (checkout/team; English-only for now). */
-export type SettingsSectionNavItem =
-  | {
-      id: Exclude<SettingsSection, "checkout" | "team">;
-      labelKey: SettingsSectionLabelKey;
-      icon: SettingsSectionIcon;
-    }
-  | { id: "checkout" | "team"; displayLabel: string; icon: SettingsSectionIcon };
+export type SettingsSectionNavItem = {
+  id: SettingsSection;
+  labelKey: SettingsSectionLabelKey;
+  icon: SettingsSectionIcon;
+};
 
 /**
  * Sections gated by a permission key; absent = visible to any member.
@@ -176,11 +176,7 @@ export const ALL_SECTIONS: SettingsSectionNavItem[] = [
   { id: "policies", labelKey: "sectionPolicies", icon: GavelIcon },
   { id: "customization", labelKey: "sectionCustomization", icon: Palette },
   { id: "promotions", labelKey: "sectionPromotions", icon: Megaphone },
-  {
-    id: "checkout",
-    displayLabel: "Checkout",
-    icon: ShoppingCartIcon,
-  },
+  { id: "checkout", labelKey: "sectionCheckout", icon: ShoppingCartIcon },
   { id: "shipping", labelKey: "sectionShipping", icon: TruckIcon },
   { id: "payments", labelKey: "sectionPayments", icon: Wallet },
   { id: "eav", labelKey: "sectionEav", icon: Layers },
@@ -188,7 +184,7 @@ export const ALL_SECTIONS: SettingsSectionNavItem[] = [
   { id: "integrations", labelKey: "sectionIntegrations", icon: PlugsIcon },
   { id: "domains", labelKey: "sectionDomains", icon: Globe },
   { id: "notifications", labelKey: "sectionNotifications", icon: BellRingingIcon },
-  { id: "team", displayLabel: "Team", icon: Users },
+  { id: "team", labelKey: "sectionTeam", icon: Users },
   { id: "account", labelKey: "sectionAccount", icon: User },
   { id: "security", labelKey: "sectionSecurity", icon: Shield },
   { id: "sessions", labelKey: "sectionSessions", icon: MonitorSmartphone },

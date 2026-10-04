@@ -498,7 +498,7 @@ export default function ProductsPage() {
                   ? "bg-foreground text-background"
                   : "text-muted-foreground hover:bg-background/70 hover:text-foreground"
               )}
-              aria-label="List view"
+              aria-label={tPages("productsListView")}
               aria-pressed={viewMode === "list"}
             >
               <List className="h-4 w-4" />
@@ -515,7 +515,7 @@ export default function ProductsPage() {
                   ? "bg-foreground text-background"
                   : "text-muted-foreground hover:bg-background/70 hover:text-foreground"
               )}
-              aria-label="Grid view"
+              aria-label={tPages("productsGridView")}
               aria-pressed={viewMode === "grid"}
             >
               <LayoutGrid className="h-4 w-4" />
@@ -730,14 +730,14 @@ export default function ProductsPage() {
                 {someSelected && (
                   <div className="mb-2 flex items-center gap-3">
                     <span className="text-sm text-muted-foreground">
-                      {selectedIds.size} selected
+                      {tPages("productsSelectedCount", { count: selectedIds.size })}
                     </span>
                     <button
                       type="button"
                       onClick={() => setSelectedIds(new Set())}
                       className="text-xs text-primary underline-offset-2 hover:underline"
                     >
-                      Deselect all
+                      {tPages("productsDeselectAll")}
                     </button>
                     {!allSelected && (
                       <button
@@ -848,7 +848,7 @@ export default function ProductsPage() {
                                   (product.total_stock ?? 0) === 0 ? "text-destructive" : "text-foreground"
                                 )}
                               >
-                                {product.total_stock ?? product.available_quantity ?? 0} in stock
+                                {tPages("productsInStock", { count: product.total_stock ?? product.available_quantity ?? 0 })}
                               </span>
                               <ClickableText
                                 href={`/variants?product_public_id=${encodeURIComponent(product.public_id)}`}
@@ -871,10 +871,10 @@ export default function ProductsPage() {
                                   : "text-foreground"
                               )}
                             >
-                              {product.total_stock ?? product.available_quantity ?? 0} in stock
+                              {tPages("productsInStock", { count: product.total_stock ?? product.available_quantity ?? 0 })}
                             </span>
                           ) : (
-                            <span className="text-xs text-muted-foreground">No stock tracking</span>
+                            <span className="text-xs text-muted-foreground">{tPages("productsNoStockTracking")}</span>
                           )}
                         </div>
 

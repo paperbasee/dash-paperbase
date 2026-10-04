@@ -182,6 +182,7 @@ function productsInBranch(node: AdminCategoryTreeNode): number {
 
 export default function CategoriesPage() {
   const tPages = useTranslations("pages");
+  const tUpload = useTranslations("upload");
   const tHints = useTranslations("pageHints");
   const tCommon = useTranslations("common");
   const confirm = useConfirm();
@@ -280,7 +281,7 @@ export default function CategoriesPage() {
       setUploadStatus("uploaded");
     } catch (err) {
       setUploadStatus("error");
-      setUploadError(err instanceof Error ? err.message : "Upload failed.");
+      setUploadError(err instanceof Error ? err.message : tUpload("failed"));
     }
   }
 
@@ -531,14 +532,14 @@ export default function CategoriesPage() {
               disabled={saving || uploadStatus === "uploading"}
             />
             {imagePreviewUrl && (
-              <img src={imagePreviewUrl} alt="Category preview" className="h-12 w-12 rounded object-cover" />
+              <img src={imagePreviewUrl} alt={tUpload("previewAlt")} className="h-12 w-12 rounded object-cover" />
             )}
             <div className="text-xs text-muted-foreground">
               {uploadStatus === "uploading" && (
-                <span className="inline-flex items-center gap-1"><Loader2 className="size-3 animate-spin" /> Uploading {uploadProgress}%</span>
+                <span className="inline-flex items-center gap-1"><Loader2 className="size-3 animate-spin" /> {tUpload("uploading", { percent: uploadProgress })}</span>
               )}
               {uploadStatus === "uploaded" && (
-                <span className="inline-flex items-center gap-1 text-emerald-600"><CheckCircle2 className="size-3" /> Replace</span>
+                <span className="inline-flex items-center gap-1 text-emerald-600"><CheckCircle2 className="size-3" /> {tUpload("replace")}</span>
               )}
               {uploadStatus === "error" && (
                 <button
@@ -547,7 +548,7 @@ export default function CategoriesPage() {
                   onClick={() => {
                     if (imageFile) void handleCategoryImageSelect(imageFile);
                   }}
-                ><AlertCircle className="size-3" /> Failed. Retry</button>
+                ><AlertCircle className="size-3" /> {tUpload("retry")}</button>
               )}
               {uploadError && <p className="text-destructive">{uploadError}</p>}
             </div>

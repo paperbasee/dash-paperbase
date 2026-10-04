@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { DownloadIcon } from "@phosphor-icons/react";
 import { AlertCircle, Loader2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/button";
 import { useOrderInvoice, type InvoiceStage } from "@/hooks/useOrderInvoice";
@@ -11,14 +12,15 @@ interface OrderInvoiceButtonProps {
   orderPublicId: string;
 }
 
-// Backend-reported stage -> label + the progress band it fills within.
+// Backend-reported stage -> its words (`pages` messages) + the progress band it fills within.
 const STAGE_META: Record<InvoiceStage, { label: string; base: number; cap: number }> = {
-  queued: { label: "Queued…", base: 6, cap: 20 },
-  rendering: { label: "Generating invoice…", base: 28, cap: 80 },
-  uploading: { label: "Almost ready…", base: 84, cap: 95 },
+  queued: { label: "orderInvoiceQueued", base: 6, cap: 20 },
+  rendering: { label: "orderInvoiceGenerating", base: 28, cap: 80 },
+  uploading: { label: "orderInvoiceAlmostReady", base: 84, cap: 95 },
 };
 
 export function OrderInvoiceButton({ orderPublicId }: OrderInvoiceButtonProps) {
+  const t = useTranslations("pages");
   const { state, getInvoice, reset } = useOrderInvoice(orderPublicId);
 
   const isGenerating = state.status === "generating";
@@ -51,12 +53,12 @@ export function OrderInvoiceButton({ orderPublicId }: OrderInvoiceButtonProps) {
   let label = "";
   if (isReady) {
     progress = 100;
-    label = "Opening…";
+    label = t("orderInvoiceOpening");
   } else if (stage) {
     const meta = STAGE_META[stage];
     const elapsed = now - stageStartRef.current;
     progress = meta.base + (meta.cap - meta.base) * (1 - Math.exp(-elapsed / 1600));
-    label = meta.label;
+    label = t(meta.label);
   }
 
   return (
@@ -90,19 +92,25 @@ export function OrderInvoiceButton({ orderPublicId }: OrderInvoiceButtonProps) {
           onClick={() => void getInvoice()}
         >
           <DownloadIcon className="size-4" aria-hidden />
-          Get Invoice
+          {t("orderInvoiceGet")}
         </Button>
       )}
       {isError && (
         <div className="flex items-center gap-1.5 text-xs text-destructive">
           <AlertCircle className="h-3.5 w-3.5 shrink-0" />
-          <span>{state.status === "error" ? state.message : ""}</span>
+          <span>
+            {state.status !== "error"
+              ? ""
+              : state.reason === "timed_out"
+                ? t("orderInvoiceTimedOut")
+                : state.detail || t("orderInvoiceRequestFailed")}
+          </span>
           <button
             type="button"
             onClick={reset}
             className="ml-auto underline underline-offset-2 hover:no-underline"
           >
-            Dismiss
+            {t("orderInvoiceDismiss")}
           </button>
         </div>
       )}

@@ -48,6 +48,7 @@ function tempUploadId(): string {
  */
 export default function BrandsPage() {
   const tPages = useTranslations("pages");
+  const tUpload = useTranslations("upload");
   const tHints = useTranslations("pageHints");
   const tCommon = useTranslations("common");
   const confirm = useConfirm();
@@ -121,7 +122,7 @@ export default function BrandsPage() {
       setUploadStatus("uploaded");
     } catch (err) {
       setUploadStatus("error");
-      setUploadError(err instanceof Error ? err.message : "Upload failed.");
+      setUploadError(err instanceof Error ? err.message : tUpload("failed"));
     }
   }
 

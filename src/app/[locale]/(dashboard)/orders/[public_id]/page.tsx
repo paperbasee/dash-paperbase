@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useParams } from "next/navigation";
-import { useLocale, useTranslations } from "next-intl";
+import { useFormatter, useLocale, useTranslations } from "next-intl";
 import {
   CreditCard,
   User,
@@ -27,6 +27,7 @@ import {
   shownOrderStatus,
 } from "@/lib/orders/order-statuses";
 import { ORDER_FLAG_OPTIONS, formatOrderFlagLabel } from "@/lib/orders/order-flags";
+import { DeliveryStatusBadge } from "@/components/orders/DeliveryStatusBadge";
 import {
   formatOrderPaymentStatusLabel,
   formatPaymentProviderLabel,
@@ -97,6 +98,7 @@ export default function OrderDetailPage() {
   const locale = useLocale();
   const numClass = numberTextClass(locale);
   const tPages = useTranslations("pages");
+  const format = useFormatter();
   const tHints = useTranslations("pageHints");
   const tNav = useTranslations("nav");
   const tCommon = useTranslations("common");
@@ -616,40 +618,12 @@ export default function OrderDetailPage() {
   const canVerifyPayment =
     order.status === "payment_pending" && order.payment_status === "submitted";
 
-  function deliveryStatusBadge(o: Order) {
-    const s = o.delivery_status || "unknown";
-    const cfg: Record<string, { label: string; className: string }> = {
-      not_dispatched: { label: "Not Dispatched", className: "bg-muted text-muted-foreground" },
-      in_transit: { label: "In Transit", className: "bg-blue-600/10 text-blue-700 dark:text-blue-300" },
-      delivered: { label: "Delivered", className: "bg-emerald-600/10 text-emerald-700 dark:text-emerald-300" },
-      partial_delivered: { label: "Partial Delivered", className: "bg-amber-600/10 text-amber-700 dark:text-amber-300" },
-      cancelled: { label: "Delivery Failed", className: "bg-rose-600/10 text-rose-700 dark:text-rose-300" },
-      unknown: { label: "Unknown", className: "bg-muted text-muted-foreground" },
-    };
-    const hit = cfg[s] || cfg.unknown;
-    return (
-      <span className={`inline-flex items-center rounded-ui px-2 py-0.5 text-xs font-medium ${hit.className}`}>
-        {hit.label}
-      </span>
-    );
-  }
-
+  /** "5 minutes ago", in the page's language. */
   function relativeTime(iso: string): string {
     const d = new Date(iso);
-    const ms = d.getTime();
-    if (Number.isNaN(ms)) return "—";
-    const diff = Date.now() - ms;
-    const sec = Math.round(diff / 1000);
-    const abs = Math.abs(sec);
-    const fmt = (n: number, unit: string) => `${n}${unit} ago`;
-    if (abs < 60) return fmt(abs, "s");
-    const min = Math.round(abs / 60);
-    if (min < 60) return fmt(min, "m");
-    const hr = Math.round(min / 60);
-    if (hr < 24) return fmt(hr, "h");
-    const day = Math.round(hr / 24);
-    return fmt(day, "d");
+    return Number.isNaN(d.getTime()) ? "—" : format.relativeTime(d, Date.now());
   }
+
 
   return (
     <div className="space-y-6">
@@ -934,9 +908,9 @@ export default function OrderDetailPage() {
                   <dd className="text-muted-foreground">{courierSummary}</dd>
                 </div>
                 <div className="flex justify-between items-start gap-3">
-                  <dt className="text-muted-foreground">Delivery Status</dt>
+                  <dt className="text-muted-foreground">{tPages("ordersListColDeliveryStatus")}</dt>
                   <dd className="text-right">
-                    {deliveryStatusBadge(order)}
+                    <DeliveryStatusBadge status={order.delivery_status} />
                     {order.last_tracking_message ? (
                       <p className="mt-1 text-xs text-muted-foreground max-w-[240px] break-words">
                         {order.last_tracking_message}
@@ -944,7 +918,7 @@ export default function OrderDetailPage() {
                     ) : null}
                     {order.delivery_status_updated_at ? (
                       <p className="mt-1 text-xs text-muted-foreground">
-                        Last updated: {relativeTime(order.delivery_status_updated_at)}
+                        {tPages("orderDeliveryLastUpdated", { when: relativeTime(order.delivery_status_updated_at) })}
                       </p>
                     ) : null}
                   </dd>
@@ -1086,9 +1060,7 @@ export default function OrderDetailPage() {
                 ) : order.has_unavailable_products ? (
                   <p className="text-sm text-muted-foreground">
                     {formatOrderStatusLabel(shownOrderStatus(order), tPages)} •{" "}
-                    {(order.unavailable_products_count ?? 0) === 1
-                      ? "Product data corrupted."
-                      : `${order.unavailable_products_count} products data corrupted.`}
+                    {tPages("orderProductsDataCorrupted", { count: order.unavailable_products_count ?? 0 })}
                   </p>
                 ) : (
                   <div className="grid grid-cols-2 gap-4 sm:gap-6">
@@ -1097,7 +1069,7 @@ export default function OrderDetailPage() {
                         htmlFor="order-detail-status-select"
                         className="mb-1 block text-xs font-medium text-muted-foreground"
                       >
-                        Action
+                        {tPages("orderDetailActionLabel")}
                       </label>
                       <div className="flex flex-wrap items-center gap-2">
                         <Select
@@ -1144,10 +1116,10 @@ export default function OrderDetailPage() {
                           disabled={flagUpdateLoading}
                           className="h-9 w-full min-w-0"
                         >
-                          <option value="">{formatOrderFlagLabel(null)}</option>
+                          <option value="">{formatOrderFlagLabel(null, tPages)}</option>
                           {ORDER_FLAG_OPTIONS.map((f) => (
                             <option key={f} value={f}>
-                              {formatOrderFlagLabel(f)}
+                              {formatOrderFlagLabel(f, tPages)}
                             </option>
                           ))}
                         </Select>
@@ -1187,7 +1159,7 @@ export default function OrderDetailPage() {
                 </div>
                 <div>
                   <label className="mb-1 block text-xs font-medium text-muted-foreground">
-                    Action
+                    {tPages("orderDetailActionLabel")}
                   </label>
                   <Input
                     value={formatOrderStatusLabel(shownOrderStatus(order), tPages)}

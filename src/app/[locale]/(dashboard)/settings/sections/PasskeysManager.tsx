@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { KeyRound, Trash2, Plus, Check, X, Pencil } from "lucide-react";
+import { useFormatter, useTranslations } from "next-intl";
 
 import {
   listPasskeys,
@@ -11,6 +12,7 @@ import {
   type PasskeyInfo,
 } from "@/lib/auth";
 import { SupportReadOnly } from "@/components/support/SupportReadOnly";
+import { useConfirm } from "@/context/ConfirmDialogContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
@@ -22,6 +24,9 @@ import { browserSupportsWebAuthn, isPasskeyCancellation } from "@/lib/passkeys";
  * with passkeys now.
  */
 export default function PasskeysManager() {
+  const t = useTranslations("settings.passkeys");
+  const format = useFormatter();
+  const confirm = useConfirm();
   const [passkeys, setPasskeys] = useState<PasskeyInfo[] | null>(null);
   const [error, setError] = useState("");
   const [adding, setAdding] = useState(false);
@@ -34,9 +39,9 @@ export default function PasskeysManager() {
     try {
       setPasskeys(await listPasskeys());
     } catch {
-      setError("Couldn't load your passkeys.");
+      setError(t("loadFailed"));
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     void load();
@@ -45,7 +50,7 @@ export default function PasskeysManager() {
   async function handleAdd() {
     setError("");
     if (!supported) {
-      setError("This device doesn't support passkeys.");
+      setError(t("unsupported"));
       return;
     }
     setAdding(true);
@@ -53,7 +58,7 @@ export default function PasskeysManager() {
       await enrollPasskey({});
       await load();
     } catch (err) {
-      if (!isPasskeyCancellation(err)) setError("Couldn't add a passkey. Please try again.");
+      if (!isPasskeyCancellation(err)) setError(t("addFailed"));
     } finally {
       setAdding(false);
     }
@@ -68,7 +73,7 @@ export default function PasskeysManager() {
       await renamePasskey(id, name);
       await load();
     } catch {
-      setError("Couldn't rename that passkey.");
+      setError(t("renameFailed"));
     } finally {
       setBusyId(null);
     }
@@ -76,17 +81,20 @@ export default function PasskeysManager() {
 
   async function handleDelete(id: string, name: string) {
     const isLast = (passkeys?.length ?? 0) <= 1;
-    const message = isLast
-      ? `Remove "${name}"? This is your only passkey — to sign in again you'll need an email sign-in link, then create a new passkey. Continue?`
-      : `Remove "${name}"? You can no longer sign in with this device.`;
-    if (typeof window !== "undefined" && !window.confirm(message)) return;
+    const ok = await confirm({
+      title: t("removeTitle", { name }),
+      message: isLast ? t("removeLastMessage") : t("removeMessage"),
+      confirmText: t("removeConfirm"),
+      variant: "danger",
+    });
+    if (!ok) return;
     setError("");
     setBusyId(id);
     try {
       await deletePasskey(id);
       await load();
     } catch {
-      setError("Couldn't remove that passkey.");
+      setError(t("removeFailed"));
     } finally {
       setBusyId(null);
     }
@@ -98,15 +106,14 @@ export default function PasskeysManager() {
       <div className="flex items-start justify-between gap-4">
         <div className="space-y-1">
           <h3 className="flex items-center gap-2 text-base font-semibold text-foreground">
-            <KeyRound size={18} /> Passkeys
+            <KeyRound size={18} /> {t("title")}
           </h3>
           <p className="text-sm text-muted-foreground">
-            Passkeys let you sign in with your device — Touch ID, Windows Hello,
-            or a security key. Add one per device so you&apos;re never locked out.
+            {t("intro")}
           </p>
         </div>
         <Button size="sm" className="gap-2 shrink-0" loading={adding} onClick={() => void handleAdd()}>
-          <Plus size={15} /> Add a passkey
+          <Plus size={15} /> {t("add")}
         </Button>
       </div>
 
@@ -122,7 +129,7 @@ export default function PasskeysManager() {
         </div>
       ) : passkeys.length === 0 ? (
         <p className="rounded-ui border border-dashed border-border px-3 py-6 text-center text-sm text-muted-foreground">
-          No passkeys yet. Add one to sign in without email links.
+          {t("empty")}
         </p>
       ) : (
         <ul className="divide-y divide-border rounded-ui border border-border">
@@ -144,7 +151,7 @@ export default function PasskeysManager() {
                     />
                     <button
                       type="button"
-                      aria-label="Save name"
+                      aria-label={t("saveName")}
                       onClick={() => void handleRename(pk.public_id)}
                       className="text-muted-foreground hover:text-foreground"
                     >
@@ -152,7 +159,7 @@ export default function PasskeysManager() {
                     </button>
                     <button
                       type="button"
-                      aria-label="Cancel"
+                      aria-label={t("cancelRename")}
                       onClick={() => setEditingId(null)}
                       className="text-muted-foreground hover:text-foreground"
                     >
@@ -162,17 +169,17 @@ export default function PasskeysManager() {
                 ) : (
                   <>
                     <p className="truncate text-sm font-medium text-foreground">
-                      {pk.name || "Passkey"}
+                      {pk.name || t("unnamed")}
                       {pk.synced && (
                         <span className="ml-2 rounded-full bg-muted px-2 py-0.5 text-xs font-normal text-muted-foreground">
-                          synced
+                          {t("synced")}
                         </span>
                       )}
                     </p>
                     <p className="text-xs text-muted-foreground">
                       {pk.last_used_at
-                        ? `Last used ${new Date(pk.last_used_at).toLocaleDateString()}`
-                        : `Added ${new Date(pk.created_at).toLocaleDateString()}`}
+                        ? t("lastUsed", { date: format.dateTime(new Date(pk.last_used_at), { dateStyle: "medium" }) })
+                        : t("added", { date: format.dateTime(new Date(pk.created_at), { dateStyle: "medium" }) })}
                     </p>
                   </>
                 )}
@@ -181,7 +188,7 @@ export default function PasskeysManager() {
                 <div className="flex items-center gap-1">
                   <button
                     type="button"
-                    aria-label="Rename passkey"
+                    aria-label={t("rename")}
                     disabled={busyId === pk.public_id}
                     onClick={() => {
                       setEditingId(pk.public_id);
@@ -193,9 +200,9 @@ export default function PasskeysManager() {
                   </button>
                   <button
                     type="button"
-                    aria-label="Remove passkey"
+                    aria-label={t("remove")}
                     disabled={busyId === pk.public_id}
-                    onClick={() => void handleDelete(pk.public_id, pk.name || "Passkey")}
+                    onClick={() => void handleDelete(pk.public_id, pk.name || t("unnamed"))}
                     className="rounded-ui p-1.5 text-muted-foreground hover:bg-destructive/10 hover:text-destructive disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-muted-foreground"
                   >
                     <Trash2 size={15} />

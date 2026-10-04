@@ -36,17 +36,17 @@ import {
 type EditableField = "status" | "priority" | "category";
 
 const STATUS_OPTIONS = [
-  { value: "new", label: "New" },
-  { value: "in_progress", label: "In progress" },
-  { value: "resolved", label: "Resolved" },
-  { value: "closed", label: "Closed" },
+  { value: "new" },
+  { value: "in_progress" },
+  { value: "resolved" },
+  { value: "closed" },
 ] as const;
 
 const PRIORITY_OPTIONS = [
-  { value: "low", label: "Low" },
-  { value: "medium", label: "Medium" },
-  { value: "high", label: "High" },
-  { value: "urgent", label: "Urgent" },
+  { value: "low" },
+  { value: "medium" },
+  { value: "high" },
+  { value: "urgent" },
 ] as const;
 
 const STATUS_I18N: Record<(typeof STATUS_OPTIONS)[number]["value"], string> = {
@@ -64,14 +64,24 @@ const PRIORITY_I18N: Record<(typeof PRIORITY_OPTIONS)[number]["value"], string> 
 };
 
 const CATEGORY_OPTIONS = [
-  { value: "general", label: "General" },
-  { value: "order", label: "Order" },
-  { value: "payment", label: "Payment" },
-  { value: "shipping", label: "Shipping" },
-  { value: "product", label: "Product" },
-  { value: "technical", label: "Technical" },
-  { value: "other", label: "Other" },
+  { value: "general" },
+  { value: "order" },
+  { value: "payment" },
+  { value: "shipping" },
+  { value: "product" },
+  { value: "technical" },
+  { value: "other" },
 ] as const;
+
+const CATEGORY_I18N: Record<(typeof CATEGORY_OPTIONS)[number]["value"], string> = {
+  general: "supportTicketsCategoryGeneral",
+  order: "supportTicketsCategoryOrder",
+  payment: "supportTicketsCategoryPayment",
+  shipping: "supportTicketsCategoryShipping",
+  product: "supportTicketsCategoryProduct",
+  technical: "supportTicketsCategoryTechnical",
+  other: "supportTicketsCategoryOther",
+};
 
 function InlineSelect({
   value,
@@ -136,6 +146,11 @@ export default function SupportTicketsPage() {
   const statusOptionsTranslated = STATUS_OPTIONS.map((o) => ({
     value: o.value,
     label: tPages(STATUS_I18N[o.value]),
+  }));
+
+  const categoryOptionsTranslated = CATEGORY_OPTIONS.map((o) => ({
+    value: o.value,
+    label: tPages(CATEGORY_I18N[o.value]),
   }));
 
   const priorityOptionsTranslated = PRIORITY_OPTIONS.map((o) => ({
@@ -408,7 +423,7 @@ export default function SupportTicketsPage() {
                     <td className="px-4 py-3 whitespace-nowrap">
                       <InlineSelect
                         value={ticket.category}
-                        options={CATEGORY_OPTIONS}
+                        options={categoryOptionsTranslated}
                         saving={!!saving[ticket.public_id]?.category}
                         widthClassName="w-[130px]"
                         onChange={(next) =>
