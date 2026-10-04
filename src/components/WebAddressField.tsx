@@ -7,14 +7,32 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { scheduleAddressCheck, type AddressCheck, type AddressKind } from "@/lib/web-address";
 
+/** Where each kind lives in the shop, shown before the address. */
+const PREFIX: Record<AddressKind, string> = {
+  product: "/products/",
+  category: "/categories/",
+  brand: "/brands/",
+  post: "/blog/",
+};
+
+/** What the field says when another row of the same kind holds the address. */
+const TAKEN = {
+  product: "takenProduct",
+  category: "takenCategory",
+  brand: "takenBrand",
+  post: "takenPost",
+} as const satisfies Record<AddressKind, string>;
+
 /**
- * A product's or category's web address, as the merchant sees and may change it (lib/web-address).
+ * A product's, category's, brand's or blog post's web address, as the merchant sees and may
+ * change it (lib/web-address).
  *
  * - A new one follows its name (the API's suggestion) until the merchant types an address.
  * - A saved one stays as it is when the name changes; typing a new one moves it, and the old
  *   address keeps forwarding.
  *
- * `value` is what the merchant typed, null until they type: the form sends it only then.
+ * `value` is what the merchant typed, null until they type: the form sends it only then. A post's
+ * `name` is its title, and the notes say so.
  */
 export function WebAddressField({
   id,
@@ -29,7 +47,7 @@ export function WebAddressField({
   id?: string;
   kind: AddressKind;
   name: string;
-  /** The address already saved; null for a new product or category. */
+  /** The address already saved; null for a new one. */
   saved: string | null;
   excludePublicId?: string;
   value: string | null;
@@ -68,7 +86,7 @@ export function WebAddressField({
   } else if (typed && check && !check.available) {
     note = (
       <span className="inline-flex flex-wrap items-center gap-2 text-amber-700 dark:text-amber-300">
-        {t(kind === "product" ? "takenProduct" : "takenCategory")}
+        {t(TAKEN[kind])}
         <Button type="button" variant="outline" size="sm" className="h-7 px-2 text-xs" onClick={() => onChange(check.suggested)}>
           {t("useSuggested", { address: check.suggested })}
         </Button>
@@ -79,9 +97,9 @@ export function WebAddressField({
   } else if (typed && saved && check?.address && check.address !== saved) {
     note = t("oldForwards", { old: saved });
   } else if (saved === null) {
-    note = t("fromName");
+    note = t(kind === "post" ? "fromTitle" : "fromName");
   } else {
-    note = t("keptOnRename");
+    note = t(kind === "post" ? "keptOnRetitle" : "keptOnRename");
   }
 
   return (
@@ -94,7 +112,7 @@ export function WebAddressField({
         )}
       >
         <span className="shrink-0 select-none border-r border-input-border bg-muted/40 px-3 font-mono text-xs text-muted-foreground">
-          {kind === "product" ? "/products/" : "/categories/"}
+          {PREFIX[kind]}
         </span>
         <input
           id={id}

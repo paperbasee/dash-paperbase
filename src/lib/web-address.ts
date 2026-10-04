@@ -1,13 +1,14 @@
 import api from "@/lib/api";
 
 /**
- * A product's or category's web address (its slug, `/products/<...>/<address>`), owner
- * 2026-10-04: made once from the name -- a Bangla name in English letters, হলুদ সুতি থ্রি-পিস ->
- * holud-suti-thri-pis -- kept when the name changes, changed only by the merchant; an old address
- * keeps forwarding. The API makes every address (api products.addresses); the dashboard only
- * asks it, so the address shown is the address saved.
+ * A product's, category's, brand's or blog post's web address (its slug: `/products/<...>/<address>`,
+ * `/categories/...`, `/brands/...`, `/blog/...`), owner 2026-10-04/05: made once from the name -- a
+ * Bangla name in English letters, হলুদ সুতি থ্রি-পিস -> holud-suti-thri-pis -- kept when the name
+ * changes, changed only by the merchant; an old address keeps forwarding. The API makes every
+ * address (api engine.core.addresses); the dashboard only asks it, so the address shown is the
+ * address saved.
  */
-export type AddressKind = "product" | "category";
+export type AddressKind = "product" | "category" | "brand" | "post";
 
 export type AddressCheckHttp = Pick<typeof api, "get">;
 
@@ -20,6 +21,8 @@ export type AddressCheck = { address: string; available: boolean; suggested: str
 const CHECK_URL: Record<AddressKind, string> = {
   product: "admin/products/check-slug/",
   category: "admin/categories/check-slug/",
+  brand: "admin/brands/check-slug/",
+  post: "admin/blogs/check-slug/",
 };
 
 type CheckResponse = { available: boolean; suggested_slug?: string; address?: string };

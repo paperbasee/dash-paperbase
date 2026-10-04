@@ -27,7 +27,7 @@ import { useCategoriesQuery } from "@/hooks/useCategoriesQuery";
 import { PageHeader } from "@/components/page/PageHeader";
 import { useOpenFromAddress } from "@/hooks/useOpenFromAddress";
 import { OPEN_NEW } from "@/lib/open-from-address";
-import { WebAddressField } from "@/components/products/WebAddressField";
+import { WebAddressField } from "@/components/WebAddressField";
 
 type FormMode = "closed" | "new_root" | "new_child" | "edit";
 

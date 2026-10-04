@@ -27,6 +27,7 @@ import {
 } from "@/lib/query-keys";
 import { useBlogTagsQuery } from "@/hooks/useBlogTagsQuery";
 import { PageHint } from "@/components/page/PageHint";
+import { WebAddressField } from "@/components/WebAddressField";
 
 interface BlogFormState {
   title: string;
@@ -106,6 +107,7 @@ export function BlogForm({
   const tPages = useTranslations("pages");
   const t = useTranslations("blogForm");
   const tUpload = useTranslations("upload");
+  const tAddress = useTranslations("webAddress");
 
   const tHints = useTranslations("pageHints");
   const { fieldErrors, clearValidation } = useNotificationValidation("blog-form");
@@ -117,6 +119,9 @@ export function BlogForm({
   const [form, setForm] = useState<BlogFormState>(() =>
     initialBlog ? stateFromBlog(initialBlog) : EMPTY_STATE,
   );
+  // The address the merchant typed; null until they type (WebAddressField).
+  const [addressInput, setAddressInput] = useState<string | null>(null);
+  const savedAddress = mode === "edit" ? initialBlog?.slug ?? "" : null;
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [uploadedImageKey, setUploadedImageKey] = useState<string | null>(null);
   const [uploadedImageUrl, setUploadedImageUrl] = useState<string | null>(null);
@@ -232,6 +237,10 @@ export function BlogForm({
   async function buildFormData(): Promise<FormData> {
     const fd = new FormData();
     fd.append("title", form.title);
+    // Only an address the merchant typed; the API makes one from the title otherwise, and keeps
+    // a moved one forwarding.
+    const typedAddress = addressInput?.trim() ?? "";
+    if (typedAddress && typedAddress !== savedAddress) fd.append("slug", typedAddress);
     fd.append("excerpt", form.excerpt);
     fd.append("content", form.content);
     fd.append("meta_title", form.meta_title);
@@ -421,11 +430,20 @@ export function BlogForm({
                   placeholder={t("titlePlaceholder")}
                   onKeyDown={handleKeyDown}
                 />
-                {mode === "edit" && initialBlog?.slug && (
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    {t.rich("slug", { slug: () => <span className="font-mono">{initialBlog.slug}</span> })}
-                  </p>
-                )}
+              </Field>
+              <Field label={tAddress("label")} htmlFor="blog-address" error={fieldErrors.slug}>
+                <WebAddressField
+                  id="blog-address"
+                  kind="post"
+                  name={form.title}
+                  saved={savedAddress}
+                  excludePublicId={mode === "edit" ? initialBlog?.public_id : undefined}
+                  value={addressInput}
+                  onChange={(value) => {
+                    clearValidation(["slug"]);
+                    setAddressInput(value);
+                  }}
+                />
               </Field>
               <Field
                 label={t("excerpt")}

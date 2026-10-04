@@ -32,7 +32,7 @@ import {
 } from "@/lib/validation";
 import { useConfirm } from "@/context/ConfirmDialogContext";
 import { notify } from "@/notifications";
-import { WebAddressField } from "@/components/products/WebAddressField";
+import { WebAddressField } from "@/components/WebAddressField";
 import { useAdminDeleteCapabilities } from "@/hooks/useAdminDeleteCapabilities";
 import { usePermissions } from "@/context/PermissionsContext";
 import { numberTextClass } from "@/lib/number-font";

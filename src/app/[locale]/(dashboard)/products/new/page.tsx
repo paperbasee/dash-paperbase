@@ -27,7 +27,7 @@ import {
   validateRequiredExtraFields,
 } from "@/lib/validation";
 import { notify } from "@/notifications";
-import { WebAddressField } from "@/components/products/WebAddressField";
+import { WebAddressField } from "@/components/WebAddressField";
 import { numberTextClass } from "@/lib/number-font";
 import { cn } from "@/lib/utils";
 import { buildPublicMediaUrlFromKey, uploadFile } from "@/hooks/usePresignedUpload";

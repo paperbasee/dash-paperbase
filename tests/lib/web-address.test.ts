@@ -5,7 +5,7 @@ import { checkAddress, scheduleAddressCheck, type AddressCheckHttp } from "@/lib
 type Pending = { resolve: () => void; reject: (err: unknown) => void };
 
 /**
- * A fake check answering like the API (products.addresses): `address` is what the words become
+ * A fake check answering like the API (engine.core.addresses): `address` is what the words become
  * (lower-case, spaces to hyphens -- the real maker also writes Bangla in English letters),
  * `available`, and `suggested_slug`, the first free of address, -2, -3 ...
  */
@@ -49,6 +49,16 @@ describe("checkAddress", () => {
     expect(fake.get.mock.calls[0][0]).toBe("admin/categories/check-slug/");
     expect(fake.get.mock.calls[0][1]?.params).toEqual({ slug: "Kurta", exclude_public_id: "cat_1" });
     expect(check).toEqual({ address: "kurta", available: true, suggested: "kurta" });
+  });
+
+  it.each([
+    ["brand", "admin/brands/check-slug/"],
+    ["post", "admin/blogs/check-slug/"],
+  ] as const)("asks the %s check at its own address", async (kind, url) => {
+    const fake = fakeCheck(["sharir-jotn"], { autoResolve: true });
+    const check = await checkAddress(fake.http, kind, { name: "sharir jotn" });
+    expect(fake.get.mock.calls[0][0]).toBe(url);
+    expect(check).toEqual({ address: "sharir-jotn", available: false, suggested: "sharir-jotn-2" });
   });
 });
 

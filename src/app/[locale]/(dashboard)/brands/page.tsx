@@ -18,6 +18,7 @@ import { brandsQueryKey } from "@/lib/query-keys";
 import { useBrandsQuery } from "@/hooks/useBrandsQuery";
 import { useOpenFromAddress } from "@/hooks/useOpenFromAddress";
 import { PageHeader } from "@/components/page/PageHeader";
+import { WebAddressField } from "@/components/WebAddressField";
 
 type FormMode = "closed" | "new" | "edit";
 
@@ -51,6 +52,7 @@ export default function BrandsPage() {
   const tUpload = useTranslations("upload");
   const tHints = useTranslations("pageHints");
   const tCommon = useTranslations("common");
+  const tAddress = useTranslations("webAddress");
   const confirm = useConfirm();
   const queryClient = useQueryClient();
 
@@ -82,6 +84,8 @@ export default function BrandsPage() {
   const [editingPublicId, setEditingPublicId] = useState<string | null>(null);
   const [form, setForm] = useState<BrandForm>(emptyForm);
   const [editingSlugPreview, setEditingSlugPreview] = useState<string | null>(null);
+  // The address the merchant typed; null until they type (WebAddressField).
+  const [addressInput, setAddressInput] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imageKey, setImageKey] = useState<string | null>(null);
   const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
@@ -131,6 +135,7 @@ export default function BrandsPage() {
     tempUploadIdRef.current = tempUploadId();
     setEditingPublicId(null);
     setEditingSlugPreview(null);
+    setAddressInput(null);
     setForm(emptyForm);
     resetImage();
   }
@@ -139,6 +144,7 @@ export default function BrandsPage() {
     setMode("edit");
     setEditingPublicId(brand.public_id);
     setEditingSlugPreview(brand.slug);
+    setAddressInput(null);
     setForm({
       name: brand.name,
       description: brand.description,
@@ -150,6 +156,7 @@ export default function BrandsPage() {
   function closeForm() {
     setMode("closed");
     setEditingSlugPreview(null);
+    setAddressInput(null);
   }
 
   async function saveBrand(e: FormEvent) {
@@ -164,6 +171,10 @@ export default function BrandsPage() {
     setSaving(true);
     const fd = new FormData();
     fd.append("name", form.name);
+    // Only an address the merchant typed; the API makes one from the name otherwise, and keeps
+    // a moved one forwarding.
+    const typedAddress = addressInput?.trim() ?? "";
+    if (typedAddress && typedAddress !== editingSlugPreview) fd.append("slug", typedAddress);
     fd.append("description", form.description);
     fd.append("is_active", String(form.is_active));
     if (imageKey) fd.append("image_key", imageKey);
@@ -236,20 +247,27 @@ export default function BrandsPage() {
           <p className="text-sm font-medium text-primary">
             {mode === "edit" ? tPages("brandsEditBrand") : tPages("brandsNewBrand")}
           </p>
-          <div className="space-y-1">
-            <Input
-              required
-              placeholder={tPages("brandsPlaceholderName")}
-              value={form.name}
-              onChange={(e) => setForm({ ...form, name: e.target.value })}
-              className="max-w-xl"
-              onKeyDown={handleKeyDown}
+          <Input
+            required
+            placeholder={tPages("brandsPlaceholderName")}
+            value={form.name}
+            onChange={(e) => setForm({ ...form, name: e.target.value })}
+            className="max-w-xl"
+            onKeyDown={handleKeyDown}
+          />
+          <div className="max-w-xl space-y-1">
+            <label htmlFor="brand-address" className="text-xs font-medium text-muted-foreground">
+              {tAddress("label")}
+            </label>
+            <WebAddressField
+              id="brand-address"
+              kind="brand"
+              name={form.name}
+              saved={mode === "edit" ? editingSlugPreview ?? "" : null}
+              excludePublicId={mode === "edit" ? editingPublicId ?? undefined : undefined}
+              value={addressInput}
+              onChange={setAddressInput}
             />
-            <p className="text-xs text-muted-foreground">
-              {mode === "edit" && editingSlugPreview
-                ? tPages("brandsSlugEditHint", { slug: editingSlugPreview })
-                : tPages("brandsSlugAutoHint")}
-            </p>
           </div>
           <Input
             placeholder={tPages("brandsPlaceholderDescription")}
