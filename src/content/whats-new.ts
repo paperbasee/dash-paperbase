@@ -88,6 +88,21 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-10-05-readable-addresses-brands-and-posts",
+    date: "2026-10-05",
+    version: "4.179.0",
+    tag: "improved",
+    title: {
+      en: "Readable web addresses for brands and blog posts",
+      bn: "ব্র্যান্ড আর ব্লগ পোস্টেও পড়ার মতো ওয়েব ঠিকানা",
+    },
+    body: {
+      en: "Brands and blog posts with Bangla names now get addresses in English letters too, like /blog/sharir-jotn, instead of post-2 or a code. Renaming keeps the address, you can change it yourself, and every old link keeps working.",
+      bn: "বাংলা নামের ব্র্যান্ড আর ব্লগ পোস্টও এখন post-2 বা কোডের বদলে ইংরেজি অক্ষরে ঠিকানা পায়, যেমন /blog/sharir-jotn। নাম বদলালেও ঠিকানা একই থাকে, চাইলে নিজে বদলাতে পারেন, আর পুরোনো সব লিংক কাজ করে।",
+    },
+    href: "/blog",
+  },
+  {
     id: "2026-10-05-readable-web-addresses",
     date: "2026-10-05",
     version: "4.178.0",
@@ -516,19 +531,5 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
       bn: "আপনি টিমে কাউকে আমন্ত্রণ জানালে, তারা যে পেজটি খোলেন তাতে এখন আপনার দোকানের লোগো, কে আমন্ত্রণ জানিয়েছেন আর তাদের ভূমিকায় কী করা যায় তা দেখায়। নতুন সদস্যরা নিজের নাম লেখেন, তাই আপনার টিমের তালিকায় শুধু ইমেইল নয়, নামও দেখায়।",
     },
     href: "/settings?tab=team",
-  },
-  {
-    id: "2026-10-01-status-notice",
-    date: "2026-10-01",
-    version: "4.154.0",
-    tag: "new",
-    title: {
-      en: "Know when Paperbase has a problem",
-      bn: "Paperbase-এ সমস্যা হলে জানতে পারবেন",
-    },
-    body: {
-      en: "If part of Paperbase is having trouble, or maintenance is planned for the next day, a short notice now appears at the top of your dashboard. Tap Details for the full story on status.paperbase.me, or hide it.",
-      bn: "Paperbase-এর কোনো অংশে সমস্যা হলে, বা পরের দিনের মধ্যে রক্ষণাবেক্ষণ থাকলে, এখন ড্যাশবোর্ডের উপরে একটি ছোট নোটিশ দেখাবে। পুরো খবরের জন্য status.paperbase.me-তে \"বিস্তারিত\" চাপুন, অথবা নোটিশটি লুকিয়ে রাখুন।",
-    },
   },
 ];
