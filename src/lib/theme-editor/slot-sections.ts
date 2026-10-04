@@ -321,7 +321,20 @@ export const WIRED_SLOTS: Partial<Record<SlotPageKey, Record<string, WiredSlot>>
       off: "off",
     },
     related: { page: "templates.product", sections: { on: "related_products" }, off: "off" },
-    faq: { page: "templates.product", sections: { on: "product_questions" }, off: "off" },
+    /*
+      The product's own questions, beside the buy button (owner, 2026-10-04):
+      rows of the buying column, so a SETTING of it like the buy bar, not a
+      section. `true` first, because the theme's default is on -- a product
+      with no questions draws nothing, and one with questions should show them.
+      `theming/0045` folded the old `product_questions` band into it.
+    */
+    faq: {
+      page: "templates.product",
+      sections: {
+        on: { type: "product_details", settings: { show_questions: true } },
+        off: { type: "product_details", settings: { show_questions: false } },
+      },
+    },
     /*
       The shopper's own trail, 2026-09-23 (stage 3). It was rendered by the
       template, last on the page, so the switch here had nothing to write to.

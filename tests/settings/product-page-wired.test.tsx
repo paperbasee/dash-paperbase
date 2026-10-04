@@ -60,6 +60,7 @@ const manifest: ThemeManifest = {
         { id: "sticky_buy", type: "boolean", ...labels("Buy bar on a phone"), default: true },
         { id: "shipping_text", type: "textarea", ...labels("Shipping details"), default: "" },
         { id: "exchange_text", type: "textarea", ...labels("Exchange policy"), default: "" },
+        { id: "show_questions", type: "boolean", ...labels("Questions about this product"), default: true },
       ],
       blocks: {
         title: { ...labels("Product name"), settings: [] },
@@ -78,7 +79,6 @@ const manifest: ThemeManifest = {
     },
     related_products: { ...labels("You may also like"), settings: [] },
     recently_viewed: { ...labels("Recently viewed"), at_most_one: true, settings: [] },
-    product_questions: { ...labels("Questions"), settings: [{ id: "heading", type: "text", ...labels("Heading"), default: "" }] },
     product_reviews: {
       ...labels("Reviews"),
       premium: true,
@@ -103,7 +103,6 @@ const manifest: ThemeManifest = {
         "product_details",
         "related_products",
         "recently_viewed",
-        "product_questions",
         "product_reviews",
       ],
       default: [],
@@ -243,8 +242,8 @@ describe("the details rows that end the buying column", () => {
     expect(claimed.has("shipping_text") && claimed.has("exchange_text")).toBe(true);
   });
 
-  test("no tile decides anything here but the phone buy bar", () => {
-    expect([...settingsDecidedOn("product", "product_details")]).toEqual(["sticky_buy"]);
+  test("no tile decides anything here but the questions and the phone buy bar", () => {
+    expect([...settingsDecidedOn("product", "product_details")]).toEqual(["show_questions", "sticky_buy"]);
   });
 
   test("its parts are the shop's own rows, not the column's name or price", () => {
@@ -263,19 +262,39 @@ describe("the details rows that end the buying column", () => {
 });
 
 describe("the rows under the buying area", () => {
-  test("related products and questions are their own sections and switch off", () => {
+  test("related products is its own section and switches off", () => {
     expect(sectionTypesOf(place("related"))).toEqual(["related_products"]);
-    expect(sectionTypesOf(place("faq"))).toEqual(["product_questions"]);
     expect(place("related").off).toBe("off");
-    expect(place("faq").off).toBe("off");
   });
 
-  test("switching questions on is born under the buying area", () => {
-    const after = pick(PAGE(), "faq", "on");
-    const sections = after.document.templates.product.sections;
-    expect(sections.findIndex((s) => s.type === "product_questions")).toBeGreaterThan(
-      sections.findIndex((s) => s.type === "product_details"),
-    );
+  test("the product's questions are a setting of the buying column, beside the buy button", () => {
+    /* Owner, 2026-10-04: rows of the column, not a band under "You may also like". */
+    expect(sectionTypesOf(place("faq"))).toEqual(["product_details"]);
+    expect(place("faq").off).toBeUndefined();
+  });
+
+  test("they are on for a shop that has never chosen, because the theme says so", () => {
+    expect(slotValueFor(PAGE().document, place("faq"))).toBe("on");
+    expect(Object.keys(place("faq").sections)[0]).toBe("on");
+    expect(manifest.sections.product_details.settings.find((s) => s.id === "show_questions")?.default).toBe(true);
+  });
+
+  test("turning them off writes false and keeps the column and its other choices", () => {
+    const after = pick(PAGE(), "faq", "off");
+    const details = sectionOfType(after.document, place("faq"), "product_details");
+    expect(details?.settings.show_questions).toBe(false);
+    expect(details?.hidden).toBe(false);
+    const both = pick(after, "stickybuy", "off");
+    expect(sectionOfType(both.document, place("faq"), "product_details")?.settings).toMatchObject({
+      show_questions: false,
+      sticky_buy: false,
+    });
+  });
+
+  test("they are listed with the column's rows, before the reviews", () => {
+    const keys = SLOTS.product.map((slot) => slot.key);
+    expect(keys.indexOf("faq")).toBe(keys.indexOf("details") + 1);
+    expect(keys.indexOf("faq")).toBeLessThan(keys.indexOf("reviews"));
   });
 
   test("turning related off keeps the section", () => {

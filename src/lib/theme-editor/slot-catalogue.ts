@@ -352,6 +352,19 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
       the words and the rows, in the dialog.
     */
     { key: "details", label: "detailRows", hint: "detailRowsHint" },
+    /*
+      The product's own questions, rows of the buying column under the ones
+      above (owner, 2026-10-04) -- so listed here, before the reviews.
+    */
+    {
+      key: "faq",
+      label: "productFaq",
+      initial: "on",
+      options: [
+        { value: "on", label: "productFaqOn", note: "productFaqOnNote", shape: "line" },
+        { value: "off", label: "off", shape: "blank" },
+      ],
+    },
     {
       key: "reviews",
       label: "productReviews",
@@ -359,15 +372,6 @@ export const SLOTS: Record<SlotPageKey, Slot[]> = {
       options: [
         { value: "cards", label: "productReviewsCards", note: "productReviewsCardsNote", shape: "row", premium: true },
         { value: "summary", label: "productReviewsSummary", note: "productReviewsSummaryNote", shape: "line", premium: true },
-        { value: "off", label: "off", shape: "blank" },
-      ],
-    },
-    {
-      key: "faq",
-      label: "productFaq",
-      initial: "off",
-      options: [
-        { value: "on", label: "productFaqOn", note: "productFaqOnNote", shape: "line" },
         { value: "off", label: "off", shape: "blank" },
       ],
     },
