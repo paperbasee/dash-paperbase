@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { useLocale, useTranslations } from "next-intl";
+import { useQueryClient } from "@tanstack/react-query";
 import { DeferredNavLink } from "@/components/navigation/DeferredNavLink";
 import { useDeferredNavigate } from "@/hooks/useDeferredNavigate";
 import { Check, ImageIcon, Plus, X, Loader2, AlertCircle } from "lucide-react";
@@ -32,6 +33,7 @@ import { numberTextClass } from "@/lib/number-font";
 import { cn } from "@/lib/utils";
 import { buildPublicMediaUrlFromKey, uploadFile } from "@/hooks/usePresignedUpload";
 import { PageHint } from "@/components/page/PageHint";
+import { refreshProductCaches } from "@/lib/products/refresh-caches";
 
 const MAX_IMAGES = MAX_PRODUCT_IMAGES;
 type UploadStatus = "idle" | "uploading" | "uploaded" | "error";
@@ -44,6 +46,7 @@ export default function NewProductPage() {
       : `tmp_${Date.now()}`
   );
   const navigate = useDeferredNavigate();
+  const queryClient = useQueryClient();
   const locale = useLocale();
   const numClass = numberTextClass(locale);
   const tPages = useTranslations("pages");
@@ -236,6 +239,7 @@ export default function NewProductPage() {
         galleryData.append("order", String(i));
         await api.post("admin/product-images/", galleryData);
       }
+      await refreshProductCaches(queryClient);
       void navigate("/products");
     } catch (err: unknown) {
       const message =
@@ -503,10 +507,11 @@ export default function NewProductPage() {
               <div className="aspect-square w-full overflow-hidden rounded-card p-3">
                 {bigPreviewUrl ? (
                   <div className="relative h-full w-full overflow-hidden rounded-ui border border-border/70 bg-card">
+                    {/* The whole photo, as the shop shows it -- never cropped to the square (owner, 2026-10-04). */}
                     <img
                       src={bigPreviewUrl}
                       alt={tPages("productPreviewAlt")}
-                      className="h-full w-full object-cover"
+                      className="h-full w-full object-contain"
                     />
                   </div>
                 ) : (
@@ -625,7 +630,7 @@ export default function NewProductPage() {
                           <img
                             src={imagePreviews[i]!}
                             alt={tPages("productThumbnailN", { n: i + 1 })}
-                            className="h-full w-full object-cover"
+                            className="h-full w-full object-contain"
                           />
                         </button>
                         <button

@@ -40,11 +40,8 @@ import { numberTextClass } from "@/lib/number-font";
 import { cn } from "@/lib/utils";
 import { buildPublicMediaUrlFromKey, uploadFile } from "@/hooks/usePresignedUpload";
 import { PageHint } from "@/components/page/PageHint";
-import {
-  inventoryStatusQueryKey,
-  navCountsQueryKey,
-  productsListQueryKeyRoot,
-} from "@/lib/query-keys";
+import { productDetailQueryKey } from "@/lib/query-keys";
+import { refreshProductCaches } from "@/lib/products/refresh-caches";
 
 const MAX_IMAGES = MAX_PRODUCT_IMAGES;
 type UploadStatus = "idle" | "uploading" | "uploaded" | "error";
@@ -122,12 +119,6 @@ export default function ProductDetailClient() {
   const confirm = useConfirm();
   const queryClient = useQueryClient();
   const [deleting, setDeleting] = useState(false);
-
-  const invalidateProductCaches = useCallback(() => {
-    void queryClient.invalidateQueries({ queryKey: productsListQueryKeyRoot });
-    void queryClient.invalidateQueries({ queryKey: navCountsQueryKey });
-    void queryClient.invalidateQueries({ queryKey: inventoryStatusQueryKey });
-  }, [queryClient]);
 
   const [form, setForm] = useState({
     name: "",
@@ -455,7 +446,7 @@ export default function ProductDetailClient() {
     const galleryIdsBeforeSave = galleryPublicIdsPerSlot(product);
 
     try {
-      const { data } = await api.patch(`admin/products/${publicId}/`, formData);
+      await api.patch(`admin/products/${publicId}/`, formData);
 
       for (const pid of removedGalleryPublicIds) {
         await api.delete(`admin/product-images/${pid}/`);
@@ -477,7 +468,6 @@ export default function ProductDetailClient() {
         await api.post("admin/product-images/", galleryData);
       }
 
-      setProduct(data);
       setRemoveImage(false);
       setRemovedGalleryPublicIds([]);
       setImageFiles(Array(MAX_IMAGES).fill(null));
@@ -485,7 +475,8 @@ export default function ProductDetailClient() {
       setUploadStatus(Array(MAX_IMAGES).fill("idle"));
       setUploadProgress(Array(MAX_IMAGES).fill(0));
       setUploadErrors(Array(MAX_IMAGES).fill(null));
-      invalidateProductCaches();
+      // The page this lands on reads the product afresh: the photos just added included.
+      await refreshProductCaches(queryClient, publicId);
       void navigate(`/products/${publicId}`);
     } catch (err: unknown) {
       const message =
@@ -523,7 +514,8 @@ export default function ProductDetailClient() {
     setDeleting(true);
     try {
       await api.delete(`admin/products/${publicId}/`);
-      invalidateProductCaches();
+      queryClient.removeQueries({ queryKey: productDetailQueryKey(publicId) });
+      await refreshProductCaches(queryClient);
       void navigate("/products");
     } catch (err) {
       notify.error(err, {
@@ -865,11 +857,12 @@ export default function ProductDetailClient() {
                 <div className="aspect-square w-full overflow-hidden rounded-card p-3">
                   {bigPreviewUrl ? (
                     <div className="relative h-full w-full overflow-hidden rounded-ui border border-border/70 bg-card">
+                      {/* The whole photo, as the shop shows it -- never cropped to the square (owner, 2026-10-04). */}
                       <img
                         key={`main-${product?.updated_at ?? product?.public_id ?? "new"}`}
                         src={bigPreviewUrl}
                         alt={tPages("productPreviewAlt")}
-                        className="h-full w-full object-cover"
+                        className="h-full w-full object-contain"
                       />
                     </div>
                   ) : (
@@ -962,7 +955,7 @@ export default function ProductDetailClient() {
                               key={`slot-${i}-${product?.updated_at ?? ""}`}
                               src={imagePreviews[i]!}
                               alt={tPages("productThumbnailN", { n: i + 1 })}
-                              className="h-full w-full object-cover"
+                              className="h-full w-full object-contain"
                             />
                           </button>
                           <button
@@ -1223,7 +1216,7 @@ export default function ProductDetailClient() {
                       key={`view-main-${product?.updated_at ?? product?.public_id ?? ""}`}
                       src={bigPreviewUrl}
                       alt={tPages("productPreviewAlt")}
-                      className="h-full w-full object-cover"
+                      className="h-full w-full object-contain"
                     />
                   ) : (
                     <div className="flex h-full w-full items-center justify-center text-sm text-muted-foreground">
@@ -1242,7 +1235,7 @@ export default function ProductDetailClient() {
                         key={i}
                         type="button"
                         onClick={() => setSelectedImageIndex(i)}
-                        className={`relative aspect-square w-16 shrink-0 overflow-hidden rounded-card border border-border ${
+                        className={`relative aspect-square w-16 shrink-0 overflow-hidden rounded-card border border-border bg-muted/30 ${
                           (selectedImageIndex ?? firstFilledIndex) === i ? "ring-2 ring-primary" : ""
                         }`}
                         aria-label={tPages("productShowImageInPreview", { n: i + 1 })}
@@ -1251,7 +1244,7 @@ export default function ProductDetailClient() {
                           key={`view-thumb-${i}-${product?.updated_at ?? ""}`}
                           src={imagePreviews[i]!}
                           alt={tPages("productThumbnailN", { n: i + 1 })}
-                          className="h-full w-full object-cover"
+                          className="h-full w-full object-contain"
                         />
                       </button>
                     ) : null
