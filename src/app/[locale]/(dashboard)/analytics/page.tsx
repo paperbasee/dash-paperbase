@@ -5,6 +5,8 @@ import { useSearchParams } from "next/navigation";
 import { RotateCw } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 
+import { FilterToggle } from "@/components/filters/FilterToggle";
+import { PageHint } from "@/components/page/PageHint";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { planIncludesApp } from "@/config/apps";
@@ -14,11 +16,11 @@ import { useRouter } from "@/i18n/navigation";
 
 import { CARD } from "./_components/kit";
 import { DownloadMenu } from "./_components/DownloadMenu";
-import { CompareMenu, PeriodChips } from "./_components/PeriodControls";
+import { CompareMenu, PeriodFilters } from "./_components/PeriodControls";
 import { SECTIONS, SectionTabs } from "./_components/SectionTabs";
 import { AnalyticsProvider } from "./_lib/context";
 import { makeFormat } from "./_lib/format";
-import { type Period, periodDays, periodFromParams, periodParams } from "./_lib/period";
+import { DEFAULT_PRESET, type Period, periodDays, periodFromParams, periodParams } from "./_lib/period";
 import { useLive, useSection } from "./_lib/queries";
 import type {
   CustomersReport,
@@ -39,14 +41,14 @@ import { Overview } from "./_sections/Overview";
 import { Products } from "./_sections/Products";
 import { Sales } from "./_sections/Sales";
 import { Traffic } from "./_sections/Traffic";
-import { PageHint } from "@/components/page/PageHint";
 
 /**
  * The analytics page (redesigned 2026-09-28, phone first; the chosen look:
  * story first, one chart that follows the number picked, lists with a bar
  * behind each row): eight sections, each one report from the API for the days
  * chosen, compared with the days before or a year before. The section and the
- * days live in the address bar.
+ * days live in the address bar; the days are chosen behind the filter button, as
+ * every page's filters are (owner, 2026-10-04).
  *
  * The whole page is Premium (owner, 2026-10-04): a plan without analytics never
  * sees it -- the address sends them to the plans, which say why.
@@ -67,6 +69,7 @@ export default function AnalyticsPage() {
   const section: SectionKey = asked && SECTIONS.includes(asked) ? asked : "overview";
   const format = useMemo(() => makeFormat(locale, currencySymbol), [locale, currencySymbol]);
   const [updatedAt, setUpdatedAt] = useState<number | null>(null);
+  const [filtersOpen, setFiltersOpen] = useState(false);
 
   const show = useCallback(
     (next: { section?: SectionKey; period?: Period }) => {
@@ -94,28 +97,45 @@ export default function AnalyticsPage() {
   return (
     <AnalyticsProvider value={view}>
       <div className="flex w-full flex-col gap-4 pb-10 sm:gap-5">
-        <header className="flex flex-col gap-3 pt-1 sm:flex-row sm:items-end sm:justify-between">
-          <div className="flex min-w-0 flex-col gap-1">
-            <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
+        {/* One row, as on every page: the title, its ? and the live pill; then the days compared,
+            the filter button and Download. The days shown and how fresh they are, underneath. */}
+        <header className="flex flex-col gap-3 pt-1">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1.5">
               <div className="flex items-center gap-1.5">
                 <h1 className="text-[22px] font-semibold tracking-tight text-foreground sm:text-2xl">{t("title")}</h1>
                 <PageHint>{tHints("analytics")}</PageHint>
               </div>
               {section !== "live" ? <LivePill onOpen={() => show({ section: "live" })} /> : null}
             </div>
-            <p className="text-xs text-muted-foreground sm:text-[13px]">
-              {section === "live" ? t("liveEvery") : <UpdatedLine period={period} at={updatedAt} />}
-            </p>
+            {section === "live" ? null : (
+              <div className="flex gap-2">
+                <CompareMenu period={period} onChange={(next) => show({ period: next })} />
+                <FilterToggle
+                  open={filtersOpen}
+                  active={period.preset !== DEFAULT_PRESET}
+                  onToggle={() => setFiltersOpen((v) => !v)}
+                  className="h-11 shrink-0 sm:h-9"
+                />
+                <DownloadMenu period={period} section={section} />
+              </div>
+            )}
           </div>
-          {section === "live" ? null : (
-            <div className="flex gap-2">
-              <CompareMenu period={period} onChange={(next) => show({ period: next })} />
-              <DownloadMenu period={period} section={section} />
-            </div>
-          )}
+          <p className="-mt-1 text-xs text-muted-foreground sm:text-[13px]">
+            {section === "live" ? t("liveEvery") : <UpdatedLine period={period} at={updatedAt} />}
+          </p>
         </header>
 
-        {section === "live" ? null : <PeriodChips period={period} onChange={(next) => show({ period: next })} />}
+        {section !== "live" && filtersOpen ? (
+          <PeriodFilters
+            period={period}
+            onChange={(next) => show({ period: next })}
+            onClear={() => {
+              show({ period: { preset: DEFAULT_PRESET, compare: period.compare } });
+              setFiltersOpen(false);
+            }}
+          />
+        ) : null}
         <SectionTabs current={section} onChange={(next) => show({ section: next })} />
 
         {section === "live" ? (

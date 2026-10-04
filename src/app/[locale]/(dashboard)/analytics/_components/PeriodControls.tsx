@@ -6,6 +6,8 @@ import { ArrowLeftRight, CalendarDays, ChevronDown } from "lucide-react";
 import { useTranslations } from "next-intl";
 import type { DateRange } from "react-day-picker";
 
+import { FilterBar } from "@/components/filters/FilterBar";
+import { FilterPills } from "@/components/filters/FilterPills";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
@@ -16,11 +18,10 @@ import {
   DropdownMenuRadioItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { cn } from "@/lib/utils";
 import { addCalendarDaysYmd, todayYmdInBD } from "@/utils/time";
 
 import { useAnalyticsView } from "../_lib/context";
-import { MAX_DAYS, PRESETS, type Period, dayCount, periodDays } from "../_lib/period";
+import { MAX_DAYS, PRESETS, type Period, type Preset, dayCount, periodDays } from "../_lib/period";
 
 const Calendar = dynamic(() => import("@/components/ui/calendar").then((mod) => mod.Calendar), {
   ssr: false,
@@ -36,27 +37,54 @@ function toYmd(date: Date): string {
 }
 
 /**
- * Which days the page shows: the quick choices, and Custom, which opens the
- * calendar (and names the days once chosen).
+ * Which days the page shows, inside the filter button's panel (owner, 2026-10-04): the quick
+ * choices, and Custom, which opens the calendar (and names the days once chosen). Clear goes back
+ * to the days the page opens on, and closes the panel.
  */
-export function PeriodChips({ period, onChange }: { period: Period; onChange: (next: Period) => void }) {
+export function PeriodFilters({
+  period,
+  onChange,
+  onClear,
+}: {
+  period: Period;
+  onChange: (next: Period) => void;
+  onClear: () => void;
+}) {
   const t = useTranslations("analyticsPage.period");
+  const tPages = useTranslations("pages");
   const { format } = useAnalyticsView();
   const [picking, setPicking] = useState(false);
   const today = todayYmdInBD();
   const { start, end } = periodDays(period, today);
 
   return (
-    <div className="scrollbar-hide flex gap-2 overflow-x-auto sm:flex-wrap">
-      {PRESETS.map((preset) => (
-        <Chip key={preset} active={period.preset === preset} onClick={() => onChange({ preset, compare: period.compare })}>
-          {preset === "7" || preset === "30" ? t("days", { n: format.count(Number(preset)) }) : t(preset)}
-        </Chip>
-      ))}
-      <Chip active={period.preset === "custom"} onClick={() => setPicking(true)}>
-        <CalendarDays className="size-4" aria-hidden />
-        {period.preset === "custom" ? format.days(start, end) : t("custom")}
-      </Chip>
+    <FilterBar>
+      <FilterPills
+        className="w-auto"
+        label={t("pickTitle")}
+        value={period.preset}
+        options={[
+          ...PRESETS.map((preset) => ({
+            value: preset,
+            label: preset === "7" || preset === "30" ? t("days", { n: format.count(Number(preset)) }) : t(preset),
+          })),
+          {
+            value: "custom",
+            label: (
+              <span className="inline-flex items-center gap-1.5">
+                <CalendarDays className="size-4" aria-hidden />
+                {period.preset === "custom" ? format.days(start, end) : t("custom")}
+              </span>
+            ),
+          },
+        ]}
+        onChange={(value) =>
+          value === "custom" ? setPicking(true) : onChange({ preset: value as Preset, compare: period.compare })
+        }
+      />
+      <button type="button" onClick={onClear} className="h-9 rounded-ui border border-border px-3 text-sm hover:bg-muted">
+        {tPages("filtersClear")}
+      </button>
       <PickDays
         open={picking}
         onOpenChange={setPicking}
@@ -68,7 +96,7 @@ export function PeriodChips({ period, onChange }: { period: Period; onChange: (n
           setPicking(false);
         }}
       />
-    </div>
+    </FilterBar>
   );
 }
 
@@ -108,22 +136,6 @@ export function CompareMenu({ period, onChange }: { period: Period; onChange: (n
         </DropdownMenuRadioGroup>
       </DropdownMenuContent>
     </DropdownMenu>
-  );
-}
-
-function Chip({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) {
-  return (
-    <button
-      type="button"
-      aria-pressed={active}
-      onClick={onClick}
-      className={cn(
-        "inline-flex h-10 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border px-3.5 text-[13px] font-medium transition-colors sm:h-9",
-        active ? "border-foreground bg-foreground text-background" : "border-border bg-card text-foreground hover:bg-muted",
-      )}
-    >
-      {children}
-    </button>
   );
 }
 

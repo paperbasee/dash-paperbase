@@ -7,15 +7,13 @@ import { readdirSync, readFileSync, statSync } from "node:fs";
 import path from "node:path";
 import { renderToStaticMarkup } from "react-dom/server";
 import { NextIntlClientProvider } from "next-intl";
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 
 import { FilterPills } from "@/components/filters/FilterPills";
 import { FilterToggle } from "@/components/filters/FilterToggle";
 import { PageHeader } from "@/components/page/PageHeader";
 import bn from "../../messages/bn.json";
 import en from "../../messages/en.json";
-
-vi.mock("@/i18n/navigation", () => ({ useRouter: () => ({ back: vi.fn() }) }));
 
 const draw = (node: React.ReactNode, locale: "en" | "bn" = "en") =>
   renderToStaticMarkup(
@@ -37,6 +35,8 @@ describe("the page header", () => {
     // The sentence waits in the ?, not under the title.
     expect(html).not.toContain("Every order your shop receives.");
     expect(html.indexOf(en.pages.filtersToggleAria)).toBeLessThan(html.indexOf("Add order"));
+    // A main menu page is reached from the menu: no back arrow.
+    expect(html).not.toContain(`aria-label="${en.pages.goBack}"`);
   });
 
   it("says so in Bangla too", () => {

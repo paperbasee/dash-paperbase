@@ -61,7 +61,8 @@ export function DownloadMenu({
           className="flex h-11 shrink-0 items-center justify-center gap-2 rounded-button border border-border bg-card px-3 text-[13px] font-medium text-foreground shadow-[0_1px_2px_rgba(15,23,42,0.05)] hover:bg-muted disabled:opacity-70 sm:h-9"
         >
           {busy ? <Loader2 className="size-4 animate-spin" aria-hidden /> : <Download className="size-4" aria-hidden />}
-          {busy ? t("download.preparing") : t("download.button")}
+          {/* On a phone the word steps aside for the days compared, beside it (owner, 2026-10-04). */}
+          <span className="sr-only sm:not-sr-only">{busy ? t("download.preparing") : t("download.button")}</span>
           <ChevronDown className="size-4 text-muted-foreground" aria-hidden />
         </button>
       </DropdownMenuTrigger>
