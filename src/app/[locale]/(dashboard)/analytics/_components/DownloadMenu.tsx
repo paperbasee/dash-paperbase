@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronDown, Download, FileSpreadsheet, LayoutGrid, Loader2 } from "lucide-react";
+import { Download, FileSpreadsheet, LayoutGrid, Loader2 } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,11 +20,12 @@ import { useAnalyticsView } from "../_lib/context";
 import { fileNameFrom } from "../_lib/download";
 import { type Period, periodDays, periodQuery } from "../_lib/period";
 import type { SectionKey } from "../_lib/types";
+import { Named } from "./kit";
 
 /**
  * The page as an Excel file, made by the API from the same numbers (analytics
  * download/): the section on screen, or every section the plan opens, for the
- * days chosen, in the dashboard's language.
+ * days chosen, in the dashboard's language. Its button is an icon, named on hover.
  */
 export function DownloadMenu({
   period,
@@ -37,6 +39,7 @@ export function DownloadMenu({
   const { format } = useAnalyticsView();
   const [busy, setBusy] = useState(false);
   const { start, end } = periodDays(period);
+  const label = busy ? t("download.preparing") : t("download.button");
 
   const download = async (which: Exclude<SectionKey, "live"> | "all") => {
     setBusy(true);
@@ -55,17 +58,13 @@ export function DownloadMenu({
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild disabled={busy}>
-        <button
-          type="button"
-          className="flex h-11 shrink-0 items-center justify-center gap-2 rounded-button border border-border bg-card px-3 text-[13px] font-medium text-foreground shadow-[0_1px_2px_rgba(15,23,42,0.05)] hover:bg-muted disabled:opacity-70 sm:h-9"
-        >
-          {busy ? <Loader2 className="size-4 animate-spin" aria-hidden /> : <Download className="size-4" aria-hidden />}
-          {/* On a phone the word steps aside for the days compared, beside it (owner, 2026-10-04). */}
-          <span className="sr-only sm:not-sr-only">{busy ? t("download.preparing") : t("download.button")}</span>
-          <ChevronDown className="size-4 text-muted-foreground" aria-hidden />
-        </button>
-      </DropdownMenuTrigger>
+      <Named label={label}>
+        <DropdownMenuTrigger asChild disabled={busy}>
+          <Button type="button" variant="outline" size="sm" className="h-9 px-3" aria-label={label}>
+            {busy ? <Loader2 className="size-4 animate-spin" aria-hidden /> : <Download className="size-4" aria-hidden />}
+          </Button>
+        </DropdownMenuTrigger>
+      </Named>
       <DropdownMenuContent align="end" className="w-72">
         <DropdownMenuLabel className="font-normal text-muted-foreground">
           {t("download.label", { days: format.days(start, end) })}

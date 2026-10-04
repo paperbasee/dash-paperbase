@@ -4,9 +4,7 @@ import { useCallback, useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
-import { useRouter } from "@/i18n/navigation";
 import { useDeferredNavigate } from "@/hooks/useDeferredNavigate";
-import { Undo2 } from "lucide-react";
 import {
   customerDetailQueryKey,
   customersListQueryKeyRoot,
@@ -30,7 +28,6 @@ export default function CustomerDetailPage() {
   const tPages = useTranslations("pages");
   const tHints = useTranslations("pageHints");
   const tCommon = useTranslations("common");
-  const router = useRouter();
   const navigate = useDeferredNavigate();
   const params = useParams<{ public_id: string }>();
   const publicId = params.public_id;
@@ -73,16 +70,6 @@ export default function CustomerDetailPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-3">
-        <div className="rounded-card bg-muted/80 px-1 py-1 hidden md:block">
-          <button
-            type="button"
-            onClick={() => router.back()}
-            aria-label={tPages("goBack")}
-            className="flex items-center justify-center rounded-ui p-1 text-muted-foreground hover:bg-muted"
-          >
-            <Undo2 className="h-4 w-4" />
-          </button>
-        </div>
         <div className="flex min-w-0 items-center gap-1.5">
           <h1 className="text-2xl font-medium leading-relaxed text-foreground">
             {tPages("customerDetailsTitle")}

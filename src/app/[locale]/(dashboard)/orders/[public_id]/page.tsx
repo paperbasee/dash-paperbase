@@ -4,9 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } fro
 import { useQueryClient } from "@tanstack/react-query";
 import { useParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
-import { useRouter } from "@/i18n/navigation";
 import {
-  Undo2,
   CreditCard,
   User,
 } from "lucide-react";
@@ -96,7 +94,6 @@ type EditForm = {
 export default function OrderDetailPage() {
   const params = useParams<{ public_id: string }>();
   const publicId = params.public_id;
-  const router = useRouter();
   const locale = useLocale();
   const numClass = numberTextClass(locale);
   const tPages = useTranslations("pages");
@@ -660,16 +657,6 @@ export default function OrderDetailPage() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-col gap-2">
           <div className="flex items-center gap-3">
-            <div className="rounded-card bg-muted/80 px-1 py-1 hidden md:block">
-              <button
-                type="button"
-                onClick={() => router.back()}
-                aria-label={tPages("goBack")}
-                className="flex shrink-0 items-center justify-center rounded-ui p-1 text-muted-foreground hover:bg-muted"
-              >
-                <Undo2 className="h-4 w-4" />
-              </button>
-            </div>
             <div className="flex min-w-0 items-center gap-1.5">
               <h1
                 className={cn(

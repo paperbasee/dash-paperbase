@@ -19,9 +19,9 @@ export function SectionTabs({
   return (
     <nav
       aria-label={t("label")}
-      // The hairline under the tabs is drawn inside the row, so the row never
-      // overflows downwards; sideways it scrolls, without a bar.
-      className="scrollbar-hide flex gap-5 overflow-x-auto shadow-[inset_0_-1px_0_hsl(var(--border))] sm:gap-6"
+      // No line under the row (owner, 2026-10-04): only the chosen section is underlined.
+      // Sideways it scrolls, without a bar.
+      className="scrollbar-hide flex gap-5 overflow-x-auto sm:gap-6"
     >
       {SECTIONS.map((section) => (
         <button

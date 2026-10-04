@@ -2,10 +2,9 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { Trash, Undo2, X, Loader2, AlertCircle, CheckCircle2 } from "lucide-react";
+import { Trash, X, Loader2, AlertCircle, CheckCircle2 } from "lucide-react";
 import { isApiHttpError } from "@/lib/api-client";
 import api from "@/lib/api";
-import { useRouter } from "@/i18n/navigation";
 import { useDeferredNavigate } from "@/hooks/useDeferredNavigate";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
@@ -88,7 +87,6 @@ export function BlogForm({
   onDelete,
   deleteLoading = false,
 }: BlogFormProps) {
-  const router = useRouter();
   const navigate = useDeferredNavigate();
   const confirm = useConfirm();
   const queryClient = useQueryClient();
@@ -363,16 +361,6 @@ export function BlogForm({
     <div className="space-y-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-3 flex-wrap">
-          <div className="rounded-card bg-muted/80 px-1 py-1 hidden md:block">
-            <button
-              type="button"
-              onClick={() => router.back()}
-              aria-label="Go back"
-              className="flex items-center justify-center rounded-ui p-1 text-muted-foreground hover:bg-muted"
-            >
-              <Undo2 className="h-4 w-4" />
-            </button>
-          </div>
           <div className="flex min-w-0 items-center gap-1.5">
             <h1 className="text-2xl font-semibold tracking-tight text-foreground">
               {tPages(mode === "new" ? "blogFormNewTitle" : "blogFormEditTitle")}

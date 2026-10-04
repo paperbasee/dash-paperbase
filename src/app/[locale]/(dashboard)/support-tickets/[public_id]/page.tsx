@@ -3,9 +3,7 @@
 import { useEffect, useMemo } from "react";
 import { useParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
-import { useRouter } from "@/i18n/navigation";
 import { ClickableTableRow } from "@/components/ui/clickable-table-row";
-import { Undo2 } from "lucide-react";
 import { useSupportTicketDetailQuery } from "@/hooks/useSupportTicketDetailQuery";
 import { formatDashboardDateTime } from "@/lib/datetime-display";
 import { notify } from "@/notifications";
@@ -23,7 +21,6 @@ export default function SupportTicketDetailPage() {
   const locale = useLocale();
   const tPages = useTranslations("pages");
   const tHints = useTranslations("pageHints");
-  const router = useRouter();
   const params = useParams<{ public_id: string }>();
   const publicId = params.public_id;
 
@@ -49,16 +46,6 @@ export default function SupportTicketDetailPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-3">
-        <div className="rounded-card bg-muted/80 px-1 py-1 hidden md:block">
-          <button
-            type="button"
-            onClick={() => router.back()}
-            aria-label={tPages("goBack")}
-            className="flex items-center justify-center rounded-ui p-1 text-muted-foreground hover:bg-muted"
-          >
-            <Undo2 className="h-4 w-4" />
-          </button>
-        </div>
         <div className="flex min-w-0 items-center gap-1.5">
           <h1 className="text-2xl font-medium text-foreground">
             {tPages("supportTicketDetailTitle")}

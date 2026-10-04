@@ -78,6 +78,19 @@ export function Panel({
   );
 }
 
+/**
+ * A button in the page's top row, which shows only its icon (owner, 2026-10-04): its name, said
+ * to screen readers by the button's own label, shows on hover.
+ */
+export function Named({ label, children }: { label: string; children: ReactNode }) {
+  return (
+    <HintTip delayDuration={150}>
+      <TooltipTrigger asChild>{children}</TooltipTrigger>
+      <TooltipContent side="bottom">{label}</TooltipContent>
+    </HintTip>
+  );
+}
+
 /** A headline number's name; with a hint, it opens a line on what it counts. */
 export function StatLabel({ label, hint, strong = false }: { label: string; hint?: string; strong?: boolean }) {
   const text = cn("text-[13px] font-medium", strong ? "text-foreground" : "text-muted-foreground");

@@ -4,7 +4,7 @@
  */
 import { renderToStaticMarkup } from "react-dom/server";
 import { NextIntlClientProvider } from "next-intl";
-import { describe, expect, test } from "vitest";
+import { describe, expect, test, vi } from "vitest";
 
 import { PeriodFilters } from "@/app/[locale]/(dashboard)/analytics/_components/PeriodControls";
 import { AnalyticsProvider } from "@/app/[locale]/(dashboard)/analytics/_lib/context";
@@ -12,6 +12,9 @@ import { makeFormat } from "@/app/[locale]/(dashboard)/analytics/_lib/format";
 import type { Period } from "@/app/[locale]/(dashboard)/analytics/_lib/period";
 import bn from "../../messages/bn.json";
 import en from "../../messages/en.json";
+
+// The analytics kit's links need Next's router; this panel draws none.
+vi.mock("@/i18n/navigation", () => ({ Link: () => null }));
 
 const draw = (period: Period, locale: "en" | "bn" = "en") =>
   renderToStaticMarkup(

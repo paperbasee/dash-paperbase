@@ -2,10 +2,9 @@
 
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { useRouter } from "@/i18n/navigation";
 import { DeferredNavLink } from "@/components/navigation/DeferredNavLink";
 import { useDeferredNavigate } from "@/hooks/useDeferredNavigate";
-import { Undo2, Check, ImageIcon, Plus, X, Loader2, AlertCircle } from "lucide-react";
+import { Check, ImageIcon, Plus, X, Loader2, AlertCircle } from "lucide-react";
 import api from "@/lib/api";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -44,7 +43,6 @@ export default function NewProductPage() {
       ? `tmp_${crypto.randomUUID()}`
       : `tmp_${Date.now()}`
   );
-  const router = useRouter();
   const navigate = useDeferredNavigate();
   const locale = useLocale();
   const numClass = numberTextClass(locale);
@@ -270,16 +268,6 @@ export default function NewProductPage() {
       {/* Page header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-3">
-          <div className="rounded-card bg-muted/80 px-1 py-1 hidden md:block">
-            <button
-              type="button"
-              onClick={() => router.back()}
-              aria-label={tPages("productBackAria")}
-              className="flex shrink-0 items-center justify-center rounded-ui p-1 text-muted-foreground hover:bg-muted"
-            >
-              <Undo2 className="h-4 w-4" />
-            </button>
-          </div>
           <div className="flex min-w-0 items-center gap-1.5">
             <h1 className="text-2xl font-semibold text-foreground tracking-tight">
               {tPages("productNewTitle")}

@@ -97,26 +97,28 @@ export default function AnalyticsPage() {
   return (
     <AnalyticsProvider value={view}>
       <div className="flex w-full flex-col gap-4 pb-10 sm:gap-5">
-        {/* One row, as on every page: the title, its ? and the live pill; then the days compared,
-            the filter button and Download. The days shown and how fresh they are, underneath. */}
+        {/* One row, as on every page: the title, its ? and the live pill; then the filter button,
+            the days compared and Download, as icons. On a phone the pill takes the next line, so
+            the buttons stay beside the title. The days shown and how fresh they are, underneath. */}
         <header className="flex flex-col gap-3 pt-1">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1.5">
-              <div className="flex items-center gap-1.5">
-                <h1 className="text-[22px] font-semibold tracking-tight text-foreground sm:text-2xl">{t("title")}</h1>
-                <PageHint>{tHints("analytics")}</PageHint>
-              </div>
-              {section !== "live" ? <LivePill onOpen={() => show({ section: "live" })} /> : null}
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+            <div className="flex min-w-0 items-center gap-1.5">
+              <h1 className="text-[22px] font-semibold tracking-tight text-foreground sm:text-2xl">{t("title")}</h1>
+              <PageHint>{tHints("analytics")}</PageHint>
             </div>
+            {section !== "live" ? (
+              <div className="order-last w-full sm:order-none sm:w-auto">
+                <LivePill onOpen={() => show({ section: "live" })} />
+              </div>
+            ) : null}
             {section === "live" ? null : (
-              <div className="flex gap-2">
-                <CompareMenu period={period} onChange={(next) => show({ period: next })} />
+              <div className="ml-auto flex gap-2">
                 <FilterToggle
                   open={filtersOpen}
                   active={period.preset !== DEFAULT_PRESET}
                   onToggle={() => setFiltersOpen((v) => !v)}
-                  className="h-11 shrink-0 sm:h-9"
                 />
+                <CompareMenu period={period} onChange={(next) => show({ period: next })} />
                 <DownloadMenu period={period} section={section} />
               </div>
             )}

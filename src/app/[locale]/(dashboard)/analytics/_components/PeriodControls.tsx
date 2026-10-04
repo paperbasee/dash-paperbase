@@ -2,7 +2,8 @@
 
 import { useMemo, useState } from "react";
 import dynamic from "next/dynamic";
-import { ArrowLeftRight, CalendarDays, ChevronDown } from "lucide-react";
+import { SlidersHorizontalIcon } from "@phosphor-icons/react";
+import { CalendarDays } from "lucide-react";
 import { useTranslations } from "next-intl";
 import type { DateRange } from "react-day-picker";
 
@@ -21,6 +22,7 @@ import {
 import { addCalendarDaysYmd, todayYmdInBD } from "@/utils/time";
 
 import { useAnalyticsView } from "../_lib/context";
+import { Named } from "./kit";
 import { MAX_DAYS, PRESETS, type Period, type Preset, dayCount, periodDays } from "../_lib/period";
 
 const Calendar = dynamic(() => import("@/components/ui/calendar").then((mod) => mod.Calendar), {
@@ -100,7 +102,10 @@ export function PeriodFilters({
   );
 }
 
-/** What the days are compared with: the days just before, or the same days a year before. */
+/**
+ * What the days are compared with: the days just before, or the same days a year before -- an
+ * icon, named on hover; the menu says which is chosen.
+ */
 export function CompareMenu({ period, onChange }: { period: Period; onChange: (next: Period) => void }) {
   const t = useTranslations("analyticsPage.period");
   const { format } = useAnalyticsView();
@@ -113,18 +118,17 @@ export function CompareMenu({ period, onChange }: { period: Period; onChange: (n
         ? [t("vsLastMonth"), t("againstLastMonth")]
         : [t("vsPreviousDays", { n }), t("againstDays", { n })];
 
+  const label = period.compare === "year" ? t("vsLastYear") : shown;
+
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <button
-          type="button"
-          className="flex h-11 min-w-0 flex-1 items-center justify-center gap-2 rounded-button border border-border bg-card px-3 text-[13px] font-medium text-foreground shadow-[0_1px_2px_rgba(15,23,42,0.05)] hover:bg-muted sm:h-9 sm:flex-none"
-        >
-          <ArrowLeftRight className="size-4 text-muted-foreground" aria-hidden />
-          {period.compare === "year" ? t("vsLastYear") : shown}
-          <ChevronDown className="size-4 text-muted-foreground" aria-hidden />
-        </button>
-      </DropdownMenuTrigger>
+      <Named label={label}>
+        <DropdownMenuTrigger asChild>
+          <Button type="button" variant="outline" size="sm" className="h-9 px-3" aria-label={label}>
+            <SlidersHorizontalIcon className="size-4" aria-hidden />
+          </Button>
+        </DropdownMenuTrigger>
+      </Named>
       <DropdownMenuContent align="end" className="min-w-56">
         <DropdownMenuLabel>{t("compareWith")}</DropdownMenuLabel>
         <DropdownMenuRadioGroup
