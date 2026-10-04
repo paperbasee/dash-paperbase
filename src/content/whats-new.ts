@@ -88,6 +88,20 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-10-04-dashboard-in-bangla-everywhere",
+    date: "2026-10-04",
+    version: "4.177.0",
+    tag: "improved",
+    title: {
+      en: "The dashboard speaks your language everywhere",
+      bn: "পুরো ড্যাশবোর্ড এখন আপনার ভাষায়",
+    },
+    body: {
+      en: "Words still in English on the orders list, an order's page, Settings (checkout, autopilot, passkeys, security, pop-ups), the blog and picture uploads now follow your language. When the internet drops, the message says so in your language too.",
+      bn: "অর্ডারের তালিকা, অর্ডারের পাতা, সেটিংস (চেকআউট, অটোপাইলট, পাসকি, নিরাপত্তা, পপ-আপ), ব্লগ আর ছবি আপলোডে যেসব লেখা এখনো ইংরেজিতে ছিল, সেগুলো এখন আপনার ভাষায়। ইন্টারনেট চলে গেলে সেই বার্তাও এখন আপনার ভাষায় দেখায়।",
+    },
+  },
+  {
     id: "2026-10-04-security-updates",
     date: "2026-10-04",
     version: "4.176.4",
@@ -514,21 +528,6 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     body: {
       en: "In the fraud check, each courier now shows as its logo on a white tile, so dark logos like SteadFast's show clearly in dark mode too.",
       bn: "ফ্রড চেকে এখন প্রতিটি কুরিয়ার তার লোগো দিয়ে সাদা ঘরে দেখায়, তাই SteadFast-এর মতো গাঢ় লোগোও ডার্ক মোডে পরিষ্কার দেখা যায়।",
-    },
-    href: "/orders",
-  },
-  {
-    id: "2026-09-30-a-fraud-colour-on-every-order",
-    date: "2026-09-30",
-    version: "4.153.0",
-    tag: "new",
-    title: {
-      en: "A fraud colour on every order",
-      bn: "প্রতিটি অর্ডারে ফ্রড রঙ",
-    },
-    body: {
-      en: "Every new order is checked on its own and shows a colour: green for a good buyer, yellow to be careful, red for risky, with the share of parcels delivered. Click it and the report opens at once: the customer's parcels at every courier, reports from other merchants, their history across Paperbase, what to do, and when it was checked. Use “Check again” for a fresh one.",
-      bn: "প্রতিটি নতুন অর্ডার নিজে থেকেই যাচাই হয় আর একটি রঙ দেখায়: ভালো ক্রেতার জন্য সবুজ, সাবধান হওয়ার জন্য হলুদ, ঝুঁকিপূর্ণ হলে লাল, সাথে কত শতাংশ পার্সেল ডেলিভার হয়েছে। ক্লিক করলেই রিপোর্ট সাথে সাথে খোলে: সব কুরিয়ারে ক্রেতার পার্সেল, অন্য মার্চেন্টদের রিপোর্ট, Paperbase জুড়ে তাঁর হিসাব, কী করবেন, আর কখন যাচাই হয়েছিল। নতুন করে দেখতে “আবার যাচাই করুন” চাপুন।",
     },
     href: "/orders",
   },
