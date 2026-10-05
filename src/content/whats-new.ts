@@ -88,6 +88,20 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-10-05-shop-not-found-page",
+    date: "2026-10-05",
+    version: "4.179.2",
+    tag: "new",
+    title: {
+      en: "A friendly page for wrong addresses",
+      bn: "ভুল ঠিকানায় এখন সুন্দর একটি পেজ",
+    },
+    body: {
+      en: "When a shopper opens an address your shop has nothing at, like an old link, a removed product or a typo, they now see your shop with its menu, in your colours, with buttons back to your home page and all products, instead of a blank \"Not Found\".",
+      bn: "ক্রেতা আপনার দোকানের এমন কোনো ঠিকানায় গেলে যেখানে কিছু নেই, যেমন পুরোনো লিংক, সরিয়ে ফেলা পণ্য বা টাইপের ভুল, এখন ফাঁকা \"Not Found\"-এর বদলে আপনার দোকানটিই দেখবেন: মেনুসহ, আপনার রঙে, আর হোম পেজ ও সব পণ্যে ফেরার বোতাম।",
+    },
+  },
+  {
     id: "2026-10-05-web-address-in-dynamic-fields",
     date: "2026-10-05",
     version: "4.179.1",
@@ -517,19 +531,5 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
       bn: "সেটিংসে নতুন পেমেন্ট ট্যাব আছে, শুধু আপনার জন্য, দোকানের মালিক হিসেবে: আলাদা করে একটি বিকাশ নম্বর ও একটি নগদ নম্বর দিন। ডেলিভারির আগে টাকা দেওয়া ক্রেতারা যে ওয়ালেট বেছে নেন তার নম্বর দেখেন, আর কোনো নম্বর বদলালে আমরা আপনাকে ইমেইল করি। ডোমেইন, কুরিয়ার অ্যাকাউন্ট আর আপনার টিমও এখন শুধু আপনার: টিমের সদস্যরা এগুলো দেখেন না।",
     },
     href: "/settings?tab=payments",
-  },
-  {
-    id: "2026-10-04-everyone-greeted-by-their-own-name",
-    date: "2026-10-04",
-    version: "4.155.1",
-    tag: "fixed",
-    title: {
-      en: "Everyone is greeted by their own name",
-      bn: "সবাইকে তাদের নিজের নামে শুভেচ্ছা",
-    },
-    body: {
-      en: "The home page now says hello to each person by their first name. Before, your team members saw your name instead of theirs. \"Last updated\" now shows in Bangla too.",
-      bn: "হোম পেজ এখন প্রত্যেককে তাদের নামের প্রথম অংশ দিয়ে শুভেচ্ছা জানায়। আগে আপনার টিমের সদস্যরা নিজেদের নামের বদলে আপনার নাম দেখতেন। \"সর্বশেষ আপডেট\" এখন বাংলাতেও দেখায়।",
-    },
   },
 ];
