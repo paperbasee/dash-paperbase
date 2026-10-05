@@ -88,6 +88,21 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-10-05-web-address-in-dynamic-fields",
+    date: "2026-10-05",
+    version: "4.179.1",
+    tag: "fixed",
+    title: {
+      en: "One name for web addresses",
+      bn: "ওয়েব ঠিকানার এক নাম",
+    },
+    body: {
+      en: "In Settings > Dynamic fields, the product's address is now called \"Web address\", the same as on the product form, instead of \"Slug\".",
+      bn: "সেটিংস > ডায়নামিক ফিল্ডে পণ্যের ঠিকানা এখন \"স্লাগ\"-এর বদলে \"ওয়েব ঠিকানা\" নামে দেখায়, পণ্যের ফর্মের মতোই।",
+    },
+    href: "/settings?tab=eav",
+  },
+  {
     id: "2026-10-05-readable-addresses-brands-and-posts",
     date: "2026-10-05",
     version: "4.179.0",
@@ -516,20 +531,5 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
       en: "The home page now says hello to each person by their first name. Before, your team members saw your name instead of theirs. \"Last updated\" now shows in Bangla too.",
       bn: "হোম পেজ এখন প্রত্যেককে তাদের নামের প্রথম অংশ দিয়ে শুভেচ্ছা জানায়। আগে আপনার টিমের সদস্যরা নিজেদের নামের বদলে আপনার নাম দেখতেন। \"সর্বশেষ আপডেট\" এখন বাংলাতেও দেখায়।",
     },
-  },
-  {
-    id: "2026-10-04-a-welcoming-team-invite",
-    date: "2026-10-04",
-    version: "4.155.0",
-    tag: "improved",
-    title: {
-      en: "A welcoming page for your team invites",
-      bn: "টিমের আমন্ত্রণের জন্য নতুন পেজ",
-    },
-    body: {
-      en: "When you invite someone to your team, the page they open now shows your shop's logo, who invited them and what their role can do. New members type their own name, so your team list shows names, not just emails.",
-      bn: "আপনি টিমে কাউকে আমন্ত্রণ জানালে, তারা যে পেজটি খোলেন তাতে এখন আপনার দোকানের লোগো, কে আমন্ত্রণ জানিয়েছেন আর তাদের ভূমিকায় কী করা যায় তা দেখায়। নতুন সদস্যরা নিজের নাম লেখেন, তাই আপনার টিমের তালিকায় শুধু ইমেইল নয়, নামও দেখায়।",
-    },
-    href: "/settings?tab=team",
   },
 ];
