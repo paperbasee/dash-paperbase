@@ -2265,7 +2265,7 @@
         "fieldTypeBoolean": "বুলিয়ান",
         "fieldTypeDropdown": "ড্রপডাউন",
         "fixedName": "পণ্যের নাম",
-        "fixedSlug": "স্লাগ",
+        "fixedWebAddress": "ওয়েব ঠিকানা",
         "fixedDescription": "বিবরণ",
         "fixedPrice": "মূল মূল্য",
         "fixedComparePrice": "তুলনামূলক মূল্য",

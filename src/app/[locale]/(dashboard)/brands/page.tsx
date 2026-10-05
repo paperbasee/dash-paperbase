@@ -83,7 +83,7 @@ export default function BrandsPage() {
   const [mode, setMode] = useState<FormMode>("closed");
   const [editingPublicId, setEditingPublicId] = useState<string | null>(null);
   const [form, setForm] = useState<BrandForm>(emptyForm);
-  const [editingSlugPreview, setEditingSlugPreview] = useState<string | null>(null);
+  const [savedAddress, setSavedAddress] = useState<string | null>(null);
   // The address the merchant typed; null until they type (WebAddressField).
   const [addressInput, setAddressInput] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -134,7 +134,7 @@ export default function BrandsPage() {
     setMode("new");
     tempUploadIdRef.current = tempUploadId();
     setEditingPublicId(null);
-    setEditingSlugPreview(null);
+    setSavedAddress(null);
     setAddressInput(null);
     setForm(emptyForm);
     resetImage();
@@ -143,7 +143,7 @@ export default function BrandsPage() {
   function openEdit(brand: AdminBrand) {
     setMode("edit");
     setEditingPublicId(brand.public_id);
-    setEditingSlugPreview(brand.slug);
+    setSavedAddress(brand.slug);
     setAddressInput(null);
     setForm({
       name: brand.name,
@@ -155,7 +155,7 @@ export default function BrandsPage() {
 
   function closeForm() {
     setMode("closed");
-    setEditingSlugPreview(null);
+    setSavedAddress(null);
     setAddressInput(null);
   }
 
@@ -174,7 +174,7 @@ export default function BrandsPage() {
     // Only an address the merchant typed; the API makes one from the name otherwise, and keeps
     // a moved one forwarding.
     const typedAddress = addressInput?.trim() ?? "";
-    if (typedAddress && typedAddress !== editingSlugPreview) fd.append("slug", typedAddress);
+    if (typedAddress && typedAddress !== savedAddress) fd.append("slug", typedAddress);
     fd.append("description", form.description);
     fd.append("is_active", String(form.is_active));
     if (imageKey) fd.append("image_key", imageKey);
@@ -263,7 +263,7 @@ export default function BrandsPage() {
               id="brand-address"
               kind="brand"
               name={form.name}
-              saved={mode === "edit" ? editingSlugPreview ?? "" : null}
+              saved={mode === "edit" ? savedAddress ?? "" : null}
               excludePublicId={mode === "edit" ? editingPublicId ?? undefined : undefined}
               value={addressInput}
               onChange={setAddressInput}

@@ -2265,7 +2265,7 @@
         "fieldTypeBoolean": "Boolean",
         "fieldTypeDropdown": "Dropdown",
         "fixedName": "Product Name",
-        "fixedSlug": "Slug",
+        "fixedWebAddress": "Web address",
         "fixedDescription": "Description",
         "fixedPrice": "Base Price",
         "fixedComparePrice": "Compare at Price",

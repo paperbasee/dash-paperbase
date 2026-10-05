@@ -230,7 +230,7 @@ export default function CategoriesPage() {
   const [editingPublicId, setEditingPublicId] = useState<string | null>(null);
   const [form, setForm] = useState<CatForm>(emptyForm);
   /** The saved web address of the category being edited; null for a new one. */
-  const [editingSlugPreview, setEditingSlugPreview] = useState<string | null>(null);
+  const [savedAddress, setSavedAddress] = useState<string | null>(null);
   /** A web address the merchant typed; null while it follows the name or stays as saved. */
   const [addressInput, setAddressInput] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -296,7 +296,7 @@ export default function CategoriesPage() {
         ? `cat_${crypto.randomUUID().replace(/-/g, "").slice(0, 20)}`
         : `cat_${Date.now()}`;
     setEditingPublicId(null);
-    setEditingSlugPreview(null);
+    setSavedAddress(null);
     setAddressInput(null);
     setForm({ ...emptyForm, parent: "" });
     setImageFile(null);
@@ -314,7 +314,7 @@ export default function CategoriesPage() {
         ? `cat_${crypto.randomUUID().replace(/-/g, "").slice(0, 20)}`
         : `cat_${Date.now()}`;
     setEditingPublicId(null);
-    setEditingSlugPreview(null);
+    setSavedAddress(null);
     setAddressInput(null);
     setForm({ ...emptyForm, parent: parentPublicId });
     setImageFile(null);
@@ -328,7 +328,7 @@ export default function CategoriesPage() {
   function openEdit(node: AdminCategoryTreeNode) {
     setMode("edit");
     setEditingPublicId(node.public_id);
-    setEditingSlugPreview(node.slug);
+    setSavedAddress(node.slug);
     setAddressInput(null);
     setForm({
       name: node.name,
@@ -378,7 +378,7 @@ export default function CategoriesPage() {
     // Only an address the merchant typed; the API makes one from the name otherwise, and keeps
     // a moved one forwarding.
     const typedAddress = addressInput?.trim() ?? "";
-    if (typedAddress && typedAddress !== editingSlugPreview) fd.append("slug", typedAddress);
+    if (typedAddress && typedAddress !== savedAddress) fd.append("slug", typedAddress);
     fd.append("description", form.description);
     fd.append("order", form.order);
     fd.append("is_active", String(form.is_active));
@@ -396,7 +396,7 @@ export default function CategoriesPage() {
         await api.post("admin/categories/", fd);
       }
       setMode("closed");
-      setEditingSlugPreview(null);
+      setSavedAddress(null);
       setAddressInput(null);
       invalidateCategoryCaches();
     } catch (err) {
@@ -476,7 +476,7 @@ export default function CategoriesPage() {
             type="button"
             onClick={() => {
               setMode("closed");
-              setEditingSlugPreview(null);
+              setSavedAddress(null);
               setAddressInput(null);
             }}
             className="rounded-card border border-border px-4 py-2 text-sm text-foreground hover:bg-muted"
@@ -511,7 +511,7 @@ export default function CategoriesPage() {
               id="category-address"
               kind="category"
               name={form.name}
-              saved={mode === "edit" ? editingSlugPreview ?? "" : null}
+              saved={mode === "edit" ? savedAddress ?? "" : null}
               excludePublicId={mode === "edit" ? editingPublicId ?? undefined : undefined}
               value={addressInput}
               onChange={setAddressInput}

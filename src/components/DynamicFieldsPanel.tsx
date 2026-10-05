@@ -36,7 +36,7 @@ const FIELD_TYPES: { value: ExtraFieldType; labelKey: string }[] = [
 
 const FIXED_PRODUCT_FIELDS: { key: string; labelKey: string }[] = [
   { key: "name", labelKey: "fixedName" },
-  { key: "slug", labelKey: "fixedSlug" },
+  { key: "slug", labelKey: "fixedWebAddress" },
   { key: "description", labelKey: "fixedDescription" },
   { key: "price", labelKey: "fixedPrice" },
   { key: "original_price", labelKey: "fixedComparePrice" },
