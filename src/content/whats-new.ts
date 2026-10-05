@@ -88,6 +88,21 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-10-05-faster-facebook-tracking",
+    date: "2026-10-05",
+    version: "4.179.3",
+    tag: "fixed",
+    title: {
+      en: "Facebook ad tracking is faster and more complete",
+      bn: "ফেসবুক বিজ্ঞাপনের ট্র্যাকিং এখন দ্রুত ও পূর্ণাঙ্গ",
+    },
+    body: {
+      en: "Your shop's Facebook pixel now sends its events straight away. Before, some reached Facebook about 5 seconds late and were lost when a shopper left quickly. TikTok's event log also now shows a send TikTok refused as failed, not as sent.",
+      bn: "আপনার দোকানের ফেসবুক পিক্সেল এখন সঙ্গে সঙ্গে ইভেন্ট পাঠায়। আগে কিছু ইভেন্ট প্রায় ৫ সেকেন্ড দেরিতে ফেসবুকে পৌঁছাত, আর ক্রেতা তাড়াতাড়ি চলে গেলে হারিয়ে যেত। টিকটক কোনো ইভেন্ট ফিরিয়ে দিলে ইভেন্ট লগে এখন সেটি পাঠানো নয়, ব্যর্থ হিসেবে দেখায়।",
+    },
+    href: "/settings?tab=integrations",
+  },
+  {
     id: "2026-10-05-shop-not-found-page",
     date: "2026-10-05",
     version: "4.179.2",
@@ -516,20 +531,5 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
       en: "The scrollbar in the sidebar, in the main menu and in Settings, is now a thin line that stays out of the way.",
       bn: "সাইডবারের স্ক্রলবার, মূল মেনু আর সেটিংস দুই জায়গাতেই, এখন একটি সরু রেখা, যা চোখে লাগে না।",
     },
-  },
-  {
-    id: "2026-10-04-payments-your-own-bkash-and-nagad-numbers",
-    date: "2026-10-04",
-    version: "4.156.0",
-    tag: "new",
-    title: {
-      en: "Payments: your own bKash and Nagad numbers",
-      bn: "পেমেন্ট: আপনার নিজের বিকাশ ও নগদ নম্বর",
-    },
-    body: {
-      en: "Settings has a new Payments tab, for you alone as the shop's owner: set a bKash number and a Nagad number, each on its own. Shoppers paying before delivery see the number of the wallet they pick, and we email you whenever one changes. Domains, courier accounts and your team are now yours alone too: your team members don't see them.",
-      bn: "সেটিংসে নতুন পেমেন্ট ট্যাব আছে, শুধু আপনার জন্য, দোকানের মালিক হিসেবে: আলাদা করে একটি বিকাশ নম্বর ও একটি নগদ নম্বর দিন। ডেলিভারির আগে টাকা দেওয়া ক্রেতারা যে ওয়ালেট বেছে নেন তার নম্বর দেখেন, আর কোনো নম্বর বদলালে আমরা আপনাকে ইমেইল করি। ডোমেইন, কুরিয়ার অ্যাকাউন্ট আর আপনার টিমও এখন শুধু আপনার: টিমের সদস্যরা এগুলো দেখেন না।",
-    },
-    href: "/settings?tab=payments",
   },
 ];
