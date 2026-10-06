@@ -116,7 +116,6 @@ describe("roleAreas -- the role cards", () => {
 
 const API_CATALOG_PATHS = [
   path.resolve(HERE, "../../../api-paperbase/engine/apps/rbac/catalog.py"),
-  "/home/mahi/Paperbase/api-paperbase/engine/apps/rbac/catalog.py",
 ];
 
 function readApiCatalog(): string | null {
