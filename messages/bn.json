@@ -2,7 +2,9 @@
   "language": {
     "switchToEnglish": "English",
     "switchToBengali": "বাংলা",
-    "toggleAria": "ভাষা পরিবর্তন করুন"
+    "toggleAria": "ভাষা পরিবর্তন করুন",
+    "shortEnglish": "EN",
+    "shortBengali": "বাং"
   },
   "documentTitle": {
     "brand": "Paperbase",
@@ -1717,7 +1719,10 @@
     "openLink": "সেখানে যান",
     "empty": "এখনও কোনো আপডেট নেই।",
     "versionLabel": "ড্যাশবোর্ড {version}",
-    "close": "নতুন কী আছে বন্ধ করুন"
+    "close": "নতুন কী আছে বন্ধ করুন",
+    "menuUpdates": "{count, plural, other {#টি নতুন আপডেট}}",
+    "menuUpdatesMany": "{max, number}+ নতুন আপডেট",
+    "menuUpToDate": "সব দেখা হয়েছে"
   },
   "mobileNav": {
     "openMenu": "মেনু খুলুন",

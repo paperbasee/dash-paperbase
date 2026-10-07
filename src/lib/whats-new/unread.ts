@@ -97,3 +97,19 @@ export function formatWhatsNewDate(date: string, locale: string): string {
     return date;
   }
 }
+
+/** Past this many, the account menu says "9+" rather than a number a newcomer's whole history would reach. */
+export const UNREAD_SHOWN_MAX = 9;
+
+/**
+ * The line under What's new in the account menu (owner, 2026-10-07): how many updates are waiting,
+ * "9+" past nine, or up to date. A message name under `whatsNew` and its values.
+ */
+export function unreadLine(count: number):
+  | { key: "menuUpToDate"; values: Record<string, never> }
+  | { key: "menuUpdates"; values: { count: number } }
+  | { key: "menuUpdatesMany"; values: { max: number } } {
+  if (count <= 0) return { key: "menuUpToDate", values: {} };
+  if (count > UNREAD_SHOWN_MAX) return { key: "menuUpdatesMany", values: { max: UNREAD_SHOWN_MAX } };
+  return { key: "menuUpdates", values: { count } };
+}

@@ -24,6 +24,8 @@ import {
 interface WhatsNewContextValue {
   /** Show the unread dot on the profile menu and its What's new item. */
   hasUnread: boolean;
+  /** How many updates are unread: the account menu's What's new line ("2 new updates"). */
+  unreadCount: number;
   /**
    * Opens the panel and marks everything as seen. `returnFocusTo` gets focus back when the
    * panel closes (the profile menu trigger), if it is still on the page.
@@ -74,10 +76,11 @@ export function WhatsNewProvider({ children }: { children: ReactNode }) {
     () => BLOCKED,
   );
 
-  const { hasUnread } = useMemo(
+  const { hasUnread, newIds: unreadIds } = useMemo(
     () => computeUnread(WHATS_NEW_ENTRIES, toLastSeen(snapshot)),
     [snapshot],
   );
+  const unreadCount = unreadIds.size;
 
   const [open, setOpen] = useState(false);
   /** Entries that were unread at the moment the panel opened; kept until it closes. */
@@ -109,7 +112,7 @@ export function WhatsNewProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  const value = useMemo(() => ({ hasUnread, openPanel }), [hasUnread, openPanel]);
+  const value = useMemo(() => ({ hasUnread, unreadCount, openPanel }), [hasUnread, unreadCount, openPanel]);
 
   return (
     <WhatsNewContext.Provider value={value}>

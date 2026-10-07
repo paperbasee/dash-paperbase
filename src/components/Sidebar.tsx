@@ -12,11 +12,6 @@ import {
   Birdhouse,
   ChevronsUpDown,
   Search,
-  LogOut,
-  Sun,
-  Moon,
-  Laptop,
-  Sparkles,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -24,8 +19,6 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuTrigger,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import {
   Tooltip,
@@ -57,13 +50,7 @@ import {
   CORE_LOCALE_STORAGE_KEY,
   setLocalePreferenceCookie,
 } from "@/lib/locale-storage";
-import { routing, type AppLocale } from "@/i18n/routing";
-
-/** Static PNGs under `public/assets/flags/` — reliable across OSes (emoji flags are not). */
-const SIDEBAR_LOCALE_FLAG_SRC = {
-  en: "/assets/flags/united-states.png",
-  bn: "/assets/flags/bangladesh.png",
-} as const satisfies Record<AppLocale, string>;
+import type { AppLocale } from "@/i18n/routing";
 import {
   applyThemePreference,
   getStoredThemePreference,
@@ -73,6 +60,7 @@ import { runThemeTransition } from "@/lib/theme-transition/transition";
 import SystemNotificationBanner from "@/components/system/SystemNotificationBanner";
 import AppSidebarNav from "@/components/sidebar/AppSidebarNav";
 import { SidebarShopLinks } from "@/components/sidebar/SidebarShopLinks";
+import { UserMenuBody } from "@/components/sidebar/UserMenuBody";
 import { useStorefrontUrl } from "@/hooks/useStorefrontUrl";
 import SettingsSidebarNav from "@/components/sidebar/SettingsSidebarNav";
 
@@ -123,7 +111,6 @@ function SidebarContent({
   const tNav = useTranslations("nav");
   const tSidebar = useTranslations("sidebar");
   const tCommon = useTranslations("common");
-  const tLang = useTranslations("language");
   const tSettings = useTranslations("settings");
   const tWhatsNew = useTranslations("whatsNew");
   const locale = useLocale();
@@ -136,7 +123,7 @@ function SidebarContent({
   const { data: brandingData, isLoading: isBrandingLoading } = branding;
   const { counts, formatCount } = navCounts;
   const { setOpen: setSearchOpen } = useSearchModal();
-  const { hasUnread: whatsNewUnread, openPanel: openWhatsNew } = useWhatsNew();
+  const { hasUnread: whatsNewUnread, unreadCount: whatsNewUnreadCount, openPanel: openWhatsNew } = useWhatsNew();
   const canShowApp = useCanShowApp();
   const storefrontUrl = useStorefrontUrl();
 
@@ -585,133 +572,19 @@ function SidebarContent({
                   "w-[max(11rem,min(100vw-2rem,16.5rem,var(--radix-dropdown-menu-trigger-width)))]"
             )}
           >
-            <div className="p-3 pb-2">
-              <p className="mb-2 px-0.5 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
-                {tSidebar("theme")}
-              </p>
-              <div
-                className="flex gap-1 rounded-xs bg-muted/60 p-1 dark:bg-muted/25"
-                role="group"
-                aria-label={tSidebar("theme")}
-              >
-                {(
-                  [
-                    { key: "light" as const, icon: Sun, label: tSidebar("light") },
-                    { key: "dark" as const, icon: Moon, label: tSidebar("dark") },
-                    { key: "system" as const, icon: Laptop, label: tSidebar("system") },
-                  ] as const
-                ).map(({ key, icon: Icon, label }) => (
-                  <button
-                    key={key}
-                    type="button"
-                    onClick={(e) => handleThemeChange(key, e)}
-                    className={cn(
-                      "flex min-w-0 flex-1 flex-col items-center gap-1 rounded-xs py-2 text-xs font-medium transition-colors",
-                      theme === key
-                        ? "bg-background text-primary shadow-sm ring-1 ring-primary/25 dark:bg-popover"
-                        : "text-muted-foreground hover:bg-background/80 hover:text-foreground"
-                    )}
-                  >
-                    <Icon
-                      className={cn(
-                        "size-4 shrink-0",
-                        theme === key ? "text-primary" : "text-muted-foreground"
-                      )}
-                    />
-                    <span className="truncate">{label}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <DropdownMenuSeparator className="my-0" />
-
-            <div className="p-1.5">
-              <p className="mb-1 px-2 pt-1 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
-                {tSidebar("language")}
-              </p>
-              <div className="space-y-1">
-                {routing.locales.map((loc) => {
-                  const isActive = locale === loc;
-                  const label =
-                    loc === "en" ? tLang("switchToEnglish") : tLang("switchToBengali");
-                  const code = loc.toUpperCase();
-                  const flagSrc = SIDEBAR_LOCALE_FLAG_SRC[loc];
-                  return (
-                    <DropdownMenuItem
-                      key={loc}
-                      onSelect={(event) => {
-                        event.preventDefault();
-                        switchUserMenuLocale(loc);
-                      }}
-                      className={cn(
-                        "cursor-pointer w-full rounded-xs px-2 py-2",
-                        "grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3",
-                        isActive &&
-                          "bg-accent/80 text-primary focus:bg-accent focus:text-primary"
-                      )}
-                    >
-                      <span className="flex min-w-0 items-center gap-2.5">
-                        <img
-                          src={flagSrc}
-                          alt=""
-                          width={20}
-                          height={15}
-                          className="h-5 w-auto max-w-[1.75rem] shrink-0 rounded-sm object-cover"
-                          draggable={false}
-                        />
-                        <span className="truncate font-medium">{label}</span>
-                      </span>
-                      <span
-                        className={cn(
-                          "shrink-0 text-xs tabular-nums text-muted-foreground",
-                          isActive && "text-primary"
-                        )}
-                      >
-                        {code}
-                      </span>
-                    </DropdownMenuItem>
-                  );
-                })}
-              </div>
-            </div>
-
-            <DropdownMenuSeparator className="my-0" />
-
-            <div className="space-y-1 p-1">
-              <DropdownMenuItem
-                onSelect={() => {
-                  whatsNewPendingRef.current = true;
-                }}
-                className="cursor-pointer text-[15px] font-medium"
-                aria-label={whatsNewUnread ? tWhatsNew("menuUnreadAria") : undefined}
-              >
-                <Sparkles className="size-[1.125rem]" aria-hidden />
-                <span className="min-w-0 flex-1 truncate">{tWhatsNew("menuLabel")}</span>
-                {whatsNewUnread ? (
-                  <span className="size-2 shrink-0 rounded-full bg-emerald-500" aria-hidden />
-                ) : null}
-              </DropdownMenuItem>
-            </div>
-
-            <DropdownMenuSeparator className="my-0" />
-
-            <div className="p-2">
-              <DropdownMenuItem
-                onSelect={() => {
-                  signOut();
-                }}
-                className={cn(
-                  "cursor-pointer justify-between gap-3 text-[15px] font-medium",
-                  "text-red-600 hover:bg-red-500/10 hover:text-red-700 focus:bg-red-500/10 focus:text-red-700",
-                  "dark:text-red-400 dark:hover:bg-red-500/15 dark:hover:text-red-300 dark:focus:bg-red-500/15 dark:focus:text-red-300",
-                  "[&_svg]:text-red-600 dark:[&_svg]:text-red-400"
-                )}
-              >
-                <span>{tSidebar("logOut")}</span>
-                <LogOut className="size-[1.125rem] shrink-0" />
-              </DropdownMenuItem>
-            </div>
+            <UserMenuBody
+              theme={theme}
+              onThemeChange={handleThemeChange}
+              locale={locale as AppLocale}
+              onLocaleChange={switchUserMenuLocale}
+              unreadCount={whatsNewUnreadCount}
+              onWhatsNew={() => {
+                whatsNewPendingRef.current = true;
+              }}
+              onSignOut={() => {
+                signOut();
+              }}
+            />
           </DropdownMenuContent>
         </DropdownMenu>
       </div>

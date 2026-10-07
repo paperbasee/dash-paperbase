@@ -2,7 +2,9 @@
   "language": {
     "switchToEnglish": "English",
     "switchToBengali": "বাংলা",
-    "toggleAria": "Switch language"
+    "toggleAria": "Switch language",
+    "shortEnglish": "EN",
+    "shortBengali": "বাং"
   },
   "documentTitle": {
     "brand": "Paperbase",
@@ -1717,7 +1719,10 @@
     "openLink": "Take me there",
     "empty": "No updates yet.",
     "versionLabel": "Dashboard {version}",
-    "close": "Close What's new"
+    "close": "Close What's new",
+    "menuUpdates": "{count, plural, one {# new update} other {# new updates}}",
+    "menuUpdatesMany": "{max, number}+ new updates",
+    "menuUpToDate": "You're up to date"
   },
   "mobileNav": {
     "openMenu": "Open menu",
