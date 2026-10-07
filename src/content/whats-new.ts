@@ -88,17 +88,17 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
-    id: "2026-10-07-filled-icons-in-the-main-menu",
+    id: "2026-10-07-new-icons-in-the-menus",
     date: "2026-10-07",
-    version: "4.182.0",
+    version: "4.183.0",
     tag: "improved",
     title: {
-      en: "Filled icons in the main menu",
-      bn: "মূল মেনুতে ভরাট আইকন",
+      en: "New icons in the menus",
+      bn: "মেনুতে নতুন আইকন",
     },
     body: {
-      en: "Every icon in the main menu is now solid, so each page is easier to spot, whether the sidebar is open or closed.",
-      bn: "মূল মেনুর প্রতিটি আইকন এখন ভরাট, তাই সাইডবার খোলা থাকুক বা বন্ধ, প্রতিটি পেজ সহজে চোখে পড়ে।",
+      en: "The main menu and the Settings menu now share one set of clean, outlined icons, so the two look alike.",
+      bn: "মূল মেনু আর সেটিংস মেনু এখন একই ধরনের পরিষ্কার, রেখায় আঁকা আইকন ব্যবহার করে, তাই দুটো দেখতে একরকম।",
     },
   },
   {
