@@ -88,6 +88,20 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-10-07-view-my-shop-in-the-sidebar",
+    date: "2026-10-07",
+    version: "4.180.0",
+    tag: "improved",
+    title: {
+      en: "View your shop and Settings, one click away",
+      bn: "এক ক্লিকে আপনার দোকান আর সেটিংস",
+    },
+    body: {
+      en: "At the bottom of the menu there's now \"View my shop\", which opens your live shop in a new tab, and \"Settings\", which used to be inside your account menu.",
+      bn: "মেনুর নিচে এখন আছে \"আমার দোকান দেখুন\", যা নতুন ট্যাবে আপনার লাইভ দোকান খোলে, আর \"সেটিংস\", যা আগে আপনার অ্যাকাউন্ট মেনুর ভেতরে ছিল।",
+    },
+  },
+  {
     id: "2026-10-05-faster-facebook-tracking",
     date: "2026-10-05",
     version: "4.179.3",
@@ -517,19 +531,5 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
       bn: "আপনার টিমের সবার এখন তিনটি রোলের একটি থাকে, আর কোন রোল কী করতে পারে তা সব শপে একই: সেটিংস > টিম > রোলে দেখুন। ভিউয়ার রোল আর বদলানো রোলগুলো আর নেই; যাদের এমন রোল ছিল তারা থামানো থাকবেন যতক্ষণ না আপনি এক ক্লিকে তাদের রোল বেছে দেন। প্রতিটি রোল এখন শুধু সেটুকুই দেখে যা সে বদলাতে পারে, তাই ম্যানেজাররা আর শপের সেটিংস দেখেন না, আর শুধু স্টাফদেরই কিছু ক্যাটাগরিতে সীমিত রাখা যায়।",
     },
     href: "/settings?tab=team",
-  },
-  {
-    id: "2026-10-04-a-slimmer-sidebar-scrollbar",
-    date: "2026-10-04",
-    version: "4.156.1",
-    tag: "improved",
-    title: {
-      en: "A slimmer scrollbar in the sidebar",
-      bn: "সাইডবারে আরও সরু স্ক্রলবার",
-    },
-    body: {
-      en: "The scrollbar in the sidebar, in the main menu and in Settings, is now a thin line that stays out of the way.",
-      bn: "সাইডবারের স্ক্রলবার, মূল মেনু আর সেটিংস দুই জায়গাতেই, এখন একটি সরু রেখা, যা চোখে লাগে না।",
-    },
   },
 ];
