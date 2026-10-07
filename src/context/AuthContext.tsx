@@ -12,6 +12,7 @@ import {
 import {
   signup as authSignup,
   passkeyLogin as authPasskeyLogin,
+  passkeyAutofillLogin as authPasskeyAutofillLogin,
   enrollPasskey as authEnrollPasskey,
   requestMagicLink as authRequestMagicLink,
   verifyMagicCode as authVerifyMagicCode,
@@ -52,6 +53,8 @@ interface AuthState {
   refreshMeProfile: () => Promise<void>;
   /** Passwordless sign-in with a passkey (discoverable when no email given). */
   signInWithPasskey: (email?: string) => Promise<AuthTokens>;
+  /** Sign in with the passkey picked from the email box's suggestions (lib/auth passkeyAutofillLogin). */
+  signInWithPasskeyAutofill: (onPicked?: () => void) => Promise<AuthTokens>;
   signup: (
     email: string,
     firstName: string,
@@ -308,6 +311,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return tokens;
   }, []);
 
+  const signInWithPasskeyAutofill = useCallback(async (onPicked?: () => void) => {
+    const tokens = await authPasskeyAutofillLogin(onPicked);
+    setIsAuthenticated(true);
+    clearPendingVerificationEmail();
+    return tokens;
+  }, []);
+
   const signup = useCallback(
     async (email: string, firstName: string, lastName: string, cf?: string) => {
       return authSignup(email, firstName, lastName, cf);
@@ -377,6 +387,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         meProfileError,
         refreshMeProfile,
         signInWithPasskey,
+        signInWithPasskeyAutofill,
         signup,
         enrollPasskey,
         requestMagicLink,

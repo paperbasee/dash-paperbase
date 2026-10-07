@@ -17,6 +17,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
 import { browserSupportsWebAuthn, isPasskeyCancellation } from "@/lib/passkeys";
+import { PASSKEY_PROVIDER_ICONS, passkeyTitle, passkeyWhere, shownProvider } from "@/lib/passkey-display";
 
 /**
  * Manage the current user's passkeys: list, add another, rename, or remove.
@@ -133,9 +134,12 @@ export default function PasskeysManager() {
         </p>
       ) : (
         <ul className="divide-y divide-border rounded-ui border border-border">
-          {passkeys.map((pk) => (
+          {passkeys.map((pk) => {
+            const title = passkeyTitle(pk, t);
+            const ProviderIcon = PASSKEY_PROVIDER_ICONS[shownProvider(pk)];
+            return (
             <li key={pk.public_id} className="flex items-center gap-3 px-4 py-3">
-              <KeyRound size={16} className="shrink-0 text-muted-foreground" />
+              <ProviderIcon className="size-5 shrink-0 text-muted-foreground" aria-hidden />
               <div className="min-w-0 flex-1">
                 {editingId === pk.public_id ? (
                   <div className="flex items-center gap-2">
@@ -168,18 +172,16 @@ export default function PasskeysManager() {
                   </div>
                 ) : (
                   <>
-                    <p className="truncate text-sm font-medium text-foreground">
-                      {pk.name || t("unnamed")}
-                      {pk.synced && (
-                        <span className="ml-2 rounded-full bg-muted px-2 py-0.5 text-xs font-normal text-muted-foreground">
-                          {t("synced")}
-                        </span>
-                      )}
-                    </p>
+                    <p className="truncate text-sm font-medium text-foreground">{title}</p>
+                    {/* Where it is saved, then when it was last used. */}
                     <p className="text-xs text-muted-foreground">
-                      {pk.last_used_at
-                        ? t("lastUsed", { date: format.dateTime(new Date(pk.last_used_at), { dateStyle: "medium" }) })
-                        : t("added", { date: format.dateTime(new Date(pk.created_at), { dateStyle: "medium" }) })}
+                      <span>{passkeyWhere(pk, t)}</span>
+                      <span aria-hidden> · </span>
+                      <span>
+                        {pk.last_used_at
+                          ? t("lastUsed", { date: format.dateTime(new Date(pk.last_used_at), { dateStyle: "medium" }) })
+                          : t("added", { date: format.dateTime(new Date(pk.created_at), { dateStyle: "medium" }) })}
+                      </span>
                     </p>
                   </>
                 )}
@@ -192,7 +194,7 @@ export default function PasskeysManager() {
                     disabled={busyId === pk.public_id}
                     onClick={() => {
                       setEditingId(pk.public_id);
-                      setEditName(pk.name || "");
+                      setEditName(title);
                     }}
                     className="rounded-ui p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground"
                   >
@@ -202,7 +204,7 @@ export default function PasskeysManager() {
                     type="button"
                     aria-label={t("remove")}
                     disabled={busyId === pk.public_id}
-                    onClick={() => void handleDelete(pk.public_id, pk.name || t("unnamed"))}
+                    onClick={() => void handleDelete(pk.public_id, title)}
                     className="rounded-ui p-1.5 text-muted-foreground hover:bg-destructive/10 hover:text-destructive disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-muted-foreground"
                   >
                     <Trash2 size={15} />
@@ -210,7 +212,8 @@ export default function PasskeysManager() {
                 </div>
               )}
             </li>
-          ))}
+            );
+          })}
         </ul>
       )}
     </div>

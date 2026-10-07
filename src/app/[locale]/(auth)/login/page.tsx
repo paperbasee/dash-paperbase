@@ -13,6 +13,7 @@ import { AuthDivider, AuthError } from "@/components/auth/AuthParts";
 import { CheckEmailPanel } from "@/components/auth/CheckEmailPanel";
 import { EmailTypoHint, useEmailTypo } from "@/components/auth/EmailTypoHint";
 import { useMinDelayLoading } from "@/hooks/useMinDelayLoading";
+import { usePasskeyAutofill } from "@/hooks/usePasskeyAutofill";
 import { resolvePostAuthRoute } from "@/lib/subscription-access";
 import { getSafeNextPath } from "@/lib/safe-next";
 import { isNetworkError } from "@/lib/network-error";
@@ -28,7 +29,7 @@ export default function LoginPage() {
   // Signed out by the shop: a role or access change, or the owner's Sessions (lib/sign-in-ended).
   const endedReason = searchParams.get("ended");
   const ended = isSignInEndReason(endedReason) ? endedReason : null;
-  const { signInWithPasskey, requestMagicLink } = useAuth();
+  const { signInWithPasskey, signInWithPasskeyAutofill, requestMagicLink } = useAuth();
 
   const [email, setEmail] = useState("");
   const typo = useEmailTypo(email, setEmail);
@@ -56,18 +57,33 @@ export default function LoginPage() {
     }
   }
 
+  // The device's passkey, offered in the email box's suggestions while the form is on screen
+  // (owner, 2026-10-07): one tap on it and Face ID or a fingerprint signs in.
+  const autofill = usePasskeyAutofill({
+    active: supportsPasskeys && !linkSent,
+    signIn: signInWithPasskeyAutofill,
+    onSignedIn: redirectAfterAuth,
+    onError: (err) => setError(isNetworkError(err) ? tAuth("unreachable") : t("passkeyFailed")),
+  });
+
   // Passkey sign-in is discoverable — the browser shows the user's accounts, so
   // no email is required. A typed email (if any) is passed only as a hint.
   async function handlePasskeyLogin() {
     setError("");
+    // One passkey request at a time: the quiet one waits while this one asks.
+    autofill.pause();
+    let signedIn = false;
     try {
       await runWithLoading(async () => {
         await signInWithPasskey(email.trim() || undefined);
+        signedIn = true;
         await redirectAfterAuth();
       });
     } catch (err: unknown) {
       if (isPasskeyCancellation(err)) return; // user dismissed the prompt
       setError(isNetworkError(err) ? tAuth("unreachable") : t("passkeyFailed"));
+    } finally {
+      if (!signedIn) autofill.resume();
     }
   }
 

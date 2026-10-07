@@ -2915,7 +2915,30 @@
       "add": "পাসকি যোগ করুন",
       "empty": "এখনো কোনো পাসকি নেই। ইমেইল লিংক ছাড়াই সাইন ইন করতে একটি যোগ করুন।",
       "unnamed": "পাসকি",
-      "synced": "সিঙ্ক করা",
+      "provider": {
+        "apple": {
+          "name": "Apple Passwords",
+          "where": "Apple Passwords-এ রাখা, আপনার iPhone, iPad আর Mac-এ"
+        },
+        "google": {
+          "name": "Google Password Manager",
+          "where": "Google Password Manager-এ রাখা, যেখানে Chrome ব্যবহার করেন"
+        },
+        "windows": {
+          "name": "Windows Hello",
+          "where": "একটি Windows কম্পিউটারের Windows Hello-তে রাখা"
+        },
+        "security_key": {
+          "name": "সিকিউরিটি কি",
+          "where": "একটি সিকিউরিটি কি-তে, যা লাগিয়ে বা ছুঁইয়ে ব্যবহার করেন"
+        },
+        "app": {
+          "where": "{name}-এ রাখা"
+        },
+        "unknown": {
+          "where": "এটি কোথায় রাখা, তা আমরা বলতে পারছি না"
+        }
+      },
       "lastUsed": "শেষ ব্যবহার {date}",
       "added": "যোগ করা হয়েছে {date}",
       "saveName": "নাম সেভ করুন",

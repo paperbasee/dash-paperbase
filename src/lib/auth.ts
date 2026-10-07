@@ -8,6 +8,7 @@ import {
 import {
   createPasskey,
   getPasskeyAssertion,
+  getPasskeyAssertionFromAutofill,
 } from "@/lib/passkeys";
 import type {
   PublicKeyCredentialCreationOptionsJSON,
@@ -28,9 +29,16 @@ export interface SignupResponse {
   email_verification_required: true;
 }
 
+/** Where a passkey is saved, as the API tells it from the passkey's maker (accounts.passkey_providers). */
+export type PasskeyProvider = "apple" | "google" | "windows" | "app" | "security_key" | "unknown";
+
 export interface PasskeyInfo {
   public_id: string;
+  /** The merchant's own name for it; "" when they never gave one. */
   name: string;
+  provider: PasskeyProvider;
+  /** The app's name when `provider` is "app" (1Password, Bitwarden...); "" otherwise. */
+  provider_name: string;
   synced: boolean;
   created_at: string;
   last_used_at: string | null;
@@ -88,14 +96,36 @@ export async function signup(
  * discoverable-credential picker; with an email it scopes to that account.
  */
 export async function passkeyLogin(email?: string): Promise<AuthTokens> {
-  const begin = await apiClient.post<WebAuthnLoginBegin>(
+  const begin = await beginPasskeyLogin(email);
+  return finishPasskeyLogin(begin.challenge_id, await getPasskeyAssertion(begin.options));
+}
+
+/**
+ * Sign in with the passkey the merchant picks from the email box's suggestions (owner,
+ * 2026-10-07). Waits, with no prompt, until they pick one; `onPicked` is told as soon as they
+ * have, before the API checks it. See lib/passkey-autofill for how the sign-in page keeps it going.
+ */
+export async function passkeyAutofillLogin(onPicked?: () => void): Promise<AuthTokens> {
+  const begin = await beginPasskeyLogin();
+  const assertion = await getPasskeyAssertionFromAutofill(begin.options);
+  onPicked?.();
+  return finishPasskeyLogin(begin.challenge_id, assertion);
+}
+
+async function beginPasskeyLogin(email?: string): Promise<WebAuthnLoginBegin> {
+  return apiClient.post<WebAuthnLoginBegin>(
     `${BASE_URL}/auth/webauthn/login/begin/`,
     email ? { email: email.trim().toLowerCase() } : {}
   );
-  const assertion = await getPasskeyAssertion(begin.options);
+}
+
+async function finishPasskeyLogin(
+  challengeId: string,
+  assertion: Awaited<ReturnType<typeof getPasskeyAssertion>>
+): Promise<AuthTokens> {
   const tokens = await apiClient.post<AuthTokens>(
     `${BASE_URL}/auth/webauthn/login/finish/`,
-    { challenge_id: begin.challenge_id, response: assertion }
+    { challenge_id: challengeId, response: assertion }
   );
   storeAuthTokens(tokens.access, tokens.refresh);
   return tokens;
@@ -104,16 +134,6 @@ export async function passkeyLogin(email?: string): Promise<AuthTokens> {
 // ---------------------------------------------------------------------------
 // Passkey enrollment (signup / recovery / invite bootstrap, or "add a passkey")
 // ---------------------------------------------------------------------------
-
-function defaultPasskeyName(): string {
-  if (typeof navigator === "undefined") return "Passkey";
-  const ua = navigator.userAgent;
-  if (/iPhone|iPad|iPod/.test(ua)) return "iPhone / iPad";
-  if (/Macintosh/.test(ua)) return "Mac";
-  if (/Windows/.test(ua)) return "Windows device";
-  if (/Android/.test(ua)) return "Android device";
-  return "Passkey";
-}
 
 /**
  * Create a passkey. When `enrollmentTicket` is supplied (bootstrap flows) the
@@ -141,7 +161,9 @@ export async function enrollPasskey(opts: {
     {
       challenge_id: begin.challenge_id,
       response: attestation,
-      name: opts.name?.trim() || defaultPasskeyName(),
+      // No name unless the merchant gave one: the passkey list then names it after where it is
+      // saved, in their language (PasskeysManager).
+      name: opts.name?.trim() || "",
       ...(opts.enrollmentTicket
         ? { enrollment_ticket: opts.enrollmentTicket }
         : {}),

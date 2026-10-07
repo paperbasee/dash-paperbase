@@ -12,7 +12,9 @@ import {
   startRegistration,
   startAuthentication,
   browserSupportsWebAuthn,
+  browserSupportsWebAuthnAutofill,
   platformAuthenticatorIsAvailable,
+  WebAuthnAbortService,
 } from "@simplewebauthn/browser";
 import type {
   PublicKeyCredentialCreationOptionsJSON,
@@ -53,4 +55,33 @@ export async function getPasskeyAssertion(
   optionsJSON: PublicKeyCredentialRequestOptionsJSON
 ): Promise<AuthenticationResponseJSON> {
   return startAuthentication({ optionsJSON });
+}
+
+/**
+ * True when this browser can offer a passkey among a sign-in box's suggestions (WebAuthn
+ * "conditional mediation": Safari 16+, Chrome, Edge, Firefox). Never throws.
+ */
+export async function passkeyAutofillAvailable(): Promise<boolean> {
+  if (!browserSupportsWebAuthn()) return false;
+  try {
+    return await browserSupportsWebAuthnAutofill();
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Wait, without any prompt, for the merchant to pick a passkey from the suggestions of the box
+ * marked `autocomplete="... webauthn"`. Ends with an AbortError when another passkey request
+ * starts (the sign-in button, a fresh wait) or `stopPasskeyAutofill` is called.
+ */
+export async function getPasskeyAssertionFromAutofill(
+  optionsJSON: PublicKeyCredentialRequestOptionsJSON
+): Promise<AuthenticationResponseJSON> {
+  return startAuthentication({ optionsJSON, useBrowserAutofill: true });
+}
+
+/** End a waiting passkey request, as leaving the sign-in page does. */
+export function stopPasskeyAutofill(): void {
+  WebAuthnAbortService.cancelCeremony();
 }

@@ -2915,7 +2915,30 @@
       "add": "Add a passkey",
       "empty": "No passkeys yet. Add one to sign in without email links.",
       "unnamed": "Passkey",
-      "synced": "synced",
+      "provider": {
+        "apple": {
+          "name": "Apple Passwords",
+          "where": "Saved in Apple Passwords, on your iPhone, iPad and Mac"
+        },
+        "google": {
+          "name": "Google Password Manager",
+          "where": "Saved in Google Password Manager, wherever you use Chrome"
+        },
+        "windows": {
+          "name": "Windows Hello",
+          "where": "Saved in Windows Hello on a Windows computer"
+        },
+        "security_key": {
+          "name": "Security key",
+          "where": "On a security key you plug in or tap"
+        },
+        "app": {
+          "where": "Saved in {name}"
+        },
+        "unknown": {
+          "where": "We can't tell where this one is saved"
+        }
+      },
       "lastUsed": "Last used {date}",
       "added": "Added {date}",
       "saveName": "Save name",
