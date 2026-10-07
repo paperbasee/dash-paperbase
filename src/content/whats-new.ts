@@ -90,15 +90,15 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
     id: "2026-10-07-view-my-shop-in-the-sidebar",
     date: "2026-10-07",
-    version: "4.180.0",
+    version: "4.180.1",
     tag: "improved",
     title: {
       en: "View your shop and Settings, one click away",
       bn: "এক ক্লিকে আপনার দোকান আর সেটিংস",
     },
     body: {
-      en: "At the bottom of the menu there's now \"View my shop\", which opens your live shop in a new tab, and \"Settings\", which used to be inside your account menu.",
-      bn: "মেনুর নিচে এখন আছে \"আমার দোকান দেখুন\", যা নতুন ট্যাবে আপনার লাইভ দোকান খোলে, আর \"সেটিংস\", যা আগে আপনার অ্যাকাউন্ট মেনুর ভেতরে ছিল।",
+      en: "At the bottom of the menu there's now \"View my shop\", which opens your live shop in a new tab, and \"Settings\", which used to be inside your account menu. \"Copy store id\" is gone from that menu, as nothing needs it any more.",
+      bn: "মেনুর নিচে এখন আছে \"আমার দোকান দেখুন\", যা নতুন ট্যাবে আপনার লাইভ দোকান খোলে, আর \"সেটিংস\", যা আগে আপনার অ্যাকাউন্ট মেনুর ভেতরে ছিল। ওই মেনু থেকে \"স্টোর আইডি কপি করুন\" সরানো হয়েছে, কারণ এটি আর কোথাও লাগে না।",
     },
   },
   {
