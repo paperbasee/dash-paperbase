@@ -1,6 +1,7 @@
 "use client";
 
-import { ArrowUpRight, Cog, Store } from "lucide-react";
+import { GearIcon } from "@phosphor-icons/react";
+import { ArrowUpRight, Store } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { DeferredNavLink } from "@/components/navigation/DeferredNavLink";
@@ -61,7 +62,7 @@ export function SidebarShopLinks({
         className={cn(ROW, settingsActive ? ON : IDLE, collapsed && "justify-center px-2")}
       >
         <span className={cn("flex items-center gap-2", collapsed ? "justify-center" : "min-w-0 flex-1")}>
-          <Cog className="size-5 shrink-0" aria-hidden />
+          <GearIcon weight="fill" className="size-5 shrink-0" aria-hidden />
           {label(tCommon("settings"))}
         </span>
       </DeferredNavLink>
