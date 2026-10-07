@@ -3,17 +3,14 @@
 import { DeferredNavLink } from "@/components/navigation/DeferredNavLink";
 import { Badge } from "@/components/ui/badge";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import {
-  ChevronRight,
-  LayoutGrid,
-  ListTodo,
-} from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { isNavHrefActive } from "@/lib/navigation/nav-active";
 import { InventoryStatusDot } from "@/components/inventory/InventoryStatusDot";
-import type { ComponentType, ReactNode } from "react";
-import type { NavCounts } from "@/config/apps";
+import type { ReactNode } from "react";
+import type { MAIN_NAV_APP_IDS, NavCounts } from "@/config/apps";
 import { APP_CONFIG, NAV_GROUP_LABEL_KEYS } from "@/config/apps";
+import { MAIN_NAV_APP_ICONS, NAV_ICONS, NAV_ICON_WEIGHT } from "@/components/sidebar/nav-icons";
 import type { InventoryStatusLevel } from "@/lib/inventory-status";
 
 /**
@@ -59,7 +56,6 @@ export default function AppSidebarNav({
   formatCount,
   numClass,
   homeHref,
-  homeIcon: HomeIcon,
   catalogLinks,
   navChildren,
   openChildren,
@@ -91,7 +87,6 @@ export default function AppSidebarNav({
   formatCount: (n: number) => string;
   numClass: string;
   homeHref: string;
-  homeIcon: ComponentType<{ className?: string }>;
   catalogLinks: readonly string[];
   /** Parent app id -> its sidebar children. The parent still navigates. */
   navChildren: Record<string, readonly string[]>;
@@ -158,7 +153,7 @@ export default function AppSidebarNav({
         title={collapsed ? tAppLabel("home") : undefined}
       >
         <span className={cn("flex items-center gap-2", collapsed ? "justify-center" : "min-w-0 flex-1")}>
-          <HomeIcon className="size-5 shrink-0" />
+          <NAV_ICONS.home weight={NAV_ICON_WEIGHT} className="size-5 shrink-0" aria-hidden />
           {!collapsed && <span className="truncate">{tAppLabel("home")}</span>}
         </span>
       </DeferredNavLink>
@@ -178,7 +173,7 @@ export default function AppSidebarNav({
                 )}
               >
                 <span className={cn("flex items-center gap-2", collapsed ? "justify-center" : "min-w-0 flex-1")}>
-                  <LayoutGrid className="size-5 shrink-0" />
+                  <NAV_ICONS.catalog weight={NAV_ICON_WEIGHT} className="size-5 shrink-0" aria-hidden />
                   {!collapsed && <span className="truncate">{tCatalogLabel}</span>}
                 </span>
                 {!collapsed && (
@@ -237,7 +232,7 @@ export default function AppSidebarNav({
         // regular app
         const app = APP_CONFIG[token as keyof typeof APP_CONFIG];
         if (!app?.href) return null;
-        const Icon = app.icon;
+        const Icon = MAIN_NAV_APP_ICONS[token as (typeof MAIN_NAV_APP_IDS)[number]];
         const active = isActive(app.href);
 
         const link = (
@@ -255,7 +250,7 @@ export default function AppSidebarNav({
             title={collapsed ? tAppLabel(app.id) : undefined}
           >
             <span className={cn("flex items-center gap-2", collapsed ? "justify-center" : "min-w-0 flex-1")}>
-              <Icon className="size-5 shrink-0" />
+              <Icon weight={NAV_ICON_WEIGHT} className="size-5 shrink-0" aria-hidden />
               {!collapsed && <span className="truncate">{tAppLabel(app.id)}</span>}
             </span>
             {!collapsed && (
@@ -337,7 +332,7 @@ export default function AppSidebarNav({
                   collapsed ? "justify-center" : "min-w-0 flex-1"
                 )}
               >
-                <Icon className="size-5 shrink-0" />
+                <Icon weight={NAV_ICON_WEIGHT} className="size-5 shrink-0" aria-hidden />
                 {/* The group's own name, not the parent page's -- otherwise
                     the same word appears twice, one indented under the other. */}
                 {!collapsed && (
@@ -412,7 +407,7 @@ export default function AppSidebarNav({
             )}
           >
             <span className={cn("flex items-center gap-2", collapsed ? "justify-center" : "min-w-0 flex-1")}>
-              <ListTodo className="size-5 shrink-0" />
+              <NAV_ICONS.more weight={NAV_ICON_WEIGHT} className="size-5 shrink-0" aria-hidden />
               {!collapsed && <span className="truncate">{tMoreLabel}</span>}
             </span>
             {!collapsed && (

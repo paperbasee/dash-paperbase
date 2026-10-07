@@ -1,10 +1,10 @@
 "use client";
 
-import { GearIcon } from "@phosphor-icons/react";
-import { ArrowUpRight, Store } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { DeferredNavLink } from "@/components/navigation/DeferredNavLink";
+import { NAV_ICONS, NAV_ICON_WEIGHT } from "@/components/sidebar/nav-icons";
 import { cn } from "@/lib/utils";
 
 /** The main menu's row, so these two read as part of it (AppSidebarNav). */
@@ -48,7 +48,7 @@ export function SidebarShopLinks({
           className={cn(ROW, IDLE, collapsed && "justify-center px-2")}
         >
           <span className={cn("flex items-center gap-2", collapsed ? "justify-center" : "min-w-0 flex-1")}>
-            <Store className="size-5 shrink-0" aria-hidden />
+            <NAV_ICONS.viewMyShop weight={NAV_ICON_WEIGHT} className="size-5 shrink-0" aria-hidden />
             {label(tNav("viewMyShop"))}
           </span>
           {!collapsed && <ArrowUpRight className="size-4 shrink-0 opacity-60" aria-hidden />}
@@ -62,7 +62,7 @@ export function SidebarShopLinks({
         className={cn(ROW, settingsActive ? ON : IDLE, collapsed && "justify-center px-2")}
       >
         <span className={cn("flex items-center gap-2", collapsed ? "justify-center" : "min-w-0 flex-1")}>
-          <GearIcon weight="fill" className="size-5 shrink-0" aria-hidden />
+          <NAV_ICONS.settings weight={NAV_ICON_WEIGHT} className="size-5 shrink-0" aria-hidden />
           {label(tCommon("settings"))}
         </span>
       </DeferredNavLink>

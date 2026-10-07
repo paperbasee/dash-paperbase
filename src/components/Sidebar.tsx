@@ -9,7 +9,6 @@ import {
   SidebarSimpleIcon,
 } from "@phosphor-icons/react";
 import {
-  Birdhouse,
   ChevronsUpDown,
   Search,
 } from "lucide-react";
@@ -83,7 +82,6 @@ function logoUrl(url: string | null): string | null {
 
 const HOME_NAV = {
   href: "/",
-  icon: Birdhouse,
   countKey: null as keyof NavCounts | null,
 };
 
@@ -459,7 +457,6 @@ function SidebarContent({
             formatCount={formatCount}
             numClass={numClass}
             homeHref={HOME_NAV.href}
-            homeIcon={HOME_NAV.icon}
             catalogLinks={catalogLinks}
             navChildren={navChildren}
             openChildren={openChildren}
