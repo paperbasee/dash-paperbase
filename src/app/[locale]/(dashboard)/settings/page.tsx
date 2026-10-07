@@ -37,6 +37,7 @@ import { settingsInvertedButtonClassName } from "./SettingsSectionBody";
 import useSettingsPageController from "./useSettingsPageController";
 import { useDeferredNavigate } from "@/hooks/useDeferredNavigate";
 import { PageHint } from "@/components/page/PageHint";
+import { NAV_ICON_WEIGHT } from "@/components/sidebar/nav-icons";
 
 export default function SettingsPage() {
   const searchParams = useSearchParams();
@@ -132,7 +133,7 @@ export default function SettingsPage() {
                 className={cn("w-full justify-between gap-2", settingsInvertedButtonClassName)}
               >
                 <span className="flex items-center gap-2">
-                  {ActiveIcon && <ActiveIcon className="size-4" />}
+                  {ActiveIcon && <ActiveIcon weight={NAV_ICON_WEIGHT} className="size-4" aria-hidden />}
                   {activeLabel}
                 </span>
                 <ChevronDown

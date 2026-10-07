@@ -1,6 +1,6 @@
 /**
- * The main menu draws filled Phosphor icons (owner, 2026-10-07: "use filled icons instead of
- * hollow"), in the slim strip and the open sidebar, for plain rows and groups alike.
+ * The main menu draws hollow Phosphor icons (owner, 2026-10-07: tried filled, then "make them un
+ * filled across all the menu"), in the slim strip and the open sidebar, for plain rows and groups.
  */
 import { renderToStaticMarkup } from "react-dom/server";
 import type { Icon } from "@phosphor-icons/react";
@@ -62,7 +62,7 @@ const drawShopLinks = () =>
 
 /** The glyph's drawing, which is what differs between Phosphor's weights. */
 const glyph = (Glyph: Icon, weight: "fill" | "regular") =>
-  renderToStaticMarkup(<Glyph weight={weight} />).match(/<path[^>]*>/g)!.join("");
+  renderToStaticMarkup(<Glyph weight={weight} />).match(/<svg[^>]*>(.*)<\/svg>/)![1];
 
 const menuIcons = [
   NAV_ICONS.home,
@@ -72,11 +72,11 @@ const menuIcons = [
 ];
 
 describe("the main menu's icons", () => {
-  it.each([true, false])("are filled, never hollow (collapsed: %s)", (collapsed) => {
+  it.each([true, false])("are hollow, never filled (collapsed: %s)", (collapsed) => {
     const html = drawMenu(collapsed);
     for (const Glyph of menuIcons) {
-      expect(html).toContain(glyph(Glyph, "fill"));
-      expect(html).not.toContain(glyph(Glyph, "regular"));
+      expect(html).toContain(glyph(Glyph, "regular"));
+      expect(html).not.toContain(glyph(Glyph, "fill"));
     }
   });
 
@@ -91,11 +91,11 @@ describe("the main menu's icons", () => {
     expect(svgs.every((svg) => svg.includes('aria-hidden="true"'))).toBe(true);
   });
 
-  it("fills View my shop and Settings under the menu too", () => {
+  it("draws View my shop and Settings under the menu hollow too", () => {
     const html = drawShopLinks();
     for (const Glyph of [NAV_ICONS.viewMyShop, NAV_ICONS.settings]) {
-      expect(html).toContain(glyph(Glyph, "fill"));
-      expect(html).not.toContain(glyph(Glyph, "regular"));
+      expect(html).toContain(glyph(Glyph, "regular"));
+      expect(html).not.toContain(glyph(Glyph, "fill"));
     }
   });
 });

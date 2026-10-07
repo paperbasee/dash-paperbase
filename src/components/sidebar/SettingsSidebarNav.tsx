@@ -4,6 +4,7 @@ import { DeferredNavLink } from "@/components/navigation/DeferredNavLink";
 import { ArrowLeft } from "lucide-react";
 import { resolveSettingsSection } from "@/app/[locale]/(dashboard)/settings/settingsSections";
 import { useVisibleSettingsSections } from "@/app/[locale]/(dashboard)/settings/useVisibleSettingsSections";
+import { NAV_ICON_WEIGHT } from "@/components/sidebar/nav-icons";
 import { cn } from "@/lib/utils";
 
 export default function SettingsSidebarNav({
@@ -85,7 +86,7 @@ export default function SettingsSidebarNav({
                 collapsed ? "justify-center" : "min-w-0 flex-1"
               )}
             >
-              <Icon className="size-5 shrink-0" />
+              <Icon weight={NAV_ICON_WEIGHT} className="size-5 shrink-0" aria-hidden />
               {!collapsed && <span className="truncate">{label}</span>}
             </span>
           </DeferredNavLink>

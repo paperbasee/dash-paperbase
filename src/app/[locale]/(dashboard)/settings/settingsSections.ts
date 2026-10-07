@@ -1,34 +1,33 @@
-import type { LucideIcon } from "lucide-react";
-import type { Icon as PhosphorIcon } from "@phosphor-icons/react";
-import { 
-  PlugsIcon, 
-  StorefrontIcon, 
-  ShoppingCartIcon, 
-  BellRingingIcon, 
-  AppStoreLogoIcon,
-  TruckIcon,
-  GavelIcon,
-} from "@phosphor-icons/react";
-
 import {
-  Layers,
-  User,
-  Shield,
-  CreditCard,
-  Palette,
-  Users,
-  Globe,
-  Megaphone,
-  MonitorSmartphone,
-  Wallet,
-} from "lucide-react";
+  AppStoreLogoIcon,
+  BellRingingIcon,
+  CreditCardIcon,
+  DevicesIcon,
+  GavelIcon,
+  GlobeIcon,
+  MegaphoneIcon,
+  PaletteIcon,
+  PlugsIcon,
+  ShieldIcon,
+  ShoppingCartIcon,
+  StackIcon,
+  StorefrontIcon,
+  TruckIcon,
+  UserIcon,
+  UsersIcon,
+  WalletIcon,
+  type Icon,
+} from "@phosphor-icons/react";
 
 import { holdsOwnerPower, type OwnerPower } from "@/config/owner-powers";
 
 import { PROMOTION_TABS } from "./sections/promotions/promotionTabs";
 
-/** Lucide or Phosphor SVG icon used in settings nav (sidebar + in-page tabs). */
-export type SettingsSectionIcon = LucideIcon | PhosphorIcon;
+/**
+ * The settings menu's icons (sidebar, phone tabs, phone section button): Phosphor, drawn at the
+ * main menu's weight (`NAV_ICON_WEIGHT`, hollow).
+ */
+export type SettingsSectionIcon = Icon;
 
 export type SettingsSection =
   | "account"
@@ -174,21 +173,21 @@ export function resolveSettingsSection(
 export const ALL_SECTIONS: SettingsSectionNavItem[] = [
   { id: "store", labelKey: "sectionStore", icon: StorefrontIcon },
   { id: "policies", labelKey: "sectionPolicies", icon: GavelIcon },
-  { id: "customization", labelKey: "sectionCustomization", icon: Palette },
-  { id: "promotions", labelKey: "sectionPromotions", icon: Megaphone },
+  { id: "customization", labelKey: "sectionCustomization", icon: PaletteIcon },
+  { id: "promotions", labelKey: "sectionPromotions", icon: MegaphoneIcon },
   { id: "checkout", labelKey: "sectionCheckout", icon: ShoppingCartIcon },
   { id: "shipping", labelKey: "sectionShipping", icon: TruckIcon },
-  { id: "payments", labelKey: "sectionPayments", icon: Wallet },
-  { id: "eav", labelKey: "sectionEav", icon: Layers },
+  { id: "payments", labelKey: "sectionPayments", icon: WalletIcon },
+  { id: "eav", labelKey: "sectionEav", icon: StackIcon },
   { id: "apps", labelKey: "sectionApps", icon: AppStoreLogoIcon },
   { id: "integrations", labelKey: "sectionIntegrations", icon: PlugsIcon },
-  { id: "domains", labelKey: "sectionDomains", icon: Globe },
+  { id: "domains", labelKey: "sectionDomains", icon: GlobeIcon },
   { id: "notifications", labelKey: "sectionNotifications", icon: BellRingingIcon },
-  { id: "team", labelKey: "sectionTeam", icon: Users },
-  { id: "account", labelKey: "sectionAccount", icon: User },
-  { id: "security", labelKey: "sectionSecurity", icon: Shield },
-  { id: "sessions", labelKey: "sectionSessions", icon: MonitorSmartphone },
-  { id: "billing", labelKey: "sectionBilling", icon: CreditCard },
+  { id: "team", labelKey: "sectionTeam", icon: UsersIcon },
+  { id: "account", labelKey: "sectionAccount", icon: UserIcon },
+  { id: "security", labelKey: "sectionSecurity", icon: ShieldIcon },
+  { id: "sessions", labelKey: "sectionSessions", icon: DevicesIcon },
+  { id: "billing", labelKey: "sectionBilling", icon: CreditCardIcon },
 ];
 
 /**

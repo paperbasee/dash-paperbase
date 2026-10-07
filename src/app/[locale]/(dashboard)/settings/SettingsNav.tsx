@@ -3,6 +3,7 @@
 import { useTranslations } from "next-intl";
 import type { SettingsSection } from "./settingsSections";
 import { useVisibleSettingsSections } from "./useVisibleSettingsSections";
+import { NAV_ICON_WEIGHT } from "@/components/sidebar/nav-icons";
 import { cn } from "@/lib/utils";
 
 export function SettingsSectionNav({
@@ -47,7 +48,7 @@ export function SettingsSectionNav({
                 : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
             )}
           >
-            <Icon className="size-4 shrink-0" />
+            <Icon weight={NAV_ICON_WEIGHT} className="size-4 shrink-0" aria-hidden />
             {label}
           </button>
         );
