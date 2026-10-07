@@ -88,6 +88,21 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-10-07-faster-passkey-sign-in",
+    date: "2026-10-07",
+    version: "4.184.0",
+    tag: "improved",
+    title: {
+      en: "Faster passkey sign-in",
+      bn: "পাসকি দিয়ে আরও দ্রুত সাইন ইন",
+    },
+    body: {
+      en: "Tap the email box on the sign-in page and your phone or computer now offers your passkey: one tap, then Face ID or your fingerprint, and you are in. Settings > Account > Passkeys also says where each passkey is saved, like Apple Passwords or Google Password Manager.",
+      bn: "সাইন-ইন পেজে ইমেইলের ঘরে ট্যাপ করলে আপনার ফোন বা কম্পিউটার এখন নিজেই আপনার পাসকি দেখায়: একবার ট্যাপ, তারপর Face ID বা আঙুলের ছাপ দিলেই সাইন ইন। সেটিংস > অ্যাকাউন্ট > পাসকি-তে এখন এটাও দেখা যায় প্রতিটি পাসকি কোথায় রাখা, যেমন Apple Passwords বা Google Password Manager।",
+    },
+    href: "/settings?tab=account",
+  },
+  {
     id: "2026-10-07-new-icons-in-the-menus",
     date: "2026-10-07",
     version: "4.183.0",
@@ -512,21 +527,6 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     body: {
       en: "When you change a team member's role or categories, or suspend or remove them, they're signed out of your shop right away on every device. They sign in again and see exactly what their new access allows. Ending a sign-in from Sessions now works at once too.",
       bn: "কোনো টিম মেম্বারের রোল বা ক্যাটাগরি বদলালে, অথবা তাঁকে স্থগিত বা সরিয়ে দিলে, সব ডিভাইসে তিনি সঙ্গে সঙ্গে আপনার শপ থেকে সাইন আউট হয়ে যান। আবার সাইন ইন করলে তাঁর নতুন অ্যাক্সেস অনুযায়ী ঠিক ততটুকুই দেখবেন। সেশন থেকে কোনো সাইন-ইন শেষ করলেও এখন সঙ্গে সঙ্গে কাজ করে।",
-    },
-    href: "/settings?tab=team",
-  },
-  {
-    id: "2026-10-04-new-team-members-give-their-full-name",
-    date: "2026-10-04",
-    version: "4.158.1",
-    tag: "improved",
-    title: {
-      en: "New team members give their full name",
-      bn: "টিমের নতুন সদস্যরা পুরো নাম দেন",
-    },
-    body: {
-      en: "When someone joins your team from an invite, they now enter both a first and a last name, so your team list shows everyone's full name.",
-      bn: "আমন্ত্রণ থেকে কেউ আপনার টিমে যোগ দিলে এখন তাকে নামের প্রথম ও শেষ অংশ দুটোই লিখতে হয়, তাই আপনার টিমের তালিকায় সবার পুরো নাম দেখা যায়।",
     },
     href: "/settings?tab=team",
   },
