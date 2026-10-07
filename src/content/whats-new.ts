@@ -88,6 +88,20 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-10-07-filled-icons-in-the-main-menu",
+    date: "2026-10-07",
+    version: "4.182.0",
+    tag: "improved",
+    title: {
+      en: "Filled icons in the main menu",
+      bn: "মূল মেনুতে ভরাট আইকন",
+    },
+    body: {
+      en: "Every icon in the main menu is now solid, so each page is easier to spot, whether the sidebar is open or closed.",
+      bn: "মূল মেনুর প্রতিটি আইকন এখন ভরাট, তাই সাইডবার খোলা থাকুক বা বন্ধ, প্রতিটি পেজ সহজে চোখে পড়ে।",
+    },
+  },
+  {
     id: "2026-10-07-a-cleaner-account-menu",
     date: "2026-10-07",
     version: "4.181.0",
@@ -515,20 +529,5 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
       bn: "আমন্ত্রণ থেকে কেউ আপনার টিমে যোগ দিলে এখন তাকে নামের প্রথম ও শেষ অংশ দুটোই লিখতে হয়, তাই আপনার টিমের তালিকায় সবার পুরো নাম দেখা যায়।",
     },
     href: "/settings?tab=team",
-  },
-  {
-    id: "2026-10-04-you-hear-when-someone-downloads-your-orders",
-    date: "2026-10-04",
-    version: "4.158.0",
-    tag: "new",
-    title: {
-      en: "You hear when someone downloads your orders",
-      bn: "কেউ আপনার অর্ডার ডাউনলোড করলে আপনি জানতে পারবেন",
-    },
-    body: {
-      en: "Every download of your orders is now a line in Activities. When someone on your team downloads them, we also email you who it was and how many orders, since the file holds your shoppers' names, phone numbers and addresses. Your own downloads send no email.",
-      bn: "আপনার অর্ডারের প্রতিটি ডাউনলোড এখন কার্যকলাপে একটি লাইন হিসেবে থাকে। টিমের কেউ অর্ডার ডাউনলোড করলে কে করেছেন আর কতগুলো অর্ডার, তা আমরা আপনাকে ইমেইলেও জানাই, কারণ ফাইলে আপনার ক্রেতাদের নাম, ফোন নম্বর আর ঠিকানা থাকে। আপনি নিজে ডাউনলোড করলে কোনো ইমেইল যায় না।",
-    },
-    href: "/activities",
   },
 ];
