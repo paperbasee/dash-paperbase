@@ -68,6 +68,13 @@ describe("the sidebar's shop links", () => {
     expect(sidebar).toContain("<SidebarShopLinks");
   });
 
+  it("leaves no Copy store id in the account menu (owner, 2026-10-07)", () => {
+    const sidebar = readFileSync(path.join(__dirname, "../../src/components/Sidebar.tsx"), "utf8");
+    expect(sidebar).not.toMatch(/copyStoreId|clipboard/i);
+    expect(en.sidebar).not.toHaveProperty("copyStoreId");
+    expect(bn.sidebar).not.toHaveProperty("copyStoreId");
+  });
+
   it("stays out of the Settings menu, which has its own way back", () => {
     const sidebar = readFileSync(path.join(__dirname, "../../src/components/Sidebar.tsx"), "utf8");
     expect(sidebar).toMatch(/navVariant !== "settings" && \(\s*<SidebarShopLinks/);

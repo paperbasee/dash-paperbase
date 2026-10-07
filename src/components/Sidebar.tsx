@@ -5,7 +5,6 @@ import { usePathname, useRouter } from "@/i18n/navigation";
 import { DeferredNavLink } from "@/components/navigation/DeferredNavLink";
 import { useSearchParams } from "next/navigation";
 import {
-  ClipboardTextIcon,
   CommandIcon,
   SidebarSimpleIcon,
 } from "@phosphor-icons/react";
@@ -14,7 +13,6 @@ import {
   ChevronsUpDown,
   Search,
   LogOut,
-  Check,
   Sun,
   Moon,
   Laptop,
@@ -133,7 +131,7 @@ function SidebarContent({
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { signOut, isAuthenticated, meProfile, meProfileStatus } = useAuth();
+  const { signOut, meProfile, meProfileStatus } = useAuth();
   const { branding, navCounts, inventoryStatus } = useSidebarData();
   const { data: brandingData, isLoading: isBrandingLoading } = branding;
   const { counts, formatCount } = navCounts;
@@ -235,8 +233,6 @@ function SidebarContent({
     moreChildActive,
     navChildren,
   ]);
-  const [copiedStoreId, setCopiedStoreId] = useState<string | null>(null);
-  const [activeStoreId, setActiveStoreId] = useState<string | null>(null);
   const [theme, setTheme] = useState<ThemePreference>("system");
   /** Controlled so we can expand the sidebar first, then open the menu when collapsed. */
   const [userMenuOpen, setUserMenuOpen] = useState(false);
@@ -312,54 +308,6 @@ function SidebarContent({
   };
 
   const isSettingsRoute = pathname.startsWith("/settings");
-
-  useEffect(() => {
-    if (!isAuthenticated) {
-      setActiveStoreId(null);
-      return;
-    }
-
-    const token = window.localStorage.getItem("access_token");
-    if (!token) {
-      setActiveStoreId(null);
-      return;
-    }
-
-    try {
-      const parts = token.split(".");
-      if (parts.length < 2) {
-        setActiveStoreId(null);
-        return;
-      }
-      const payload = parts[1];
-      const normalized = payload.replace(/-/g, "+").replace(/_/g, "/");
-      const padded = normalized.padEnd(Math.ceil(normalized.length / 4) * 4, "=");
-      const decoded = JSON.parse(atob(padded)) as { active_store_public_id?: unknown };
-      const val = decoded.active_store_public_id;
-      if (typeof val === "string" && val.trim()) {
-        setActiveStoreId(val);
-      } else if (typeof val === "number" && Number.isFinite(val)) {
-        setActiveStoreId(String(val));
-      } else {
-        setActiveStoreId(null);
-      }
-    } catch {
-      setActiveStoreId(null);
-    }
-  }, [isAuthenticated]);
-
-  const handleCopyStoreId = async (storeId: string) => {
-    if (!storeId || typeof window === "undefined") return;
-    try {
-      await window.navigator.clipboard.writeText(storeId);
-      setCopiedStoreId(storeId);
-      window.setTimeout(() => {
-        setCopiedStoreId((prev) => (prev === storeId ? null : prev));
-      }, 1400);
-    } catch {
-      // Ignore clipboard permission/runtime errors.
-    }
-  };
 
   const handleUserMenuCloseAutoFocus = (event: Event) => {
     if (!whatsNewPendingRef.current) return;
@@ -731,29 +679,6 @@ function SidebarContent({
             <DropdownMenuSeparator className="my-0" />
 
             <div className="space-y-1 p-1">
-              {activeStoreId ? (
-                <DropdownMenuItem
-                  onSelect={(event) => {
-                    event.preventDefault();
-                    void handleCopyStoreId(activeStoreId);
-                  }}
-                  className="text-[15px] font-medium"
-                >
-                  {copiedStoreId === activeStoreId ? (
-                    <Check
-                      className="size-[1.125rem] text-emerald-600 animate-pulse"
-                      aria-hidden
-                    />
-                  ) : (
-                    <ClipboardTextIcon className="size-[1.125rem]" aria-hidden />
-                  )}
-                  <span>
-                    {copiedStoreId === activeStoreId
-                      ? tSidebar("storeIdCopied")
-                      : tSidebar("copyStoreId")}
-                  </span>
-                </DropdownMenuItem>
-              ) : null}
               <DropdownMenuItem
                 onSelect={() => {
                   whatsNewPendingRef.current = true;
