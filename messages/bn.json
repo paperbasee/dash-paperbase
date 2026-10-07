@@ -109,7 +109,9 @@
     "groupShoppers": "ক্রেতা",
     "coupons": "ডিসকাউন্ট কোড",
     "order_lookup": "অর্ডার ট্র্যাকিং",
-    "cart": "কার্ট"
+    "cart": "কার্ট",
+    "viewMyShop": "আমার দোকান দেখুন",
+    "viewMyShopAria": "আমার দোকান দেখুন (নতুন ট্যাবে খুলবে)"
   },
   "analyticsPage": {
     "title": "অ্যানালিটিক্স",

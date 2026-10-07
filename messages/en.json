@@ -109,7 +109,9 @@
     "groupShoppers": "Shoppers",
     "coupons": "Discount codes",
     "order_lookup": "Order tracking",
-    "cart": "Cart"
+    "cart": "Cart",
+    "viewMyShop": "View my shop",
+    "viewMyShopAria": "View my shop (opens in a new tab)"
   },
   "analyticsPage": {
     "title": "Analytics",

@@ -2,7 +2,7 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-import { domainsQueryKey } from "@/lib/query-keys";
+import { domainsQueryKey, storeQueryKey } from "@/lib/query-keys";
 import {
   connectDomain,
   domainIsSettling,
@@ -34,6 +34,8 @@ function useInvalidateDomains() {
   const qc = useQueryClient();
   return () => {
     void qc.invalidateQueries({ queryKey: domainsQueryKey });
+    // The shop's live address follows its primary domain (the sidebar's View my shop).
+    void qc.invalidateQueries({ queryKey: storeQueryKey });
   };
 }
 

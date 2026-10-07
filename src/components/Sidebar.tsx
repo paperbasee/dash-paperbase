@@ -14,7 +14,6 @@ import {
   ChevronsUpDown,
   Search,
   LogOut,
-  Cog,
   Check,
   Sun,
   Moon,
@@ -75,6 +74,8 @@ import {
 import { runThemeTransition } from "@/lib/theme-transition/transition";
 import SystemNotificationBanner from "@/components/system/SystemNotificationBanner";
 import AppSidebarNav from "@/components/sidebar/AppSidebarNav";
+import { SidebarShopLinks } from "@/components/sidebar/SidebarShopLinks";
+import { useStorefrontUrl } from "@/hooks/useStorefrontUrl";
 import SettingsSidebarNav from "@/components/sidebar/SettingsSidebarNav";
 
 /**
@@ -139,6 +140,7 @@ function SidebarContent({
   const { setOpen: setSearchOpen } = useSearchModal();
   const { hasUnread: whatsNewUnread, openPanel: openWhatsNew } = useWhatsNew();
   const canShowApp = useCanShowApp();
+  const storefrontUrl = useStorefrontUrl();
 
   const mainNavSequence = useMemo(
     () =>
@@ -543,6 +545,16 @@ function SidebarContent({
         )}
       </nav>
 
+      {/* The main menu's foot only: the Settings menu has its own way back, and is Settings (owner, 2026-10-07). */}
+      {navVariant !== "settings" && (
+        <SidebarShopLinks
+          collapsed={collapsed}
+          storefrontUrl={storefrontUrl}
+          settingsActive={isSettingsRoute}
+          onNavigate={handleLinkClick}
+        />
+      )}
+
       {showSystemNotification && !collapsed && (
         <div className="shrink-0 px-4 pb-3">
           <SystemNotificationBanner placement="sidebar" />
@@ -742,22 +754,6 @@ function SidebarContent({
                   </span>
                 </DropdownMenuItem>
               ) : null}
-              <DropdownMenuItem asChild className="p-0 text-[15px] font-medium focus:bg-transparent">
-                <DeferredNavLink
-                  href="/settings"
-                  onNavigate={handleLinkClick}
-                  className={cn(
-                    "flex w-full cursor-pointer items-center gap-2 rounded-xs px-2 py-2 outline-none select-none",
-                    isSettingsRoute
-                      ? "bg-accent text-foreground dark:bg-white/[0.12] dark:text-white/95"
-                      : "text-popover-foreground hover:bg-accent hover:text-accent-foreground focus-visible:bg-accent focus-visible:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
-                  )}
-                  aria-current={isSettingsRoute ? "page" : undefined}
-                >
-                  <Cog className="size-[1.125rem]" />
-                  {tCommon("settings")}
-                </DeferredNavLink>
-              </DropdownMenuItem>
               <DropdownMenuItem
                 onSelect={() => {
                   whatsNewPendingRef.current = true;
