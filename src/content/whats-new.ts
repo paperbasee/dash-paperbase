@@ -88,6 +88,20 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-10-07-a-cleaner-account-menu",
+    date: "2026-10-07",
+    version: "4.181.0",
+    tag: "improved",
+    title: {
+      en: "A cleaner account menu",
+      bn: "আরও পরিচ্ছন্ন অ্যাকাউন্ট মেনু",
+    },
+    body: {
+      en: "The menu under your name is now shorter: theme and language are small switches, and What's new tells you how many updates are waiting.",
+      bn: "আপনার নামের নিচের মেনু এখন আরও ছোট: থিম আর ভাষা ছোট সুইচে, আর নতুন কী আছে জানায় কতগুলো আপডেট দেখা বাকি।",
+    },
+  },
+  {
     id: "2026-10-07-view-my-shop-in-the-sidebar",
     date: "2026-10-07",
     version: "4.180.1",
@@ -516,20 +530,5 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
       bn: "আপনার অর্ডারের প্রতিটি ডাউনলোড এখন কার্যকলাপে একটি লাইন হিসেবে থাকে। টিমের কেউ অর্ডার ডাউনলোড করলে কে করেছেন আর কতগুলো অর্ডার, তা আমরা আপনাকে ইমেইলেও জানাই, কারণ ফাইলে আপনার ক্রেতাদের নাম, ফোন নম্বর আর ঠিকানা থাকে। আপনি নিজে ডাউনলোড করলে কোনো ইমেইল যায় না।",
     },
     href: "/activities",
-  },
-  {
-    id: "2026-10-04-three-fixed-roles-admin-manager-staff",
-    date: "2026-10-04",
-    version: "4.157.0",
-    tag: "new",
-    title: {
-      en: "Three fixed roles: Admin, Manager and Staff",
-      bn: "তিনটি নির্দিষ্ট রোল: অ্যাডমিন, ম্যানেজার ও স্টাফ",
-    },
-    body: {
-      en: "Everyone on your team now has one of three roles, and what each can do is the same in every shop: see it in Settings > Team > Roles. The Viewer role and edited roles are gone; anyone who had one is paused until you choose their role, in one click. Each role now sees only what it can change, so Managers no longer see the shop's settings, and only Staff can be limited to some categories.",
-      bn: "আপনার টিমের সবার এখন তিনটি রোলের একটি থাকে, আর কোন রোল কী করতে পারে তা সব শপে একই: সেটিংস > টিম > রোলে দেখুন। ভিউয়ার রোল আর বদলানো রোলগুলো আর নেই; যাদের এমন রোল ছিল তারা থামানো থাকবেন যতক্ষণ না আপনি এক ক্লিকে তাদের রোল বেছে দেন। প্রতিটি রোল এখন শুধু সেটুকুই দেখে যা সে বদলাতে পারে, তাই ম্যানেজাররা আর শপের সেটিংস দেখেন না, আর শুধু স্টাফদেরই কিছু ক্যাটাগরিতে সীমিত রাখা যায়।",
-    },
-    href: "/settings?tab=team",
   },
 ];
