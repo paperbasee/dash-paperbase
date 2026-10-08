@@ -88,6 +88,20 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-10-09-your-account-in-one-place",
+    date: "2026-10-09",
+    version: "4.186.0",
+    tag: "improved",
+    title: {
+      en: "Your account in one place",
+      bn: "আপনার অ্যাকাউন্ট এক জায়গায়",
+    },
+    body: {
+      en: "Settings no longer has Account and Security: your name, phone, picture and passkeys are all in Your Paperbase account, in the menu under your name. Search for passkey or my account to open it. Team members with nothing to change in Settings no longer see it in the menu.",
+      bn: "সেটিংসে আর অ্যাকাউন্ট আর নিরাপত্তা নেই: আপনার নাম, ফোন, ছবি আর পাসকি সবই আছে আপনার Paperbase অ্যাকাউন্টে, আপনার নামের নিচের মেনুতে। খুলতে সার্চে লিখুন পাসকি বা আমার অ্যাকাউন্ট। সেটিংসে যাদের বদলানোর কিছু নেই, সেই টিম সদস্যরা মেনুতে আর সেটিংস দেখবেন না।",
+    },
+  },
+  {
     id: "2026-10-08-sign-in-at-paperbase-accounts",
     date: "2026-10-08",
     version: "4.185.0",
@@ -525,20 +539,5 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
       bn: "প্রতিটি প্ল্যান এখন একটি কার্ড: দাম, কাদের জন্য আর কী কী পাবেন, তাই এক নজরেই দেখা যায় প্রিমিয়ামে বাড়তি কী আছে। আপনার প্ল্যান কবে পর্যন্ত চালু তা দেখায়, আর বার্ষিক দামে দেখায় কত সাশ্রয় হয়।",
     },
     href: "/plans",
-  },
-  {
-    id: "2026-10-04-a-clearer-look-at-premium-analytics",
-    date: "2026-10-04",
-    version: "4.163.1",
-    tag: "improved",
-    title: {
-      en: "A clearer look at Premium analytics",
-      bn: "প্রিমিয়াম অ্যানালিটিক্স এখন আরও পরিষ্কারভাবে দেখা যায়",
-    },
-    body: {
-      en: "On the Essential plan, each Premium part of Analytics now shows its real layout, blurred, with a short note on what it tells you and a button to upgrade. Overview and Sales stay on your plan.",
-      bn: "এসেনশিয়াল প্ল্যানে অ্যানালিটিক্সের প্রতিটি প্রিমিয়াম অংশ এখন তার আসল নকশা ঝাপসা করে দেখায়, সাথে থাকে সেটি কী জানায় তার ছোট একটি লেখা আর আপগ্রেড করার বোতাম। সারসংক্ষেপ আর বিক্রি আপনার প্ল্যানেই থাকছে।",
-    },
-    href: "/analytics",
   },
 ];
