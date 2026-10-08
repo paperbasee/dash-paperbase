@@ -139,6 +139,25 @@ function switchedOn(plan: Plan | null): string[] {
   );
 }
 
+/** What one plan gives, on its own: its product cap, then what it switches on (Settings > Billing). */
+export function planLines(plan: Plan): CardLine[] {
+  return [productLine(plan), ...switchedOn(plan).map((id) => ({ id }))];
+}
+
+/** What a payment for `plan` is: a month, or on yearly twelve of its monthly price at once (api billing/pricing.py). */
+export function chargeOf(plan: Plan): number {
+  return Number(plan.price) * (plan.billing_cycle === "yearly" ? 12 : 1);
+}
+
+/** A monthly plan's yearly row, what it charges and what a year of it saves; none when nothing is saved. */
+export function yearlyOffer(plans: Plan[], current: Plan): { plan: Plan; charge: number; saving: number } | null {
+  if (current.billing_cycle !== "monthly") return null;
+  const yearly = plans.find((plan) => plan.name === current.name && plan.billing_cycle === "yearly");
+  if (!yearly) return null;
+  const saving = chargeOf(current) * 12 - chargeOf(yearly);
+  return saving > 0 ? { plan: yearly, charge: chargeOf(yearly), saving } : null;
+}
+
 /**
  * A card's list, Shopify's way: the first plan says what you get -- what every plan has, its
  * product cap, what it switches on -- and each plan after it says "Everything in <the plan before>,

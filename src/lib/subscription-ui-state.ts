@@ -64,33 +64,3 @@ export function isNetworkingStoreUnderReview(me: MeForRouting): boolean {
   if (meInPaidCalendarWindow(me)) return false;
   return true;
 }
-
-export type BillingSettingsStatusKey =
-  | "statusActive"
-  | "statusInactive"
-  | "statusGrace"
-  | "statusExpired"
-  | "statusPendingReview"
-  | "statusRejected";
-
-/** Settings billing row label key under `settings.billing.*`. */
-export function billingSettingsStatusKey(
-  ui: SubscriptionUIState,
-  subscriptionStatus: SubscriptionStatus
-): BillingSettingsStatusKey {
-  switch (ui) {
-    case "rejected":
-      return "statusRejected";
-    case "pending_review":
-      return "statusPendingReview";
-    case "grace":
-      return "statusGrace";
-    case "expired":
-      return "statusExpired";
-    case "inactive":
-      return "statusInactive";
-    case "none":
-    default:
-      return subscriptionStatus === "ACTIVE" ? "statusActive" : "statusInactive";
-  }
-}

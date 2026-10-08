@@ -8,6 +8,7 @@ import { useRouter } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { hasAuthSessionCookie } from "@/lib/auth-session-cookie";
 import api from "@/lib/api";
+import { formatBillingAmount, formatBillingDay } from "@/lib/billing";
 import { toLocaleDigits } from "@/lib/locale-digits";
 import { ensureMeProfile } from "@/lib/me-profile-store";
 import { numberTextClass } from "@/lib/number-font";
@@ -64,7 +65,10 @@ export default function PlansPage() {
   const numClass = numberTextClass(locale);
   const t = useTranslations("plansPage");
   const router = useRouter();
-  const fromAnalytics = useSearchParams().get("from") === "analytics";
+  const searchParams = useSearchParams();
+  const fromAnalytics = searchParams.get("from") === "analytics";
+  // Settings > Billing's "See yearly prices" opens on them (`?cycle=yearly`).
+  const askedCycle = searchParams.get("cycle");
 
   const [pageState, setPageState] = useState<PageState>("loading");
   const [plans, setPlans] = useState<Plan[]>([]);
@@ -83,13 +87,14 @@ export default function PlansPage() {
       .then(([{ data }, profile]) => {
         setPlans(data);
         setMe(profile);
-        // The shop's own cycle; else yearly, where the saving shows, if any plan has one.
+        // The cycle asked for; else the shop's own; else yearly, where the saving shows, if any plan has one.
         const current = data.find((plan) => plan.public_id === currentPlanOf(profile)?.id);
-        setCycle(current?.billing_cycle ?? (data.some((plan) => plan.billing_cycle === "yearly") ? "yearly" : "monthly"));
+        const asked = askedCycle === "yearly" || askedCycle === "monthly" ? askedCycle : null;
+        setCycle(asked ?? current?.billing_cycle ?? (data.some((plan) => plan.billing_cycle === "yearly") ? "yearly" : "monthly"));
         setPageState("ready");
       })
       .catch(() => setPageState("error"));
-  }, [router]);
+  }, [router, askedCycle]);
 
   async function select(plan: Plan) {
     setSelectingId(plan.public_id);
@@ -116,7 +121,7 @@ export default function PlansPage() {
   // A team member reads the plans; paying is the owner's (api: owner power "billing").
   const mayPay = !me?.is_moderator;
   const digits = (text: string) => toLocaleDigits(text, locale);
-  const taka = (value: number) => `৳${digits(new Intl.NumberFormat("en-US").format(Math.round(value)))}`;
+  const taka = (value: number) => formatBillingAmount(value, locale);
   const withLines = groups.some((group) => groupDescription(group, locale));
 
   return (
@@ -299,7 +304,7 @@ function PlanCard({
   const kind = cardAction(current, plan);
   const paidAndOn = kind === null;
   const action = kind === "renew" || kind === "select" ? t(kind, { plan: group.name }) : kind ? t(kind) : null;
-  const until = current?.endDate && !current.ended ? formatDay(current.endDate, locale) : null;
+  const until = current?.endDate && !current.ended ? formatBillingDay(current.endDate, locale) : null;
 
   return (
     <section
@@ -396,17 +401,6 @@ function PlanCard({
       )}
     </section>
   );
-}
-
-/** "12 Nov 2026" in the page's language, from the API's date. */
-function formatDay(ymd: string, locale: string): string {
-  const [year, month, day] = ymd.slice(0, 10).split("-").map(Number);
-  return new Intl.DateTimeFormat(locale === "bn" ? "bn-BD" : "en-GB", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-    timeZone: "UTC",
-  }).format(Date.UTC(year, month - 1, day));
 }
 
 function Tag({ dot, className, children }: { dot: string; className?: string; children: ReactNode }) {

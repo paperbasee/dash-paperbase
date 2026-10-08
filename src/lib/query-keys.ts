@@ -234,6 +234,10 @@ export const storeQueryKey = ["store", "current"] as const;
 /** A new shop's free trial in days (GET billing/trial/), for the sign-up page. */
 export const trialOfferQueryKey = ["billing", "trial"] as const;
 
+/** Settings > Billing: the overview (GET billing/overview/), and Paperbase's plans (GET billing/plans/). */
+export const billingOverviewQueryKey = ["billing", "overview"] as const;
+export const billingPlansQueryKey = ["billing", "plans"] as const;
+
 /** The owner's Sessions tab: live sign-ins, and one page of sign-in history. */
 export const activeSessionsQueryKey = ["sessions", "active"] as const;
 export function sessionHistoryQueryKey(page: number) {

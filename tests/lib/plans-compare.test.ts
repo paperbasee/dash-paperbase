@@ -3,12 +3,15 @@ import { describe, expect, it } from "vitest";
 import {
   cardAction,
   cardLines,
+  chargeOf,
   groupDescription,
   groupPlans,
   groupSaving,
   highlightedGroup,
+  planLines,
   planOn,
   PLAN_LINES,
+  yearlyOffer,
   yearlySaving,
   type Plan,
 } from "@/lib/plans-compare";
@@ -159,5 +162,33 @@ describe("a card's button (owner, 2026-10-03)", () => {
   it("select on a trial's plan, on every other plan, and with no plan", () => {
     expect(cardAction({ ...on, trial: true }, essential.monthly!)).toBe("select");
     expect(cardAction(null, premium.monthly!)).toBe("select");
+  });
+});
+
+describe("one plan on its own (Settings > Billing, owner 2026-10-09)", () => {
+  const [, essentialMonthly, premiumYearly, premiumMonthly] = PLANS;
+
+  it("lists what it gives: its cap, then what it switches on", () => {
+    expect(planLines(premiumMonthly)).toEqual([
+      { id: "products", count: 500 },
+      { id: "analytics" },
+      { id: "fraudCheck" },
+      { id: "orderEmails" },
+      { id: "premiumSections" },
+    ]);
+    expect(planLines(essentialMonthly)).toEqual([{ id: "products", count: 100 }]);
+    expect(planLines(plan("Open", "monthly", "0", {}))).toEqual([{ id: "unlimitedProducts" }]);
+  });
+
+  it("charges a month, or twelve months at once on yearly", () => {
+    expect(chargeOf(premiumMonthly)).toBe(1800);
+    expect(chargeOf(premiumYearly)).toBe(18000);
+  });
+
+  it("offers its yearly row to a monthly plan when that saves money", () => {
+    expect(yearlyOffer(PLANS, premiumMonthly)).toEqual({ plan: premiumYearly, charge: 18000, saving: 3600 });
+    expect(yearlyOffer(PLANS, premiumYearly)).toBeNull();
+    expect(yearlyOffer([premiumMonthly], premiumMonthly)).toBeNull();
+    expect(yearlyOffer([plan("Premium", "yearly", "1900.00", premium), premiumMonthly], premiumMonthly)).toBeNull();
   });
 });

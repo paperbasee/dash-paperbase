@@ -2046,7 +2046,6 @@
     "sectionIntegrations": "Integrations",
     "sectionNotifications": "Notifications",
     "sectionBilling": "Billing",
-    "sectionData": "Data & Export",
     "currentStoreFallback": "Current store",
     "saving": "Saving…",
     "save": "Save",
@@ -2368,19 +2367,106 @@
       "emailCustomerCourier": "Email customer when the order is sent to courier"
     },
     "billing": {
-      "heading": "Billing & Plan",
-      "subtitle": "Current plan and subscription period from your account.",
-      "currentPlan": "Current Plan",
-      "subscriptionStatus": "Subscription status",
-      "periodEnds": "Current period ends",
-      "loading": "Loading…",
-      "dash": "—",
-      "statusActive": "Active",
-      "statusInactive": "Inactive",
-      "statusGrace": "Grace period",
-      "statusExpired": "Expired",
-      "statusPendingReview": "Pending review",
-      "statusRejected": "Rejected"
+      "heading": "Billing",
+      "subtitle": "Your plan, what it costs, and every payment to Paperbase.",
+      "comparePlans": "Compare plans",
+      "loadError": "Could not load your billing. Try again.",
+      "retry": "Try again",
+      "cycle": {
+        "monthly": "Monthly",
+        "yearly": "Yearly"
+      },
+      "ring": {
+        "daysLeft": "{count, plural, one {day left} other {days left}}",
+        "aria": "{left} of {total} days left"
+      },
+      "band": {
+        "noPlan": "No plan yet",
+        "active": {
+          "pill": "Active",
+          "line": "Paid until {end}.",
+          "next": "Next payment: {amount} on {next}."
+        },
+        "endingSoon": {
+          "pill": "{count, plural, =0 {Ends today} one {Ends tomorrow} other {Ends in # days}}",
+          "line": "Paid until {end}.",
+          "next": "Pay {amount} on {next} to keep {plan}. A grace day follows."
+        },
+        "trial": {
+          "pill": "Free trial",
+          "line": "Trial until {end}.",
+          "next": "Choose a plan to keep your shop open after that."
+        },
+        "grace": {
+          "pill": "Grace day",
+          "line": "{plan} ended on {end}.",
+          "next": "Pay today: your shop closes to shoppers at midnight."
+        },
+        "expired": {
+          "pill": "Ended",
+          "line": "{plan} ended on {end}.",
+          "next": "Your shop is closed to shoppers until you pay."
+        },
+        "checking": {
+          "pill": "Checking payment",
+          "line": "We are checking your payment of {amount}.",
+          "next": "Transaction ID {trx}. This changes when we are done."
+        },
+        "notFound": {
+          "pill": "Payment not found",
+          "line": "We could not confirm transaction ID {trx}.",
+          "next": "Check the ID in your bKash or Nagad app, or pay again."
+        },
+        "none": {
+          "line": "Choose a plan to open your shop to shoppers."
+        }
+      },
+      "action": {
+        "pay": "Pay {amount} now",
+        "payAgain": "Pay again",
+        "choose": "Choose a plan",
+        "change": "Change plan",
+        "payNote": "With bKash or Nagad",
+        "payError": "Could not start the payment. Try again."
+      },
+      "tiles": {
+        "products": "Products",
+        "productsOf": "of {limit}",
+        "noLimit": "No limit on your plan",
+        "price": "Your price",
+        "perMonth": "a month",
+        "billedYearly": "{charge} a year, paid at once",
+        "ifYearly": "{price} a month if paid yearly",
+        "paid": "Paid so far",
+        "paidSince": "{count, plural, one {# payment} other {# payments}} since {month}",
+        "noPayments": "No payments yet"
+      },
+      "payments": {
+        "heading": "Payments",
+        "empty": "No payments yet.",
+        "trial": "Free trial",
+        "recorded": "Recorded by Paperbase",
+        "trx": "ID {trx}",
+        "status": {
+          "success": "Paid",
+          "pending": "Being checked",
+          "failed": "Not found",
+          "refunded": "Refunded",
+          "trial": "Trial"
+        },
+        "provider": {
+          "bkash": "bKash",
+          "nagad": "Nagad"
+        }
+      },
+      "includes": {
+        "heading": "In your plan"
+      },
+      "yearly": {
+        "heading": "Save {saving} a year",
+        "body": "Next time, pay {charge} once for twelve months of {plan}.",
+        "link": "See yearly prices"
+      }
     },
     "dataExport": {
       "heading": "Data & Export",
