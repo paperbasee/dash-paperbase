@@ -88,6 +88,20 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-10-09-back-in-after-an-outage",
+    date: "2026-10-09",
+    version: "4.187.2",
+    tag: "fixed",
+    title: {
+      en: "Back in by itself after an outage",
+      bn: "বিভ্রাটের পর নিজে থেকেই ফেরা",
+    },
+    body: {
+      en: "If Paperbase stops answering while you sign in or work, the dashboard waits on the \"Unable to connect\" page and opens by itself once Paperbase is back. You no longer need to sign in again.",
+      bn: "সাইন ইন বা কাজের সময় Paperbase সাড়া না দিলে ড্যাশবোর্ড \"সংযোগ করা যাচ্ছে না\" পাতায় অপেক্ষা করে, আর Paperbase ফিরলেই নিজে থেকে খুলে যায়। আর আবার সাইন ইন করতে হবে না।",
+    },
+  },
+  {
     id: "2026-10-09-round-ticks-on-billing",
     date: "2026-10-09",
     version: "4.187.1",
@@ -522,21 +536,6 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     body: {
       en: "When you pay for your plan, the payment page now opens in Bangla, so the bKash and Nagad steps are easy to follow. Prefer English? Tap English at the top; this device remembers it, and your dashboard keeps its own language.",
       bn: "প্ল্যানের টাকা দেওয়ার সময় পেমেন্ট পেজ এখন বাংলায় খোলে, যাতে বিকাশ ও নগদের ধাপগুলো সহজে বোঝা যায়। ইংরেজিতে দেখতে চান? উপরের English চাপুন; এই ডিভাইস সেটা মনে রাখবে, আর আপনার ড্যাশবোর্ড নিজের ভাষাতেই থাকবে।",
-    },
-    href: "/plans",
-  },
-  {
-    id: "2026-10-04-clear-bkash-and-nagad-logos",
-    date: "2026-10-04",
-    version: "4.166.1",
-    tag: "fixed",
-    title: {
-      en: "Clear bKash and Nagad logos",
-      bn: "বিকাশ ও নগদের লোগো এখন পরিষ্কার",
-    },
-    body: {
-      en: "On the payment page, bKash's logo lost its letters on the dark theme. Both logos now read clearly on light and dark, and are drawn larger.",
-      bn: "পেমেন্ট পেজে ডার্ক থিমে বিকাশের লোগোর লেখা দেখা যাচ্ছিল না। এখন লাইট ও ডার্ক দুই থিমেই দুটি লোগো পরিষ্কার দেখা যায়, আর আকারেও একটু বড়।",
     },
     href: "/plans",
   },
