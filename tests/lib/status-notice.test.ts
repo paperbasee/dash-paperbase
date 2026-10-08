@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { noticeTitle, parseSummary, pickNotice, SOON_S, type StatusSummary } from "@/lib/status-notice";
+import { noticeTitle, noticeWhileAway, parseSummary, pickNotice, SOON_S, type StatusSummary } from "@/lib/status-notice";
 
 const NOW = 1_790_791_200; // 2026-10-01 00:00 in Dhaka
 
@@ -76,6 +76,19 @@ describe("the status page's notice", () => {
     expect(pickNotice(one, NOW + 3601, new Set(["incident-1", "maintenance-2-soon"]))).toMatchObject({
       key: "maintenance-2-now",
     });
+  });
+
+  it("tells the waiting page of an incident even if put away, and of maintenance now, never of maintenance ahead", () => {
+    // Put away in the dashboard's bar, it is still why the waiting page is up.
+    const open = summary([incident(1, "major_outage")], []);
+    expect(pickNotice(open, NOW, new Set(["incident-1"]))).toBeNull();
+    expect(noticeWhileAway(open, NOW)).toMatchObject({ kind: "incident", id: 1 });
+
+    expect(noticeWhileAway(summary([], [maintenanceWindow(2, NOW - 60, NOW + 600)]), NOW)).toMatchObject({
+      kind: "maintenance_now",
+    });
+    expect(noticeWhileAway(summary([], [maintenanceWindow(3, NOW + 3600, NOW + 7200)]), NOW)).toBeNull();
+    expect(noticeWhileAway(summary([], []), NOW)).toBeNull();
   });
 
   it("speaks the merchant's language, English when no Bangla was written", () => {

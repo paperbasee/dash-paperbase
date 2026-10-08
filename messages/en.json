@@ -40,7 +40,6 @@
     "pleaseWait": "Please wait…",
     "reload": "Reload",
     "signOut": "Sign out",
-    "contactSupport": "Contact support",
     "retry": "Try again",
     "settings": "Settings",
     "store": "Store",
@@ -1736,10 +1735,6 @@
   "sheet": {
     "navigationMenu": "Navigation menu"
   },
-  "planNotActive": {
-    "title": "Plan not active",
-    "body": "Your account does not have an active subscription. Please subscribe or contact support before continuing."
-  },
   "dashboardLayout": {
     "subscriptionVerifyTitle": "Unable to verify subscription",
     "subscriptionVerifyBody": "We could not verify your account status right now. Please try reloading. If the issue continues, contact support.",
@@ -1759,12 +1754,26 @@
     "inactivePlanBannerPlansLink": "View plans",
     "rejectedPlanBannerText": "Your last subscription request was not approved. You can choose a new plan or contact support.",
     "rejectedPlanBannerPlansLink": "View plans",
-    "serverUnreachableTitle": "Unable to connect",
-    "serverUnreachableBody": "Unable to connect to the server. Please check your internet connection or try again later.",
     "trialBannerText": "You're on a free trial — {days} days left.",
-    "trialBannerCta": "Choose a plan",
-    "signInUnreachableTitle": "Sign-in can't be reached",
-    "signInUnreachableBody": "Paperbase's sign-in isn't answering right now, so the dashboard can't check who you are. Your shop keeps selling. This page tries again by itself."
+    "trialBannerCta": "Choose a plan"
+  },
+  "unreachable": {
+    "apiTitle": "Paperbase isn't answering right now",
+    "apiBody": "This is on our side, not yours. Your dashboard opens by itself as soon as we're back, and you won't need to sign in again.",
+    "signInTitle": "Paperbase's sign-in isn't answering",
+    "signInBody": "Your shop keeps selling. Your dashboard opens by itself as soon as sign-in is back.",
+    "offlineTitle": "You're offline",
+    "offlineBody": "This device isn't connected to the internet. Check your <nowrap>Wi-Fi</nowrap> or mobile data. Your dashboard comes back by itself once you're connected.",
+    "tryNow": "Try now",
+    "seeStatus": "See Paperbase status",
+    "checkingIn": "Checking again in {seconds} {count, plural, one {second} other {seconds}}",
+    "checkingNow": "Checking now…",
+    "waiting": "Waiting for your connection",
+    "statusInvestigating": "Status page: we're looking into it, since {time}",
+    "statusIdentified": "Status page: we've found the cause, since {time}",
+    "statusMonitoring": "Status page: a fix is in and we're watching it, since {time}",
+    "statusMaintenance": "Status page: planned maintenance until {until}",
+    "statusQuiet": "Status page: nothing reported yet"
   },
   "dashboard": {
     "title": "{greeting}, {name} 👋",

@@ -18,22 +18,15 @@ const EVERY_MS = 2 * 60 * 1000;
 const STALE_MS = 10 * 60 * 1000;
 
 /**
- * The status page's notice for the dashboard (lib/status-notice.ts), and the way to put it away.
- * Asked straight from the browser (the status page allows the dashboard's origin) and NOT through
- * react-query: its cache is kept in IndexedDB, and a notice restored from yesterday would be
- * worse than none. When the status page does not answer, there is simply no notice.
+ * What the status page says now (lib/status-notice.ts): its summary while fresh, else null -- the
+ * status page did not answer, or this dashboard has none. Asked straight from the browser (the
+ * status page allows the dashboard's origin) and NOT through react-query: its cache is kept in
+ * IndexedDB, and a summary restored from yesterday would be worse than none. `now` is when it was
+ * last asked, in milliseconds.
  */
-export function useStatusNotice(enabled: boolean): {
-  notice: StatusNotice | null;
-  dismiss: (key: string) => void;
-} {
+export function useStatusSummary(enabled: boolean): { summary: StatusSummary | null; now: number } {
   const [summary, setSummary] = useState<{ value: StatusSummary; at: number } | null>(null);
-  const [dismissed, setDismissed] = useState<Set<string>>(() => new Set());
   const [now, setNow] = useState(() => Date.now());
-
-  useEffect(() => {
-    setDismissed(readDismissed());
-  }, []);
 
   useEffect(() => {
     const base = statusUrl();
@@ -68,6 +61,21 @@ export function useStatusNotice(enabled: boolean): {
     };
   }, [enabled]);
 
+  return { summary: enabled && summary && now - summary.at < STALE_MS ? summary.value : null, now };
+}
+
+/** The status page's notice for the dashboard's bar, and the way to put it away. */
+export function useStatusNotice(enabled: boolean): {
+  notice: StatusNotice | null;
+  dismiss: (key: string) => void;
+} {
+  const { summary, now } = useStatusSummary(enabled);
+  const [dismissed, setDismissed] = useState<Set<string>>(() => new Set());
+
+  useEffect(() => {
+    setDismissed(readDismissed());
+  }, []);
+
   const dismiss = useCallback((key: string) => {
     setDismissed((current) => {
       const next = new Set(current).add(key);
@@ -76,9 +84,8 @@ export function useStatusNotice(enabled: boolean): {
     });
   }, []);
 
-  const fresh = summary && now - summary.at < STALE_MS ? summary.value : null;
   return {
-    notice: enabled && fresh ? pickNotice(fresh, Math.floor(now / 1000), dismissed) : null,
+    notice: summary ? pickNotice(summary, Math.floor(now / 1000), dismissed) : null,
     dismiss,
   };
 }

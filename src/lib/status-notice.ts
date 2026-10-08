@@ -102,6 +102,21 @@ export function pickNotice(
   return first ? { ...first, more: rest.length } : null;
 }
 
+/**
+ * What the waiting page (a part of Paperbase not answering) tells of the status page: the worst
+ * open incident, or the maintenance going on now -- even one put away in the dashboard's bar, since
+ * it is why the page is up. Null when it reports neither; maintenance still to come is no reason.
+ */
+export function noticeWhileAway(summary: StatusSummary, nowS: number): StatusNotice | null {
+  const notice = pickNotice(summary, nowS, new Set());
+  return notice && notice.kind !== "maintenance_soon" ? notice : null;
+}
+
+/** The calendar day of a moment (unix seconds) in Bangladesh: "2026-10-02". */
+export function dhakaDay(seconds: number): string {
+  return new Date(seconds * 1000).toLocaleDateString("en-CA", { timeZone: "Asia/Dhaka" });
+}
+
 /** The title in the merchant's language: Bangla falls back to the English when not written. */
 export function noticeTitle(notice: { title_en: string; title_bn: string }, locale: string): string {
   return locale === "bn" && notice.title_bn.trim() ? notice.title_bn : notice.title_en;

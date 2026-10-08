@@ -6,20 +6,20 @@ import type { ReactNode } from "react";
 
 import { formatDashboardDateTime, formatDashboardTime } from "@/lib/datetime-display";
 import { toLocaleDigits } from "@/lib/locale-digits";
-import { noticeTitle, statusUrl, type StatusNotice } from "@/lib/status-notice";
+import { dhakaDay, noticeTitle, statusUrl, type StatusNotice } from "@/lib/status-notice";
 import { cn } from "@/lib/utils";
 
 /** Its height on a wide screen, where it is one line: the dashboard's fixed parts sit below it. */
 export const STATUS_NOTICE_HEIGHT = 32;
 
 /** Coloured as the status page colours it: how bad an incident is, or maintenance. */
-const TONE = {
+export const NOTICE_TONE = {
   degraded: "bg-amber-50 text-amber-900 dark:bg-amber-950 dark:text-amber-100",
   partial_outage: "bg-orange-50 text-orange-900 dark:bg-orange-950 dark:text-orange-100",
   major_outage: "bg-red-50 text-red-900 dark:bg-red-950 dark:text-red-100",
   maintenance: "bg-sky-50 text-sky-900 dark:bg-sky-950 dark:text-sky-100",
 } as const;
-const DOT = {
+export const NOTICE_DOT = {
   degraded: "bg-amber-500",
   partial_outage: "bg-orange-500",
   major_outage: "bg-red-500",
@@ -27,11 +27,6 @@ const DOT = {
 } as const;
 
 const STATUSES = ["investigating", "identified", "monitoring"] as const;
-
-/** The calendar day of a moment in Bangladesh: "2026-10-02". */
-function dhakaDay(seconds: number): string {
-  return new Date(seconds * 1000).toLocaleDateString("en-CA", { timeZone: "Asia/Dhaka" });
-}
 
 /**
  * Across the top of the dashboard: what the status page says now (useStatusNotice). The merchant
@@ -76,9 +71,9 @@ export function StatusNoticeBar({
   }
 
   return (
-    <div role="status" className={cn("relative border-b border-border md:h-8", TONE[tone])}>
+    <div role="status" className={cn("relative border-b border-border md:h-8", NOTICE_TONE[tone])}>
       <div className="mx-auto flex min-h-8 w-full max-w-[88rem] items-center justify-center gap-x-2 gap-y-0.5 px-9 py-1.5 text-center text-[11px] leading-snug max-md:flex-wrap sm:text-xs md:h-full md:min-h-0 md:py-0">
-        <span aria-hidden className={cn("size-1.5 shrink-0 rounded-full", DOT[tone])} />
+        <span aria-hidden className={cn("size-1.5 shrink-0 rounded-full", NOTICE_DOT[tone])} />
         <p className="min-w-0 md:truncate">{message}</p>
         {notice.more > 0 ? (
           <span className="shrink-0 opacity-75">

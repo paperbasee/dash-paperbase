@@ -826,8 +826,118 @@ input.font-numbers-date-value::placeholder {
     opacity: 0;
   }
 }
+/* The waiting page's drawings (components/unreachable/drawings.tsx). Each starts from the part as
+   drawn -- its opacity, its lean -- and comes back to it, so a still drawing is a whole one. */
+@keyframes pb-turn {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes pb-dim {
+  50% {
+    opacity: 0.35;
+  }
+}
+@keyframes pb-fade {
+  50% {
+    opacity: 0;
+  }
+}
+@keyframes pb-glint {
+  50% {
+    opacity: 1;
+  }
+}
+@keyframes pb-twinkle {
+  0%,
+  100% {
+    transform: scale(0.55);
+  }
+  50% {
+    transform: none;
+  }
+}
+@keyframes pb-typing {
+  18% {
+    transform: translateY(-4px);
+    opacity: 1;
+  }
+  36% {
+    transform: none;
+    opacity: 0.5;
+  }
+}
+@keyframes pb-bob {
+  50% {
+    transform: translateY(-5px);
+  }
+}
+@keyframes pb-squash {
+  50% {
+    transform: scaleX(0.86);
+  }
+}
+@keyframes pb-scan {
+  0%,
+  100% {
+    transform: translateY(-48px);
+  }
+  50% {
+    transform: translateY(48px);
+  }
+}
+@keyframes pb-sway {
+  50% {
+    transform: rotate(var(--half));
+  }
+}
+@keyframes pb-wave {
+  12%,
+  30% {
+    opacity: 1;
+  }
+  45%,
+  100% {
+    opacity: 0;
+  }
+}
 
 @layer components {
+  /* The drawings' colours: the dashboard's slate, and their own for dark. */
+  .pb-art {
+    --art-ink: #1e293b;
+    --art-surface: #ffffff;
+    --art-t1: #f1f5f9;
+    --art-t2: #e2e8f0;
+    --art-t3: #cbd5e1;
+    --art-t4: #94a3b8;
+    --art-blob: #f1f5f9;
+    --art-ground: #e2e8f0;
+    --art-amber: #f59e0b;
+    --art-amber-soft: #fef3c7;
+    --art-blue: #3b82f6;
+    --art-blue-soft: #dbeafe;
+    --art-red: #ef4444;
+    --art-green: #22c55e;
+    --art-mark: #ffffff;
+  }
+  .dark .pb-art {
+    --art-ink: #aeb6c2;
+    --art-surface: #1f2226;
+    --art-t1: #272b30;
+    --art-t2: #30353c;
+    --art-t3: #454b54;
+    --art-t4: #6b7380;
+    --art-blob: #181a1d;
+    --art-ground: #0b0c0e;
+    --art-amber: #fbbf24;
+    --art-amber-soft: #3a2c0c;
+    --art-blue: #60a5fa;
+    --art-blue-soft: #1c2d47;
+    --art-red: #f87171;
+    --art-green: #4ade80;
+    --art-mark: #111214;
+  }
   .pb-rise {
     animation: pb-rise 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) both;
   }

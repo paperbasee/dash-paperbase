@@ -256,7 +256,7 @@ export default function DashboardLayoutClient({
 
   if (meProfileStatus === "error") {
     if (isNetworkError(meProfileError)) return null;
-    return <SubscriptionAccessBlock variant="verifyFailed" />;
+    return <SubscriptionAccessBlock />;
   }
 
   return (

@@ -65,7 +65,7 @@ export default function OnboardingLayout({ children }: { children: React.ReactNo
   if (!authHydrated) return <Waiting />;
   if (isAuthenticated && (subGate === "idle" || subGate === "pending")) return <Waiting />;
   if (isAuthenticated && subGate === "failed") {
-    return <SubscriptionAccessBlock variant="verifyFailed" />;
+    return <SubscriptionAccessBlock />;
   }
   return <>{children}</>;
 }
