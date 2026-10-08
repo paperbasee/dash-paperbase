@@ -2,87 +2,12 @@ import type { ReactNode } from "react";
 import type { Metadata } from "next";
 import { cookies, headers } from "next/headers";
 import Script from "next/script";
-import { Archivo, Cinzel, Instrument_Serif, Noto_Sans_Bengali, Playfair_Display, Poppins } from "next/font/google";
 import { getLocale } from "next-intl/server";
+// The fonts first, kept in this repository: a build never fetches them (fonts.css).
+import "./fonts.css";
 import "./globals.css";
 import { isTurnstileDisabled } from "@/lib/turnstile-env";
 import { CORE_THEME_COOKIE_KEY } from "@/lib/theme";
-
-/**
- * The dashboard's own faces are not preloaded. Its first screen draws no text
- * until the sign-in is checked, so a preload always lands before anything uses
- * it and the browser warns that it went unused. Without the preload the files
- * are fetched with the first text and kept in the browser's cache after that;
- * the Bangla face is fetched only where Bangla text is drawn (its
- * unicode-range), which spares every English page the download.
- */
-const poppins = Poppins({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  display: "swap",
-  preload: false,
-});
-
-/**
- * The faces a merchant may set their SHOP in, offered in the theme editor.
- *
- * Declared here because `next/font` is a build-time transform that only runs on
- * a server component module -- called from the editor's own client component it
- * stops the build on "Font loader calls must be assigned to a const", which it
- * is, and which is not the problem.
- *
- * `preload: false` is what keeps that from costing every page: the CSS is
- * defined everywhere, the files are fetched only where a rule actually uses one,
- * and the only rules that do are in the editor's specimen list.
- */
-const archivo = Archivo({
-  subsets: ["latin"],
-  weight: ["400", "600"],
-  variable: "--font-archivo",
-  display: "swap",
-  preload: false,
-});
-
-const playfairDisplay = Playfair_Display({
-  subsets: ["latin"],
-  weight: ["400", "600"],
-  variable: "--font-playfair",
-  display: "swap",
-  preload: false,
-});
-
-const cinzel = Cinzel({
-  subsets: ["latin"],
-  weight: ["400", "600"],
-  variable: "--font-cinzel",
-  display: "swap",
-  preload: false,
-});
-
-// One const each, at module scope: a loader call nested in an array or an object
-// is refused with "Font loaders must be called and assigned to a const in the
-// module scope", which reads like the opposite of what is wrong.
-const shopFaces = [archivo, playfairDisplay, cinzel];
-
-/**
- * The sign-in pages' headings (owner's design, 2026-09-28): a tall, narrow serif. Fetched only
- * on the pages that set it, like the faces above.
- */
-const instrumentSerif = Instrument_Serif({
-  subsets: ["latin"],
-  weight: "400",
-  variable: "--font-instrument-serif",
-  display: "swap",
-  preload: false,
-});
-
-const notoSansBengali = Noto_Sans_Bengali({
-  subsets: ["bengali"],
-  weight: ["400", "500", "600", "700"],
-  variable: "--font-noto-sans-bengali",
-  display: "swap",
-  preload: false,
-});
 
 export const metadata: Metadata = {
   manifest: "/site.webmanifest",
@@ -162,10 +87,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
     <html
       lang={locale}
       suppressHydrationWarning
-      className={[isDark ? "dark" : undefined, poppins.className, notoSansBengali.variable,
-        instrumentSerif.variable, ...shopFaces.map((face) => face.variable)]
-        .filter(Boolean)
-        .join(" ")}
+      className={isDark ? "dark" : undefined}
       data-theme={dataTheme}
     >
       <head>

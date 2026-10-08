@@ -18,12 +18,9 @@
  * and we supply the other half. That is the part a merchant does not choose, and
  * the only real cost of folding three controls into one.
  *
- * **The faces themselves are loaded in `StylePanel`, not here.** `next/font` is a
- * build-time transform that only runs on component modules; called from a plain
- * data file it survives to the checker as an ordinary function call and the
- * build stops with "Font loader calls must be assigned to a const" -- which it
- * is, and which is not the actual problem. So this file stays pure data and the
- * panel maps each key to the class the loader made.
+ * **The faces themselves are drawn in `StylePanel`, not here.** They are declared
+ * once in src/app/fonts.css as CSS variables; this file stays pure data and the
+ * panel maps each key to the variable that names its face.
  */
 
 export type ShopLanguage = "en" | "bn";

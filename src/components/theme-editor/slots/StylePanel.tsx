@@ -29,10 +29,9 @@ const ALIGN_ITEMS: Record<CardAlign["key"], string> = {
 /**
  * Which face each specimen is set in.
  *
- * The families are declared in the root layout as CSS variables, with
- * `preload: false` -- `next/font` only runs on a server component module, and
- * declaring them there costs other pages nothing because the files are fetched
- * only where a rule uses one, which is here.
+ * The families are declared once for every page, as CSS variables, in
+ * src/app/fonts.css. That costs other pages nothing: a font file is fetched only
+ * where a rule uses it, which is here.
  *
  * Poppins is the dashboard's own face and needs no class.
  */
