@@ -88,6 +88,21 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-10-09-pay-early-lose-no-days",
+    date: "2026-10-09",
+    version: "4.188.0",
+    tag: "improved",
+    title: {
+      en: "Pay early, lose no days",
+      bn: "আগে পেমেন্ট করুন, কোনো দিন নষ্ট হবে না",
+    },
+    body: {
+      en: "In your plan's last week you can pay for the next month or year from Settings > Billing or the Plans page. The new period starts the day after your current one ends, so no day is lost. Switching plans works the same way, and a payment sent on time keeps your shop open while we check it.",
+      bn: "প্ল্যানের শেষ সপ্তাহে সেটিংস > বিলিং বা প্ল্যান পাতা থেকে পরের মাস বা বছরের পেমেন্ট করতে পারবেন। নতুন মেয়াদ শুরু হবে চলতি মেয়াদ শেষ হওয়ার পরদিন, তাই কোনো দিন নষ্ট হবে না। প্ল্যান বদলালেও একই নিয়ম, আর সময়মতো পাঠানো পেমেন্ট যাচাইয়ের সময় আপনার দোকান খোলা থাকে।",
+    },
+    href: "/settings?tab=billing",
+  },
+  {
     id: "2026-10-09-back-in-after-an-outage",
     date: "2026-10-09",
     version: "4.187.2",
@@ -523,20 +538,5 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
       bn: "এখনও কোনো পোস্ট বা রিভিউ না থাকলে ব্লগ ও রিভিউ পেজে এখন ছোট একটি ফোল্ডার দেখা যায়, ছুঁলেই খুলে যায়, আর সাথে থাকে প্রথম পোস্ট লেখা বা রিভিউ যোগ করার একটি বাটন। কাস্টমার ও অ্যাকাউন্ট পেজে ফিল্টার বাটন এখন অন্য সব তালিকার মতো ডান দিকে।",
     },
     href: "/blog",
-  },
-  {
-    id: "2026-10-04-the-payment-page-in-bangla",
-    date: "2026-10-04",
-    version: "4.167.0",
-    tag: "new",
-    title: {
-      en: "The payment page in Bangla",
-      bn: "পেমেন্ট পেজ এখন বাংলায়",
-    },
-    body: {
-      en: "When you pay for your plan, the payment page now opens in Bangla, so the bKash and Nagad steps are easy to follow. Prefer English? Tap English at the top; this device remembers it, and your dashboard keeps its own language.",
-      bn: "প্ল্যানের টাকা দেওয়ার সময় পেমেন্ট পেজ এখন বাংলায় খোলে, যাতে বিকাশ ও নগদের ধাপগুলো সহজে বোঝা যায়। ইংরেজিতে দেখতে চান? উপরের English চাপুন; এই ডিভাইস সেটা মনে রাখবে, আর আপনার ড্যাশবোর্ড নিজের ভাষাতেই থাকবে।",
-    },
-    href: "/plans",
   },
 ];
