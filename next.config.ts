@@ -148,8 +148,19 @@ const nextConfig: NextConfig = {
 };
 
 export default withSentryConfig(withNextIntl(nextConfig), {
-  org: "paperbaseme",
-  project: "dashboard-paperbase",
+  // The organization `paperbasee` and its project `dash-paperbase` (renamed
+  // from dashboard-paperbase on 2026-10-08; guidelines/monitoring-sentry.md).
+  org: "paperbasee",
+  project: "dash-paperbase",
+  // A production build records its release and its deploy under `production`,
+  // the environment its errors carry. Left to itself the plugin names the deploy
+  // `vercel-production`, a second name for the same thing. Any other build
+  // (a Vercel preview, a local one) creates no release: nothing but production
+  // ever reaches merchants.
+  release:
+    process.env.VERCEL_TARGET_ENV === "production"
+      ? { deploy: { env: "production" } }
+      : { create: false },
   // Quiet unless something is wrong.
   silent: !process.env.CI,
   // Source maps upload only when a build is given a token. Without one the
