@@ -12,6 +12,7 @@ import { formatDashboardDateTime } from "@/lib/datetime-display";
 import { toLocaleDigits } from "@/lib/locale-digits";
 import { activeSessionsQueryKey, sessionHistoryQueryKey } from "@/lib/query-keys";
 import {
+  accountsAway,
   endOtherSessions,
   endSession,
   fetchActiveSessions,
@@ -23,8 +24,8 @@ import { cn } from "@/lib/utils";
 
 import { SettingsSectionBody, settingsSectionSurfaceClassName } from "../SettingsSectionBody";
 
-/** "Active now" within this long of the session's last request (the API notes one every 5 min). */
-const ACTIVE_NOW_MS = 10 * 60_000;
+/** "Active now" within this long of the sign-in's last use (Accounts notes each renewal, ~10 min). */
+const ACTIVE_NOW_MS = 15 * 60_000;
 
 function useRelativeTime() {
   const locale = useLocale();
@@ -114,6 +115,7 @@ export default function SessionsSection({ hidden }: { hidden: boolean }) {
     if (row.end_reason === "support_ended") return { label: t("status.visitEnded"), tone: "quiet" as const };
     if (row.end_reason === "access_changed") return { label: t("status.accessChanged"), tone: "quiet" as const };
     if (row.end_reason === "access_ended") return { label: t("status.accessEnded"), tone: "warn" as const };
+    if (row.end_reason === "switched_off") return { label: t("status.switchedOff"), tone: "warn" as const };
     return { label: t("status.expired"), tone: "quiet" as const };
   }
 
@@ -139,6 +141,12 @@ export default function SessionsSection({ hidden }: { hidden: boolean }) {
             </Button>
           </div>
 
+          {endOne.isError || endOthers.isError ? (
+            <p role="alert" className="text-sm text-destructive">
+              {t(accountsAway(endOne.error ?? endOthers.error) ? "accountsAway" : "endFailed")}
+            </p>
+          ) : null}
+
           {active.isPending ? (
             <div className="space-y-2" aria-busy>
               {[0, 1].map((i) => (
@@ -146,7 +154,7 @@ export default function SessionsSection({ hidden }: { hidden: boolean }) {
               ))}
             </div>
           ) : active.isError ? (
-            <p className="text-sm text-destructive">{t("loadFailed")}</p>
+            <p className="text-sm text-destructive">{t(accountsAway(active.error) ? "accountsAway" : "loadFailed")}</p>
           ) : (
             <ul className="divide-y divide-border overflow-hidden rounded-card border border-border">
               {(active.data ?? []).map((row) => {
@@ -218,7 +226,7 @@ export default function SessionsSection({ hidden }: { hidden: boolean }) {
           {history.isPending ? (
             <div className="h-40 animate-pulse rounded-card bg-muted/60" aria-busy />
           ) : history.isError ? (
-            <p className="text-sm text-destructive">{t("loadFailed")}</p>
+            <p className="text-sm text-destructive">{t(accountsAway(history.error) ? "accountsAway" : "loadFailed")}</p>
           ) : (history.data?.results.length ?? 0) === 0 ? (
             <p className="text-sm text-muted-foreground">{t("historyEmpty")}</p>
           ) : (

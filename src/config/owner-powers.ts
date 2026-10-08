@@ -21,7 +21,6 @@ export const OWNER_POWERS = [
   "sessions",
   "security",
   "autopilot",
-  "owner_details",
 ] as const;
 
 export type OwnerPower = (typeof OWNER_POWERS)[number];

@@ -3,15 +3,19 @@
 import { useTranslations } from "next-intl";
 import { KeyRound, ShieldCheck } from "lucide-react";
 
+import { useSupportMode } from "@/hooks/useSupportMode";
+import { accountPageUrl } from "@/lib/accounts/config";
+
 import { SettingsSectionBody } from "../SettingsSectionBody";
 
 /**
- * Sign-in is passwordless (passkeys + email magic-links), so there is no
- * password to change and no separate TOTP to manage. Passkeys are managed per
- * account under Settings → Account, so this section just explains the model.
+ * Sign-in is passwordless (passkeys, and the email's link or code), so there is no password to
+ * change. Passkeys are each person's own, in their Paperbase account at Accounts, so this section
+ * explains the model and links there (not for Paperbase support, which never opens it).
  */
 export default function SecuritySection({ hidden }: { hidden: boolean }) {
   const t = useTranslations("settings.security");
+  const inSupportMode = useSupportMode();
   if (hidden) return null;
 
   return (
@@ -35,7 +39,14 @@ export default function SecuritySection({ hidden }: { hidden: boolean }) {
             <p className="text-sm font-medium text-foreground">{t("manageTitle")}</p>
             <p className="text-sm text-muted-foreground">
               {t.rich("manageBody", {
-                place: (chunks) => <span className="font-medium text-foreground">{chunks}</span>,
+                place: (chunks) =>
+                  inSupportMode ? (
+                    <span className="font-medium text-foreground">{chunks}</span>
+                  ) : (
+                    <a href={accountPageUrl()} className="font-medium text-foreground underline underline-offset-4">
+                      {chunks}
+                    </a>
+                  ),
               })}
             </p>
           </div>

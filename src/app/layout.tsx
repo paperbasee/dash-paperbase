@@ -1,12 +1,10 @@
 import type { ReactNode } from "react";
 import type { Metadata } from "next";
 import { cookies, headers } from "next/headers";
-import Script from "next/script";
 import { getLocale } from "next-intl/server";
 // The fonts first, kept in this repository: a build never fetches them (fonts.css).
 import "./fonts.css";
 import "./globals.css";
-import { isTurnstileDisabled } from "@/lib/turnstile-env";
 import { CORE_THEME_COOKIE_KEY } from "@/lib/theme";
 
 export const metadata: Metadata = {
@@ -100,12 +98,6 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
       </head>
       <body className="antialiased font-sans">
         {children}
-        {!isTurnstileDisabled() ? (
-          <Script
-            src="https://challenges.cloudflare.com/turnstile/v0/api.js"
-            strategy="afterInteractive"
-          />
-        ) : null}
       </body>
     </html>
   );

@@ -23,6 +23,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { isNetworkError } from "@/lib/network-error";
 import { logout } from "@/lib/auth";
+import { withNext } from "@/lib/safe-next";
 import { SUPPORT_STRIP_HEIGHT, SupportStrip } from "@/components/support/SupportStrip";
 import { STATUS_NOTICE_HEIGHT, StatusNoticeBar } from "@/components/status/StatusNoticeBar";
 import { useStatusNotice } from "@/hooks/useStatusNotice";
@@ -75,8 +76,8 @@ export default function DashboardLayoutClient({
   const tDashboardLayout = useTranslations("dashboardLayout");
   const {
     isAuthenticated,
-    isLoading,
     authHydrated,
+    signInUnreachable,
     meProfile,
     meProfileStatus,
     meProfileError,
@@ -140,7 +141,7 @@ export default function DashboardLayoutClient({
     subscriptionIsPaidPeriod(meProfile) &&
     isEligiblePlan &&
     storeCount === 0;
-  const authCheckReady = authHydrated && !isLoading;
+  const authCheckReady = authHydrated;
 
   const markRefreshedRef = useRef<(() => void) | null>(null);
   const socketEnabled =
@@ -184,11 +185,14 @@ export default function DashboardLayoutClient({
     // Wait for client auth hydration before deciding user is unauthenticated.
     // Without this guard, refresh can momentarily see `isAuthenticated=false`
     // and incorrectly trigger a hard logout.
-    if (!authCheckReady) return;
-    if (!isAuthenticated) {
-      logout();
+    if (!authCheckReady || isAuthenticated) return;
+    if (signInUnreachable) {
+      // Accounts did not answer: the sign-in may well be on; say so rather than sign out.
+      router.replace("/server-unreachable?part=sign-in");
+      return;
     }
-  }, [isAuthenticated, authCheckReady]);
+    logout(withNext("/login", `${window.location.pathname}${window.location.search}`));
+  }, [isAuthenticated, authCheckReady, signInUnreachable, router]);
 
   useEffect(() => {
     if (!shouldRedirectToOnboarding) return;
@@ -232,7 +236,6 @@ export default function DashboardLayoutClient({
 
   const authBlocking =
     !authHydrated ||
-    isLoading ||
     !isAuthenticated ||
     meProfileStatus === "loading" ||
     (meProfileStatus === "idle" && isAuthenticated);

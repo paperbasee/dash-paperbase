@@ -4,8 +4,7 @@ import { LifeBuoy } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 
-import api from "@/lib/api";
-import { leaveSupportSession } from "@/lib/auth";
+import { endSupportVisit } from "@/lib/auth";
 import { toLocaleDigits } from "@/lib/locale-digits";
 
 /** The strip's height: the dashboard's fixed parts sit below it (--subscription-banner-offset). */
@@ -14,8 +13,8 @@ export const SUPPORT_STRIP_HEIGHT = 36;
 /**
  * Across the top of a shop's dashboard while Paperbase support is in it (owner, 2026-09-29):
  * whose shop, how long is left, and the way out. It looks like nothing else in the dashboard on
- * purpose -- one glance says this is not your own shop. The API ends the session's tokens at the
- * minute; the strip leaves with it rather than waiting for a refused request.
+ * purpose -- one glance says this is not your own shop. Accounts' support sign-in stops at the
+ * visit's end; the strip ends it then rather than waiting for a refused request.
  */
 export function SupportStrip({ session }: { session: { store_name: string; expires_at: string } }) {
   const t = useTranslations("supportMode");
@@ -30,17 +29,13 @@ export function SupportStrip({ session }: { session: { store_name: string; expir
     return () => window.clearInterval(timer);
   }, []);
   useEffect(() => {
-    if (now >= endsAt) leaveSupportSession();
+    if (now >= endsAt) void endSupportVisit();
   }, [now, endsAt]);
 
-  async function end() {
+  /** End session: Accounts ends the support sign-in, and the API the visit, with its Activities line. */
+  function end() {
     setEnding(true);
-    try {
-      await api.post("auth/support/end/");
-    } catch {
-      // Ended already, or unreachable: the tokens are forgotten here either way.
-    }
-    leaveSupportSession();
+    void endSupportVisit();
   }
 
   return (
@@ -59,7 +54,7 @@ export function SupportStrip({ session }: { session: { store_name: string; expir
       </span>
       <button
         type="button"
-        onClick={() => void end()}
+        onClick={end}
         disabled={ending}
         className="shrink-0 rounded-full border border-white/25 px-2.5 py-0.5 text-xs font-medium transition-colors hover:bg-white/10 disabled:opacity-60"
       >

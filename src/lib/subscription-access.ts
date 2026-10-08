@@ -32,8 +32,10 @@ export interface MeSubscription {
 }
 
 export interface MeForRouting {
-  /** User public_id from auth/me/; used for cache key when JWT omits user_public_id. */
+  /** The person's public_id (Accounts' `sub`). */
   public_id?: string;
+  /** The face chosen in the person's Paperbase account; "" for their own (public_id). */
+  avatar_seed?: string;
   /** Logged-in user's own identity (distinct from the store owner's branding). */
   email?: string;
   first_name?: string;

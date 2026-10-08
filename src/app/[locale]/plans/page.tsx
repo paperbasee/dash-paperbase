@@ -6,7 +6,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { Check, Star } from "lucide-react";
 import { useRouter } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
-import { getAccessToken } from "@/lib/auth";
+import { hasAuthSessionCookie } from "@/lib/auth-session-cookie";
 import api from "@/lib/api";
 import { toLocaleDigits } from "@/lib/locale-digits";
 import { ensureMeProfile } from "@/lib/me-profile-store";
@@ -74,7 +74,7 @@ export default function PlansPage() {
   const [cycle, setCycle] = useState<BillingCycle>("yearly");
 
   useEffect(() => {
-    if (!getAccessToken()) {
+    if (!hasAuthSessionCookie()) {
       router.replace("/login");
       return;
     }

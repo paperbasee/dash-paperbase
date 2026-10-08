@@ -7,7 +7,6 @@ import { useAutoExpire } from "@/hooks/useAutoExpire";
 import { useBrandingQuery } from "@/hooks/useBrandingQuery";
 import { useEmailNotificationPrefsQuery } from "@/hooks/useEmailNotificationPrefsQuery";
 import api from "@/lib/api";
-import { useAccountSettings } from "./useAccountSettings";
 import { useStoreSettings } from "./useStoreSettings";
 import type { DynamicFieldsMessage } from "@/components/DynamicFieldsPanel";
 import { queryClient } from "@/components/QueryProvider";
@@ -33,7 +32,6 @@ export default function useSettingsPageController() {
   const { hasFeature, loading: orderEmailFeatureLoading } = useFeatures();
   const orderEmailNotificationsEnabled = hasFeature("order_email_notifications");
 
-  const account = useAccountSettings();
   const store = useStoreSettings();
 
   const { data: storeSettings } = useEmailNotificationPrefsQuery({
@@ -42,8 +40,6 @@ export default function useSettingsPageController() {
 
   useEffect(() => {
     if (!branding) return;
-    account.setOwnerName(branding.owner_name ?? "");
-    account.setOwnerEmail(branding.owner_email ?? "");
     store.syncFromBranding(branding);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [branding]);
@@ -89,19 +85,10 @@ export default function useSettingsPageController() {
     void updateEmailNotificationPref(key, value);
   }
 
-  const isLoading = isBrandingLoading && !branding;
-
   return {
-    isLoading,
     branding,
     enabledApps,
 
-    ownerName: account.ownerName,
-    setOwnerName: account.setOwnerName,
-    ownerEmail: account.ownerEmail,
-    accountSaving: account.saving,
-    accountMessage: account.message,
-    handleAccountSubmit: account.handleSubmit,
 
     storeName: store.storeName,
     setStoreName: store.setStoreName,

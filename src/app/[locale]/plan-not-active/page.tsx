@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { useRouter } from "@/i18n/navigation";
-import { getAccessToken } from "@/lib/auth";
+import { hasAuthSessionCookie } from "@/lib/auth-session-cookie";
 import { AuthPageShell } from "@/components/auth/AuthPageShell";
 import api from "@/lib/api";
 
@@ -14,7 +14,7 @@ export default function PlanNotActivePage() {
   const router = useRouter();
 
   useEffect(() => {
-    if (!getAccessToken()) {
+    if (!hasAuthSessionCookie()) {
       router.replace("/login");
       return;
     }

@@ -12,11 +12,12 @@ import {
 } from "@/lib/storeSocialLinks";
 import type { AccountProblem } from "./sections/IdentityAccounts";
 import { defaultBranding } from "@/context/BrandingContext";
-import type { SettingsMessage } from "./useAccountSettings";
 import { notify } from "@/notifications";
 import { parseValidation, storeUpdateSchema } from "@/lib/validation";
 import { queryClient } from "@/components/QueryProvider";
 import { brandingQueryKey } from "@/lib/query-keys";
+
+type SettingsMessage = { type: "success" | "error"; text: string } | null;
 
 function resolveLogoUrl(url: string | null): string | null {
   if (!url) return null;

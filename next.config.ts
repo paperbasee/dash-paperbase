@@ -43,6 +43,14 @@ const sentryIngest = (() => {
 const mediaOrigin = devMediaOrigin(isDev, process.env.NEXT_PUBLIC_MEDIA_BASE_URL);
 const withMedia = mediaOrigin ? ` ${mediaOrigin}` : "";
 
+// Accounts, where everyone signs in: the page trades its code for the pass, renews the pass and
+// signs out there (src/lib/accounts).
+const accountsOrigin = process.env.NEXT_PUBLIC_ACCOUNTS_URL
+  ? ` ${new URL(process.env.NEXT_PUBLIC_ACCOUNTS_URL).origin}`
+  : isDev
+  ? " http://localhost:4400"
+  : "";
+
 // Paperbase's status page: the dashboard reads its summary for the notice across the top.
 const statusOrigin = process.env.NEXT_PUBLIC_STATUS_URL
   ? ` ${new URL(process.env.NEXT_PUBLIC_STATUS_URL).origin}`
@@ -84,15 +92,14 @@ const securityHeaders = [
     key: "Content-Security-Policy",
     value: [
       "default-src 'self'",
-      // Cloudflare Turnstile (widget script + challenge iframe)
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://challenges.cloudflare.com https://static.cloudflareinsights.com",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://static.cloudflareinsights.com",
       // Theme editor: the storefront preview host, only when NEXT_PUBLIC_STOREFRONT_PREVIEW_ORIGIN is set.
       dashboardFrameSrc(previewOrigin(process.env.NEXT_PUBLIC_STOREFRONT_PREVIEW_ORIGIN)),
       "style-src 'self' 'unsafe-inline'",
       `img-src 'self' data: blob: https: ${apiOrigin}${withMedia}`,
       "font-src 'self' data:",
       // Allow the backend API origin explicitly (http in dev, https in prod).
-      `connect-src 'self' ${apiOrigin}${withMedia}${statusOrigin} ${wsOrigin} https://challenges.cloudflare.com https://*.r2.cloudflarestorage.com ${sentryIngest}`,
+      `connect-src 'self' ${apiOrigin}${accountsOrigin}${withMedia}${statusOrigin} ${wsOrigin} https://*.r2.cloudflarestorage.com ${sentryIngest}`,
       "frame-ancestors 'none'",
       ...(cspReportUri ? [cspReportUri] : []),
     ].join("; "),

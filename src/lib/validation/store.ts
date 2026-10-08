@@ -22,11 +22,4 @@ export function buildStoreUpdateSchema(messages: ValidationMessages = defaultVal
   });
 }
 
-export function buildAccountSettingsSchema(messages: ValidationMessages = defaultValidationMessages) {
-  return z.object({
-    ownerName: requiredString("Owner name", messages),
-  });
-}
-
 export const storeUpdateSchema = buildStoreUpdateSchema();
-export const accountSettingsSchema = buildAccountSettingsSchema();

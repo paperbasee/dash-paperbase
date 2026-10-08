@@ -1,11 +1,14 @@
 import api from "@/lib/api";
+import { isApiHttpError } from "@/lib/api-client";
 
 /**
  * The owner's Sessions tab (2026-09-29): every sign-in to the shop -- the owner's, their team's and
- * Paperbase support's -- as the API records them (accounts.sign_in_sessions). Owner only.
+ * Paperbase support's -- as Accounts keeps them, through the API, which checks it is the owner
+ * asking (api accounts/session_views.py). Owner only. A 503 `accounts_unavailable`: Accounts did
+ * not answer.
  */
 
-export type SignInMethod = "passkey" | "email_link" | "email_code" | "support" | "earlier";
+export type SignInMethod = "passkey" | "email_link" | "email_code" | "support";
 
 export type SignInSessionRow = {
   public_id: string;
@@ -22,7 +25,7 @@ export type SignInSessionRow = {
   created_at: string;
   last_seen_at: string;
   ended_at: string | null;
-  end_reason: "" | "signed_out" | "ended" | "support_ended" | "access_changed" | "access_ended";
+  end_reason: "" | "signed_out" | "ended" | "support_ended" | "access_changed" | "access_ended" | "switched_off";
   ended_by: string;
   is_live: boolean;
   is_current: boolean;
@@ -47,6 +50,11 @@ export async function endSession(publicId: string): Promise<void> {
 export async function endOtherSessions(): Promise<number> {
   const { data } = await api.post<{ ended: number }>("auth/sessions/end-others/");
   return data.ended;
+}
+
+/** Accounts did not answer the API (503 `accounts_unavailable`), rather than any other failure. */
+export function accountsAway(error: unknown): boolean {
+  return isApiHttpError(error) && error.status === 503;
 }
 
 /** "Dhaka, Bangladesh", or the country alone, or nothing. */

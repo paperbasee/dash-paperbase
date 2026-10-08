@@ -217,31 +217,6 @@ export function NameStep({ setup, className }: { setup: SetupState; className?: 
           </div>
         )}
       </div>
-
-      {setup.askOwnerName ? (
-        <fieldset className="space-y-2">
-          <legend className="field-label">{t("yourName")}</legend>
-          <div className="grid grid-cols-2 gap-3">
-            <Input
-              size="lg"
-              aria-label={t("firstName")}
-              placeholder={t("firstName")}
-              value={setup.ownerFirst}
-              onChange={(e) => setup.setOwnerFirst(e.target.value)}
-              autoComplete="given-name"
-            />
-            <Input
-              size="lg"
-              aria-label={t("lastName")}
-              placeholder={t("lastName")}
-              value={setup.ownerLast}
-              onChange={(e) => setup.setOwnerLast(e.target.value)}
-              autoComplete="family-name"
-            />
-          </div>
-          {setup.stepError === "owner" ? <FieldError>{t("ownerNameRequired")}</FieldError> : null}
-        </fieldset>
-      ) : null}
     </div>
   );
 }

@@ -1,32 +1,18 @@
-import { isVerifyEmailRoute } from "@/lib/verification-state";
-import {
-  setAuthSessionCookie,
-  clearAuthSessionCookie,
-} from "@/lib/auth-session-cookie";
 import {
   ApiHttpError,
   ApiTransportError,
   buildApiUrl,
-  isApiHttpError,
 } from "@/lib/api-client";
 import { recordApiLatency } from "@/lib/api-latency";
+import { heldClaims, passForRequest, renewPass } from "@/lib/accounts/pass";
+import { activeShop } from "@/lib/active-shop";
 
-type RefreshResponse = {
-  access?: unknown;
-  refresh?: unknown;
-};
-
-type JwtPayload = {
-  exp?: unknown;
-  active_store_public_id?: unknown;
-};
-
-const REFRESH_TIMEOUT_MS = 15_000;
-const PROACTIVE_REFRESH_LEEWAY_MS = 10_000;
-const RECENT_ROTATION_WINDOW_MS = 30_000;
-const LAST_ROTATED_AT_KEY = "paperbase_token_rotated_at";
-const ME_PROFILE_STORAGE_KEY = "paperbase_me_profile_v7";
-const REFRESH_LOCK_NAME = "paperbase-token-refresh";
+/**
+ * The dashboard's API client. Every request carries the pass (lib/accounts/pass, held in memory)
+ * and names the shop the dashboard works in (lib/active-shop): passes carry no shop. A pass the
+ * API refuses is renewed at Accounts once and the request tried again; when the sign-in is over,
+ * the tab leaves for the sign-in page (context/AuthContext, told by lib/accounts/pass).
+ */
 
 const RETRY_AFTER_401 = Symbol("paperbaseApiRetry401");
 
@@ -38,10 +24,6 @@ type AxiosCompatConfig = {
   timeout?: number;
   [RETRY_AFTER_401]?: boolean;
 };
-
-let isRefreshing = false;
-let refreshPromise: Promise<string> | null = null;
-let refreshBlocked = false;
 
 function extractDetailMessage(payload: unknown): string | null {
   if (!payload || typeof payload !== "object") return null;
@@ -71,195 +53,20 @@ function mergeAbortSignals(...signals: (AbortSignal | undefined)[]): AbortSignal
   return ctrl.signal;
 }
 
-function clearAuthStateAndRedirect() {
-  localStorage.removeItem("access_token");
-  localStorage.removeItem("refresh_token");
-  localStorage.removeItem(LAST_ROTATED_AT_KEY);
-  localStorage.removeItem(ME_PROFILE_STORAGE_KEY);
-  clearAuthSessionCookie();
-  refreshBlocked = true;
-  window.location.href = "/login";
+/** The shop the dashboard works in, for the person whose pass this tab holds. */
+export function currentShop(): string | null {
+  return activeShop(heldClaims()?.sub);
 }
 
-function persistTokens(data: RefreshResponse): string {
-  if (typeof data.access !== "string" || data.access.length === 0) {
-    throw new Error("Invalid refresh response: missing access token");
-  }
-
-  localStorage.setItem("access_token", data.access);
-
-  if (typeof data.refresh === "string" && data.refresh.length > 0) {
-    localStorage.setItem("refresh_token", data.refresh);
-  }
-
-  localStorage.setItem(LAST_ROTATED_AT_KEY, String(Date.now()));
-  setAuthSessionCookie();
-  refreshBlocked = false;
-  return data.access;
-}
-
-function readLastRotatedAt(): number | null {
-  const raw = localStorage.getItem(LAST_ROTATED_AT_KEY);
-  if (!raw) return null;
-  const n = Number(raw);
-  return Number.isFinite(n) ? n : null;
-}
-
-function decodeJwtPayload(token: string): JwtPayload | null {
-  try {
-    const parts = token.split(".");
-    if (parts.length < 2) return null;
-    const normalized = parts[1].replace(/-/g, "+").replace(/_/g, "/");
-    const padded = normalized.padEnd(Math.ceil(normalized.length / 4) * 4, "=");
-    return JSON.parse(atob(padded)) as JwtPayload;
-  } catch {
-    return null;
-  }
-}
-
-export function getActiveStorePublicIdFromJwt(token: string): string | null {
-  const payload = decodeJwtPayload(token);
-  if (!payload) return null;
-  const val = payload.active_store_public_id;
-  if (typeof val === "string" && val.trim()) return val;
-  return null;
-}
-
-function isExpiringSoon(token: string, leewayMs: number): boolean {
-  const payload = decodeJwtPayload(token);
-  if (!payload || typeof payload.exp !== "number") return false;
-  // exp is seconds since epoch.
-  const expMs = payload.exp * 1000;
-  return Date.now() + leewayMs >= expMs;
-}
-
-function hasUsableRefreshToken(): boolean {
-  const refreshToken = localStorage.getItem("refresh_token");
-  if (!refreshToken) return false;
-  const payload = decodeJwtPayload(refreshToken);
-  if (!payload || typeof payload.exp !== "number") return true;
-  return payload.exp * 1000 > Date.now();
-}
-
-function hasAccessToken(): boolean {
-  const accessToken = localStorage.getItem("access_token");
-  return typeof accessToken === "string" && accessToken.length > 0;
-}
-
-async function performRefreshUnderLock(): Promise<string> {
-  const justRotatedAt = readLastRotatedAt();
-  if (
-    justRotatedAt !== null &&
-    Date.now() - justRotatedAt < RECENT_ROTATION_WINDOW_MS
-  ) {
-    const fresh = localStorage.getItem("access_token");
-    if (fresh && !isExpiringSoon(fresh, PROACTIVE_REFRESH_LEEWAY_MS)) {
-      return fresh;
-    }
-  }
-
-  const refreshToken = localStorage.getItem("refresh_token");
-  if (!refreshToken || !hasUsableRefreshToken()) {
-    clearAuthStateAndRedirect();
-    throw new Error("Missing or expired refresh token");
-  }
-
-  const requestRefresh = async (token: string): Promise<string> => {
-    const url = buildApiUrl("auth/token/refresh/");
-    const controller = new AbortController();
-    const tid = setTimeout(() => controller.abort(), REFRESH_TIMEOUT_MS);
-    let res: Response;
-    try {
-      res = await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ refresh: token }),
-        signal: controller.signal,
-      });
-    } catch (cause) {
-      throw new ApiTransportError(
-        cause instanceof Error ? cause.message : "Network request failed",
-        { cause: cause instanceof Error ? cause : undefined }
-      );
-    } finally {
-      clearTimeout(tid);
-    }
-
-    const text = await res.text();
-    let parsed: unknown = null;
-    if (text) {
-      try {
-        parsed = JSON.parse(text) as unknown;
-      } catch {
-        parsed = text;
-      }
-    }
-
-    if (!res.ok) {
-      const msg = extractDetailMessage(parsed) ?? `HTTP ${res.status}`;
-      throw new ApiHttpError(msg, res.status, parsed);
-    }
-
-    return persistTokens(parsed as RefreshResponse);
-  };
-
-  try {
-    return await requestRefresh(refreshToken);
-  } catch (err) {
-    const status = isApiHttpError(err) ? err.status : undefined;
-    if (status === 401 || status === 403) {
-      const latestRefreshToken = localStorage.getItem("refresh_token");
-      if (
-        latestRefreshToken &&
-        latestRefreshToken !== refreshToken &&
-        hasUsableRefreshToken()
-      ) {
-        try {
-          return await requestRefresh(latestRefreshToken);
-        } catch (retryErr) {
-          const retryStatus = isApiHttpError(retryErr) ? retryErr.status : undefined;
-          if (retryStatus === 401 || retryStatus === 403) {
-            clearAuthStateAndRedirect();
-          }
-          throw retryErr;
-        }
-      }
-      clearAuthStateAndRedirect();
-    }
-    throw err;
-  }
-}
-
-async function refreshAccessTokenSingleFlight(): Promise<string> {
-  if (isRefreshing && refreshPromise) {
-    return refreshPromise;
-  }
-
-  isRefreshing = true;
-  refreshPromise = (async () => {
-    try {
-      if (
-        typeof navigator !== "undefined" &&
-        typeof navigator.locks !== "undefined" &&
-        typeof navigator.locks.request === "function"
-      ) {
-        return await navigator.locks.request(REFRESH_LOCK_NAME, () =>
-          performRefreshUnderLock()
-        );
-      }
-      return await performRefreshUnderLock();
-    } finally {
-      isRefreshing = false;
-      refreshPromise = null;
-    }
-  })();
-
-  return refreshPromise;
-}
-
-/** Refreshes access (and refresh when rotation is enabled) from the stored refresh token. */
-export async function refreshAccessTokenOrThrow(): Promise<string> {
-  return refreshAccessTokenSingleFlight();
+/** The pass and the shop, for a request. */
+export async function signInHeaders(): Promise<Headers> {
+  const h = new Headers();
+  if (typeof window === "undefined") return h;
+  const pass = await passForRequest();
+  if (pass) h.set("Authorization", `Bearer ${pass}`);
+  const shop = currentShop();
+  if (shop) h.set("X-Store-Public-ID", shop);
+  return h;
 }
 
 function normalizeConfigHeaders(
@@ -285,50 +92,12 @@ function normalizeConfigHeaders(
   return h;
 }
 
-async function prepareAuthHeaders(requestPath: string): Promise<Headers> {
-  const h = new Headers();
-  if (typeof window === "undefined") {
-    return h;
-  }
-
-  let token = localStorage.getItem("access_token");
-  if (token && hasUsableRefreshToken()) {
-    refreshBlocked = false;
-  }
-
-  const isRefreshCall = requestPath.includes("/auth/token/refresh/");
-  if (
-    token &&
-    !isRefreshCall &&
-    !refreshBlocked &&
-    hasUsableRefreshToken() &&
-    isExpiringSoon(token, PROACTIVE_REFRESH_LEEWAY_MS)
-  ) {
-    try {
-      token = await refreshAccessTokenSingleFlight();
-    } catch {
-      // keep possibly-stale token; caller may get 401 and retry via executeRequest
-    }
-  }
-
-  if (token) {
-    h.set("Authorization", `Bearer ${token}`);
-    const activeStorePublicId = getActiveStorePublicIdFromJwt(token);
-    if (activeStorePublicId) {
-      h.set("X-Store-Public-ID", activeStorePublicId);
-    }
-  }
-
-  return h;
-}
-
 async function executeRequest<T>(
   method: string,
   path: string,
   body: unknown,
   config: AxiosCompatConfig
 ): Promise<{ data: T; status: number; statusText: string; headers: Headers }> {
-  const isRefreshCall = path.includes("/auth/token/refresh/");
   const isRetry401 = config[RETRY_AFTER_401] === true;
 
   const url = buildApiUrl(path, config.params);
@@ -350,7 +119,7 @@ async function executeRequest<T>(
 
   const mergedSignal = mergeAbortSignals(config.signal, timeoutSignal);
 
-  const authHeaders = await prepareAuthHeaders(path);
+  const authHeaders = await signInHeaders();
   const extraHeaders = normalizeConfigHeaders(config.headers, body);
   extraHeaders.forEach((v, k) => authHeaders.set(k, v));
 
@@ -384,36 +153,15 @@ async function executeRequest<T>(
     timeoutClear?.();
   }
 
-  const skipVerifyEmailRedirect =
-    typeof window !== "undefined" && isVerifyEmailRoute(window.location.pathname);
-
-  if (
-    res.status === 401 &&
-    !isRetry401 &&
-    !isRefreshCall &&
-    !refreshBlocked &&
-    hasAccessToken() &&
-    hasUsableRefreshToken()
-  ) {
-    const text401 = await res.text();
-    let data401: unknown = null;
-    try {
-      data401 = text401 ? JSON.parse(text401) : null;
-    } catch {
-      data401 = text401;
+  // The pass refused (run out, or its sign-in just ended): once, a fresh one and again. A sign-in
+  // that is over leaves for the sign-in page by itself (lib/accounts/pass tells AuthContext).
+  if (res.status === 401 && !isRetry401 && authHeaders.has("Authorization")) {
+    const renewal = await renewPass();
+    if (renewal.kind === "renewed") {
+      return executeRequest<T>(method, path, body, { ...config, [RETRY_AFTER_401]: true });
     }
-    const msg401 = extractDetailMessage(data401) ?? `HTTP ${res.status}`;
-
-    if (skipVerifyEmailRedirect) {
-      throw new ApiHttpError(msg401, res.status, data401);
-    }
-
-    try {
-      await refreshAccessTokenSingleFlight();
-      const retryConfig: AxiosCompatConfig = { ...config, [RETRY_AFTER_401]: true };
-      return executeRequest<T>(method, path, body, retryConfig);
-    } catch {
-      throw new ApiHttpError(msg401, res.status, data401);
+    if (renewal.kind === "unreachable") {
+      throw new ApiTransportError("Accounts could not be reached to renew the pass");
     }
   }
 

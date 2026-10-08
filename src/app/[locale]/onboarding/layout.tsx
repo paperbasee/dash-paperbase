@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "@/i18n/navigation";
 import { useAuth } from "@/context/AuthContext";
-import { getAccessToken } from "@/lib/auth";
 import { fetchMeForRouting, setupUnfinished } from "@/lib/subscription-access";
 import SubscriptionAccessBlock from "@/components/auth/SubscriptionAccessBlock";
 
@@ -29,13 +28,13 @@ export default function OnboardingLayout({ children }: { children: React.ReactNo
   // Read on arrival only: Finish moves the address to `?step=done` itself, and the gate must not
   // run again then -- it would swap setup out for the wait while the last saves are landing.
   const [arrivedAtDone] = useState(() => searchParams.get("step") === "done");
-  const { isAuthenticated, isLoading: authLoading, authHydrated } = useAuth();
+  const { isAuthenticated, authHydrated } = useAuth();
   const [subGate, setSubGate] = useState<SubGate>("idle");
 
   useEffect(() => {
-    if (authLoading) return;
+    if (!authHydrated) return;
 
-    if (!isAuthenticated || !getAccessToken()) {
+    if (!isAuthenticated) {
       setSubGate("ok");
       return;
     }
@@ -61,9 +60,9 @@ export default function OnboardingLayout({ children }: { children: React.ReactNo
     return () => {
       cancelled = true;
     };
-  }, [isAuthenticated, authLoading, isAddMode, arrivedAtDone, router]);
+  }, [isAuthenticated, authHydrated, isAddMode, arrivedAtDone, router]);
 
-  if (!authHydrated || authLoading) return <Waiting />;
+  if (!authHydrated) return <Waiting />;
   if (isAuthenticated && (subGate === "idle" || subGate === "pending")) return <Waiting />;
   if (isAuthenticated && subGate === "failed") {
     return <SubscriptionAccessBlock variant="verifyFailed" />;

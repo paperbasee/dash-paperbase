@@ -4,20 +4,21 @@ import type { NextRequest } from "next/server";
 import { routing } from "./i18n/routing";
 
 /**
- * Locale negotiation (next-intl) runs first, then the existing auth_session gate.
+ * Locale negotiation (next-intl) runs first, then the auth_session gate: a hint that this browser
+ * is signed in (lib/auth-session-cookie); the pass itself lives in the page's memory.
  */
 
 const intlMiddleware = createMiddleware(routing);
 
 const PUBLIC_PATHS = [
+  // On to Accounts, where signing in and up happen; /auth holds the way back (auth/callback)
+  // and a support visit's start.
   "/login",
   "/signup",
   "/onboarding",
   "/plan-not-active",
   "/plans",
   "/checkout",
-  "/reset-password",
-  "/verify-email",
   "/auth",
   "/order",
   "/billing",

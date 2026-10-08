@@ -45,9 +45,9 @@ describe("previewOrigin", () => {
 
 describe("dashboardFrameSrc", () => {
   test("adds the preview origin only when one is configured", () => {
-    expect(dashboardFrameSrc(null)).toBe("frame-src 'self' https://challenges.cloudflare.com");
+    expect(dashboardFrameSrc(null)).toBe("frame-src 'self'");
     expect(dashboardFrameSrc(previewOrigin("https://preview.paperbase.me/"))).toBe(
-      "frame-src 'self' https://challenges.cloudflare.com https://preview.paperbase.me",
+      "frame-src 'self' https://preview.paperbase.me",
     );
   });
 
@@ -59,7 +59,7 @@ describe("dashboardFrameSrc", () => {
       "http://preview.paperbase.me",
       "https://preview.paperbase.me; script-src *",
     ]) {
-      expect(dashboardFrameSrc(previewOrigin(raw))).toBe("frame-src 'self' https://challenges.cloudflare.com");
+      expect(dashboardFrameSrc(previewOrigin(raw))).toBe("frame-src 'self'");
     }
   });
 });

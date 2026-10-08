@@ -1,7 +1,7 @@
 "use client";
 
 import type { MouseEvent, ReactNode } from "react";
-import { ChevronRight, Globe, Laptop, LogOut, Moon, Palette, Sparkles, Sun } from "lucide-react";
+import { ChevronRight, CircleUserRound, Globe, Laptop, LogOut, Moon, Palette, Sparkles, Sun } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { DropdownMenuItem, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
@@ -13,7 +13,8 @@ import { unreadLine } from "@/lib/whats-new/unread";
 /**
  * What the account menu holds (owner, 2026-10-07: design "A with C's What's new"): theme and
  * language as small switches on one row each, What's new as a tile that says how many updates
- * are waiting, and Log out, quiet until pointed at.
+ * are waiting, the person's Paperbase account at Accounts (name, phone, picture, passkeys), and
+ * Log out, quiet until pointed at.
  */
 export function UserMenuBody({
   theme,
@@ -22,6 +23,7 @@ export function UserMenuBody({
   onLocaleChange,
   unreadCount,
   onWhatsNew,
+  accountHref,
   onSignOut,
 }: {
   theme: ThemePreference;
@@ -30,6 +32,8 @@ export function UserMenuBody({
   onLocaleChange: (next: AppLocale) => void;
   unreadCount: number;
   onWhatsNew: () => void;
+  /** "Your Paperbase account" at Accounts; null in a support visit, which never opens it. */
+  accountHref: string | null;
   onSignOut: () => void;
 }) {
   const tSidebar = useTranslations("sidebar");
@@ -83,6 +87,15 @@ export function UserMenuBody({
       </DropdownMenuItem>
 
       <DropdownMenuSeparator className="mx-0 my-1" />
+
+      {accountHref ? (
+        <DropdownMenuItem asChild className="mx-1 cursor-pointer gap-2.5 rounded-xs px-2.5 py-2 text-sm font-medium text-foreground">
+          <a href={accountHref}>
+            <CircleUserRound className="size-4 text-muted-foreground" aria-hidden />
+            <span>{tSidebar("yourAccount")}</span>
+          </a>
+        </DropdownMenuItem>
+      ) : null}
 
       <DropdownMenuItem
         onSelect={onSignOut}

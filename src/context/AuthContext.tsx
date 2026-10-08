@@ -9,24 +9,9 @@ import {
   useRef,
   type ReactNode,
 } from "react";
-import {
-  signup as authSignup,
-  passkeyLogin as authPasskeyLogin,
-  passkeyAutofillLogin as authPasskeyAutofillLogin,
-  enrollPasskey as authEnrollPasskey,
-  requestMagicLink as authRequestMagicLink,
-  verifyMagicCode as authVerifyMagicCode,
-  verifyMagicLink as authVerifyMagicLink,
-  logout as authLogout,
-  signInOf,
-  signOut as authSignOut,
-  type AuthTokens,
-  type SignupResponse,
-  type MagicLinkPurpose,
-  type MagicLinkVerifyResult,
-  type PasskeyInfo,
-} from "@/lib/auth";
-import { clearPendingVerificationEmail } from "@/lib/verification-state";
+import { logout as authLogout, signOut as authSignOut, SIGN_IN_CHANNEL, THIS_TAB } from "@/lib/auth";
+import { clearAuthSessionCookie, hasAuthSessionCookie } from "@/lib/auth-session-cookie";
+import { heldPass, holdPass, onSignedOut, renewIfStale, renewPass } from "@/lib/accounts/pass";
 import type { MeForRouting } from "@/lib/subscription-access";
 import {
   ensureMeProfile,
@@ -34,70 +19,42 @@ import {
   ME_PROFILE_PERSIST_EVENT,
   ME_PROFILE_STORAGE_KEY,
 } from "@/lib/me-profile-store";
-import { refreshAccessTokenOrThrow } from "@/lib/api";
 
 export type MeProfileStatus = "idle" | "loading" | "ready" | "error";
 
 interface AuthState {
   isAuthenticated: boolean;
-  isLoading: boolean;
   isLoggingOut: boolean;
-  /** True after first client mount (avoids SSR/client hydration mismatch for auth-derived UI). */
+  /** True once this tab knows whether it is signed in (avoids SSR/client hydration mismatch). */
   authHydrated: boolean;
+  /** Accounts could not be reached to know (lib/accounts/pass `unreachable`). */
+  signInUnreachable: boolean;
   /** True while a network refresh of `me` is in flight (may be true while status is already `ready`). */
   meProfileFetching: boolean;
   meProfile: MeForRouting | null;
   meProfileStatus: MeProfileStatus;
   /** Raw error from the last failed ensureMeProfile call; null when status is not "error". */
   meProfileError: unknown;
-  refreshMeProfile: () => Promise<void>;
-  /** Passwordless sign-in with a passkey (discoverable when no email given). */
-  signInWithPasskey: (email?: string) => Promise<AuthTokens>;
-  /** Sign in with the passkey picked from the email box's suggestions (lib/auth passkeyAutofillLogin). */
-  signInWithPasskeyAutofill: (onPicked?: () => void) => Promise<AuthTokens>;
-  signup: (
-    email: string,
-    firstName: string,
-    lastName: string,
-    cf_turnstile_response?: string
-  ) => Promise<SignupResponse>;
-  /** Create a passkey; bootstrap flows pass a ticket and get logged in. */
-  enrollPasskey: (opts: {
-    enrollmentTicket?: string;
-    name?: string;
-  }) => Promise<{ tokens?: AuthTokens; credential: PasskeyInfo }>;
-  requestMagicLink: (
-    email: string,
-    purpose: MagicLinkPurpose
-  ) => Promise<{ message: string }>;
-  verifyMagicLink: (token: string) => Promise<MagicLinkVerifyResult>;
-  verifyMagicCode: (email: string, code: string) => Promise<MagicLinkVerifyResult>;
+  /** Back from Accounts with a pass (app/[locale]/auth/callback): this tab is signed in. */
+  completeSignIn: (pass: string) => void;
+  /** Leave for the sign-in page, forgetting this tab's sign-in (lib/auth logout). */
   logout: () => void;
-  /** The Sign out a person presses: the API ends this sign-in too (lib/auth signOut). */
+  /** The Sign out a person presses: Accounts ends the sign-in (lib/auth signOut). */
   signOut: () => void;
 }
 
 const AuthContext = createContext<AuthState | undefined>(undefined);
 
-function isTokenExpired(token: string): boolean {
-  try {
-    const parts = token.split(".");
-    if (parts.length < 2) return true;
-    const normalized = parts[1].replace(/-/g, "+").replace(/_/g, "/");
-    const padded = normalized.padEnd(Math.ceil(normalized.length / 4) * 4, "=");
-    const payload = JSON.parse(atob(padded)) as { exp?: unknown };
-    if (typeof payload.exp !== "number") return true;
-    return payload.exp * 1000 <= Date.now();
-  } catch {
-    return true;
-  }
-}
-
+/**
+ * Who is signed in, for the whole dashboard. Signing in is Accounts' (lib/accounts): this tab is
+ * signed in while it holds a pass, which it asks Accounts for as it opens, when the browser looks
+ * signed in (the `auth_session` hint), and renews before it runs out.
+ */
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isLoading] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [authHydrated, setAuthHydrated] = useState(false);
+  const [signInUnreachable, setSignInUnreachable] = useState(false);
 
   const [meProfile, setMeProfile] = useState<MeForRouting | null>(null);
   const [meProfileStatus, setMeProfileStatus] = useState<MeProfileStatus>("idle");
@@ -120,50 +77,77 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     []
   );
 
+  const logout = useCallback(() => {
+    setIsLoggingOut(true);
+    authLogout();
+    setIsAuthenticated(false);
+  }, []);
+
+  const signOut = useCallback(() => {
+    setIsLoggingOut(true);
+    void authSignOut();
+  }, []);
+
+  const completeSignIn = useCallback((pass: string) => {
+    holdPass(pass);
+    setSignInUnreachable(false);
+    setIsAuthenticated(true);
+    setAuthHydrated(true);
+  }, []);
+
+  // As the tab opens: signed in if it already holds a pass (just back from Accounts), or if
+  // Accounts gives one for the browser's sign-in.
   useEffect(() => {
     let cancelled = false;
-
-    const bootstrapAuth = async () => {
-      const accessToken = localStorage.getItem("access_token");
-      const refreshToken = localStorage.getItem("refresh_token");
-
-      if (accessToken && !isTokenExpired(accessToken)) {
-        if (!cancelled) {
-          setIsAuthenticated(true);
-          setAuthHydrated(true);
-        }
-        return;
+    if (heldPass()) {
+      setIsAuthenticated(true);
+      setAuthHydrated(true);
+      return;
+    }
+    if (!hasAuthSessionCookie()) {
+      setAuthHydrated(true);
+      return;
+    }
+    void renewPass().then((renewal) => {
+      if (cancelled) return;
+      if (renewal.kind === "renewed") {
+        setIsAuthenticated(true);
+      } else if (renewal.kind === "signed_out") {
+        clearAuthSessionCookie();
+      } else {
+        setSignInUnreachable(true);
       }
-
-      if (!refreshToken) {
-        if (!cancelled) {
-          setIsAuthenticated(false);
-          setAuthHydrated(true);
-        }
-        return;
-      }
-
-      try {
-        await refreshAccessTokenOrThrow();
-        if (!cancelled) {
-          setIsAuthenticated(true);
-        }
-      } catch {
-        if (!cancelled) {
-          setIsAuthenticated(false);
-        }
-      } finally {
-        if (!cancelled) {
-          setAuthHydrated(true);
-        }
-      }
-    };
-
-    void bootstrapAuth();
+      setAuthHydrated(true);
+    });
     return () => {
       cancelled = true;
     };
   }, []);
+
+  // The sign-in ended -- found by a renewal, or another tab of this browser signed out: leave.
+  useEffect(() => {
+    const stopListening = onSignedOut(() => logout());
+    let channel: BroadcastChannel | null = null;
+    try {
+      channel = new BroadcastChannel(SIGN_IN_CHANNEL);
+      channel.onmessage = (event: MessageEvent<{ kind?: string; from?: string }>) => {
+        const fromAnotherTab = event.data?.from !== THIS_TAB;
+        if (event.data?.kind === "signed_out" && fromAnotherTab && isAuthenticatedRef.current) logout();
+      };
+    } catch {
+      channel = null;
+    }
+    // A tab woken from sleep renews at once if its pass ran out meanwhile.
+    const onVisible = () => {
+      if (document.visibilityState === "visible") renewIfStale();
+    };
+    document.addEventListener("visibilitychange", onVisible);
+    return () => {
+      stopListening();
+      channel?.close();
+      document.removeEventListener("visibilitychange", onVisible);
+    };
+  }, [logout]);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -217,67 +201,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => window.removeEventListener(ME_PROFILE_PERSIST_EVENT, onPersisted);
   }, [setMeProfileFromStore]);
 
-  const lastRemoteLogoutAt = useRef(0);
+  // Another tab of this browser fetched or dropped the profile: this tab follows.
   const lastProfileStorageEventAt = useRef(0);
-  const handleRemoteSessionChange = useCallback(
+  const handleProfileStorage = useCallback(
     (e: StorageEvent) => {
-      if (e.storageArea !== localStorage) return;
+      if (e.storageArea !== localStorage || e.key !== ME_PROFILE_STORAGE_KEY || !isAuthenticatedRef.current) return;
+      const now = Date.now();
+      if (now - lastProfileStorageEventAt.current < 400) return;
+      lastProfileStorageEventAt.current = now;
 
-      const tokenRemoved =
-        (e.key === "access_token" || e.key === "refresh_token") &&
-        e.oldValue != null &&
-        e.newValue == null;
-      if (tokenRemoved) {
-        const now = Date.now();
-        if (now - lastRemoteLogoutAt.current < 400) return;
-        lastRemoteLogoutAt.current = now;
-        setIsAuthenticated(false);
-        setMeProfileFromStore(null, "idle");
-        setMeProfileFetching(false);
-        const path = window.location.pathname;
-        if (!path.includes("/login")) {
-          window.location.replace("/login");
-        }
+      if (e.newValue == null && e.oldValue != null) {
+        setMeProfileFromStore(null, "loading");
+        setMeProfileFetching(true);
+        ensureMeProfile()
+          .then((m) => {
+            setMeProfileError(null);
+            setMeProfileFromStore(m, "ready");
+          })
+          .catch((err: unknown) => {
+            setMeProfileError(err);
+            setMeProfileFromStore(null, "error");
+          })
+          .finally(() => setMeProfileFetching(false));
         return;
       }
-
-      // Another tab signed in as someone else, or into another sign-in (a support visit entered in
-      // this browser): this tab follows it rather than showing the old account with the new token.
-      // The hourly renewal keeps the user and the session, and changes nothing here.
-      if (e.key === "access_token" && e.oldValue && e.newValue) {
-        const before = signInOf(e.oldValue);
-        const after = signInOf(e.newValue);
-        if (before && after && (before.user !== after.user || (before.sid && after.sid && before.sid !== after.sid))) {
-          window.location.reload();
-          return;
-        }
-      }
-
-      if (e.key === ME_PROFILE_STORAGE_KEY && isAuthenticatedRef.current) {
-        const now = Date.now();
-        if (now - lastProfileStorageEventAt.current < 400) return;
-        lastProfileStorageEventAt.current = now;
-
-        if (e.newValue == null && e.oldValue != null) {
-          setMeProfileFromStore(null, "loading");
-          setMeProfileFetching(true);
-          ensureMeProfile({ forceNetwork: true })
-            .then((m) => {
-              setMeProfileError(null);
-              setMeProfileFromStore(m, "ready");
-            })
-            .catch((err: unknown) => {
-              setMeProfileError(err);
-              setMeProfileFromStore(null, "error");
-            })
-            .finally(() => setMeProfileFetching(false));
-          return;
-        }
-        if (e.newValue != null) {
-          const next = getHydratedMeProfile();
-          if (next) {
-            setMeProfileFromStore(next, "ready");
-          }
+      if (e.newValue != null) {
+        const next = getHydratedMeProfile();
+        if (next) {
+          setMeProfileFromStore(next, "ready");
         }
       }
     },
@@ -285,114 +236,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 
   useEffect(() => {
-    window.addEventListener("storage", handleRemoteSessionChange);
-    return () => window.removeEventListener("storage", handleRemoteSessionChange);
-  }, [handleRemoteSessionChange]);
-
-  const refreshMeProfile = useCallback(async () => {
-    if (!isAuthenticated) return;
-    setMeProfileFetching(true);
-    try {
-      const m = await ensureMeProfile({ forceNetwork: true });
-      setMeProfileError(null);
-      setMeProfileFromStore(m, "ready");
-    } catch (err: unknown) {
-      setMeProfileError(err);
-      setMeProfileFromStore(null, "error");
-    } finally {
-      setMeProfileFetching(false);
-    }
-  }, [isAuthenticated, setMeProfileFromStore]);
-
-  const signInWithPasskey = useCallback(async (email?: string) => {
-    const tokens = await authPasskeyLogin(email);
-    setIsAuthenticated(true);
-    clearPendingVerificationEmail();
-    return tokens;
-  }, []);
-
-  const signInWithPasskeyAutofill = useCallback(async (onPicked?: () => void) => {
-    const tokens = await authPasskeyAutofillLogin(onPicked);
-    setIsAuthenticated(true);
-    clearPendingVerificationEmail();
-    return tokens;
-  }, []);
-
-  const signup = useCallback(
-    async (email: string, firstName: string, lastName: string, cf?: string) => {
-      return authSignup(email, firstName, lastName, cf);
-    },
-    []
-  );
-
-  const enrollPasskey = useCallback(
-    async (opts: { enrollmentTicket?: string; name?: string }) => {
-      const result = await authEnrollPasskey(opts);
-      if (result.tokens) {
-        setIsAuthenticated(true);
-        clearPendingVerificationEmail();
-      }
-      return result;
-    },
-    []
-  );
-
-  const requestMagicLink = useCallback(
-    async (email: string, purpose: MagicLinkPurpose) => {
-      return authRequestMagicLink(email, purpose);
-    },
-    []
-  );
-
-  const verifyMagicCode = useCallback(async (email: string, code: string) => {
-    const result = await authVerifyMagicCode(email, code);
-    if (result.action === "signed_in") {
-      setIsAuthenticated(true);
-      clearPendingVerificationEmail();
-    }
-    return result;
-  }, []);
-
-  const verifyMagicLink = useCallback(async (token: string) => {
-    const result = await authVerifyMagicLink(token);
-    if (result.action === "signed_in") {
-      setIsAuthenticated(true);
-      clearPendingVerificationEmail();
-    }
-    return result;
-  }, []);
-
-  const logout = useCallback(() => {
-    setIsLoggingOut(true);
-    authLogout();
-    setIsAuthenticated(false);
-  }, []);
-
-  const signOut = useCallback(() => {
-    setIsLoggingOut(true);
-    authSignOut();
-    setIsAuthenticated(false);
-  }, []);
+    window.addEventListener("storage", handleProfileStorage);
+    return () => window.removeEventListener("storage", handleProfileStorage);
+  }, [handleProfileStorage]);
 
   return (
     <AuthContext.Provider
       value={{
         isAuthenticated,
-        isLoading,
         isLoggingOut,
         authHydrated,
+        signInUnreachable,
         meProfileFetching,
         meProfile,
         meProfileStatus,
         meProfileError,
-        refreshMeProfile,
-        signInWithPasskey,
-        signInWithPasskeyAutofill,
-        signup,
-        enrollPasskey,
-        requestMagicLink,
-        verifyMagicLink,
-        verifyMagicCode,
+        completeSignIn,
         logout,
         signOut,
       }}

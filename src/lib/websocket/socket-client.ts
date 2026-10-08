@@ -19,10 +19,19 @@ function resolveWsBase(): string {
   return "ws://localhost:8000";
 }
 
-function buildSocketUrl(token: string): string {
-  const base = resolveWsBase();
-  const encoded = encodeURIComponent(token);
-  return `${base}/ws/v1/store/events/?token=${encoded}`;
+/**
+ * What the socket signs in with: the pass (a browser cannot set headers on a socket) and the shop
+ * the dashboard works in -- passes carry no shop (api engine/core/ws_jwt.py).
+ */
+export interface SocketCredentials {
+  pass: string;
+  shop: string | null;
+}
+
+export function buildSocketUrl({ pass, shop }: SocketCredentials): string {
+  const query = new URLSearchParams({ token: pass });
+  if (shop) query.set("store", shop);
+  return `${resolveWsBase()}/ws/v1/store/events/?${query.toString()}`;
 }
 
 function reconnectDelayMs(attempt: number): number {
@@ -44,11 +53,18 @@ export class StoreSocketClient {
   private readonly messageHandlers = new Set<(event: SocketEvent) => void>();
   private onConnectHandler: (() => void) | null = null;
   private onDisconnectHandler: (() => void) | null = null;
-  private lastToken: string | null = null;
+  /** Where each (re)connection gets a current pass: one lasts only ten minutes. */
+  private credentials: (() => Promise<SocketCredentials | null>) | null = null;
 
-  connect(token: string): void {
-    this.lastToken = token;
+  connect(credentials: () => Promise<SocketCredentials | null>): void {
+    this.credentials = credentials;
     this.isIntentionallyClosed = false;
+    void this.open();
+  }
+
+  private async open(): Promise<void> {
+    const signIn = await this.credentials?.();
+    if (!signIn || this.isIntentionallyClosed) return;
 
     if (this.ws) {
       this.ws.onopen = null;
@@ -59,8 +75,7 @@ export class StoreSocketClient {
       this.ws = null;
     }
 
-    const url = buildSocketUrl(token);
-    const ws = new WebSocket(url);
+    const ws = new WebSocket(buildSocketUrl(signIn));
     this.ws = ws;
 
     ws.onopen = () => {
@@ -100,15 +115,15 @@ export class StoreSocketClient {
     ws.onclose = () => {
       this.stopPing();
       this.onDisconnectHandler?.();
-      if (!this.isIntentionallyClosed && this.lastToken) {
-        this.scheduleReconnect(this.lastToken);
+      if (!this.isIntentionallyClosed && this.credentials) {
+        this.scheduleReconnect();
       }
     };
   }
 
   disconnect(): void {
     this.isIntentionallyClosed = true;
-    this.lastToken = null;
+    this.credentials = null;
     this.stopPing();
     if (this.reconnectTimer !== null) {
       clearTimeout(this.reconnectTimer);
@@ -124,7 +139,7 @@ export class StoreSocketClient {
     }
   }
 
-  private scheduleReconnect(token: string): void {
+  private scheduleReconnect(): void {
     if (this.reconnectAttempts >= this.maxReconnectAttempts) {
       return;
     }
@@ -133,7 +148,7 @@ export class StoreSocketClient {
     this.reconnectTimer = setTimeout(() => {
       this.reconnectTimer = null;
       if (!this.isIntentionallyClosed) {
-        this.connect(token);
+        void this.open();
       }
     }, delay);
   }

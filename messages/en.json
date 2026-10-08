@@ -1704,7 +1704,8 @@
     "searchTeam": "Team",
     "searchRecent": "Recent searches",
     "searchClearRecent": "Clear",
-    "searchKeysHint": "↑ ↓ to move · Enter to open · Esc to close"
+    "searchKeysHint": "↑ ↓ to move · Enter to open · Esc to close",
+    "yourAccount": "Your Paperbase account"
   },
   "whatsNew": {
     "menuLabel": "What's new",
@@ -1761,7 +1762,9 @@
     "serverUnreachableTitle": "Unable to connect",
     "serverUnreachableBody": "Unable to connect to the server. Please check your internet connection or try again later.",
     "trialBannerText": "You're on a free trial — {days} days left.",
-    "trialBannerCta": "Choose a plan"
+    "trialBannerCta": "Choose a plan",
+    "signInUnreachableTitle": "Sign-in can't be reached",
+    "signInUnreachableBody": "Paperbase's sign-in isn't answering right now, so the dashboard can't check who you are. Your shop keeps selling. This page tries again by itself."
   },
   "dashboard": {
     "title": "{greeting}, {name} 👋",
@@ -1859,44 +1862,6 @@
     "refreshAria": "Refresh dashboard data"
   },
   "auth": {
-    "turnstileHumanPrompt": "Let us verify you are a human",
-    "turnstileRequired": "Please complete the verification challenge before continuing.",
-    "login": {
-      "title": "Welcome back to Paperbase",
-      "subtitle": "Sign in to run your shop.",
-      "passkey": "Continue with a passkey",
-      "noPasskeys": "This device can't use passkeys. Use the email link below.",
-      "orEmail": "or use your email",
-      "email": "Email",
-      "emailPlaceholder": "you@example.com",
-      "sendLink": "Email me a sign-in link",
-      "emailRequired": "Enter your email to get a sign-in link.",
-      "passkeyFailed": "We couldn't sign you in with a passkey. Try the email link, or a device that has your passkey.",
-      "accountCheckFailed": "We couldn't check your account. Try again.",
-      "failed": "Something went wrong. Try again.",
-      "ended": {
-        "access_changed": "Your role or access in this shop changed. Sign in again to carry on.",
-        "access_ended": "You no longer have access to this shop. If that's a mistake, ask the shop owner.",
-        "ended": "This sign-in was ended from the shop's Sessions. Sign in again to carry on.",
-        "support_ended": "The support visit has ended."
-      }
-    },
-    "signup": {
-      "title": "Open your shop in Paperbase",
-      "subtitle": "Set up Paperbase in under two minutes.",
-      "firstName": "First name",
-      "lastName": "Last name",
-      "firstNamePlaceholder": "Nusrat",
-      "lastNamePlaceholder": "Jahan",
-      "email": "Email",
-      "emailPlaceholder": "you@example.com",
-      "create": "Email me a link to get started",
-      "nameRequired": "Enter your first and last name.",
-      "emailRequired": "Enter your email address.",
-      "failed": "We couldn't create your account. Try again.",
-      "trialFree": "Free for {days, plural, one {# day} other {# days}}",
-      "trialNoPayment": "No payment to start"
-    },
     "onboarding": {
       "stepOf": "Step {current} of {total}",
       "stepSell": "What you sell",
@@ -1930,10 +1895,6 @@
       "addressCheckFailed": "Couldn't check the address just now.",
       "checking": "Checking",
       "available": "Available",
-      "yourName": "Your name",
-      "firstName": "First name",
-      "lastName": "Last name",
-      "ownerNameRequired": "Enter your first and last name.",
       "creating": "Creating your shop…",
       "createFailed": "We couldn't create your shop. Try again.",
       "addressTitle": "Where will shoppers find you?",
@@ -2012,70 +1973,6 @@
       "ownDomainLater": "Want your own domain, like {example}? <link>Connect it any time in Settings</link>.",
       "ownDomainPending": "{domain} isn't connected yet, so your free address is the one that's live. <link>Finish it in Settings</link>."
     },
-    "verifyEmail": {
-      "verifying": "Verifying your email…",
-      "verifiedTitle": "Email verified",
-      "verifiedDefault": "Email verified successfully.",
-      "failedTitle": "Verification failed",
-      "failedHint": "Request a new link from the signup flow or contact support.",
-      "checkTitle": "Check your email",
-      "checkBody": "We've sent a verification link to your email address. Please check your inbox.",
-      "emailPlaceholder": "Enter your email address",
-      "emailHint": "Enter your signup email to request a new verification link.",
-      "resendHint": "Didn't receive the email? Check spam or resend.",
-      "resendSuccess": "If the email exists, verification link has been sent.",
-      "resendEmail": "Resend email",
-      "resendAvailableInSeconds": "Resend available in {seconds}s",
-      "sending": "Sending…",
-      "emailRequiredResend": "Email address is required to resend verification.",
-      "backToLogin": "Back to login",
-      "logIn": "Log in",
-      "genericError": "Something went wrong. Please try again."
-    },
-    "checkEmail": {
-      "title": "Check your email",
-      "signinBody": "If an account uses {email}, we've sent it a sign-in link and a 6-digit code.",
-      "signupBody": "We sent a link and a 6-digit code to {email}. Open the link, or type the code below.",
-      "openGmail": "Open Gmail",
-      "openOutlook": "Open Outlook",
-      "noEmail": "No email? Check your spam folder, or",
-      "resendIn": "send again in {seconds}s",
-      "resend": "send it again",
-      "resent": "Sent again.",
-      "wrongEmail": "Wrong email?",
-      "goBack": "Go back",
-      "orCode": "or type the code from the email",
-      "codeLabel": "6-digit code",
-      "checking": "Checking the code…",
-      "codeWrong": "That code isn't right. Check the email and try again.",
-      "codeLocked": "Too many tries. Send yourself a new code.",
-      "codeUnreachable": "Couldn't check the code just now. Try again."
-    },
-    "passkey": {
-      "verifyingTitle": "Checking your link",
-      "verifyingBody": "One moment…",
-      "errorTitle": "This link didn't work",
-      "missingToken": "This link is missing its token.",
-      "invalid": "This link is invalid or has expired.",
-      "backToSignIn": "Back to sign in",
-      "offerTitle": "Add a passkey to this device",
-      "offerBody": "Next time, sign in here with your face, fingerprint, or PIN. No email link needed.",
-      "enrollTitle": "Create your passkey",
-      "enrollBody": "You're signing in as {email}. Your device becomes your sign-in: your face, fingerprint, or PIN. No password to remember.",
-      "create": "Create a passkey",
-      "notNow": "Not now",
-      "noSupport": "This device can't make passkeys. Open the link on a device that can.",
-      "cancelled": "Passkey setup was cancelled. Try again to finish.",
-      "cancelledOffer": "Passkey setup was cancelled. Try again, or skip for now.",
-      "failed": "We couldn't create your passkey. Try again.",
-      "failedOffer": "We couldn't create your passkey. Try again, or skip for now.",
-      "finishFailed": "Something went wrong finishing your passkey. Try again."
-    },
-    "tabs": {
-      "label": "Sign in or create an account",
-      "signIn": "Sign in",
-      "createAccount": "Create account"
-    },
     "wall": {
       "title": "Every shop starts with a single sign-in.",
       "body": "Orders, couriers and your own website, in one place.",
@@ -2089,21 +1986,25 @@
       "title": "Welcome to the team.",
       "body": "Orders, couriers and the shop, together in one place."
     },
-    "agree": "By continuing, you agree to Paperbase's <terms>Terms</terms> and <privacy>Privacy Policy</privacy>.",
     "needHelp": "Need help?",
     "talkToUs": "Talk to us",
     "unreachable": "We couldn't reach the server. Try again.",
-    "didYouMean": "Did you mean <fix>{email}</fix>?",
-    "useSuggestion": "Use this",
-    "keepTyped": "Keep what I typed",
     "support": {
       "enteringTitle": "Opening the shop as support",
       "enteringBody": "The dashboard opens in support mode in a moment.",
       "failedTitle": "This link didn't open the shop",
-      "failed": "Open a new one from the shop's page in the admin.",
-      "missing": "This link has no ticket. Open a new one from the shop's page in the admin.",
-      "endedTitle": "Support session ended",
-      "endedBody": "You've left the shop's dashboard. Its owner can see the visit in their Activities. You can close this tab."
+      "missing": "This link has no ticket. Open a new one from the shop's page in the admin."
+    },
+    "toAccounts": {
+      "signInTitle": "Taking you to sign in",
+      "signUpTitle": "Taking you to create your account",
+      "body": "One moment…"
+    },
+    "callback": {
+      "title": "Signing you in",
+      "failedTitle": "That sign-in didn't finish",
+      "failedBody": "Start again. It only takes a moment.",
+      "again": "Sign in again"
     }
   },
   "settings": {
@@ -2158,21 +2059,12 @@
     "add": "Add",
     "optionalTag": "(optional)",
     "account": {
-      "heading": "Account",
-      "subtitle": "Owner information for this store.",
-      "ownerName": "Owner name",
-      "ownerNamePlaceholder": "e.g. John Doe",
-      "ownerEmail": "Owner email",
-      "emailVerified": "Verified",
-      "emailReadonlyHint": "Owner email address cannot be changed from the dashboard. Contact support if you need to update it.",
-      "saveButton": "Save account settings",
-      "saved": "Account settings saved.",
-      "saveFailed": "Failed to save account settings.",
-      "validationOwnerName": "Owner name is required.",
-      "validationGeneric": "Please correct the highlighted fields.",
+      "heading": "Your account",
+      "subtitle": "Your name, email, phone, picture and passkeys are your Paperbase account's: one account for every shop you work in.",
+      "ownerNameNote": "Your name is also the shop owner's name in Paperbase's emails.",
+      "manage": "Manage your Paperbase account",
       "roleOwner": "Owner",
-      "roleMember": "Member",
-      "roleEmail": "{role} email"
+      "roleMember": "Member"
     },
     "store": {
       "heading": "Store Info",
@@ -2487,64 +2379,11 @@
     },
     "security": {
       "heading": "Security",
-      "subtitle": "Manage your password and sign-in protection for this account.",
-      "changePassword": "Change password",
-      "changePasswordHint": "Update your password to keep your account secure.",
-      "currentPassword": "Current password",
-      "newPassword": "New password",
-      "confirmNewPassword": "Confirm new password",
-      "showPassword": "Show password",
-      "hidePassword": "Hide password",
-      "logoutAllDevices": "Log out from all other devices",
-      "updatePassword": "Change password",
-      "updating": "Updating…",
-      "twoFactorLabel": "Two-factor authentication",
-      "twoFactorOn": "On",
-      "twoFactorOff": "Off",
-      "enable2fa": "Enable 2FA",
-      "qrAlt": "2FA QR Code",
-      "secretOnce": "Secret (shown once):",
-      "otpPlaceholder": "Enter OTP from app",
-      "verify": "Verify",
-      "disableHint": "To disable 2FA, confirm with your password and current OTP.",
-      "currentOtp": "Current OTP code",
-      "disable2fa": "Disable 2FA",
-      "recoveryHeading": "Can't access your 2FA device?",
-      "recoveryBody": "If you cannot access your authenticator device, you can request a recovery code via email.",
-      "sendRecovery": "Send recovery code",
-      "sending": "Sending…",
-      "retryIn": "Retry in {seconds}s",
-      "recoveryPlaceholder": "Recovery code",
-      "verifyDisable": "Verify & Disable 2FA",
-      "verifying": "Verifying…",
-      "loadStatusFailed": "Failed to load 2FA status.",
-      "setupScanHint": "Scan the QR code, then enter the OTP to enable 2FA.",
-      "setupStartFailed": "Could not start 2FA setup.",
-      "enabledSuccess": "2FA enabled successfully.",
-      "invalidOtp": "Invalid OTP code.",
-      "recoverySent": "Recovery code sent to your email",
-      "recoverySendFailed": "Could not send recovery code. Try again later.",
-      "recoveryInvalid": "Invalid or expired recovery code.",
-      "toastDisabledDetail": "2FA has been disabled successfully.",
-      "toastDisabledEmail": "2FA disabled. Confirmation email sent.",
-      "disableFailed": "Failed to disable 2FA. Check password and OTP code.",
-      "passwordAllRequired": "All password fields are required.",
-      "passwordMismatch": "New passwords do not match.",
-      "passwordChanged": "Password changed successfully.",
-      "passwordChangeFailed": "Failed to change password. Check your current password.",
-      "modalChangePasswordTitle": "Change password",
-      "modalChangePasswordDescription": "Update your password to keep your account secure.",
-      "modalEnable2faTitle": "Enable two-factor authentication",
-      "modalEnable2faDescription": "Use an authenticator app to protect your account.",
-      "modalEnable2faStartHint": "Generate a QR code and secret, then enter the code from your app.",
-      "modalDisable2faTitle": "Disable two-factor authentication",
-      "modalRecoveryTitle": "Recover account access",
-      "modalRecoveryDescription": "If you cannot access your authenticator device, request a recovery code by account email.",
       "passwordless": "Your store uses passwordless sign-in.",
       "phishingTitle": "Phishing-resistant by design",
       "phishingBody": "Everyone signs in with passkeys — bound to your device (Touch ID, Windows Hello, or a security key). There are no passwords to steal or reset.",
       "manageTitle": "Manage your passkeys",
-      "manageBody": "Add, rename, or remove passkeys under <place>Settings → Account</place>. Keep at least two (e.g. your laptop and your phone) so you're never locked out."
+      "manageBody": "Add, rename or remove passkeys in <place>your Paperbase account</place>. Keep at least two (e.g. your laptop and phone) so you never get locked out."
     },
     "billing": {
       "heading": "Billing & Plan",
@@ -2881,8 +2720,7 @@
         "passkey": "Passkey",
         "email_link": "Email link",
         "email_code": "Email code",
-        "support": "Paperbase support",
-        "earlier": "Earlier sign-in"
+        "support": "Paperbase support"
       },
       "status": {
         "active": "Active",
@@ -2891,8 +2729,11 @@
         "visitEnded": "Visit ended",
         "expired": "Expired",
         "accessChanged": "Role or access changed",
-        "accessEnded": "Suspended or removed"
-      }
+        "accessEnded": "Suspended or removed",
+        "switchedOff": "Switched off by Paperbase"
+      },
+      "accountsAway": "Sign-ins can't be reached right now. Try again in a minute.",
+      "endFailed": "That didn't end. Try again."
     },
     "payments": {
       "heading": "Payments",
@@ -2908,52 +2749,6 @@
       "failed": "Couldn't save. Try again.",
       "noneWarning": "{count, plural, one {# product needs} other {# products need}} paying before delivery, but no number is set, so shoppers can't pay for {count, plural, one {it} other {them}}.",
       "emailNote": "We email you whenever a number changes."
-    },
-    "passkeys": {
-      "title": "Passkeys",
-      "intro": "Passkeys let you sign in with your device — Touch ID, Windows Hello, or a security key. Add one per device so you're never locked out.",
-      "add": "Add a passkey",
-      "empty": "No passkeys yet. Add one to sign in without email links.",
-      "unnamed": "Passkey",
-      "provider": {
-        "apple": {
-          "name": "Apple Passwords",
-          "where": "Saved in Apple Passwords, on your iPhone, iPad and Mac"
-        },
-        "google": {
-          "name": "Google Password Manager",
-          "where": "Saved in Google Password Manager, wherever you use Chrome"
-        },
-        "windows": {
-          "name": "Windows Hello",
-          "where": "Saved in Windows Hello on a Windows computer"
-        },
-        "security_key": {
-          "name": "Security key",
-          "where": "On a security key you plug in or tap"
-        },
-        "app": {
-          "where": "Saved in {name}"
-        },
-        "unknown": {
-          "where": "We can't tell where this one is saved"
-        }
-      },
-      "lastUsed": "Last used {date}",
-      "added": "Added {date}",
-      "saveName": "Save name",
-      "cancelRename": "Cancel",
-      "rename": "Rename passkey",
-      "remove": "Remove passkey",
-      "removeTitle": "Remove \"{name}\"?",
-      "removeMessage": "You can no longer sign in with this device.",
-      "removeLastMessage": "This is your only passkey — to sign in again you'll need an email sign-in link, then create a new passkey.",
-      "removeConfirm": "Remove",
-      "loadFailed": "Couldn't load your passkeys.",
-      "unsupported": "This device doesn't support passkeys.",
-      "addFailed": "Couldn't add a passkey. Please try again.",
-      "renameFailed": "Couldn't rename that passkey.",
-      "removeFailed": "Couldn't remove that passkey."
     },
     "checkout": {
       "formTitle": "Customer Information Form",
@@ -4179,27 +3974,12 @@
     "endsOn": "Ends {date}",
     "acceptCreate": "Accept and create account",
     "passkeyHint": "You'll sign in with a passkey: your fingerprint, face or screen lock. No password.",
-    "noPasskeys": "This browser can't create passkeys. Open the invite on your phone, or update your browser.",
     "or": "or",
     "haveAccount": "Already on Paperbase?",
     "signInToAccept": "Sign in to accept",
     "join": "Join {shop}",
     "signedInAs": "Signed in as {email}",
     "notYou": "Not you?",
-    "createTitle": "Create your Paperbase account",
-    "createBody": "One account for every shop you work with. Then you'll join {shop} as {role}.",
-    "email": "Email",
-    "firstName": "First name",
-    "lastName": "Last name",
-    "firstNamePlaceholder": "Karim",
-    "lastNamePlaceholder": "Hossain",
-    "nameRequired": "Enter your first and last name.",
-    "createPasskey": "Create passkey and join",
-    "createHint": "Your passkey is your fingerprint, face or screen lock. You'll use it to sign in. No password.",
-    "back": "Back to the invite",
-    "accountExists": "You already have a Paperbase account with this email. Sign in to accept the invite.",
-    "passkeyCancelled": "Passkey setup was cancelled. Try again to finish joining.",
-    "accountReady": "Your account is ready, but the passkey didn't finish. Sign in with your email to open {shop}.",
     "signIn": "Sign in",
     "failed": "Something went wrong. Try again.",
     "someoneElseTitle": "This invite is for someone else",
@@ -4228,9 +4008,7 @@
     "tryAgain": "Try again",
     "joinedTitle": "You're on the team",
     "joinedBody": "Welcome to {shop}. You joined as {role}.",
-    "openShop": "Open {shop}",
-    "firstNameRequired": "Enter your first name.",
-    "lastNameRequired": "Enter your last name."
+    "openShop": "Open {shop}"
   },
   "pageAccess": {
     "title": "This page isn't part of your role",

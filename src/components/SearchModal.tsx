@@ -26,8 +26,7 @@ import {
   type SearchRow,
   type ServerKind,
 } from "@/lib/search/results";
-import api, { getActiveStorePublicIdFromJwt } from "@/lib/api";
-import { getAccessToken } from "@/lib/auth";
+import api, { currentShop } from "@/lib/api";
 
 interface SearchModalProps {
   open: boolean;
@@ -77,11 +76,6 @@ function usePlaceMatches(query: string): {
   );
 }
 
-/** Recent searches are kept per shop. */
-function activeStorePublicId(): string | null {
-  const token = getAccessToken();
-  return token ? getActiveStorePublicIdFromJwt(token) : null;
-}
 
 export function SearchModal({ open, onOpenChange }: SearchModalProps) {
   const t = useTranslations();
@@ -99,7 +93,7 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
   const listRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (open) setRecent(readRecentSearches(activeStorePublicId()));
+    if (open) setRecent(readRecentSearches(currentShop()));
   }, [open]);
 
   const handleOpenChange = (nextOpen: boolean) => {
@@ -181,7 +175,7 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
   }, [active]);
 
   const goTo = (href: string) => {
-    setRecent(rememberSearch(activeStorePublicId(), query));
+    setRecent(rememberSearch(currentShop(), query));
     navigate(normalizeNavigationHref(href));
     onOpenChange(false);
   };
@@ -287,7 +281,7 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
                     <button
                       type="button"
                       onClick={() => {
-                        clearRecentSearches(activeStorePublicId());
+                        clearRecentSearches(currentShop());
                         setRecent([]);
                       }}
                       className="text-xs text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"

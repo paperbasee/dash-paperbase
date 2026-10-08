@@ -60,6 +60,7 @@ import SystemNotificationBanner from "@/components/system/SystemNotificationBann
 import AppSidebarNav from "@/components/sidebar/AppSidebarNav";
 import { SidebarShopLinks } from "@/components/sidebar/SidebarShopLinks";
 import { UserMenuBody } from "@/components/sidebar/UserMenuBody";
+import { accountPageUrl } from "@/lib/accounts/config";
 import { useStorefrontUrl } from "@/hooks/useStorefrontUrl";
 import SettingsSidebarNav from "@/components/sidebar/SettingsSidebarNav";
 
@@ -135,8 +136,9 @@ function SidebarContent({
     [canShowApp]
   );
   const inventoryNavStatus = inventoryStatus.status;
+  // The face is the one chosen in the person's Paperbase account (`avatar_seed`), else their own.
   const userPublicId =
-    meProfileStatus === "ready" ? (meProfile?.public_id ?? null) : null;
+    meProfileStatus === "ready" ? (meProfile?.avatar_seed || meProfile?.public_id || null) : null;
   const userPlan =
     meProfileStatus === "ready" ? (meProfile?.subscription?.plan ?? null) : null;
   const urgentSubscriptionRing =
@@ -578,6 +580,7 @@ function SidebarContent({
               onWhatsNew={() => {
                 whatsNewPendingRef.current = true;
               }}
+              accountHref={meProfile?.support_session ? null : accountPageUrl()}
               onSignOut={() => {
                 signOut();
               }}

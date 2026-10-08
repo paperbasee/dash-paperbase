@@ -32,5 +32,5 @@ export function previewOrigin(raw: string | undefined | null): string | null {
  * form-action). The preview origin is added only when it is configured.
  */
 export function dashboardFrameSrc(origin: string | null): string {
-  return ["frame-src 'self' https://challenges.cloudflare.com", origin].filter(Boolean).join(" ");
+  return ["frame-src 'self'", origin].filter(Boolean).join(" ");
 }

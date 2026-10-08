@@ -13,7 +13,6 @@ import { CATALOG_INCLUDED_APP_IDS, OPTIONAL_APP_IDS } from "@/config/apps";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "@/i18n/navigation";
 import api from "@/lib/api";
-import { setAuthSessionCookie } from "@/lib/auth-session-cookie";
 import {
   connectDomain,
   fetchDomains,
@@ -30,7 +29,6 @@ import { fetchSetupGuide, type SetupGuide } from "@/lib/setup-guide";
 import { accountsFromApi } from "@/lib/storeSocialLinks";
 import { fetchMeForRouting, invalidateMeRoutingCache, setupUnfinished } from "@/lib/subscription-access";
 import { fetchPalettes, type ShopPalette } from "@/lib/theme-editor/palettes";
-import { clearPendingVerificationEmail } from "@/lib/verification-state";
 
 /**
  * The new shop's setup (owner, 2026-09-28). Five steps, one question each:
@@ -64,8 +62,6 @@ export const DOMAINS_ENABLED = process.env.NEXT_PUBLIC_DOMAINS_ENABLED === "1";
 type CreatedStore = {
   public_id: string;
   storefront_url?: string;
-  access: string;
-  refresh: string;
 };
 
 /**
@@ -115,8 +111,6 @@ type Draft = {
   kind?: ShopKind | null;
   sellsOn?: SellsOn[];
   shopName?: string;
-  ownerFirst?: string;
-  ownerLast?: string;
 };
 
 const DRAFT_KEY = "pb_setup_draft_v1";
@@ -166,7 +160,7 @@ export function useSetup() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const isAddMode = searchParams.get("add") === "1";
-  const { isAuthenticated, isLoading: authLoading, authHydrated, signOut } = useAuth();
+  const { isAuthenticated, authHydrated, signOut } = useAuth();
 
   const [ready, setReady] = useState(false);
   const [user, setUser] = useState("");
@@ -191,9 +185,6 @@ export function useSetup() {
   const [busy, setBusy] = useState(false);
 
   // The owner, from sign-up. Asked on the name step only when sign-up did not have it.
-  const [ownerFirst, setOwnerFirst] = useState("");
-  const [ownerLast, setOwnerLast] = useState("");
-  const [askOwnerName, setAskOwnerName] = useState(false);
 
   const [kind, setKind] = useState<ShopKind | null>(null);
   // "Where do you sell now?": optional, any places or "just starting" (lib/sells-on).
@@ -236,7 +227,7 @@ export function useSetup() {
 
   // ---- where to start ------------------------------------------------------------------------
   useEffect(() => {
-    if (!authHydrated || authLoading) return;
+    if (!authHydrated) return;
     if (!isAuthenticated) {
       router.replace("/login");
       return;
@@ -247,9 +238,6 @@ export function useSetup() {
         const me = await fetchMeForRouting();
         if (cancelled) return;
         setUser(me.public_id ?? "");
-        setOwnerFirst(me.first_name || "");
-        setOwnerLast(me.last_name || "");
-        setAskOwnerName(!(me.first_name ?? "").trim() || !(me.last_name ?? "").trim());
         const finished = Boolean(me.store) && !setupUnfinished(me);
         if (me.store && (!finished || arrivedAtDone)) {
           // The shop exists: every answer is the shop's own, wherever it was given.
@@ -293,8 +281,6 @@ export function useSetup() {
             setKind(draft.kind ?? null);
             setSellsOn(readSellsOn(draft.sellsOn));
             setShopName(draft.shopName ?? "");
-            if (draft.ownerFirst) setOwnerFirst(draft.ownerFirst);
-            if (draft.ownerLast) setOwnerLast(draft.ownerLast);
           }
         }
         if (!cancelled) setReady(true);
@@ -305,7 +291,7 @@ export function useSetup() {
     return () => {
       cancelled = true;
     };
-  }, [authHydrated, authLoading, isAuthenticated, isAddMode, arrivedAtDone, router]);
+  }, [authHydrated, isAuthenticated, isAddMode, arrivedAtDone, router]);
 
   // The palettes' colours are the API's (theming/presets/), for the preview and the Look step.
   useEffect(() => {
@@ -359,8 +345,8 @@ export function useSetup() {
   // What is answered before the shop exists, kept in this tab until the name step makes it (Draft).
   useEffect(() => {
     if (!ready || !user || storeId) return;
-    writeDraft({ user, kind, sellsOn, shopName, ownerFirst, ownerLast });
-  }, [ready, user, storeId, kind, sellsOn, shopName, ownerFirst, ownerLast]);
+    writeDraft({ user, kind, sellsOn, shopName });
+  }, [ready, user, storeId, kind, sellsOn, shopName]);
 
   // ---- a domain made on an earlier visit comes back with its records --------------------------
   useEffect(() => {
@@ -413,7 +399,7 @@ export function useSetup() {
     setError(isNetworkError(err) ? "network" : "failed");
   }
 
-  const [stepError, setStepError] = useState<"sell" | "name" | "owner" | null>(null);
+  const [stepError, setStepError] = useState<"sell" | "name" | null>(null);
 
   async function continueFromSell() {
     if (!kind) {
@@ -451,10 +437,6 @@ export function useSetup() {
       return;
     }
     if (nameCheck.state === "needs_letters") return;
-    if (askOwnerName && (!ownerFirst.trim() || !ownerLast.trim())) {
-      setStepError("owner");
-      return;
-    }
     setStepError(null);
     setBusy(true);
     try {
@@ -485,15 +467,11 @@ export function useSetup() {
       name,
       store_type: STORE_TYPE_BY_KIND[kind ?? "other"],
       sells_on: sellsOn,
-      ...(askOwnerName ? { owner_first_name: ownerFirst.trim(), owner_last_name: ownerLast.trim() } : {}),
       modules_enabled,
     });
-    localStorage.setItem("access_token", data.access);
-    localStorage.setItem("refresh_token", data.refresh);
-    setAuthSessionCookie();
+    // Passes carry no shop, so none come back: the owner works in their own shop as it is.
     localStorage.setItem("core_enabled_apps", JSON.stringify([...OPTIONAL_APP_IDS]));
     invalidateMeRoutingCache();
-    clearPendingVerificationEmail();
     setStoreId(data.public_id);
     setSavedName(name);
     setSavedKind(kind);
@@ -656,11 +634,6 @@ export function useSetup() {
     storeMade: storeId !== null,
     /** The shop's public id, once it is made. */
     storeId,
-    askOwnerName,
-    ownerFirst,
-    setOwnerFirst,
-    ownerLast,
-    setOwnerLast,
     continueFromName,
     // address
     storeHostname,

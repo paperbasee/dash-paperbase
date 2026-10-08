@@ -1,265 +1,22 @@
-import { apiClient } from "@/lib/api-client";
+/**
+ * Signing out, and leaving for the sign-in page. Signing in is Accounts' (lib/accounts): the
+ * dashboard holds only the pass, in memory, and asks Accounts for a fresh one (lib/accounts/pass).
+ */
+
 import { clearMeProfileCache } from "@/lib/me-profile-store";
 import { clearAllUnsentCopies } from "@/lib/theme-editor/unsent-copy";
-import {
-  setAuthSessionCookie,
-  clearAuthSessionCookie,
-} from "@/lib/auth-session-cookie";
-import {
-  createPasskey,
-  getPasskeyAssertion,
-  getPasskeyAssertionFromAutofill,
-} from "@/lib/passkeys";
-import type {
-  PublicKeyCredentialCreationOptionsJSON,
-  PublicKeyCredentialRequestOptionsJSON,
-} from "@simplewebauthn/browser";
+import { clearAuthSessionCookie } from "@/lib/auth-session-cookie";
+import { accountsUrl } from "@/lib/accounts/config";
+import { dropPass } from "@/lib/accounts/pass";
+import { forgetActiveShop } from "@/lib/active-shop";
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
-const LAST_ROTATED_AT_KEY = "paperbase_token_rotated_at";
+/** The tabs of this browser tell each other a sign-out on it. */
+export const SIGN_IN_CHANNEL = "paperbase-sign-in";
+/** This tab, so it does not act on its own message. */
+export const THIS_TAB = typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID() : String(Math.random());
+const SIGN_OUT_TIMEOUT_MS = 8_000;
 
-export interface AuthTokens {
-  access: string;
-  refresh: string;
-  active_store_public_id: string | null;
-}
-
-export interface SignupResponse {
-  detail: string;
-  email_verification_required: true;
-}
-
-/** Where a passkey is saved, as the API tells it from the passkey's maker (accounts.passkey_providers). */
-export type PasskeyProvider = "apple" | "google" | "windows" | "app" | "security_key" | "unknown";
-
-export interface PasskeyInfo {
-  public_id: string;
-  /** The merchant's own name for it; "" when they never gave one. */
-  name: string;
-  provider: PasskeyProvider;
-  /** The app's name when `provider` is "app" (1Password, Bitwarden...); "" otherwise. */
-  provider_name: string;
-  synced: boolean;
-  created_at: string;
-  last_used_at: string | null;
-}
-
-interface WebAuthnRegisterBegin {
-  challenge_id: string;
-  options: PublicKeyCredentialCreationOptionsJSON;
-}
-interface WebAuthnLoginBegin {
-  challenge_id: string;
-  options: PublicKeyCredentialRequestOptionsJSON;
-}
-
-export type MagicLinkPurpose = "login" | "recovery";
-
-export type MagicLinkVerifyResult =
-  | { action: "enroll_passkey"; enrollment_ticket: string; email: string }
-  | ({ action: "signed_in" } & AuthTokens);
-
-/**
- * Persist a fresh access/refresh pair and mark the session active. Used by every
- * flow that mints tokens (passkey login, magic-link, invite enrollment).
- */
-export function storeAuthTokens(access: string, refresh: string): void {
-  localStorage.setItem("access_token", access);
-  localStorage.setItem("refresh_token", refresh);
-  setAuthSessionCookie();
-}
-
-// ---------------------------------------------------------------------------
-// Signup (passwordless) — create the account, backend emails a magic link.
-// ---------------------------------------------------------------------------
-
-export async function signup(
-  email: string,
-  first_name: string,
-  last_name: string,
-  cf_turnstile_response?: string
-): Promise<SignupResponse> {
-  return apiClient.post<SignupResponse>(`${BASE_URL}/auth/register/`, {
-    email: email.trim().toLowerCase(),
-    first_name,
-    last_name,
-    ...(cf_turnstile_response ? { cf_turnstile_response } : {}),
-  });
-}
-
-// ---------------------------------------------------------------------------
-// Passkey login
-// ---------------------------------------------------------------------------
-
-/**
- * Full passkey sign-in ceremony. With no email the browser offers a
- * discoverable-credential picker; with an email it scopes to that account.
- */
-export async function passkeyLogin(email?: string): Promise<AuthTokens> {
-  const begin = await beginPasskeyLogin(email);
-  return finishPasskeyLogin(begin.challenge_id, await getPasskeyAssertion(begin.options));
-}
-
-/**
- * Sign in with the passkey the merchant picks from the email box's suggestions (owner,
- * 2026-10-07). Waits, with no prompt, until they pick one; `onPicked` is told as soon as they
- * have, before the API checks it. See lib/passkey-autofill for how the sign-in page keeps it going.
- */
-export async function passkeyAutofillLogin(onPicked?: () => void): Promise<AuthTokens> {
-  const begin = await beginPasskeyLogin();
-  const assertion = await getPasskeyAssertionFromAutofill(begin.options);
-  onPicked?.();
-  return finishPasskeyLogin(begin.challenge_id, assertion);
-}
-
-async function beginPasskeyLogin(email?: string): Promise<WebAuthnLoginBegin> {
-  return apiClient.post<WebAuthnLoginBegin>(
-    `${BASE_URL}/auth/webauthn/login/begin/`,
-    email ? { email: email.trim().toLowerCase() } : {}
-  );
-}
-
-async function finishPasskeyLogin(
-  challengeId: string,
-  assertion: Awaited<ReturnType<typeof getPasskeyAssertion>>
-): Promise<AuthTokens> {
-  const tokens = await apiClient.post<AuthTokens>(
-    `${BASE_URL}/auth/webauthn/login/finish/`,
-    { challenge_id: challengeId, response: assertion }
-  );
-  storeAuthTokens(tokens.access, tokens.refresh);
-  return tokens;
-}
-
-// ---------------------------------------------------------------------------
-// Passkey enrollment (signup / recovery / invite bootstrap, or "add a passkey")
-// ---------------------------------------------------------------------------
-
-/**
- * Create a passkey. When `enrollmentTicket` is supplied (bootstrap flows) the
- * finish call returns tokens and logs the user in. When authenticated ("add a
- * passkey" in Settings) it just returns the new credential.
- */
-export async function enrollPasskey(opts: {
-  enrollmentTicket?: string;
-  name?: string;
-}): Promise<{ tokens?: AuthTokens; credential: PasskeyInfo }> {
-  const authToken = opts.enrollmentTicket ? null : getAccessToken();
-  const beginBody = opts.enrollmentTicket
-    ? { enrollment_ticket: opts.enrollmentTicket }
-    : {};
-  const begin = await apiClient.post<WebAuthnRegisterBegin>(
-    `${BASE_URL}/auth/webauthn/register/begin/`,
-    beginBody,
-    authToken
-  );
-  const attestation = await createPasskey(begin.options);
-  const finish = await apiClient.post<
-    { credential: PasskeyInfo } & Partial<AuthTokens>
-  >(
-    `${BASE_URL}/auth/webauthn/register/finish/`,
-    {
-      challenge_id: begin.challenge_id,
-      response: attestation,
-      // No name unless the merchant gave one: the passkey list then names it after where it is
-      // saved, in their language (PasskeysManager).
-      name: opts.name?.trim() || "",
-      ...(opts.enrollmentTicket
-        ? { enrollment_ticket: opts.enrollmentTicket }
-        : {}),
-    },
-    authToken
-  );
-  if (finish.access && finish.refresh) {
-    storeAuthTokens(finish.access, finish.refresh);
-    return {
-      tokens: {
-        access: finish.access,
-        refresh: finish.refresh,
-        active_store_public_id: finish.active_store_public_id ?? null,
-      },
-      credential: finish.credential,
-    };
-  }
-  return { credential: finish.credential };
-}
-
-// ---------------------------------------------------------------------------
-// Email magic-link (login fallback + device-loss recovery)
-// ---------------------------------------------------------------------------
-
-export async function requestMagicLink(
-  email: string,
-  purpose: MagicLinkPurpose
-): Promise<{ message: string }> {
-  return apiClient.post<{ message: string }>(`${BASE_URL}/auth/magic/request/`, {
-    email: email.trim().toLowerCase(),
-    purpose,
-  });
-}
-
-/**
- * The six-digit code from the same email as the link (API 1.87.0): typed with the address it went
- * to, it does exactly what the link does -- for an owner who opened the email on their phone.
- */
-export async function verifyMagicCode(email: string, code: string): Promise<MagicLinkVerifyResult> {
-  const result = await apiClient.post<MagicLinkVerifyResult>(`${BASE_URL}/auth/magic/verify-code/`, {
-    email: email.trim().toLowerCase(),
-    code,
-  });
-  if (result.action === "signed_in") {
-    storeAuthTokens(result.access, result.refresh);
-  }
-  return result;
-}
-
-export async function verifyMagicLink(
-  token: string
-): Promise<MagicLinkVerifyResult> {
-  const result = await apiClient.post<MagicLinkVerifyResult>(
-    `${BASE_URL}/auth/magic/verify/`,
-    { token }
-  );
-  if (result.action === "signed_in") {
-    storeAuthTokens(result.access, result.refresh);
-  }
-  return result;
-}
-
-// ---------------------------------------------------------------------------
-// Passkey management (authenticated)
-// ---------------------------------------------------------------------------
-
-export async function listPasskeys(): Promise<PasskeyInfo[]> {
-  return apiClient.get<PasskeyInfo[]>(
-    `${BASE_URL}/auth/webauthn/credentials/`,
-    getAccessToken()
-  );
-}
-
-export async function renamePasskey(
-  publicId: string,
-  name: string
-): Promise<PasskeyInfo> {
-  return apiClient.patch<PasskeyInfo>(
-    `${BASE_URL}/auth/webauthn/credentials/${publicId}/`,
-    { name },
-    getAccessToken()
-  );
-}
-
-export async function deletePasskey(publicId: string): Promise<void> {
-  await apiClient.delete<void>(
-    `${BASE_URL}/auth/webauthn/credentials/${publicId}/`,
-    getAccessToken()
-  );
-}
-
-// ---------------------------------------------------------------------------
-// Session
-// ---------------------------------------------------------------------------
-
-/** What this browser keeps of the account signed in, other than its tokens: data, profile, edits. */
+/** What this browser keeps of the account signed in: its data, profile and theme edits. */
 function forgetSignedInData() {
   if (typeof window !== "undefined") {
     void (async () => {
@@ -274,35 +31,18 @@ function forgetSignedInData() {
   clearAllUnsentCopies(localStorage);
 }
 
-/** Everything this browser holds for the account signed in: its data, profile, edits and tokens. */
+/** Everything this browser holds for the sign-in: its data, the pass, the shop and the hint. */
 function forgetThisSignIn() {
   forgetSignedInData();
-  localStorage.removeItem("access_token");
-  localStorage.removeItem("refresh_token");
-  localStorage.removeItem(LAST_ROTATED_AT_KEY);
+  dropPass();
+  forgetActiveShop();
   clearAuthSessionCookie();
 }
 
 /**
- * Who a token signs in, and which sign-in -- its user and its session (`sid`) -- so a tab can
- * tell another tab's new sign-in from the hourly renewal of the same one. Null if unreadable.
- */
-export function signInOf(token: string | null): { user: string; sid: string } | null {
-  if (!token) return null;
-  try {
-    const payload = JSON.parse(atob(token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/"))) as {
-      user_public_id?: unknown;
-      sid?: unknown;
-    };
-    return { user: String(payload.user_public_id ?? ""), sid: typeof payload.sid === "string" ? payload.sid : "" };
-  } catch {
-    return null;
-  }
-}
-
-/**
  * Leave for the sign-in page -- or `to`, a page that carries on signed out, such as the team
- * invite -- forgetting this browser's sign-in. The API is not told (see signOut).
+ * invite -- forgetting this tab's sign-in. Accounts is not told: the sign-in is already over (it
+ * ended elsewhere, or another tab signed out), or it is not this tab's to end.
  */
 export function logout(to = "/login") {
   window.location.replace(to);
@@ -310,59 +50,44 @@ export function logout(to = "/login") {
 }
 
 /**
- * The person pressed Sign out: the API ends this browser's sign-in, so it leaves the owner's
- * Sessions list at once, then the browser forgets it.
- *
- * Only for that press. The automatic sign-outs -- another tab signed out, a sign-in that ran
- * out -- use `logout` alone: they react to tokens already changed, and the token in storage by
- * then may be a new sign-in's (a support visit just entered in another tab), which they must not
- * end (2026-09-29).
+ * Ask Accounts to end this browser's sign-in, and tell the other tabs. Accounts away, the browser
+ * forgets the sign-in anyway; its cookie runs out by itself.
  */
-export function signOut(to = "/login") {
-  const access = localStorage.getItem("access_token");
-  if (access) {
-    void fetch(`${BASE_URL}/auth/logout/`, {
+async function endSignInAtAccounts(): Promise<void> {
+  try {
+    await fetch(`${accountsUrl()}/passes/sign-out`, {
       method: "POST",
-      headers: { Authorization: `Bearer ${access}` },
-      keepalive: true,
-    }).catch(() => undefined);
+      credentials: "include",
+      signal: AbortSignal.timeout(SIGN_OUT_TIMEOUT_MS),
+    });
+  } catch {
+    // Unreachable: nothing more this page can do.
   }
+  try {
+    const channel = new BroadcastChannel(SIGN_IN_CHANNEL);
+    channel.postMessage({ kind: "signed_out", from: THIS_TAB });
+    channel.close();
+  } catch {
+    // An older browser: the other tabs find out at their next request.
+  }
+}
+
+/**
+ * The person pressed Sign out: Accounts ends this browser's sign-in -- its cookie stops working,
+ * and the API is told -- then the browser forgets it. Waits for Accounts before leaving: the
+ * sign-in page would otherwise find the sign-in still on and sign them straight back in.
+ */
+export async function signOut(to = "/login") {
+  await endSignInAtAccounts();
   logout(to);
 }
 
-// ---------------------------------------------------------------------------
-// Paperbase support inside a shop's dashboard ("Sign in as this shop" in Django admin).
-// ---------------------------------------------------------------------------
-
-export type SupportSessionInfo = { public_id: string; store_name: string; expires_at: string };
-
 /**
- * The admin's one-time ticket for a support session's tokens (POST auth/support/enter/). Whatever
- * this browser held for another sign-in goes first, as a sign-out would clear it.
+ * Paperbase support pressed End session, or its time ran out: the support sign-in ends at Accounts
+ * (which tells the API, which ends the visit and writes the merchant's Activities line), and the
+ * browser goes to Accounts' "Support session ended" page.
  */
-export async function enterSupportSession(ticket: string): Promise<SupportSessionInfo> {
-  const result = await apiClient.post<AuthTokens & { support_session: SupportSessionInfo }>(
-    `${BASE_URL}/auth/support/enter/`,
-    { ticket }
-  );
-  // Replaced in one step, never emptied first: another tab that saw no sign-in for a moment would
-  // sign itself out and take the new one with it.
-  forgetSignedInData();
-  storeAuthTokens(result.access, result.refresh);
-  return result.support_session;
-}
-
-/** A support session ended: sign out, onto a page that says so rather than the sign-in page. */
-export function leaveSupportSession() {
-  window.location.replace("/auth/support?ended=1");
-  forgetThisSignIn();
-}
-
-export function getAccessToken(): string | null {
-  if (typeof window === "undefined") return null;
-  return localStorage.getItem("access_token");
-}
-
-export function isAuthenticated(): boolean {
-  return !!getAccessToken();
+export async function endSupportVisit() {
+  await endSignInAtAccounts();
+  logout(`${accountsUrl()}/support/ended`);
 }

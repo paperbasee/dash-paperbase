@@ -1,32 +1,28 @@
 "use client";
 
-import { Check, Clock, Fingerprint, Lock, Mail } from "lucide-react";
+import { Check, Clock, Fingerprint, Mail } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useState, type FormEvent, type ReactNode } from "react";
+import { useCallback, useEffect, useState, type ReactNode } from "react";
 
 import { AuthDivider, AuthError, AuthHeading } from "@/components/auth/AuthParts";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import UserAvatar from "@/components/UserAvatar";
-import { useAuth } from "@/context/AuthContext";
 import { Link } from "@/i18n/navigation";
 import api from "@/lib/api";
 import { isApiHttpError } from "@/lib/api-client";
-import { signOut, storeAuthTokens } from "@/lib/auth";
+import { heldClaims } from "@/lib/accounts/pass";
+import { chooseShop } from "@/lib/active-shop";
+import { signOut } from "@/lib/auth";
 import { isNetworkError } from "@/lib/network-error";
-import { browserSupportsWebAuthn, isPasskeyCancellation } from "@/lib/passkeys";
 import { withNext } from "@/lib/safe-next";
 import { ROLE_MESSAGES, isRoleSlug } from "@/config/permissions";
 import { inviteDay, inviteScreen, parseInvitePreview, type InvitePreview } from "@/lib/team/invite-page";
 
-/** The steps of the page: what the API said (`ready`), then the new person's name, then in. */
-type Phase = "loading" | "broken" | "unreachable" | "ready" | "create" | "joined";
+/** The steps of the page: what the API said (`ready`), then in. */
+type Phase = "loading" | "broken" | "unreachable" | "ready" | "joined";
 
 const LINK = "font-medium text-foreground underline decoration-border underline-offset-4 hover:decoration-foreground";
-
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === "object" && value !== null;
 
 /** The shop that sent the invite: its logo (or its first letter) and its name. */
 function ShopMark({ store }: { store: InvitePreview["store"] }) {
@@ -79,8 +75,9 @@ function Screen({
 /**
  * The page an invited person opens from the email (owner, 2026-10-02): in the sign-in pages' frame,
  * the shop, who invited them and the role they will have, then the one thing to do -- join, or
- * create their Paperbase account (their own name, then a passkey) -- or, when the invite is over or
- * meant for another account, a screen that says so (lib/team/invite-page.ts).
+ * create their Paperbase account at Accounts (its sign-up asks their name, then a passkey) and come
+ * back here signed in to join -- or, when the invite is over or meant for another account, a
+ * screen that says so (lib/team/invite-page.ts).
  */
 export default function TeamInvitePage() {
   const t = useTranslations("teamInvite");
@@ -88,28 +85,16 @@ export default function TeamInvitePage() {
   const tTeam = useTranslations("settings.team");
   const locale = useLocale();
   const token = useSearchParams().get("token") ?? "";
-  const { enrollPasskey } = useAuth();
 
   const [phase, setPhase] = useState<Phase>("loading");
   const [preview, setPreview] = useState<InvitePreview | null>(null);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
-  const [supportsPasskeys, setSupportsPasskeys] = useState<boolean | null>(null);
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  // Which of the two names is missing: both are required (owner, 2026-10-02).
-  const [missing, setMissing] = useState<{ first: boolean; last: boolean }>({ first: false, last: false });
-  const [accountExists, setAccountExists] = useState(false);
-  // The account is made once: a passkey cancelled half-way retries with the same ticket.
-  const [ticket, setTicket] = useState("");
-  const [accountReady, setAccountReady] = useState(false);
 
+  // Signing in or up happens at Accounts, which comes back here to accept.
   const invitePath = `/team/invite?token=${encodeURIComponent(token)}`;
   const signInHref = withNext("/login", invitePath);
-
-  useEffect(() => {
-    setSupportsPasskeys(browserSupportsWebAuthn());
-  }, []);
+  const signUpHref = withNext("/signup", invitePath);
 
   /** Ask the API what the invite is now; the page shows that. */
   const load = useCallback(async (): Promise<InvitePreview | null> => {
@@ -137,9 +122,10 @@ export default function TeamInvitePage() {
     setBusy(true);
     setError("");
     try {
-      const { data } = await api.post<{ access?: string; refresh?: string }>("team/invites/accept/", { token });
-      // The tokens name the shop just joined, so the dashboard opens in it without a new sign-in.
-      if (data.access && data.refresh) storeAuthTokens(data.access, data.refresh);
+      const { data } = await api.post<{ store: { public_id: string } }>("team/invites/accept/", { token });
+      // Passes carry no shop: the dashboard opens in the shop just joined by naming it.
+      const person = heldClaims()?.sub;
+      if (person) chooseShop(person, data.store.public_id);
       setPhase("joined");
     } catch (err) {
       if (isNetworkError(err)) {
@@ -149,62 +135,6 @@ export default function TeamInvitePage() {
         const now = await load();
         if (now && inviteScreen(now) === "accept") setError(t("failed"));
       }
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  async function handleCreate(event: FormEvent) {
-    event.preventDefault();
-    setError("");
-    setAccountExists(false);
-    const first = firstName.trim();
-    const last = lastName.trim();
-    if (!first || !last) {
-      setMissing({ first: !first, last: !last });
-      return;
-    }
-    setBusy(true);
-    let enrollment = ticket;
-    if (!enrollment) {
-      try {
-        const { data } = await api.post<{ enrollment_ticket: string }>("team/invites/accept-new/", {
-          token,
-          first_name: first,
-          last_name: last,
-        });
-        enrollment = data.enrollment_ticket;
-        setTicket(enrollment);
-      } catch (err) {
-        setBusy(false);
-        const body = isApiHttpError(err) && isRecord(err.data) ? err.data : null;
-        if (isNetworkError(err)) {
-          setError(tAuth("unreachable"));
-        } else if (body && "email" in body) {
-          setAccountExists(true);
-          setError(t("accountExists"));
-        } else if (body && ("first_name" in body || "last_name" in body)) {
-          setMissing({ first: "first_name" in body, last: "last_name" in body });
-        } else {
-          // The invite ended, was cancelled or used while the form was open.
-          const now = await load();
-          if (now && inviteScreen(now) === "join") {
-            setPhase("create");
-            setError(t("failed"));
-          }
-        }
-        return;
-      }
-    }
-    try {
-      const done = await enrollPasskey({ enrollmentTicket: enrollment });
-      if (done.tokens) setPhase("joined");
-      else setAccountReady(true);
-    } catch (err) {
-      if (isPasskeyCancellation(err)) setError(t("passkeyCancelled"));
-      else if (isNetworkError(err)) setError(tAuth("unreachable"));
-      // The account and its place on the team exist; signing in by email finishes it.
-      else setAccountReady(true);
     } finally {
       setBusy(false);
     }
@@ -270,113 +200,6 @@ export default function TeamInvitePage() {
     );
   }
 
-  if (phase === "create") {
-    return (
-      <Screen
-        store={store}
-        title={t("createTitle")}
-        body={t("createBody", { shop, role: role.name })}
-      >
-        {accountReady ? (
-          <div className="space-y-4">
-            <AuthError>{t("accountReady", { shop })}</AuthError>
-            <Button asChild className="h-11 w-full">
-              <Link href={signInHref}>{t("signIn")}</Link>
-            </Button>
-          </div>
-        ) : (
-          <form onSubmit={handleCreate} noValidate className="space-y-4">
-            <div className="form-field">
-              <span className="field-label">{t("email")}</span>
-              <div className="flex h-11 items-center justify-between gap-3 rounded-xs border border-border bg-muted/40 px-4 text-sm text-foreground">
-                <span className="truncate">{preview.email_masked}</span>
-                <Lock className="size-4 shrink-0 text-muted-foreground" aria-hidden />
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div className="form-field">
-                <label htmlFor="invite-first-name" className="field-label">
-                  {t("firstName")}
-                </label>
-                <Input
-                  id="invite-first-name"
-                  size="lg"
-                  value={firstName}
-                  onChange={(e) => {
-                    setFirstName(e.target.value);
-                    setMissing((now) => ({ ...now, first: false }));
-                  }}
-                  placeholder={t("firstNamePlaceholder")}
-                  autoComplete="given-name"
-                  required
-                  aria-invalid={missing.first ? true : undefined}
-                  disabled={Boolean(ticket)}
-                  autoFocus
-                />
-              </div>
-              <div className="form-field">
-                <label htmlFor="invite-last-name" className="field-label">
-                  {t("lastName")}
-                </label>
-                <Input
-                  id="invite-last-name"
-                  size="lg"
-                  value={lastName}
-                  onChange={(e) => {
-                    setLastName(e.target.value);
-                    setMissing((now) => ({ ...now, last: false }));
-                  }}
-                  placeholder={t("lastNamePlaceholder")}
-                  autoComplete="family-name"
-                  required
-                  aria-invalid={missing.last ? true : undefined}
-                  disabled={Boolean(ticket)}
-                />
-              </div>
-            </div>
-            {missing.first || missing.last ? (
-              <p className="-mt-2 text-xs text-destructive">
-                {t(missing.first && missing.last ? "nameRequired" : missing.first ? "firstNameRequired" : "lastNameRequired")}
-              </p>
-            ) : null}
-            {error ? (
-              <AuthError>
-                {error}
-                {accountExists ? (
-                  <>
-                    {" "}
-                    <Link href={signInHref} className={LINK}>
-                      {t("signInToAccept")}
-                    </Link>
-                  </>
-                ) : null}
-              </AuthError>
-            ) : null}
-            <div>
-              <Button type="submit" loading={busy} className="h-11 w-full">
-                <Fingerprint className="size-[18px]" aria-hidden />
-                {t("createPasskey")}
-              </Button>
-              <p className="mt-2.5 text-center text-xs leading-relaxed text-muted-foreground">{t("createHint")}</p>
-            </div>
-            {ticket ? null : (
-              <button
-                type="button"
-                onClick={() => {
-                  setError("");
-                  setPhase("ready");
-                }}
-                className="mx-auto block text-sm text-muted-foreground hover:text-foreground"
-              >
-                ← {t("back")}
-              </button>
-            )}
-          </form>
-        )}
-      </Screen>
-    );
-  }
-
   const screen = inviteScreen(preview);
   const day = inviteDay(preview.expires_at, locale);
   const goHome = (
@@ -385,7 +208,7 @@ export default function TeamInvitePage() {
     </Button>
   );
   const signOutHere = (
-    <Button type="button" className="h-11 w-full" onClick={() => signOut(invitePath)}>
+    <Button type="button" className="h-11 w-full" onClick={() => void signOut(invitePath)}>
       {t("signOutContinue")}
     </Button>
   );
@@ -505,33 +328,22 @@ export default function TeamInvitePage() {
           </Button>
           <p className="mt-3 text-center text-xs text-muted-foreground">
             {t("signedInAs", { email: preview.viewer?.email ?? "" })} ·{" "}
-            <button type="button" onClick={() => signOut(invitePath)} className={LINK}>
+            <button type="button" onClick={() => void signOut(invitePath)} className={LINK}>
               {t("notYou")}
             </button>
           </p>
         </div>
       ) : (
         <div className="space-y-5">
-          {supportsPasskeys === false ? (
-            <p className="rounded-ui border border-border bg-muted/40 px-3 py-2 text-center text-sm text-muted-foreground">
-              {t("noPasskeys")}
-            </p>
-          ) : (
-            <div>
-              <Button
-                type="button"
-                className="h-11 w-full"
-                onClick={() => {
-                  setError("");
-                  setPhase("create");
-                }}
-              >
+          <div>
+            <Button asChild className="h-11 w-full">
+              <Link href={signUpHref}>
                 <Fingerprint className="size-[18px]" aria-hidden />
                 {t("acceptCreate")}
-              </Button>
-              <p className="mt-2.5 text-center text-xs leading-relaxed text-muted-foreground">{t("passkeyHint")}</p>
-            </div>
-          )}
+              </Link>
+            </Button>
+            <p className="mt-2.5 text-center text-xs leading-relaxed text-muted-foreground">{t("passkeyHint")}</p>
+          </div>
           <AuthDivider>{t("or")}</AuthDivider>
           <p className="text-center text-sm text-muted-foreground">
             {t("haveAccount")}{" "}

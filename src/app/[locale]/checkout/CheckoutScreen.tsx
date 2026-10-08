@@ -6,7 +6,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import type { AppLocale } from "@/i18n/routing";
 import { Button } from "@/components/ui/button";
-import { getAccessToken } from "@/lib/auth";
+import { hasAuthSessionCookie } from "@/lib/auth-session-cookie";
 import { invalidateMeRoutingCache } from "@/lib/subscription-access";
 import api from "@/lib/api";
 import { CheckoutSuccessAnimation } from "@/components/checkout/CheckoutSuccessAnimation";
@@ -96,7 +96,7 @@ export default function CheckoutScreen() {
   }
 
   useEffect(() => {
-    if (!getAccessToken()) {
+    if (!hasAuthSessionCookie()) {
       router.replace("/login", { locale: dashboardLocale });
       return;
     }

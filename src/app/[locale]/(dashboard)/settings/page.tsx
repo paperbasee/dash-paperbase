@@ -12,7 +12,6 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import AccountSection from "./sections/AccountSection";
-import PasskeysManager from "./sections/PasskeysManager";
 import StoreInfoSection from "./sections/StoreInfoSection";
 import InvoiceSettingsPanel from "./sections/InvoiceSettingsPanel";
 import DynamicFieldsSection from "./sections/DynamicFieldsSection";
@@ -64,11 +63,7 @@ export default function SettingsPage() {
 
   const controller = useSettingsPageController();
   const {
-    isLoading,
     enabledApps,
-    ownerName,
-    setOwnerName,
-    ownerEmail,
     storeName,
     setStoreName,
     storeType,
@@ -90,8 +85,6 @@ export default function SettingsPage() {
     setClearLogo,
     setLogoFile,
     fileInputRef,
-    accountSaving,
-    accountMessage,
     storeSaving,
     storeMessage,
     dynamicFieldsMessage,
@@ -101,7 +94,6 @@ export default function SettingsPage() {
     orderEmailNotificationsEnabled,
     orderEmailFeatureLoading,
     emailPrefsSaving,
-    handleAccountSubmit,
     handleStoreSubmit,
   } = controller;
 
@@ -156,22 +148,7 @@ export default function SettingsPage() {
         </div>
 
         <main className="min-w-0 w-full flex-1">
-          <AccountSection
-            hidden={activeSection !== "account"}
-            isLoading={isLoading}
-            ownerName={ownerName}
-            ownerEmail={ownerEmail}
-            onOwnerNameChange={setOwnerName}
-            accountSaving={accountSaving}
-            accountMessage={accountMessage}
-            onSubmit={handleAccountSubmit}
-          />
-
-          {activeSection === "account" && (
-            <div className="mt-6">
-              <PasskeysManager />
-            </div>
-          )}
+          <AccountSection hidden={activeSection !== "account"} />
 
           <StoreInfoSection
             hidden={activeSection !== "store"}

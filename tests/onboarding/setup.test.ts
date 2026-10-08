@@ -64,12 +64,17 @@ describe("the sample shop", () => {
   });
 });
 
-describe("the shop wall behind sign in and sign up", () => {
-  test("sign in, sign up and the email-link pages share one frame, so the wall never restarts between them", () => {
+describe("the shop wall behind the pages on the way to and from Accounts", () => {
+  test("they share one frame, so the wall never restarts between them", () => {
     expect(read("src/app/[locale]/(auth)/layout.tsx")).toContain("<AuthFrame>{children}</AuthFrame>");
-    for (const page of ["login", "signup", "auth/passkey", "auth/verify-email"]) {
+    for (const page of ["login", "signup", "auth/callback", "auth/support", "team/invite"]) {
       expect(fs.existsSync(path.join(ROOT, "src/app/[locale]/(auth)", page, "page.tsx")), page).toBe(true);
     }
+  });
+
+  test("sign in and sign up go on to Accounts, sign-up as its own page", () => {
+    expect(read("src/app/[locale]/(auth)/login/page.tsx")).toContain("<GoToAccounts />");
+    expect(read("src/app/[locale]/(auth)/signup/page.tsx")).toContain('<GoToAccounts prompt="create" />');
   });
 
   test("the columns drift up and down, each once round a copy of itself", () => {
@@ -79,26 +84,19 @@ describe("the shop wall behind sign in and sign up", () => {
     expect(css).toContain("@keyframes pb-wall-up {\n  from {\n    transform: translateY(0);\n  }\n  to {\n    transform: translateY(-50%);");
   });
 
-  test("help, terms and privacy link only to addresses the deployment sets -- plain words until then", () => {
-    const links = read("src/lib/platform-links.ts");
-    for (const name of ["NEXT_PUBLIC_SUPPORT_URL", "NEXT_PUBLIC_TERMS_URL", "NEXT_PUBLIC_PRIVACY_URL"]) {
-      expect(links, name).toContain(`process.env.${name}`);
-    }
+  test("help links only to the address the deployment sets -- plain words until then", () => {
+    expect(read("src/lib/platform-links.ts")).toContain("process.env.NEXT_PUBLIC_SUPPORT_URL");
     const frame = read("src/components/auth/AuthFrame.tsx");
     // Plain words until an address is set: never a link to nowhere.
     expect(frame).toContain('if (!href) return <span className="font-medium text-foreground">{children}</span>;');
     expect(frame).not.toMatch(/href="https?:\/\//);
   });
 
-  test("the tabs step aside once the email is sent", () => {
-    expect(read("src/app/[locale]/(auth)/login/page.tsx")).toContain("useHideAuthTabs(linkSent);");
-    expect(read("src/app/[locale]/(auth)/signup/page.tsx")).toContain("useHideAuthTabs(sent);");
-  });
 });
 
 describe("the words, in both languages", () => {
-  test("sign in, sign up, setup and the sample shop say everything in Bangla too", () => {
-    for (const ns of ["login", "signup", "checkEmail", "passkey", "tabs", "wall", "onboarding"] as const) {
+  test("the way to and from Accounts, setup and the sample shop say everything in Bangla too", () => {
+    for (const ns of ["toAccounts", "callback", "support", "wall", "inviteWall", "onboarding"] as const) {
       expect(keys(bn.auth[ns]).sort(), ns).toEqual(keys(en.auth[ns]).sort());
     }
     expect(keys(bn.shopPreview).sort()).toEqual(keys(en.shopPreview).sort());
@@ -107,9 +105,9 @@ describe("the words, in both languages", () => {
 
   test("the pages hold no English of their own", () => {
     for (const file of [
-      "src/app/[locale]/(auth)/login/page.tsx",
-      "src/app/[locale]/(auth)/signup/page.tsx",
-      "src/app/[locale]/(auth)/auth/passkey/page.tsx",
+      "src/components/auth/GoToAccounts.tsx",
+      "src/app/[locale]/(auth)/auth/callback/page.tsx",
+      "src/app/[locale]/(auth)/auth/support/page.tsx",
       "src/components/auth/AuthFrame.tsx",
       "src/components/auth/ShopWall.tsx",
     ]) {

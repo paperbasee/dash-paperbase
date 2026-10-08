@@ -1,17 +1,19 @@
-import { getActiveStorePublicIdFromJwt } from "@/lib/api";
+import { currentShop } from "@/lib/api";
 import { buildApiUrl } from "@/lib/api-client";
+import { heldPass } from "@/lib/accounts/pass";
 
+/** Sent as the page goes, so with the pass held now: there is no waiting for a fresh one. */
 function fireKeepalivePost(path: string, body: object = {}): void {
   if (typeof window === "undefined") return;
-  const token = localStorage.getItem("access_token");
-  if (!token) return;
+  const pass = heldPass();
+  if (!pass) return;
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
-    Authorization: `Bearer ${token}`,
+    Authorization: `Bearer ${pass}`,
   };
-  const storePublicId = getActiveStorePublicIdFromJwt(token);
-  if (storePublicId) {
-    headers["X-Store-Public-ID"] = storePublicId;
+  const shop = currentShop();
+  if (shop) {
+    headers["X-Store-Public-ID"] = shop;
   }
   void fetch(buildApiUrl(path), {
     method: "POST",
