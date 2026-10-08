@@ -90,7 +90,7 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
     id: "2026-10-09-a-clearer-waiting-page",
     date: "2026-10-09",
-    version: "4.189.0",
+    version: "4.189.1",
     tag: "improved",
     title: {
       en: "A clearer page when Paperbase is away",
