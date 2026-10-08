@@ -88,6 +88,21 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-10-08-sign-in-at-paperbase-accounts",
+    date: "2026-10-08",
+    version: "4.185.0",
+    tag: "new",
+    title: {
+      en: "A new sign-in page and your Paperbase account",
+      bn: "নতুন সাইন-ইন পাতা আর আপনার Paperbase অ্যাকাউন্ট",
+    },
+    body: {
+      en: "You now sign in at accounts.paperbase.me, with the same passkey or email code. Your name, phone, picture and passkeys are in Your Paperbase account, in the menu under your name. Everyone signs in once more after the change.",
+      bn: "এখন সাইন ইন হয় accounts.paperbase.me-তে, একই পাসকি বা ইমেইল কোড দিয়ে। আপনার নাম, ফোন, ছবি আর পাসকি আছে আপনার Paperbase অ্যাকাউন্টে, আপনার নামের নিচের মেনুতে। এই বদলের পর সবাইকে একবার আবার সাইন ইন করতে হবে।",
+    },
+    href: "/settings?tab=account",
+  },
+  {
     id: "2026-10-10-getting-ready-for-paperbase-accounts",
     date: "2026-10-10",
     version: "4.184.4",
