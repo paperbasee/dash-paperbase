@@ -103,10 +103,7 @@ export default function UnreachableScreen({
 
   return (
     <div className="pb-motion flex min-h-dvh flex-col bg-background text-foreground">
-      <header className="px-5 py-4 sm:px-8 sm:py-6">
-        <span className="text-sm font-semibold tracking-wide text-muted-foreground">Paperbase</span>
-      </header>
-      <main className="flex flex-1 flex-col items-center px-5 pb-8 text-center sm:px-6 sm:pb-14">
+      <main className="flex flex-1 flex-col items-center px-5 pb-8 pt-13 text-center sm:px-6 sm:pb-14 sm:pt-17">
         <Drawing className="w-80 max-w-full sm:w-100" />
         {/* Offline, the status page is out of reach too -- and Paperbase is not the one away. */}
         {part === "offline" ? null : <StatusLine />}

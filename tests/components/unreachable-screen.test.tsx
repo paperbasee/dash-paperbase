@@ -49,6 +49,15 @@ describe("the waiting page", () => {
   });
   afterEach(() => vi.unstubAllEnvs());
 
+  it("puts the drawing first: no name across the top (owner, 2026-10-09)", () => {
+    for (const part of ["api", "signIn", "offline"] as const) {
+      const html = render(part);
+      expect(html).not.toContain("<header");
+      expect(html.indexOf("<svg")).toBeLessThan(html.indexOf("<h1"));
+      expect(html.slice(0, html.indexOf("<svg"))).not.toContain("Paperbase");
+    }
+  });
+
   it("draws each part away its own way, as decoration, and stills it for less motion", () => {
     const drawings = (["api", "signIn", "offline"] as const).map((part) => {
       const html = render(part);
