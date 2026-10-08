@@ -88,6 +88,21 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-10-09-a-clearer-billing-page",
+    date: "2026-10-09",
+    version: "4.187.0",
+    tag: "improved",
+    title: {
+      en: "A clearer Billing page",
+      bn: "আরও পরিষ্কার বিলিং পাতা",
+    },
+    body: {
+      en: "Settings > Billing now shows how many days your plan has left, when the next payment is due, your products against your plan's limit, what you have paid so far, and every payment with its transaction ID. Once your plan ends, you can pay right there.",
+      bn: "সেটিংস > বিলিং-এ এখন দেখা যায় প্ল্যানের আর কত দিন বাকি, পরের পেমেন্ট কবে, প্ল্যানের সীমার মধ্যে কতগুলো পণ্য, এ পর্যন্ত কত পরিশোধ করেছেন, আর ট্রানজেকশন আইডিসহ প্রতিটি পেমেন্ট। প্ল্যান শেষ হলে সেখান থেকেই পেমেন্ট করতে পারবেন।",
+    },
+    href: "/settings?tab=billing",
+  },
+  {
     id: "2026-10-09-your-account-in-one-place",
     date: "2026-10-09",
     version: "4.186.0",
@@ -522,21 +537,6 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     body: {
       en: "If there's no bKash or Nagad number to pay your plan to yet, the payment page now says so plainly, instead of showing a form with no number.",
       bn: "প্ল্যানের টাকা পাঠানোর জন্য এখনো কোনো বিকাশ বা নগদ নম্বর না থাকলে, পেমেন্ট পেজ এখন নম্বর ছাড়া ফর্ম না দেখিয়ে সেটা সোজাসুজি জানায়।",
-    },
-    href: "/plans",
-  },
-  {
-    id: "2026-10-04-a-new-plans-page",
-    date: "2026-10-04",
-    version: "4.165.0",
-    tag: "improved",
-    title: {
-      en: "A new Plans page",
-      bn: "নতুন প্ল্যান পেজ",
-    },
-    body: {
-      en: "Each plan is a card with its price, who it is for and what you get, so you can see at a glance what Premium adds. Your plan shows until when it is active, and yearly prices show what you save.",
-      bn: "প্রতিটি প্ল্যান এখন একটি কার্ড: দাম, কাদের জন্য আর কী কী পাবেন, তাই এক নজরেই দেখা যায় প্রিমিয়ামে বাড়তি কী আছে। আপনার প্ল্যান কবে পর্যন্ত চালু তা দেখায়, আর বার্ষিক দামে দেখায় কত সাশ্রয় হয়।",
     },
     href: "/plans",
   },
