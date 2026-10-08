@@ -88,6 +88,21 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-10-09-round-ticks-on-billing",
+    date: "2026-10-09",
+    version: "4.187.1",
+    tag: "improved",
+    title: {
+      en: "Round ticks on the Billing page",
+      bn: "বিলিং পাতায় গোল টিক চিহ্ন",
+    },
+    body: {
+      en: "What your plan gives, on the Billing page, now has the same round green ticks as the Plans page.",
+      bn: "বিলিং পাতায় আপনার প্ল্যানে কী আছে, তাতে এখন প্ল্যান পাতার মতোই সবুজ গোল টিক চিহ্ন।",
+    },
+    href: "/settings?tab=billing",
+  },
+  {
     id: "2026-10-09-a-clearer-billing-page",
     date: "2026-10-09",
     version: "4.187.0",
@@ -522,21 +537,6 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     body: {
       en: "On the payment page, bKash's logo lost its letters on the dark theme. Both logos now read clearly on light and dark, and are drawn larger.",
       bn: "পেমেন্ট পেজে ডার্ক থিমে বিকাশের লোগোর লেখা দেখা যাচ্ছিল না। এখন লাইট ও ডার্ক দুই থিমেই দুটি লোগো পরিষ্কার দেখা যায়, আর আকারেও একটু বড়।",
-    },
-    href: "/plans",
-  },
-  {
-    id: "2026-10-04-a-clear-page-when-payment-is-not-ready",
-    date: "2026-10-04",
-    version: "4.166.0",
-    tag: "fixed",
-    title: {
-      en: "A clear page when payment isn't ready",
-      bn: "পেমেন্ট তৈরি না থাকলে পরিষ্কার একটি পেজ",
-    },
-    body: {
-      en: "If there's no bKash or Nagad number to pay your plan to yet, the payment page now says so plainly, instead of showing a form with no number.",
-      bn: "প্ল্যানের টাকা পাঠানোর জন্য এখনো কোনো বিকাশ বা নগদ নম্বর না থাকলে, পেমেন্ট পেজ এখন নম্বর ছাড়া ফর্ম না দেখিয়ে সেটা সোজাসুজি জানায়।",
     },
     href: "/plans",
   },
