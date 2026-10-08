@@ -88,6 +88,20 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-10-10-getting-ready-for-paperbase-accounts",
+    date: "2026-10-10",
+    version: "4.184.4",
+    tag: "improved",
+    title: {
+      en: "Getting ready for Paperbase accounts",
+      bn: "Paperbase অ্যাকাউন্টের প্রস্তুতি",
+    },
+    body: {
+      en: "We added a small file that will let the coming Paperbase accounts sign-in page use the passkeys you already have. Nothing changes for you yet: you sign in as before.",
+      bn: "আসন্ন Paperbase অ্যাকাউন্টের সাইন-ইন পাতা যেন আপনার আগের পাসকি দিয়েই কাজ করে, সেজন্য একটি ছোট ফাইল যোগ করা হয়েছে। আপনার জন্য এখনই কিছু বদলাচ্ছে না: আগের মতোই সাইন ইন করবেন।",
+    },
+  },
+  {
     id: "2026-10-08-security-updates",
     date: "2026-10-08",
     version: "4.184.1",
@@ -513,20 +527,5 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
       bn: "এসেনশিয়াল প্ল্যানে অ্যানালিটিক্সের প্রতিটি প্রিমিয়াম অংশ এখন তার আসল নকশা ঝাপসা করে দেখায়, সাথে থাকে সেটি কী জানায় তার ছোট একটি লেখা আর আপগ্রেড করার বোতাম। সারসংক্ষেপ আর বিক্রি আপনার প্ল্যানেই থাকছে।",
     },
     href: "/analytics",
-  },
-  {
-    id: "2026-10-04-category-limits-hold-everywhere",
-    date: "2026-10-04",
-    version: "4.162.0",
-    tag: "improved",
-    title: {
-      en: "Category limits now hold everywhere",
-      bn: "ক্যাটাগরি সীমা এখন সব জায়গায় কাজ করে",
-    },
-    body: {
-      en: "A Staff member limited to some categories now sees only their categories' numbers on the home page too, and the order list shows each order's full item count. On an order with items from other categories, they can work on the whole order but change only their own items.",
-      bn: "কিছু ক্যাটাগরিতে সীমিত কোনো স্টাফ এখন হোম পেজেও শুধু তাঁর ক্যাটাগরির সংখ্যা দেখেন, আর অর্ডার তালিকায় প্রতিটি অর্ডারের পুরো আইটেম সংখ্যা দেখায়। অন্য ক্যাটাগরির আইটেমসহ কোনো অর্ডারে তিনি পুরো অর্ডার নিয়ে কাজ করতে পারেন, কিন্তু বদলাতে পারেন শুধু নিজের আইটেমগুলো।",
-    },
-    href: "/settings?tab=team",
   },
 ];
