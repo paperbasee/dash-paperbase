@@ -58,7 +58,7 @@ describe("Promotions section visibility", () => {
   it("lets a pop-up-only staff member reach the pop-up without any settings permission", () => {
     const access = staff(["popups.view", "popups.manage"]);
     const visible = SECTIONS.filter((row) => isSectionVisible(row.id, access));
-    expect(visible.map((row) => row.id)).toEqual(["promotions", "account"]);
+    expect(visible.map((row) => row.id)).toEqual(["promotions"]);
     // Plain /settings and the default "store" tab both land them on Promotions.
     expect(resolveSettingsSection(null, visible)).toBe("promotions");
     expect(resolveSettingsSection("store", visible)).toBe("promotions");

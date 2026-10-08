@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { useCanShowApp } from "@/hooks/useCanShowApp";
+import { useSupportMode } from "@/hooks/useSupportMode";
 import { usePermissions } from "@/context/PermissionsContext";
 import { useVisibleSettingsSections } from "@/app/[locale]/(dashboard)/settings/useVisibleSettingsSections";
 import { findPlaces, placeLabel, visiblePlaces, type SearchPlace } from "@/lib/search/places";
@@ -61,9 +62,11 @@ function usePlaceMatches(query: string): {
   const canShowApp = useCanShowApp();
   const { has } = usePermissions();
   const sections = useVisibleSettingsSections();
+  const inSupportMode = useSupportMode();
   const visible = useMemo(
-    () => visiblePlaces({ canShowApp, has, settingsSections: new Set(sections.map((row) => row.id)) }),
-    [canShowApp, has, sections],
+    () =>
+      visiblePlaces({ canShowApp, has, settingsSections: new Set(sections.map((row) => row.id)), inSupportMode }),
+    [canShowApp, has, sections, inSupportMode],
   );
   const labelOf = useMemo(() => (place: SearchPlace) => placeLabel(place, (key) => t(key)), [t]);
   return useMemo(
@@ -147,7 +150,7 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
       ["sidebar.searchActions", placeMatches.actions],
     ] as const) {
       for (const place of matches) {
-        out.push({ key: place.id, group, href: place.href, title: placeMatches.labelOf(place) });
+        out.push({ key: place.id, group, href: place.href, title: placeMatches.labelOf(place), external: place.external });
       }
     }
     // Not while the server is still looking (that would be the last answer), nor after it failed.
@@ -174,9 +177,15 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
     listRef.current?.querySelector<HTMLElement>(`[data-row="${active}"]`)?.scrollIntoView({ block: "nearest" });
   }, [active]);
 
-  const goTo = (href: string) => {
+  const goTo = (row: SearchRow) => {
     setRecent(rememberSearch(currentShop(), query));
-    navigate(normalizeNavigationHref(href));
+    if (row.external) {
+      // Your Paperbase account, at Accounts: opened in this tab, as the user menu's link opens it.
+      onOpenChange(false);
+      window.location.assign(row.href);
+      return;
+    }
+    navigate(normalizeNavigationHref(row.href));
     onOpenChange(false);
   };
 
@@ -190,7 +199,7 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
       setActive((index) => (index - 1 + rows.length) % rows.length);
     } else if (event.key === "Enter" && rows[active]) {
       event.preventDefault();
-      goTo(rows[active].href);
+      goTo(rows[active]);
     }
   }
 
@@ -326,7 +335,7 @@ export function SearchModal({ open, onOpenChange }: SearchModalProps) {
                       type="button"
                       role="option"
                       aria-selected={index === active}
-                      onClick={() => goTo(row.href)}
+                      onClick={() => goTo(row)}
                       onMouseMove={() => setActive(index)}
                       className={cn(
                         "mb-1 w-full rounded-xs border border-transparent px-3 py-2 text-left transition",

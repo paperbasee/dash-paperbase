@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
 import { ChevronDown } from "lucide-react";
@@ -11,7 +11,6 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import AccountSection from "./sections/AccountSection";
 import StoreInfoSection from "./sections/StoreInfoSection";
 import InvoiceSettingsPanel from "./sections/InvoiceSettingsPanel";
 import DynamicFieldsSection from "./sections/DynamicFieldsSection";
@@ -20,7 +19,6 @@ import IntegrationsSection from "./sections/IntegrationsSection";
 import DomainsSection from "./sections/DomainsSection";
 import NotificationsSection from "./sections/NotificationsSection";
 import PaymentsSection from "./sections/PaymentsSection";
-import SecuritySection from "./sections/SecuritySection";
 import SessionsSection from "./sections/SessionsSection";
 import TeamSection from "./sections/team/TeamSection";
 import BillingSection from "./sections/BillingSection";
@@ -49,6 +47,12 @@ export default function SettingsPage() {
   // recovers when a section appears late (enabled apps and permissions load async).
   const visibleSections = useVisibleSettingsSections();
   const activeSection = resolveSettingsSection(searchParams.get("tab"), visibleSections);
+
+  // Nothing in Settings for this person (a Staff member with no settings permission): it is not
+  // in their menu, and an address typed by hand goes home.
+  useEffect(() => {
+    if (activeSection === null) navigate("/");
+  }, [activeSection, navigate]);
 
   function setSection(next: SettingsSection) {
     const current = (searchParams.get("tab") || "").trim();
@@ -97,6 +101,8 @@ export default function SettingsPage() {
     handleStoreSubmit,
   } = controller;
 
+
+  if (activeSection === null) return null;
 
   const activeSectionMeta = SECTIONS.find((s) => s.id === activeSection);
   const activeLabel = activeSectionMeta ? tSettings(activeSectionMeta.labelKey) : tSettings("title");
@@ -148,8 +154,6 @@ export default function SettingsPage() {
         </div>
 
         <main className="min-w-0 w-full flex-1">
-          <AccountSection hidden={activeSection !== "account"} />
-
           <StoreInfoSection
             hidden={activeSection !== "store"}
             previewUrl={previewUrl}
@@ -220,8 +224,6 @@ export default function SettingsPage() {
           />
 
           <TeamSection hidden={activeSection !== "team"} />
-
-          <SecuritySection hidden={activeSection !== "security"} />
 
           <SessionsSection hidden={activeSection !== "sessions"} />
 

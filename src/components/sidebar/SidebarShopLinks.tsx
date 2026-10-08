@@ -16,19 +16,22 @@ const ON = "bg-accent text-foreground dark:bg-white/[0.12] dark:text-white/95";
 
 /**
  * Pinned under the main menu, above the account (owner, 2026-10-07): the live shop, which opens in
- * a new tab, and Settings, which moved here from the account menu. Everyone on the team sees both;
- * Settings shows each person only the parts their role allows.
+ * a new tab, and Settings, which moved here from the account menu. Settings shows each person only
+ * the parts their role allows, and is left out for someone with none (`hasSettings`): a person's
+ * own account is at Accounts, in the menu under their name (owner, 2026-10-09).
  *
  * `storefrontUrl` is "" until the shop's address is known, and View my shop waits for it.
  */
 export function SidebarShopLinks({
   collapsed,
   storefrontUrl,
+  hasSettings,
   settingsActive,
   onNavigate,
 }: {
   collapsed: boolean;
   storefrontUrl: string;
+  hasSettings: boolean;
   settingsActive: boolean;
   onNavigate?: () => void;
 }) {
@@ -54,18 +57,20 @@ export function SidebarShopLinks({
           {!collapsed && <ArrowUpRight className="size-4 shrink-0 opacity-60" aria-hidden />}
         </a>
       ) : null}
-      <DeferredNavLink
-        href="/settings"
-        onNavigate={onNavigate}
-        aria-current={settingsActive ? "page" : undefined}
-        title={collapsed ? tCommon("settings") : undefined}
-        className={cn(ROW, settingsActive ? ON : IDLE, collapsed && "justify-center px-2")}
-      >
-        <span className={cn("flex items-center gap-2", collapsed ? "justify-center" : "min-w-0 flex-1")}>
-          <NAV_ICONS.settings weight={NAV_ICON_WEIGHT} className="size-5 shrink-0" aria-hidden />
-          {label(tCommon("settings"))}
-        </span>
-      </DeferredNavLink>
+      {hasSettings ? (
+        <DeferredNavLink
+          href="/settings"
+          onNavigate={onNavigate}
+          aria-current={settingsActive ? "page" : undefined}
+          title={collapsed ? tCommon("settings") : undefined}
+          className={cn(ROW, settingsActive ? ON : IDLE, collapsed && "justify-center px-2")}
+        >
+          <span className={cn("flex items-center gap-2", collapsed ? "justify-center" : "min-w-0 flex-1")}>
+            <NAV_ICONS.settings weight={NAV_ICON_WEIGHT} className="size-5 shrink-0" aria-hidden />
+            {label(tCommon("settings"))}
+          </span>
+        </DeferredNavLink>
+      ) : null}
     </div>
   );
 }

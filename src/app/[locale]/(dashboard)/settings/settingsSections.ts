@@ -8,12 +8,10 @@ import {
   MegaphoneIcon,
   PaletteIcon,
   PlugsIcon,
-  ShieldIcon,
   ShoppingCartIcon,
   StackIcon,
   StorefrontIcon,
   TruckIcon,
-  UserIcon,
   UsersIcon,
   WalletIcon,
   type Icon,
@@ -30,7 +28,6 @@ import { PROMOTION_TABS } from "./sections/promotions/promotionTabs";
 export type SettingsSectionIcon = Icon;
 
 export type SettingsSection =
-  | "account"
   | "store"
   | "policies"
   | "customization"
@@ -44,7 +41,6 @@ export type SettingsSection =
   | "domains"
   | "notifications"
   | "team"
-  | "security"
   | "sessions"
   | "billing";
 
@@ -62,8 +58,6 @@ export type SettingsSectionLabelKey =
   | "sectionIntegrations"
   | "sectionDomains"
   | "sectionNotifications"
-  | "sectionAccount"
-  | "sectionSecurity"
   | "sectionSessions"
   | "sectionBilling";
 
@@ -109,7 +103,6 @@ export const SECTION_OWNER_POWER: Partial<Record<SettingsSection, OwnerPower>> =
   payments: "payments",
   domains: "domains",
   team: "team",
-  security: "security",
   sessions: "sessions",
   billing: "billing",
 };
@@ -160,13 +153,15 @@ export function isSectionVisible(id: SettingsSection, access: SettingsSectionAcc
  * The section the settings page shows and the sidebar highlights: the URL's `tab`
  * when the user can see it, else their first visible section, so nobody lands on a
  * panel missing from their nav (e.g. a staff member without the default "store").
+ * None when they see no section at all: Settings is not in their menu, and the page
+ * sends them home.
  */
 export function resolveSettingsSection(
   requested: string | null,
   visible: readonly SettingsSectionNavItem[],
-): SettingsSection {
+): SettingsSection | null {
   const candidate = (requested ?? "").trim();
-  return (visible.find((row) => row.id === candidate) ?? visible[0])?.id ?? "store";
+  return (visible.find((row) => row.id === candidate) ?? visible[0])?.id ?? null;
 }
 
 /** Every settings section that exists, before any feature-flag filtering. */
@@ -184,8 +179,6 @@ export const ALL_SECTIONS: SettingsSectionNavItem[] = [
   { id: "domains", labelKey: "sectionDomains", icon: GlobeIcon },
   { id: "notifications", labelKey: "sectionNotifications", icon: BellRingingIcon },
   { id: "team", labelKey: "sectionTeam", icon: UsersIcon },
-  { id: "account", labelKey: "sectionAccount", icon: UserIcon },
-  { id: "security", labelKey: "sectionSecurity", icon: ShieldIcon },
   { id: "sessions", labelKey: "sectionSessions", icon: DevicesIcon },
   { id: "billing", labelKey: "sectionBilling", icon: CreditCardIcon },
 ];

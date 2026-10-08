@@ -7,9 +7,6 @@
  * - The owner sees them all. Paperbase support, signed in as the owner, sees them to read (the
  *   API refuses any change), except the sessions, which are hidden from support altogether.
  * - A platform superuser sees them, except the sessions.
- *
- * `security` is the dashboard's own: a page that explains sign-in, with nothing behind it to
- * refuse.
  */
 
 export const OWNER_POWERS = [
@@ -19,7 +16,6 @@ export const OWNER_POWERS = [
   "billing",
   "team",
   "sessions",
-  "security",
   "autopilot",
 ] as const;
 

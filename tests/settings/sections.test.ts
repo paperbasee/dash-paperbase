@@ -20,6 +20,8 @@ import {
 import { APP_CONFIG } from "@/config/apps";
 import { OWNER_POWERS } from "@/config/owner-powers";
 import { ALL_PERMISSION_KEYS, APP_PAGE_PERMISSION } from "@/config/permissions";
+import bn from "../../messages/bn.json";
+import en from "../../messages/en.json";
 
 /**
  * settingsSections is the single source of truth for which settings tabs a
@@ -251,9 +253,9 @@ describe("permission map ↔ SECTIONS consistency", () => {
 });
 
 describe("role-shaped visibility (the maps as consumers apply them)", () => {
-  it("shows a permissionless staff member only the ungated sections", () => {
-    // account has no requirement; security is ungated but owner-only.
-    expect(visibleIdsFor(grants().has).sort()).toEqual(["account"]);
+  it("shows a permissionless staff member nothing: Settings leaves their menu", () => {
+    // Account was the one ungated section; it left for Your Paperbase account (owner, 2026-10-09).
+    expect(visibleIdsFor(grants().has)).toEqual([]);
   });
 
   it("keeps Sessions the owner's alone: not a superuser, not support signed in as the owner", () => {
@@ -266,16 +268,13 @@ describe("role-shaped visibility (the maps as consumers apply them)", () => {
 
   it("keeps owner-only sections away from a non-owner who somehow holds every key", () => {
     const superRole = { has: () => true };
-    expect(visibleIdsFor(superRole.has)).not.toContain("security");
-    expect(visibleIdsFor(superRole.has, { isOwner: true })).toContain("security");
-    expect(visibleIdsFor(superRole.has, { isSuperuser: true })).toContain("security");
+    expect(visibleIdsFor(superRole.has)).not.toContain("billing");
+    expect(visibleIdsFor(superRole.has, { isOwner: true })).toContain("billing");
+    expect(visibleIdsFor(superRole.has, { isSuperuser: true })).toContain("billing");
   });
 
   it("shows Integrations to whoever may open either part: the pixels or the courier accounts", () => {
-    expect(visibleIdsFor(grants("integrations.view", "integrations.manage").has).sort()).toEqual([
-      "account",
-      "integrations",
-    ]);
+    expect(visibleIdsFor(grants("integrations.view", "integrations.manage").has)).toEqual(["integrations"]);
     expect(visibleIdsFor(grants().has, { isOwner: true })).toContain("integrations");
     expect(visibleIdsFor(grants("integrations.view").has)).not.toContain("integrations");
   });
@@ -328,15 +327,34 @@ describe("active section (what the page shows and the sidebar highlights)", () =
   it("opens the first visible section when the tab is missing, unknown or hidden", () => {
     expect(resolveSettingsSection(null, SECTIONS)).toBe("store");
     expect(resolveSettingsSection("networking", SECTIONS)).toBe("store");
-    expect(resolveSettingsSection("store", rows("integrations", "account"))).toBe("integrations");
+    expect(resolveSettingsSection("store", rows("integrations"))).toBe("integrations");
+  });
+
+  it("is none when the person sees no section: the page sends them home", () => {
+    expect(resolveSettingsSection("store", [])).toBeNull();
+    expect(resolveSettingsSection(null, [])).toBeNull();
   });
 
   it("follows the URL's tab again once that section becomes visible", () => {
     // Enabled apps can arrive after the page mounts; no earlier fallback may stick.
-    expect(resolveSettingsSection("promotions", rows("store", "account"))).toBe("store");
-    expect(resolveSettingsSection("promotions", rows("store", "promotions", "account"))).toBe(
-      "promotions",
-    );
+    expect(resolveSettingsSection("promotions", rows("store"))).toBe("store");
+    expect(resolveSettingsSection("promotions", rows("store", "promotions"))).toBe("promotions");
+  });
+});
+
+describe("Account and Security left Settings (owner, 2026-10-09)", () => {
+  // A person's name, phone, picture and passkeys are in Your Paperbase account, at Accounts,
+  // linked from the user menu and found by search. Nothing in the dashboard is left to show.
+  it("are no sections, and their words are gone", () => {
+    const ids = ALL_SECTIONS.map((row) => row.id as string);
+    expect(ids).not.toContain("account");
+    expect(ids).not.toContain("security");
+    for (const messages of [en, bn]) {
+      expect(messages.settings).not.toHaveProperty("account");
+      expect(messages.settings).not.toHaveProperty("security");
+      expect(messages.settings).not.toHaveProperty("sectionAccount");
+      expect(messages.settings).not.toHaveProperty("sectionSecurity");
+    }
   });
 });
 

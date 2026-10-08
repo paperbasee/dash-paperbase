@@ -57,7 +57,7 @@ describe("Shipping section", () => {
   it("lets a shipping-only staff member reach Shipping without any settings permission", () => {
     const access = staff(["shipping.view", "shipping.manage"]);
     const visible = SECTIONS.filter((row) => isSectionVisible(row.id, access));
-    expect(visible.map((row) => row.id)).toEqual(["shipping", "account"]);
+    expect(visible.map((row) => row.id)).toEqual(["shipping"]);
     // Plain /settings and the default "store" tab both land them on Shipping.
     expect(resolveSettingsSection(null, visible)).toBe("shipping");
     expect(resolveSettingsSection("store", visible)).toBe("shipping");

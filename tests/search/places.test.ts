@@ -5,6 +5,7 @@
  */
 import { describe, expect, test } from "vitest";
 
+import { accountPageUrl } from "@/lib/accounts/config";
 import {
   SEARCH_PLACES,
   compactText,
@@ -33,7 +34,8 @@ const labelIn = (messages: Messages) => (place: SearchPlace) =>
 const EVERYONE: PlaceAccess = {
   canShowApp: () => true,
   has: () => true,
-  settingsSections: new Set(["store", "policies", "customization", "promotions", "checkout", "shipping", "eav", "apps", "integrations", "domains", "notifications", "team", "account", "security", "sessions", "billing"]),
+  settingsSections: new Set(["store", "policies", "customization", "promotions", "checkout", "shipping", "eav", "apps", "integrations", "domains", "notifications", "team", "sessions", "billing"]),
+  inSupportMode: false,
 };
 
 const ids = (places: SearchPlace[]) => places.map((place) => place.id);
@@ -58,9 +60,13 @@ describe("every place", () => {
 });
 
 describe("who sees what", () => {
-  test("someone who may open nothing finds only Home", () => {
-    const nobody: PlaceAccess = { canShowApp: () => false, has: () => false, settingsSections: new Set() };
-    expect(ids(visiblePlaces(nobody))).toEqual(["page:home"]);
+  test("someone who may open nothing finds only Home and their own Paperbase account", () => {
+    const nobody: PlaceAccess = { canShowApp: () => false, has: () => false, settingsSections: new Set(), inSupportMode: false };
+    expect(ids(visiblePlaces(nobody))).toEqual(["page:home", "account"]);
+  });
+
+  test("Paperbase support, signed in as the owner, never finds the owner's own account", () => {
+    expect(ids(visiblePlaces({ ...EVERYONE, inSupportMode: true }))).not.toContain("account");
   });
 
   test("seeing products is not adding them", () => {
@@ -68,6 +74,7 @@ describe("who sees what", () => {
       canShowApp: (app) => app === "products",
       has: (key) => key === "products.view",
       settingsSections: new Set(),
+      inSupportMode: false,
     };
     expect(find("product", en, viewer)).toContain("page:products");
     expect(find("add product", en, viewer)).not.toContain("action:add-product");
@@ -107,6 +114,18 @@ describe("finding", () => {
   test("actions are found by what they do", () => {
     expect(find("add product")).toContain("action:add-product");
     expect(find("new order")).toContain("action:add-order");
+  });
+
+  test("a person's name, phone and passkeys are found in Your Paperbase account, at Accounts", () => {
+    // Settings > Account and Security left the dashboard (owner, 2026-10-09).
+    for (const words of ["passkey", "my account", "profile", "পাসকি", "আমার অ্যাকাউন্ট"]) {
+      expect(find(words), words).toContain("account");
+    }
+    const account = SEARCH_PLACES.find((place) => place.id === "account")!;
+    expect(account.external).toBe(true);
+    expect(account.href).toBe(accountPageUrl());
+    expect(ids([...SEARCH_PLACES])).not.toContain("settings:account");
+    expect(ids([...SEARCH_PLACES])).not.toContain("settings:security");
   });
 
   test("one letter finds nothing -- it would find half the dashboard", () => {

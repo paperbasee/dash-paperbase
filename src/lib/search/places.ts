@@ -7,6 +7,9 @@
  * only to someone who could open it: the same rules the sidebar and Settings use (`shows`, fed by
  * `useCanShowApp` and `useVisibleSettingsSections`).
  *
+ * One place is outside the dashboard: "Your Paperbase account" at Accounts, where a person's name,
+ * phone, picture and passkeys are (owner, 2026-10-09: Settings > Account and Security went).
+ *
  * A place is found by its name in the dashboard's language and by its `words`: everyday words
  * for it in English AND Bangla, whichever language the dashboard is in ("steadfast" and "কুরিয়ার"
  * both find Integrations). The words are for finding, not for showing, so they live here rather
@@ -14,6 +17,7 @@
  */
 
 import { APP_CONFIG } from "@/config/apps";
+import { accountPageUrl } from "@/lib/accounts/config";
 import { SECTIONS } from "@/app/[locale]/(dashboard)/settings/settingsSections";
 import { SECTIONS as ANALYTICS_SECTIONS } from "@/app/[locale]/(dashboard)/analytics/_components/SectionTabs";
 import { SLOT_PAGES } from "@/lib/theme-editor/slot-catalogue";
@@ -28,6 +32,8 @@ export interface PlaceAccess {
   has: (key: string) => boolean;
   /** Settings sections this person sees (`useVisibleSettingsSections`). */
   settingsSections: ReadonlySet<string>;
+  /** Paperbase support, signed in as the owner, who never opens the owner's own account. */
+  inSupportMode: boolean;
 }
 
 /** A name to show: message keys (from the root), joined with " · ". */
@@ -40,6 +46,8 @@ export interface SearchPlace {
   label: PlaceLabel;
   words: readonly string[];
   shows: (access: PlaceAccess) => boolean;
+  /** Another site's page, opened as a link is: not the dashboard's own navigation. */
+  external?: boolean;
 }
 
 /** Everyday words for each page, both languages. */
@@ -77,8 +85,6 @@ const SETTINGS_WORDS: Record<string, readonly string[]> = {
   domains: ["domain", "custom domain", "website address", "www", "ডোমেইন", "ওয়েবসাইটের ঠিকানা"],
   notifications: ["email", "alerts", "notify", "ইমেইল", "নোটিফিকেশন", "জানানো"],
   team: ["staff", "members", "roles", "invite", "moderator", "manager", "permissions", "টিম", "স্টাফ", "সদস্য", "রোল", "আমন্ত্রণ"],
-  account: ["profile", "my account", "passkey", "name", "প্রোফাইল", "আমার অ্যাকাউন্ট", "পাসকি"],
-  security: ["security", "passkey", "safety", "নিরাপত্তা", "পাসকি"],
   sessions: ["devices", "signed in", "sign out", "logged in", "ডিভাইস", "সাইন আউট", "সেশন"],
   billing: ["plan", "subscription", "payment", "upgrade", "renew", "invoice", "প্ল্যান", "সাবস্ক্রিপশন", "বিল", "নবায়ন"],
 };
@@ -102,6 +108,18 @@ function page(id: string, href: string, words: readonly string[], shows: SearchP
 /** Every place and action there is; `visiblePlaces` keeps the ones a person may open. */
 export const SEARCH_PLACES: readonly SearchPlace[] = [
   page("home", "/", ["dashboard", "overview", "start", "ড্যাশবোর্ড", "হোম"], () => true),
+  {
+    id: "account",
+    group: "places",
+    href: accountPageUrl(),
+    label: { keys: ["sidebar.yourAccount"] },
+    words: [
+      "my account", "profile", "passkey", "passkeys", "name", "phone", "picture", "security", "password",
+      "আমার অ্যাকাউন্ট", "প্রোফাইল", "পাসকি", "নাম", "ফোন", "ছবি", "নিরাপত্তা",
+    ],
+    shows: (a) => !a.inSupportMode,
+    external: true,
+  },
   ...Object.values(APP_CONFIG)
     .filter((app) => app.href !== null)
     .map((app) => page(app.id, app.href as string, APP_WORDS[app.id] ?? [], (a) => a.canShowApp(app.id))),

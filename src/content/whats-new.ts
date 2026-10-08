@@ -100,7 +100,6 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
       en: "You now sign in at accounts.paperbase.me, with the same passkey or email code. Your name, phone, picture and passkeys are in Your Paperbase account, in the menu under your name. Everyone signs in once more after the change.",
       bn: "এখন সাইন ইন হয় accounts.paperbase.me-তে, একই পাসকি বা ইমেইল কোড দিয়ে। আপনার নাম, ফোন, ছবি আর পাসকি আছে আপনার Paperbase অ্যাকাউন্টে, আপনার নামের নিচের মেনুতে। এই বদলের পর সবাইকে একবার আবার সাইন ইন করতে হবে।",
     },
-    href: "/settings?tab=account",
   },
   {
     id: "2026-10-10-getting-ready-for-paperbase-accounts",
@@ -143,7 +142,6 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
       en: "Tap the email box on the sign-in page and your phone or computer now offers your passkey: one tap, then Face ID or your fingerprint, and you are in. Settings > Account > Passkeys also says where each passkey is saved, like Apple Passwords or Google Password Manager.",
       bn: "সাইন-ইন পেজে ইমেইলের ঘরে ট্যাপ করলে আপনার ফোন বা কম্পিউটার এখন নিজেই আপনার পাসকি দেখায়: একবার ট্যাপ, তারপর Face ID বা আঙুলের ছাপ দিলেই সাইন ইন। সেটিংস > অ্যাকাউন্ট > পাসকি-তে এখন এটাও দেখা যায় প্রতিটি পাসকি কোথায় রাখা, যেমন Apple Passwords বা Google Password Manager।",
     },
-    href: "/settings?tab=account",
   },
   {
     id: "2026-10-07-new-icons-in-the-menus",

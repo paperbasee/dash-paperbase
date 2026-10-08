@@ -12,7 +12,7 @@ export function SettingsSectionNav({
   onNavigate,
   className,
 }: {
-  activeSection: SettingsSection;
+  activeSection: SettingsSection | null;
   onSelect: (id: SettingsSection) => void;
   onNavigate?: () => void;
   className?: string;

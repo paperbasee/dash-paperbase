@@ -63,6 +63,7 @@ import { UserMenuBody } from "@/components/sidebar/UserMenuBody";
 import { accountPageUrl } from "@/lib/accounts/config";
 import { useStorefrontUrl } from "@/hooks/useStorefrontUrl";
 import SettingsSidebarNav from "@/components/sidebar/SettingsSidebarNav";
+import { useVisibleSettingsSections } from "@/app/[locale]/(dashboard)/settings/useVisibleSettingsSections";
 
 /**
  * Top-level nav order; `__catalog__` is the Products / catalog group.
@@ -125,6 +126,7 @@ function SidebarContent({
   const { hasUnread: whatsNewUnread, unreadCount: whatsNewUnreadCount, openPanel: openWhatsNew } = useWhatsNew();
   const canShowApp = useCanShowApp();
   const storefrontUrl = useStorefrontUrl();
+  const settingsSections = useVisibleSettingsSections();
 
   const mainNavSequence = useMemo(
     () =>
@@ -484,6 +486,7 @@ function SidebarContent({
         <SidebarShopLinks
           collapsed={collapsed}
           storefrontUrl={storefrontUrl}
+          hasSettings={settingsSections.length > 0}
           settingsActive={isSettingsRoute}
           onNavigate={handleLinkClick}
         />

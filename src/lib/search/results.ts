@@ -75,6 +75,8 @@ export interface SearchRow {
   href: string;
   title: string;
   subtitle?: string;
+  /** Another site's page (places.ts `external`), opened as a link is. */
+  external?: boolean;
 }
 
 // --- recent searches -----------------------------------------------------------------------------

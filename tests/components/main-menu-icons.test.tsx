@@ -56,7 +56,7 @@ const drawMenu = (collapsed: boolean) =>
 const drawShopLinks = () =>
   renderToStaticMarkup(
     <NextIntlClientProvider locale="en" messages={en} timeZone="Asia/Dhaka">
-      <SidebarShopLinks collapsed storefrontUrl="https://gadzilla.paperbase.me" settingsActive={false} />
+      <SidebarShopLinks collapsed storefrontUrl="https://gadzilla.paperbase.me" hasSettings settingsActive={false} />
     </NextIntlClientProvider>
   );
 

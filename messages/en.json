@@ -2045,8 +2045,6 @@
     "sectionApps": "Apps",
     "sectionIntegrations": "Integrations",
     "sectionNotifications": "Notifications",
-    "sectionAccount": "Account",
-    "sectionSecurity": "Security",
     "sectionBilling": "Billing",
     "sectionData": "Data & Export",
     "currentStoreFallback": "Current store",
@@ -2058,14 +2056,6 @@
     "inactive": "Inactive",
     "add": "Add",
     "optionalTag": "(optional)",
-    "account": {
-      "heading": "Your account",
-      "subtitle": "Your name, email, phone, picture and passkeys are your Paperbase account's: one account for every shop you work in.",
-      "ownerNameNote": "Your name is also the shop owner's name in Paperbase's emails.",
-      "manage": "Manage your Paperbase account",
-      "roleOwner": "Owner",
-      "roleMember": "Member"
-    },
     "store": {
       "heading": "Store Info",
       "subtitle": "Your store identity. Powers frontend, invoices, and emails.",
@@ -2376,14 +2366,6 @@
       "emailHint": "Control when emails are sent for order events. Order email alerts are a Premium feature.",
       "emailOwnerOnOrder": "Email me when an order is received",
       "emailCustomerCourier": "Email customer when the order is sent to courier"
-    },
-    "security": {
-      "heading": "Security",
-      "passwordless": "Your store uses passwordless sign-in.",
-      "phishingTitle": "Phishing-resistant by design",
-      "phishingBody": "Everyone signs in with passkeys — bound to your device (Touch ID, Windows Hello, or a security key). There are no passwords to steal or reset.",
-      "manageTitle": "Manage your passkeys",
-      "manageBody": "Add, rename or remove passkeys in <place>your Paperbase account</place>. Keep at least two (e.g. your laptop and phone) so you never get locked out."
     },
     "billing": {
       "heading": "Billing & Plan",

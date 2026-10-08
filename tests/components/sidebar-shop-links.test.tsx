@@ -23,7 +23,7 @@ const SHOP = "https://gadzilla.paperbase.me";
 const draw = (props: Partial<Parameters<typeof SidebarShopLinks>[0]>, locale: "en" | "bn" = "en") =>
   renderToStaticMarkup(
     <NextIntlClientProvider locale={locale} messages={locale === "en" ? en : bn} timeZone="Asia/Dhaka">
-      <SidebarShopLinks collapsed={false} storefrontUrl={SHOP} settingsActive={false} {...props} />
+      <SidebarShopLinks collapsed={false} storefrontUrl={SHOP} hasSettings settingsActive={false} {...props} />
     </NextIntlClientProvider>
   );
 
@@ -42,6 +42,14 @@ describe("the sidebar's shop links", () => {
     const html = draw({ storefrontUrl: "" });
     expect(html).not.toContain(en.nav.viewMyShop);
     expect(html).toContain('href="/settings"');
+  });
+
+  it("leaves Settings out for someone with nothing in it", () => {
+    // A Staff member with no settings permission: Account was the one tab everyone had, and it
+    // left for Your Paperbase account (owner, 2026-10-09).
+    const html = draw({ hasSettings: false });
+    expect(html).not.toContain('href="/settings"');
+    expect(html).toContain(en.nav.viewMyShop);
   });
 
   it("marks Settings while it is open", () => {
