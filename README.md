@@ -18,14 +18,13 @@ The dashboard is the API's only client. The public storefront API and its publis
 Create `.env.local` (not committed) with:
 
 ```bash
-# Required: origin of the Django API (no trailing slash issues are normalized in code)
-# Development default assumed in next.config.ts when unset: http://localhost:8000
-NEXT_PUBLIC_API_URL=http://localhost:8000
+# Required: the Django API, WITH /api/v1 (bare paths are joined onto it)
+NEXT_PUBLIC_API_URL=http://localhost:8000/api/v1
 # Required: Accounts, where everyone signs in (accounts-paperbase; locally `pb accounts`)
 NEXT_PUBLIC_ACCOUNTS_URL=http://localhost:4400
 ```
 
-Production builds set `NEXT_PUBLIC_API_URL` to the deployed API origin (for example `https://api.example.com`) and `NEXT_PUBLIC_ACCOUNTS_URL` to Accounts' (`https://accounts.paperbase.me`). Accounts sends people back to `<this dashboard>/auth/callback`, the address it registered for the dashboard. The dashboard must stay on a `paperbase.me` address: renewing the pass relies on Accounts' cookie being same-site.
+Production builds set `NEXT_PUBLIC_API_URL` to the deployed API (for example `https://api.example.com/api/v1`) and `NEXT_PUBLIC_ACCOUNTS_URL` to Accounts' (`https://accounts.paperbase.me`). Accounts sends people back to `<this dashboard>/auth/callback`, the address it registered for the dashboard. The dashboard must stay on a `paperbase.me` address: renewing the pass relies on Accounts' cookie being same-site.
 
 `public/.well-known/webauthn` lets `accounts.paperbase.me` use the passkeys tied to `dash.paperbase.me` (Related Origin Requests); it names production's Accounts.
 
