@@ -143,6 +143,12 @@ const nextConfig: NextConfig = {
         source: "/(.*)",
         headers: securityHeaders,
       },
+      {
+        // The passkey permission file (public/.well-known/webauthn; guidelines/accounts-plan.md,
+        // section 9): browsers read it as JSON, which a file without an extension is not served as.
+        source: "/.well-known/webauthn",
+        headers: [{ key: "Content-Type", value: "application/json" }],
+      },
     ];
   },
 };
