@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect } from "react";
+import { useLocale } from "next-intl";
 import { useSearchParams } from "next/navigation";
-import { useRouter } from "@/i18n/navigation";
 import SubscriptionAccessBlock from "@/components/auth/SubscriptionAccessBlock";
 import { accountsUrl } from "@/lib/accounts/config";
 
@@ -21,10 +21,12 @@ function getBackendHealthUrl(): string {
 
 /**
  * A part of Paperbase did not answer: the API, or (`?part=sign-in`) Accounts, where the dashboard
- * gets its passes. The page keeps asking, and goes back to the dashboard once it answers.
+ * gets its passes. The page keeps asking, and once it answers loads the dashboard afresh: a move
+ * inside the page would keep the profile's "unreachable" error, and the dashboard would send the
+ * person straight back here.
  */
 export default function ServerUnreachablePage() {
-  const router = useRouter();
+  const locale = useLocale();
   const signIn = useSearchParams().get("part") === "sign-in";
 
   useEffect(() => {
@@ -40,7 +42,7 @@ export default function ServerUnreachablePage() {
       )
         .then(() => {
           sessionStorage.removeItem(DASHBOARD_SERVER_UNREACHABLE_KEY);
-          router.replace("/");
+          window.location.replace(`/${locale}`);
         })
         .catch(() => {
           // Still away: asked again in a moment.
@@ -51,7 +53,7 @@ export default function ServerUnreachablePage() {
       clearInterval(timer);
       controller.abort();
     };
-  }, [router, signIn]);
+  }, [locale, signIn]);
 
   return <SubscriptionAccessBlock variant={signIn ? "signInUnreachable" : "serverUnreachable"} />;
 }

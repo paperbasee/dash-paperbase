@@ -119,3 +119,13 @@ export async function resolvePostAuthRoute(): Promise<PostAuthRouteResult> {
     return { ok: false, kind: isNetworkError(err) ? "network_error" : "fetch_error" };
   }
 }
+
+/**
+ * Where a sign-in Accounts just finished goes: the route's page; with the API not answering, the
+ * page that waits for it and then opens the dashboard (the person is signed in, so signing in
+ * again would change nothing); none when the API answered with an error.
+ */
+export function pathAfterSignIn(route: PostAuthRouteResult): string | null {
+  if (route.ok) return route.path;
+  return route.kind === "network_error" ? "/server-unreachable" : null;
+}

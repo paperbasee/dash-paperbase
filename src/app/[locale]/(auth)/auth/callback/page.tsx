@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthContext";
 import { Link, useRouter } from "@/i18n/navigation";
 import { finishSignIn, type SignInFailure } from "@/lib/accounts/sign-in";
-import { resolvePostAuthRoute } from "@/lib/subscription-access";
+import { pathAfterSignIn, resolvePostAuthRoute } from "@/lib/subscription-access";
 
 /**
  * Where Accounts sends people back after signing in or up (`<DASHBOARD_URL>/auth/callback`, the
@@ -40,9 +40,9 @@ export default function SignInCallbackPage() {
         router.replace(result.next);
         return;
       }
-      const route = await resolvePostAuthRoute();
-      if (route.ok) {
-        router.replace(route.path);
+      const path = pathAfterSignIn(await resolvePostAuthRoute());
+      if (path) {
+        router.replace(path);
       } else {
         setFailure("unreachable");
       }

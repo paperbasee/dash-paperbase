@@ -19,7 +19,7 @@ import {
   productPhoto,
 } from "@/components/shop-preview/samples";
 import { normalizeBdMobile } from "@/lib/bd-mobile";
-import { resolvePostAuthPath, type MeForRouting } from "@/lib/subscription-access";
+import { pathAfterSignIn, resolvePostAuthPath, type MeForRouting } from "@/lib/subscription-access";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const read = (file: string) => fs.readFileSync(path.join(ROOT, file), "utf8");
@@ -154,6 +154,23 @@ describe("where an owner goes after signing in", () => {
   test("a finished shop, or a member of someone else's: the dashboard", () => {
     expect(resolvePostAuthPath({ ...base, store: { public_id: "str_1", name: "R", role: "Owner", setup_finished: true } })).toBe("/");
     expect(resolvePostAuthPath({ ...base, store: { public_id: "str_1", name: "R", role: "Packer" } })).toBe("/");
+  });
+
+  test("signed in at Accounts with the API away: the page that waits for it, not 'sign in again'", () => {
+    // Found by hand, 2026-10-09: the callback said "That sign-in didn't finish" though Accounts had
+    // signed them in, and signing in again only said it again.
+    expect(pathAfterSignIn({ ok: true, path: "/", me: base })).toBe("/");
+    expect(pathAfterSignIn({ ok: false, kind: "network_error" })).toBe("/server-unreachable");
+    expect(pathAfterSignIn({ ok: false, kind: "fetch_error" })).toBeNull();
+    expect(read("src/app/[locale]/(auth)/auth/callback/page.tsx")).toContain("pathAfterSignIn(await resolvePostAuthRoute())");
+  });
+
+  test("once Paperbase answers again, the waiting page loads the dashboard afresh", () => {
+    // Found by hand, 2026-10-09: a move inside the page kept the profile's old "unreachable" error,
+    // and the dashboard sent the person straight back -- every time the page asked, for good.
+    const page = read("src/app/[locale]/server-unreachable/page.tsx");
+    expect(page).toContain("window.location.replace(`/${locale}`)");
+    expect(page).not.toContain("router.replace(");
   });
 
   test("the dashboard sends an unfinished owner back too", () => {
