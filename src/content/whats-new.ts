@@ -88,6 +88,20 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-10-08-security-updates",
+    date: "2026-10-08",
+    version: "4.184.1",
+    tag: "fixed",
+    title: {
+      en: "Security updates for the dashboard",
+      bn: "ড্যাশবোর্ডে নিরাপত্তা আপডেট",
+    },
+    body: {
+      en: "We updated the parts the dashboard is built on, closing known security issues. Nothing changes in how you use it.",
+      bn: "ড্যাশবোর্ড যেসব অংশ দিয়ে তৈরি, সেগুলো আপডেট করে জানা নিরাপত্তা সমস্যাগুলো বন্ধ করা হয়েছে। আপনার ব্যবহারে কিছুই বদলাবে না।",
+    },
+  },
+  {
     id: "2026-10-07-faster-passkey-sign-in",
     date: "2026-10-07",
     version: "4.184.0",
@@ -512,21 +526,6 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     body: {
       en: "A Staff member limited to some categories now sees only their categories' numbers on the home page too, and the order list shows each order's full item count. On an order with items from other categories, they can work on the whole order but change only their own items.",
       bn: "কিছু ক্যাটাগরিতে সীমিত কোনো স্টাফ এখন হোম পেজেও শুধু তাঁর ক্যাটাগরির সংখ্যা দেখেন, আর অর্ডার তালিকায় প্রতিটি অর্ডারের পুরো আইটেম সংখ্যা দেখায়। অন্য ক্যাটাগরির আইটেমসহ কোনো অর্ডারে তিনি পুরো অর্ডার নিয়ে কাজ করতে পারেন, কিন্তু বদলাতে পারেন শুধু নিজের আইটেমগুলো।",
-    },
-    href: "/settings?tab=team",
-  },
-  {
-    id: "2026-10-04-team-changes-take-effect-at-once",
-    date: "2026-10-04",
-    version: "4.161.0",
-    tag: "improved",
-    title: {
-      en: "Team changes take effect at once",
-      bn: "টিমের পরিবর্তন এখন সঙ্গে সঙ্গে কাজ করে",
-    },
-    body: {
-      en: "When you change a team member's role or categories, or suspend or remove them, they're signed out of your shop right away on every device. They sign in again and see exactly what their new access allows. Ending a sign-in from Sessions now works at once too.",
-      bn: "কোনো টিম মেম্বারের রোল বা ক্যাটাগরি বদলালে, অথবা তাঁকে স্থগিত বা সরিয়ে দিলে, সব ডিভাইসে তিনি সঙ্গে সঙ্গে আপনার শপ থেকে সাইন আউট হয়ে যান। আবার সাইন ইন করলে তাঁর নতুন অ্যাক্সেস অনুযায়ী ঠিক ততটুকুই দেখবেন। সেশন থেকে কোনো সাইন-ইন শেষ করলেও এখন সঙ্গে সঙ্গে কাজ করে।",
     },
     href: "/settings?tab=team",
   },
