@@ -11,6 +11,7 @@ import { AlertTriangle, Check, Clock, CreditCard, Loader2, XCircle, type LucideI
 
 import { DeferredNavLink } from "@/components/navigation/DeferredNavLink";
 import { Button } from "@/components/ui/button";
+import { CircleCheck } from "@/components/ui/circle-check";
 import {
   formatBillingAmount,
   formatBillingDay,
@@ -346,8 +347,8 @@ export function PlanIncludes({ plan }: { plan: Plan }) {
       <h3 className="text-[15px] font-semibold">{t("heading")}</h3>
       <ul className="flex flex-col gap-2.5">
         {planLines(plan).map((line) => (
-          <li key={line.id} className="flex items-start gap-2 text-[13px] text-foreground/80">
-            <Check className="mt-0.5 size-4 shrink-0 text-emerald-600" strokeWidth={2.2} aria-hidden />
+          <li key={line.id} className="flex items-start gap-2.5 text-[13px] leading-5 text-foreground/80">
+            <CircleCheck />
             {line.count === undefined ? tLines(line.id) : tLines(line.id, { count: digits(line.count) })}
           </li>
         ))}

@@ -3,9 +3,10 @@
 import { type ReactNode, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
-import { Check, Star } from "lucide-react";
+import { Star } from "lucide-react";
 import { useRouter } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
+import { CircleCheck } from "@/components/ui/circle-check";
 import { hasAuthSessionCookie } from "@/lib/auth-session-cookie";
 import api from "@/lib/api";
 import { formatBillingAmount, formatBillingDay } from "@/lib/billing";
@@ -355,9 +356,7 @@ function PlanCard({
       <ul className="flex flex-1 flex-col gap-3">
         {list.lines.map((item) => (
           <li key={item.id} className="flex items-center gap-3 text-[13.5px]">
-            <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-green-600 text-white">
-              <Check className="size-3" strokeWidth={3} aria-hidden />
-            </span>
+            <CircleCheck />
             <span className="min-w-0">
               {item.count === undefined
                 ? t(`lines.${item.id}`)
