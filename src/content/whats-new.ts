@@ -88,6 +88,20 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-10-09-a-clearer-waiting-page",
+    date: "2026-10-09",
+    version: "4.189.0",
+    tag: "improved",
+    title: {
+      en: "A clearer page when Paperbase is away",
+      bn: "Paperbase সাড়া না দিলে আরও পরিষ্কার পাতা",
+    },
+    body: {
+      en: "If Paperbase or its sign-in stops answering, the waiting page now says which part is away, shows what our status page says, and counts down to the next check. Try now checks at once. If your own internet is off, it says that instead, and your dashboard comes back once you're connected.",
+      bn: "Paperbase বা এর সাইন ইন সাড়া না দিলে অপেক্ষার পাতা এখন জানায় কোন অংশ সাড়া দিচ্ছে না, আমাদের স্ট্যাটাস পাতা কী বলছে তা দেখায়, আর পরের বার দেখা পর্যন্ত সময় গুনে দেখায়। \"আবার চেষ্টা করুন\" চাপলে সঙ্গে সঙ্গে দেখা হয়। আপনার নিজের ইন্টারনেট বন্ধ থাকলে সেটাই জানায়, আর সংযোগ ফিরলেই ড্যাশবোর্ড ফিরে আসে।",
+    },
+  },
+  {
     id: "2026-10-09-pay-early-lose-no-days",
     date: "2026-10-09",
     version: "4.188.0",
@@ -523,20 +537,5 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
       en: "An Add new button in the sidebar opens a quick menu: a new order, product, category, discount code, blog post or review, from any page. It shows only what your role can add.",
       bn: "সাইডবারের নতুন যোগ করুন বাটনে একটি ছোট মেনু খোলে: যেকোনো পেজ থেকে নতুন অর্ডার, পণ্য, ক্যাটাগরি, ডিসকাউন্ট কোড, ব্লগ পোস্ট বা রিভিউ। আপনার রোল যা যোগ করতে পারে, শুধু সেগুলোই দেখায়।",
     },
-  },
-  {
-    id: "2026-10-04-a-friendlier-empty-blog-and-reviews",
-    date: "2026-10-04",
-    version: "4.168.0",
-    tag: "improved",
-    title: {
-      en: "A friendlier empty Blog and Reviews",
-      bn: "ফাঁকা ব্লগ ও রিভিউ এখন আরও সুন্দর",
-    },
-    body: {
-      en: "With no posts or reviews yet, Blog and Reviews now show a little folder that opens when you touch it, with one button to write your first post or add a review. On Customers and Accounts, the filter button now sits on the right, like every other list.",
-      bn: "এখনও কোনো পোস্ট বা রিভিউ না থাকলে ব্লগ ও রিভিউ পেজে এখন ছোট একটি ফোল্ডার দেখা যায়, ছুঁলেই খুলে যায়, আর সাথে থাকে প্রথম পোস্ট লেখা বা রিভিউ যোগ করার একটি বাটন। কাস্টমার ও অ্যাকাউন্ট পেজে ফিল্টার বাটন এখন অন্য সব তালিকার মতো ডান দিকে।",
-    },
-    href: "/blog",
   },
 ];
