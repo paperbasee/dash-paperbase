@@ -15,14 +15,10 @@ const DSN = (process.env.NEXT_PUBLIC_SENTRY_DSN ?? "").trim();
 /**
  * Which environment an event belongs to.
  *
- * The explicit variable wins. When it is absent we derive from the hostname
- * rather than defaulting to "production", because NEXT_PUBLIC_* is inlined at
- * BUILD time: one image promoted from staging to production (guidelines/
- * releasing-safely.md, "build once, ship that same build") would otherwise
- * carry a single baked-in value and file every staging error under production.
- * Guessing from the host is not elegant, but its failure mode is safe --
- * an unrecognised host reads as production, so a real production error is
- * never hidden in a staging bucket.
+ * The explicit variable wins. Without it, a developer's own machine is
+ * `development` and everything else is `production`, the only deployed
+ * environment since the staging server was removed (2026-09-14). The browser
+ * passes its hostname; the server passes none and reads production.
  */
 export function resolveEnvironment(hostname?: string): string {
   const explicit = (
@@ -37,7 +33,6 @@ export function resolveEnvironment(hostname?: string): string {
   if (host === "localhost" || host.endsWith(".localhost") || host.startsWith("127.")) {
     return "development";
   }
-  if (host.includes("staging") || host.includes("stg")) return "staging";
   return "production";
 }
 
