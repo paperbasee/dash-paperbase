@@ -82,6 +82,7 @@ function sub(fields: Partial<MeSubscription> = {}): MeSubscription {
     days_remaining: 18,
     is_trial: false,
     active_row_calendar_status: "ACTIVE",
+    next_period: null,
     ...fields,
   };
 }
@@ -113,13 +114,25 @@ describe("the band", () => {
     expect(text(html)).toContain("Next payment: ৳1,800 on 9 Nov 2026.");
     expect(html).toContain('aria-label="18 of 31 days left"');
     expect(html).not.toContain("Pay ৳1,800 now");
-    expect(html).toContain('href="/plans"');
+    // Nothing to do: the tab's own "Compare plans" is the way to the plans.
+    expect(html).not.toContain('href="/plans"');
   });
 
-  it("in its last days, says so, still without a pay button", () => {
-    expect(text(band(sub({ days_remaining: 2 })))).toContain("Ends in 2 days");
+  it("in its last week, offers to pay for the next period, which starts when this one ends", () => {
+    const html = text(band(sub({ days_remaining: 6 })));
+    expect(html).toContain("Ends in 6 days");
+    expect(html).toContain("Pay now and the next period starts on 9 Nov 2026: no day is lost.");
+    expect(html).toContain("Pay ৳1,800 now");
+    expect(html).toContain("Starts 9 Nov 2026");
     expect(text(band(sub({ days_remaining: 0 })))).toContain("Ends today");
-    expect(band(sub({ days_remaining: 2 }))).not.toContain("Pay ৳1,800 now");
+  });
+
+  it("with the next period paid, says so and asks nothing", () => {
+    const next = { plan: "Premium", plan_public_id: "pln_premium_y", billing_cycle: "yearly" as const, start_date: "2026-11-09", end_date: "2027-11-08" };
+    const html = text(band(sub({ days_remaining: 2, next_period: next })));
+    expect(html).toContain("Active");
+    expect(html).toContain("Paid ahead: Premium · Yearly, 9 Nov 2026 to 8 Nov 2027.");
+    expect(html).not.toContain("Pay ৳1,800 now");
   });
 
   it("on its grace day, and after it, offers to pay and says what happens to the shop", () => {
@@ -160,6 +173,7 @@ describe("the band", () => {
     const states: [MeSubscription, "REJECTED" | "PENDING_REVIEW" | null][] = [
       [sub(), null],
       [sub({ days_remaining: 1 }), null],
+      [sub({ days_remaining: 1, next_period: { plan: "Premium", plan_public_id: "p", billing_cycle: "monthly", start_date: "2026-11-09", end_date: "2026-12-08" } }), null],
       [sub({ is_trial: true }), null],
       [sub({ subscription_status: "GRACE", days_remaining: 0, active_row_calendar_status: "GRACE" }), null],
       [sub({ subscription_status: "EXPIRED", days_remaining: 0, active_row_calendar_status: "EXPIRED" }), null],

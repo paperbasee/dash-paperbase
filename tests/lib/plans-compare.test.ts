@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  PAY_AHEAD_DAYS,
   cardAction,
   cardLines,
   chargeOf,
@@ -8,6 +9,8 @@ import {
   groupPlans,
   groupSaving,
   highlightedGroup,
+  nextStart,
+  switchOpens,
   planLines,
   planOn,
   PLAN_LINES,
@@ -144,16 +147,48 @@ describe("the cards (owner, 2026-10-03)", () => {
   });
 });
 
-describe("a card's button (owner, 2026-10-03)", () => {
+describe("a card's button (owner, 2026-10-03; paying early, 2026-10-09)", () => {
   const [essential, premium] = groupPlans(PLANS);
-  const on = { id: essential.monthly!.public_id, trial: false, ended: false, endDate: "2026-11-01" };
+  const on = {
+    id: essential.monthly!.public_id,
+    name: "Essential",
+    trial: false,
+    ended: false,
+    endDate: "2026-11-01",
+    daysLeft: 20,
+    paidUntil: null,
+  };
 
-  it("none on the shop's own paid plan while it runs, on either cycle", () => {
+  it("none while the shop's own paid plan has more than a week to run, on either cycle", () => {
     expect(cardAction(on, essential.monthly!)).toBeNull();
     expect(cardAction(on, essential.yearly!)).toBeNull();
   });
 
-  it("renew, or the other cycle, once it has ended", () => {
+  it("in its last week: renew it, its other cycle, or another plan -- each starting when it ends", () => {
+    const lastWeek = { ...on, daysLeft: PAY_AHEAD_DAYS };
+    expect(cardAction(lastWeek, essential.monthly!)).toBe("renew");
+    expect(cardAction(lastWeek, essential.yearly!)).toBe("switchToYearly");
+    expect(cardAction(lastWeek, premium.monthly!)).toBe("switchTo");
+    expect(cardAction(on, premium.monthly!)).toBeNull();
+  });
+
+  it("before its last week, says when switching opens", () => {
+    expect(switchOpens(on)).toBe("2026-10-25");
+    expect(switchOpens({ ...on, paidUntil: "2026-12-01" })).toBeNull();
+    expect(switchOpens({ ...on, trial: true })).toBeNull();
+    expect(switchOpens(null)).toBeNull();
+  });
+
+  it("none once the next period is paid", () => {
+    expect(cardAction({ ...on, daysLeft: 2, paidUntil: "2026-12-01" }, essential.monthly!)).toBeNull();
+  });
+
+  it("a new period starts the day after the current one ends", () => {
+    expect(nextStart(on)).toBe("2026-11-02");
+    expect(nextStart(null)).toBeNull();
+  });
+
+  it("renew, the other cycle or another plan once it has ended", () => {
     const ended = { ...on, ended: true };
     expect(cardAction(ended, essential.monthly!)).toBe("renew");
     expect(cardAction(ended, essential.yearly!)).toBe("switchToYearly");

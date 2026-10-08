@@ -155,9 +155,22 @@ export function BillingBand({
           ) : null}
         </div>
         <p className="text-sm text-zinc-300">{t(`band.${lane}.line`, values)}</p>
-        {lane !== "none" ? <p className="text-[13px] text-zinc-400">{t(`band.${lane}.next`, values)}</p> : null}
+        {band.next ? (
+          <p className="text-[13px] text-zinc-400">
+            {t("band.active.nextPaid", {
+              plan: band.next.plan,
+              cycle: t(`cycle.${band.next.billing_cycle}`),
+              start: formatBillingDay(band.next.start_date, locale),
+              end: formatBillingDay(band.next.end_date, locale),
+            })}
+          </p>
+        ) : lane !== "none" ? (
+          <p className="text-[13px] text-zinc-400">{t(`band.${lane}.next`, values)}</p>
+        ) : null}
       </div>
-      {canAct ? <BandAction band={band} plan={plan} amount={amount} paying={paying} payError={payError} onPay={onPay} /> : null}
+      {canAct ? (
+        <BandAction band={band} plan={plan} amount={amount} startsOn={values.next} paying={paying} payError={payError} onPay={onPay} />
+      ) : null}
     </section>
   );
 }
@@ -166,6 +179,7 @@ function BandAction({
   band,
   plan,
   amount,
+  startsOn,
   paying,
   payError,
   onPay,
@@ -173,6 +187,8 @@ function BandAction({
   band: Band;
   plan: Plan | null;
   amount: string;
+  /** The day a period paid now starts, written out. */
+  startsOn: string;
   paying: boolean;
   payError: string | null;
   onPay: () => void;
@@ -186,7 +202,9 @@ function BandAction({
           {paying ? <Loader2 className="size-4 animate-spin" aria-hidden /> : null}
           {band.lane === "notFound" ? t("payAgain") : t("pay", { amount })}
         </Button>
-        <span className="text-center text-xs text-zinc-400">{t("payNote")}</span>
+        <span className="text-center text-xs text-zinc-400">
+          {band.lane === "endingSoon" && startsOn ? t("startsOn", { date: startsOn }) : t("payNote")}
+        </span>
         {payError ? <span role="alert" className="text-center text-xs text-red-300">{payError}</span> : null}
       </div>
     );
@@ -199,13 +217,7 @@ function BandAction({
       </DeferredNavLink>
     );
   }
-  if (band.lane === "active" || band.lane === "endingSoon") {
-    return (
-      <DeferredNavLink href="/plans" className={cn(light, "border border-white/25 text-white hover:bg-white/10")}>
-        {t("change")}
-      </DeferredNavLink>
-    );
-  }
+  // Nothing to do now: the tab's own "Compare plans" is the way to the plans.
   return null;
 }
 

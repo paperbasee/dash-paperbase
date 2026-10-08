@@ -29,6 +29,19 @@ export interface MeSubscription {
    * When renewal is PENDING_REVIEW, this can be ACTIVE/GRACE while `subscription_status` stays PENDING_REVIEW.
    */
   active_row_calendar_status?: SubscriptionStatus | null;
+  /**
+   * A period paid early, to follow the one in force: its plan and first day, and the last day paid
+   * for. Null when nothing is paid ahead (api subscription_status.next_period).
+   */
+  next_period?: NextPeriod | null;
+}
+
+export interface NextPeriod {
+  plan: string;
+  plan_public_id: string;
+  billing_cycle: "monthly" | "yearly";
+  start_date: string;
+  end_date: string;
 }
 
 export interface MeForRouting {

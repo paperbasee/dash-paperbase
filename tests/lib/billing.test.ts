@@ -5,7 +5,6 @@
 import { describe, expect, it } from "vitest";
 
 import {
-  ENDING_SOON_DAYS,
   billingBand,
   formatBillingAmount,
   formatBillingDay,
@@ -13,6 +12,7 @@ import {
   type BillingOverview,
   type BillingPayment,
 } from "@/lib/billing";
+import { PAY_AHEAD_DAYS } from "@/lib/plans-compare";
 import type { MeSubscription } from "@/lib/subscription-access";
 
 function payment(fields: Partial<BillingPayment> = {}): BillingPayment {
@@ -50,6 +50,7 @@ function sub(fields: Partial<MeSubscription> = {}): MeSubscription {
     days_remaining: 18,
     is_trial: false,
     active_row_calendar_status: "ACTIVE",
+    next_period: null,
     ...fields,
   };
 }
@@ -74,13 +75,26 @@ describe("the band", () => {
     expect(band).toMatchObject({ lane: "active", daysLeft: 18, periodDays: 31, nextDue: "2026-11-09", action: null });
   });
 
-  it("says the plan ends soon in its last days, still offering no payment: paying now loses the days left", () => {
-    expect(billingBand(sub({ days_remaining: ENDING_SOON_DAYS + 1 }), null, overview()).lane).toBe("active");
-    expect(billingBand(sub({ days_remaining: ENDING_SOON_DAYS }), null, overview())).toMatchObject({
-      lane: "endingSoon",
+  it("in the plan's last week, offers to pay for the next period: no day is lost", () => {
+    expect(PAY_AHEAD_DAYS).toBe(7);
+    expect(billingBand(sub({ days_remaining: PAY_AHEAD_DAYS + 1 }), null, overview())).toMatchObject({
+      lane: "active",
       action: null,
     });
+    expect(billingBand(sub({ days_remaining: PAY_AHEAD_DAYS }), null, overview())).toMatchObject({
+      lane: "endingSoon",
+      action: "pay",
+    });
     expect(billingBand(sub({ days_remaining: 0 }), null, overview()).lane).toBe("endingSoon");
+  });
+
+  it("with the next period paid, nothing is ending and nothing is asked", () => {
+    const next = { plan: "Premium", plan_public_id: "pln_premium_m", billing_cycle: "monthly" as const, start_date: "2026-11-09", end_date: "2026-12-08" };
+    expect(billingBand(sub({ days_remaining: 2, next_period: next }), null, overview())).toMatchObject({
+      lane: "active",
+      action: null,
+      next,
+    });
   });
 
   it("offers to pay once the plan has ended: its grace day, then after it", () => {

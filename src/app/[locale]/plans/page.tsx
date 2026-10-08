@@ -22,7 +22,9 @@ import {
   groupPlans,
   groupSaving,
   highlightedGroup,
+  nextStart,
   planOn,
+  switchOpens,
   type BillingCycle,
   type CardLine,
   type CurrentPlan,
@@ -44,9 +46,12 @@ function currentPlanOf(me: MeForRouting | null): CurrentPlan | null {
   if (sub.subscription_status !== "ACTIVE" && sub.subscription_status !== "GRACE") return null;
   return {
     id: sub.plan_public_id,
+    name: sub.plan ?? "",
     trial: Boolean(sub.is_trial),
     ended: sub.subscription_status === "GRACE",
     endDate: sub.end_date ?? null,
+    daysLeft: sub.days_remaining,
+    paidUntil: sub.next_period?.end_date ?? null,
   };
 }
 
@@ -185,7 +190,8 @@ export default function PlansPage() {
                   list={cardLines(groups, index, cycle)}
                   line={withLines ? groupDescription(group, locale) : null}
                   dark={group === highlighted}
-                  current={group === currentGroup ? current : null}
+                  current={current}
+                  own={group === currentGroup}
                   mayPay={mayPay}
                   busy={selectingId}
                   onSelect={select}
@@ -261,6 +267,7 @@ function PlanCard({
   line,
   dark,
   current,
+  own,
   mayPay,
   busy,
   onSelect,
@@ -274,8 +281,10 @@ function PlanCard({
   /** Null when no plan has a line: then none leaves room for one. */
   line: string | null;
   dark: boolean;
-  /** Set on the shop's own plan. */
+  /** The shop's plan now, whichever card this is. */
   current: CurrentPlan | null;
+  /** This card is the shop's own plan. */
+  own: boolean;
   mayPay: boolean;
   busy: string | null;
   onSelect: (plan: Plan) => void;
@@ -291,7 +300,7 @@ function PlanCard({
   // The dark card shows what a month would cost without paying yearly, struck through.
   const was = dark && yearly && saving && group.monthly ? Number(group.monthly.price) : null;
 
-  const tag = current ? (
+  const tag = own && current ? (
     <Tag dot="bg-amber-400">{t(current.trial ? "trialBadge" : "currentBadge")}</Tag>
   ) : dark && yearly && saving ? (
     <Tag dot="bg-zinc-900" className="bg-amber-300 text-zinc-900">
@@ -301,11 +310,18 @@ function PlanCard({
     <Tag dot="bg-green-600">{t("recommended")}</Tag>
   ) : null;
 
-  // A paid plan in force has no button (lib/plans-compare cardAction): it shows until when instead.
+  // A paid plan with more than a week to run has no button (lib/plans-compare cardAction): it shows
+  // until when instead -- the last day paid for, when the next period is paid too.
   const kind = cardAction(current, plan);
   const paidAndOn = kind === null;
-  const action = kind === "renew" || kind === "select" ? t(kind, { plan: group.name }) : kind ? t(kind) : null;
-  const until = current?.endDate && !current.ended ? formatBillingDay(current.endDate, locale) : null;
+  const action =
+    kind === "renew" || kind === "select" || kind === "switchTo" ? t(kind, { plan: group.name }) : kind ? t(kind) : null;
+  const untilDay = own ? (current?.paidUntil ?? (current?.endDate && !current.ended ? current.endDate : null)) : null;
+  const until = untilDay ? formatBillingDay(untilDay, locale) : null;
+  // Another plan, before the shop's plan's last week: when switching to it opens.
+  const opens = !own && !kind ? switchOpens(current) : null;
+  // Paid now, a period starts the day after the current one (or the trial) ends: no day is lost.
+  const starts = kind && current ? nextStart(current) : null;
 
   return (
     <section
@@ -366,7 +382,7 @@ function PlanCard({
         ))}
       </ul>
 
-      {paidAndOn ? (
+      {paidAndOn && own ? (
         // Where the button would be: the plan in force, and until when.
         <p
           className={cn(
@@ -376,6 +392,12 @@ function PlanCard({
         >
           {until ? t("activeUntil", { date: until }) : t("currentBadge")}
         </p>
+      ) : paidAndOn ? (
+        opens ? (
+          <p className={cn("mt-7 self-center text-[13px]", dark ? "text-zinc-400" : "text-muted-foreground")}>
+            {t("switchOpens", { date: formatBillingDay(opens, locale) })}
+          </p>
+        ) : null
       ) : (
         <div className="mt-7 flex flex-col items-center gap-2">
           {current?.trial && until ? (
@@ -395,6 +417,11 @@ function PlanCard({
             >
               {action}
             </Button>
+          ) : null}
+          {mayPay && action && starts ? (
+            <p className={cn("text-xs", dark ? "text-zinc-400" : "text-muted-foreground")}>
+              {t("startsOn", { date: formatBillingDay(starts, locale) })}
+            </p>
           ) : null}
         </div>
       )}

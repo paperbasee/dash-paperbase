@@ -4,15 +4,16 @@
  * cap, the payments made) beside what /auth/me/ says of the plan; the Plans page shares how money
  * and days are written.
  *
- * The band at the top says where the plan stands. It offers to pay only once the plan has ended
- * (its grace day, after it, or a payment not found): paying again while a plan runs starts the new
- * period that day and loses the days left (api billing activate_subscription; plans-compare
- * `cardAction` holds the same rule).
+ * The band at the top says where the plan stands. It offers to pay in the plan's last week
+ * (PAY_AHEAD_DAYS), on its grace day and after it, and after a payment not found: a period paid
+ * early starts the day after the current one ends, so no day is lost (api billing
+ * activate_subscription; plans-compare `cardAction` holds the same rule). Once the next period is
+ * paid, nothing is ending and nothing is asked.
  */
 import api from "@/lib/api";
 import { toLocaleDigits } from "@/lib/locale-digits";
-import type { BillingCycle, Plan } from "@/lib/plans-compare";
-import type { MeSubscription } from "@/lib/subscription-access";
+import { PAY_AHEAD_DAYS, type BillingCycle, type Plan } from "@/lib/plans-compare";
+import type { MeSubscription, NextPeriod } from "@/lib/subscription-access";
 import { resolveSubscriptionUIState, type LatestPaymentStatus } from "@/lib/subscription-ui-state";
 
 export type PaymentStatus = "pending" | "success" | "failed" | "refunded";
@@ -98,9 +99,6 @@ function dayAfter(ymd: string): string {
   return new Date((dayNumber(ymd) + 1) * DAY_MS).toISOString().slice(0, 10);
 }
 
-/** The band says the plan ends soon in its last this many days. */
-export const ENDING_SOON_DAYS = 3;
-
 export type BandLane = "active" | "endingSoon" | "trial" | "grace" | "expired" | "checking" | "notFound" | "none";
 
 export interface Band {
@@ -115,6 +113,8 @@ export interface Band {
   payment: BillingPayment | null;
   /** Pay for the plan again, choose a plan, or nothing to do. */
   action: "pay" | "choose" | null;
+  /** The period already paid to follow this one. */
+  next: NextPeriod | null;
 }
 
 const LANES: Record<ReturnType<typeof resolveSubscriptionUIState>, BandLane> = {
@@ -132,8 +132,9 @@ export function billingBand(
   latestPaymentStatus: LatestPaymentStatus | null,
   overview: BillingOverview,
 ): Band {
+  const next = sub.next_period ?? null;
   let lane = LANES[resolveSubscriptionUIState(sub.subscription_status, latestPaymentStatus, sub.is_trial === true)];
-  if (lane === "active" && sub.days_remaining <= ENDING_SOON_DAYS) lane = "endingSoon";
+  if (lane === "active" && !next && sub.days_remaining <= PAY_AHEAD_DAYS) lane = "endingSoon";
 
   // A paid period still running, also under a renewal being checked or refused (/auth/me/).
   const calendar = sub.subscription_status === "PENDING_REVIEW" || sub.subscription_status === "REJECTED"
@@ -149,6 +150,12 @@ export function billingBand(
     periodDays: period ? dayNumber(period.end_date) - dayNumber(period.start_date) + 1 : null,
     nextDue: period ? dayAfter(period.end_date) : null,
     payment: about ? (overview.payments.find((p) => p.status === about) ?? null) : null,
-    action: lane === "grace" || lane === "expired" || lane === "notFound" ? "pay" : lane === "trial" || lane === "none" ? "choose" : null,
+    action:
+      lane === "endingSoon" || lane === "grace" || lane === "expired" || lane === "notFound"
+        ? "pay"
+        : lane === "trial" || lane === "none"
+          ? "choose"
+          : null,
+    next,
   };
 }
