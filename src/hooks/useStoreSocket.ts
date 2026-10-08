@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { currentShop } from "@/lib/api";
 import { heldClaims, passForRequest } from "@/lib/accounts/pass";
-import { logout } from "@/lib/auth";
+import { isSigningOut, logout } from "@/lib/auth";
 import { pageAfterSignInEnded } from "@/lib/sign-in-ended";
 import { StoreSocketClient, type SocketCredentials } from "@/lib/websocket/socket-client";
 import { createInvalidationCoalescer } from "@/lib/websocket/coalesce-query-invalidations";
@@ -80,7 +80,7 @@ export function useStoreSocket(
       const leaveFor = pageAfterSignInEnded(socketEvent, socketSidRef.current, heldClaims()?.sid ?? null);
       if (leaveFor) {
         client.disconnect();
-        logout(leaveFor);
+        if (!isSigningOut()) logout(leaveFor);
         return;
       }
       const queryKeys = getQueryKeysToInvalidate(socketEvent.event);

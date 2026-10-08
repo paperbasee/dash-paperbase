@@ -9,7 +9,7 @@ import {
   useRef,
   type ReactNode,
 } from "react";
-import { logout as authLogout, signOut as authSignOut, SIGN_IN_CHANNEL, THIS_TAB } from "@/lib/auth";
+import { isSigningOut, logout as authLogout, signOut as authSignOut, SIGN_IN_CHANNEL, THIS_TAB } from "@/lib/auth";
 import { clearAuthSessionCookie, hasAuthSessionCookie } from "@/lib/auth-session-cookie";
 import { heldPass, holdPass, onSignedOut, renewIfStale, renewPass } from "@/lib/accounts/pass";
 import type { MeForRouting } from "@/lib/subscription-access";
@@ -126,7 +126,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // The sign-in ended -- found by a renewal, or another tab of this browser signed out: leave.
   useEffect(() => {
-    const stopListening = onSignedOut(() => logout());
+    const stopListening = onSignedOut(() => {
+      if (!isSigningOut()) logout();
+    });
     let channel: BroadcastChannel | null = null;
     try {
       channel = new BroadcastChannel(SIGN_IN_CHANNEL);

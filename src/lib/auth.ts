@@ -16,6 +16,17 @@ export const SIGN_IN_CHANNEL = "paperbase-sign-in";
 export const THIS_TAB = typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID() : String(Math.random());
 const SIGN_OUT_TIMEOUT_MS = 8_000;
 
+let signingOut = false;
+
+/**
+ * Whether this tab is ending its sign-in itself (Sign out, End session). The sign-in's end then
+ * comes back to it from the API ("session.ended") and from a renewal; the tab is already leaving,
+ * for where it chose, and must not be sent to the sign-in page instead.
+ */
+export function isSigningOut(): boolean {
+  return signingOut;
+}
+
 /** What this browser keeps of the account signed in: its data, profile and theme edits. */
 function forgetSignedInData() {
   if (typeof window !== "undefined") {
@@ -54,6 +65,7 @@ export function logout(to = "/login") {
  * forgets the sign-in anyway; its cookie runs out by itself.
  */
 async function endSignInAtAccounts(): Promise<void> {
+  signingOut = true;
   try {
     await fetch(`${accountsUrl()}/passes/sign-out`, {
       method: "POST",
