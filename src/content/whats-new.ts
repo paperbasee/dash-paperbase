@@ -88,6 +88,21 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-10-09-is-your-domain-secure",
+    date: "2026-10-09",
+    version: "4.190.0",
+    tag: "new",
+    title: {
+      en: "See if shoppers reach your domain securely",
+      bn: "ক্রেতারা আপনার ডোমেইনে নিরাপদে ঢুকছেন কিনা দেখুন",
+    },
+    body: {
+      en: "Settings, Domains now checks that shoppers reach your own domain securely, and says exactly what to change if not, for example in Cloudflare. After you change something, press Check again.",
+      bn: "সেটিংসের ডোমেইন অংশ এখন পরীক্ষা করে ক্রেতারা আপনার নিজের ডোমেইনে নিরাপদে ঢুকতে পারছেন কিনা, আর না পারলে ঠিক কী বদলাতে হবে তা বলে দেয়, যেমন Cloudflare-এ। কিছু বদলানোর পর “আবার পরীক্ষা করুন” চাপুন।",
+    },
+    href: "/settings?tab=domains",
+  },
+  {
     id: "2026-10-09-a-cleaner-notice-at-the-top",
     date: "2026-10-09",
     version: "4.189.5",
@@ -506,20 +521,5 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
       bn: "ফাঁকা ট্র্যাশে এখন একটি ছোট বিন দেখা যায়, ছুঁলেই যার ঢাকনা খুলে যায়, আর বলে এটি কিসের জন্য: যা মুছে ফেলেন তা ১৫ দিন সেখানে থাকে, যাতে ফিরিয়ে আনতে পারেন।",
     },
     href: "/trash",
-  },
-  {
-    id: "2026-10-04-tidier-page-headers",
-    date: "2026-10-04",
-    version: "4.172.0",
-    tag: "improved",
-    title: {
-      en: "Tidier pages, with a ? beside each title",
-      bn: "আরও গোছানো পেজ, প্রতিটি শিরোনামের পাশে একটি ?",
-    },
-    body: {
-      en: "Every page now has a small ? beside its title: point at it or tap it to see what the page is for. Filters stay inside the filter button until you open them, and a dot on it shows when one is on.",
-      bn: "এখন প্রতিটি পেজের শিরোনামের পাশে একটি ছোট ? আছে: পেজটি কিসের জন্য তা দেখতে এর ওপর মাউস রাখুন বা ট্যাপ করুন। ফিল্টারগুলো ফিল্টার বাটনের ভেতরেই থাকে, আর কোনো ফিল্টার চালু থাকলে বাটনে একটি বিন্দু দেখা যায়।",
-    },
-    href: "/orders",
   },
 ];
