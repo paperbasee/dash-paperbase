@@ -88,8 +88,8 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
-    id: "2026-10-10-a-clearer-waiting-page",
-    date: "2026-10-10",
+    id: "2026-10-09-a-clearer-waiting-page",
+    date: "2026-10-09",
     version: "4.189.1",
     tag: "improved",
     title: {
@@ -102,8 +102,8 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     },
   },
   {
-    id: "2026-10-10-pay-early-lose-no-days",
-    date: "2026-10-10",
+    id: "2026-10-09-pay-early-lose-no-days",
+    date: "2026-10-09",
     version: "4.188.0",
     tag: "improved",
     title: {
@@ -117,8 +117,8 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     href: "/settings?tab=billing",
   },
   {
-    id: "2026-10-10-back-in-after-an-outage",
-    date: "2026-10-10",
+    id: "2026-10-09-back-in-after-an-outage",
+    date: "2026-10-09",
     version: "4.187.2",
     tag: "fixed",
     title: {
@@ -131,8 +131,8 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     },
   },
   {
-    id: "2026-10-10-round-ticks-on-billing",
-    date: "2026-10-10",
+    id: "2026-10-09-round-ticks-on-billing",
+    date: "2026-10-09",
     version: "4.187.1",
     tag: "improved",
     title: {
@@ -146,8 +146,8 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     href: "/settings?tab=billing",
   },
   {
-    id: "2026-10-10-a-clearer-billing-page",
-    date: "2026-10-10",
+    id: "2026-10-09-a-clearer-billing-page",
+    date: "2026-10-09",
     version: "4.187.0",
     tag: "improved",
     title: {
@@ -161,8 +161,8 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     href: "/settings?tab=billing",
   },
   {
-    id: "2026-10-10-your-account-in-one-place",
-    date: "2026-10-10",
+    id: "2026-10-09-your-account-in-one-place",
+    date: "2026-10-09",
     version: "4.186.0",
     tag: "improved",
     title: {
@@ -175,8 +175,8 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     },
   },
   {
-    id: "2026-10-10-sign-in-at-paperbase-accounts",
-    date: "2026-10-10",
+    id: "2026-10-09-sign-in-at-paperbase-accounts",
+    date: "2026-10-09",
     version: "4.185.0",
     tag: "new",
     title: {
@@ -189,8 +189,8 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     },
   },
   {
-    id: "2026-10-10-getting-ready-for-paperbase-accounts",
-    date: "2026-10-10",
+    id: "2026-10-09-getting-ready-for-paperbase-accounts",
+    date: "2026-10-09",
     version: "4.184.4",
     tag: "improved",
     title: {

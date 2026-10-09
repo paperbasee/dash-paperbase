@@ -1,7 +1,7 @@
 /**
  * The passkey permission file (guidelines/accounts-plan.md, section 9): it lets Accounts, at
  * accounts.paperbase.me, use the passkeys made on this site. Live before Accounts is (step 5's
- * rehearsal, 2026-10-10): browsers fetch it at /.well-known/webauthn, read it as JSON, and give
+ * rehearsal, 2026-10-09): browsers fetch it at /.well-known/webauthn, read it as JSON, and give
  * up on a redirect -- so it is served as JSON and the sign-in redirect never touches it.
  */
 import { readFileSync } from "node:fs";
