@@ -27,6 +27,7 @@ import {
   settingsSectionSurfaceClassName,
 } from "../SettingsSectionBody";
 import {
+  useCheckHttps,
   useConnectDomain,
   useDomainsQuery,
   useRemoveDomain,
@@ -34,7 +35,9 @@ import {
   useVerifyDomain,
 } from "@/lib/domains/hooks";
 import {
+  domainSecureState,
   liveStorefrontDomain,
+  runHttpsCheck,
   storefrontUrlFor,
   type StoreDomain,
   type StoreDomainDnsRecord,
@@ -261,9 +264,14 @@ export default function DomainsSection({ hidden }: { hidden: boolean }) {
   const verify = useVerifyDomain();
   const setPrimary = useSetPrimaryDomain();
   const remove = useRemoveDomain();
+  const checkHttps = useCheckHttps();
 
   const busy =
-    connect.isPending || verify.isPending || setPrimary.isPending || remove.isPending;
+    connect.isPending ||
+    verify.isPending ||
+    setPrimary.isPending ||
+    remove.isPending ||
+    checkHttps.isPending;
 
   /** Same predicate as the old `showRecords`, so no capability shifts. */
   const needsSetup = (d: StoreDomain) =>
@@ -293,29 +301,83 @@ export default function DomainsSection({ hidden }: { hidden: boolean }) {
    *
    * Without this a domain whose DNS has verified but whose certificate has not
    * issued yet looks identical to a working one -- so the merchant visits a
-   * browser warning and opens a support ticket. Only shown for custom domains;
-   * the Paperbase address is always secure.
+   * browser warning and opens a support ticket. Since the plan to move every
+   * shop address to https (agreed 2026-10-09), Secure also needs the outside
+   * check to have found https working for shoppers: behind Cloudflare our
+   * certificate can be fine while shoppers get http or a broken one, and a shop
+   * is only moved to https once that check passes. Each other answer names the
+   * one thing to change.
+   * Only shown for custom domains; the Paperbase address is always secure.
    */
   function certificateNotice(domain: StoreDomain): string {
-    if (domain.kind !== "custom" || domain.status !== "active") return "";
-    switch (domain.ssl_status) {
-      case "issued":
+    switch (domainSecureState(domain)) {
+      case "secure":
         return t("domains.sslIssued");
-      case "failed":
+      case "certificateFailed":
         return domain.ssl_error
           ? `${t("domains.sslFailed")} ${domain.ssl_error}`
           : t("domains.sslFailed");
-      case "pending":
-      case "none":
-      default:
+      case "certificatePending":
         return t("domains.sslPending");
+      case "checking":
+        return t("domains.httpsChecking");
+      case "noAnswer":
+        return t("domains.httpsNoAnswer");
+      case "originOverHttp":
+        return t("domains.httpsOriginOverHttp");
+      case "edgeRedirectsToHttp":
+        return t("domains.httpsEdgeRedirectsToHttp");
+      case "edgeCertificateInvalid":
+        return t("domains.httpsEdgeCertificateInvalid");
+      case "wrongAnswer":
+        return t("domains.httpsWrongAnswer");
+      case null:
+        return "";
     }
   }
 
   function certificateNoticeClassName(domain: StoreDomain): string {
-    if (domain.ssl_status === "failed") return "text-destructive";
-    if (domain.ssl_status === "issued") return "text-emerald-700 dark:text-emerald-300";
+    const state = domainSecureState(domain);
+    if (state === "certificateFailed") return "text-destructive";
+    if (state === "secure") return "text-emerald-700 dark:text-emerald-300";
     return "text-amber-700 dark:text-amber-300";
+  }
+
+  /**
+   * The notice beside a merchant's own live domain, with its Check again. The
+   * button runs the certificate probe and the outside check now rather than at
+   * the next hourly one, so a merchant who has just changed a Cloudflare setting
+   * sees the answer while still on this page. Verify stays a setup-only button:
+   * verifying DNS again can take a live domain down over one failed lookup.
+   */
+  function renderCertificateNotice(domain: StoreDomain, className: string) {
+    const notice = certificateNotice(domain);
+    if (!notice) return null;
+    return (
+      <div
+        className={cn(
+          "flex flex-col items-start gap-1.5 sm:flex-row sm:justify-between sm:gap-3",
+          className,
+        )}
+      >
+        <p className={cn("text-xs leading-relaxed", certificateNoticeClassName(domain))}>
+          {notice}
+        </p>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          className="h-auto shrink-0 gap-1 px-0 text-xs text-muted-foreground hover:text-foreground"
+          loading={checkHttps.isPending && checkHttps.variables === domain.public_id}
+          disabled={busy || !canManage}
+          aria-label={t("domains.checkHttpsAgainAria", { hostname: domain.hostname })}
+          onClick={() => void handleCheckHttps(domain)}
+        >
+          <RefreshCcw className="size-3.5" />
+          {t("domains.checkHttpsAgain")}
+        </Button>
+      </div>
+    );
   }
 
   function statusLabel(status: StoreDomainStatus): string {
@@ -375,6 +437,43 @@ export default function DomainsSection({ hidden }: { hidden: boolean }) {
         title: t("domains.heading"),
         fallbackMessage: t("domains.msgVerifyFailed"),
       });
+    }
+  }
+
+  async function handleCheckHttps(domain: StoreDomain) {
+    if (busy || !canManage) return;
+    const outcome = await runHttpsCheck(() => checkHttps.mutateAsync(domain.public_id));
+    switch (outcome.kind) {
+      case "secure":
+        notify.success(t("domains.msgHttpsSecure", { hostname: domain.hostname }), {
+          title: t("domains.heading"),
+        });
+        return;
+      case "notSecure":
+        // Not an error: the check ran, and the notice beside the domain now says
+        // what to change.
+        notify.info(t("domains.msgHttpsNotSecure", { hostname: domain.hostname }), {
+          title: t("domains.heading"),
+        });
+        return;
+      case "noAnswer":
+        notify.info(t("domains.msgHttpsNoAnswer", { hostname: domain.hostname }), {
+          title: t("domains.heading"),
+        });
+        return;
+      case "tooSoon":
+        notify.info(t("domains.msgHttpsTooSoon", { seconds: outcome.seconds }), {
+          title: t("domains.heading"),
+        });
+        return;
+      case "notLive":
+        notify.info(t("domains.msgHttpsNotLive"), { title: t("domains.heading") });
+        return;
+      case "failed":
+        notify.error(outcome.error, {
+          title: t("domains.heading"),
+          fallbackMessage: t("domains.msgVerifyFailed"),
+        });
     }
   }
 
@@ -567,16 +666,7 @@ export default function DomainsSection({ hidden }: { hidden: boolean }) {
             {/* The certificate notice lives HERE for the live domain and is
                 suppressed on its calm row: "your site shows a browser warning" is a
                 fact about this address, so it belongs beside it, once. */}
-            {certificateNotice(liveDomain) ? (
-              <p
-                className={cn(
-                  "mt-3 text-xs leading-relaxed",
-                  certificateNoticeClassName(liveDomain),
-                )}
-              >
-                {certificateNotice(liveDomain)}
-              </p>
-            ) : null}
+            {renderCertificateNotice(liveDomain, "mt-3")}
           </div>
         ) : null}
 
@@ -690,9 +780,13 @@ export default function DomainsSection({ hidden }: { hidden: boolean }) {
 
                     {recordsOpen ? (
                       <div id={`dns-${domain.public_id}`}>
-                        <p className="border-b border-border px-4 py-2.5 text-xs leading-relaxed text-muted-foreground">
-                          {t("domains.whereToAdd")}
-                        </p>
+                        <div className="border-b border-border px-4 py-2.5 text-xs leading-relaxed text-muted-foreground">
+                          <p>{t("domains.whereToAdd")}</p>
+                          {/* Said where the merchant already has Cloudflare open: an
+                              orange cloud set to Flexible or Off keeps shoppers on
+                              http, and the shop is never moved to https then. */}
+                          <p className="mt-1">{t("domains.cloudflareHint")}</p>
+                        </div>
 
                         {/* Desktop: a real table. table-fixed plus break-all means a
                             43-character token can never widen the page, which is why
@@ -1017,16 +1111,9 @@ export default function DomainsSection({ hidden }: { hidden: boolean }) {
                       ? ` · ${t("domains.verifiedAt")} ${formatDashboardDateTime(domain.verified_at, locale)}`
                       : ""}
                   </p>
-                  {domain.public_id !== liveDomain?.public_id && certificateNotice(domain) ? (
-                    <p
-                      className={cn(
-                        "mt-2 text-xs leading-relaxed",
-                        certificateNoticeClassName(domain),
-                      )}
-                    >
-                      {certificateNotice(domain)}
-                    </p>
-                  ) : null}
+                  {domain.public_id !== liveDomain?.public_id
+                    ? renderCertificateNotice(domain, "mt-2")
+                    : null}
                   {domain.check_error ? (
                     <p className="mt-2 text-xs leading-relaxed text-amber-700 dark:text-amber-300">
                       {domain.check_error}

@@ -82,3 +82,14 @@ describe("domains copy — the component and the messages agree", () => {
     expect(missing).toEqual([]);
   });
 });
+
+describe("domains copy — one word for the merchant's store", () => {
+  it("never says shop where the rest of the tab says store", () => {
+    // Every line of this tab calls it the merchant's store (স্টোর); a notice beside them that
+    // says shop (দোকান) reads as if it meant something else.
+    const enShop = Object.keys(enDomains).filter((k) => /\bshops?\b/i.test(enDomains[k]));
+    const bnShop = Object.keys(bnDomains).filter((k) => bnDomains[k].includes("দোকান"));
+    expect(enShop).toEqual([]);
+    expect(bnShop).toEqual([]);
+  });
+});
