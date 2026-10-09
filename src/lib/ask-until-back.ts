@@ -47,3 +47,21 @@ export function askUntilBack(o: {
     },
   };
 }
+
+/**
+ * Whether a part's `/health` says it is up: its own `{"status": "ok"}`, read in full. Asked as an
+ * ordinary page asks, never blind (`no-cors`): blind, a proxy's error page while the part restarts
+ * counted as "back", and the waiting page reloaded the dashboard again and again (switch night,
+ * 2026-10-09). The API's and Accounts' answers let the dashboard read them; a proxy's does not,
+ * and the browser refuses it.
+ */
+export async function healthSaysUp(url: string, signal: AbortSignal): Promise<boolean> {
+  try {
+    const response = await fetch(url, { signal, cache: "no-store" });
+    if (!response.ok) return false;
+    const body: unknown = await response.json();
+    return typeof body === "object" && body !== null && (body as { status?: unknown }).status === "ok";
+  } catch {
+    return false;
+  }
+}

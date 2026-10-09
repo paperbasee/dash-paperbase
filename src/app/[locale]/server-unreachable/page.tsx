@@ -5,7 +5,7 @@ import { useLocale } from "next-intl";
 import { useSearchParams } from "next/navigation";
 import UnreachableScreen from "@/components/unreachable/UnreachableScreen";
 import { accountsUrl } from "@/lib/accounts/config";
-import { askUntilBack } from "@/lib/ask-until-back";
+import { askUntilBack, healthSaysUp } from "@/lib/ask-until-back";
 
 const DASHBOARD_SERVER_UNREACHABLE_KEY = "paperbase_dashboard_server_unreachable";
 /** Seconds between two asks, counted down on the page. */
@@ -21,19 +21,9 @@ function getBackendHealthUrl(): string {
   }
 }
 
-/** Whether the part that was away answers now. */
-async function answers(signIn: boolean, signal: AbortSignal): Promise<boolean> {
-  try {
-    if (signIn) {
-      // Accounts' health answers no other origin: an answer at all is enough.
-      await fetch(`${accountsUrl()}/health`, { mode: "no-cors", signal, cache: "no-store" });
-      return true;
-    }
-    const res = await fetch(getBackendHealthUrl(), { signal, cache: "no-store" });
-    return res.ok;
-  } catch {
-    return false;
-  }
+/** Whether the part that was away answers now: the API, or Accounts where everyone signs in. */
+function answers(signIn: boolean, signal: AbortSignal): Promise<boolean> {
+  return healthSaysUp(signIn ? `${accountsUrl()}/health` : getBackendHealthUrl(), signal);
 }
 
 function onConnectionChange(changed: () => void) {

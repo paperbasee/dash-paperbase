@@ -4,7 +4,7 @@
  */
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { askUntilBack } from "@/lib/ask-until-back";
+import { askUntilBack, healthSaysUp } from "@/lib/ask-until-back";
 
 function start(answer: () => boolean, online = () => true) {
   const seen = { asks: 0, back: 0, counts: [] as number[], checking: [] as boolean[] };
@@ -99,5 +99,39 @@ describe("askUntilBack", () => {
     await vi.advanceTimersByTimeAsync(60_000);
     expect(seen.asks).toBe(1);
     expect(seen.counts).toEqual([15]);
+  });
+});
+
+describe("healthSaysUp", () => {
+  afterEach(() => vi.unstubAllGlobals());
+
+  const answer = (status: number, body: string) =>
+    vi.stubGlobal("fetch", vi.fn(async () => new Response(body, { status, headers: { "Content-Type": "application/json" } })));
+
+  it("is up only on the part's own ok, read in full", async () => {
+    answer(200, '{"status": "ok"}');
+    expect(await healthSaysUp("https://accounts.example.test/health", new AbortController().signal)).toBe(true);
+  });
+
+  it("is not up on the proxy's own error page while the part restarts", async () => {
+    // Switch night (2026-10-09): asked without reading, Traefik's 502 counted as "back" and the
+    // waiting page reloaded the dashboard again and again. Unreadable (no CORS header), the
+    // browser refuses it: fetch throws.
+    vi.stubGlobal("fetch", vi.fn(async () => { throw new TypeError("Failed to fetch"); }));
+    expect(await healthSaysUp("https://accounts.example.test/health", new AbortController().signal)).toBe(false);
+  });
+
+  it("is not up on the part's own 503, nor on anything that is not its ok", async () => {
+    answer(503, '{"status": "error", "detail": "database unavailable"}');
+    expect(await healthSaysUp("https://accounts.example.test/health", new AbortController().signal)).toBe(false);
+    answer(200, "<html>Bad Gateway</html>");
+    expect(await healthSaysUp("https://accounts.example.test/health", new AbortController().signal)).toBe(false);
+  });
+
+  it("asks as an ordinary page would, never blind", async () => {
+    answer(200, '{"status": "ok"}');
+    await healthSaysUp("https://accounts.example.test/health", new AbortController().signal);
+    const [, init] = vi.mocked(fetch).mock.calls[0];
+    expect(init?.mode).not.toBe("no-cors");
   });
 });
