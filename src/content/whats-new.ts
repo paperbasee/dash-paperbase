@@ -88,6 +88,20 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-10-09-a-cleaner-notice-at-the-top",
+    date: "2026-10-09",
+    version: "4.189.5",
+    tag: "improved",
+    title: {
+      en: "A cleaner notice at the top",
+      bn: "উপরের নোটিশ আরও পরিষ্কার",
+    },
+    body: {
+      en: "During maintenance or a problem, the notice at the top of your dashboard now starts straight with its words. Its colour still tells you which it is.",
+      bn: "রক্ষণাবেক্ষণ বা কোনো সমস্যার সময় ড্যাশবোর্ডের উপরের নোটিশ এখন সরাসরি লেখা দিয়ে শুরু হয়। কোনটা কী, তা এর রং দেখেই বোঝা যায়।",
+    },
+  },
+  {
     id: "2026-10-09-the-waiting-page-stays-put",
     date: "2026-10-09",
     version: "4.189.4",
@@ -507,20 +521,5 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
       bn: "এখন প্রতিটি পেজের শিরোনামের পাশে একটি ছোট ? আছে: পেজটি কিসের জন্য তা দেখতে এর ওপর মাউস রাখুন বা ট্যাপ করুন। ফিল্টারগুলো ফিল্টার বাটনের ভেতরেই থাকে, আর কোনো ফিল্টার চালু থাকলে বাটনে একটি বিন্দু দেখা যায়।",
     },
     href: "/orders",
-  },
-  {
-    id: "2026-10-04-analytics-is-part-of-premium",
-    date: "2026-10-04",
-    version: "4.171.0",
-    tag: "improved",
-    title: {
-      en: "Analytics is part of Premium",
-      bn: "অ্যানালিটিক্স এখন প্রিমিয়ামের অংশ",
-    },
-    body: {
-      en: "Analytics, with your sales, visitors, best sellers and more, is now on the Premium plan. On Essential, opening Analytics takes you to the plans, and a gold star marks it in Settings, Apps.",
-      bn: "অ্যানালিটিক্স, মানে আপনার বিক্রি, ভিজিটর, সবচেয়ে বিক্রি হওয়া পণ্য আর আরও অনেক কিছু, এখন প্রিমিয়াম প্ল্যানে। এসেনশিয়ালে অ্যানালিটিক্স খুললে প্ল্যান পেজে নিয়ে যায়, আর সেটিংসের অ্যাপে এর পাশে একটি সোনালি তারা থাকে।",
-    },
-    href: "/plans",
   },
 ];
