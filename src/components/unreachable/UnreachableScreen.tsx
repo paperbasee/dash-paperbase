@@ -2,7 +2,7 @@
 
 import { useLocale, useTranslations } from "next-intl";
 
-import { NOTICE_DOT, NOTICE_TONE } from "@/components/status/StatusNoticeBar";
+import { NOTICE_TONE } from "@/components/status/StatusNoticeBar";
 import { Button } from "@/components/ui/button";
 import { NoInternet, ServerDown, SignInDown } from "@/components/unreachable/drawings";
 import { useStatusSummary } from "@/hooks/useStatusNotice";
@@ -61,11 +61,10 @@ function StatusLine() {
   return (
     <p
       className={cn(
-        "mt-4 inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs leading-snug sm:px-3.5 sm:text-[13px]",
+        "mt-4 inline-block rounded-full px-3 py-1.5 text-xs leading-snug sm:px-3.5 sm:text-[13px]",
         tone ? NOTICE_TONE[tone] : "bg-muted text-muted-foreground"
       )}
     >
-      <span aria-hidden className={cn("size-[7px] shrink-0 rounded-full", tone ? NOTICE_DOT[tone] : "bg-muted-foreground/60")} />
       {words}
     </p>
   );

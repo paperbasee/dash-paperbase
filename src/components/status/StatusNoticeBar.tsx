@@ -19,12 +19,6 @@ export const NOTICE_TONE = {
   major_outage: "bg-red-50 text-red-900 dark:bg-red-950 dark:text-red-100",
   maintenance: "bg-sky-50 text-sky-900 dark:bg-sky-950 dark:text-sky-100",
 } as const;
-export const NOTICE_DOT = {
-  degraded: "bg-amber-500",
-  partial_outage: "bg-orange-500",
-  major_outage: "bg-red-500",
-  maintenance: "bg-sky-500",
-} as const;
 
 const STATUSES = ["investigating", "identified", "monitoring"] as const;
 
@@ -73,7 +67,6 @@ export function StatusNoticeBar({
   return (
     <div role="status" className={cn("relative border-b border-border md:h-8", NOTICE_TONE[tone])}>
       <div className="mx-auto flex min-h-8 w-full max-w-[88rem] items-center justify-center gap-x-2 gap-y-0.5 px-9 py-1.5 text-center text-[11px] leading-snug max-md:flex-wrap sm:text-xs md:h-full md:min-h-0 md:py-0">
-        <span aria-hidden className={cn("size-1.5 shrink-0 rounded-full", NOTICE_DOT[tone])} />
         <p className="min-w-0 md:truncate">{message}</p>
         {notice.more > 0 ? (
           <span className="shrink-0 opacity-75">

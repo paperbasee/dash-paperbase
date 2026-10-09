@@ -119,6 +119,13 @@ describe("the waiting page", () => {
     expect(render("api")).not.toContain("Status page");
   });
 
+  it("the status page's line starts with its words, no dot before them (owner, 2026-10-09)", () => {
+    for (const summary of [incident("investigating"), { incidents: [], maintenance: [] }]) {
+      status.summary = summary;
+      expect(render("api")).toMatch(/rounded-full px-3[^"]*">Status page:/);
+    }
+  });
+
   it("without a status page, no link to one", () => {
     vi.stubEnv("NEXT_PUBLIC_STATUS_URL", "");
     expect(render("api")).not.toContain("See Paperbase status");
