@@ -88,6 +88,20 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-10-09-the-waiting-page-stays-put",
+    date: "2026-10-09",
+    version: "4.189.4",
+    tag: "fixed",
+    title: {
+      en: "The waiting page no longer reloads again and again",
+      bn: "অপেক্ষার পাতা আর বারবার নতুন করে লোড হয় না",
+    },
+    body: {
+      en: "While Paperbase's sign-in was restarting, the waiting page could reload the dashboard over and over. It now waits calmly and opens your dashboard once sign-in is really back.",
+      bn: "Paperbase-এর সাইন ইন আবার চালু হওয়ার সময় অপেক্ষার পাতা বারবার ড্যাশবোর্ড লোড করতে পারত। এখন এটি শান্তভাবে অপেক্ষা করে, আর সাইন ইন সত্যিই ফিরলে তবেই ড্যাশবোর্ড খোলে।",
+    },
+  },
+  {
     id: "2026-10-09-a-clearer-waiting-page",
     date: "2026-10-09",
     version: "4.189.1",
@@ -506,21 +520,6 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     body: {
       en: "Analytics, with your sales, visitors, best sellers and more, is now on the Premium plan. On Essential, opening Analytics takes you to the plans, and a gold star marks it in Settings, Apps.",
       bn: "অ্যানালিটিক্স, মানে আপনার বিক্রি, ভিজিটর, সবচেয়ে বিক্রি হওয়া পণ্য আর আরও অনেক কিছু, এখন প্রিমিয়াম প্ল্যানে। এসেনশিয়ালে অ্যানালিটিক্স খুললে প্ল্যান পেজে নিয়ে যায়, আর সেটিংসের অ্যাপে এর পাশে একটি সোনালি তারা থাকে।",
-    },
-    href: "/plans",
-  },
-  {
-    id: "2026-10-04-a-shorter-bkash-step-in-bangla",
-    date: "2026-10-04",
-    version: "4.169.1",
-    tag: "improved",
-    title: {
-      en: "A shorter bKash step in Bangla",
-      bn: "বাংলায় বিকাশের ধাপ এখন আরও ছোট",
-    },
-    body: {
-      en: "On the payment page, the Bangla bKash instruction is now shorter and reads just like Nagad's.",
-      bn: "পেমেন্ট পেজে বাংলায় বিকাশের নির্দেশনা এখন আরও ছোট, নগদের নির্দেশনার মতোই।",
     },
     href: "/plans",
   },
