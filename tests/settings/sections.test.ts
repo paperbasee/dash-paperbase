@@ -73,17 +73,16 @@ function visibleIdsFor(
   has: (key: string) => boolean,
   opts: {
     isOwner?: boolean;
-    isSuperuser?: boolean;
     inSupportMode?: boolean;
     sections?: SettingsSectionNavItem[];
     canShowApp?: (appId: string) => boolean;
   } = {},
 ): SettingsSection[] {
-  const { isOwner = false, isSuperuser = false, inSupportMode = false } = opts;
+  const { isOwner = false, inSupportMode = false } = opts;
   const canShowApp =
-    opts.canShowApp ?? ((appId: string) => isOwner || isSuperuser || has(APP_PAGE_PERMISSION[appId]));
+    opts.canShowApp ?? ((appId: string) => isOwner || has(APP_PAGE_PERMISSION[appId]));
   return (opts.sections ?? SECTIONS)
-    .filter((row) => isSectionVisible(row.id, { has, isOwner, isSuperuser, canShowApp, inSupportMode }))
+    .filter((row) => isSectionVisible(row.id, { has, isOwner, canShowApp, inSupportMode }))
     .map((row) => row.id);
 }
 
@@ -258,10 +257,9 @@ describe("role-shaped visibility (the maps as consumers apply them)", () => {
     expect(visibleIdsFor(grants().has)).toEqual([]);
   });
 
-  it("keeps Sessions the owner's alone: not a superuser, not support signed in as the owner", () => {
+  it("keeps Sessions the owner's alone: not a member, not support signed in as the owner", () => {
     const everything = { has: () => true };
     expect(visibleIdsFor(everything.has, { isOwner: true })).toContain("sessions");
-    expect(visibleIdsFor(everything.has, { isSuperuser: true })).not.toContain("sessions");
     expect(visibleIdsFor(everything.has)).not.toContain("sessions");
     expect(visibleIdsFor(everything.has, { isOwner: true, inSupportMode: true })).not.toContain("sessions");
   });
@@ -270,7 +268,6 @@ describe("role-shaped visibility (the maps as consumers apply them)", () => {
     const superRole = { has: () => true };
     expect(visibleIdsFor(superRole.has)).not.toContain("billing");
     expect(visibleIdsFor(superRole.has, { isOwner: true })).toContain("billing");
-    expect(visibleIdsFor(superRole.has, { isSuperuser: true })).toContain("billing");
   });
 
   it("shows Integrations to whoever may open either part: the pixels or the courier accounts", () => {

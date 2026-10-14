@@ -13,8 +13,8 @@ import { pageRule } from "@/lib/page-access";
 
 /**
  * Shows the page only to a member whose role includes it (lib/page-access.ts); everyone else --
- * someone who typed the address, or followed an old link -- is told so plainly. The owner and
- * Paperbase superusers pass everywhere, and nothing is hidden while the permissions are loading.
+ * someone who typed the address, or followed an old link -- is told so plainly. The owner passes
+ * everywhere, and nothing is hidden while the permissions are loading.
  * The API refuses the same requests either way; this only spares the member a broken page.
  */
 export function PageAccessGate({ children }: { children: ReactNode }) {

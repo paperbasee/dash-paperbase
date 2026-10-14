@@ -114,8 +114,7 @@ export default function ProductDetailClient() {
   } = useProductDetailQuery(publicId ?? "");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
-  const { canDeleteProducts: canDeleteProduct, isSuperuser: deleteIsSuperuser } =
-    useAdminDeleteCapabilities();
+  const { canDeleteProducts: canDeleteProduct } = useAdminDeleteCapabilities();
   const canEditProduct = usePermissions().has("products.edit");
   const confirm = useConfirm();
   const queryClient = useQueryClient();
@@ -484,9 +483,7 @@ export default function ProductDetailClient() {
   async function handleDeleteProduct() {
     const ok = await confirm({
       title: tPages("confirmDialogTitleDeleteProduct"),
-      message: deleteIsSuperuser
-        ? tPages("productDetailConfirmDeletePermanent")
-        : tPages("productDetailConfirmDeleteTrash"),
+      message: tPages("productDetailConfirmDeleteTrash"),
       variant: "danger",
     });
     if (!ok) return;

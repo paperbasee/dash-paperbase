@@ -67,7 +67,7 @@ export async function runBulkProductAction(
   return result;
 }
 
-/** Store members move the products to trash; superusers delete them permanently. */
+/** Moves the products to trash, where they can be restored. */
 export function bulkDeleteProducts(http: BulkProductHttp, ids: readonly string[]) {
   return runBulkProductAction(http, "admin/products/bulk-delete/", ids);
 }

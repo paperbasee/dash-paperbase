@@ -136,8 +136,7 @@ export default function ProductsPage() {
   const [updatingId, setUpdatingId] = useState<string | null>(null);
   const reorderBusyRef = useRef(false);
   const setScrollContainer = useHorizontalWheelScroll<HTMLDivElement>();
-  const { canDeleteProducts, isSuperuser: deleteIsSuperuser } =
-    useAdminDeleteCapabilities();
+  const { canDeleteProducts } = useAdminDeleteCapabilities();
   // Staff see the products to sell from and change none of them (roles plan, owner 2026-10-02).
   const { has } = usePermissions();
   const canAddProducts = has("products.create");
@@ -344,13 +343,9 @@ export default function ProductsPage() {
       title: tPages("confirmDialogTitleDeleteProducts", {
         count: deletedCount,
       }),
-      message: deleteIsSuperuser
-        ? tPages("confirmDeleteProductsPermanent", {
-            count: deletedCount,
-          })
-        : tPages("confirmDeleteProductsTrash", {
-            count: deletedCount,
-          }),
+      message: tPages("confirmDeleteProductsTrash", {
+        count: deletedCount,
+      }),
       variant: "danger",
     });
     if (!ok) return;
@@ -476,13 +471,9 @@ export default function ProductsPage() {
               className="inline-flex items-center gap-2 rounded-card bg-destructive px-4 py-2 text-sm font-semibold text-destructive-foreground transition hover:bg-destructive/90 disabled:opacity-50"
             >
               {deleting && <Loader2 className="size-4 animate-spin" />}
-              {deleteIsSuperuser
-                ? tPages("deleteSelectedPermanent", {
-                    count: toLocaleDigits(String(selectedIds.size), locale),
-                  })
-                : tPages("moveToTrashSelected", {
-                    count: toLocaleDigits(String(selectedIds.size), locale),
-                  })}
+              {tPages("moveToTrashSelected", {
+                count: toLocaleDigits(String(selectedIds.size), locale),
+              })}
             </button>
           )}
           <div className="flex min-h-0 items-center gap-1 rounded-ui border border-border bg-muted/70 p-1 text-sm shadow-xs">

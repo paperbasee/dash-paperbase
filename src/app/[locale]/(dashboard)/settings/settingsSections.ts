@@ -130,7 +130,6 @@ export const SECTION_APPS: Partial<Record<SettingsSection, readonly string[]>> =
 export type SettingsSectionAccess = {
   has: (key: string) => boolean;
   isOwner: boolean;
-  isSuperuser: boolean;
   canShowApp: (appId: string) => boolean;
   /** Paperbase support is in the dashboard ("Sign in as this shop"), signed in as the owner. */
   inSupportMode?: boolean;

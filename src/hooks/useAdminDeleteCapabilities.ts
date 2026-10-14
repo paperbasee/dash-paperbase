@@ -4,10 +4,10 @@ import { usePermissions } from "@/context/PermissionsContext";
 
 /**
  * Destructive-action capabilities, driven by RBAC permissions (not the legacy
- * role enum). Owners and superusers hold everything via usePermissions().has.
+ * role enum). The owner holds everything via usePermissions().has.
  */
 export function useAdminDeleteCapabilities() {
-  const { has, isSuperuser, loading } = usePermissions();
+  const { has, loading } = usePermissions();
 
   return {
     canDeleteProducts: has("products.delete"),
@@ -16,7 +16,6 @@ export function useAdminDeleteCapabilities() {
     // Managers restore, only Admins delete forever.
     canRestoreTrash: has("trash.restore"),
     canPurgeTrash: has("trash.purge"),
-    isSuperuser,
     loading,
   };
 }

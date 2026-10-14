@@ -8,11 +8,11 @@ import { useSupportMode } from "@/hooks/useSupportMode";
 
 /** Whether the person signed in holds one of the owner's powers (config/owner-powers.ts). */
 export function useOwnerPower(): (power: OwnerPower) => boolean {
-  const { isOwner, isSuperuser, isUnknown } = usePermissions();
+  const { isOwner, isUnknown } = usePermissions();
   const inSupportMode = useSupportMode();
   return useCallback(
-    (power: OwnerPower) => holdsOwnerPower(power, { isOwner, isSuperuser, inSupportMode, isUnknown }),
-    [isOwner, isSuperuser, inSupportMode, isUnknown]
+    (power: OwnerPower) => holdsOwnerPower(power, { isOwner, inSupportMode, isUnknown }),
+    [isOwner, inSupportMode, isUnknown]
   );
 }
 

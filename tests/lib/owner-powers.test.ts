@@ -2,9 +2,8 @@ import { describe, expect, it } from "vitest";
 
 import { OWNER_POWERS, holdsOwnerPower } from "@/config/owner-powers";
 
-const owner = { isOwner: true, isSuperuser: false };
-const member = { isOwner: false, isSuperuser: false };
-const superuser = { isOwner: false, isSuperuser: true };
+const owner = { isOwner: true };
+const member = { isOwner: false };
 
 describe("the owner's powers", () => {
   it("are the owner's and no member's, Admin or not", () => {
@@ -18,11 +17,6 @@ describe("the owner's powers", () => {
     const support = { ...owner, inSupportMode: true };
     expect(holdsOwnerPower("payments", support)).toBe(true);
     expect(holdsOwnerPower("sessions", support)).toBe(false);
-  });
-
-  it("show to a platform superuser, but never the sessions", () => {
-    expect(holdsOwnerPower("domains", superuser)).toBe(true);
-    expect(holdsOwnerPower("sessions", superuser)).toBe(false);
   });
 
   it("hide nothing while it isn't known who this is", () => {

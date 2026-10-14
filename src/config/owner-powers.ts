@@ -6,7 +6,6 @@
  *
  * - The owner sees them all. Paperbase support, signed in as the owner, sees them to read (the
  *   API refuses any change), except the sessions, which are hidden from support altogether.
- * - A platform superuser sees them, except the sessions.
  */
 
 export const OWNER_POWERS = [
@@ -21,12 +20,11 @@ export const OWNER_POWERS = [
 
 export type OwnerPower = (typeof OWNER_POWERS)[number];
 
-/** Powers for the owner in person: not a superuser's, and not Paperbase support's. */
+/** Powers for the owner in person, not for Paperbase support signed in as the owner. */
 const OWNER_IN_PERSON: ReadonlySet<OwnerPower> = new Set<OwnerPower>(["sessions"]);
 
 export type OwnerPowerAccess = {
   isOwner: boolean;
-  isSuperuser: boolean;
   /** Paperbase support is in the dashboard ("Sign in as this shop"), signed in as the owner. */
   inSupportMode?: boolean;
   /** Who this is isn't known yet: nothing is hidden meanwhile (the API decides anyway). */
@@ -37,5 +35,5 @@ export type OwnerPowerAccess = {
 export function holdsOwnerPower(power: OwnerPower, access: OwnerPowerAccess): boolean {
   if (access.isUnknown) return true;
   if (OWNER_IN_PERSON.has(power)) return access.isOwner && !access.inSupportMode;
-  return access.isOwner || access.isSuperuser;
+  return access.isOwner;
 }

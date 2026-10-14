@@ -20,7 +20,7 @@ import { APP_PAGE_PERMISSION } from "@/config/permissions";
 function staff(granted: string[]) {
   const has = (key: string) => granted.includes(key);
   const canShowApp = (appId: string) => has(APP_PAGE_PERMISSION[appId]);
-  return { has, isOwner: false, isSuperuser: false, canShowApp };
+  return { has, isOwner: false, canShowApp };
 }
 
 describe("shipping app", () => {
@@ -41,7 +41,7 @@ describe("Shipping section", () => {
   });
 
   it("is hidden when the shipping app cannot be shown, even for the owner", () => {
-    const owner = { has: () => true, isOwner: true, isSuperuser: false };
+    const owner = { has: () => true, isOwner: true };
     expect(isSectionVisible("shipping", { ...owner, canShowApp: () => false })).toBe(false);
     expect(
       isSectionVisible("shipping", { ...owner, canShowApp: (appId) => appId === "shipping" }),

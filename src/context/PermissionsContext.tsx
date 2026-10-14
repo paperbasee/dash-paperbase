@@ -16,7 +16,6 @@ import { APP_PAGE_PERMISSION } from "@/config/permissions";
 export interface MyPermissionsResponse {
   store_public_id: string;
   is_owner: boolean;
-  is_superuser: boolean;
   /** Their fixed role; null for the owner (outside the roles) and a member with none. */
   role: { slug: string; name: string; description: string } | null;
   permissions: string[];
@@ -25,7 +24,6 @@ export interface MyPermissionsResponse {
 export interface PermissionsContextValue {
   permissions: Set<string>;
   isOwner: boolean;
-  isSuperuser: boolean;
   role: MyPermissionsResponse["role"];
   loading: boolean;
   /** True while the set is still unknown; callers should avoid hiding UI yet. */
@@ -60,11 +58,9 @@ export function PermissionsProvider({ children }: { children: ReactNode }) {
     () => new Set(data?.permissions ?? []),
     [data?.permissions]
   );
+  // The owner holds everything; the server already returns the full set, but
+  // treat the flag as an all-access shortcut so the UI never mis-hides for the owner.
   const isOwner = data?.is_owner ?? false;
-  const isSuperuser = data?.is_superuser ?? false;
-  // Owners/superusers hold everything; the server already returns the full set,
-  // but treat the flags as an all-access shortcut so UI never mis-hides for them.
-  const allAccess = isOwner || isSuperuser;
   // Until we have a definitive answer, don't hide anything (avoid a flash of an
   // empty sidebar on first paint or a transient fetch failure). The server
   // re-checks every request, so being permissive here never grants real access.
@@ -73,27 +69,26 @@ export function PermissionsProvider({ children }: { children: ReactNode }) {
   const has = useCallback(
     (key: string | null | undefined): boolean => {
       if (!key) return true;
-      if (allAccess || unknown) return true;
+      if (isOwner || unknown) return true;
       return permissions.has(key);
     },
-    [allAccess, unknown, permissions]
+    [isOwner, unknown, permissions]
   );
 
   const canViewApp = useCallback(
     (appId: string): boolean => {
-      if (allAccess || unknown) return true;
+      if (isOwner || unknown) return true;
       const key = APP_PAGE_PERMISSION[appId];
       if (!key) return true; // not permission-gated
       return permissions.has(key);
     },
-    [allAccess, unknown, permissions]
+    [isOwner, unknown, permissions]
   );
 
   const value = useMemo<PermissionsContextValue>(
     () => ({
       permissions,
       isOwner,
-      isSuperuser,
       role: data?.role ?? null,
       loading: query.isLoading,
       // Until we have a definitive answer, don't hide anything (avoid a flash
@@ -105,7 +100,6 @@ export function PermissionsProvider({ children }: { children: ReactNode }) {
     [
       permissions,
       isOwner,
-      isSuperuser,
       data?.role,
       query.isLoading,
       query.isError,

@@ -26,7 +26,7 @@ import { APP_PAGE_PERMISSION } from "@/config/permissions";
 function staff(granted: string[]) {
   const has = (key: string) => granted.includes(key);
   const canShowApp = (appId: string) => has(APP_PAGE_PERMISSION[appId]);
-  return { has, isOwner: false, isSuperuser: false, canShowApp };
+  return { has, isOwner: false, canShowApp };
 }
 
 describe("promotion tabs", () => {
@@ -44,7 +44,7 @@ describe("promotion tabs", () => {
 
 describe("Promotions section visibility", () => {
   it("is hidden when no tab is visible, even for the owner", () => {
-    const owner = { has: () => true, isOwner: true, isSuperuser: false };
+    const owner = { has: () => true, isOwner: true };
     expect(isSectionVisible("promotions", { ...owner, canShowApp: () => false })).toBe(false);
     expect(
       isSectionVisible("promotions", { ...owner, canShowApp: (appId) => appId === "popup" }),
