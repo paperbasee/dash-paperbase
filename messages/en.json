@@ -2815,7 +2815,8 @@
         "expired": "Expired",
         "accessChanged": "Role or access changed",
         "accessEnded": "Suspended or removed",
-        "switchedOff": "Switched off by Paperbase"
+        "switchedOff": "Switched off by Paperbase",
+        "emailChanged": "Email changed by Paperbase"
       },
       "accountsAway": "Sign-ins can't be reached right now. Try again in a minute.",
       "endFailed": "That didn't end. Try again."

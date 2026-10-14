@@ -25,7 +25,7 @@ export type SignInSessionRow = {
   created_at: string;
   last_seen_at: string;
   ended_at: string | null;
-  end_reason: "" | "signed_out" | "ended" | "support_ended" | "access_changed" | "access_ended" | "switched_off";
+  end_reason: "" | "signed_out" | "ended" | "support_ended" | "access_changed" | "access_ended" | "switched_off" | "email_changed";
   ended_by: string;
   is_live: boolean;
   is_current: boolean;

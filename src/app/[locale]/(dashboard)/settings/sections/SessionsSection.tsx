@@ -116,6 +116,7 @@ export default function SessionsSection({ hidden }: { hidden: boolean }) {
     if (row.end_reason === "access_changed") return { label: t("status.accessChanged"), tone: "quiet" as const };
     if (row.end_reason === "access_ended") return { label: t("status.accessEnded"), tone: "warn" as const };
     if (row.end_reason === "switched_off") return { label: t("status.switchedOff"), tone: "warn" as const };
+    if (row.end_reason === "email_changed") return { label: t("status.emailChanged"), tone: "warn" as const };
     return { label: t("status.expired"), tone: "quiet" as const };
   }
 

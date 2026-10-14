@@ -2815,7 +2815,8 @@
         "expired": "মেয়াদ শেষ",
         "accessChanged": "রোল বা অ্যাক্সেস বদলেছে",
         "accessEnded": "স্থগিত বা সরিয়ে দেওয়া হয়েছে",
-        "switchedOff": "Paperbase বন্ধ করেছে"
+        "switchedOff": "Paperbase বন্ধ করেছে",
+        "emailChanged": "Paperbase ইমেইল বদলেছে"
       },
       "accountsAway": "এই মুহূর্তে সাইন-ইনগুলো দেখা যাচ্ছে না। এক মিনিট পরে আবার চেষ্টা করুন।",
       "endFailed": "শেষ করা যায়নি। আবার চেষ্টা করুন।"
