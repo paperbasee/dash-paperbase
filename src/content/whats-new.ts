@@ -88,6 +88,21 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-10-14-sessions-show-email-changed",
+    date: "2026-10-14",
+    version: "4.191.0",
+    tag: "improved",
+    title: {
+      en: "Sessions show when your sign-in email changed",
+      bn: "সাইন ইনের ইমেইল বদলালে তা সেশনে দেখা যায়",
+    },
+    body: {
+      en: "If Paperbase support changes the email you sign in with, we email both addresses and sign you out everywhere. Sessions shows why.",
+      bn: "Paperbase সাপোর্ট যদি আপনার সাইন ইন করার ইমেইল বদলে দেয়, আমরা দুটো ঠিকানাতেই ইমেইল পাঠাই আর সব ডিভাইস থেকে আপনাকে সাইন আউট করে দিই। সেশনে এর কারণ দেখা যায়।",
+    },
+    href: "/settings?tab=sessions",
+  },
+  {
     id: "2026-10-09-is-your-domain-secure",
     date: "2026-10-09",
     version: "4.190.0",
@@ -506,20 +521,5 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
       bn: "পেজগুলোতে আর পেছনে যাওয়ার তীর দেখা যায় না। অ্যানালিটিক্সে কোন দিনগুলো দেখবেন (আজ, ৭ দিন, এই মাস, নিজে বাছুন...) তা এখন ফিল্টার বাটনের ভেতরে, আর তুলনা ও ডাউনলোড এর পাশে ছোট আইকন: নাম দেখতে এর ওপর মাউস রাখুন।",
     },
     href: "/analytics",
-  },
-  {
-    id: "2026-10-04-a-friendlier-empty-trash",
-    date: "2026-10-04",
-    version: "4.172.2",
-    tag: "improved",
-    title: {
-      en: "A friendlier empty Trash",
-      bn: "ফাঁকা ট্র্যাশ এখন আরও সুন্দর",
-    },
-    body: {
-      en: "An empty Trash now shows a little bin whose lid lifts when you touch it, and says what it is for: what you delete waits there for 15 days, so you can bring it back.",
-      bn: "ফাঁকা ট্র্যাশে এখন একটি ছোট বিন দেখা যায়, ছুঁলেই যার ঢাকনা খুলে যায়, আর বলে এটি কিসের জন্য: যা মুছে ফেলেন তা ১৫ দিন সেখানে থাকে, যাতে ফিরিয়ে আনতে পারেন।",
-    },
-    href: "/trash",
   },
 ];
