@@ -9,7 +9,12 @@ import {
   WHATS_NEW_MAX_ENTRIES,
   WHATS_NEW_TAGS,
 } from "@/content/whats-new";
-import { ALL_SECTIONS } from "@/app/[locale]/(dashboard)/settings/settingsSections";
+import { holdsOwnerPower } from "@/config/owner-powers";
+import {
+  ALL_SECTIONS,
+  SECTION_OWNER_POWER,
+  type SettingsSection,
+} from "@/app/[locale]/(dashboard)/settings/settingsSections";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const DASHBOARD_ROUTES = path.join(ROOT, "src/app/[locale]/(dashboard)");
@@ -123,6 +128,24 @@ describe("what's new content", () => {
         expect(pathname, entry.id).toBe("/settings");
         expect(sectionIds.has(params.get("tab") ?? ""), `${entry.id} tab`).toBe(true);
       }
+    }
+  });
+
+  /**
+   * Every reader sees every entry, and Settings quietly opens another tab when the one
+   * asked for is hidden from them. A tab only the owner in person opens (Sessions) is
+   * hidden from the whole team and from Paperbase support too, so an entry pointing
+   * there has to say the owner is the one who sees it.
+   */
+  it("an entry pointing at a tab only the owner in person opens says the owner sees it", () => {
+    for (const entry of WHATS_NEW_ENTRIES) {
+      const [pathname, query] = (entry.href ?? "").split("?");
+      if (pathname !== "/settings" || !query) continue;
+      const tab = new URLSearchParams(query).get("tab") as SettingsSection;
+      const power = SECTION_OWNER_POWER[tab];
+      if (!power || holdsOwnerPower(power, { isOwner: true, inSupportMode: true })) continue;
+      expect(entry.body.en, `${entry.id} body.en`).toMatch(/\bowner\b/i);
+      expect(entry.body.bn, `${entry.id} body.bn`).toContain("মালিক");
     }
   });
 

@@ -93,12 +93,12 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     version: "4.191.0",
     tag: "improved",
     title: {
-      en: "Sessions show when your sign-in email changed",
-      bn: "সাইন ইনের ইমেইল বদলালে তা সেশনে দেখা যায়",
+      en: "Sessions say when a sign-in email changed",
+      bn: "সেশনে দেখা যায় কখন সাইন ইনের ইমেইল বদলেছে",
     },
     body: {
-      en: "If Paperbase support changes the email you sign in with, we email both addresses and sign you out everywhere. Sessions shows why.",
-      bn: "Paperbase সাপোর্ট যদি আপনার সাইন ইন করার ইমেইল বদলে দেয়, আমরা দুটো ঠিকানাতেই ইমেইল পাঠাই আর সব ডিভাইস থেকে আপনাকে সাইন আউট করে দিই। সেশনে এর কারণ দেখা যায়।",
+      en: "If Paperbase support changes the email you sign in with, we email both addresses and sign you out everywhere. The shop owner sees why in Settings, Sessions.",
+      bn: "Paperbase সাপোর্ট যদি আপনার সাইন ইন করার ইমেইল বদলে দেয়, আমরা দুটো ঠিকানাতেই ইমেইল পাঠাই আর সব ডিভাইস থেকে আপনাকে সাইন আউট করে দিই। সেটিংস > সেশনে দোকানের মালিক এর কারণ দেখতে পান।",
     },
     href: "/settings?tab=sessions",
   },
