@@ -4240,5 +4240,24 @@
     "takenBrand": "Another brand already uses this address.",
     "takenPost": "Another post already uses this address.",
     "useSuggested": "Use {address}"
+  },
+  "orderNote": {
+    "add": "Add a note to order {orderNumber}",
+    "read": "Read the note on order {orderNumber}",
+    "label": "Note for order {orderNumber}",
+    "title": "Note",
+    "placeholder": "Write a note for your team",
+    "teamOnly": "Only your team can see this.",
+    "by": "{name} · {when}",
+    "unsaved": "Not saved yet",
+    "left": "{count} left",
+    "save": "Save",
+    "remove": "Remove note",
+    "close": "Close note",
+    "saved": "Note saved",
+    "removed": "Note removed",
+    "undo": "Undo",
+    "notSaved": "Note not saved",
+    "tryAgain": "Please try again."
   }
 }

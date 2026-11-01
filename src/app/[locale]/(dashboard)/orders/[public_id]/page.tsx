@@ -79,6 +79,7 @@ import { notify, normalizeError } from "@/notifications";
 import { cn } from "@/lib/utils";
 import { useEnterNavigation } from "@/hooks/useEnterNavigation";
 import { useConfirm } from "@/context/ConfirmDialogContext";
+import { OrderNoteButton } from "@/components/orders/order-note";
 import { PageHint } from "@/components/page/PageHint";
 
 type EditForm = {
@@ -641,6 +642,7 @@ export default function OrderDetailPage() {
                 #S-{order.order_number}
               </h1>
               <PageHint>{tHints("orderDetail")}</PageHint>
+              <OrderNoteButton order={order} onSaved={() => invalidateOrdersCaches()} />
             </div>
           </div>
           <nav className="flex flex-wrap items-center gap-1 text-sm text-muted-foreground">

@@ -129,6 +129,10 @@ export interface Order {
     | "unknown";
   delivery_status_updated_at: string | null;
   last_tracking_message: string;
+  /** The team's one note on this order; never shown to the shopper. */
+  merchant_note?: string;
+  merchant_note_updated_at?: string | null;
+  merchant_note_updated_by?: string;
   /** The fraud check's colour, kept when the order was checked; "" never checked. */
   fraud_risk?: "safe" | "caution" | "new" | "risky" | "";
   fraud_success_ratio?: number | null;
