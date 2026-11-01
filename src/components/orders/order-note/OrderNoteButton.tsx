@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { StickyNote, Trash2, X } from "lucide-react";
+import { TargetIcon, Trash2, X } from "lucide-react";
 import { useFormatter, useTranslations } from "next-intl";
 import { Popover, Tooltip } from "radix-ui";
 
@@ -259,7 +259,7 @@ export function OrderNoteButton({ order, onSaved, className }: OrderNoteButtonPr
                   className
                 )}
               >
-                <StickyNote
+                <TargetIcon
                   className={cn("size-4", hasNote && "fill-amber-400/25")}
                   strokeWidth={1.75}
                   aria-hidden

@@ -97,8 +97,8 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
       bn: "প্রতিটি অর্ডারে একটি নোট",
     },
     body: {
-      en: "Your team can now keep a note on any order: click the small note icon beside the order number in Orders. Point at a coloured icon to read the note. Only your team sees it, never the customer.",
-      bn: "আপনার টিম এখন যেকোনো অর্ডারে একটি নোট রাখতে পারে: অর্ডার পেজে অর্ডার নম্বরের পাশের ছোট নোট আইকনে ক্লিক করুন। রঙিন আইকনের ওপর মাউস রাখলে নোটটি পড়া যায়। এটি শুধু আপনার টিম দেখতে পায়, গ্রাহক কখনো দেখেন না।",
+      en: "Your team can now keep a note on any order: click the small target icon beside the order number in Orders. Point at a coloured icon to read the note. Only your team sees it, never the customer.",
+      bn: "আপনার টিম এখন যেকোনো অর্ডারে একটি নোট রাখতে পারে: অর্ডার পেজে অর্ডার নম্বরের পাশের ছোট টার্গেট আইকনে ক্লিক করুন। রঙিন আইকনের ওপর মাউস রাখলে নোটটি পড়া যায়। এটি শুধু আপনার টিম দেখতে পায়, গ্রাহক কখনো দেখেন না।",
     },
     href: "/orders",
   },
