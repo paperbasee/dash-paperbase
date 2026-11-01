@@ -88,6 +88,21 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-11-01-notes-on-orders",
+    date: "2026-11-01",
+    version: "4.192.0",
+    tag: "new",
+    title: {
+      en: "A note on every order",
+      bn: "প্রতিটি অর্ডারে একটি নোট",
+    },
+    body: {
+      en: "Your team can now keep a note on any order: click the small note icon beside the order number in Orders. Point at a coloured icon to read the note. Only your team sees it, never the customer.",
+      bn: "আপনার টিম এখন যেকোনো অর্ডারে একটি নোট রাখতে পারে: অর্ডার পেজে অর্ডার নম্বরের পাশের ছোট নোট আইকনে ক্লিক করুন। রঙিন আইকনের ওপর মাউস রাখলে নোটটি পড়া যায়। এটি শুধু আপনার টিম দেখতে পায়, গ্রাহক কখনো দেখেন না।",
+    },
+    href: "/orders",
+  },
+  {
     id: "2026-11-01-security-updates-for-your-shop",
     date: "2026-11-01",
     version: "4.191.2",
@@ -502,21 +517,6 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     body: {
       en: "The questions you write on a product now sit right under its buy button, in one \"Questions\" row that opens onto them all. Reviews now come before \"You may also like\". In Customize, Questions is on by default.",
       bn: "পণ্যে লেখা প্রশ্নগুলো এখন কেনার বোতামের ঠিক নিচে, একটি \"প্রশ্ন ও উত্তর\" সারিতে, খুললে সব দেখা যায়। রিভিউ এখন \"এগুলোও দেখতে পারেন\"-এর আগে আসে। কাস্টমাইজে প্রশ্ন শুরু থেকেই চালু।",
-    },
-    href: "/settings/customize",
-  },
-  {
-    id: "2026-10-04-editor-product-photos-alone",
-    date: "2026-10-04",
-    version: "4.173.4",
-    tag: "fixed",
-    title: {
-      en: "Picking the product photos picks just the photos",
-      bn: "পণ্যের ছবি বাছলে এখন শুধু ছবিই বাছা হয়",
-    },
-    body: {
-      en: "In Customize, on the product page, clicking the photos now outlines only the photos, and the place is called Product photos. Clicking the name or price beside them opens Product details.",
-      bn: "কাস্টমাইজে, পণ্যের পেজে ছবিতে ক্লিক করলে এখন শুধু ছবির চারপাশেই দাগ পড়ে, আর জায়গাটির নাম পণ্যের ছবি। পাশে নাম বা দামে ক্লিক করলে পণ্যের বিস্তারিত খোলে।",
     },
     href: "/settings/customize",
   },
