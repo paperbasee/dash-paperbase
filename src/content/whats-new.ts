@@ -88,6 +88,20 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-11-01-security-updates",
+    date: "2026-11-01",
+    version: "4.191.1",
+    tag: "fixed",
+    title: {
+      en: "Security updates for the dashboard",
+      bn: "ড্যাশবোর্ডে নিরাপত্তা আপডেট",
+    },
+    body: {
+      en: "We updated the parts the dashboard is built on, closing known security issues. Nothing changes in how you use it.",
+      bn: "ড্যাশবোর্ড যেসব অংশ দিয়ে তৈরি, সেগুলো আপডেট করে জানা নিরাপত্তা সমস্যাগুলো বন্ধ করা হয়েছে। আপনার ব্যবহারে কিছুই বদলাবে না।",
+    },
+  },
+  {
     id: "2026-10-14-sessions-show-email-changed",
     date: "2026-10-14",
     version: "4.191.0",
@@ -506,20 +520,5 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
       bn: "পণ্যের ছবি এখন বড় করে কাটা না হয়ে পুরোটা দেখা যায়: পণ্য যোগ বা এডিট করার সময়, আর পণ্যের গ্রিডেও। আর যে ছবি যোগ বা বদল করেন, তা সেভ করার সাথে সাথেই পণ্যে দেখা যায়, কয়েক মিনিট পরে নয়।",
     },
     href: "/products",
-  },
-  {
-    id: "2026-10-04-cleaner-page-tops-and-analytics-days",
-    date: "2026-10-04",
-    version: "4.173.1",
-    tag: "improved",
-    title: {
-      en: "Cleaner page tops, and Analytics days in the filter",
-      bn: "আরও পরিষ্কার পেজের ওপরের অংশ, আর অ্যানালিটিক্সের দিনগুলো ফিল্টারে",
-    },
-    body: {
-      en: "Pages no longer show a back arrow. On Analytics, the days you look at (Today, 7 days, This month, Custom...) are now inside the filter button, and the comparison and Download are small icons beside it: point at one to see its name.",
-      bn: "পেজগুলোতে আর পেছনে যাওয়ার তীর দেখা যায় না। অ্যানালিটিক্সে কোন দিনগুলো দেখবেন (আজ, ৭ দিন, এই মাস, নিজে বাছুন...) তা এখন ফিল্টার বাটনের ভেতরে, আর তুলনা ও ডাউনলোড এর পাশে ছোট আইকন: নাম দেখতে এর ওপর মাউস রাখুন।",
-    },
-    href: "/analytics",
   },
 ];
