@@ -88,6 +88,20 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-11-01-security-updates-for-your-shop",
+    date: "2026-11-01",
+    version: "4.191.2",
+    tag: "fixed",
+    title: {
+      en: "Security updates for your shop",
+      bn: "আপনার দোকানে নিরাপত্তা আপডেট",
+    },
+    body: {
+      en: "We updated the parts your shop is built on and tightened how uploaded pictures are checked. Nothing changes in how you use it.",
+      bn: "আপনার দোকান যেসব অংশ দিয়ে তৈরি, সেগুলো আপডেট করেছি আর আপলোড করা ছবি যাচাইয়ের নিয়ম আরও কড়া করেছি। আপনার ব্যবহারে কিছুই বদলাবে না।",
+    },
+  },
+  {
     id: "2026-11-01-security-updates",
     date: "2026-11-01",
     version: "4.191.1",
@@ -505,20 +519,5 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
       bn: "কাস্টমাইজে, পণ্যের পেজে ছবিতে ক্লিক করলে এখন শুধু ছবির চারপাশেই দাগ পড়ে, আর জায়গাটির নাম পণ্যের ছবি। পাশে নাম বা দামে ক্লিক করলে পণ্যের বিস্তারিত খোলে।",
     },
     href: "/settings/customize",
-  },
-  {
-    id: "2026-10-04-product-photos-whole-and-at-once",
-    date: "2026-10-04",
-    version: "4.173.3",
-    tag: "fixed",
-    title: {
-      en: "Product photos show whole, and at once",
-      bn: "পণ্যের ছবি এখন পুরোটা দেখা যায়, সাথে সাথেই",
-    },
-    body: {
-      en: "Product photos now show whole instead of zoomed in: when you add or edit a product, and in the Products grid. And a photo you add or change shows on the product the moment you save, instead of minutes later.",
-      bn: "পণ্যের ছবি এখন বড় করে কাটা না হয়ে পুরোটা দেখা যায়: পণ্য যোগ বা এডিট করার সময়, আর পণ্যের গ্রিডেও। আর যে ছবি যোগ বা বদল করেন, তা সেভ করার সাথে সাথেই পণ্যে দেখা যায়, কয়েক মিনিট পরে নয়।",
-    },
-    href: "/products",
   },
 ];
