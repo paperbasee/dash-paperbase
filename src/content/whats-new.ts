@@ -88,6 +88,21 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-11-02-a-cleaner-integrations-page",
+    date: "2026-11-02",
+    version: "4.193.0",
+    tag: "improved",
+    title: {
+      en: "A cleaner Integrations page",
+      bn: "আরও গোছানো ইন্টিগ্রেশন পেজ",
+    },
+    body: {
+      en: "Integrations is easier to read. Each service now has its own card, and you can filter them by connected, not connected or coming soon, or by ads and delivery. View details holds a service's on/off switch and its connections.",
+      bn: "ইন্টিগ্রেশন পেজ এখন পড়া আরও সহজ। প্রতিটি সেবার নিজের কার্ড আছে, আর সংযুক্ত, সংযুক্ত নয় বা শিগগিরই আসছে অনুযায়ী, কিংবা বিজ্ঞাপন ও ডেলিভারি অনুযায়ী ফিল্টার করতে পারবেন। সেবার চালু-বন্ধের সুইচ ও কানেকশনগুলো পাবেন বিস্তারিত দেখুন-এ।",
+    },
+    href: "/settings?tab=integrations",
+  },
+  {
     id: "2026-11-01-notes-on-orders",
     date: "2026-11-01",
     version: "4.192.0",
@@ -502,21 +517,6 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     body: {
       en: "Shoppers can pick a quantity, never more than you have, and order on WhatsApp with their choice already typed. Pressed before a size is chosen, the buttons show which choice is missing, and Share now works on computers too. Turn each part on or off in Customize, under Buying area.",
       bn: "ক্রেতা এখন পরিমাণ বেছে নিতে পারেন, আপনার স্টকের বেশি নয়, আর পছন্দ আগেই লেখা অবস্থায় WhatsApp-এ অর্ডার করতে পারেন। সাইজ না বেছে বোতাম চাপলে দেখায় কোনটি বাছতে হবে, আর শেয়ার এখন কম্পিউটারেও কাজ করে। কাস্টমাইজে \"কেনার অংশ\" থেকে প্রতিটি চালু বা বন্ধ করুন।",
-    },
-    href: "/settings/customize",
-  },
-  {
-    id: "2026-10-04-questions-beside-the-buy-button",
-    date: "2026-10-04",
-    version: "4.174.0",
-    tag: "improved",
-    title: {
-      en: "Product questions beside the buy button",
-      bn: "পণ্যের প্রশ্ন এখন কেনার বোতামের পাশে",
-    },
-    body: {
-      en: "The questions you write on a product now sit right under its buy button, in one \"Questions\" row that opens onto them all. Reviews now come before \"You may also like\". In Customize, Questions is on by default.",
-      bn: "পণ্যে লেখা প্রশ্নগুলো এখন কেনার বোতামের ঠিক নিচে, একটি \"প্রশ্ন ও উত্তর\" সারিতে, খুললে সব দেখা যায়। রিভিউ এখন \"এগুলোও দেখতে পারেন\"-এর আগে আসে। কাস্টমাইজে প্রশ্ন শুরু থেকেই চালু।",
     },
     href: "/settings/customize",
   },
