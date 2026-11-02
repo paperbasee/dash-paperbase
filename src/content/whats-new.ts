@@ -90,7 +90,7 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
     id: "2026-11-02-a-cleaner-integrations-page",
     date: "2026-11-02",
-    version: "4.193.0",
+    version: "4.193.1",
     tag: "improved",
     title: {
       en: "A cleaner Integrations page",
