@@ -34,7 +34,7 @@ import PurchaseTimingBlock from "./PurchaseTimingBlock";
  * beside it cannot stretch the title.
  */
 const LAYOUT =
-  "flex flex-col @min-[48rem]/page:grid @min-[48rem]/page:grid-cols-[14.375rem_minmax(0,1fr)] @min-[48rem]/page:grid-rows-[4rem_auto_1fr]";
+  "flex flex-col @min-[48rem]/page:grid @min-[48rem]/page:grid-cols-[14.375rem_minmax(0,1fr)] @min-[48rem]/page:grid-rows-[3.25rem_auto_1fr]";
 const MAIN_COLUMN = "@min-[48rem]/page:col-start-2 @min-[48rem]/page:border-s @min-[48rem]/page:border-border @min-[48rem]/page:ps-7";
 const SIDE_COLUMN = "@min-[48rem]/page:col-start-1 @min-[48rem]/page:pe-6";
 
@@ -95,7 +95,7 @@ export default function IntegrationsSection({ hidden }: { hidden: boolean }) {
       <div className="@container/page min-w-0">
         <div className={LAYOUT}>
           <div className={cn(MAIN_COLUMN, "@min-[48rem]/page:row-start-1")}>
-            <div className="mb-3.5 flex min-h-9 items-center gap-1.5 border-b border-border pb-3 @min-[48rem]/page:mb-0 @min-[48rem]/page:h-12 @min-[48rem]/page:pb-3.5">
+            <div className="mb-3.5 flex min-h-9 items-center gap-1.5 @min-[48rem]/page:mb-0">
               <h2 className="min-w-0 truncate text-[17px] font-semibold text-foreground">{t("heading")}</h2>
               <PageHint>{t("subtitle")}</PageHint>
               <div className="ms-auto @min-[48rem]/page:hidden">
