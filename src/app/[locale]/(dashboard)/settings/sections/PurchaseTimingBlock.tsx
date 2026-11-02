@@ -141,7 +141,7 @@ export default function PurchaseTimingBlock({
               <li>{t("confirmationGoal")}</li>
             </ul>
           ) : null}
-          <p className="mt-3 border-t border-border pt-3 text-[12px] leading-relaxed text-muted-foreground">{t("prepaidNote")}</p>
+          <p className="mt-3.5 text-[12px] leading-relaxed text-muted-foreground">{t("prepaidNote")}</p>
           {!canManage ? <p className="mt-1 text-[12px] text-muted-foreground">{t("askToChange")}</p> : null}
         </div>
       </ServiceDialog>
