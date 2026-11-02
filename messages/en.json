@@ -2275,6 +2275,16 @@
     "integrations": {
       "heading": "Integrations",
       "subtitle": "Connect your shop to ads and delivery services.",
+      "overview": "Overview",
+      "categories": "Categories",
+      "connected": "Connected",
+      "viewDetails": "View details",
+      "blurbs": {
+        "ads": "Sends your shop's visits and sales to {service}, so your ads find the right buyers.",
+        "google_analytics": "See who visits your shop and where they come from.",
+        "steadfast": "Send your orders to Steadfast and get each parcel's status automatically.",
+        "courier": "Send your orders to {service} from your dashboard."
+      },
       "sectionAds": "Ads",
       "sectionDelivery": "Delivery",
       "services": {
@@ -2289,7 +2299,6 @@
         "parceldex": "Parceldex"
       },
       "comingSoon": "Coming soon",
-      "comingSoonNote": "Not available yet",
       "statusNotConnected": "Not connected",
       "checking": "Checking…",
       "connect": "Connect",
@@ -2319,9 +2328,9 @@
       "offConfirm": "Turn off",
       "keepOn": "Keep it on",
       "onPixelsTitle": "Turn on all {count} {service} pixels?",
-      "onPixelsBody": "Every {service} pixel starts sending events again. You can switch one off inside the card.",
+      "onPixelsBody": "Every {service} pixel starts sending events again. You can switch one off from the list.",
       "onAccountsTitle": "Turn on all {count} {service} accounts?",
-      "onAccountsBody": "Every {service} account can send orders again. You can switch one off inside the card.",
+      "onAccountsBody": "Every {service} account can send orders again. You can switch one off from the list.",
       "onConfirm": "Turn on all",
       "saveFailedTitle": "Couldn't save",
       "saveFailedBody": "{service} wasn't changed. Check your connection and try again.",

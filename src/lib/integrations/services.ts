@@ -1,9 +1,9 @@
 /**
- * The services on Settings > Integrations, and the rules of the card switch
+ * The services on Settings > Integrations, and the rules of the service switch
  * (owner, 2026-09-25): one card per SERVICE -- Meta, TikTok, Steadfast -- with
- * every connection of that service listed inside it, each with its own switch.
+ * every connection of that service listed in its pop-up, each with its own switch.
  *
- * The card's own switch is the whole service at once. It reads "on" while any
+ * The pop-up's top switch is the whole service at once. It reads "on" while any
  * connection is on; turning it off turns every connection off (after a warning),
  * and turning it back on turns every one back on. There is no separate
  * service-wide flag stored anywhere: two layers of switches would let a pixel be
@@ -40,11 +40,10 @@ export const DELIVERY_SERVICES_COMING_SOON: readonly ServiceKey[] = [
   "parceldex",
 ];
 
-/**
- * Picture logos, served from `public/`. Meta and TikTok are drawn as icons
- * instead. The courier ones are wordmarks (about 3:1), so their tile is wide.
- */
-export const SERVICE_LOGO_FILES: Partial<Record<ServiceKey, { src: string; wide: boolean }>> = {
+/** Every service's logo, served from `public/`. The courier ones are wordmarks (about 3:1), so their tile is wide. */
+export const SERVICE_LOGO_FILES: Record<ServiceKey, { src: string; wide: boolean }> = {
+  facebook: { src: "/assets/integration-logos/meta.svg", wide: false },
+  tiktok: { src: "/assets/integration-logos/tiktok.svg", wide: false },
   google_analytics: { src: "/assets/integration-logos/google-analytics.svg", wide: false },
   steadfast: { src: "/assets/courier-assets/steadfast-logo.png", wide: true },
   pathao: { src: "/assets/courier-assets/pathao-logo.png", wide: true },
@@ -53,9 +52,6 @@ export const SERVICE_LOGO_FILES: Partial<Record<ServiceKey, { src: string; wide:
   paperfly: { src: "/assets/courier-assets/paperfly-logo.png", wide: true },
   parceldex: { src: "/assets/courier-assets/parceldex-logo.png", wide: true },
 };
-
-/** The Paperbase mark: the dashboard's own icon, so a white-label build shows its own. */
-export const PLATFORM_MARK_SRC = "/favicon-128x128.png";
 
 export type Switchable = { public_id: string; is_active: boolean; is_connected: boolean };
 
@@ -66,7 +62,7 @@ export type ServiceState = {
   connected: number;
   disconnected: number;
   active: number;
-  /** What the card switch shows: on while any connection is on. */
+  /** What the service switch shows: on while any connection is on. */
   on: boolean;
   shape: "none" | "disconnected" | "all_on" | "all_off" | "some_on";
 };
@@ -95,7 +91,7 @@ export function serviceState(connections: readonly Switchable[]): ServiceState {
   };
 }
 
-/** The connections a card switch has to change to reach `turnOn`: connected ones only. */
+/** The connections the service switch has to change to reach `turnOn`: connected ones only. */
 export function switchTargets<T extends Switchable>(connections: readonly T[], turnOn: boolean): T[] {
   return connections.filter((one) => one.is_connected && one.is_active !== turnOn);
 }
@@ -131,6 +127,61 @@ export async function setServiceActive<T extends Switchable>(
     }
   });
   return { failed, errors };
+}
+
+export type ServiceGroup = "ads" | "delivery";
+/** The page's Overview filter. Every service is in exactly one, so the counts add up to the page. */
+export type ServiceStanding = "connected" | "not_connected" | "coming_soon";
+export type ServiceEntry = { key: ServiceKey; group: ServiceGroup; standing: ServiceStanding };
+
+export const SERVICE_STANDINGS: readonly ServiceStanding[] = ["connected", "not_connected", "coming_soon"];
+
+/**
+ * The page's services in the order the cards are drawn: what works first, then what is coming.
+ * Each side shows only to whoever may see it (`ads`, `delivery`); a service with no state yet is
+ * not connected.
+ */
+export function listServices(
+  can: { ads: boolean; delivery: boolean },
+  states: Partial<Record<ServiceKey, ServiceState>>,
+): ServiceEntry[] {
+  const working = (key: ServiceKey, group: ServiceGroup): ServiceEntry => ({
+    key,
+    group,
+    standing: states[key]?.count ? "connected" : "not_connected",
+  });
+  const coming = (key: ServiceKey, group: ServiceGroup): ServiceEntry => ({ key, group, standing: "coming_soon" });
+  return [
+    ...(can.ads ? AD_SERVICES.map((key) => working(key, "ads")) : []),
+    ...(can.delivery ? [working("steadfast", "delivery")] : []),
+    ...(can.ads ? AD_SERVICES_COMING_SOON.map((key) => coming(key, "ads")) : []),
+    ...(can.delivery ? DELIVERY_SERVICES_COMING_SOON.map((key) => coming(key, "delivery")) : []),
+  ];
+}
+
+/** No group ticked means all of them. */
+export function inGroups(entries: readonly ServiceEntry[], groups: readonly ServiceGroup[]): ServiceEntry[] {
+  return groups.length ? entries.filter((entry) => groups.includes(entry.group)) : [...entries];
+}
+
+export function countByStanding(entries: readonly ServiceEntry[]): Record<ServiceStanding, number> {
+  const counts: Record<ServiceStanding, number> = { connected: 0, not_connected: 0, coming_soon: 0 };
+  for (const entry of entries) counts[entry.standing] += 1;
+  return counts;
+}
+
+/**
+ * The cards left showing. A standing that has nothing left in it stops filtering, so connecting
+ * the last unconnected service never leaves an empty page behind.
+ */
+export function shownServices(
+  entries: readonly ServiceEntry[],
+  groups: readonly ServiceGroup[],
+  standing: ServiceStanding | null,
+): ServiceEntry[] {
+  const grouped = inGroups(entries, groups);
+  const left = standing ? grouped.filter((entry) => entry.standing === standing) : grouped;
+  return left.length ? left : grouped;
 }
 
 export const marketingIntegrationPath = (publicId: string) =>

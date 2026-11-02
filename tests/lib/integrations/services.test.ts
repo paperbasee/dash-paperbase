@@ -13,14 +13,17 @@ import {
   AD_SERVICES_COMING_SOON,
   DELIVERY_SERVICES_COMING_SOON,
   MAX_PIXELS_PER_SERVICE,
-  PLATFORM_MARK_SRC,
   SERVICE_LOGO_FILES,
+  countByStanding,
   courierPath,
   disconnectPath,
+  inGroups,
+  listServices,
   marketingIntegrationPath,
   pixelsLeft,
   serviceState,
   setServiceActive,
+  shownServices,
   switchTargets,
 } from "@/lib/integrations/services";
 
@@ -144,15 +147,61 @@ describe("the page's services", () => {
 
   test("every logo is a real file in public/", () => {
     const publicDir = path.resolve(__dirname, "../../../public");
-    const files = [PLATFORM_MARK_SRC, ...Object.values(SERVICE_LOGO_FILES).map((logo) => logo!.src)];
-    for (const src of files) {
+    for (const { src } of Object.values(SERVICE_LOGO_FILES)) {
       expect(existsSync(path.join(publicDir, src)), src).toBe(true);
     }
   });
 
-  test("every picture-logo service on the page has a file (Meta and TikTok are drawn)", () => {
-    for (const key of [...AD_SERVICES_COMING_SOON, "steadfast" as const, ...DELIVERY_SERVICES_COMING_SOON]) {
+  test("every service on the page has a logo", () => {
+    for (const { key } of listServices({ ads: true, delivery: true }, {})) {
       expect(SERVICE_LOGO_FILES[key], key).toBeTruthy();
     }
+  });
+});
+
+describe("the filter column's rules", () => {
+  const states = { facebook: serviceState([on("a")]), tiktok: serviceState([]), steadfast: serviceState([gone("b")]) };
+  const all = listServices({ ads: true, delivery: true }, states);
+  const keys = (entries: { key: string }[]) => entries.map((entry) => entry.key);
+
+  test("what works comes first, then what is coming, and nothing twice", () => {
+    expect(keys(all)).toEqual([
+      "facebook", "tiktok", "steadfast", "google_analytics", "pathao", "carrybee", "redx", "paperfly", "parceldex",
+    ]);
+  });
+
+  test("a disconnected service still counts as connected: it has a connection to come back to", () => {
+    expect(all.find((entry) => entry.key === "steadfast")?.standing).toBe("connected");
+    expect(all.find((entry) => entry.key === "tiktok")?.standing).toBe("not_connected");
+  });
+
+  test("a service with no state yet reads as not connected", () => {
+    expect(listServices({ ads: true, delivery: false }, {})[0]).toMatchObject({ key: "facebook", standing: "not_connected" });
+  });
+
+  test("each side shows only to whoever may see it", () => {
+    const adsOnly = listServices({ ads: true, delivery: false }, states);
+    expect(keys(adsOnly)).toEqual(["facebook", "tiktok", "google_analytics"]);
+    expect(adsOnly.every((entry) => entry.group === "ads")).toBe(true);
+    expect(listServices({ ads: false, delivery: true }, states).every((entry) => entry.group === "delivery")).toBe(true);
+  });
+
+  test("the counts add up to every service, and follow the ticked groups", () => {
+    expect(countByStanding(all)).toEqual({ connected: 2, not_connected: 1, coming_soon: 6 });
+    expect(countByStanding(inGroups(all, ["ads"]))).toEqual({ connected: 1, not_connected: 1, coming_soon: 1 });
+  });
+
+  test("no group ticked means all of them", () => {
+    expect(inGroups(all, [])).toEqual(all);
+    expect(inGroups(all, ["ads", "delivery"])).toEqual(all);
+  });
+
+  test("groups and a standing narrow the cards together", () => {
+    expect(keys(shownServices(all, ["ads"], "connected"))).toEqual(["facebook"]);
+    expect(keys(shownServices(all, ["delivery"], "coming_soon"))).toEqual(["pathao", "carrybee", "redx", "paperfly", "parceldex"]);
+  });
+
+  test("a standing that has emptied stops filtering, so the page is never left blank", () => {
+    expect(keys(shownServices(all, ["delivery"], "not_connected"))).toEqual(keys(inGroups(all, ["delivery"])));
   });
 });

@@ -28,11 +28,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { useEnterNavigation } from "@/hooks/useEnterNavigation";
-import { useConfirm } from "@/context/ConfirmDialogContext";
 import { usePermissions } from "@/context/PermissionsContext";
 import { notify } from "@/notifications";
 import {
   ConnectionList,
+  ConnectionMenu,
   ConnectionRow,
   ConnectionSwitch,
   DialogScreen,
@@ -64,7 +64,8 @@ type Screen =
   | { kind: "events"; id: string }
   | { kind: "reconnect"; id: string }
   | { kind: "disconnect"; id: string }
-  | { kind: "remove"; id: string };
+  | { kind: "remove"; id: string }
+  | { kind: "switchAll"; turnOn: boolean };
 
 const inputGuards = {
   autoComplete: "off",
@@ -78,7 +79,7 @@ const inputGuards = {
 
 /**
  * Meta or TikTok: one card for the service, every pixel in its pop-up
- * (owner, 2026-09-25). The card's switch is the whole service; each pixel
+ * (owner, 2026-09-25). The pop-up's top switch is the whole service; each pixel
  * keeps its own switch, its event switches, Edit and Disconnect. Disconnect
  * is not delete: the pixel stays with its settings, without its token, until
  * it is reconnected -- or removed.
@@ -86,15 +87,16 @@ const inputGuards = {
 export default function PixelServiceCard({
   provider,
   panelHidden,
+  filteredOut,
 }: {
   provider: PixelService;
   panelHidden: boolean;
+  filteredOut: boolean;
 }) {
   const locale = useLocale();
   const numClass = numberTextClass(locale);
   const t = useTranslations("settings");
   const tI = useTranslations("settings.integrations");
-  const confirm = useConfirm();
   const queryClient = useQueryClient();
   const canManage = usePermissions().has("integrations.manage");
   const { data: all = [], isLoading } = useMarketingIntegrationsQuery({ enabled: !panelHidden });
@@ -120,13 +122,11 @@ export default function PixelServiceCard({
   const { handleKeyDown } = useEnterNavigation(() => formRef.current?.requestSubmit());
   const formId = `pixel-form-${provider}`;
 
-  const screenPixel = screen.kind === "list" || screen.kind === "connect"
-    ? undefined
-    : pixels.find((one) => one.public_id === screen.id);
+  const screenPixel = "id" in screen ? pixels.find((one) => one.public_id === screen.id) : undefined;
 
   // A pixel removed elsewhere returns its screen to the list rather than leaving it empty.
   useEffect(() => {
-    if (screen.kind !== "list" && screen.kind !== "connect" && !screenPixel) setScreen({ kind: "list" });
+    if ("id" in screen && !screenPixel) setScreen({ kind: "list" });
   }, [screen, screenPixel]);
 
   useEffect(() => {
@@ -247,27 +247,10 @@ export default function PixelServiceCard({
     }
   }
 
-  function onCardSwitch(turnOn: boolean) {
-    const count = switchTargets(pixels, turnOn).length;
-    if (!turnOn) {
-      void confirm({
-        title: tI("offTitle", { service }),
-        message: tI("offPixels", { count, service }),
-        variant: "danger",
-        confirmText: tI("offConfirm"),
-        cancelText: tI("keepOn"),
-        onConfirm: () => switchAll(false),
-      });
-    } else if (count > 1) {
-      void confirm({
-        title: tI("onPixelsTitle", { count, service }),
-        message: tI("onPixelsBody", { service }),
-        confirmText: tI("onConfirm"),
-        onConfirm: () => switchAll(true),
-      });
-    } else {
-      void switchAll(true);
-    }
+  /** Stopping a service, or starting several pixels, asks first: on its own screen, never a second pop-up. */
+  function onServiceSwitch(turnOn: boolean) {
+    if (!turnOn || switchTargets(pixels, turnOn).length > 1) go({ kind: "switchAll", turnOn });
+    else void switchAll(true);
   }
 
   async function switchOne(pixel: MarketingIntegration, turnOn: boolean) {
@@ -320,16 +303,10 @@ export default function PixelServiceCard({
       : baseStatus;
   const tone: ServiceTone = state.on ? "on" : state.count ? "off" : "none";
 
-  const cardControl = isLoading ? null : state.count === 0 ? (
-    canManage ? (
-      <Button type="button" variant="outline" size="sm" className="text-[12px]" onClick={() => openAt({ kind: "connect" })}>
-        {tI("connect")}
-      </Button>
-    ) : null
-  ) : state.connected ? (
+  const serviceSwitch = screen.kind === "list" && state.connected ? (
     <Switch
       checked={state.on}
-      onCheckedChange={onCardSwitch}
+      onCheckedChange={onServiceSwitch}
       disabled={!canManage || switchingAll}
       aria-label={tI("serviceSwitchLabel", { service })}
     />
@@ -363,23 +340,19 @@ export default function PixelServiceCard({
                   .filter(Boolean)
                   .join(" · ")}
                 actions={
-                  <>
-                    {pixel.event_settings ? (
-                      <Button type="button" variant="outline" size="sm" className={small} onClick={() => go({ kind: "events", id: pixel.public_id })}>
-                        {tI("events")}
-                      </Button>
-                    ) : null}
-                    {canManage ? (
-                      <>
-                        <Button type="button" variant="outline" size="sm" className={small} onClick={() => startEdit(pixel)}>
-                          {tI("edit")}
-                        </Button>
-                        <Button type="button" variant="ghost" size="sm" className={small} onClick={() => go({ kind: "disconnect", id: pixel.public_id })}>
-                          {tI("disconnect")}
-                        </Button>
-                      </>
-                    ) : null}
-                  </>
+                  <ConnectionMenu
+                    items={[
+                      ...(pixel.event_settings
+                        ? [{ label: tI("events"), onSelect: () => go({ kind: "events", id: pixel.public_id }) }]
+                        : []),
+                      ...(canManage
+                        ? [
+                            { label: tI("edit"), onSelect: () => startEdit(pixel) },
+                            { label: tI("disconnect"), onSelect: () => go({ kind: "disconnect", id: pixel.public_id }) },
+                          ]
+                        : []),
+                    ]}
+                  />
                 }
               />
             ) : (
@@ -538,20 +511,22 @@ export default function PixelServiceCard({
         </div>
         {pixel.event_settings ? (
           <div className="border-t border-border pt-3">
-            <p className="mb-2 text-xs font-medium text-foreground">{t("marketing.eventTracking")}</p>
-            <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:gap-x-5">
-              {EVENT_KEYS.map(({ key, label }) => (
-                <label key={key} className="inline-flex cursor-pointer items-center gap-2 text-xs text-muted-foreground">
-                  <input
-                    type="checkbox"
-                    checked={pixel.event_settings![key]}
-                    disabled={!canManage || eventSavingId === pixel.public_id}
-                    onChange={(e) => void switchEvent(pixel, key, e.target.checked)}
-                    className="form-checkbox size-3.5"
-                  />
-                  {(t as (k: string) => string)(`marketing.${label}`)}
-                </label>
-              ))}
+            <p className="mb-1 text-xs font-medium text-foreground">{t("marketing.eventTracking")}</p>
+            <div className="divide-y divide-border">
+              {EVENT_KEYS.map(({ key, label }) => {
+                const words = (t as (k: string) => string)(`marketing.${label}`);
+                return (
+                  <div key={key} className="flex min-h-12 items-center justify-between gap-3 text-[13px] text-foreground">
+                    {words}
+                    <Switch
+                      checked={pixel.event_settings![key]}
+                      onCheckedChange={(next) => void switchEvent(pixel, key, next)}
+                      disabled={!canManage || eventSavingId === pixel.public_id}
+                      aria-label={words}
+                    />
+                  </div>
+                );
+              })}
             </div>
           </div>
         ) : null}
@@ -560,7 +535,14 @@ export default function PixelServiceCard({
   }
 
   const heading =
-    screen.kind === "connect"
+    screen.kind === "switchAll"
+      ? {
+          title: screen.turnOn
+            ? tI("onPixelsTitle", { count: switchTargets(pixels, true).length, service })
+            : tI("offTitle", { service }),
+          subtitle: service,
+        }
+      : screen.kind === "connect"
       ? { title: words("modalConnectTitle"), subtitle: words("modalConnectDescription") }
       : screen.kind === "edit"
         ? { title: tI("editTitle", { service }), subtitle: tI("editDescription") }
@@ -579,10 +561,13 @@ export default function PixelServiceCard({
       <ServiceCard
         service={provider}
         name={service}
+        blurb={tI("blurbs.ads", { service })}
         status={status}
         tone={tone}
-        control={cardControl}
+        sealed={state.connected > 0}
         onOpen={state.count ? () => openAt({ kind: "list" }) : undefined}
+        onConnect={!isLoading && !state.count && canManage ? () => openAt({ kind: "connect" }) : undefined}
+        filteredOut={filteredOut}
       />
 
       <ServiceDialog
@@ -592,9 +577,27 @@ export default function PixelServiceCard({
         title={heading.title}
         subtitle={heading.subtitle}
         onBack={screen.kind === "list" ? undefined : back}
+        control={serviceSwitch}
       >
         {screen.kind === "list"
           ? listScreen()
+          : screen.kind === "switchAll"
+            ? (
+              <DialogScreen
+                confirmLabel={screen.turnOn ? tI("onConfirm") : tI("offConfirm")}
+                cancelLabel={screen.turnOn ? undefined : tI("keepOn")}
+                confirmDanger={!screen.turnOn}
+                busy={switchingAll}
+                onCancel={back}
+                onConfirm={() => void switchAll(screen.turnOn).then(back)}
+              >
+                <p className="text-[13px] leading-relaxed text-muted-foreground">
+                  {screen.turnOn
+                    ? tI("onPixelsBody", { service })
+                    : tI("offPixels", { count: switchTargets(pixels, false).length, service })}
+                </p>
+              </DialogScreen>
+            )
           : screen.kind === "connect" || screen.kind === "edit" || screen.kind === "reconnect"
             ? formScreen()
             : screen.kind === "events" && screenPixel

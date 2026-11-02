@@ -1,15 +1,19 @@
 /**
- * Settings > Integrations as the owner chose it on 2026-09-25: a card per
- * service with the Paperbase mark and the service's logo, a switch for the
- * whole service, the connections inside the opened card, and greyed "Coming
- * soon" cards that offer nothing to press.
+ * Settings > Integrations as the owner chose it on 2026-11-02: a filter column
+ * beside a card per service, each with its logo, state, a green seal, one
+ * sentence and View details; the whole-service switch and every connection in
+ * the pop-up; and "Coming soon" cards that offer nothing to press.
  */
+import { readFileSync } from "node:fs";
+import path from "node:path";
 import { renderToStaticMarkup } from "react-dom/server";
 import { NextIntlClientProvider, createTranslator } from "next-intl";
 import { describe, expect, test } from "vitest";
 
+import { IntegrationFilters } from "@/app/[locale]/(dashboard)/settings/sections/integrations/IntegrationFilters";
 import {
   ConnectionList,
+  ConnectionMenu,
   ConnectionRow,
   ConnectionSwitch,
   DisconnectedMark,
@@ -30,45 +34,127 @@ function render(node: React.ReactNode) {
 const noop = () => {};
 /** A broken sentence must fail the test, not be logged and replaced by its key. */
 const strict = { onError: (error: unknown) => { throw error; } };
+const blurb = "Sends your shop's visits and sales to Meta.";
 
 describe("a service card", () => {
-  test("shows the Paperbase mark and the service's own logo", () => {
-    const html = render(<ServiceCard service="steadfast" name="Steadfast" status="1 account" tone="on" />);
-    expect(html).toContain('src="/favicon-128x128.png"');
+  test("shows the service's logo, name and what it does, and no Paperbase mark", () => {
+    const html = render(<ServiceCard service="steadfast" name="Steadfast" blurb={blurb} status="1 account" tone="on" />);
     expect(html).toContain('src="/assets/courier-assets/steadfast-logo.png"');
+    expect(html).toContain("Steadfast");
+    expect(html).toContain(blurb.replace("'", "&#x27;"));
+    expect(html).not.toContain("favicon");
   });
 
-  test("a connected service opens its pop-up, with its switch outside the button", () => {
+  test("a connected service offers View details, with no switch on the card", () => {
     const html = render(
-      <ServiceCard
-        service="facebook"
-        name="Meta"
-        status="2 pixels · sending events"
-        tone="on"
-        control={<span data-testid="switch" />}
-        onOpen={noop}
-      />,
+      <ServiceCard service="facebook" name="Meta" blurb={blurb} status="2 pixels · sending events" tone="on" sealed onOpen={noop} />,
     );
+    expect(html).toContain("View details");
     expect(html).toContain('aria-haspopup="dialog"');
-    expect(html).not.toContain("aria-expanded");
-    expect(html).not.toMatch(/<button[^>]*>(?:(?!<\/button>)[\s\S])*data-testid="switch"/);
-    expect(html).toContain('data-testid="switch"');
+    expect(html).not.toContain("Connect");
+    expect(html).not.toContain('role="switch"');
   });
 
-  test("a card that cannot open is not a button", () => {
-    const html = render(<ServiceCard service="facebook" name="Meta" status="Not connected" tone="none" />);
+  test("the seal is green while a connection runs, and grey once they are all off", () => {
+    const on = render(<ServiceCard service="facebook" name="Meta" blurb={blurb} tone="on" sealed onOpen={noop} />);
+    const off = render(<ServiceCard service="facebook" name="Meta" blurb={blurb} tone="off" sealed onOpen={noop} />);
+    expect(on).toContain("text-green-600");
+    expect(off).not.toContain("text-green-600");
+    expect(off).toContain("text-muted-foreground/60");
+  });
+
+  test("a disconnected service has no seal: nothing on it can run", () => {
+    const html = render(<ServiceCard service="facebook" name="Meta" blurb={blurb} tone="off" onOpen={noop} />);
+    expect(html).not.toContain("text-green-600");
+    expect(html).not.toContain("<svg");
+  });
+
+  test("a service with nothing connected offers Connect, for whoever may", () => {
+    const html = render(<ServiceCard service="facebook" name="Meta" blurb={blurb} status="Not connected" tone="none" onConnect={noop} />);
+    expect(html).toContain("Connect");
+    expect(html).not.toContain("View details");
+  });
+
+  test("whoever may not connect it has nothing to press", () => {
+    const html = render(<ServiceCard service="facebook" name="Meta" blurb={blurb} status="Not connected" tone="none" />);
     expect(html).not.toContain("<button");
   });
 
-  test("coming soon: greyed, a badge, nothing to press", () => {
-    const html = render(
-      <ServiceCard service="pathao" name="Pathao" status="Not available yet" tone="none" comingSoon />,
-    );
+  test("coming soon: says so, and offers nothing to press", () => {
+    const html = render(<ServiceCard service="pathao" name="Pathao" blurb={blurb} tone="none" comingSoon />);
     expect(html).toContain("Coming soon");
-    expect(html).toContain("opacity-60");
     expect(html).not.toContain("<button");
     expect(html).not.toContain('role="switch"');
   });
+
+  test("a filter hides a card without removing it, so its pop-up survives", () => {
+    const html = render(<ServiceCard service="facebook" name="Meta" blurb={blurb} tone="on" onOpen={noop} filteredOut />);
+    expect(html).toContain("hidden");
+    expect(html).toContain("View details");
+  });
+});
+
+describe("the filter column", () => {
+  const counts = { connected: 3, not_connected: 0, coming_soon: 6 };
+  const filters = (extra: Partial<React.ComponentProps<typeof IntegrationFilters>> = {}) =>
+    render(
+      <IntegrationFilters
+        counts={counts}
+        standing={null}
+        onStanding={noop}
+        groups={[]}
+        onGroups={noop}
+        showGroups
+        {...extra}
+      />,
+    );
+
+  test("names where services stand, with their counts", () => {
+    const html = filters();
+    for (const word of ["Overview", "Connected", "Not connected", "Coming soon", "Categories", "All", "Ads", "Delivery"]) {
+      expect(html, word).toContain(word);
+    }
+    expect(html).toContain(">3<");
+    expect(html).toContain(">6<");
+  });
+
+  test("a standing with nothing in it cannot be chosen", () => {
+    expect(filters().match(/<button[^>]*disabled=""/g)).toHaveLength(1);
+  });
+
+  test("the one chosen reads as pressed, even if it has emptied", () => {
+    const html = filters({ standing: "not_connected" });
+    expect(html.match(/aria-pressed="true"/g)).toHaveLength(1);
+    expect(html).not.toContain('disabled=""');
+  });
+
+  test("no count is drawn until the connections have loaded", () => {
+    const html = filters({ counts: null });
+    expect(html).not.toContain(">0<");
+    expect(html).not.toContain(">6<");
+  });
+
+  test("All is ticked until a group is, and never beside one", () => {
+    expect(filters().match(/checked=""/g)).toHaveLength(1);
+    expect(filters({ groups: ["ads"] }).match(/checked=""/g)).toHaveLength(1);
+  });
+
+  test("whoever sees one group has no categories to choose from", () => {
+    expect(filters({ showGroups: false })).not.toContain("Categories");
+  });
+});
+
+describe("the whole-service switch", () => {
+  const sections = path.resolve(__dirname, "../../src/app/[locale]/(dashboard)/settings/sections/integrations");
+
+  test.each(["PixelServiceCard.tsx", "SteadfastServiceCard.tsx"])(
+    "%s asks on a screen of the pop-up, never in a second pop-up (owner, 2026-09-25)",
+    (file) => {
+      const source = readFileSync(path.join(sections, file), "utf8");
+      expect(source).toContain('kind: "switchAll"');
+      expect(source).not.toContain("useConfirm");
+    },
+  );
 });
 
 describe("the pop-up's list", () => {
@@ -76,6 +162,13 @@ describe("the pop-up's list", () => {
     // One or two pixels looked "too small" (owner); three is the limit.
     expect(render(<ConnectionList kind="pixels">x</ConnectionList>)).toContain("sm:min-h-[calc(3*(3.5rem_+_1px))]");
     expect(render(<ConnectionList kind="accounts">x</ConnectionList>)).toContain("sm:min-h-[calc(3*(6rem_+_2px))]");
+  });
+});
+
+describe("a connection's menu", () => {
+  test("is a named ··· button, and nothing at all with nothing to offer", () => {
+    expect(render(<ConnectionMenu items={[{ label: "Events", onSelect: noop }]} />)).toContain('aria-label="More"');
+    expect(render(<ConnectionMenu items={[]} />)).toBe("");
   });
 });
 
@@ -114,6 +207,13 @@ describe("the page's words", () => {
   ] as const)("%s names every service and reads every sentence", (locale, messages) => {
     const t = createTranslator({ locale, messages, namespace: "settings.integrations", ...strict });
     for (const key of services) expect(t(`services.${key}` as never), key).toBeTruthy();
+    for (const key of ["overview", "categories", "connected", "statusNotConnected", "comingSoon", "viewDetails"]) {
+      expect(t(key as never), key).toBeTruthy();
+    }
+    expect(t("blurbs.ads", { service: "Meta" })).toContain("Meta");
+    expect(t("blurbs.courier", { service: "Pathao" })).toContain("Pathao");
+    expect(t("blurbs.google_analytics")).toBeTruthy();
+    expect(t("blurbs.steadfast")).toBeTruthy();
 
     // Every plural and every {service}, formatted for real: an ICU mistake
     // only shows when a merchant turns a switch.

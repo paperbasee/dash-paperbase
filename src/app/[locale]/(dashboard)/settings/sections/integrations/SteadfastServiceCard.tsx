@@ -21,12 +21,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { useEnterNavigation } from "@/hooks/useEnterNavigation";
-import { useConfirm } from "@/context/ConfirmDialogContext";
 import { useMayChangeOwnerPower } from "@/hooks/useOwnerPower";
 import { notify } from "@/notifications";
 import { cn } from "@/lib/utils";
 import {
   ConnectionList,
+  ConnectionMenu,
   ConnectionRow,
   ConnectionSwitch,
   DialogScreen,
@@ -46,7 +46,8 @@ type Screen =
   | { kind: "connect" }
   | { kind: "reconnect"; id: string }
   | { kind: "disconnect"; id: string }
-  | { kind: "remove"; id: string };
+  | { kind: "remove"; id: string }
+  | { kind: "switchAll"; turnOn: boolean };
 
 const inputGuards = {
   autoComplete: "off",
@@ -60,15 +61,20 @@ const inputGuards = {
 
 /**
  * Steadfast: one card, every Steadfast account in its pop-up (owner,
- * 2026-09-25). Orders go out through the shop's active accounts, so the card's
- * switch is whether the shop can send to Steadfast at all. Disconnect forgets
+ * 2026-09-25). Orders go out through the shop's active accounts, so the pop-up's
+ * top switch is whether the shop can send to Steadfast at all. Disconnect forgets
  * an account's keys but keeps it, with its delivery-updates setup.
  */
-export default function SteadfastServiceCard({ panelHidden }: { panelHidden: boolean }) {
+export default function SteadfastServiceCard({
+  panelHidden,
+  filteredOut,
+}: {
+  panelHidden: boolean;
+  filteredOut: boolean;
+}) {
   const locale = useLocale();
   const t = useTranslations("settings");
   const tI = useTranslations("settings.integrations");
-  const confirm = useConfirm();
   const queryClient = useQueryClient();
   // The owner's alone (config/owner-powers.ts "couriers"); support reads it, changes nothing.
   const canManage = useMayChangeOwnerPower()("couriers");
@@ -88,14 +94,11 @@ export default function SteadfastServiceCard({ panelHidden }: { panelHidden: boo
   const { handleKeyDown } = useEnterNavigation(() => formRef.current?.requestSubmit());
   const formId = "steadfast-keys-form";
 
-  const screenAccount =
-    screen.kind === "list" || screen.kind === "connect"
-      ? undefined
-      : accounts.find((one) => one.public_id === screen.id);
+  const screenAccount = "id" in screen ? accounts.find((one) => one.public_id === screen.id) : undefined;
 
   // An account removed elsewhere returns its screen to the list rather than leaving it empty.
   useEffect(() => {
-    if (screen.kind !== "list" && screen.kind !== "connect" && !screenAccount) setScreen({ kind: "list" });
+    if ("id" in screen && !screenAccount) setScreen({ kind: "list" });
   }, [screen, screenAccount]);
 
   const refresh = () => queryClient.invalidateQueries({ queryKey: couriersQueryKey });
@@ -181,27 +184,10 @@ export default function SteadfastServiceCard({ panelHidden }: { panelHidden: boo
     }
   }
 
-  function onCardSwitch(turnOn: boolean) {
-    const count = switchTargets(accounts, turnOn).length;
-    if (!turnOn) {
-      void confirm({
-        title: tI("offTitle", { service }),
-        message: tI("offAccounts", { count, service }),
-        variant: "danger",
-        confirmText: tI("offConfirm"),
-        cancelText: tI("keepOn"),
-        onConfirm: () => switchAll(false),
-      });
-    } else if (count > 1) {
-      void confirm({
-        title: tI("onAccountsTitle", { count, service }),
-        message: tI("onAccountsBody", { service }),
-        confirmText: tI("onConfirm"),
-        onConfirm: () => switchAll(true),
-      });
-    } else {
-      void switchAll(true);
-    }
+  /** Stopping a service, or starting several accounts, asks first: on its own screen, never a second pop-up. */
+  function onServiceSwitch(turnOn: boolean) {
+    if (!turnOn || switchTargets(accounts, turnOn).length > 1) go({ kind: "switchAll", turnOn });
+    else void switchAll(true);
   }
 
   async function switchOne(account: Courier, turnOn: boolean) {
@@ -233,16 +219,10 @@ export default function SteadfastServiceCard({ panelHidden }: { panelHidden: boo
       : baseStatus;
   const tone: ServiceTone = state.on ? "on" : state.count ? "off" : "none";
 
-  const cardControl = isLoading ? null : state.count === 0 ? (
-    canManage ? (
-      <Button type="button" variant="outline" size="sm" className="text-[12px]" onClick={() => openAt({ kind: "connect" })}>
-        {tI("connect")}
-      </Button>
-    ) : null
-  ) : state.connected ? (
+  const serviceSwitch = screen.kind === "list" && state.connected ? (
     <Switch
       checked={state.on}
-      onCheckedChange={onCardSwitch}
+      onCheckedChange={onServiceSwitch}
       disabled={!canManage || switchingAll}
       aria-label={tI("serviceSwitchLabel", { service })}
     />
@@ -279,11 +259,13 @@ export default function SteadfastServiceCard({ panelHidden }: { panelHidden: boo
                   .filter(Boolean)
                   .join(" · ")}
                 actions={
-                  canManage ? (
-                    <Button type="button" variant="ghost" size="sm" className={small} onClick={() => go({ kind: "disconnect", id: account.public_id })}>
-                      {tI("disconnect")}
-                    </Button>
-                  ) : null
+                  <ConnectionMenu
+                    items={
+                      canManage
+                        ? [{ label: tI("disconnect"), onSelect: () => go({ kind: "disconnect", id: account.public_id }) }]
+                        : []
+                    }
+                  />
                 }
               >
                 {canManage && account.is_active ? <SteadfastWebhookSetup courier={account} /> : null}
@@ -384,7 +366,14 @@ export default function SteadfastServiceCard({ panelHidden }: { panelHidden: boo
   }
 
   const heading =
-    screen.kind === "connect"
+    screen.kind === "switchAll"
+      ? {
+          title: screen.turnOn
+            ? tI("onAccountsTitle", { count: switchTargets(accounts, true).length, service })
+            : tI("offTitle", { service }),
+          subtitle: service,
+        }
+      : screen.kind === "connect"
       ? { title: t("courier.modalConnectTitle"), subtitle: t("courier.modalConnectDescription") }
       : screen.kind === "reconnect"
         ? { title: tI("reconnectAccountTitle", { service }), subtitle: service }
@@ -399,10 +388,13 @@ export default function SteadfastServiceCard({ panelHidden }: { panelHidden: boo
       <ServiceCard
         service="steadfast"
         name={service}
+        blurb={tI("blurbs.steadfast")}
         status={status}
         tone={tone}
-        control={cardControl}
+        sealed={state.connected > 0}
         onOpen={state.count ? () => openAt({ kind: "list" }) : undefined}
+        onConnect={!isLoading && !state.count && canManage ? () => openAt({ kind: "connect" }) : undefined}
+        filteredOut={filteredOut}
       />
 
       <ServiceDialog
@@ -412,9 +404,27 @@ export default function SteadfastServiceCard({ panelHidden }: { panelHidden: boo
         title={heading.title}
         subtitle={heading.subtitle}
         onBack={screen.kind === "list" ? undefined : back}
+        control={serviceSwitch}
       >
         {screen.kind === "list"
           ? listScreen()
+          : screen.kind === "switchAll"
+            ? (
+              <DialogScreen
+                confirmLabel={screen.turnOn ? tI("onConfirm") : tI("offConfirm")}
+                cancelLabel={screen.turnOn ? undefined : tI("keepOn")}
+                confirmDanger={!screen.turnOn}
+                busy={switchingAll}
+                onCancel={back}
+                onConfirm={() => void switchAll(screen.turnOn).then(back)}
+              >
+                <p className="text-[13px] leading-relaxed text-muted-foreground">
+                  {screen.turnOn
+                    ? tI("onAccountsBody", { service })
+                    : tI("offAccounts", { count: switchTargets(accounts, false).length, service })}
+                </p>
+              </DialogScreen>
+            )
           : screen.kind === "connect" || screen.kind === "reconnect"
             ? keysScreen()
             : screen.kind === "disconnect" && screenAccount

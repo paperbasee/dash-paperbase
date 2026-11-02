@@ -2,9 +2,8 @@
 
 import type { ReactNode } from "react";
 import { useTranslations } from "next-intl";
-import { ArrowsLeftRightIcon, LinkBreakIcon, MetaLogoIcon, TiktokLogoIcon } from "@phosphor-icons/react";
-import { ArrowLeft, ChevronRight } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { DotsThreeIcon, LinkBreakIcon, SealCheckIcon } from "@phosphor-icons/react";
+import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -13,66 +12,53 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
-import { PLATFORM_MARK_SRC, SERVICE_LOGO_FILES, type ServiceKey } from "@/lib/integrations/services";
+import { SERVICE_LOGO_FILES, type ServiceKey } from "@/lib/integrations/services";
 import { settingsInvertedButtonClassName } from "../../SettingsSectionBody";
 
 /**
- * One service on Settings > Integrations (owner, 2026-09-25, from a reference
- * they chose): the Paperbase mark and the service's own logo joined by arrows,
- * the service's name and state, and its switch. Clicking it opens the
- * service's pop-up, where every connection of the service is listed -- not
- * inline: the owner found a card opening in the grid "unprofessional".
+ * One service on Settings > Integrations (owner, 2026-11-02, from a design they chose): its logo,
+ * name and state, a green seal once it is connected, what it does in one sentence, and View details
+ * -- which opens the service's pop-up, where every connection is listed and the whole service is
+ * switched. Not in the grid: the owner found a card opening in place "unprofessional" (2026-09-25).
+ *
+ * Column widths follow the `cards` container, the width the page really has, not the screen's.
  */
 
 export type ServiceTone = "on" | "off" | "none";
 
-function ServiceLogo({ service, compact }: { service: ServiceKey; compact?: boolean }) {
-  const file = SERVICE_LOGO_FILES[service];
-  const tile = cn(
-    "flex shrink-0 items-center justify-center overflow-hidden border border-border bg-white",
-    compact ? "h-8 rounded-[7px]" : "h-10 rounded-[9px]",
-    file?.wide ? (compact ? "w-[84px] px-1.5" : "w-[104px] px-2") : compact ? "w-8" : "w-10",
-  );
-  const icon = compact ? "size-5" : "size-6";
+/** Colour logos sit straight on a light card; on a dark one, a wordmark's dark letters need a white tile. */
+function ServiceLogo({ service, faded = false }: { service: ServiceKey; faded?: boolean }) {
+  const { src, wide } = SERVICE_LOGO_FILES[service];
   return (
-    <span className={tile}>
-      {service === "facebook" ? (
-        <MetaLogoIcon className={cn(icon, "text-[#0866FF]")} weight="bold" />
-      ) : service === "tiktok" ? (
-        <TiktokLogoIcon className={cn(icon, "text-black")} weight="fill" />
-      ) : file ? (
-        // eslint-disable-next-line @next/next/no-img-element -- a fixed, local file
-        <img src={file.src} alt="" className={cn("h-full w-full object-contain", file.wide ? "py-1.5" : "p-1.5")} />
-      ) : null}
-    </span>
-  );
-}
-
-export function LogoPair({ service, compact }: { service: ServiceKey; compact?: boolean }) {
-  return (
-    <span className="flex shrink-0 items-center gap-2" aria-hidden>
-      {/* eslint-disable-next-line @next/next/no-img-element -- the dashboard's own icon */}
-      <img
-        src={PLATFORM_MARK_SRC}
-        alt=""
-        className={cn("shrink-0", compact ? "size-8 rounded-[7px]" : "size-10 rounded-[9px]")}
-      />
-      <ArrowsLeftRightIcon className="size-4 shrink-0 text-muted-foreground" />
-      <ServiceLogo service={service} compact={compact} />
+    <span
+      className={cn(
+        "flex h-11 shrink-0 items-center justify-center overflow-hidden rounded-ui dark:bg-white",
+        wide ? "w-[68px] dark:w-[74px] dark:px-1.5" : "w-9 dark:w-11 dark:p-1.5",
+        faded && "opacity-70",
+      )}
+    >
+      {/* eslint-disable-next-line @next/next/no-img-element -- a fixed, local file */}
+      <img src={src} alt="" className="size-full object-contain" />
     </span>
   );
 }
 
 export function StatusLine({ tone, children }: { tone: ServiceTone; children: ReactNode }) {
   return (
-    <span className="flex min-w-0 items-center gap-1.5 text-[12px] text-muted-foreground">
+    <span className="flex min-w-0 items-center gap-2 text-[12px] text-muted-foreground">
       <span
         aria-hidden
         className={cn(
           "h-1.5 w-1.5 shrink-0 rounded-full",
-          tone === "on" ? "bg-green-500" : "bg-muted-foreground/60",
+          tone === "on" ? "bg-green-500 ring-[3px] ring-green-500/20" : "bg-muted-foreground/60",
         )}
       />
       <span className="min-w-0 truncate">{children}</span>
@@ -83,82 +69,98 @@ export function StatusLine({ tone, children }: { tone: ServiceTone; children: Re
 export function ServiceCard({
   service,
   name,
+  blurb,
   status,
   tone,
-  control,
+  sealed = false,
   onOpen,
+  onConnect,
   comingSoon = false,
+  filteredOut = false,
 }: {
   service: ServiceKey;
   name: string;
-  status: ReactNode;
+  /** What the service does for the shop, in one sentence. */
+  blurb: string;
+  status?: ReactNode;
   tone: ServiceTone;
-  /** The card's switch, its Connect button, or nothing. */
-  control?: ReactNode;
+  /** The green seal: it has a connection that can run. Grey while they are all off. */
+  sealed?: boolean;
   /** Opens the service's pop-up. Absent: nothing to open (not connected, or not built yet). */
   onOpen?: () => void;
+  /** Absent for whoever may not connect it. */
+  onConnect?: () => void;
   comingSoon?: boolean;
+  /** Hidden, not removed: the card holds its pop-up, which a filter must never close. */
+  filteredOut?: boolean;
 }) {
   const t = useTranslations("settings.integrations");
-  const top = (
-    <span className="flex h-[76px] w-full items-center justify-center border-b border-border bg-muted/40">
-      <LogoPair service={service} />
-    </span>
-  );
-  const bottom = (
-    <span className="flex min-h-[52px] w-full items-center px-3.5 py-2.5 pe-24">
-      <span className="flex min-w-0 flex-1 flex-col gap-0.5 text-start">
-        <span className="flex min-w-0 items-center gap-1">
-          <span className="truncate text-[13px] font-medium text-foreground">{name}</span>
-          {onOpen ? <ChevronRight aria-hidden className="size-3.5 shrink-0 text-muted-foreground" /> : null}
-        </span>
-        <StatusLine tone={tone}>{status}</StatusLine>
-      </span>
-    </span>
-  );
-  // The logos and the words are ONE button, so a click anywhere opens the
-  // pop-up; the switch sits beside it rather than inside it (a control in a control).
   return (
-    <div
+    <article
       data-service={service}
+      hidden={filteredOut}
       className={cn(
-        "relative min-w-0 overflow-hidden rounded-card border border-border bg-card",
-        comingSoon && "opacity-60",
+        "relative flex min-w-0 flex-col rounded-card border border-border transition-colors hover:border-muted-foreground/40",
+        comingSoon
+          ? "col-span-1 p-3 @min-[36rem]/cards:p-[18px]"
+          : "col-span-2 bg-card p-[15px] @min-[36rem]/cards:col-span-1 @min-[36rem]/cards:min-h-[206px] @min-[36rem]/cards:p-[18px]",
       )}
     >
-      {onOpen ? (
-        <button
-          type="button"
-          aria-haspopup="dialog"
-          onClick={onOpen}
-          className="flex w-full flex-col outline-none transition-colors hover:bg-muted/20 focus-visible:ring-[3px] focus-visible:ring-ring/20"
-        >
-          {top}
-          {bottom}
-        </button>
-      ) : (
-        <div className="flex w-full flex-col">
-          {top}
-          {bottom}
+      <div className={cn("flex min-w-0 items-center gap-3", comingSoon && "flex-wrap gap-y-2 @min-[36rem]/cards:flex-nowrap")}>
+        <ServiceLogo service={service} faded={comingSoon} />
+        <div className={cn("min-w-0 flex-1", comingSoon && "basis-full @min-[36rem]/cards:basis-0")}>
+          <p
+            className={cn(
+              "leading-snug",
+              comingSoon
+                ? "text-[13px] font-medium text-muted-foreground @min-[36rem]/cards:text-[15px]"
+                : "truncate pe-7 text-[15px] font-semibold text-foreground",
+            )}
+          >
+            {name}
+          </p>
+          {status ? <div className="mt-0.5"><StatusLine tone={tone}>{status}</StatusLine></div> : null}
         </div>
-      )}
-      <div className="absolute end-3.5 bottom-0 flex h-[52px] items-center">
         {comingSoon ? (
-          <Badge variant="outline" className="shrink-0 text-[11px] font-normal text-muted-foreground">
+          <span className="order-last -mt-1.5 basis-full text-[11.5px] text-muted-foreground @min-[36rem]/cards:order-none @min-[36rem]/cards:mt-0 @min-[36rem]/cards:basis-auto @min-[36rem]/cards:self-start @min-[36rem]/cards:whitespace-nowrap @min-[36rem]/cards:rounded-ui @min-[36rem]/cards:border @min-[36rem]/cards:border-border @min-[36rem]/cards:px-[7px] @min-[36rem]/cards:py-0.5 @min-[36rem]/cards:text-[11px]">
             {t("comingSoon")}
-          </Badge>
-        ) : (
-          control
-        )}
+          </span>
+        ) : null}
       </div>
-    </div>
+      {sealed ? (
+        <SealCheckIcon
+          aria-hidden
+          weight="fill"
+          className={cn(
+            "absolute end-4 top-4 size-[22px]",
+            tone === "on" ? "text-green-600 dark:text-green-500" : "text-muted-foreground/60",
+          )}
+        />
+      ) : null}
+      <p className={cn("mt-3 flex-1 text-[13px] leading-relaxed text-muted-foreground", comingSoon && "hidden @min-[36rem]/cards:block")}>
+        {blurb}
+      </p>
+      {onOpen || onConnect ? (
+        <div className="mt-2.5 flex justify-end">
+          {onOpen ? (
+            <Button type="button" variant="outline" size="sm" className="text-[12px]" aria-haspopup="dialog" onClick={onOpen}>
+              {t("viewDetails")}
+            </Button>
+          ) : (
+            <Button type="button" variant="outline" size="sm" className={cn("text-[12px]", settingsInvertedButtonClassName)} onClick={onConnect}>
+              {t("connect")}
+            </Button>
+          )}
+        </div>
+      ) : null}
+    </article>
   );
 }
 
 /**
- * A service's pop-up. It holds one screen at a time -- the list, or a form or
- * a question opened from it, with a Back arrow -- so a pop-up never opens on
- * top of another. On a phone it fills the screen.
+ * A pop-up of this page. It holds one screen at a time -- the list, or a form or a question opened
+ * from it, with a Back arrow -- so a pop-up never opens on top of another. On a phone it fills the
+ * screen. `service` draws its logo on the list screen; `control` sits on the title's line.
  */
 export function ServiceDialog({
   open,
@@ -167,15 +169,17 @@ export function ServiceDialog({
   title,
   subtitle,
   onBack,
+  control,
   children,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  service: ServiceKey;
+  service?: ServiceKey;
   title: string;
   subtitle: ReactNode;
   /** Shown on every screen but the list. */
   onBack?: () => void;
+  control?: ReactNode;
   children: ReactNode;
 }) {
   const t = useTranslations("settings.integrations");
@@ -187,21 +191,22 @@ export function ServiceDialog({
           "sm:h-auto sm:max-h-[min(90dvh,44rem)] sm:w-[calc(100vw-2rem)] sm:max-w-[40rem] sm:rounded-card",
         )}
       >
-        <DialogHeader className="shrink-0 border-b border-border px-4 py-3 pe-12 sm:px-5">
+        <DialogHeader className="shrink-0 border-b border-border px-4 py-3 pe-12 sm:px-5 sm:pe-12">
           <div className="flex min-w-0 items-center gap-3">
             {onBack ? (
               <Button type="button" variant="ghost" size="icon" className="-ms-2 shrink-0" onClick={onBack} aria-label={t("back")}>
                 <ArrowLeft className="size-4 rtl:rotate-180" aria-hidden />
               </Button>
-            ) : (
-              <LogoPair service={service} compact />
-            )}
-            <div className="min-w-0 space-y-0.5 text-start">
+            ) : service ? (
+              <ServiceLogo service={service} />
+            ) : null}
+            <div className="min-w-0 flex-1 space-y-0.5 text-start">
               <DialogTitle className="truncate text-[15px] font-medium leading-snug">{title}</DialogTitle>
               <DialogDescription asChild className="text-[12px]">
                 <div>{subtitle}</div>
               </DialogDescription>
             </div>
+            {control}
           </div>
         </DialogHeader>
         <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">{children}</div>
@@ -214,6 +219,7 @@ export function ServiceDialog({
 export function DialogScreen({
   children,
   confirmLabel,
+  cancelLabel,
   confirmDanger = false,
   busy,
   onCancel,
@@ -222,6 +228,8 @@ export function DialogScreen({
 }: {
   children: ReactNode;
   confirmLabel: string;
+  /** "Cancel" unless the question reads better with its own words. */
+  cancelLabel?: string;
   confirmDanger?: boolean;
   busy: boolean;
   onCancel: () => void;
@@ -235,7 +243,7 @@ export function DialogScreen({
       {children}
       <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
         <Button type="button" variant="outline" onClick={onCancel} disabled={busy}>
-          {t("cancel")}
+          {cancelLabel ?? t("cancel")}
         </Button>
         <Button
           type={formId ? "submit" : "button"}
@@ -290,6 +298,28 @@ const ROOM_FOR_THREE = {
 
 export function ConnectionList({ kind, children }: { kind: keyof typeof ROOM_FOR_THREE; children: ReactNode }) {
   return <div className={ROOM_FOR_THREE[kind]}>{children}</div>;
+}
+
+/** What can be done to a connection, behind its ···, so a row stays one calm line. */
+export function ConnectionMenu({ items }: { items: { label: string; onSelect: () => void }[] }) {
+  const t = useTranslations("nav");
+  if (items.length === 0) return null;
+  return (
+    <DropdownMenu modal={false}>
+      <DropdownMenuTrigger asChild>
+        <Button type="button" variant="ghost" size="sm" className="w-9 px-0" aria-label={t("more")}>
+          <DotsThreeIcon weight="bold" className="size-5" aria-hidden />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="min-w-40">
+        {items.map((item) => (
+          <DropdownMenuItem key={item.label} onSelect={item.onSelect}>
+            {item.label}
+          </DropdownMenuItem>
+        ))}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
 }
 
 /** One connection in a service's pop-up: its switch, what it is, and what can be done to it. */
