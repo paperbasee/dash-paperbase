@@ -47,15 +47,17 @@ function DialogContent({
   className,
   children,
   showCloseButton = true,
+  overlayClassName,
   onOpenAutoFocus,
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Content> & {
   showCloseButton?: boolean
+  overlayClassName?: string
 }) {
   const tCommon = useTranslations("common")
   return (
     <DialogPortal>
-      <DialogOverlay />
+      <DialogOverlay className={overlayClassName} />
       <DialogPrimitive.Content
         data-slot="dialog-content"
         onOpenAutoFocus={(event) => {

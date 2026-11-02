@@ -157,11 +157,30 @@ describe("the whole-service switch", () => {
   );
 });
 
-describe("the pop-up's list", () => {
-  test("keeps room for three connections, the most a service has, and no more", () => {
-    // One or two pixels looked "too small" (owner); three is the limit.
-    expect(render(<ConnectionList kind="pixels">x</ConnectionList>)).toContain("sm:min-h-[calc(3*(3.5rem_+_1px))]");
-    expect(render(<ConnectionList kind="accounts">x</ConnectionList>)).toContain("sm:min-h-[calc(3*(6rem_+_2px))]");
+describe("the pop-up", () => {
+  const cardSource = readFileSync(
+    path.resolve(__dirname, "../../src/app/[locale]/(dashboard)/settings/sections/integrations/ServiceCard.tsx"),
+    "utf8",
+  );
+
+  test("is as tall as what it holds: no room kept for rows it does not have (owner, 2026-11-02)", () => {
+    expect(render(<ConnectionList>x</ConnectionList>)).not.toContain("min-h");
+  });
+
+  test("has no close button to see: pressing outside closes it", () => {
+    expect(cardSource).toContain("showCloseButton={false}");
+    expect(cardSource).not.toContain("onPointerDownOutside");
+    expect(cardSource).not.toContain("onInteractOutside");
+  });
+
+  test("a screen reader, which cannot press outside, still has Close", () => {
+    expect(cardSource).toContain('<DialogClose className="sr-only">');
+  });
+
+  test("on a phone it rises from the bottom, so there is an outside to press", () => {
+    expect(cardSource).toContain("max-sm:bottom-0");
+    expect(cardSource).toContain("max-h-[86dvh]");
+    expect(cardSource).not.toContain("h-dvh");
   });
 });
 
@@ -169,6 +188,14 @@ describe("a connection's menu", () => {
   test("is a named ··· button, and nothing at all with nothing to offer", () => {
     expect(render(<ConnectionMenu items={[{ label: "Events", onSelect: noop }]} />)).toContain('aria-label="More"');
     expect(render(<ConnectionMenu items={[]} />)).toBe("");
+  });
+});
+
+describe("a switch", () => {
+  test("off still shows its knob and track, on a dark page too", () => {
+    const html = render(<ConnectionSwitch active={false} label="Off" disabled={false} onSwitch={noop} />);
+    expect(html).toContain("bg-muted-foreground");
+    expect(html).toContain("border-muted-foreground/40");
   });
 });
 

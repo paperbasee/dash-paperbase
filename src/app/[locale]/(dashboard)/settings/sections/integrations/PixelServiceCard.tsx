@@ -31,10 +31,12 @@ import { useEnterNavigation } from "@/hooks/useEnterNavigation";
 import { usePermissions } from "@/context/PermissionsContext";
 import { notify } from "@/notifications";
 import {
+  ConnectionFoot,
   ConnectionList,
   ConnectionMenu,
   ConnectionRow,
   ConnectionSwitch,
+  DIALOG_BODY,
   DialogScreen,
   DisconnectedMark,
   ServiceCard,
@@ -318,7 +320,7 @@ export default function PixelServiceCard({
   function listScreen() {
     return (
       <>
-        <ConnectionList kind="pixels">
+        <ConnectionList>
           {pixels.map((pixel) =>
             pixel.is_connected ? (
               <ConnectionRow
@@ -384,7 +386,7 @@ export default function PixelServiceCard({
             ),
           )}
         </ConnectionList>
-        <div className="flex flex-wrap items-center gap-3 border-t border-border px-4 py-3 sm:px-5">
+        <ConnectionFoot>
           {canManage && left > 0 ? (
             <Button type="button" variant="outline" size="sm" className={small} onClick={() => openAt({ kind: "connect" })}>
               <Plus className="size-3.5" aria-hidden />
@@ -398,7 +400,7 @@ export default function PixelServiceCard({
                 ? tI("pixelsLeft", { left })
                 : tI("pixelsFull", { max: MAX_PIXELS_PER_SERVICE })}
           </p>
-        </div>
+        </ConnectionFoot>
       </>
     );
   }
@@ -485,7 +487,7 @@ export default function PixelServiceCard({
 
   function eventsScreen(pixel: MarketingIntegration) {
     return (
-      <div className="space-y-4 px-4 py-4 sm:px-5">
+      <div className={cn("space-y-4", DIALOG_BODY)}>
         <div>
           <p className="mb-1 text-xs font-medium text-muted-foreground">{idLabel}</p>
           <div className="flex flex-wrap items-center gap-2">

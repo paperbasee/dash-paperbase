@@ -18,6 +18,11 @@
     /* Theme transition perf controls (default visuals preserved). */
     --surface-blur: 8px;
     --shadow-elevated: var(--system-banner-shadow);
+    /* A pop-up raised off the page: a hairline, then two soft shadows. */
+    --shadow-raised:
+      0 0 0 1px rgba(15, 23, 42, 0.07),
+      0 12px 28px -16px rgba(15, 23, 42, 0.2),
+      0 36px 90px -30px rgba(15, 23, 42, 0.38);
   }
 
   :root {
@@ -210,6 +215,11 @@
     /* Theme transition perf controls (default visuals preserved). */
     --surface-blur: 8px;
     --shadow-elevated: var(--system-banner-shadow);
+    --shadow-raised:
+      0 0 0 1px rgba(255, 255, 255, 0.075),
+      inset 0 1px 0 rgba(255, 255, 255, 0.055),
+      0 14px 32px -14px rgba(0, 0, 0, 0.65),
+      0 36px 90px -24px rgba(0, 0, 0, 0.9);
   }
 }
 
@@ -1036,5 +1046,27 @@ input.font-numbers-date-value::placeholder {
   /* Stopped, confetti would hang in the air: it is not drawn at all. */
   .pb-motion .pb-confetti {
     display: none;
+  }
+}
+
+/* The Integrations pop-up: a card that settles on a computer, a sheet that rises on a phone. */
+@keyframes card-rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.97);
+  }
+}
+
+@keyframes sheet-rise {
+  from {
+    opacity: 0.4;
+    transform: translateY(3rem);
+  }
+}
+
+@keyframes sheet-fall {
+  to {
+    opacity: 0;
+    transform: translateY(3rem);
   }
 }

@@ -16,7 +16,7 @@ import {
   type PurchaseTiming,
 } from "@/lib/marketing/purchase-timing";
 import { notify } from "@/notifications";
-import { ServiceDialog } from "./integrations/ServiceCard";
+import { DIALOG_BODY, ServiceDialog } from "./integrations/ServiceCard";
 
 /**
  * When a cash on delivery order counts as a sale for the shop's ads (owner,
@@ -81,8 +81,12 @@ export default function PurchaseTimingBlock({
       </button>
 
       <ServiceDialog open={open} onOpenChange={setOpen} title={t("title")} subtitle={t("intro")}>
-        <div className="px-4 py-4 sm:px-5">
-          <div role="radiogroup" aria-label={t("title")} className="grid gap-2">
+        <div className={DIALOG_BODY}>
+          <div
+            role="radiogroup"
+            aria-label={t("title")}
+            className="divide-y divide-border overflow-hidden rounded-ui bg-muted/60 ring-1 ring-inset ring-border"
+          >
             {PURCHASE_TIMINGS.map((timing) => {
               const selected = chosen === timing;
               return (
@@ -96,22 +100,11 @@ export default function PurchaseTimingBlock({
                     if (!selected) save.mutate(timing);
                   }}
                   className={cn(
-                    "flex min-h-11 items-start gap-2.5 rounded-card border px-3 py-2.5 text-start transition-colors",
-                    "disabled:cursor-not-allowed",
-                    selected
-                      ? "border-foreground bg-muted/40"
-                      : "border-border hover:border-foreground/40 disabled:hover:border-border",
+                    "flex min-h-11 w-full items-start justify-between gap-4 px-4 py-[15px] text-start transition-colors",
+                    "outline-none focus-visible:bg-foreground/5 disabled:cursor-not-allowed",
+                    selected ? "bg-foreground/[0.065]" : "hover:bg-foreground/[0.04] disabled:hover:bg-transparent",
                   )}
                 >
-                  <span
-                    aria-hidden
-                    className={cn(
-                      "mt-0.5 grid size-4 shrink-0 place-items-center rounded-full border",
-                      selected ? "border-foreground bg-foreground text-background" : "border-muted-foreground/50",
-                    )}
-                  >
-                    {selected ? <Check className="size-3" strokeWidth={3} /> : null}
-                  </span>
                   <span className="min-w-0">
                     <span className="block text-[13px] font-medium text-foreground">
                       {t(timing)}
@@ -120,6 +113,15 @@ export default function PurchaseTimingBlock({
                     <span className="mt-0.5 block text-[12px] leading-relaxed text-muted-foreground">
                       {t(`${timing}Note`)}
                     </span>
+                  </span>
+                  <span
+                    aria-hidden
+                    className={cn(
+                      "mt-px grid size-5 shrink-0 place-items-center rounded-full border",
+                      selected ? "border-foreground bg-foreground text-background" : "border-muted-foreground/50",
+                    )}
+                  >
+                    {selected ? <Check className="size-3.5" strokeWidth={3} /> : null}
                   </span>
                 </button>
               );
@@ -134,12 +136,12 @@ export default function PurchaseTimingBlock({
             custom event without a custom conversion.
           */}
           {chosen === "confirmation" ? (
-            <ul className="mt-2.5 list-disc space-y-1 ps-5 text-[12px] leading-relaxed text-muted-foreground">
+            <ul className="mt-3.5 list-disc space-y-1 ps-5 text-[12px] leading-relaxed text-muted-foreground">
               <li>{t("confirmationLate")}</li>
               <li>{t("confirmationGoal")}</li>
             </ul>
           ) : null}
-          <p className="mt-2.5 text-[12px] text-muted-foreground">{t("prepaidNote")}</p>
+          <p className="mt-3 border-t border-border pt-3 text-[12px] leading-relaxed text-muted-foreground">{t("prepaidNote")}</p>
           {!canManage ? <p className="mt-1 text-[12px] text-muted-foreground">{t("askToChange")}</p> : null}
         </div>
       </ServiceDialog>

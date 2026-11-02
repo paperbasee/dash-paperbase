@@ -1,12 +1,13 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { useRef, type ReactNode } from "react";
 import { useTranslations } from "next-intl";
 import { DotsThreeIcon, LinkBreakIcon, SealCheckIcon } from "@phosphor-icons/react";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogDescription,
   DialogHeader,
@@ -33,6 +34,9 @@ import { settingsInvertedButtonClassName } from "../../SettingsSectionBody";
  */
 
 export type ServiceTone = "on" | "off" | "none";
+
+/** The sides and foot of every pop-up screen, so the screens line up with each other. */
+export const DIALOG_BODY = "px-4 pb-5 sm:px-7 sm:pb-[26px]";
 
 /** Colour logos sit straight on a light card; on a dark one, a wordmark's dark letters need a white tile. */
 function ServiceLogo({ service, faded = false }: { service: ServiceKey; faded?: boolean }) {
@@ -157,10 +161,76 @@ export function ServiceCard({
   );
 }
 
+/** The logo at the head of a pop-up: always on its tile, so the pop-up opens on the service's mark. */
+function DialogLogo({ service }: { service: ServiceKey }) {
+  const { src, wide } = SERVICE_LOGO_FILES[service];
+  return (
+    <span
+      className={cn(
+        "flex h-11 shrink-0 items-center justify-center overflow-hidden rounded-ui bg-white ring-1 ring-border sm:h-[52px]",
+        wide ? "w-[70px] px-1.5 sm:w-[88px] sm:px-2" : "w-11 p-2 sm:w-[52px] sm:p-2.5",
+      )}
+    >
+      {/* eslint-disable-next-line @next/next/no-img-element -- a fixed, local file */}
+      <img src={src} alt="" className="size-full object-contain" />
+    </span>
+  );
+}
+
+/** How far down a phone's sheet is pulled before letting go closes it. */
+const SHEET_CLOSE_PX = 80;
+
+/** The bar at the top of a phone's sheet: pull it down to close. Decoration to a screen reader, which has Close. */
+function SheetHandle({ onClose }: { onClose: () => void }) {
+  const startY = useRef<number | null>(null);
+  const sheetOf = (event: React.PointerEvent) =>
+    event.currentTarget.closest<HTMLElement>('[data-slot="dialog-content"]');
+
+  function release(event: React.PointerEvent, closes: boolean) {
+    const sheet = sheetOf(event);
+    if (sheet) {
+      sheet.style.transform = "";
+      sheet.style.transition = "";
+    }
+    startY.current = null;
+    if (closes) onClose();
+  }
+
+  return (
+    <div
+      aria-hidden
+      className="absolute inset-x-0 top-0 z-10 flex h-7 touch-none justify-center pt-2 sm:hidden"
+      onPointerDown={(event) => {
+        startY.current = event.clientY;
+        event.currentTarget.setPointerCapture(event.pointerId);
+        const sheet = sheetOf(event);
+        if (sheet) sheet.style.transition = "none";
+      }}
+      onPointerMove={(event) => {
+        if (startY.current === null) return;
+        const sheet = sheetOf(event);
+        if (sheet) sheet.style.transform = `translateY(${Math.max(0, event.clientY - startY.current)}px)`;
+      }}
+      onPointerUp={(event) => {
+        if (startY.current === null) return;
+        release(event, event.clientY - startY.current > SHEET_CLOSE_PX);
+      }}
+      onPointerCancel={(event) => release(event, false)}
+    >
+      <span className="h-1 w-[38px] rounded-full bg-muted-foreground/50" />
+    </div>
+  );
+}
+
 /**
- * A pop-up of this page. It holds one screen at a time -- the list, or a form or a question opened
- * from it, with a Back arrow -- so a pop-up never opens on top of another. On a phone it fills the
- * screen. `service` draws its logo on the list screen; `control` sits on the title's line.
+ * A pop-up of this page (owner, 2026-11-02): a raised card, as tall as what it holds, on a softly
+ * blurred page. No close button: pressing outside closes it, as does Esc; the hidden Close is for a
+ * screen reader, which can press neither. On a phone it rises from the bottom, so there is an
+ * outside to press, and its bar can be pulled down.
+ *
+ * It holds one screen at a time -- the list, or a form or a question opened from it, with a Back
+ * arrow -- so a pop-up never opens on top of another. `service` draws its logo on the list screen;
+ * `control` sits on the title's line.
  */
 export function ServiceDialog({
   open,
@@ -183,25 +253,33 @@ export function ServiceDialog({
   children: ReactNode;
 }) {
   const t = useTranslations("settings.integrations");
+  const tCommon = useTranslations("common");
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
+        showCloseButton={false}
+        overlayClassName="bg-black/30 backdrop-blur-[8px] dark:bg-black/60"
         className={cn(
-          "flex h-dvh max-h-dvh w-screen max-w-none flex-col gap-0 overflow-hidden rounded-none p-0",
-          "sm:h-auto sm:max-h-[min(90dvh,44rem)] sm:w-[calc(100vw-2rem)] sm:max-w-[40rem] sm:rounded-card",
+          "flex max-h-[86dvh] flex-col gap-0 overflow-hidden border-0 bg-card p-0 [box-shadow:var(--shadow-raised)]",
+          "max-sm:inset-x-0 max-sm:top-auto max-sm:bottom-0 max-sm:max-w-none max-sm:translate-x-0 max-sm:translate-y-0 max-sm:rounded-b-none",
+          "max-sm:data-[state=open]:animate-[sheet-rise_320ms_cubic-bezier(0.16,1,0.3,1)]! max-sm:data-[state=closed]:animate-[sheet-fall_180ms_ease-in_forwards]!",
+          "sm:max-h-[min(90dvh,44rem)] sm:w-[calc(100vw-2rem)] sm:max-w-[35rem] sm:rounded-card",
+          "sm:data-[state=open]:animate-[card-rise_300ms_cubic-bezier(0.16,1,0.3,1)]!",
         )}
       >
-        <DialogHeader className="shrink-0 border-b border-border px-4 py-3 pe-12 sm:px-5 sm:pe-12">
-          <div className="flex min-w-0 items-center gap-3">
+        <SheetHandle onClose={() => onOpenChange(false)} />
+        <DialogClose className="sr-only">{tCommon("close")}</DialogClose>
+        <DialogHeader className="shrink-0 border-b-0 px-4 pb-4 pt-6 sm:px-7 sm:pb-5 sm:pt-7">
+          <div className="flex min-w-0 items-center gap-3 sm:gap-4">
             {onBack ? (
               <Button type="button" variant="ghost" size="icon" className="-ms-2 shrink-0" onClick={onBack} aria-label={t("back")}>
                 <ArrowLeft className="size-4 rtl:rotate-180" aria-hidden />
               </Button>
             ) : service ? (
-              <ServiceLogo service={service} />
+              <DialogLogo service={service} />
             ) : null}
             <div className="min-w-0 flex-1 space-y-0.5 text-start">
-              <DialogTitle className="truncate text-[15px] font-medium leading-snug">{title}</DialogTitle>
+              <DialogTitle className="text-[17px] font-semibold leading-snug tracking-[-0.01em]">{title}</DialogTitle>
               <DialogDescription asChild className="text-[12px]">
                 <div>{subtitle}</div>
               </DialogDescription>
@@ -239,7 +317,7 @@ export function DialogScreen({
 }) {
   const t = useTranslations("settings");
   return (
-    <div className="flex flex-col gap-4 px-4 py-4 sm:px-5">
+    <div className={cn("flex flex-col gap-4", DIALOG_BODY)}>
       {children}
       <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
         <Button type="button" variant="outline" onClick={onCancel} disabled={busy}>
@@ -285,19 +363,16 @@ export function DisconnectedMark() {
   );
 }
 
-/**
- * The pop-up keeps room for THREE connections, the most a service has (owner,
- * 2026-09-25: one or two "looks too small"), and never grows past it. A row is
- * one 3.5rem line plus its 1px border; a Steadfast account adds its 2.5rem
- * delivery-updates line and that line's border.
- */
-const ROOM_FOR_THREE = {
-  pixels: "sm:min-h-[calc(3*(3.5rem_+_1px))]",
-  accounts: "sm:min-h-[calc(3*(6rem_+_2px))]",
-} as const;
+/** A service's connections, held together on a quiet panel; the pop-up is as tall as they are (owner, 2026-11-02). */
+export function ConnectionList({ children }: { children: ReactNode }) {
+  return <div className="mx-4 overflow-hidden rounded-ui bg-muted/60 ring-1 ring-inset ring-border sm:mx-7">{children}</div>;
+}
 
-export function ConnectionList({ kind, children }: { kind: keyof typeof ROOM_FOR_THREE; children: ReactNode }) {
-  return <div className={ROOM_FOR_THREE[kind]}>{children}</div>;
+/** Under the list: what can be added, and how many more. */
+export function ConnectionFoot({ children }: { children: ReactNode }) {
+  return (
+    <div className="flex flex-wrap items-center justify-between gap-3 px-4 pb-5 pt-3.5 sm:px-7 sm:pb-[26px] sm:pt-[18px]">{children}</div>
+  );
 }
 
 /** What can be done to a connection, behind its ···, so a row stays one calm line. */
@@ -341,7 +416,7 @@ export function ConnectionRow({
 }) {
   return (
     <div className="border-b border-border last:border-b-0">
-      <div className="flex min-h-14 min-w-0 flex-wrap items-center gap-x-3 gap-y-1 px-4 py-2 sm:px-5">
+      <div className="flex min-h-16 min-w-0 flex-wrap items-center gap-x-3 gap-y-1 py-2 pe-2 ps-3.5 sm:min-h-[72px]">
         {lead}
         <div className="min-w-0 flex-1">
           <p className="truncate text-[13px] font-medium text-foreground">{title}</p>

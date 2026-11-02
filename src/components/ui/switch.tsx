@@ -36,14 +36,14 @@ function Switch({ checked, onCheckedChange, className, disabled, ...props }: Swi
       <span
         aria-hidden
         className={cn(
-          "relative h-5 w-9 rounded-full border border-input-border transition-colors duration-150",
-          checked ? "bg-foreground" : "bg-input-surface",
+          "relative h-5 w-9 rounded-full border transition-colors duration-150",
+          checked ? "border-foreground bg-foreground" : "border-muted-foreground/40 bg-input-surface",
         )}
       >
         <span
           className={cn(
-            "absolute top-1/2 size-[15px] -translate-y-1/2 rounded-full bg-background shadow-sm transition-[left] duration-150",
-            checked ? "left-[17px]" : "left-[2px]",
+            "absolute top-1/2 size-[15px] -translate-y-1/2 rounded-full shadow-sm transition-[left,background-color] duration-150",
+            checked ? "left-[17px] bg-background" : "left-[2px] bg-muted-foreground",
           )}
         />
       </span>

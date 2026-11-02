@@ -25,6 +25,7 @@ import { useMayChangeOwnerPower } from "@/hooks/useOwnerPower";
 import { notify } from "@/notifications";
 import { cn } from "@/lib/utils";
 import {
+  ConnectionFoot,
   ConnectionList,
   ConnectionMenu,
   ConnectionRow,
@@ -233,7 +234,7 @@ export default function SteadfastServiceCard({
   function listScreen() {
     return (
       <>
-        <ConnectionList kind="accounts">
+        <ConnectionList>
           {accounts.map((account) =>
             account.is_connected ? (
               <ConnectionRow
@@ -299,7 +300,7 @@ export default function SteadfastServiceCard({
             ),
           )}
         </ConnectionList>
-        <div className="flex flex-wrap items-center gap-3 border-t border-border px-4 py-3 sm:px-5">
+        <ConnectionFoot>
           {canManage ? (
             <Button type="button" variant="outline" size="sm" className={small} onClick={() => go({ kind: "connect" })}>
               <Plus className="size-3.5" aria-hidden />
@@ -308,7 +309,7 @@ export default function SteadfastServiceCard({
           ) : (
             <p className="text-[12px] text-muted-foreground">{tI("viewOnly")}</p>
           )}
-        </div>
+        </ConnectionFoot>
       </>
     );
   }
