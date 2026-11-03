@@ -88,6 +88,20 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-11-03-log-out-on-your-account-page",
+    date: "2026-11-03",
+    version: "4.194.0",
+    tag: "improved",
+    title: {
+      en: "Log out moved to your account page",
+      bn: "লগ আউট এখন আপনার অ্যাকাউন্ট পেজে",
+    },
+    body: {
+      en: "Log out is no longer in the menu with your name, so a wrong click can't sign you out. Open Your Paperbase account from that menu: Log out is at the bottom of the page, and it asks before signing you out.",
+      bn: "লগ আউট এখন আর আপনার নামের মেনুতে নেই, তাই ভুল ক্লিকে আর সাইন আউট হবে না। সেই মেনু থেকে \"আপনার Paperbase অ্যাকাউন্ট\" খুলুন: পেজের একদম নিচে লগ আউট আছে, আর সাইন আউট করার আগে সেটি জিজ্ঞেস করে নেয়।",
+    },
+  },
+  {
     id: "2026-11-02-a-cleaner-integrations-page",
     date: "2026-11-02",
     version: "4.193.1",
@@ -502,21 +516,6 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     body: {
       en: "Tick a main category in Customize, under Card photos, and its cards take each photo's own shape: no blank sides, nothing cut. The categories under it follow, and so does a home page row of it. Everywhere else, cards stay square.",
       bn: "কাস্টমাইজে \"কার্ডের ছবি\" থেকে কোনো মূল ক্যাটাগরিতে টিক দিন, তার কার্ডগুলো প্রতিটি ছবির নিজের মাপ নেবে: পাশে ফাঁকা থাকবে না, কিছু কাটাও পড়বে না। এর ভেতরের ক্যাটাগরি আর হোম পেজে এর সারিও তাই করবে। বাকি সব জায়গায় কার্ড চৌকোই থাকে।",
-    },
-    href: "/settings/customize",
-  },
-  {
-    id: "2026-10-04-buying-area-whatsapp-quantity-share",
-    date: "2026-10-04",
-    version: "4.175.0",
-    tag: "new",
-    title: {
-      en: "Quantity, WhatsApp orders and Share on product pages",
-      bn: "পণ্যের পাতায় পরিমাণ, WhatsApp-এ অর্ডার আর শেয়ার",
-    },
-    body: {
-      en: "Shoppers can pick a quantity, never more than you have, and order on WhatsApp with their choice already typed. Pressed before a size is chosen, the buttons show which choice is missing, and Share now works on computers too. Turn each part on or off in Customize, under Buying area.",
-      bn: "ক্রেতা এখন পরিমাণ বেছে নিতে পারেন, আপনার স্টকের বেশি নয়, আর পছন্দ আগেই লেখা অবস্থায় WhatsApp-এ অর্ডার করতে পারেন। সাইজ না বেছে বোতাম চাপলে দেখায় কোনটি বাছতে হবে, আর শেয়ার এখন কম্পিউটারেও কাজ করে। কাস্টমাইজে \"কেনার অংশ\" থেকে প্রতিটি চালু বা বন্ধ করুন।",
     },
     href: "/settings/customize",
   },
