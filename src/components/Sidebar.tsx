@@ -118,7 +118,7 @@ function SidebarContent({
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { signOut, meProfile, meProfileStatus } = useAuth();
+  const { meProfile, meProfileStatus } = useAuth();
   const { branding, navCounts, inventoryStatus } = useSidebarData();
   const { data: brandingData, isLoading: isBrandingLoading } = branding;
   const { counts, formatCount } = navCounts;
@@ -584,9 +584,6 @@ function SidebarContent({
                 whatsNewPendingRef.current = true;
               }}
               accountHref={meProfile?.support_session ? null : accountPageUrl()}
-              onSignOut={() => {
-                signOut();
-              }}
             />
           </DropdownMenuContent>
         </DropdownMenu>

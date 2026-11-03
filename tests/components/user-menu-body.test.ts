@@ -1,6 +1,8 @@
 /**
  * The account menu (owner, 2026-10-07: "A with C's What's new"): What's new says how many updates
- * are waiting, "9+" past nine, or that you're up to date, in English and Bangla.
+ * are waiting, "9+" past nine, or that you're up to date, in English and Bangla. No Log out
+ * (owner, 2026-11-03: it was hit by mistake): it is on "Your Paperbase account", and the menu's
+ * line to that page says so.
  */
 import { readFileSync } from "node:fs";
 import path from "node:path";
@@ -40,5 +42,25 @@ describe("the What's new line in the account menu", () => {
     const sidebar = readFileSync(path.join(__dirname, "../../src/components/Sidebar.tsx"), "utf8");
     expect(sidebar).toContain("<UserMenuBody");
     expect(sidebar).toContain("unreadCount={whatsNewUnreadCount}");
+  });
+});
+
+describe("Log out, on the account page instead of the menu", () => {
+  const menu = readFileSync(path.join(__dirname, "../../src/components/sidebar/UserMenuBody.tsx"), "utf8");
+
+  it("is not in the menu", () => {
+    expect(menu).not.toMatch(/LogOut|onSignOut|logOut/);
+    expect(en.sidebar).not.toHaveProperty("logOut");
+    expect(bn.sidebar).not.toHaveProperty("logOut");
+  });
+
+  it("is named on the menu's line to the account page", () => {
+    expect(menu).toContain('tSidebar("yourAccountHint")');
+    expect(en.sidebar.yourAccountHint).toBe("Profile, passkeys, log out");
+    expect(bn.sidebar.yourAccountHint).toBe("প্রোফাইল, পাসকি, লগ আউট");
+  });
+
+  it("has What's new under the account line (owner, 2026-11-03)", () => {
+    expect(menu.indexOf('tSidebar("yourAccount")')).toBeLessThan(menu.indexOf('tWhatsNew("menuLabel")'));
   });
 });

@@ -1,7 +1,7 @@
 "use client";
 
 import type { MouseEvent, ReactNode } from "react";
-import { ChevronRight, CircleUserRound, Globe, Laptop, LogOut, Moon, Palette, Sparkles, Sun } from "lucide-react";
+import { ChevronRight, CircleUserRound, Globe, Laptop, Moon, Palette, Sparkles, Sun } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { DropdownMenuItem, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
@@ -12,9 +12,10 @@ import { unreadLine } from "@/lib/whats-new/unread";
 
 /**
  * What the account menu holds (owner, 2026-10-07: design "A with C's What's new"): theme and
- * language as small switches on one row each, What's new as a tile that says how many updates
- * are waiting, the person's Paperbase account at Accounts (name, phone, picture, passkeys), and
- * Log out, quiet until pointed at.
+ * language as small switches on one row each, the person's Paperbase account at Accounts (name,
+ * phone, picture, passkeys), then What's new as a tile that says how many updates are waiting.
+ * Log out lives on that account page, not here (owner, 2026-11-03: it was hit by mistake); the
+ * account line says so, and What's new moved under it the same day.
  */
 export function UserMenuBody({
   theme,
@@ -24,7 +25,6 @@ export function UserMenuBody({
   unreadCount,
   onWhatsNew,
   accountHref,
-  onSignOut,
 }: {
   theme: ThemePreference;
   onThemeChange: (next: ThemePreference, event: MouseEvent) => void;
@@ -34,7 +34,6 @@ export function UserMenuBody({
   onWhatsNew: () => void;
   /** "Your Paperbase account" at Accounts; null in a support visit, which never opens it. */
   accountHref: string | null;
-  onSignOut: () => void;
 }) {
   const tSidebar = useTranslations("sidebar");
   const tLang = useTranslations("language");
@@ -70,6 +69,21 @@ export function UserMenuBody({
 
       <DropdownMenuSeparator className="mx-0 my-1" />
 
+      {accountHref ? (
+        <>
+          <DropdownMenuItem asChild className="mx-1 cursor-pointer gap-2.5 rounded-xs px-2.5 py-2 text-sm font-medium text-foreground">
+            <a href={accountHref}>
+              <CircleUserRound className="size-4 text-muted-foreground" aria-hidden />
+              <span className="flex min-w-0 flex-col leading-snug">
+                <span className="truncate">{tSidebar("yourAccount")}</span>
+                <span className="truncate text-xs font-normal text-muted-foreground">{tSidebar("yourAccountHint")}</span>
+              </span>
+            </a>
+          </DropdownMenuItem>
+          <DropdownMenuSeparator className="mx-0 my-1" />
+        </>
+      ) : null}
+
       <DropdownMenuItem
         onSelect={onWhatsNew}
         aria-label={unreadCount > 0 ? tWhatsNew("menuUnreadAria") : undefined}
@@ -84,29 +98,6 @@ export function UserMenuBody({
           <span className="size-2 shrink-0 rounded-full bg-emerald-500 ring-[3px] ring-emerald-500/20" aria-hidden />
         ) : null}
         <ChevronRight className="size-4 text-muted-foreground" aria-hidden />
-      </DropdownMenuItem>
-
-      <DropdownMenuSeparator className="mx-0 my-1" />
-
-      {accountHref ? (
-        <DropdownMenuItem asChild className="mx-1 cursor-pointer gap-2.5 rounded-xs px-2.5 py-2 text-sm font-medium text-foreground">
-          <a href={accountHref}>
-            <CircleUserRound className="size-4 text-muted-foreground" aria-hidden />
-            <span>{tSidebar("yourAccount")}</span>
-          </a>
-        </DropdownMenuItem>
-      ) : null}
-
-      <DropdownMenuItem
-        onSelect={onSignOut}
-        className={cn(
-          "mx-1 cursor-pointer gap-2.5 rounded-xs px-2.5 py-2 text-sm font-medium text-muted-foreground",
-          "focus:bg-red-500/10 focus:text-red-700 dark:focus:bg-red-500/15 dark:focus:text-red-300"
-        )}
-      >
-        {/* text-current: the icon takes the row's colour, grey at rest and red when pointed at. */}
-        <LogOut className="size-4 text-current" aria-hidden />
-        <span>{tSidebar("logOut")}</span>
       </DropdownMenuItem>
     </div>
   );

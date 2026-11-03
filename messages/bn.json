@@ -1687,7 +1687,6 @@
     "light": "লাইট",
     "dark": "ডার্ক",
     "system": "সিস্টেম",
-    "logOut": "লগ আউট",
     "twoFaSwitchPrompt": "স্টোর বদলাতে আপনার ২এফএ কোড লিখুন:",
     "searchPlaces": "পেজ ও সেটিংস",
     "searchActions": "কাজ",
@@ -1697,7 +1696,8 @@
     "searchRecent": "সাম্প্রতিক খোঁজ",
     "searchClearRecent": "মুছুন",
     "searchKeysHint": "↑ ↓ দিয়ে সরান · Enter দিয়ে খুলুন · Esc দিয়ে বন্ধ করুন",
-    "yourAccount": "আপনার Paperbase অ্যাকাউন্ট"
+    "yourAccount": "আপনার Paperbase অ্যাকাউন্ট",
+    "yourAccountHint": "প্রোফাইল, পাসকি, লগ আউট"
   },
   "whatsNew": {
     "menuLabel": "নতুন কী আছে",

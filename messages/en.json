@@ -1687,7 +1687,6 @@
     "light": "Light",
     "dark": "Dark",
     "system": "System",
-    "logOut": "Log out",
     "twoFaSwitchPrompt": "Enter your 2FA code to switch stores:",
     "searchPlaces": "Pages & settings",
     "searchActions": "Actions",
@@ -1697,7 +1696,8 @@
     "searchRecent": "Recent searches",
     "searchClearRecent": "Clear",
     "searchKeysHint": "↑ ↓ to move · Enter to open · Esc to close",
-    "yourAccount": "Your Paperbase account"
+    "yourAccount": "Your Paperbase account",
+    "yourAccountHint": "Profile, passkeys, log out"
   },
   "whatsNew": {
     "menuLabel": "What's new",
