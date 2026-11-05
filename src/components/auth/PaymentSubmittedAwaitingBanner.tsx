@@ -4,20 +4,10 @@ import { useLocale, useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import { numberTextClass } from "@/lib/number-font";
 
-interface PaymentSubmittedAwaitingBannerProps {
-  endDate?: string | null;
-  storefrontBlocksAt?: string | null;
-}
-
-export default function PaymentSubmittedAwaitingBanner({
-  endDate,
-  storefrontBlocksAt,
-}: PaymentSubmittedAwaitingBannerProps) {
+export default function PaymentSubmittedAwaitingBanner() {
   const locale = useLocale();
   const numClass = numberTextClass(locale);
   const t = useTranslations("dashboardLayout");
-  void endDate;
-  void storefrontBlocksAt;
   const line = t("paymentSubmittedBannerOneLineNoTimer");
 
   return (

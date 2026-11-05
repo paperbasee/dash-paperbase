@@ -77,31 +77,34 @@ export function yearlySaving(groups: PlanGroup[]): { low: number; high: number }
 }
 
 /**
- * The shop's own plan, as the Plans page reads it: its end, the days left, and the last day paid
- * for when the next period is already paid (null otherwise).
+ * The shop's own plan while it runs, as the Plans page reads it: when it ends, to the minute, how long
+ * it still runs, and when the paid time ends when the next period is already paid (null otherwise).
  */
 export type CurrentPlan = {
   id: string;
   name: string;
   trial: boolean;
-  ended: boolean;
-  endDate: string | null;
-  daysLeft: number;
+  /** ISO 8601. */
+  endsAt: string | null;
+  msLeft: number;
+  /** ISO 8601. */
   paidUntil: string | null;
 };
 
 /**
- * Paying is offered in a plan's last this many days (owner, 2026-10-09): a period paid early starts
- * the day after the current one ends, so no day is lost (api billing activate_subscription).
+ * Paying is offered in a plan's last this many days (owner, 2026-10-09): approved before the end, a
+ * period paid early starts the moment the current one ends, so no time is lost (api billing
+ * activate_subscription).
  */
 export const PAY_AHEAD_DAYS = 7;
+const DAY_MS = 86_400_000;
 
 /**
  * A card's button (owner, 2026-10-03; paying early, 2026-10-09). While the shop's paid plan has
- * more than PAY_AHEAD_DAYS to run, no card has one; in its last week, on its grace day and after,
- * its own card renews, its other cycle and the other plans switch -- the new period starting when
- * the current one ends. None once the next period is paid. On a trial, or with no plan, every plan
- * is chosen like any other.
+ * more than PAY_AHEAD_DAYS to run, no card has one; in its last week its own card renews, its other
+ * cycle and the other plans switch -- the new period starting the moment the current one ends. None
+ * once the next period is paid. On a trial, with no plan, or once the plan has ended, every plan is
+ * chosen like any other.
  */
 export function cardAction(
   current: CurrentPlan | null,
@@ -109,26 +112,21 @@ export function cardAction(
 ): "renew" | "switchToYearly" | "switchToMonthly" | "switchTo" | "select" | null {
   if (!current || current.trial) return "select";
   if (current.paidUntil) return null;
-  if (!current.ended && current.daysLeft > PAY_AHEAD_DAYS) return null;
+  if (current.msLeft > PAY_AHEAD_DAYS * DAY_MS) return null;
   if (plan.public_id === current.id) return "renew";
   if (plan.name !== current.name) return "switchTo";
   return plan.billing_cycle === "yearly" ? "switchToYearly" : "switchToMonthly";
 }
 
-/** The day switching opens on a paid plan: the first of its last week. None on a trial or when paid ahead. */
+/** When switching opens on a paid plan: PAY_AHEAD_DAYS before its end. None on a trial or when paid ahead. */
 export function switchOpens(current: CurrentPlan | null): string | null {
-  if (!current?.endDate || current.trial || current.paidUntil) return null;
-  return shiftDay(current.endDate, -PAY_AHEAD_DAYS);
+  if (!current?.endsAt || current.trial || current.paidUntil) return null;
+  return new Date(Date.parse(current.endsAt) - PAY_AHEAD_DAYS * DAY_MS).toISOString();
 }
 
-/** The day a period paid now would start: the day after the current one (or the trial) ends. */
+/** When a period paid now would start, if approved before then: the moment the current one (or the trial) ends. */
 export function nextStart(current: CurrentPlan | null): string | null {
-  return current?.endDate ? shiftDay(current.endDate, 1) : null;
-}
-
-function shiftDay(ymd: string, days: number): string {
-  const [year, month, day] = ymd.slice(0, 10).split("-").map(Number);
-  return new Date(Date.UTC(year, month - 1, day + days)).toISOString().slice(0, 10);
+  return current?.endsAt ?? null;
 }
 
 /** A switch in `features.features`, or a number in `features.limits`, that a plan may change. */

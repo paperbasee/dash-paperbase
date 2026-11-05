@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, type CSSProperties } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { usePathname, useRouter } from "@/i18n/navigation";
 import { History } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
@@ -31,6 +31,7 @@ import {
   hasVisitedPlans,
   shouldOfferInitialPlanSelection,
 } from "@/lib/plans-onboarding";
+import { formatBillingMoment } from "@/lib/billing";
 import { setupUnfinished, subscriptionIsPaidPeriod } from "@/lib/subscription-access";
 import { resolveSubscriptionUIStateFromMe } from "@/lib/subscription-ui-state";
 import SubscriptionAccessBlock from "@/components/auth/SubscriptionAccessBlock";
@@ -74,6 +75,7 @@ export default function DashboardLayoutClient({
   const tSheet = useTranslations("sheet");
   const tDashboard = useTranslations("dashboard");
   const tDashboardLayout = useTranslations("dashboardLayout");
+  const locale = useLocale();
   const {
     isAuthenticated,
     authHydrated,
@@ -284,10 +286,7 @@ export default function DashboardLayoutClient({
               ) : null}
               {showTopBannerStrip && subscriptionUiState === "pending_review" ? (
                 meProfile?.latest_payment_status === "PENDING_REVIEW" ? (
-                  <PaymentSubmittedAwaitingBanner
-                    endDate={subscription?.end_date ?? null}
-                    storefrontBlocksAt={subscription?.storefront_blocks_at ?? null}
-                  />
+                  <PaymentSubmittedAwaitingBanner />
                 ) : (
                   <div
                     role="status"
@@ -303,12 +302,9 @@ export default function DashboardLayoutClient({
                   </div>
                 )
               ) : null}
-              {showTopBannerStrip && (subscriptionUiState === "grace" || subscriptionUiState === "expired") ? (
+              {showTopBannerStrip && subscriptionUiState === "expired" ? (
                 <SubscriptionExpirationBanner
-                  variant={subscriptionUiState}
                   planPublicId={subscription?.plan_public_id ?? null}
-                  storefrontBlocksAt={subscription?.storefront_blocks_at ?? null}
-                  endDate={subscription?.end_date ?? null}
                   moderatorNotice={isModerator}
                 />
               ) : null}
@@ -320,7 +316,7 @@ export default function DashboardLayoutClient({
                   <div className={NOTICE_ROW}>
                     <p className={cn(NOTICE_TEXT, "text-foreground")}>
                       {tDashboardLayout("trialBannerText", {
-                        days: subscription?.days_remaining ?? 0,
+                        end: subscription?.ends_at ? formatBillingMoment(subscription.ends_at, locale) : "",
                       })}{" "}
                       <DeferredNavLink
                         href="/plans"

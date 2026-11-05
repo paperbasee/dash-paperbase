@@ -100,7 +100,7 @@ export default function BillingSection({ hidden }: { hidden: boolean }) {
               band={billingBand(sub, meProfile?.latest_payment_status ?? null, overview.data)}
               plan={plan}
               planName={sub.plan}
-              endDate={sub.end_date}
+              endsAt={sub.ends_at}
               canAct={!inSupportMode}
               paying={paying}
               payError={payError}

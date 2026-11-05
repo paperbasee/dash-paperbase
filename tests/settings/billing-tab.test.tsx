@@ -66,8 +66,15 @@ function payment(fields: Partial<BillingPayment> = {}): BillingPayment {
   };
 }
 
+/** Thursday 21 Oct 2026, 9:54 AM in Dhaka: the band's "now". */
+const NOW = Date.parse("2026-10-21T03:54:00Z");
+const HOUR = 3_600_000;
+const DAY = 24 * HOUR;
+const at = (ms: number) => new Date(ms).toISOString();
+
 const overview: BillingOverview = {
-  period: { start_date: "2026-10-09", end_date: "2026-11-08" },
+  // 30 days to the minute: 9 Oct at 9:54 AM to 8 Nov at 9:54 AM (Dhaka).
+  period: { starts_at: "2026-10-09T03:54:00Z", ends_at: "2026-11-08T03:54:00Z" },
   products: { count: 312, limit: 500 },
   payments: [payment()],
   paid: { total: "1800.00", count: 1, since: "2026-10-09T04:00:00Z" },
@@ -78,8 +85,8 @@ function sub(fields: Partial<MeSubscription> = {}): MeSubscription {
     subscription_status: "ACTIVE",
     plan: "Premium",
     plan_public_id: "pln_premium_m",
-    end_date: "2026-11-08",
-    days_remaining: 18,
+    starts_at: "2026-10-09T03:54:00Z",
+    ends_at: "2026-11-08T03:54:00Z",
     is_trial: false,
     active_row_calendar_status: "ACTIVE",
     next_period: null,
@@ -87,13 +94,21 @@ function sub(fields: Partial<MeSubscription> = {}): MeSubscription {
   };
 }
 
-function band(subscription: MeSubscription, latest: "REJECTED" | "PENDING_REVIEW" | null = null, data = overview, locale: "en" | "bn" = "en", canAct = true) {
+/** The period the overview holds is the one /auth/me/ dates: the same end. */
+function periodOf(subscription: MeSubscription): BillingOverview["period"] {
+  return subscription.starts_at && subscription.ends_at
+    ? { starts_at: subscription.starts_at, ends_at: subscription.ends_at }
+    : null;
+}
+
+function band(subscription: MeSubscription, latest: "REJECTED" | "PENDING_REVIEW" | null = null, data?: BillingOverview, locale: "en" | "bn" = "en", canAct = true) {
+  const shown = data ?? { ...overview, period: periodOf(subscription) };
   return draw(
     <BillingBand
-      band={billingBand(subscription, latest, data)}
+      band={billingBand(subscription, latest, shown, NOW)}
       plan={premium}
       planName={subscription.plan}
-      endDate={subscription.end_date}
+      endsAt={subscription.ends_at}
       canAct={canAct}
       paying={false}
       payError={null}
@@ -106,43 +121,56 @@ function band(subscription: MeSubscription, latest: "REJECTED" | "PENDING_REVIEW
 const text = (html: string) => html.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ");
 
 describe("the band", () => {
-  it("while the plan runs: the days left, until when, the next payment, and no pay button", () => {
+  it("while the plan runs: the days left, until when to the minute, the next payment, and no pay button", () => {
     const html = band(sub());
     expect(text(html)).toContain("Premium · Monthly Active");
     expect(text(html)).toContain("18 days left");
-    expect(text(html)).toContain("Paid until 8 Nov 2026.");
-    expect(text(html)).toContain("Next payment: ৳1,800 on 9 Nov 2026.");
-    expect(html).toContain('aria-label="18 of 31 days left"');
+    expect(text(html)).toContain("Paid until 8 Nov 2026, 9:54 am.");
+    expect(text(html)).toContain("Next payment: ৳1,800 on 8 Nov 2026, 9:54 am.");
+    expect(html).toContain('aria-label="18 of 30 days left"');
     expect(html).not.toContain("Pay ৳1,800 now");
     // Nothing to do: the tab's own "Compare plans" is the way to the plans.
     expect(html).not.toContain('href="/plans"');
   });
 
-  it("in its last week, offers to pay for the next period, which starts when this one ends", () => {
-    const html = text(band(sub({ days_remaining: 6 })));
+  it("in its last week, offers to pay for the next period, which starts the moment this one ends", () => {
+    const html = text(band(sub({ ends_at: at(NOW + 6 * DAY) })));
     expect(html).toContain("Ends in 6 days");
-    expect(html).toContain("Pay now and the next period starts on 9 Nov 2026: no day is lost.");
+    expect(html).toContain(
+      "Pay now: approved before 27 Oct 2026, 9:54 am, the next period starts exactly then, so no time is lost.",
+    );
     expect(html).toContain("Pay ৳1,800 now");
-    expect(html).toContain("Starts 9 Nov 2026");
-    expect(text(band(sub({ days_remaining: 0 })))).toContain("Ends today");
+    expect(html).toContain("Starts 27 Oct 2026, 9:54 am");
+  });
+
+  it("on its last day, counts the hours", () => {
+    const html = text(band(sub({ ends_at: at(NOW + 5 * HOUR + 10 * 60_000) })));
+    expect(html).toContain("Ends in 5 hours");
+    expect(html).toContain("5 hours left");
+    expect(text(band(sub({ ends_at: at(NOW + 20 * 60_000) })))).toContain("Ends within the hour");
   });
 
   it("with the next period paid, says so and asks nothing", () => {
-    const next = { plan: "Premium", plan_public_id: "pln_premium_y", billing_cycle: "yearly" as const, start_date: "2026-11-09", end_date: "2027-11-08" };
-    const html = text(band(sub({ days_remaining: 2, next_period: next })));
+    const next = {
+      plan: "Premium",
+      plan_public_id: "pln_premium_y",
+      billing_cycle: "yearly" as const,
+      starts_at: "2026-10-23T03:54:00Z",
+      ends_at: "2027-10-23T03:54:00Z",
+    };
+    const html = text(band(sub({ ends_at: next.starts_at, next_period: next })));
     expect(html).toContain("Active");
-    expect(html).toContain("Paid ahead: Premium · Yearly, 9 Nov 2026 to 8 Nov 2027.");
+    expect(html).toContain("Paid ahead: Premium · Yearly, 23 Oct 2026, 9:54 am to 23 Oct 2027, 9:54 am.");
     expect(html).not.toContain("Pay ৳1,800 now");
   });
 
-  it("on its grace day, and after it, offers to pay and says what happens to the shop", () => {
-    const grace = text(band(sub({ subscription_status: "GRACE", days_remaining: 0, active_row_calendar_status: "GRACE" })));
-    expect(grace).toContain("Grace day");
-    expect(grace).toContain("your shop closes to shoppers at midnight");
-    expect(grace).toContain("Pay ৳1,800 now");
-    const ended = text(band(sub({ subscription_status: "EXPIRED", days_remaining: 0, active_row_calendar_status: "EXPIRED" })));
-    expect(ended).toContain("Premium ended on 8 Nov 2026.");
+  it("the moment it has ended, offers to pay and says the shop is closed", () => {
+    const ended = text(
+      band(sub({ subscription_status: "EXPIRED", active_row_calendar_status: "EXPIRED", ends_at: "2026-10-20T03:54:00Z" })),
+    );
+    expect(ended).toContain("Premium ended on 20 Oct 2026, 9:54 am.");
     expect(ended).toContain("closed to shoppers until you pay");
+    expect(ended).toContain("Pay ৳1,800 now");
   });
 
   it("names the payment being checked, and the one not found", () => {
@@ -157,36 +185,38 @@ describe("the band", () => {
   });
 
   it("a trial and no plan at all choose one", () => {
-    expect(text(band(sub({ is_trial: true, days_remaining: 9 })))).toContain("Free trial");
-    const none = text(band(sub({ subscription_status: "NONE", plan: null, plan_public_id: null, end_date: null }), null, { ...overview, period: null }));
+    expect(text(band(sub({ is_trial: true, ends_at: at(NOW + 9 * DAY) })))).toContain("Free trial");
+    const none = text(band(sub({ subscription_status: "NONE", plan: null, plan_public_id: null, starts_at: null, ends_at: null })));
     expect(none).toContain("No plan yet");
     expect(none).toContain("Choose a plan");
   });
 
   it("Paperbase support reads it without a button", () => {
-    const html = band(sub({ subscription_status: "GRACE", days_remaining: 0, active_row_calendar_status: "GRACE" }), null, overview, "en", false);
+    const html = band(sub({ subscription_status: "EXPIRED", active_row_calendar_status: "EXPIRED" }), null, undefined, "en", false);
     expect(html).not.toContain("Pay ৳1,800 now");
     expect(html).not.toContain('href="/plans"');
   });
 
   it("speaks Bangla, in Bangla digits, in every state", () => {
+    const next = { plan: "Premium", plan_public_id: "p", billing_cycle: "monthly" as const, starts_at: "2026-10-22T03:54:00Z", ends_at: "2026-11-21T03:54:00Z" };
     const states: [MeSubscription, "REJECTED" | "PENDING_REVIEW" | null][] = [
       [sub(), null],
-      [sub({ days_remaining: 1 }), null],
-      [sub({ days_remaining: 1, next_period: { plan: "Premium", plan_public_id: "p", billing_cycle: "monthly", start_date: "2026-11-09", end_date: "2026-12-08" } }), null],
+      [sub({ ends_at: at(NOW + DAY + HOUR) }), null],
+      [sub({ ends_at: at(NOW + 5 * HOUR) }), null],
+      [sub({ ends_at: next.starts_at, next_period: next }), null],
       [sub({ is_trial: true }), null],
-      [sub({ subscription_status: "GRACE", days_remaining: 0, active_row_calendar_status: "GRACE" }), null],
-      [sub({ subscription_status: "EXPIRED", days_remaining: 0, active_row_calendar_status: "EXPIRED" }), null],
+      [sub({ subscription_status: "EXPIRED", active_row_calendar_status: "EXPIRED" }), null],
       [sub({ subscription_status: "PENDING_REVIEW" }), "PENDING_REVIEW"],
       [sub({ subscription_status: "REJECTED" }), "REJECTED"],
       [sub({ subscription_status: "NONE", plan: null }), null],
     ];
     for (const [subscription, latest] of states) {
-      const html = band(subscription, latest, { ...overview, payments: [payment({ status: "pending" }), payment({ status: "failed" })] }, "bn");
+      const data = { ...overview, period: periodOf(subscription), payments: [payment({ status: "pending" }), payment({ status: "failed" })] };
+      const html = band(subscription, latest, data, "bn");
       // Two English words in a row on screen would be a sentence left in English (names stand alone).
       expect(text(html)).not.toMatch(/[A-Za-z]{4,} [A-Za-z]{4,}/);
     }
-    expect(text(band(sub(), null, overview, "bn"))).toContain("১৮");
+    expect(text(band(sub(), null, undefined, "bn"))).toContain("১৮");
   });
 });
 

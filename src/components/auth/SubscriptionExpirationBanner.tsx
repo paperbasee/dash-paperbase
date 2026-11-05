@@ -1,28 +1,17 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { useLocale, useTranslations } from "next-intl";
+import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { useDeferredNavigate } from "@/hooks/useDeferredNavigate";
 import api from "@/lib/api";
 import { payRefusal } from "@/lib/billing";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { numberTextClass } from "@/lib/number-font";
-import {
-  formatTimeLeftHm,
-  resolveStorefrontBlocksAtIso,
-} from "@/lib/storefront-blocks-at";
-
-export type SubscriptionBannerVariant = "grace" | "expired";
 
 interface SubscriptionExpirationBannerProps {
-  variant: SubscriptionBannerVariant;
   /** Current plan public id from auth/me — used to open checkout for the same plan. */
   planPublicId?: string | null;
-  /** From auth/me; fallback computed from `endDate` when absent (older caches). */
-  storefrontBlocksAt?: string | null;
-  endDate?: string | null;
   /**
    * Moderators see the active store’s subscription (owner billing), not their own.
    * Uses store-focused copy and hides pay/renew (only the owner can renew).
@@ -30,44 +19,20 @@ interface SubscriptionExpirationBannerProps {
   moderatorNotice?: boolean;
 }
 
+/**
+ * The plan has ended, and the shop with it: plans run to the minute since 2026-11-05, with no free
+ * day in which to warn before it closes.
+ */
 export default function SubscriptionExpirationBanner({
-  variant,
   planPublicId,
-  storefrontBlocksAt,
-  endDate,
   moderatorNotice = false,
 }: SubscriptionExpirationBannerProps) {
-  const locale = useLocale();
-  const numClass = numberTextClass(locale);
   const t = useTranslations("dashboardLayout");
   const tPay = useTranslations("billingPay");
   const router = useRouter();
   const navigate = useDeferredNavigate();
   const [payLoading, setPayLoading] = useState(false);
   const [payError, setPayError] = useState<string | null>(null);
-  const [now, setNow] = useState(() => Date.now());
-
-  const deadlineMs = useMemo(() => {
-    const iso = resolveStorefrontBlocksAtIso(endDate, storefrontBlocksAt);
-    if (!iso) return null;
-    const parsed = Date.parse(iso);
-    return Number.isNaN(parsed) ? null : parsed;
-  }, [endDate, storefrontBlocksAt]);
-
-  useEffect(() => {
-    if (variant !== "grace" || deadlineMs == null) return;
-    const id = window.setInterval(() => setNow(Date.now()), 1000);
-    return () => window.clearInterval(id);
-  }, [variant, deadlineMs]);
-
-  const messageKey = variant === "grace" ? "graceBannerText" : "expiredBannerText";
-  const moderatorMessageKey =
-    variant === "grace" ? "moderatorGraceBannerText" : "moderatorExpiredBannerText";
-  const moderatorNoTimerKey = "moderatorGraceBannerTextNoTimer";
-  const showGraceTimer = variant === "grace" && deadlineMs != null;
-  const timeLeftHm = showGraceTimer
-    ? formatTimeLeftHm(deadlineMs - now)
-    : null;
 
   async function handlePay() {
     const id = (planPublicId ?? "").trim();
@@ -99,25 +64,7 @@ export default function SubscriptionExpirationBanner({
       <div className="mx-auto flex w-full max-w-[88rem] flex-wrap items-center justify-center gap-x-2 gap-y-1 px-2 py-1 text-center md:gap-x-3 md:px-4 md:py-1">
         <div className="flex max-w-3xl flex-wrap items-center justify-center gap-1 sm:gap-1.5">
           <p className="text-center text-[11px] leading-snug text-red-800 sm:text-xs dark:text-red-200">
-            {variant === "grace" ? (
-              <span className={cn("font-medium", numClass)}>
-                {moderatorNotice ? (
-                  timeLeftHm != null ? (
-                    t(moderatorMessageKey, { time: timeLeftHm })
-                  ) : (
-                    t(moderatorNoTimerKey)
-                  )
-                ) : timeLeftHm != null ? (
-                  t("graceBannerText", { time: timeLeftHm })
-                ) : (
-                  t("graceBannerTextNoTimer")
-                )}
-              </span>
-            ) : moderatorNotice ? (
-              <span>{t(moderatorMessageKey)}</span>
-            ) : (
-              <span>{t(messageKey)}</span>
-            )}
+            <span>{t(moderatorNotice ? "moderatorExpiredBannerText" : "expiredBannerText")}</span>
           </p>
         </div>
         {!moderatorNotice ? (
@@ -129,7 +76,7 @@ export default function SubscriptionExpirationBanner({
             loading={payLoading}
             onClick={() => void handlePay()}
           >
-            {variant === "grace" ? t("bannerPayNow") : t("expiredBannerPay")}
+            {t("expiredBannerPay")}
           </Button>
           {payError ? (
             <span className="text-xs text-red-800 dark:text-red-200">{payError}</span>

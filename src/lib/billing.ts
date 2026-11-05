@@ -4,9 +4,10 @@
  * cap, the payments made) beside what /auth/me/ says of the plan; the Plans page shares how money
  * and days are written.
  *
- * The band at the top says where the plan stands. It offers to pay in the plan's last week
- * (PAY_AHEAD_DAYS), on its grace day and after it, and after a payment not found: a period paid
- * early starts the day after the current one ends, so no day is lost (api billing
+ * The band at the top says where the plan stands. Plans run to the minute (2026-11-05): the shop
+ * stops at the plan's exact end, with no free day. It offers to pay in the plan's last week
+ * (PAY_AHEAD_DAYS), after it ends, and after a payment not found: approved before the end, a period
+ * paid early starts the moment the current one ends, so no time is lost (api billing
  * activate_subscription; plans-compare `cardAction` holds the same rule). Once the next period is
  * paid, nothing is ending and nothing is asked.
  */
@@ -36,8 +37,8 @@ export interface BillingPayment {
 }
 
 export interface BillingOverview {
-  /** The period in force (YYYY-MM-DD, both days included); none without a plan. */
-  period: { start_date: string; end_date: string } | null;
+  /** The period in force, its exact start and end (ISO 8601); none without a plan. */
+  period: { starts_at: string; ends_at: string } | null;
   /** Products against the plan's cap; `limit` null when the plan sets none. */
   products: { count: number; limit: number | null };
   /** Newest first. */
@@ -81,6 +82,19 @@ export function formatBillingDay(value: string, locale: string): string {
   }).format(Date.UTC(year, month - 1, day));
 }
 
+/** "5 Dec 2026, 9:54 am" in the reader's language and digits: a moment the API gives, in Dhaka time. */
+export function formatBillingMoment(value: string, locale: string): string {
+  return new Intl.DateTimeFormat(locale === "bn" ? "bn-BD" : "en-GB", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+    timeZone: "Asia/Dhaka",
+  }).format(new Date(value));
+}
+
 /** "Jul 2026" in the reader's language, for a time the API gives. */
 export function formatBillingMonth(value: string, locale: string): string {
   const [year, month] = dhakaDay(value).split("-").map(Number);
@@ -90,25 +104,19 @@ export function formatBillingMonth(value: string, locale: string): string {
 }
 
 const DAY_MS = 86_400_000;
+const HOUR_MS = 3_600_000;
 
-function dayNumber(ymd: string): number {
-  const [year, month, day] = ymd.split("-").map(Number);
-  return Date.UTC(year, month - 1, day) / DAY_MS;
-}
-
-function dayAfter(ymd: string): string {
-  return new Date((dayNumber(ymd) + 1) * DAY_MS).toISOString().slice(0, 10);
-}
-
-export type BandLane = "active" | "endingSoon" | "trial" | "grace" | "expired" | "checking" | "notFound" | "none";
+export type BandLane = "active" | "endingSoon" | "trial" | "expired" | "checking" | "notFound" | "none";
 
 export interface Band {
   lane: BandLane;
-  /** Days left of the paid period, for the ring; null when none is running. */
+  /** Whole days left of the paid period, for the ring; null when none is running. */
   daysLeft: number | null;
+  /** Whole hours left past those days: what a plan on its last day says. */
+  hoursLeft: number | null;
   /** The period's length in days. */
   periodDays: number | null;
-  /** The next payment's day: the day after the period ends. */
+  /** When the next payment is due: the moment the period ends (ISO 8601). */
   nextDue: string | null;
   /** The payment the band is about: the one being checked, or the one not found. */
   payment: BillingPayment | null;
@@ -121,7 +129,6 @@ export interface Band {
 const LANES: Record<ReturnType<typeof resolveSubscriptionUIState>, BandLane> = {
   rejected: "notFound",
   pending_review: "checking",
-  grace: "grace",
   expired: "expired",
   inactive: "none",
   trial: "trial",
@@ -132,27 +139,29 @@ export function billingBand(
   sub: MeSubscription,
   latestPaymentStatus: LatestPaymentStatus | null,
   overview: BillingOverview,
+  now: number = Date.now(),
 ): Band {
   const next = sub.next_period ?? null;
-  let lane = LANES[resolveSubscriptionUIState(sub.subscription_status, latestPaymentStatus, sub.is_trial === true)];
-  if (lane === "active" && !next && sub.days_remaining <= PAY_AHEAD_DAYS) lane = "endingSoon";
-
   // A paid period still running, also under a renewal being checked or refused (/auth/me/).
-  const calendar = sub.subscription_status === "PENDING_REVIEW" || sub.subscription_status === "REJECTED"
+  const status = sub.subscription_status === "PENDING_REVIEW" || sub.subscription_status === "REJECTED"
     ? sub.active_row_calendar_status
     : sub.subscription_status;
-  const daysLeft = calendar === "ACTIVE" ? sub.days_remaining : calendar === "GRACE" ? 0 : null;
+  const left = status === "ACTIVE" && sub.ends_at ? Math.max(0, Date.parse(sub.ends_at) - now) : null;
+
+  let lane = LANES[resolveSubscriptionUIState(sub.subscription_status, latestPaymentStatus, sub.is_trial === true)];
+  if (lane === "active" && !next && left !== null && left <= PAY_AHEAD_DAYS * DAY_MS) lane = "endingSoon";
 
   const period = overview.period;
   const about = lane === "checking" ? "pending" : lane === "notFound" ? "failed" : null;
   return {
     lane,
-    daysLeft,
-    periodDays: period ? dayNumber(period.end_date) - dayNumber(period.start_date) + 1 : null,
-    nextDue: period ? dayAfter(period.end_date) : null,
+    daysLeft: left === null ? null : Math.floor(left / DAY_MS),
+    hoursLeft: left === null ? null : Math.floor((left % DAY_MS) / HOUR_MS),
+    periodDays: period ? Math.round((Date.parse(period.ends_at) - Date.parse(period.starts_at)) / DAY_MS) : null,
+    nextDue: period ? period.ends_at : null,
     payment: about ? (overview.payments.find((p) => p.status === about) ?? null) : null,
     action:
-      lane === "endingSoon" || lane === "grace" || lane === "expired" || lane === "notFound"
+      lane === "endingSoon" || lane === "expired" || lane === "notFound"
         ? "pay"
         : lane === "trial" || lane === "none"
           ? "choose"

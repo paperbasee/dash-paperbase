@@ -15,6 +15,7 @@ import { CircleCheck } from "@/components/ui/circle-check";
 import {
   formatBillingAmount,
   formatBillingDay,
+  formatBillingMoment,
   formatBillingMonth,
   type Band,
   type BandLane,
@@ -33,7 +34,6 @@ const TONE: Record<BandLane, { ring: string; pill: string }> = {
   active: { ring: "stroke-emerald-400", pill: "bg-emerald-400/15 text-emerald-300" },
   trial: { ring: "stroke-sky-400", pill: "bg-sky-400/15 text-sky-300" },
   endingSoon: { ring: "stroke-amber-400", pill: "bg-amber-400/15 text-amber-300" },
-  grace: { ring: "stroke-amber-400", pill: "bg-amber-400/15 text-amber-300" },
   checking: { ring: "stroke-sky-400", pill: "bg-sky-400/15 text-sky-300" },
   notFound: { ring: "stroke-red-400", pill: "bg-red-400/15 text-red-300" },
   expired: { ring: "stroke-red-400", pill: "bg-red-400/15 text-red-300" },
@@ -52,14 +52,21 @@ function useDigits() {
   return { locale, digits: (n: number) => toLocaleDigits(new Intl.NumberFormat("en-US").format(n), locale), numClass: numberTextClass(locale) };
 }
 
-/** The days left of the period, out of its length; a mark instead when none are counted. */
+/**
+ * The days left of the period, out of its length -- the hours on its last day; a mark instead when
+ * none are counted.
+ */
 export function DaysRing({ band }: { band: Band }) {
   const t = useTranslations("settings.billing.ring");
   const { digits, numClass } = useDigits();
   const radius = 56;
   const around = 2 * Math.PI * radius;
   const counted = band.daysLeft !== null && band.periodDays !== null;
-  const share = counted ? Math.min(1, Math.max(0, band.daysLeft! / band.periodDays!)) : 0;
+  const share = counted
+    ? Math.min(1, Math.max(0, (band.daysLeft! + (band.hoursLeft ?? 0) / 24) / band.periodDays!))
+    : 0;
+  const lastDay = counted && band.daysLeft === 0;
+  const shown = lastDay ? (band.hoursLeft ?? 0) : (band.daysLeft ?? 0);
   const Mark = MARK[band.lane] ?? Check;
   return (
     <div
@@ -87,8 +94,8 @@ export function DaysRing({ band }: { band: Band }) {
       <div className="absolute inset-0 flex flex-col items-center justify-center">
         {counted ? (
           <>
-            <span className={cn("text-[34px] font-semibold leading-none", numClass)}>{digits(band.daysLeft!)}</span>
-            <span className="mt-1 text-xs text-white/70">{t("daysLeft", { count: band.daysLeft! })}</span>
+            <span className={cn("text-[34px] font-semibold leading-none", numClass)}>{digits(shown)}</span>
+            <span className="mt-1 text-xs text-white/70">{t(lastDay ? "hoursLeft" : "daysLeft", { count: shown })}</span>
           </>
         ) : (
           <Mark className="size-9 text-white/80" strokeWidth={1.5} aria-hidden />
@@ -103,7 +110,7 @@ export function BillingBand({
   band,
   plan,
   planName,
-  endDate,
+  endsAt,
   canAct,
   paying,
   payError,
@@ -113,7 +120,8 @@ export function BillingBand({
   /** The shop's plan in Paperbase's list; null when the list does not hold it. */
   plan: Plan | null;
   planName: string | null;
-  endDate: string | null;
+  /** When the period ends, to the minute (ISO 8601). */
+  endsAt: string | null;
   /** False for Paperbase support signed in as the owner: they read, the owner pays. */
   canAct: boolean;
   paying: boolean;
@@ -130,11 +138,12 @@ export function BillingBand({
       : "";
   const values = {
     plan: planName ?? "",
-    end: endDate ? formatBillingDay(endDate, locale) : "",
-    next: band.nextDue ? formatBillingDay(band.nextDue, locale) : "",
+    end: endsAt ? formatBillingMoment(endsAt, locale) : "",
+    next: band.nextDue ? formatBillingMoment(band.nextDue, locale) : "",
     amount,
     trx: band.payment?.transaction_id ?? "",
     count: band.daysLeft ?? 0,
+    hours: band.hoursLeft ?? 0,
   };
   const cycle = plan ? t(`cycle.${plan.billing_cycle}`) : null;
   const title = planName ? [planName, cycle].filter(Boolean).join(" · ") : t("band.noPlan");
@@ -160,8 +169,8 @@ export function BillingBand({
             {t("band.active.nextPaid", {
               plan: band.next.plan,
               cycle: t(`cycle.${band.next.billing_cycle}`),
-              start: formatBillingDay(band.next.start_date, locale),
-              end: formatBillingDay(band.next.end_date, locale),
+              start: formatBillingMoment(band.next.starts_at, locale),
+              end: formatBillingMoment(band.next.ends_at, locale),
             })}
           </p>
         ) : lane !== "none" ? (
@@ -187,7 +196,7 @@ function BandAction({
   band: Band;
   plan: Plan | null;
   amount: string;
-  /** The day a period paid now starts, written out. */
+  /** When a period paid now starts, written out. */
   startsOn: string;
   paying: boolean;
   payError: string | null;

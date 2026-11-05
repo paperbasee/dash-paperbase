@@ -139,7 +139,7 @@ describe("where an owner goes after signing in", () => {
   const base: MeForRouting = {
     active_store_public_id: "str_1",
     latest_payment_status: null,
-    subscription: { subscription_status: "ACTIVE", plan: null, plan_public_id: null, end_date: null, days_remaining: 0 },
+    subscription: { subscription_status: "ACTIVE", plan: null, plan_public_id: null, starts_at: null, ends_at: null },
   };
 
   test("no shop: setup", () => {

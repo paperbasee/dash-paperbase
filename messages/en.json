@@ -1733,13 +1733,10 @@
     "subscriptionVerifyBody": "We could not verify your account status right now. Please try reloading. If the issue continues, contact support.",
     "noSubscriptionTitle": "No active subscription",
     "noSubscriptionBody": "Your account does not have an active plan. Please contact support to activate a subscription before accessing the dashboard.",
-    "graceBannerText": "Subscription expiring soon. Renew now. Time left: {time}",
-    "graceBannerTextNoTimer": "Subscription expiring soon. Renew now.",
     "expiredBannerText": "Subscription expired. Renew to continue.",
     "expiredBannerPay": "Pay & renew",
     "expiredBannerPayLoading": "Opening checkout…",
     "expiredBannerPayError": "Could not start checkout. Try again or pick a plan.",
-    "bannerPayNow": "Pay now",
     "paymentPendingBannerText": "Your payment is pending. It will go live after approval.",
     "paymentSubmittedBannerOneLineNoTimer": "Payment submitted. Waiting for approval.",
     "pendingReviewBannerText": "Your store is under review. It will go live after approval.",
@@ -1747,8 +1744,9 @@
     "inactivePlanBannerPlansLink": "View plans",
     "rejectedPlanBannerText": "Your last subscription request was not approved. You can choose a new plan or contact support.",
     "rejectedPlanBannerPlansLink": "View plans",
-    "trialBannerText": "You're on a free trial — {days} days left.",
-    "trialBannerCta": "Choose a plan"
+    "trialBannerText": "You're on a free trial until {end}.",
+    "trialBannerCta": "Choose a plan",
+    "moderatorExpiredBannerText": "This shop's plan has ended and it is closed to shoppers. Its owner can renew it."
   },
   "unreachable": {
     "apiTitle": "Paperbase isn't answering right now",
@@ -2389,7 +2387,8 @@
       },
       "ring": {
         "daysLeft": "{count, plural, one {day left} other {days left}}",
-        "aria": "{left} of {total} days left"
+        "aria": "{left} of {total} days left",
+        "hoursLeft": "{count, plural, one {hour left} other {hours left}}"
       },
       "band": {
         "noPlan": "No plan yet",
@@ -2400,19 +2399,14 @@
           "nextPaid": "Paid ahead: {plan} · {cycle}, {start} to {end}."
         },
         "endingSoon": {
-          "pill": "{count, plural, =0 {Ends today} one {Ends tomorrow} other {Ends in # days}}",
+          "pill": "{count, plural, =0 {{hours, plural, =0 {Ends within the hour} one {Ends in # hour} other {Ends in # hours}}} one {Ends in # day} other {Ends in # days}}",
           "line": "Paid until {end}.",
-          "next": "Pay now and the next period starts on {next}: no day is lost."
+          "next": "Pay now: approved before {next}, the next period starts exactly then, so no time is lost."
         },
         "trial": {
           "pill": "Free trial",
           "line": "Trial until {end}.",
           "next": "Choose a plan to keep your shop open after that."
-        },
-        "grace": {
-          "pill": "Grace day",
-          "line": "{plan} ended on {end}.",
-          "next": "Pay today: your shop closes to shoppers at midnight."
         },
         "expired": {
           "pill": "Ended",

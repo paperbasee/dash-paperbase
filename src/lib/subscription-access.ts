@@ -10,7 +10,6 @@ export type SubscriptionStatus =
   | "PENDING_REVIEW"
   | "REJECTED"
   | "ACTIVE"
-  | "GRACE"
   | "EXPIRED";
 
 export interface MeSubscription {
@@ -18,20 +17,22 @@ export interface MeSubscription {
   plan: string | null;
   /** For renew / checkout (billing payment initiate). */
   plan_public_id: string | null;
-  end_date: string | null;
-  days_remaining: number;
-  /** ISO 8601 instant when storefront API keys start receiving subscription_expired (BD calendar). */
-  storefront_blocks_at?: string | null;
+  /**
+   * The period's exact start and end (ISO 8601). Plans run to the minute (2026-11-05): the shop stops
+   * serving at `ends_at`, with no free day after it.
+   */
+  starts_at: string | null;
+  ends_at: string | null;
   /** True while the store is on the free trial granted at signup. */
   is_trial?: boolean;
   /**
-   * Calendar state of the latest DB ACTIVE subscription row (if any).
-   * When renewal is PENDING_REVIEW, this can be ACTIVE/GRACE while `subscription_status` stays PENDING_REVIEW.
+   * State of the latest DB ACTIVE subscription row (if any).
+   * When renewal is PENDING_REVIEW, this can be ACTIVE while `subscription_status` stays PENDING_REVIEW.
    */
   active_row_calendar_status?: SubscriptionStatus | null;
   /**
-   * A period paid early, to follow the one in force: its plan and first day, and the last day paid
-   * for. Null when nothing is paid ahead (api subscription_status.next_period).
+   * A period paid early, to follow the one in force: its plan, when it begins, and when the paid time
+   * ends. Null when nothing is paid ahead (api subscription_status.next_period).
    */
   next_period?: NextPeriod | null;
 }
@@ -40,8 +41,8 @@ export interface NextPeriod {
   plan: string;
   plan_public_id: string;
   billing_cycle: "monthly" | "yearly";
-  start_date: string;
-  end_date: string;
+  starts_at: string;
+  ends_at: string;
 }
 
 export interface MeForRouting {
@@ -87,12 +88,9 @@ export function hasSubscriptionPlan(me: MeForRouting): boolean {
   return s !== "NONE" && s !== "REJECTED";
 }
 
-/** Calendar-active paid period (excludes EXPIRED and NONE). */
+/** A paid period running now (excludes EXPIRED and NONE). */
 export function subscriptionIsPaidPeriod(me: MeForRouting): boolean {
-  const s = me.subscription?.subscription_status;
-  if (s === "ACTIVE" || s === "GRACE") return true;
-  const cal = me.subscription?.active_row_calendar_status;
-  return cal === "ACTIVE" || cal === "GRACE";
+  return me.subscription?.subscription_status === "ACTIVE" || me.subscription?.active_row_calendar_status === "ACTIVE";
 }
 
 /** Clear cached auth/me (logout, etc.). */

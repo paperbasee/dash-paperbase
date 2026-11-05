@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { CircleCheck } from "@/components/ui/circle-check";
 import { hasAuthSessionCookie } from "@/lib/auth-session-cookie";
 import api from "@/lib/api";
-import { formatBillingAmount, formatBillingDay, payRefusal } from "@/lib/billing";
+import { formatBillingAmount, formatBillingMoment, payRefusal } from "@/lib/billing";
 import { toLocaleDigits } from "@/lib/locale-digits";
 import { ensureMeProfile } from "@/lib/me-profile-store";
 import { numberTextClass } from "@/lib/number-font";
@@ -37,21 +37,19 @@ import { SupportReadOnly } from "@/components/support/SupportReadOnly";
 type PageState = "loading" | "ready" | "error";
 
 /**
- * The shop's plan now: paid or on trial and in force, or just ended and in its grace days. A lapsed
- * or unpaid one is not "current".
+ * The shop's plan now: paid or on trial, and running. One that has ended, or is unpaid, is not
+ * "current".
  */
 function currentPlanOf(me: MeForRouting | null): CurrentPlan | null {
   const sub = me?.subscription;
-  if (!sub?.plan_public_id) return null;
-  if (sub.subscription_status !== "ACTIVE" && sub.subscription_status !== "GRACE") return null;
+  if (!sub?.plan_public_id || sub.subscription_status !== "ACTIVE") return null;
   return {
     id: sub.plan_public_id,
     name: sub.plan ?? "",
     trial: Boolean(sub.is_trial),
-    ended: sub.subscription_status === "GRACE",
-    endDate: sub.end_date ?? null,
-    daysLeft: sub.days_remaining,
-    paidUntil: sub.next_period?.end_date ?? null,
+    endsAt: sub.ends_at ?? null,
+    msLeft: sub.ends_at ? Math.max(0, Date.parse(sub.ends_at) - Date.now()) : 0,
+    paidUntil: sub.next_period?.ends_at ?? null,
   };
 }
 
@@ -317,11 +315,11 @@ function PlanCard({
   const paidAndOn = kind === null;
   const action =
     kind === "renew" || kind === "select" || kind === "switchTo" ? t(kind, { plan: group.name }) : kind ? t(kind) : null;
-  const untilDay = own ? (current?.paidUntil ?? (current?.endDate && !current.ended ? current.endDate : null)) : null;
-  const until = untilDay ? formatBillingDay(untilDay, locale) : null;
+  const untilMoment = own ? (current?.paidUntil ?? current?.endsAt ?? null) : null;
+  const until = untilMoment ? formatBillingMoment(untilMoment, locale) : null;
   // Another plan, before the shop's plan's last week: when switching to it opens.
   const opens = !own && !kind ? switchOpens(current) : null;
-  // Paid now, a period starts the day after the current one (or the trial) ends: no day is lost.
+  // Approved before it ends, a period paid now starts the moment the current one (or the trial) ends.
   const starts = kind && current ? nextStart(current) : null;
 
   return (
@@ -396,7 +394,7 @@ function PlanCard({
       ) : paidAndOn ? (
         opens ? (
           <p className={cn("mt-7 self-center text-[13px]", dark ? "text-zinc-400" : "text-muted-foreground")}>
-            {t("switchOpens", { date: formatBillingDay(opens, locale) })}
+            {t("switchOpens", { date: formatBillingMoment(opens, locale) })}
           </p>
         ) : null
       ) : (
@@ -421,7 +419,7 @@ function PlanCard({
           ) : null}
           {mayPay && action && starts ? (
             <p className={cn("text-xs", dark ? "text-zinc-400" : "text-muted-foreground")}>
-              {t("startsOn", { date: formatBillingDay(starts, locale) })}
+              {t("startsOn", { date: formatBillingMoment(starts, locale) })}
             </p>
           ) : null}
         </div>

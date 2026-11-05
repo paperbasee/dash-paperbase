@@ -145,8 +145,7 @@ function SidebarContent({
     meProfileStatus === "ready" ? (meProfile?.subscription?.plan ?? null) : null;
   const urgentSubscriptionRing =
     meProfileStatus === "ready" &&
-    (meProfile?.subscription?.subscription_status === "GRACE" ||
-      meProfile?.subscription?.subscription_status === "EXPIRED");
+    meProfile?.subscription?.subscription_status === "EXPIRED";
   const [catalogOpen, setCatalogOpen] = useState(false);
 
   const isActive = (href: string) => isNavHrefActive(pathname, href);
