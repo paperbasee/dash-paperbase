@@ -88,6 +88,21 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-11-05-plans-run-to-the-minute",
+    date: "2026-11-05",
+    version: "4.196.0",
+    tag: "improved",
+    title: {
+      en: "Plans now run to the minute",
+      bn: "প্ল্যান এখন চলে মিনিট ধরে",
+    },
+    body: {
+      en: "A plan now runs exactly 30 days (a yearly one, 365) and ends at the same minute it started, and your shop closes to shoppers that moment: no extra day, no waiting while a payment is checked. Pay before then: a payment approved before the end starts your next period exactly at it, and we email you 3 days and 1 day before. A plan you already have keeps its last day in full and ends at midnight after it.",
+      bn: "প্ল্যান এখন ঠিক ৩০ দিন চলে (বছরের প্ল্যান ৩৬৫ দিন), যে মিনিটে শুরু ঠিক সেই মিনিটে শেষ হয়, আর তখনই আপনার শপ ক্রেতাদের জন্য বন্ধ হয়ে যায়: বাড়তি কোনো দিন নেই, পেমেন্ট যাচাইয়ের অপেক্ষাতেও খোলা থাকে না। তার আগেই পেমেন্ট করুন: শেষ হওয়ার আগে অনুমোদিত পেমেন্টে পরের মেয়াদ ঠিক তখনই শুরু হয়, আর শেষ হওয়ার ৩ দিন ও ১ দিন আগে আমরা ইমেইলে জানাই। আপনার এখনকার প্ল্যান তার শেষ দিনটা পুরো পায়, সেই রাত ১২টায় শেষ হয়।",
+    },
+    href: "/settings?tab=billing",
+  },
+  {
     id: "2026-11-05-payments-being-checked",
     date: "2026-11-05",
     version: "4.195.0",
@@ -503,20 +518,6 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     body: {
       en: "Words still in English on the orders list, an order's page, Settings (checkout, autopilot, passkeys, security, pop-ups), the blog and picture uploads now follow your language. When the internet drops, the message says so in your language too.",
       bn: "অর্ডারের তালিকা, অর্ডারের পাতা, সেটিংস (চেকআউট, অটোপাইলট, পাসকি, নিরাপত্তা, পপ-আপ), ব্লগ আর ছবি আপলোডে যেসব লেখা এখনো ইংরেজিতে ছিল, সেগুলো এখন আপনার ভাষায়। ইন্টারনেট চলে গেলে সেই বার্তাও এখন আপনার ভাষায় দেখায়।",
-    },
-  },
-  {
-    id: "2026-10-04-security-updates",
-    date: "2026-10-04",
-    version: "4.176.4",
-    tag: "fixed",
-    title: {
-      en: "Security updates for the dashboard",
-      bn: "ড্যাশবোর্ডে নিরাপত্তা আপডেট",
-    },
-    body: {
-      en: "We updated the parts the dashboard is built on, closing known security issues. Nothing changes in how you use it.",
-      bn: "ড্যাশবোর্ড যেসব অংশ দিয়ে তৈরি, সেগুলো আপডেট করে জানা নিরাপত্তা সমস্যাগুলো বন্ধ করা হয়েছে। আপনার ব্যবহারে কিছুই বদলাবে না।",
     },
   },
 ];
