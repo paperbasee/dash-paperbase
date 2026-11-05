@@ -5,6 +5,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { useDeferredNavigate } from "@/hooks/useDeferredNavigate";
 import api from "@/lib/api";
+import { payRefusal } from "@/lib/billing";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { numberTextClass } from "@/lib/number-font";
@@ -39,6 +40,7 @@ export default function SubscriptionExpirationBanner({
   const locale = useLocale();
   const numClass = numberTextClass(locale);
   const t = useTranslations("dashboardLayout");
+  const tPay = useTranslations("billingPay");
   const router = useRouter();
   const navigate = useDeferredNavigate();
   const [payLoading, setPayLoading] = useState(false);
@@ -78,8 +80,9 @@ export default function SubscriptionExpirationBanner({
     try {
       await api.post("billing/payment/initiate/", { plan_public_id: id });
       router.push("/checkout");
-    } catch {
-      setPayError(t("expiredBannerPayError"));
+    } catch (err) {
+      const refusal = payRefusal(err);
+      setPayError(refusal ? tPay(refusal) : t("expiredBannerPayError"));
     } finally {
       setPayLoading(false);
     }

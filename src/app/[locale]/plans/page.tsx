@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { CircleCheck } from "@/components/ui/circle-check";
 import { hasAuthSessionCookie } from "@/lib/auth-session-cookie";
 import api from "@/lib/api";
-import { formatBillingAmount, formatBillingDay } from "@/lib/billing";
+import { formatBillingAmount, formatBillingDay, payRefusal } from "@/lib/billing";
 import { toLocaleDigits } from "@/lib/locale-digits";
 import { ensureMeProfile } from "@/lib/me-profile-store";
 import { numberTextClass } from "@/lib/number-font";
@@ -70,6 +70,7 @@ export default function PlansPage() {
   const locale = useLocale();
   const numClass = numberTextClass(locale);
   const t = useTranslations("plansPage");
+  const tPay = useTranslations("billingPay");
   const router = useRouter();
   const searchParams = useSearchParams();
   const fromAnalytics = searchParams.get("from") === "analytics";
@@ -109,9 +110,9 @@ export default function PlansPage() {
       await api.post("billing/payment/initiate/", { plan_public_id: plan.public_id });
       router.push("/checkout");
     } catch (err: unknown) {
-      const detail =
-        err && typeof err === "object" && "message" in err && typeof err.message === "string" ? err.message : "";
-      setSelectError(detail && !detail.startsWith("HTTP ") ? detail : t("initiateError"));
+      // The API's reason in the merchant's language; its English sentence is never shown.
+      const refusal = payRefusal(err);
+      setSelectError(refusal ? tPay(refusal) : t("initiateError"));
     } finally {
       setSelectingId(null);
     }

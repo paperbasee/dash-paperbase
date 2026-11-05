@@ -6,7 +6,7 @@ import { ImagePlus, Loader2 } from "lucide-react";
 
 import { uploadFile, validateUploadFile } from "@/hooks/usePresignedUpload";
 import api from "@/lib/api";
-import { isApiHttpError } from "@/lib/api-client";
+import { apiErrorCode } from "@/lib/api-client";
 import type { ThemeImage } from "@/lib/theme-editor/api";
 import { cn } from "@/lib/utils";
 import { KitNote } from "./kit";
@@ -111,9 +111,9 @@ export function PicturePicker({ open, onClose, used, current, svg = false, onPic
       onPick(picture);
       onClose();
     } catch (err) {
-      const code = isApiHttpError(err) ? (err.response?.data as { code?: unknown } | undefined)?.code : undefined;
+      const code = apiErrorCode(err);
       setProblem(
-        typeof code === "string" && LOGO_REFUSALS.includes(code)
+        code && LOGO_REFUSALS.includes(code)
           ? t(`logoRefused.${code}`)
           : t("pictureUploadFailed"),
       );

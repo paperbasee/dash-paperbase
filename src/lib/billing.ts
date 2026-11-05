@@ -11,6 +11,7 @@
  * paid, nothing is ending and nothing is asked.
  */
 import api from "@/lib/api";
+import { apiErrorCode } from "@/lib/api-client";
 import { toLocaleDigits } from "@/lib/locale-digits";
 import { PAY_AHEAD_DAYS, type BillingCycle, type Plan } from "@/lib/plans-compare";
 import type { MeSubscription, NextPeriod } from "@/lib/subscription-access";
@@ -158,4 +159,17 @@ export function billingBand(
           : null,
     next,
   };
+}
+
+/** Why the API would not start a payment, as a key of the `billingPay` words; null for anything else. */
+export type PayRefusal = "waiting" | "planGone";
+
+const PAY_REFUSALS: Record<string, PayRefusal> = {
+  payment_waiting: "waiting",
+  plan_unavailable: "planGone",
+};
+
+export function payRefusal(error: unknown): PayRefusal | null {
+  const code = apiErrorCode(error);
+  return (code && PAY_REFUSALS[code]) || null;
 }

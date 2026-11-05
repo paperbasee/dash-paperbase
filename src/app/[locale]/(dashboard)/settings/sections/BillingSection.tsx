@@ -17,7 +17,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useSupportMode } from "@/hooks/useSupportMode";
 import { useRouter } from "@/i18n/navigation";
 import api from "@/lib/api";
-import { billingBand, fetchBillingOverview, fetchPlans } from "@/lib/billing";
+import { billingBand, fetchBillingOverview, fetchPlans, payRefusal } from "@/lib/billing";
 import { yearlyOffer } from "@/lib/plans-compare";
 import { billingOverviewQueryKey, billingPlansQueryKey } from "@/lib/query-keys";
 
@@ -26,6 +26,7 @@ import { BillingBand, BillingTiles, PaymentTimeline, PlanIncludes, YearlyCard } 
 
 export default function BillingSection({ hidden }: { hidden: boolean }) {
   const t = useTranslations("settings.billing");
+  const tPay = useTranslations("billingPay");
   const { meProfile, meProfileStatus } = useAuth();
   const inSupportMode = useSupportMode();
   const router = useRouter();
@@ -56,8 +57,9 @@ export default function BillingSection({ hidden }: { hidden: boolean }) {
       // As the dashboard's banner renews: a payment for the plan, then the checkout's bKash / Nagad steps.
       await api.post("billing/payment/initiate/", { plan_public_id: plan.public_id });
       router.push("/checkout");
-    } catch {
-      setPayError(t("action.payError"));
+    } catch (err) {
+      const refusal = payRefusal(err);
+      setPayError(refusal ? tPay(refusal) : t("action.payError"));
     } finally {
       setPaying(false);
     }

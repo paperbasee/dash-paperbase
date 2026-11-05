@@ -89,6 +89,13 @@ export function isApiTransportError(error: unknown): error is ApiTransportError 
   return error instanceof ApiTransportError;
 }
 
+/** The `code` an API refusal names (`{"code": ..., "detail": ...}`), for words of the dashboard's own. */
+export function apiErrorCode(error: unknown): string | undefined {
+  if (!isApiHttpError(error)) return undefined;
+  const code = (error.data as { code?: unknown } | null | undefined)?.code;
+  return typeof code === "string" ? code : undefined;
+}
+
 /**
  * Low-level JSON request helper: native `fetch`, default JSON content type, Bearer optional.
  * On non-ok: parses body for DRF `detail`, else `HTTP {status}`; throws {@link ApiHttpError}.

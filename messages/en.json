@@ -3682,6 +3682,10 @@
     "body": "Payment receipt sent to your email.",
     "backHome": "Back to home"
   },
+  "billingPay": {
+    "waiting": "Your last payment is still being checked. You can pay again once we approve or refuse it.",
+    "planGone": "This plan is not offered any more. Pick another plan."
+  },
   "plansPage": {
     "title": "Choose your plan",
     "subtitle": "Pick the plan for your shop. Paid by bKash or Nagad.",

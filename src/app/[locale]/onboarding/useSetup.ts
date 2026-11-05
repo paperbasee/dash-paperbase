@@ -13,6 +13,7 @@ import { CATALOG_INCLUDED_APP_IDS, OPTIONAL_APP_IDS } from "@/config/apps";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "@/i18n/navigation";
 import api from "@/lib/api";
+import { apiErrorCode } from "@/lib/api-client";
 import {
   connectDomain,
   fetchDomains,
@@ -140,14 +141,6 @@ function hostnameOf(url: string | undefined | null): string {
   } catch {
     return "";
   }
-}
-
-function errorCode(err: unknown): string | undefined {
-  const data =
-    err && typeof err === "object" && "response" in err
-      ? (err as { response?: { data?: { code?: unknown } } }).response?.data
-      : undefined;
-  return typeof data?.code === "string" ? data.code : undefined;
 }
 
 const MIN_TICK_MS = 650;
@@ -315,7 +308,7 @@ export function useSetup() {
         .get<{ hostname: string }>("store/address-preview/", { params: { name } })
         .then(({ data }) => setNameCheck(data.hostname ? { state: "ok", hostname: data.hostname } : { state: "none" }))
         .catch((err: unknown) =>
-          setNameCheck(errorCode(err) === "name_needs_letters" ? { state: "needs_letters" } : { state: "failed" })
+          setNameCheck(apiErrorCode(err) === "name_needs_letters" ? { state: "needs_letters" } : { state: "failed" })
         );
     }, 400);
     return () => window.clearTimeout(timer);
@@ -450,7 +443,7 @@ export function useSetup() {
       }
       go("address");
     } catch (err) {
-      if (errorCode(err) === "name_needs_letters") setNameCheck({ state: "needs_letters" });
+      if (apiErrorCode(err) === "name_needs_letters") setNameCheck({ state: "needs_letters" });
       else fail(err);
     } finally {
       setBusy(false);
@@ -578,7 +571,7 @@ export function useSetup() {
       await new Promise((resolve) => setTimeout(resolve, 450));
       go("ready");
     } catch (err) {
-      if (errorCode(err)?.startsWith("social_account")) {
+      if (apiErrorCode(err)?.startsWith("social_account")) {
         setContactError("facebook");
         go("contact");
         return;

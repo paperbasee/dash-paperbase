@@ -4,11 +4,13 @@
  */
 import { describe, expect, it } from "vitest";
 
+import { ApiHttpError, ApiTransportError } from "@/lib/api-client";
 import {
   billingBand,
   formatBillingAmount,
   formatBillingDay,
   formatBillingMonth,
+  payRefusal,
   type BillingOverview,
   type BillingPayment,
 } from "@/lib/billing";
@@ -139,5 +141,24 @@ describe("the band", () => {
     const band = billingBand(sub({ subscription_status: "REJECTED" }), "REJECTED", overview({ payments: [refused, payment()] }));
     expect(band).toMatchObject({ lane: "notFound", action: "pay" });
     expect(band.payment?.transaction_id).toBe("8AB0QQ11MN");
+  });
+});
+
+describe("payRefusal: why the API would not start a payment", () => {
+  const refused = (code: string) => new ApiHttpError("refused", 400, { code, detail: "In English." });
+
+  it("names a payment still being checked", () => {
+    expect(payRefusal(refused("payment_waiting"))).toBe("waiting");
+  });
+
+  it("names a plan no longer offered", () => {
+    expect(payRefusal(refused("plan_unavailable"))).toBe("planGone");
+  });
+
+  it("has no words of its own for anything else", () => {
+    expect(payRefusal(refused("something_new"))).toBeNull();
+    expect(payRefusal(new ApiHttpError("HTTP 500", 500, null))).toBeNull();
+    expect(payRefusal(new ApiTransportError("offline"))).toBeNull();
+    expect(payRefusal(new Error("boom"))).toBeNull();
   });
 });
