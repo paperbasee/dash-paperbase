@@ -88,6 +88,21 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-11-05-payments-being-checked",
+    date: "2026-11-05",
+    version: "4.195.0",
+    tag: "improved",
+    title: {
+      en: "Clearer while we check your payment",
+      bn: "পেমেন্ট যাচাইয়ের সময় আরও পরিষ্কার",
+    },
+    body: {
+      en: "While we check a payment you sent, Billing says so instead of offering Pay again, and if a payment can't start it now tells you why. A payment sent before your plan ends keeps your shop open for up to 3 days while we check it.",
+      bn: "আপনার পাঠানো পেমেন্ট যাচাই করার সময় বিলিং এখন সেটাই দেখায়, আবার পেমেন্ট করতে বলে না। কোনো পেমেন্ট শুরু না হলে এখন কারণটাও জানায়। প্ল্যান শেষ হওয়ার আগে পাঠানো পেমেন্ট যাচাইয়ের সময় আপনার শপ সর্বোচ্চ ৩ দিন খোলা রাখে।",
+    },
+    href: "/settings?tab=billing",
+  },
+  {
     id: "2026-11-03-log-out-on-your-account-page",
     date: "2026-11-03",
     version: "4.194.0",
@@ -503,20 +518,5 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
       en: "We updated the parts the dashboard is built on, closing known security issues. Nothing changes in how you use it.",
       bn: "ড্যাশবোর্ড যেসব অংশ দিয়ে তৈরি, সেগুলো আপডেট করে জানা নিরাপত্তা সমস্যাগুলো বন্ধ করা হয়েছে। আপনার ব্যবহারে কিছুই বদলাবে না।",
     },
-  },
-  {
-    id: "2026-10-04-cards-that-follow-the-photo",
-    date: "2026-10-04",
-    version: "4.176.0",
-    tag: "new",
-    title: {
-      en: "Product cards that follow the photo",
-      bn: "ছবির মাপে প্রোডাক্ট কার্ড",
-    },
-    body: {
-      en: "Tick a main category in Customize, under Card photos, and its cards take each photo's own shape: no blank sides, nothing cut. The categories under it follow, and so does a home page row of it. Everywhere else, cards stay square.",
-      bn: "কাস্টমাইজে \"কার্ডের ছবি\" থেকে কোনো মূল ক্যাটাগরিতে টিক দিন, তার কার্ডগুলো প্রতিটি ছবির নিজের মাপ নেবে: পাশে ফাঁকা থাকবে না, কিছু কাটাও পড়বে না। এর ভেতরের ক্যাটাগরি আর হোম পেজে এর সারিও তাই করবে। বাকি সব জায়গায় কার্ড চৌকোই থাকে।",
-    },
-    href: "/settings/customize",
   },
 ];
