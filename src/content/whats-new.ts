@@ -88,6 +88,20 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-11-08-security-updates",
+    date: "2026-11-08",
+    version: "4.196.1",
+    tag: "fixed",
+    title: {
+      en: "Security updates for the dashboard",
+      bn: "ড্যাশবোর্ডে নিরাপত্তা আপডেট",
+    },
+    body: {
+      en: "We updated the parts the dashboard is built on, closing known security issues. Nothing changes in how you use it.",
+      bn: "ড্যাশবোর্ড যেসব অংশ দিয়ে তৈরি, সেগুলো আপডেট করে জানা নিরাপত্তা সমস্যাগুলো বন্ধ করা হয়েছে। আপনার ব্যবহারে কিছুই বদলাবে না।",
+    },
+  },
+  {
     id: "2026-11-05-plans-run-to-the-minute",
     date: "2026-11-05",
     version: "4.196.0",
@@ -505,19 +519,5 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
       bn: "বাংলা নামের পণ্য বা ক্যাটাগরি এখন লম্বা কোডের বদলে ইংরেজি অক্ষরে ঠিকানা পায়, যেমন holud-suti-thri-pis। নাম বদলালেও ঠিকানা একই থাকে, চাইলে নিজে বদলাতে পারেন, আর পুরোনো সব লিংক কাজ করে।",
     },
     href: "/products",
-  },
-  {
-    id: "2026-10-04-dashboard-in-bangla-everywhere",
-    date: "2026-10-04",
-    version: "4.177.0",
-    tag: "improved",
-    title: {
-      en: "The dashboard speaks your language everywhere",
-      bn: "পুরো ড্যাশবোর্ড এখন আপনার ভাষায়",
-    },
-    body: {
-      en: "Words still in English on the orders list, an order's page, Settings (checkout, autopilot, passkeys, security, pop-ups), the blog and picture uploads now follow your language. When the internet drops, the message says so in your language too.",
-      bn: "অর্ডারের তালিকা, অর্ডারের পাতা, সেটিংস (চেকআউট, অটোপাইলট, পাসকি, নিরাপত্তা, পপ-আপ), ব্লগ আর ছবি আপলোডে যেসব লেখা এখনো ইংরেজিতে ছিল, সেগুলো এখন আপনার ভাষায়। ইন্টারনেট চলে গেলে সেই বার্তাও এখন আপনার ভাষায় দেখায়।",
-    },
   },
 ];
