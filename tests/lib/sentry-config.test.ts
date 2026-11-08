@@ -5,7 +5,7 @@
  */
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { resolveEnvironment } from "@/sentry-config";
+import { baseOptions, resolveEnvironment } from "@/sentry-config";
 
 afterEach(() => {
   vi.unstubAllEnvs();
@@ -34,5 +34,34 @@ describe("resolveEnvironment", () => {
   it("lets an explicit setting win", () => {
     vi.stubEnv("NEXT_PUBLIC_SENTRY_ENVIRONMENT", "production");
     expect(resolveEnvironment("localhost")).toBe("production");
+  });
+});
+
+/**
+ * Sentry 11 collects everything it can unless told otherwise (its `dataCollection`
+ * replaced `sendDefaultPii`). The dashboard carries merchant data, so it keeps what
+ * Sentry 10 sent with `sendDefaultPii: false`: no people, cookies, bodies or local values.
+ */
+describe("baseOptions", () => {
+  const options = baseOptions("dash.paperbase.me");
+
+  it("sends no person, cookie, request body or local variable", () => {
+    expect(options?.dataCollection).toMatchObject({
+      userInfo: false,
+      cookies: false,
+      httpBodies: [],
+      stackFrameVariables: false,
+      databaseQueryData: false,
+    });
+  });
+
+  it("drops the headers and query values that name a person's address", () => {
+    const deny = { deny: expect.arrayContaining(["forwarded", "-ip", "remote-", "via", "-user"]) };
+    expect(options?.dataCollection?.httpHeaders).toEqual({ request: deny, response: deny });
+    expect(options?.dataCollection?.urlQueryParams).toEqual(deny);
+  });
+
+  it("reports errors only, grouped as before", () => {
+    expect(options).toMatchObject({ tracesSampleRate: 0, attachStacktrace: false });
   });
 });
