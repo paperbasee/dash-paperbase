@@ -88,6 +88,21 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-11-10-fraud-check-page",
+    date: "2026-11-10",
+    version: "4.197.0",
+    tag: "new",
+    title: {
+      en: "Check any phone number for fraud",
+      bn: "যেকোনো ফোন নম্বরে ফ্রড চেক",
+    },
+    body: {
+      en: "Sales has a new Fraud check page. Type any buyer's phone number to see if you can send to them: how many parcels were delivered, each courier's record, other merchants' reports and Paperbase's own history. Part of Premium.",
+      bn: "বিক্রয়-এ নতুন ফ্রড চেক পেজ এসেছে। যেকোনো ক্রেতার ফোন নম্বর লিখে দেখুন তাঁকে পাঠানো যাবে কি না: কতগুলো পার্সেল ডেলিভার হয়েছে, প্রতিটি কুরিয়ারের হিসাব, অন্য মার্চেন্টদের রিপোর্ট আর Paperbase-এর নিজের হিসাব। প্রিমিয়ামের অংশ।",
+    },
+    href: "/orders/fraud-check",
+  },
+  {
     id: "2026-11-08-security-updates",
     date: "2026-11-08",
     version: "4.196.1",
@@ -504,20 +519,5 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
       bn: "বাংলা নামের ব্র্যান্ড আর ব্লগ পোস্টও এখন post-2 বা কোডের বদলে ইংরেজি অক্ষরে ঠিকানা পায়, যেমন /blog/sharir-jotn। নাম বদলালেও ঠিকানা একই থাকে, চাইলে নিজে বদলাতে পারেন, আর পুরোনো সব লিংক কাজ করে।",
     },
     href: "/blog",
-  },
-  {
-    id: "2026-10-05-readable-web-addresses",
-    date: "2026-10-05",
-    version: "4.178.0",
-    tag: "improved",
-    title: {
-      en: "Readable web addresses for Bangla names",
-      bn: "বাংলা নামেও পড়ার মতো ওয়েব ঠিকানা",
-    },
-    body: {
-      en: "A product or category with a Bangla name now gets an address in English letters, like holud-suti-thri-pis, instead of a long code. Renaming keeps the address, you can change it yourself, and every old link keeps working.",
-      bn: "বাংলা নামের পণ্য বা ক্যাটাগরি এখন লম্বা কোডের বদলে ইংরেজি অক্ষরে ঠিকানা পায়, যেমন holud-suti-thri-pis। নাম বদলালেও ঠিকানা একই থাকে, চাইলে নিজে বদলাতে পারেন, আর পুরোনো সব লিংক কাজ করে।",
-    },
-    href: "/products",
   },
 ];
