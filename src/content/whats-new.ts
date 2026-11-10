@@ -88,6 +88,21 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-11-10-unlimited-products-and-fraud-checks-a-day",
+    date: "2026-11-10",
+    version: "4.198.0",
+    tag: "improved",
+    title: {
+      en: "Unlimited products, and your fraud checks on Billing",
+      bn: "যত খুশি পণ্য, আর বিলিং-এ আপনার ফ্রড চেক",
+    },
+    body: {
+      en: "Every plan now has unlimited products. Settings > Billing shows how many fraud checks your shop has used today, out of your plan's daily allowance.",
+      bn: "এখন প্রতিটি প্ল্যানে যত খুশি পণ্য রাখা যায়। সেটিংস > বিলিং-এ দেখুন আজ আপনার দোকান কয়টি ফ্রড চেক ব্যবহার করেছে, আপনার প্ল্যানের দৈনিক সীমার মধ্যে।",
+    },
+    href: "/settings?tab=billing",
+  },
+  {
     id: "2026-11-10-premium-tools-follow-the-plan",
     date: "2026-11-10",
     version: "4.197.1",
@@ -504,20 +519,5 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
       en: "When a shopper opens an address your shop has nothing at, like an old link, a removed product or a typo, they now see your shop with its menu, in your colours, with buttons back to your home page and all products, instead of a blank \"Not Found\".",
       bn: "ক্রেতা আপনার দোকানের এমন কোনো ঠিকানায় গেলে যেখানে কিছু নেই, যেমন পুরোনো লিংক, সরিয়ে ফেলা পণ্য বা টাইপের ভুল, এখন ফাঁকা \"Not Found\"-এর বদলে আপনার দোকানটিই দেখবেন: মেনুসহ, আপনার রঙে, আর হোম পেজ ও সব পণ্যে ফেরার বোতাম।",
     },
-  },
-  {
-    id: "2026-10-05-web-address-in-dynamic-fields",
-    date: "2026-10-05",
-    version: "4.179.1",
-    tag: "fixed",
-    title: {
-      en: "One name for web addresses",
-      bn: "ওয়েব ঠিকানার এক নাম",
-    },
-    body: {
-      en: "In Settings > Dynamic fields, the product's address is now called \"Web address\", the same as on the product form, instead of \"Slug\".",
-      bn: "সেটিংস > ডায়নামিক ফিল্ডে পণ্যের ঠিকানা এখন \"স্লাগ\"-এর বদলে \"ওয়েব ঠিকানা\" নামে দেখায়, পণ্যের ফর্মের মতোই।",
-    },
-    href: "/settings?tab=eav",
   },
 ];
