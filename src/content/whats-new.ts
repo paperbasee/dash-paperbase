@@ -88,6 +88,21 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-11-10-premium-tools-follow-the-plan",
+    date: "2026-11-10",
+    version: "4.197.1",
+    tag: "fixed",
+    title: {
+      en: "Premium tools follow your plan to the minute",
+      bn: "প্রিমিয়াম টুল এখন প্ল্যানের সাথে মিনিট ধরে চলে",
+    },
+    body: {
+      en: "Fraud check, analytics and order emails now pause the moment a plan ends, and start again as soon as a payment is approved. Your settings stay as they were while they wait.",
+      bn: "ফ্রড চেক, অ্যানালিটিক্স আর অর্ডার ইমেইল এখন প্ল্যান শেষ হওয়ার সাথে সাথে বন্ধ হয়, আর পেমেন্ট অনুমোদন হলেই আবার চালু হয়। এর মধ্যে আপনার সেটিংস যেমন ছিল তেমনই থাকে।",
+    },
+    href: "/settings?tab=billing",
+  },
+  {
     id: "2026-11-10-fraud-check-page",
     date: "2026-11-10",
     version: "4.197.0",
@@ -504,20 +519,5 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
       bn: "সেটিংস > ডায়নামিক ফিল্ডে পণ্যের ঠিকানা এখন \"স্লাগ\"-এর বদলে \"ওয়েব ঠিকানা\" নামে দেখায়, পণ্যের ফর্মের মতোই।",
     },
     href: "/settings?tab=eav",
-  },
-  {
-    id: "2026-10-05-readable-addresses-brands-and-posts",
-    date: "2026-10-05",
-    version: "4.179.0",
-    tag: "improved",
-    title: {
-      en: "Readable web addresses for brands and blog posts",
-      bn: "ব্র্যান্ড আর ব্লগ পোস্টেও পড়ার মতো ওয়েব ঠিকানা",
-    },
-    body: {
-      en: "Brands and blog posts with Bangla names now get addresses in English letters too, like /blog/sharir-jotn, instead of post-2 or a code. Renaming keeps the address, you can change it yourself, and every old link keeps working.",
-      bn: "বাংলা নামের ব্র্যান্ড আর ব্লগ পোস্টও এখন post-2 বা কোডের বদলে ইংরেজি অক্ষরে ঠিকানা পায়, যেমন /blog/sharir-jotn। নাম বদলালেও ঠিকানা একই থাকে, চাইলে নিজে বদলাতে পারেন, আর পুরোনো সব লিংক কাজ করে।",
-    },
-    href: "/blog",
   },
 ];
