@@ -2,7 +2,7 @@
 
 /**
  * Settings > Billing's parts (owner, 2026-10-09: design B): the band that says where the plan
- * stands, with the days left as a ring; three tiles (products, price, paid so far); the payments as
+ * stands, with the days left as a ring; three tiles (fraud checks today, price, paid so far); the payments as
  * a timeline; and beside them what the plan gives and what paying yearly would save. Each is drawn
  * from what it is given (lib/billing, lib/plans-compare), so the tests draw every state.
  */
@@ -243,23 +243,27 @@ export function BillingTiles({
 }) {
   const t = useTranslations("settings.billing.tiles");
   const { locale, digits, numClass } = useDigits();
-  const { count, limit } = overview.products;
-  const used = limit ? Math.min(100, Math.round((count / limit) * 100)) : 0;
+  const { included, today, per_day: perDay } = overview.fraud_checks;
+  const used = perDay ? Math.min(100, Math.round((today / perDay) * 100)) : 0;
   const paid = overview.paid;
   return (
     <div className="grid gap-4 sm:grid-cols-3">
-      <section aria-label={t("products")} className={cn(CARD, "flex flex-col gap-2.5")}>
-        <p className="text-[13px] text-muted-foreground">{t("products")}</p>
-        <p className={cn("text-[22px] font-semibold", numClass)}>
-          {digits(count)}
-          {limit !== null ? <span className="text-sm font-normal text-muted-foreground"> {t("productsOf", { limit: digits(limit) })}</span> : null}
-        </p>
-        {limit !== null ? (
-          <div className="h-1.5 overflow-hidden rounded-full bg-muted" aria-hidden>
-            <div className={cn("h-full rounded-full", used >= 90 ? "bg-amber-500" : "bg-blue-600")} style={{ width: `${used}%` }} />
-          </div>
+      <section aria-label={t("fraudChecks")} className={cn(CARD, "flex flex-col gap-2.5")}>
+        <p className="text-[13px] text-muted-foreground">{t("fraudChecks")}</p>
+        {included ? (
+          <>
+            <p className={cn("text-[22px] font-semibold", numClass)}>
+              {digits(today)}
+              {perDay !== null ? <span className="text-sm font-normal text-muted-foreground"> {t("fraudChecksOf", { limit: digits(perDay) })}</span> : null}
+            </p>
+            {perDay !== null ? (
+              <div className="h-1.5 overflow-hidden rounded-full bg-muted" aria-hidden>
+                <div className={cn("h-full rounded-full", used >= 90 ? "bg-amber-500" : "bg-blue-600")} style={{ width: `${used}%` }} />
+              </div>
+            ) : null}
+          </>
         ) : (
-          <p className="text-xs text-muted-foreground">{t("noLimit")}</p>
+          <p className="text-sm text-muted-foreground">{t("fraudChecksPremium")}</p>
         )}
       </section>
       {plan ? (

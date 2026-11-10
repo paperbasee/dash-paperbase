@@ -129,8 +129,8 @@ export function nextStart(current: CurrentPlan | null): string | null {
   return current?.endsAt ?? null;
 }
 
-/** A switch in `features.features`, or a number in `features.limits`, that a plan may change. */
-export type PlanLine = { id: string; kind: "feature" | "limit"; key: string };
+/** A switch in `features.features` that a plan may turn on. */
+export type PlanLine = { id: string; key: string };
 
 /**
  * What a plan may switch, in the order the cards list it (words: plansPage.lines.<id>). Only what a
@@ -139,43 +139,45 @@ export type PlanLine = { id: string; kind: "feature" | "limit"; key: string };
  * page (owner, 2026-10-04).
  */
 export const PLAN_LINES: PlanLine[] = [
-  { id: "products", kind: "limit", key: "max_products" },
-  { id: "analytics", kind: "feature", key: "advanced_analytics" },
-  { id: "fraudCheck", kind: "feature", key: "fraud_check" },
-  { id: "orderEmails", kind: "feature", key: "order_email_notifications" },
-  { id: "premiumSections", kind: "feature", key: "premium_sections" },
+  { id: "analytics", key: "advanced_analytics" },
+  { id: "fraudCheck", key: "fraud_check" },
+  { id: "orderEmails", key: "order_email_notifications" },
+  { id: "premiumSections", key: "premium_sections" },
 ];
 
 /**
  * What every plan has -- nothing a plan switches, so it is the same text on the first card
- * (owner, 2026-10-03). Steadfast only: the one courier a shop can send to.
+ * (owner, 2026-10-03). Steadfast only: the one courier a shop can send to. No plan limits products
+ * (owner, 2026-11-10).
  */
-export const EVERY_PLAN = ["shop", "orders", "steadfast", "team", "extras"] as const;
+export const EVERY_PLAN = ["shop", "orders", "unlimitedProducts", "steadfast", "team", "extras"] as const;
 
-/** One line of a card: its words (plansPage.lines.<id>), and a limit's number. */
+/** One line of a card: its words (plansPage.lines.<id>), and a number for the words that take one. */
 export type CardLine = { id: string; count?: number };
 
-/** A plan's product cap: a number, or null for none set -- no cap at all (api products/services.py). */
-function productCap(plan: Plan | null): number | null {
-  const cap = plan?.features?.limits?.max_products;
-  return typeof cap === "number" ? cap : null;
+/**
+ * A plan's fraud checks a day, as the owner sets it in Django admin
+ * (`features.limits.fraud_checks_per_day`, api billing/feature_gate.py); null when it names none.
+ */
+function fraudChecksPerDay(plan: Plan | null): number | null {
+  const perDay = plan?.features?.limits?.fraud_checks_per_day;
+  return typeof perDay === "number" ? perDay : null;
 }
 
-function productLine(plan: Plan | null): CardLine {
-  const cap = productCap(plan);
-  return cap === null ? { id: "unlimitedProducts" } : { id: "products", count: cap };
+/** A switch's line: fraud check says how many a day when the plan names a number. */
+function lineFor(plan: Plan | null, id: string): CardLine {
+  const perDay = id === "fraudCheck" ? fraudChecksPerDay(plan) : null;
+  return perDay === null ? { id } : { id: "fraudCheckPerDay", count: perDay };
 }
 
 /** The switches a plan has on, in PLAN_LINES order. */
 function switchedOn(plan: Plan | null): string[] {
-  return PLAN_LINES.filter((line) => line.kind === "feature" && plan?.features?.features?.[line.key] === true).map(
-    (line) => line.id,
-  );
+  return PLAN_LINES.filter((line) => plan?.features?.features?.[line.key] === true).map((line) => line.id);
 }
 
-/** What one plan gives, on its own: its product cap, then what it switches on (Settings > Billing). */
+/** What one plan gives, on its own: unlimited products, then what it switches on (Settings > Billing). */
 export function planLines(plan: Plan): CardLine[] {
-  return [productLine(plan), ...switchedOn(plan).map((id) => ({ id }))];
+  return [{ id: "unlimitedProducts" }, ...switchedOn(plan).map((id) => lineFor(plan, id))];
 }
 
 /** What a payment for `plan` is: a month, or on yearly twelve of its monthly price at once (api billing/pricing.py). */
@@ -193,24 +195,25 @@ export function yearlyOffer(plans: Plan[], current: Plan): { plan: Plan; charge:
 }
 
 /**
- * A card's list, Shopify's way: the first plan says what you get -- what every plan has, its
- * product cap, what it switches on -- and each plan after it says "Everything in <the plan before>,
- * plus:" and only what it adds: a bigger cap, and the switches the one before lacks.
+ * A card's list, Shopify's way: the first plan says what you get -- what every plan has, then what
+ * it switches on -- and each plan after it says "Everything in <the plan before>, plus:" and only
+ * what it adds: the switches the one before lacks, and more fraud checks a day than it had.
  */
 export function cardLines(groups: PlanGroup[], index: number, cycle: BillingCycle): { plus: string | null; lines: CardLine[] } {
   const plan = planOn(groups[index], cycle);
   if (index === 0) {
-    const [shop, orders, ...rest] = EVERY_PLAN;
-    const features = switchedOn(plan).map((id) => ({ id }));
-    return { plus: null, lines: [{ id: shop }, { id: orders }, productLine(plan), ...rest.map((id) => ({ id })), ...features] };
+    return {
+      plus: null,
+      lines: [...EVERY_PLAN.map((id) => ({ id })), ...switchedOn(plan).map((id) => lineFor(plan, id))],
+    };
   }
   const before = planOn(groups[index - 1], cycle);
-  const [cap, capBefore] = [productCap(plan), productCap(before)];
-  const moreProducts = capBefore !== null && (cap === null || cap > capBefore);
   const had = new Set(switchedOn(before));
-  const added = switchedOn(plan).filter((id) => !had.has(id));
+  const [perDay, perDayBefore] = [fraudChecksPerDay(plan), fraudChecksPerDay(before)];
+  const moreChecks = perDay !== null && perDayBefore !== null && perDay > perDayBefore;
+  const adds = (id: string) => !had.has(id) || (id === "fraudCheck" && moreChecks);
   return {
     plus: groups[index - 1].name,
-    lines: [...(moreProducts ? [productLine(plan)] : []), ...added.map((id) => ({ id }))],
+    lines: switchedOn(plan).filter(adds).map((id) => lineFor(plan, id)),
   };
 }

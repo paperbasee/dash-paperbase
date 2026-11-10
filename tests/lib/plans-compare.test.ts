@@ -29,9 +29,9 @@ const plan = (name: string, cycle: "monthly" | "yearly", price: string, features
 });
 
 // The plans as the API has them (billing/plans/, ordered by price).
-const essential = { limits: { max_products: 100 }, features: { order_email_notifications: false } };
+const essential = { limits: {}, features: { order_email_notifications: false } };
 const premium = {
-  limits: { max_products: 500 },
+  limits: { fraud_checks_per_day: 100 },
   features: {
     themes: true,
     fraud_check: true,
@@ -75,13 +75,13 @@ describe("what each card lists (owner, 2026-10-03: Shopify's way)", () => {
   const groups = groupPlans(PLANS);
   const ids = (index: number, cycle: "monthly" | "yearly" = "monthly") => cardLines(groups, index, cycle);
 
-  it("the first plan says what you get: every plan's lines, its cap, what it switches on", () => {
+  it("the first plan says what you get: every plan's lines (unlimited products), what it switches on", () => {
     expect(ids(0)).toEqual({
       plus: null,
       lines: [
         { id: "shop" },
         { id: "orders" },
-        { id: "products", count: 100 },
+        { id: "unlimitedProducts" },
         { id: "steadfast" },
         { id: "team" },
         { id: "extras" },
@@ -93,9 +93,8 @@ describe("what each card lists (owner, 2026-10-03: Shopify's way)", () => {
     expect(ids(1, "yearly")).toEqual({
       plus: "Essential",
       lines: [
-        { id: "products", count: 500 },
         { id: "analytics" },
-        { id: "fraudCheck" },
+        { id: "fraudCheckPerDay", count: 100 },
         { id: "orderEmails" },
         { id: "premiumSections" },
       ],
@@ -109,13 +108,16 @@ describe("what each card lists (owner, 2026-10-03: Shopify's way)", () => {
     expect(keys).not.toContain("themes");
   });
 
-  it("no cap set is no cap at all, and a plan adding nothing lists nothing", () => {
-    const capped = { limits: { max_products: 100 }, features: { order_email_notifications: false } };
-    const open = { features: { order_email_notifications: false } };
-    const pair = groupPlans([plan("Small", "monthly", "100.00", capped), plan("Big", "monthly", "200.00", open)]);
-    expect(cardLines(pair, 1, "monthly").lines).toEqual([{ id: "unlimitedProducts" }]);
-    const same = groupPlans([plan("A", "monthly", "100.00", capped), plan("B", "monthly", "200.00", capped)]);
+  it("fraud checks say how many a day when the admin set it; more a day is an addition; nothing new lists nothing", () => {
+    const few = { limits: { fraud_checks_per_day: 50 }, features: { fraud_check: true } };
+    const many = { limits: { fraud_checks_per_day: 200 }, features: { fraud_check: true } };
+    const unset = { features: { fraud_check: true } };
+    const pair = groupPlans([plan("Small", "monthly", "100.00", few), plan("Big", "monthly", "200.00", many)]);
+    expect(cardLines(pair, 1, "monthly").lines).toEqual([{ id: "fraudCheckPerDay", count: 200 }]);
+    const same = groupPlans([plan("A", "monthly", "100.00", few), plan("B", "monthly", "200.00", few)]);
     expect(cardLines(same, 1, "monthly").lines).toEqual([]);
+    const alone = groupPlans([plan("Only", "monthly", "100.00", unset)]);
+    expect(cardLines(alone, 0, "monthly").lines.at(-1)).toEqual({ id: "fraudCheck" });
   });
 });
 
@@ -198,15 +200,15 @@ describe("a card's button (owner, 2026-10-03; paying early, 2026-10-09; to the m
 describe("one plan on its own (Settings > Billing, owner 2026-10-09)", () => {
   const [, essentialMonthly, premiumYearly, premiumMonthly] = PLANS;
 
-  it("lists what it gives: its cap, then what it switches on", () => {
+  it("lists what it gives: unlimited products, then what it switches on", () => {
     expect(planLines(premiumMonthly)).toEqual([
-      { id: "products", count: 500 },
+      { id: "unlimitedProducts" },
       { id: "analytics" },
-      { id: "fraudCheck" },
+      { id: "fraudCheckPerDay", count: 100 },
       { id: "orderEmails" },
       { id: "premiumSections" },
     ]);
-    expect(planLines(essentialMonthly)).toEqual([{ id: "products", count: 100 }]);
+    expect(planLines(essentialMonthly)).toEqual([{ id: "unlimitedProducts" }]);
     expect(planLines(plan("Open", "monthly", "0", {}))).toEqual([{ id: "unlimitedProducts" }]);
   });
 

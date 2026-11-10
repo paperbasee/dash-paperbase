@@ -2441,9 +2441,9 @@
         "startsOn": "Starts {date}"
       },
       "tiles": {
-        "products": "Products",
-        "productsOf": "of {limit}",
-        "noLimit": "No limit on your plan",
+        "fraudChecks": "Fraud checks today",
+        "fraudChecksOf": "of {limit}",
+        "fraudChecksPremium": "Part of Premium",
         "price": "Your price",
         "perMonth": "a month",
         "billedYearly": "{charge} a year, paid at once",
@@ -3716,13 +3716,13 @@
     "lines": {
       "shop": "Your own online shop, designed in Customize",
       "orders": "Orders, customers and stock in one place",
-      "products": "Up to {count} products",
       "unlimitedProducts": "Unlimited products",
       "steadfast": "Send parcels to Steadfast from the order",
       "team": "A team with roles: Admin, Manager and Staff",
       "extras": "Coupons, reviews, blog and pop-ups",
       "analytics": "Analytics: sales, visitors, products, districts, delivery, customers and live",
       "fraudCheck": "Fraud check before you send a parcel",
+      "fraudCheckPerDay": "Fraud check, up to {count} a day",
       "orderEmails": "An email for every new order",
       "premiumSections": "Premium sections in Customize"
     },

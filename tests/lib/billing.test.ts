@@ -44,7 +44,7 @@ function overview(fields: Partial<BillingOverview> = {}): BillingOverview {
   return {
     // 30 days to the minute: approved 9 Oct at 9:54 AM, ending 8 Nov at 9:54 AM (Dhaka).
     period: { starts_at: "2026-10-09T03:54:00Z", ends_at: "2026-11-08T03:54:00Z" },
-    products: { count: 312, limit: 500 },
+    fraud_checks: { included: true, today: 37, per_day: 100 },
     payments: [payment()],
     paid: { total: "1800.00", count: 1, since: "2026-10-09T08:00:00Z" },
     ...fields,

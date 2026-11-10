@@ -44,7 +44,7 @@ const premium: Plan = {
   price: "1800.00",
   billing_cycle: "monthly",
   features: {
-    limits: { max_products: 500 },
+    limits: { fraud_checks_per_day: 100 },
     features: { advanced_analytics: true, fraud_check: true, order_email_notifications: true, premium_sections: true },
   },
   is_default: true,
@@ -75,7 +75,7 @@ const at = (ms: number) => new Date(ms).toISOString();
 const overview: BillingOverview = {
   // 30 days to the minute: 9 Oct at 9:54 AM to 8 Nov at 9:54 AM (Dhaka).
   period: { starts_at: "2026-10-09T03:54:00Z", ends_at: "2026-11-08T03:54:00Z" },
-  products: { count: 312, limit: 500 },
+  fraud_checks: { included: true, today: 37, per_day: 100 },
   payments: [payment()],
   paid: { total: "1800.00", count: 1, since: "2026-10-09T04:00:00Z" },
 };
@@ -224,19 +224,34 @@ describe("the tiles", () => {
   it("products against the cap, the price, and what has been paid since when", () => {
     const yearly = { ...premium, public_id: "pln_premium_y", price: "1500.00", billing_cycle: "yearly" as const };
     const html = text(draw(<BillingTiles overview={overview} plan={premium} yearly={yearly} />));
-    expect(html).toContain("312 of 500");
+    expect(html).toContain("Fraud checks today");
+    expect(html).toContain("37 of 100");
     expect(html).toContain("৳1,800 a month");
     expect(html).toContain("৳1,500 a month if paid yearly");
     expect(html).toContain("৳1,800");
     expect(html).toContain("1 payment since Oct 2026");
   });
 
-  it("no cap and nothing paid yet", () => {
+  it("no daily number set, and nothing paid yet", () => {
     const html = text(
-      draw(<BillingTiles overview={{ ...overview, products: { count: 3, limit: null }, paid: { total: "0.00", count: 0, since: null } }} plan={null} yearly={null} />),
+      draw(
+        <BillingTiles
+          overview={{ ...overview, fraud_checks: { included: true, today: 3, per_day: null }, paid: { total: "0.00", count: 0, since: null } }}
+          plan={null}
+          yearly={null}
+        />,
+      ),
     );
-    expect(html).toContain("No limit on your plan");
+    expect(html).toContain("Fraud checks today 3");
+    expect(html).not.toContain(" of ");
     expect(html).toContain("No payments yet");
+  });
+
+  it("a plan without fraud checks says they are Premium's", () => {
+    const html = text(
+      draw(<BillingTiles overview={{ ...overview, fraud_checks: { included: false, today: 0, per_day: null } }} plan={null} yearly={null} />),
+    );
+    expect(html).toContain("Part of Premium");
   });
 });
 
@@ -273,8 +288,8 @@ describe("the payments", () => {
 describe("the plan beside them", () => {
   it("what it gives, in the Plans page's words", () => {
     const html = text(draw(<PlanIncludes plan={premium} />));
-    expect(html).toContain("Up to 500 products");
-    expect(html).toContain("Fraud check before you send a parcel");
+    expect(html).toContain("Unlimited products");
+    expect(html).toContain("Fraud check, up to 100 a day");
     expect(html).toContain("Premium sections in Customize");
   });
 

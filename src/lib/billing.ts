@@ -1,7 +1,7 @@
 /**
  * Paperbase's billing in the dashboard. Settings > Billing (owner, 2026-10-09: design B) reads the
- * overview the API gives (GET billing/overview/: the period's dates, products against the plan's
- * cap, the payments made) beside what /auth/me/ says of the plan; the Plans page shares how money
+ * overview the API gives (GET billing/overview/: the period's dates, the fraud checks today against
+ * the plan's daily number, the payments made) beside what /auth/me/ says of the plan; the Plans page shares how money
  * and days are written.
  *
  * The band at the top says where the plan stands. Plans run to the minute (2026-11-05): the shop
@@ -39,8 +39,11 @@ export interface BillingPayment {
 export interface BillingOverview {
   /** The period in force, its exact start and end (ISO 8601); none without a plan. */
   period: { starts_at: string; ends_at: string } | null;
-  /** Products against the plan's cap; `limit` null when the plan sets none. */
-  products: { count: number; limit: number | null };
+  /**
+   * The shop's fraud checks that asked the couriers today (Bangladesh's day), against its plan's
+   * daily number (Django admin; null when it names none). `included`: the plan has fraud checks.
+   */
+  fraud_checks: { included: boolean; today: number; per_day: number | null };
   /** Newest first. */
   payments: BillingPayment[];
   /** Successful payments of more than nothing: their sum, how many, and the first one's time. */
