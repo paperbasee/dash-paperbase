@@ -51,6 +51,8 @@ describe("Settings → Apps", () => {
       "abandoned_checkouts",
       "customers",
       "accounts",
+      // Nothing to switch; the plan decides (APP_PLAN_FEATURE), and the card says Premium without it.
+      "fraud_check",
     ]);
     expect(APPS_SCREEN_SWITCHABLE_IDS).toEqual([
       "analytics",

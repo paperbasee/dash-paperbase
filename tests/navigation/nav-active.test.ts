@@ -14,6 +14,7 @@ describe("which sidebar row is active", () => {
   it("lights the child alone, not the parent it sits under", () => {
     const pairs: [string, string][] = [
       ["abandoned_checkouts", "orders"],
+      ["fraud_check", "orders"],
       ["accounts", "customers"],
       ["wishlist", "products"],
     ];

@@ -57,13 +57,19 @@ function currentPlanOf(me: MeForRouting | null): CurrentPlan | null {
  * Plans (owner, 2026-10-02; this look, 2026-10-03, from their reference): a card per plan -- its
  * price, its line, and what it gives (the first what you get, each after "Everything in ..., plus:")
  * -- with the recommended one dark, a tag in a cut corner (current plan, the yearly saving,
- * recommended), and a yearly / monthly switch. A shop sent here from Analytics, which its plan
- * does not include (`?from=analytics`), is told so at the top. Paying is the owner's alone; a team
+ * recommended), and a yearly / monthly switch. A shop sent here from a page its plan does not
+ * include (`?from=analytics`, `?from=fraud-check`) is told so at the top. Paying is the owner's alone; a team
  * member reads the same page without the buttons.
  *
  * Rounder than the rest of the dashboard (whose corners are 3px) on purpose: the owner's
  * reference, approved as a mockup, on a page that stands outside the dashboard's frame.
  */
+/** The page a shop was sent from (`?from=`), when its plan does not include it: what the note says. */
+const FROM_NOTES = {
+  analytics: "fromAnalytics",
+  "fraud-check": "fromFraudCheck",
+} as const;
+
 export default function PlansPage() {
   const locale = useLocale();
   const numClass = numberTextClass(locale);
@@ -71,7 +77,8 @@ export default function PlansPage() {
   const tPay = useTranslations("billingPay");
   const router = useRouter();
   const searchParams = useSearchParams();
-  const fromAnalytics = searchParams.get("from") === "analytics";
+  const from = searchParams.get("from");
+  const fromNote = from && Object.hasOwn(FROM_NOTES, from) ? FROM_NOTES[from as keyof typeof FROM_NOTES] : null;
   // Settings > Billing's "See yearly prices" opens on them (`?cycle=yearly`).
   const askedCycle = searchParams.get("cycle");
 
@@ -133,10 +140,10 @@ export default function PlansPage() {
     <div className="min-h-screen bg-(--plans-page) px-4 py-10 text-foreground [--plans-page:#f3f3f2] sm:py-14 dark:[--plans-page:hsl(var(--background))]">
       <div className="mx-auto flex max-w-5xl flex-col">
         <p className="text-[13px] font-semibold tracking-wide text-muted-foreground">Paperbase</p>
-        {fromAnalytics ? (
+        {fromNote ? (
           <p className="mt-3 inline-flex w-fit items-center gap-2 rounded-full bg-amber-100 px-3 py-1 text-[13px] font-medium text-amber-900 dark:bg-amber-400/15 dark:text-amber-200">
             <Star className="size-3.5 shrink-0 fill-amber-400 text-amber-400 dark:fill-amber-300 dark:text-amber-300" aria-hidden />
-            {t("fromAnalytics")}
+            {t(fromNote)}
           </p>
         ) : null}
         <header className="mb-7 mt-1.5 flex flex-wrap items-end justify-between gap-4">

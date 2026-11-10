@@ -63,6 +63,8 @@ export default function AppsSection({
             {APPS_SCREEN_ALWAYS_ON_IDS.map((id) => {
               const app = APP_CONFIG[id];
               const Icon = app.icon;
+              // Nothing to switch, but a plan can still leave it out (Fraud check): it says Premium.
+              const included = planIncludesApp(id, features);
               return (
                 <div
                   key={id}
@@ -70,12 +72,27 @@ export default function AppsSection({
                 >
                   <Icon className="size-5 shrink-0 text-muted-foreground" />
                   <div className="min-w-0">
-                    <p className="font-medium text-foreground">{t(`apps.items.${id}.label` as never)}</p>
+                    <p className="flex items-center gap-1.5 font-medium text-foreground">
+                      {t(`apps.items.${id}.label` as never)}
+                      {APP_PLAN_FEATURE[id] ? (
+                        <Star
+                          role="img"
+                          aria-label={t("apps.premium")}
+                          className="size-3.5 shrink-0 fill-amber-400 text-amber-400 dark:fill-amber-300 dark:text-amber-300"
+                        />
+                      ) : null}
+                    </p>
                     <p className="text-xs text-muted-foreground">{t(`apps.items.${id}.description` as never)}</p>
                   </div>
-                  <span className="shrink-0 justify-self-end whitespace-nowrap rounded-tooltip bg-primary/15 px-2.5 py-0.5 text-xs font-medium text-primary">
-                    {t("apps.alwaysOn")}
-                  </span>
+                  {included ? (
+                    <span className="shrink-0 justify-self-end whitespace-nowrap rounded-tooltip bg-primary/15 px-2.5 py-0.5 text-xs font-medium text-primary">
+                      {t("apps.alwaysOn")}
+                    </span>
+                  ) : (
+                    <span className="shrink-0 justify-self-end whitespace-nowrap rounded-tooltip bg-amber-100 px-2.5 py-0.5 text-xs font-medium text-amber-900 dark:bg-amber-400/15 dark:text-amber-200">
+                      {t("apps.premium")}
+                    </span>
+                  )}
                 </div>
               );
             })}

@@ -10,6 +10,7 @@ describe("pageRule -- what an address needs", () => {
     expect(pageRule("/products/prd_1/")).toEqual({ appId: "products", key: undefined });
     expect(pageRule("/products/wished").appId).toBe("wishlist");
     expect(pageRule("/orders/abandoned").appId).toBe("abandoned_checkouts");
+    expect(pageRule("/orders/fraud-check").appId).toBe("fraud_check");
     expect(pageRule("/customers/accounts").appId).toBe("accounts");
     expect(pageRule("/inventory").appId).toBe("inventory");
   });

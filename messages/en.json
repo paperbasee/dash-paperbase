@@ -104,6 +104,7 @@
     "more": "More",
     "navigation": "Navigation",
     "abandoned_checkouts": "Abandoned checkouts",
+    "fraud_check": "Fraud check",
     "accounts": "Accounts",
     "wishlist": "Most wished-for",
     "groupSales": "Sales",
@@ -2260,6 +2261,10 @@
           "label": "Abandoned checkouts",
           "description": "See shoppers who filled in checkout and did not finish, with what was in their bag. Kept for 30 days, then deleted."
         },
+        "fraud_check": {
+          "label": "Fraud check",
+          "description": "Check any buyer's phone number and see how their parcels went with the couriers."
+        },
         "order_lookup": {
           "label": "Order tracking",
           "description": "Let a shopper find their order with its number and the phone they ordered with — no account needed. Useful when your checkout does not ask for an email."
@@ -3684,6 +3689,7 @@
     "title": "Choose your plan",
     "subtitle": "Pick the plan for your shop. Paid by bKash or Nagad.",
     "fromAnalytics": "Analytics is part of Premium",
+    "fromFraudCheck": "Fraud check is part of Premium",
     "currentLine": "You're on {plan}.",
     "trialLine": "You're on a free trial of {plan}.",
     "shopOnLine": "This shop is on {plan}.",
@@ -4059,6 +4065,28 @@
     "limitExceeded": "Limit exceeded.",
     "failed": "Fraud check failed."
   },
+  "fraudCheckPage": {
+    "phoneLabel": "Buyer's phone number",
+    "placeholder": "Phone number",
+    "note": "A new number uses one of today's checks. A number checked in the last 3 days is free.",
+    "guideTitle": "What the colours mean",
+    "guideSafe": "80% or more delivered",
+    "guideCaution": "Between 60% and 80% delivered",
+    "guideRisky": "Less than 60% delivered",
+    "guideNew": "No parcels on record yet",
+    "ringDelivered": "delivered",
+    "ringParcels": "parcels",
+    "totalParcels": "Total parcels",
+    "byCourier": "By courier",
+    "courierLine": "{success} of {total} delivered{cancelled, plural, =0 {} other {, {cancelled} cancelled}}",
+    "noCouriers": "No courier has a parcel for this number yet.",
+    "noReports": "No merchant has reported this number.",
+    "providerDown": "The couriers did not answer this time, so only Paperbase's own history is shown. Try again in a few minutes.",
+    "errorPhone": "Type an 11-digit number that starts with 01.",
+    "errorLimit": "Today's checks are used up. Try again tomorrow.",
+    "errorBusy": "This number is being checked right now. Try again in a moment.",
+    "errorFailed": "Could not check this number right now. Try again in a few minutes."
+  },
   "teamInvite": {
     "onPaperbase": "on Paperbase",
     "loadingTitle": "Opening your invite",
@@ -4122,6 +4150,7 @@
     "customers": "Everyone who has ordered from your shop, by phone number, with how many orders they placed and how much they spent.",
     "accounts": "Shoppers who made an account on your shop with their email. Their saved items and orders follow them to any device.",
     "abandoned": "People who filled in your checkout form and did not finish. Tap a row to see what they wanted, or tap the number to call them.",
+    "fraudCheck": "Check any buyer's phone number before you send an order. See how their parcels went with the couriers.",
     "mostWishedFor": "What shoppers have saved to come back to. The top of this list is what to restock or promote.",
     "mostWishedForScope": "Counts customers who were signed in when they saved. A shopper who saves without signing in keeps that list in their own browser until they do, so it is not counted here.",
     "reviews": "What shoppers wrote about your products. Nothing appears in your shop until you approve it. You can reply to any of them, and add reviews of your own — those are marked as added by the shop.",

@@ -21,6 +21,7 @@ import {
   Award,
   Star,
   Phone as PhoneIcon,
+  ShieldCheck,
   UserRound,
 } from "lucide-react";
 
@@ -105,6 +106,16 @@ export const APP_CONFIG: Record<string, AppConfig> = {
     description: "People who filled in checkout and did not finish",
     essential: false,
     href: "/orders/abandoned",
+    countKey: null,
+    parentId: "orders",
+  },
+  fraud_check: {
+    id: "fraud_check",
+    label: "Fraud check",
+    icon: ShieldCheck,
+    description: "Check any buyer's phone number for how their parcels went with the couriers",
+    essential: false,
+    href: "/orders/fraud-check",
     countKey: null,
     parentId: "orders",
   },
@@ -350,11 +361,15 @@ export const MORE_APP_IDS = ["support_tickets", "trash"] as const;
 export const OPT_IN_APP_IDS = ["wishlist", "coupons", "order_lookup"] as const;
 
 /**
- * Apps a plan must include (owner, 2026-10-04: analytics is Premium only). On a plan without the
- * feature the app is off whatever the shop switched -- out of the sidebar, its switch locked in
- * Settings > Apps -- and comes back by itself on the upgrade.
+ * Apps a plan must include (owner, 2026-10-04: analytics is Premium only; fraud checks always were).
+ * On a plan without the feature the app is off whatever the shop switched -- out of the sidebar,
+ * its switch locked (or its Always on marked Premium) in Settings > Apps -- and comes back by
+ * itself on the upgrade.
  */
-export const APP_PLAN_FEATURE: Readonly<Record<string, string>> = { analytics: "advanced_analytics" };
+export const APP_PLAN_FEATURE: Readonly<Record<string, string>> = {
+  analytics: "advanced_analytics",
+  fraud_check: "fraud_check",
+};
 
 /**
  * Whether the shop's plan includes an app. Features not loaded yet (`null`) take nothing away, so
@@ -398,6 +413,10 @@ export const ALWAYS_ON_EXTRA_APP_IDS = [
   // account to belong to, so a shop with accounts off could not have a
   // wishlist either, however much the merchant wanted one.
   "accounts",
+  // Owner, 2026-11-10: a page to check any phone number, not only an order's. It only reads, and
+  // a merchant on Premium has fraud checks on every order already, so there is nothing to switch:
+  // the plan decides (`APP_PLAN_FEATURE`).
+  "fraud_check",
 ] as const;
 
 /**
@@ -412,7 +431,7 @@ export const ALWAYS_ON_EXTRA_APP_IDS = [
  * different things is worse than either.
  */
 export const NAV_CHILD_APP_IDS: Record<string, readonly string[]> = {
-  orders: ["orders", "abandoned_checkouts"],
+  orders: ["orders", "abandoned_checkouts", "fraud_check"],
   customers: ["customers", "accounts"],
 };
 

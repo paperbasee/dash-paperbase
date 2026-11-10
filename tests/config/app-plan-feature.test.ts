@@ -14,6 +14,12 @@ describe("which apps a plan includes", () => {
     expect(planIncludesApp("analytics", { basic_analytics: true })).toBe(false);
   });
 
+  it("the Fraud check page needs Premium's fraud checks, as every fraud check does", () => {
+    expect(APP_PLAN_FEATURE.fraud_check).toBe("fraud_check");
+    expect(planIncludesApp("fraud_check", { fraud_check: true })).toBe(true);
+    expect(planIncludesApp("fraud_check", { advanced_analytics: true })).toBe(false);
+  });
+
   it("apps no plan gates are every plan's, and an unloaded plan takes nothing away", () => {
     expect(planIncludesApp("blog", {})).toBe(true);
     expect(planIncludesApp("analytics", null)).toBe(true);

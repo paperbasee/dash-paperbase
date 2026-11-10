@@ -57,6 +57,7 @@ const APP_WORDS: Record<string, readonly string[]> = {
   orders: ["sales", "sell", "parcel", "অর্ডার", "বিক্রি", "পার্সেল"],
   customers: ["buyers", "clients", "গ্রাহক", "ক্রেতা", "কাস্টমার"],
   abandoned_checkouts: ["abandoned cart", "incomplete", "left checkout", "unfinished", "অসম্পূর্ণ", "চেকআউট"],
+  fraud_check: ["fraud", "fake order", "check number", "phone check", "courier history", "ফ্রড", "ভুয়া অর্ডার", "নম্বর যাচাই", "ফোন যাচাই"],
   accounts: ["shopper accounts", "sign in", "logins", "অ্যাকাউন্ট", "ক্রেতার অ্যাকাউন্ট"],
   wishlist: ["wished", "favourites", "favorites", "saved", "উইশলিস্ট", "পছন্দ"],
   brands: ["brand", "maker", "ব্র্যান্ড"],

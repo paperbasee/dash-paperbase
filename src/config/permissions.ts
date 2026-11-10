@@ -82,6 +82,8 @@ export const APP_PAGE_PERMISSION: Record<string, string> = {
   products: "products.view",
   orders: "orders.view",
   abandoned_checkouts: "orders.view",
+  // Every check may ask the provider and spend the plan's checks, as an order's does: orders.edit.
+  fraud_check: "orders.edit",
   customers: "customers.view",
   accounts: "customers.view",
   wishlist: "analytics.view",
