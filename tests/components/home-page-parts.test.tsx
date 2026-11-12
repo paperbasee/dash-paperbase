@@ -9,7 +9,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { NextIntlClientProvider } from "next-intl";
 import { describe, expect, it, vi } from "vitest";
 
-import { HomeOrdersPanel, squareGrid } from "@/components/dashboard/HomeOrdersPanel";
+import { CHART_MARGIN, HomeOrdersPanel, peakLabels, squareGrid } from "@/components/dashboard/HomeOrdersPanel";
 import { HomeSidePanel } from "@/components/dashboard/HomeSidePanel";
 import { isOrderQueue, type HomeNumbers } from "@/lib/dashboard/home";
 
@@ -131,8 +131,10 @@ describe("the orders chart's grid", () => {
     const grid = squareGrid(width, lastIndex, maxOrders);
     const columns = grid.xTicks.length - 1;
     const rows = grid.yTicks.length - 1;
-    const plotWidth = width - 30 - 0 - 10;
-    const plotHeight = grid.height - 12 - 0 - 26;
+    const plotWidth = width - CHART_MARGIN.left - CHART_MARGIN.right;
+    const plotHeight = grid.height - CHART_MARGIN.top - CHART_MARGIN.bottom - 26;
+    // The same space on both sides of the grid.
+    expect(CHART_MARGIN.left).toBe(CHART_MARGIN.right);
     expect(Math.abs(plotWidth / columns - plotHeight / rows)).toBeLessThan(1);
     // Every column the same width, in buckets as in pixels.
     const steps = grid.xTicks.slice(1).map((x, i) => x - grid.xTicks[i]);
@@ -144,6 +146,26 @@ describe("the orders chart's grid", () => {
     // Whole numbers of orders on every row.
     for (const tick of grid.yTicks) expect(Number.isInteger(tick)).toBe(true);
     expect(grid.yTicks[rows]).toBeGreaterThanOrEqual(maxOrders);
+  });
+});
+
+describe("the counts over the line", () => {
+  // Owner, 2026-11-12: "no need to show the y axis number just show the number on top of the lines".
+  it("marks the peaks and now, never a quiet day", () => {
+    const values = [0, 0, 28, 0, 0, 4, 1, 7, 0, 6, 0, 3, 0, 0];
+    expect([...peakLabels(values, 1)].sort((a, b) => a - b)).toEqual([2, 5, 7, 9, 11]);
+    expect(peakLabels([0, 0, 0], 1).size).toBe(0);
+    expect(peakLabels([0, 2, 5], 1)).toEqual(new Set([2]));
+  });
+
+  it("keeps the higher of two peaks too close to both be read", () => {
+    const values = [0, 4, 0, 7, 0, 6, 0, 0, 0, 3];
+    // Two buckets apart is too close: 7 stays, 4 and 6 beside it go; now (3) always shows.
+    expect([...peakLabels(values, 3)].sort((a, b) => a - b)).toEqual([3, 9]);
+  });
+
+  it("marks a level run once, at its start", () => {
+    expect(peakLabels([0, 5, 5, 5, 0, 0], 1)).toEqual(new Set([1]));
   });
 });
 

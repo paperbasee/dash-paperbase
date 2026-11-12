@@ -2,7 +2,7 @@
 
 import { useId } from "react";
 import { useFormatter, useLocale, useTranslations } from "next-intl";
-import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { Area, AreaChart, CartesianGrid, LabelList, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 
 import { RechartsSizedContainer } from "@/components/RechartsSizedContainer";
 import { Link } from "@/i18n/navigation";
@@ -128,16 +128,25 @@ function PeriodSummary({
 // columns had followed the date labels, which fall unevenly (8 days apart, then 12), so the
 // boxes differed and the last one most. Now the grid is laid out first -- four rows, and as many
 // columns as make each box as wide as it is tall -- and the chart's height follows from it.
+//
+// No axis of counts (owner, 2026-11-12: on a phone the chart had no "proper space in between 2
+// sides" -- the counts took a column on the left only, so the grid sat off-centre and its last
+// point met the right edge -- then "no need to show the y axis number just show the number on
+// top of the lines"). The grid runs the full width with the same inset on both sides, and the
+// line's peaks carry their own counts.
 const ROWS = 4;
 const TARGET_CELL = 38;
 const MIN_LABEL_GAP = 72;
-const MARGIN = { top: 12, right: 10, left: 0, bottom: 0 };
-const Y_AXIS_WIDTH = 30;
+export const CHART_MARGIN = { top: 20, right: 6, left: 6, bottom: 0 };
+// The narrowest gap, in pixels, between two counts over the line.
+const MIN_PEAK_LABEL_GAP = 22;
 const X_AXIS_HEIGHT = 26;
 
 export interface SquareGrid {
   /** The chart's height, so that every box of the grid is a square. */
   height: number;
+  /** One box's side, in pixels. */
+  cell: number;
   yTicks: number[];
   /** Where the vertical lines fall, in buckets from the first (fractions between them too). */
   xTicks: number[];
@@ -148,7 +157,7 @@ export interface SquareGrid {
 
 /** The grid for a chart ``width`` wide over buckets 0..``lastIndex`` peaking at ``maxOrders``. */
 export function squareGrid(width: number, lastIndex: number, maxOrders: number): SquareGrid {
-  const plotWidth = Math.max(1, width - Y_AXIS_WIDTH - MARGIN.left - MARGIN.right);
+  const plotWidth = Math.max(1, width - CHART_MARGIN.left - CHART_MARGIN.right);
   const labelEvery = Math.max(1, Math.ceil(MIN_LABEL_GAP / TARGET_CELL));
   // Whole groups of labelled columns, so the last line -- now -- carries a label too.
   const groups = Math.max(1, Math.round(plotWidth / (TARGET_CELL * labelEvery)));
@@ -157,12 +166,33 @@ export function squareGrid(width: number, lastIndex: number, maxOrders: number):
   const step = Math.max(1, Math.ceil(maxOrders / ROWS));
   const xMax = Math.max(lastIndex, 1);
   return {
-    height: Math.round(cell * ROWS + MARGIN.top + MARGIN.bottom + X_AXIS_HEIGHT),
+    height: Math.round(cell * ROWS + CHART_MARGIN.top + CHART_MARGIN.bottom + X_AXIS_HEIGHT),
+    cell,
     yTicks: Array.from({ length: ROWS + 1 }, (_, i) => i * step),
     xTicks: Array.from({ length: columns + 1 }, (_, j) => (j * xMax) / columns),
     labelEvery,
     xMax,
   };
+}
+
+/**
+ * Which points carry their count over the line: the peaks (a point at least as high as both
+ * neighbours, the first of a level run), and the last point -- now -- when it has orders.
+ * Higher ones are kept first, and none closer than ``minGap`` buckets to one already kept.
+ */
+export function peakLabels(values: number[], minGap: number): Set<number> {
+  const last = values.length - 1;
+  const carries = (i: number) =>
+    values[i] > 0 && (i === last || (values[i] > (values[i - 1] ?? 0) && values[i] >= values[i + 1]));
+  const order = values
+    .map((_, i) => i)
+    .filter(carries)
+    .sort((a, b) => (a === last ? -1 : b === last ? 1 : values[b] - values[a] || a - b));
+  const kept = new Set<number>();
+  for (const i of order) {
+    if ([...kept].every((k) => Math.abs(k - i) >= minGap)) kept.add(i);
+  }
+  return kept;
 }
 
 /** Orders across the period as a line: straight runs between buckets over a striped fill. */
@@ -190,6 +220,11 @@ function OrdersLine({ series, bucket }: Pick<HomeOrdersPanelProps, "series" | "b
     <RechartsSizedContainer className="w-full">
       {({ width }) => {
         const grid = squareGrid(width, lastIndex, maxOrders);
+        const bucketWidth = (grid.cell * (grid.xTicks.length - 1)) / grid.xMax;
+        const labelled = peakLabels(
+          series.map((point) => point.orders),
+          Math.max(1, Math.ceil(MIN_PEAK_LABEL_GAP / bucketWidth))
+        );
         // A label names the bucket nearest its line; the lines between labels carry none.
         const XTick = (props: { x?: number | string; y?: number | string; payload?: { value?: unknown }; index?: number }) => {
           const i = props.index ?? 0;
@@ -207,79 +242,86 @@ function OrdersLine({ series, bucket }: Pick<HomeOrdersPanelProps, "series" | "b
           );
         };
         return (
-          <ResponsiveContainer width={width} height={grid.height} minWidth={0}>
-            <AreaChart data={points} margin={MARGIN} aria-label={t("chartAria")} role="img">
-              <defs>
-                <pattern id={`stripes-${id}`} width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
-                  <rect width="7" height="7" fill={LINE} fillOpacity={0.06} />
-                  <line x1="0" y1="0" x2="0" y2="7" stroke={LINE} strokeOpacity={0.14} strokeWidth="2.5" />
-                </pattern>
-              </defs>
-              <CartesianGrid stroke="hsl(var(--border))" strokeOpacity={0.7} />
-              <XAxis
-                type="number"
-                dataKey="x"
-                domain={[0, grid.xMax]}
-                ticks={grid.xTicks}
-                interval={0}
-                height={X_AXIS_HEIGHT}
-                tickLine={false}
-                axisLine={false}
-                tick={XTick}
-              />
-              <YAxis
-                domain={[0, grid.yTicks[ROWS]]}
-                ticks={grid.yTicks}
-                interval={0}
-                tickLine={false}
-                axisLine={false}
-                width={Y_AXIS_WIDTH}
-                allowDecimals={false}
-                tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }}
-                tickFormatter={(v) => toLocaleDigits(String(v), locale)}
-              />
-              <Tooltip
-                cursor={{ stroke: LINE, strokeWidth: 1 }}
-                content={({ active, payload }) => {
-                  const point = payload?.[0]?.payload as DashboardAnalyticsPoint | undefined;
-                  if (!active || !point) return null;
-                  return (
-                    <div className="flex min-w-36 flex-col items-center gap-0.5 rounded-ui border border-border bg-card px-3.5 py-2 text-center [box-shadow:var(--shadow-popover)]">
-                      <span className={cn("text-base font-semibold text-foreground", numberTextClass(locale))}>
-                        {toLocaleDigits(String(point.orders), locale)}
-                      </span>
-                      <span className="text-xs text-muted-foreground">{when(point.label, true)}</span>
-                    </div>
-                  );
-                }}
-              />
-              <Area
-                type="linear"
-                dataKey="orders"
-                stroke={LINE}
-                strokeWidth={1.75}
-                fill={`url(#stripes-${id})`}
-                isAnimationActive={false}
-                dot={(props: { cx?: number; cy?: number; index?: number }) => {
-                  const { cx, cy, index } = props;
-                  if (cx == null || cy == null || (!markAll && index !== lastIndex)) return <g key={`dot-${index}`} />;
-                  const last = index === lastIndex;
-                  return (
-                    <circle
-                      key={`dot-${index}`}
-                      cx={cx}
-                      cy={cy}
-                      r={last ? 4 : 3.5}
-                      fill={last ? LINE : "hsl(var(--card))"}
-                      stroke={LINE}
-                      strokeWidth={1.5}
-                    />
-                  );
-                }}
-                activeDot={{ r: 5, fill: "hsl(var(--card))", stroke: LINE, strokeWidth: 2 }}
-              />
-            </AreaChart>
-          </ResponsiveContainer>
+          <div className="relative">
+            <ResponsiveContainer width={width} height={grid.height} minWidth={0}>
+              <AreaChart data={points} margin={CHART_MARGIN} aria-label={t("chartAria")} role="img">
+                <defs>
+                  <pattern id={`stripes-${id}`} width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+                    <rect width="7" height="7" fill={LINE} fillOpacity={0.06} />
+                    <line x1="0" y1="0" x2="0" y2="7" stroke={LINE} strokeOpacity={0.14} strokeWidth="2.5" />
+                  </pattern>
+                </defs>
+                <CartesianGrid stroke="hsl(var(--border))" strokeOpacity={0.7} />
+                <XAxis
+                  type="number"
+                  dataKey="x"
+                  domain={[0, grid.xMax]}
+                  ticks={grid.xTicks}
+                  interval={0}
+                  height={X_AXIS_HEIGHT}
+                  tickLine={false}
+                  axisLine={false}
+                  tick={XTick}
+                />
+                {/* Sets the scale only: the counts are drawn over the grid below. */}
+                <YAxis hide domain={[0, grid.yTicks[ROWS]]} ticks={grid.yTicks} allowDecimals={false} />
+                <Tooltip
+                  cursor={{ stroke: LINE, strokeWidth: 1 }}
+                  content={({ active, payload }) => {
+                    const point = payload?.[0]?.payload as DashboardAnalyticsPoint | undefined;
+                    if (!active || !point) return null;
+                    return (
+                      <div className="flex min-w-36 flex-col items-center gap-0.5 rounded-ui border border-border bg-card px-3.5 py-2 text-center [box-shadow:var(--shadow-popover)]">
+                        <span className={cn("text-base font-semibold text-foreground", numberTextClass(locale))}>
+                          {toLocaleDigits(String(point.orders), locale)}
+                        </span>
+                        <span className="text-xs text-muted-foreground">{when(point.label, true)}</span>
+                      </div>
+                    );
+                  }}
+                />
+                <Area
+                  type="linear"
+                  dataKey="orders"
+                  stroke={LINE}
+                  strokeWidth={1.75}
+                  fill={`url(#stripes-${id})`}
+                  isAnimationActive={false}
+                  dot={(props: { cx?: number; cy?: number; index?: number }) => {
+                    const { cx, cy, index } = props;
+                    if (cx == null || cy == null || (!markAll && index !== lastIndex)) return <g key={`dot-${index}`} />;
+                    const last = index === lastIndex;
+                    return (
+                      <circle
+                        key={`dot-${index}`}
+                        cx={cx}
+                        cy={cy}
+                        r={last ? 4 : 3.5}
+                        fill={last ? LINE : "hsl(var(--card))"}
+                        stroke={LINE}
+                        strokeWidth={1.5}
+                      />
+                    );
+                  }}
+                  activeDot={{ r: 5, fill: "hsl(var(--card))", stroke: LINE, strokeWidth: 2 }}
+                >
+                  <LabelList
+                    dataKey="orders"
+                    content={(props: { x?: number | string; y?: number | string; index?: number; value?: unknown }) => {
+                      const x = Number(props.x);
+                      const y = Number(props.y);
+                      if (props.index == null || !labelled.has(props.index) || !Number.isFinite(x) || !Number.isFinite(y)) return null;
+                      return (
+                        <text x={x} y={y - 9} textAnchor="middle" fontSize={11} fontWeight={600} fill="hsl(var(--foreground))">
+                          {toLocaleDigits(String(props.value), locale)}
+                        </text>
+                      );
+                    }}
+                  />
+                </Area>
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
         );
       }}
     </RechartsSizedContainer>
