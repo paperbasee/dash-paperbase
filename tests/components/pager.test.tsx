@@ -41,9 +41,11 @@ describe("the pager", () => {
     expect(pager({ pages: 1, count: 30, pageSize: 96 })).not.toBe("");
   });
 
-  it("says which rows these are, out of how many", () => {
-    expect(pager()).toContain("1–24 of 51");
-    expect(pager({ page: 3 })).toContain("49–51 of 51");
+  it("says how many rows there are in all", () => {
+    expect(pager()).toContain(en.pager.totalLabel);
+    expect(pager()).toMatch(/>51</);
+    // The total is the list's, not the page's: it does not move as pages turn.
+    expect(pager({ page: 3 })).toMatch(/>51</);
   });
 
   it("marks the page being read, and no other", () => {
@@ -54,11 +56,19 @@ describe("the pager", () => {
 
   it("closes the way back on the first page and the way on from the last", () => {
     const first = pager({ page: 1 });
-    expect(first.match(/disabled=""/g)).toHaveLength(2); // first and previous
+    expect(first.match(/disabled=""/g)).toHaveLength(1); // previous
     expect(first).toContain(`aria-label="${en.pager.next}"`);
 
     const last = pager({ page: 3 });
-    expect(last.match(/disabled=""/g)).toHaveLength(2); // next and last
+    expect(last.match(/disabled=""/g)).toHaveLength(1); // next
+  });
+
+  it("has no first or last button: the numbers already reach both ends", () => {
+    const html = pager({ page: 10, pages: 20, count: 480 });
+    expect(html).toContain(`aria-label="${en.pager.goToPage.replace("{page}", "1")}"`);
+    expect(html).toContain(`aria-label="${en.pager.goToPage.replace("{page}", "20")}"`);
+    // Two step buttons in the row, not four.
+    expect(html.match(/title="/g)).toHaveLength(2);
   });
 
   it("offers the three sizes, with the one in use chosen", () => {
@@ -76,7 +86,7 @@ describe("the pager", () => {
 
   it("counts in Bangla, in Bangla", () => {
     const html = pager({ page: 2 }, "bn");
-    expect(html).toContain("২৫–৪৮");
+    expect(html).toContain(bn.pager.totalLabel);
     expect(html).toContain("৫১");
     expect(html).toContain(bn.pager.perPage);
     expect(html).toContain(`aria-label="${bn.pager.next}"`);

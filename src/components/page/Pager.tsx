@@ -1,22 +1,22 @@
 "use client";
 
 /**
- * The foot of a dashboard list: where you are, how to get elsewhere, and how many rows a page
- * holds.
+ * The foot of a dashboard list: how many rows there are, how many a page holds, and how to get
+ * to another one.
  *
  * One component for every list, so no page hand-rolls its own buttons again. It draws nothing
  * when there is nothing to page and no size worth changing.
+ *
+ * The shape is the one the owner chose (2026-11-12): the total on the left, and on the right
+ * the rows-a-page picker beside plain chevrons and page numbers, the page being read filled in.
+ * No first/last buttons -- page 1 and the last page are always among the numbers, so a second
+ * way to reach them only crowded the row, and crowded it worst on a phone.
  *
  * `onPrefetch` is called when a button is hovered or focused, never on its own: a page nobody
  * is about to open costs the database nothing.
  */
 
-import {
-  CaretDoubleLeft,
-  CaretDoubleRight,
-  CaretLeft,
-  CaretRight,
-} from "@phosphor-icons/react";
+import { CaretLeft, CaretRight } from "@phosphor-icons/react";
 import { useLocale, useTranslations } from "next-intl";
 
 import { Select } from "@/components/ui/select";
@@ -39,14 +39,15 @@ type PagerProps = {
   className?: string;
 };
 
-//: Only the double arrows carry this: on a phone the row has no width for them, and previous
-//: and next with the page numbers reach everywhere they do.
-const WIDE_ONLY = "hidden sm:inline-flex";
+/** Every button in the row is this size, so the numbers and the chevrons line up. */
+const SPOT = "inline-flex size-8 items-center justify-center rounded-full text-sm";
 
-const STEP_CLASS =
-  "inline-flex items-center justify-center rounded-ui border border-border-subtle px-2 py-1.5 sm:px-2.5 " +
-  "text-foreground transition-[background-color,border-color] duration-[180ms] ease-in-out " +
-  "hover:border-border-hover hover:bg-muted disabled:cursor-not-allowed disabled:opacity-40";
+const STEP_CLASS = cn(
+  SPOT,
+  "text-muted-foreground transition-colors duration-[180ms] ease-in-out",
+  "hover:bg-muted hover:text-foreground disabled:cursor-not-allowed disabled:opacity-30",
+  "disabled:hover:bg-transparent disabled:hover:text-muted-foreground"
+);
 
 export function Pager({
   page,
@@ -65,16 +66,7 @@ export function Pager({
 
   if (pages <= 1 && count <= PAGE_SIZES[0]) return null;
 
-  const firstRow = count === 0 ? 0 : (page - 1) * pageSize + 1;
-  const lastRow = Math.min(page * pageSize, count);
-
-  const step = (
-    target: number,
-    label: string,
-    icon: React.ReactNode,
-    enabled: boolean,
-    extra?: string,
-  ) => (
+  const step = (target: number, label: string, icon: React.ReactNode, enabled: boolean) => (
     <button
       type="button"
       aria-label={label}
@@ -83,7 +75,7 @@ export function Pager({
       onClick={() => onPage(target)}
       onMouseEnter={enabled ? () => onPrefetch?.(target) : undefined}
       onFocus={enabled ? () => onPrefetch?.(target) : undefined}
-      className={cn(STEP_CLASS, extra)}
+      className={STEP_CLASS}
     >
       {icon}
     </button>
@@ -93,47 +85,40 @@ export function Pager({
     <nav
       aria-label={t("label")}
       className={cn(
-        "flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between",
-        className,
+        "flex flex-wrap items-center gap-x-4 gap-y-3 border-t border-border-subtle pt-4",
+        className
       )}
     >
-      {/* On a phone these two share the first line; from sm up `contents` dissolves the
-          wrapper and they take their own places in the row. */}
-      <div className="flex items-center justify-between gap-3 sm:contents">
-        <label className="flex items-center gap-2 text-sm text-muted-foreground">
-          {t("perPage")}
-          <Select
-            value={String(pageSize)}
-            onChange={(event) => onPageSize(Number(event.target.value) as PageSize)}
-            className={cn("w-[84px]", numClass)}
-            aria-label={t("perPageAria")}
-          >
-            {PAGE_SIZES.map((size) => (
-              <option key={size} value={size}>
-                {digits(size)}
-              </option>
-            ))}
-          </Select>
-        </label>
+      <p className="text-sm text-muted-foreground">
+        {t("totalLabel")}{" "}
+        <span className={cn("font-semibold text-foreground", numClass)}>{digits(count)}</span>
+      </p>
 
-        <p className={cn("text-sm text-muted-foreground", numClass)}>
-          {t("range", { from: digits(firstRow), to: digits(lastRow), count: digits(count) })}
-        </p>
-      </div>
+      {/* `ml-auto` sends the picker and the buttons to the right end. On a phone the picker
+          finishes the first line with the total and the full-width button row wraps under it,
+          centred; from sm up the three sit on one line. */}
+      <label className="ml-auto flex items-center gap-2 text-sm text-muted-foreground">
+        {t("perPage")}
+        <Select
+          value={String(pageSize)}
+          onChange={(event) => onPageSize(Number(event.target.value) as PageSize)}
+          className={cn("h-8 w-[72px] py-0 pl-2.5 text-sm", numClass)}
+          aria-label={t("perPageAria")}
+        >
+          {PAGE_SIZES.map((size) => (
+            <option key={size} value={size}>
+              {digits(size)}
+            </option>
+          ))}
+        </Select>
+      </label>
 
-      {/* Centred under the line above on a phone; from sm up it ends the row, and `ml-auto`
-          keeps it against the right edge on the narrow widths where it wraps. */}
-      <div className="flex items-center justify-center gap-1 sm:ml-auto">
-        {step(1, t("first"), <CaretDoubleLeft className="size-4" aria-hidden />, page > 1, WIDE_ONLY)}
+      <div className="flex w-full items-center justify-center gap-0.5 sm:w-auto">
         {step(page - 1, t("previous"), <CaretLeft className="size-4" aria-hidden />, page > 1)}
 
         {pageButtons(page, pages).map((one, index) =>
           one === "gap" ? (
-            <span
-              key={`gap-${index}`}
-              aria-hidden
-              className="px-1 text-sm text-muted-foreground"
-            >
+            <span key={`gap-${index}`} aria-hidden className={cn(SPOT, "text-muted-foreground")}>
               …
             </span>
           ) : (
@@ -146,29 +131,21 @@ export function Pager({
               onMouseEnter={() => onPrefetch?.(one)}
               onFocus={() => onPrefetch?.(one)}
               className={cn(
-                "min-w-8 rounded-ui border px-1.5 py-1.5 text-sm sm:min-w-9 sm:px-2",
-                "transition-[background-color,border-color] duration-[180ms] ease-in-out",
+                SPOT,
+                "transition-colors duration-[180ms] ease-in-out",
                 one === page
-                  ? "border-border-hover bg-muted font-semibold text-foreground"
-                  : "border-border-subtle text-foreground hover:border-border-hover hover:bg-muted",
-                numClass,
+                  ? "bg-foreground font-semibold text-background"
+                  : "text-muted-foreground hover:bg-muted hover:text-foreground",
+                numClass
               )}
             >
               {digits(one)}
             </button>
-          ),
+          )
         )}
 
         {step(page + 1, t("next"), <CaretRight className="size-4" aria-hidden />, page < pages)}
-        {step(
-          pages,
-          t("last"),
-          <CaretDoubleRight className="size-4" aria-hidden />,
-          page < pages,
-          WIDE_ONLY,
-        )}
       </div>
-
     </nav>
   );
 }

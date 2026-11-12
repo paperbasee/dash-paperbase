@@ -4165,13 +4165,11 @@
   },
   "pager": {
     "label": "List pages",
-    "range": "{from}–{to} of {count}",
-    "first": "First page",
+    "totalLabel": "Total",
     "previous": "Previous page",
     "next": "Next page",
-    "last": "Last page",
     "goToPage": "Page {page}",
-    "perPage": "Per page",
+    "perPage": "Rows per page",
     "perPageAria": "Rows per page"
   },
   "autopilot": {

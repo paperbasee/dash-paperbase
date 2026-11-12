@@ -4165,13 +4165,11 @@
   },
   "pager": {
     "label": "তালিকার পাতা",
-    "range": "{count}টির মধ্যে {from}–{to}",
-    "first": "প্রথম পাতা",
+    "totalLabel": "মোট",
     "previous": "আগের পাতা",
     "next": "পরের পাতা",
-    "last": "শেষ পাতা",
     "goToPage": "পাতা {page}",
-    "perPage": "প্রতি পাতায়",
+    "perPage": "প্রতি পাতায় সারি",
     "perPageAria": "প্রতি পাতায় কত সারি"
   },
   "autopilot": {
