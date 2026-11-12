@@ -88,6 +88,20 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-11-12-a-new-home-page",
+    date: "2026-11-12",
+    version: "4.202.0",
+    tag: "new",
+    title: {
+      en: "A new home page: what needs you right now",
+      bn: "নতুন হোম পেজ: এই মুহূর্তে কী আপনার অপেক্ষায়",
+    },
+    body: {
+      en: "Home now shows the orders placed in the days you pick, where every order stands right now, your latest orders and what needs attention. Each number opens its own list, and owners and Admins see the money Steadfast is holding for them.",
+      bn: "হোম পেজে এখন দেখবেন আপনার বেছে নেওয়া দিনগুলোর অর্ডার, প্রতিটি অর্ডার এই মুহূর্তে কোথায় আছে, সাম্প্রতিক অর্ডার আর কোথায় নজর দিতে হবে। প্রতিটি সংখ্যায় চাপলে তার তালিকা খোলে, আর মালিক ও অ্যাডমিন দেখবেন Steadfast-এর কাছে তাঁদের কত টাকা আছে।",
+    },
+  },
+  {
     id: "2026-11-12-page-numbers-on-every-list",
     date: "2026-11-12",
     version: "4.201.0",
