@@ -1,6 +1,7 @@
 import { useCallback, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
 import { usePathname, useRouter } from "@/i18n/navigation";
+import { parsePageSize, type PageSize } from "@/lib/paging";
 
 type FilterMap = Record<string, string>;
 
@@ -16,6 +17,10 @@ export function useFilters(filterKeys: string[]) {
   const searchParams = useSearchParams();
 
   const page = useMemo(() => parsePage(searchParams.get("page")), [searchParams]);
+
+  // How many rows a page holds, kept in the web address beside the page so a refresh, the back
+  // button and a pasted link all show the list the merchant was looking at.
+  const pageSize = useMemo(() => parsePageSize(searchParams.get("per")), [searchParams]);
 
   const filters = useMemo<FilterMap>(() => {
     const out: FilterMap = {};
@@ -57,6 +62,19 @@ export function useFilters(filterKeys: string[]) {
     [applyParams]
   );
 
+  const setPageSize = useCallback(
+    (nextSize: PageSize) => {
+      applyParams((params) => {
+        // A bigger page holds the rows of several old ones, so the old page number means
+        // nothing now: back to the first.
+        params.delete("page");
+        if (nextSize === parsePageSize(null)) params.delete("per");
+        else params.set("per", String(nextSize));
+      });
+    },
+    [applyParams]
+  );
+
   const clearFilters = useCallback(() => {
     applyParams((params) => {
       for (const key of filterKeys) params.delete(key);
@@ -64,5 +82,5 @@ export function useFilters(filterKeys: string[]) {
     });
   }, [applyParams, filterKeys]);
 
-  return { page, filters, setFilter, setPage, clearFilters };
+  return { page, pageSize, filters, setFilter, setPage, setPageSize, clearFilters };
 }

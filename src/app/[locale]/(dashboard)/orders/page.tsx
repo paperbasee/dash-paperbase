@@ -4,7 +4,6 @@ import {
   Fragment,
   useCallback,
   useEffect,
-  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -15,7 +14,8 @@ import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { DeferredNavLink } from "@/components/navigation/DeferredNavLink";
 import { toLocaleDigits } from "@/lib/locale-digits";
-import { cursorFromLink } from "@/lib/cursor-from-link";
+import { Pager } from "@/components/page/Pager";
+import { DEFAULT_PAGE_SIZE, type PageSize } from "@/lib/paging";
 import { cn } from "@/lib/utils";
 import { digitsInNumberFont, numberTextClass } from "@/lib/number-font";
 import { Download, Loader2, RefreshCcw, Truck } from "lucide-react";
@@ -56,6 +56,7 @@ import { useConfirm } from "@/context/ConfirmDialogContext";
 import { notify, normalizeError } from "@/notifications";
 import { BelowFoldScrollHint } from "@/components/BelowFoldScrollHint";
 import { useOrdersPage } from "@/hooks/useOrdersPage";
+import { fetchOrdersList } from "@/hooks/useOrdersQuery";
 import { useCategoriesQuery } from "@/hooks/useCategoriesQuery";
 import {
   navCountsQueryKey,
@@ -191,7 +192,7 @@ export default function OrdersPage() {
   const { currencySymbol } = useBranding();
   const queryClient = useQueryClient();
   const confirm = useConfirm();
-  const { filters, setFilter, clearFilters } = useFilters([
+  const { page, pageSize, filters, setFilter, setPage, setPageSize, clearFilters } = useFilters([
     "customer",
     "status",
     "flag",
@@ -204,7 +205,6 @@ export default function OrdersPage() {
   const [searchInput, setSearchInput] = useState(filters.search || "");
   const debouncedSearch = useDebouncedValue(searchInput);
   const [filtersOpen, setFiltersOpen] = useState(false);
-  const [listCursor, setListCursor] = useState<string | null>(null);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [bulkDispatching, setBulkDispatching] = useState(false);
   const [statusUpdatingId, setStatusUpdatingId] = useState<string | null>(null);
@@ -222,29 +222,37 @@ export default function OrdersPage() {
   const [retryingCourierId, setRetryingCourierId] = useState<string | null>(null);
   const setScrollContainer = useHorizontalWheelScroll<HTMLDivElement>();
 
-  const listParams = useMemo(() => {
-    const params: Record<string, string> = {};
-    if (listCursor) params.cursor = listCursor;
-    if (filters.customer) params.customer = filters.customer;
-    if (filters.status) params.status = filters.status;
-    if (filters.flag) params.flag = filters.flag;
-    if (filters.date_range) params.date_range = filters.date_range;
-    if (filters.payment_status) params.payment_status = filters.payment_status;
-    if (filters.delivery_status) params.delivery_status = filters.delivery_status;
-    if (filters.category) params.category = filters.category;
-    if (filters.search) params.search = filters.search;
-    return params;
-  }, [
-    listCursor,
-    filters.customer,
-    filters.date_range,
-    filters.flag,
-    filters.category,
-    filters.payment_status,
-    filters.delivery_status,
-    filters.search,
-    filters.status,
-  ]);
+  const paramsForPage = useCallback(
+    (wanted: number) => {
+      const params: Record<string, string> = {};
+      // Page 1 and the default size are left out, so the list as it opens is one set of
+      // parameters -- one key in the dashboard's cache and one in the API's.
+      if (wanted > 1) params.page = String(wanted);
+      if (pageSize !== DEFAULT_PAGE_SIZE) params.page_size = String(pageSize);
+      if (filters.customer) params.customer = filters.customer;
+      if (filters.status) params.status = filters.status;
+      if (filters.flag) params.flag = filters.flag;
+      if (filters.date_range) params.date_range = filters.date_range;
+      if (filters.payment_status) params.payment_status = filters.payment_status;
+      if (filters.delivery_status) params.delivery_status = filters.delivery_status;
+      if (filters.category) params.category = filters.category;
+      if (filters.search) params.search = filters.search;
+      return params;
+    },
+    [
+      pageSize,
+      filters.customer,
+      filters.date_range,
+      filters.flag,
+      filters.category,
+      filters.payment_status,
+      filters.delivery_status,
+      filters.search,
+      filters.status,
+    ]
+  );
+
+  const listParams = useMemo(() => paramsForPage(page), [paramsForPage, page]);
 
   const { data: ordersPage, isLoading, isError, error, markOrderSeen } =
     useOrdersPage(listParams);
@@ -252,8 +260,24 @@ export default function OrdersPage() {
   const orders = ordersPage?.results ?? [];
   const ordersCount =
     typeof ordersPage?.count === "number" ? ordersPage.count : null;
-  const nextLink = ordersPage?.next ?? null;
-  const prevLink = ordersPage?.previous ?? null;
+  // The server's own answer, not the web address: a page past the end is served as the last
+  // one (engine/core/pagination.py), and the pager must show where the merchant really is.
+  const shownPage = ordersPage?.page ?? page;
+  const totalPages = ordersPage?.pages ?? 1;
+
+  // A page is fetched when a merchant points at its button, never before: a page nobody opens
+  // costs the database nothing, and by the time the click lands the rows are usually here.
+  const prefetchPage = useCallback(
+    (wanted: number) => {
+      if (wanted === shownPage) return;
+      const params = paramsForPage(wanted);
+      void queryClient.prefetchQuery({
+        queryKey: ordersListQueryKey(params),
+        queryFn: () => fetchOrdersList(params),
+      });
+    },
+    [paramsForPage, queryClient, shownPage]
+  );
 
   const invalidateOrdersCaches = useCallback(() => {
     void queryClient.invalidateQueries({ queryKey: ordersListQueryKeyRoot });
@@ -500,19 +524,6 @@ export default function OrdersPage() {
     if (next === (filters.search || "")) return;
     setFilter("search", next);
   }, [debouncedSearch, filters.search, setFilter]);
-
-  useLayoutEffect(() => {
-    setListCursor(null);
-  }, [
-    filters.customer,
-    filters.date_range,
-    filters.flag,
-    filters.category,
-    filters.payment_status,
-    filters.delivery_status,
-    filters.search,
-    filters.status,
-  ]);
 
   useEffect(() => {
     setGlobalSelectActive(false);
@@ -1591,24 +1602,15 @@ export default function OrdersPage() {
             }
           />
 
-          <div className="flex items-center justify-between gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              disabled={!prevLink}
-              onClick={() => setListCursor(cursorFromLink(prevLink))}
-            >
-              {tPages("supportTicketsPrevious")}
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              disabled={!nextLink}
-              onClick={() => setListCursor(cursorFromLink(nextLink))}
-            >
-              {tPages("supportTicketsNext")}
-            </Button>
-          </div>
+          <Pager
+            page={shownPage}
+            pages={totalPages}
+            count={ordersCount ?? 0}
+            pageSize={pageSize}
+            onPage={setPage}
+            onPageSize={(size: PageSize) => setPageSize(size)}
+            onPrefetch={prefetchPage}
+          />
         </>
       ) : null}
       <BelowFoldScrollHint />

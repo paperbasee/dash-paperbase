@@ -4173,6 +4173,17 @@
     "settings": "Your shop's settings: its name and look, payments, couriers, your team, notifications and more.",
     "home": "Your shop at a glance for the days you pick: orders, sales, new products, customers and messages."
   },
+  "pager": {
+    "label": "List pages",
+    "range": "{from}–{to} of {count}",
+    "first": "First page",
+    "previous": "Previous page",
+    "next": "Next page",
+    "last": "Last page",
+    "goToPage": "Page {page}",
+    "perPage": "Per page",
+    "perPageAria": "Rows per page"
+  },
   "autopilot": {
     "label": "Autopilot",
     "enable": "Enable Autopilot",

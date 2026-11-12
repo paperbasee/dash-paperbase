@@ -88,6 +88,21 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-11-12-order-pages-and-page-size",
+    date: "2026-11-12",
+    version: "4.199.0",
+    tag: "improved",
+    title: {
+      en: "Pick your page, and how many orders it holds",
+      bn: "যে পাতায় খুশি যান, যত খুশি অর্ডার নিয়ে",
+    },
+    body: {
+      en: "The orders list now has page numbers you can jump to, and you choose how many orders a page holds. Where you are is kept in the web address, so refreshing the page leaves you where you were instead of sending you back to the top.",
+      bn: "অর্ডারের তালিকায় এখন পাতার নম্বর আছে, যে পাতায় খুশি যেতে পারেন, আর এক পাতায় কয়টি অর্ডার থাকবে তা আপনি ঠিক করবেন। আপনি কোন পাতায় আছেন তা ঠিকানায় থাকে, তাই রিফ্রেশ করলে আর শুরুতে ফিরে যেতে হয় না।",
+    },
+    href: "/orders",
+  },
+  {
     id: "2026-11-10-unlimited-products-and-fraud-checks-a-day",
     date: "2026-11-10",
     version: "4.198.0",
@@ -505,19 +520,5 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
       bn: "আপনার দোকানের ফেসবুক পিক্সেল এখন সঙ্গে সঙ্গে ইভেন্ট পাঠায়। আগে কিছু ইভেন্ট প্রায় ৫ সেকেন্ড দেরিতে ফেসবুকে পৌঁছাত, আর ক্রেতা তাড়াতাড়ি চলে গেলে হারিয়ে যেত। টিকটক কোনো ইভেন্ট ফিরিয়ে দিলে ইভেন্ট লগে এখন সেটি পাঠানো নয়, ব্যর্থ হিসেবে দেখায়।",
     },
     href: "/settings?tab=integrations",
-  },
-  {
-    id: "2026-10-05-shop-not-found-page",
-    date: "2026-10-05",
-    version: "4.179.2",
-    tag: "new",
-    title: {
-      en: "A friendly page for wrong addresses",
-      bn: "ভুল ঠিকানায় এখন সুন্দর একটি পেজ",
-    },
-    body: {
-      en: "When a shopper opens an address your shop has nothing at, like an old link, a removed product or a typo, they now see your shop with its menu, in your colours, with buttons back to your home page and all products, instead of a blank \"Not Found\".",
-      bn: "ক্রেতা আপনার দোকানের এমন কোনো ঠিকানায় গেলে যেখানে কিছু নেই, যেমন পুরোনো লিংক, সরিয়ে ফেলা পণ্য বা টাইপের ভুল, এখন ফাঁকা \"Not Found\"-এর বদলে আপনার দোকানটিই দেখবেন: মেনুসহ, আপনার রঙে, আর হোম পেজ ও সব পণ্যে ফেরার বোতাম।",
-    },
   },
 ];
