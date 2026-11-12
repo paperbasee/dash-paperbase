@@ -9,7 +9,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { NextIntlClientProvider } from "next-intl";
 import { describe, expect, it, vi } from "vitest";
 
-import { HomeOrdersPanel } from "@/components/dashboard/HomeOrdersPanel";
+import { HomeOrdersPanel, squareGrid } from "@/components/dashboard/HomeOrdersPanel";
 import { HomeSidePanel } from "@/components/dashboard/HomeSidePanel";
 import { isOrderQueue, type HomeNumbers } from "@/lib/dashboard/home";
 
@@ -116,6 +116,34 @@ describe("the orders panel", () => {
     expect(html).toContain("২৪");
     expect(html).toContain("আগের সময়ের তুলনায়");
     expect(html).toContain("৫ দিনের বেশি আটকে");
+  });
+});
+
+describe("the orders chart's grid", () => {
+  // Owner, 2026-11-12: "the squares of the graph is not equal (especially on right side)". The
+  // columns had followed the date labels, which fall unevenly; the grid now comes first.
+  it.each([
+    [1280, 89, 28],
+    [700, 23, 5],
+    [330, 89, 7],
+    [900, 6, 0],
+  ])("draws square boxes at %ipx wide over %i buckets", (width, lastIndex, maxOrders) => {
+    const grid = squareGrid(width, lastIndex, maxOrders);
+    const columns = grid.xTicks.length - 1;
+    const rows = grid.yTicks.length - 1;
+    const plotWidth = width - 30 - 0 - 10;
+    const plotHeight = grid.height - 12 - 0 - 26;
+    expect(Math.abs(plotWidth / columns - plotHeight / rows)).toBeLessThan(1);
+    // Every column the same width, in buckets as in pixels.
+    const steps = grid.xTicks.slice(1).map((x, i) => x - grid.xTicks[i]);
+    for (const step of steps) expect(step).toBeCloseTo(steps[0], 9);
+    // The first and the last line carry a date: the period's start and now.
+    expect(grid.xTicks[0]).toBe(0);
+    expect(grid.xTicks[columns]).toBe(grid.xMax);
+    expect(columns % grid.labelEvery).toBe(0);
+    // Whole numbers of orders on every row.
+    for (const tick of grid.yTicks) expect(Number.isInteger(tick)).toBe(true);
+    expect(grid.yTicks[rows]).toBeGreaterThanOrEqual(maxOrders);
   });
 });
 

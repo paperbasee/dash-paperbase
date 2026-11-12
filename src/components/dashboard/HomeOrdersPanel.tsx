@@ -1,7 +1,10 @@
 "use client";
 
+import { useId } from "react";
 import { useFormatter, useLocale, useTranslations } from "next-intl";
+import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 
+import { RechartsSizedContainer } from "@/components/RechartsSizedContainer";
 import { Link } from "@/i18n/navigation";
 import type { AnalyticsBucket, DashboardAnalyticsPoint, DashboardAnalyticsSummary } from "@/lib/basicAnalyticsService";
 import type { HomeNumbers, WaitingStep } from "@/lib/dashboard/home";
@@ -11,6 +14,9 @@ import { cn } from "@/lib/utils";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 const DHAKA = "Asia/Dhaka";
+const LINE = "hsl(var(--accent-blue))";
+// Each point gets a marker while there are few enough to tell apart; past that, only the last.
+const MARK_EVERY_POINT_UP_TO = 14;
 
 /** Text colours that mean something, and nothing else is coloured (owner, 2026-11-12). */
 export const TONE = {
@@ -31,15 +37,21 @@ interface HomeOrdersPanelProps {
 }
 
 /**
- * The home page's top panel: the orders placed in the period the switch picks, split by where
- * they stand, with orders per bucket beside them; under a hairline, where every order is now.
+ * The home page's top panel: on the left, the orders placed in the period the switch picks,
+ * split by where they stand, with a line of orders across the period under them; on the
+ * right, where every order is now.
  */
 export function HomeOrdersPanel({ summary, previousOrders, series, bucket, flow, now }: HomeOrdersPanelProps) {
   return (
-    <section className="overflow-hidden rounded-card border border-card-border bg-card">
-      <div className="grid md:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
+    <section
+      className={cn(
+        "grid overflow-hidden rounded-card border border-card-border bg-card",
+        flow && "lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]"
+      )}
+    >
+      <div className="flex min-w-0 flex-col gap-5 px-5 pb-3 pt-5 sm:px-6 sm:pt-6">
         <PeriodSummary summary={summary} previousOrders={previousOrders} />
-        <OrderBars series={series} bucket={bucket} />
+        <OrdersLine series={series} bucket={bucket} />
       </div>
       {flow ? <OrderFlow flow={flow} now={now} /> : null}
     </section>
@@ -64,10 +76,10 @@ function PeriodSummary({
   ];
 
   return (
-    <div className="flex flex-col justify-between gap-6 border-b border-border-subtle px-5 py-5 sm:px-7 sm:py-6 md:border-b-0 md:border-r">
-      <div>
-        <h2 className="text-sm font-semibold text-foreground">{t("orders")}</h2>
-        <div className="mt-3 flex flex-wrap items-baseline gap-x-3 gap-y-1">
+    <div>
+      <h2 className="text-sm font-semibold text-foreground">{t("orders")}</h2>
+      <div className="mt-3 flex flex-wrap items-end justify-between gap-x-8 gap-y-4">
+        <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
           <span className={cn("text-[2.75rem] font-semibold leading-none tracking-tight text-foreground sm:text-5xl", numbers)}>
             {summary ? digits(summary.orders) : "—"}
           </span>
@@ -87,96 +99,190 @@ function PeriodSummary({
             </span>
           ) : null}
         </div>
-      </div>
-      <div>
-        <dl className="flex flex-wrap gap-x-8 gap-y-3">
+        <dl className="flex flex-wrap gap-x-7 gap-y-2">
           {parts.map((part) => (
             <div key={part.key} className="flex flex-col gap-0.5">
               <dt className="flex items-center gap-1.5 text-xs text-muted-foreground">
                 <span className={cn("size-2 rounded-[2px]", part.swatch)} aria-hidden />
                 {part.label}
               </dt>
-              <dd className={cn("text-xl font-semibold tracking-tight text-foreground", numbers)}>
+              <dd className={cn("text-lg font-semibold tracking-tight text-foreground", numbers)}>
                 {part.value === undefined ? "—" : digits(part.value)}
               </dd>
             </div>
           ))}
         </dl>
-        {summary && summary.orders > 0 ? (
-          <div className="mt-3.5 flex h-1 gap-0.5 overflow-hidden rounded-full" aria-hidden>
-            <span className="bg-foreground" style={{ flex: summary.confirmed }} />
-            <span className="bg-foreground/35" style={{ flex: summary.pending }} />
-            <span className="bg-rose-500" style={{ flex: summary.cancelled }} />
-          </div>
-        ) : null}
       </div>
+      {summary && summary.orders > 0 ? (
+        <div className="mt-4 flex h-1 gap-0.5 overflow-hidden rounded-full" aria-hidden>
+          <span className="bg-foreground" style={{ flex: summary.confirmed }} />
+          <span className="bg-foreground/35" style={{ flex: summary.pending }} />
+          <span className="bg-rose-500" style={{ flex: summary.cancelled }} />
+        </div>
+      ) : null}
     </div>
   );
 }
 
-/** Ticks under the bars: the first, three between, and the last bucket. */
-function tickIndexes(length: number): number[] {
-  if (length <= 1) return length === 1 ? [0] : [];
-  const picks = [0, 0.25, 0.5, 0.75, 1].map((f) => Math.round(f * (length - 1)));
-  return [...new Set(picks)];
+// The chart's grid is square (owner, 2026-11-12: "the squares of the graph is not equal"): its
+// columns had followed the date labels, which fall unevenly (8 days apart, then 12), so the
+// boxes differed and the last one most. Now the grid is laid out first -- four rows, and as many
+// columns as make each box as wide as it is tall -- and the chart's height follows from it.
+const ROWS = 4;
+const TARGET_CELL = 38;
+const MIN_LABEL_GAP = 72;
+const MARGIN = { top: 12, right: 10, left: 0, bottom: 0 };
+const Y_AXIS_WIDTH = 30;
+const X_AXIS_HEIGHT = 26;
+
+export interface SquareGrid {
+  /** The chart's height, so that every box of the grid is a square. */
+  height: number;
+  yTicks: number[];
+  /** Where the vertical lines fall, in buckets from the first (fractions between them too). */
+  xTicks: number[];
+  /** A date label on every this-many vertical line, the first and the last among them. */
+  labelEvery: number;
+  xMax: number;
 }
 
-function OrderBars({ series, bucket }: Pick<HomeOrdersPanelProps, "series" | "bucket">) {
+/** The grid for a chart ``width`` wide over buckets 0..``lastIndex`` peaking at ``maxOrders``. */
+export function squareGrid(width: number, lastIndex: number, maxOrders: number): SquareGrid {
+  const plotWidth = Math.max(1, width - Y_AXIS_WIDTH - MARGIN.left - MARGIN.right);
+  const labelEvery = Math.max(1, Math.ceil(MIN_LABEL_GAP / TARGET_CELL));
+  // Whole groups of labelled columns, so the last line -- now -- carries a label too.
+  const groups = Math.max(1, Math.round(plotWidth / (TARGET_CELL * labelEvery)));
+  const columns = groups * labelEvery;
+  const cell = plotWidth / columns;
+  const step = Math.max(1, Math.ceil(maxOrders / ROWS));
+  const xMax = Math.max(lastIndex, 1);
+  return {
+    height: Math.round(cell * ROWS + MARGIN.top + MARGIN.bottom + X_AXIS_HEIGHT),
+    yTicks: Array.from({ length: ROWS + 1 }, (_, i) => i * step),
+    xTicks: Array.from({ length: columns + 1 }, (_, j) => (j * xMax) / columns),
+    labelEvery,
+    xMax,
+  };
+}
+
+/** Orders across the period as a line: straight runs between buckets over a striped fill. */
+function OrdersLine({ series, bucket }: Pick<HomeOrdersPanelProps, "series" | "bucket">) {
   const format = useFormatter();
   const locale = useLocale();
   const t = useTranslations("dashboard.home");
-  const max = Math.max(1, ...series.map((point) => point.orders));
+  const id = useId().replace(/[^a-zA-Z0-9]/g, "");
   const lastIndex = series.length - 1;
+  const markAll = series.length <= MARK_EVERY_POINT_UP_TO;
+  const points = series.map((point, i) => ({ ...point, x: i }));
+  const maxOrders = Math.max(0, ...series.map((point) => point.orders));
 
-  const label = (raw: string) => {
+  const when = (raw: string, long = false) => {
     const at = new Date(raw);
     if (Number.isNaN(at.getTime())) return raw;
     if (bucket === "minute") return format.dateTime(at, { hour: "numeric", minute: "2-digit", timeZone: DHAKA });
-    if (bucket === "hour") return format.dateTime(at, { hour: "numeric", timeZone: DHAKA });
-    if (bucket === "month") return format.dateTime(at, { month: "short", timeZone: DHAKA });
-    return format.dateTime(at, { day: "numeric", month: "short", timeZone: DHAKA });
+    if (bucket === "hour")
+      return format.dateTime(at, long ? { weekday: "short", hour: "numeric", timeZone: DHAKA } : { hour: "numeric", timeZone: DHAKA });
+    if (bucket === "month") return format.dateTime(at, { month: long ? "long" : "short", year: long ? "numeric" : undefined, timeZone: DHAKA });
+    return format.dateTime(at, long ? { weekday: "long", day: "numeric", month: "long", timeZone: DHAKA } : { day: "numeric", month: "short", timeZone: DHAKA });
   };
-  const ticks = tickIndexes(series.length);
 
   return (
-    <div className="flex min-w-0 flex-col gap-3 px-5 pb-4 pt-6 sm:px-7">
-      <div
-        className="relative grid h-24 items-end border-b border-border-subtle sm:h-32"
-        style={{ gridTemplateColumns: `repeat(${Math.max(series.length, 1)}, minmax(0, 1fr))`, gap: series.length > 40 ? 1 : 4 }}
-        role="img"
-        aria-label={t("barsAria")}
-      >
-        <span className="pointer-events-none absolute inset-x-0 top-0 border-t border-dashed border-border-subtle" aria-hidden />
-        <span className="pointer-events-none absolute inset-x-0 top-1/2 border-t border-dashed border-border-subtle" aria-hidden />
-        {series.map((point, i) => {
-          const last = i === lastIndex;
+    <RechartsSizedContainer className="w-full">
+      {({ width }) => {
+        const grid = squareGrid(width, lastIndex, maxOrders);
+        // A label names the bucket nearest its line; the lines between labels carry none.
+        const XTick = (props: { x?: number | string; y?: number | string; payload?: { value?: unknown }; index?: number }) => {
+          const i = props.index ?? 0;
+          const x = Number(props.x);
+          const y = Number(props.y);
+          const value = Number(props.payload?.value);
+          if (!Number.isFinite(x) || !Number.isFinite(y) || !Number.isFinite(value)) return <g />;
+          if (i % grid.labelEvery !== 0 || series.length === 0) return <g />;
+          const point = series[Math.min(lastIndex, Math.max(0, Math.round(value)))];
+          const anchor = i === 0 ? "start" : i === grid.xTicks.length - 1 ? "end" : "middle";
           return (
-            <span
-              key={point.label}
-              className={cn(
-                "relative z-[1] block min-h-[2px] rounded-t-[2px]",
-                last ? "bg-[hsl(var(--accent-blue))]" : "bg-foreground/15"
-              )}
-              style={{ height: point.orders ? `${Math.max(5, Math.round((point.orders / max) * 90))}%` : 0 }}
-              title={`${label(point.label)}: ${toLocaleDigits(String(point.orders), locale)}`}
-            >
-              {last && point.orders > 0 ? (
-                <span className="absolute bottom-full left-1/2 mb-1.5 -translate-x-1/2 text-[11px] font-semibold text-[hsl(var(--accent-blue))]">
-                  {toLocaleDigits(String(point.orders), locale)}
-                </span>
-              ) : null}
-            </span>
+            <text x={x} y={y + 14} textAnchor={anchor} fontSize={11} fill="hsl(var(--muted-foreground))">
+              {when(point.label)}
+            </text>
           );
-        })}
-      </div>
-      <div className="flex justify-between gap-2 whitespace-nowrap text-[11px] text-muted-foreground">
-        {ticks.map((i) => (
-          <span key={i} className={cn(i === lastIndex && "font-medium text-foreground")}>
-            {label(series[i].label)}
-          </span>
-        ))}
-      </div>
-    </div>
+        };
+        return (
+          <ResponsiveContainer width={width} height={grid.height} minWidth={0}>
+            <AreaChart data={points} margin={MARGIN} aria-label={t("chartAria")} role="img">
+              <defs>
+                <pattern id={`stripes-${id}`} width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+                  <rect width="7" height="7" fill={LINE} fillOpacity={0.06} />
+                  <line x1="0" y1="0" x2="0" y2="7" stroke={LINE} strokeOpacity={0.14} strokeWidth="2.5" />
+                </pattern>
+              </defs>
+              <CartesianGrid stroke="hsl(var(--border))" strokeOpacity={0.7} />
+              <XAxis
+                type="number"
+                dataKey="x"
+                domain={[0, grid.xMax]}
+                ticks={grid.xTicks}
+                interval={0}
+                height={X_AXIS_HEIGHT}
+                tickLine={false}
+                axisLine={false}
+                tick={XTick}
+              />
+              <YAxis
+                domain={[0, grid.yTicks[ROWS]]}
+                ticks={grid.yTicks}
+                interval={0}
+                tickLine={false}
+                axisLine={false}
+                width={Y_AXIS_WIDTH}
+                allowDecimals={false}
+                tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }}
+                tickFormatter={(v) => toLocaleDigits(String(v), locale)}
+              />
+              <Tooltip
+                cursor={{ stroke: LINE, strokeWidth: 1 }}
+                content={({ active, payload }) => {
+                  const point = payload?.[0]?.payload as DashboardAnalyticsPoint | undefined;
+                  if (!active || !point) return null;
+                  return (
+                    <div className="flex min-w-36 flex-col items-center gap-0.5 rounded-ui border border-border bg-card px-3.5 py-2 text-center [box-shadow:var(--shadow-popover)]">
+                      <span className={cn("text-base font-semibold text-foreground", numberTextClass(locale))}>
+                        {toLocaleDigits(String(point.orders), locale)}
+                      </span>
+                      <span className="text-xs text-muted-foreground">{when(point.label, true)}</span>
+                    </div>
+                  );
+                }}
+              />
+              <Area
+                type="linear"
+                dataKey="orders"
+                stroke={LINE}
+                strokeWidth={1.75}
+                fill={`url(#stripes-${id})`}
+                isAnimationActive={false}
+                dot={(props: { cx?: number; cy?: number; index?: number }) => {
+                  const { cx, cy, index } = props;
+                  if (cx == null || cy == null || (!markAll && index !== lastIndex)) return <g key={`dot-${index}`} />;
+                  const last = index === lastIndex;
+                  return (
+                    <circle
+                      key={`dot-${index}`}
+                      cx={cx}
+                      cy={cy}
+                      r={last ? 4 : 3.5}
+                      fill={last ? LINE : "hsl(var(--card))"}
+                      stroke={LINE}
+                      strokeWidth={1.5}
+                    />
+                  );
+                }}
+                activeDot={{ r: 5, fill: "hsl(var(--card))", stroke: LINE, strokeWidth: 2 }}
+              />
+            </AreaChart>
+          </ResponsiveContainer>
+        );
+      }}
+    </RechartsSizedContainer>
   );
 }
 
@@ -237,14 +343,14 @@ function OrderFlow({ flow, now }: { flow: NonNullable<HomeNumbers["flow"]>; now:
   ];
 
   return (
-    // The hairlines between the cells are the panel's border colour showing through a 1px gap,
-    // so they sit right at two, three and six cells a row alike.
-    <div className="grid grid-cols-2 gap-px border-t border-border-subtle bg-border-subtle sm:grid-cols-3 xl:grid-cols-6">
+    // Two cells a row, three rows tall beside the orders; the hairlines between them are the
+    // panel's border colour showing through a 1px gap, so they sit right at every width.
+    <div className="grid grid-cols-2 gap-px border-t border-border-subtle bg-border-subtle sm:grid-cols-3 lg:grid-cols-2 lg:grid-rows-3 lg:border-l lg:border-t-0">
       {cells.map((cell) => (
         <Link
           key={cell.key}
           href={cell.href}
-          className="flex min-w-0 flex-col gap-1.5 bg-card px-4 pb-5 pt-4 transition-colors hover:bg-muted/40 sm:px-5"
+          className="flex min-w-0 flex-col justify-center gap-1 bg-card px-4 py-4 transition-colors hover:bg-muted/40 sm:px-5"
         >
           <span className="truncate text-xs text-muted-foreground">{cell.name}</span>
           <span className={cn("text-[1.75rem] font-semibold leading-tight tracking-tight text-foreground", numberTextClass(locale))}>

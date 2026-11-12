@@ -1802,7 +1802,7 @@
       "orders": "অর্ডার",
       "vsBefore": "আগের সময়ের তুলনায়",
       "noChange": "আগের সময়ের সমান",
-      "barsAria": "সময়ের প্রতিটি ভাগে আসা অর্ডার",
+      "chartAria": "পুরো সময় জুড়ে আসা অর্ডার",
       "flowToSend": "পাঠাতে হবে",
       "flowOnTheWay": "পথে আছে",
       "flowDeliveredToday": "আজ ডেলিভারি",

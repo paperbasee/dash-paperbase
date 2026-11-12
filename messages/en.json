@@ -1802,7 +1802,7 @@
       "orders": "Orders",
       "vsBefore": "vs the period before",
       "noChange": "Same as the period before",
-      "barsAria": "Orders placed in each part of the period",
+      "chartAria": "Orders placed across the period",
       "flowToSend": "To send",
       "flowOnTheWay": "On the way",
       "flowDeliveredToday": "Delivered today",
