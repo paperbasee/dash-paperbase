@@ -7,6 +7,7 @@ import type { ActivityLog, PaginatedResponse } from "@/types";
 
 export interface ActivitiesFilters {
   page: number;
+  page_size?: number;
   entity_type?: string;
   action?: string;
   actor?: string;

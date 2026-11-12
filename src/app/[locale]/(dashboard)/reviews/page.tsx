@@ -1,9 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
-import { useSearchParams } from "next/navigation";
 
 import api from "@/lib/api";
 import { cn } from "@/lib/utils";
@@ -12,8 +11,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { ClickableText } from "@/components/ui/clickable-text";
 import { useConfirm } from "@/context/ConfirmDialogContext";
 import { notify } from "@/notifications";
-import { reviewCountsQueryKey, reviewsQueryKeyRoot } from "@/lib/query-keys";
-import { useReviewCountsQuery, useReviewsQuery } from "@/hooks/useReviewsQuery";
+import { reviewCountsQueryKey, reviewsQueryKey, reviewsQueryKeyRoot } from "@/lib/query-keys";
+import { fetchReviews, useReviewCountsQuery, useReviewsQuery } from "@/hooks/useReviewsQuery";
+import { Pager } from "@/components/page/Pager";
+import { useFilters } from "@/hooks/useFilters";
+import { usePrefetchPage } from "@/hooks/usePrefetchPage";
+import { type ListPageParams, type PageSize } from "@/lib/paging";
 import { useBrandsQuery } from "@/hooks/useBrandsQuery";
 import type { AdminReview } from "@/types";
 import { Stars } from "@/components/reviews/Stars";
@@ -52,15 +55,29 @@ export default function ReviewsPage() {
   const confirm = useConfirm();
   const queryClient = useQueryClient();
 
-  const searchParams = useSearchParams();
-  const [tab, setTab] = useState<Status>(() => tabFrom(searchParams.get("tab")));
+  // The tab, the page and the size all live in the web address, so a refresh comes back to
+  // the same tab on the same page -- and switching tab drops the page, as any filter does.
+  const { page, pageSize, filters, setFilter, setPage, setPageSize } = useFilters(["tab"]);
+  const tab = tabFrom(filters.tab ?? null);
+  const setTab = (value: Status) => setFilter("tab", value);
   // The review a search result named: shown in its tab, scrolled to and marked.
   const [marked, setMarked] = useState<string | null>(null);
   const [adding, setAdding] = useState(false);
   const addForm = useRef<HTMLDivElement>(null);
   const [busy, setBusy] = useState<string | null>(null);
 
-  const { data: reviews = [], isLoading, isError, error } = useReviewsQuery(tab);
+  const listParams = useMemo(() => ({ page, pageSize }), [page, pageSize]);
+  const { data, isLoading, isError, error } = useReviewsQuery(tab, listParams);
+  const reviews = data?.results ?? [];
+  const count = data?.count ?? 0;
+  const shownPage = data?.page ?? page;
+  const totalPages = data?.pages ?? 1;
+  const prefetchPage = usePrefetchPage(
+    shownPage,
+    (wanted: number) => ({ page: wanted, pageSize }),
+    (params: ListPageParams) => reviewsQueryKey(tab, params),
+    (params: ListPageParams) => fetchReviews(tab, params)
+  );
 
   // A search result names the review to show (`?open=`); the sidebar's Add new menu asks for the
   // add form (`?open=new`).
@@ -223,6 +240,16 @@ export default function ReviewsPage() {
           ))}
         </ul>
       )}
+
+      <Pager
+        page={shownPage}
+        pages={totalPages}
+        count={count}
+        pageSize={pageSize}
+        onPage={setPage}
+        onPageSize={(size: PageSize) => setPageSize(size)}
+        onPrefetch={prefetchPage}
+      />
     </div>
   );
 }

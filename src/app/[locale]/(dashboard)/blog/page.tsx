@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { type ReactNode, useCallback, useEffect, useMemo, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { DeferredNavLink } from "@/components/navigation/DeferredNavLink";
 import { EmptyFolder } from "@/components/EmptyFolder";
@@ -16,8 +16,11 @@ import { digitsInNumberFont } from "@/lib/number-font";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { notify } from "@/notifications";
-import type { BlogsListParams } from "@/lib/query-keys";
-import { useBlogsQuery } from "@/hooks/useBlogsQuery";
+import { blogsListQueryKey, type BlogsListParams } from "@/lib/query-keys";
+import { fetchBlogsList, useBlogsQuery } from "@/hooks/useBlogsQuery";
+import { Pager } from "@/components/page/Pager";
+import { usePrefetchPage } from "@/hooks/usePrefetchPage";
+import { DEFAULT_PAGE_SIZE, type PageSize } from "@/lib/paging";
 import { useBlogTagsQuery } from "@/hooks/useBlogTagsQuery";
 import { BlogListCard } from "./_components/BlogListCard";
 
@@ -27,7 +30,7 @@ export default function BlogListPage() {
   const tPages = useTranslations("pages");
   const tHints = useTranslations("pageHints");
   const tCommon = useTranslations("common");
-  const { filters, setFilter, clearFilters } = useFilters([
+  const { page, pageSize, filters, setFilter, setPage, setPageSize, clearFilters } = useFilters([
     "published_date",
     "tag",
     "search",
@@ -36,18 +39,35 @@ export default function BlogListPage() {
   const debouncedSearch = useDebouncedValue(searchInput);
   const [filtersOpen, setFiltersOpen] = useState(false);
 
-  const listParams = useMemo((): BlogsListParams => {
-    const params: BlogsListParams = {};
-    if (filters.search?.trim()) params.q = filters.search.trim();
-    if (filters.tag?.trim()) params.tag = filters.tag.trim();
-    if (filters.published_date?.trim()) {
-      params.published_date = filters.published_date.trim();
-    }
-    return params;
-  }, [filters.published_date, filters.search, filters.tag]);
+  const paramsForPage = useCallback(
+    (wanted: number): BlogsListParams => {
+      const params: BlogsListParams = {};
+      if (wanted > 1) params.page = String(wanted);
+      if (pageSize !== DEFAULT_PAGE_SIZE) params.page_size = String(pageSize);
+      if (filters.search?.trim()) params.q = filters.search.trim();
+      if (filters.tag?.trim()) params.tag = filters.tag.trim();
+      if (filters.published_date?.trim()) {
+        params.published_date = filters.published_date.trim();
+      }
+      return params;
+    },
+    [pageSize, filters.published_date, filters.search, filters.tag]
+  );
 
-  const { data: blogs = [], isLoading: blogsLoading, isError: blogsIsError, error: blogsError } =
+  const listParams = useMemo(() => paramsForPage(page), [paramsForPage, page]);
+
+  const { data: blogsPage, isLoading: blogsLoading, isError: blogsIsError, error: blogsError } =
     useBlogsQuery(listParams);
+  const blogs = blogsPage?.results ?? [];
+  const count = blogsPage?.count ?? 0;
+  const shownPage = blogsPage?.page ?? page;
+  const totalPages = blogsPage?.pages ?? 1;
+  const prefetchPage = usePrefetchPage(
+    shownPage,
+    paramsForPage,
+    blogsListQueryKey,
+    fetchBlogsList
+  );
   const { data: tags = [], isError: tagsIsError, error: tagsError } = useBlogTagsQuery();
   const loading = blogsLoading;
 
@@ -188,6 +208,16 @@ export default function BlogListPage() {
           </div>
         </div>
       ) : null}
+
+      <Pager
+        page={shownPage}
+        pages={totalPages}
+        count={count}
+        pageSize={pageSize}
+        onPage={setPage}
+        onPageSize={(size: PageSize) => setPageSize(size)}
+        onPrefetch={prefetchPage}
+      />
     </div>
   );
 }

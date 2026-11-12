@@ -24,6 +24,7 @@ import { formatDashboardDate } from "@/lib/datetime-display";
 import { notify } from "@/notifications";
 import { usePermissions } from "@/context/PermissionsContext";
 import {
+  fetchCoupons,
   useCouponsQuery,
   useDeleteCoupon,
   useSaveCoupon,
@@ -31,6 +32,11 @@ import {
 import type { Coupon, CouponWrite } from "@/types";
 import { useOpenFromAddress } from "@/hooks/useOpenFromAddress";
 import { PageHeader } from "@/components/page/PageHeader";
+import { Pager } from "@/components/page/Pager";
+import { useFilters } from "@/hooks/useFilters";
+import { usePrefetchPage } from "@/hooks/usePrefetchPage";
+import { type PageSize } from "@/lib/paging";
+import { couponsQueryKey } from "@/lib/query-keys";
 import { OPEN_NEW } from "@/lib/open-from-address";
 
 const BLANK: CouponWrite = { code: "", kind: "fixed", value: "" };
@@ -43,7 +49,9 @@ export default function CouponsPage() {
   const { has } = usePermissions();
   const canManage = has("coupons.manage");
 
-  const { data, isLoading, isError, error } = useCouponsQuery();
+  const { page, pageSize, setPage, setPageSize } = useFilters([]);
+  const listParams = useMemo(() => ({ page, pageSize }), [page, pageSize]);
+  const { data, isLoading, isError, error } = useCouponsQuery(listParams);
   const save = useSaveCoupon();
   const remove = useDeleteCoupon();
 
@@ -54,7 +62,16 @@ export default function CouponsPage() {
   // fields with a different heading.
   const [editing, setEditing] = useState<string | null>(null);
 
-  const coupons = useMemo(() => data ?? [], [data]);
+  const coupons = useMemo(() => data?.results ?? [], [data]);
+  const count = data?.count ?? 0;
+  const shownPage = data?.page ?? page;
+  const totalPages = data?.pages ?? 1;
+  const prefetchPage = usePrefetchPage(
+    shownPage,
+    (wanted: number) => ({ page: wanted, pageSize }),
+    couponsQueryKey,
+    fetchCoupons
+  );
 
   // A search result names the code to open (`?open=`): in the form for someone who may change
   // it, as the list's own Edit is; the list alone for the rest. The sidebar's Add new menu asks
@@ -327,6 +344,15 @@ export default function CouponsPage() {
           </table>
         </div>
       )}
+      <Pager
+        page={shownPage}
+        pages={totalPages}
+        count={count}
+        pageSize={pageSize}
+        onPage={setPage}
+        onPageSize={(size: PageSize) => setPageSize(size)}
+        onPrefetch={prefetchPage}
+      />
     </div>
   );
 }

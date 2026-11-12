@@ -15,6 +15,7 @@ import { useRouter } from "@/i18n/navigation";
 import { DeferredNavLink } from "@/components/navigation/DeferredNavLink";
 import { toLocaleDigits } from "@/lib/locale-digits";
 import { Pager } from "@/components/page/Pager";
+import { usePrefetchPage } from "@/hooks/usePrefetchPage";
 import { DEFAULT_PAGE_SIZE, type PageSize } from "@/lib/paging";
 import { cn } from "@/lib/utils";
 import { digitsInNumberFont, numberTextClass } from "@/lib/number-font";
@@ -265,19 +266,7 @@ export default function OrdersPage() {
   const shownPage = ordersPage?.page ?? page;
   const totalPages = ordersPage?.pages ?? 1;
 
-  // A page is fetched when a merchant points at its button, never before: a page nobody opens
-  // costs the database nothing, and by the time the click lands the rows are usually here.
-  const prefetchPage = useCallback(
-    (wanted: number) => {
-      if (wanted === shownPage) return;
-      const params = paramsForPage(wanted);
-      void queryClient.prefetchQuery({
-        queryKey: ordersListQueryKey(params),
-        queryFn: () => fetchOrdersList(params),
-      });
-    },
-    [paramsForPage, queryClient, shownPage]
-  );
+  const prefetchPage = usePrefetchPage(shownPage, paramsForPage, ordersListQueryKey, fetchOrdersList);
 
   const invalidateOrdersCaches = useCallback(() => {
     void queryClient.invalidateQueries({ queryKey: ordersListQueryKeyRoot });

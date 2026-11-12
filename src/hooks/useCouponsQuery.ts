@@ -1,20 +1,30 @@
 "use client";
 
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "@/lib/api";
-import { couponsQueryKey } from "@/lib/query-keys";
-import type { Coupon, CouponWrite } from "@/types";
+import { couponsQueryKey, couponsQueryKeyRoot } from "@/lib/query-keys";
+import type { Coupon, CouponWrite, PaginatedResponse } from "@/types";
+import { DEFAULT_PAGE_SIZE, listPageQuery, type ListPageParams } from "@/lib/paging";
 
-export async function fetchCoupons(): Promise<Coupon[]> {
-  const { data } = await api.get<Coupon[] | { results: Coupon[] }>("admin/coupons/");
-  return Array.isArray(data) ? data : (data?.results ?? []);
+export async function fetchCoupons(
+  params: ListPageParams = { page: 1, pageSize: DEFAULT_PAGE_SIZE }
+): Promise<PaginatedResponse<Coupon>> {
+  const { data } = await api.get<PaginatedResponse<Coupon>>("admin/coupons/", {
+    params: listPageQuery(params),
+  });
+  return data;
 }
 
-export function useCouponsQuery(options?: { enabled?: boolean }) {
+export function useCouponsQuery(
+  params: ListPageParams = { page: 1, pageSize: DEFAULT_PAGE_SIZE },
+  options?: { enabled?: boolean }
+) {
   return useQuery({
-    queryKey: couponsQueryKey,
-    queryFn: fetchCoupons,
+    queryKey: couponsQueryKey(params),
+    queryFn: () => fetchCoupons(params),
     enabled: options?.enabled ?? true,
+    // The rows stay on screen while the next page arrives.
+    placeholderData: keepPreviousData,
   });
 }
 
@@ -36,7 +46,7 @@ export function useSaveCoupon() {
       const { data } = await api.post<Coupon>("admin/coupons/", body);
       return data;
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: couponsQueryKey }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: couponsQueryKeyRoot }),
   });
 }
 
@@ -46,6 +56,6 @@ export function useDeleteCoupon() {
     mutationFn: async (publicId: string) => {
       await api.delete(`admin/coupons/${publicId}/`);
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: couponsQueryKey }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: couponsQueryKeyRoot }),
   });
 }

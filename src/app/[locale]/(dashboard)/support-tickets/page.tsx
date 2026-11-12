@@ -10,10 +10,13 @@ import { FilterBar } from "@/components/filters/FilterBar";
 import { FilterPills } from "@/components/filters/FilterPills";
 import { FilterToggle } from "@/components/filters/FilterToggle";
 import { PageHeader } from "@/components/page/PageHeader";
+import { Pager } from "@/components/page/Pager";
 import { FilterDropdown } from "@/components/filters/FilterDropdown";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { useFilters } from "@/hooks/useFilters";
-import { useSupportTicketsQuery } from "@/hooks/useSupportTicketsQuery";
+import { usePrefetchPage } from "@/hooks/usePrefetchPage";
+import { DEFAULT_PAGE_SIZE, type PageSize } from "@/lib/paging";
+import { fetchSupportTicketsList, useSupportTicketsQuery } from "@/hooks/useSupportTicketsQuery";
 import {
   Combobox,
   ComboboxContent,
@@ -131,7 +134,7 @@ export default function SupportTicketsPage() {
   const confirm = useConfirm();
   const queryClient = useQueryClient();
 
-  const { page, filters, setFilter, setPage, clearFilters } = useFilters([
+  const { page, pageSize, filters, setFilter, setPage, setPageSize, clearFilters } = useFilters([
     "status",
     "priority",
     "search",
@@ -182,19 +185,33 @@ export default function SupportTicketsPage() {
     setFilter("search", next);
   }, [debouncedSearch, filters.search, setFilter]);
 
-  const listParams = useMemo((): SupportTicketsListParams => {
-    const params: SupportTicketsListParams = { page };
-    if (filters.status) params.status = filters.status;
-    if (filters.priority) params.priority = filters.priority;
-    if (filters.search) params.search = filters.search;
-    return params;
-  }, [page, filters.status, filters.priority, filters.search]);
+  const paramsForPage = useCallback(
+    (wanted: number): SupportTicketsListParams => {
+      const params: SupportTicketsListParams = { page: wanted };
+      if (pageSize !== DEFAULT_PAGE_SIZE) params.page_size = pageSize;
+      if (filters.status) params.status = filters.status;
+      if (filters.priority) params.priority = filters.priority;
+      if (filters.search) params.search = filters.search;
+      return params;
+    },
+    [pageSize, filters.status, filters.priority, filters.search]
+  );
+
+  const listParams = useMemo(() => paramsForPage(page), [paramsForPage, page]);
 
   const { data, isLoading, isError, error } = useSupportTicketsQuery(listParams);
 
   const tickets = data?.results ?? [];
   const count = data?.count ?? 0;
-  const hasNext = !!data?.next;
+  // The server's own answer: a page past the end is served as the last one.
+  const shownPage = data?.page ?? page;
+  const totalPages = data?.pages ?? 1;
+  const prefetchPage = usePrefetchPage(
+    shownPage,
+    paramsForPage,
+    supportTicketsListQueryKey,
+    fetchSupportTicketsList
+  );
   const loading = isLoading;
 
   const invalidateSupportTicketsCaches = useCallback(
@@ -458,25 +475,15 @@ export default function SupportTicketsPage() {
             </table>
           </div>
 
-          <div className="flex items-center justify-between">
-            <button
-              disabled={page <= 1}
-              onClick={() => setPage(page - 1)}
-              className="btn-page"
-            >
-              {tPages("supportTicketsPrevious")}
-            </button>
-            <span className="text-sm text-muted-foreground">
-              {tPages("supportTicketsPageLabel", { page })}
-            </span>
-            <button
-              disabled={!hasNext}
-              onClick={() => setPage(page + 1)}
-              className="btn-page"
-            >
-              {tPages("supportTicketsNext")}
-            </button>
-          </div>
+          <Pager
+            page={shownPage}
+            pages={totalPages}
+            count={count}
+            pageSize={pageSize}
+            onPage={setPage}
+            onPageSize={(size: PageSize) => setPageSize(size)}
+            onPrefetch={prefetchPage}
+          />
         </>
       ) : null}
     </div>

@@ -9,17 +9,20 @@
 // Read-only, and it empties itself: if the call works and they order, the row
 // leaves on its own.
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { DeferredNavLink } from "@/components/navigation/DeferredNavLink";
 import { useLocale, useTranslations } from "next-intl";
 import { toLocaleDigits } from "@/lib/locale-digits";
 import { numberTextClass } from "@/lib/number-font";
+import { Pager } from "@/components/page/Pager";
 import { useFilters } from "@/hooks/useFilters";
-import { useAbandonedCheckoutsQuery } from "@/hooks/useAbandonedCheckoutsQuery";
+import { usePrefetchPage } from "@/hooks/usePrefetchPage";
+import { DEFAULT_PAGE_SIZE, type PageSize } from "@/lib/paging";
+import { fetchAbandonedCheckouts, useAbandonedCheckoutsQuery } from "@/hooks/useAbandonedCheckoutsQuery";
 import { formatDashboardDateTime } from "@/lib/datetime-display";
 import { notify } from "@/notifications";
 import type { AbandonedCheckout } from "@/types";
-import type { CustomersListParams } from "@/lib/query-keys";
+import { abandonedCheckoutsQueryKey, type CustomersListParams } from "@/lib/query-keys";
 
 function valueDisplay(row: AbandonedCheckout): string {
   const number = Number(row.value ?? "0");
@@ -32,10 +35,19 @@ export function AbandonedCheckoutsTab() {
   const numClass = numberTextClass(locale);
   const tPages = useTranslations("pages");
   const tCommon = useTranslations("common");
-  const { page, setPage } = useFilters([]);
+  const { page, pageSize, setPage, setPageSize } = useFilters([]);
   const [openRow, setOpenRow] = useState<number | null>(null);
 
-  const listParams = useMemo((): CustomersListParams => ({ page }), [page]);
+  const paramsForPage = useCallback(
+    (wanted: number): CustomersListParams => {
+      const params: CustomersListParams = { page: wanted };
+      if (pageSize !== DEFAULT_PAGE_SIZE) params.page_size = pageSize;
+      return params;
+    },
+    [pageSize]
+  );
+
+  const listParams = useMemo(() => paramsForPage(page), [paramsForPage, page]);
   const { data, isLoading, isError, error } = useAbandonedCheckoutsQuery(listParams);
 
   useEffect(() => {
@@ -48,7 +60,15 @@ export function AbandonedCheckoutsTab() {
 
   const rows = data?.results ?? [];
   const count = data?.count ?? 0;
-  const hasNext = !!data?.next;
+  // The server's own answer: a page past the end is served as the last one.
+  const shownPage = data?.page ?? page;
+  const totalPages = data?.pages ?? 1;
+  const prefetchPage = usePrefetchPage(
+    shownPage,
+    paramsForPage,
+    abandonedCheckoutsQueryKey,
+    fetchAbandonedCheckouts
+  );
 
   if (isLoading) {
     return <p className="text-xs text-muted-foreground">{tCommon("loading")}</p>;
@@ -146,29 +166,15 @@ export function AbandonedCheckoutsTab() {
 
       <p className="text-xs text-muted-foreground">{tPages("abandonedKeptFor")}</p>
 
-      {(count > 10 || hasNext) && (
-        <div className="flex items-center justify-between">
-          <button
-            disabled={page <= 1}
-            onClick={() => setPage(page - 1)}
-            className="btn-page"
-          >
-            {tPages("supportTicketsPrevious")}
-          </button>
-          <span className={`text-sm text-muted-foreground ${numClass}`}>
-            {tPages("supportTicketsPageLabel", {
-              page: toLocaleDigits(String(page), locale),
-            })}
-          </span>
-          <button
-            disabled={!hasNext}
-            onClick={() => setPage(page + 1)}
-            className="btn-page"
-          >
-            {tPages("supportTicketsNext")}
-          </button>
-        </div>
-      )}
+      <Pager
+        page={shownPage}
+        pages={totalPages}
+        count={count}
+        pageSize={pageSize}
+        onPage={setPage}
+        onPageSize={(size: PageSize) => setPageSize(size)}
+        onPrefetch={prefetchPage}
+      />
     </div>
   );
 }

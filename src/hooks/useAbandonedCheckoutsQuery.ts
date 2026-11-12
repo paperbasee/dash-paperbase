@@ -1,6 +1,6 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import api from "@/lib/api";
 import type { AbandonedCheckout, PaginatedResponse } from "@/types";
 import {
@@ -43,5 +43,7 @@ export function useAbandonedCheckoutsQuery(params: CustomersListParams) {
     // Explicit rather than relying on "stale implies refetch": a later change
     // to the shared default must not quietly make this list stop refreshing.
     refetchOnMount: "always",
+    // The rows stay on screen while the next page arrives.
+    placeholderData: keepPreviousData,
   });
 }

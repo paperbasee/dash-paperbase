@@ -1,6 +1,6 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import api from "@/lib/api";
 import type { CustomerAccount, PaginatedResponse } from "@/types";
 import {
@@ -36,5 +36,7 @@ export function useCustomerAccountsQuery(
     enabled: options?.enabled ?? true,
     staleTime: 0,
     refetchOnMount: "always",
+    // The rows stay on screen while the next page arrives.
+    placeholderData: keepPreviousData,
   });
 }

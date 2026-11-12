@@ -514,12 +514,6 @@ input.font-numbers-date-value::placeholder {
   }
 
   /* Pagination prev/next button — duplicated across 9 list pages */
-  .btn-page {
-    @apply rounded-ui border border-border-subtle px-4 py-2 text-sm font-medium text-foreground
-           transition-[background-color,border-color,box-shadow,transform] duration-[180ms] ease-in-out
-           hover:border-border-hover hover:bg-muted disabled:opacity-40 disabled:cursor-not-allowed;
-  }
-
   /* Form field wrapper — label stacked above input */
   .form-field {
     @apply flex flex-col gap-2;

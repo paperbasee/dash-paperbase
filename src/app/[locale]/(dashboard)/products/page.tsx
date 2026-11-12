@@ -3,7 +3,6 @@
 import {
   useCallback,
   useEffect,
-  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -13,7 +12,9 @@ import {
 import { useLocale, useTranslations } from "next-intl";
 import { DeferredNavLink } from "@/components/navigation/DeferredNavLink";
 import { toLocaleDigits } from "@/lib/locale-digits";
-import { cursorFromLink } from "@/lib/cursor-from-link";
+import { Pager } from "@/components/page/Pager";
+import { usePrefetchPage } from "@/hooks/usePrefetchPage";
+import { DEFAULT_PAGE_SIZE, type PageSize } from "@/lib/paging";
 import {
   DndContext,
   KeyboardSensor,
@@ -74,7 +75,7 @@ import { useNavCounts } from "@/hooks/useNavCounts";
 import { numberTextClass } from "@/lib/number-font";
 import { cn } from "@/lib/utils";
 import { BelowFoldScrollHint } from "@/components/BelowFoldScrollHint";
-import { useProductsQuery } from "@/hooks/useProductsQuery";
+import { fetchProductsList, useProductsQuery } from "@/hooks/useProductsQuery";
 import { useCategoriesQuery } from "@/hooks/useCategoriesQuery";
 import {
   inventoryStatusQueryKey,
@@ -111,7 +112,7 @@ export default function ProductsPage() {
   const { currencySymbol } = useBranding();
   const queryClient = useQueryClient();
   const confirm = useConfirm();
-  const { filters, setFilter, clearFilters } = useFilters([
+  const { page, pageSize, filters, setFilter, setPage, setPageSize, clearFilters } = useFilters([
     "status",
     "prepayment_type",
     "category",
@@ -130,7 +131,6 @@ export default function ProductsPage() {
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>(() => getStoredViewMode());
   const { counts: navCounts } = useNavCounts();
-  const [listCursor, setListCursor] = useState<string | null>(null);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [deleting, setDeleting] = useState(false);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
@@ -142,46 +142,57 @@ export default function ProductsPage() {
   const canAddProducts = has("products.create");
   const canEditProducts = has("products.edit");
 
-  const listParams = useMemo(() => {
-    const params: Record<string, string> = {};
-    if (listCursor) params.cursor = listCursor;
-    if (filters.status) params.status = filters.status;
-    if (filters.prepayment_type) params.prepayment_type = filters.prepayment_type;
-    if (filters.category) params.category = filters.category;
-    if (filters.price_min) params.price_min = filters.price_min;
-    if (filters.price_max) params.price_max = filters.price_max;
-    if (filters.search) params.search = filters.search;
-    if (filters.ordering) {
-      params.ordering = filters.ordering;
-    } else if (
-      filters.category &&
-      !filters.search &&
-      !filters.status &&
-      !filters.prepayment_type &&
-      !filters.price_min &&
-      !filters.price_max
-    ) {
-      params.ordering = "display_order";
-    }
-    return params;
-  }, [
-    listCursor,
-    filters.category,
-    filters.ordering,
-    filters.prepayment_type,
-    filters.price_max,
-    filters.price_min,
-    filters.search,
-    filters.status,
-  ]);
+  const paramsForPage = useCallback(
+    (wanted: number) => {
+      const params: Record<string, string> = {};
+      // Page 1 and the default size are left out, so the list as it opens is one set of
+      // parameters, and one key in the caches that hold it.
+      if (wanted > 1) params.page = String(wanted);
+      if (pageSize !== DEFAULT_PAGE_SIZE) params.page_size = String(pageSize);
+      if (filters.status) params.status = filters.status;
+      if (filters.prepayment_type) params.prepayment_type = filters.prepayment_type;
+      if (filters.category) params.category = filters.category;
+      if (filters.price_min) params.price_min = filters.price_min;
+      if (filters.price_max) params.price_max = filters.price_max;
+      if (filters.search) params.search = filters.search;
+      if (filters.ordering) {
+        params.ordering = filters.ordering;
+      } else if (
+        filters.category &&
+        !filters.search &&
+        !filters.status &&
+        !filters.prepayment_type &&
+        !filters.price_min &&
+        !filters.price_max
+      ) {
+        params.ordering = "display_order";
+      }
+      return params;
+    },
+    [
+      pageSize,
+      filters.category,
+      filters.ordering,
+      filters.prepayment_type,
+      filters.price_max,
+      filters.price_min,
+      filters.search,
+      filters.status,
+    ]
+  );
+
+  const listParams = useMemo(() => paramsForPage(page), [paramsForPage, page]);
 
   const { data: productsPage, isLoading, isError, error } = useProductsQuery(listParams);
 
   const products = productsPage?.results ?? [];
   const productsCount =
     typeof productsPage?.count === "number" ? productsPage.count : null;
-  const nextLink = productsPage?.next ?? null;
-  const prevLink = productsPage?.previous ?? null;
+  // The server's own answer: a page past the end is served as the last one.
+  const shownPage = productsPage?.page ?? page;
+  const totalPages = productsPage?.pages ?? 1;
+
+  const prefetchPage = usePrefetchPage(shownPage, paramsForPage, productsListQueryKey, fetchProductsList);
 
   const invalidateProductsList = useCallback(() => {
     void queryClient.invalidateQueries({ queryKey: productsListQueryKeyRoot });
@@ -254,17 +265,6 @@ export default function ProductsPage() {
     { value: "popularity", label: tPages("productsListSortPopularity") },
   ];
 
-  useLayoutEffect(() => {
-    setListCursor(null);
-  }, [
-    filters.category,
-    filters.price_max,
-    filters.price_min,
-    filters.prepayment_type,
-    filters.search,
-    filters.ordering,
-    filters.status,
-  ]);
 
   const filtersActive = Boolean(
     (filters.status || "").trim() ||
@@ -918,24 +918,15 @@ export default function ProductsPage() {
             )}
           </div>
 
-          <div className="flex items-center justify-between gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              disabled={!prevLink}
-              onClick={() => setListCursor(cursorFromLink(prevLink))}
-            >
-              {tPages("supportTicketsPrevious")}
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              disabled={!nextLink}
-              onClick={() => setListCursor(cursorFromLink(nextLink))}
-            >
-              {tPages("supportTicketsNext")}
-            </Button>
-          </div>
+          <Pager
+            page={shownPage}
+            pages={totalPages}
+            count={productsCount ?? 0}
+            pageSize={pageSize}
+            onPage={setPage}
+            onPageSize={(size: PageSize) => setPageSize(size)}
+            onPrefetch={prefetchPage}
+          />
         </>
       ) : null}
       <BelowFoldScrollHint />

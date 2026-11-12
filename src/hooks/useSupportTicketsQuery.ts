@@ -1,6 +1,6 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import api from "@/lib/api";
 import type { SupportTicket, PaginatedResponse } from "@/types";
 import {
@@ -22,5 +22,7 @@ export function useSupportTicketsQuery(params: SupportTicketsListParams) {
   return useQuery({
     queryKey: supportTicketsListQueryKey(params),
     queryFn: () => fetchSupportTicketsList(params),
+    // The rows stay on screen while the next page arrives.
+    placeholderData: keepPreviousData,
   });
 }

@@ -1,16 +1,10 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import api from "@/lib/api";
-import type { AdminReview, AdminReviewCounts } from "@/types";
+import type { AdminReview, AdminReviewCounts, PaginatedResponse } from "@/types";
+import { listPageQuery, type ListPageParams } from "@/lib/paging";
 import { reviewCountsQueryKey, reviewsQueryKey } from "@/lib/query-keys";
-
-type Page = { results?: AdminReview[] } | AdminReview[];
-
-function rows(data: Page): AdminReview[] {
-  if (Array.isArray(data)) return data;
-  return Array.isArray(data?.results) ? data.results : [];
-}
 
 /**
  * One status's worth of reviews.
@@ -19,13 +13,22 @@ function rows(data: Page): AdminReview[] {
  * from Waiting to Published shows the cached list instead of a spinner, and
  * approving something invalidates both.
  */
-export function useReviewsQuery(status: string) {
+export async function fetchReviews(
+  status: string,
+  params: ListPageParams
+): Promise<PaginatedResponse<AdminReview>> {
+  const { data } = await api.get<PaginatedResponse<AdminReview>>("admin/reviews/", {
+    params: { status, ...listPageQuery(params) },
+  });
+  return data;
+}
+
+export function useReviewsQuery(status: string, params: ListPageParams) {
   return useQuery({
-    queryKey: reviewsQueryKey(status),
-    queryFn: async () => {
-      const { data } = await api.get<Page>(`admin/reviews/?status=${encodeURIComponent(status)}`);
-      return rows(data);
-    },
+    queryKey: reviewsQueryKey(status, params),
+    queryFn: () => fetchReviews(status, params),
+    // The rows stay on screen while the next page arrives.
+    placeholderData: keepPreviousData,
   });
 }
 

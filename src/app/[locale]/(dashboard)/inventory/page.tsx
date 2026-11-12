@@ -9,10 +9,13 @@ import { FilterBar } from "@/components/filters/FilterBar";
 import { FilterPills } from "@/components/filters/FilterPills";
 import { FilterToggle } from "@/components/filters/FilterToggle";
 import { PageHeader } from "@/components/page/PageHeader";
+import { Pager } from "@/components/page/Pager";
 import { FilterDropdown } from "@/components/filters/FilterDropdown";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { useFilters } from "@/hooks/useFilters";
-import { useInventoryListQuery } from "@/hooks/useInventoryListQuery";
+import { usePrefetchPage } from "@/hooks/usePrefetchPage";
+import { DEFAULT_PAGE_SIZE, type PageSize } from "@/lib/paging";
+import { fetchInventoryList, useInventoryListQuery } from "@/hooks/useInventoryListQuery";
 import { usePermissions } from "@/context/PermissionsContext";
 import { useConfirm } from "@/context/ConfirmDialogContext";
 import api from "@/lib/api";
@@ -38,7 +41,7 @@ export default function InventoryPage() {
   const { has } = usePermissions();
   const canReconcile = has("inventory.adjust");
   const confirm = useConfirm();
-  const { page, filters, setFilter, setPage, clearFilters } = useFilters([
+  const { page, pageSize, filters, setFilter, setPage, setPageSize, clearFilters } = useFilters([
     "search",
     "stock",
     "tracked",
@@ -62,20 +65,39 @@ export default function InventoryPage() {
     setFilter("search", next);
   }, [debouncedSearch, filters.search, setFilter]);
 
-  const listParams = useMemo((): InventoryListParams => {
-    const params: InventoryListParams = { page };
-    if (filters.search) params.search = filters.search;
-    if (filters.stock) params.stock = filters.stock;
-    if (filters.tracked) params.tracked = filters.tracked;
-    if (filters.type) params.type = filters.type;
-    return params;
-  }, [page, filters.search, filters.stock, filters.tracked, filters.type]);
+  const paramsForPage = useCallback(
+    (wanted: number): InventoryListParams => {
+      const params: InventoryListParams = { page: wanted };
+      if (pageSize !== DEFAULT_PAGE_SIZE) params.page_size = pageSize;
+      if (filters.search) params.search = filters.search;
+      if (filters.stock) params.stock = filters.stock;
+      if (filters.tracked) params.tracked = filters.tracked;
+      if (filters.type) params.type = filters.type;
+      return params;
+    },
+    [pageSize, filters.search, filters.stock, filters.tracked, filters.type]
+  );
+
+  const listParams = useMemo(() => paramsForPage(page), [paramsForPage, page]);
 
   const { data, isLoading, isError, error } = useInventoryListQuery(listParams);
 
   const inventory = data?.list.results ?? [];
   const count = data?.list.count ?? 0;
-  const hasNext = !!data?.list.next;
+  // The server's own answer: a page past the end is served as the last one.
+  const shownPage = data?.list?.page ?? page;
+  const totalPages = data?.list?.pages ?? 1;
+  // fetchInventoryList also warms the low/out-of-stock counts, so it needs the client.
+  const fetchInventoryForPage = useCallback(
+    (params: InventoryListParams) => fetchInventoryList(params, queryClient),
+    [queryClient]
+  );
+  const prefetchPage = usePrefetchPage(
+    shownPage,
+    paramsForPage,
+    inventoryListQueryKey,
+    fetchInventoryForPage
+  );
   const lowStockTotal = data ? data.lowStockTotal : null;
   const outOfStockTotal = data ? data.outOfStockTotal : null;
   const loading = isLoading;
@@ -377,27 +399,15 @@ export default function InventoryPage() {
             </table>
           </div>
 
-          {(count > 10 || hasNext) && (
-            <div className="flex items-center justify-between">
-              <button
-                disabled={page <= 1}
-                onClick={() => setPage(page - 1)}
-                className="btn-page"
-              >
-                {tPages("supportTicketsPrevious")}
-              </button>
-              <span className="text-sm text-muted-foreground">
-                {tPages("inventoryPageLabel", { page, count })}
-              </span>
-              <button
-                disabled={!hasNext}
-                onClick={() => setPage(page + 1)}
-                className="btn-page"
-              >
-                {tPages("supportTicketsNext")}
-              </button>
-            </div>
-          )}
+          <Pager
+            page={shownPage}
+            pages={totalPages}
+            count={count}
+            pageSize={pageSize}
+            onPage={setPage}
+            onPageSize={(size: PageSize) => setPageSize(size)}
+            onPrefetch={prefetchPage}
+          />
         </>
       ) : null}
       <BelowFoldScrollHint />

@@ -5,6 +5,9 @@ import { useLocale, useTranslations } from "next-intl";
 import { FilterBar } from "@/components/filters/FilterBar";
 import { FilterToggle } from "@/components/filters/FilterToggle";
 import { PageHeader } from "@/components/page/PageHeader";
+import { Pager } from "@/components/page/Pager";
+import { useFilters } from "@/hooks/useFilters";
+import { DEFAULT_PAGE_SIZE, type PageSize } from "@/lib/paging";
 import { Select } from "@/components/ui/select";
 import { useActivities } from "@/hooks/useActivities";
 import { formatDashboardDateTimeWithSeconds } from "@/lib/datetime-display";
@@ -58,9 +61,14 @@ export default function ActivitiesPage() {
   const locale = useLocale();
   const tPages = useTranslations("pages");
   const tHints = useTranslations("pageHints");
-  const [page, setPage] = useState(1);
-  const [entityType, setEntityType] = useState("");
-  const [action, setAction] = useState("");
+  // The page and the filters live in the web address, as on every other list, so a refresh
+  // comes back to the same page (useFilters drops the page whenever a filter changes).
+  const { page, pageSize, filters: urlFilters, setFilter, setPage, setPageSize } = useFilters([
+    "entity_type",
+    "action",
+  ]);
+  const entityType = urlFilters.entity_type || "";
+  const action = urlFilters.action || "";
   const [filtersOpen, setFiltersOpen] = useState(false);
   const filtersActive = Boolean(entityType || action);
 
@@ -108,27 +116,23 @@ export default function ActivitiesPage() {
   const filters = useMemo(
     () => ({
       page,
+      page_size: pageSize !== DEFAULT_PAGE_SIZE ? pageSize : undefined,
       entity_type: entityType || undefined,
       action: action || undefined,
     }),
-    [page, entityType, action],
+    [page, pageSize, entityType, action],
   );
 
   const { data, loading, error } = useActivities(filters);
 
   const results = data?.results ?? [];
   const count = data?.count ?? 0;
-  const hasNext = !!data?.next;
+  const shownPage = data?.page ?? page;
+  const totalPages = data?.pages ?? 1;
 
-  const onChangeType = (next: string) => {
-    setEntityType(next);
-    setPage(1);
-  };
+  const onChangeType = (next: string) => setFilter("entity_type", next);
 
-  const onChangeAction = (next: string) => {
-    setAction(next);
-    setPage(1);
-  };
+  const onChangeAction = (next: string) => setFilter("action", next);
 
   const getActionBadgeClassName = (nextAction: string) =>
     ACTION_BADGE_STYLES[nextAction.toLowerCase()] ?? "bg-slate-600 text-white dark:bg-slate-500";
@@ -250,25 +254,14 @@ export default function ActivitiesPage() {
             </div>
           </div>
 
-          <div className="flex items-center justify-between">
-            <button
-              disabled={page <= 1}
-              onClick={() => setPage((p) => p - 1)}
-              className="btn-page"
-            >
-              {tPages("supportTicketsPrevious")}
-            </button>
-            <span className="text-sm text-muted-foreground">
-              {tPages("activitiesPage", { page })}
-            </span>
-            <button
-              disabled={!hasNext}
-              onClick={() => setPage((p) => p + 1)}
-              className="btn-page"
-            >
-              {tPages("supportTicketsNext")}
-            </button>
-          </div>
+          <Pager
+            page={shownPage}
+            pages={totalPages}
+            count={count}
+            pageSize={pageSize}
+            onPage={setPage}
+            onPageSize={(size: PageSize) => setPageSize(size)}
+          />
         </>
       ) : null}
     </div>

@@ -11,6 +11,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
 
 import { activeSessionsQueryKey, sessionHistoryQueryKey } from "@/lib/query-keys";
+import { DEFAULT_PAGE_SIZE } from "@/lib/paging";
 import type { SignInSessionRow } from "@/lib/sessions";
 import bn from "../../messages/bn.json";
 import en from "../../messages/en.json";
@@ -52,7 +53,13 @@ function ended(end_reason: SignInSessionRow["end_reason"]): SignInSessionRow {
 function statusOf(row: SignInSessionRow, locale: "en" | "bn" = "en") {
   const client = new QueryClient({ defaultOptions: { queries: { staleTime: Infinity, retry: false } } });
   client.setQueryData(activeSessionsQueryKey, []);
-  client.setQueryData(sessionHistoryQueryKey(1), { count: 1, page: 1, pages: 1, results: [row] });
+  client.setQueryData(sessionHistoryQueryKey({ page: 1, pageSize: DEFAULT_PAGE_SIZE }), {
+    count: 1,
+    page: 1,
+    pages: 1,
+    page_size: DEFAULT_PAGE_SIZE,
+    results: [row],
+  });
   const html = renderToStaticMarkup(
     <QueryClientProvider client={client}>
       <NextIntlClientProvider locale={locale} messages={locale === "en" ? en : bn} timeZone="Asia/Dhaka" onError={strict}>

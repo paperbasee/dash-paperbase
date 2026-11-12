@@ -46,3 +46,23 @@ export function pageButtons(page: number, pages: number): (number | "gap")[] {
   });
   return out;
 }
+
+export type ListPageParams = { page: number; pageSize: number };
+
+/**
+ * What a list asks the API for.
+ *
+ * Page 1 and the default size are left out, so the list as it opens is one set of parameters --
+ * one key in the dashboard's cache and one in the API's, rather than two that mean the same.
+ */
+export function listPageQuery({ page, pageSize }: ListPageParams): Record<string, string> {
+  const query: Record<string, string> = {};
+  if (page > 1) query.page = String(page);
+  if (pageSize !== DEFAULT_PAGE_SIZE) query.page_size = String(pageSize);
+  return query;
+}
+
+/** The part of a query key that says which page of a list it is. */
+export function listPageKey({ page, pageSize }: ListPageParams) {
+  return [page, pageSize] as const;
+}

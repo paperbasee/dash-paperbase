@@ -1,3 +1,5 @@
+import { listPageKey, type ListPageParams } from "@/lib/paging";
+
 import type { AnalyticsBucket } from "@/lib/basicAnalyticsService";
 
 export const brandingQueryKey = ["branding", "admin"] as const;
@@ -40,7 +42,11 @@ export function analyticsSectionQueryKey(section: string, periodQuery: string) {
 
 export const analyticsLiveQueryKey = [...analyticsQueryKeyRoot, "live"] as const;
 
-export const couponsQueryKey = ["coupons"] as const;
+export const couponsQueryKeyRoot = ["coupons"] as const;
+
+export function couponsQueryKey(params: ListPageParams) {
+  return [...couponsQueryKeyRoot, ...listPageKey(params)] as const;
+}
 
 export const shippingZonesQueryKey = ["shipping", "zones"] as const;
 
@@ -122,7 +128,8 @@ export const brandsQueryKey = ["brands"] as const;
 export const reviewsQueryKeyRoot = ["reviews"] as const;
 
 /** One page of the Reviews tab: the list depends on the status filter. */
-export const reviewsQueryKey = (status: string) => [...reviewsQueryKeyRoot, "list", status] as const;
+export const reviewsQueryKey = (status: string, params: ListPageParams) =>
+  [...reviewsQueryKeyRoot, "list", status, ...listPageKey(params)] as const;
 
 export const reviewCountsQueryKey = [...reviewsQueryKeyRoot, "counts"] as const;
 
@@ -183,8 +190,8 @@ export const blogTagsQueryKey = ["blog-tags"] as const;
 
 export const trashQueryKeyRoot = ["trash", "list"] as const;
 
-export function trashQueryKey(page: number) {
-  return [...trashQueryKeyRoot, page] as const;
+export function trashQueryKey(params: { page: number; pageSize: number }) {
+  return [...trashQueryKeyRoot, params.page, params.pageSize] as const;
 }
 
 export const couriersQueryKey = ["couriers"] as const;
@@ -240,6 +247,6 @@ export const billingPlansQueryKey = ["billing", "plans"] as const;
 
 /** The owner's Sessions tab: live sign-ins, and one page of sign-in history. */
 export const activeSessionsQueryKey = ["sessions", "active"] as const;
-export function sessionHistoryQueryKey(page: number) {
-  return ["sessions", "history", page] as const;
+export function sessionHistoryQueryKey({ page, pageSize }: { page: number; pageSize: number }) {
+  return ["sessions", "history", page, pageSize] as const;
 }

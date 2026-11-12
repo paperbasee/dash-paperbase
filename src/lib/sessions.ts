@@ -1,4 +1,5 @@
 import api from "@/lib/api";
+import { DEFAULT_PAGE_SIZE } from "@/lib/paging";
 import { isApiHttpError } from "@/lib/api-client";
 
 /**
@@ -31,15 +32,28 @@ export type SignInSessionRow = {
   is_current: boolean;
 };
 
-export type SessionHistoryPage = { count: number; page: number; pages: number; results: SignInSessionRow[] };
+export type SessionHistoryPage = {
+  count: number;
+  page: number;
+  pages: number;
+  page_size: number;
+  results: SignInSessionRow[];
+};
+
+export type SessionHistoryQuery = { page: number; pageSize: number };
 
 export async function fetchActiveSessions(): Promise<SignInSessionRow[]> {
   const { data } = await api.get<{ active: SignInSessionRow[] }>("auth/sessions/");
   return data.active;
 }
 
-export async function fetchSessionHistory(page: number): Promise<SessionHistoryPage> {
-  const { data } = await api.get<SessionHistoryPage>("auth/sessions/history/", { params: { page } });
+export async function fetchSessionHistory({
+  page,
+  pageSize,
+}: SessionHistoryQuery): Promise<SessionHistoryPage> {
+  const { data } = await api.get<SessionHistoryPage>("auth/sessions/history/", {
+    params: pageSize === DEFAULT_PAGE_SIZE ? { page } : { page, page_size: pageSize },
+  });
   return data;
 }
 

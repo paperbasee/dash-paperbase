@@ -3,10 +3,12 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { LifeBuoy, Monitor, Smartphone, Tablet } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Pager } from "@/components/page/Pager";
+import { DEFAULT_PAGE_SIZE, type PageSize } from "@/lib/paging";
 import { useConfirm } from "@/context/ConfirmDialogContext";
 import { formatDashboardDateTime } from "@/lib/datetime-display";
 import { toLocaleDigits } from "@/lib/locale-digits";
@@ -65,12 +67,17 @@ export default function SessionsSection({ hidden }: { hidden: boolean }) {
   const confirm = useConfirm();
   const queryClient = useQueryClient();
   const relative = useRelativeTime();
+  // The one list whose page is NOT in the web address. This is a settings panel reading
+  // Accounts' own sign-in history, and `useFilters` would pull the app router into a panel that
+  // is rendered flat in tests. The pager is the same; only the remembering is missing.
   const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState<PageSize>(DEFAULT_PAGE_SIZE);
+  const historyParams = useMemo(() => ({ page, pageSize }), [page, pageSize]);
 
   const active = useQuery({ queryKey: activeSessionsQueryKey, queryFn: fetchActiveSessions, enabled: !hidden, meta: { persist: false } });
   const history = useQuery({
-    queryKey: sessionHistoryQueryKey(page),
-    queryFn: () => fetchSessionHistory(page),
+    queryKey: sessionHistoryQueryKey(historyParams),
+    queryFn: () => fetchSessionHistory(historyParams),
     enabled: !hidden,
     meta: { persist: false },
     placeholderData: (previous) => previous,
@@ -281,25 +288,17 @@ export default function SessionsSection({ hidden }: { hidden: boolean }) {
                   </tbody>
                 </table>
               </div>
-              {(history.data?.pages ?? 1) > 1 ? (
-                <div className="flex items-center justify-between gap-3">
-                  <Button type="button" variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>
-                    {t("previous")}
-                  </Button>
-                  <span className="text-xs text-muted-foreground">
-                    {digits(t("pageOf", { page: history.data!.page, pages: history.data!.pages }))}
-                  </span>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    disabled={page >= (history.data?.pages ?? 1)}
-                    onClick={() => setPage((p) => p + 1)}
-                  >
-                    {t("next")}
-                  </Button>
-                </div>
-              ) : null}
+              <Pager
+                page={history.data?.page ?? page}
+                pages={history.data?.pages ?? 1}
+                count={history.data?.count ?? 0}
+                pageSize={pageSize}
+                onPage={setPage}
+                onPageSize={(size: PageSize) => {
+                  setPageSize(size);
+                  setPage(1);
+                }}
+              />
             </>
           )}
 

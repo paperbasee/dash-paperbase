@@ -4,23 +4,26 @@
 // page.tsx when the Accounts tab arrived beside it; nothing about what it shows
 // changed in that move.
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { ClickableTableRow } from "@/components/ui/clickable-table-row";
 import { toLocaleDigits } from "@/lib/locale-digits";
 import { digitsInNumberFont, numberTextClass } from "@/lib/number-font";
 import { FilterToggle } from "@/components/filters/FilterToggle";
 import { PageHeader } from "@/components/page/PageHeader";
+import { Pager } from "@/components/page/Pager";
 import { Input } from "@/components/ui/input";
 import { FilterBar } from "@/components/filters/FilterBar";
 import { FilterDropdown } from "@/components/filters/FilterDropdown";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { useFilters } from "@/hooks/useFilters";
+import { usePrefetchPage } from "@/hooks/usePrefetchPage";
+import { DEFAULT_PAGE_SIZE, type PageSize } from "@/lib/paging";
 import type { Customer } from "@/types";
 import { formatDashboardDate } from "@/lib/datetime-display";
 import { notify } from "@/notifications";
-import { useCustomersQuery } from "@/hooks/useCustomersQuery";
-import type { CustomersListParams } from "@/lib/query-keys";
+import { fetchCustomersList, useCustomersQuery } from "@/hooks/useCustomersQuery";
+import { customersListQueryKey, type CustomersListParams } from "@/lib/query-keys";
 
 function customerTotalSpentDisplay(c: Customer): string {
   const raw = c.total_spent;
@@ -37,7 +40,7 @@ export function CustomersTab() {
   const tHints = useTranslations("pageHints");
   const tNav = useTranslations("nav");
   const tCommon = useTranslations("common");
-  const { page, filters, setFilter, setPage, clearFilters } = useFilters([
+  const { page, pageSize, filters, setFilter, setPage, setPageSize, clearFilters } = useFilters([
     "joined_date",
     "is_repeat_customer",
     "search",
@@ -46,15 +49,21 @@ export function CustomersTab() {
   const debouncedSearch = useDebouncedValue(searchInput);
   const [filtersOpen, setFiltersOpen] = useState(false);
 
-  const listParams = useMemo((): CustomersListParams => {
-    const params: CustomersListParams = { page };
-    if (filters.joined_date) params.joined_date = filters.joined_date;
-    if (filters.is_repeat_customer) {
-      params.is_repeat_customer = filters.is_repeat_customer;
-    }
-    if (filters.search) params.search = filters.search;
-    return params;
-  }, [page, filters.joined_date, filters.is_repeat_customer, filters.search]);
+  const paramsForPage = useCallback(
+    (wanted: number): CustomersListParams => {
+      const params: CustomersListParams = { page: wanted };
+      if (pageSize !== DEFAULT_PAGE_SIZE) params.page_size = pageSize;
+      if (filters.joined_date) params.joined_date = filters.joined_date;
+      if (filters.is_repeat_customer) {
+        params.is_repeat_customer = filters.is_repeat_customer;
+      }
+      if (filters.search) params.search = filters.search;
+      return params;
+    },
+    [pageSize, filters.joined_date, filters.is_repeat_customer, filters.search]
+  );
+
+  const listParams = useMemo(() => paramsForPage(page), [paramsForPage, page]);
 
   const { data, isLoading, isError, error } = useCustomersQuery(listParams);
 
@@ -68,7 +77,15 @@ export function CustomersTab() {
 
   const customers = data?.results ?? [];
   const count = data?.count ?? 0;
-  const hasNext = !!data?.next;
+  // The server's own answer: a page past the end is served as the last one.
+  const shownPage = data?.page ?? page;
+  const totalPages = data?.pages ?? 1;
+  const prefetchPage = usePrefetchPage(
+    shownPage,
+    paramsForPage,
+    customersListQueryKey,
+    fetchCustomersList
+  );
 
   const filtersActive = useMemo(
     () =>
@@ -212,29 +229,15 @@ export function CustomersTab() {
             </table>
           </div>
 
-          {(count > 10 || hasNext) && (
-            <div className="flex items-center justify-between">
-              <button
-                disabled={page <= 1}
-                onClick={() => setPage(page - 1)}
-                className="btn-page"
-              >
-                {tPages("supportTicketsPrevious")}
-              </button>
-              <span className={`text-sm text-muted-foreground ${numClass}`}>
-                {tPages("supportTicketsPageLabel", {
-                  page: toLocaleDigits(String(page), locale),
-                })}
-              </span>
-              <button
-                disabled={!hasNext}
-                onClick={() => setPage(page + 1)}
-                className="btn-page"
-              >
-                {tPages("supportTicketsNext")}
-              </button>
-            </div>
-          )}
+          <Pager
+            page={shownPage}
+            pages={totalPages}
+            count={count}
+            pageSize={pageSize}
+            onPage={setPage}
+            onPageSize={(size: PageSize) => setPageSize(size)}
+            onPrefetch={prefetchPage}
+          />
         </>
       ) : null}
     </div>

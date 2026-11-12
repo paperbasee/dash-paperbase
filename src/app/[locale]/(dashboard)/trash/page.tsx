@@ -1,10 +1,14 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useLocale, useTranslations } from "next-intl";
 import { EmptyTrash } from "@/components/EmptyTrash";
 import { PageHeader } from "@/components/page/PageHeader";
+import { Pager } from "@/components/page/Pager";
+import { useFilters } from "@/hooks/useFilters";
+import { usePrefetchPage } from "@/hooks/usePrefetchPage";
+import { type PageSize } from "@/lib/paging";
 import { toLocaleDigits } from "@/lib/locale-digits";
 import { numberTextClass } from "@/lib/number-font";
 import { Loader2, Undo2, Trash } from "lucide-react";
@@ -15,7 +19,7 @@ import type { TrashItem } from "@/types";
 import { useConfirm } from "@/context/ConfirmDialogContext";
 import { notify, normalizeError } from "@/notifications";
 import { useAdminDeleteCapabilities } from "@/hooks/useAdminDeleteCapabilities";
-import { useTrashQuery, type TrashQueryData } from "@/hooks/useTrashQuery";
+import { fetchTrash, useTrashQuery, type TrashQueryData } from "@/hooks/useTrashQuery";
 import {
   BulkProductActionError,
   bulkDeleteTrash,
@@ -30,6 +34,7 @@ import {
   navCountsQueryKey,
   ordersListQueryKeyRoot,
   productsListQueryKeyRoot,
+  trashQueryKey,
   trashQueryKeyRoot,
 } from "@/lib/query-keys";
 
@@ -48,7 +53,8 @@ export default function TrashPage() {
   const confirm = useConfirm();
   const queryClient = useQueryClient();
 
-  const [page, setPage] = useState(1);
+  const { page, pageSize, setPage, setPageSize } = useFilters([]);
+  const trashParams = useMemo(() => ({ page, pageSize }), [page, pageSize]);
 
   const invalidateTrashCaches = useCallback(() => {
     // Every trash page: a bulk selection can span pages, and removing rows shifts later pages.
@@ -63,11 +69,18 @@ export default function TrashPage() {
     isLoading: trashLoading,
     isError: trashIsError,
     error: trashError,
-  } = useTrashQuery(page, trashEnabled);
+  } = useTrashQuery(trashParams, trashEnabled);
 
   const rows = canViewTrash ? (trashData?.results ?? []) : [];
   const count = canViewTrash ? (trashData?.count ?? 0) : 0;
-  const hasNext = canViewTrash ? (trashData?.hasNext ?? false) : false;
+  const shownPage = trashData?.page ?? page;
+  const totalPages = trashData?.pages ?? 1;
+  const prefetchPage = usePrefetchPage(
+    shownPage,
+    (wanted: number) => ({ page: wanted, pageSize }),
+    trashQueryKey,
+    fetchTrash
+  );
   const loading = capsLoading || (trashEnabled && trashLoading);
   const [error, setError] = useState<string | null>(null);
 
@@ -458,26 +471,15 @@ export default function TrashPage() {
               <span className={numClass}>{toLocaleDigits(String(count), locale)}</span>{" "}
               {count === 1 ? tPages("trashCountSingular") : tPages("trashCountPlural")}
             </span>
-            <div className="flex gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                disabled={page <= 1 || loading}
-                onClick={() => setPage((p) => Math.max(1, p - 1))}
-              >
-                {tPages("trashPrev")}
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                disabled={!hasNext || loading}
-                onClick={() => setPage((p) => p + 1)}
-              >
-                {tPages("trashNext")}
-              </Button>
-            </div>
+            <Pager
+              page={shownPage}
+              pages={totalPages}
+              count={count}
+              pageSize={pageSize}
+              onPage={setPage}
+              onPageSize={(size: PageSize) => setPageSize(size)}
+              onPrefetch={prefetchPage}
+            />
           </div>
         </>
       ) : null}

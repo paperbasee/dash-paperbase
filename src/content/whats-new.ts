@@ -88,6 +88,20 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-11-12-page-numbers-on-every-list",
+    date: "2026-11-12",
+    version: "4.200.0",
+    tag: "improved",
+    title: {
+      en: "Page numbers on every list, and nothing hidden",
+      bn: "প্রতিটি তালিকায় পাতার নম্বর, কিছুই লুকানো নেই",
+    },
+    body: {
+      en: "Every list now has page numbers you can jump to, a choice of 24, 48 or 96 rows a page, and it remembers where you were when you refresh. Reviews, coupons and blog posts used to show only their first 24 — all of them are reachable now.",
+      bn: "এখন প্রতিটি তালিকায় পাতার নম্বর আছে, যে পাতায় খুশি যেতে পারেন, এক পাতায় ২৪, ৪৮ বা ৯৬টি সারি বেছে নিতে পারেন, আর রিফ্রেশ করলেও আপনি যেখানে ছিলেন সেখানেই থাকবেন। রিভিউ, কুপন আর ব্লগ পোস্টে আগে কেবল প্রথম ২৪টি দেখা যেত — এখন সবগুলোতেই পৌঁছানো যায়।",
+    },
+  },
+  {
     id: "2026-11-12-order-pages-and-page-size",
     date: "2026-11-12",
     version: "4.199.0",
@@ -505,20 +519,5 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
       en: "At the bottom of the menu there's now \"View my shop\", which opens your live shop in a new tab, and \"Settings\", which used to be inside your account menu. \"Copy store id\" is gone from that menu, as nothing needs it any more.",
       bn: "মেনুর নিচে এখন আছে \"আমার দোকান দেখুন\", যা নতুন ট্যাবে আপনার লাইভ দোকান খোলে, আর \"সেটিংস\", যা আগে আপনার অ্যাকাউন্ট মেনুর ভেতরে ছিল। ওই মেনু থেকে \"স্টোর আইডি কপি করুন\" সরানো হয়েছে, কারণ এটি আর কোথাও লাগে না।",
     },
-  },
-  {
-    id: "2026-10-05-faster-facebook-tracking",
-    date: "2026-10-05",
-    version: "4.179.3",
-    tag: "fixed",
-    title: {
-      en: "Facebook ad tracking is faster and more complete",
-      bn: "ফেসবুক বিজ্ঞাপনের ট্র্যাকিং এখন দ্রুত ও পূর্ণাঙ্গ",
-    },
-    body: {
-      en: "Your shop's Facebook pixel now sends its events straight away. Before, some reached Facebook about 5 seconds late and were lost when a shopper left quickly. TikTok's event log also now shows a send TikTok refused as failed, not as sent.",
-      bn: "আপনার দোকানের ফেসবুক পিক্সেল এখন সঙ্গে সঙ্গে ইভেন্ট পাঠায়। আগে কিছু ইভেন্ট প্রায় ৫ সেকেন্ড দেরিতে ফেসবুকে পৌঁছাত, আর ক্রেতা তাড়াতাড়ি চলে গেলে হারিয়ে যেত। টিকটক কোনো ইভেন্ট ফিরিয়ে দিলে ইভেন্ট লগে এখন সেটি পাঠানো নয়, ব্যর্থ হিসেবে দেখায়।",
-    },
-    href: "/settings?tab=integrations",
   },
 ];

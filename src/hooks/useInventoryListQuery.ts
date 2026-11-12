@@ -1,6 +1,6 @@
 "use client";
 
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { keepPreviousData, useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "@/lib/api";
 import type { Inventory, PaginatedResponse } from "@/types";
 import { inventoryCountsQueryKey, inventoryListQueryKey, type InventoryListParams } from "@/lib/query-keys";
@@ -37,5 +37,7 @@ export function useInventoryListQuery(params: InventoryListParams) {
   return useQuery({
     queryKey: inventoryListQueryKey(params),
     queryFn: () => fetchInventoryList(params, queryClient),
+    // The rows stay on screen while the next page arrives.
+    placeholderData: keepPreviousData,
   });
 }
