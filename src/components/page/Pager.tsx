@@ -10,7 +10,8 @@
  * The shape is the one the owner chose (2026-11-12): the total on the left, and on the right
  * the rows-a-page picker beside plain chevrons and page numbers, the page being read filled in.
  * No first/last buttons -- page 1 and the last page are always among the numbers, so a second
- * way to reach them only crowded the row, and crowded it worst on a phone.
+ * way to reach them only crowded the row, and crowded it worst on a phone. No rule above it
+ * either (owner, 2026-11-12): the page's own spacing is the separation it needs.
  *
  * `onPrefetch` is called when a button is hovered or focused, never on its own: a page nobody
  * is about to open costs the database nothing.
@@ -85,7 +86,7 @@ export function Pager({
     <nav
       aria-label={t("label")}
       className={cn(
-        "flex flex-wrap items-center gap-x-4 gap-y-3 border-t border-border-subtle pt-4",
+        "flex flex-wrap items-center gap-x-4 gap-y-3",
         className
       )}
     >
