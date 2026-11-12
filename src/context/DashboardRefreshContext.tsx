@@ -1,20 +1,12 @@
 "use client";
 
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useState,
-  type MutableRefObject,
-  type ReactNode,
-} from "react";
+import { createContext, useCallback, useContext, useState, type ReactNode } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
+import { homeQueryKeyRoot, navCountsQueryKey, ordersListQueryKeyRoot } from "@/lib/query-keys";
 import { notify } from "@/notifications";
 
 export interface DashboardRefreshContextValue {
-  lastRefreshedAt: Date | null;
   isRefreshing: boolean;
   refresh: () => Promise<void>;
 }
@@ -23,41 +15,20 @@ const DashboardRefreshContext = createContext<DashboardRefreshContextValue | und
   undefined
 );
 
-export interface DashboardRefreshProviderProps {
-  markRefreshedRef: MutableRefObject<(() => void) | null>;
-  children: ReactNode;
-}
-
-export function DashboardRefreshProvider({
-  markRefreshedRef,
-  children,
-}: DashboardRefreshProviderProps) {
+export function DashboardRefreshProvider({ children }: { children: ReactNode }) {
   const queryClient = useQueryClient();
   const t = useTranslations("pages");
-  const [lastRefreshedAt, setLastRefreshedAt] = useState<Date | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  const markRefreshed = useCallback(() => {
-    setLastRefreshedAt(new Date());
-  }, []);
-
-  useEffect(() => {
-    markRefreshedRef.current = markRefreshed;
-    return () => {
-      markRefreshedRef.current = null;
-    };
-  }, [markRefreshed, markRefreshedRef]);
-
+  // The home page's Refresh: its numbers, its latest orders, and the menu's counts.
   const refresh = useCallback(async () => {
     setIsRefreshing(true);
     try {
       await Promise.all([
-        queryClient.invalidateQueries({ queryKey: ["nav-counts"] }),
-        queryClient.invalidateQueries({ queryKey: ["analytics", "overview"] }),
-        queryClient.invalidateQueries({ queryKey: ["inventory", "counts"] }),
-        queryClient.invalidateQueries({ queryKey: ["products", "list"] }),
+        queryClient.invalidateQueries({ queryKey: navCountsQueryKey }),
+        queryClient.invalidateQueries({ queryKey: homeQueryKeyRoot }),
+        queryClient.invalidateQueries({ queryKey: ordersListQueryKeyRoot }),
       ]);
-      setLastRefreshedAt(new Date());
     } catch (err) {
       notify.error(err, {
         title: t("toastTitleDashboardRefreshFailed"),
@@ -69,7 +40,6 @@ export function DashboardRefreshProvider({
   }, [queryClient, t]);
 
   const value: DashboardRefreshContextValue = {
-    lastRefreshedAt,
     isRefreshing,
     refresh,
   };

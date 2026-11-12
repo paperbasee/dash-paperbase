@@ -11,11 +11,9 @@ export function createInvalidationCoalescer(
   queryClient: QueryClient,
   options?: {
     windowMs?: number;
-    onFlush?: () => void;
   }
 ): InvalidationCoalescer {
   const windowMs = options?.windowMs ?? DEFAULT_WINDOW_MS;
-  const onFlush = options?.onFlush;
 
   const pendingKeys = new Set<string>();
   let eventCount = 0;
@@ -42,8 +40,6 @@ export function createInvalidationCoalescer(
     if (process.env.NODE_ENV === "development") {
       console.debug("[ws-invalidate]", { events, uniqueKeys });
     }
-
-    onFlush?.();
   };
 
   const scheduleFlush = () => {

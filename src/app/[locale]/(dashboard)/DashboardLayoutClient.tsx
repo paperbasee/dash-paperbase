@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, type CSSProperties } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { usePathname, useRouter } from "@/i18n/navigation";
 import { History } from "lucide-react";
@@ -145,16 +145,11 @@ export default function DashboardLayoutClient({
     storeCount === 0;
   const authCheckReady = authHydrated;
 
-  const markRefreshedRef = useRef<(() => void) | null>(null);
   const socketEnabled =
     isAuthenticated &&
     meProfileStatus === "ready" &&
     Boolean(meProfile?.active_store_public_id?.trim());
-  useStoreSocket({
-    enabled: socketEnabled,
-    onConnect: () => markRefreshedRef.current?.(),
-    onAfterInvalidate: () => markRefreshedRef.current?.(),
-  });
+  useStoreSocket({ enabled: socketEnabled });
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -265,7 +260,7 @@ export default function DashboardLayoutClient({
     <BrandingProvider>
       <PermissionsProvider>
       <EnabledAppsProvider>
-      <DashboardRefreshProvider markRefreshedRef={markRefreshedRef}>
+      <DashboardRefreshProvider>
       <NavigationLoadingProvider>
       <SearchModalProvider shortcut={!isThemeEditor}>
       <WhatsNewProvider>

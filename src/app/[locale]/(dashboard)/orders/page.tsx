@@ -31,6 +31,7 @@ import { PageHeader } from "@/components/page/PageHeader";
 import { FilterDropdown } from "@/components/filters/FilterDropdown";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { useFilters } from "@/hooks/useFilters";
+import { ORDER_QUEUES, isOrderQueue, type OrderQueue } from "@/lib/dashboard/home";
 import { useHorizontalWheelScroll } from "@/hooks/useHorizontalWheelScroll";
 import api from "@/lib/api";
 import { useBranding } from "@/context/BrandingContext";
@@ -180,6 +181,13 @@ function bulkDispatchFailureBody(
   return `${intro}\n${lines.join("\n")}${trailing}`;
 }
 
+const ORDER_QUEUE_LABEL_KEYS: Record<OrderQueue, string> = {
+  stuck: "ordersQueueStuck",
+  delivered_today: "ordersQueueDeliveredToday",
+  returned_recently: "ordersQueueReturnedRecently",
+  risky: "ordersQueueRisky",
+};
+
 export default function OrdersPage() {
   const router = useRouter();
   const locale = useLocale();
@@ -202,10 +210,12 @@ export default function OrdersPage() {
     "delivery_status",
     "category",
     "search",
+    "queue",
   ]);
   const [searchInput, setSearchInput] = useState(filters.search || "");
   const debouncedSearch = useDebouncedValue(searchInput);
-  const [filtersOpen, setFiltersOpen] = useState(false);
+  // Opened from a home page number (?queue=), the panel opens on it, so the list says why it is short.
+  const [filtersOpen, setFiltersOpen] = useState(() => isOrderQueue(filters.queue));
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [bulkDispatching, setBulkDispatching] = useState(false);
   const [statusUpdatingId, setStatusUpdatingId] = useState<string | null>(null);
@@ -238,6 +248,7 @@ export default function OrdersPage() {
       if (filters.delivery_status) params.delivery_status = filters.delivery_status;
       if (filters.category) params.category = filters.category;
       if (filters.search) params.search = filters.search;
+      if (isOrderQueue(filters.queue)) params.queue = filters.queue;
       return params;
     },
     [
@@ -250,6 +261,7 @@ export default function OrdersPage() {
       filters.delivery_status,
       filters.search,
       filters.status,
+      filters.queue,
     ]
   );
 
@@ -342,6 +354,12 @@ export default function OrdersPage() {
   // "Premium Feature" label — misleading when the store's plan is fine and it is
   // the role that lacks the permission.
   const canRunFraudCheck = hasPermission("orders.edit");
+
+  // The home page's order views, each the same list as its home count (API orders/queues.py).
+  const queuePillOptions: { value: string; label: string }[] = [
+    { value: "", label: tCommon("all") },
+    ...ORDER_QUEUES.map((queue) => ({ value: queue, label: tPages(ORDER_QUEUE_LABEL_KEYS[queue]) })),
+  ];
 
   const deliveryPillOptions: { value: string; label: string }[] = [
     { value: "", label: tCommon("all") },
@@ -525,6 +543,7 @@ export default function OrdersPage() {
     filters.delivery_status,
     filters.search,
     filters.status,
+    filters.queue,
   ]);
 
   const filtersActive = Boolean(
@@ -535,7 +554,8 @@ export default function OrdersPage() {
       (filters.payment_status || "").trim() ||
       (filters.delivery_status || "").trim() ||
       (filters.category || "").trim() ||
-      (filters.search || "").trim()
+      (filters.search || "").trim() ||
+      isOrderQueue(filters.queue)
   );
 
   const pageOrdersCount = orders.length;
@@ -702,6 +722,7 @@ export default function OrdersPage() {
               delivery_status: filters.delivery_status || "",
               category: filters.category || "",
               search: filters.search || "",
+              queue: isOrderQueue(filters.queue) ? filters.queue : "",
             },
           }
         : { select_all: false, order_ids: Array.from(selectedIds) };
@@ -1078,6 +1099,12 @@ export default function OrdersPage() {
 
       {filtersOpen ? (
         <FilterBar>
+          <FilterPills
+            label={tPages("filtersQueue")}
+            options={queuePillOptions}
+            value={isOrderQueue(filters.queue) ? filters.queue : ""}
+            onChange={(value) => setFilter("queue", value)}
+          />
           <FilterPills
             label={tPages("filtersDeliveryStatus")}
             options={deliveryPillOptions}

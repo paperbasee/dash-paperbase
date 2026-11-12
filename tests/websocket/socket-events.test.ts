@@ -45,13 +45,13 @@ describe("socket events and the order editors' stock", () => {
 
   it("keeps the existing invalidations for those events", () => {
     expect(getQueryKeysToInvalidate(SOCKET_EVENTS.ORDER_CREATED)).toEqual(
-      expect.arrayContaining([["orders", "list"], ["nav-counts"], ["analytics", "overview"]]),
+      expect.arrayContaining([["orders", "list"], ["nav-counts"], ["home"]]),
     );
     expect(getQueryKeysToInvalidate(SOCKET_EVENTS.ORDER_UPDATED)).toEqual(
       expect.arrayContaining([
         ["orders", "list"],
         ["nav-counts"],
-        ["analytics", "overview"],
+        ["home"],
         ["inventory", "counts"],
         ["inventory", "list"],
       ]),

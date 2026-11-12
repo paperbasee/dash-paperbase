@@ -23,15 +23,23 @@ export const inventoryCountsQueryKey = ["inventory", "counts"] as const;
 /** @deprecated Use inventoryCountsQueryKey */
 export const inventoryStatusQueryKey = inventoryCountsQueryKey;
 
-export const dashboardAnalyticsQueryKeyRoot = ["analytics", "overview"] as const;
+/** Everything the home page asks for: an order event or Refresh reloads it all. */
+export const homeQueryKeyRoot = ["home"] as const;
 
+/** The orders panel for the period the home page's switch picks. */
 export function dashboardAnalyticsQueryKey(filters: {
   startDate: string;
   endDate: string;
   bucket: AnalyticsBucket;
 }) {
-  return [...dashboardAnalyticsQueryKeyRoot, filters] as const;
+  return [...homeQueryKeyRoot, "orders-panel", filters] as const;
 }
+
+/** The home page's "right now" numbers: the order flow and what needs attention. */
+export const homeNumbersQueryKey = [...homeQueryKeyRoot, "numbers"] as const;
+
+/** The money the courier holds for the shop (owner and Admins). */
+export const courierBalanceQueryKey = [...homeQueryKeyRoot, "courier-balance"] as const;
 
 /** The analytics page: one report per section, for the days asked. */
 export const analyticsQueryKeyRoot = ["analytics", "sections"] as const;

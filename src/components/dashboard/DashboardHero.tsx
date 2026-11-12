@@ -11,31 +11,17 @@ interface DashboardHeroProps {
   greeting: string;
   /** The person's own first name; empty, and the greeting goes without one. */
   name: string;
-  lastUpdatedLabel: string | null;
   range: DateRangeValue;
   onRangeChange: (value: DateRangeValue) => void;
 }
 
-export default function DashboardHero({
-  greeting,
-  name,
-  lastUpdatedLabel,
-  range,
-  onRangeChange,
-}: DashboardHeroProps) {
+export default function DashboardHero({ greeting, name, range, onRangeChange }: DashboardHeroProps) {
   const t = useTranslations("dashboard");
   const tHints = useTranslations("pageHints");
   const [datePanelOpen, setDatePanelOpen] = useState(false);
 
-  const metaParts = [
-    t("heroMetaOverview"),
-    lastUpdatedLabel
-      ? t("heroMetaLastUpdated", { when: lastUpdatedLabel })
-      : t("heroMetaLastUpdatedUnknown"),
-  ];
-
   return (
-    <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+    <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
       <div className="min-w-0">
         <div className="flex items-center gap-1.5">
           <h1 className="text-[1.65rem] font-medium leading-tight tracking-tight text-foreground sm:text-[1.85rem]">
@@ -43,9 +29,6 @@ export default function DashboardHero({
           </h1>
           <PageHint>{tHints("home")}</PageHint>
         </div>
-        <p className="mt-1 font-numbers text-xs text-muted-foreground sm:text-sm">
-          {metaParts.join(" · ")}
-        </p>
       </div>
       <div
         className={cn(

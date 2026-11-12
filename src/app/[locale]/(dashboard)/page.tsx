@@ -1,35 +1,32 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { useLocale, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
 import DashboardHero from "@/components/dashboard/DashboardHero";
-import DashboardKpiCard from "@/components/dashboard/DashboardKpiCard";
-import DashboardActivityTimeline from "@/components/dashboard/DashboardActivityTimeline";
-import DashboardComingSoonCard from "@/components/dashboard/DashboardComingSoonCard";
-import DashboardStatusFooter from "@/components/dashboard/DashboardStatusFooter";
+import { HomeLatestOrders } from "@/components/dashboard/HomeLatestOrders";
+import { HomeOrdersPanel } from "@/components/dashboard/HomeOrdersPanel";
+import { HomeSidePanel } from "@/components/dashboard/HomeSidePanel";
 import { HomeSetupGuide } from "@/components/setup-guide/SetupGuideCard";
 import type { DateRangeValue } from "@/components/DateRangeFilter";
-import { useDashboardAnalyticsQuery } from "@/hooks/useDashboardAnalyticsQuery";
-import { useNavCounts } from "@/hooks/useNavCounts";
-import { useApiLatency } from "@/hooks/useApiLatency";
 import { useAuth } from "@/context/AuthContext";
-import { useDashboardRefresh } from "@/context/DashboardRefreshContext";
+import { usePermissions } from "@/context/PermissionsContext";
+import { useDashboardAnalyticsQuery } from "@/hooks/useDashboardAnalyticsQuery";
+import { useCourierBalance, useHomeNumbers } from "@/hooks/useHomeNumbers";
 import { resolvePreset } from "@/lib/date-range-presets";
-import { computeTrend } from "@/lib/dashboard/compute-trend";
-import { greetingName, updatedAgo } from "@/lib/dashboard/greeting";
-import {
-  loadDashboardRange,
-  saveDashboardRange,
-} from "@/lib/dashboard/dashboard-range-storage";
+import { greetingName } from "@/lib/dashboard/greeting";
+import { loadDashboardRange, saveDashboardRange } from "@/lib/dashboard/dashboard-range-storage";
 import { getPreviousDateRange } from "@/lib/dashboard/previous-date-range";
-import { toLocaleDigits } from "@/lib/locale-digits";
 import { normalizeDateRange } from "@/lib/validation";
 
+/**
+ * The home page (owner, 2026-11-12): the orders placed in the period the switch picks, where
+ * every order is right now, the newest orders, what needs attention, and the courier's money.
+ * Sales and their charts are the Analytics page's.
+ */
 export default function DashboardPage() {
-  const locale = useLocale();
   const t = useTranslations("dashboard");
   const { meProfile, meProfileStatus } = useAuth();
-  const { lastRefreshedAt } = useDashboardRefresh();
+  const { has, isUnknown } = usePermissions();
   const today = useMemo(() => new Date(), []);
   const [now, setNow] = useState(() => Date.now());
 
@@ -50,6 +47,12 @@ export default function DashboardPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // "Oldest 2 hours ago" moves with the clock between fetches.
+  useEffect(() => {
+    const id = window.setInterval(() => setNow(Date.now()), 60_000);
+    return () => window.clearInterval(id);
+  }, []);
+
   const handleRangeChange = (next: DateRangeValue) => {
     setRange(next);
     saveDashboardRange(next);
@@ -68,127 +71,46 @@ export default function DashboardPage() {
     return t("greetingLateNight");
   }, [t]);
 
-  const {
-    data,
-    isLoading,
-    error,
-    networkError: analyticsNetworkError,
-  } = useDashboardAnalyticsQuery({
+  const period = useDashboardAnalyticsQuery({
     startDate: range.startDate,
     endDate: range.endDate,
     bucket: range.bucket,
   });
-
-  const { data: previousData } = useDashboardAnalyticsQuery({
+  const previous = useDashboardAnalyticsQuery({
     startDate: previousRange.startDate,
     endDate: previousRange.endDate,
     bucket: previousRange.bucket,
   });
-
-  const { isError: navCountsError } = useNavCounts();
-  const latencyMs = useApiLatency();
-
-  const summary = data?.summary;
-  const previousSummary = previousData?.summary;
-  const series = data?.series ?? [];
-  const numberFont = locale === "bn" ? "sans" : "mono";
-
-  const fmtStat = (n: number | undefined) =>
-    n == null ? "--" : toLocaleDigits(String(n), locale);
-
-  const kpiTrend = (
-    current: number | undefined,
-    previous: number | undefined
-  ) => {
-    if (current == null || previous == null) return undefined;
-    return computeTrend(current, previous);
-  };
-
-  const ago = updatedAgo(lastRefreshedAt, now);
-  const lastUpdatedLabel = !ago
-    ? null
-    : ago.unit === "now"
-      ? t("heroUpdatedJustNow")
-      : t(ago.unit === "minutes" ? "heroUpdatedMinutesAgo" : "heroUpdatedHoursAgo", {
-          count: toLocaleDigits(String(ago.count), locale),
-        });
-  const apiHealthy = !analyticsNetworkError && !navCountsError && !error;
-
-  useEffect(() => {
-    const id = window.setInterval(() => setNow(Date.now()), 30_000);
-    return () => window.clearInterval(id);
-  }, []);
+  const numbers = useHomeNumbers();
+  // The courier's money is the owner's and Admins' (settings.manage); nobody else asks, not
+  // even while the member's permissions are still loading.
+  const courier = useCourierBalance(!isUnknown && has("settings.manage"));
 
   return (
-    <div className="flex flex-col gap-6 pb-2">
-      <DashboardHero
-        greeting={greeting}
-        name={name}
-        lastUpdatedLabel={lastUpdatedLabel}
-        range={range}
-        onRangeChange={handleRangeChange}
-      />
+    <div className="flex flex-col gap-5 pb-2">
+      <DashboardHero greeting={greeting} name={name} range={range} onRangeChange={handleRangeChange} />
 
       <HomeSetupGuide />
 
-      {(error || analyticsNetworkError) && (
+      {period.error || period.networkError ? (
         <div className="rounded-card border border-destructive/30 bg-destructive/5 px-4 py-2 text-sm text-destructive">
-          {analyticsNetworkError ? t("serverUnreachable") : error}
+          {period.networkError ? t("serverUnreachable") : period.error}
         </div>
-      )}
+      ) : null}
 
-      <section className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
-        <DashboardKpiCard
-          title={t("totalOrders")}
-          value={!summary ? "--" : fmtStat(summary.totalOrders)}
-          subtitle={t("withinPeriod")}
-          accent="blue"
-          trend={kpiTrend(summary?.totalOrders, previousSummary?.totalOrders)}
-          numberFont={numberFont}
-          loading={isLoading}
-        />
-        <DashboardKpiCard
-          title={t("totalProducts")}
-          value={!summary ? "--" : fmtStat(summary.totalProducts)}
-          subtitle={t("addedInPeriod")}
-          accent="green"
-          trend={kpiTrend(summary?.totalProducts, previousSummary?.totalProducts)}
-          numberFont={numberFont}
-          loading={isLoading}
-        />
-        <DashboardKpiCard
-          title={t("totalCustomers")}
-          value={!summary ? "--" : fmtStat(summary.totalCustomers)}
-          subtitle={t("customersInPeriod")}
-          accent="yellow"
-          trend={kpiTrend(summary?.totalCustomers, previousSummary?.totalCustomers)}
-          numberFont={numberFont}
-          loading={isLoading}
-        />
-        <DashboardKpiCard
-          title={t("supportTickets")}
-          value={!summary ? "--" : fmtStat(summary.totalSupportTickets)}
-          subtitle={t("supportAndInquiries")}
-          accent="red"
-          trend={kpiTrend(
-            summary?.totalSupportTickets,
-            previousSummary?.totalSupportTickets
-          )}
-          numberFont={numberFont}
-          loading={isLoading}
-        />
-      </section>
+      <HomeOrdersPanel
+        summary={period.data?.summary ?? null}
+        previousOrders={previous.data?.summary.orders ?? null}
+        series={period.data?.series ?? []}
+        bucket={range.bucket}
+        flow={numbers.data?.flow}
+        now={now}
+      />
 
-      <DashboardActivityTimeline data={series} bucket={range.bucket} />
-
-      <section className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
-        <DashboardComingSoonCard className="aspect-square w-full py-6 sm:py-8" minHeightClass="min-h-0" />
-        <DashboardComingSoonCard className="aspect-square w-full py-6 sm:py-8" minHeightClass="min-h-0" />
-        <DashboardComingSoonCard className="aspect-square w-full py-6 sm:py-8" minHeightClass="min-h-0" />
-        <DashboardComingSoonCard className="aspect-square w-full py-6 sm:py-8" minHeightClass="min-h-0" />
-      </section>
-
-      <DashboardStatusFooter apiHealthy={apiHealthy} latencyMs={latencyMs} />
+      <div className="grid items-start gap-5 xl:grid-cols-[minmax(0,1fr)_340px]">
+        <HomeLatestOrders startDate={range.startDate} endDate={range.endDate} summary={period.data?.summary ?? null} />
+        <HomeSidePanel attention={numbers.data?.attention} flow={numbers.data?.flow} courier={courier.data} />
+      </div>
     </div>
   );
 }

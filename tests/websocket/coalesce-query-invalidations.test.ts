@@ -14,15 +14,10 @@ describe("createInvalidationCoalescer", () => {
   it("coalesces multiple enqueues into one flush with deduped keys", () => {
     const queryClient = new QueryClient();
     const invalidate = vi.spyOn(queryClient, "invalidateQueries");
-    const onFlush = vi.fn();
-
-    const coalescer = createInvalidationCoalescer(queryClient, {
-      windowMs: 300,
-      onFlush,
-    });
+    const coalescer = createInvalidationCoalescer(queryClient, { windowMs: 300 });
 
     coalescer.enqueue([["nav-counts"]]);
-    coalescer.enqueue([["nav-counts"], ["analytics", "overview"]]);
+    coalescer.enqueue([["nav-counts"], ["home"]]);
     coalescer.enqueue([["inventory-status"]]);
 
     expect(invalidate).not.toHaveBeenCalled();
@@ -30,7 +25,6 @@ describe("createInvalidationCoalescer", () => {
     vi.advanceTimersByTime(300);
 
     expect(invalidate).toHaveBeenCalledTimes(3);
-    expect(onFlush).toHaveBeenCalledTimes(1);
   });
 
   it("flushes pending keys on dispose", () => {

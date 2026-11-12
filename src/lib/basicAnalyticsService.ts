@@ -2,19 +2,19 @@ import api from "@/lib/api";
 
 export type AnalyticsBucket = "minute" | "hour" | "day" | "week" | "month";
 
+/** Every order placed in the period, cancelled ones too, split by where it stands. */
 export interface DashboardAnalyticsSummary {
-  totalOrders: number;
-  totalProducts: number;
-  totalSupportTickets: number;
-  totalCustomers: number;
+  orders: number;
+  confirmed: number;
+  /** Pending and payment pending: not confirmed yet. */
+  pending: number;
+  cancelled: number;
 }
 
+/** Orders placed in one bucket (a minute, hour, day, week or month) of the period. */
 export interface DashboardAnalyticsPoint {
   label: string;
   orders: number;
-  products: number;
-  supportTickets: number;
-  customers: number;
 }
 
 export interface DashboardAnalyticsResponse {

@@ -1,4 +1,4 @@
-import { orderEditorVariantsQueryKeyRoot } from "@/lib/query-keys";
+import { homeQueryKeyRoot, orderEditorVariantsQueryKeyRoot } from "@/lib/query-keys";
 
 /**
  * The order editors' variants carry available stock. Orders (storefront checkouts, other
@@ -7,31 +7,35 @@ import { orderEditorVariantsQueryKeyRoot } from "@/lib/query-keys";
  */
 const ORDER_EDITOR_VARIANTS: string[] = [...orderEditorVariantsQueryKeyRoot];
 
+/** Every number on the home page moves with orders and stock. */
+const HOME: string[] = [...homeQueryKeyRoot];
+
 const EVENT_INVALIDATION_MAP: Record<string, string[][]> = {
   "order.created": [
     ["orders", "list"],
     ["nav-counts"],
-    ["analytics", "overview"],
+    HOME,
     ORDER_EDITOR_VARIANTS,
   ],
   "order.updated": [
     ["orders", "list"],
     ["nav-counts"],
-    ["analytics", "overview"],
+    HOME,
     ["inventory", "counts"],
     ["inventory", "list"],
     ORDER_EDITOR_VARIANTS,
   ],
-  "order.deleted": [["orders", "list"], ["nav-counts"], ["analytics", "overview"]],
-  "product.created": [["products", "list"], ["nav-counts"], ["inventory", "counts"]],
+  "order.deleted": [["orders", "list"], ["nav-counts"], HOME],
+  "product.created": [["products", "list"], ["nav-counts"], ["inventory", "counts"], HOME],
   "product.updated": [
     ["products", "list"],
     ["nav-counts"],
     ["inventory", "counts"],
+    HOME,
     ORDER_EDITOR_VARIANTS,
   ],
-  "product.deleted": [["products", "list"], ["nav-counts"], ["inventory", "counts"]],
-  "payment.success": [["orders", "list"], ["nav-counts"], ["analytics", "overview"]],
+  "product.deleted": [["products", "list"], ["nav-counts"], ["inventory", "counts"], HOME],
+  "payment.success": [["orders", "list"], ["nav-counts"], HOME],
 };
 
 export const SOCKET_EVENTS = {

@@ -32,7 +32,7 @@ import {
 import { buildOrderCreateSchema, parseValidation } from "@/lib/validation";
 import {
   abandonedCheckoutsQueryKeyRoot,
-  dashboardAnalyticsQueryKeyRoot,
+  homeQueryKeyRoot,
   navCountsQueryKey,
   ordersListQueryKeyRoot,
 } from "@/lib/query-keys";
@@ -69,7 +69,7 @@ export function useNewOrder() {
     // A converted abandoned checkout leaves that list with this order.
     void queryClient.invalidateQueries({ queryKey: abandonedCheckoutsQueryKeyRoot });
     void queryClient.invalidateQueries({ queryKey: navCountsQueryKey });
-    void queryClient.invalidateQueries({ queryKey: dashboardAnalyticsQueryKeyRoot });
+    void queryClient.invalidateQueries({ queryKey: homeQueryKeyRoot });
     // The order took stock: the next editor must not show the old available quantities.
     void invalidateOrderEditorVariants(queryClient);
   }, [queryClient]);
