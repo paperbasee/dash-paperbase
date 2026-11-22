@@ -380,6 +380,41 @@ export default function DomainsSection({ hidden }: { hidden: boolean }) {
     );
   }
 
+  /**
+   * A server move left this domain on our old server (step 16.5; the owner, 2026-11-22): it still
+   * reaches a box our platform name no longer points at, pinned there by an A record or a proxy's
+   * origin. The API says so only after two looks ten minutes apart. By name first, as the setup
+   * steps say it, then the address we have now; each value only when the API gave it, since a
+   * guessed one would take the store down.
+   */
+  function renderLeftBehind(domain: StoreDomain) {
+    const left = domain.left_behind;
+    if (!left) return null;
+    const target = (domain.dns_records ?? []).find(
+      (record) => (record.type || "").toUpperCase() === "CNAME",
+    )?.value;
+    return (
+      <div className="mt-2 space-y-1.5 rounded-ui border border-amber-200 bg-amber-50 px-3 py-2.5 text-xs leading-relaxed text-amber-800 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-100">
+        <p className="font-medium">{t("domains.leftBehindTitle")}</p>
+        <p>{t("domains.leftBehindBody", { oldAddress: left.old_address })}</p>
+        {target ? (
+          <div className="flex items-center justify-between gap-2">
+            <p className="min-w-0 break-words">{t("domains.leftBehindByName", { target })}</p>
+            <CopyButton value={target} label={t("domains.copyValueAria", { type: "CNAME" })} />
+          </div>
+        ) : null}
+        {left.new_address ? (
+          <div className="flex items-center justify-between gap-2">
+            <p className="min-w-0 break-words">
+              {t("domains.leftBehindByAddress", { newAddress: left.new_address })}
+            </p>
+            <CopyButton value={left.new_address} label={t("domains.copyValueAria", { type: "A" })} />
+          </div>
+        ) : null}
+      </div>
+    );
+  }
+
   function statusLabel(status: StoreDomainStatus): string {
     switch (status) {
       case "active":
@@ -1114,6 +1149,7 @@ export default function DomainsSection({ hidden }: { hidden: boolean }) {
                   {domain.public_id !== liveDomain?.public_id
                     ? renderCertificateNotice(domain, "mt-2")
                     : null}
+                  {renderLeftBehind(domain)}
                   {domain.check_error ? (
                     <p className="mt-2 text-xs leading-relaxed text-amber-700 dark:text-amber-300">
                       {domain.check_error}

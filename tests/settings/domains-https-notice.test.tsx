@@ -84,6 +84,7 @@ function custom(overrides: Partial<StoreDomain> = {}): StoreDomain {
     removable: true,
     https_check: "ok",
     https_checked_at: "2026-10-09T14:01:00Z",
+    left_behind: null,
     ...overrides,
   };
 }

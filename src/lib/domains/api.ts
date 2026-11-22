@@ -64,8 +64,20 @@ export interface StoreDomain {
   created_at: string;
   /** Only custom domains can be removed; the Paperbase address is permanent. */
   removable: boolean;
+  /**
+   * A server move left this domain on our old server (step 16.5; the API's left_behind): still reaching a box the
+   * platform's name no longer points at, at two looks ten minutes apart. null while it follows.
+   */
+  left_behind: StoreDomainLeftBehind | null;
   /** Present for custom domains; the records the merchant must create. */
   dns_records?: StoreDomainDnsRecord[];
+}
+
+export interface StoreDomainLeftBehind {
+  /** The old server's address the domain still reaches. */
+  old_address: string;
+  /** Where the platform points now; "" when the API could not read it. */
+  new_address: string;
 }
 
 export interface StoreDomainVerifyResponse {
