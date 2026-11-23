@@ -88,6 +88,21 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-11-23-clearer-steps-for-your-own-domain",
+    date: "2026-11-23",
+    version: "4.203.0",
+    tag: "improved",
+    title: {
+      en: "Clearer steps for connecting your own domain",
+      bn: "নিজের ডোমেইন যুক্ত করার আরও পরিষ্কার ধাপ",
+    },
+    body: {
+      en: "Connecting your main domain now names the record your DNS provider may call CNAME flattening, ALIAS or ANAME, and says plainly what happens if you use our address instead. If a domain still points at our old server after we move, its row tells you how to fix it.",
+      bn: "মূল ডোমেইন যুক্ত করার সময় এখন দেখাবে আপনার DNS প্রোভাইডার যে রেকর্ডকে CNAME flattening, ALIAS বা ANAME বলতে পারে, আর আমাদের ঠিকানা ব্যবহার করলে কী হয় তা সোজাসুজি বলে। আমরা সার্ভার বদলানোর পর কোনো ডোমেইন পুরোনো সার্ভারের দিকে নির্দেশ করলে, তার সারিতেই ঠিক করার উপায় দেখাবে।",
+    },
+    href: "/settings?tab=domains",
+  },
+  {
     id: "2026-11-12-a-new-home-page",
     date: "2026-11-12",
     version: "4.202.0",
@@ -503,20 +518,6 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     body: {
       en: "The menu under your name is now shorter: theme and language are small switches, and What's new tells you how many updates are waiting.",
       bn: "আপনার নামের নিচের মেনু এখন আরও ছোট: থিম আর ভাষা ছোট সুইচে, আর নতুন কী আছে জানায় কতগুলো আপডেট দেখা বাকি।",
-    },
-  },
-  {
-    id: "2026-10-07-view-my-shop-in-the-sidebar",
-    date: "2026-10-07",
-    version: "4.180.1",
-    tag: "improved",
-    title: {
-      en: "View your shop and Settings, one click away",
-      bn: "এক ক্লিকে আপনার দোকান আর সেটিংস",
-    },
-    body: {
-      en: "At the bottom of the menu there's now \"View my shop\", which opens your live shop in a new tab, and \"Settings\", which used to be inside your account menu. \"Copy store id\" is gone from that menu, as nothing needs it any more.",
-      bn: "মেনুর নিচে এখন আছে \"আমার দোকান দেখুন\", যা নতুন ট্যাবে আপনার লাইভ দোকান খোলে, আর \"সেটিংস\", যা আগে আপনার অ্যাকাউন্ট মেনুর ভেতরে ছিল। ওই মেনু থেকে \"স্টোর আইডি কপি করুন\" সরানো হয়েছে, কারণ এটি আর কোথাও লাগে না।",
     },
   },
 ];
