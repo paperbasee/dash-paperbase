@@ -88,6 +88,21 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-11-24-enterprise-for-big-campaigns",
+    date: "2026-11-24",
+    version: "4.204.0",
+    tag: "new",
+    title: {
+      en: "Enterprise, for shops with big campaigns",
+      bn: "বড় ক্যাম্পেইনের দোকানের জন্য এন্টারপ্রাইজ",
+    },
+    body: {
+      en: "On Premium, Billing now shows Enterprise: room on our servers that no other shop can take when they are busy, and checkout never turned away. There is no fixed price: talk to us on WhatsApp and we size it for your shop.",
+      bn: "প্রিমিয়ামে এখন বিলিং পেজে এন্টারপ্রাইজ দেখাবে: আমাদের সার্ভারে আপনার নিজের জায়গা, সার্ভার ব্যস্ত থাকলেও যা অন্য কোনো দোকান নিতে পারে না, আর চেকআউট কখনো ফেরানো হয় না। নির্দিষ্ট দাম নেই: WhatsApp-এ কথা বলুন, আমরা আপনার দোকানের মাপে ঠিক করে দেব।",
+    },
+    href: "/settings?tab=billing",
+  },
+  {
     id: "2026-11-23-clearer-steps-for-your-own-domain",
     date: "2026-11-23",
     version: "4.203.0",
@@ -504,20 +519,6 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     body: {
       en: "The main menu and the Settings menu now share one set of clean, outlined icons, so the two look alike.",
       bn: "মূল মেনু আর সেটিংস মেনু এখন একই ধরনের পরিষ্কার, রেখায় আঁকা আইকন ব্যবহার করে, তাই দুটো দেখতে একরকম।",
-    },
-  },
-  {
-    id: "2026-10-07-a-cleaner-account-menu",
-    date: "2026-10-07",
-    version: "4.181.0",
-    tag: "improved",
-    title: {
-      en: "A cleaner account menu",
-      bn: "আরও পরিচ্ছন্ন অ্যাকাউন্ট মেনু",
-    },
-    body: {
-      en: "The menu under your name is now shorter: theme and language are small switches, and What's new tells you how many updates are waiting.",
-      bn: "আপনার নামের নিচের মেনু এখন আরও ছোট: থিম আর ভাষা ছোট সুইচে, আর নতুন কী আছে জানায় কতগুলো আপডেট দেখা বাকি।",
     },
   },
 ];
