@@ -48,6 +48,25 @@ export interface BillingOverview {
   payments: BillingPayment[];
   /** Successful payments of more than nothing: their sum, how many, and the first one's time. */
   paid: { total: string; count: number; since: string | null };
+  /** Enterprise's card (phase 5.10): whether it is shown, and to an Enterprise shop its end. None before api 1.212.0. */
+  enterprise?: EnterpriseOffer;
+}
+
+/**
+ * Enterprise on Billing (phase 5.10), as the API decides it: shown to a merchant whose plan offers it (Premium) and to
+ * a shop Enterprise now, while the owner's WhatsApp is typed in the private admin. `whatsapp`: that number's
+ * country-coded digits; `until`: an Enterprise shop's end, none when it has none.
+ */
+export interface EnterpriseOffer {
+  shown: boolean;
+  on: boolean;
+  until: string | null;
+  whatsapp: string | null;
+}
+
+/** A WhatsApp chat with `digits` (8801712345678), the message typed for the merchant to send. */
+export function enterpriseChatUrl(digits: string, message: string): string {
+  return `https://wa.me/${digits}?text=${encodeURIComponent(message)}`;
 }
 
 export async function fetchBillingOverview(): Promise<BillingOverview> {

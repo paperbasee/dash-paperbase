@@ -3,7 +3,8 @@
 /**
  * Settings > Billing (owner, 2026-10-09: design B, "like Shopify"): a band saying where the plan
  * stands -- the days left as a ring, and the one thing to do now -- then products, price and what
- * has been paid, the payments, what the plan gives and what paying yearly would save. The plan's
+ * has been paid, the payments, what the plan gives, what paying yearly would save, and Enterprise for
+ * Premium merchants (phase 5.10: a talk on WhatsApp, the API deciding whether it shows). The plan's
  * state is /auth/me/'s, as the dashboard's banners read it; the rest is GET billing/overview/ and
  * Paperbase's plans. The owner's power (Paperbase support reads it without the buttons).
  */
@@ -22,7 +23,7 @@ import { yearlyOffer } from "@/lib/plans-compare";
 import { billingOverviewQueryKey, billingPlansQueryKey } from "@/lib/query-keys";
 
 import { SettingsSectionBody, settingsSectionSurfaceClassName } from "../SettingsSectionBody";
-import { BillingBand, BillingTiles, PaymentTimeline, PlanIncludes, YearlyCard } from "./billing/BillingParts";
+import { BillingBand, BillingTiles, EnterpriseCard, PaymentTimeline, PlanIncludes, YearlyCard } from "./billing/BillingParts";
 
 export default function BillingSection({ hidden }: { hidden: boolean }) {
   const t = useTranslations("settings.billing");
@@ -48,6 +49,7 @@ export default function BillingSection({ hidden }: { hidden: boolean }) {
 
   const plan = ready ? (plans.data.find((row) => row.public_id === sub.plan_public_id) ?? null) : null;
   const offer = plan && plans.data ? yearlyOffer(plans.data, plan) : null;
+  const enterprise = ready && overview.data.enterprise?.shown ? overview.data.enterprise : null;
 
   async function pay() {
     if (!plan) return;
@@ -109,10 +111,13 @@ export default function BillingSection({ hidden }: { hidden: boolean }) {
             <BillingTiles overview={overview.data} plan={plan} yearly={offer?.plan ?? null} />
             <div className="flex flex-wrap items-start gap-5">
               <PaymentTimeline payments={overview.data.payments} className="min-w-0 flex-[999_1_420px]" />
-              {plan ? (
+              {plan || enterprise ? (
                 <aside className="flex flex-[1_1_280px] flex-col gap-5">
-                  <PlanIncludes plan={plan} />
-                  {offer ? <YearlyCard planName={plan.name} charge={offer.charge} saving={offer.saving} /> : null}
+                  {plan ? <PlanIncludes plan={plan} /> : null}
+                  {plan && offer ? <YearlyCard planName={plan.name} charge={offer.charge} saving={offer.saving} /> : null}
+                  {enterprise ? (
+                    <EnterpriseCard card={enterprise} shopName={meProfile?.store?.name ?? ""} canAct={!inSupportMode} />
+                  ) : null}
                 </aside>
               ) : null}
             </div>

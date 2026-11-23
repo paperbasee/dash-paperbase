@@ -3,8 +3,8 @@
 /**
  * Settings > Billing's parts (owner, 2026-10-09: design B): the band that says where the plan
  * stands, with the days left as a ring; three tiles (fraud checks today, price, paid so far); the payments as
- * a timeline; and beside them what the plan gives and what paying yearly would save. Each is drawn
- * from what it is given (lib/billing, lib/plans-compare), so the tests draw every state.
+ * a timeline; and beside them what the plan gives, what paying yearly would save, and Enterprise (phase 5.10).
+ * Each is drawn from what it is given (lib/billing, lib/plans-compare), so the tests draw every state.
  */
 import { useLocale, useTranslations } from "next-intl";
 import { AlertTriangle, Check, Clock, CreditCard, Loader2, XCircle, type LucideIcon } from "lucide-react";
@@ -13,6 +13,7 @@ import { DeferredNavLink } from "@/components/navigation/DeferredNavLink";
 import { Button } from "@/components/ui/button";
 import { CircleCheck } from "@/components/ui/circle-check";
 import {
+  enterpriseChatUrl,
   formatBillingAmount,
   formatBillingDay,
   formatBillingMoment,
@@ -21,6 +22,7 @@ import {
   type BandLane,
   type BillingOverview,
   type BillingPayment,
+  type EnterpriseOffer,
 } from "@/lib/billing";
 import { toLocaleDigits } from "@/lib/locale-digits";
 import { numberTextClass } from "@/lib/number-font";
@@ -401,3 +403,55 @@ export function YearlyCard({ planName, charge, saving }: { planName: string; cha
     </section>
   );
 }
+
+/** Enterprise's promises, in the order the card says them. */
+const ENTERPRISE_PROMISES = ["room", "spikes", "checkout", "ready", "watched", "line"] as const;
+
+/**
+ * Enterprise (phase 5.10; owner, 2026-11-23): no fixed price -- a talk on the owner's WhatsApp, a message ready naming
+ * the shop. What it promises, 2 days' notice before a big campaign, the hours replies come. An Enterprise shop is told
+ * so and keeps the line. Paperbase support sees it without the button, as the band's.
+ */
+export function EnterpriseCard({ card, shopName, canAct }: { card: EnterpriseOffer; shopName: string; canAct: boolean }) {
+  const t = useTranslations("settings.billing.enterprise");
+  const { locale } = useDigits();
+  const message = card.on ? t("messageOn", { shop: shopName }) : t("message", { shop: shopName });
+  return (
+    <section aria-label={t("heading")} className={cn(CARD, "flex flex-col gap-3 p-6")}>
+      <div className="flex flex-col gap-1">
+        <h3 className="text-[15px] font-semibold">{card.on ? t("onHeading") : t("heading")}</h3>
+        <p className="text-[13px] text-muted-foreground">
+          {card.on
+            ? card.until
+              ? t("onUntil", { day: formatBillingDay(card.until, locale) })
+              : t("onOpen")
+            : t("lead")}
+        </p>
+      </div>
+      {card.on ? null : (
+        <ul className="flex flex-col gap-2.5">
+          {ENTERPRISE_PROMISES.map((promise) => (
+            <li key={promise} className="flex items-start gap-2.5 text-[13px] leading-5 text-foreground/80">
+              <CircleCheck />
+              {t(`promises.${promise}`)}
+            </li>
+          ))}
+        </ul>
+      )}
+      <p className="text-[13px] font-medium">{t("notice")}</p>
+      {card.on ? null : <p className="text-[13px] text-muted-foreground">{t("price")}</p>}
+      {canAct && card.whatsapp ? (
+        <a
+          href={enterpriseChatUrl(card.whatsapp, message)}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-1 inline-flex min-h-11 w-fit items-center rounded-xs border border-border px-4 text-sm font-medium hover:bg-muted"
+        >
+          {t("talk")}
+        </a>
+      ) : null}
+      <p className="text-xs text-muted-foreground">{t("hours")}</p>
+    </section>
+  );
+}
+

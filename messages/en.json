@@ -2457,6 +2457,27 @@
         "heading": "Save {saving} a year",
         "body": "Next time, pay {charge} once for twelve months of {plan}.",
         "link": "See yearly prices"
+      },
+      "enterprise": {
+        "heading": "Enterprise",
+        "lead": "For shops that run big campaigns: room on our servers that is yours.",
+        "promises": {
+          "room": "Room of its own that no other shop can take when the servers are busy",
+          "spikes": "Spare room when your shop spikes",
+          "checkout": "Checkout is never turned away",
+          "ready": "Your pages ready again after every change",
+          "watched": "Your shop's speed watched on its own",
+          "line": "A direct line to us"
+        },
+        "notice": "Tell us 2 days before a big campaign.",
+        "price": "No fixed price: we size it for your shop, then tell you what it costs.",
+        "talk": "Talk to us on WhatsApp",
+        "hours": "We reply 10 am – 10 pm, Dhaka time, every day, within 2 hours.",
+        "message": "I want Enterprise for {shop}",
+        "onHeading": "Enterprise is on",
+        "onUntil": "Your shop has Enterprise until {day}.",
+        "onOpen": "Your shop has Enterprise.",
+        "messageOn": "About Enterprise for {shop}"
       }
     },
     "dataExport": {

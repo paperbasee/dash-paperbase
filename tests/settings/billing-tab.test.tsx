@@ -15,11 +15,12 @@ vi.mock("@/components/navigation/DeferredNavLink", () => ({
 import {
   BillingBand,
   BillingTiles,
+  EnterpriseCard,
   PaymentTimeline,
   PlanIncludes,
   YearlyCard,
 } from "@/app/[locale]/(dashboard)/settings/sections/billing/BillingParts";
-import { billingBand, type BillingOverview, type BillingPayment } from "@/lib/billing";
+import { billingBand, enterpriseChatUrl, type BillingOverview, type BillingPayment } from "@/lib/billing";
 import type { Plan } from "@/lib/plans-compare";
 import type { MeSubscription } from "@/lib/subscription-access";
 
@@ -78,6 +79,7 @@ const overview: BillingOverview = {
   fraud_checks: { included: true, today: 37, per_day: 100 },
   payments: [payment()],
   paid: { total: "1800.00", count: 1, since: "2026-10-09T04:00:00Z" },
+  enterprise: { shown: false, on: false, until: null, whatsapp: null },
 };
 
 function sub(fields: Partial<MeSubscription> = {}): MeSubscription {
@@ -300,3 +302,49 @@ describe("the plan beside them", () => {
     expect(html).toContain('href="/plans?cycle=yearly"');
   });
 });
+
+describe("Enterprise (phase 5.10): a talk on WhatsApp, no price", () => {
+  const offered = { shown: true, on: false, until: null, whatsapp: "8801712345678" };
+
+  it("opens a chat with the owner with a ready message naming the shop", () => {
+    expect(enterpriseChatUrl("8801712345678", "I want Enterprise for Glow Theory")).toBe(
+      "https://wa.me/8801712345678?text=I%20want%20Enterprise%20for%20Glow%20Theory",
+    );
+  });
+
+  it("says what it promises, asks for 2 days' notice, and gives the hours", () => {
+    const html = draw(<EnterpriseCard card={offered} shopName="Glow Theory" canAct />);
+    const words = text(html);
+    expect(words).toContain("Enterprise");
+    expect(words).toContain("Room of its own that no other shop can take when the servers are busy");
+    expect(words).toContain("Checkout is never turned away");
+    expect(words).toContain("A direct line to us");
+    expect(words).toContain("Tell us 2 days before a big campaign.");
+    expect(words).toContain("We reply 10 am – 10 pm, Dhaka time, every day, within 2 hours.");
+    expect(words).not.toMatch(/৳/);
+    expect(html).toContain('href="https://wa.me/8801712345678?text=I%20want%20Enterprise%20for%20Glow%20Theory"');
+    expect(html).toContain('target="_blank"');
+    expect(html).toContain('rel="noopener noreferrer"');
+  });
+
+  it("in Bangla, the message too", () => {
+    const html = draw(<EnterpriseCard card={offered} shopName="Glow Theory" canAct />, "bn");
+    expect(text(html)).toContain("বড় ক্যাম্পেইনের ২ দিন আগে আমাদের জানান।");
+    expect(html).toContain(`href="${enterpriseChatUrl("8801712345678", "আমি Glow Theory-এর জন্য এন্টারপ্রাইজ চাই")}"`);
+  });
+
+  it("an Enterprise shop is told so, until its end, and keeps its line", () => {
+    const html = draw(
+      <EnterpriseCard card={{ ...offered, on: true, until: "2026-12-23T04:00:00Z" }} shopName="Glow Theory" canAct />,
+    );
+    expect(text(html)).toContain("Enterprise is on");
+    expect(text(html)).toContain("Your shop has Enterprise until 23 Dec 2026.");
+    expect(html).toContain(enterpriseChatUrl("8801712345678", "About Enterprise for Glow Theory").replace(/&/g, "&amp;"));
+  });
+
+  it("Paperbase support sees the card without the button", () => {
+    const html = draw(<EnterpriseCard card={offered} shopName="Glow Theory" canAct={false} />);
+    expect(html).not.toContain("wa.me");
+  });
+});
+
