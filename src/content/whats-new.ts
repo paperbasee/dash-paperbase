@@ -88,6 +88,21 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-11-24-fraud-checks-on-your-own-key",
+    date: "2026-11-24",
+    version: "4.205.0",
+    tag: "new",
+    title: {
+      en: "Fraud checks on your own BD Courier key",
+      bn: "নিজের BD Courier কী দিয়ে ফ্রড চেক",
+    },
+    body: {
+      en: "On Premium, Settings > Fraud check lets you run checks on your own BD Courier account: paste your key and Paperbase sets no daily limit. If your key stops working, we say so on your orders, and you can switch back to Paperbase's check any time.",
+      bn: "প্রিমিয়ামে এখন সেটিংস > ফ্রড চেক থেকে নিজের BD Courier অ্যাকাউন্টে যাচাই চালাতে পারবেন: আপনার কী পেস্ট করুন, Paperbase কোনো দৈনিক সীমা রাখবে না। কী কাজ করা বন্ধ করলে আপনার অর্ডারেই তা জানিয়ে দেব, আর যেকোনো সময় Paperbase-এর চেকে ফিরে যেতে পারবেন।",
+    },
+    href: "/settings?tab=fraud_check",
+  },
+  {
     id: "2026-11-24-enterprise-for-big-campaigns",
     date: "2026-11-24",
     version: "4.204.0",
@@ -505,20 +520,6 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     body: {
       en: "Tap the email box on the sign-in page and your phone or computer now offers your passkey: one tap, then Face ID or your fingerprint, and you are in. Settings > Account > Passkeys also says where each passkey is saved, like Apple Passwords or Google Password Manager.",
       bn: "সাইন-ইন পেজে ইমেইলের ঘরে ট্যাপ করলে আপনার ফোন বা কম্পিউটার এখন নিজেই আপনার পাসকি দেখায়: একবার ট্যাপ, তারপর Face ID বা আঙুলের ছাপ দিলেই সাইন ইন। সেটিংস > অ্যাকাউন্ট > পাসকি-তে এখন এটাও দেখা যায় প্রতিটি পাসকি কোথায় রাখা, যেমন Apple Passwords বা Google Password Manager।",
-    },
-  },
-  {
-    id: "2026-10-07-new-icons-in-the-menus",
-    date: "2026-10-07",
-    version: "4.183.0",
-    tag: "improved",
-    title: {
-      en: "New icons in the menus",
-      bn: "মেনুতে নতুন আইকন",
-    },
-    body: {
-      en: "The main menu and the Settings menu now share one set of clean, outlined icons, so the two look alike.",
-      bn: "মূল মেনু আর সেটিংস মেনু এখন একই ধরনের পরিষ্কার, রেখায় আঁকা আইকন ব্যবহার করে, তাই দুটো দেখতে একরকম।",
     },
   },
 ];
