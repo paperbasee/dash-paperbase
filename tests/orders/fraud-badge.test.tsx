@@ -7,6 +7,7 @@ import { NextIntlClientProvider } from "next-intl";
 import { describe, expect, test } from "vitest";
 
 import { FraudBadge, isFraudRiskLevel } from "@/app/[locale]/(dashboard)/orders/_components/FraudBadge";
+import { FraudCheckButton } from "@/app/[locale]/(dashboard)/orders/_components/FraudCheckButton";
 import { AdvicePanel } from "@/app/[locale]/(dashboard)/orders/_components/FraudCheckDialog";
 import bn from "../../messages/bn.json";
 import en from "../../messages/en.json";
@@ -16,7 +17,7 @@ function render(node: React.ReactNode, locale: "en" | "bn" = "en") {
     <NextIntlClientProvider locale={locale} messages={locale === "en" ? en : bn}>
       {node}
     </NextIntlClientProvider>,
-  );
+  ).replace(/&gt;/g, ">");
 }
 
 describe("the badge", () => {
@@ -52,6 +53,22 @@ describe("the badge", () => {
 
   test("reads in Bangla", () => {
     expect(render(<FraudBadge level="risky" successRatio={40} totalParcels={10} />, "bn")).toContain("ঝুঁকিপূর্ণ");
+  });
+
+  test("a failing own fraud key is warned of on the badge (phase 5a)", () => {
+    const html = render(<FraudBadge level="safe" successRatio={90} totalParcels={9} keyTrouble="failing" />);
+    expect(html).toContain(en.fraudCheck.ownKeyFailing);
+    expect(html).toContain("text-red-");
+    expect(render(<FraudBadge level="safe" successRatio={90} totalParcels={9} />)).not.toContain(en.fraudCheck.ownKeyFailing);
+    expect(render(<FraudBadge level="safe" successRatio={90} totalParcels={9} keyTrouble="missing" />, "bn")).toContain(
+      bn.fraudCheck.ownKeyMissing,
+    );
+  });
+
+  test("and on the button of an order not checked yet", () => {
+    const html = render(<FraudCheckButton loading={false} onClick={() => {}} keyTrouble="failing" />);
+    expect(html).toContain(en.fraudCheck.ownKeyFailing);
+    expect(render(<FraudCheckButton loading={false} onClick={() => {}} />)).not.toContain(en.fraudCheck.ownKeyFailing);
   });
 
   test("only the four colours count as checked", () => {

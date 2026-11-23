@@ -8,6 +8,7 @@ import {
   MegaphoneIcon,
   PaletteIcon,
   PlugsIcon,
+  ShieldCheckIcon,
   ShoppingCartIcon,
   StackIcon,
   StorefrontIcon,
@@ -38,6 +39,7 @@ export type SettingsSection =
   | "eav"
   | "apps"
   | "integrations"
+  | "fraud_check"
   | "domains"
   | "notifications"
   | "team"
@@ -56,6 +58,7 @@ export type SettingsSectionLabelKey =
   | "sectionEav"
   | "sectionApps"
   | "sectionIntegrations"
+  | "sectionFraudCheck"
   | "sectionDomains"
   | "sectionNotifications"
   | "sectionSessions"
@@ -83,6 +86,8 @@ export const SECTION_PERMISSION: Partial<Record<SettingsSection, string | string
   eav: "products.edit",
   apps: "settings.manage",
   integrations: "integrations.manage",
+  // Whose account checks buyers' numbers (phase 5a): the Admin role sets the shop's own key.
+  fraud_check: "settings.manage",
   notifications: "settings.manage",
 };
 
@@ -175,6 +180,7 @@ export const ALL_SECTIONS: SettingsSectionNavItem[] = [
   { id: "eav", labelKey: "sectionEav", icon: StackIcon },
   { id: "apps", labelKey: "sectionApps", icon: AppStoreLogoIcon },
   { id: "integrations", labelKey: "sectionIntegrations", icon: PlugsIcon },
+  { id: "fraud_check", labelKey: "sectionFraudCheck", icon: ShieldCheckIcon },
   { id: "domains", labelKey: "sectionDomains", icon: GlobeIcon },
   { id: "notifications", labelKey: "sectionNotifications", icon: BellRingingIcon },
   { id: "team", labelKey: "sectionTeam", icon: UsersIcon },

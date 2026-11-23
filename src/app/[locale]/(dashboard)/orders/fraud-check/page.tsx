@@ -9,6 +9,7 @@ import { planIncludesApp } from "@/config/apps";
 import { useFeatures } from "@/hooks/useFeatures";
 import { useRouter } from "@/i18n/navigation";
 import api from "@/lib/api";
+import { ownKeyRefusal } from "@/lib/fraud-key";
 import { numberTextClass } from "@/lib/number-font";
 
 import type { FraudCheckApiOk } from "../_components/types";
@@ -104,11 +105,20 @@ export default function FraudCheckPage() {
     // Couriers and reports are the provider's to give: when it did not answer, only Paperbase's own.
     const answered = data.status === "success";
     const report = readReport(data.response);
+    const refusal = ownKeyRefusal(data);
     body = (
       <>
-        {!answered ? <Notice>{t("providerDown")}</Notice> : null}
+        {!answered ? (
+          <Notice>
+            {refusal !== null ? tCheck("ownKeyFailed", { detail: refusal || tCheck("failed") }) : t("providerDown")}
+          </Notice>
+        ) : null}
         {lookup.refreshProblem ? (
-          <Notice>{tCheck(lookup.refreshProblem === "errorLimit" ? "checkAgainLimit" : "checkAgainFailed")}</Notice>
+          <Notice>
+            {lookup.refreshProblem === "errorOwnKeyMinute"
+              ? tCheck("ownKeyMinute")
+              : tCheck(lookup.refreshProblem === "errorLimit" ? "checkAgainLimit" : "checkAgainFailed")}
+          </Notice>
         ) : null}
         {data.risk ? (
           <VerdictBand

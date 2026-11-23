@@ -42,8 +42,10 @@ export interface BillingOverview {
   /**
    * The shop's fraud checks that asked the couriers today (Bangladesh's day), against its plan's
    * daily number (Django admin; null when it names none). `included`: the plan has fraud checks.
+   * `own_key`: the shop checks on its own key (phase 5a), which Paperbase counts against nothing;
+   * none before api 1.213.0.
    */
-  fraud_checks: { included: boolean; today: number; per_day: number | null };
+  fraud_checks: { included: boolean; today: number; per_day: number | null; own_key?: boolean };
   /** Newest first. */
   payments: BillingPayment[];
   /** Successful payments of more than nothing: their sum, how many, and the first one's time. */

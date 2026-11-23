@@ -308,6 +308,12 @@ describe("role-shaped visibility (the maps as consumers apply them)", () => {
     expect(visible).not.toContain("domains");
   });
 
+  it("shows Fraud check to whoever may change the shop's settings: the Admin role and the owner", () => {
+    expect(visibleIdsFor(grants("settings.view", "settings.manage").has)).toContain("fraud_check");
+    expect(visibleIdsFor(() => true, { isOwner: true })).toContain("fraud_check");
+    expect(visibleIdsFor(grants("settings.view", "orders.edit").has)).not.toContain("fraud_check");
+  });
+
   it("shows every section to the owner", () => {
     expect(visibleIdsFor(() => true, { isOwner: true }).sort()).toEqual([...SECTION_IDS].sort());
   });

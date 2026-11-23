@@ -245,14 +245,16 @@ export function BillingTiles({
 }) {
   const t = useTranslations("settings.billing.tiles");
   const { locale, digits, numClass } = useDigits();
-  const { included, today, per_day: perDay } = overview.fraud_checks;
+  const { included, today, per_day: perDay, own_key: ownKey } = overview.fraud_checks;
   const used = perDay ? Math.min(100, Math.round((today / perDay) * 100)) : 0;
   const paid = overview.paid;
   return (
     <div className="grid gap-4 sm:grid-cols-3">
       <section aria-label={t("fraudChecks")} className={cn(CARD, "flex flex-col gap-2.5")}>
         <p className="text-[13px] text-muted-foreground">{t("fraudChecks")}</p>
-        {included ? (
+        {included && ownKey ? (
+          <p className="text-sm text-muted-foreground">{t("fraudChecksOwnKey")}</p>
+        ) : included ? (
           <>
             <p className={cn("text-[22px] font-semibold", numClass)}>
               {digits(today)}

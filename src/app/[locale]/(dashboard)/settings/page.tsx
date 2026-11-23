@@ -16,6 +16,7 @@ import InvoiceSettingsPanel from "./sections/InvoiceSettingsPanel";
 import DynamicFieldsSection from "./sections/DynamicFieldsSection";
 import AppsSection from "./sections/AppsSection";
 import IntegrationsSection from "./sections/IntegrationsSection";
+import FraudCheckSection from "./sections/FraudCheckSection";
 import DomainsSection from "./sections/DomainsSection";
 import NotificationsSection from "./sections/NotificationsSection";
 import PaymentsSection from "./sections/PaymentsSection";
@@ -212,6 +213,7 @@ export default function SettingsPage() {
           <IntegrationsSection
             hidden={activeSection !== "integrations"}
           />
+          <FraudCheckSection hidden={activeSection !== "fraud_check"} />
           <DomainsSection hidden={activeSection !== "domains"} />
 
           <NotificationsSection

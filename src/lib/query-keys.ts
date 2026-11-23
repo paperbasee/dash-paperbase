@@ -209,6 +209,8 @@ export const districtsQueryKey = ["districts"] as const;
 export const checkoutSettingsQueryKey = ["checkout-settings"] as const;
 /** Settings > Payments: the shop's bKash and Nagad numbers (owner only). */
 export const paymentNumbersQueryKey = ["payment-numbers"] as const;
+/** Settings > Fraud check: Paperbase's check or the shop's own key (phase 5a); the orders list warns from it too. */
+export const fraudKeyQueryKey = ["fraud-key"] as const;
 
 
 export const domainsQueryKey = ["domains"] as const;

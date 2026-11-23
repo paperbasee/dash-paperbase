@@ -1,5 +1,6 @@
 "use client";
 
+import { TriangleAlert } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import {
@@ -11,6 +12,15 @@ import {
 import { cn } from "@/lib/utils";
 
 import type { FraudRiskLevel } from "./types";
+
+/** Why the shop's checks fail on its own fraud key (lib/fraud-key.ts `ownKeyTrouble`), for the list to warn. */
+export type FraudKeyTrouble = "failing" | "missing" | null;
+
+/** The warning's words for each trouble. */
+export const KEY_TROUBLE_WORDS: Record<"failing" | "missing", "ownKeyFailing" | "ownKeyMissing"> = {
+  failing: "ownKeyFailing",
+  missing: "ownKeyMissing",
+};
 
 /**
  * An order's fraud colour (owner, 2026-09-30: "the colour badge on orders"), as the API decided
@@ -104,17 +114,24 @@ export function FraudBadge({
   level,
   successRatio,
   totalParcels,
+  keyTrouble = null,
   onClick,
   className,
 }: {
   level: FraudRiskLevel;
   successRatio: number | null | undefined;
   totalParcels: number | null | undefined;
+  /**
+   * The shop's own fraud key fails (phase 5a): this order's colour came without the provider's report,
+   * and new orders get none until the key is fixed -- said on the badge (owner, 2026-11-17).
+   */
+  keyTrouble?: FraudKeyTrouble;
   /** Opens the full fraud check; without it the badge only tells. */
   onClick?: () => void;
   className?: string;
 }) {
   const t = useTranslations("fraudCheck");
+  const warning = keyTrouble ? t(KEY_TROUBLE_WORDS[keyTrouble]) : null;
   const name = t(NAME_KEY[level]);
   const known = level !== "new" && successRatio != null && !!totalParcels;
   const share = known ? (successRatio as number) : null;
@@ -126,7 +143,10 @@ export function FraudBadge({
     <>
       <Ring level={level} share={share} />
       <span className="flex min-w-0 flex-col text-left leading-tight">
-        <span className={cn("text-xs font-semibold", NAME_TONE[level])}>{name}</span>
+        <span className={cn("flex items-center gap-1 text-xs font-semibold", NAME_TONE[level])}>
+          {name}
+          {warning ? <TriangleAlert className="size-3 shrink-0 text-red-600 dark:text-red-400" aria-hidden /> : null}
+        </span>
         <span className="text-[11px] tabular-nums text-muted-foreground">{under}</span>
       </span>
     </>
@@ -145,7 +165,7 @@ export function FraudBadge({
             <button
               type="button"
               className={classes}
-              aria-label={`${name}: ${detail}`}
+              aria-label={warning ? `${name}: ${detail}. ${warning}` : `${name}: ${detail}`}
               onClick={(event) => {
                 event.preventDefault();
                 event.stopPropagation();
@@ -155,13 +175,14 @@ export function FraudBadge({
               {body}
             </button>
           ) : (
-            <span className={classes} aria-label={`${name}: ${detail}`}>
+            <span className={classes} aria-label={warning ? `${name}: ${detail}. ${warning}` : `${name}: ${detail}`}>
               {body}
             </span>
           )}
         </TooltipTrigger>
         <TooltipContent side="top" sideOffset={6}>
           <span className="font-semibold">{name}</span> · {detail}
+          {warning ? <span className="mt-1 block text-red-300 dark:text-red-700">{warning}</span> : null}
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>

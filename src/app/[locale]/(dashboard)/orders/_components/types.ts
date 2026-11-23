@@ -25,6 +25,8 @@ export type FraudCheckApiOk = {
   history?: PhoneHistory | null;
   /** None when nothing could be said (the provider failed and Paperbase knows no parcels). */
   risk?: FraudRisk | null;
+  /** Asked on the shop's own key (phase 5a): a failure is that key's, fixed in Settings > Fraud check. */
+  own_key?: boolean;
 };
 
 export type FraudCheckState =

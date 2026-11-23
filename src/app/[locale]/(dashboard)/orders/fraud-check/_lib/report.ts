@@ -1,4 +1,5 @@
 import { isApiHttpError } from "@/lib/api-client";
+import { hitOwnKeyMinute } from "@/lib/fraud-key";
 
 import type { FraudCheckApiOk } from "../../_components/types";
 
@@ -18,11 +19,13 @@ export async function checkPhone(client: Client, phone: string, fresh: boolean):
 }
 
 /** Why a check got no answer, as the page says it: each names a `fraudCheckPage.error*` message. */
-export type CheckProblem = "errorPhone" | "errorLimit" | "errorBusy" | "errorFailed";
+export type CheckProblem = "errorPhone" | "errorLimit" | "errorOwnKeyMinute" | "errorBusy" | "errorFailed";
 
 export function checkProblem(err: unknown): CheckProblem {
   if (!isApiHttpError(err)) return "errorFailed";
   if (err.status === 400) return "errorPhone";
+  // On the shop's own key (phase 5a) no day runs out: only the safety limit a minute.
+  if (hitOwnKeyMinute(err)) return "errorOwnKeyMinute";
   if (err.status === 429) return "errorLimit";
   if (err.status === 409) return "errorBusy";
   return "errorFailed";

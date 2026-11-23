@@ -97,6 +97,8 @@ describe("asking", () => {
   test("each refusal is told in the merchant's words", () => {
     expect(checkProblem(new ApiHttpError("bad", 400, { phone: ["Phone number must be exactly 11 digits."] }))).toBe("errorPhone");
     expect(checkProblem(new ApiHttpError("limit", 429, {}))).toBe("errorLimit");
+    // On the shop's own key no day runs out (phase 5a): only the safety limit a minute.
+    expect(checkProblem(new ApiHttpError("minute", 429, { limit_exceeded: "own_key_minute" }))).toBe("errorOwnKeyMinute");
     expect(checkProblem(new ApiHttpError("busy", 409, {}))).toBe("errorBusy");
     expect(checkProblem(new ApiHttpError("down", 502, {}))).toBe("errorFailed");
     expect(checkProblem(new ApiTransportError("offline"))).toBe("errorFailed");

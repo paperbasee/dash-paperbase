@@ -76,6 +76,8 @@ import type { FraudCheckApiOk, FraudCheckState } from "./_components/types";
 import { errorStatus, loadFraudCheck } from "./_components/fraudCheckApi";
 import { FraudBadge, isFraudRiskLevel } from "./_components/FraudBadge";
 import { useFeatures } from "@/hooks/useFeatures";
+import { useFraudKeyQuery } from "@/hooks/useFraudKeyQuery";
+import { hitOwnKeyMinute, ownKeyRefusal, ownKeyTrouble } from "@/lib/fraud-key";
 import { useNavCounts } from "@/hooks/useNavCounts";
 import { usePermissions } from "@/context/PermissionsContext";
 
@@ -346,6 +348,10 @@ export default function OrdersPage() {
   } | null>(null);
   const { hasFeature } = useFeatures();
   const canFraudCheck = hasFeature("fraud_check");
+  // On the shop's own fraud key, a failing key means new orders arrive unchecked (phase 5a): said on
+  // each order the provider has not answered for.
+  const { data: fraudKey } = useFraudKeyQuery({ enabled: canFraudCheck });
+  const keyTrouble = ownKeyTrouble(fraudKey);
   const { counts: navCounts } = useNavCounts();
   const { has: hasPermission, isOwner } = usePermissions();
   const canExportOrders = hasPermission("orders.export");
@@ -1024,7 +1030,9 @@ export default function OrdersPage() {
           [key]: {
             ...kept,
             refreshing: false,
-            refreshError: tFraud(status === 429 ? "checkAgainLimit" : "checkAgainFailed"),
+            refreshError: hitOwnKeyMinute(err)
+              ? tFraud("ownKeyMinute")
+              : tFraud(status === 429 ? "checkAgainLimit" : "checkAgainFailed"),
           },
         }));
         return;
@@ -1032,7 +1040,7 @@ export default function OrdersPage() {
       const normalized = normalizeError(err, "Failed to run fraud check.");
       setFraudByOrderId((prev) => ({
         ...prev,
-        [key]: { kind: "error", message: normalized.message, status },
+        [key]: { kind: "error", message: hitOwnKeyMinute(err) ? tFraud("ownKeyMinute") : normalized.message, status },
       }));
     }
   }
@@ -1382,6 +1390,7 @@ export default function OrdersPage() {
                               level={order.fraud_risk}
                               successRatio={order.fraud_success_ratio}
                               totalParcels={order.fraud_total_parcels}
+                              keyTrouble={order.fraud_report ? null : keyTrouble}
                               onClick={
                                 order.fraud_report || canRunFraudCheck ? () => handleFraudCheck(order) : undefined
                               }
@@ -1391,6 +1400,7 @@ export default function OrdersPage() {
                               loading={fraud.kind === "loading"}
                               disabled={!order.phone}
                               locked={!canFraudCheck}
+                              keyTrouble={order.phone ? keyTrouble : null}
                               onClick={() => handleFraudCheck(order)}
                             />
                           ) : (
@@ -1593,7 +1603,8 @@ export default function OrdersPage() {
             }}
             phone={fraudDialogOrder?.phone ?? null}
             loading={fraudState?.kind === "loading"}
-            response={fraudReady?.data.response ?? null}
+            // Only an answer is a report: a refusal's body (the provider's error) is no courier's row.
+            response={fraudReady?.data.status === "success" ? fraudReady.data.response : null}
             history={fraudReady?.data.history ?? null}
             risk={fraudReady?.data.risk ?? null}
             checkedAt={fraudReady?.data.checked_at ?? null}
@@ -1613,7 +1624,9 @@ export default function OrdersPage() {
               fraudState?.kind === "error"
                 ? fraudState.message
                 : fraudReady && fraudStatus(fraudReady.data) === "error"
-                  ? fraudDetail(fraudReady.data) ?? tFraud("failed")
+                  ? ownKeyRefusal(fraudReady.data) !== null
+                    ? tFraud("ownKeyFailed", { detail: ownKeyRefusal(fraudReady.data) || tFraud("failed") })
+                    : fraudDetail(fraudReady.data) ?? tFraud("failed")
                   : null
             }
           />

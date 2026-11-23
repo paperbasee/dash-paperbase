@@ -249,6 +249,23 @@ describe("the tiles", () => {
     expect(html).toContain("No payments yet");
   });
 
+  it("a shop on its own fraud key is told Paperbase counts none of its checks", () => {
+    const html = text(
+      draw(
+        <BillingTiles
+          overview={{ ...overview, fraud_checks: { included: true, today: 0, per_day: 100, own_key: true } }}
+          plan={null}
+          yearly={null}
+        />,
+      ),
+    );
+    expect(html).toContain(en.settings.billing.tiles.fraudChecksOwnKey);
+    expect(html).not.toContain(" of 100");
+    expect(text(draw(<BillingTiles overview={{ ...overview, fraud_checks: { included: true, today: 0, per_day: 100, own_key: true } }} plan={null} yearly={null} />, "bn"))).toContain(
+      bn.settings.billing.tiles.fraudChecksOwnKey,
+    );
+  });
+
   it("a plan without fraud checks says they are Premium's", () => {
     const html = text(
       draw(<BillingTiles overview={{ ...overview, fraud_checks: { included: false, today: 0, per_day: null } }} plan={null} yearly={null} />),
