@@ -259,6 +259,20 @@ describe("the orders chart's grid", () => {
     for (const tick of grid.yTicks) expect(Number.isInteger(tick)).toBe(true);
     expect(grid.yTicks[rows]).toBeGreaterThanOrEqual(maxOrders);
   });
+
+  // Owner, 2026-11-26: "why there is extra bottom space under the chart" -- beside the taller
+  // Right now card the overview stretched, and the chart kept its four rows.
+  it("fills a taller space with more rows of the same squares, never fewer than four", () => {
+    const tall = squareGrid(850, 89, 28, 400);
+    const plain = squareGrid(850, 89, 28);
+    const rows = tall.yTicks.length - 1;
+    expect(tall.cell).toBeCloseTo(plain.cell, 9);
+    expect(rows).toBeGreaterThan(4);
+    expect(tall.height).toBeLessThanOrEqual(400);
+    expect(400 - tall.height).toBeLessThan(tall.cell);
+    expect(tall.yTicks[rows]).toBeGreaterThanOrEqual(28);
+    expect(squareGrid(850, 89, 28, 120).yTicks).toHaveLength(5);
+  });
 });
 
 describe("the counts over the line", () => {

@@ -1,7 +1,7 @@
 "use client";
 
 import { ArrowRight, Check, Copy } from "lucide-react";
-import { useEffect, useId, useState } from "react";
+import { useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import { useFormatter, useLocale, useTranslations } from "next-intl";
 import { Area, CartesianGrid, ComposedChart, LabelList, Line, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 
@@ -15,6 +15,8 @@ import { cn } from "@/lib/utils";
 
 const DHAKA = "Asia/Dhaka";
 const LINE = "hsl(var(--accent-blue))";
+/** The chart's space inside the card, in pixels: its height follows from these (HomeOrdersPanel). */
+const CHART_INSET = { top: 20, bottom: 4, side: 20 };
 const BEFORE = "hsl(var(--muted-foreground))";
 
 /** Text colours that mean something, and nothing else is coloured (owner, 2026-11-12). */
@@ -77,8 +79,23 @@ export function HomeOrdersPanel({ summary, previous, series, previousSeries, buc
   };
   const empty = summary !== null && summary.orders === 0;
 
+  // The chart takes the card's spare height (the row is as tall as Right now beside it), so it
+  // adds no height of its own; the least it is given is four rows of squares at its width.
+  const area = useRef<HTMLDivElement>(null);
+  const [areaWidth, setAreaWidth] = useState(0);
+  useLayoutEffect(() => {
+    const el = area.current;
+    if (!el || typeof ResizeObserver === "undefined") return;
+    const measure = () => setAreaWidth(Math.floor(el.getBoundingClientRect().width));
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+  const fourRows = areaWidth > 0 ? squareGrid(areaWidth - 2 * CHART_INSET.side, 1, 0).height : 192;
+
   return (
-    <section className="min-w-0 overflow-hidden rounded-card border border-card-border bg-card">
+    <section className="flex min-w-0 flex-col overflow-hidden rounded-card border border-card-border bg-card">
       <div role="tablist" aria-label={t("overviewAria")} className="grid grid-cols-2 gap-px border-b border-border-subtle bg-border-subtle sm:grid-cols-4">
         {METRICS.map((key) => (
           <MetricTab
@@ -93,8 +110,13 @@ export function HomeOrdersPanel({ summary, previous, series, previousSeries, buc
           />
         ))}
       </div>
-      <div className="relative min-h-[220px] px-4 pb-1 pt-5 sm:px-6">
-        <MetricLine series={series} previousSeries={previousSeries} metric={metric} bucket={bucket} />
+      <div ref={area} className="relative flex-1" style={{ minHeight: fourRows + CHART_INSET.top + CHART_INSET.bottom }}>
+        <div
+          className="absolute"
+          style={{ top: CHART_INSET.top, bottom: CHART_INSET.bottom, left: CHART_INSET.side, right: CHART_INSET.side }}
+        >
+          <MetricLine series={series} previousSeries={previousSeries} metric={metric} bucket={bucket} />
+        </div>
         {empty ? <EmptyChart shopUrl={shopUrl} /> : null}
       </div>
       <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border-subtle px-4 py-3 text-xs sm:px-6">
@@ -260,20 +282,27 @@ export interface SquareGrid {
   xMax: number;
 }
 
-/** The grid for a chart ``width`` wide over buckets 0..``lastIndex`` peaking at ``maxOrders``. */
-export function squareGrid(width: number, lastIndex: number, maxOrders: number): SquareGrid {
+/**
+ * The grid for a chart ``width`` wide over buckets 0..``lastIndex`` peaking at ``maxOrders``. Given
+ * the ``height`` it may fill (beside the taller Right now card, owner 2026-11-26: "why there is
+ * extra bottom space under the chart"), it takes as many rows of the same squares as fit, never
+ * fewer than four; the space left over is less than one square.
+ */
+export function squareGrid(width: number, lastIndex: number, maxOrders: number, height?: number): SquareGrid {
   const plotWidth = Math.max(1, width - CHART_MARGIN.left - CHART_MARGIN.right);
   const labelEvery = Math.max(1, Math.ceil(MIN_LABEL_GAP / TARGET_CELL));
   // Whole groups of labelled columns, so the last line -- now -- carries a label too.
   const groups = Math.max(1, Math.round(plotWidth / (TARGET_CELL * labelEvery)));
   const columns = groups * labelEvery;
   const cell = plotWidth / columns;
-  const step = Math.max(1, Math.ceil(maxOrders / ROWS));
+  const frame = CHART_MARGIN.top + CHART_MARGIN.bottom + X_AXIS_HEIGHT;
+  const rows = height ? Math.max(ROWS, Math.floor((height - frame) / cell)) : ROWS;
+  const step = Math.max(1, Math.ceil(maxOrders / rows));
   const xMax = Math.max(lastIndex, 1);
   return {
-    height: Math.round(cell * ROWS + CHART_MARGIN.top + CHART_MARGIN.bottom + X_AXIS_HEIGHT),
+    height: Math.round(cell * rows + frame),
     cell,
-    yTicks: Array.from({ length: ROWS + 1 }, (_, i) => i * step),
+    yTicks: Array.from({ length: rows + 1 }, (_, i) => i * step),
     xTicks: Array.from({ length: columns + 1 }, (_, j) => (j * xMax) / columns),
     labelEvery,
     xMax,
@@ -345,9 +374,10 @@ function MetricLine({
   };
 
   return (
-    <RechartsSizedContainer className="w-full">
-      {({ width }) => {
-        const grid = squareGrid(width, lastIndex, maxValue);
+    // Fills the space the card gives it, the chart sitting on its foot.
+    <RechartsSizedContainer className="flex h-full items-end">
+      {({ width, height }) => {
+        const grid = squareGrid(width, lastIndex, maxValue, height);
         const bucketWidth = (grid.cell * (grid.xTicks.length - 1)) / grid.xMax;
         const labelled = peakLabels(
           points.map((point) => point.value),
@@ -391,7 +421,7 @@ function MetricLine({
                 tick={XTick}
               />
               {/* Sets the scale only: the counts are drawn over the grid below. */}
-              <YAxis hide domain={[0, grid.yTicks[ROWS]]} ticks={grid.yTicks} allowDecimals={false} />
+              <YAxis hide domain={[0, grid.yTicks[grid.yTicks.length - 1]]} ticks={grid.yTicks} allowDecimals={false} />
               <Tooltip
                 cursor={{ stroke: "hsl(var(--muted-foreground))", strokeOpacity: 0.5, strokeDasharray: "3 3" }}
                 content={({ active, payload }) => {
