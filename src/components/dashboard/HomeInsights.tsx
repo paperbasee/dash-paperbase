@@ -8,9 +8,6 @@ import type { HomeInsight } from "@/lib/dashboard/home";
 import { toLocaleDigits } from "@/lib/locale-digits";
 import { cn } from "@/lib/utils";
 
-/** The cards share the row, however many are true (owner, 2026-11-26: "Fill the row"). */
-const COLUMNS: Record<number, string> = { 1: "", 2: "md:grid-cols-2", 3: "md:grid-cols-3" };
-
 const ICON = {
   late: { Icon: Clock, tile: "bg-orange-500/10 text-orange-700 dark:text-orange-400" },
   stuck: { Icon: Truck, tile: "bg-rose-500/10 text-rose-600 dark:text-rose-400" },
@@ -30,7 +27,7 @@ export function HomeInsights({ insights, onShowCancelled }: { insights: HomeInsi
   if (insights.length === 0) return null;
 
   return (
-    <section aria-label={t("insightsAria")} className={cn("grid gap-4", COLUMNS[insights.length])}>
+    <section aria-label={t("insightsAria")} className="grid gap-4 md:grid-cols-3">
       {insights.map((insight) => {
         const { Icon, tile } = ICON[insight.kind];
         const action = "mt-1 inline-flex items-center gap-1 self-start text-xs font-medium text-foreground hover:underline";

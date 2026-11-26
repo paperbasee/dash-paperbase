@@ -195,15 +195,6 @@ describe("the insights", () => {
     expect(html).toContain("Cancellations rose 22%");
     expect(render(<HomeInsights insights={[]} onShowCancelled={() => undefined} />)).toBe("");
   });
-
-  // Owner, 2026-11-26 ("Fill the row"): one card alone looked like two had failed to load.
-  it("share the row between them, however many are true", () => {
-    const cards = (n: number) =>
-      render(<HomeInsights insights={homeInsights(flow, { orders: 1, confirmed: 0, pending: 0, cancelled: 22 }, { orders: 1, confirmed: 0, pending: 0, cancelled: 18 }).slice(0, n)} onShowCancelled={() => undefined} />);
-    expect(cards(1)).not.toMatch(/md:grid-cols-/);
-    expect(cards(2)).toContain("md:grid-cols-2");
-    expect(cards(3)).toContain("md:grid-cols-3");
-  });
 });
 
 describe("needs attention", () => {
