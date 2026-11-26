@@ -30,6 +30,7 @@ import { fetchSetupGuide, type SetupGuide } from "@/lib/setup-guide";
 import { accountsFromApi } from "@/lib/storeSocialLinks";
 import { fetchMeForRouting, invalidateMeRoutingCache, setupUnfinished } from "@/lib/subscription-access";
 import { fetchPalettes, type ShopPalette } from "@/lib/theme-editor/palettes";
+import { runningTrial, type RunningTrial } from "@/lib/trial";
 
 /**
  * The new shop's setup (owner, 2026-09-28). Five steps, one question each:
@@ -215,6 +216,8 @@ export function useSetup() {
     dashboard: "todo",
   });
   const [guide, setGuide] = useState<SetupGuide | null>(null);
+  // The free trial the name step's new shop came with (stores.store_provisioning), for the end to say.
+  const [trial, setTrial] = useState<RunningTrial | null>(null);
   // Finish ran in this visit: the end is the launch, not a reload of it.
   const [justFinished, setJustFinished] = useState(false);
 
@@ -261,6 +264,7 @@ export function useSetup() {
             const nextGuide = await fetchSetupGuide();
             if (cancelled) return;
             setGuide(nextGuide);
+            setTrial(runningTrial(me.subscription));
             setEndPhase("ready");
           }
         } else if (me.active_store_public_id && !isAddMode) {
@@ -564,8 +568,9 @@ export function useSetup() {
       await atLeast(api.post("store/setup/finish/"));
       setTicks((t) => ({ ...t, address: "done", dashboard: "now" }));
       invalidateMeRoutingCache();
-      const [nextGuide] = await atLeast(Promise.all([fetchSetupGuide(), fetchMeForRouting()]));
+      const [nextGuide, me] = await atLeast(Promise.all([fetchSetupGuide(), fetchMeForRouting()]));
       setGuide(nextGuide);
+      setTrial(runningTrial(me.subscription));
       setTicks((t) => ({ ...t, dashboard: "done" }));
       setJustFinished(true);
       await new Promise((resolve) => setTimeout(resolve, 450));
@@ -666,6 +671,7 @@ export function useSetup() {
     // finishing, ready
     ticks,
     guide,
+    trial,
     justFinished,
     // the preview
     shownHostname,

@@ -830,6 +830,21 @@ input.font-numbers-date-value::placeholder {
     opacity: 0;
   }
 }
+/* Setup's end, the free trial's card (onboarding/PremiumTrialCard): its days roll up from 0 to the
+   column's own place, then a light passes over the card once. */
+@keyframes pb-roll {
+  from {
+    transform: translateY(0);
+  }
+}
+@keyframes pb-shine {
+  from {
+    transform: translateX(-110%);
+  }
+  to {
+    transform: translateX(110%);
+  }
+}
 /* The waiting page's drawings (components/unreachable/drawings.tsx). Each starts from the part as
    drawn -- its opacity, its lean -- and comes back to it, so a still drawing is a whole one. */
 @keyframes pb-turn {
@@ -1010,6 +1025,15 @@ input.font-numbers-date-value::placeholder {
   }
   .pb-confetti {
     animation: pb-confetti var(--dur, 1.6s) cubic-bezier(0.25, 0.7, 0.4, 1) var(--delay, 0s) both;
+  }
+  .pb-roll {
+    animation: pb-roll 1.1s 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  }
+  /* Off the card when still, so a device that asks for less motion never sees it. */
+  .pb-shine {
+    transform: translateX(110%);
+    background: linear-gradient(105deg, transparent 30%, rgb(255 255 255 / 0.16) 50%, transparent 70%);
+    animation: pb-shine 1.2s 1.6s ease-in-out both;
   }
   .pb-shake {
     animation: pb-shake 0.45s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;

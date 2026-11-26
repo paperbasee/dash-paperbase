@@ -14,6 +14,7 @@ import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 
 import { LiveShop } from "./LiveShop";
+import { PremiumTrialCard } from "./PremiumTrialCard";
 import { PreviewPanel, SETUP_COLUMNS, SetupPreview } from "./SetupShell";
 import { DOMAINS_ENABLED, type SetupState } from "./useSetup";
 
@@ -342,6 +343,7 @@ export function FinishScreen({ setup }: { setup: SetupState }) {
               </div>
             ) : null}
             {DOMAINS_ENABLED && url && !setup.usingOwnDomain ? <OwnDomainLater setup={setup} /> : null}
+            {setup.trial ? <PremiumTrialCard trial={setup.trial} /> : null}
             {setup.guide ? <SetupGuideCard guide={setup.guide} /> : null}
             <Button asChild className="h-11 w-full">
               <Link href="/">
