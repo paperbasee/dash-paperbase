@@ -88,6 +88,20 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-11-26-a-new-home-page",
+    date: "2026-11-26",
+    version: "4.207.0",
+    tag: "new",
+    title: {
+      en: "A new home page",
+      bn: "নতুন হোম পেজ",
+    },
+    body: {
+      en: "Your orders, confirmed, pending and cancelled are now tabs over one chart, each against the days before. Right now shows what waits for you, and a few lines tell you what to look at, like orders waiting over a day.",
+      bn: "অর্ডার, নিশ্চিত, মুলতুবি আর বাতিল এখন একটি চার্টের ওপর ট্যাব, প্রতিটি আগের দিনগুলোর তুলনায়। 'এই মুহূর্তে' দেখায় কী আপনার অপেক্ষায়, আর কয়েকটি লাইন বলে দেয় কোথায় নজর দেবেন, যেমন এক দিনের বেশি অপেক্ষায় থাকা অর্ডার।",
+    },
+  },
+  {
     id: "2026-11-26-setup-guide-strip",
     date: "2026-11-26",
     version: "4.206.0",
@@ -504,21 +518,6 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     body: {
       en: "What your plan gives, on the Billing page, now has the same round green ticks as the Plans page.",
       bn: "বিলিং পাতায় আপনার প্ল্যানে কী আছে, তাতে এখন প্ল্যান পাতার মতোই সবুজ গোল টিক চিহ্ন।",
-    },
-    href: "/settings?tab=billing",
-  },
-  {
-    id: "2026-10-09-a-clearer-billing-page",
-    date: "2026-10-09",
-    version: "4.187.0",
-    tag: "improved",
-    title: {
-      en: "A clearer Billing page",
-      bn: "আরও পরিষ্কার বিলিং পাতা",
-    },
-    body: {
-      en: "Settings > Billing now shows how many days your plan has left, when the next payment is due, your products against your plan's limit, what you have paid so far, and every payment with its transaction ID. Once your plan ends, you can pay right there.",
-      bn: "সেটিংস > বিলিং-এ এখন দেখা যায় প্ল্যানের আর কত দিন বাকি, পরের পেমেন্ট কবে, প্ল্যানের সীমার মধ্যে কতগুলো পণ্য, এ পর্যন্ত কত পরিশোধ করেছেন, আর ট্রানজেকশন আইডিসহ প্রতিটি পেমেন্ট। প্ল্যান শেষ হলে সেখান থেকেই পেমেন্ট করতে পারবেন।",
     },
     href: "/settings?tab=billing",
   },
