@@ -88,6 +88,20 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-11-26-new-accounts-go-to-setup",
+    date: "2026-11-26",
+    version: "4.205.2",
+    tag: "fixed",
+    title: {
+      en: "A new account goes straight to shop setup",
+      bn: "নতুন অ্যাকাউন্ট খুললে সরাসরি দোকান সেটআপে",
+    },
+    body: {
+      en: "Someone who had just signed up could land on an empty dashboard that said they didn't have permission. Now anyone without a shop goes straight to setup, where they make their shop.",
+      bn: "নতুন সাইন আপ করার পর কেউ কেউ একটি ফাঁকা ড্যাশবোর্ডে পৌঁছে যেতেন, যেখানে লেখা থাকত তাদের অনুমতি নেই। এখন যার দোকান নেই, তিনি সরাসরি সেটআপে যান এবং সেখানে নিজের দোকান তৈরি করেন।",
+    },
+  },
+  {
     id: "2026-11-26-shop-menu-stands-out",
     date: "2026-11-26",
     version: "4.205.1",
@@ -506,20 +520,6 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     body: {
       en: "You now sign in at accounts.paperbase.me, with the same passkey or email code. Your name, phone, picture and passkeys are in Your Paperbase account, in the menu under your name. Everyone signs in once more after the change.",
       bn: "এখন সাইন ইন হয় accounts.paperbase.me-তে, একই পাসকি বা ইমেইল কোড দিয়ে। আপনার নাম, ফোন, ছবি আর পাসকি আছে আপনার Paperbase অ্যাকাউন্টে, আপনার নামের নিচের মেনুতে। এই বদলের পর সবাইকে একবার আবার সাইন ইন করতে হবে।",
-    },
-  },
-  {
-    id: "2026-10-09-getting-ready-for-paperbase-accounts",
-    date: "2026-10-09",
-    version: "4.184.4",
-    tag: "improved",
-    title: {
-      en: "Getting ready for Paperbase accounts",
-      bn: "Paperbase অ্যাকাউন্টের প্রস্তুতি",
-    },
-    body: {
-      en: "We added a small file that will let the coming Paperbase accounts sign-in page use the passkeys you already have. Nothing changes for you yet: you sign in as before.",
-      bn: "আসন্ন Paperbase অ্যাকাউন্টের সাইন-ইন পাতা যেন আপনার আগের পাসকি দিয়েই কাজ করে, সেজন্য একটি ছোট ফাইল যোগ করা হয়েছে। আপনার জন্য এখনই কিছু বদলাচ্ছে না: আগের মতোই সাইন ইন করবেন।",
     },
   },
 ];
