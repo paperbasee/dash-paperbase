@@ -88,6 +88,34 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-11-26-setup-guide-strip",
+    date: "2026-11-26",
+    version: "4.206.0",
+    tag: "improved",
+    title: {
+      en: "A slimmer setup guide on your home page",
+      bn: "হোম পেজে আরও ছোট সেট-আপ গাইড",
+    },
+    body: {
+      en: "The setup guide is now one row of steps across the top of your home page. The next step stands out, and each one opens where it is done.",
+      bn: "সেট-আপ গাইড এখন আপনার হোম পেজের ওপরে এক সারির ধাপ। পরের ধাপটি আলাদা করে চোখে পড়ে, আর প্রতিটি ধাপ খোলে যেখানে সেটি করতে হয় সেখানে।",
+    },
+  },
+  {
+    id: "2026-11-26-free-trial-shown-at-setup",
+    date: "2026-11-26",
+    version: "4.206.0",
+    tag: "new",
+    title: {
+      en: "New shops see their free Premium days",
+      bn: "নতুন দোকান দেখে তার ফ্রি প্রিমিয়ামের দিন",
+    },
+    body: {
+      en: "When setup finishes, a new shop now sees the free Premium trial it got: how many days, and when they end.",
+      bn: "সেট-আপ শেষ হলে নতুন দোকান এখন দেখতে পায় সে কত দিনের ফ্রি প্রিমিয়াম ট্রায়াল পেয়েছে, আর তা কবে শেষ হবে।",
+    },
+  },
+  {
     id: "2026-11-26-new-accounts-go-to-setup",
     date: "2026-11-26",
     version: "4.205.2",
@@ -493,33 +521,5 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
       bn: "সেটিংস > বিলিং-এ এখন দেখা যায় প্ল্যানের আর কত দিন বাকি, পরের পেমেন্ট কবে, প্ল্যানের সীমার মধ্যে কতগুলো পণ্য, এ পর্যন্ত কত পরিশোধ করেছেন, আর ট্রানজেকশন আইডিসহ প্রতিটি পেমেন্ট। প্ল্যান শেষ হলে সেখান থেকেই পেমেন্ট করতে পারবেন।",
     },
     href: "/settings?tab=billing",
-  },
-  {
-    id: "2026-10-09-your-account-in-one-place",
-    date: "2026-10-09",
-    version: "4.186.0",
-    tag: "improved",
-    title: {
-      en: "Your account in one place",
-      bn: "আপনার অ্যাকাউন্ট এক জায়গায়",
-    },
-    body: {
-      en: "Settings no longer has Account and Security: your name, phone, picture and passkeys are all in Your Paperbase account, in the menu under your name. Search for passkey or my account to open it. Team members with nothing to change in Settings no longer see it in the menu.",
-      bn: "সেটিংসে আর অ্যাকাউন্ট আর নিরাপত্তা নেই: আপনার নাম, ফোন, ছবি আর পাসকি সবই আছে আপনার Paperbase অ্যাকাউন্টে, আপনার নামের নিচের মেনুতে। খুলতে সার্চে লিখুন পাসকি বা আমার অ্যাকাউন্ট। সেটিংসে যাদের বদলানোর কিছু নেই, সেই টিম সদস্যরা মেনুতে আর সেটিংস দেখবেন না।",
-    },
-  },
-  {
-    id: "2026-10-09-sign-in-at-paperbase-accounts",
-    date: "2026-10-09",
-    version: "4.185.0",
-    tag: "new",
-    title: {
-      en: "A new sign-in page and your Paperbase account",
-      bn: "নতুন সাইন-ইন পাতা আর আপনার Paperbase অ্যাকাউন্ট",
-    },
-    body: {
-      en: "You now sign in at accounts.paperbase.me, with the same passkey or email code. Your name, phone, picture and passkeys are in Your Paperbase account, in the menu under your name. Everyone signs in once more after the change.",
-      bn: "এখন সাইন ইন হয় accounts.paperbase.me-তে, একই পাসকি বা ইমেইল কোড দিয়ে। আপনার নাম, ফোন, ছবি আর পাসকি আছে আপনার Paperbase অ্যাকাউন্টে, আপনার নামের নিচের মেনুতে। এই বদলের পর সবাইকে একবার আবার সাইন ইন করতে হবে।",
-    },
   },
 ];
