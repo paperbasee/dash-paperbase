@@ -1,22 +1,21 @@
 "use client";
 
-import { useId } from "react";
+import { ArrowRight, Check, Copy } from "lucide-react";
+import { useEffect, useId, useState } from "react";
 import { useFormatter, useLocale, useTranslations } from "next-intl";
-import { Area, AreaChart, CartesianGrid, LabelList, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { Area, CartesianGrid, ComposedChart, LabelList, Line, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 
 import { RechartsSizedContainer } from "@/components/RechartsSizedContainer";
+import { SocialMark } from "@/components/SocialMark";
 import { Link } from "@/i18n/navigation";
 import type { AnalyticsBucket, DashboardAnalyticsPoint, DashboardAnalyticsSummary } from "@/lib/basicAnalyticsService";
-import type { HomeNumbers, WaitingStep } from "@/lib/dashboard/home";
 import { toLocaleDigits } from "@/lib/locale-digits";
 import { numberTextClass } from "@/lib/number-font";
 import { cn } from "@/lib/utils";
 
-const DAY_MS = 24 * 60 * 60 * 1000;
 const DHAKA = "Asia/Dhaka";
 const LINE = "hsl(var(--accent-blue))";
-// Each point gets a marker while there are few enough to tell apart; past that, only the last.
-const MARK_EVERY_POINT_UP_TO = 14;
+const BEFORE = "hsl(var(--muted-foreground))";
 
 /** Text colours that mean something, and nothing else is coloured (owner, 2026-11-12). */
 export const TONE = {
@@ -25,99 +24,205 @@ export const TONE = {
   good: "text-emerald-700 dark:text-emerald-400",
 };
 
+/** The overview's tabs, each a part of the period's orders the chart can draw. */
+const METRICS = ["orders", "confirmed", "pending", "cancelled"] as const;
+type Metric = (typeof METRICS)[number];
+
+/** Which way a change is good: more orders, more confirmed, fewer cancelled; pending is neither. */
+const GOOD_WAY: Record<Metric, "up" | "down" | null> = {
+  orders: "up",
+  confirmed: "up",
+  pending: null,
+  cancelled: "down",
+};
+
+export type PeriodChange =
+  | { kind: "same" }
+  | { kind: "up" | "down"; percent: number }
+  | { kind: "new"; added: number };
+
+/** A number against the same length of time just before: a share of it, to one decimal. */
+export function periodChange(now: number, before: number): PeriodChange {
+  if (now === before) return { kind: "same" };
+  if (before === 0) return { kind: "new", added: now };
+  return { kind: now > before ? "up" : "down", percent: Math.round((Math.abs(now - before) / before) * 1000) / 10 };
+}
+
 interface HomeOrdersPanelProps {
   summary: DashboardAnalyticsSummary | null;
-  /** Orders placed in the same length of time just before; null until known. */
-  previousOrders: number | null;
+  /** The same length of time just before; null until known. */
+  previous: DashboardAnalyticsSummary | null;
   series: DashboardAnalyticsPoint[];
+  previousSeries: DashboardAnalyticsPoint[];
   bucket: AnalyticsBucket;
-  /** The order flow, right now; null when the member may not open orders. */
-  flow: HomeNumbers["flow"] | undefined;
-  now: number;
+  /** The shop's address, for the empty chart's "share your shop"; "" while unknown. */
+  shopUrl: string;
 }
 
 /**
- * The home page's top panel: on the left, the orders placed in the period the switch picks,
- * split by where they stand, with a line of orders across the period under them; on the
- * right, where every order is now.
+ * The home page's overview (owner's pick of 2026-11-26, like Google Analytics' home): the period's
+ * orders and their three parts as tabs, each with its change on the period before, over one
+ * chart of the tab picked -- this period a line over a soft fill, the period before dashed.
  */
-export function HomeOrdersPanel({ summary, previousOrders, series, bucket, flow, now }: HomeOrdersPanelProps) {
+export function HomeOrdersPanel({ summary, previous, series, previousSeries, bucket, shopUrl }: HomeOrdersPanelProps) {
+  const t = useTranslations("dashboard.home");
+  const tPages = useTranslations("pages");
+  const locale = useLocale();
+  const [metric, setMetric] = useState<Metric>("orders");
+  const label: Record<Metric, string> = {
+    orders: t("orders"),
+    confirmed: tPages("orderStatusConfirmed"),
+    pending: tPages("orderStatusPending"),
+    cancelled: tPages("orderStatusCancelled"),
+  };
+  const empty = summary !== null && summary.orders === 0;
+
   return (
-    <section
-      className={cn(
-        "grid overflow-hidden rounded-card border border-card-border bg-card",
-        flow && "lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]"
-      )}
-    >
-      <div className="flex min-w-0 flex-col gap-5 px-5 pb-3 pt-5 sm:px-6 sm:pt-6">
-        <PeriodSummary summary={summary} previousOrders={previousOrders} />
-        <OrdersLine series={series} bucket={bucket} />
+    <section className="min-w-0 overflow-hidden rounded-card border border-card-border bg-card">
+      <div role="tablist" aria-label={t("overviewAria")} className="grid grid-cols-2 gap-px border-b border-border-subtle bg-border-subtle sm:grid-cols-4">
+        {METRICS.map((key) => (
+          <MetricTab
+            key={key}
+            metric={key}
+            label={label[key]}
+            now={summary?.[key]}
+            before={previous?.[key]}
+            selected={key === metric}
+            onSelect={() => setMetric(key)}
+            locale={locale}
+          />
+        ))}
       </div>
-      {flow ? <OrderFlow flow={flow} now={now} /> : null}
+      <div className="relative min-h-[220px] px-4 pb-1 pt-5 sm:px-6">
+        <MetricLine series={series} previousSeries={previousSeries} metric={metric} bucket={bucket} />
+        {empty ? <EmptyChart shopUrl={shopUrl} /> : null}
+      </div>
+      <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border-subtle px-4 py-3 text-xs sm:px-6">
+        <span className="flex gap-4 text-muted-foreground">
+          <span className="inline-flex items-center gap-1.5">
+            <span className="h-[2.5px] w-3.5 rounded-full bg-[hsl(var(--accent-blue))]" aria-hidden />
+            {t("thisPeriod")}
+          </span>
+          <span className="inline-flex items-center gap-1.5">
+            <span className="w-3.5 border-t-2 border-dashed border-muted-foreground/70" aria-hidden />
+            {t("periodBefore")}
+          </span>
+        </span>
+        <Link href="/orders" className="inline-flex items-center gap-1 text-sm font-medium text-foreground hover:underline">
+          {t("viewOrders")}
+          <ArrowRight className="size-3.5 text-muted-foreground" aria-hidden />
+        </Link>
+      </div>
     </section>
   );
 }
 
-function PeriodSummary({
-  summary,
-  previousOrders,
-}: Pick<HomeOrdersPanelProps, "summary" | "previousOrders">) {
+function MetricTab({
+  metric,
+  label,
+  now,
+  before,
+  selected,
+  onSelect,
+  locale,
+}: {
+  metric: Metric;
+  label: string;
+  now: number | undefined;
+  before: number | undefined;
+  selected: boolean;
+  onSelect: () => void;
+  locale: string;
+}) {
   const t = useTranslations("dashboard.home");
-  const tPages = useTranslations("pages");
-  const locale = useLocale();
   const digits = (n: number) => toLocaleDigits(String(n), locale);
-  const numbers = numberTextClass(locale);
-  const change = summary && previousOrders !== null ? summary.orders - previousOrders : null;
-
-  const parts = [
-    { key: "confirmed", label: tPages("orderStatusConfirmed"), value: summary?.confirmed, swatch: "bg-foreground" },
-    { key: "pending", label: tPages("orderStatusPending"), value: summary?.pending, swatch: "bg-foreground/35" },
-    { key: "cancelled", label: tPages("orderStatusCancelled"), value: summary?.cancelled, swatch: "bg-rose-500" },
-  ];
+  const change = now !== undefined && before !== undefined ? periodChange(now, before) : null;
+  const good = GOOD_WAY[metric];
+  const tone =
+    change && (change.kind === "up" || change.kind === "down")
+      ? good === null
+        ? "text-muted-foreground"
+        : change.kind === good
+          ? TONE.good
+          : TONE.risk
+      : "text-muted-foreground";
 
   return (
-    <div>
-      <h2 className="text-sm font-semibold text-foreground">{t("orders")}</h2>
-      <div className="mt-3 flex flex-wrap items-end justify-between gap-x-8 gap-y-4">
-        <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-          <span className={cn("text-[2.75rem] font-semibold leading-none tracking-tight text-foreground sm:text-5xl", numbers)}>
-            {summary ? digits(summary.orders) : "—"}
-          </span>
-          {change !== null ? (
-            <span className="text-xs text-muted-foreground">
-              {change === 0 ? (
-                t("noChange")
-              ) : (
-                <>
-                  <span className={cn("font-medium", change > 0 ? TONE.good : TONE.risk)}>
-                    {change > 0 ? "+" : "−"}
-                    {digits(Math.abs(change))}
-                  </span>{" "}
-                  {t("vsBefore")}
-                </>
-              )}
-            </span>
-          ) : null}
-        </div>
-        <dl className="flex flex-wrap gap-x-7 gap-y-2">
-          {parts.map((part) => (
-            <div key={part.key} className="flex flex-col gap-0.5">
-              <dt className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                <span className={cn("size-2 rounded-[2px]", part.swatch)} aria-hidden />
-                {part.label}
-              </dt>
-              <dd className={cn("text-lg font-semibold tracking-tight text-foreground", numbers)}>
-                {part.value === undefined ? "—" : digits(part.value)}
-              </dd>
-            </div>
-          ))}
-        </dl>
-      </div>
-      {summary && summary.orders > 0 ? (
-        <div className="mt-4 flex h-1 gap-0.5 overflow-hidden rounded-full" aria-hidden>
-          <span className="bg-foreground" style={{ flex: summary.confirmed }} />
-          <span className="bg-foreground/35" style={{ flex: summary.pending }} />
-          <span className="bg-rose-500" style={{ flex: summary.cancelled }} />
+    <button
+      type="button"
+      role="tab"
+      aria-selected={selected}
+      onClick={onSelect}
+      className={cn(
+        "relative flex min-w-0 flex-col gap-1.5 px-4 pb-4 pt-4 text-left transition-colors sm:px-5",
+        selected ? "bg-card" : "bg-muted/40 hover:bg-muted/60"
+      )}
+    >
+      {selected ? <span className="absolute inset-x-0 top-0 h-[3px] bg-[hsl(var(--accent-blue))]" aria-hidden /> : null}
+      <span className={cn("truncate text-xs", selected ? "font-medium text-foreground/80" : "text-muted-foreground")}>{label}</span>
+      <span
+        className={cn(
+          "text-[1.75rem] font-semibold leading-none tracking-tight",
+          selected ? "text-foreground" : "text-foreground/80",
+          numberTextClass(locale)
+        )}
+      >
+        {now === undefined ? "—" : digits(now)}
+      </span>
+      <span className={cn("min-h-4 truncate text-xs font-medium", tone)}>
+        {change === null ? null : change.kind === "same" ? (
+          t("sameAsBefore")
+        ) : change.kind === "new" ? (
+          <>+{digits(change.added)}</>
+        ) : (
+          <>
+            {change.kind === "up" ? "▲" : "▼"} {toLocaleDigits(change.percent.toFixed(1), locale)}%
+            <span className="ml-1.5 font-normal text-muted-foreground/80">{t("vsValue", { value: digits(before ?? 0) })}</span>
+          </>
+        )}
+      </span>
+    </button>
+  );
+}
+
+/** Copies the shop's link, and says so for a moment. */
+function useCopied(): [boolean, (text: string) => void] {
+  const [copied, setCopied] = useState(false);
+  useEffect(() => {
+    if (!copied) return;
+    const timer = window.setTimeout(() => setCopied(false), 1600);
+    return () => window.clearTimeout(timer);
+  }, [copied]);
+  return [copied, (text) => void navigator.clipboard?.writeText(text).then(() => setCopied(true))];
+}
+
+/** A period with no orders: what will be drawn here, and the shop's link to bring the next ones. */
+function EmptyChart({ shopUrl }: { shopUrl: string }) {
+  const t = useTranslations("dashboard.home");
+  const [copied, copy] = useCopied();
+  return (
+    <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-card/80 px-6 text-center">
+      <p className="text-sm font-semibold text-foreground">{t("emptyChartTitle")}</p>
+      <p className="text-xs text-muted-foreground">{t("emptyChartBody")}</p>
+      {shopUrl ? (
+        <div className="mt-2 flex flex-wrap justify-center gap-2">
+          <button
+            type="button"
+            onClick={() => copy(shopUrl)}
+            className="inline-flex h-9 items-center gap-1.5 rounded-ui bg-foreground px-3.5 text-sm font-medium text-background transition-opacity hover:opacity-90"
+          >
+            {copied ? <Check className="size-4" aria-hidden /> : <Copy className="size-4" aria-hidden />}
+            {copied ? t("copied") : t("copyShopLink")}
+          </button>
+          <a
+            href={`https://wa.me/?text=${encodeURIComponent(shopUrl)}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex h-9 items-center gap-1.5 rounded-ui border border-border bg-card px-3.5 text-sm font-medium text-foreground transition-colors hover:bg-muted"
+          >
+            <SocialMark platform="whatsapp" className="size-4" />
+            {t("shareOnWhatsApp")}
+          </a>
         </div>
       ) : null}
     </div>
@@ -195,16 +300,39 @@ export function peakLabels(values: number[], minGap: number): Set<number> {
   return kept;
 }
 
-/** Orders across the period as a line: straight runs between buckets over a striped fill. */
-function OrdersLine({ series, bucket }: Pick<HomeOrdersPanelProps, "series" | "bucket">) {
+interface ChartPoint {
+  x: number;
+  label: string;
+  value: number;
+  /** The same bucket of the period before; null where that period is shorter. */
+  before: number | null;
+}
+
+/** The tab's part across the period: a smooth line over a soft fill, the period before dashed. */
+function MetricLine({
+  series,
+  previousSeries,
+  metric,
+  bucket,
+}: {
+  series: DashboardAnalyticsPoint[];
+  previousSeries: DashboardAnalyticsPoint[];
+  metric: Metric;
+  bucket: AnalyticsBucket;
+}) {
   const format = useFormatter();
   const locale = useLocale();
   const t = useTranslations("dashboard.home");
   const id = useId().replace(/[^a-zA-Z0-9]/g, "");
   const lastIndex = series.length - 1;
-  const markAll = series.length <= MARK_EVERY_POINT_UP_TO;
-  const points = series.map((point, i) => ({ ...point, x: i }));
-  const maxOrders = Math.max(0, ...series.map((point) => point.orders));
+  const points: ChartPoint[] = series.map((point, i) => ({
+    x: i,
+    label: point.label,
+    value: point[metric] ?? 0,
+    before: previousSeries[i] ? (previousSeries[i][metric] ?? 0) : null,
+  }));
+  const maxValue = Math.max(0, ...points.map((point) => Math.max(point.value, point.before ?? 0)));
+  const digits = (n: number) => toLocaleDigits(String(n), locale);
 
   const when = (raw: string, long = false) => {
     const at = new Date(raw);
@@ -213,16 +341,16 @@ function OrdersLine({ series, bucket }: Pick<HomeOrdersPanelProps, "series" | "b
     if (bucket === "hour")
       return format.dateTime(at, long ? { weekday: "short", hour: "numeric", timeZone: DHAKA } : { hour: "numeric", timeZone: DHAKA });
     if (bucket === "month") return format.dateTime(at, { month: long ? "long" : "short", year: long ? "numeric" : undefined, timeZone: DHAKA });
-    return format.dateTime(at, long ? { weekday: "long", day: "numeric", month: "long", timeZone: DHAKA } : { day: "numeric", month: "short", timeZone: DHAKA });
+    return format.dateTime(at, long ? { weekday: "short", day: "numeric", month: "short", timeZone: DHAKA } : { day: "numeric", month: "short", timeZone: DHAKA });
   };
 
   return (
     <RechartsSizedContainer className="w-full">
       {({ width }) => {
-        const grid = squareGrid(width, lastIndex, maxOrders);
+        const grid = squareGrid(width, lastIndex, maxValue);
         const bucketWidth = (grid.cell * (grid.xTicks.length - 1)) / grid.xMax;
         const labelled = peakLabels(
-          series.map((point) => point.orders),
+          points.map((point) => point.value),
           Math.max(1, Math.ceil(MIN_PEAK_LABEL_GAP / bucketWidth))
         );
         // A label names the bucket nearest its line; the lines between labels carry none.
@@ -232,8 +360,8 @@ function OrdersLine({ series, bucket }: Pick<HomeOrdersPanelProps, "series" | "b
           const y = Number(props.y);
           const value = Number(props.payload?.value);
           if (!Number.isFinite(x) || !Number.isFinite(y) || !Number.isFinite(value)) return <g />;
-          if (i % grid.labelEvery !== 0 || series.length === 0) return <g />;
-          const point = series[Math.min(lastIndex, Math.max(0, Math.round(value)))];
+          if (i % grid.labelEvery !== 0 || points.length === 0) return <g />;
+          const point = points[Math.min(lastIndex, Math.max(0, Math.round(value)))];
           const anchor = i === 0 ? "start" : i === grid.xTicks.length - 1 ? "end" : "middle";
           return (
             <text x={x} y={y + 14} textAnchor={anchor} fontSize={11} fill="hsl(var(--muted-foreground))">
@@ -242,165 +370,101 @@ function OrdersLine({ series, bucket }: Pick<HomeOrdersPanelProps, "series" | "b
           );
         };
         return (
-          <div className="relative">
-            <ResponsiveContainer width={width} height={grid.height} minWidth={0}>
-              <AreaChart data={points} margin={CHART_MARGIN} aria-label={t("chartAria")} role="img">
-                <defs>
-                  <pattern id={`stripes-${id}`} width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
-                    <rect width="7" height="7" fill={LINE} fillOpacity={0.06} />
-                    <line x1="0" y1="0" x2="0" y2="7" stroke={LINE} strokeOpacity={0.14} strokeWidth="2.5" />
-                  </pattern>
-                </defs>
-                <CartesianGrid stroke="hsl(var(--border))" strokeOpacity={0.7} />
-                <XAxis
-                  type="number"
-                  dataKey="x"
-                  domain={[0, grid.xMax]}
-                  ticks={grid.xTicks}
-                  interval={0}
-                  height={X_AXIS_HEIGHT}
-                  tickLine={false}
-                  axisLine={false}
-                  tick={XTick}
-                />
-                {/* Sets the scale only: the counts are drawn over the grid below. */}
-                <YAxis hide domain={[0, grid.yTicks[ROWS]]} ticks={grid.yTicks} allowDecimals={false} />
-                <Tooltip
-                  cursor={{ stroke: LINE, strokeWidth: 1 }}
-                  content={({ active, payload }) => {
-                    const point = payload?.[0]?.payload as DashboardAnalyticsPoint | undefined;
-                    if (!active || !point) return null;
-                    return (
-                      <div className="flex min-w-36 flex-col items-center gap-0.5 rounded-ui border border-border bg-card px-3.5 py-2 text-center [box-shadow:var(--shadow-popover)]">
-                        <span className={cn("text-base font-semibold text-foreground", numberTextClass(locale))}>
-                          {toLocaleDigits(String(point.orders), locale)}
+          <ResponsiveContainer width={width} height={grid.height} minWidth={0}>
+            <ComposedChart data={points} margin={CHART_MARGIN} aria-label={t("chartAria")} role="img">
+              <defs>
+                <linearGradient id={`fill-${id}`} x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0" stopColor={LINE} stopOpacity={0.16} />
+                  <stop offset="1" stopColor={LINE} stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid stroke="hsl(var(--border))" strokeOpacity={0.6} />
+              <XAxis
+                type="number"
+                dataKey="x"
+                domain={[0, grid.xMax]}
+                ticks={grid.xTicks}
+                interval={0}
+                height={X_AXIS_HEIGHT}
+                tickLine={false}
+                axisLine={false}
+                tick={XTick}
+              />
+              {/* Sets the scale only: the counts are drawn over the grid below. */}
+              <YAxis hide domain={[0, grid.yTicks[ROWS]]} ticks={grid.yTicks} allowDecimals={false} />
+              <Tooltip
+                cursor={{ stroke: "hsl(var(--muted-foreground))", strokeOpacity: 0.5, strokeDasharray: "3 3" }}
+                content={({ active, payload }) => {
+                  const point = payload?.[0]?.payload as ChartPoint | undefined;
+                  if (!active || !point) return null;
+                  return (
+                    <div className="flex min-w-44 flex-col gap-1.5 rounded-ui border border-border bg-card px-3 py-2.5 text-xs [box-shadow:var(--shadow-popover)]">
+                      <span className="font-semibold text-foreground">{when(point.label, true)}</span>
+                      <span className="flex items-center justify-between gap-4">
+                        <span className="inline-flex items-center gap-1.5 text-muted-foreground">
+                          <span className="size-2 rounded-full bg-[hsl(var(--accent-blue))]" aria-hidden />
+                          {t("thisPeriod")}
                         </span>
-                        <span className="text-xs text-muted-foreground">{when(point.label, true)}</span>
-                      </div>
+                        <span className={cn("font-semibold text-foreground", numberTextClass(locale))}>{digits(point.value)}</span>
+                      </span>
+                      {point.before !== null ? (
+                        <span className="flex items-center justify-between gap-4">
+                          <span className="inline-flex items-center gap-1.5 text-muted-foreground">
+                            <span className="w-2 border-t-2 border-dashed border-muted-foreground/70" aria-hidden />
+                            {t("periodBefore")}
+                          </span>
+                          <span className={cn("text-muted-foreground", numberTextClass(locale))}>{digits(point.before)}</span>
+                        </span>
+                      ) : null}
+                    </div>
+                  );
+                }}
+              />
+              <Line
+                type="monotone"
+                dataKey="before"
+                stroke={BEFORE}
+                strokeOpacity={0.6}
+                strokeWidth={1.5}
+                strokeDasharray="5 5"
+                dot={false}
+                activeDot={{ r: 3.5, fill: "hsl(var(--card))", stroke: BEFORE, strokeWidth: 1.5 }}
+                isAnimationActive={false}
+                connectNulls
+              />
+              <Area
+                type="monotone"
+                dataKey="value"
+                stroke={LINE}
+                strokeWidth={2.25}
+                fill={`url(#fill-${id})`}
+                isAnimationActive={false}
+                dot={(props: { cx?: number; cy?: number; index?: number }) => {
+                  const { cx, cy, index } = props;
+                  // Now is the line's last point, in blue.
+                  if (cx == null || cy == null || index !== lastIndex) return <g key={`dot-${index}`} />;
+                  return <circle key={`dot-${index}`} cx={cx} cy={cy} r={4} fill={LINE} />;
+                }}
+                activeDot={{ r: 5, fill: "hsl(var(--card))", stroke: LINE, strokeWidth: 2.25 }}
+              >
+                <LabelList
+                  dataKey="value"
+                  content={(props: { x?: number | string; y?: number | string; index?: number; value?: unknown }) => {
+                    const x = Number(props.x);
+                    const y = Number(props.y);
+                    if (props.index == null || !labelled.has(props.index) || !Number.isFinite(x) || !Number.isFinite(y)) return null;
+                    return (
+                      <text x={x} y={y - 9} textAnchor="middle" fontSize={11} fontWeight={600} fill="hsl(var(--foreground))">
+                        {digits(Number(props.value))}
+                      </text>
                     );
                   }}
                 />
-                <Area
-                  type="linear"
-                  dataKey="orders"
-                  stroke={LINE}
-                  strokeWidth={1.75}
-                  fill={`url(#stripes-${id})`}
-                  isAnimationActive={false}
-                  dot={(props: { cx?: number; cy?: number; index?: number }) => {
-                    const { cx, cy, index } = props;
-                    if (cx == null || cy == null || (!markAll && index !== lastIndex)) return <g key={`dot-${index}`} />;
-                    const last = index === lastIndex;
-                    return (
-                      <circle
-                        key={`dot-${index}`}
-                        cx={cx}
-                        cy={cy}
-                        r={last ? 4 : 3.5}
-                        fill={last ? LINE : "hsl(var(--card))"}
-                        stroke={LINE}
-                        strokeWidth={1.5}
-                      />
-                    );
-                  }}
-                  activeDot={{ r: 5, fill: "hsl(var(--card))", stroke: LINE, strokeWidth: 2 }}
-                >
-                  <LabelList
-                    dataKey="orders"
-                    content={(props: { x?: number | string; y?: number | string; index?: number; value?: unknown }) => {
-                      const x = Number(props.x);
-                      const y = Number(props.y);
-                      if (props.index == null || !labelled.has(props.index) || !Number.isFinite(x) || !Number.isFinite(y)) return null;
-                      return (
-                        <text x={x} y={y - 9} textAnchor="middle" fontSize={11} fontWeight={600} fill="hsl(var(--foreground))">
-                          {toLocaleDigits(String(props.value), locale)}
-                        </text>
-                      );
-                    }}
-                  />
-                </Area>
-              </AreaChart>
-            </ResponsiveContainer>
-          </div>
+              </Area>
+            </ComposedChart>
+          </ResponsiveContainer>
         );
       }}
     </RechartsSizedContainer>
-  );
-}
-
-function OrderFlow({ flow, now }: { flow: NonNullable<HomeNumbers["flow"]>; now: number }) {
-  const t = useTranslations("dashboard.home");
-  const tPages = useTranslations("pages");
-  const format = useFormatter();
-  const locale = useLocale();
-
-  const waited = (step: WaitingStep) => {
-    if (!step.oldest_at) return { text: t("nothingWaiting"), tone: "" };
-    const since = new Date(step.oldest_at);
-    return {
-      text: t("oldest", { when: format.relativeTime(since, now) }),
-      tone: now - since.getTime() >= DAY_MS ? TONE.late : "",
-    };
-  };
-
-  const cells = [
-    { key: "pending", href: "/orders?status=pending", name: tPages("orderStatusPending"), count: flow.pending.count, note: waited(flow.pending) },
-    {
-      key: "payment",
-      href: "/orders?status=payment_pending",
-      name: tPages("orderStatusPaymentPending"),
-      count: flow.payment_pending.count,
-      note: waited(flow.payment_pending),
-    },
-    {
-      key: "send",
-      href: "/orders?status=confirmed&delivery_status=not_dispatched",
-      name: t("flowToSend"),
-      count: flow.to_send.count,
-      note: waited(flow.to_send),
-    },
-    {
-      key: "transit",
-      href: flow.in_transit.stuck ? "/orders?queue=stuck" : "/orders?delivery_status=in_transit",
-      name: t("flowOnTheWay"),
-      count: flow.in_transit.count,
-      note: flow.in_transit.stuck
-        ? { text: t("stuck", { count: toLocaleDigits(String(flow.in_transit.stuck), locale) }), tone: TONE.risk }
-        : { text: "", tone: "" },
-    },
-    {
-      key: "delivered",
-      href: "/orders?queue=delivered_today",
-      name: t("flowDeliveredToday"),
-      count: flow.delivered_today.count,
-      note: { text: t("sinceMidnight"), tone: "" },
-    },
-    {
-      key: "returned",
-      href: "/orders?queue=returned_recently",
-      name: t("flowReturned"),
-      count: flow.returned_recently.count,
-      note: { text: t("lastSevenDays"), tone: "" },
-    },
-  ];
-
-  return (
-    // Two cells a row, three rows tall beside the orders; the hairlines between them are the
-    // panel's border colour showing through a 1px gap, so they sit right at every width.
-    <div className="grid grid-cols-2 gap-px border-t border-border-subtle bg-border-subtle sm:grid-cols-3 lg:grid-cols-2 lg:grid-rows-3 lg:border-l lg:border-t-0">
-      {cells.map((cell) => (
-        <Link
-          key={cell.key}
-          href={cell.href}
-          className="flex min-w-0 flex-col justify-center gap-1 bg-card px-4 py-4 transition-colors hover:bg-muted/40 sm:px-5"
-        >
-          <span className="truncate text-xs text-muted-foreground">{cell.name}</span>
-          <span className={cn("text-[1.75rem] font-semibold leading-tight tracking-tight text-foreground", numberTextClass(locale))}>
-            {toLocaleDigits(String(cell.count), locale)}
-          </span>
-          <span className={cn("min-h-[1.125rem] truncate text-xs text-muted-foreground/80", cell.note.tone)}>{cell.note.text}</span>
-        </Link>
-      ))}
-    </div>
   );
 }

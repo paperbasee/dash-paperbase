@@ -11,11 +11,13 @@ interface DashboardHeroProps {
   greeting: string;
   /** The person's own first name; empty, and the greeting goes without one. */
   name: string;
+  /** The shop's name, for the line under the greeting; empty, and the line is left out. */
+  shopName: string;
   range: DateRangeValue;
   onRangeChange: (value: DateRangeValue) => void;
 }
 
-export default function DashboardHero({ greeting, name, range, onRangeChange }: DashboardHeroProps) {
+export default function DashboardHero({ greeting, name, shopName, range, onRangeChange }: DashboardHeroProps) {
   const t = useTranslations("dashboard");
   const tHints = useTranslations("pageHints");
   const [datePanelOpen, setDatePanelOpen] = useState(false);
@@ -29,6 +31,7 @@ export default function DashboardHero({ greeting, name, range, onRangeChange }: 
           </h1>
           <PageHint>{tHints("home")}</PageHint>
         </div>
+        {shopName ? <p className="mt-1 text-sm text-muted-foreground">{t("subtitle", { shop: shopName })}</p> : null}
       </div>
       <div
         className={cn(

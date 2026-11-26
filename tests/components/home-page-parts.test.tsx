@@ -1,17 +1,21 @@
 /**
- * The home page (owner, 2026-11-12, round 5 of the designs): the orders in the period, where
- * every order is now, what needs attention and the courier's money. Every number links to the
- * list it counts, colour means late or risky and nothing else, and a part the member may not
- * open is not drawn.
+ * The home page (owner's pick of 2026-11-26, direction 1 -- light, like Google Analytics' home;
+ * round 5 of 2026-11-12 before it): one card of four numbers as tabs over one chart, the "right
+ * now" card beside it, what to look at in words, the latest orders, what needs attention and the
+ * courier's money. Every number links to the list it counts, colour means something or nothing,
+ * and a part the member may not open is not drawn.
  */
 import type { ReactNode } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { NextIntlClientProvider } from "next-intl";
 import { describe, expect, it, vi } from "vitest";
 
-import { CHART_MARGIN, HomeOrdersPanel, peakLabels, squareGrid } from "@/components/dashboard/HomeOrdersPanel";
-import { HomeSidePanel } from "@/components/dashboard/HomeSidePanel";
-import { isOrderQueue, type HomeNumbers } from "@/lib/dashboard/home";
+import { HomeInsights } from "@/components/dashboard/HomeInsights";
+import { CHART_MARGIN, HomeOrdersPanel, peakLabels, periodChange, squareGrid } from "@/components/dashboard/HomeOrdersPanel";
+import { HomeRightNow } from "@/components/dashboard/HomeRightNow";
+import { HomeAttention, HomeCourier } from "@/components/dashboard/HomeSidePanel";
+import type { DashboardAnalyticsPoint } from "@/lib/basicAnalyticsService";
+import { homeInsights, isOrderQueue, type HomeNumbers } from "@/lib/dashboard/home";
 
 import bn from "../../messages/bn.json";
 import en from "../../messages/en.json";
@@ -28,12 +32,21 @@ const NOW = Date.parse("2026-11-12T09:20:00Z");
 const HOUR = 60 * 60 * 1000;
 
 const flow: NonNullable<HomeNumbers["flow"]> = {
-  pending: { count: 12, oldest_at: new Date(NOW - 50 * HOUR).toISOString() },
+  pending: { count: 12, oldest_at: new Date(NOW - 50 * HOUR).toISOString(), over_day: 3 },
   payment_pending: { count: 3, oldest_at: new Date(NOW - 5 * HOUR).toISOString() },
   to_send: { count: 8, oldest_at: new Date(NOW - 26 * HOUR).toISOString() },
   in_transit: { count: 21, stuck: 2 },
   delivered_today: { count: 6 },
   returned_recently: { count: 3 },
+};
+
+const quiet: NonNullable<HomeNumbers["flow"]> = {
+  pending: { count: 0, oldest_at: null, over_day: 0 },
+  payment_pending: { count: 0, oldest_at: null },
+  to_send: { count: 0, oldest_at: null },
+  in_transit: { count: 0, stuck: 0 },
+  delivered_today: { count: 0 },
+  returned_recently: { count: 0 },
 };
 
 const attention: HomeNumbers["attention"] = {
@@ -45,6 +58,14 @@ const attention: HomeNumbers["attention"] = {
   low_stock: 5,
 };
 
+const point = (label: string, orders: number, confirmed = 0, pending = 0, cancelled = 0): DashboardAnalyticsPoint => ({
+  label,
+  orders,
+  confirmed,
+  pending,
+  cancelled,
+});
+
 function render(node: ReactNode, locale: "en" | "bn" = "en") {
   return renderToStaticMarkup(
     <NextIntlClientProvider locale={locale} messages={locale === "en" ? en : bn} timeZone="Asia/Dhaka" now={new Date(NOW)}>
@@ -53,69 +74,160 @@ function render(node: ReactNode, locale: "en" | "bn" = "en") {
   );
 }
 
-function panel(overrides: Partial<Parameters<typeof HomeOrdersPanel>[0]> = {}, locale: "en" | "bn" = "en") {
+function overview(overrides: Partial<Parameters<typeof HomeOrdersPanel>[0]> = {}, locale: "en" | "bn" = "en") {
   return render(
     <HomeOrdersPanel
-      summary={{ orders: 24, confirmed: 11, pending: 10, cancelled: 3 }}
-      previousOrders={18}
-      series={[
-        { label: "2026-11-12T13:00:00+06:00", orders: 3 },
-        { label: "2026-11-12T14:00:00+06:00", orders: 5 },
-      ]}
-      bucket="hour"
-      flow={flow}
-      now={NOW}
+      summary={{ orders: 184, confirmed: 121, pending: 41, cancelled: 22 }}
+      previous={{ orders: 164, confirmed: 111, pending: 35, cancelled: 18 }}
+      series={[point("2026-11-11", 22, 14, 5, 3), point("2026-11-12", 31, 21, 7, 3)]}
+      previousSeries={[point("2026-11-09", 20), point("2026-11-10", 25)]}
+      bucket="day"
+      shopUrl="https://rupkotha.paperbase.me"
       {...overrides}
     />,
     locale
   );
 }
 
-describe("the orders panel", () => {
-  it("counts the period's orders, their split, and the change on the period before", () => {
-    const html = panel();
-    expect(html).toContain(">24<");
-    expect(html).toContain(">11<");
-    expect(html).toContain(">10<");
-    expect(html).toContain(">3<");
-    expect(html).toMatch(/\+6<\/span> vs the period before/);
-    expect(panel({ previousOrders: 24 })).toContain("Same as the period before");
-    expect(panel({ previousOrders: 30 })).toContain("−6");
+describe("the overview card", () => {
+  it("shows the four numbers as tabs, each with its change on the period before", () => {
+    const html = overview();
+    expect(html.match(/role="tab"/g)).toHaveLength(4);
+    expect(html).toMatch(/aria-selected="true"[^>]*>[\s\S]*?Orders/);
+    for (const value of [">184<", ">121<", ">41<", ">22<"]) expect(html).toContain(value);
+    expect(html).toContain("12.2%");
+    expect(html).toContain("vs 164");
   });
 
-  it("opens each step's own list", () => {
-    const html = panel();
+  it("colours a change by what it means: more orders good, more cancelled bad, pending neither", () => {
+    const html = overview();
+    expect(html).toMatch(/text-emerald-700[^"]*">▲ 12\.2%/);
+    expect(html).toMatch(/text-rose-600[^"]*">▲ 22\.2%/);
+    expect(html).toMatch(/text-muted-foreground[^"]*">▲ 17\.1%/);
+  });
+
+  it("says when nothing moved, and when there was nothing before", () => {
+    expect(overview({ previous: { orders: 184, confirmed: 121, pending: 41, cancelled: 22 } })).toContain("Same as before");
+    expect(overview({ previous: { orders: 0, confirmed: 0, pending: 0, cancelled: 0 } })).toContain("+184");
+  });
+
+  it("asks for the first orders of a quiet period, with the shop's link", () => {
+    const html = overview({ summary: { orders: 0, confirmed: 0, pending: 0, cancelled: 0 }, series: [point("2026-11-12", 0)] });
+    expect(html).toContain("No orders in these days");
+    expect(html).toContain("Copy shop link");
+    expect(html).toContain(`href="https://wa.me/?text=`);
+    expect(html).toContain(encodeURIComponent("https://rupkotha.paperbase.me"));
+  });
+
+  it("speaks Bangla in Bangla digits", () => {
+    const html = overview({}, "bn");
+    expect(html).toContain("১৮৪");
+    expect(html).toContain("১২.২%");
+  });
+});
+
+describe("a change on the period before", () => {
+  it("is a share of the period before, to one decimal", () => {
+    expect(periodChange(184, 164)).toEqual({ kind: "up", percent: 12.2 });
+    expect(periodChange(10, 20)).toEqual({ kind: "down", percent: 50 });
+    expect(periodChange(5, 5)).toEqual({ kind: "same" });
+    expect(periodChange(7, 0)).toEqual({ kind: "new", added: 7 });
+    expect(periodChange(0, 0)).toEqual({ kind: "same" });
+  });
+});
+
+describe("the right now card", () => {
+  it("says how many orders wait, and opens each step's own list", () => {
+    const html = render(<HomeRightNow flow={flow} now={NOW} />);
+    expect(html).toContain(">23<");
     expect(html).toContain('href="/orders?status=pending"');
     expect(html).toContain('href="/orders?status=payment_pending"');
     expect(html).toContain('href="/orders?status=confirmed&amp;delivery_status=not_dispatched"');
     expect(html).toContain('href="/orders?queue=stuck"');
     expect(html).toContain('href="/orders?queue=delivered_today"');
     expect(html).toContain('href="/orders?queue=returned_recently"');
-    // With nothing stuck, On the way opens every parcel on the way.
-    const calm = panel({ flow: { ...flow, in_transit: { count: 21, stuck: 0 } } });
+    const calm = render(<HomeRightNow flow={{ ...flow, in_transit: { count: 21, stuck: 0 } }} now={NOW} />);
     expect(calm).toContain('href="/orders?delivery_status=in_transit"');
-    expect(calm).not.toContain("stuck over 5 days");
+    expect(calm).not.toContain("stuck");
   });
 
   it("marks a step late only when its oldest order has waited a day", () => {
-    const html = panel();
+    const html = render(<HomeRightNow flow={flow} now={NOW} />);
     expect(html).toMatch(/text-orange-700[^"]*">Oldest 2 days ago/);
     expect(html).toMatch(/text-orange-700[^"]*">Oldest 1 day ago/);
     expect(html).not.toMatch(/text-orange-700[^"]*">Oldest 5 hours ago/);
-    expect(html).toContain("2 stuck over 5 days");
+    expect(html).toMatch(/text-rose-600[^"]*">· 2 stuck/);
   });
 
-  it("draws no order flow for a member who may not open orders", () => {
-    const html = panel({ flow: null });
+  it("says so when nothing waits", () => {
+    const html = render(<HomeRightNow flow={quiet} now={NOW} />);
+    expect(html).toContain("Nothing waits for you");
     expect(html).not.toContain("/orders?status=pending");
-    expect(html).toContain(">24<");
+  });
+});
+
+describe("the insights", () => {
+  it("are said only while true, most urgent first", () => {
+    const summary = { orders: 184, confirmed: 121, pending: 41, cancelled: 22 };
+    const before = { orders: 164, confirmed: 111, pending: 35, cancelled: 18 };
+    expect(homeInsights(flow, summary, before)).toEqual([
+      { kind: "late", count: 3 },
+      { kind: "stuck", count: 2 },
+      { kind: "cancelled", percent: 22, now: 22, before: 18 },
+    ]);
+    expect(homeInsights(quiet, summary, { ...before, cancelled: 21 })).toEqual([]);
+    // A rise of one order is noise, however large a share; two or more and a fifth or more is news.
+    expect(homeInsights(quiet, { ...summary, cancelled: 2 }, { ...before, cancelled: 1 })).toEqual([]);
+    expect(homeInsights(quiet, { ...summary, cancelled: 3 }, { ...before, cancelled: 1 })).toEqual([
+      { kind: "cancelled", percent: 200, now: 3, before: 1 },
+    ]);
+    expect(homeInsights(quiet, { ...summary, cancelled: 3 }, { ...before, cancelled: 0 })).toEqual([]);
+    expect(homeInsights(null, summary, before)).toEqual([]);
   });
 
-  it("speaks Bangla in Bangla digits", () => {
-    const html = panel({}, "bn");
-    expect(html).toContain("২৪");
-    expect(html).toContain("আগের সময়ের তুলনায়");
-    expect(html).toContain("৫ দিনের বেশি আটকে");
+  it("each opens the orders it is about", () => {
+    const html = render(
+      <HomeInsights insights={homeInsights(flow, { orders: 1, confirmed: 0, pending: 0, cancelled: 22 }, { orders: 1, confirmed: 0, pending: 0, cancelled: 18 })} onShowCancelled={() => undefined} />
+    );
+    expect(html).toContain("3 orders have waited over a day");
+    expect(html).toContain('href="/orders?queue=pending_over_day"');
+    expect(html).toContain("2 parcels are stuck with the courier");
+    expect(html).toContain("Cancellations rose 22%");
+    expect(render(<HomeInsights insights={[]} onShowCancelled={() => undefined} />)).toBe("");
+  });
+});
+
+describe("needs attention", () => {
+  it("lists each count, opening its list, risky counts in red and nothing waiting quiet", () => {
+    const html = render(<HomeAttention attention={attention} />);
+    for (const href of ["/orders?queue=risky", "/orders/abandoned", "/support-tickets?status=new", "/reviews", "/inventory?stock=out_of_stock", "/inventory?stock=low_stock"]) {
+      expect(html).toContain(`href="${href}"`);
+    }
+    expect(html).toMatch(/text-rose-600[^"]*">2</);
+    expect(html).toMatch(/text-muted-foreground\/70[^"]*">0</);
+  });
+
+  it("leaves out what the member may not open, and says all clear when nothing needs them", () => {
+    const staff = render(<HomeAttention attention={{ ...attention, reviews: null, out_of_stock: null, low_stock: null }} />);
+    expect(staff).not.toContain("/reviews");
+    expect(staff).not.toContain("/inventory");
+    const clear = render(<HomeAttention attention={{ risky: 0, incomplete_checkouts: 0, messages: 0, reviews: 0, out_of_stock: 0, low_stock: 0 }} />);
+    expect(clear).toContain("All clear");
+    const blank = { risky: null, incomplete_checkouts: null, messages: null, reviews: null, out_of_stock: null, low_stock: null };
+    expect(render(<HomeAttention attention={blank} />)).toBe("");
+  });
+});
+
+describe("the courier's money", () => {
+  it("shows the money to whoever may see it, and asks for Steadfast where it is not connected", () => {
+    const money = render(<HomeCourier courier={{ state: "ok", amount: "48250.00", checked_at: "" }} flow={flow} />);
+    expect(money).toContain("৳48,250");
+    expect(money).toContain("Collected by Steadfast, not paid to you yet");
+    const none = render(<HomeCourier courier={{ state: "not_connected" }} flow={flow} />);
+    expect(none).toContain("Connect a courier");
+    expect(none).toContain('href="/settings?tab=integrations"');
+    expect(render(<HomeCourier courier={{ state: "unauthorized" }} flow={flow} />)).toContain("Steadfast refused your saved keys");
+    expect(render(<HomeCourier courier={undefined} flow={flow} />)).toBe("");
   });
 });
 
@@ -169,50 +281,11 @@ describe("the counts over the line", () => {
   });
 });
 
-describe("the side panel", () => {
-  it("lists what needs attention, each opening its list, risky counts in red", () => {
-    const html = render(<HomeSidePanel attention={attention} flow={flow} courier={undefined} />);
-    expect(html).toContain('href="/orders?queue=risky"');
-    expect(html).toContain('href="/orders/abandoned"');
-    expect(html).toContain('href="/support-tickets?status=new"');
-    expect(html).toContain('href="/reviews"');
-    expect(html).toContain('href="/inventory?stock=out_of_stock"');
-    expect(html).toContain('href="/inventory?stock=low_stock"');
-    expect(html).toMatch(/text-rose-600[^"]*">2</);
-    // Nothing waiting is quiet, never red.
-    expect(html).toMatch(/text-muted-foreground\/70[^"]*">0</);
-  });
-
-  it("leaves out what the member may not open", () => {
-    const staff = { ...attention, reviews: null, out_of_stock: null, low_stock: null };
-    const html = render(<HomeSidePanel attention={staff} flow={flow} courier={undefined} />);
-    expect(html).not.toContain("/reviews");
-    expect(html).not.toContain("/inventory");
-    expect(html).toContain("/orders?queue=risky");
-  });
-
-  it("shows the courier's money to whoever may see it, and nothing without Steadfast", () => {
-    const money = render(
-      <HomeSidePanel attention={attention} flow={flow} courier={{ state: "ok", amount: "46800.00", checked_at: "" }} />
-    );
-    expect(money).toContain("৳46,800");
-    expect(money).toContain("Collected by Steadfast, not paid to you yet");
-    expect(money).toContain('href="/orders?queue=stuck"');
-    const none = render(<HomeSidePanel attention={attention} flow={flow} courier={{ state: "not_connected" }} />);
-    expect(none).not.toContain("With the courier");
-    const refused = render(<HomeSidePanel attention={attention} flow={flow} courier={{ state: "unauthorized" }} />);
-    expect(refused).toContain("Steadfast refused your saved keys");
-  });
-
-  it("draws nothing at all when nothing in it is the member's", () => {
-    const blank = { risky: null, incomplete_checkouts: null, messages: null, reviews: null, out_of_stock: null, low_stock: null };
-    expect(render(<HomeSidePanel attention={blank} flow={null} courier={undefined} />)).toBe("");
-  });
-});
-
 describe("the order list's views", () => {
   it("knows the home page's views and nothing else", () => {
-    for (const queue of ["stuck", "delivered_today", "returned_recently", "risky"]) expect(isOrderQueue(queue)).toBe(true);
+    for (const queue of ["pending_over_day", "stuck", "delivered_today", "returned_recently", "risky"]) {
+      expect(isOrderQueue(queue)).toBe(true);
+    }
     for (const other of ["", "pending", "nonsense", null, undefined]) expect(isOrderQueue(other)).toBe(false);
   });
 });

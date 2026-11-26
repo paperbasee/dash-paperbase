@@ -1,4 +1,5 @@
 import api from "@/lib/api";
+import type { DashboardAnalyticsSummary } from "@/lib/basicAnalyticsService";
 
 /** One step an order waits at, and since when its oldest has waited (null when empty). */
 export interface WaitingStep {
@@ -12,7 +13,8 @@ export interface WaitingStep {
  */
 export interface HomeNumbers {
   flow: {
-    pending: WaitingStep;
+    /** `over_day`: placed more than a day ago, the list `?queue=pending_over_day` opens. */
+    pending: WaitingStep & { over_day: number };
     payment_pending: WaitingStep;
     to_send: WaitingStep;
     in_transit: { count: number; stuck: number };
@@ -52,9 +54,46 @@ export async function fetchCourierBalance(): Promise<CourierBalance> {
  * The orders list's named views the home page opens (`/orders?queue=...`), each the same
  * query as its home count (API orders/queues.py).
  */
-export const ORDER_QUEUES = ["stuck", "delivered_today", "returned_recently", "risky"] as const;
+export const ORDER_QUEUES = ["pending_over_day", "stuck", "delivered_today", "returned_recently", "risky"] as const;
 export type OrderQueue = (typeof ORDER_QUEUES)[number];
 
 export function isOrderQueue(value: string | null | undefined): value is OrderQueue {
   return ORDER_QUEUES.includes(value as OrderQueue);
+}
+
+/** Cancellations up by at least this share, and by at least two orders, make an insight. */
+const CANCELLED_RISE_SHARE = 0.2;
+const CANCELLED_RISE_MIN = 2;
+
+export type HomeInsight =
+  | { kind: "late"; count: number }
+  | { kind: "stuck"; count: number }
+  | { kind: "cancelled"; percent: number; now: number; before: number };
+
+/**
+ * What the home page says in words below its numbers (owner's pick, 2026-11-26): each only
+ * while it is true, from numbers the page already has, most urgent first. A member who may not
+ * open orders (no `flow`) is told nothing.
+ */
+export function homeInsights(
+  flow: HomeNumbers["flow"] | undefined,
+  summary: DashboardAnalyticsSummary | null,
+  previous: DashboardAnalyticsSummary | null
+): HomeInsight[] {
+  if (!flow) return [];
+  const insights: HomeInsight[] = [];
+  if (flow.pending.over_day > 0) insights.push({ kind: "late", count: flow.pending.over_day });
+  if (flow.in_transit.stuck > 0) insights.push({ kind: "stuck", count: flow.in_transit.stuck });
+  if (summary && previous && previous.cancelled > 0) {
+    const rise = summary.cancelled - previous.cancelled;
+    if (rise >= CANCELLED_RISE_MIN && rise / previous.cancelled >= CANCELLED_RISE_SHARE) {
+      insights.push({
+        kind: "cancelled",
+        percent: Math.round((rise / previous.cancelled) * 100),
+        now: summary.cancelled,
+        before: previous.cancelled,
+      });
+    }
+  }
+  return insights;
 }

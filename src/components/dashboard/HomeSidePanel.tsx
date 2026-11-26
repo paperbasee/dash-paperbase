@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronRight } from "lucide-react";
+import { ArrowRight, Check, ChevronRight, MessageSquare, PackageMinus, PackageX, ShieldAlert, ShoppingCart, Star, type LucideIcon } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 
 import { Link } from "@/i18n/navigation";
@@ -14,51 +14,60 @@ import { TONE } from "./HomeOrdersPanel";
 type Attention = HomeNumbers["attention"];
 
 /** Each row opens the list it counts; a count that costs sales or trust is red. */
-const ATTENTION_ROWS: { key: keyof Attention; label: string; href: string; risk?: boolean }[] = [
-  { key: "risky", label: "riskyBuyers", href: "/orders?queue=risky", risk: true },
-  { key: "incomplete_checkouts", label: "incompleteCheckouts", href: "/orders/abandoned" },
-  { key: "messages", label: "messages", href: "/support-tickets?status=new" },
-  { key: "reviews", label: "reviews", href: "/reviews" },
-  { key: "out_of_stock", label: "outOfStock", href: "/inventory?stock=out_of_stock", risk: true },
-  { key: "low_stock", label: "lowStock", href: "/inventory?stock=low_stock" },
+const ATTENTION_ROWS: { key: keyof Attention; label: string; href: string; Icon: LucideIcon; risk?: boolean }[] = [
+  { key: "risky", label: "riskyBuyers", href: "/orders?queue=risky", Icon: ShieldAlert, risk: true },
+  { key: "incomplete_checkouts", label: "incompleteCheckouts", href: "/orders/abandoned", Icon: ShoppingCart },
+  { key: "messages", label: "messages", href: "/support-tickets?status=new", Icon: MessageSquare },
+  { key: "reviews", label: "reviews", href: "/reviews", Icon: Star },
+  { key: "out_of_stock", label: "outOfStock", href: "/inventory?stock=out_of_stock", Icon: PackageX, risk: true },
+  { key: "low_stock", label: "lowStock", href: "/inventory?stock=low_stock", Icon: PackageMinus },
 ];
 
-interface HomeSidePanelProps {
-  attention: Attention | undefined;
-  flow: HomeNumbers["flow"] | undefined;
-  /** The courier's money, for the owner and Admins; undefined when not theirs to see. */
-  courier: CourierBalance | undefined;
-}
-
-/** What needs attention, and the money the courier holds -- each shown when it is the member's. */
-export function HomeSidePanel({ attention, flow, courier }: HomeSidePanelProps) {
-  const rows = ATTENTION_ROWS.filter((row) => attention?.[row.key] != null);
-  const showCourier = courier !== undefined && courier.state !== "not_connected";
-  if (rows.length === 0 && !showCourier) return null;
-
-  return (
-    <aside className="min-w-0 overflow-hidden rounded-card border border-card-border bg-card">
-      {rows.length > 0 ? <NeedsAttention attention={attention!} rows={rows} /> : null}
-      {showCourier ? (
-        <CourierMoney courier={courier} flow={flow} className={rows.length > 0 ? "border-t border-border-subtle" : ""} />
-      ) : null}
-    </aside>
-  );
-}
-
-function NeedsAttention({ attention, rows }: { attention: Attention; rows: typeof ATTENTION_ROWS }) {
+/**
+ * What needs attention, each row opening its list; the rows the member may not open are left
+ * out, and with nothing waiting in any of them the card just says so.
+ */
+export function HomeAttention({ attention }: { attention: Attention | undefined }) {
   const t = useTranslations("dashboard.home");
   const locale = useLocale();
+  const rows = ATTENTION_ROWS.filter((row) => attention?.[row.key] != null);
+  if (!attention || rows.length === 0) return null;
+
+  if (rows.every((row) => attention[row.key] === 0)) {
+    return (
+      <section className="flex items-center gap-3 rounded-card border border-card-border bg-card px-5 py-4">
+        <span className="flex size-8 shrink-0 items-center justify-center rounded-ui bg-[hsl(var(--accent-green)/0.12)] text-[hsl(var(--accent-green))]">
+          <Check className="size-4" strokeWidth={2.5} aria-hidden />
+        </span>
+        <span className="flex flex-col">
+          <span className="text-sm font-semibold text-foreground">{t("allClear")}</span>
+          <span className="text-xs text-muted-foreground">{t("allClearBody")}</span>
+        </span>
+      </section>
+    );
+  }
+
   return (
-    <section className="px-4 py-4 sm:px-5">
-      <h2 className="text-sm font-semibold text-foreground">{t("attention")}</h2>
-      <ul className="mt-1.5">
+    <section className="rounded-card border border-card-border bg-card pb-2">
+      <h2 className="px-5 pb-1.5 pt-4 text-sm font-semibold text-foreground">{t("attention")}</h2>
+      <ul>
         {rows.map((row) => {
           const count = attention[row.key] ?? 0;
+          const urgent = count > 0 && row.risk;
           return (
-            <li key={row.key} className="border-b border-border-subtle last:border-b-0">
-              <Link href={row.href} className="group flex items-center gap-2.5 py-2.5 text-sm text-foreground">
-                <span className="min-w-0 flex-1 truncate group-hover:underline">{t(row.label)}</span>
+            <li key={row.key}>
+              <Link href={row.href} className="group flex items-center gap-3 px-5 py-1.5 text-sm transition-colors hover:bg-muted/40">
+                <span
+                  className={cn(
+                    "flex size-7 shrink-0 items-center justify-center rounded-ui",
+                    urgent ? "bg-rose-500/10 text-rose-600 dark:text-rose-400" : "bg-muted text-muted-foreground"
+                  )}
+                >
+                  <row.Icon className="size-[15px]" aria-hidden />
+                </span>
+                <span className={cn("min-w-0 flex-1 truncate", count === 0 ? "text-muted-foreground" : "text-foreground")}>
+                  {t(row.label)}
+                </span>
                 <span
                   className={cn(
                     "font-semibold",
@@ -68,7 +77,7 @@ function NeedsAttention({ attention, rows }: { attention: Attention; rows: typeo
                 >
                   {toLocaleDigits(String(count), locale)}
                 </span>
-                <ChevronRight className="size-3.5 shrink-0 text-muted-foreground/60" aria-hidden />
+                <ChevronRight className="size-3.5 shrink-0 text-muted-foreground/50" aria-hidden />
               </Link>
             </li>
           );
@@ -78,57 +87,51 @@ function NeedsAttention({ attention, rows }: { attention: Attention; rows: typeo
   );
 }
 
-function CourierMoney({
-  courier,
-  flow,
-  className,
-}: {
-  courier: CourierBalance;
-  flow: HomeNumbers["flow"] | undefined;
-  className: string;
-}) {
+/**
+ * The money Steadfast holds for the shop, for the owner and Admins (undefined for anyone else);
+ * where no courier is connected, the way to connect one.
+ */
+export function HomeCourier({ courier, flow }: { courier: CourierBalance | undefined; flow: HomeNumbers["flow"] | undefined }) {
   const t = useTranslations("dashboard.home");
   const locale = useLocale();
-  const digits = (n: number) => toLocaleDigits(String(n), locale);
-  const parcels = flow
-    ? [
-        { key: "transit", label: t("flowOnTheWay"), value: flow.in_transit.count },
-        { key: "delivered", label: t("courierDelivered"), value: flow.delivered_today.count },
-        { key: "returned", label: t("flowReturned"), value: flow.returned_recently.count },
-      ]
-    : [];
+  if (!courier) return null;
+
+  if (courier.state === "not_connected") {
+    return (
+      <section className="flex flex-col gap-1.5 rounded-card border border-card-border bg-card px-5 py-4">
+        <h2 className="text-sm font-semibold text-foreground">{t("courier")}</h2>
+        <p className="text-xs leading-relaxed text-muted-foreground">{t("connectCourierBody")}</p>
+        <Link href="/settings?tab=integrations" className="mt-1 inline-flex items-center gap-1 self-start text-sm font-medium text-foreground hover:underline">
+          {t("connectCourier")}
+          <ArrowRight className="size-3.5 text-muted-foreground" aria-hidden />
+        </Link>
+      </section>
+    );
+  }
 
   return (
-    <section className={cn("px-4 py-4 sm:px-5", className)}>
-      <h2 className="text-sm font-semibold text-foreground">{t("courier")}</h2>
+    <section className="flex flex-col gap-1 rounded-card border border-card-border bg-card px-5 py-4">
+      <h2 className="flex items-center justify-between text-sm font-semibold text-foreground">
+        {t("courier")}
+        <span className="text-xs font-normal text-muted-foreground">Steadfast</span>
+      </h2>
       {courier.state === "ok" ? (
         <>
-          <p className={cn("mt-2.5 text-3xl font-semibold leading-tight tracking-tight text-foreground", numberTextClass(locale))}>
+          <p className={cn("mt-1.5 text-[1.75rem] font-semibold leading-tight tracking-tight text-foreground", numberTextClass(locale))}>
             ৳{toLocaleDigits(Math.round(Number(courier.amount)).toLocaleString("en-US"), locale)}
           </p>
-          <p className="mt-1 text-xs text-muted-foreground">{t("courierNote")}</p>
+          <p className="text-xs text-muted-foreground">
+            {t("courierNote")}
+            {flow && flow.in_transit.count > 0 ? (
+              <> · {t("courierOnTheWay", { count: flow.in_transit.count })}</>
+            ) : null}
+          </p>
         </>
       ) : (
-        <p className={cn("mt-2 text-sm", courier.state === "unauthorized" ? TONE.risk : "text-muted-foreground")}>
+        <p className={cn("mt-1 text-sm", courier.state === "unauthorized" ? TONE.risk : "text-muted-foreground")}>
           {courier.state === "unauthorized" ? t("courierUnauthorized") : t("courierUnavailable")}
         </p>
       )}
-      {parcels.length > 0 ? (
-        <dl className="mt-4 grid grid-cols-3 gap-px border-t border-border-subtle bg-border-subtle">
-          {parcels.map((parcel) => (
-            <div key={parcel.key} className="flex flex-col gap-0.5 bg-card pt-3 [&:not(:first-child)]:pl-3.5">
-              <dt className="truncate text-xs text-muted-foreground">{parcel.label}</dt>
-              <dd className={cn("text-base font-semibold text-foreground", numberTextClass(locale))}>{digits(parcel.value)}</dd>
-            </div>
-          ))}
-        </dl>
-      ) : null}
-      {flow && flow.in_transit.stuck > 0 ? (
-        <Link href="/orders?queue=stuck" className={cn("mt-3.5 flex items-center gap-1.5 text-xs hover:underline", TONE.risk)}>
-          <span className="size-1.5 rounded-full bg-current" aria-hidden />
-          {t("stuck", { count: digits(flow.in_transit.stuck) })}
-        </Link>
-      ) : null}
     </section>
   );
 }

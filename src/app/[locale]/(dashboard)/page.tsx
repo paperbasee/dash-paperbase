@@ -3,25 +3,30 @@
 import { useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import DashboardHero from "@/components/dashboard/DashboardHero";
-import { HomeLatestOrders } from "@/components/dashboard/HomeLatestOrders";
+import { HomeInsights } from "@/components/dashboard/HomeInsights";
+import { HomeLatestOrders, type LatestFilter } from "@/components/dashboard/HomeLatestOrders";
 import { HomeOrdersPanel } from "@/components/dashboard/HomeOrdersPanel";
-import { HomeSidePanel } from "@/components/dashboard/HomeSidePanel";
+import { HomeRightNow } from "@/components/dashboard/HomeRightNow";
+import { HomeAttention, HomeCourier } from "@/components/dashboard/HomeSidePanel";
 import { HomeSetupGuide } from "@/components/setup-guide/SetupGuideCard";
 import type { DateRangeValue } from "@/components/DateRangeFilter";
 import { useAuth } from "@/context/AuthContext";
 import { usePermissions } from "@/context/PermissionsContext";
 import { useDashboardAnalyticsQuery } from "@/hooks/useDashboardAnalyticsQuery";
 import { useCourierBalance, useHomeNumbers } from "@/hooks/useHomeNumbers";
+import { useStorefrontUrl } from "@/hooks/useStorefrontUrl";
 import { resolvePreset } from "@/lib/date-range-presets";
 import { greetingName } from "@/lib/dashboard/greeting";
 import { loadDashboardRange, saveDashboardRange } from "@/lib/dashboard/dashboard-range-storage";
+import { homeInsights } from "@/lib/dashboard/home";
 import { getPreviousDateRange } from "@/lib/dashboard/previous-date-range";
 import { normalizeDateRange } from "@/lib/validation";
 
 /**
- * The home page (owner, 2026-11-12): the orders placed in the period the switch picks, where
- * every order is right now, the newest orders, what needs attention, and the courier's money.
- * Sales and their charts are the Analytics page's.
+ * The home page (owner's pick of 2026-11-26, direction 1 -- light, like Google Analytics' home):
+ * the period's orders as tabs over one chart, against the period before; "right now" beside it;
+ * the latest orders; what needs attention; the courier's money; and what to look at, in words.
+ * Only the home's own numbers: sales and the rest are the Analytics page's.
  */
 export default function DashboardPage() {
   const t = useTranslations("dashboard");
@@ -85,10 +90,23 @@ export default function DashboardPage() {
   // The courier's money is the owner's and Admins' (settings.manage); nobody else asks, not
   // even while the member's permissions are still loading.
   const courier = useCourierBalance(!isUnknown && has("settings.manage"));
+  const shopUrl = useStorefrontUrl();
+  const shopName = meProfileStatus === "ready" ? (meProfile?.store?.name ?? "") : "";
+  const [latestFilter, setLatestFilter] = useState<LatestFilter>("");
+
+  const summary = period.data?.summary ?? null;
+  const flow = numbers.data?.flow;
+  const insights = homeInsights(flow, summary, previous.data?.summary ?? null);
+
+  // The cancellations insight counts this period's: the latest orders below show exactly those.
+  const showCancelled = () => {
+    setLatestFilter("cancelled");
+    document.getElementById("latest-orders")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
 
   return (
     <div className="flex flex-col gap-5 pb-2">
-      <DashboardHero greeting={greeting} name={name} range={range} onRangeChange={handleRangeChange} />
+      <DashboardHero greeting={greeting} name={name} shopName={shopName} range={range} onRangeChange={handleRangeChange} />
 
       <HomeSetupGuide />
 
@@ -98,19 +116,34 @@ export default function DashboardPage() {
         </div>
       ) : null}
 
-      <HomeOrdersPanel
-        summary={period.data?.summary ?? null}
-        previousOrders={previous.data?.summary.orders ?? null}
-        series={period.data?.series ?? []}
-        bucket={range.bucket}
-        flow={numbers.data?.flow}
-        now={now}
-      />
-
-      <div className="grid items-start gap-5 xl:grid-cols-[minmax(0,1fr)_340px]">
-        <HomeLatestOrders startDate={range.startDate} endDate={range.endDate} summary={period.data?.summary ?? null} />
-        <HomeSidePanel attention={numbers.data?.attention} flow={numbers.data?.flow} courier={courier.data} />
+      <div className={flow ? "grid gap-5 xl:grid-cols-[minmax(0,1fr)_360px]" : "grid"}>
+        <HomeOrdersPanel
+          summary={summary}
+          previous={previous.data?.summary ?? null}
+          series={period.data?.series ?? []}
+          previousSeries={previous.data?.series ?? []}
+          bucket={range.bucket}
+          shopUrl={shopUrl}
+        />
+        {flow ? <HomeRightNow flow={flow} now={now} /> : null}
       </div>
+
+      <div className="grid items-start gap-5 xl:grid-cols-[minmax(0,1fr)_360px]">
+        <HomeLatestOrders
+          startDate={range.startDate}
+          endDate={range.endDate}
+          summary={summary}
+          filter={latestFilter}
+          onFilterChange={setLatestFilter}
+          shopUrl={shopUrl}
+        />
+        <div className="flex min-w-0 flex-col gap-5">
+          <HomeAttention attention={numbers.data?.attention} />
+          <HomeCourier courier={courier.data} flow={flow} />
+        </div>
+      </div>
+
+      <HomeInsights insights={insights} onShowCancelled={showCancelled} />
     </div>
   );
 }

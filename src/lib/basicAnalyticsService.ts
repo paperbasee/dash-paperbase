@@ -11,10 +11,9 @@ export interface DashboardAnalyticsSummary {
   cancelled: number;
 }
 
-/** Orders placed in one bucket (a minute, hour, day, week or month) of the period. */
-export interface DashboardAnalyticsPoint {
+/** Orders placed in one bucket (a minute, hour, day, week or month) of the period, split like the summary. */
+export interface DashboardAnalyticsPoint extends DashboardAnalyticsSummary {
   label: string;
-  orders: number;
 }
 
 export interface DashboardAnalyticsResponse {

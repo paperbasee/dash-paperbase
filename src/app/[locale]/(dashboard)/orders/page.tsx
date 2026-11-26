@@ -184,6 +184,7 @@ function bulkDispatchFailureBody(
 }
 
 const ORDER_QUEUE_LABEL_KEYS: Record<OrderQueue, string> = {
+  pending_over_day: "ordersQueuePendingOverDay",
   stuck: "ordersQueueStuck",
   delivered_today: "ordersQueueDeliveredToday",
   returned_recently: "ordersQueueReturnedRecently",
