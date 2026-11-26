@@ -88,6 +88,20 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-11-26-shop-menu-stands-out",
+    date: "2026-11-26",
+    version: "4.205.1",
+    tag: "improved",
+    title: {
+      en: "Your shop's menu stands out when it opens",
+      bn: "দোকানের মেনু খুললে এখন আলাদা করে চোখে পড়ে",
+    },
+    body: {
+      en: "On a computer, when a shopper opens a menu in your shop's header, the page under it now goes darker, so the links stand out clearly from the page.",
+      bn: "কম্পিউটারে ক্রেতা আপনার দোকানের হেডারের কোনো মেনু খুললে নিচের পেজটা এখন একটু গাঢ় হয়ে যায়, তাই লিংকগুলো পেজ থেকে আলাদা করে স্পষ্ট দেখা যায়।",
+    },
+  },
+  {
     id: "2026-11-26-security-updates",
     date: "2026-11-26",
     version: "4.205.1",
@@ -506,20 +520,6 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     body: {
       en: "We added a small file that will let the coming Paperbase accounts sign-in page use the passkeys you already have. Nothing changes for you yet: you sign in as before.",
       bn: "আসন্ন Paperbase অ্যাকাউন্টের সাইন-ইন পাতা যেন আপনার আগের পাসকি দিয়েই কাজ করে, সেজন্য একটি ছোট ফাইল যোগ করা হয়েছে। আপনার জন্য এখনই কিছু বদলাচ্ছে না: আগের মতোই সাইন ইন করবেন।",
-    },
-  },
-  {
-    id: "2026-10-08-security-updates",
-    date: "2026-10-08",
-    version: "4.184.1",
-    tag: "fixed",
-    title: {
-      en: "Security updates for the dashboard",
-      bn: "ড্যাশবোর্ডে নিরাপত্তা আপডেট",
-    },
-    body: {
-      en: "We updated the parts the dashboard is built on, closing known security issues. Nothing changes in how you use it.",
-      bn: "ড্যাশবোর্ড যেসব অংশ দিয়ে তৈরি, সেগুলো আপডেট করে জানা নিরাপত্তা সমস্যাগুলো বন্ধ করা হয়েছে। আপনার ব্যবহারে কিছুই বদলাবে না।",
     },
   },
 ];
