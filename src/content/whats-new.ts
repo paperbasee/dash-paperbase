@@ -88,6 +88,20 @@ export const WHATS_NEW_MAX_ENTRIES = 30;
 
 export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
   {
+    id: "2026-11-26-security-updates",
+    date: "2026-11-26",
+    version: "4.205.1",
+    tag: "fixed",
+    title: {
+      en: "Security updates for the dashboard",
+      bn: "ড্যাশবোর্ডে নিরাপত্তা আপডেট",
+    },
+    body: {
+      en: "We updated the parts the dashboard is built on, closing known security issues. Nothing changes in how you use it.",
+      bn: "ড্যাশবোর্ড যেসব অংশ দিয়ে তৈরি, সেগুলো আপডেট করে জানা নিরাপত্তা সমস্যাগুলো বন্ধ করা হয়েছে। আপনার ব্যবহারে কিছুই বদলাবে না।",
+    },
+  },
+  {
     id: "2026-11-24-fraud-checks-on-your-own-key",
     date: "2026-11-24",
     version: "4.205.0",
@@ -506,20 +520,6 @@ export const WHATS_NEW_ENTRIES: readonly WhatsNewEntry[] = [
     body: {
       en: "We updated the parts the dashboard is built on, closing known security issues. Nothing changes in how you use it.",
       bn: "ড্যাশবোর্ড যেসব অংশ দিয়ে তৈরি, সেগুলো আপডেট করে জানা নিরাপত্তা সমস্যাগুলো বন্ধ করা হয়েছে। আপনার ব্যবহারে কিছুই বদলাবে না।",
-    },
-  },
-  {
-    id: "2026-10-07-faster-passkey-sign-in",
-    date: "2026-10-07",
-    version: "4.184.0",
-    tag: "improved",
-    title: {
-      en: "Faster passkey sign-in",
-      bn: "পাসকি দিয়ে আরও দ্রুত সাইন ইন",
-    },
-    body: {
-      en: "Tap the email box on the sign-in page and your phone or computer now offers your passkey: one tap, then Face ID or your fingerprint, and you are in. Settings > Account > Passkeys also says where each passkey is saved, like Apple Passwords or Google Password Manager.",
-      bn: "সাইন-ইন পেজে ইমেইলের ঘরে ট্যাপ করলে আপনার ফোন বা কম্পিউটার এখন নিজেই আপনার পাসকি দেখায়: একবার ট্যাপ, তারপর Face ID বা আঙুলের ছাপ দিলেই সাইন ইন। সেটিংস > অ্যাকাউন্ট > পাসকি-তে এখন এটাও দেখা যায় প্রতিটি পাসকি কোথায় রাখা, যেমন Apple Passwords বা Google Password Manager।",
     },
   },
 ];
