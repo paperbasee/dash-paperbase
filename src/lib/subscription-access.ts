@@ -82,15 +82,18 @@ export function setupUnfinished(me: MeForRouting): boolean {
   return me.store?.role === "Owner" && me.store.setup_finished === false;
 }
 
+/**
+ * Setup is where this person belongs: they have no shop, or they own one setup made and have not
+ * finished it. The plan plays no part: a new sign-up has none until setup makes the shop.
+ */
+export function needsSetup(me: MeForRouting): boolean {
+  return !me.active_store_public_id || setupUnfinished(me);
+}
+
 /** True when the user has a subscription row other than NONE/REJECTED (banners, onboarding eligibility). */
 export function hasSubscriptionPlan(me: MeForRouting): boolean {
   const s = me.subscription?.subscription_status;
   return s !== "NONE" && s !== "REJECTED";
-}
-
-/** A paid period running now (excludes EXPIRED and NONE). */
-export function subscriptionIsPaidPeriod(me: MeForRouting): boolean {
-  return me.subscription?.subscription_status === "ACTIVE" || me.subscription?.active_row_calendar_status === "ACTIVE";
 }
 
 /** Clear cached auth/me (logout, etc.). */
@@ -111,10 +114,7 @@ export type PostAuthPath = "/" | "/onboarding";
  * Subscription status does not gate routing; inactive plans are surfaced in-dashboard only.
  */
 export function resolvePostAuthPath(me: MeForRouting): PostAuthPath {
-  if (me.active_store_public_id && !setupUnfinished(me)) {
-    return "/";
-  }
-  return "/onboarding";
+  return needsSetup(me) ? "/onboarding" : "/";
 }
 
 export type PostAuthRouteResult =

@@ -32,7 +32,7 @@ import {
   shouldOfferInitialPlanSelection,
 } from "@/lib/plans-onboarding";
 import { formatBillingMoment } from "@/lib/billing";
-import { setupUnfinished, subscriptionIsPaidPeriod } from "@/lib/subscription-access";
+import { needsSetup } from "@/lib/subscription-access";
 import { resolveSubscriptionUIStateFromMe } from "@/lib/subscription-ui-state";
 import SubscriptionAccessBlock from "@/components/auth/SubscriptionAccessBlock";
 import PaymentSubmittedAwaitingBanner from "@/components/auth/PaymentSubmittedAwaitingBanner";
@@ -99,15 +99,6 @@ export default function DashboardLayoutClient({
     meProfileStatus === "ready" && meProfile
       ? resolveSubscriptionUIStateFromMe(meProfile)
       : null;
-  /** Must match `resolvePostAuthPath` in subscription-access.ts (avoid / ↔ /onboarding loops). */
-  const hasStoreContext =
-    meProfileStatus === "ready" &&
-    Boolean(
-      (meProfile?.active_store_public_id &&
-        String(meProfile.active_store_public_id).trim()) ||
-        meProfile?.store?.public_id
-    );
-  const storeCount = hasStoreContext ? 1 : 0;
   const contentContainerClass = "mx-auto w-full max-w-[88rem] px-4 md:px-6 lg:px-8";
 
   const showTopBannerStrip =
@@ -130,19 +121,11 @@ export default function DashboardLayoutClient({
     (showTopBannerStrip ? (isPendingReviewWithPaymentBanner ? 30 : 24) : 0)
   }px`;
 
-  const normalizedPlan = (subscription?.plan ?? "").toLowerCase();
-  const isEligiblePlan =
-    normalizedPlan === "essential" ||
-    normalizedPlan === "premium";
   const meReady = meProfileStatus === "ready";
-  const shouldRedirectToOnboarding =
-    meReady &&
-    meProfile !== null &&
-    !isModerator &&
-    pathname === "/" &&
-    subscriptionIsPaidPeriod(meProfile) &&
-    isEligiblePlan &&
-    storeCount === 0;
+  // Setup is for someone with no shop, or an owner who left it before the last step (setup makes
+  // the shop half-way through, 2026-09-28): on any page they go back to it before anything asks
+  // for the shop. The same rule as the sign-in's (resolvePostAuthPath), so the two never loop.
+  const setupPending = meReady && meProfile !== null && needsSetup(meProfile);
   const authCheckReady = authHydrated;
 
   const socketEnabled =
@@ -192,14 +175,6 @@ export default function DashboardLayoutClient({
   }, [isAuthenticated, authCheckReady, signInUnreachable, router]);
 
   useEffect(() => {
-    if (!shouldRedirectToOnboarding) return;
-    router.replace("/onboarding");
-  }, [shouldRedirectToOnboarding, router]);
-
-  // Setup makes the shop half-way through it (2026-09-28); an owner who left before the last
-  // step finishes it before anything else.
-  const setupPending = meReady && meProfile !== null && setupUnfinished(meProfile);
-  useEffect(() => {
     if (!setupPending) return;
     router.replace("/onboarding");
   }, [setupPending, router]);
@@ -240,7 +215,7 @@ export default function DashboardLayoutClient({
   if (isLoggingOut) return null;
   if (!networkGateReady) return null;
 
-  if (authBlocking || shouldRedirectToOnboarding) {
+  if (authBlocking || setupPending) {
     return (
       <div
         className="min-h-screen bg-background md:pt-[var(--subscription-banner-offset,0px)]"

@@ -19,7 +19,7 @@ import {
   productPhoto,
 } from "@/components/shop-preview/samples";
 import { normalizeBdMobile } from "@/lib/bd-mobile";
-import { pathAfterSignIn, resolvePostAuthPath, type MeForRouting } from "@/lib/subscription-access";
+import { needsSetup, pathAfterSignIn, resolvePostAuthPath, type MeForRouting } from "@/lib/subscription-access";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const read = (file: string) => fs.readFileSync(path.join(ROOT, file), "utf8");
@@ -173,9 +173,24 @@ describe("where an owner goes after signing in", () => {
     expect(page).not.toContain("router.replace(");
   });
 
-  test("the dashboard sends an unfinished owner back too", () => {
+  test("no shop goes to setup whatever the plan: none, a trial or a paid one", () => {
+    const noShop = { ...base, active_store_public_id: null, store: null };
+    expect(needsSetup({ ...noShop, subscription: { ...base.subscription, subscription_status: "NONE" } })).toBe(true);
+    expect(needsSetup({ ...noShop, subscription: { ...base.subscription, plan: "Essential" } })).toBe(true);
+    expect(needsSetup({ ...base, store: { public_id: "str_1", name: "R", role: "Owner", setup_finished: false } })).toBe(true);
+    expect(needsSetup({ ...base, store: { public_id: "str_1", name: "R", role: "Owner", setup_finished: true } })).toBe(false);
+    expect(needsSetup({ ...base, store: { public_id: "str_1", name: "R", role: "Packer" } })).toBe(false);
+  });
+
+  test("the dashboard sends anyone setup is for back to it, on every page, before it asks for the shop", () => {
+    // Found 2026-11-26: a new sign-up who came back to "/" opened the dashboard with no shop, and
+    // every call said "You don't have permission"; the dashboard sent a person with no shop to
+    // setup only once they had a paid Essential or Premium plan (the pay-first rule of 2026-04).
     const layout = read("src/app/[locale]/(dashboard)/DashboardLayoutClient.tsx");
-    expect(layout).toContain("const setupPending = meReady && meProfile !== null && setupUnfinished(meProfile);");
+    expect(layout).toContain("const setupPending = meReady && meProfile !== null && needsSetup(meProfile);");
+    expect(layout).toContain("if (authBlocking || setupPending) {");
+    expect(layout).not.toContain("shouldRedirectToOnboarding");
+    expect(layout).not.toContain("isEligiblePlan");
   });
 });
 
